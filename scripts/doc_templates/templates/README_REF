@@ -1,0 +1,105 @@
+% $Id: README_REF,v 1.1 2001/12/13 20:03:39 cdeluca Exp $
+
+================================================================================
+                                 README_REF
+================================================================================
+
+This file describes how to create a basic reference manual using a set of 
+templates.
+
+A reference manual includes the parts shown in the table below.  Brackets []
+indicate that a part is optional.  In the filenames, "comp" refers to the 
+component or library that the whole reference manual or reference manual chapter
+describes.  Components are often broken up into separate "classes" or modules, which are typically segregated into separate files.  Several classes or 
+modules may be included in a single design document.
+
+The structure of the reference manual accommodates the specification of
+multiple language interfaces.  For now, only Fortran templates are 
+actually included.
+
+If some document parts (e.g., synopsis, architecture, references, glossary) 
+are expanded for inclusion in the reference manual, this expanded version 
+can replace earlier versions of the parts that were included in requirements, 
+design and architecture documents.  
+
+--------------------------------------------------------------------------------
+Part		Template File	    Description
+--------------------------------------------------------------------------------
+document	<comp>_refdoc.tex   Document shell with software release number
+
+synopsis        <comp>_syn.tex      Brief description of the software 
+                                    function  
+
+architecture    <comp>_arch.tex     Description of the computational 
+                                    architecture, including layering strategy 
+                                    and major internal components and classes
+
+class           class_desc.tex      Short summary of class function 
+description
+
+class           class_rest.tex      List of class restrictions due to design
+restrictions                        or implementation strategies
+
+fortran files   prologue.F          Contain code headers instrumented for
+                                    ProTeX; not included in document but used 
+                                    to create it
+
+fparameters     class_fparam.tex    Fortran flags and parameters, if any
+
+fapi            class_fapi.tex      Fortran application program interface;
+                                    this file should be generated from the
+                                    prologue.F template using ProTeX
+
+fexamples       class_fex.tex       Fortran examples
+
+[c/c++ files]   prologue.c          Contain code headers instrumented for
+                                    ProTeX; not included in document but used
+                                    to create it
+
+[cparameters]   class_cparam.tex    C/C++ flags and enum types, if any
+
+[capi]          class_capi.tex      C/C++ application program interface;
+                                    this file should be generated using ProTeX
+
+[cexamples]     class_cex.tex       C/C++ examples
+
+[glossary]      <comp>_glos.tex     Definitions, acronyms, abbreviations
+
+[references]    <comp>_ref.bib      References
+
+--------------------------------------------------------------------------------
+
+To create a new reference manual, fill in the template files, duplicating and 
+renaming the class files for each class in your component.  In 
+<comp>_refdoc.tex, be sure to comment out the \input of any files you aren't 
+including and specify the \input filenames of files that you are including.
+
+Process prologue files using ProTeX:
+
+	do_fprotex <class> <prologue.F[90]>
+	
+	Here <prologue.F[90]> is the name of the Fortran file with the 
+        instrumented headers.
+        This script will produce a LaTeX file called <class>_fapi.tex.
+
+Build a dvi file from LaTeX documents:
+
+	do_latex <comp> ref
+
+Produce an html version of the documentation:
+
+	do_l2h <comp> ref
+
+The html files are placed in a directory called <comp>_refdoc.
+
+The dvipdf tool can be used to produce a pdf:
+
+	dvipdf <comp>_refdoc.dvi
+
+================================================================================
+C. DeLuca (cdeluca@ucar.edu)                                      March 13, 2000
+
+
+
+
+

@@ -1,0 +1,45 @@
+#!/bin/csh -f
+#
+#===============================================================================
+# do_l2h
+#===============================================================================
+#
+# Create html version from latex document.
+#
+# Usage: do_l2h <comp> <document type>
+#
+#        <comp> is the name of the component, library, or module used as the
+#               basis for document filenames (e.g., coupler)
+#
+#        <document type> is one of the following:
+#               req  - requirements document
+#               arch - architecture document
+#               des  - detailed design document
+#               ref  - reference manual
+#               usr  - user's guide
+#               phys - algorithmic or physical description
+#        
+# See the latex2html manual:
+# http://laborant.dfki.uni-sb.de:8000/doc/latex2html-manual-html-99_1/
+# for a desription of the command-line parameters used in this script.
+#
+# C. DeLuca                                                       March 15, 2001
+#===============================================================================
+
+if($#argv != 2) then
+  echo "Usage:  do_l2h <component> <document type>"
+  exit
+else 
+  latex2html  -white \
+	    -toc_depth 5 \
+	    -split +1 \
+	    -show_section_numbers \
+	    -address "<A HREF="mailto:esmf@ucar.edu">esmf@ucar.edu</A>" \
+	    $1_$2doc.tex
+endif
+
+
+
+
+
+

@@ -1,0 +1,107 @@
+================================================================================
+            Earth System Modeling Framework Document Templates
+
+                                 README
+================================================================================
+
+1. Introduction
+   ------------
+
+The "templates" directory contains a set of file templates for generating 
+software-related documentation.  This documentation is modular and 
+reusable.  For example, a file containing a glossary of terms related to a 
+component may be included in a preliminary requirements document and may also 
+be included in a user reference manual.  The templates target both computational 
+and scientific documentation of software.  
+
+This documentation approach is based on the LaTeX and ProTeX tools.  LaTeX
+is a sophisticated character-based document preparation system that requires 
+compilation.  Most of the files in the "templates" directory are LaTeX 
+templates.  ProTeX is a Perl tool that processes C and Fortran code
+headers, or prologues, and generates an interface specification 
+in LaTeX form automatically.  The prologue templates show Fortran and C 
+headers instrumented for use with ProTeX.  
+
+The templates that are currently included are:
+
+    Document                       Primary File              README
+    -------------------------------------------------------------------------
+    Prologues (from NASA/DAO)      prologue.[F,C]            none
+    Requirements document (LaTeX)  comp_reqdoc.tex           README_REQ
+    Architecture document (LaTeX)  comp_archdoc.tex	     README_ARCH
+    Design document (LaTeX)	   comp_desdoc.tex	     README_DES
+    Reference manual               comp_refdoc.tex           README_REF    
+    User's guide                   comp_usrdoc.tex           README_USR
+    Physics                        comp_physdoc.tex          README_PHYS
+
+The ProTeX script is also included.  It is slightly different than the
+current distribution in order to accommodate the document format.
+The ProTeX website:
+http://dao.gsfc.nasa.gov/dao/software/ProTeX
+has additional templates and examples.
+
+The "examples" directory contains a number of sample documents that were 
+created using the templates.  Links to the web-browsable form of these sample 
+documents are included in the ESMF Software Developer's Guide Documentation 
+Section.  Further discussion of the documents is also included in the 
+Developer's Guide:
+
+http://www.esmf.ucar.edu -> Development Documents
+
+2. Implied development cycle
+   -------------------------
+
+These documents correspond to a staged development cycle in which requirements 
+are generated first.  Next an overall architecture is specified that 
+typically includes a layering strategy and a specification of how major 
+components should interact.  Finally detailed design documents that contain 
+interface specifications for individual classes and modules are generated.
+These documents build on each other, so that requirements are folded into
+architecture, and architecture is folded into design.
+
+Reference and user manuals describe the API interface and how to build and 
+run the software.
+
+3. How to use the templates
+   ------------------------
+
+Set the environment variable DOC_DIR to the top-level directory in this packet,
+e.g. $HOME/doc_templates.
+
+Put the scripts in $DOC_DIR/templates/scripts in your path.
+
+To start a new document, execute the script:
+
+do_newdoc <component name> <document type>
+
+The document type can be one of the following:
+
+	req  - requirements document
+	arch - architecture document
+	des  - design document
+	ref  - reference manual
+	usr  - user's guide
+        phys - physical description
+	all  - templates and READMEs for all documents
+
+If the directory does not exist, the script will create a new directory 
+called <component name> and fill it with the appropriate document-specific
+README and template files for the document type.
+
+If the directory does exist, the script will add any additional files that
+are needed to complete the new document.
+
+See individual README's for further explanation on how to prepare specific
+documents.
+
+================================================================================
+C. DeLuca (cdeluca@ucar.edu)                                      March 13, 2000
+
+
+
+
+
+
+
+
+

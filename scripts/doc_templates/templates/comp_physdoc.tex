@@ -1,0 +1,64 @@
+% $Id: comp_physdoc.tex,v 1.1 2001/12/13 20:03:39 cdeluca Exp $
+
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage[T1]{fontenc}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+
+\begin{document}
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+\begin{titlepage}
+
+\begin{center}
+{\Large Earth System Modeling Framework } \\
+\vspace{.25in}
+{\Large {\bf <Module, Library, Component or Model Name> Description}} \\
+\vspace{.25in}
+{\large {\it Authors}}
+\vspace{.5in}
+\end{center}
+
+\begin{latexonly}
+\vspace{5.5in}
+\begin{tabular}{p{5in}p{.9in}}
+\hrulefill \\
+\noindent {\bf NASA High Performance Computing and Communications Program} \\
+\noindent Earth and Space Sciences Project \\
+\noindent CAN 00-OES-01 \\
+\noindent http://www.esmf.ucar.edu \\
+\end{tabular}
+\end{latexonly}
+
+\end{titlepage}
+
+\tableofcontents
+
+\newpage
+\section{Introduction}
+
+\section{Physical Description}
+
+%\section{Bibliography}
+\bibliography{comp} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,45 @@
+#!/bin/csh -f
+#
+#===============================================================================
+# do_latex
+#===============================================================================
+# Build document with bibliography if available. 
+#
+# Usage: do_latex <comp> <document type>
+#
+#        <comp> is the name of the component, library, or module used as the
+#               basis for document filenames (e.g., coupler)
+#
+#        <document type> is one of the following:
+#               req  - requirements document
+#               arch - architecture document
+#               des  - detailed design document        
+#               ref  - reference manual
+#               usr  - user's guide
+#               phys - algorithmic or physical description
+#
+# C. DeLuca                                                       March 15, 2000
+#===============================================================================
+
+if ($#argv != 2) then
+  echo "Usage: do_latex <component> <document type>
+  exit
+else
+  if (-r $1.bib) then
+    cp $1.bib $1_$2doc.bib
+    latex $1_$2doc.tex
+    latex $1_$2doc.tex
+    bibtex $1_$2doc
+    latex $1_$2doc.tex
+    rm -f $1_$2doc.bib
+  else 
+    latex $1_$2doc.tex
+    latex $1_$2doc.tex
+  endif
+endif
+
+
+
+
+
+

@@ -1,0 +1,41 @@
+#!/bin/csh -f
+#
+#===============================================================================
+# do_fprotex
+#===============================================================================
+# 
+# Process Fortran prologue(s) using ProTex.
+#
+# Usage: do_fprotex <class> <fortran filename>
+#
+#        <class> is the name of the class or module whose functions
+#               are instrumented for ProTeX (e.g., date)
+#
+#        <fortran_filename.F[90]> is the name of the file that includes the 
+#               prologue(s) instrumented for ProTeX (e.g., date.F)
+#
+# See the ProTeX documentation:
+# http://dao.gsfc.nasa.gov/software/protex
+# for a description of the command-line options used in this script.
+# 
+# C. DeLuca                                                       March 15, 2001
+#===============================================================================
+
+if ($#argv != 2 ) then
+  echo "Usage: do_fprotex <class> <fortran_filename.F[90]>"
+  exit
+else
+  set class=$1
+  set file=$2
+  perl $DOC_DIR/templates/protex -bF +f $file > ${class}_fapi.tex
+endif
+
+
+
+
+
+
+
+
+
+
