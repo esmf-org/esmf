@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.28 2004/06/07 21:19:17 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.29 2004/06/08 03:00:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -12,8 +12,8 @@
 #define ESMF_FILENAME "ESMF_DELayout.F90"
 !==============================================================================
 !
-!     ESMF DELayout Module
-      module ESMF_DELayoutMod
+! ESMF DELayout Module
+module ESMF_DELayoutMod
 !
 !==============================================================================
 !
@@ -34,77 +34,77 @@
 !------------------------------------------------------------------------------
 
 ! !USES:
-      use ESMF_BaseMod                          ! ESMF base class
-      use ESMF_LogErrMod
-      use ESMF_VMMod                            ! ESMF VM
-      
-      implicit none
+  use ESMF_BaseMod                          ! ESMF base class
+  use ESMF_LogErrMod
+  use ESMF_VMMod                            ! ESMF VM
+  
+  implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      private
+  private
       
 !------------------------------------------------------------------------------
 !     ! ESMF_DELayout
 !
 !------------------------------------------------------------------------------
 
-      ! F90 class type to hold pointer to C++ object
-      type ESMF_DELayout
-      sequence
-      private
-        type(ESMF_Pointer) :: this
-      end type
+  ! F90 class type to hold pointer to C++ object
+  type ESMF_DELayout
+  sequence
+  private
+    type(ESMF_Pointer) :: this
+  end type
 
 !------------------------------------------------------------------------------
 
-      ! type used to define DELayout data arrays
-      type ESMF_I4_AP
-        integer(ESMF_KIND_I4), pointer:: ap(:)
-      end type
+  ! type used to define DELayout data arrays
+  type ESMF_I4_AP
+    integer(ESMF_KIND_I4), pointer:: ap(:)
+  end type
 
 !------------------------------------------------------------------------------
 
-      ! type used to define DELayout data arrays
-      type ESMF_R4_AP
-        real(ESMF_KIND_R4), pointer:: ap(:)
-      end type
+  ! type used to define DELayout data arrays
+  type ESMF_R4_AP
+    real(ESMF_KIND_R4), pointer:: ap(:)
+  end type
 
 !------------------------------------------------------------------------------
 
-      ! type used to define DELayout data arrays
-      type ESMF_R8_AP
-        real(ESMF_KIND_R8), pointer:: ap(:)
-      end type
+  ! type used to define DELayout data arrays
+  type ESMF_R8_AP
+    real(ESMF_KIND_R8), pointer:: ap(:)
+  end type
 
 !------------------------------------------------------------------------------
 
-      ! type to hold ESMF_DELayout data
-      type ESMF_DELayoutData
-        sequence
-        private
-        type(ESMF_Pointer):: this     ! C pointer to pointer vector
-        integer:: n                   ! number of pointers in pointer vector
-        integer, pointer:: len(:)     ! number of elements in each element
-        type(ESMF_DataKind):: dtk     ! type and kind of data
-      end type
+  ! type to hold ESMF_DELayout data
+  type ESMF_DELayoutData
+    sequence
+    private
+    type(ESMF_Pointer):: this     ! C pointer to pointer vector
+    integer:: n                   ! number of pointers in pointer vector
+    integer, pointer:: len(:)     ! number of elements in each element
+    type(ESMF_DataKind):: dtk     ! type and kind of data
+  end type
 
 !------------------------------------------------------------------------------
 
-      integer(ESMF_KIND_I4), parameter:: ESMF_CWGHT_NORMAL = 50 !default
+  integer(ESMF_KIND_I4), parameter:: ESMF_CWGHT_NORMAL = 50 !default
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_DELayout
-      public ESMF_I4_AP
-      public ESMF_R4_AP
-      public ESMF_R8_AP
-      public ESMF_DELayoutData
+  public ESMF_DELayout
+  public ESMF_I4_AP
+  public ESMF_R4_AP
+  public ESMF_R8_AP
+  public ESMF_DELayoutData
       
 !------------------------------------------------------------------------------
 ! !PUBLIC PARAMETERS:
       
-      public ESMF_CWGHT_NORMAL
+  public ESMF_CWGHT_NORMAL
 
 !------------------------------------------------------------------------------
 
@@ -112,27 +112,27 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 
-  ! - ESMF-public methods:
-      public ESMF_DELayoutCreate
-      public ESMF_DELayoutDestroy
+! - ESMF-public methods:
+  public ESMF_DELayoutCreate
+  public ESMF_DELayoutDestroy
+  
+  public ESMF_DELayoutGet
+  public ESMF_DELayoutGetDE
+  public ESMF_DELayoutGetDEMatch
+  
+  public ESMF_DELayoutPrint
       
-      public ESMF_DELayoutGet
-      public ESMF_DELayoutGetDE
-      public ESMF_DELayoutGetDEMatch
-      
-      public ESMF_DELayoutPrint
-      
-  ! - ESMF-private methods:
-      public ESMF_DELayoutAllGlobalReduce
-      public ESMF_DELayoutCopy
-      public ESMF_DELayoutExchange
-      public ESMF_DELayoutGather
-      public ESMF_DELayoutScatter
-      
-      public ESMF_DELayoutWait
+! - ESMF-private methods:
+  public ESMF_DELayoutAllGlobalReduce
+  public ESMF_DELayoutCopy
+  public ESMF_DELayoutExchange
+  public ESMF_DELayoutGather
+  public ESMF_DELayoutScatter
+  
+  public ESMF_DELayoutWait
 
-      public ESMF_DELayoutDataCreate
-      public ESMF_DELayoutDataDestroy
+  public ESMF_DELayoutDataCreate
+  public ESMF_DELayoutDataDestroy
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -140,7 +140,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.28 2004/06/07 21:19:17 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.29 2004/06/08 03:00:39 theurich Exp $'
 
 !==============================================================================
 ! 
