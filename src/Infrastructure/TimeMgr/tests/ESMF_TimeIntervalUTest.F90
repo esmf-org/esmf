@@ -1,4 +1,4 @@
-
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.30 2004/07/02 20:37:57 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.29 2004/07/01 20:02:15 svasquez Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.30 2004/07/02 20:37:57 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -53,6 +53,9 @@
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
+
+      ! to retrieve time in string format
+      character(ESMF_MAXSTR) :: timeString
 
       ! instantiate timestep, start and stop times
       type(ESMF_TimeInterval) :: timeStep, timeStep2, timeStep3
@@ -417,11 +420,13 @@
       call ESMF_TimeSet(endTime, yy=2004, mm=3, dd=31, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(timeStep, d=60, rc=rc)
-      call ESMF_TimeIntervalGet(timeStep, mm=months, endTimeIn=endTime, rc=rc)
-      call ESMF_Test((months==2.and.rc==ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_TimeIntervalGet(timeStep, mm=months, endTimeIn=endTime, &
+                                timeString=timeString, rc=rc)
+      call ESMF_Test((months==2 .and. timeString=="P0Y0M60DT0H0M0S" .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       print *, "months = ", months
+      print *, "timeStep = ", timeString
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
