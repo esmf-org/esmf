@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.20 2003/06/05 22:28:17 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.21 2003/06/19 21:00:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.20 2003/06/05 22:28:17 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.21 2003/06/19 21:00:44 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -351,10 +351,10 @@
       ! Test adding an uninitialized Field to a State
       ! This code crashes, it will be commented out until
       ! bug 709032 is fixed.
-       !call ESMF_StateAddData(state1, field4, rc)
-       !write(name, *) "Adding an uninitialized  Field to a State Test"
-       !call ESMF_Test((rc.eq.ESMF_FAILURE), &
-        !                 name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_StateAddData(state1, field4, rc)
+      write(name, *) "Adding an uninitialized  Field to a State Test"
+      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
