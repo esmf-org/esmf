@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.27 2003/09/24 22:59:02 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.28 2003/09/25 16:29:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.27 2003/09/24 22:59:02 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.28 2003/09/25 16:29:41 jwolfe Exp $'
 
 !==============================================================================
 
@@ -236,11 +236,6 @@
       call ESMF_LocalArrayGetData(dstLocalCoordArray, dstLocalCoord, &
                                   ESMF_DATA_REF, status)
 
-      ! HACK to make haloed and ghosted coords
-      allocate(dstLocalCoord(dstCounts(1),dstCounts(2),dstCounts(3)))
-      dstLocalCoordArray = ESMF_LocalArrayCreate(dstLocalCoord, ESMF_DATA_REF, &
-                                                 status)
-
       ! get source grid info
       call ESMF_DataMapGet(srcDataMap, relloc=srcRelLoc, rc=status)
       if(status .NE. ESMF_SUCCESS) then
@@ -315,6 +310,8 @@
                  "RoutePrecomputeDomList returned failure"
         return
       endif
+      ! set size of recv items in Route
+      call ESMF_RouteSetRecvItems(route, recvDomainList%total_points, status)
       ! Save route in the routehandle object
       call ESMF_RouteHandleSet(rh, route1=route, rc=status)
 
@@ -387,7 +384,6 @@
       size_xy(1) = dstCounts(1)*4
       size_xy(2) = dstCounts(2)*4
       size = ((dstCounts(1)*dstCounts(2)) + 1) * 4
-      !tv%domainlist = recvDomainList
       srcindex = ESMF_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMF_I4, &
                                           size, status)
       dstindex = ESMF_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMF_I4, &
@@ -398,8 +394,6 @@
    !                                       size_x0, status)
  
       ! set the values in the TV
-   !   call ESMF_TransformValuesSet(tv, 0, recvDomainList, &
-   !                                srcindex, dstindex, weights, rc)
       call ESMF_TransformValuesSet(tv, 0, srcindex=srcindex, dstindex=dstindex, &
                                    weights=weights, rc=status)
 
