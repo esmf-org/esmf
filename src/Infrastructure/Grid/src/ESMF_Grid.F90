@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.204 2004/12/08 18:30:25 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.205 2004/12/14 01:00:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.204 2004/12/08 18:30:25 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.205 2004/12/14 01:00:41 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -5686,7 +5686,6 @@
       integer, dimension(:), allocatable :: newCountPerDE1, newCountPerDE2
       integer, dimension(:), allocatable :: oldCountPerDE1, oldCountPerDE2
       integer, dimension(:), allocatable :: petlist, petTrack
-      integer, dimension(:,:), allocatable :: cellCountPerDEPerDim
       type(ESMF_DELayout) :: newDELayout, oldDELayout
       type(ESMF_GridClass), pointer :: gp
 
@@ -5898,6 +5897,37 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+
+      ! clean up
+      deallocate(     decompIDs, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(       newNDEs, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(       oldNDEs, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(oldCountPerDE1, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      if (oldDimCount.gt.1) then
+        deallocate(oldCountPerDE2, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
+      deallocate(       petlist, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(      petTrack, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(newCountPerDE1, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(newCountPerDE2, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
 
       if  (present(rc)) rc = ESMF_SUCCESS
 
