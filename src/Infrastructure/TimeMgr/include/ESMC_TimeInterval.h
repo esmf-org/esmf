@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.39 2004/10/27 18:49:29 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.40 2004/11/05 04:02:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -192,7 +192,8 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     bool operator<=(const ESMC_TimeInterval &) const;
     bool operator>=(const ESMC_TimeInterval &) const;
 
-    // copy or assign from ESMC_Fraction expressions
+    // copy or assign from ESMC_Fraction expressions, supports Time1-Time2
+    // operator in ESMC_Time.
     // TODO:  should be implicit ?
     ESMC_TimeInterval& operator=(const ESMC_Fraction &);
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.25 2004/10/27 18:46:16 eschwab Exp $
+// $Id: ESMC_BaseTime.h,v 1.26 2004/11/05 04:02:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -159,8 +159,9 @@ class ESMC_BaseTime : public ESMC_Fraction { // it is a fraction !
     // ESMC_BaseTime doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
 
-    // explicit assignment operator to support F90 ESMF_Time & ESMF_TimeInterval
-    // TODO:  should be implicit ?
+    // TODO: should be implicit, but then won't support
+    //   F90 ESMF_Time & ESMF_TimeInterval via ESMC_BaseTime_F.C interface
+    //   for increment/decrement
     ESMC_BaseTime& operator=(const ESMC_Fraction &);
 
     // required methods inherited and overridden from the ESMC_Base class
