@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.16 2003/09/04 18:57:56 cdeluca Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.17 2003/09/12 17:47:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -180,7 +180,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.16 2003/09/04 18:57:56 cdeluca Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.17 2003/09/12 17:47:51 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1144,6 +1144,8 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
           print *, "LocalArray destruction error"
           return
         endif
+
+        array%this = ESMF_NULL_POINTER
 
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
