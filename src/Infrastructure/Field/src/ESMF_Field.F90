@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.48 2003/07/30 21:50:19 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.49 2003/07/31 22:58:36 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,10 +27,13 @@
 ! !MODULE: ESMF_FieldMod - Combine physical field metadata, data and grid
 !
 ! !DESCRIPTION:
-! The code in this file implements the {\tt ESMF\_Field} class, which represents a
-! single scalar or vector field.  {\tt ESMF\_Field}s associate a metadata description 
-! expressed as a set of {\tt ESMF\_Attributes} with a data {\tt ESMF\_Array}, {\tt ESMF\_Grid}, 
-! and I/O specification, or {\tt ESMF\_IOSpec}.  A {\tt ESMF\_DataMap} describes the 
+! The code in this file implements the {\tt ESMF\_Field} class, which 
+! represents a
+! single scalar or vector field.  {\tt ESMF\_Field}s associate a metadata 
+! description 
+! expressed as a set of {\tt ESMF\_Attributes} with a data {\tt ESMF\_Array}, 
+! {\tt ESMF\_Grid}, and I/O specification, or {\tt ESMF\_IOSpec}.  
+! A {\tt ESMF\_DataMap} describes the 
 ! relationship of the {\tt ESMF\_Array} to the {\tt ESMF\_Grid}.  
 !
 ! This type is implemented in Fortran 90 and a corresponding
@@ -41,8 +44,8 @@
       use ESMF_BaseMod
       use ESMF_IOMod
       use ESMF_LocalArrayMod
-      use ESMF_DELayoutMod
       use ESMF_DataMapMod
+      use ESMF_DELayoutMod
       use ESMF_GridMod
       use ESMF_ArrayBaseMod
       use ESMF_ArrayExpandMod
@@ -123,16 +126,16 @@
       sequence
       private
        
-        type (ESMF_Base) :: base                 ! base class object
+        type (ESMF_Base) :: base             ! base class object
         type (ESMF_Status) :: fieldstatus = ESMF_STATE_UNINIT
-        type (ESMF_Grid) :: grid                 ! save to satisfy query routines
-        type (ESMF_GridType), pointer :: gridp => NULL()  ! for faster acces
+        type (ESMF_Grid) :: grid             ! save to satisfy query routines
+        type (ESMF_GridType), pointer :: gridp => NULL()  ! for faster access
         type (ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT
-        type (ESMF_LocalField) :: localfield     ! this differs per DE
+        type (ESMF_LocalField) :: localfield ! this differs per DE
         type (ESMF_Status) :: datastatus = ESMF_STATE_UNINIT
-        type (ESMF_DataMap) :: mapping           ! mapping of array indicies to grid
-        type (ESMF_IOSpec) :: iospec             ! iospec values
-        type (ESMF_Status) :: iostatus           ! if unset, inherit from gcomp
+        type (ESMF_DataMap) :: mapping       ! mapping of array indicies to grid
+        type (ESMF_IOSpec) :: iospec         ! iospec values
+        type (ESMF_Status) :: iostatus       ! if unset, inherit from gcomp
 
       end type
 
@@ -187,15 +190,23 @@
    public ESMF_FieldSetDataMap         ! Set a DataMap (may reorder if different
                                        !   DataMap is already present)
 
-                                       ! These are mainly entry points:
-   public ESMF_FieldReduce             ! Global reduction operations
-   !public ESMF_FieldTranspose         ! Transpose operation
-   public ESMF_FieldHalo               ! Halo updates
-   public ESMF_FieldAllGather          ! Construct N copies of N data arrays
-   public ESMF_FieldGather             ! Construct 1 copy of N data arrays
-   public ESMF_FieldScatter            ! Construct N copies of 1 data array
-   public ESMF_FieldRegrid             ! Regridding and interpolation
-   public ESMF_FieldRedist             ! Redistribute existing array data
+   ! These are the recommended entry points; the code itself is in Array:
+   public ESMF_FieldRedist   ! Redistribute existing arrays, matching grids
+   public ESMF_FieldRegrid   ! Regridding and interpolation, different grids
+   public ESMF_FieldHalo     ! Halo updates
+
+   public ESMF_FieldGather   ! Combine 1 decomposed field into 1 on 1 DE
+   public ESMF_FieldAllGather! Combine 1 decomposed field into N copies on N DEs
+
+   public ESMF_FieldScatter  ! Split 1 field into a decomposed one over N DEs
+   !public ESMF_FieldBroadcast! Send 1 field to all DEs, none decomposed
+   !public ESMF_FieldAlltoAll ! might make sense with bundles; each DE could
+                              ! call with a different non-decomposed field
+                              ! and the result would be a packed bundle of
+                              ! data with decomposed fields on each DE.
+
+   public ESMF_FieldReduce     ! Global reduction operation, return on 1 DE
+   !public ESMF_FieldAllReduce  ! Global reduction operation, return on each DE
 
    public ESMF_FieldSetAttribute       ! Set and Get Attributes
    public ESMF_FieldGetAttribute       !   interface to Base class
@@ -214,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.48 2003/07/30 21:50:19 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.49 2003/07/31 22:58:36 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2412,21 +2423,27 @@
 ! !IROUTINE: ESMF_FieldHalo - Data Halo operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldHalo(field, rc)
+      subroutine ESMF_FieldHalo(field, async, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field) :: field                 
+      type(ESMF_Field), intent(inout) :: field                 
+      type(ESMF_Async), intent(inout), optional :: async
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call {\tt ESMF\_Grid} routines to perform a {\tt ESMF\_Halo} operation over the data
-!     in a {\tt ESMF\_Field}.  This routine updates the data inside the {\tt ESMF\_Field}
-!     so there is no separate return argument.
+!     Perform a {\tt Halo} operation over the data
+!     in an {\tt ESMF\_Field}.  This routine updates the data 
+!     inside the {\tt ESMF\_Field} in place.
 !
 !     \begin{description}
 !     \item [field] 
-!           {\tt ESMF\_Field} containing data to be haloed.
+!           {\tt ESMF\_Field} containing data to be halo'd.
+!     \item [{[async]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -2551,25 +2568,40 @@
 ! !IROUTINE: ESMF_FieldRegrid - Data Regrid operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRegrid(srcfield, dstfield, rc)
+      subroutine ESMF_FieldRegrid(srcfield, dstfield, parentlayout, async, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field) :: srcfield                 
-      type(ESMF_Field) :: dstfield                 
+      type(ESMF_Field), intent(in) :: srcfield                 
+      type(ESMF_Field), intent(inout) :: dstfield                 
+      type(ESMF_DELayout), intent(in) :: parentlayout
+      type(ESMF_Async), intent(inout), optional :: async
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call {\tt ESMF\_Grid} routines to perform a {\tt ESMF\_Regrid} operation over the data
-!     in a {\tt ESMF\_Field}.  This routine reads the source field and leaves the
-!     data untouched.  It reads the {\tt ESMF\_Grid} from the destination field and
-!     updates the array data in the destination.
+!     Perform a {\tt ESMF\_Regrid} operation over the data
+!     in a {\tt ESMF\_Field}.  This routine reads the source field and 
+!     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
+!     {\tt ESMF\_DataMap} information in the destination field to
+!     control the transformation of data.  The array data in the 
+!     destination field is overwritten by this call.
 !
 !     \begin{description}
 !     \item [srcfield] 
 !           {\tt ESMF\_Field} containing source data.
 !     \item [dstfield] 
-!           {\tt ESMF\_Field} containing destination grid.
+!           {\tt ESMF\_Field} containing destination grid and data map.
+!     \item [parentlayout]
+!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Field}s, 
+!           most commonly the layout
+!           of the Coupler if the regridding is inter-component, but could 
+!           also be the individual layout for a component if the 
+!           regridding is intra-component.  
+!     \item [{[async]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -2633,31 +2665,43 @@
 ! !IROUTINE: ESMF_FieldRedist - Data Redistribution operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRedist(srcfield, dstfield, parentlayout, rc)
+      subroutine ESMF_FieldRedist(srcfield, dstfield, parentlayout, async, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field) :: srcfield                 
-      type(ESMF_Field) :: dstfield                 
-      type(ESMF_DELayout) :: parentlayout
+      type(ESMF_Field), intent(in) :: srcfield                 
+      type(ESMF_Field), intent(inout) :: dstfield                 
+      type(ESMF_DELayout), intent(in) :: parentlayout
+      type(ESMF_Async), intent(inout), optional :: async
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call routines to perform a {\tt Route} operation over the data
-!     in a {\tt ESMF\_Field}.  This routine reads the source field and leaves the
-!     data untouched.  It reads the {\t ESMF\_Grid} from the destination field and
-!     updates the array data in the destination.
+!     Perform a {\tt Redistribution} operation over the data
+!     in a {\tt ESMF\_Field}.  This routine reads the source field and leaves 
+!     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_DataMap}
+!     from the destination field and updates the array data in the destination.
+!     The {\tt ESMF\_Grid}s may have different decompositions (different
+!     {\tt ESMF\_DELayout}s) or different data maps, but the source and
+!     destination grids must describe the same set of coordinates.
+!     Unlike {\tt ESMF\_Regrid} this routine does not do interpolation,
+!     only data movement.
 !
 !     \begin{description}
 !     \item [srcfield] 
 !           {\tt ESMF\_Field} containing source data.
 !     \item [dstfield] 
 !           {\tt ESMF\_Field} containing destination grid.
-!     \item [parentlayout] 
-!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Field}s, most commonly the layout
-!           of the Coupler if the route is inter-component, but could 
-!           also be the individual layout for a component if the {\tt Route} 
-!           is intra-component.
+!     \item [parentlayout]
+!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Field}s, 
+!           most commonly the layout
+!           of the Coupler if the redistribution is inter-component, 
+!           but could also be the individual layout for a component if the 
+!           redistribution is intra-component.  
+!     \item [{[async]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communication.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
