@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_ErrConstants.inc,v 1.1 2003/03/19 16:01:10 shep_smith Exp $
+$Id: ESMF_ErrConstants.inc,v 1.2 2003/03/28 21:38:58 shep_smith Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,19 +10,11 @@ NASA Goddard Space Flight Center.
 Licensed under the GPL.
 
 
+ESMF Error include file of constants for both FORTRAN or C++.
 Do not have C++ or F90 style comments in here because this file is processed
 by both C++ and F90 compilers.
 
 
-!BOP
--------------------------------------------------------------------------
-
-!DESCRIPTION:
-
-ESMF Error include file of constants for both FORTRAN or C++.
-
--------------------------------------------------------------------------
-!EOP
 #endif
 
 #if !defined(__DIR__)
@@ -81,10 +73,8 @@ ESMF Error include file of constants for both FORTRAN or C++.
 
 #if 0
 !BOP
----------------------------------------------------------------------------
   These are the generic error codes.  The user is free to add
   additional messages within the source code.
----------------------------------------------------------------------------
 !EOP
 #endif
 
