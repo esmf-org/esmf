@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.45 2004/03/23 17:33:17 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.46 2004/04/21 22:06:58 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -111,9 +111,9 @@
 %\section{Design and Implementation Notes}
 \input{ESMF_infradataimplnotes.tex}
 
-#include "../Infrastructure/Field/doc/Field_refdoc.ctex"
-
 #include "../Infrastructure/Bundle/doc/Bundle_refdoc.ctex"
+
+#include "../Infrastructure/Field/doc/Field_refdoc.ctex"
 
 #include "../Infrastructure/ArrayComm/doc/Array_refdoc.ctex"
 
@@ -152,7 +152,22 @@
 
 %#include "../Infrastructure/IO/doc/IO_refdoc.ctex"
 
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Appendices}
+\end{htmlonly}
+\part{Appendices}
+
+\input{ESMF_appuml}
+
 \end{document}
+
+
+
+
+
+
+
 
 
 
