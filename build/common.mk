@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.12 2003/09/18 22:19:41 svasquez Exp $
+#  $Id: common.mk,v 1.13 2003/09/19 21:04:34 flanigan Exp $
 #
 #  common.mk
 #
@@ -448,7 +448,10 @@ build_system_tests: chkopts chkdir_tests
 
 tree_build_system_tests:  $(SYSTEM_TESTS_BUILD) 
 
-$(ESMC_TESTDIR)/ESMF_SysTest% : $(SYSTEM_TESTS_OBJ) ESMF_SysTest%.o 
+#
+#  Link rule for Fortran system tests.
+#
+$(ESMC_TESTDIR)/ESMF_%STest : $(SYSTEM_TESTS_OBJ) ESMF_%STest.o 
 	$(SL_F_LINKER) -o $@  $^ -lesmf  ${F90CXXLIBS} \
 	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
