@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.13 2003/10/21 23:19:37 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.14 2003/10/22 04:52:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.13 2003/10/21 23:19:37 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.14 2003/10/22 04:52:55 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -431,8 +431,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
     int rc;
     ESMC_DomainList *dp = this;
     struct ESMC_AxisIndex AI;
-    struct ESMC_AxisIndex *aip = &AI;
-    FTN(f_esmf_domainlistgetai)(&dp, &domainnum, &ainum, &aip, &rc);
+    FTN(f_esmf_domainlistgetai)(&dp, &domainnum, &ainum, &AI, &rc);
     return AI;
 }
    

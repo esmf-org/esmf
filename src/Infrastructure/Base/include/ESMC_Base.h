@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.33 2003/10/22 03:27:56 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.34 2003/10/22 04:50:52 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -247,7 +247,7 @@ int ESMC_DataKindSize(ESMC_DataKind dk);
 extern "C" {
 void FTN(f_esmf_domainlistgetde)(ESMC_DomainList **, int *, int *, int *);
 void FTN(f_esmf_domainlistgetai)(ESMC_DomainList **, int *, int *, 
-                                                    ESMC_AxisIndex **ai, int *);
+                                                    ESMC_AxisIndex *ai, int *);
 }
 
 #endif  // ESMC_BASE_H
