@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.61 2005/02/07 23:35:58 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.62 2005/04/02 00:18:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.61 2005/02/07 23:35:58 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.62 2005/04/02 00:18:06 eschwab Exp $'
 
 !==============================================================================
 !
@@ -235,6 +235,7 @@
 !          the {\tt ESMF\_Clock}'s.  Does not replace the {\tt ESMF\_Clock}'s 
 !          timeStep; use {\tt ESMF\_ClockSet(clock, timeStep, ...)} for
 !          this purpose.  Supports applications with variable time steps.
+!          timeStep can be positive or negative.
 !     \item[{[ringingAlarmList]}]
 !          Returns the array of alarms that are ringing after the
 !          time step.
@@ -312,22 +313,30 @@
 !          default unique name will be generated: "ClockNNN" where NNN
 !          is a unique sequence number from 001 to 999.
 !     \item[timeStep]
-!          The {\tt ESMF\_Clock}'s time step interval.
+!          The {\tt ESMF\_Clock}'s time step interval, which can be
+!          positive or negative.
 !     \item[startTime]
-!          The {\tt ESMF\_Clock}'s starting time.
+!          The {\tt ESMF\_Clock}'s starting time.  Can be less than or
+!          or greater than stopTime, depending on a positive or negative
+!          timeStep, respectively, and whether a stopTime is specified;
+!          see below.
 !     \item[{[stopTime]}]
-!          The {\tt ESMF\_Clock}'s stopping time.  If neither stopTime,
-!          runDuration, nor runTimeStepCount is specified, clock runs "forever";
-!          user must use other means to know when to stop (e.g. ESMF\_Alarm or
-!          ESMF\_ClockGet(clock, currTime)).
-!          Mutually exclusive with runDuration and runTimeStepCount.
+!          The {\tt ESMF\_Clock}'s stopping time.  Can be greater than or
+!          less than the startTime, depending on a positive or negative
+!          timeStep, respectively.  If neither stopTime, runDuration, nor
+!          runTimeStepCount is specified, clock runs "forever"; user must
+!          use other means to know when to stop (e.g. ESMF\_Alarm or
+!          ESMF\_ClockGet(clock, currTime)).  Mutually exclusive with
+!          runDuration and runTimeStepCount.
 !     \item[{[runDuration]}]
 !          Alternative way to specify {\tt ESMF\_Clock}'s stopping time;
 !             stopTime = startTime + runDuration.
+!          Can be positive or negative, consistent with the timeStep's sign.
 !          Mutually exclusive with stopTime and runTimeStepCount.
 !     \item[{[runTimeStepCount]}]
 !          Alternative way to specify {\tt ESMF\_Clock}'s stopping time;
 !             stopTime = startTime + (runTimeStepCount * timeStep).
+!          stopTime can be before startTime if timeStep is negative.
 !          Mutually exclusive with stopTime and runDuration.
 !     \item[{[refTime]}]
 !          The {\tt ESMF\_Clock}'s reference time.  Provides reference point
@@ -890,26 +899,33 @@
 !     \item[{[name]}]
 !          The new name for this clock.
 !     \item[{[timeStep]}]
-!          The {\tt ESMF\_Clock}'s time step interval.  This is used to
-!          change a clock's timestep property for those applications that need
-!          variable timesteps.  Also see {\tt ESMF\_ClockAdvance()} below
-!          for specifying variable timesteps that are NOT saved as the clock's
-!          internal time step property.
+!          The {\tt ESMF\_Clock}'s time step interval, which can be positive or
+!          negative.  This is used to change a clock's timestep property for
+!          those applications that need variable timesteps.  Also see
+!          {\tt ESMF\_ClockAdvance()} below for specifying variable timesteps
+!          that are NOT saved as the clock's internal time step property.
 !     \item[{[startTime]}]
-!          The {\tt ESMF\_Clock}'s starting time.
+!          The {\tt ESMF\_Clock}'s starting time.  Can be less than or
+!          or greater than stopTime, depending on a positive or negative
+!          timeStep, respectively, and whether a stopTime is specified;
+!          see below.
 !     \item[{[stopTime]}]
-!          The {\tt ESMF\_Clock}'s stopping time.  If neither stopTime,
-!          runDuration, nor runTimeStepCount is specified, clock runs "forever";
-!          user must use other means to know when to stop (e.g. ESMF\_Alarm or
+!          The {\tt ESMF\_Clock}'s stopping time.  Can be greater than or
+!          less than the startTime, depending on a positive or negative
+!          timeStep, respectively.  If neither stopTime, runDuration, nor
+!          runTimeStepCount is specified, clock runs "forever"; user must
+!          use other means to know when to stop (e.g. ESMF\_Alarm or
 !          ESMF\_ClockGet(clock, currTime)).
 !          Mutually exclusive with runDuration and runTimeStepCount.
 !     \item[{[runDuration]}]
 !          Alternative way to specify {\tt ESMF\_Clock}'s stopping time;
 !             stopTime = startTime + runDuration.
+!          Can be positive or negative, consistent with the timeStep's sign.
 !          Mutually exclusive with stopTime and runTimeStepCount.
 !     \item[{[runTimeStepCount]}]
 !          Alternative way to specify {\tt ESMF\_Clock}'s stopping time;
 !             stopTime = startTime + (runTimeStepCount * timeStep).
+!          stopTime can be before startTime if timeStep is negative.
 !          Mutually exclusive with stopTime and runDuration.
 !     \item[{[refTime]}]
 !          The {\tt ESMF\_Clock}'s reference time.
