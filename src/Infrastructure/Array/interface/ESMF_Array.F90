@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.10 2004/06/02 23:12:48 jwolfe Exp $
+! $Id: ESMF_Array.F90,v 1.11 2004/06/03 12:19:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -124,7 +124,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.10 2004/06/02 23:12:48 jwolfe Exp $'
+      '$Id: ESMF_Array.F90,v 1.11 2004/06/03 12:19:56 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -735,8 +735,8 @@ end subroutine
 !
 ! !DESCRIPTION:
 !     Sets the name of the {\tt ESMF\_Array}.  
-!     Note: Unlike most other ESMF objects, there are
-!     very few items which can be set once an {\tt ESMF\Array} 
+!     Note: Unlike most other ESMF objects there are
+!     very few items which can be changed once an {\tt ESMF\_Array} 
 !     is created.
 !
 !     The arguments are:
