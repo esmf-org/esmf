@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2004/03/16 18:28:45 nscollins Exp $
+# $Id: makefile,v 1.5 2004/03/23 18:30:30 nscollins Exp $
 
 # Leave alone.
 ALL: build_here 
@@ -39,5 +39,5 @@ CLEANDIRS   =
 CLEANFILES  = ESMF_StateGet.F90
 CLOBBERDIRS =
 
-ESMF_StateGet.F90: ESMF_StateGet.cpp ESMF_StateMacros.h
+ESMF_StateGet.o: ESMF_StateGet.cpp ESMF_StateMacros.h ESMF_State.o
 
