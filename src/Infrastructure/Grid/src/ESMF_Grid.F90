@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.26 2003/01/15 21:04:06 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.27 2003/01/15 23:19:15 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,9 +29,9 @@
 ! !DESCRIPTION:
 !
 ! The code in this file implements the {\tt Grid} class.  This class
-! provides a unified interface for both PhysGrid and DistGrid information
-! for model grids.  Functions for defining and computing grid information
-! are available through this class.
+! provides a unified interface for both {\tt PhysGrid} and {\tt DistGrid}
+! information for model grids.  Functions for defining and computing {\tt Grid}
+! information are available through this class.
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -89,6 +89,7 @@
                              ! to define horizontal, staggered and vertical grids
         type (ESMF_DistGrid) :: distgrid    ! decomposition and other
                                             ! logical space info for grid
+!       type (???) :: search_structure
 
       end type
 
@@ -195,7 +196,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.26 2003/01/15 21:04:06 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.27 2003/01/15 23:19:15 jwolfe Exp $'
 
 !==============================================================================
 !
