@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/03/25 00:18:34 flanigan Exp $ 
+# $Id: makefile,v 1.7 2003/03/28 17:42:31 svasquez Exp $ 
 
 ALL:  tests
 
@@ -43,7 +43,7 @@ CLOBBERDIRS =
 #
 
 $(ESMC_TESTDIR)/ESMF_CompCreate: ESMF_CompCreate.o
-	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_CompCreate ESMF_CompCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_CompCreate ESMF_CompCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_CompCreate.o
 
 RUN_ESMF_CompCreate:
@@ -63,7 +63,7 @@ ESMF_CompCreate.rm:
 #
 
 $(ESMC_TESTDIR)/ESMF_StateCreate: ESMF_StateCreate.o
-	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_StateCreate ESMF_StateCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_StateCreate ESMF_StateCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_StateCreate.o
 
 RUN_ESMF_StateCreate:
@@ -85,7 +85,7 @@ ESMF_StateCreate.rm:
 #
 
 $(ESMC_TESTDIR)/ESMF_StateUTest: ESMF_StateUTest.o
-	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_StateUTest ESMF_StateUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_StateUTest ESMF_StateUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_StateUTest.o
 
 RUN_ESMF_StateUTest:
