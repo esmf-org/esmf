@@ -84,6 +84,7 @@ void vmachine::vmachine_init(void){
   // and the main_vmachine is all MPI pets we can do the following:
   npets=size;           // user is required to start with #processes=#cores!!!!
   mypet=rank;
+  mpionly = 1;          // the default VM can only be MPI-only
   // set up private MPI_COMM_WORLD Group and Comm
   MPI_Comm_group(MPI_COMM_WORLD, &mpi_g);
   MPI_Comm_create(MPI_COMM_WORLD, mpi_g, &mpi_c);
@@ -1696,15 +1697,105 @@ void vmachine::vmachine_threadbarrier(void){
 }
 
 
-void vmachine::vmachine_allreduce(void *in, void *out, int len, vmOp op){
-  // MPI-only implementation -> will get lots more complicated in general case
-  // assme integer arrays -> will get more complicated in general
-  MPI_Op mpiop;
-  switch (op){
-  case vmSUM:
-    mpiop = MPI_SUM;
-  }
-  MPI_Allreduce(in, out, len, MPI_INT, mpiop, mpi_c);
+void vmachine::vmachine_allreduce(void *in, void *out, int len, vmType type,
+  vmOp op){
+  if (mpionly){
+    // Find corresponding MPI operation
+    MPI_Op mpiop;
+    switch (op){
+    case vmSUM:
+      mpiop = MPI_SUM;
+      break;
+    case vmMIN:
+      mpiop = MPI_MIN;
+      break;
+    case vmMAX:
+      mpiop = MPI_MAX;
+      break;
+    }
+    // Find corresponding MPI data type
+    MPI_Datatype mpitype;
+    switch (type){
+    case vmI4:
+      mpitype = MPI_INT;
+      break;
+    case vmR4:
+      mpitype = MPI_FLOAT;
+      break;
+    case vmR8:
+      mpitype = MPI_DOUBLE;
+      break;
+    }
+    MPI_Allreduce(in, out, len, mpitype, mpiop, mpi_c);
+  }else{
+    // This is a very simplistic, probably very bad peformance implementation.
+    int templen = len;
+    switch (type){
+    case vmI4:
+      templen *= 4;   // 4 bytes
+      break;
+    case vmR4:
+      templen *= 4;   // 4 bytes
+      break;
+    case vmR8:
+      templen *= 8;   // 8 bytes
+      break;
+    }
+    char *temparray = new char[templen*npets]; // allocate temp data array
+    // gather all data onto each PET
+    for (int i=0; i<npets; i++)
+      vmachine_gather(in, temparray, templen, i);
+    // each PET does its own reduction on its local temparray data
+    switch (op){
+    case vmSUM:
+      switch (type){
+      case vmI4:
+        int *tempdata = (int *)temparray;
+        int *outdata = (int *)out;
+        for (int i=0; i<len; i++){
+          *outdata = 0;
+          for (int j=0; j<npets; j++){
+            *outdata += tempdata[j*len];
+          }
+          ++tempdata;
+          ++outdata;
+        }
+        break;
+      case vmR4:
+        float *tempdata = (float *)temparray;
+        float *outdata = (float *)out;
+        for (int i=0; i<len; i++){
+          *outdata = 0;
+          for (int j=0; j<npets; j++){
+            *outdata += tempdata[j*len];
+          }
+          ++tempdata;
+          ++outdata;
+        }
+        break;
+      case vmR8:
+        double *tempdata = (double *)temparray;
+        double *outdata = (double *)out;
+        for (int i=0; i<len; i++){
+          *outdata = 0;
+          for (int j=0; j<npets; j++){
+            *outdata += tempdata[j*len];
+          }
+          ++tempdata;
+          ++outdata;
+        }
+        break;
+      }
+      break;
+    case vmMIN:
+      printf("Reduce operation vmMIN is not yet implemented\n");
+      break;
+    case vmMAX:
+      printf("Reduce operation vmMAX is not yet implemented\n");
+      break;
+    }
+    delete [] temparray;
+  }  
 }
 
 
