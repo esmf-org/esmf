@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.33 2003/09/04 22:24:21 cdeluca Exp $
+! $Id: ESMF_Route.F90,v 1.34 2003/09/12 22:40:44 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.33 2003/09/04 22:24:21 cdeluca Exp $'
+      '$Id: ESMF_Route.F90,v 1.34 2003/09/12 22:40:44 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -966,7 +966,19 @@
           rc = ESMF_FAILURE
         endif
 
-        ! TODO:?  Translate AxisIndices from F90 to C++
+        ! Translate AxisIndices from F90 to C++
+        do i = 1, recvDomainList%num_domains
+          do j = 1, recvDomainList%domains(i)%rank
+            recvDomainList%domains(i)%ai(j)%min = recvDomainList%domains(i)%ai(j)%min - 1
+            recvDomainList%domains(i)%ai(j)%max = recvDomainList%domains(i)%ai(j)%max - 1
+          enddo
+        enddo
+        do i = 1, sendDomainList%num_domains
+          do j = 1, sendDomainList%domains(i)%rank
+            sendDomainList%domains(i)%ai(j)%min = sendDomainList%domains(i)%ai(j)%min - 1
+            sendDomainList%domains(i)%ai(j)%max = sendDomainList%domains(i)%ai(j)%max - 1
+          enddo
+        enddo
 
         ! Call C++  code
         call c_ESMC_RoutePrecomputeDomList(route, rank, my_DE, &
@@ -976,7 +988,19 @@
           ! don't return before adding 1 back to AIs
         endif
 
-        ! TODO:?  Translate AxisIndices back to F90 from C++
+        ! Translate AxisIndices back to F90 from C++
+        do i = 1, recvDomainList%num_domains
+          do j = 1, recvDomainList%domains(i)%rank
+            recvDomainList%domains(i)%ai(j)%min = recvDomainList%domains(i)%ai(j)%min + 1
+            recvDomainList%domains(i)%ai(j)%max = recvDomainList%domains(i)%ai(j)%max + 1
+          enddo
+        enddo
+        do i = 1, sendDomainList%num_domains
+          do j = 1, sendDomainList%domains(i)%rank
+            sendDomainList%domains(i)%ai(j)%min = sendDomainList%domains(i)%ai(j)%min + 1
+            sendDomainList%domains(i)%ai(j)%max = sendDomainList%domains(i)%ai(j)%max + 1
+          enddo
+        enddo
 
         if (rcpresent) rc = status
 
