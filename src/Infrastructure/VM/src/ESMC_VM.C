@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.28 2005/01/13 22:58:42 theurich Exp $
+// $Id: ESMC_VM.C,v 1.29 2005/01/14 03:38:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.28 2005/01/13 22:58:42 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.29 2005/01/14 03:38:13 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -536,7 +536,7 @@ void ESMC_VM::ESMC_VMSendVMId(ESMC_VMId *vmID, int dest){
 
 void ESMC_VM::ESMC_VMRecvVMId(ESMC_VMId *vmID, int source){
   vmk_recv(vmID->vmKey, vmKeyWidth, source);
-  vmk_send(&(vmID->localID), sizeof(int), source);
+  vmk_recv(&(vmID->localID), sizeof(int), source);
 }
 
 
