@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.1 2003/01/23 22:27:19 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.2 2003/02/14 22:33:47 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,7 +27,10 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the inter-language code which
-//  allows F90 to call C++ for supporting {\tt Component} class functions.
+//  allows C++ to call F90 for supporting {\tt Component} class functions.
+//  This also contains the function pointer callbacks so F90 can call
+//  user-supplied functions by reference instead of forcing them to 
+//  have unique entry point names over the entire set of possible components.
 //
 //EOP
 
