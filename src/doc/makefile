@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.39 2003/10/21 23:47:28 cdeluca Exp $ 
+# $Id: makefile,v 1.40 2004/02/05 00:11:15 cdeluca Exp $ 
 ALL: alldoc 
 
 
@@ -22,17 +22,18 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/doc
 
-DVIFILES  =	ESMF_refdoc.dvi \
-                ESMF_usrdoc.dvi \
-                ESMF_reqdoc.dvi
+DVIFILES  =	ESMF_refdoc.dvi 
+#                ESMF_usrdoc.dvi \
+#                ESMF_reqdoc.dvi
 
-PDFFILES  =     ${ESMC_DOCDIR}/ESMF_reqdoc.pdf \
-		${ESMC_DOCDIR}/ESMF_usrdoc.pdf \
-                ${ESMC_DOCDIR}/ESMF_refdoc.pdf
+PDFFILES  =	${ESMC_DOCDIR}/ESMF_refdoc.pdf     
+#		${ESMC_DOCDIR}/ESMF_reqdoc.pdf \
+#		${ESMC_DOCDIR}/ESMF_usrdoc.pdf \
 
-HTMLFILES =	${ESMC_DOCDIR}/ESMF_reqdoc \
-		${ESMC_DOCDIR}/ESMF_usrdoc \
-                ${ESMC_DOCDIR}/ESMF_refdoc
+
+HTMLFILES =	${ESMC_DOCDIR}/ESMF_refdoc 
+#		${ESMC_DOCDIR}/ESMF_usrdoc \
+#                ${ESMC_DOCDIR}/ESMF_reqdoc
 
 
 TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/Demo/coupled_flow:" 

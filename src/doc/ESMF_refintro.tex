@@ -1,41 +1,28 @@
 
 \section{Release Notes}
 
-The purpose of the ESMF v1.0 release was to provide a first look at the ESMF
-Application Programming Interface (API), and to demonstrate the viability 
-of the ESMF architecture and implementation.  For that release we focused 
-on implementing major architectural features and basic functionality.  The 
-performance characteristics and memory requirements of the software 
-are unlikely to resemble those in later releases.
-
-We are relying on Earth system modelers to provide us with the feedback 
-necessary to realize this goal.  Section \ref{sec:Support} of this document 
-includes instructions on submitting comments on ESMF v1.0 to our 
-development team.
-
-We are providing roughly monthly {\it internal releases} which are snapshots
-of the source code tree and must be compiled before being used.  While these
-releases are tested, there will be known bugs in them which are documented,
-along with advances in functionality, on the {\tt Internal Releases} web page
-located at the ESMF web site {\tt www.esmf.ucar.edu}.
-
-Our next major release, ESMF v2.0, will occur in April 2004.  At that time, 
-the {\it ESMF Reference Manual} will cover a broader range of functionality
-and the interfaces and documentation will be more polished and consistent.  
-We anticipate, but have 
-not scheduled, other public releases and patches between now and ESMF v2.0.  
-Our focus during this year will be on developing an easy to use, 
-production-quality product.  
-
+ESMF v2.0 is a first production release of the Earth System 
+Modeling Framework.  While the ESMF still has much growing to do
+over the coming years, we expect modelers to find in this release 
+tools that benefit real codes.  You may choose to start with the
+highest level of functionality in the framework, the software
+for representing models as components and coupling them to other
+models; or the lowest level, the toolkits for data communication,
+I/O, logging, or calendar management.  Wherever you begin, we hope
+that you find the ESMF useful, and look forward to hearing your
+comments on any aspect of the software.
+Section \ref{sec:Support} 
+of this document includes instructions on submitting comments on 
+ESMF to our development team.
 
 \section{What is the Earth System Modeling Framework?}
 
-The Earth System Modeling Framework (ESMF) is a structured collection of 
-software building blocks that can be used or customized to develop 
+The ESMF is a structured collection of software building blocks that 
+can be used or customized to develop 
 Earth system model components, and assemble them into applications.  
 The simplest view of the ESMF is that it consists of an
-{\it infrastructure} of utilities and data structures for creating 
-model components, and a {\it superstructure} for coupling them.  
+{\bf infrastructure} of utilities and data structures for creating 
+model components, and a {\bf superstructure} for coupling them.  
 User code sits between these two layers, making calls to the infrastructure
 libraries beneath it and being scheduled and synchronized by the 
 superstructure above it.  The configuration resembles a sandwich, as
@@ -47,7 +34,8 @@ as atmospheric models, land models, and data assimilation systems.  The
 ESMF is not a single master application into which all components must fit; 
 rather it is a way of developing components so that they can be used 
 in many different user-written applications.  Model components that adopt 
-ESMF are usable in different contexts without code modification, and may be
+ESMF are designed to be usable in different contexts without code 
+modification, and may be
 incorporated into other ESMF-based modeling systems within the Earth 
 science community.  In addition to high-level organization, ESMF provides 
 a set of robust, portable, performance optimized libraries for regridding, 
@@ -57,37 +45,38 @@ of the ESMF infrastructure, or they may decide to simply wrap user-written
 components in ESMF interfaces in order to adopt the ESMF architecture and 
 utilize framework coupling services.
 
-\section{The ESMF Reference Manual for Fortran90}
+\section{The ESMF Reference Manual for Fortran}
 
-This {\it ESMF Reference Manual} is a listing of ESMF standard interfaces
-for Fortran90.  Interfaces are grouped by class.  A class is an 
-object-oriented software design construct that embodies a specific 
-concept like a physical field.  (For more on object-oriented
-design, how we have implemented object-oriented design in Fortran, and 
-how it is used to organize 
-ESMF, please see the \htmladdnormallink{{\it ESMF Architecture Document}}
-{http://www.esmf.ucar.edu/esmf_docs/ESMF_archdoc}.
+The ESMF provides both Fortran and C++ versions of its interfaces
+for many methods.  This {\it ESMF Reference Manual} is a listing of 
+ESMF standard interfaces for Fortran.\footnote{Since the audience for it is 
+small, we have not yet prepared a comprehensive reference manual for C++.}  
 
-The {\it Reference Manual} is divided into two main parts.  The 
-first part is a description 
-of the classes in the ESMF superstructure, and the second part is a 
-description of classes in the ESMF infrastructure.  The major classes
-in the ESMF superstructure are Components, which typically represent
+Interfaces are grouped by class.  A class is an object-oriented software 
+design construct that embodies 
+a specific concept like a physical field.  Superstructure classes 
+are listed first in this {\it Manual}, followed by infrastructure 
+classes.
+
+The major classes in the ESMF superstructure are Components, which 
+typically represent
 large pieces of functionality such as models, model couplers, and 
 dynamics and physics packages; and States, which are the data structures
 used to store the fields and other data Components require or can 
 make available.  There are both data structures and utilities in the ESMF 
-infrastructure; classes include but are not limited to Fields, 
-collections of Fields (Bundles), Arrays, and utilities for communication,
+infrastructure; classes include Fields, collections of Fields on the 
+same grid (called Bundles), Arrays, and utilities for communication,
 decomposition, time management, and application configuration.
 
-For a broad overview of how the ESMF software works, see the 
-\htmladdnormallink{{\it ESMF User's Guide}}{http://www.esmf.ucar.edu/esmf_docs/ESMF_usrdoc}.  This 
+For how to get started with ESMF, see the 
+\htmladdnormallink{{\it ESMF User's Guide}}{http://www.esmf.ucar.edu/esmf_docs/ESMF_usrdoc}.  This document includes installation instructions, an
+overview of the whole framework, an extended example of a coupled code, 
+and other useful information. 
 
 \begin{center}
 \begin{figure}
 \caption{Schematic of ESMF ``sandwich'' architecture. In this design the framework consists of two parts. An upper level
-{\bf Superstructure} layer and a lower-level {\bf Infrastructure} layer. User code is sandwiched between these two layers.}
+{\bf superstructure} layer and a lower-level {\bf infrastructure} layer. User code is sandwiched between these two layers.}
 \label{fig:TheESMFwich}
 \scalebox{1.0}{\includegraphics{ESMF_sandwich.eps}}
 \end{figure}
