@@ -1,4 +1,4 @@
-! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.1 2004/06/17 17:04:19 theurich Exp $
+! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.2 2004/06/17 19:20:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -57,8 +57,8 @@ program ESMF_VMGetMPICommunicatorEx
   call ESMF_Finalize(rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
-    print *, "PASS: ESMF_VMDefaultBasicsEx.F90"
+    print *, "PASS: ESMF_VMGetMPICommunicatorEx.F90"
   else
-    print *, "FAIL: ESMF_VMDefaultBasicsEx.F90"
+    print *, "FAIL: ESMF_VMGetMPICommunicatorEx.F90"
   endif
 end program

@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvEx.F90,v 1.2 2004/06/17 19:02:39 theurich Exp $
+! $Id: ESMF_VMSendVMRecvEx.F90,v 1.3 2004/06/17 19:20:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -74,9 +74,9 @@ program ESMF_VMSendVMRecvEx
 
   call ESMF_Finalize(rc)
   if (finalrc==ESMF_SUCCESS) then
-    print *, "PASS: ESMF_VMDefaultBasicsEx.F90"
+    print *, "PASS: ESMF_VMSendVMRecvEx.F90"
   else
-    print *, "FAIL: ESMF_VMDefaultBasicsEx.F90"
+    print *, "FAIL: ESMF_VMSendVMRecvEx.F90"
   endif
   
 end program
