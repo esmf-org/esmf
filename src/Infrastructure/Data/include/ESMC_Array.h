@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.11 2003/01/23 22:18:30 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.12 2003/01/23 22:21:54 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -153,9 +153,11 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     void ESMC_ArraySetOrigin(enum ESMC_ArrayOrigin o) { this->origin = o; }
     void ESMC_ArrayGetOrigin(enum ESMC_ArrayOrigin *o) { *o = this->origin; }
 
-    // copy the contents using an assignment
-    void ESMC_ArraySetF90Ptr(struct c_F90ptr *p);
-    void ESMC_ArrayGetF90Ptr(struct c_F90ptr *p);
+    // copy the contents of an f90 ptr
+    void ESMC_ArraySetF90Ptr(struct c_F90ptr *p) {
+        memcpy((void *)(&this->f90dopev), (void *)p, sizeof(struct c_F90ptr)); }
+    void ESMC_ArrayGetF90Ptr(struct c_F90ptr *p) {
+       memcpy((void *)p, (void *)(&this->f90dopev), sizeof(struct c_F90ptr)); }
 
     // set/get the dealloc flag
     void ESMC_ArraySetNoDealloc(void) { this->needs_dealloc = 0; }
@@ -180,6 +182,17 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
 //-----------------------------------------------------------------------------
 
  };   // end class ESMC_Array
+
+
+// these are functions, but not class methods.
+ESMC_Array *ESMC_ArrayCreate(int rank, enum ESMC_DataType dt,
+                             enum ESMC_DataKind dk, void *base,
+                             int *offsets, int *lengths, int *strides, int *rc);
+int ESMC_ArrayDestroy(ESMC_Array *array);
+ESMC_Array *ESMC_ArrayCreate_F(int rank, enum ESMC_DataType dt,
+                               enum ESMC_DataKind dk, void *base,
+                               int *offsets, int *lengths, int *strides,
+                               struct c_F90ptr *f90ptr, int *rc);
 
 // internal methods for setting the call back addrs
 extern "C" {
