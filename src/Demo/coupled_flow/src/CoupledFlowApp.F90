@@ -1,0 +1,269 @@
+! $Id: CoupledFlowApp.F90,v 1.1 2003/05/07 06:58:53 cdeluca Exp $
+!
+!------------------------------------------------------------------------------
+!BOP
+!
+! !MODULE: CoupledFlowApp.F90 - Main program source file for demo
+!
+! !DESCRIPTION:
+! ESMF Application Wrapper for Coupled Flow Demo.  This file contains the
+!  main program, and creates an ESMF Application Component to contain
+!  all other Components.
+!
+!
+!EOP
+
+    program ESMF_ApplicationWrapper
+
+    ! ESMF Framework module, defines all ESMF data types and procedures
+    use ESMF_Mod
+    
+    ! Flow Component registration routines
+    use CoupledFlowMod, only : CoupledFlow_register
+
+    implicit none
+    
+    ! Local variables
+
+    ! Components
+    type(ESMF_AppComp) :: compApp
+    type(ESMF_GridComp) :: compGridded
+
+    ! States and Layouts
+    type(ESMF_DELayout) :: layoutApp
+    type(ESMF_State) :: flowstate
+
+    ! A common grid
+    type(ESMF_Grid) :: grid
+
+    ! A clock, a calendar, and timesteps
+    type(ESMF_Clock) :: clock
+    type(ESMF_Calendar) :: gregorianCalendar
+    type(ESMF_TimeInterval) :: timeStep
+    type(ESMF_Time) :: startTime
+    type(ESMF_Time) :: stopTime
+
+    ! Variables related to grid and clock
+    integer :: i_max, j_max
+    real :: x_min, x_max, y_min, y_max
+    integer :: s_month, s_day, s_hour, s_min
+    integer :: e_month, e_day, e_hour, e_min
+
+    ! Read in from config file
+    namelist /input/ i_max, j_max, x_min, x_max, y_min, y_max, &
+                     s_month, s_day, s_hour, e_month, e_day, e_hour
+!BOP
+!
+! !DESCRIPTION:
+! \subsubsection{Namelist Input Parameters for CoupledFlowApp:}
+!     The following variables must be input to the CoupledFlow Application to
+!     run.  They are located in a file called "coupled\_app\_input."
+!
+!     The variables are:
+!     \begin{description}
+!     \item [i\_max]
+!           Global number of cells in the first grid direction.
+!     \item [j\_max]
+!           Global number of cells in the second grid direction.
+!     \item [x\_min]
+!           Minimum grid coordinate in the first direction.
+!     \item [x\_max]
+!           Maximum grid coordinate in the first direction.
+!     \item [y\_min]
+!           Minimum grid coordinate in the second direction.
+!     \item [y\_max]
+!           Maximum grid coordinate in the second direction.
+!     \item [s\_month]
+!           Simulation start time month (integer).
+!     \item [s\_day]
+!           Simulation start time day (integer).
+!     \item [s\_hour]
+!           Simulation start time hour (integer).
+!     \item [s\_min]
+!           Simulation start time minute (integer).
+!     \item [e\_month]
+!           Simulationendt time month (integer).
+!     \item [e\_day]
+!           Simulation end time day (integer).
+!     \item [e\_hour]
+!           Simulation end time hour (integer).
+!     \item [e\_min]
+!           Simulation end time minute (integer).
+!     \end{description}
+!
+!EOP
+
+    ! Return codes for error checks
+    integer :: rc
+        
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+    print *, "Coupled Flow Demo Application Start"
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!   Read in configuration data - will be replaced by Config routines
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!
+      !
+      ! Read in input file
+      !
+      open(15, status="old", file="coupled_app_input")
+      read(15, input, end=20)
+   20 continue
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!    Create section
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!
+
+    ! Create the top level application component.  This initializes the
+    ! ESMF Framework as well.
+    compApp = ESMF_AppCompCreate("Coupled Flow Application", rc=rc)
+
+    ! Query application for default layout.
+    call ESMF_AppCompGet(compApp, layout=layoutApp, rc=rc)
+
+   
+    ! Create the Gridded component, passing in the default layout.
+    compGridded = ESMF_GridCompCreate("Coupled Flow Demo", layout=layoutApp, rc=rc)
+
+
+    print *, "Comp Creates finished"
+
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!  Register section
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+      call ESMF_GridCompSetServices(compGridded, CoupledFlow_register, rc)
+      print *, "Comp SetServices finished, rc= ", rc
+
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!  Create and initialize a clock, and a grid.
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!BOP
+!
+! !DESCRIPTION:
+! \subsubsection{Example of Calendar and Clock Creation and Usage:}
+!
+!     The following piece of code provides an example of Clock creation used in
+!     the Demo.  As shown in this example, we first initialize a calendar to
+!     set the type of time scale (in this case, Gregorian):
+!\begin{verbatim}
+      call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+!\end{verbatim}
+!     Next we initialize a time interval (timestep) to 2 seconds:
+!\begin{verbatim}
+      call ESMF_TimeIntervalInit(timeStep, S=int(2,kind=ESMF_IKIND_I8), rc=rc)
+!\end{verbatim}
+!     And then we set the start time and stop time to input values for the month,
+!     day, and hour (assuming the year to be 2003):
+!\begin{verbatim}
+      call ESMF_TimeInit(startTime, YR=int(2003,kind=ESMF_IKIND_I8), &
+                         MM=s_month, DD=s_day, H=s_hour, M=s_min, &
+                         S=int(0,kind=ESMF_IKIND_I8), &
+                         cal=gregorianCalendar, rc=rc)
+
+      call ESMF_TimeInit(stopTime, YR=int(2003,kind=ESMF_IKIND_I8), &
+                         MM=e_month, DD=e_day, H=e_hour, M=e_min, &
+                         S=int(0,kind=ESMF_IKIND_I8), &
+                         cal=gregorianCalendar, rc=rc)
+!\end{verbatim}
+!     With the time interval, start time, and stop time set above, the Clock can
+!     now be created:
+!\begin{verbatim}
+      call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
+!\end{verbatim}
+!     Subsequent calls to ESMF\_ClockAdvance with this clock will increment the
+!     current time from the start time by the timestep.
+!EOP 
+      !
+      ! Create the Grid and attach it to the Component
+      !
+!BOP
+!
+! !DESCRIPTION:
+! \subsubsection{Example of Grid Creation:}
+!
+!     The following piece of code provides an example of Grid creation used in
+!     the Demo.  The extents of the Grid were previously read in from an input
+!     file, but the rest of the Grid parameters are set here by default.  The
+!     Grid spans the Application's Layout, while the type of the Grid is assumed to
+!     be horizontal and cartesian x-y with an Arakawa C staggering.  The Halo width
+!     for the Grid is set to one and the name to "source grid":
+!\begin{verbatim}
+      grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+                             x_min=x_min, x_max=x_max, &
+                             y_min=y_min, y_max=y_max, &
+                             layout=layoutApp, &   
+                             horz_gridtype=ESMF_GridType_XY, &
+                             horz_stagger=ESMF_GridStagger_C, &
+                             horz_coord_system=ESMF_CoordSystem_Cartesian, &
+                             halo_width=1, &
+                             name="source grid", rc=rc)
+!\end{verbatim}
+!     The Grid can then be attached to the Gridded Component with a Set call:
+!\begin{verbatim}
+     call ESMF_GridCompSet(compGridded, grid=grid, rc=rc)
+!\end{verbatim}
+!EOP
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!  Create and initialize a State to use for both import and export.
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+      flowstate = ESMF_StateCreate("Coupled Flow State", rc=rc)
+     
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!  Init, Run, and Finalize section
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+ 
+      call ESMF_GridCompInitialize(compGridded, flowstate, flowstate, &
+                                                                 clock, rc=rc)
+      print *, "Coupled Flow Component Initialize finished, rc =", rc
+ 
+
+
+      call ESMF_GridCompRun(compGridded, flowstate, flowstate, clock, rc=rc)
+      print *, "Coupled Flow Component Run finished, rc =", rc
+ 
+
+
+      call ESMF_GridCompFinalize(compGridded, flowstate, flowstate, clock, rc=rc)
+      print *, "Coupled Flow Component Finalize finished, rc =", rc
+ 
+ 
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!     Destroy section
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!     Clean up
+
+      call ESMF_StateDestroy(flowstate, rc)
+
+      call ESMF_GridCompDestroy(compGridded, rc)
+
+      call ESMF_DELayoutDestroy(layoutApp, rc)
+
+      call ESMF_AppCompDestroy(compApp, rc)
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+10    print *, "Coupled Flow Application Demo complete!"
+
+      end program ESMF_ApplicationWrapper
+    

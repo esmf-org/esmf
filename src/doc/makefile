@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2003/04/30 23:22:52 flanigan Exp $ 
+# $Id: makefile,v 1.29 2003/05/07 06:58:58 cdeluca Exp $ 
 ALL: alldoc 
 
 
@@ -22,17 +22,16 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/doc
 
-DVIFILES  = 	${ESMC_DOCDIR}/ESMF_reqdoc.dvi \
+DVIFILES  =	${ESMC_DOCDIR}/ESMF_reqdoc.dvi \
 		${ESMC_DOCDIR}/ESMF_usrdoc.dvi \
                 ${ESMC_DOCDIR}/ESMF_refdoc.dvi
 
 
 PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
 
-HTMLFILES = 	${ESMC_DOCDIR}/ESMF_reqdoc \
+HTMLFILES =	${ESMC_DOCDIR}/ESMF_reqdoc \
 		${ESMC_DOCDIR}/ESMF_usrdoc \
                 ${ESMC_DOCDIR}/ESMF_refdoc
-
 
 #
 # Files that a doc depends on.  Do not list the the ctex file !  
@@ -44,8 +43,7 @@ REQDOC_DEP_FILES = ESMF_syn.tex ESMF_auth.tex ESMF_buildreq.tex
 DESDOC_DEP_FILES = 
 REFDOC_DEP_FILES = 
 
-#  Note that ESMF_usrdoc.tex is not a .ctex file.
-USRDOC_DEP_FILES = ESMF_usrdoc.tex ESMF_desc.tex ESMF_install.tex 
+USRDOC_DEP_FILES = ESMF_desc.tex ESMF_install.tex 
 
 include $(ESMF_DIR)/makefile
 
@@ -62,7 +60,7 @@ CLOBBERDIRS =
 
 # Dvi files
 ${ESMC_DOCDIR}/ESMF_usrdoc.dvi: $(USRDOC_DEP_FILES)
-	export TEXINPUTS=".:$(ESMF_BUILD_DOCDIR):" ;\
+	export TEXINPUTS=".:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/Demo/coupled_flow:" ;\
 	${DO_LATEX} ESMF usr
 	mv -f ESMF_usrdoc.dvi $(ESMC_DOCDIR)
 
@@ -75,7 +73,7 @@ ${ESMC_DOCDIR}/ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
 # Html Files
 ${ESMC_DOCDIR}/ESMF_usrdoc: $(USRDOC_DEP_FILES)
 	-rm -r $(ESMC_DOCDIR)/ESMF_usrdoc
-	export TEXINPUTS=".:$(ESMF_BUILD_DOCDIR):" ;\
+	export TEXINPUTS=".:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/Demo/coupled_flow:" ;\
 	${DO_L2H} ESMF usr
 	mv -f ESMF_usrdoc ${ESMC_DOCDIR}
 

@@ -1,0 +1,7 @@
+&input
+      on_month = 5,   on_day = 15,  on_hour =  9,  on_min = 24,
+     off_month = 5,  off_day = 15, off_hour =  9, off_min = 36,
+
+     in_energy = 600.0, 
+     in_velocity = 4.5, 
+     in_rho = 2.0 /

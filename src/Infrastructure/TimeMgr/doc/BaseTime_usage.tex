@@ -1,0 +1,50 @@
+% $Id: BaseTime_usage.tex,v 1.1 2003/05/07 06:58:56 cdeluca Exp $
+
+The {\tt BaseTime} class is designed with a minimum number of elements
+to represent any required time.  The design is based on the idea used
+in the real-time POSIX 1003.1b-1993 standard.  That is, to represent
+time simply as a pair of integers: one for seconds (whole) and one for
+nanoseconds (fractional).  These can then be converted at the interface
+level to any desired format.
+
+For ESMF, this idea is modified and extended, in order to handle the
+requirements for a large time range (> 200,000 years) and to exactly
+represent any rational fraction, not just nanoseconds.  To handle the
+large time range, a 64-bit or greater integer is used for whole seconds.
+Any rational fractional second is expressed using two additional integers:
+a numerator and a denominator.  Both the whole seconds and fractional
+numerator are signed to handle negative time intervals and instants.
+For arithmetic consistency both must carry the same sign (both positve
+or both negative), except, of course, for zero values.  The fractional
+seconds element (numerator) is \htmlref{normalized}{glos:Normalized}
+(bounded) with respect to whole seconds. If the absolute value of the
+numerator becomes greater than or equal to the denominator, the whole
+seconds is incremented or decremented accordingly and the numerator is
+reset to the remainder.  Conversions are performed upon demand by
+interface methods within the derived classes {\tt TimeInterval} and
+{\tt Time}.  This is done because different applications require different
+representations of time intervals and time instances.
+
+The {\tt BaseTime} class defines increment and decrement methods for basic
+time interval calculations between time instants.  It is done here rather
+than in the calendar class because it can be done with simple arithmetic
+that is calendar-independent.  Upon demand by a user, the results are
+converted to user-units via methods in the derived classes {\tt TimeInterval}
+and {\tt Time} and the associated {\tt Calendar} class.
+
+Comparison methods are also defined in the {\tt BaseTime} class.  These
+perform equality/inequality, less than, and greater than comparisons
+between any two {\tt TimeIntervals} or {\tt Time}.  These methods capture
+the common comparison logic between {\tt TimeIntervals} and {\tt Time} and
+hence are defined here for sharing.
+
+Methods or possibly a separate class will be included to handle fractional
+arithmetic.  An pre-developed open source package would be preferable.
+
+For ease in calendar conversions, a time value of zero (both whole and
+numerator) will correspond to the Julian date of zero.
+
+The {\tt BaseTime} class is only a base class not to be instantiated by any
+application. It is only used by the derived classes {\tt TimeInterval} and
+{\tt Time}.
+

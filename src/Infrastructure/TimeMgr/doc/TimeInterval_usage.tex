@@ -1,0 +1,18 @@
+% $Id: TimeInterval_usage.tex,v 1.1 2003/05/07 06:58:56 cdeluca Exp $
+
+{\tt TimeInterval} inherits from the base class {\tt BaseTime}.  As such,
+it gains the core representation of time as well as its associated methods.
+{\tt TimeInterval} further specializes {\tt BaseTime} by adding shortcut
+methods to set and get a {\tt TimeInterval} in a natural way with
+appropriate unit combinations, as per the requirements.  Usually, the
+largest resolution of time for a {\tt TimeInterval} is in days, making it
+independent of any calendar.  A {\tt TimeInterval} can also be used as a
+{\tt Calendar} interval by associating it with a calendar type.  Then it
+becomes calendar-dependent, since its largest resolution of time will be
+in months and years.  In order to support calendar intervals,
+{\tt TimeInterval} adds a calendar type attribute to {\tt BaseTime}.
+{\tt TimeInterval} also defines methods for multiplication and division
+of {\tt TimeIntervals} by integers, reals, fractions and other
+{\tt TimeIntervals}.  {\tt TimeInterval} defines methods for absolute
+value and negative absolute value for use with both positive or
+negative time intervals.

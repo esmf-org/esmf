@@ -1,0 +1,540 @@
+! $Id: InjectorMod.F90,v 1.1 2003/05/07 06:58:54 cdeluca Exp $
+!
+!-------------------------------------------------------------------------
+!BOP
+! !MODULE: InjectorMod - Fluid Injection Component
+!
+! !DESCRIPTION:
+!   This is a user-supplied fluid injection component which interacts 
+!   with a separate fluid flow model component by altering the inflow 
+!   boundary conditions during a user-specifed time interval.
+!   The energy, velocity, and density of the inflow fluid during
+!   the injection time interval are user-specified.  
+!   The location of the inflow is 
+!   determined by the fluid flow model component through a set of
+!   boundary condition flags which are supplied to this component
+!   in the import state.  The energy, velocity, and density fields
+!   of the calculation are updated by this component and returned
+!   to the fluid flow solver for the next computational time step
+!   in the export state.
+!
+!
+!EOP
+
+    module InjectorMod
+
+    ! ESMF Framework module
+    use ESMF_Mod
+    use InjectArraysMod
+    
+    implicit none
+    
+    ! Private data block
+    type injectdata
+       type(ESMF_Calendar) :: gregorianCalendar
+       type(ESMF_Time) :: inject_start_time
+       type(ESMF_Time) :: inject_stop_time
+       real :: inject_energy
+       real :: inject_velocity
+       real :: inject_density
+    end type
+
+    type wrapper
+      type(injectdata), pointer :: ptr
+    end type
+
+   
+    ! External entry point which will register the Init, Run, and Finalize
+    !  routines for this Component.
+    public Injector_register
+        
+    contains
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: Injector_register - Set the Init, Run, Final routines
+
+! !INTERFACE:
+      subroutine Injector_register(comp, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp), intent(inout) :: comp
+      integer, intent(out) :: rc
+!
+! !DESCRIPTION:
+!     User-written registration routine.  This is the
+!     only public entry point for this Component.  When this is called by
+!     a higher level component it will register with the Framework the
+!     subroutines to be called when the Framework needs to Initialize,
+!     Run, or Finalize this Component.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[comp]
+!          The Gridded Component corresponding to this code.
+!     \item[rc]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors,
+!          {\tt ESMF\_FAILURE} othewise.
+!     \end{description}
+!
+!EOPI
+
+        ! local variables
+        type(injectdata), pointer :: datablock
+        type(wrapper) :: wrap
+
+        print *, "in user register routine"
+
+        ! Register the callback routines.
+        !
+        !  This Component has a 2 phase initialization, and a single
+        !   phase run and finalize.
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
+                                                        injector_init1, 1, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
+                                                        injector_init2, 2, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
+                                           injector_run, ESMF_SINGLEPHASE, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+                                         injector_final, ESMF_SINGLEPHASE, rc)
+
+        print *, "Registered Initialize, Run, and Finalize routines"
+
+
+        ! Allocate private persistent space
+        allocate(datablock)
+        wrap%ptr => datablock
+        call ESMF_GridCompSetInternalState(comp, wrap, rc)
+
+        print *, "Registered Private Data block for Internal State"
+    end subroutine
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: User Initialization routine, phase 1
+
+! !INTERFACE:
+      subroutine injector_init1(gcomp, importstate, exportstate, clock, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp), intent(inout) :: gcomp
+      type(ESMF_State), intent(inout) :: importstate, exportstate
+      type(ESMF_Clock), intent(in) :: clock
+      integer, intent(out) :: rc
+!
+! !DESCRIPTION:
+!     User-supplied Initialization routine.  Sets up data space,
+!     and marks which Fields in the export state can be produced
+!     by this Component.  The Coupler will mark which Fields are
+!     needed by whatever other Component(s) are coupled with this
+!     Component.  The second phase of the Init process will place
+!     the actual Field data in the export state.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[gcomp]
+!          Argument 1.
+!     \item[importstate]
+!          Argument 2.
+!     \item[exportstate]
+!          Argument 2.
+!     \item[clock]
+!          Optional object name.
+!     \item[rc]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      !
+      ! Local variables
+      !
+      integer :: i, j
+      type(ESMF_DELayout) :: layout
+      type(ESMF_Grid) :: grid
+      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
+      integer :: on_month, on_day, on_hour, on_min
+      integer :: off_month, off_day, off_hour, off_min
+      real :: in_energy, in_velocity, in_rho
+      integer :: myde
+      type(injectdata), pointer :: datablock
+      type(wrapper) :: wrap
+      namelist /input/ on_month, on_day, on_hour, on_min, &
+                       off_month, off_day, off_hour, off_min, &
+                       in_energy, in_velocity, in_rho
+!BOP
+!
+! !DESCRIPTION:
+! \subsection{Namelist Input Parameters for Injector:}
+!     The following variables must be input to the Injector Component to run.
+!     They are located in a file called "coupled\_inject\_input."
+!
+!     The variables are:
+!     \begin{description}
+!     \item [on\_month]
+!           Injector start time month (integer).
+!     \item [on\_day]
+!           Injector start time day (integer).
+!     \item [on\_hour]
+!           Injector start time hour (integer).
+!     \item [on\_min]
+!           Injector start time minute (integer).
+!     \item [off\_month]
+!           Injector stop time month (integer).
+!     \item [off\_day]
+!           Injector stop time day (integer).
+!     \item [off\_hour]
+!           Injector stop time hour (integer).
+!     \item [off\_min]
+!           Injector stop time minute (integer).
+!     \item [in\_energy]
+!           Standard internal energy of the injector flow.
+!     \item [in\_velocity]
+!           Vertical velocity of the injector flow.
+!     \item [in\_rho]
+!           Density of the injector flow.
+!     \end{description}
+!
+!EOP
+      !
+      ! Set initial values
+      !
+      rc = ESMF_FAILURE
+   
+      !
+      ! Read in input file
+      !
+      open(10, status="old", file="coupled_inject_input")
+      read(10, input, end=20)
+   20 continue
+
+      ! Set peristent values in saved data block
+      call ESMF_GridCompGetInternalState(gcomp, wrap, rc)
+      datablock => wrap%ptr
+
+      ! initialize calendar to be Gregorian type
+      call ESMF_CalendarInit(datablock%gregorianCalendar, &
+                                          ESMF_CAL_GREGORIAN, rc)
+
+      ! initialize start time to 12May2003, 3:00 pm
+      ! for testing, initialize start time to 13May2003, 2:00 pm
+      call ESMF_TimeInit(datablock%inject_start_time, &
+                                 YR=int(2003,kind=ESMF_IKIND_I8), &
+                                 MM=on_month, DD=on_day, H=on_hour, M=on_min, &
+                                 S=int(0,kind=ESMF_IKIND_I8), &
+                                 cal=datablock%gregorianCalendar, rc=rc)
+
+      ! initialize stop time to 13May2003, 2:00 pm
+      call ESMF_TimeInit(datablock%inject_stop_time, &
+                                 YR=int(2003,kind=ESMF_IKIND_I8), &
+                                 MM=off_month, DD=off_day, H=off_hour, M=off_min, &
+                                 S=int(0,kind=ESMF_IKIND_I8), &
+                                 cal=datablock%gregorianCalendar, rc=rc)
+
+
+      datablock%inject_energy = in_energy
+      datablock%inject_velocity = in_velocity
+      datablock%inject_density = in_rho
+
+      !
+      ! Query component for information.
+      !
+      call ESMF_GridCompGet(gcomp, layout=layout, grid=grid, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) then
+         print *, "ERROR in injector_init: getting info from component"
+         return
+      endif
+
+      !
+      ! create space for data arrays
+      !
+      call InjectArraysAlloc(grid, rc)
+      if(rc .NE. ESMF_SUCCESS) then
+        print *, "ERROR in injector_init:  injectarraysalloc"
+        return
+      endif
+
+      ! For initialization, add all fields to the import state.  Only the ones
+      !  needed will be copied over to the export state for coupling.
+      !  These are empty and will be filled in by the first run of the 
+      !  Coupler.
+      call ESMF_StateAddData(importstate, field_sie, rc)
+      call ESMF_StateAddData(importstate, field_u, rc)
+      call ESMF_StateAddData(importstate, field_v, rc)
+      call ESMF_StateAddData(importstate, field_rho, rc)
+      call ESMF_StateAddData(importstate, field_p, rc)
+      call ESMF_StateAddData(importstate, field_q, rc)
+      call ESMF_StateAddData(importstate, field_flag, rc)
+
+      ! This is adding names only to the export list, marked by default
+      !  as "not needed". The coupler will mark the ones needed based
+      !  on the requirements of the component(s) this is coupled to.
+      call ESMF_StateAddData(exportstate, "SIE", rc)
+      call ESMF_StateAddData(exportstate, "U", rc)
+      call ESMF_StateAddData(exportstate, "V", rc)
+      call ESMF_StateAddData(exportstate, "RHO", rc)
+      call ESMF_StateAddData(exportstate, "P", rc)
+      call ESMF_StateAddData(exportstate, "Q", rc)
+      call ESMF_StateAddData(exportstate, "FLAG", rc)
+
+end subroutine injector_init1
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  injector_init2 - second phase of injector init
+
+! !INTERFACE:
+      subroutine injector_init2(gcomp, importstate, exportstate, clock, rc)
+!
+! !ARGUMENTS:
+     type(ESMF_GridComp), intent(inout) :: gcomp
+     type(ESMF_State), intent(inout) :: importstate, exportstate
+     type(ESMF_Clock), intent(inout) :: clock
+     integer, intent(out) :: rc
+!
+! !DESCRIPTION:
+!     User-supplied second phase of Initialization.  This updates the
+!     export state with the actual Fields which are required to be
+!     provided to other Components.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[comp] 
+!          Component.
+!     \item[importstate]
+!          Importstate.
+!     \item[exportstate]
+!          Exportstate.
+!     \item[clock] 
+!          External clock.
+!     \item[rc] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors,
+!          otherwise {\tt ESMF\_FAILURE}.
+!     \end{description}
+!
+!EOPI
+      integer :: i, datacount
+      character(len=ESMF_MAXSTR), dimension(7) :: datanames
+      type(ESMF_Field) :: thisfield
+
+      !
+      ! Set initial values
+      !
+      rc = ESMF_FAILURE
+   
+      ! All possible export data fields.
+      datacount = 7
+      datanames(1) = "SIE"
+      datanames(2) = "U"
+      datanames(3) = "V"
+      datanames(4) = "RHO"
+      datanames(5) = "P"
+      datanames(6) = "Q"
+      datanames(7) = "FLAG"
+
+      ! Update any required fields in the export state
+      do i=1, datacount
+
+         ! check isneeded flag here
+         if (.not. ESMF_StateIsNeeded(importstate, datanames(i), rc)) then 
+             cycle
+         endif
+
+         call ESMF_StateGetData(importstate, datanames(i), thisfield, rc=rc)
+         call ESMF_StateAddData(exportstate, thisfield, rc=rc)
+
+      enddo
+
+    end subroutine injector_init2
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  injector_run - injector run routine
+
+! !INTERFACE:
+      subroutine injector_run(comp, importstate, exportstate, clock, rc)
+!
+! !ARGUMENTS:
+     type(ESMF_GridComp), intent(inout) :: comp
+     type(ESMF_State), intent(inout) :: importstate, exportstate
+     type(ESMF_Clock), intent(inout) :: clock
+     integer, intent(out) :: rc
+!
+! !DESCRIPTION:
+!     User-supplied Run routine.  Examines the Flag data for locations
+!     where fluid is to be injected.  Examines the Clock for the current
+!     time.  If it is during the injection period, the specified energy,
+!     velocity, and density data values are overwritten by this Component.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[comp] 
+!          Component.
+!     \item[importstate]
+!          Importstate.
+!     \item[exportstate]
+!          Exportstate.
+!     \item[clock] 
+!          External clock.
+!     \item[rc]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors,
+!          otherwise {\tt ESMF\_FAILURE}.
+!     \end{description}
+!
+!EOPI
+      ! Local variables
+        type(ESMF_Field) :: thisfield
+        type(ESMF_Field) :: local_sie, local_v, local_rho, local_flag
+        type(ESMF_Array) :: array_sie, array_v, array_rho, array_flag
+        real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: data_sie, data_v
+        real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: data_rho, data_flag
+        type(ESMF_Time) :: currtime
+        type(injectdata), pointer :: datablock
+        type(wrapper) :: wrap
+
+        integer :: i, j, datacount
+        character(len=ESMF_MAXSTR), dimension(7) :: datanames
+
+
+        ! All possible export data fields.
+        datacount = 7
+        datanames(1) = "SIE"
+        datanames(2) = "U"
+        datanames(3) = "V"
+        datanames(4) = "RHO"
+        datanames(5) = "P"
+        datanames(6) = "Q"
+        datanames(7) = "FLAG"
+
+        ! Get our local info
+        call ESMF_GridCompGetInternalState(comp, wrap, rc)
+        datablock => wrap%ptr
+
+
+        ! Get the Field and Bundle data from the State that we might update
+        call ESMF_StateGetData(importstate, "SIE", local_sie, rc=rc)
+        call ESMF_StateGetData(importstate, "V", local_v, rc=rc)
+        call ESMF_StateGetData(importstate, "RHO", local_rho, rc=rc)
+        call ESMF_StateGetData(importstate, "FLAG", local_flag, rc=rc)
+      
+        ! Get the Field and Bundle data from the State, and a pointer to
+        !  the existing data (not a copy).
+        call ESMF_FieldGetData(local_sie, array_sie, rc=rc) 
+        call ESMF_ArrayGetData(array_sie, data_sie, ESMF_DATA_REF, rc)
+            
+        call ESMF_FieldGetData(local_v, array_v, rc=rc) 
+        call ESMF_ArrayGetData(array_v, data_v, ESMF_DATA_REF, rc)
+      
+        call ESMF_FieldGetData(local_rho, array_rho, rc=rc) 
+        call ESMF_ArrayGetData(array_rho, data_rho, ESMF_DATA_REF, rc)
+      
+        call ESMF_FieldGetData(local_flag, array_flag, rc=rc) 
+        call ESMF_ArrayGetData(array_flag, data_flag, ESMF_DATA_REF, rc)
+          
+        ! Update values.  Flag = 10 means override values with our own.
+
+        ! Check time to see if we are still injecting
+        call ESMF_ClockGetCurrTime(clock, currtime, rc)
+        if ((currtime .ge. datablock%inject_start_time) .and. &
+            (currtime .le. datablock%inject_stop_time)) then
+
+            ! Set injection values
+            do j = jmin, jmax
+              do i = imin, imax
+                if (data_flag(i,j).eq.10) then
+                  data_sie(i,j) = datablock%inject_energy
+                  data_v(i,j) = datablock%inject_velocity
+                  data_rho(i,j) = datablock%inject_density
+                endif
+              enddo
+            enddo
+
+        else
+
+            ! Set default constant values.
+            do j = jmin, jmax
+              do i = imin, imax
+                if (data_flag(i,j).eq.10) then
+                  data_sie(i,j) = 200.0
+                  data_v(i,j) = 0.0
+                  data_rho(i,j) = 6.0
+                endif
+              enddo
+            enddo
+
+        endif 
+ 
+        ! Update any required fields in the export state
+        do i=1, datacount
+
+           ! check isneeded flag here
+           if (.not. ESMF_StateIsNeeded(importstate, datanames(i), rc)) then 
+               cycle
+           endif
+
+           call ESMF_StateGetData(importstate, datanames(i), thisfield, rc=rc)
+           call ESMF_StateAddData(exportstate, thisfield, rc=rc)
+
+        enddo
+
+    end subroutine injector_run
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  injector_final - finalize routine
+
+! !INTERFACE:
+      subroutine injector_final(comp, importstate, exportstate, clock, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp), intent(inout) :: comp
+      type(ESMF_State), intent(inout) :: importstate, exportstate
+      type(ESMF_Clock), intent(inout) :: clock
+      integer, intent(out) :: rc
+!
+! !DESCRIPTION:
+!     User-supplied finalize routine.  Release space allocated
+!      by this component.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[comp] 
+!          Component.
+!     \item[importstate]
+!          Importstate.
+!     \item[exportstate]
+!          Exportstate.
+!     \item[clock] 
+!          External clock.
+!     \item[rc] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors,
+!          otherwise {\tt ESMF\_FAILURE}.
+!     \end{description}
+!
+!EOPI
+        ! Local variables
+        type(injectdata), pointer :: datablock
+        type(wrapper) :: wrap
+
+        print *, "Injector Finalize starting"
+    
+        ! Release our field and data space
+        call InjectArraysDealloc(rc)
+
+
+        ! Get our local info and release it
+        nullify(wrap%ptr)
+        datablock => wrap%ptr
+        call ESMF_GridCompGetInternalState(comp, wrap, rc)
+
+        datablock => wrap%ptr
+        deallocate(datablock, stat=rc)
+        nullify(wrap%ptr)
+
+        print *, "Injector Finalize returning"
+   
+    end subroutine injector_final
+
+    end module InjectorMod
+    
