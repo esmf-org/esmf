@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.17 2003/02/11 23:24:57 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.18 2003/02/11 23:41:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -242,7 +242,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.17 2003/02/11 23:24:57 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.18 2003/02/11 23:41:14 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1087,14 +1087,22 @@ end function
       do i=1, bcount
         nextitem => stypep%datalist(startbase + i)
         nextitem%otype = ESMF_STATEBUNDLE
-        ! TODO: pull out bundle name here
-        !character, pointer :: namep
+
+        ! add bundle by name
+        allocate(nextitem%namep, stat=status)
+        if (status .ne. 0) then    ! F90 return code
+          print *, "Error: adding bundles to a state"
+          return
+        endif
+        call ESMF_BundleGetName(bundles(i), nextitem%namep)
+
         allocate(nextitem%datap, stat=status)
         if (status .ne. 0) then    ! F90 return code
           print *, "Error: adding bundles to a state"
           return
         endif
         nextitem%datap%bp = bundles(i)
+
         !integer :: indirect_index
         nextitem%needed = ESMF_STATEDATANOTNEEDED
         nextitem%ready = ESMF_STATEDATANOTREADY
@@ -1208,8 +1216,15 @@ end function
       do i=1, fcount
         nextitem => stypep%datalist(startbase + i)
         nextitem%otype = ESMF_STATEFIELD
-        ! TODO: pull out field name here
-        !character, pointer :: namep
+
+        ! add field by name
+        allocate(nextitem%namep, stat=status)
+        if (status .ne. 0) then    ! F90 return code
+          print *, "Error: adding fields to a state"
+          return
+        endif
+        call ESMF_FieldGetName(fields(i), nextitem%namep)
+
         allocate(nextitem%datap, stat=status)
         if (status .ne. 0) then    ! F90 return code
           print *, "Error: adding fields to a state"
@@ -1324,8 +1339,16 @@ end function
       do i=1, acount
         nextitem => stypep%datalist(startbase + i)
         nextitem%otype = ESMF_STATEARRAY
-        ! TODO: pull out array name here
-        !character, pointer :: namep
+
+
+        ! add array by name
+        allocate(nextitem%namep, stat=status)
+        if (status .ne. 0) then    ! F90 return code
+          print *, "Error: adding arrays to a state"
+          return
+        endif
+        call ESMF_ArrayGetName(arrays(i), nextitem%namep)
+
         allocate(nextitem%datap, stat=status)
         if (status .ne. 0) then    ! F90 return code
           print *, "Error: adding arrays to a state"
