@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.13 2005/01/12 00:09:37 nscollins Exp $
+#  $Id: build_rules.mk,v 1.14 2005/03/03 22:07:09 theurich Exp $
 #
 #  Darwin.xlf.default.mk
 #
@@ -67,7 +67,7 @@ endif
 ifeq ($(ESMF_COMM),lam)
 # with lam-mpi installed in /usr/local:
 MPI_HOME       =
-MPI_LIB        = -lmpi -llam
+MPI_LIB        = -lmpi -llam -llamf77mpi
 MPI_INCLUDE    =
 MPIRUN         =  mpirun
 endif
