@@ -1,4 +1,4 @@
-! $Id: ESMF_Layout.F90,v 1.9 2003/02/21 21:02:16 jwolfe Exp $
+! $Id: ESMF_Layout.F90,v 1.10 2003/02/26 20:14:26 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Layout.F90,v 1.9 2003/02/21 21:02:16 jwolfe Exp $'
+      '$Id: ESMF_Layout.F90,v 1.10 2003/02/26 20:14:26 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -561,13 +561,14 @@ end interface
 !BOP
 ! !INTERFACE:
       subroutine ESMF_LayoutGatherArrayI(layout, DistArray, decompids, &
-                                         AIPtr, GlobalArray, rc)
+                                         AIPtr, AIPtr2, GlobalArray, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Layout) :: layout
       integer, dimension(:), intent(in) :: DistArray
       integer, dimension(:), intent(in) :: decompids
       type(ESMF_AxisIndex), dimension(:) :: AIPtr
+      type(ESMF_AxisIndex), dimension(:) :: AIPtr2
       integer, dimension(:), intent(out) :: GlobalArray
       integer, intent(out), optional :: rc             
 !
@@ -593,8 +594,8 @@ end interface
 !       Routine which interfaces to the C++ routine.
         size_decomp = size(decompids)
         call c_ESMC_LayoutGatherArrayI(layout, DistArray, decompids, &
-                                       size_decomp, AIPtr, GlobalArray, &
-                                       status)
+                                       size_decomp, AIPtr, AIPtr2, &
+                                       GlobalArray, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "ESMF_LayoutGatherArrayI error"
           return
