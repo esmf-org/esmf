@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.9 2003/05/02 21:37:31 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.10 2003/06/07 00:49:20 eschwab Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -127,22 +127,18 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       datablock => wrap%ptr
 
       ! initialize calendar to be Gregorian type
-      call ESMF_CalendarInit(datablock%gregorianCalendar, &
-                                          ESMF_CAL_GREGORIAN, rc)
+      call ESMF_CalendarSet(datablock%gregorianCalendar, &
+                                         ESMF_CAL_GREGORIAN, rc)
 
-      ! initialize start time to 12May2003, 3:00 pm
-      ! for testing, initialize start time to 13May2003, 2:00 pm
-      call ESMF_TimeInit(datablock%inject_start_time, &
-                                 YR=int(2003,kind=ESMF_IKIND_I8), &
-                                 MM=5, DD=12, H=14, M=0, &
-                                 S=int(0,kind=ESMF_IKIND_I8), &
+      ! initialize start time to 12May2003, 2:00 pm
+      ! for testing, initialize start time to 12May2003, 2:00 pm
+      call ESMF_TimeSet(datablock%inject_start_time, &
+                                 YR=2003, MM=5, DD=12, H=14, &
                                  cal=datablock%gregorianCalendar, rc=rc)
 
       ! initialize stop time to 13May2003, 2:00 pm
-      call ESMF_TimeInit(datablock%inject_stop_time, &
-                                 YR=int(2003,kind=ESMF_IKIND_I8), &
-                                 MM=5, DD=13, H=14, M=0, &
-                                 S=int(0,kind=ESMF_IKIND_I8), &
+      call ESMF_TimeSet(datablock%inject_stop_time, &
+                                 YR=2003, MM=5, DD=13, H=14, &
                                  cal=datablock%gregorianCalendar, rc=rc)
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74558.F90,v 1.12 2003/06/06 20:24:14 nscollins Exp $
+! $Id: ESMF_SysTest74558.F90,v 1.13 2003/06/07 00:46:51 eschwab Exp $
 !
 ! System test code #74558
 
@@ -106,25 +106,23 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
       ! initialize calendar to be Gregorian type
-      call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, &
-                             status)
+      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, &
+                            status)
 
       ! initialize time interval to 1 second
-      call ESMF_TimeIntervalInit(time_step, s_=1.0D0, rc=status)
+      call ESMF_TimeIntervalSet(time_step, s_=1.0D0, rc=status)
 
-      ! initialize start time to 3/28/2003
-      call ESMF_TimeInit(startTime, YR=int(2003,kind=ESMF_IKIND_I8), &
-                         MM=3, DD=28, H=10, M=0, &
-                         cal=gregorianCalendar, rc=status)
+      ! initialize start time to 3/28/2003 10:00
+      call ESMF_TimeSet(startTime, YR=2003, MM=3, DD=28, H=10, M=0, &
+                        cal=gregorianCalendar, rc=status)
 
-      ! initialize stop time to 3/29/2003
-      call ESMF_TimeInit(stopTime, YR=int(2003,kind=ESMF_IKIND_I8), &
-                         MM=3, DD=28, H=10, M=1, &
-                         cal=gregorianCalendar, rc=status)
+      ! initialize stop time to 3/28/2003 10:01
+      call ESMF_TimeSet(stopTime, YR=2003, MM=3, DD=28, H=10, M=1, &
+                        cal=gregorianCalendar, rc=status)
 
       ! initialize the clock with the above values
-      call ESMF_ClockInit(clock, time_step, startTime, stopTime, &
-                          rc=status)
+      call ESMF_ClockSet(clock, time_step, startTime, stopTime, &
+                         rc=status)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
