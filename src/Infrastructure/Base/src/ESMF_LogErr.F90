@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.62 2004/12/30 16:59:56 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.63 2005/01/10 21:50:24 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -335,7 +335,7 @@ end subroutine ESMF_LogFinalize
     			    WRITE(log%unitnumber,122) &
                                   log%LOG_ENTRY(j)%d     , " ", log%LOG_ENTRY(j)%h   , &
                                   log%LOG_ENTRY(j)%m     ,      log%LOG_ENTRY(j)%s   , ".", &
-                                  log%LOG_ENTRY(j)%ms    , " ", log%LOG_ENTRY(j)%lt  , "  pet", &
+                                  log%LOG_ENTRY(j)%ms    , " ", log%LOG_ENTRY(j)%lt  , "  PET", &
 				  log%petnum, " ", &
                                   log%LOG_ENTRY(j)%file  , " ", log%LOG_ENTRY(j)%line, " ", &
                                   log%LOG_ENTRY(j)%method, " ", log%LOG_ENTRY(j)%msg
@@ -343,7 +343,7 @@ end subroutine ESMF_LogFinalize
     			    WRITE(log%unitnumber,123) &
                                   log%LOG_ENTRY(j)%d   , " ", log%LOG_ENTRY(j)%h   , &
                                   log%LOG_ENTRY(j)%m   ,      log%LOG_ENTRY(j)%s   , ".", &
-                                  log%LOG_ENTRY(j)%ms  , " ", log%LOG_ENTRY(j)%lt  , "  pet", &
+                                  log%LOG_ENTRY(j)%ms  , " ", log%LOG_ENTRY(j)%lt  , "  PET", &
 				  log%petnum, " ", &
                                   log%LOG_ENTRY(j)%file, " ", log%LOG_ENTRY(j)%line, " ", &
                                   log%LOG_ENTRY(j)%msg
@@ -353,14 +353,14 @@ end subroutine ESMF_LogFinalize
     		            WRITE(log%unitnumber,132) &
                                   log%LOG_ENTRY(j)%d     , " ", log%LOG_ENTRY(j)%h  , &
                                   log%LOG_ENTRY(j)%m     ,      log%LOG_ENTRY(j)%s  , ".", &
-                                  log%LOG_ENTRY(j)%ms    , " ", log%LOG_ENTRY(j)%lt , "  pet", &
+                                  log%LOG_ENTRY(j)%ms    , " ", log%LOG_ENTRY(j)%lt , "  PET", &
 				  log%petnum, " ", &
     			          log%LOG_ENTRY(j)%method, " ", log%LOG_ENTRY(j)%msg
     		        else
     		            WRITE(log%unitnumber,133) &
                                   log%LOG_ENTRY(j)%d  , " ", log%LOG_ENTRY(j)%h , &
                                   log%LOG_ENTRY(j)%m  ,      log%LOG_ENTRY(j)%s , ".", &
-                                  log%LOG_ENTRY(j)%ms , " ", log%LOG_ENTRY(j)%lt, "  pet", &
+                                  log%LOG_ENTRY(j)%ms , " ", log%LOG_ENTRY(j)%lt, "  PET", &
 				  log%petnum, " ", &
                                   log%LOG_ENTRY(j)%msg
     		        endif	
