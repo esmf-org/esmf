@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.38 2004/02/10 18:27:06 svasquez Exp $
+#  $Id: common.mk,v 1.39 2004/02/18 18:24:08 nscollins Exp $
 #===============================================================================
 #  common.mk
 #
@@ -600,6 +600,12 @@ demo: chkopts build_libs chkdir_tests
 
 tree_demo: tree_build_demo tree_run_demo
 
+demo_uni: chkopts build_libs chkdir_tests
+	@if [ -d src/Demo ] ; then cd src/Demo; fi; \
+	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_demo_uni tree
+
+tree_demo_uni: tree_build_demo tree_run_demo_uni
+
 #
 # build_demo
 #
@@ -624,6 +630,13 @@ run_demo:  chkopts chkdir_tests
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_demo tree
 
 tree_run_demo: $(DEMO_RUN) 
+
+
+run_demo_uni:  chkopts chkdir_tests
+	@if [ -d src/Demo ] ; then cd src/Demo; fi; \
+	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_demo_uni tree
+
+tree_run_demo_uni: $(DEMO_RUN_UNI) 
 
 
 #-------------------------------------------------------------------------------
