@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Version.inc,v 1.1 2003/03/04 19:51:22 nscollins Exp $
+$Id: ESMF_Version.inc,v 1.2 2003/04/03 22:42:36 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -20,21 +20,8 @@ ends up being included multiple times.
 #define ESMF_VERSION_INC
 
 #if 0
-!BOP
-!-------------------------------------------------------------------------
-!
-!DESCRIPTION:
-!
-! Version numbers usable ESMF-wide in both F90 and C++
-!
-!-------------------------------------------------------------------------
-!EOP
+contents moved to ESMF_BaseMod so user code
+does not require the preprocessor to compile.
 #endif
-
-#define ESMF_MAJOR_VERSION 0
-#define ESMF_MINOR_VERSION 0
-#define ESMF_REVISION      1
-
-#define ESMF_VERSION_STRING "0.0.1"
 
 #endif 

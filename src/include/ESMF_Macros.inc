@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Macros.inc,v 1.5 2003/02/28 01:19:39 eschwab Exp $
+$Id: ESMF_Macros.inc,v 1.6 2003/04/03 22:42:36 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -20,27 +20,16 @@ ends up being included multiple times.
 #define ESMF_MACROS_INC
 
 #if 0
-!BOP
--------------------------------------------------------------------------
 
- !DESCRIPTION:
+former file contents moved to ESMF_BaseMod
+so user code can be compiled without requiring
+the preprocessor.
 
- Utility macros and constants usable ESMF-wide in both F90 and C++
+#endif 
 
- (all lines below between the !BOP and !EOP markers will be included in
-  the automated document processing.)
-
--------------------------------------------------------------------------
-!EOP
+#if 0
+i left the following macro here in case it is needed for our internal use.
 #endif
-
-#define ESMF_SUCCESS  0
-#define ESMF_FAILURE -1
-
-#define ESMF_MAXSTR 128
-#define ESMF_MAXDIM 7
-#define ESMF_MAXDECOMPDIM 2
-#define ESMF_MAXGRIDDIM 2
 
 #define ESMF_SRCLINE __FILE__, __LINE__
 

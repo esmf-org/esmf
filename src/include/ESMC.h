@@ -1,4 +1,4 @@
-// $Id: ESMC.h,v 1.7 2003/03/31 20:03:52 cdeluca Exp $
+// $Id: ESMC.h,v 1.8 2003/04/03 22:42:35 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -13,6 +13,7 @@
 // system dependent #defines from build process
 #include "conf.h"
 
-#include "ESMF_Macros.inc"
+#include "ESMC_Macros.h"
 
+// TODO: this file needs any external include files added here
 
