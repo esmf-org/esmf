@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.20 2004/07/22 14:46:11 nscollins Exp $
+// $Id: ESMC_Base_F.C,v 1.21 2004/09/16 23:38:33 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.20 2004/07/22 14:46:11 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.21 2004/09/16 23:38:33 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -567,7 +567,7 @@ extern "C" {
   }
 
   if (attrDt != *dt) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(status,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_INCOMP,
                          "attribute value not expected type", &status);
     //printf("attribute %s not expected type %s, actually type %d\n", 
     //       name, ESMC_DataTypeString(*dt), ESMC_DataTypeString(attrDt));
@@ -576,7 +576,7 @@ extern "C" {
     return;
   }
   if (attrDk != *dk) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(status,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_INCOMP,
                          "attribute value not expected kind", &status);
     //printf("attribute %s not expected kind %s, actually kind %d\n", 
     //       name, ESMC_DataKindString(*dk), ESMC_DataKindString(attrDk));
@@ -585,7 +585,7 @@ extern "C" {
     return;
   }
   if (attrCount != *count) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(status,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_ARG_INCOMP,
                          "attribute value not expected count", &status);
     //printf("expected count %d does not match actual count %d\n", 
     //           *count, attrCount);
