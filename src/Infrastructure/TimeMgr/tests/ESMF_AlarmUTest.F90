@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.12 2004/05/18 21:19:28 svasquez Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.13 2004/05/20 19:25:14 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.12 2004/05/18 21:19:28 svasquez Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.13 2004/05/20 19:25:14 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -164,10 +164,29 @@
       alarm1 = ESMF_AlarmCreate(name="WAKEUP", clock=clock1, ringTime=alarmTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Destroy Alarm Test"
+      call ESMF_AlarmDestroy(alarm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      
+
+#ifdef ESMF_EXHAUSTIVE
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Create Alarm Test"
+      alarm1 = ESMF_AlarmCreate(name="WAKEUP", clock=clock1, ringTime=alarmTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Create Alarm Test"
       alarm3 = ESMF_AlarmCreate(name="WAKEUP", clock=clock1, ringTime=alarmTime, rc=rc)
@@ -176,7 +195,7 @@
 
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Create Alarm Copy Test"
       alarm2 = ESMF_AlarmCreate(alarm1, rc=rc)
@@ -185,7 +204,7 @@
 
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Testing for alarm equality
       ! alarmsEqual = ESMF_AlarmOperator(==)(alarm1,alarm2)
       write(failMsg, *) "Returned not equal"
@@ -196,7 +215,7 @@
 
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Testing for alarm inequality:
       ! alarmsEqual = ESMF_AlarmOperator(==)(alarm1,alarm3)
       write(failMsg, *) "Returned equal"
@@ -207,7 +226,7 @@
 
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Testing alarms equality using:
       ! alarmsNotEqual = ESMF_AlarmOperator(/=)(alarm1,alarm2)
       write(failMsg, *) "Returned not equal"
@@ -217,7 +236,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Testing alarms inequality using:
       ! alarmsNotEqual = ESMF_AlarmOperator(/=)(alarm1,alarm3)
       write(failMsg, *) "Returned equal"
@@ -228,14 +247,14 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Validate Alarm Test"
       call ESMF_AlarmValidate(alarm1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned not sticky"
       write(name, *) "Check if Alarm is sticky Test"
       sticky =  ESMF_AlarmIsSticky(alarm1, rc=rc)
@@ -243,7 +262,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned not enabled"
       write(name, *) "Check if Alarm is enabled Test"
       enabled =  ESMF_AlarmIsEnabled(alarm1, rc=rc)
@@ -251,7 +270,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Alarm not sticky Test"
       call  ESMF_AlarmNotSticky(alarm1, rc=rc)
@@ -260,7 +279,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or name is not correct"
       write(name, *) "Get Alarm name Test"
       call  ESMF_AlarmGet(alarm1, name=aName, rc=rc)
@@ -271,7 +290,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or name is not correct"
       write(name, *) "Set Alarm name Test"
       call  ESMF_AlarmSet(alarm1, name="ALARM1", rc=rc)
@@ -279,7 +298,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or name is not correct"
       write(name, *) "Get Alarm name Test"
       call  ESMF_AlarmGet(alarm1, name=aName, rc=rc)
@@ -290,7 +309,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned sticky"
       write(name, *) "Check if Alarm is not sticky Test"
       sticky =  ESMF_AlarmIsSticky(alarm1, rc=rc)
@@ -299,7 +318,7 @@
 
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Alarm sticky Test"
       call  ESMF_AlarmSticky(alarm1, rc=rc)
@@ -308,7 +327,7 @@
 
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned not sticky"
       write(name, *) "Check if Alarm is sticky Test"
       sticky =  ESMF_AlarmIsSticky(alarm1, rc=rc)
@@ -316,7 +335,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or is ringing"
       write(name, *) "Check if Alarm is not ringing Test"
       isringing = ESMF_AlarmIsRinging(alarm1, rc=rc)
@@ -325,7 +344,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Turn on Ringing Alarm "
       call ESMF_AlarmRingerOn(alarm1, rc=rc)
@@ -334,7 +353,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or its not ringing"
       write(name, *) "Check if Alarm is ringing Test"
       isringing = ESMF_AlarmIsRinging(alarm1, rc=rc)
@@ -343,7 +362,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Turn off Ringing Alarm "
       call ESMF_AlarmRingerOff(alarm1, rc=rc)
@@ -352,7 +371,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or its ringing"
       write(name, *) "Check if Alarm is not ringing Test"
       isringing = ESMF_AlarmIsRinging(alarm1, rc=rc)
@@ -360,7 +379,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Enable Alarm Test"
       call ESMF_AlarmEnable(alarm1, rc=rc)
@@ -368,7 +387,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned enabled"
       write(name, *) "Check if Alarm is enabled Test"
       enabled =  ESMF_AlarmIsEnabled(alarm1, rc=rc)
@@ -376,7 +395,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Alarm Print Test"
       call  ESMF_AlarmPrint(alarm1, rc=rc)
@@ -384,7 +403,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Disable Alarm Test"
       call ESMF_AlarmDisable(alarm1, rc=rc)
@@ -392,7 +411,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned enabled"
       write(name, *) "Check if Alarm is disabled Test"
       enabled =  ESMF_AlarmIsEnabled(alarm1, rc=rc)
@@ -400,7 +419,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Destroy Alarm Test"
       call ESMF_AlarmDestroy(alarm1, rc=rc)
@@ -410,7 +429,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting Time Step
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Time Interval Initialization Test"
@@ -419,7 +438,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting the Start Time
       write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Set Start Time Initialization Test"
@@ -431,7 +450,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting the Stop Time
       write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Set Stop Time Initialization Test"
@@ -442,7 +461,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting the Alarm Time
       write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Set Alarm Time Initialization Test"
@@ -452,7 +471,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       ! ----------------------------------------------------------------------------
       ! Initialize clock 
-      !NEX_UTest
+      !EX_UTest
        write(name, *) "Clock Initialization Test"
        write(failMsg, *) " Did not return ESMF_SUCCESS"
        clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, &
@@ -462,7 +481,7 @@
 
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Sticky Alarm Time Initialization Test"
       alarm =  ESMF_AlarmCreate(name="alarm1", clock=clock, ringTime=alarmTime, rc=rc)
@@ -470,7 +489,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Get Alarm Test"
       call ESMF_ClockGetAlarm(clock, name="alarm1", alarm=alarm, rc=rc)
@@ -478,7 +497,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       !Test Alarm will ring next
       call ESMF_ClockAdvance(clock, rc=rc)
       call ESMF_ClockAdvance(clock, rc=rc)
@@ -489,7 +508,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       !Test Get Clock Next Time
       write(failMsg, *) " Did not return ESMF_SUCCESS)"
       write(name, *) "Get Clock Next Time Test"
@@ -498,7 +517,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       !Test Alarm will ring next
       call ESMF_ClockAdvance(clock, rc=rc)
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
@@ -508,7 +527,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       !Test Get Time from clock
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Get Clock Current Time Test"
@@ -517,7 +536,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       !Test that Clock Get Next Time Passed
       write(failMsg, *) " Next Time not equal to current Time"
       write(name, *) "Get Clock Next Time Test"
@@ -526,7 +545,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       !Test Alarm ringing
       call ESMF_ClockAdvance(clock, rc=rc)
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
@@ -536,7 +555,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       !Test Alarm still ringing
       call ESMF_ClockAdvance(clock, rc=rc)
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
@@ -547,7 +566,7 @@
       
     ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       !Test Alarm Previously ringing
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
       write(name, *) "Alarm Was Previously ringing Test"
@@ -560,7 +579,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       !Test Alarm Previously ringing
       call ESMF_ClockAdvance(clock, rc=rc)
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
@@ -570,7 +589,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       !Test Alarm still ringing
       call ESMF_ClockAdvance(clock, rc=rc)
       call ESMF_ClockAdvance(clock, rc=rc)
@@ -589,7 +608,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Turn off Ringing Alarm "
       call ESMF_AlarmRingerOff(alarm, rc=rc)
@@ -598,7 +617,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or its ringing"
       write(name, *) "Check if Alarm is not ringing Test"
       isringing = ESMF_AlarmIsRinging(alarm, rc=rc)
@@ -607,7 +626,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       !Test Alarm Previously ringing
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
       write(name, *) "Alarm Was Previously ringing Test"
@@ -618,7 +637,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       !Test Alarm Previously ringing
       call ESMF_ClockAdvance(clock, rc=rc)
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
@@ -629,7 +648,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       !Test Alarm Previously ringing
       call ESMF_ClockAdvance(clock, rc=rc)
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
@@ -640,7 +659,7 @@
 
       ! ----------------------------------------------------------------------------
       ! Initialize clock 
-      !NEX_UTest
+      !EX_UTest
        write(name, *) "Clock Initialization Test"
        write(failMsg, *) " Did not return ESMF_SUCCESS"
        clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, &
@@ -650,7 +669,7 @@
 
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Non-Sticky Alarm Time Initialization Test"
       alarm =  ESMF_AlarmCreate(name="alarm1", clock=clock, &
@@ -659,7 +678,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       !Test Alarm will ring next
       call ESMF_ClockAdvance(clock, rc=rc)
       call ESMF_ClockAdvance(clock, rc=rc)
@@ -670,7 +689,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       !Test Alarm will ring next
       call ESMF_ClockAdvance(clock, rc=rc)
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
@@ -680,7 +699,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       !Test Alarm ringing
       call ESMF_ClockAdvance(clock, rc=rc)
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
@@ -690,7 +709,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       !Test Alarm still ringing
       call ESMF_ClockAdvance(clock, rc=rc)
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
@@ -701,7 +720,7 @@
       
     ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       !Test Alarm Previously ringing
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
       write(name, *) "Alarm Was Previously ringing Test"
@@ -714,7 +733,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       !Test Alarm Previously ringing
       call ESMF_ClockAdvance(clock, rc=rc)
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
@@ -724,6 +743,8 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
+#endif
 
       ! finalize ESMF framework
       call ESMF_Finalize(rc)
