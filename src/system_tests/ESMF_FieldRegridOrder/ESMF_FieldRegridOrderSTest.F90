@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.9.4.1 2005/02/09 21:48:39 nscollins Exp $
+! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.9.4.2 2005/03/03 22:21:18 nscollins Exp $
 !
 ! System test code FieldRegridOrder
 !  Description on Sourceforge under System Test #xxxxxx
@@ -83,7 +83,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Get number of PETs we are running with
-    call ESMF_VMGet(vm, petCount=npets, rc=rc)
+    call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     if (npets .lt. 6) then
@@ -225,11 +225,6 @@
     call ESMF_CplCompFinalize(cpl, c1exp, c2imp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Coupler Finalize finished, rc =", rc
-
-
-    ! Figure out our local PET id for message below.
-    call ESMF_VMGet(vm, localPet=pet_id, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
 
 
     print *, "------------------------------------------------------------"
