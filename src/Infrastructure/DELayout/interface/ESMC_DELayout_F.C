@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.1 2003/09/19 17:00:03 cdeluca Exp $
+// $Id: ESMC_DELayout_F.C,v 1.2 2003/11/05 23:29:02 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -156,10 +156,10 @@ extern "C" {
        }
 
        void FTN(c_esmc_delayoutscatterla)(ESMC_DELayout **ptr,
-                                 ESMC_LocalArray *sndarray,
-                                 ESMC_LocalArray *rcvarray, int *len,
+                                 ESMC_LocalArray **sndarray,
+                                 ESMC_LocalArray **rcvarray, int *len,
                                  int *srcdeid, int *status) {
-           *status = (*ptr)->ESMC_DELayoutScatter(sndarray, rcvarray, *len,
+           *status = (*ptr)->ESMC_DELayoutScatter(*sndarray, *rcvarray, *len,
                                                   *srcdeid);
        }
 
@@ -191,11 +191,11 @@ extern "C" {
        }
 
        void FTN(c_esmc_delayoutallgathervla)(ESMC_DELayout **ptr,
-                          ESMC_LocalArray *sndarray, int *slen,
-                          ESMC_LocalArray *rcvarray, int *rlen, int *rcvdispls,
+                          ESMC_LocalArray **sndarray, int *slen,
+                          ESMC_LocalArray **rcvarray, int *rlen, int *rcvdispls,
                           int *status) {
-           *status = (*ptr)->ESMC_DELayoutAllGatherV(sndarray, *slen,
-                                                     rcvarray,  rlen, rcvdispls);
+           *status = (*ptr)->ESMC_DELayoutAllGatherV(*sndarray, *slen,
+                                                     *rcvarray,  rlen, rcvdispls);
        }
 
 };
