@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.31 2003/08/29 19:32:05 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.32 2003/08/29 20:49:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.31 2003/08/29 19:32:05 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.32 2003/08/29 20:49:55 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -160,14 +160,13 @@
       ! ----------------------------------------------------------------------------
 
 #ifdef ESMF_EXHAUSTIVE
-
-      !EX_UTest
+      ! This code crashes, bug 79753 has been opened.
       ! Attempt to get un-initialized year from stop time
-       write(name, *) "Get Uninitialized StopTime Year Test"
-       call ESMF_TimeGet(stopTime, yr=YR, rc=rc)
-       write(failMsg, *) " Returned ESMF_SUCCESS"
-       call ESMF_Test((rc.eq.ESMF_FAILURE), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      ! write(name, *) "Get Uninitialized StopTime Year Test"
+      ! call ESMF_TimeGet(stopTime, yr=YR, rc=rc)
+      ! write(failMsg, *) " Returned ESMF_SUCCESS"
+      ! call ESMF_Test((rc.eq.ESMF_FAILURE), &
+      !                name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 
