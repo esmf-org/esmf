@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.66 2004/08/03 22:18:23 nscollins Exp $
+#  $Id: common.mk,v 1.67 2004/08/04 15:23:09 nscollins Exp $
 #===============================================================================
 #   common.mk
 #
@@ -290,7 +290,7 @@ libf:${LIBNAME}(${OBJSF})
 #-------------------------------------------------------------------------------
 # Builds ESMF recursively.
 #-------------------------------------------------------------------------------
-build_libs: chk_dir
+build_libs: chk_dir include
 	cd $(ESMF_TOP_DIR) ;\
 	${MAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} ACTION=vpathlib tree shared
 
@@ -304,8 +304,6 @@ vpathlib:
 
 # Builds library
 lib:: chk_dir ${SOURCE}
-	@if [ "${STOREH}" != "" ] ; then \
-	   $(MAKE) -f ${MAKEFILE} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} tree_include; fi
 	@if [ "${SOURCEC}" != "" ] ; then \
 	   $(MAKE) -f ${MAKEFILE} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} libc; fi
 	@if [ "${SOURCEF}" != "" ] ; then \
