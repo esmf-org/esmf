@@ -1,4 +1,4 @@
- $Id: README,v 1.26 2003/08/21 21:07:20 flanigan Exp $
+ $Id: README,v 1.27 2003/08/21 21:13:41 flanigan Exp $
 ================================================================================
                                    README
 
@@ -176,7 +176,6 @@ directories.
 
 To build documentation:
 
-  gmake dvi           ! Makes the dvi files
   gmake pdf           ! Makes the pdf files
   gmake html          ! Creates the html directory.
   gmake alldoc        ! Builds all the above documents.
