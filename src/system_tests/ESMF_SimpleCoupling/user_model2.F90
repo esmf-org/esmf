@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.2 2003/10/10 18:54:31 nscollins Exp $
+! $Id: user_model2.F90,v 1.3 2004/01/30 01:31:27 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -95,7 +95,8 @@
         real(ESMF_KIND_R8) :: g_min(2), g_max(2)
         integer :: counts(2)
         integer :: ni, nj, de_id
-        integer :: horz_gridtype, horz_stagger
+        type(ESMF_GridKind) :: horz_gridkind
+        type(ESMF_GridStagger) :: horz_stagger
         type(ESMF_CoordSystem) :: horz_coord_system
         integer :: status, myde
 
@@ -111,16 +112,17 @@
         g_max(1) = 20.0
         g_min(2) = 0.0
         g_max(2) = 5.0
-        horz_gridtype = ESMF_GridType_XY
+        horz_gridkind = ESMF_GridKind_XY
         horz_stagger = ESMF_GridStagger_A
         horz_coord_system = ESMF_CoordSystem_Cartesian
 
-        grid1 = ESMF_GridCreate(2, counts=counts, &
-                                min=g_min, max=g_max, &
+        grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                                minGlobalCoordPerDim=g_min, &
+                                maxGlobalCoordPerDim=g_max, &
                                 layout=layout, &
-                                horz_gridtype=horz_gridtype, &
-                                horz_stagger=horz_stagger, &
-                                horz_coord_system=horz_coord_system, &
+                                horzGridKind=horz_gridkind, &
+                                horzStagger=horz_stagger, &
+                                horzCoordSystem=horz_coord_system, &
                                 name="source grid", rc=status)
 
         ! Figure out our local processor id

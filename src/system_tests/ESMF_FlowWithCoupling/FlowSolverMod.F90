@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.2 2003/10/10 17:16:41 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.3 2004/01/30 01:31:27 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -114,8 +114,8 @@
       real(kind=ESMF_KIND_R8) :: g_min(2), g_max(2)
       real(kind=ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
       integer :: counts(2)
-      integer :: horz_gridtype, vert_gridtype
-      integer :: horz_stagger, vert_stagger
+      type(ESMF_GridKind) :: horz_gridkind, vert_gridkind
+      type(ESMF_GridStagger) :: horz_stagger, vert_stagger
       type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: myde
       namelist /input/ counts, x_min, x_max, y_min, y_max, &
@@ -153,16 +153,17 @@
 !
 ! Create the Grid
 !
-      horz_gridtype = ESMF_GridType_XY
-      horz_stagger = ESMF_GridStagger_C
+      horz_gridkind = ESMF_GridKind_XY
+      horz_stagger = ESMF_GridStagger_C_NE
       horz_coord_system = ESMF_CoordSystem_Cartesian
 
-      grid = ESMF_GridCreate(2, counts=counts, &
-                             min=g_min, max=g_max, &
+      grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                             minGlobalCoordPerDim=g_min, &
+                             maxGlobalCoordPerDim=g_max, &
                              layout=layout, &
-                             horz_gridtype=horz_gridtype, &
-                             horz_stagger=horz_stagger, &
-                             horz_coord_system=horz_coord_system, &
+                             horzGridKind=horz_gridkind, &
+                             horzStagger=horz_stagger, &
+                             horzCoordSystem=horz_coord_system, &
                              name="source grid", rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flow_init:  grid create"

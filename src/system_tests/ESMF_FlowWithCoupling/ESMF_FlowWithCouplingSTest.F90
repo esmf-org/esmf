@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.6 2004/01/29 04:51:38 eschwab Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.7 2004/01/30 01:31:27 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -42,7 +42,6 @@
     character(len=ESMF_MAXSTR) :: cnameIN, cnameFS, cplname
     type(ESMF_DELayout) :: layoutDef, layoutIN, layoutFS
     type(ESMF_State) :: INimp, INexp, FSimp, FSexp
-    type(ESMF_State) :: cplstateF2I, cplstateI2F, cplbothlists
 
     integer :: de_id, ndes, rc, delist(16)
     integer :: i, mid, quart
@@ -206,32 +205,9 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Flow Model Initialize finished, rc =", rc
 
-      ! Create a list of 2 states for Coupler, direction 1
-      cplstateI2F = ESMF_StateCreate("Coupler States Injector to FlowSolver", &
-                                               ESMF_STATELIST, cplname, rc=rc)
-      call ESMF_StateAddData(cplstateI2F, INexp, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_StateAddData(cplstateI2F, FSimp, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
- 
-      ! Create a list of 2 states for Coupler, direction 2
-      cplstateF2I = ESMF_StateCreate("Coupler States FlowSolver to Injector", &
-                                               ESMF_STATELIST, cplname, rc=rc)
-      call ESMF_StateAddData(cplstateF2I, FSexp, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_StateAddData(cplstateF2I, INimp, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
- 
-      ! Create a list of the previous 2 statelists for initialization
-      cplbothlists = ESMF_StateCreate("All Coupler states", ESMF_STATELIST, &
-                                                               cplname, rc=rc)
-
-      call ESMF_StateAddData(cplbothlists, cplstateI2F, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_StateAddData(cplbothlists, cplstateF2I, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-
-      call ESMF_CplCompInitialize(cpl, cplbothlists, clock, rc=rc)
+      ! initialize the coupler information going from injector to flow solver
+      ! TODO: what about the other direction?  make 2 phases?
+      call ESMF_CplCompInitialize(cpl, INexp, FSimp, clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Coupler Initialize finished, rc =", rc
  
@@ -252,7 +228,7 @@
         if (rc .ne. ESMF_SUCCESS) goto 10
 
         ! Couple export state of FlowSolver to import of Injector
-        call ESMF_CplCompRun(cpl, cplstateF2I, clock, rc=rc)
+        call ESMF_CplCompRun(cpl, FSexp, INimp, clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
   
         ! Run Injector Component
@@ -260,7 +236,7 @@
         if (rc .ne. ESMF_SUCCESS) goto 10
   
         ! Couple export state of Injector to import of FlowSolver
-        call ESMF_CplCompRun(cpl, cplstateI2F, clock, rc=rc)
+        call ESMF_CplCompRun(cpl, INexp, FSimp, clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
   
         ! Advance the time
@@ -289,7 +265,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! Finalize Coupler
-      call ESMF_CplCompFinalize(cpl, cplstateI2F, clock, rc=rc)
+      call ESMF_CplCompFinalize(cpl, INexp, FSimp, clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
 !------------------------------------------------------------------------------
@@ -306,10 +282,6 @@
       call ESMF_StateDestroy(FSimp, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateDestroy(FSexp, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_StateDestroy(cplstateI2F, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_StateDestroy(cplstateF2I, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_ClockDestroy(clock, rc)

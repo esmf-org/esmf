@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.4 2004/01/29 04:51:38 eschwab Exp $
+! $Id: InjectorMod.F90,v 1.5 2004/01/30 01:31:27 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -104,8 +104,8 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       integer :: counts(2)
       real :: in_energy, in_velocity, in_rho
       integer :: printout
-      integer :: horz_gridtype, vert_gridtype
-      integer :: horz_stagger, vert_stagger
+      type(ESMF_GridKind) :: horz_gridkind, vert_gridkind
+      type(ESMF_GridStagger) :: horz_stagger, vert_stagger
       type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: myde
       type(injectdata), pointer :: datablock
@@ -164,22 +164,22 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       !
       ! Create the Grid
       !
-      horz_gridtype = ESMF_GridType_XY
-      vert_gridtype = ESMF_GridType_Unknown
+      horz_gridkind = ESMF_GridKind_XY
+      vert_gridkind = ESMF_GridKind_Unknown
       horz_stagger = ESMF_GridStagger_A
       vert_stagger = ESMF_GridStagger_Unknown
       horz_coord_system = ESMF_CoordSystem_Cartesian
       vert_coord_system = ESMF_CoordSystem_Unknown
 
-      grid = ESMF_GridCreate(2, counts=counts, &
-                             min=g_min, max=g_max, &
+      grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                             minGlobalCoordPerDim=g_min, &
                              layout=layout, &
-                             horz_gridtype=horz_gridtype, &
-                             vert_gridtype=vert_gridtype, &
-                             horz_stagger=horz_stagger, &
-                             vert_stagger=vert_stagger, &
-                             horz_coord_system=horz_coord_system, &
-                             vert_coord_system=vert_coord_system, &
+                             horzGridKind=horz_gridkind, &
+                             vertGridKind=vert_gridkind, &
+                             horzStagger=horz_stagger, &
+                             vertStagger=vert_stagger, &
+                             horzCoordSystem=horz_coord_system, &
+                             vertCoordSystem=vert_coord_system, &
                              name="source grid", rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in injector_init:  grid create"

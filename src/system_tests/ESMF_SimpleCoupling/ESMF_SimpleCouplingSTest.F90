@@ -1,4 +1,4 @@
-! $Id: ESMF_SimpleCouplingSTest.F90,v 1.6 2004/01/29 04:51:38 eschwab Exp $
+! $Id: ESMF_SimpleCouplingSTest.F90,v 1.7 2004/01/30 01:31:27 nscollins Exp $
 !
 ! System test code SimpleCoupling
 !  Description on Sourceforge under System Test #62502
@@ -33,7 +33,7 @@
     integer :: de_id, ndes, rc, delist(4)
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
     type(ESMF_DELayout) :: layout1, layout2, layout3
-    type(ESMF_State) :: c1exp, c2imp, cplstate
+    type(ESMF_State) :: c1exp, c2imp
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
 
@@ -180,14 +180,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1a Initialize finished, rc =", rc
 
-      cplstate = ESMF_StateCreate("coupler list", ESMF_STATELIST, cplname, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_StateAddData(cplstate, c1exp, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_StateAddData(cplstate, c2imp, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
- 
-      call ESMF_CplCompInitialize(cpl, statelist=cplstate, clock=clock, rc=rc)
+      call ESMF_CplCompInitialize(cpl, c1exp, c2imp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Coupler Initialize finished, rc =", rc
  
@@ -203,7 +196,7 @@
         if (rc .ne. ESMF_SUCCESS) goto 10
         print *, "Comp 1 Run returned, rc =", rc
   
-        call ESMF_CplCompRun(cpl, statelist=cplstate, clock=clock, rc=rc)
+        call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
         print *, "Coupler Run returned, rc =", rc
   
@@ -232,7 +225,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 2 Finalize finished, rc =", rc
 
-      call ESMF_CplCompFinalize(cpl, statelist=cplstate, clock=clock, rc=rc)
+      call ESMF_CplCompFinalize(cpl, c1exp, c2imp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Coupler Finalize finished, rc =", rc
 
@@ -261,8 +254,6 @@
       call ESMF_StateDestroy(c1exp, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateDestroy(c2imp, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_StateDestroy(cplstate, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_ClockDestroy(clock, rc)

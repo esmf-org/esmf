@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/10/09 20:56:13 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2004/01/30 01:31:27 nscollins Exp $ 
 
 ALL: system_tests
 
@@ -28,6 +28,8 @@ SYSTEM_TESTS_RUN      = RUN_FlowWithCoupling
 SYSTEM_TESTS_RUN_UNI  = RUN_FlowWithCouplingUNI
 
 SYSTEM_TESTS_RM       = FlowWithCoupling.rm
+
+ESMF_FlowWithCouplingSTest.o: $(SYSTEM_TESTS_OBJ)
 
 include $(ESMF_DIR)/makefile
 
