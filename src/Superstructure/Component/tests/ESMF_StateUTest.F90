@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.14 2003/04/16 19:31:49 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.15 2003/04/16 22:31:20 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.14 2003/04/16 19:31:49 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.15 2003/04/16 22:31:20 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -642,8 +642,6 @@
       !------------------------------------------------------------------------
 
       ! Test Destruction of a destroyed State
-      ! This code crashes, it will be commented out until
-      ! bug 70054 is fixed.
       write(failMsg, *) ""
       write(name, *) "Destruction of a destroyed State Test"
       call  ESMF_StateDestroy(state1, rc)
