@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.4 2004/06/21 10:01:43 nscollins Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.5 2004/10/25 22:20:41 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,6 +33,7 @@
     ! Local variables
     integer :: x, y, rc, mycell, finalrc, numdes
     integer :: i, j
+    integer :: lb(2), ub(2), halo
     type(ESMF_Grid) :: srcgrid, dstgrid
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: arraya, arrayb
@@ -83,24 +84,31 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    ! allow for a halo width of 3
-    allocate(f90ptr1(96,186))
-    do j=1, 180
-      do i=1, 90
-        f90ptr1(i+3, j+3) = i*1000 + j
-      enddo
-    enddo
-
-    arraya = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    field1 = ESMF_FieldCreate(srcgrid, arraya, horzRelloc=ESMF_CELL_CENTER, &
+    ! allow for a halo width of 3
+    halo = 3
+    field1 = ESMF_FieldCreate(srcgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=3, name="src pressure", rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
+    call ESMF_FieldGetDataPointer(field1, f90ptr1, ESMF_DATA_REF, rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    lb(:) = lbound(f90ptr1)
+    ub(:) = ubound(f90ptr1)
+
+    f90ptr1(:,:) = 0.0
+    do j=lb(2)+halo, ub(2)-halo
+      do i=lb(1)+halo, ub(1)-halo
+        f90ptr1(i, j) = i*1000 + j
+      enddo
+    enddo
+
 
     field2 = ESMF_FieldCreate(dstgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                                    name="dst pressure", rc=rc)
