@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.6 2003/07/24 22:35:23 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.7 2003/07/25 23:13:49 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,7 +89,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.6 2003/07/24 22:35:23 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.7 2003/07/25 23:13:49 jwolfe Exp $'
 !
 !==============================================================================
 
@@ -123,15 +123,23 @@
         integer :: status
 
         ! call c routine to add index
-        if (present(totalindex)) call c_ESMC_ArraySetAxisIndex(array, &
-                                         ESMF_DOMAIN_TOTAL, totalindex, status)
-        if (status .ne. ESMF_SUCCESS) goto 10
-        if (present(compindex)) call c_ESMC_ArraySetAxisIndex(array, &
-                                  ESMF_DOMAIN_COMPUTATIONAL, compindex, status)
-        if (status .ne. ESMF_SUCCESS) goto 10
-        if (present(exclindex)) call c_ESMC_ArraySetAxisIndex(array, &
-                                      ESMF_DOMAIN_EXCLUSIVE, exclindex, status)
-        if (status .ne. ESMF_SUCCESS) goto 10
+        if (present(totalindex)) then
+          call c_ESMC_ArraySetAxisIndex(array, ESMF_DOMAIN_TOTAL, &
+                                        totalindex, status)
+          if (status .ne. ESMF_SUCCESS) goto 10
+        endif
+
+        if (present(compindex)) then
+          call c_ESMC_ArraySetAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
+                                        compindex, status)
+          if (status .ne. ESMF_SUCCESS) goto 10
+        endif
+
+        if (present(exclindex)) then
+          call c_ESMC_ArraySetAxisIndex(array, ESMF_DOMAIN_EXCLUSIVE, &
+                                        exclindex, status)
+          if (status .ne. ESMF_SUCCESS) goto 10
+        endif
 
         status = ESMF_SUCCESS
 
@@ -166,32 +174,32 @@
         if (present(totalindex)) then
           call c_ESMC_ArrayGetAxisIndex(array, ESMF_DOMAIN_TOTAL, totalindex,&
                                         status)
+          if (status .ne. ESMF_SUCCESS) goto 10
           do i=1,size(totalindex)
             totalindex(i)%min = totalindex(i)%min + 1
             totalindex(i)%max = totalindex(i)%max + 1
           enddo
         endif
-        if (status .ne. ESMF_SUCCESS) goto 10
 
         if (present(compindex)) then
           call c_ESMC_ArrayGetAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
                                         compindex, status)
+          if (status .ne. ESMF_SUCCESS) goto 10
           do i=1,size(compindex)
             compindex(i)%min = compindex(i)%min + 1
             compindex(i)%max = compindex(i)%max + 1
           enddo
         endif
-        if (status .ne. ESMF_SUCCESS) goto 10
 
         if (present(exclindex)) then
           call c_ESMC_ArrayGetAxisIndex(array, ESMF_DOMAIN_EXCLUSIVE, &
                                         exclindex, status)
+          if (status .ne. ESMF_SUCCESS) goto 10
           do i=1,size(exclindex)
             exclindex(i)%min = exclindex(i)%min + 1
             exclindex(i)%max = exclindex(i)%max + 1
           enddo
         endif
-        if (status .ne. ESMF_SUCCESS) goto 10
 
         status = ESMF_SUCCESS
 
