@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.62 2004/11/17 00:54:59 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.63 2004/11/18 16:49:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -226,7 +226,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.62 2004/11/17 00:54:59 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.63 2004/11/18 16:49:03 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -385,7 +385,8 @@
 ! !IROUTINE: ESMF_RegridAddLink2D - Adds address pair and regrid weight to regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridAddLink2D(tv, srcAdd, dstAdd, weight, aggregate, rc)
+      subroutine ESMF_RegridAddLink2D(tv, srcAdd, dstAdd, weight, aggregate, &
+                                      srcCount, dstCount, rc)
 !
 ! !ARGUMENTS:
 
@@ -394,6 +395,8 @@
       integer, dimension(2), intent(in) :: dstAdd
       real(kind=ESMF_KIND_R8), intent(in) :: weight
       logical, intent(in), optional :: aggregate
+      integer, intent(in), optional :: srcCount
+      integer, dimension(2), intent(in), optional :: dstCount
       integer, intent(out), optional :: rc
 
 !
@@ -424,14 +427,14 @@
 ! !REQUIREMENTS: !  TODO
 
       integer :: localrc
+      integer :: numList, i, i1, startIndex, stopIndex
       integer, dimension(:), pointer :: srcPtr, dstPtr
-      integer :: numList, i, i1
-      integer :: n1=1
+      integer, dimension(:), allocatable, save :: srcMinIndex, srcMaxIndex
+      integer, dimension(:,:), allocatable, save :: dstMinIndex, dstMaxIndex
       logical :: aggregateUse, newLink
+      logical :: firstTime=.true.
       real(kind=ESMF_KIND_R8), dimension(:), pointer :: wgtPtr
       type(ESMF_LocalArray) :: srcIndex, dstIndex, weights
-      !type (ESMF_Array) :: &! temps for use when re-sizing arrays
-      !   srcAddTmp, dstAddTmp, weightsTmp
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -439,6 +442,31 @@
       newLink = .true.
       aggregateUse = .false.
       if (present(aggregate)) aggregateUse=aggregate
+
+      ! if it's the first time through and the sizes are passed in, allocate
+      ! storage for min/max indices
+      if (aggregateUse) then
+        if (firstTime) then
+          ! TODO: check for counts
+          firstTime = .false.
+          allocate(srcMinIndex(srcCount), &
+                   srcMaxIndex(srcCount), stat=localrc)
+          allocate(dstMinIndex(dstCount(1), dstCount(2)), &
+                   dstMaxIndex(dstCount(1), dstCount(2)), stat=localrc)
+          srcMinIndex = 0
+          srcMaxIndex = 0
+          dstMinIndex = 0
+          dstMaxIndex = 0
+          return
+        else
+          startIndex = min(srcMinIndex(srcAdd), dstMinIndex(dstAdd(1),dstAdd(2)))
+          stopIndex  = max(srcMaxIndex(srcAdd), dstMaxIndex(dstAdd(1),dstAdd(2)))
+          if (startIndex.eq.0) then
+            startIndex = 1
+            stopIndex  = 0
+          endif
+        endif 
+      endif
 
       call ESMF_TransformValuesGet(tv, numList=numList, srcIndex=srcIndex, &
                                    dstIndex=dstIndex, weights=weights, rc=localrc)
@@ -456,7 +484,7 @@
       ! if the aggregation flag is set, search through the already existing
       ! links for the current address pair
       if (aggregateUse .and. numList.ne.0) then
-        do i = 1,numList
+        do i = startIndex,stopIndex
           i1 = 2*(i-1)
           if ((dstPtr(i1+1) .eq. dstAdd(1)) .AND. &
               (dstPtr(i1+2) .eq. dstAdd(2)) .AND. &
@@ -487,6 +515,8 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+
+      !TODO: some call to deallocate arrays
 
       if (present(rc)) rc = ESMF_SUCCESS
 
