@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.22 2004/09/01 22:19:41 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.23 2004/09/02 15:58:12 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -161,12 +161,12 @@ end type ESMF_Log
  
 
 interface operator (.eq.)
-   module procedure ESMF_mteq
-   module procedure ESMF_hteq
+   module procedure ESMF_lmteq
+   module procedure ESMF_lhteq
 end interface
 
 interface operator (.gt.)
-   module procedure ESMF_mtgt
+   module procedure ESMF_lmtgt
 end interface
 !EOPI  
 
@@ -178,25 +178,25 @@ contains
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_DataTypes to see if they're the same or not
 
-function ESMF_hteq(ht1, ht2)
- logical ESMF_hteq
+function ESMF_lhteq(ht1, ht2)
+ logical ESMF_lhteq
  type(ESMF_HaltType), intent(in) :: ht1,ht2
 
- ESMF_hteq = (ht1%htype .eq. ht2%htype)
+ ESMF_lhteq = (ht1%htype .eq. ht2%htype)
 end function
 
-function ESMF_mteq(mt1, mt2)
- logical ESMF_mteq
+function ESMF_lmteq(mt1, mt2)
+ logical ESMF_lmteq
  type(ESMF_MsgType), intent(in) :: mt1,mt2
 
- ESMF_mteq = (mt1%mtype .eq. mt2%mtype)
+ ESMF_lmteq = (mt1%mtype .eq. mt2%mtype)
 end function
 
-function ESMF_mtgt(mt1, mt2)
- logical ESMF_mtgt
+function ESMF_lmtgt(mt1, mt2)
+ logical ESMF_lmtgt
  type(ESMF_MsgType), intent(in) :: mt1,mt2
 
- ESMF_mtgt = (mt1%mtype .gt. mt2%mtype)
+ ESMF_lmtgt = (mt1%mtype .gt. mt2%mtype)
 end function
 
 !--------------------------------------------------------------------------
