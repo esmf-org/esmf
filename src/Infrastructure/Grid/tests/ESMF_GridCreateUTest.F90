@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.20 2004/06/15 18:19:35 svasquez Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.21 2004/06/15 23:05:30 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.20 2004/06/15 18:19:35 svasquez Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.21 2004/06/15 23:05:30 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -197,7 +197,7 @@
       call ESMF_GridGet(grid, minGlobalCoordPerDim=Rgrid_min, rc=rc)
       write(name, *) "Get the Grid minGlobalCoordPerDim Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS or the minGlobalCoordPerDim is not correct"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. Rgrid_min(1).eq.-90.0 .and. Rgrid_min(2).eq.0.0 .and. Rgrid_min(3).eq.90.0), &
+      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. Rgrid_min(1).eq.-90.0 .and. Rgrid_min(2).eq.0.0), &
                         name, failMsg, result, ESMF_SRCLINE)
   
       !------------------------------------------------------------------------
@@ -207,7 +207,7 @@
       write(name, *) "Get the Grid maxGlobalCoordPerDim Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS or the maxGlobalCoordPerDim is not correct"
       write(name, *) "Verify the Grid maxGlobalCoordPerDim Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. Rgrid_max(1).eq.90.0 .and. Rgrid_max(2).eq.180.0 .and. Rgrid_max(3).eq.100.0), &
+      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. Rgrid_max(1).eq.90.0 .and. Rgrid_max(2).eq.180.0), &
                         name, failMsg, result, ESMF_SRCLINE)
   
       !------------------------------------------------------------------------
