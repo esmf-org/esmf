@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.49 2003/07/24 17:12:34 dneckels Exp $
+! $Id: ESMF_Base.F90,v 1.50 2003/07/25 17:17:53 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -185,7 +185,8 @@
 !
       type ESMF_DomainList
       sequence
-          integer :: num_domains
+          integer :: num_domains     ! number of domains stored
+          integer :: current_size    ! current buffer size
           type(ESMF_Domain), dimension(:), pointer :: domains
       end type
 
@@ -304,6 +305,7 @@
       public ESMF_DomainListCreate
       public ESMF_DomainListDestroy
       public ESMF_DomainListPrint
+      public ESMF_DomainListAdd
  
 !  Misc methods
       public ESMF_SetName
@@ -322,11 +324,34 @@
 !
 !EOP
 
+!==============================================================================
+!
+! INTERFACE BLOCKS
+!
+!==============================================================================
+!BOP
+! !INTERFACE:
+      interface ESMF_DomainListAdd
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_DomainListAdd2d
+         module procedure ESMF_DomainListAdd3d
+         module procedure ESMF_DomainListAddObj
+!
+
+! !DESCRIPTION:
+!     These functions are meant to ease the task of creating multidimensional
+!     domains.
+!
+!EOP
+      end interface 
+
+
 !------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.49 2003/07/24 17:12:34 dneckels Exp $'
+               '$Id: ESMF_Base.F90,v 1.50 2003/07/25 17:17:53 dneckels Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -978,6 +1003,9 @@ end function
 ! Allocate an amount of memory that will hopefully be sufficient.
       allocate(ESMF_DomainListCreate%domains(num_domains), stat=status)
 
+! Store the size of the current buffer.
+      ESMF_DomainListCreate%current_size = num_domains
+
 ! There are currently no domains, so set to zero
       ESMF_DomainListCreate%num_domains = 0
 
@@ -1022,12 +1050,149 @@ end function
 ! debugging during development.
 !
 !EOP
-      integer :: status
+      integer :: status, i, j
+      integer :: min, max, stride
 
       print *, "DomainListPrint"
-      print *, "Number domains:", domainlist%num_domains
+      print *, "Number stored domains:", domainlist%num_domains
+      print *, "Buffer size:", domainlist%current_size
+
+! Now loop through domains and print them out
+
+      do i=1, domainlist%num_domains
+         print *, '***Domain.  Rank:', domainlist%domains(i)%rank
+         do j=1, domainlist%domains(i)%rank
+	    call ESMF_AxisIndexGet(domainlist%domains(i)%ai(j), min, max, stride)
+	    print *, '   axis:min,max,stride3:', min, max, stride
+         enddo
+      enddo
 
       end subroutine ESMF_DomainListPrint
+
+!-------------------------------------------------------------------------
+!BOP
+!
+!IROUTINE:  ESMF_DomainListAdd2d - Add a 2d domainlist
+
+!
+! !INTERFACE:
+      subroutine ESMF_DomainListAdd2d(domainlist, &
+                             min1, max1, stride1, &
+                             min2, max2, stride2)
+!
+! !ARGUMENTS:
+     type(ESMF_DomainList), intent(inout) :: domainlist
+     integer :: min1         ! Minimimun in first direction
+     integer :: max1         ! Maximimun in first direction
+     integer :: stride1      ! stride in first direction
+     integer :: min2         ! Minimimun in second direction
+     integer :: max2         ! Maximimun in second direction
+     integer :: stride2      ! stride in second direction
+!
+! !DESCRIPTION:
+!
+!EOP
+      type(ESMF_Domain) :: newdomain          ! temp variable to use
+      
+      newdomain%rank = 2
+      call ESMF_AxisIndexSet(newdomain%ai(1), min1, max1, stride1)
+      call ESMF_AxisIndexSet(newdomain%ai(2), min2, max2, stride2)
+
+      call ESMF_DomainListAdd(domainlist, newdomain)
+
+      end subroutine ESMF_DomainListAdd2d
+
+!-------------------------------------------------------------------------
+!BOP
+!
+!IROUTINE:  ESMF_DomainListAdd3d - Add a 3d domainlist
+
+!
+! !INTERFACE:
+      subroutine ESMF_DomainListAdd3d(domainlist, &
+                            min1, max1, stride1, &
+                            min2, max2, stride2, &
+                            min3, max3, stride3)
+!
+! !ARGUMENTS:
+     type(ESMF_DomainList), intent(inout) :: domainlist
+     integer :: min1         ! Minimimun in first direction
+     integer :: max1         ! Maximimun in first direction
+     integer :: stride1      ! stride in first direction
+     integer :: min2         ! Minimimun in second direction
+     integer :: max2         ! Maximimun in second direction
+     integer :: stride2      ! stride in second direction
+     integer :: min3         ! Minimimun in third direction
+     integer :: max3         ! Maximimun in third direction
+     integer :: stride3      ! stride in third direction
+!
+! !DESCRIPTION:
+!
+!EOP
+      type(ESMF_Domain) :: newdomain          ! temp variable to use
+      
+      newdomain%rank = 3
+      call ESMF_AxisIndexSet(newdomain%ai(1), min1, max1, stride1)
+      call ESMF_AxisIndexSet(newdomain%ai(2), min2, max2, stride2)
+      call ESMF_AxisIndexSet(newdomain%ai(3), min3, max3, stride3)
+
+      call ESMF_DomainListAdd(domainlist,newdomain)
+
+      end subroutine ESMF_DomainListAdd3d
+
+!-------------------------------------------------------------------------
+!BOP
+!
+!IROUTINE:  ESMF_DomainListAddObj - Add a domain object 
+
+!
+! !INTERFACE:
+      subroutine ESMF_DomainListAddObj(domainlist, newdomain)
+!
+! !ARGUMENTS:
+      type(ESMF_DomainList), intent(inout) :: domainlist
+      type(ESMF_Domain), intent(in) :: newdomain
+!
+! !DESCRIPTION:
+!   The other add routines should end by using this call.  It takes care of
+!   the memory management issues, i.e. it reallocs the list if it has grown
+!   too large. 
+!
+!EOP
+      type(ESMF_Domain), dimension(:), allocatable, target :: temp_domains
+      integer :: new_size         ! New number of domains to alloc
+      integer :: status, i
+      
+! One way or another we are going to add the domain, so increment counter
+      domainlist%num_domains = domainlist%num_domains + 1
+
+! Check to see if we have room to add this object in the current list
+! (Fortran equivalent of a linked list:)
+
+      if (domainlist%num_domains  .gt. domainlist%current_size) then
+
+! The strategy is debatable, but simply double the number of domains
+      new_size = domainlist%current_size * 2
+      allocate(temp_domains(new_size), stat=status)
+
+! Copy over the old domains
+      do i=1, domainlist%current_size
+         temp_domains(i) = domainlist%domains(i)
+      enddo
+
+! Deallocate the old list and point to the new one
+      deallocate(domainlist%domains)
+
+      domainlist%domains => temp_domains
+      domainlist%current_size = new_size
+          
+      endif
+
+! Now add the new domain
+
+      domainlist%domains(domainlist%num_domains) = newdomain
+
+      end subroutine ESMF_DomainListAddObj
 
 !=========================================================================
 ! Misc utility routines, perhaps belongs in a utility file?
