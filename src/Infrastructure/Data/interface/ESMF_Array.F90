@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.55 2003/04/28 17:45:03 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.56 2003/04/29 18:04:42 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -271,7 +271,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.55 2003/04/28 17:45:03 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.56 2003/04/29 18:04:42 cdeluca Exp $'
 !==============================================================================
 !
 ! INTERFACE BLOCKS
@@ -17938,7 +17938,7 @@ end function
         end function ESMF_ArrayRead
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE - ESMF_ArrayValidate - Check validity of Array object
+! !IROUTINE: ESMF_ArrayValidate - Check validity of Array object
 !
 ! !INTERFACE:
       subroutine ESMF_ArrayValidate(array, options, rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.29 2003/04/29 17:47:05 cdeluca Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.30 2003/04/29 18:04:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -159,7 +159,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.29 2003/04/29 17:47:05 cdeluca Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.30 2003/04/29 18:04:45 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -2222,7 +2222,7 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_ArrayValidate - Check validity of Array object
+! !IROUTINE: ESMF_ArrayValidate - Check validity of Array object
 !
 ! !INTERFACE:
       subroutine ESMF_ArrayValidate(array, options, rc)
