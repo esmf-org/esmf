@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.14 2003/04/25 21:10:48 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.15 2003/05/02 00:59:40 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.14 2003/04/25 21:10:48 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.15 2003/05/02 00:59:40 eschwab Exp $'
 
 !==============================================================================
 !
@@ -141,13 +141,13 @@
 ! !IROUTINE: ESMF_AlarmInit - Initializes an alarm
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmInit(alarm, RingInterval, RingTime, &
+      subroutine ESMF_AlarmInit(alarm, RingTime, RingInterval, &
                                 StopTime, Enabled, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(out) :: alarm
-      type(ESMF_TimeInterval), intent(in), optional :: RingInterval
       type(ESMF_Time), intent(in), optional :: RingTime
+      type(ESMF_TimeInterval), intent(in), optional :: RingInterval
       type(ESMF_Time), intent(in), optional :: StopTime
       logical, intent(in) :: Enabled
       integer, intent(out), optional :: rc
@@ -159,10 +159,10 @@
 !     \begin{description}
 !     \item[alarm]
 !          The object instance to initialize
-!     \item[{[RingInterval]}]
-!          Optional ring interval for repeating alarms
 !     \item[{[RingTime]}]
 !          Optional ring time for one-shot or first repeating alarm
+!     \item[{[RingInterval]}]
+!          Optional ring interval for repeating alarms
 !     \item[{[StopTime]}]
 !          Optional stop time for repeating alarms
 !     \item[Enabled]
@@ -174,7 +174,7 @@
 ! !REQUIREMENTS:
 !     TMG4.1, TMG4.7
 !EOP
-      call c_ESMC_AlarmInit(alarm, RingInterval, RingTime, &
+      call c_ESMC_AlarmInit(alarm, RingTime, RingInterval, &
                             StopTime, Enabled, rc)
 
       end subroutine ESMF_AlarmInit

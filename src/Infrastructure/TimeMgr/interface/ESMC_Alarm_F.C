@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.7 2003/04/15 16:47:36 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.8 2003/05/02 00:59:40 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,9 +33,9 @@
 extern "C" {
 
        void FTN(c_esmc_alarminit)(ESMC_Alarm *ptr,
-                ESMC_TimeInterval *ringInterval, ESMC_Time *ringTime,
+                ESMC_Time *ringTime, ESMC_TimeInterval *ringInterval,
                 ESMC_Time *stopTime, int *enabled, int *status) {
-           *status = (ptr)->ESMC_AlarmInit(ringInterval, ringTime, stopTime,
+           *status = (ptr)->ESMC_AlarmInit(ringTime, ringInterval, stopTime,
                                            *enabled);
        }
 
