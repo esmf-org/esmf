@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateUTest.F90,v 1.8 2004/06/15 15:54:33 svasquez Exp $
+! $Id: ESMF_CompCreateUTest.F90,v 1.9 2004/07/06 22:26:13 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,6 +32,7 @@
     
 !   ! Local variables
     integer :: rc
+    integer , pointer:: pointer
     character(ESMF_MAXSTR) :: cname, bname
     type(ESMF_GridComp) :: comp1
 
@@ -93,6 +94,16 @@
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
+!   !  Test validate a component
+
+    call ESMF_GridCompValidate(comp1, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Validating a Component Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
 !   !  Test get a Component name
 
     call ESMF_GridCompGet(comp1, name=bname, rc=rc)
@@ -111,6 +122,24 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Verifying the correct Component name was returned Test"
     call ESMF_Test((bname.eq."Atmosphere"), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   Emailed Nancy about theses tests.
+!   !  Set Internal State
+
+!    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    !write(name, *) "Set Internal State Test"
+    !call ESMF_GridCompSetInternalState(comp1, dataPointer=pointer, rc=rc)
+    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+!   !  Get Internal State
+
+    !write(failMsg, *) "Did not return ESMF_SUCCESS"
+    !write(name, *) "Get Internal State Test"
+    !call ESMF_GridCompGetInternalState(comp1, dataPointer=pointer, rc=rc)
+    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
