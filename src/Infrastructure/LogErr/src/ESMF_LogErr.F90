@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.3 2004/03/24 17:49:55 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.4 2004/03/24 20:07:33 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -77,39 +77,75 @@ contains
 
 !--------------------------------------------------------------------------
 !BOP
-!
-! !IROUTINE: ESMF_LogOpen - Open a Log file
+! !IROUTINE: ESMF_LogClose - Close Log file(s)
+
 ! !INTERFACE: 
-subroutine ESMF_LogOpen(aLog, filename,rc)
+	subroutine ESMF_LogClose(aLog,rc)
 !
 ! !ARGUMENTS:
-!
-type(ESMF_Log)						:: aLog
-character(len=*)					:: filename
-integer, intent(out),optional		:: rc
+      type(ESMF_Log)			:: aLog
+      integer, intent(out),optional	:: rc
 
 ! !DESCRIPTION:
-! This routine opens the file(s) associated with {\tt alLog}.
+!      This routine closes the file(s) associated with {\tt aLog}.
 !
-! The arguments are:
-! \begin{description}
+!      The arguments are:
+!      \begin{description}
 ! 
-! \item[aLog]
-! Log object.
+!      \item [aLog]
+!            Log object.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+! 
+!EOP
+
+	character(len=10) 					:: t
+	character(len=8) 					:: d
+	
+	rc=1
+	if (aLog%FileIsOpen .eq. ESMF_TRUE) then
+		call DATE_AND_TIME(d,t)
+		WRITE(aLog%unitnumber,100) d,t,"INFO     Log Close"
+		100 FORMAT(a8,2x,a10,2x,a)
+		if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  INFO       Log Close"
+		CLOSE(UNIT=aLog%stdOutUnitNumber)
+		rc=0
+	endif	
+	
+end subroutine ESMF_LogClose
+
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogOpen - Open Log file(s)
+
+! !INTERFACE: 
+      subroutine ESMF_LogOpen(aLog, filename, rc)
 !
-! \item[filetype]
-! Set to either ESMF\_SINGLE\_FILE or ESMF\_MULTIPLE\_FILE
+! !ARGUMENTS:
+      type(ESMF_Log)			:: aLog
+      character(len=*)			:: filename
+      integer, intent(out),optional	:: rc
+
+! !DESCRIPTION:
+!      This routine opens the file(s) associated with {\tt aLog}.
+!
+!      The arguments are:
+!      \begin{description}
 ! 
-!  \item[filename]
-!  name of file
-! 
-!  \end{description}
+!      \item [aLog]
+!            Log object.
+!      \item [filename]
+!            Name of file.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
 ! 
 !EOP
 	
-	integer 						:: status, i
-	character(len=10) 				:: t
-	character(len=8) 				:: d
+	integer 				:: status, i
+	character(len=10) 			:: t
+	character(len=8) 			:: d
 	
 	rc=1
 	aLog%FileIsOpen=ESMF_FALSE
@@ -142,31 +178,36 @@ integer, intent(out),optional		:: rc
 	
 end subroutine ESMF_LogOpen	
 
-subroutine ESMF_LogClose(aLog,rc)
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
 
-	type(ESMF_Log)						:: aLog
-	integer, intent(out),optional		:: rc
-	
-	character(len=10) 					:: t
-	character(len=8) 					:: d
-	
-	rc=1
-	if (aLog%FileIsOpen .eq. ESMF_TRUE) then
-		call DATE_AND_TIME(d,t)
-		WRITE(aLog%unitnumber,100) d,t,"INFO     Log Close"
-		100 FORMAT(a8,2x,a10,2x,a)
-		if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  INFO       Log Close"
-		CLOSE(UNIT=aLog%stdOutUnitNumber)
-		rc=0
-	endif	
-	
-end subroutine ESMF_LogClose
-
-subroutine ESMF_LogWrite(aLog,logtype,context,rc)
-	type(ESMF_Log), intent(in) 			:: aLog
-	integer, intent(in)					:: logtype
+! !INTERFACE: 
+	subroutine ESMF_LogWrite(aLog, logtype, context, rc)
+!
+! !ARGUMENTS:
+	type(ESMF_Log), intent(in) 		:: aLog
+	integer, intent(in)			:: logtype
 	character(len=*), intent(in)		:: context
 	integer, intent(out),optional		:: rc
+
+! !DESCRIPTION:
+!      This routine writes to the file(s) associated with {\tt aLog}.
+!
+!      The arguments are:
+!      \begin{description}
+! 
+!      \item [aLog]
+!            Log object.
+!      \item [logtype]
+!            The type of message (info(0), warning(1), error(2)).
+!      \item [context]
+!            User-provided context string.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+! 
+!EOP
 	
    	character(len=10) 					:: t
 	character(len=8) 					:: d
@@ -204,3 +245,4 @@ subroutine ESMF_LogInit(aLog)
 end subroutine ESMF_LogInit
 
 end module ESMF_LogErrMod
+
