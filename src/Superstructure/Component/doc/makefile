@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/01/07 21:36:12 nscollins Exp $ 
+# $Id: makefile,v 1.2 2003/01/10 22:15:30 flanigan Exp $ 
 
 all: alldocs
 
@@ -59,8 +59,6 @@ REFREXFILES = Component_refdoc.ctex
 #
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 #
-DO_LATEX = do_latex
-DO_L2H = do_l2h
 
 # Dvi files
 Component_desdoc.dvi: Component_desdoc.ctex
