@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/03/25 00:17:48 flanigan Exp $
+# $Id: makefile,v 1.11 2003/03/28 17:24:56 svasquez Exp $
 
 # makefile template for the examples directory.
 
@@ -43,11 +43,11 @@ CLEANFILES  = *.o *.mod
 CLOBBERDIRS =
 
 ESMF_DELayout_FEx: ESMF_DELayout_FEx.o chkopts
-	-${F90CXXLD} -o ESMF_DELayout_FEx ESMF_DELayout_FEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${F90CXXLD} -o ESMF_DELayout_FEx ESMF_DELayout_FEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
 	${RM} ESMF_DELayout_FEx.o
 
 ESMF_DELayout_FEx2: ESMF_DELayout_FEx2.o chkopts
-	-${F90CXXLD} -o ESMF_DELayout_FEx2 ESMF_DELayout_FEx2.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${F90CXXLD} -o ESMF_DELayout_FEx2 ESMF_DELayout_FEx2.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
 	${RM} ESMF_DELayout_FEx2.o
 
 ESMC_CommMemEx: ESMC_CommMemEx.o  chkopts

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/25 00:18:11 flanigan Exp $
+# $Id: makefile,v 1.5 2003/03/28 17:21:52 svasquez Exp $
 
 # makefile template for the examples directory.
 
@@ -50,7 +50,7 @@ ESMF_GridCreateDir:
 	mkdir -p ${ESMC_TESTDIR}
 
 ESMF_GridCreateEx: ESMF_GridCreateEx.o  chkopts
-	-${F90CXXLD} -o ESMF_GridCreateEx ESMF_GridCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${F90CXXLD} -o ESMF_GridCreateEx ESMF_GridCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
 	${RM} ESMF_GridCreateEx.o
 
 RUN_ESMF_GridCreateEx:
