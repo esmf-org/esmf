@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.37 2004/01/16 00:38:22 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.38 2004/01/30 19:59:15 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.37 2004/01/16 00:38:22 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.38 2004/01/30 19:59:15 eschwab Exp $'
 
 !==============================================================================
 !
@@ -147,7 +147,7 @@
 ! !INTERFACE:
       function ESMF_AlarmCreate(name, clock, ringTime, ringInterval, &
                                 stopTime, ringDuration, &
-                                nRingDurationTimeSteps, &
+                                ringTimeStepCount, &
                                 refTime, enabled, sticky, rc)
 
 ! !RETURN VALUE:
@@ -160,7 +160,7 @@
       type(ESMF_TimeInterval), intent(in),  optional :: ringInterval
       type(ESMF_Time),         intent(in),  optional :: stopTime
       type(ESMF_TimeInterval), intent(in),  optional :: ringDuration
-      integer,                 intent(in),  optional :: nRingDurationTimeSteps
+      integer,                 intent(in),  optional :: ringTimeStepCount
       type(ESMF_Time),         intent(in),  optional :: refTime
       logical,                 intent(in),  optional :: enabled
       logical,                 intent(in),  optional :: sticky
@@ -190,12 +190,12 @@
 !     \item[{[ringDuration]}]
 !          The absolute ring duration.  If not sticky (see argument below),
 !          alarms rings for ringDuration, then turns itself off.  Mutually 
-!          exclusive with nRingDurationTimeSteps (below); used only if
-!          nRingDurationTimeSteps is zero.
+!          exclusive with ringTimeStepCount (below); used only if
+!          ringTimeStepCount is zero.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
-!     \item[{[nRingDurationTimeSteps]}]
+!     \item[{[ringTimeStepCount]}]
 !          The relative ring duration.  If not sticky (see argument below),
-!          alarms rings for nRingDurationTimeSteps, then turns itself off.
+!          alarms rings for ringTimeStepCount, then turns itself off.
 !          Mutually exclusive with ringDuration (above); used if non-zero,
 !          otherwise ringDuration is used.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
@@ -211,7 +211,7 @@
 !          manually via a user call to {\tt ESMF\_AlarmRingerOff()}.
 !          If not sticky, an alarm will turn itself off after a certain
 !          ring duration specified by either ringDuration or
-!          nRingDurationTimeSteps (see above).
+!          ringTimeStepCount (see above).
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -232,7 +232,7 @@
 !     invoke C to C++ entry point to allocate and initialize new alarm
       call c_ESMC_AlarmCreate(ESMF_AlarmCreate, nameLen, name, clock, &
                               ringTime, ringInterval, stopTime, ringDuration, &
-                              nRingDurationTimeSteps, refTime, enabled, &
+                              ringTimeStepCount, refTime, enabled, &
                               sticky, rc)
 
       end function ESMF_AlarmCreate
@@ -273,7 +273,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_AlarmSet(alarm, name, clock, ringTime, ringInterval, &
-                               stopTime, ringDuration, nRingDurationTimeSteps, &
+                               stopTime, ringDuration, ringTimeStepCount, &
                                refTime, ringing, enabled, sticky, rc)
 
 ! !ARGUMENTS:
@@ -284,7 +284,7 @@
       type(ESMF_TimeInterval), intent(in),  optional :: ringInterval
       type(ESMF_Time),         intent(in),  optional :: stopTime
       type(ESMF_TimeInterval), intent(in),  optional :: ringDuration
-      integer,                 intent(in),  optional :: nRingDurationTimeSteps
+      integer,                 intent(in),  optional :: ringTimeStepCount
       type(ESMF_Time),         intent(in),  optional :: refTime
       logical,                 intent(in),  optional :: ringing
       logical,                 intent(in),  optional :: enabled
@@ -313,12 +313,12 @@
 !     \item[{[ringDuration]}]
 !          The absolute ring duration.  If not sticky (see argument below),
 !          alarms rings for ringDuration, then turns itself off.  Mutually 
-!          exclusive with nRingDurationTimeSteps (below); used only if
-!          nRingDurationTimeSteps is zero.
+!          exclusive with ringTimeStepCount (below); used only if
+!          ringTimeStepCount is zero.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
-!     \item[{[nRingDurationTimeSteps]}]
+!     \item[{[ringTimeStepCount]}]
 !          The relative ring duration.  If not sticky (see argument below),
-!          alarms rings for nRingDurationTimeSteps, then turns itself off.
+!          alarms rings for ringTimeStepCount, then turns itself off.
 !          Mutually exclusive with ringDuration (above); used if non-zero,
 !          otherwise ringDuration is used.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
@@ -336,7 +336,7 @@
 !          will remain ringing until turned off manually via a user call to
 !          {\tt ESMF\_AlarmRingerOff()}.  If not sticky, an alarm will turn
 !          itself off after a certain ring duration specified by either
-!          ringDuration or nRingDurationTimeSteps (see above).
+!          ringDuration or ringTimeStepCount (see above).
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -357,7 +357,7 @@
 !     invoke C to C++ entry point
       call c_ESMC_AlarmSet(alarm, nameLen, name, clock, ringTime, &
                            ringInterval, stopTime, ringDuration, &
-                           nRingDurationTimeSteps, refTime, ringing, &
+                           ringTimeStepCount, refTime, ringing, &
                            enabled, sticky, rc)
 
       end subroutine ESMF_AlarmSet
@@ -369,7 +369,7 @@
 ! !INTERFACE:
       subroutine ESMF_AlarmGet(alarm, name, clock, ringTime, prevRingTime, &
                                ringInterval, stopTime, ringDuration, &
-                               nRingDurationTimeSteps, nTimeStepsRinging, &
+                               ringTimeStepCount, timeStepRingingCount, &
                                ringBegin, refTime, ringing, &
                                ringingOnPrevTimeStep, enabled, sticky, rc)
 
@@ -382,8 +382,8 @@
       type(ESMF_TimeInterval), intent(out), optional :: ringInterval
       type(ESMF_Time),         intent(out), optional :: stopTime
       type(ESMF_TimeInterval), intent(out), optional :: ringDuration
-      integer,                 intent(out), optional :: nRingDurationTimeSteps
-      integer,                 intent(out), optional :: nTimeStepsRinging
+      integer,                 intent(out), optional :: ringTimeStepCount
+      integer,                 intent(out), optional :: timeStepRingingCount
       type(ESMF_Time),         intent(out), optional :: ringBegin
       type(ESMF_Time),         intent(out), optional :: refTime
       logical,                 intent(out), optional :: ringing
@@ -413,19 +413,19 @@
 !          The stop time for repeating (interval) alarms.
 !     \item[{[ringDuration]}]
 !          The ring duration.  Mutually exclusive with 
-!          nRingDurationTimeSteps (see below).
-!     \item[{[nRingDurationTimeSteps]}]
+!          ringTimeStepCount (see below).
+!     \item[{[ringTimeStepCount]}]
 !          The number of time steps comprising the ring duration.  Mutually
 !          exclusive with ringDuration (see above).
-!     \item[{[nTimeStepsRinging]}]
+!     \item[{[timeStepRingingCount]}]
 !          The number of time steps for which the alarm has been ringing thus
-!          far.  Used internally for tracking nRingDurationTimeSteps ring 
+!          far.  Used internally for tracking ringTimeStepCount ring 
 !          durations (see above).  Mutually exclusive with ringBegin
 !          (see below).
 !     \item[{[ringBegin]}]
 !          The time when the alarm began ringing.  Used internally for tracking
-!          ringDuration (see above).  Mutually exclusive with nTimeStepsRinging
-!          (see above).
+!          ringDuration (see above).  Mutually exclusive with
+!          timeStepRingingCount (see above).
 !     \item[{[refTime]}]
 !          The reference (i.e. base) time for an interval alarm.
 !     \item[{[ringing]}]
@@ -460,8 +460,8 @@
 !     invoke C to C++ entry point
       call c_ESMC_AlarmGet(alarm, nameLen, tempNameLen, tempName, clock, &
                            ringTime, prevRingTime, ringInterval, stopTime, &
-                           ringDuration, nRingDurationTimeSteps, &
-                           nTimeStepsRinging, ringBegin, refTime, &
+                           ringDuration, ringTimeStepCount, &
+                           timeStepRingingCount, ringBegin, refTime, &
                            ringing, ringingOnPrevTimeStep, enabled, sticky, rc)
 
       ! copy temp name back to given name to restore native F90 storage style
@@ -783,12 +783,12 @@
 
 ! !INTERFACE:
       subroutine ESMF_AlarmNotSticky(alarm, ringDuration, &
-                                     nRingDurationTimeSteps, rc)
+                                     ringTimeStepCount, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),        intent(inout)         :: alarm
       type(ESMF_TimeInterval), intent(in),  optional :: ringDuration
-      integer,                 intent(in),  optional :: nRingDurationTimeSteps
+      integer,                 intent(in),  optional :: ringTimeStepCount
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -801,8 +801,8 @@
 !          The object instance to unset sticky.
 !     \item[{[ringDuration]}]
 !          If not sticky, alarms rings for ringDuration, then turns itself off.
-!     \item[{[nRingDurationTimeSteps]}]
-!          If not sticky, alarms rings for nRingDurationTimeSteps, then turns
+!     \item[{[ringTimeStepCount]}]
+!          If not sticky, alarms rings for ringTimeStepCount, then turns
 !          itself off.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -814,7 +814,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmNotSticky(alarm, ringDuration, &
-                                 nRingDurationTimeSteps, rc)
+                                 ringTimeStepCount, rc)
 
       end subroutine ESMF_AlarmNotSticky
 
@@ -1033,10 +1033,11 @@
 !          "stopTime"     - print when alarm intervals end. \\
 !          "ringBegin"    - print time when the alarm actually begins to ring.\\
 !          "refTime"      - print the alarm's interval reference (base) time. \\
-!          "nRingDurationTimeSteps" - print for how many time steps the alarm \\
-!                                     rings. \\
-!          "nTimeStepsRinging"      - print for how many time steps the alarm \\
-!                                     has been ringing. \\
+!          "ringTimeStepCount" - print how long this alarm is to remain \\
+!                                ringing, in terms of a number of clock time \\
+!                                steps. \\
+!          "timeStepRingingCount"   - print the number of time steps the
+!                                     alarm has been ringing thus far. \\
 !          "ringing"                - print the alarm's current ringing state.\\
 !          "ringingOnPrevTimeStep"  - print whether the alarm was ringing \\
 !                                     immediately after the previous clock \\

@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.26 2004/01/29 04:45:31 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.27 2004/01/30 19:59:05 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.26 2004/01/29 04:45:31 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.27 2004/01/30 19:59:05 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -57,18 +57,18 @@ int ESMC_Alarm::count=0;
 //    pointer to newly allocated ESMC_Alarm
 //
 // !ARGUMENTS:
-      int                nameLen,       // in
-      const char        *name,          // in
-      ESMC_Clock        *clock,         // in
-      ESMC_Time         *ringTime,      // in
-      ESMC_TimeInterval *ringInterval,  // in
-      ESMC_Time         *stopTime,      // in
-      ESMC_TimeInterval *ringDuration,  // in
-      int               *nRingDurationTimeSteps, // in
-      ESMC_Time         *refTime,       // in
-      bool              *enabled,       // in
-      bool              *sticky,        // in
-      int               *rc ) {         // out - return code
+      int                nameLen,           // in
+      const char        *name,              // in
+      ESMC_Clock        *clock,             // in
+      ESMC_Time         *ringTime,          // in
+      ESMC_TimeInterval *ringInterval,      // in
+      ESMC_Time         *stopTime,          // in
+      ESMC_TimeInterval *ringDuration,      // in
+      int               *ringTimeStepCount, // in
+      ESMC_Time         *refTime,           // in
+      bool              *enabled,           // in
+      bool              *sticky,            // in
+      int               *rc ) {             // out - return code
 //
 // !DESCRIPTION:
 //      ESMF routine which allocates and initializes {\tt ESMC\_Alarm} values.
@@ -138,8 +138,8 @@ int ESMC_Alarm::count=0;
     if (ringDuration != ESMC_NULL_POINTER) {
       alarm->ringDuration = *ringDuration;
     }
-    if (nRingDurationTimeSteps != ESMC_NULL_POINTER) {
-      alarm->nRingDurationTimeSteps = *nRingDurationTimeSteps;
+    if (ringTimeStepCount != ESMC_NULL_POINTER) {
+      alarm->ringTimeStepCount = *ringTimeStepCount;
     }
     if (refTime != ESMC_NULL_POINTER) {
       alarm->refTime = *refTime;
@@ -217,18 +217,18 @@ int ESMC_Alarm::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      int                nameLen,       // in
-      const char        *name,          // in
-      ESMC_Clock       **clock,         // in
-      ESMC_Time         *ringTime,      // in
-      ESMC_TimeInterval *ringInterval,  // in
-      ESMC_Time         *stopTime,      // in
-      ESMC_TimeInterval *ringDuration,  // in
-      int               *nRingDurationTimeSteps, // in
-      ESMC_Time         *refTime,       // in
-      bool              *ringing,       // in
-      bool              *enabled,       // in
-      bool              *sticky) {      // in
+      int                nameLen,           // in
+      const char        *name,              // in
+      ESMC_Clock       **clock,             // in
+      ESMC_Time         *ringTime,          // in
+      ESMC_TimeInterval *ringInterval,      // in
+      ESMC_Time         *stopTime,          // in
+      ESMC_TimeInterval *ringDuration,      // in
+      int               *ringTimeStepCount, // in
+      ESMC_Time         *refTime,           // in
+      bool              *ringing,           // in
+      bool              *enabled,           // in
+      bool              *sticky) {          // in
 //
 // !DESCRIPTION:
 //      ESMF routine which only initializes {\tt ESMC\_Alarm} values;
@@ -267,8 +267,8 @@ int ESMC_Alarm::count=0;
     if (ringDuration != ESMC_NULL_POINTER) {
       this->ringDuration = *ringDuration;
     }
-    if (nRingDurationTimeSteps != ESMC_NULL_POINTER) {
-      this->nRingDurationTimeSteps = *nRingDurationTimeSteps;
+    if (ringTimeStepCount != ESMC_NULL_POINTER) {
+      this->ringTimeStepCount = *ringTimeStepCount;
     }
     if (refTime != ESMC_NULL_POINTER) {
       this->refTime = *refTime;
@@ -310,23 +310,23 @@ int ESMC_Alarm::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      int                nameLen,           // in
-      int               *tempNameLen,       // out
-      char              *tempName,          // out
-      ESMC_Clock       **clock,             // out
-      ESMC_Time         *ringTime,          // out
-      ESMC_Time         *prevRingTime,      // out
-      ESMC_TimeInterval *ringInterval,      // out
-      ESMC_Time         *stopTime,          // out
-      ESMC_TimeInterval *ringDuration,      // out
-      int               *nRingDurationTimeSteps, // out
-      int               *nTimeStepsRinging, // out
-      ESMC_Time         *ringBegin,         // out
-      ESMC_Time         *refTime,           // out
-      bool              *ringing,           // out
+      int                nameLen,                // in
+      int               *tempNameLen,            // out
+      char              *tempName,               // out
+      ESMC_Clock       **clock,                  // out
+      ESMC_Time         *ringTime,               // out
+      ESMC_Time         *prevRingTime,           // out
+      ESMC_TimeInterval *ringInterval,           // out
+      ESMC_Time         *stopTime,               // out
+      ESMC_TimeInterval *ringDuration,           // out
+      int               *ringTimeStepCount,      // out
+      int               *timeStepRingingCount,   // out
+      ESMC_Time         *ringBegin,              // out
+      ESMC_Time         *refTime,                // out
+      bool              *ringing,                // out
       bool              *ringingOnPrevTimeStep,  // out
-      bool              *enabled,           // out
-      bool              *sticky) {          // out
+      bool              *enabled,                // out
+      bool              *sticky) {               // out
 //
 // !DESCRIPTION:
 //      Gets {\tt ESMC\_Alarm} property values;
@@ -366,8 +366,8 @@ int ESMC_Alarm::count=0;
     if (ringDuration != ESMC_NULL_POINTER) {
       *ringDuration = this->ringDuration;
     }
-    if (nRingDurationTimeSteps != ESMC_NULL_POINTER) {
-      *nRingDurationTimeSteps = this->nRingDurationTimeSteps;
+    if (ringTimeStepCount != ESMC_NULL_POINTER) {
+      *ringTimeStepCount = this->ringTimeStepCount;
     }
     if (refTime != ESMC_NULL_POINTER) {
       *refTime = this->refTime;
@@ -666,7 +666,7 @@ int ESMC_Alarm::count=0;
 //
 // !INTERFACE:
       int ESMC_Alarm::ESMC_AlarmNotSticky(ESMC_TimeInterval *ringDuration,
-                                          int *nRingDurationTimeSteps) {
+                                          int *ringTimeStepCount) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -686,7 +686,7 @@ int ESMC_Alarm::count=0;
 
     // mutually exclusive: can only specify one ring duration type
     if (ringDuration == ESMC_NULL_POINTER &&
-        nRingDurationTimeSteps == ESMC_NULL_POINTER) {
+        ringTimeStepCount == ESMC_NULL_POINTER) {
       cout << "ESMC_Alarm::ESMC_AlarmNotSticky(): can only specify " <<
               "one type of ring duration, not both." << endl;
       return(ESMF_FAILURE);
@@ -695,8 +695,8 @@ int ESMC_Alarm::count=0;
     if (ringDuration != ESMC_NULL_POINTER) {
       this->ringDuration = *ringDuration;
     }
-    if (nRingDurationTimeSteps != ESMC_NULL_POINTER) {
-      this->nRingDurationTimeSteps = *nRingDurationTimeSteps;
+    if (ringTimeStepCount != ESMC_NULL_POINTER) {
+      this->ringTimeStepCount = *ringTimeStepCount;
     }
 
     return(ESMF_SUCCESS);
@@ -1001,11 +1001,11 @@ int ESMC_Alarm::count=0;
           refTime.ESMC_TimePrint();
         }
       }
-      else if (strncmp(opts, "nringdurationtimesteps", 22) == 0) {
-        cout << "nRingDurationTimeSteps = " << nRingDurationTimeSteps << endl;
+      else if (strncmp(opts, "ringtimestepcount", 17) == 0) {
+        cout << "ringTimeStepCount = " << ringTimeStepCount << endl;
       }
-      else if (strncmp(opts, "ntimestepsringing", 17) == 0) {
-        cout << "nTimeStepsRinging = " << nTimeStepsRinging << endl;
+      else if (strncmp(opts, "timestepringingcount", 20) == 0) {
+        cout << "timeStepRingingCount = " << timeStepRingingCount << endl;
       }
       else if (strncmp(opts, "ringing", 7) == 0) {
         cout << "ringing = " << ringing << endl;
@@ -1033,8 +1033,8 @@ int ESMC_Alarm::count=0;
       cout << "stopTime = "     << endl; stopTime.ESMC_TimePrint(options);
       cout << "ringBegin = "    << endl; ringBegin.ESMC_TimePrint(options);
       cout << "refTime = "      << endl; refTime.ESMC_TimePrint(options);
-      cout << "nRingDurationTimeSteps = " << nRingDurationTimeSteps << endl;
-      cout << "nTimeStepsRinging = " << nTimeStepsRinging << endl;
+      cout << "ringTimeStepCount = "    << ringTimeStepCount << endl;
+      cout << "timeStepRingingCount = " << timeStepRingingCount << endl;
       cout << "ringing = "      << ringing << endl;
       cout << "ringingOnPrevTimeStep = "  << ringingOnPrevTimeStep << endl;
       cout << "enabled = "      << enabled << endl;
@@ -1068,8 +1068,8 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
     name[0] = '\0';
-    nRingDurationTimeSteps = 0;
-    nTimeStepsRinging = 0;
+    ringTimeStepCount = 0;
+    timeStepRingingCount = 0;
     ringing = ringingOnCurrTimeStep = ringingOnPrevTimeStep = false;
     enabled = true;
     sticky  = true;

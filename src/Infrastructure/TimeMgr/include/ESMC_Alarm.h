@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.20 2003/12/19 19:19:08 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.21 2004/01/30 19:59:05 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -108,10 +108,10 @@ class ESMC_Alarm {
     ESMC_Time         stopTime;     // when alarm intervals end.
     ESMC_Time         ringBegin;    // note time when alarm turns on.
     ESMC_Time         refTime;      // reference time.
-    int               nRingDurationTimeSteps; // how long alarm rings;
+    int               ringTimeStepCount;      // how long alarm rings;
                                               //  mutually exclusive with
                                               //  ringDuration
-    int               nTimeStepsRinging;      // how long alarm has been
+    int               timeStepRingingCount;   // how long alarm has been
                                               //   ringing in terms of a 
                                               //   number of time steps.
 
@@ -156,7 +156,7 @@ class ESMC_Alarm {
                       ESMC_TimeInterval *ringInterval=0,
                       ESMC_Time         *stopTime=0,
                       ESMC_TimeInterval *ringDuration=0,
-                      int               *nRingDurationTimeSteps=0,
+                      int               *ringTimeStepCount=0,
                       ESMC_Time         *refTime=0,
                       bool              *ringing=0,
                       bool              *enabled=0,  // (TMG 4.1, 4.7)
@@ -171,8 +171,8 @@ class ESMC_Alarm {
                       ESMC_TimeInterval *ringInterval=0,
                       ESMC_Time         *stopTime=0,
                       ESMC_TimeInterval *ringDuration=0,
-                      int               *nRingDurationTimeSteps=0,
-                      int               *nTimeStepsRinging=0,
+                      int               *ringTimeStepCount=0,
+                      int               *timeStepRingingCount=0,
                       ESMC_Time         *ringBegin=0,
                       ESMC_Time         *refTime=0,
                       bool              *ringing=0,
@@ -193,7 +193,7 @@ class ESMC_Alarm {
 
     int  ESMC_AlarmSticky(void);
     int  ESMC_AlarmNotSticky(ESMC_TimeInterval *ringDuration=0,
-                             int *nRingDurationTimeSteps=0);
+                             int *ringTimeStepCount=0);
     bool ESMC_AlarmIsSticky(int *rc) const;
 
     bool ESMC_AlarmCheckRingTime(int *rc);
@@ -264,7 +264,7 @@ class ESMC_Alarm {
                                  ESMC_TimeInterval* ringInterval=0,
                                  ESMC_Time*         stopTime=0, 
                                  ESMC_TimeInterval* ringDuration=0,
-                                 int*               nRingDurationTimeSteps=0,
+                                 int*               ringTimeStepCount=0,
                                  ESMC_Time*         refTime=0,
                                  bool*              enabled=0,
                                  bool*              sticky=0,

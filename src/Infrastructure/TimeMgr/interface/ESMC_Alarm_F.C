@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.17 2003/12/19 19:21:21 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.18 2004/01/30 19:59:05 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@ extern "C" {
                                     const char *name, ESMC_Clock **clock,
                 ESMC_Time *ringTime, ESMC_TimeInterval *ringInterval,
                 ESMC_Time *stopTime, ESMC_TimeInterval *ringDuration, 
-                int *nRingDurationTimeSteps, ESMC_Time *refTime,
+                int *ringTimeStepCount, ESMC_Time *refTime,
                 bool *enabled, bool *sticky, int *status) {
           *ptr = ESMC_AlarmCreate(
                  *nameLen,  // always present internal argument.
@@ -56,8 +56,8 @@ extern "C" {
                                            ESMC_NULL_POINTER : stopTime),
                  ((void*) ringDuration == (void*)ESMC_BAD_POINTER ?
                                            ESMC_NULL_POINTER : ringDuration),
-                 ((void*) nRingDurationTimeSteps == (void*)ESMC_BAD_POINTER ?
-                                   ESMC_NULL_POINTER : nRingDurationTimeSteps),
+                 ((void*) ringTimeStepCount == (void*)ESMC_BAD_POINTER ?
+                                        ESMC_NULL_POINTER : ringTimeStepCount),
                  ((void*) refTime      == (void*)ESMC_BAD_POINTER ?
                                            ESMC_NULL_POINTER : refTime),
                  ((void*) enabled      == (void*)ESMC_BAD_POINTER ?
@@ -78,7 +78,7 @@ extern "C" {
                                  const char *name, ESMC_Clock **clock,
                 ESMC_Time *ringTime, ESMC_TimeInterval *ringInterval,
                 ESMC_Time *stopTime, ESMC_TimeInterval *ringDuration, 
-                int *nRingDurationTimeSteps, ESMC_Time *refTime,
+                int *ringTimeStepCount, ESMC_Time *refTime,
                 bool *ringing, bool *enabled, bool *sticky,
                 int *status) {
           int rc = (*ptr)->ESMC_AlarmSet(
@@ -96,8 +96,8 @@ extern "C" {
                                             ESMC_NULL_POINTER : stopTime),
                  ((void*) ringDuration  == (void*)ESMC_BAD_POINTER ?
                                             ESMC_NULL_POINTER : ringDuration),
-                 ((void*) nRingDurationTimeSteps == (void*)ESMC_BAD_POINTER ?
-                                   ESMC_NULL_POINTER : nRingDurationTimeSteps),
+                 ((void*) ringTimeStepCount == (void*)ESMC_BAD_POINTER ?
+                                        ESMC_NULL_POINTER : ringTimeStepCount),
                  ((void*) refTime       == (void*)ESMC_BAD_POINTER ?
                                             ESMC_NULL_POINTER : refTime),
                  ((void*) ringing       == (void*)ESMC_BAD_POINTER ?
@@ -115,8 +115,8 @@ extern "C" {
                                  ESMC_Clock **clock,
                 ESMC_Time *ringTime, ESMC_Time *prevRingTime, 
                 ESMC_TimeInterval *ringInterval, ESMC_Time *stopTime,
-                ESMC_TimeInterval *ringDuration, int *nRingDurationTimeSteps,
-                int *nTimeStepsRinging, ESMC_Time *ringBegin,
+                ESMC_TimeInterval *ringDuration, int *ringTimeStepCount,
+                int *timeStepRingingCount, ESMC_Time *ringBegin,
                 ESMC_Time *refTime, bool *ringing, bool *ringingOnPrevTimeStep,
                 bool *enabled, bool *sticky, int *status) {
           int rc = (*ptr)->ESMC_AlarmGet(
@@ -138,10 +138,10 @@ extern "C" {
                                             ESMC_NULL_POINTER : stopTime),
                  ((void*) ringDuration  == (void*)ESMC_BAD_POINTER ?
                                             ESMC_NULL_POINTER : ringDuration),
-                 ((void*) nRingDurationTimeSteps == (void*)ESMC_BAD_POINTER ?
-                                   ESMC_NULL_POINTER : nRingDurationTimeSteps),
-                 ((void*) nTimeStepsRinging      == (void*)ESMC_BAD_POINTER ?
-                                   ESMC_NULL_POINTER : nTimeStepsRinging),
+                 ((void*) ringTimeStepCount    == (void*)ESMC_BAD_POINTER ?
+                                     ESMC_NULL_POINTER : ringTimeStepCount),
+                 ((void*) timeStepRingingCount == (void*)ESMC_BAD_POINTER ?
+                                     ESMC_NULL_POINTER : timeStepRingingCount),
                  ((void*) ringBegin     == (void*)ESMC_BAD_POINTER ?
                                             ESMC_NULL_POINTER : ringBegin),
                  ((void*) refTime       == (void*)ESMC_BAD_POINTER ?
@@ -221,13 +221,13 @@ extern "C" {
 
        void FTN(c_esmc_alarmnotsticky)(ESMC_Alarm **ptr,
                                           ESMC_TimeInterval *ringDuration, 
-                                          int *nRingDurationTimeSteps,
+                                          int *ringTimeStepCount,
                                           int *status) {
           int rc = (*ptr)->ESMC_AlarmNotSticky(
-            ((void*) ringDuration           == (void*)ESMC_BAD_POINTER ?
-                                  ESMC_NULL_POINTER : ringDuration),
-            ((void*) nRingDurationTimeSteps == (void*)ESMC_BAD_POINTER ?
-                                  ESMC_NULL_POINTER : nRingDurationTimeSteps) );
+            ((void*) ringDuration      == (void*)ESMC_BAD_POINTER ?
+                                   ESMC_NULL_POINTER : ringDuration),
+            ((void*) ringTimeStepCount == (void*)ESMC_BAD_POINTER ?
+                                   ESMC_NULL_POINTER : ringTimeStepCount) );
           if (status != ESMC_NULL_POINTER &&
               (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
