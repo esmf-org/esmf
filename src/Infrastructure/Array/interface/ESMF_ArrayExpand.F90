@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand.F90,v 1.11 2004/02/11 16:52:12 nscollins Exp $
+! $Id: ESMF_ArrayExpand.F90,v 1.12 2004/02/12 22:03:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -204,7 +204,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand.F90,v 1.11 2004/02/11 16:52:12 nscollins Exp $'
+      '$Id: ESMF_ArrayExpand.F90,v 1.12 2004/02/12 22:03:29 nscollins Exp $'
 !==============================================================================
 !
 ! INTERFACE BLOCKS
@@ -881,7 +881,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_KIND_I2), dimension(:), pointer :: newp 
@@ -903,7 +902,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -991,7 +989,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_KIND_I4), dimension(:), pointer :: newp 
@@ -1013,7 +1010,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -1101,7 +1097,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_KIND_I8), dimension(:), pointer :: newp 
@@ -1123,7 +1118,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -1211,7 +1205,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_KIND_I2), dimension(:,:), pointer :: newp 
@@ -1233,7 +1226,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -1321,7 +1313,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_KIND_I4), dimension(:,:), pointer :: newp 
@@ -1343,7 +1334,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -1431,7 +1421,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_KIND_I8), dimension(:,:), pointer :: newp 
@@ -1453,7 +1442,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -1541,7 +1529,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_KIND_I2), dimension(:,:,:), pointer :: newp 
@@ -1563,7 +1550,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -1651,7 +1637,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_KIND_I4), dimension(:,:,:), pointer :: newp 
@@ -1673,7 +1658,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -1761,7 +1745,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_KIND_I8), dimension(:,:,:), pointer :: newp 
@@ -1783,7 +1766,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -1871,7 +1853,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_KIND_I2), dimension(:,:,:,:), pointer :: newp 
@@ -1893,7 +1874,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -1981,7 +1961,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_KIND_I4), dimension(:,:,:,:), pointer :: newp 
@@ -2003,7 +1982,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -2091,7 +2069,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_KIND_I8), dimension(:,:,:,:), pointer :: newp 
@@ -2113,7 +2090,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -2201,7 +2177,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_KIND_I2), dimension(:,:,:,:,:), pointer :: newp 
@@ -2223,7 +2198,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -2311,7 +2285,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_KIND_I4), dimension(:,:,:,:,:), pointer :: newp 
@@ -2333,7 +2306,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -2421,7 +2393,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_KIND_I8), dimension(:,:,:,:,:), pointer :: newp 
@@ -2443,7 +2414,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -2531,7 +2501,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_KIND_R4), dimension(:), pointer :: newp 
@@ -2553,7 +2522,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -2641,7 +2609,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_KIND_R8), dimension(:), pointer :: newp 
@@ -2663,7 +2630,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -2751,7 +2717,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_KIND_R4), dimension(:,:), pointer :: newp 
@@ -2773,7 +2738,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -2861,7 +2825,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_KIND_R8), dimension(:,:), pointer :: newp 
@@ -2883,7 +2846,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -2971,7 +2933,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_KIND_R4), dimension(:,:,:), pointer :: newp 
@@ -2993,7 +2954,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -3081,7 +3041,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_KIND_R8), dimension(:,:,:), pointer :: newp 
@@ -3103,7 +3062,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -3191,7 +3149,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_KIND_R4), dimension(:,:,:,:), pointer :: newp 
@@ -3213,7 +3170,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -3301,7 +3257,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_KIND_R8), dimension(:,:,:,:), pointer :: newp 
@@ -3323,7 +3278,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -3411,7 +3365,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_KIND_R4), dimension(:,:,:,:,:), pointer :: newp 
@@ -3433,7 +3386,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -3521,7 +3473,6 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  integer :: hwidth ! local copy of halo width 
- integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_KIND_R8), dimension(:,:,:,:,:), pointer :: newp 
@@ -3543,7 +3494,6 @@ end interface
  !endif 
  
  ! Always supply a halo value, setting it to 0 if not specified. 
- ! Lower and upper bounds also. 
  if (present(halo_width)) then 
  hwidth = halo_width 
  else 
@@ -12145,6 +12095,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -12154,6 +12109,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -12164,6 +12121,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -12171,9 +12130,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -12199,7 +12155,7 @@ end interface
  
  wrap %I21Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -12300,6 +12256,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -12309,6 +12270,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -12319,6 +12282,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -12326,9 +12291,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -12354,7 +12316,7 @@ end interface
  
  wrap %I41Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -12455,6 +12417,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -12464,6 +12431,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -12474,6 +12443,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -12481,9 +12452,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -12509,7 +12477,7 @@ end interface
  
  wrap %I81Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -12610,6 +12578,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -12619,6 +12592,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -12629,6 +12604,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -12636,9 +12613,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -12664,7 +12638,7 @@ end interface
  
  wrap %I22Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -12765,6 +12739,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -12774,6 +12753,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -12784,6 +12765,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -12791,9 +12774,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -12819,7 +12799,7 @@ end interface
  
  wrap %I42Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -12920,6 +12900,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -12929,6 +12914,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -12939,6 +12926,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -12946,9 +12935,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -12974,7 +12960,7 @@ end interface
  
  wrap %I82Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -13075,6 +13061,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -13084,6 +13075,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -13094,6 +13087,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -13101,9 +13096,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -13129,7 +13121,7 @@ end interface
  
  wrap %I23Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -13230,6 +13222,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -13239,6 +13236,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -13249,6 +13248,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -13256,9 +13257,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -13284,7 +13282,7 @@ end interface
  
  wrap %I43Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -13385,6 +13383,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -13394,6 +13397,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -13404,6 +13409,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -13411,9 +13418,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -13439,7 +13443,7 @@ end interface
  
  wrap %I83Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -13540,6 +13544,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -13549,6 +13558,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -13559,6 +13570,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -13566,9 +13579,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -13594,7 +13604,7 @@ end interface
  
  wrap %I24Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -13695,6 +13705,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -13704,6 +13719,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -13714,6 +13731,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -13721,9 +13740,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -13749,7 +13765,7 @@ end interface
  
  wrap %I44Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -13850,6 +13866,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -13859,6 +13880,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -13869,6 +13892,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -13876,9 +13901,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -13904,7 +13926,7 @@ end interface
  
  wrap %I84Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -14005,6 +14027,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -14014,6 +14041,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -14024,6 +14053,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -14031,9 +14062,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -14059,7 +14087,7 @@ end interface
  
  wrap %I25Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -14160,6 +14188,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -14169,6 +14202,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -14179,6 +14214,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -14186,9 +14223,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -14214,7 +14248,7 @@ end interface
  
  wrap %I45Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -14315,6 +14349,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -14324,6 +14363,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -14334,6 +14375,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -14341,9 +14384,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -14369,7 +14409,7 @@ end interface
  
  wrap %I85Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -14470,6 +14510,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -14479,6 +14524,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -14489,6 +14536,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -14496,9 +14545,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -14524,7 +14570,7 @@ end interface
  
  wrap %R41Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -14625,6 +14671,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -14634,6 +14685,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -14644,6 +14697,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -14651,9 +14706,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -14679,7 +14731,7 @@ end interface
  
  wrap %R81Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -14780,6 +14832,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -14789,6 +14846,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -14799,6 +14858,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -14806,9 +14867,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -14834,7 +14892,7 @@ end interface
  
  wrap %R42Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -14935,6 +14993,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -14944,6 +15007,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -14954,6 +15019,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -14961,9 +15028,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -14989,7 +15053,7 @@ end interface
  
  wrap %R82Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -15090,6 +15154,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -15099,6 +15168,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -15109,6 +15180,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -15116,9 +15189,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -15144,7 +15214,7 @@ end interface
  
  wrap %R43Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -15245,6 +15315,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -15254,6 +15329,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -15264,6 +15341,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -15271,9 +15350,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -15299,7 +15375,7 @@ end interface
  
  wrap %R83Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -15400,6 +15476,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -15409,6 +15490,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -15419,6 +15502,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -15426,9 +15511,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -15454,7 +15536,7 @@ end interface
  
  wrap %R44Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -15555,6 +15637,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -15564,6 +15651,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -15574,6 +15663,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -15581,9 +15672,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -15609,7 +15697,7 @@ end interface
  
  wrap %R84Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -15710,6 +15798,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -15719,6 +15812,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -15729,6 +15824,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -15736,9 +15833,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -15764,7 +15858,7 @@ end interface
  
  wrap %R45Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -15865,6 +15959,11 @@ end interface
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -15874,6 +15973,8 @@ end interface
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -15884,6 +15985,8 @@ end interface
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
@@ -15891,9 +15994,6 @@ end interface
  endif 
  
  if (willalloc) then 
- ! Assume defaults first, then alter if lb or ub specified. 
- lb = 1 
- ub(1:size(counts)) = counts 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
@@ -15919,7 +16019,7 @@ end interface
  
  wrap %R85Dptr => newp 
  call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
