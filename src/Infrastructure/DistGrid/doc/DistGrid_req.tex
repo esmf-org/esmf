@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.23 2002/05/24 11:50:47 cdeluca Exp $
+% $Id: DistGrid_req.tex,v 1.24 2002/06/04 21:27:11 rhallberg Exp $
 
 This part covers all the requirements for defining, querying and
 relating grid distributions or domain decompositions. The PElist and
@@ -15,9 +15,9 @@ Given a global domain and a PElist, there will be methods to derive an
 appropriate layout of PEs in multiple dimensions.
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} Required by MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 1\\
+{\bf Source:} MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -27,9 +27,9 @@ Subdivide a layout.  All distributed grid operations shall work
 on such a sub-layout.
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} Required by NCEP-SSI, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 1 \\
+{\bf Source:} Required by NCEP-SSI, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -39,9 +39,9 @@ It will be possible to override the internally generated layout above
 by direct user specification.
 
 \begin{reqlist}
-{\bf Priority:} 3. \\ 
-{\bf Source:} Required by MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 2. \\ 
+{\bf Source:} Required by MIT, GFDL. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -52,8 +52,8 @@ ESMF permits 1D domain decomposition, i.e. the distribution of a
 
 \begin{reqlist}
 {\bf Priority:} 1.\\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, NCEP-GSM, NCEP-SSI, MIT, WRF. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, NCEP-GSM, NCEP-SSI, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} probably can be treated as a special case of 2D with no
   loss of generality or performance.
@@ -66,7 +66,7 @@ dimensions, on data arrays specified in any index order (XYZ, XZY,
 etc).
 
 \begin{reqlist}
-{\bf Priority:} \\
+{\bf Priority:} 1 \\
 {\bf Source:} Get detailed list of sources here for different index
   orders: full generality is potentially a lot of work. \\
  CAM-FV: (XY, XYZ, XZY).  Consistently decomposed blockwise in Y. \\
@@ -79,7 +79,8 @@ etc).
            ungridded obs (T,YX,ZT) decomposed variable blocked on YX \\
  MIT: (XYZ) blocked along X or Y. \\
  WRF: (XY, YX, XYZ, YZX, XZY, ZXY) \\
-{\bf Status:} Proposed. \\
+ GFDL: X, Y \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:}  In CAM-FV dynamics, 4D tracer areas are XYZT or
 	possibly XZTY, where T is the tracer dimension.  In the physics
@@ -96,8 +97,8 @@ ESMF permits 2D domain decomposition, i.e. the distribution of a
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} Should NOT be treated as a special case of 3D!
 	CAM-FV has been extended for 2D decomposition, but 
@@ -129,7 +130,8 @@ etc).
   NCEP-SSI: grid (T,Y,X,ZT) decomposed variable blocked on Y and X \\
   MIT: XYZ blocked in X, Y or XY, variable sizes and holes \\
   WRF: (XY, YX, XYZ, YZX, XZY, ZXY) \\
-{\bf Status:} Proposed. \\
+  GFDL: XY
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -140,8 +142,8 @@ distributed along a single axis of distribution.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} Required by CAM-FV (2D decomposition), NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} Required by CAM-FV (2D decomposition), NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} \\
 {\bf Notes:} i.e given a 2D decompsition in \texttt{(i,j)}, it must be
   possible to have arrays that are functions of \texttt{(i,j)},
@@ -157,7 +159,7 @@ ESMF permits 3D domain decomposition, i.e. the distribution of a
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} Anyone? \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Rejected. \\
 {\bf Verification:} \\
 {\bf Notes:} 4D not foreseen for CAM-FV at this time.
 \end{reqlist}
@@ -168,10 +170,10 @@ Given a global domain and a layout, there will be methods to assign
 each point in the domain to one PE for computation. 
 
 \begin{reqlist}
-{\bf Priority:} \\ 
+{\bf Priority:} 1 \\ 
 {\bf Source:} Requirements for specific flags to control the
-  decomposition must be added here. CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT. \\
-{\bf Status:} Proposed. \\
+  decomposition must be added here. CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} \\
 {\bf Notes:} In multi-threaded applications, the PE assignment is done
   only for each ``MPI process''. Additional threaded PEs work on
@@ -204,8 +206,8 @@ extents.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} WS:  there will there be a fairly wide spectrum 
 of decomposition create methods, with varying degrees of user
@@ -223,11 +225,11 @@ generate a domain decomposition where one or more exclusive
 domains are assigned to no PE.
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} POP, CICE , MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 2 \\
+{\bf Source:} POP, CICE, MIT, GFDL. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
-{\bf Notes:} Possibly useful in an ocean model when a decomposition
+{\bf Notes:} Very useful in an ocean model when a decomposition
   of the sphere yields entire exclusive domains containing only
   land points.
 
@@ -243,8 +245,8 @@ synchronization of exclusive domains across a distributed grid.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test for specific cases.\\
 {\bf Notes:} 
 
@@ -258,10 +260,10 @@ conformant with that pattern.
 
 \begin{reqlist}
 {\bf Priority:} 2. \\ 
-{\bf Source:} Required by MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} Required by MIT, GFDL. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test for specific cases.\\
-{\bf Notes:} This would be very useful. Why doesn't anybody want it? - CNH
+{\bf Notes:} 
 \end{reqlist}
 
 \sreq{Periodic boundary conditions}
@@ -272,8 +274,8 @@ specify this as input information for grid topology generation.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test, code inspection. \\
 {\bf Notes:} It is natural to treat this as a distributed grid
   feature, rather than having separate edge detection code in
@@ -293,8 +295,8 @@ along each axis of decomposition.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -305,8 +307,8 @@ an exclusive domain along each axis of decomposition.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. 
 \end{reqlist}
 
@@ -317,8 +319,8 @@ an exclusive domain along each axis of decomposition.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} NCEP-GSM, NCEP-SSI, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} NCEP-GSM, NCEP-SSI, MIT, GFDL. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test.\\
 {\bf Notes:}
 \end{reqlist}
@@ -330,8 +332,8 @@ decomposition of all the exclusive domains in the distributed grid.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.\\
 {\bf Notes:}
 \end{reqlist}
@@ -342,9 +344,9 @@ ESMF methods will be provided to retrieve the list of exclusive
 domains associated with each PE of a distributed grid.
 
 \begin{reqlist}
-{\bf Priority:} \\ 
-{\bf Source:} CCSM-CPL, POP, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 1 \\ 
+{\bf Source:} CCSM-CPL, POP, MIT, GFDL \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} \\
 {\bf Notes:} Besides being able to retrieve one's own domain
   information, the full list of domains is also required for certain
@@ -360,8 +362,8 @@ along each axis of decomposition.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -372,8 +374,8 @@ local domain along each axis of decomposition.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} Required by CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} Required by CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -383,10 +385,12 @@ It shall be possible to retrieve the full index list of a
 local domain along each axis of decomposition.
 
 \begin{reqlist}
-{\bf Priority:} 1. \\ 
-{\bf Source:} Required by NCEP-GSM, NCEP-SSI, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 2. \\ 
+{\bf Source:} Required by NCEP-GSM, NCEP-SSI. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test.
+{\bf Notes:} This is interpreted (with the 2 preceding requirements) as
+a specific requirement for unstructured distributed grid points.  (CNH, RWH, VB)
 \end{reqlist}
 
 \ssreq{Maximum domain extent}
@@ -396,8 +400,8 @@ decomposition of all the local domains in the distributed grid.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} Required by CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} Required by CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -408,9 +412,9 @@ ESMF will have methods to translate the local indices to
 globally-conformant indices.
 
 \begin{reqlist}
-{\bf Priority:} \\
+{\bf Priority:} 2 \\
 {\bf Source:} POP, CICE, MIT (desired). \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} \\
 {\bf Notes:} It is possible (using array lower bound specifications)
   to generate a \emph{globally conformant} array allocation: such that
@@ -428,9 +432,9 @@ ESMF methods will be provided to retrieve the list of local
 domains associated with each PE of a distributed grid.
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} CCSM-CPL, POP, CICE, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL, POP, CICE, MIT, GFDL. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} \\
 {\bf Notes:} Besides being able to retrieve one's own domain
   information, the full list of domains is also required for certain
@@ -446,8 +450,8 @@ along each axis of decomposition.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -458,8 +462,8 @@ memory domain along each axis of decomposition.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} Required by CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} Required by CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -469,9 +473,9 @@ It shall be possible to retrieve the full index list of a
 memory domain along each axis of decomposition.
 
 \begin{reqlist}
-{\bf Priority:} 1. \\ 
-{\bf Source:} Required by NCEP-GSM, NCEP-SSI, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 2. \\ 
+{\bf Source:} Required by NCEP-GSM, NCEP-SSI. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -482,8 +486,8 @@ decomposition of all the memory domains in the distributed grid.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} Required by CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} Required by CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -493,9 +497,9 @@ ESMF methods will be provided to retrieve the list of memory
 domains associated with each PE of a distributed grid.
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} CCSM-CPL, POP, CICE, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, POP, CICE, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} \\
 {\bf Notes:} Besides being able to retrieve one's own domain
   information, the full list of domains is also required for certain
@@ -510,9 +514,9 @@ It shall be possible to retrieve the size of a global domain
 along each axis of decomposition.
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.\\
 {\bf Notes:} CAM-FV: the size of the global domain is known
 a priori and does not need to be retrieved.
@@ -524,9 +528,9 @@ It shall be possible to retrieve the beginning and ending indices of the
 global domain along each axis of decomposition.
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} CCSM-CPL, POP, CIC, MIT, WRF. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, POP, CIC, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} CAM-FV: the size of the global domain begin and end
 indices are known a priori and does not need to be retrieved.
@@ -538,9 +542,9 @@ ESMF methods will be provided to publish and retrieve the layout
 associated with a distributed grid.
 
 \begin{reqlist}
-{\bf Priority:} \\
+{\bf Priority:} 3 \\
 {\bf Source:} CCSM-CPL, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Deferred. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -551,9 +555,9 @@ connectivities established by the data dependency patterns of the
 distributed grid.
 
 \begin{reqlist}
-{\bf Priority:} \\
+{\bf Priority:} 3 \\
 {\bf Source:} CCSM-CPL, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Deferred. \\
 {\bf Verification:} Unit test.\\
 {\bf Notes:}
 \end{reqlist}
@@ -565,9 +569,9 @@ ESMF methods will be provided to query the PE associated with (i.e
 distributed grid.
 
 \begin{reqlist}
-{\bf Priority:} \\ 
-{\bf Source:} CCSM-CPL, POP, MIT, WRF \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 2 \\ 
+{\bf Source:} CCSM-CPL, POP, MIT, WRF, GFDL \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} \\
 {\bf Notes:} WS: which PE is it on and (optionally?) what 
 is its local index.  Also: if one is given the PE and the local index, 
@@ -582,9 +586,9 @@ any component in an application in a form that permits all the query
 operations listed above.
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} CCSM-CPL, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} Application here means "ESMF application"? - CNH
 \end{reqlist}
@@ -598,8 +602,8 @@ global domain.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -610,9 +614,9 @@ It shall be possible to state if two distributed grids sharing a
 global domain are identically decomposed.
 
 \begin{reqlist}
-{\bf Priority:} \\ 
-{\bf Source:} CCSM-CPL, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 2 \\ 
+{\bf Source:} CCSM-CPL, MIT, GFDL \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -623,9 +627,9 @@ domain decompositions assign their exclusive domains to the
 identical sequence of PEs.
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} CCSM-CPL, POP, CICE, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL, POP, CICE, MIT, GFDL. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. 
 \end{reqlist}
 
@@ -639,8 +643,8 @@ data transfer may not be complete when the call returns.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, NSIPP, NCEP-SSI, MIT, WRF \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, NSIPP, NCEP-SSI, MIT, WRF, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} \\
 {\bf Notes:} Maybe we're pre-empting design issues, but I'd want
   issues like wait-for-completion dealt with within distributed grids.
@@ -656,9 +660,9 @@ ESMF shall provide a blocked halo update: where the underlying
 data transfer is complete when the call returns.
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 1 \\
+{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.\\
 {\bf Notes:} Doesn't necessarily need separate call, same as unblocked
   + wait-for-completion.
@@ -672,8 +676,8 @@ issued unblocked halo update.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, NCEP-SSI, MIT, WRF. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, NCEP-SSI, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -683,9 +687,9 @@ ESMF shall provide methods to declare halo points valid or invalid
 (i.e requiring a halo update prior to use).
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} POP (desired), CICE (desired), MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 3 \\
+{\bf Source:} POP (desired), CICE (desired), MIT (desired), GFDL (desired). \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} \\
 {\bf Notes:} This feature can be used to detect when to perform a halo
   update. This may also be used to reduce the frequency of halo
@@ -709,7 +713,7 @@ data arrays where each array element is a derived data type.
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} \\
-{\bf Status:} Proposed. \\ 
+{\bf Status:} Deferred. \\ 
 {\bf Verification:} \\
 {\bf Notes:} I hope this isn't required, but see
   Section~\ref{DG:Unstructured} below.
@@ -721,9 +725,10 @@ A "transpose" form (in the mathematical sense of the word) is required
 for all the permutations that a halo can perform.
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:}  MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Source:}  MIT, GFDL. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test.
+{\bf Notes:} Needed for Part III MIT/GCM milestones.
 \end{reqlist}
 
 \req{Data transpose} \label{DG:transpose}
@@ -735,8 +740,8 @@ data transfer may not be complete when the call returns.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV (2D decomposition), NSIPP, NCEP-GSM, NCEP-SSI, MIT, WRF \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV (2D decomposition), NSIPP, NCEP-GSM, NCEP-SSI, MIT, WRF, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} \\
 {\bf Notes:} Maybe we're pre-empting design issues, but I'd want
   issues like wait-for-completion dealt with within distributed grids.
@@ -749,8 +754,8 @@ data transfer is complete when the call returns.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} Required by CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} Required by CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} \\
 {\bf Notes:} Doesn't necessarily need separate call, same as unblocked
   + wait-for-completion.
@@ -763,8 +768,8 @@ issued unblocked data transpose.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV (2D decomposition), NSIPP, NCEP-GSM, NCEP-SSI, MIT, WRF \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV (2D decomposition), NSIPP, NCEP-GSM, NCEP-SSI, MIT, WRF, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -788,9 +793,9 @@ for all the permutations that a transpose (in the ESMF sense) can perform.
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
 {\bf Source:}  MIT \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
-{\bf Notes:}
+{\bf Notes:} Needed for milestone.
 \end{reqlist}
 
 \req{Gather}
@@ -800,8 +805,8 @@ array from a distributed array.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\  
-{\bf Source:} All, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Source:} All, MIT, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} 
 \end{reqlist}
@@ -813,8 +818,8 @@ PElist of the entire global array from a distributed array.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, NCEP-GSM, NCEP-SSI, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, NCEP-GSM, NCEP-SSI, MIT, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} 
 \end{reqlist}
@@ -825,9 +830,9 @@ In a 2D decomposition, it shall be possible to perform a gather along
 either axis.
 
 \begin{reqlist}
-{\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV (2D decomposition), POP, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 2 \\ 
+{\bf Source:} CAM-FV (2D decomposition), POP, MIT, GFDL \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} 
 \end{reqlist}
@@ -838,9 +843,9 @@ for the matrix operator a gather represents.
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
 {\bf Source:}  MIT \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
-{\bf Notes:}
+{\bf Notes:} Needed for a milestone.
 \end{reqlist}
 
 \req{Scatter}
@@ -849,9 +854,9 @@ It shall be possible to create a distributed array across a PE list
 from a copy on any PE of the entire global array.
 
 \begin{reqlist}
-{\bf Priority:} \\ 
-{\bf Source:} All, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 1 \\ 
+{\bf Source:} All, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} 
 \end{reqlist}
@@ -862,9 +867,9 @@ In a 2D decomposition, it shall be possible to perform a scatter along
 either axis.
 
 \begin{reqlist}
-{\bf Priority:} \\ 
-{\bf Source:} CAM-FV (2D decomposition), NSIPP, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 2 \\ 
+{\bf Source:} CAM-FV (2D decomposition), NSIPP. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} 
 \end{reqlist}
@@ -874,8 +879,8 @@ A "transpose" form (in the mathematical sense of the word) is required
 for the matrix operator a scatter represents.
 \begin{reqlist}
 {\bf Priority:} \\ 
-{\bf Source:}  MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Source:}  \\
+{\bf Status:} Rejected. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:}
 \end{reqlist}
@@ -885,22 +890,22 @@ for the matrix operator a scatter represents.
 It shall be possible to broadcast data to all PEs in the domain decomposition.
 
 \begin{reqlist}
-{\bf Priority:} \\ 
-{\bf Source:} NCEP-SSI, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 1 \\ 
+{\bf Source:} NCEP-SSI, MIT, GFDL. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
-{\bf Notes:} 
+{\bf Notes:} Needed for milestone.
 \end{reqlist}
 
 \sreq{Adjoint of broadcast}
 A "transpose" form (in the mathematical sense of the word) is required
 for the matrix operator a broadcast represents.
 \begin{reqlist}
-{\bf Priority:} \\ 
+{\bf Priority:} 1 \\ 
 {\bf Source:}  MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
-{\bf Notes:}
+{\bf Notes:} Needed for milestone.
 \end{reqlist}
 
 \req{Bundling}
@@ -910,8 +915,8 @@ distribution for aggregate data transfer.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF, GFDL \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} Note that all arrays in a bundle must share the same
   distribution, that's the only case where aggregate data transfer
@@ -936,9 +941,9 @@ It must be possible to initiate any number of instances of a bundle on
 a distributed grid.
 
 \begin{reqlist}
-{\bf Priority:} \\ 
-{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 1 \\ 
+{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, GFDL \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. 
 \end{reqlist}
 
@@ -948,9 +953,9 @@ It must be possible to add any array on a conformant distributed grid
 to a bundle.
 
 \begin{reqlist}
-{\bf Priority:} \\ 
-{\bf Source:} CAM-FV, POP, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 1 \\ 
+{\bf Source:} CAM-FV, POP, MIT, GFDL. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} Mix-and-match data types allowed? Could be tricky... if
   array elements have differing byte lengths.
@@ -961,9 +966,9 @@ to a bundle.
 It must be possible to delete any array from a bundle.
 
 \begin{reqlist}
-{\bf Priority:} \\
+{\bf Priority:} 2 \\
 {\bf Source:} CCSM-CPL, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. 
 \end{reqlist}
 
@@ -972,9 +977,9 @@ It must be possible to delete any array from a bundle.
 It must be possible to merge bundles sharing a distributed grid.
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} CCSM-CPL, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL, MIT, GFDL. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} Two bundles on different distributed grids may end up on the same
   one after a data transpose.  
@@ -989,8 +994,8 @@ integer array.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. 
 \end{reqlist}
 
@@ -1002,8 +1007,8 @@ floating-point or complex array.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. 
 \end{reqlist}
 
@@ -1014,9 +1019,9 @@ floating-point or complex array under control of a mask. The mask
 omits an arbitrary list of array locations from the sum.
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} POP, CICE, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 2 \\
+{\bf Source:} POP, CICE, MIT, GFDL \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} Not the same mask as in Req.~\ref{DG:masklayout}.
 \end{reqlist}
@@ -1028,8 +1033,8 @@ floating-point or complex array along either axis of decomposition.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} CAM-FV (2D decomposition), NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV (2D decomposition), NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, MIT, GFDL \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} Required for computing zonal means.
 \end{reqlist}
@@ -1042,8 +1047,8 @@ bitwise identical on different decompositions.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} Trace to GR. CAM-EUL, CLM, NCEP-GSM, NCEP-SSI, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Source:} Trace to GR. CAM-EUL, CLM, NCEP-GSM, NCEP-SSI, MIT, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} Possibly a compile-time option of normal (optimized)
              global sum. I think it should runtime selectable - CNH.
@@ -1055,9 +1060,9 @@ ESMF shall provide methods to compute the global checksum of a
 distributed floating-point or complex array. 
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} MIT (desired) \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 3 \\
+{\bf Source:} MIT (desired), GFDL (desired) \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} A checksum is different from a sum in that there is no
   data loss when the data has a dynamic range exceeding the FP or
@@ -1074,8 +1079,8 @@ distributed integer or FP array.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:}
 \end{reqlist}
@@ -1088,8 +1093,8 @@ retrievable.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:}
 \end{reqlist}
@@ -1102,8 +1107,8 @@ distributed integer or FP array.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:}
 \end{reqlist}
@@ -1116,8 +1121,8 @@ retrievable.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. 
 \end{reqlist}
 
@@ -1126,9 +1131,9 @@ retrievable.
 It shall be possible to perform gather, scatter, broadcast, and reduction in both blocked and unblocked forms.
 
 \begin{reqlist}
-{\bf Priority:} \\ 
-{\bf Source:} NCEP-SSI, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 2\\ 
+{\bf Source:} NCEP-SSI, MIT, GFDL. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. 
 \end{reqlist}
 
@@ -1156,8 +1161,8 @@ cell center $(i,j)$.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, MIT, WRF (SISL, 3DVAR) \\
-{\bf Status:} Proposed. \\
+{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, MIT, WRF (SISL, 3DVAR), GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:}
 \end{reqlist}
@@ -1170,8 +1175,8 @@ $(i+\frac12,j+\frac12)$. Both NE and SW flavors are supported.
 
 \begin{reqlist}
 {\bf Priority:} 1.\\ 
-{\bf Source:} Required by POP, CICE, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} Required by POP, CICE, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -1184,8 +1189,8 @@ flavors are supported.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} Required by CAM-FV, POP, MIT, WRF. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} Required by CAM-FV, POP, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -1199,19 +1204,19 @@ flavors are supported.
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
 {\bf Source:} Required by CAM-FV, MIT. \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
 \sreq{\egrid}
 
-ESMF will support a \dgrid stencil: where the vector component array
+ESMF will support a \egrid stencil: where the vector component array
 locations $u_{ij}$ and $v_{ij}$ are (include specification of E-grid here).
 
 \begin{reqlist}
-{\bf Priority:} \\ 
+{\bf Priority:} 2\\ 
 {\bf Source:} WRF (MesoNH). \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -1232,8 +1237,8 @@ also some points on the vector stencil may be redundant.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} POP, CICE. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} POP, CICE, GFDL, MIT. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:}
 \end{reqlist}
@@ -1242,8 +1247,8 @@ also some points on the vector stencil may be redundant.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} POP, CICE. \\
-{\bf Status:} Proposed. \\
+{\bf Source:} POP, CICE, GFDL, MIT. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:}
 \end{reqlist}
@@ -1257,8 +1262,8 @@ methods to enforce exact redundancy.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
-{\bf Source:} POP, CICE \\
-{\bf Status:} Proposed. \\
+{\bf Source:} POP, CICE, MIT, GFDL \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:}
 \end{reqlist}
@@ -1270,9 +1275,9 @@ for instance, a southern fold with a \bgrid~ stencil needs an extra
 vector row at the southern edge.
 
 \begin{reqlist}
-{\bf Priority:} 1. \\ 
-{\bf Source:} POP, CICE. \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 2. \\ 
+{\bf Source:} POP, CICE, MIT, GFDL. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:}
 \end{reqlist}
@@ -1294,9 +1299,9 @@ sphere to perform the appropriate component interchanges.
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
 {\bf Source:} MIT \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
-{\bf Notes:}
+{\bf Notes:} Needed for a milestone
 \end{reqlist}
 
 \sreq{Redundancy enforcement}
@@ -1309,7 +1314,7 @@ methods to enforce exact redundancy.
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
 {\bf Source:} MIT \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:}
 \end{reqlist}
@@ -1330,9 +1335,9 @@ There will be an efficient method to create an array where all the
 global data is available along one of the axes of distribution.
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 1 \\
+{\bf Source:} see Req.~\ref{DG:PartGather}\\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} Already covered by Req.~\ref{DG:PartGather}, but
   highlighted here.
@@ -1346,9 +1351,9 @@ transpose, as opposed to the general redistribution that we've called
 a data transpose in~\ref{DG:transpose}.
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} \\
-{\bf Status:} Proposed. \\
+{\bf Priority:} 1 \\
+{\bf Source:} See Req.~\ref{DG:PartGather}\\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} Already covered by Req.~\ref{DG:PartGather}, but
   highlighted here.
@@ -1375,9 +1380,9 @@ discussions on these grids.
 \req{Reduced grids}
 
 \begin{reqlist}
-{\bf Priority:} \\
+{\bf Priority:} 2 \\
 {\bf Source:} NCEP-GSM \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:}
 \end{reqlist}
@@ -1401,9 +1406,9 @@ along axes of decomposition on a distributed moving mesh-aligned
 nested grid.
 
 \begin{reqlist}
-{\bf Priority:} \\
+{\bf Priority:} 2 \\
 {\bf Source:} WRF \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} i.e, a moving mesh-aligned nested grid may support a
   lateral data shift: ``move all points on this distributed grid 2
@@ -1428,7 +1433,7 @@ grids and ungridded location streams.
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
 {\bf Source:} PSAS, NSIPP, NCEP-SSI (milestone), MIT(assimilation  and lagrangian diagnostics) \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} The method to generate the background grid requires
   location information, and belongs to the physical grid.  Needed
@@ -1443,7 +1448,7 @@ grids and ungridded location streams, using the background grid.
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
 {\bf Source:} PSAS, NSIPP, NCEP-SSI (milestone), MIT(assimilation  and lagrangian diagnostics) \\
-{\bf Status:} Proposed. \\ 
+{\bf Status:} Approved-2. \\ 
 {\bf Verification:} Unit test. \\
 {\bf Notes:}  Needed for PSAS, but not a milestone.
 \end{reqlist}
@@ -1457,7 +1462,7 @@ streams, using the background grid.
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
 {\bf Source:} PSAS, NSIPP, NCEP-SSI (milestone), MIT(assimilation and lagrangian diagnostics) \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} Needed for PSAS, but not a milestone.
 \end{reqlist}
@@ -1471,7 +1476,7 @@ streams, using the background grid.
 \begin{reqlist}
 {\bf Priority:} 1. \\ 
 {\bf Source:} PSAS, NCEP-SSI (milestone) \\
-{\bf Status:} Proposed. \\
+{\bf Status:} Approved-2. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} Needed for PSAS, but not a milestone.
 \end{reqlist}
