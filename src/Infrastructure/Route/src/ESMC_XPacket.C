@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.37 2003/08/14 21:56:50 jwolfe Exp $
+// $Id: ESMC_XPacket.C,v 1.38 2003/09/04 19:42:52 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.37 2003/08/14 21:56:50 jwolfe Exp $";
+              "$Id: ESMC_XPacket.C,v 1.38 2003/09/04 19:42:52 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -312,6 +312,7 @@
 //      Translates a set of AxisIndices into one or more XPackets.
 //      If internal or non-periodic boundary, will only return 1 xp.
 //      If external along a periodic boundary, may return multiple xp's.
+//      If 'boundary' comes in as NULL, default to non-periodic.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -328,9 +329,11 @@
           int boundary_r[2];
 
           nxp = 1;
-          for (i=0; i<size_axisindex; i++) {
-            if (boundary[i][0] == ESMF_TF_TRUE) nxp++;
-            if (boundary[i][1] == ESMF_TF_TRUE) nxp++;
+          if (boundary) {
+              for (i=0; i<size_axisindex; i++) {
+                if (boundary[i][0] == ESMF_TF_TRUE) nxp++;
+                if (boundary[i][1] == ESMF_TF_TRUE) nxp++;
+              }
           }
 
           xps = new ESMC_XPacket[nxp];
@@ -350,7 +353,7 @@
 
           // if periodic along the first axis and this piece along boundary:
           for (i=0; i<size_axisindex; i++) {
-            if (boundary[i][0] == ESMF_TF_TRUE) {
+            if (boundary && (boundary[i][0] == ESMF_TF_TRUE)) {
  
               nextxp++;
 
@@ -369,7 +372,7 @@
               xps[nextxp].stride[0] = indexlist[0].stride;
               xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
             }
-            if (boundary[i][1] == ESMF_TF_TRUE) {
+            if (boundary && (boundary[i][1] == ESMF_TF_TRUE)) {
  
               nextxp++;
 
