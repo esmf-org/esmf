@@ -11,9 +11,13 @@ interfaces.  The implementation of these interfaces must enable the
 components to be instantiated in parallel configurations
 and destroyed; to be initialized, finalized, and run; to be queried for 
 distribution, state, run status and other pertinent information;
-and, for {\tt Gridded Component}s, to interact with other components such
+and, for {\tt Gridded Component}s, and to interoperate with other components,
+using framework communication services and constructs, such
 that they do not need to maintain information about the coupling context.
-JMC codes are required to be compliant by April 2004.
+We also require that ESMF components extensively use internally two 
+or more utilities from the following set: I/O, parameter specification, 
+log/error, performance profiling, time management, grid communication 
+services.  JMC codes are required to be compliant by April 2004.
 
 \subsection{Implications of Architecture for Framework Adoption}
 
