@@ -1,4 +1,4 @@
-% $Id: ESMF_use.tex,v 1.10 2003/10/20 23:10:31 svasquez Exp $
+% $Id: ESMF_use.tex,v 1.11 2003/10/20 23:28:05 svasquez Exp $
 
 \subsection{Using the ESMF}
 \label{UsingLibrary}
@@ -98,9 +98,6 @@ LIBDIR = ${ESMF_DIR}/lib/lib${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_PREC}.${ESMF_SITE}
 \end{verbatim}
 
 
-\noindent The following are the linking commands for platforms for which
-we offer limited support.
-
 \noindent{\it Linking using the Linux Lahey Fortran compiler:}
 
 \begin{verbatim}
@@ -111,7 +108,6 @@ we offer limited support.
     -L${LIBDIR} -lesmf -lmpiuni
 
 \end{verbatim}
-
    
 
 \noindent{\it Linking using the Linux Portland Fortran compiler:}
