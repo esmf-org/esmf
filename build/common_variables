@@ -1,4 +1,4 @@
-# $Id: common_variables,v 1.30 2003/05/27 22:42:24 flanigan Exp $ 
+# $Id: common_variables,v 1.31 2003/05/29 22:16:24 flanigan Exp $ 
 #
 # LIBNAME       - library name
 # SOURCE        - source files
@@ -111,5 +111,3 @@ include $(ESMF_BUILD_DIR)/common_$(BOPT)
 
 
 
-
-		
