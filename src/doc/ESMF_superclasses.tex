@@ -18,8 +18,8 @@ couple components at varying scales both flexibly and efficiently requires
 careful design and implementation.  In this section, we 
 explain the classes involved in ESMF coupled applications, their 
 relationships, and the sequence of actions given a number of different 
-coupling configurations.  These include a single executable configurations and
-multiple executable configurations, either of which may sequence components
+coupling configurations.  These include both single and multiple 
+executable configurations, either of which may sequence components
 sequentially or concurrently. 
 
 \subsection{Classes and Scoping}
@@ -46,7 +46,7 @@ model in which inter-process communication is handled internal to
 a component (see Section~\ref{sec:strategies}).  It is possible for
 some portions of the functionality of a component to be restricted to
 a subset of the DEs over which the component is defined.  For example, 
-it might be computationally efficient for the computation of interpolation
+it may be computationally efficient for the computation of interpolation
 weights to occur on a set of DEs not being used by any gridded components
 in the application.  The coupler might define a subcomponent on those DEs 
 specifically to handle that function.
@@ -73,10 +73,23 @@ components instantiated on a separate set of DEs and running as
 another executable, and a coupler and application component 
 instantiated across all DEs.
 
-Figure \ref{fig:couplerscaling} shows a hierarchical configuration of
-couplers in an application. 
+Figure \ref{fig:couplerscaling} illustrates scoping of components
+in a coupled, hierarchically structured application.  At the top level, 
+a climate application consists of atmosphere and ocean components 
+instantiated on mutually exclusive DE sets.  These components communicate 
+via an atmosphere/ocean coupler defined on the union of their DEs.  
+Sequencing is controlled by an application
+component which is also defined across all PEs.  The atmosphere component
+is similarly structured as a coupled application.  It consists of a 
+physics component and a dynamics component, which are both distributed
+across all the atmospheric DEs.  A physics/dynamics coupler controls
+the data transpose between these subcomponents.  In this case, the
+atmospheric component rather than the highest level application component
+controls the coupling sequence.  
 
 \begin{figure}
+\caption[{Scoping of Components in a Coupled Application}]{A coupled
+application may itself be composed of other coupled systems.}
 \label{fig:couplerscaling}
 \scalebox{0.7}{\includegraphics{CouplerScaling.eps}}
 \end{figure}
