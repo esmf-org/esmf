@@ -1,17 +1,4 @@
-% $Id: DELayout_usage.tex,v 1.1 2004/04/28 23:10:54 cdeluca Exp $
-
-\subsubsection{Practical aspects of using ESMF\_DELayout}
-In a typical ESMF application the application writer will create one ESMF\_DELayout for each ESMF\_Grid object, provide the ESMF\_DELayout during ESMF\_Grid creation and destroy the ESMF\_DELayout object immediately there after. The ESMF\_Grid object will hold a copy of the provided ESMF\_DELayout and a reference to this copy can be obtained using ESMF\_Grid methods anytime it is required.
-
-The ESMF\_DELayout creation methods require a reference to the ESMF\_VM object of the current component. This reference is stored in the ESMF\_DELayout object (and its copies) and will be used in methods that require access to the virtual machine.
-
-Typically the application writer will not need to use any of the DELayout methods directly after creating and destroying. All of the functionality provided by ESMF\_DELayout will be available through higher classes such as ESMF\_Grid and ESMF\_Field. However, in order to facilitate code migration to ESMF we do provide several ESMF\_DELayout methods which may be of interest to the application writer. Besides creation and destruction methods the available user API can be divided into four groups:
-\begin{itemize}
-\item {\em Get} methods which allow access to internal information,
-\item {\em Print} method which allows internal information to be printed (debugging),
-\item {\em Data} methods to create and destroy data objects suitable for use in communication calls,
-\item {\em Communication} methods --- blocking and non--blocking point--to--point and collective communications.
-\end{itemize}
+% $Id: DELayout_usage.tex,v 1.2 2004/06/09 12:32:20 theurich Exp $
 
 \subsubsection{Examples}
 {\em Here I need to fill in the layout examples I have written thus far...}
