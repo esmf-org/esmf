@@ -1,0 +1,33 @@
+#!/bin/csh -f
+#
+# $Id: do_chprotex,v 1.1 2002/10/11 22:54:09 eschwab Exp $
+#
+#===============================================================================
+# chprotex
+#===============================================================================
+# 
+# Process C++ include file prologue(s) using ProTex.
+#
+# Usage: co_chprotex <class> <c++ filename>
+#
+#        <class> is the name of the class whose definition/methods
+#                are instrumented for ProTeX (e.g., ESMC_TimeInstant)
+#
+#        <C++_filename.h> is the name of the file that includes the 
+#             prologue(s) instrumented for ProTeX (e.g., ESMC_TimeInstant.h)
+#
+# See the ProTeX documentation:
+# http://dao.gsfc.nasa.gov/software/protex
+# for a description of the command-line options used in this script.
+# 
+# E. Schwab                                                       Oct 11, 2002
+#===============================================================================
+
+if ($#argv != 2 ) then
+  echo "Usage: chprotex <class> <C++_filename.h>"
+  exit
+else
+  set class=$1
+  set file=$2
+  perl $DOC_DIR/templates/protex -bC +f $file > ${class}_chapi.tex
+endif
