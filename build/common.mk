@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.56.2.6 2004/07/28 21:19:51 nscollins Exp $
+#  $Id: common.mk,v 1.56.2.7 2004/07/28 22:47:10 nscollins Exp $
 #===============================================================================
 #   common.mk
 #
@@ -458,7 +458,7 @@ $(ESMC_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
 run_system_tests:  chkopts chkdir_tests
 	@if [ -d src/system_tests ] ; then cd src/system_tests; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
-	   if [ -d $(SYSTEM_TEST) ] ; \
+	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
            else \
               echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
