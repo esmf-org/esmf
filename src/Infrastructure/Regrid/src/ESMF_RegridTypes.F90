@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.56 2004/06/15 22:48:41 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.57 2004/07/27 15:49:47 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -225,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.56 2004/06/15 22:48:41 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.57 2004/07/27 15:49:47 nscollins Exp $'
 
 !==============================================================================
 !
@@ -338,8 +338,8 @@
       integer :: numList
       real(kind=ESMF_KIND_R8), dimension(:), pointer :: wgtPtr
       type(ESMF_LocalArray) :: srcIndex, dstIndex, weights
-      type (ESMF_Array) :: &! temps for use when re-sizing arrays
-         srcAddTmp, dstAddTmp, weightsTmp
+      !type (ESMF_Array) :: &! temps for use when re-sizing arrays
+      !   srcAddTmp, dstAddTmp, weightsTmp
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -428,8 +428,8 @@
       logical :: aggregateUse, newLink
       real(kind=ESMF_KIND_R8), dimension(:), pointer :: wgtPtr
       type(ESMF_LocalArray) :: srcIndex, dstIndex, weights
-      type (ESMF_Array) :: &! temps for use when re-sizing arrays
-         srcAddTmp, dstAddTmp, weightsTmp
+      !type (ESMF_Array) :: &! temps for use when re-sizing arrays
+      !   srcAddTmp, dstAddTmp, weightsTmp
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
