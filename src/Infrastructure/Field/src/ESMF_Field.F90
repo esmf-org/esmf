@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.116 2004/03/08 22:47:05 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.117 2004/03/09 22:21:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.116 2004/03/08 22:47:05 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.117 2004/03/09 22:21:32 svasquez Exp $'
 
 !==============================================================================
 !
@@ -429,22 +429,17 @@
 ! Associates an {\tt ESMF\_Array} with a {\tt ESMF\_Field} and sets a 
 !  flag in the {\tt ESMF\_Field} indicating that data is present.
 !
-!
+!     The arguments are:
 !     \begin{description}
 !     \item [ftype]
 !           Pointer to a {\tt ESMF\_Field} object.
-!
 !     \item [array]
 !           Pointer to {\tt ESMF\_Array}.
-!
 !     \item [{[copyflag]}]
 !           Indicates whether the array should be copied or referenced.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
-!
 !
 !EOP
 ! !REQUIREMENTS: FLD1.6.5
@@ -471,20 +466,16 @@
 !     Associates a data buffer with a {\tt ESMF\_Field} and sets a flag in 
 !     the {\tt ESMF\_Field} indicating that data is present.  
 !
-!
+!     The arguments are:
 !     \begin{description}
 !     \item [ftype]
 !           Pointer to a {\tt ESMF\_Field} object.
-!
 !     \item [buffer]
 !           Pointer to data buffer.
-!
 !     \item [{[copyflag]}]
 !           Indicates whether the buffer should be copied or referenced.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -514,22 +505,18 @@
 !     {\tt ESMF\_Field} and sets a flag in 
 !     the {\tt ESMF\_Field} indicating that data is present.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [ftype]
 !           Pointer to a {\tt ESMF\_Field} object.
-!
 !     \item [grid]
 !           Pointer to {\tt ESMF\_Grid}.
-!
 !     \item [array]
 !           Pointer to {\tt ESMF\_Array}.
-!
 !     \item [copyflag]
 !           Indicates whether the array should be copied or referenced.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -569,40 +556,29 @@
 !     gridded {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}.
 ! 
 !     The arguments are:
-!
 !     \begin{description}
 !     \item [grid] 
 !           Pointer to a {\tt ESMF\_Grid} object. 
-!
 !     \item [arrayspec]
 !           {\tt ESMF\_Data} specification. 
-!
 !     \item [{[allocflag]}]
 !           Whether to allocate space for the array.  Default is
 !           {\tt ESMF\_DO\_ALLOCATE}.  Other option is {\tt ESMF\_NO\_ALLOCATE}.
-!
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
-!
 !     \item [{[vertRelloc]}] 
 !           Relative location of data per grid cell/vertex in the vertical grid.
-!
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
-!
 !     \item [{[datamap]}]
 !           Describes the mapping of data to the {\tt ESMF\_Grid}.
-!
 !     \item [{[name]}] 
 !           {\tt Field} name. 
-!
 !     \item [{[iospec]}] 
 !           I/O specification. 
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -678,40 +654,31 @@
 !     This version of creation assumes the data exists already and is being
 !     passed in through an {\tt ESMF\_Array}.  
 ! 
+!     The arguments are:
 !     \begin{description}
-!
 !     \item [grid] 
 !           Pointer to a {\tt ESMF\_Grid} object. 
 !     \item [array]
 !           Includes data specification and allocated memory. 
-!
 !     \item [{[copyflag]}]
 !           Indicates whether to reference the array or make a 
 !           copy of it.  Valid values are {\tt ESMF\_DATA\_COPY} and 
 !           {\tt ESMF\_DATA\_REF}, respectively.
-!
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
-!
 !     \item [{[vertRelloc]}] 
 !           Relative location of data per grid cell/vertex in the vertical grid.
-!
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
-!
 !     \item [{[datamap]}]
 !           Describes the mapping of data to the {\tt ESMF\_Grid}.
-!
 !     \item [{[name]}] 
 !           {\tt Field} name. 
-!
 !     \item [{[iospec]}] 
 !           I/O specification. 
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -789,35 +756,27 @@
 ! new {\tt ESMF\_Field}.  Data is copied.
 !
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [srcfield]
 !           Source {\tt ESMF\_Field}.
-!
 !     \item [grid]
 !           {\tt ESMF\_Grid} of source {\tt ESMF\_Field}.
-!
 !     \item [horzRelLoc]
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
-!
 !     \item [vertRelLoc]
 !           Relative location of data per grid cell/vertex in the vertical grid.
-!
 !     \item [{[halowidth]}]
 !           Halo width.
-!
 !     \item [{[datamap]}]
 !           {\tt ESMF\_DataMap}
-!
 !     \item [{[name]}]
 !       {\tt ESMF\_Field} name.
-!
 !     \item [{[iospec]}]
 !       {\tt ESMF\_Field} {\tt ESMF\_IOSpec}.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -885,35 +844,27 @@
 !     Creates a {\tt ESMF\_Field} in its entirety except for the assignment
 !     or allocation of an associated raw data buffer.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [grid] 
 !           Pointer to a {\tt ESMF\_Grid} object. 
-!
 !     \item [arrayspec]
 !           Data specification. 
-!
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
-!
 !     \item [{[vertRelloc]}] 
 !           Relative location of data per grid cell/vertex in the vertical grid.
-!
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
-!
 !     \item [{[datamap]}]
 !           Describes the mapping of data to the {\tt ESMF\_Grid}.
-!
 !     \item [{[name]}] 
 !           {\tt Field} name. 
-!
 !     \item [{[iospec]}] 
 !           I/O specification. 
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -986,32 +937,25 @@
 !     This version of {\tt ESMF\_FieldCreate} builds a {\tt ESMF\_Field} 
 !     and depends on a later call to add an {\tt ESMF\_Array} to it.  
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [grid] 
 !           Pointer to a {\tt ESMF\_Grid} object. 
-!
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
-!
 !     \item [{[vertRelloc]}] 
 !           Relative location of data per grid cell/vertex in the vertical grid.
-!
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
-!
 !     \item [{[datamap]}]
 !           Describes the mapping of data to the {\tt ESMF\_Grid}.
-!
 !     \item [{[name]}] 
 !           {\tt Field} name. 
-!
 !     \item [{[iospec]}] 
 !           I/O specification. 
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -1078,16 +1022,14 @@
 !     and depends on later calls to add a {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
 !     it.  
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [{[name]}] 
 !           {\tt Field} name. 
-!
 !     \item [{[iospec]}] 
 !           I/O specification. 
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -1145,13 +1087,12 @@
 ! !DESCRIPTION:
 !     Releases all resources associated with the {\tt ESMF\_Field}.
 ! 
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           Pointer to a {\tt ESMF\_Field} object.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -1216,19 +1157,16 @@
 !     {\tt ESMF\_Field} as not having any associated data.
 !
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [ftype]
 !           Pointer to a {\tt ESMF\_Field} object.
-!
 !     \item [buffer]
 !           Buffer to disassociate.
-!
 !     \item [{[access}]]
 !           {\tt ESMF\_Access} which may be ESMF\_READWRITE or ESMF\_READONLY.
-!           
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !           
 !EOPI
@@ -1261,19 +1199,16 @@
 !     {\tt ESMF\_Field} as not having any associated data.
 !
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [ftype]
 !           Pointer to a {\tt ESMF\_Field} object.
-!
 !     \item [array]
 !           {\tt ESMF\_Array} to disassociate.
-!
 !     \item [{[access}]]
 !           {\tt ESMF\_Access} which may be ESMF\_READWRITE or ESMF\_READONLY.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -1310,32 +1245,25 @@
 !      named\_argument=value syntax.
 !
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [ftype]
 !           Pointer to a {\tt ESMF\_Field} object.
-!
 !     \item [{[grid]}]
 !           {\tt ESMF\_Grid}.
-!
 !     \item [{[array]}]
 !           {\tt ESMF\_Array}.
-!
 !     \item [{[datamap]}]
 !           {\tt ESMF\_DataMap}.
-!
 !     \item [{[horzRelloc}]]
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
-!
 !     \item [{[vertRelloc]}]
 !           Relative location of data per grid cell/vertex in the vertical grid.
-!
 !     \item [{[name]}]
 !           Name of queried item.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -1444,16 +1372,14 @@
 !      specifying a name, the framework will have assigned it a unique one.
 !
 !       
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           {\tt ESMF\_Field} object to query..
-!             
 !     \item [name]
 !           Field name.
-!           
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -1511,20 +1437,16 @@
 ! !DESCRIPTION:
 !      Returns an integer attribute from a {\tt ESMF\_Field}.
 !
-! 
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [name]
 !           The name of the Attribute to retrieve.
-!
 !     \item [value]
 !           The integer value of the named Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -1573,22 +1495,18 @@
 !      Returns an integer list attribute from a {\tt ESMF\_Field}.
 !
 ! 
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [name]
 !           The name of the Attribute to retrieve.
-!
 !     \item [count]
 !           The number of values to be set.
-!
 !     \item [value]
 !           The integer values of the named Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -1642,19 +1560,16 @@
 ! !DESCRIPTION:
 !      Returns a real attribute from a {\tt ESMF\_Field}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [name]
 !           The name of the Attribute to retrieve.
-!
 !     \item [value]
 !           The real value of the named Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -1702,22 +1617,18 @@
 ! !DESCRIPTION:
 !      Returns a real attribute from a {\tt ESMF\_Field}.
 ! 
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [name]
 !           The name of the Attribute to retrieve.
-!
 !     \item [count]
 !           The number of values to be set.
-!
 !     \item [value]
 !           The real values of the named Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -1771,19 +1682,16 @@
 ! !DESCRIPTION:
 !      Returns an logical attribute from a {\tt ESMF\_Field}.
 ! 
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [name]
 !           The name of the Attribute to retrieve.
-!
 !     \item [value]
 !           The logical value of the named Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -1831,22 +1739,18 @@
 ! !DESCRIPTION:
 !      Returns an logical list attribute from a {\tt ESMF\_Field}.
 ! 
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [name]
 !           The name of the Attribute to retrieve.
-!
 !     \item [count]
 !           The number of values to be set.
-!
 !     \item [value]
 !           The logical values of the named Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -1901,19 +1805,16 @@
 !      Returns an integer attribute from a {\tt ESMF\_Field}.
 !
 ! 
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [name]
 !           The name of the Attribute to retrieve.
-!
 !     \item [value]
 !           The character value of the named Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -1958,16 +1859,14 @@
 ! !DESCRIPTION:
 !      Returns the number of values associated with the given attribute.
 ! 
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [count]
 !           The number of attributes on this object.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -2014,23 +1913,19 @@
 ! !DESCRIPTION:
 !      Returns the number of values associated with the given attribute.
 ! 
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [name]
 !           The name of the Attribute to query.
-!
 !     \item [type]
 !           The type of the Attribute.
-!
 !     \item [count]
 !           The number of items in this Attribute.  For character types,
 !           the length of the character string.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -2084,26 +1979,21 @@
 ! !DESCRIPTION:
 !      Returns the number of values associated with the given attribute.
 ! 
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [num]
 !           The number of the Attribute to query.
-!
 !     \item [name]
 !           Returns the name of the Attribute.
-!
 !     \item [type]
 !           Returns the type of the Attribute.
-!
 !     \item [count]
 !           Returns the number of items in this Attribute.  For character types,
 !           this is the length of the character string.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -2154,17 +2044,14 @@
 ! !DESCRIPTION:
 !      Returns a reference to the {\tt ESMF\_Grid} associated with this {\tt ESMF\_Field}.
 !
-!
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [Grid]
 !           {\tt ESMF\_Grid} returned.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -2216,25 +2103,20 @@
 !     Return global {\tt ESMF\_Grid} information. 
 !
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [{[ndim]}]
 !           Number of dimensions.
-!
 !     \item [{[ncell]}]
 !           Number of cells.
-!
 !     \item [{[nvertex]}]
 !           Number of vertex.
-!
 !     \item [{[size]}]
 !           Size of grid.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -2270,26 +2152,20 @@
 ! !DESCRIPTION:
 !      Get {\tt ESMF\_Grid} information specific to the local {\tt ESMF\_DE}.
 !
-!
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [{[ndim]}]
 !           Number of dimensions.
-!
 !     \item [{[ncell]}]
 !           Number of cells.
-!
 !     \item [{[nvertex]}]
 !           Number of vertex.
-!
 !     \item [{[size]}]
 !           Size of grid.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -2320,22 +2196,18 @@
 ! !DESCRIPTION:
 !     Get data either in {\tt ESMF\_Array} or buffer form.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [{[array]}]
 !           Field {\tt ESMF\_Array}.
-!
 !     \item [{[buffer]}]
 !           Field buffer.
-!
 !     \item [{[size]}]
 !           Size of grid.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -2421,25 +2293,20 @@
 ! !DESCRIPTION:
 !     Retrieve global {\tt ESMF\_Field} data information.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [{[size]}]
 !           Field size.
-!
 !     \item [indexorder]
 !           Field index order.
-!
 !     \item [datatype]
 !           Field data type.
-!
 !     \item [interleave]
 !           Data may be ESMF\_IL\_BLOCK or ESMF\_IL\_ITEM.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -2466,16 +2333,14 @@
 !      Returns a description of the actual ordering of data in the
 !      memory buffer, e.g. row-major/column-major.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [datamap]
 !           Field {\tt ESMF\_DataMap}.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -2529,25 +2394,20 @@
 !     Retrieve {\tt ESMF\_Field} data information specific to the local
 !     {\tt ESMF\_DE}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [{[size]}]
 !           Field size.
-!
 !     \item [indexorder]
 !           Data index order.
-!
 !     \item [datatype]
 !           Field data type.
-!
 !     \item [interleave]
 !           Data may be ESMF\_IL\_BLOCK or ESMF\_IL\_ITEM.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -2577,20 +2437,17 @@
 !     DataMap access routines to get relloc.
 !
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [name]
 !           A {\tt ESMF\_Field} name.
-!
 !     \item [{[horzRelloc]}]
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
-!
 !     \item [{[vertRelloc]}]
 !            Relative location of data per grid cell/vertex in the vertical grid.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -2618,17 +2475,14 @@
 ! !DESCRIPTION:
 !     Routine to print information about a field.
 !
-!
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [options]
 !           Print options.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -2719,23 +2573,18 @@
 !      This includes creating the {\tt ESMF\_Grid} associated with this {\tt ESMF\_Field}.
 !      To share a single {\tt ESMF\_Grid} betwen multiple {\tt ESMF\_Field}s, see the {\tt ESMF\_FieldCreate} calls.
 !
-!
+!     The arguments are:
 !     \begin{description}
 !     \item [name]
 !           A {\tt ESMF\_Field} name.
-!
 !     \item [{[gname]}]
 !            {\tt ESMF\_Grid} name.
-!
 !     \item [{[dnames]}]
 !            Data name.
-!
 !     \item [{[iospec]}]
 !            I/O specification.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -2775,17 +2624,14 @@
 !      all data associated with a {\tt ESMF\_Field} from the 
 !      last call to WriteRestart.
 !
-!
+!     The arguments are:
 !     \begin{description}
 !     \item [name]
 !           A {\tt ESMF\_Field} name.
-!
 !     \item [{[iospec]}]
 !            I/O specification.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -2823,16 +2669,14 @@
 !  Otherwise it is an error to try to change the {\tt ESMF\_Grid} 
 !  associated with a {\tt ESMF\_Field}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!     
 !     \item [grid]
 !           {\tt ESMF\_Grid} to be added.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -2891,16 +2735,14 @@
 !  {\tt ESMF\_Field}, the data will be reordered according to the new 
 !  specification.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [datamap]
 !           New memory order of data.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -2960,19 +2802,16 @@
 !      through the {\tt ESMF\_Field} interface instead of detaching data and setting 
 !      it outside the framework.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [index]
 !           Index or range to set.
-!
 !     \item [values]
 !           Data values to set.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -3002,19 +2841,16 @@
 ! !DESCRIPTION:
 !      Attaches an integer attribute to a {\tt ESMF\_Field}.
 ! 
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [name]
 !           The name of the Attribute to set.
-!
 !     \item [value]
 !           The integer value of the Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -3062,22 +2898,18 @@
 ! !DESCRIPTION:
 !      Attaches an integer list attribute to a {\tt ESMF\_Field}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [name]
 !           The name of the Attribute to set.
-!
 !     \item [count]
 !           The number of values to be set.
-!
 !     \item [value]
 !           The integer values of the Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -3131,19 +2963,16 @@
 ! !DESCRIPTION:
 !      Attaches a real attribute to a {\tt ESMF\_Field}.
 ! 
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [name]
 !           The name of the Attribute to set.
-!
 !     \item [value]
 !           The real value of the Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -3191,22 +3020,18 @@
 ! !DESCRIPTION:
 !      Attaches a real list attribute to a {\tt ESMF\_Field}.
 !
-! 
+!!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [name]
 !           The name of the Attribute to set.
-!
 !     \item [count]
 !           The number of values to be set.
-!
 !     \item [value]
 !           The real values of the Attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -3260,20 +3085,16 @@
 ! !DESCRIPTION:
 !      Attaches an logical attribute to a {\tt ESMF\_Field}.
 !
-! 
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [name]
 !           The name of the Attribute to set.
-!
 !     \item [value]
 !           The logical true/false value of the Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -3321,23 +3142,18 @@
 ! !DESCRIPTION:
 !      Attaches an logical list attribute to a {\tt ESMF\_Field}.
 !
-! 
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [name]
 !           The name of the Attribute to set.
-!
 !     \item [count]
 !           The number of values to be set.
-!
 !     \item [value]
 !           The logical true/false values of the Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -3391,19 +3207,16 @@
 ! !DESCRIPTION:
 !      Attaches a character attribute to a {\tt ESMF\_Field}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [name]
 !           The name of the Attribute to set.
-!
 !     \item [value]
 !           The character value of the Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -3446,16 +3259,14 @@
 ! !DESCRIPTION:
 !     Routine to validate the internal state of a {\tt ESMF\_Field}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [opt]
 !           Validation option.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -3508,22 +3319,18 @@
 !      options specified in the IOSpec derived type. 
 !
 !
-!
+!     The arguments are:
 !     \begin{description}
 !     \item [name]
 !           A {\tt ESMF\_Field} name.
-!
 !     \item [{[subset]}]
 !            {\tt ESMF\_Subset}.
-!
 !     \item [{[iospec]}]
 !            I/O specification.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
-
+!
 !
 !EOP
 
@@ -3595,17 +3402,14 @@
 !      same I/O interface as Read/Write, but the default options are to
 !      select the fastest way to save data to disk.
 !
-!
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
-!
 !     \item [{[iospec]}]
 !            I/O specification.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -3651,42 +3455,33 @@
 !     Constructs all {\tt ESMF\_Field} internals, including the allocation
 !     of a data {\tt ESMF\_Array}.  
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [ftype]
 !           Pointer to a {\tt ESMF\_Field} object.
-!
 !     \item [grid] 
 !           Pointer to a {\tt ESMF\_Grid} object. 
-!
 !     \item [arrayspec]
 !           Data specification. 
-!
 !     \item [{[allocflag]}]
 !           Set to allocate space for data array.  Default is
 !           {\tt ESMF\_DO\_ALLOCATE}.  Other option is {\tt ESMF\_NO\_ALLOCATE}.
-!
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
-!
 !     \item [{[vertRelloc]}] 
 !           Relative location of data per grid cell/vertex in the vertical grid.
 !           If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
-!
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
-!
 !     \item [{[datamap]}]
 !           Describes the mapping of data to the {\tt ESMF\_Grid}.
-!
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
-!
 !     \item [{[iospec]}] 
 !           I/O specification. 
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -3811,38 +3606,29 @@
 !     Constructs all {\tt ESMF\_Field} internals, including the allocation
 !     of a data {\tt ESMF\_Array}.  
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [ftype]
 !           Pointer to a {\tt ESMF\_Field} object.
-!
 !     \item [grid] 
 !           Pointer to a {\tt ESMF\_Grid} object. 
-!
 !     \item [array]
 !           Data. 
-!
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
-!
 !     \item [{[vertRelloc]}] 
 !           Relative location of data per grid cell/vertex in the vertical grid.
-!
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
-!
 !     \item [{[datamap]}]
 !           Describes the mapping of data to the {\tt ESMF\_Grid}.
-!
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
-!
 !     \item [{[iospec]}] 
 !           I/O specification. 
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOPI
@@ -3906,38 +3692,29 @@
 !     Constructs all {\tt ESMF\_Field} internals except for the assignment of 
 !     an associated data buffer.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [ftype]
 !           Pointer to a {\tt ESMF\_Field} object.
-!
 !     \item [grid] 
 !           Pointer to a {\tt ESMF\_Grid} object. 
-!
 !     \item [arrayspec]
 !           Data specification. 
-!
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
-!
 !     \item [{[vertRelloc]}] 
 !           Relative location of data per grid cell/vertex in the vertical grid.
-!
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
-!
 !     \item [{[datamap]}]
 !           Describes the mapping of data to the {\tt ESMF\_Grid}.
-!
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
-!
 !     \item [{[iospec]}] 
 !           I/O specification. 
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOPI
@@ -4044,35 +3821,27 @@
 ! 
 ! Constructs a {\tt ESMF\_Field} except for its internal data {\tt ESMF\_Array}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [ftype]
 !           Pointer to a {\tt ESMF\_Field} object.
-!
 !     \item [grid] 
 !           Pointer to a {\tt ESMF\_Grid} object. 
-!
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
-!
 !     \item [{[vertRelloc]}] 
 !           Relative location of data per grid cell/vertex in the vertical grid.
-!
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
-!
 !     \item [{[datamap]}]
 !           Describes the mapping of data to the {\tt ESMF\_Grid}.
-!
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
-!
 !     \item [{[iospec]}] 
 !           I/O specification. 
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOPI
@@ -4162,19 +3931,16 @@
 !     and {\tt ESMF\_Data}.
 !
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [ftypep]
 !           Pointer to a {\tt ESMF\_Field} object.
-!
 !     \item [{[name]}]
 !           {\tt ESMF\_Field} name.
-!
 !     \item [{[iospec]}]
 !           {\tt ESMF\_Field} I/O specification.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -4234,13 +4000,12 @@
 ! !DESCRIPTION:
 !     Releases all resources except the {\tt ESMF\_Field} itself.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [ftype]
 !           Pointer to a {\tt ESMF\_Field} object.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOPI
@@ -4296,22 +4061,18 @@
 !      desired area in src\_field.  This procedure is mostly an entry point;
 !      most of the work is done in the {\tt ESMF\_Grid} class.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [srcField]
 !           Source {\tt ESMF\_Field} object.
-!
 !     \item [dstField]
 !           Destination {\tt ESMF\_Field} object.
-!
 !     \item [recvDomainlist]
 !           Receive domain list.
-!
 !     \item [sendDomainlist]
 !           Send domain list.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI

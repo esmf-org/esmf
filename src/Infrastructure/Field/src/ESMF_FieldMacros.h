@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldMacros.h,v 1.1 2004/02/05 21:50:12 nscollins Exp $
+! $Id: ESMF_FieldMacros.h,v 1.2 2004/03/09 22:21:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -120,17 +120,14 @@
 !  \begin{description} @\
 !  \item[field] @\
 !   The {\tt ESMF\_Field} to query. @\
-! @\
 !  \item[f90ptr] @\
 !   An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data @\
 !   in the Field.  When this call returns successfully, the pointer will now reference @\
 !   the data in the Field.  This is either a reference or a copy, depending on the @\
 !   setting of the following argument.  The default is to return a reference. @\
-! @\
 !  \item[{[copyflag]}] @\
 !   Defaults to {\tt ESMF\_DATA\_REF}.  If set to {\tt ESMF\_DATA\_COPY}, a separate @\
 !   copy of the data will be made and the pointer will point at the copy. @\
-! @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
