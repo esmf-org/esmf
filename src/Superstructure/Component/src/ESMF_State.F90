@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.14 2003/02/11 18:23:39 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.15 2003/02/11 22:05:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -164,7 +164,7 @@
       sequence
       private
         type(ESMF_StateObjectType) :: otype
-        character, pointer :: namep
+        character(len=ESMF_MAXSTR), pointer :: namep
         type(ESMF_DataHolder), pointer :: datap
         integer :: indirect_index
         type(ESMF_StateDataNeeded) :: needed
@@ -190,8 +190,6 @@
         type(ESMF_StateData), dimension(:), pointer :: datalist
       end type
 
-!     ! allocation size to grow by
-      integer, parameter :: chunksize = 16
 !------------------------------------------------------------------------------
 !     ! ESMF_State
 !
@@ -244,7 +242,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.14 2003/02/11 18:23:39 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.15 2003/02/11 22:05:35 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -301,10 +299,10 @@ end interface
 !
         module procedure ESMF_StateAddBundle
         module procedure ESMF_StateAddBundleList
-        !module procedure ESMF_StateAddField
-        !module procedure ESMF_StateAddFieldList
-        !module procedure ESMF_StateAddArray
-        !module procedure ESMF_StateAddArrayList
+        module procedure ESMF_StateAddField
+        module procedure ESMF_StateAddFieldList
+        module procedure ESMF_StateAddArray
+        module procedure ESMF_StateAddArrayList
         module procedure ESMF_StateAddDataName
         module procedure ESMF_StateAddDataNameList
 
@@ -734,18 +732,18 @@ end function
 ! !REQUIREMENTS:
 
 
-!       ! local vars
+        ! local vars
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
-        integer :: allocsize
+        integer :: count
 
-!       ! Initialize return code; assume failure until success is certain
+        ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
 
-!       ! Set initial values
+        ! Set initial values
         call ESMF_StateConstructEmpty(stypep, compname, statetype, &
                                                          statename, status)
         if (status .ne. ESMF_SUCCESS) then
@@ -753,24 +751,61 @@ end function
           return
         endif
 
-!       ! TODO: add working code here
-
-!       ! round up to next multiple of chunksize
-        allocsize = itemcount + chunksize - mod(itemcount,chunksize)
-        allocate(stypep%datalist(allocsize), stat=status)
-        if(status .NE. 0) then     ! this is an F90 rc, not ESMF
-          print *, "ERROR in ESMF_StateConstructNew: allocation"
-          return
-        endif
-        stypep%datacount = itemcount
-        stypep%alloccount = allocsize
-      
-!       ! TODO: add working code here
-
+        ! Set the initial size of the datalist
+        call ESMF_StateTypeExtendList(stypep, itemcount, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "State construction error"
           return
         endif
+
+        stypep%datacount = itemcount
+      
+        ! For each item type, set the data values.  All the allocation 
+        !  has already been done.
+        if (present(bundles)) then
+          count = size(bundles)
+          if (count .gt. 0) then
+            call ESMF_StateTypeAddBundleList(stypep, count, bundles, status)
+            if (status .ne. ESMF_SUCCESS) then
+              print *, "State construction error adding bundles"
+              return
+            endif
+          endif
+        endif
+
+        if (present(fields)) then
+          count = size(fields)
+          if (count .gt. 0) then
+            call ESMF_StateTypeAddFieldList(stypep, count, fields, status)
+            if (status .ne. ESMF_SUCCESS) then
+              print *, "State construction error adding fields"
+              return
+            endif
+          endif
+        endif
+
+        if (present(arrays)) then
+          count = size(arrays)
+          if (count .gt. 0) then
+            call ESMF_StateTypeAddArrayList(stypep, count, arrays, status)
+            if (status .ne. ESMF_SUCCESS) then
+              print *, "State construction error adding arrays"
+              return
+            endif
+          endif
+        endif
+
+        if (present(names)) then
+          count = size(names)
+          if (count .gt. 0) then
+            call ESMF_StateTypeAddDataNameList(stypep, count, names, status)
+            if (status .ne. ESMF_SUCCESS) then
+              print *, "State construction error adding names"
+              return
+            endif
+          endif
+        endif
+
 
 !       ! Set return values
         if (rcpresent) rc = ESMF_SUCCESS
@@ -936,6 +971,10 @@ end function
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+! 
+! Add data (bundles, fields, arrays, or names) to the state.
+!
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_StateAddBundle - Add a Bundle to a State.
 !
@@ -1005,12 +1044,8 @@ end function
 
       integer :: status=ESMF_FAILURE              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
-      type(ESMF_StateData), dimension(:), pointer :: temp_list
       type(ESMF_StateData), pointer :: nextitem
-      integer :: i
-      integer :: allocsize 
-      integer :: startbase
-      integer :: newsize
+      integer :: i, startbase
 
       ! Initialize return code.  Assume failure until success assured.
       if(present(rc)) then
@@ -1021,45 +1056,10 @@ end function
       ! Add the bundles to the state, checking for name clashes
       ! TODO: check for name collisions
 
-      ! An initially empty list. Simply allocate, no data copy needed.
-      if (stypep%alloccount .eq. 0) then
-
-          allocsize = bcount + chunksize - mod(bcount,chunksize)
-          allocate(stypep%datalist(allocsize), stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_StateTypeAddBundleList: datalist allocate"
-            return
-          endif
-          stypep%alloccount = allocsize
-
-      ! Extend an existing list to the right length, including copy
-      else if (stypep%alloccount .lt. stypep%datacount + bcount) then
-
-          newsize = stypep%datacount + bcount
-          allocsize = newsize + chunksize - mod(newsize,chunksize)
-          allocate(temp_list(allocsize), stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_StateTypeAddBundleList: datalist reallocate"
-            return
-          endif
-  
-          ! Preserve old contents
-          do i = 1, stypep%datacount
-            temp_list(i) = stypep%datalist(i)
-          enddo
-  
-          ! Delete old list
-          deallocate(stypep%datalist, stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_StateTypeAddBundleList: datalist deallocate"
-            return
-          endif
-  
-          ! Now make this the permanent list
-          stypep%datalist => temp_list
-
-          stypep%alloccount = allocsize
-
+      call ESMF_StateTypeExtendList(stypep, bcount, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_StateTypeAddBundleList: datalist allocate"
+        return
       endif
 
       ! Last valid entry before adding more items
@@ -1073,6 +1073,10 @@ end function
         ! TODO: pull out bundle name here
         !character, pointer :: namep
         allocate(nextitem%datap, stat=status)
+        if (status .ne. 0) then    ! F90 return code
+          print *, "Error: adding bundles to a state"
+          return
+        endif
         nextitem%datap%bp = bundles(i)
         !integer :: indirect_index
         nextitem%needed = ESMF_STATEDATANOTNEEDED
@@ -1080,6 +1084,8 @@ end function
         nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
       enddo
   
+      ! TODO: make indirect entries for fields inside the bundles?
+
       stypep%datacount = startbase + bcount
 
 
@@ -1087,6 +1093,240 @@ end function
 
 
       end subroutine ESMF_StateTypeAddBundleList
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddField - Add a Field to a State.
+!
+! !INTERFACE:
+      subroutine ESMF_StateAddField(state, field, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      type(ESMF_Field), intent(in) :: field
+      integer, intent(out), optional :: rc
+!     
+! !DESCRIPTION:
+!      Add a single {\tt Field} reference to an existing {\tt State}.
+!      The {\tt Field} name must be unique within the {\tt State}
+!
+! !REQUIREMENTS: 
+!EOP
+      type(ESMF_Field) :: temp_list(1)
+
+      temp_list(1) = field
+
+      call ESMF_StateTypeAddFieldList(state%statep, 1, temp_list, rc)      
+
+      end subroutine ESMF_StateAddField
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddFieldList - Add a list of Fields to a State
+!
+! !INTERFACE:
+      subroutine ESMF_StateAddFieldList(state, fcount, fields, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state 
+      integer, intent(in) :: fcount
+      type(ESMF_Field), dimension(:), intent(in) :: fields
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Add multiple fields to a {\tt State}.
+!
+!EOP
+! !REQUIREMENTS:
+
+      call ESMF_StateTypeAddFieldList(state%statep, fcount, fields, rc)
+
+      end subroutine ESMF_StateAddFieldList
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateTypeAddFieldList - Add a list of Fields to a StateType
+!
+! !INTERFACE:
+      subroutine ESMF_StateTypeAddFieldList(stypep, fcount, fields, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_StateType), intent(inout) :: stypep
+      integer, intent(in) :: fcount
+      type(ESMF_Field), dimension(:), intent(in) :: fields
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Add multiple fields to a {\tt State}.  Internal routine only.
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status=ESMF_FAILURE              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+      type(ESMF_StateData), pointer :: nextitem
+      integer :: i, startbase
+
+      ! Initialize return code.  Assume failure until success assured.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+  
+      ! Add the fields to the state, checking for name clashes
+      ! TODO: check for name collisions
+
+      call ESMF_StateTypeExtendList(stypep, fcount, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_StateTypeAddFieldList: datalist allocate"
+        return
+      endif
+
+      ! Last valid entry before adding more items
+      startbase = stypep%datacount
+
+      ! There is enough space now to add new fields to the list.
+           
+      do i=1, fcount
+        nextitem => stypep%datalist(startbase + i)
+        nextitem%otype = ESMF_STATEFIELD
+        ! TODO: pull out field name here
+        !character, pointer :: namep
+        allocate(nextitem%datap, stat=status)
+        if (status .ne. 0) then    ! F90 return code
+          print *, "Error: adding fields to a state"
+          return
+        endif
+        nextitem%datap%fp = fields(i)
+        !integer :: indirect_index
+        nextitem%needed = ESMF_STATEDATANOTNEEDED
+        nextitem%ready = ESMF_STATEDATANOTREADY
+        nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+      enddo
+  
+      stypep%datacount = startbase + fcount
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateTypeAddFieldList
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddArray - Add a Array to a State.
+!
+! !INTERFACE:
+      subroutine ESMF_StateAddArray(state, array, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      type(ESMF_Array), intent(in) :: array
+      integer, intent(out), optional :: rc
+!     
+! !DESCRIPTION:
+!      Add a single {\tt Array} reference to an existing {\tt State}.
+!      The {\tt Array} name must be unique within the {\tt State}
+!
+! !REQUIREMENTS: 
+!EOP
+      type(ESMF_Array) :: temp_list(1)
+
+      temp_list(1) = array
+
+      call ESMF_StateTypeAddArrayList(state%statep, 1, temp_list, rc)      
+
+      end subroutine ESMF_StateAddArray
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddArrayList - Add a list of Arrays to a State
+!
+! !INTERFACE:
+      subroutine ESMF_StateAddArrayList(state, acount, arrays, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state 
+      integer, intent(in) :: acount
+      type(ESMF_Array), dimension(:), intent(in) :: arrays
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Add multiple arrays to a {\tt State}.
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_StateTypeAddArrayList(state%statep, acount, arrays, rc)
+
+        end subroutine ESMF_StateAddArrayList
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateTypeAddArrayList - Add a list of Arrays to a StateType
+!
+! !INTERFACE:
+      subroutine ESMF_StateTypeAddArrayList(stypep, acount, arrays, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_StateType), intent(inout) :: stypep
+      integer, intent(in) :: acount
+      type(ESMF_Array), dimension(:), intent(in) :: arrays
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Add multiple arrays to a {\tt State}.  Internal routine only.
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status=ESMF_FAILURE              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+      type(ESMF_StateData), pointer :: nextitem
+      integer :: i, startbase
+
+      ! Initialize return code.  Assume failure until success assured.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+  
+      ! Add the arrays to the state, checking for name clashes
+      ! TODO: check for name collisions
+
+      call ESMF_StateTypeExtendList(stypep, acount, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_StateTypeAddArrayList: datalist allocate"
+        return
+      endif
+
+      ! Last valid entry before adding more items
+      startbase = stypep%datacount
+
+      ! There is enough space now to add new arrays to the list.
+           
+      do i=1, acount
+        nextitem => stypep%datalist(startbase + i)
+        nextitem%otype = ESMF_STATEARRAY
+        ! TODO: pull out array name here
+        !character, pointer :: namep
+        allocate(nextitem%datap, stat=status)
+        if (status .ne. 0) then    ! F90 return code
+          print *, "Error: adding arrays to a state"
+          return
+        endif
+        nextitem%datap%ap = arrays(i)
+        !integer :: indirect_index
+        nextitem%needed = ESMF_STATEDATANOTNEEDED
+        nextitem%ready = ESMF_STATEDATANOTREADY
+        nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+      enddo
+  
+
+      stypep%datacount = startbase + acount
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateTypeAddArrayList
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1171,66 +1411,127 @@ end function
 ! !REQUIREMENTS: 
 !EOP
 
-      integer :: status=ESMF_FAILURE              ! Error status
-      integer :: i                                ! temp var
-      logical :: rcpresent=.FALSE.                ! Return code present
 
-!     Initialize return code.  Assume failure until success assured.
+      integer :: status=ESMF_FAILURE              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+      type(ESMF_StateData), pointer :: nextitem
+      integer :: i, startbase
+
+      ! Initialize return code.  Assume failure until success assured.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
+  
+      ! TODO: check for name collisions
 
-!!!     Add the names in the list, checking for collisions.
-!!      if(stypep%field_count .eq. 0) then
-!!          allocate(stypep%datalist(itemcount), stat=status)
-!!          if(status .NE. 0) then
-!!            print *, "ERROR in ESMF_BundleAddFields: Fieldlist allocate"
-!!            return
-!!          endif
-!!         
-!!!         now add the fields to the new list
-!!          do i=1, itemcount
-!!            stypep%datalist(i) = fields(i)
-!!          enddo
-!!
-!!          stypep%field_count = itemcount
-!!      else
-!!!         make a list the right length
-!!          allocate(temp_datalist(stypep%field_count + itemcount), stat=status)
-!!          if(status .NE. 0) then
-!!            print *, "ERROR in ESMF_BundleConstructNew: temporary Fieldlist allocate"
-!!            return
-!!          endif
-!!
-!!!         preserve old contents
-!!          do i = 1, stypep%field_count
-!!            temp_datalist(i) = stypep%datalist(i)
-!!          enddo
-!!
-!!!         and append the new fields to the list
-!!          do i=stypep%field_count+1, stypep%field_count + itemcount
-!!            temp_datalist(i) = fields(i)
-!!          enddo
-!!
-!!!         delete old list
-!!          deallocate(stypep%datalist, stat=status)
-!!          if(status .NE. 0) then
-!!            print *, "ERROR in ESMF_BundleConstructNew: Fieldlist deallocate"
-!!          endif
-!!
-!!!         and now make this the permanent list
-!!          stypep%datalist => temp_datalist
-!!          stypep%field_count = stypep%field_count + itemcount
-!!      endif 
-!!!     If packed data buffer requested, create or update it here.
-!!      if (stypep%pack_flag .eq. ESMF_PACK_FIELD_DATA) then 
-!!         call ESMF_BundleTypeRepackData(stypep, rc=rc)
-!!      endif
+      call ESMF_StateTypeExtendList(stypep, namecount, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_StateTypeAddDataNameList: datalist allocate"
+        return
+      endif
+
+      ! Last valid entry before adding more items
+      startbase = stypep%datacount
+
+      ! There is enough space now to add new names to the list.
+           
+      do i=1, namecount
+        nextitem => stypep%datalist(startbase + i)
+        nextitem%otype = ESMF_STATEDATANAME
+        allocate(nextitem%namep, stat=status)
+        if (status .ne. 0) then    ! F90 return code
+          print *, "Error: adding bundles to a state"
+          return
+        endif
+        nextitem%namep = namelist(i)
+        nullify(nextitem%datap)
+        !integer :: indirect_index
+        nextitem%needed = ESMF_STATEDATANOTNEEDED
+        nextitem%ready = ESMF_STATEDATANOTREADY
+        nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+      enddo
+  
+      stypep%datacount = startbase + namecount
 
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateTypeAddDataNameList
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateTypeExtendList - internal routine
+!
+! !INTERFACE:
+      subroutine ESMF_StateTypeExtendList(stypep, itemcount, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_StateType), intent(inout) :: stypep
+      integer, intent(in) :: itemcount
+      integer, intent(out) :: rc
+!     
+! !DESCRIPTION:
+!      Make sure there is enough allocated space for {\tt itemcount}
+!      more things in the datalist.
+!
+! !REQUIREMENTS: 
+!EOP
+
+      integer :: status=ESMF_FAILURE      ! local error status
+      type(ESMF_StateData), dimension(:), pointer :: temp_list
+      type(ESMF_StateData), pointer :: nextitem
+      integer :: i
+      integer :: allocsize 
+      integer :: newsize
+      integer, parameter :: chunksize = 16         ! extend list by this
+ 
+      ! Assume failure until success assured.
+      rc = ESMF_FAILURE
+
+      ! An initially empty list. Simply allocate, no data copy needed.
+      if (stypep%alloccount .eq. 0) then
+
+          allocsize = itemcount + chunksize - mod(itemcount,chunksize)
+          allocate(stypep%datalist(allocsize), stat=status)
+          if(status .NE. 0) then
+            print *, "ERROR in ESMF_StateTypeExtendList: datalist allocate"
+            return
+          endif
+          stypep%alloccount = allocsize
+
+      ! Extend an existing list to the right length, including copy
+      else if (stypep%alloccount .lt. stypep%datacount + itemcount) then
+
+          newsize = stypep%datacount + itemcount
+          allocsize = newsize + chunksize - mod(newsize,chunksize)
+          allocate(temp_list(allocsize), stat=status)
+          if(status .NE. 0) then
+            print *, "ERROR in ESMF_StateTypeExtendList: datalist reallocate"
+            return
+          endif
+  
+          ! Preserve old contents
+          do i = 1, stypep%datacount
+            temp_list(i) = stypep%datalist(i)
+          enddo
+  
+          ! Delete old list
+          deallocate(stypep%datalist, stat=status)
+          if(status .NE. 0) then
+            print *, "ERROR in ESMF_StateTypeExtendList: datalist deallocate"
+            return
+          endif
+  
+          ! Now make this the permanent list
+          stypep%datalist => temp_list
+
+          stypep%alloccount = allocsize
+
+      endif
+   
+      rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateTypeExtendList
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
