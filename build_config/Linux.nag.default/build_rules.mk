@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.11 2004/05/28 07:54:26 nscollins Exp $
+#  $Id: build_rules.mk,v 1.12 2004/06/07 16:01:57 nscollins Exp $
 #
 #  Linux.nag.default.mk
 #
@@ -71,7 +71,7 @@ endif
 
 ifeq ($(ESMF_COMM),mpiuni)
 # without mpich installed:
-MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/mpiuni
+MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/stubs/mpiuni
 MPI_LIB        = -lmpiuni
 MPI_INCLUDE    = -I${MPI_HOME}
 MPIRUN         =  ${MPI_HOME}/mpirun

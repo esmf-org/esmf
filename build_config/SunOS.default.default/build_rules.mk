@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.10 2004/05/28 20:16:08 jwolfe Exp $
+# $Id: build_rules.mk,v 1.11 2004/06/07 16:01:57 nscollins Exp $
 #
 # SunOS.default.default.mk
 #
@@ -52,7 +52,7 @@ MPIRUN         =  ${MPI_HOME}/bin/mprun
 endif
 
 ifeq ($(ESMF_COMM),mpiuni)
-MPI_HOME       = ${ESMF_TOP_DIR}/src/Infrastructure/mpiuni
+MPI_HOME       = ${ESMF_TOP_DIR}/src/Infrastructure/stubs/mpiuni
 MPI_LIB        = -lmpiuni
 MPI_INCLUDE    = -I${MPI_HOME}
 MPIRUN         =  ${MPI_HOME}/mpirun

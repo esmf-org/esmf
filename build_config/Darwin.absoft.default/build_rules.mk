@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.6 2004/05/18 11:31:00 nscollins Exp $
+#  $Id: build_rules.mk,v 1.7 2004/06/07 16:01:57 nscollins Exp $
 #
 #  Darwin.absoft.default.mk
 #
@@ -71,7 +71,7 @@ endif
 
 ifeq ($(ESMF_COMM),mpiuni)
 # without mpich installed:
-MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/mpiuni
+MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/stubs/mpiuni
 MPI_LIB        = -lmpiuni
 MPI_INCLUDE    = -I${MPI_HOME}
 MPIRUN         =  ${MPI_HOME}/mpirun

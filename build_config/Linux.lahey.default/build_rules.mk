@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.9 2004/05/18 11:31:01 nscollins Exp $
+# $Id: build_rules.mk,v 1.10 2004/06/07 16:01:57 nscollins Exp $
 #
 # Linux.lahey.default.mk
 #
@@ -69,7 +69,7 @@ MPIRUN         =  mpirun $(ESMF_NODES)
 endif
 
 ifeq ($(ESMF_COMM),mpiuni)
-MPI_HOME       = ${ESMF_TOP_DIR}/src/Infrastructure/mpiuni
+MPI_HOME       = ${ESMF_TOP_DIR}/src/Infrastructure/stubs/mpiuni
 MPI_LIB        = -lmpiuni
 MPI_INCLUDE    = -I${MPI_HOME}
 MPIRUN         =  ${MPI_HOME}/mpirun
