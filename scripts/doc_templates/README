@@ -73,6 +73,9 @@ To start working on a new component, execute the script:
 
    do_newcomp <component name> <implementation language>
 
+from a directory where you desire a new component tree to be created.
+Examples would be esmf/src/Infrastructure or esmf/src/Superstructure.
+
 The implementation language can be one of the following:
 
    f - Fortran 90
@@ -98,7 +101,7 @@ directory.  The templates created by do_newcomp are generic, non-class
 specific.  See do_newclass below for class-specific templates.  
 
 To start coding a new class, execute the following script in a source
-code directory (src or interface):
+code directory below the component directory (src or interface):
 
    do_newclass <class name> <implementation language>
 
@@ -109,16 +112,19 @@ The implementation language can be one of the following:
 
 This will create a source code template using the class name provided in
 the chosen language.  For F90, a single ESMF_<Class>.F90 file is created.
-For C++, two files are created:  ESMC_<Class>.h and ESMC_<Class>.C  Also,
-interface templates in the language other than the one chosen are created.
-See the discussion above about do_newcomp and the placement of the template
-files in the component tree.
+For C++, two files are created:  ESMC_<Class>.h and ESMC_<Class>.C  The
+ESMC_<Class>.h file goes in ../include.  Also, interface templates in the
+language other than the one chosen are created.  For example, if you're
+in the src directory creating a .C file, a corresponding .F90 interface
+file will be placed in ../interface.  See the discussion above about
+do_newcomp and the placement of the template files in the component tree.
 
 To start a new document, execute the script:
 
    do_newdoc <component name> <document type>
 
-The document type can be one of the following:
+from the same directory where you ran do_newcomp.  The document type can
+be one of the following:
 
 	req  - requirements document
 	arch - architecture document
