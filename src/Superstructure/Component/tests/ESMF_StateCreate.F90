@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.3 2003/02/11 18:24:31 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.4 2003/02/11 23:23:53 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -34,7 +34,7 @@
     character(ESMF_MAXSTR) :: cname, sname, bname, fname
     type(ESMF_Array) :: array1
     type(ESMF_Field) :: field1
-    type(ESMF_Bundle) :: bundle1, bundle2
+    type(ESMF_Bundle) :: bundle1, bundle2, bundle3
     type(ESMF_State) :: state1, state2, state3, state4
         
 !-------------------------------------------------------------------------
@@ -55,12 +55,13 @@
     print *, "State Destroy returned", rc
 
     print *, "State Test 1 finished"
+    print *, " "
 
 
 !-------------------------------------------------------------------------
 !   ! Test 2:
 !   !
-!   !  Quick Test - Create, Add Data, Query, then Destroy a State.
+!   !  Quick Test - Create, Add Data, Print, Query, then Destroy a State.
  
     print *, "State Test 2: Export State"
 
@@ -68,7 +69,7 @@
     state2 = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)  
     print *, "State Create returned, name = ", trim(cname)
 
-    bundle1 = ESMF_BundleCreate(rc=rc)
+    bundle1 = ESMF_BundleCreate(name="Surface pressure", rc=rc)
     print *, "Bundle Create returned", rc
 
     call ESMF_StateAddData(state2, bundle1, rc=rc)
@@ -77,6 +78,12 @@
     call ESMF_StatePrint(state2, rc=rc)
     print *, "State Print returned", rc
 
+    call ESMF_StateGetData(state2, "Surface pressure", bundle3, rc=rc)
+    print *, "State GetData returned", rc
+
+    call ESMF_BundlePrint(bundle3, rc=rc)
+    print *, "Bundle Print returned", rc
+
     call ESMF_StateDestroy(state2, rc=rc)
     print *, "State Destroy returned", rc
 
@@ -84,6 +91,7 @@
     print *, "Bundle Destroy returned", rc
 
     print *, "State Test 2 finished"
+    print *, " "
 
 
 !-------------------------------------------------------------------------
@@ -107,6 +115,7 @@
     ! save for next test, do not destroy yet
 
     print *, "State Test 3 finished"
+    print *, " "
 
 
 !-------------------------------------------------------------------------
@@ -149,6 +158,7 @@
     print *, "State Destroy returned", rc
 
     print *, "State Test 4 finished"
+    print *, " "
 
 
 
