@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/11/10 23:55:14 nscollins Exp $ 
+# $Id: makefile,v 1.4 2003/11/12 22:02:46 nscollins Exp $ 
 
 
 LOCDIR   = src/Superstructure/AppDriver
@@ -17,7 +17,8 @@ include $(ESMF_DIR)/makefile
 
 # at the present time do NOT list the subdirs here, because the makefiles
 # inside them are not intended to be executed as part of the esmf build.
-DIRS     =  
+# (the doc dir is the exception - we do need to make the docs.)
+DIRS     =   doc
 
 CLEANDIRS   =
 CLEANFILES  =
