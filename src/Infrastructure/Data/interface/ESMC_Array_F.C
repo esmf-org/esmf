@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.28 2003/03/10 03:23:01 cdeluca Exp $
+// $Id: ESMC_Array_F.C,v 1.29 2003/03/11 23:09:42 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -126,8 +126,8 @@ extern "C" {
           *status = (*ptr)->ESMC_ArraySetBaseAddr((void *)(base));
      }
 
-     void FTN(c_esmc_arraygetbaseaddr)(ESMC_Array **ptr, float *base, int *status) {
-          *status = (*ptr)->ESMC_ArrayGetBaseAddr((void *)base);
+     void FTN(c_esmc_arraygetbaseaddr)(ESMC_Array **ptr, float **base, int *status) {
+          *status = (*ptr)->ESMC_ArrayGetBaseAddr((void **)base);
      }
 
      void FTN(c_esmc_arraysetf90ptr)(ESMC_Array **ptr, struct c_F90ptr *p, int *status) {

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.22 2003/03/11 03:00:47 cdeluca Exp $
+// $Id: ESMC_Array.h,v 1.23 2003/03/11 23:09:41 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -190,7 +190,7 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
 
     int ESMC_ArraySetBaseAddr(void *base_addr) { this->base_addr = base_addr; 
                                                  return ESMF_SUCCESS;}
-    int ESMC_ArrayGetBaseAddr(void *base) { base = this->base_addr; 
+    int ESMC_ArrayGetBaseAddr(void **base) { *base = this->base_addr; 
                                             return ESMF_SUCCESS;}
 
     int ESMC_ArraySetOrigin(enum ESMC_ArrayOrigin o) { this->origin = o; 
