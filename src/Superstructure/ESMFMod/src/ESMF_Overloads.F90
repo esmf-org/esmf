@@ -1,0 +1,499 @@
+! $Id: ESMF_Overloads.F90,v 1.1 2004/01/26 17:57:56 nscollins Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+! Laboratory, University of Michigan, National Centers for Environmental 
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!
+!==============================================================================
+!
+!     ESMF Base2 Module
+      module ESMF_Base2Mod
+!
+!==============================================================================
+!
+! This file contains functions which are logically part of the base class,
+!  but because of the rules in compiling fortran, must be defined at the
+!  very end, not at the beginning.  These include interfaces like get and
+!  set of attributes, read/write, validate, and print.
+!
+!------------------------------------------------------------------------------
+! INCLUDES
+#include "ESMF.h"
+! #include "ESMF_Base.h"
+!==============================================================================
+!BOP
+! !MODULE: ESMF_Base2Mod - Functions overloaded by object type.
+!
+! !DESCRIPTION:
+!
+! This file contains functions which are logically part of the {\tt Base} class,
+!  but because of the rules in compiling fortran, must be defined at the
+!  very end, not at the beginning.  These include interfaces like get and
+!  set of attributes, read/write, validate, and print.
+!
+!
+!------------------------------------------------------------------------------
+! !USES:
+      use ESMF_BaseMod    ! ESMF base class
+      use ESMF_FieldMod 
+      implicit none
+
+!------------------------------------------------------------------------------
+!
+! !PUBLIC MEMBER FUNCTIONS:
+!
+    public ESMF_AttributeSetCharacter
+    public ESMF_AttributeGetCharacter
+    public ESMF_AttributeSetInteger
+    public ESMF_AttributeGetInteger
+    !public ESMF_AttributeSetReal
+    !public ESMF_AttributeGetReal
+    !public ESMF_AttributeSetLogical
+    !public ESMF_AttributeGetLogical
+
+    !public ESMF_Read
+    !public ESMF_Write
+    !public ESMF_Print
+    !public ESMF_Validate
+ 
+!
+!
+!EOP
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+      character(*), parameter, private :: version = &
+      '$Id: ESMF_Overloads.F90,v 1.1 2004/01/26 17:57:56 nscollins Exp $'
+
+!==============================================================================
+!
+! INTERFACE BLOCKS
+!
+!==============================================================================
+!BOP
+! !INTERFACE:
+      interface ESMF_AttributeSetCharacter
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_FieldAttrSetChar
+      !module procedure ESMF_GridAttrSetChar
+      !module procedure ESMF_ArrayAttrSetChar
+      !module procedure ESMF_ClockAttrSetChar
+      ! etc
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for Attribute Set/Get
+!     methods for each object type in the system.
+!
+!EOP
+      end interface 
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_AttributeGetCharacter
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_FieldAttrGetChar
+      !module procedure ESMF_GridAttrGetChar
+      !module procedure ESMF_ArrayAttrGetChar
+      !module procedure ESMF_ClockAttrGetChar
+      ! etc
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for Attribute Set/Get
+!     methods for each object type in the system.
+!
+!EOP
+      end interface 
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_AttributeSetInteger
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_FieldAttrSetInt
+      !module procedure ESMF_GridAttrSetInt
+      !module procedure ESMF_ArrayAttrSetInt
+      !module procedure ESMF_ClockAttrSetInt
+      ! etc
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for Attribute Set/Get
+!     methods for each object type in the system.
+!
+!EOP
+      end interface 
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_AttributeGetInteger
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_FieldAttrGetInt
+      !module procedure ESMF_GridAttrGetInt
+      !module procedure ESMF_ArrayAttrGetInt
+      !module procedure ESMF_ClockAttrGetInt
+      ! etc
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for Attribute Set/Get
+!     methods for each object type in the system.
+!
+!EOP
+      end interface 
+!
+!------------------------------------------------------------------------------
+
+!     < add other interfaces here>
+
+!==============================================================================
+
+      contains
+
+!==============================================================================
+!
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldAttrSetChar - Set a character attr on a Field object.
+
+! !INTERFACE:
+      subroutine ESMF_FieldAttrSetChar(field, name, value, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field
+      character (len = *), intent(in) :: name  
+      character (len = *), intent(in) :: value  
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Set the character string {\tt value} as a named attribute on 
+!     the Field object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[field] 
+!          {\tt ESMF_Field} object to attach attribute onto.
+!     \item[name]
+!          Attribute name. 
+!     \item[value] 
+!          Attribute value.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+        ! local variables
+        integer :: status                                ! local error status
+        logical :: rcpresent                             ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif  
+
+        ! pass thru f90/c++ interface - this requires first entry of object
+        ! is a base type.
+        call c_ESMF_AttributeSetChar(field, name, value, status)
+
+        if (rcpresent) rc = status
+
+      end subroutine ESMF_FieldAttrSetChar
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldAttrGetChar - Get a character attr from a Field object.
+
+! !INTERFACE:
+      subroutine ESMF_FieldAttrGetChar(field, name, value, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field
+      character (len = *), intent(in) :: name  
+      character (len = *), intent(out) :: value  
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Get the character string {\tt value} which is the named attribute of 
+!     the Field object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[field] 
+!          {\tt ESMF_Field} object to get attribute value from.
+!     \item[name]
+!          Attribute name. 
+!     \item[value] 
+!          Attribute value.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+        ! local variables
+        integer :: status                                ! local error status
+        logical :: rcpresent                             ! did user specify rc?
+
+        ! Get initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif  
+
+        ! pass thru f90/c++ interface - this requires first entry of object
+        ! is a base type.
+        call c_ESMF_AttributeGetChar(field, name, value, status)
+
+        if (rcpresent) rc = status
+
+      end subroutine ESMF_FieldAttrGetChar
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldAttrSetInt - Set a integer attr on a Field object.
+
+! !INTERFACE:
+      subroutine ESMF_FieldAttrSetInt(field, name, value, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field
+      character (len = *), intent(in) :: name  
+      integer, intent(in) :: value  
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Set the integer {\tt value} as a named attribute on 
+!     the Field object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[field] 
+!          {\tt ESMF_Field} object to attach attribute onto.
+!     \item[name]
+!          Attribute name. 
+!     \item[value] 
+!          Attribute value.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+        ! local variables
+        integer :: status                                ! local error status
+        logical :: rcpresent                             ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif  
+
+        ! pass thru f90/c++ interface - this requires first entry of object
+        ! is a base type.
+        call c_ESMF_AttributeSetInt(field, name, value, status)
+
+        if (rcpresent) rc = status
+
+      end subroutine ESMF_FieldAttrSetInt
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldAttrGetInt - Get a integer attr from a Field object.
+
+! !INTERFACE:
+      subroutine ESMF_FieldAttrGetInt(field, name, value, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field
+      character (len = *), intent(in) :: name  
+      integer, intent(out) :: value  
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Get the integer {\tt value} which is the named attribute of 
+!     the Field object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[field] 
+!          {\tt ESMF_Field} object to get attribute value from.
+!     \item[name]
+!          Attribute name. 
+!     \item[value] 
+!          Attribute value.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+        ! local variables
+        integer :: status                                ! local error status
+        logical :: rcpresent                             ! did user specify rc?
+
+        ! Get initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif  
+
+        ! pass thru f90/c++ interface - this requires first entry of object
+        ! is a base type.
+        call c_ESMF_AttributeGetInt(field, name, value, status)
+
+        if (rcpresent) rc = status
+
+      end subroutine ESMF_FieldAttrGetInt
+
+#if 0
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_Validate - Check internal consistency of any object.
+
+! !INTERFACE:
+      subroutine ESMF_FieldValidate(field, opt, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base2), intent(in) :: <class>       
+      character (len=*), intent(in), optional :: opt    
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     Validates that a Base2 is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[<class>] 
+!          Class to be queried.
+!     \item[{[opt]}]
+!          Validation options.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  XXXn.n, YYYn.n
+
+      integer :: status                       ! local error status
+      logical :: rcpresent                    ! did user specify rc?
+      character (len=6) :: defaultopts
+
+      ! Initialize return code; assume failure until success is certain  
+      status = ESMF_FAILURE       
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      defaultopts = "quick"
+
+      ! Decide at what level of detail to verify.
+      if(present(opt)) then
+          ! TODO:  decide how much checking to do
+      endif
+
+      !
+      !  TODO: code goes here
+      !
+
+      ! Set return values
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_Base2Validate
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_Base2Print - Print the contents of a Base2
+
+! !INTERFACE:
+      subroutine ESMF_Base2Print(<class>, opt, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base2), intent(in) :: <class>      
+      character (len=*), intent(in), optional :: opt      
+      integer, intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!      Print information about a Base2.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[<class>] 
+!          Class to be queried.
+!     \item[{[opt]}]
+!          Print options that control the type of information and level of 
+!          detail.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      integer :: status                       ! local error status
+      logical :: rcpresent                    ! did user specify rc?
+      character (len=6) :: defaultopts
+      character (len=ESMF_MAXSTR) :: name
+
+      ! Initialize return code; assume failure until success is certain  
+      status = ESMF_FAILURE       
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      defaultopts = "brief"
+
+      ! Decide what to print.
+      if(present(opt)) then
+          ! TODO:  decide what to print
+      endif
+
+      call ESMF_GetName(<class>%<class>type%base, name, status)
+      print *, "Base2 print:"
+      print *, "  name = ", trim(name)
+
+      ! TODO: add more info here
+
+      ! Set return values
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_Base2Print
+
+!------------------------------------------------------------------------------
+#endif
+
+      end module ESMF_Base2Mod
