@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.23 2004/06/15 15:49:08 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.24 2004/06/20 06:05:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.23 2004/06/15 15:49:08 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.24 2004/06/20 06:05:34 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -45,7 +45,7 @@
       type(ESMF_Field) :: field1, field2, field3(3), field4
       type(ESMF_Bundle) :: bundle1, bundle2(1), bundle3(1), bundle4(1), bundle5, bundle6
       type(ESMF_State) :: state1, state2, state3, state4
-      type(ESMF_Array) :: array1, array2(2), array3, array4
+      type(ESMF_Array) :: array1, array2(2), array3, array3a, array4
       type(ESMF_NeededFlag) :: needed
       real, dimension(:,:), pointer :: f90ptr1
 
@@ -521,7 +521,7 @@
 
       !EX_UTest
       ! Test adding an uninitialized Array to a State
-      call ESMF_StateAddArray(state1, array3, rc)
+      call ESMF_StateAddArray(state1, array3a, rc)
       write(name, *) "Adding an uninitialized Array to a State Test"
       print *, "rc = ", rc
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
