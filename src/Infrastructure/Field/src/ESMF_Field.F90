@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.98 2004/01/28 17:50:01 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.99 2004/01/28 20:30:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -216,7 +216,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.98 2004/01/28 17:50:01 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.99 2004/01/28 20:30:08 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1206,10 +1206,9 @@
       endif     
  
       ! Construct a default name if one is not given
-      call ESMF_BaseCreate(ftype%base, "Fields", name, 0, status)
-      !call ESMF_SetName(ftype%base, name, "Fields", status)
+      call ESMF_BaseCreate(ftype%base, "Field", name, 0, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNoBuffer: SetName"
+        print *, "ERROR in ESMF_FieldConstructNoBuffer: BaseCreate"
         return
       endif 
 
@@ -1319,10 +1318,9 @@
       endif
 
       ! Construct a default name if one is not given
-      call ESMF_BaseCreate(ftype%base, "Fields", name, 0, status)
-      !call ESMF_SetName(ftype%base, name, "Fields", status)
+      call ESMF_BaseCreate(ftype%base, "Field", name, 0, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNoArray: SetName"
+        print *, "ERROR in ESMF_FieldConstructNoArray: BaseCreate"
         return
       endif 
 
@@ -1393,10 +1391,9 @@
       endif
 
       ! Construct a default name if one is not given
-      call ESMF_BaseCreate(ftypep%base, "Fields", name, 0, status)
-      !call ESMF_SetName(ftypep%base, name, "Fields", status)
+      call ESMF_BaseCreate(ftypep%base, "Field", name, 0, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNoGridArray: SetName"
+        print *, "ERROR in ESMF_FieldConstructNoGridArray: BaseCreate"
         return
       endif 
 
@@ -1444,7 +1441,7 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-
+      integer :: status
       logical :: rcpresent                          ! Return code present
 
       ! Initialize return code; assume failure until success is certain
@@ -1456,6 +1453,13 @@
 
 
       print *, "Field Destruct called"
+
+      ! release the base class resources
+      call ESMF_BaseDestroy(ftype%base, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldDestruct: BaseDestroy failed"
+        return
+      endif 
 
 !
 ! TODO: more code goes here
@@ -1625,7 +1629,7 @@
 !EOP
 ! !REQUIREMENTS: FLD1.6.2
 
-        type(ESMF_FieldType), pointer :: ftypep
+        type(ESMF_FieldType), pointer :: ftype
         integer :: status
 
         ! assume failure
@@ -1637,44 +1641,44 @@
           return
         endif
  
-        ftypep => field%ftypep
-        if (ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+        ftype => field%ftypep
+        if (ftype%fieldstatus .ne. ESMF_STATE_READY) then
           print *, "ERROR: Field not ready"
           return
         endif
 
         if (present(grid)) then
-            if (ftypep%gridstatus .ne. ESMF_STATE_READY) then
+            if (ftype%gridstatus .ne. ESMF_STATE_READY) then
               print *, "ERROR: No grid attached to Field"
               return
             endif
-            grid = ftypep%grid
+            grid = ftype%grid
         endif
 
         if (present(array)) then
-            if (ftypep%datastatus .ne. ESMF_STATE_READY) then
+            if (ftype%datastatus .ne. ESMF_STATE_READY) then
               print *, "ERROR: No data attached to Field"
               return
             endif
-            array = ftypep%localfield%localdata
+            array = ftype%localfield%localdata
         endif
 
         if (present(datamap)) then
             ! TODO: what's the proper test here?  you could have a map w/ no data yet
-            !if (ftypep%datastatus .ne. ESMF_STATE_READY) then
+            !if (ftype%datastatus .ne. ESMF_STATE_READY) then
             !  print *, "ERROR: No data attached to Field"
             !  return
             !endif
-            datamap = ftypep%mapping
+            datamap = ftype%mapping
         endif
 
         if (present(relloc)) then
             ! TODO: what's the proper test here?  ditto code above.
-            !if (ftypep%datastatus .ne. ESMF_STATE_READY) then
+            !if (ftype%datastatus .ne. ESMF_STATE_READY) then
             !  print *, "ERROR: No data attached to Field"
             !  return
             !endif
-            call ESMF_DataMapGet(ftypep%mapping, relloc=relloc, rc=status)
+            call ESMF_DataMapGet(ftype%mapping, relloc=relloc, rc=status)
             if (status .ne. ESMF_SUCCESS) then
                 print *, "ERROR in getting RelLoc in ESMF_DataMapGet"
                 rc = status
@@ -1683,7 +1687,7 @@
         endif
 
         if (present(name)) then
-            call ESMF_GetName(ftypep%base, name, status)
+            call ESMF_GetName(ftype%base, name, status)
             if (status .ne. ESMF_SUCCESS) then
                 print *, "ERROR in getting Field name in ESMF_FieldGet"
                 rc = status
