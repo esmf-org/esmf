@@ -1,0 +1,27 @@
+% $Id: HW_Monitor_design.tex,v 1.1 2002/11/13 23:30:21 ekluz Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the GPL.
+
+%\subsection{Design}
+
+The HW\_Monitor class uses Hardware monitoring libraries (PCL or PAPI)
+to do performance profiling of code segments. Floating point operations
+per second, data cache utilization and miss rates, floating point unit
+utilization, and cycle counts are the desired statistics to be reported.
+The HW\_Monitor class is meant to be created by the InstrumentedSegment
+class. There are three important methods for HW\_Monitor: Init, BeginMonitoring,
+EndMonitoring, and Report. The Init method does the initialization needed
+to figure out which hardware monitoring counters need to be used and verify
+that they are available. It also prepares arrays for the counters that
+will be activated. BeginMonitoring turns performance monitoring on, for
+a given code segment. EndMonitoring turns performance monitoring off, for
+a given code segment. The Report method then gives a report on the statistics
+for the code segment timed.
+
+

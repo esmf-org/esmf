@@ -1,4 +1,4 @@
-% $Id: PerfProf_desdoc.ctex,v 1.1 2002/11/13 22:08:46 ekluz Exp $
+% $Id: PerfProf_desdoc.ctex,v 1.2 2002/11/13 23:30:21 ekluz Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -96,6 +96,36 @@
 \input{class_rest}
 #elif defined(CONSTITUENT)
 \input{comppath/class_rest}
+#endif
+
+\section{HW\_Monitor Design}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{HW_Monitor_desc}
+#elif defined(CONSTITUENT)
+\input{comppath/HW_Monitor_desc}
+#endif
+
+\subsection{Design}
+#ifdef STANDALONE
+\input{HW_Monitor_design}
+#elif defined(CONSTITUENT)
+\input{comppath/HW_Monitor_design}
+#endif
+
+\subsubsection{Class Definition}
+#ifdef STANDALONE
+\input{HW_Monitor_def}
+#elif defined(CONSTITUENT)
+\input{comppath/HW_Monitor_def}
+#endif
+
+\subsubsection{Restrictions}
+#ifdef STANDALONE
+\input{HW_Monitor_rest}
+#elif defined(CONSTITUENT)
+\input{comppath/HW_Monitor_rest}
 #endif
 
 \section{<Name1> F90 Interface}

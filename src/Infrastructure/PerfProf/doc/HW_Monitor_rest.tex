@@ -1,0 +1,22 @@
+% $Id: HW_Monitor_rest.tex,v 1.1 2002/11/13 23:30:21 ekluz Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the GPL.
+
+%\subsubsection{Restrictions}
+
+% <List class restrictions due to design or implementation strategies.>
+
+The HW\_Monitor class is restricted for use on machines that either
+have PCL or PAPI available. The design uses the platform independent
+interface of these libraries for the actual interface to the hardware
+monitoring. Also some platforms may not have some of the requested hardware
+counters available. This may be because a given platform does not have 
+the hardware requested (Level 2 data cache for example), or it may be because
+hardware monitoring is not available. In either case only the available
+statistics will be provided.
