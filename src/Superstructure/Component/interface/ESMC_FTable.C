@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.3 2003/02/27 21:28:26 nscollins Exp $
+// $Id: ESMC_FTable.C,v 1.4 2003/03/07 18:19:48 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.3 2003/02/27 21:28:26 nscollins Exp $";
+           "$Id: ESMC_FTable.C,v 1.4 2003/03/07 18:19:48 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -88,7 +88,7 @@
         dataalloc = ndatap;
     }
 
-    printf("TableExtend method called \n");
+    //printf("TableExtend method called \n");
     return ESMF_SUCCESS;
 
  } // end ESMC_FTableExtend
@@ -304,7 +304,7 @@
         if (strcmp(namep, data[i].dataname))
 	   continue;
 
-        *datap =  data[i].dataptr;
+        *datap = data[i].dataptr;
         *dtype = data[i].dtype;
 
         return ESMF_SUCCESS;
@@ -469,7 +469,7 @@
 //
 //  code goes here
 //
-    printf("in ftable constructor\n");
+    //printf("in ftable constructor\n");
     funccount = 0;
     funcalloc = 0;
     funcs = 0;
@@ -501,7 +501,7 @@
 //
 //  code goes here
 //
-    printf("in ftable destructor\n");
+    //printf("in ftable destructor\n");
     if (funcs)
         delete funcs;
 
