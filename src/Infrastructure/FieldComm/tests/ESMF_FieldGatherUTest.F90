@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.1 2004/09/23 20:45:13 jwolfe Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.2 2004/09/23 20:52:33 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldGatherUTest.F90,v 1.1 2004/09/23 20:45:13 jwolfe Exp $'
+      '$Id: ESMF_FieldGatherUTest.F90,v 1.2 2004/09/23 20:52:33 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,6 +54,7 @@
       integer :: npets, myDE
       integer :: hWidth
       integer, dimension(2) :: counts, localCounts
+      logical :: ok
       real(ESMF_KIND_R8) :: pi, minGather, maxGather
       real(ESMF_KIND_R8), dimension(2) :: min, max
       real(ESMF_KIND_R8), dimension(:,:), pointer :: coordX, coordY
@@ -164,6 +165,7 @@
       ! check results, at least if the values are in the global computational
       ! range
       call ESMF_DELayoutGet(delayout, localDE=myDE, rc=rc)
+      ok = .true.
       if (myDE.eq.0) then
         call ESMF_ArrayGetData(array2, gatheredData, ESMF_DATA_REF, rc)
         if (rc .ne. ESMF_SUCCESS) goto 20
@@ -179,11 +181,11 @@
                 maxGather =  gatheredData(ifld,jfld)
           enddo
         enddo
-        write(failMsg, *) "Did not calculate correct results"
-        write(name, *) "Field Gather Test"
-        call ESMF_Test((minGather.ge.10.0 .AND. maxGather.le.32.0), &
-                        name, failMsg, result, ESMF_SRCLINE)
+        ok = (minGather.ge.10.0 .AND. maxGather.le.32.0)
       endif
+      write(failMsg, *) "Did not calculate correct results"
+      write(name, *) "Field Gather Test"
+      call ESMF_Test(ok, name, failMsg, result, ESMF_SRCLINE)
 
       ! Clean up
       call ESMF_FieldDestroy(field, rc)
