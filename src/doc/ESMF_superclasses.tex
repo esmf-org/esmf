@@ -42,8 +42,13 @@ and characteristics is essential for performance portability.
 Where their physics content permits
 {\tt Gridded Component}s can be configured for
 sequential or concurrent execution without changes to the {\tt Gridded 
-Component} code.  Changes to {\tt Coupler} or application code are likely to 
-be required (see Section~\ref{sec:scoping}).
+Component} code.  Changes to {\tt Coupler} and/or {\tt Application Component} code are likely to 
+be required (see Section~\ref{sec:scoping}). This is possible because 
+the {\tt Gridded Component} uses the infrastructure layer to abstract communication
+protocols such that a {\tt Gridded Component} looks the same on all
+platforms. Additionally, the superstructure layer ensures that a {\tt Gridded
+Component} can be created to execute concurrently or sequentially through the
+manipulation of PE lists.
 
 The ability to overlap computation with communication is also essential for
 performance.  We facilitate this by enabling the user to initiate data 
