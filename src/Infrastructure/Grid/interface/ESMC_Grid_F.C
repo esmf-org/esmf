@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid_F.C,v 1.2 2004/12/01 21:38:59 nscollins Exp $
+// $Id: ESMC_Grid_F.C,v 1.3 2004/12/04 00:30:27 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Grid_F.C,v 1.2 2004/12/01 21:38:59 nscollins Exp $";
+             "$Id: ESMC_Grid_F.C,v 1.3 2004/12/04 00:30:27 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -44,31 +44,49 @@ extern "C" {
 //
 
 // non-method functions
-void FTN(c_esmc_gridserialize)(int *gridStatus, 
-                          int *dimCount, 
-                          int *hasLocalData, 
-                          int *gridStructure, 
-                          int *horzGridType, 
-                          int *vertGridType, 
-                          int *horzStagger, 
-                          int *vertStagger,
-                          void *buffer, int *length, int *offset, int *localrc){
+void FTN(c_esmc_gridserialize)(int *dimCount, 
+                               int *gridStructure, 
+                               int *horzGridType, 
+                               int *vertGridType, 
+                               int *horzStagger, 
+                               int *vertStagger,
+                               int *gridStorage,
+                               int *horzCoordSystem,
+                               int *vertCoordSystem,
+                               int *coordOrder,
+                               int *coordIndex,
+                               int *periodic,                  // array of logicals
+                               double *minGlobalCoordPerDim,   // array of reals
+                               double *maxGlobalCoordPerDim,   // array of reals
+                               void *buffer, int *length, int *offset, int *localrc){
 
-    int *ip;
+    int *ip, i;
+    double *dp;
 
     // TODO: verify length > needed, and if not, make room.
 
     ip = (int *)((char *)(buffer) + *offset);
-    *ip++ = *gridStatus;
     *ip++ = *dimCount; 
-    *ip++ = *hasLocalData; 
     *ip++ = *gridStructure; 
     *ip++ = *horzGridType; 
     *ip++ = *vertGridType; 
     *ip++ = *horzStagger; 
     *ip++ = *vertStagger; 
+    *ip++ = *gridStorage;
+    *ip++ = *horzCoordSystem;
+    *ip++ = *vertCoordSystem;
+    *ip++ = *coordOrder;
+    *ip++ = *coordIndex;
+    for (i=0; i<*dimCount; i++) 
+      *ip++ = periodic[i];               // array of logicals
 
-    *offset = (char *)ip - (char *)buffer;
+    dp = (double *)ip;
+    for (i=0; i<*dimCount; i++) {
+      *dp++ = minGlobalCoordPerDim[i];   // array of reals
+      *dp++ = maxGlobalCoordPerDim[i];   // array of reals
+    }
+   
+    *offset = (char *)dp - (char *)buffer;
 
     if (localrc) *localrc = ESMF_SUCCESS;
 
@@ -76,29 +94,48 @@ void FTN(c_esmc_gridserialize)(int *gridStatus,
 } 
 
 
-void FTN(c_esmc_griddeserialize)(int *gridStatus, 
-                            int *dimCount, 
-                            int *hasLocalData, 
-                            int *gridStructure, 
-                            int *horzGridType, 
-                            int *vertGridType, 
-                            int *horzStagger, 
-                            int *vertStagger,
-                            void *buffer, int *offset, int *localrc){
+void FTN(c_esmc_griddeserialize)(int *dimCount, 
+                                 int *gridStructure, 
+                                 int *horzGridType, 
+                                 int *vertGridType, 
+                                 int *horzStagger, 
+                                 int *vertStagger,
+                                 int *gridStorage,
+                                 int *horzCoordSystem,
+                                 int *vertCoordSystem,
+                                 int *coordOrder,
+                                 int *coordIndex,
+                                 int *periodic,                  // array of logicals
+                                 double *minGlobalCoordPerDim,   // array of reals
+                                 double *maxGlobalCoordPerDim,   // array of reals
+                                 void *buffer, int *offset, int *localrc){
 
-    int *ip;
+    int *ip, i;
+    double *dp;
 
     ip = (int *)((char *)(buffer) + *offset);
-    *gridStatus = *ip++;
-    *dimCount = *ip++; 
-    *hasLocalData = *ip++; 
-    *gridStructure = *ip++; 
-    *horzGridType = *ip++; 
-    *vertGridType = *ip++; 
-    *horzStagger = *ip++; 
-    *vertStagger = *ip++; 
+    *dimCount        = *ip++; 
+    *gridStructure   = *ip++; 
+    *horzGridType    = *ip++; 
+    *vertGridType    = *ip++; 
+    *horzStagger     = *ip++; 
+    *vertStagger     = *ip++; 
+    *gridStorage     = *ip++;
+    *horzCoordSystem = *ip++;
+    *vertCoordSystem = *ip++;
+    *coordOrder      = *ip++;
+    *coordIndex      = *ip++;
 
-    *offset = (char *)ip - (char *)buffer;
+    for (i=0; i<*dimCount; i++)
+      periodic[i] = *ip++;    // array of logicals
+
+    dp = (double *)ip;
+    for (i=0; i<*dimCount; i++) {
+      minGlobalCoordPerDim[i] = *dp++;    // array of reals
+      maxGlobalCoordPerDim[i] = *dp++;    // array of reals
+    }
+
+    *offset = (char *)dp - (char *)buffer;
 
     if (localrc) *localrc = ESMF_SUCCESS;
 
