@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74559.F90,v 1.9 2003/05/02 14:26:12 nscollins Exp $
+! $Id: ESMF_SysTest74559.F90,v 1.10 2003/05/02 21:54:27 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !
@@ -73,17 +73,17 @@
 
     ! Sanity check the number of DEs we were started on.
     call ESMF_DELayoutGetNumDEs(layoutApp, ndes, rc)
-    !if ((ndes .lt. 4) .or. (ndes .gt. 16)) then
-    !    print *, "This demo needs to run at least 4-way and no more than 16-way."
-    !    print *, "The requested number of processors was ", ndes
-    !    goto 10
-    !endif
-    !if (mod(ndes, 4) .ne. 0) then
-    !    print *, "This demo needs to run on some multiple of 4 processors,"
-    !    print *, " at least 4-way and no more than 16-way."
-    !    print *, "The requested number of processors was ", ndes
-    !    goto 10
-    !endif
+    if ((ndes .lt. 4) .or. (ndes .gt. 16)) then
+        print *, "This test needs to run at least 4-way and no more than 16-way."
+        print *, "The requested number of processors was ", ndes
+        goto 10
+    endif
+    if (mod(ndes, 4) .ne. 0) then
+        print *, "This test needs to run on some multiple of 4 processors,"
+        print *, " at least 4-way and no more than 16-way."
+        print *, "The requested number of processors was ", ndes
+        goto 10
+    endif
 
     ! Set up the component layouts so they are different, so we can show
     !  we really are routing data between processors.
@@ -96,14 +96,11 @@
     !  run on a 2 x N/2 layout, the second will be on a 4 x N/4 layout.
     !  The coupler will run on the original default 1 x N layout.
     cnameIN = "Injector model"
-    layoutIN = ESMF_DELayoutCreate(delist, 2, (/ 1, 1 /), (/ 0, 0 /), rc)
-    !layoutIN = ESMF_DELayoutCreate(delist, 2, (/ mid, 2 /), (/ 0, 0 /), rc)
-    !layoutIN = ESMF_DELayoutCreate(delist, 2, (/ quart, 4 /), (/ 0, 0 /), rc)
+    layoutIN = ESMF_DELayoutCreate(delist, 2, (/ mid, 2 /), (/ 0, 0 /), rc)
     INcomp = ESMF_GridCompCreate(cnameIN, layout=layoutIN, rc=rc)
 
     cnameFS = "Flow Solver model"
-    layoutFS = ESMF_DELayoutCreate(delist, 2, (/ 1, 1 /), (/ 0, 0 /), rc)
-    !layoutFS = ESMF_DELayoutCreate(delist, 2, (/ quart, 4 /), (/ 0, 0 /), rc)
+    layoutFS = ESMF_DELayoutCreate(delist, 2, (/ quart, 4 /), (/ 0, 0 /), rc)
     FScomp = ESMF_GridCompCreate(cnameFS, layout=layoutFS, rc=rc)
 
     cplname = "Two-way coupler"
