@@ -1,4 +1,4 @@
-% $Id: LogErr_refdoc.ctex,v 1.4 2003/10/10 06:35:22 cdeluca Exp $
+% $Id: LogErr_refdoc.ctex,v 1.5 2003/10/10 06:57:41 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,13 +47,6 @@
 \input{../Infrastructure/LogErr/doc/LogErr_syn}
 #endif
 
-%\section{Algorithmic Description}
-#ifdef STANDALONE
-%\input{LogErr_alg}
-#elif defined(CONSTITUENT)
-%\input{../Infrastructure/LogErr/doc/LogErr_alg}
-#endif
-
 \section{Object Model}
 #ifdef STANDALONE
 \input{LogErr_obj}
@@ -79,11 +72,11 @@
 \input{../Infrastructure/LogErr/doc/LogErr_desc}
 #endif
 
-\subsection{Design}
+\subsection{Use and Examples}
 #ifdef STANDALONE
-\input{LogErr_design}
+\input{LogErr_fex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/LogErr_design}
+\input{../Infrastructure/LogErr/doc/LogErr_fex}
 #endif
 
 \subsubsection{Class Definition}
@@ -100,14 +93,14 @@
 \input{../Infrastructure/LogErr/doc/LogErr_rest}
 #endif
 
-\section{LogErr Fortran Interface}
-
-\subsection{Use and Examples}
+%\subsection{Implementation Notes}
 #ifdef STANDALONE
-\input{LogErr_fex}
+\input{LogErr_implnotes}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/LogErr_fex}
+\input{../Infrastructure/LogErr/doc/LogErr_implnotes}
 #endif
+
+\section{LogErr Fortran Interface}
 
 %#\subsection{Parameters and Definitions}
 #ifdef STANDALONE
