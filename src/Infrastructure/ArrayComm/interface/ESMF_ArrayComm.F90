@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.64 2005/02/28 16:30:28 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.65 2005/02/28 21:55:58 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.64 2005/02/28 16:30:28 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.65 2005/02/28 21:55:58 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -615,13 +615,15 @@
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayHalo()
-    subroutine ESMF_ArrayHaloNew(array, routehandle, blocking, commhandle, rc)
+    subroutine ESMF_ArrayHaloNew(array, routehandle, blocking, commhandle, &
+                                 routeOptions, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array), intent(inout) :: array
     type(ESMF_RouteHandle), intent(in) :: routehandle
     type(ESMF_BlockingFlag), intent(in), optional :: blocking
     type(ESMF_CommHandle), intent(inout), optional :: commhandle
+    type(ESMF_RouteOptions), intent(in), optional :: routeOptions
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -650,6 +652,10 @@
 !         argument is required.  Information about the pending operation
 !         will be stored in the {\tt ESMF\_CommHandle} and can be queried
 !         or waited for later.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to execute the halo.
+!           See Section~\ref{opt:routeopt} for possible values.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -675,6 +681,12 @@
       local_array%this%ptr = array%this%ptr
 
       ! Execute the communications call.
+      if (present(routeOptions)) &
+                         call c_ESMC_RouteSet(route, routeOptions, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call ESMF_RouteRun(route, local_array, local_array, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -724,7 +736,7 @@
 !
 ! !INTERFACE:
       subroutine ESMF_ArrayHaloStore(array, grid, datamap, routehandle, &
-                                     halodirection, rc)
+                                     halodirection, routeOptions, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
@@ -732,6 +744,7 @@
       type(ESMF_FieldDataMap), intent(in) :: datamap
       type(ESMF_RouteHandle), intent(out) :: routehandle
       type(ESMF_HaloDirection), intent(in), optional :: halodirection
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -757,6 +770,10 @@
 !     \item [{[halodirection]}]
 !           {\tt ESMF\_HaloDirection} to indicate which of the boundaries
 !           should be updated.  If not specified, all boundaries are updated.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to execute the halo.
+!           See Section~\ref{opt:routeopt} for possible values.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -864,6 +881,13 @@
                                         globalCellCountPerDim, delayout, &
                                         periodic, status)
 
+      ! Set the route options if given.
+      if (present(routeOptions)) &
+                         call c_ESMC_RouteSet(route, routeOptions, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       ! and set route into routehandle object
       call ESMF_RouteHandleSet(routehandle, route1=route, &
                                htype=ESMF_HALOHANDLE, rc=status)
@@ -946,7 +970,7 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayRedist
       subroutine ESMF_ArrayRedistNew(srcArray, dstArray, routehandle, &
-                                     blocking, commhandle, rc) 
+                                     blocking, commhandle, routeOptions, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcArray
@@ -954,6 +978,7 @@
       type(ESMF_RouteHandle), intent(in) :: routehandle
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -991,6 +1016,10 @@
 !           argument is required.  Information about the pending operation
 !           will be stored in the {\tt ESMF\_CommHandle} and can be queried
 !           or waited for later.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to execute the
+!           See Section~\ref{opt:routeopt} for possible values.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1006,6 +1035,16 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      ! Set the route options if given.
+      if (present(routeOptions)) &
+                         call c_ESMC_RouteSet(route, routeOptions, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Execute the communications call.
       dstLocalArray = dstArray
@@ -1061,7 +1100,7 @@
 ! !INTERFACE:
       subroutine ESMF_ArrayRedistStore(srcArray, srcGrid, srcDataMap, &
                                        dstArray, dstGrid, dstDataMap, &
-                                       parentVM, routehandle, rc)
+                                       parentVM, routeOptions, routehandle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcArray
@@ -1071,6 +1110,7 @@
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_FieldDataMap), intent(in) :: dstDataMap
       type(ESMF_VM), intent(in) :: parentVM
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       type(ESMF_RouteHandle), intent(out) :: routehandle
       integer, intent(out), optional :: rc
 !
@@ -1105,6 +1145,10 @@
 !   \item[parentVM]
 !    {\tt ESMF\_VM} object which includes all PETs in both the
 !    source and destination grids.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to execute the
+!           See Section~\ref{opt:routeopt} for possible values.
 !   \item [routehandle]
 !    Returned {\tt ESMF\_RouteHandle} which identifies this 
 !    communication pattern.
@@ -1368,6 +1412,13 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       endif
+
+      ! Set the route options if given.
+      if (present(routeOptions)) &
+                         call c_ESMC_RouteSet(route, routeOptions, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! and set route into routehandle object
       call ESMF_RouteHandleSet(routehandle, route1=route, &

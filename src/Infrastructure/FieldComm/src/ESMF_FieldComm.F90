@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.68 2005/02/28 16:30:40 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.69 2005/02/28 21:56:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.68 2005/02/28 16:30:40 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.69 2005/02/28 21:56:29 nscollins Exp $'
 
 !==============================================================================
 !
@@ -322,7 +322,7 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldHalo()
       subroutine ESMF_FieldHaloRun(field, routehandle, blockingflag, &
-                                   commhandle, halodirection, rc)
+                                   commhandle, halodirection, routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
@@ -331,6 +331,7 @@
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       type(ESMF_HaloDirection), intent(in), optional :: halodirection
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -368,6 +369,10 @@
 !           along all boundaries.  This option is used only in the situation where
 !           the halo must be precomputed at this time.
 !           (This feature is not yet supported.)
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to update the halo.
+!           See Section~\ref{opt:routeopt} for possible values.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -418,11 +423,12 @@
         call ESMF_LogWrite("uninitialized routehandle: calling FieldHaloStore", &
                               ESMF_LOG_WARNING, &
                               ESMF_CONTEXT)
-        call ESMF_FieldHaloStore(field, routehandle, halodirection, status)
+        call ESMF_FieldHaloStore(field, routehandle, halodirection, &
+                                  routeOptions, status)
       endif
 
       call ESMF_ArrayHalo(ftypep%localfield%localdata, routehandle, &
-                          blockingflag, commhandle, rc=status)
+                          blockingflag, commhandle, routeOptions, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -470,13 +476,15 @@
 ! !IROUTINE: ESMF_FieldHaloStore - Precompute a halo operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldHaloStore(field, routehandle, halodirection, rc)
+      subroutine ESMF_FieldHaloStore(field, routehandle, halodirection, &
+                                     routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_HaloDirection), intent(in), optional :: halodirection
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -507,6 +515,10 @@
 !           Optional argument to restrict halo direction to a subset of the
 !           possible halo directions.  If not specified, the halo is executed
 !           along all boundaries. (This feature is not yet supported.)
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to update the halo.
+!           See Section~\ref{opt:routeopt} for possible values.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -545,7 +557,7 @@
 
       call ESMF_ArrayHaloStore(ftypep%localfield%localdata, ftypep%grid, &
                                ftypep%mapping, routehandle, &
-                               halodirection, rc=status)
+                               halodirection, routeOptions, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -562,7 +574,8 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldRedist(srcField, dstField, routehandle, &
-                                  blockingflag, commhandle, parentVM, rc)
+                                  blockingflag, commhandle, parentVM, &
+                                  routeOptions, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField
@@ -571,6 +584,7 @@
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       type(ESMF_VM), intent(in), optional :: parentVM
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -617,6 +631,10 @@
 !           component if the redistribution is intra-component.  This argument
 !           is only used in the situation where the routehandle has not been
 !           precomputed yet.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to redistribute the data.
+!           See Section~\ref{opt:routeopt} for possible values.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -675,7 +693,7 @@
           return
         endif
         call ESMF_FieldRedistStore(srcField, dstField, parentVM, &
-                                   routehandle, status)
+                                   routeOptions, routehandle, status)
         if (ESMF_LogMsgFoundError(status, &
               "routehandle invalid, and unable to precompute one on the fly", &
                                   ESMF_CONTEXT, rc)) return
@@ -684,7 +702,8 @@
 
       call ESMF_ArrayRedist(srcFtypep%localfield%localdata, &
                             dstFtypep%localfield%localdata, &
-                            routehandle, blockingflag, commhandle, status)
+                            routehandle, blockingflag, commhandle, &
+                            routeOptions, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -739,7 +758,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldRedistStore(srcField, dstField, parentVM, &
-                                       routehandle, rc)
+                                       routeOptions, routehandle, rc)
 !
 !
 ! !ARGUMENTS:
@@ -747,6 +766,7 @@
       type(ESMF_Field), intent(inout) :: dstField
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteHandle), intent(out) :: routehandle
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -773,6 +793,10 @@
 !           of the Coupler if the redistribution is inter-component, 
 !           but could also be the individual VM for a component if the 
 !           redistribution is intra-component.  
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to execute the
+!           See Section~\ref{opt:routeopt} for possible values.
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} which will be used to execute the
 !           redistribution when {\tt ESMF\_FieldRedist} is called.
@@ -833,7 +857,7 @@
                                  dstFtypep%grid, &
                                  dstFtypep%mapping, &
                                  parentVM, &
-                                 routehandle, localrc)
+                                 routeOptions, routehandle, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -852,7 +876,8 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldRedistStoreNew(srcField, decompIds, dstField, &
-                                          parentVM, routehandle, rc)
+                                          parentVM, routeOptions, &
+                                          routehandle, rc)
 !
 !
 ! !ARGUMENTS:
@@ -860,6 +885,7 @@
       integer, dimension(:), intent(in) :: decompIds
       type(ESMF_Field), intent(out) :: dstField
       type(ESMF_VM), intent(in) :: parentVM
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       integer, intent(out), optional :: rc               
 !
@@ -886,6 +912,10 @@
 !           of the Coupler if the redistribution is inter-component, 
 !           but could also be the individual VM for a component if the 
 !           redistribution is intra-component.  
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to execute the
+!           See Section~\ref{opt:routeopt} for possible values.
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} which will be used to execute the
 !           redistribution when {\tt ESMF\_FieldRedist} is called.
@@ -940,7 +970,7 @@
                                  dstFtypep%localfield%localdata, &
                                  dstFtypep%grid, &
                                  dstFtypep%mapping, &
-                                 parentVM, &
+                                 parentVM, routeOptions, &
                                  routehandle, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1036,7 +1066,8 @@
 ! !INTERFACE:
       subroutine ESMF_FieldRegrid(srcField, dstField, routehandle, &
                                   parentVM, regridmethod, regridnorm, &
-                                  srcMask, dstMask, blockingflag, commhandle, rc)
+                                  srcMask, dstMask, blockingflag, &
+                                  commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField                 
@@ -1049,6 +1080,7 @@
       type(ESMF_Mask), intent(in), optional :: dstMask                 
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -1104,6 +1136,10 @@
 !           argument is required.  Information about the pending operation
 !           will be stored in the {\tt ESMF\_CommHandle} and can be queried
 !           or waited for later.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to execute the regrid.
+!           See Section~\ref{opt:routeopt} for possible values.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1154,7 +1190,7 @@
                            ESMF_CONTEXT)
         call ESMF_FieldRegridStore(srcField, dstField, parentVM, &
                                    routehandle, regridmethod, regridnorm, &
-                                   srcMask, dstMask, localrc)
+                                   srcMask, dstMask, routeOptions, localrc)
       endif
 
       ! TODO: we need not only to know if this DE has data in the field,
@@ -1203,7 +1239,7 @@
       call ESMF_ArrayRegrid(srcArray, srcDatamap, hasSrcData, &
                             dstArray, dstDatamap, hasDstData, &
                             routehandle, srcMask, dstMask, &
-                            blockingflag, commhandle, localrc)
+                            blockingflag, commhandle, routeOptions, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1259,7 +1295,7 @@
 ! !INTERFACE:
       subroutine ESMF_FieldRegridStore(srcField, dstField, parentVM, &
                                        routehandle, regridmethod, regridnorm, &
-                                       srcMask, dstMask, rc)
+                                       srcMask, dstMask, routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
@@ -1271,6 +1307,7 @@
       type(ESMF_RegridNormOpt), intent(in), optional :: regridnorm
       type(ESMF_Mask), intent(in), optional :: srcMask                 
       type(ESMF_Mask), intent(in), optional :: dstMask                 
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -1305,6 +1342,10 @@
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
 !     \item [{[dstMask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid destination data.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to execute the regrid.
+!           See Section~\ref{opt:routeopt} for possible values.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1362,11 +1403,11 @@
         return
       endif
 
-      call ESMF_ArrayRegridStore(srcArray, srcGrid, srcDatamap, hasSrcData, &      
+      call ESMF_ArrayRegridStore(srcArray, srcGrid, srcDatamap, hasSrcData, & 
                                  dstArray, dstGrid, dstDatamap, hasDstData, &
                                  parentVM, routehandle, &
                                  regridmethod, regridnorm, &    
-                                 srcMask, dstMask, localrc)
+                                 srcMask, dstMask, routeOptions, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return

@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.91 2004/12/28 07:19:23 theurich Exp $
+! $Id: ESMF_Regrid.F90,v 1.92 2005/02/28 21:57:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.91 2004/12/28 07:19:23 theurich Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.92 2005/02/28 21:57:57 nscollins Exp $'
 
 !==============================================================================
 
@@ -1071,7 +1071,7 @@
                                        dstArray, dstGrid, dstDatamap, hasDstData, &
                                        parentVM, routehandle, &
                                        regridmethod, regridnorm, &
-                                       srcmask, dstmask, rc) 
+                                       srcmask, dstmask, routeOptions, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_Array),         intent(in   ) :: srcArray
@@ -1088,6 +1088,7 @@
       type(ESMF_RegridNormOpt), intent(in   ), optional :: regridnorm
       type(ESMF_Mask),          intent(in   ), optional :: srcmask
       type(ESMF_Mask),          intent(in   ), optional :: dstmask
+      type(ESMF_RouteOptions),  intent(in   ), optional :: routeOptions
       integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1131,6 +1132,10 @@
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
 !     \item [{[dstmask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid destination data.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to execute the regrid.
+!           See Section~\ref{opt:routeopt} for possible values.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1139,6 +1144,7 @@
 ! !REQUIREMENTS:
 
       integer :: localrc        ! local error status
+      type(ESMF_Route) :: route
 
       ! assume failure until success certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -1159,6 +1165,20 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+      ! control over internal communications strategy
+      if (present(routeOptions)) then
+          call ESMF_RouteHandleGet(routehandle, route1=route, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
+          ! Set the route options
+          call c_ESMC_RouteSet(route, routeOptions, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      endif
+
       ! set successful routehandle to type regrid
       call ESMF_RouteHandleSet(routehandle, htype=ESMF_REGRIDHANDLE, rc=localrc)
 
@@ -1175,7 +1195,7 @@
       subroutine ESMF_ArrayRegrid(srcArray, srcDataMap, hasSrcData, &
                                   dstArray, dstDataMap, hasDstData, &
                                   routehandle, srcmask, dstmask, &
-                                  blocking, commhandle, rc)
+                                  blocking, commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array),        intent(inout) :: srcarray
@@ -1189,6 +1209,7 @@
       type(ESMF_Mask),         intent(in   ), optional :: dstmask
       type(ESMF_BlockingFlag), intent(in   ), optional :: blocking
       type(ESMF_CommHandle),   intent(inout), optional :: commhandle
+      type(ESMF_RouteOptions), intent(in   ), optional :: routeOptions
       integer,                 intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1221,6 +1242,10 @@
 !           argument is required.  Information about the pending operation
 !           will be stored in the {\tt ESMF\_CommHandle} and can be queried
 !           or waited for later.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to execute the
+!           See Section~\ref{opt:routeopt} for possible values.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1231,6 +1256,7 @@
       integer :: localrc        ! local error status
       logical :: dummy
       type(ESMF_DataKind) :: srcKind, dstKind
+      type(ESMF_Route) :: route
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -1244,6 +1270,20 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+
+      ! control over internal communications strategy
+      if (present(routeOptions)) then
+          call ESMF_RouteHandleGet(routehandle, route1=route, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
+          ! Set the route options
+          call c_ESMC_RouteSet(route, routeOptions, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      endif
 
       ! Execute the communications call based on datakinds
       if (srcKind.eq.ESMF_R4 .AND. dstKind.eq.ESMF_R4) then
