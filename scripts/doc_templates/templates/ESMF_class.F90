@@ -1,4 +1,4 @@
-! $Id: ESMF_class.F90,v 1.11 2002/11/04 06:13:42 cdeluca Exp $
+! $Id: ESMF_class.F90,v 1.12 2002/11/05 18:04:20 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt Class> class ...
+! The code in this file implements the {\tt <Class>} class ...
 !
 ! < Insert a paragraph or two explaining the function of this class. >
 !
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_class.F90,v 1.11 2002/11/04 06:13:42 cdeluca Exp $'
+      '$Id: ESMF_class.F90,v 1.12 2002/11/05 18:04:20 cdeluca Exp $'
 
 !==============================================================================
 !
