@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.2 2003/03/11 03:00:50 cdeluca Exp $
+// $Id: ESMC_Field.C,v 1.3 2003/06/26 15:13:20 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -14,7 +14,7 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ Field methods declared
+// The code in this file implements the C++ {\tt ESMC\_Field} methods declared
 // in the companion file ESMC_Field.h
 //
 // 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Field.C,v 1.2 2003/03/11 03:00:50 cdeluca Exp $";
+             "$Id: ESMC_Field.C,v 1.3 2003/06/26 15:13:20 rstaufer Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -70,11 +70,11 @@ int ESMC_FieldDestroy(ESMC_Field *f) {
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
-//      allocated Field object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC_FieldDestruct
+//      allocated {\tt ESMC\_Field} object.  May need to do additional allocations
+//      as needed.  Must call the corresponding {\tt ESMC\_FieldDestruct}
 //      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC_FieldCreate, which calls
-//      ESMC_FieldConstruct.  Define for deep classes only.
+//      ESMF use only; end-users use {\tt ESMC\_FieldCreate}, which calls
+//      {\tt ESMC\_FieldConstruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -101,10 +101,10 @@ int ESMC_FieldDestroy(ESMC_Field *f) {
 //
 // !DESCRIPTION:
 //      ESMF routine which deallocates any space allocated by
-//      ESMF_FieldConstruct, does any additional cleanup before the
-//      original Field object is freed.  Intended for internal ESMF
-//      use only; end-users use ESMC_FieldDestroy, which calls
-//      ESMC_FieldDestruct.  Define for deep classes only.
+//      {\tt ESMF\_FieldConstruct}, does any additional cleanup before the
+//      original {\tt ESMC\_Field} object is freed.  Intended for internal ESMF
+//      use only; end-users use {\tt ESMC\_FieldDestroy}, which calls
+//      {\tt ESMC\_FieldDestruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -130,7 +130,7 @@ int ESMC_FieldDestroy(ESMC_Field *f) {
       //ESMC_FieldConfig *config) const {  // out - resources
 //
 // !DESCRIPTION:
-//    Returns the set of resources the Field object was configured with.
+//    Returns the set of resources the {\tt ESMC\_Field} object was configured with.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -155,7 +155,7 @@ int ESMC_FieldDestroy(ESMC_Field *f) {
    //   const ESMC_FieldConfig *config) {     // in - resources
 //
 // !DESCRIPTION:
-//    Configures the Field object with set of resources given.
+//    Configures the {\tt ESMC\_Field} object with set of resources given.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -180,7 +180,7 @@ int ESMC_FieldDestroy(ESMC_Field *f) {
    //    <value type> *value) const {     // out - value
 //
 // !DESCRIPTION:
-//     Returns the value of Field member <Value>.
+//     Returns the value of {\tt ESMC\_Field} member <Value>.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -206,7 +206,7 @@ int ESMC_FieldDestroy(ESMC_Field *f) {
       // <value type> value) {     // in - value
 //
 // !DESCRIPTION:
-//     Sets the Field member <Value> with the given value.
+//     Sets the {\tt ESMC\_Field} member <Value> with the given value.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -232,8 +232,8 @@ int ESMC_FieldDestroy(ESMC_Field *f) {
       const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a Field is internally consistent.
-//      Returns error code if problems are found.  ESMC_Base class method.
+//      Validates that a {\tt ESMC\_Field} is internally consistent.
+//      Returns error code if problems are found.  {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -260,8 +260,8 @@ int ESMC_FieldDestroy(ESMC_Field *f) {
       const char *options) const {     //  in - print options
 //
 // !DESCRIPTION:
-//      Print information about a Field.  The options control the
-//      type of information and level of detail.  ESMC_Base class method.
+//      Print information about a {\tt ESMC\_Field}.  The options control the
+//      type of information and level of detail.  {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
