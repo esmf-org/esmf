@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.12 2004/06/08 02:53:41 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.13 2004/06/11 14:55:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -124,7 +124,7 @@ class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_DELayoutGatherV(void **srcdata, void **destdata, 
       int *blen, int *bdestdispl, ESMC_DataKind dtk, int rootDE, 
       ESMC_Logical oneToOneFlag);
-    int ESMC_DELayoutAllGlobalReduce(void **srcdata, void *result, int len,
+    int ESMC_DELayoutAllFullReduce(void **srcdata, void *result, int len,
       ESMC_DataKind dtk, ESMC_Operation op, ESMC_Logical oneToOneFlag);
   private:
     int ESMC_DELayoutFindDEtoPET(int npets);

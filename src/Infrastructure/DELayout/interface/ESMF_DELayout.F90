@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.31 2004/06/09 16:00:18 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.32 2004/06/11 14:55:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -124,7 +124,7 @@ module ESMF_DELayoutMod
   public ESMF_DELayoutPrint
       
 ! - ESMF-private methods:
-  public ESMF_DELayoutAllGlobalReduce
+  public ESMF_DELayoutAllFullReduce
   public ESMF_DELayoutCopy
   public ESMF_DELayoutExchange
   public ESMF_DELayoutGather
@@ -141,7 +141,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.31 2004/06/09 16:00:18 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.32 2004/06/11 14:55:34 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -168,23 +168,23 @@ module ESMF_DELayoutMod
 
 ! -------------------------- ESMF-private method ------------------------------
 !BOPI
-! !IROUTINE: ESMF_DELayoutAllGlobalReduce -- Generic interface
+! !IROUTINE: ESMF_DELayoutAllFullReduce -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_DELayoutAllGlobalReduce
+      interface ESMF_DELayoutAllFullReduce
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_DELayoutAllGlobReduceGenI4
-      module procedure ESMF_DELayoutAllGlobReduceGenR4
-      module procedure ESMF_DELayoutAllGlobReduceGenR8
-      module procedure ESMF_DELayoutAllGlobReduceI4
-      module procedure ESMF_DELayoutAllGlobReduceR4
-      module procedure ESMF_DELayoutAllGlobReduceR8
+      module procedure ESMF_DELayoutAllFullReduceGenI4
+      module procedure ESMF_DELayoutAllFullReduceGenR4
+      module procedure ESMF_DELayoutAllFullReduceGenR8
+      module procedure ESMF_DELayoutAllFullReduceI4
+      module procedure ESMF_DELayoutAllFullReduceR4
+      module procedure ESMF_DELayoutAllFullReduceR8
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_DELayoutAllGlobalReduce} functions.   
+!  types of {\tt ESMF\_DELayoutAllFullReduce} functions.   
 !EOPI 
       end interface
 
@@ -783,13 +783,13 @@ contains
 
 ! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DELayoutAllGlobReduceGenI4()"
+#define ESMF_METHOD "ESMF_DELayoutAllFullReduceGenI4()"
 !BOPI
-! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce I4 data on a general DELayout
+! !IROUTINE: ESMF_DELayoutAllFullReduce - Reduce I4 data on a general DELayout
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
-  subroutine ESMF_DELayoutAllGlobReduceGenI4(delayout, srcData, &
+  ! Private name; call using ESMF_DELayoutAllFullReduce()
+  subroutine ESMF_DELayoutAllFullReduceGenI4(delayout, srcData, &
     dstData, count, reduceFlag, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
@@ -835,26 +835,26 @@ contains
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutAllGlobReduce(delayout, srcData, dstData, &
+    call c_ESMC_DELayoutAllFullReduce(delayout, srcData, dstData, &
       count, ESMF_I4, reduceFlag, ESMF_FALSE, localrc)
       
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-  end subroutine ESMF_DELayoutAllGlobReduceGenI4
+  end subroutine ESMF_DELayoutAllFullReduceGenI4
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DELayoutAllGlobReduceGenR4()"
+#define ESMF_METHOD "ESMF_DELayoutAllFullReduceGenR4()"
 !BOPI
-! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce R4 data on a general DELayout
+! !IROUTINE: ESMF_DELayoutAllFullReduce - Reduce R4 data on a general DELayout
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
-  subroutine ESMF_DELayoutAllGlobReduceGenR4(delayout, srcData, &
+  ! Private name; call using ESMF_DELayoutAllFullReduce()
+  subroutine ESMF_DELayoutAllFullReduceGenR4(delayout, srcData, &
     dstData, count, reduceFlag, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
@@ -900,26 +900,26 @@ contains
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutAllGlobReduce(delayout, srcData, dstData, &
+    call c_ESMC_DELayoutAllFullReduce(delayout, srcData, dstData, &
       count, ESMF_R4, reduceFlag, ESMF_FALSE, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-  end subroutine ESMF_DELayoutAllGlobReduceGenR4
+  end subroutine ESMF_DELayoutAllFullReduceGenR4
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DELayoutAllGlobReduceGenR8()"
+#define ESMF_METHOD "ESMF_DELayoutAllFullReduceGenR8()"
 !BOPI
-! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce R8 data on a general DELayout
+! !IROUTINE: ESMF_DELayoutAllFullReduce - Reduce R8 data on a general DELayout
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
-  subroutine ESMF_DELayoutAllGlobReduceGenR8(delayout, srcData, &
+  ! Private name; call using ESMF_DELayoutAllFullReduce()
+  subroutine ESMF_DELayoutAllFullReduceGenR8(delayout, srcData, &
     dstData, count, reduceFlag,  blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
@@ -965,26 +965,26 @@ contains
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutAllGlobReduce(delayout, srcData, dstData, &
+    call c_ESMC_DELayoutAllFullReduce(delayout, srcData, dstData, &
       count, ESMF_R8, reduceFlag, ESMF_FALSE, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-  end subroutine ESMF_DELayoutAllGlobReduceGenR8
+  end subroutine ESMF_DELayoutAllFullReduceGenR8
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DELayoutAllGlobReduceI4()"
+#define ESMF_METHOD "ESMF_DELayoutAllFullReduceI4()"
 !BOPI
-! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce I4 data on a one-to-one DELayout
+! !IROUTINE: ESMF_DELayoutAllFullReduce - Reduce I4 data on a one-to-one DELayout
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
-  subroutine ESMF_DELayoutAllGlobReduceI4(delayout, srcData, &
+  ! Private name; call using ESMF_DELayoutAllFullReduce()
+  subroutine ESMF_DELayoutAllFullReduceI4(delayout, srcData, &
     dstData, count, reduceFlag, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
@@ -1030,26 +1030,26 @@ contains
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutAllGlobReduce(delayout, srcData, dstData, &
+    call c_ESMC_DELayoutAllFullReduce(delayout, srcData, dstData, &
       count, ESMF_I4, reduceFlag, ESMF_TRUE, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-  end subroutine ESMF_DELayoutAllGlobReduceI4
+  end subroutine ESMF_DELayoutAllFullReduceI4
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DELayoutAllGlobReduceR4()"
+#define ESMF_METHOD "ESMF_DELayoutAllFullReduceR4()"
 !BOPI
-! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce R4 data on a one-to-one DELayout
+! !IROUTINE: ESMF_DELayoutAllFullReduce - Reduce R4 data on a one-to-one DELayout
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
-  subroutine ESMF_DELayoutAllGlobReduceR4(delayout, srcData, &
+  ! Private name; call using ESMF_DELayoutAllFullReduce()
+  subroutine ESMF_DELayoutAllFullReduceR4(delayout, srcData, &
     dstData, count, reduceFlag, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
@@ -1094,26 +1094,26 @@ contains
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutAllGlobReduce(delayout, srcData, dstData, &
+    call c_ESMC_DELayoutAllFullReduce(delayout, srcData, dstData, &
       count, ESMF_R4, reduceFlag, ESMF_TRUE, localrc)
       
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-  end subroutine ESMF_DELayoutAllGlobReduceR4
+  end subroutine ESMF_DELayoutAllFullReduceR4
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DELayoutAllGlobReduceR8()"
+#define ESMF_METHOD "ESMF_DELayoutAllFullReduceR8()"
 !BOPI
-! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce R8 data on a one-to-one DELayout
+! !IROUTINE: ESMF_DELayoutAllFullReduce - Reduce R8 data on a one-to-one DELayout
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutAllGlobalReduce()
-  subroutine ESMF_DELayoutAllGlobReduceR8(delayout, srcData, &
+  ! Private name; call using ESMF_DELayoutAllFullReduce()
+  subroutine ESMF_DELayoutAllFullReduceR8(delayout, srcData, &
     dstData, count, reduceFlag, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
@@ -1159,14 +1159,14 @@ contains
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutAllGlobReduce(delayout, srcData, dstData, &
+    call c_ESMC_DELayoutAllFullReduce(delayout, srcData, dstData, &
       count, ESMF_R8, reduceFlag, ESMF_TRUE, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-  end subroutine ESMF_DELayoutAllGlobReduceR8
+  end subroutine ESMF_DELayoutAllFullReduceR8
 !------------------------------------------------------------------------------
 
         

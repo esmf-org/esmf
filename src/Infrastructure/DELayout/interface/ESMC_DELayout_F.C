@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.16 2004/06/08 02:39:21 theurich Exp $
+// $Id: ESMC_DELayout_F.C,v 1.17 2004/06/11 14:55:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -123,17 +123,17 @@ extern "C" {
   
   // - ESMF-private methods:
        
-  void FTN(c_esmc_delayoutallglobreduce)(ESMC_DELayout **ptr, 
+  void FTN(c_esmc_delayoutallfullreduce)(ESMC_DELayout **ptr, 
     void ***datain, void *result, int *len, ESMC_DataKind *dtk,
     ESMC_Operation *op, ESMC_Logical *oneToOneFlag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_delayoutallglobreduce()"
+#define ESMC_METHOD "c_esmc_delayoutallfullreduce()"
     int localrc;
     if (*oneToOneFlag == ESMF_TRUE){
-      localrc = (*ptr)->ESMC_DELayoutAllGlobalReduce((void **)datain, result,
+      localrc = (*ptr)->ESMC_DELayoutAllFullReduce((void **)datain, result,
         *len, *dtk, *op, *oneToOneFlag);
     }else{
-      localrc = (*ptr)->ESMC_DELayoutAllGlobalReduce(*datain, result,
+      localrc = (*ptr)->ESMC_DELayoutAllFullReduce(*datain, result,
         *len, *dtk, *op, *oneToOneFlag);
     }
     // Use LogErr to handle return code

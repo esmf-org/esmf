@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.16 2004/06/08 02:53:42 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.17 2004/06/11 14:55:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.16 2004/06/08 02:53:42 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.17 2004/06/11 14:55:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1182,12 +1182,12 @@ int ESMC_DELayout::ESMC_DELayoutGatherV(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DELayoutAllGlobalReduce()"
+#define ESMC_METHOD "ESMC_DELayoutAllFullReduce()"
 //BOP
-// !IROUTINE:  ESMC_DELayoutAllGlobalReduce
+// !IROUTINE:  ESMC_DELayoutAllFullReduce
 //
 // !INTERFACE:
-int ESMC_DELayout::ESMC_DELayoutAllGlobalReduce(
+int ESMC_DELayout::ESMC_DELayoutAllFullReduce(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1208,7 +1208,7 @@ int ESMC_DELayout::ESMC_DELayoutAllGlobalReduce(
 //-----------------------------------------------------------------------------
   // local reference to VM
   ESMC_VM &vm = *myvm;
-  // very crude implementation of a layout wide GlobalReduce
+  // very crude implementation of a layout wide FullReduce
   int mypet = vm.vmachine_mypet();
   void *localresult;
   int local_i4;
