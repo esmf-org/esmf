@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.23 2004/02/19 21:28:20 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.24 2004/02/19 22:40:17 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.23 2004/02/19 21:28:20 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.24 2004/02/19 22:40:17 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2028,6 +2028,7 @@
         call ESMF_LRGridAddDistGrid(grid, distGridId, 1, counts(3:3), &
                                     layout, decompIdsUse(3:3), &
                                     periodic(3:3), &
+                                    countsPerDEDim1=countsPerDE3, &
                                     distGridName=distGridName, rc=status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
@@ -2055,6 +2056,7 @@
             call ESMF_LRGridAddDistGrid(grid, distGridId, 1, counts(3:3), &
                                         layout, decompIdsUse(3:3), &
                                         periodic(3:3), &
+                                        countsPerDEDim1=countsPerDE3, &
                                         distGridName=distGridName, rc=status)
             if(status .NE. ESMF_SUCCESS) then
               print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
