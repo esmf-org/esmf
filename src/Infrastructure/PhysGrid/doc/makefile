@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2003/04/07 16:48:40 flanigan Exp $ 
+# $Id: makefile,v 1.12 2003/05/29 20:59:10 flanigan Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -13,11 +13,13 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/PhysGrid/doc
 
-DVIFILES  = 	${ESMC_DOCDIR}/PhysGrid_reqdoc.dvi \
-		${ESMC_DOCDIR}/PhysGrid_desdoc.dvi \
-		${ESMC_DOCDIR}/PhysGrid_refdoc.dvi
+DVIFILES  = 	PhysGrid_reqdoc.dvi \
+		PhysGrid_desdoc.dvi \
+		PhysGrid_refdoc.dvi
 
-PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
+PDFFILES  =     ${ESMC_DOCDIR}/PhysGrid_reqdoc.pdf \
+		${ESMC_DOCDIR}/PhysGrid_desdoc.pdf \
+		${ESMC_DOCDIR}/PhysGrid_refdoc.pdf
 
 HTMLFILES = 	${ESMC_DOCDIR}/PhysGrid_reqdoc \
 		${ESMC_DOCDIR}/PhysGrid_desdoc \
@@ -53,8 +55,10 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = PhysGrid_reqdoc PhysGrid_desdoc PhySGrid_refdoc
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG PhysGrid_desdoc.tex PhysGrid_reqdoc.tex PhysGrid_refdoc.tex
+CLEANDIRS   = PhysGrid_reqdoc PhysGrid_desdoc PhysGrid_refdoc $(HTMLFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG \
+              PhysGrid_desdoc.tex PhysGrid_reqdoc.tex PhysGrid_refdoc.tex    \
+              $(PDFFILES)
 CLOBBERDIRS =
 
 

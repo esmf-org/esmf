@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2003/04/10 21:14:31 cdeluca Exp $ 
+# $Id: makefile,v 1.13 2003/05/29 20:59:07 flanigan Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -12,11 +12,13 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/CommMem/doc
 
-DVIFILES  = 	${ESMC_DOCDIR}/CommMem_reqdoc.dvi \
-		${ESMC_DOCDIR}/CommMem_desdoc.dvi \
-		${ESMC_DOCDIR}/CommMem_refdoc.dvi
+DVIFILES  = 	CommMem_reqdoc.dvi \
+		CommMem_desdoc.dvi \
+		CommMem_refdoc.dvi
 
-PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
+PDFFILES  =     ${ESMC_DOCDIR}/CommMem_reqdoc.pdf \
+		${ESMC_DOCDIR}/CommMem_desdoc.pdf \
+		${ESMC_DOCDIR}/CommMem_refdoc.pdf
 
 HTMLFILES = 	${ESMC_DOCDIR}/CommMem_reqdoc \
 		${ESMC_DOCDIR}/CommMem_desdoc \
@@ -58,8 +60,10 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   = 
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG CommMem_desdoc.tex CommMem_reqdoc.tex CommMem_refdoc.tex
+CLEANDIRS   =  CommMem_reqdoc CommMem_desdoc CommMem_refdoc $(HTMLFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log \
+              *.toc *.dvi *.ORIG CommMem_desdoc.tex CommMem_reqdoc.tex \
+              CommMem_refdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 
 

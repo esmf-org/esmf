@@ -3,11 +3,11 @@ All: alldoc
 
 LOCDIR = src/Infrastructure/ConfigAttr/doc
 
-DVIFILES  =	${ESMC_DOCDIR}/Config_reqdoc.dvi \
-		${ESMC_DOCDIR}/Config_refdoc.dvi
+DVIFILES  =	Config_reqdoc.dvi \
+		Config_refdoc.dvi
 
-
-PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
+PDFFILES  =     ${ESMC_DOCDIR}/Config_reqdoc.pdf \
+		${ESMC_DOCDIR}/Config_refdoc.pdf
 
 HTMLFILES =	${ESMC_DOCDIR}/Config_reqdoc \
 		${ESMC_DOCDIR}/Config_refdoc
@@ -43,6 +43,7 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   =
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG ConfigAttr_reqdoc.tex
+CLEANDIRS   = Config_reqdoc Config_refdoc $(HTMLFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi \
+              *.ORIG ConfigAttr_reqdoc.tex $(PDFFILES)
 CLOBBERDIRS =

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/05/07 07:09:06 cdeluca Exp $
+# $Id: makefile,v 1.2 2003/05/29 20:59:06 flanigan Exp $
 ALL: alldoc 
 
 CFLAGS    =
@@ -12,9 +12,9 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Demo/coupled_flow/doc
 
-DVIFILES  = 	${ESMC_DOCDIR}/Demo_usrdoc.dvi
+DVIFILES  = 	Demo_usrdoc.dvi
 
-PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
+PDFFILES  =     ${ESMC_DOCDIR}/Demo_usrdoc.pdf
 
 HTMLFILES = 	${ESMC_DOCDIR}/Demo_usrdoc 
 
@@ -48,15 +48,16 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = Demo_usrdoc 
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG Demo_usrdoc.tex
+CLEANDIRS   = Demo_usrdoc $(HTMLFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG \
+              Demo_usrdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 
 
 
-$(ESMC_DOCDIR)/%_usrdoc.dvi : %_usrdoc.ctex $(USRDOC_DEP_FILES)
+%_usrdoc.dvi : %_usrdoc.ctex $(USRDOC_DEP_FILES)
 	$(DO_LATEX) $* usr
-	mv -f $(@F) $(ESMC_DOCDIR)
+
 
 $(ESMC_DOCDIR)/%_usrdoc: %_usrdoc.ctex $(USRDOC_DEP_FILES)
 	${DO_L2H} $* usr

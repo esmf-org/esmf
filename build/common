@@ -1,4 +1,4 @@
-# $Id: common,v 1.47 2003/05/27 22:42:23 flanigan Exp $ 
+# $Id: common,v 1.48 2003/05/29 20:59:06 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -103,6 +103,7 @@ clobber: clean
 tree_clean:
 	@for DIR in $(CLEANDIRS) foo ; do \
 	   if [ $$DIR != "foo" ] ; then \
+	      echo rm -rf $$DIR ;\
 	      rm -rf $$DIR ;\
 	   fi ;\
 	done
@@ -633,20 +634,18 @@ tree_html:chkdir_doc ${HTMLFILES}
 #
 #  dvi
 #
-$(ESMC_DOCDIR)/%_desdoc.dvi : %_desdoc.ctex $(DESDOC_DEP_FILES)
+%_desdoc.dvi : %_desdoc.ctex $(DESDOC_DEP_FILES)
 	$(DO_LATEX) $* des
-	mv -f $(@F) $(ESMC_DOCDIR)
 
-$(ESMC_DOCDIR)/%_refdoc.dvi : %_refdoc.ctex $(REFDOC_DEP_FILES)
+%_refdoc.dvi : %_refdoc.ctex $(REFDOC_DEP_FILES)
 	$(DO_LATEX) $* ref
-	mv -f $(@F) $(ESMC_DOCDIR)
 
-$(ESMC_DOCDIR)/%_reqdoc.dvi : %_reqdoc.ctex $(REQDOC_DEP_FILES)
+%_reqdoc.dvi : %_reqdoc.ctex $(REQDOC_DEP_FILES)
 	$(DO_LATEX) $* req
-	mv -f $(@F) $(ESMC_DOCDIR)
+
 
 # Pdf files
-$(ESMC_DOCDIR)/%.pdf: $(ESMC_DOCDIR)/%.dvi
+$(ESMC_DOCDIR)/%.pdf: %.dvi
 	dvipdf $< $@
 
 # Html Files

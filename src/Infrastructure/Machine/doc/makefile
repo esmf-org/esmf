@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2003/04/29 15:55:45 cdeluca Exp $ 
+# $Id: makefile,v 1.10 2003/05/29 20:59:10 flanigan Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -13,11 +13,13 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Machine/doc
 
-DVIFILES  = 	${ESMC_DOCDIR}/Machine_refdoc.dvi \
-		${ESMC_DOCDIR}/Machine_desdoc.dvi
-#		${ESMC_DOCDIR}/Machine_reqdoc.dvi 
+DVIFILES  = 	Machine_refdoc.dvi \
+		Machine_desdoc.dvi
+#		Machine_reqdoc.dvi 
 
-PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
+PDFFILES  =     ${ESMC_DOCDIR}/Machine_refdoc.pdf \
+		${ESMC_DOCDIR}/Machine_desdoc.pdf
+#		${ESMC_DOCDIR}/Machine_reqdoc.pdf
 
 HTMLFILES = 	${ESMC_DOCDIR}/Machine_refdoc \
 		${ESMC_DOCDIR}/Machine_desdoc
@@ -60,8 +62,10 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = Machine_desdoc Machine_refdoc Machine_reqdoc
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG Machine_desdoc.tex Machine_refdoc.tex Machine_reqdoc.tex
+CLEANDIRS   = Machine_desdoc Machine_refdoc Machine_reqdoc $(HTMLFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi  \
+              *.ORIG Machine_desdoc.tex Machine_refdoc.tex Machine_reqdoc.tex \
+              $(PDFFILES)
 CLOBBERDIRS =
 
 

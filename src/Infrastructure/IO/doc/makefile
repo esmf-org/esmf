@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/04/07 16:48:38 flanigan Exp $ 
+# $Id: makefile,v 1.9 2003/05/29 20:59:09 flanigan Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -12,9 +12,9 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/IO/doc
 
-DVIFILES  =   ${ESMC_DOCDIR}/IO_reqdoc.dvi 
+DVIFILES  =   IO_reqdoc.dvi 
 
-PDFFILES  =   $(addsuffix .pdf, $(basename $(DVIFILES)))
+PDFFILES  =   ${ESMC_DOCDIR}/IO_reqdoc.pdf
 
 HTMLFILES =   ${ESMC_DOCDIR}/IO_reqdoc 
 
@@ -52,8 +52,9 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = IO_reqdoc
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG IO_Reqdoc.tex
+CLEANDIRS   = IO_reqdoc $(HTMLFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG \
+              IO_Reqdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 
 

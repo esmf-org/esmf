@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.6 2003/04/07 22:28:19 flanigan Exp $
+# $Id: makefile,v 1.7 2003/05/29 20:59:11 flanigan Exp $
 
 All: alldoc
 
 LOCDIR = src/Infrastructure/Route/doc
 
-DVIFILES = $(ESMC_DOCDIR)/Route_refdoc.dvi
+DVIFILES = Route_refdoc.dvi
 
-PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
+PDFFILES  = $(ESMC_DOCDIR)/Route_refdoc.pdf
 
 HTMLFILES = $(ESMC_DOCDIR)/Route_refdoc
 
@@ -41,6 +41,7 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   = Route_refdoc
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG Route_refdoc.tex
+CLEANDIRS   = Route_refdoc $(HTMLFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG \
+              Route_refdoc.tex $(PDFFILES)
 CLOBBERDIRS =

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.32 2003/05/19 15:19:05 flanigan Exp $ 
+# $Id: makefile,v 1.33 2003/05/29 20:59:12 flanigan Exp $ 
 ALL: alldoc 
 
 
@@ -22,17 +22,17 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/doc
 
-DVIFILES  =	${ESMC_DOCDIR}/ESMF_reqdoc.dvi \
-		${ESMC_DOCDIR}/ESMF_usrdoc.dvi \
-                ${ESMC_DOCDIR}/ESMF_refdoc.dvi
+DVIFILES  =	ESMF_reqdoc.dvi \
+		ESMF_usrdoc.dvi \
+                ESMF_refdoc.dvi
 
-
-PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
+PDFFILES  =     ${ESMC_DOCDIR}/ESMF_reqdoc.pdf \
+		${ESMC_DOCDIR}/ESMF_usrdoc.pdf \
+                ${ESMC_DOCDIR}/ESMF_refdoc.pdf
 
 HTMLFILES =	${ESMC_DOCDIR}/ESMF_reqdoc \
 		${ESMC_DOCDIR}/ESMF_usrdoc \
                 ${ESMC_DOCDIR}/ESMF_refdoc
-
 
 
 #
@@ -51,8 +51,8 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   = ESMF_reqdoc ESMF_usrdoc ESMF_refdoc $(HTMLFILE)
-CLEANFILES  = *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG ESMF_reqdoc.tex ESMF_refdoc.tex $(PDFFILES) $(DVIFILES)
+CLEANDIRS   = ESMF_reqdoc ESMF_usrdoc ESMF_refdoc $(HTMLFILES)
+CLEANFILES  = *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG ESMF_reqdoc.tex ESMF_refdoc.tex ESMF_usrdoc.tex $(PDFFILES) $(DVIFILES)
 CLOBBERDIRS = 
 
 
@@ -62,16 +62,14 @@ CLOBBERDIRS =
 #
 
 # Dvi files
-${ESMC_DOCDIR}/ESMF_usrdoc.dvi: $(USRDOC_DEP_FILES)
+ESMF_usrdoc.dvi: $(USRDOC_DEP_FILES)
 	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	export TEXINPUTS=".:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/Demo/coupled_flow:" ;\
 	${DO_LATEX} ESMF usr
-	mv -f ESMF_usrdoc.dvi $(ESMC_DOCDIR)
 
-${ESMC_DOCDIR}/ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
+ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
 	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	${DO_LATEX} ESMF ref
-	mv -f ESMF_refdoc.dvi $(ESMC_DOCDIR)
 
 
 # Html Files

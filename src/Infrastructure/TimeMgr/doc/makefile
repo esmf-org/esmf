@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2003/04/11 05:24:30 cdeluca Exp $
+# $Id: makefile,v 1.16 2003/05/29 20:59:11 flanigan Exp $
 ALL: alldoc
 
 CFLAGS    =
@@ -12,11 +12,13 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/TimeMgr/doc
 
-DVIFILES  = 	${ESMC_DOCDIR}/TimeMgr_reqdoc.dvi \
-		${ESMC_DOCDIR}/TimeMgr_desdoc.dvi \
-		${ESMC_DOCDIR}/TimeMgr_refdoc.dvi
+DVIFILES  = 	TimeMgr_reqdoc.dvi \
+		TimeMgr_desdoc.dvi \
+		TimeMgr_refdoc.dvi
 
-PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
+PDFFILES  =     ${ESMC_DOCDIR}/TimeMgr_reqdoc.pdf \
+		${ESMC_DOCDIR}/TimeMgr_desdoc.pdf \
+		${ESMC_DOCDIR}/TimeMgr_refdoc.pdf
 
 HTMLFILES = 	${ESMC_DOCDIR}/TimeMgr_reqdoc \
 		${ESMC_DOCDIR}/TimeMgr_desdoc \
@@ -47,7 +49,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 #
 # Files that a doc depends on.  Do not list the the ctex file !  
 # The ctex file is listed in the rule found in the build/common file.
-# These lists will almost certainly will not be an exhaustive list of 
+# These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
 REQDOC_DEP_FILES = 
@@ -59,8 +61,10 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   = TimeMgr_reqdoc TimeMgr_desdoc TimeMgr_refdoc 
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi TimeMgr_reqdoc.tex TimeMgr_desdoc.tex TimeMgr_refdoc.tex 
+CLEANDIRS   = TimeMgr_reqdoc TimeMgr_desdoc TimeMgr_refdoc $(HTMLFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG \
+              TimeMgr_reqdoc.tex TimeMgr_desdoc.tex TimeMgr_refdoc.tex \
+              $(PDFFILES)
 CLOBBERDIRS =
 
 

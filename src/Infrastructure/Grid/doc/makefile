@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2003/05/20 14:41:08 flanigan Exp $ 
+# $Id: makefile,v 1.12 2003/05/29 20:59:08 flanigan Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -13,10 +13,11 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Grid/doc
 
-DVIFILES  =	$(ESMC_DOCDIR)/Grid_desdoc.dvi \
-		${ESMC_DOCDIR}/Grid_refdoc.dvi
+DVIFILES  =	Grid_desdoc.dvi \
+		Grid_refdoc.dvi
 
-PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
+PDFFILES  =     $(ESMC_DOCDIR)/Grid_desdoc.pdf \
+		${ESMC_DOCDIR}/Grid_refdoc.pdf
 
 HTMLFILES =	$(ESMC_DOCDIR)/Grid_desdoc \
 		${ESMC_DOCDIR}/Grid_refdoc
@@ -52,7 +53,9 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = Grid_desdoc Grid_reqdoc Grid_refdoc
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG Grid_desdoc.tex Grid_reqdoc.tex Grid_refdoc.tex
+CLEANDIRS   = Grid_desdoc Grid_reqdoc Grid_refdoc $(HTMLFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi \
+              *.ORIG Grid_desdoc.tex Grid_reqdoc.tex Grid_refdoc.tex \
+              $(PDFFILES)
 CLOBBERDIRS =
 

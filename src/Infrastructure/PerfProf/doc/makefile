@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2003/04/07 16:48:40 flanigan Exp $ 
+# $Id: makefile,v 1.12 2003/05/29 20:59:10 flanigan Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -12,11 +12,14 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/PerfProf/doc
 
-DVIFILES  = 	${ESMC_DOCDIR}/PerfProf_reqdoc.dvi \
-		${ESMC_DOCDIR}/PerfProf_desdoc.dvi \
-		${ESMC_DOCDIR}/PerfProf_refdoc.dvi
+DVIFILES  = 	PerfProf_reqdoc.dvi \
+		PerfProf_desdoc.dvi \
+		PerfProf_refdoc.dvi
 
-PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
+PDFFILES  =     ${ESMC_DOCDIR}/PerfProf_reqdoc.pdf \
+		${ESMC_DOCDIR}/PerfProf_desdoc.pdf \
+		${ESMC_DOCDIR}/PerfProf_refdoc.pdf
+
 
 HTMLFILES = 	${ESMC_DOCDIR}/PerfProf_reqdoc \
 		${ESMC_DOCDIR}/PerfProf_desdoc \
@@ -53,7 +56,9 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   = PerfProf_desdoc PerfProf_reqdoc PerfProf_refdoc
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG PerfProf_reqdoc.tex PerfProf_desdoc.tex PerfProf_refdoc.tex
+CLEANDIRS   = PerfProf_desdoc PerfProf_reqdoc PerfProf_refdoc $(HTMLFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi \
+              *.ORIG PerfProf_reqdoc.tex PerfProf_desdoc.tex PerfProf_refdoc.tex \
+              $(PDFFILES)
 CLOBBERDIRS =
 

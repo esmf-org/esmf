@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2003/04/07 16:48:37 flanigan Exp $ 
+# $Id: makefile,v 1.10 2003/05/29 20:59:08 flanigan Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -13,11 +13,13 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/DistGrid/doc
 
-DVIFILES  = 	${ESMC_DOCDIR}/DistGrid_reqdoc.dvi \
-		${ESMC_DOCDIR}/DistGrid_desdoc.dvi \
-		${ESMC_DOCDIR}/DistGrid_refdoc.dvi
+DVIFILES  = 	DistGrid_reqdoc.dvi \
+		DistGrid_desdoc.dvi \
+		DistGrid_refdoc.dvi
 
-PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
+PDFFILES  =     ${ESMC_DOCDIR}/DistGrid_reqdoc.pdf \
+		${ESMC_DOCDIR}/DistGrid_desdoc.pdf \
+		${ESMC_DOCDIR}/DistGrid_refdoc.pdf
 
 HTMLFILES = 	${ESMC_DOCDIR}/DistGrid_reqdoc \
 		${ESMC_DOCDIR}/DistGrid_desdoc \
@@ -54,7 +56,10 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = DistGrid_reqdoc DistGrid_desdoc DistGrid_refdoc
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi DistGrid_desdoc.tex DistGrid_reqdoc.tex DistGrid_refdoc.tex
+CLEANDIRS   = DistGrid_reqdoc DistGrid_desdoc DistGrid_refdoc \
+              $(HTMLFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi \
+              DistGrid_desdoc.tex DistGrid_reqdoc.tex DistGrid_refdoc.tex \
+              $(PDFFILES)
 CLOBBERDIRS =
 
