@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/04/04 14:46:23 nscollins Exp $ 
+# $Id: makefile,v 1.9 2003/04/04 15:13:43 nscollins Exp $ 
 
 ALL:  examples
 
@@ -16,7 +16,6 @@ LOCDIR	  = src/Superstructure/Component/examples
 
 TESTEXAMPLES_1  = \
 	ESMC_AppMainEx RUN_ESMC_AppMainEx ESMC_AppMainEx.rm \
-	ESMC_CompEx RUN_ESMC_CompEx ESMC_CompEx.rm \
 	ESMC_CplEx RUN_ESMC_CplEx ESMC_CplEx.rm \
 	ESMC_GCompEx RUN_ESMC_GCompEx ESMC_GCompEx.rm \
 	ESMC_StateEx RUN_ESMC_StateEx ESMC_StateEx.rm \
@@ -24,7 +23,6 @@ TESTEXAMPLES_1  = \
 
 TESTEXAMPLES_3  = \
 	ESMF_AppMainEx RUN_ESMF_AppMainEx ESMF_AppMainEx.rm \
-	ESMF_CompEx RUN_ESMF_CompEx ESMF_CompEx.rm \
 	ESMF_CplEx RUN_ESMF_CplEx ESMF_CplEx.rm \
 	ESMF_GCompEx RUN_ESMF_GCompEx ESMF_GCompEx.rm \
 	ESMF_StateEx RUN_ESMF_StateEx ESMF_StateEx.rm \
@@ -32,7 +30,6 @@ TESTEXAMPLES_3  = \
 
 TESTEXAMPLES_4  = \
 	ESMC_AppMainEx RUN_ESMC_AppMainExUNI ESMC_AppMainEx.rm \
-	ESMC_CompEx RUN_ESMC_CompExUNI ESMC_CompEx.rm \
 	ESMC_CplEx RUN_ESMC_CplExUNI ESMC_CplEx.rm \
 	ESMC_GCompEx RUN_ESMC_GCompExUNI ESMC_GCompEx.rm \
 	ESMC_StateEx RUN_ESMC_StateExUNI ESMC_StateEx.rm \
@@ -40,24 +37,22 @@ TESTEXAMPLES_4  = \
 
 TESTEXAMPLES_9  = \
 	ESMF_AppMainEx RUN_ESMF_AppMainEx ESMF_AppMainEx.rm \
-	ESMF_CompEx RUN_ESMF_CompEx ESMF_CompEx.rm \
 	ESMF_CplEx RUN_ESMF_CplEx ESMF_CplEx.rm \
 	ESMF_GCompEx RUN_ESMF_GCompEx ESMF_GCompEx.rm \
 	ESMF_StateEx RUN_ESMF_StateEx ESMF_StateEx.rm \
 	ESMF_XformEx RUN_ESMF_XformEx ESMF_XformEx.rm 
 
 
-EXAMPLESF  = ESMF_AppMainEx.F90 ESMF_CompEx.F90 \
-	     ESMF_CplEx.F90 ESMF_GCompEx.F90 ESMF_StateEx.F90 ESMF_XformEx.F90
+EXAMPLESF  = ESMF_AppMainEx.F90 ESMF_CplEx.F90 ESMF_GCompEx.F90 \
+             ESMF_StateEx.F90 ESMF_XformEx.F90
 
-EXAMPLESC  = ESMC_AppMainEx.C ESMC_CompEx.C \
-	     ESMC_CplEx.C ESMC_GCompEx.C ESMC_StateEx.C ESMC_XformEx.C
+EXAMPLESC  = ESMC_AppMainEx.C ESMC_CplEx.C ESMC_GCompEx.C \
+             ESMC_StateEx.C ESMC_XformEx.C
 
 
 
-examples:  ESMF_AppMainEx ESMF_CompEx ESMF_CplEx ESMF_GCompEx \
-       ESMF_StateEx ESMF_XformEx ESMC_AppMainEx ESMC_CompEx \
-       ESMC_CplEx ESMC_GCompEx ESMC_StateEx ESMC_XformEx
+examples:  ESMF_AppMainEx ESMF_CplEx ESMF_GCompEx ESMF_StateEx ESMF_XformEx \
+           ESMC_AppMainEx ESMC_CplEx ESMC_GCompEx ESMC_StateEx ESMC_XformEx
 
 
 include $(ESMF_DIR)/makefile
@@ -87,26 +82,6 @@ RUN_ESMF_AppMainExUNI:
 
 ESMF_AppMainEx.rm:
 	echo "ESMF_AppMainEx.rm target called here."
-
-
-#------------------------
-ESMF_CompCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
-
-ESMF_CompEx: ESMF_CompEx.o  
-	${F90CXXLD} -g -o ESMF_CompEx ESMF_CompEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
-	${RM} ESMF_CompEx.o
-
-RUN_ESMF_CompEx:
-	-@rm -f testlog stdlog.* logfile.* ESMF_CompEx.tmps
-	${MPIRUN} -np 4 ESMF_CompEx > ESMF_CompEx.stdout
-
-RUN_ESMF_CompExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_CompEx.tmps
-	${MPIRUN} -np 1 ESMF_CompEx > ESMF_CompEx.stdout
-
-ESMF_CompEx.rm:
-	echo "ESMF_CompEx.rm target called here."
 
 
 #------------------------
@@ -211,26 +186,6 @@ RUN_ESMC_AppMainExUNI:
 
 ESMC_AppMainEx.rm:
 	echo "ESMC_AppMainEx.rm target called here."
-
-
-#------------------------
-ESMC_CompCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
-
-ESMC_CompEx: ESMC_CompEx.o  
-	${F90CXXLD} -g -o ESMC_CompEx ESMC_CompEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
-	${RM} ESMC_CompEx.o
-
-RUN_ESMC_CompEx:
-	-@rm -f testlog stdlog.* logfile.* ESMC_CompEx.tmps
-	${MPIRUN} -np 4 ESMC_CompEx > ESMC_CompEx.stdout
-
-RUN_ESMC_CompExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMC_CompEx.tmps
-	${MPIRUN} -np 1 ESMC_CompEx > ESMC_CompEx.stdout
-
-ESMC_CompEx.rm:
-	echo "ESMC_CompEx.rm target called here."
 
 
 #------------------------
