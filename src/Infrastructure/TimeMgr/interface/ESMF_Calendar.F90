@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.46 2004/01/29 20:10:45 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.47 2004/01/30 23:14:03 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -97,6 +97,7 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
       public ESMF_CalendarCreate
+      public ESMF_CalendarCreateCustom
       public ESMF_CalendarDestroy
       public ESMF_CalendarSet
       public ESMF_CalendarSetCustom
@@ -113,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.46 2004/01/29 20:10:45 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.47 2004/01/30 23:14:03 eschwab Exp $'
 
 !==============================================================================
 
@@ -175,6 +176,93 @@
       call c_ESMC_CalendarCreate(ESMF_CalendarCreate, nameLen, name, type, rc)
     
       end function ESMF_CalendarCreate
+    
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarCreateCustom - Create a custom Calendar
+
+! !INTERFACE:
+      function ESMF_CalendarCreateCustom(name, daysPerMonth, secondsPerDay, &
+                                         daysPerYear, daysPerYearDn, &
+                                         daysPerYearDd, rc)
+! !RETURN VALUE:
+      type(ESMF_Calendar) :: ESMF_CalendarCreateCustom
+
+! !ARGUMENTS:
+      character (len=*),     intent(in),  optional :: name
+      integer, dimension(:), intent(in),  optional :: daysPerMonth
+      integer(ESMF_KIND_I4), intent(in),  optional :: secondsPerDay
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDn
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDd
+      integer,               intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Creates a custom {\tt ESMF\_Calendar} and sets its properties.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{[name]}]
+!          The name for the newly created calendar.  If not specified, a
+!          default unique name will be generated: "CalendarNNN" where NNN
+!          is a unique sequence number from 001 to 999.
+!     \item[{[daysPerMonth]}]
+!          Integer array of days per month, for each month of the year.
+!          The number of months per year is variable and taken from the
+!          size of the array.  If unspecified, months per year = 0,
+!          with the days array undefined.
+!     \item[{[secondsPerDay]}]
+!          Integer number of seconds per day.  Defaults to 86400 if not 
+!          specified.
+!     \item[{[daysPerYear]}]
+!          Integer number of days per year.  Use with daysPerYearDn and
+!          daysPerYearDd (see below) to specify a days-per-year calendar
+!          for any planetary body.  Default = 0
+!     \item[{[daysPerYearDn]}]
+!          Integer numerator portion of fractional number of days per year
+!          (daysPerYearDn/daysPerYearDd).
+!          Use with daysPerYear (see above) and daysPerYearDd (see below) to
+!          specify a days-per-year calendar for any planetary body.
+!          Default = 0
+!     \item[{[daysPerYearDd]}]
+!          Integer denominator portion of fractional number of days per year
+!          (daysPerYearDn/daysPerYearDd).
+!          Use with daysPerYear and daysPerYearDn (see above) to
+!          specify a days-per-year calendar for any planetary body.
+!          Default = 1
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!     
+!EOP
+! !REQUIREMENTS:
+!     TMG2.3.4
+
+      ! initialize name length to zero for non-existent name
+      integer :: nameLen = 0
+
+      ! initialize number of months per year to zero for not-present
+      !   daysPerMonth
+      integer :: monthsPerYear = 0
+
+      ! get length of given name for C++ validation
+      if (present(name)) then
+        nameLen = len_trim(name)
+      end if
+
+      ! get size of given daysPerMonth array for C++ validation
+      if (present(daysPerMonth)) then
+        monthsPerYear = size(daysPerMonth)
+      end if
+
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarCreateCustom(ESMF_CalendarCreateCustom, &
+                                       nameLen, name, monthsPerYear, &
+                                       daysPerMonth, secondsPerDay, &
+                                       daysPerYear, daysPerYearDn, &
+                                       daysPerYearDd, rc)
+    
+      end function ESMF_CalendarCreateCustom
     
 !------------------------------------------------------------------------------
 !BOP

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.40 2004/01/29 20:10:45 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.41 2004/01/30 23:14:03 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.40 2004/01/29 20:10:45 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.41 2004/01/30 23:14:03 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static calendar instance counter
@@ -51,7 +51,7 @@ int ESMC_Calendar::count=0;
       ESMC_Calendar *ESMC_CalendarCreate(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_Alarm
+//     pointer to newly allocated ESMC_Calendar
 //
 // !ARGUMENTS:
       int                nameLen,    // in
@@ -112,6 +112,84 @@ int ESMC_Calendar::count=0;
     return(calendar);
 
  } // end ESMC_CalendarCreate
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CalendarCreateCustom - Allocates and Initializes a Custom Calendar object
+//
+// !INTERFACE:
+      ESMC_Calendar *ESMC_CalendarCreateCustom(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_Calendar
+//
+// !ARGUMENTS:
+      int           nameLen,       // in
+      const char   *name,          // in
+      int          *monthsPerYear, // in  
+      int          *daysPerMonth,  // in
+      ESMF_KIND_I4 *secondsPerDay, // in
+      ESMF_KIND_I4 *daysPerYear,   // in
+      ESMF_KIND_I4 *daysPerYearDn, // in
+      ESMF_KIND_I4 *daysPerYearDd, // in
+      int          *rc) {          // out - return code
+
+// !DESCRIPTION:
+//      Allocates and Initializes a custom {\tt ESMC\_Calendar}.
+//
+//EOP
+// !REQUIREMENTS:
+
+    int returnCode;
+    ESMC_Calendar *calendar;
+
+    try {
+      calendar = new ESMC_Calendar;
+    }
+    catch (...) {
+      // TODO:  call ESMF log/err handler
+      cerr << "ESMC_CalendarCreateCustom() memory allocation failed\n";
+      if (rc != ESMC_NULL_POINTER) {
+        *rc = ESMF_FAILURE;
+      }
+      return(ESMC_NULL_POINTER);
+    }
+
+    // TODO: use inherited methods from ESMC_Base or share with ESMC_Alarm
+    if (name != ESMC_NULL_POINTER) {
+      if (nameLen < ESMF_MAXSTR) {
+        strncpy(calendar->name, name, nameLen);
+        calendar->name[nameLen] = '\0';  // null terminate
+      } else {
+        // TODO: error, delete and return null calendar?
+        if (rc != ESMC_NULL_POINTER) {
+          *rc = ESMF_FAILURE;
+        }
+        return(calendar);
+      }
+    } else {
+      // create default name "CalendarNNN"
+      sprintf(calendar->name, "Calendar%3.3d\0", calendar->id);
+    }
+
+    returnCode = calendar->ESMC_CalendarSetCustom(monthsPerYear, daysPerMonth,
+                                                  secondsPerDay, daysPerYear,
+                                                  daysPerYearDn, daysPerYearDd);
+    if (returnCode != ESMF_SUCCESS) {
+      if (rc != ESMC_NULL_POINTER) {
+        *rc = returnCode;
+      }
+      return(calendar);
+    }
+
+    returnCode = calendar->ESMC_CalendarValidate();
+    if (rc != ESMC_NULL_POINTER) {
+      *rc = returnCode;
+    }
+
+    return(calendar);
+
+ } // end ESMC_CalendarCreateCustom
 
 //-----------------------------------------------------------------------------
 //BOP
