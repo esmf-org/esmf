@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.207 2004/12/17 19:40:42 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.208 2004/12/17 21:15:34 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.207 2004/12/17 19:40:42 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.208 2004/12/17 21:15:34 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -5851,6 +5851,7 @@
       integer :: i, i1, j, n
       integer :: dimCount, oldDimCount, npets, npets2
       integer :: newDEId, oldDEId, petId, coords(2)
+      integer :: petMatchCount, petMatchList(1)
       integer, dimension(:), allocatable :: decompIDs, newNDEs, oldNDEs
       integer, dimension(:), allocatable :: newCountPerDE1, newCountPerDE2
       integer, dimension(:), allocatable :: oldCountPerDE1, oldCountPerDE2
@@ -6012,8 +6013,9 @@
         do i = 1,oldNDEs(1)
           oldDEId = (j-1)*oldNDEs(1) + i - 1
           newDEId = (j-1)*newNDEs(1) + i - 1
-          call ESMF_DELayoutGetDELocalInfo(oldDELayout, de=oldDEId, &
-                                           coord=coords, pid=petId, rc=localrc)
+          call ESMF_DELayoutGetDEMatchPET(oldDELayout, oldDEId, vm, &
+                                          petMatchCount, petMatchList, rc)
+          petId            = petMatchList(1)
           petlist(newDEId) = petId
           petTrack(petId)  = 0
         enddo
@@ -6037,11 +6039,7 @@
       newCountPerDE1 = 0
       newCountPerDE2 = 0
       do i = 1,oldNDEs(1)
-        !oldDEId = i - 1
-        !call ESMF_DELayoutGetDELocalInfo(oldDELayout, de=oldDEId, &
-        !                                 coord=coords, pid=petId, rc=localrc)
-        !newCountPerDE1(petId+1) = oldCountPerDE1(i)   ! TODO: fix for wild petlist
-        newCountPerDE1(i) = oldCountPerDE1(i)   ! TODO: fix for wild petlist
+        newCountPerDE1(i) = oldCountPerDE1(i)
       enddo
       do j = 1,oldNDEs(2)
         newCountPerDE2(j) = oldCountPerDE2(j)
