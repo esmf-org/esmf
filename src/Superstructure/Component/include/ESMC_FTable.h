@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.h,v 1.1 2003/02/25 18:26:57 nscollins Exp $
+// $Id: ESMC_FTable.h,v 1.2 2003/02/25 19:56:50 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -67,10 +67,10 @@
    private:
     int funccount;
     int funcalloc;
-    struct funcinfo funcs[];
+    struct funcinfo *funcs;
     int datacount;
     int dataalloc;
-    struct datainfo data[];
+    struct datainfo *data;
 
   public:
 
