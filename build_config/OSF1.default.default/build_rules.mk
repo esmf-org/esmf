@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.3 2003/11/11 18:52:14 nscollins Exp $
+#  $Id: build_rules.mk,v 1.4 2003/11/11 18:55:28 nscollins Exp $
 #
 #  OSF1.default.default.mk
 #
@@ -108,8 +108,8 @@ C_CLINKER_SLFLAG	= -Wl,-rpath,
 C_FLINKER_SLFLAG	= -Wl,-rpath,
 C_CLINKER		= cc
 C_FLINKER		= f90
-C_CCV			= -V
-C_FCV			= -version
+C_CCV			= $(C_CC) -V
+C_FCV			= $(C_FC) -version
 C_SYS_LIB		= -lfor -lutil -lFutil -lots
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS		= -g -assume gfullpath -pthread
@@ -125,7 +125,7 @@ CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CLINKER	   = cxx
 CXX_FLINKER	   = f90
-CXX_CCV		   = -V
+CXX_CCV		   = $(CXX_CC) -V
 CXX_SYS_LIB	   = -lcomplex -lfor -lutil -lFutil -lots
 C_F90CXXLIBS       = -L/usr/ccs/lib/cmplrs/cxx -lcxx 
 C_F90CXXLD         = f90
