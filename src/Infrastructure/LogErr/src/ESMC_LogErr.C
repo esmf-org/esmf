@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.13 2003/07/02 20:40:10 rstaufer Exp $
+// $Id: ESMC_LogErr.C,v 1.14 2003/07/25 14:31:02 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,9 +28,8 @@
 
 // associated class definition file
 #include <ESMC.h>
-//#include "/home/sjs/ESMF/esmf/esmf/src/include/ESMC.h"
+#include <ESMC_Base.h>
 #include "ESMC_LogErr.h"
-//#include "../include/ESMC_LogErr.h"
 
 //Global Variables
 FILE* logErrCFilePtr[10];
@@ -43,12 +42,12 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.13 2003/07/02 20:40:10 rstaufer Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.14 2003/07/25 14:31:02 shep_smith Exp $";
 //----------------------------------------------------------------------------/
 //
 // This section includes all the Log routines
 //
-//---------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //
 //
 //BOP
@@ -90,26 +89,26 @@ void ESMC_Log::ESMC_LogOpenCFile(
 
 {
    
-   if (!ESMC_LogNameValid(name,ESMF_LOG_FALSE) ) {
+   if (!ESMC_LogNameValid(name,ESMF_TF_FALSE) ) {
       printf("File name is already being used.\n");
       ESMC_LogExit();
    } 
    switch(numLogFile) {
     
    case ESMF_SINGLE_LOG_FILE:
-       oneLogErrFile=ESMF_LOG_TRUE;
+       oneLogErrFile=ESMF_TF_TRUE;
        strcpy(nameLogErrFile,name);
        break;
       
    case ESMF_MULT_LOG_FILE:
-       oneLogErrFile=ESMF_LOG_FALSE;
+       oneLogErrFile=ESMF_TF_FALSE;
        strcpy(nameLogErrFile,name);
        break;
 
    default:
      ESMC_LogExit();
   }
-  if (oneLogErrFile == ESMF_LOG_FALSE) ESMC_LogFormName();
+  if (oneLogErrFile == ESMF_TF_FALSE) ESMC_LogFormName();
   logErrCFilePtr[numFilePtr]=fopen(nameLogErrFile,"a+");
   if (logErrCFilePtr[numCFiles] == NULL) {
      printf("Could not open file.");
@@ -158,8 +157,8 @@ void ESMC_Log::ESMC_LogOpenFortFile(
 //
 {
     
-   int fortIsOpen;
-   if (!ESMC_LogNameValid(name,ESMF_LOG_TRUE) ) {
+//   ESMC_Logical  fortIsOpen;
+   if (!ESMC_LogNameValid(name,ESMF_TF_TRUE) ) {
       printf("File name is already being used.\n");
       ESMC_LogExit();
    } 
@@ -167,23 +166,23 @@ void ESMC_Log::ESMC_LogOpenFortFile(
    switch(numLogFile) {
     
    case ESMF_SINGLE_LOG_FILE:
-       oneLogErrFile=ESMF_LOG_TRUE;
+       oneLogErrFile=ESMF_TF_TRUE;
        strcpy(nameLogErrFile,name);
        break;
       
    case ESMF_MULT_LOG_FILE :
-       oneLogErrFile=ESMF_LOG_FALSE;
+       oneLogErrFile=ESMF_TF_FALSE;
        strcpy(nameLogErrFile,name);
        break;
 
    default:
      ESMC_LogExit();
   }
-  if (oneLogErrFile == ESMF_LOG_FALSE) ESMC_LogFormName();
+  if (oneLogErrFile == ESMF_TF_FALSE) ESMC_LogFormName();
   unitNumber=ESMF_LOG_FORT_UNIT_NUMBER;
   FTN(f_esmf_logopenfortran)(&fortIsOpen,&unitNumber,nameLogErrFile, 
                                                        strlen(nameLogErrFile));
-  if (fortIsOpen == ESMF_LOG_FALSE) {
+  if (fortIsOpen == ESMF_TF_FALSE) {
      printf("Could not open file.");
      ESMC_LogExit();
   }
@@ -210,7 +209,7 @@ bool ESMC_Log::ESMC_LogNameValid(
 // EOP
 {
   int i;
-  if (FortIO == ESMF_LOG_FALSE) {
+  if (FortIO == ESMF_TF_FALSE) {
     for(i=0; i< numCFiles; i++)
      if (strcmp(name,listOfCFileNames[i])  == 0) 
 	return false;
@@ -224,79 +223,6 @@ bool ESMC_Log::ESMC_LogNameValid(
     return true;
   }
 }
-//----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_LogInit - initializes a Log object
-//
-// !INTERFACE:
-void ESMC_Log::ESMC_LogInit(
-//
-// !RETURN VALUE:
-//    None
-// !ARGUMENTS:
-//     
-    int verbosity, //set verbosity level
-    int flush,      //sets flush level
-    int haltOnError,
-    int haltOnWarning
-    )
-
-// !DESCRIPTION
-//   {\tt ESMC\_LogInit} initializes the log object.  The following items are set:
-//   verbosity (whether or not something is written out, flush (is output 
-//   flushed?), whether or not the code halts on errors and warnings.  By
-//   default, all output goes to standard out.  This can be changed by calling
-//   the open file methods.
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-//
-//
-{
-   if (verbosity == ESMF_LOG_TRUE)
-      verbose=ESMF_LOG_TRUE;
-   else if (verbosity == ESMF_LOG_FALSE)
-      verbose=ESMF_LOG_FALSE;
-   else {
-      printf("Verbosity must be set to ESMF_LOG_FALSE or ESMF_LOG_TRUE.\n");
-      ESMC_LogExit();
-   }
-   if (flush == ESMF_LOG_TRUE)
-      flush=ESMF_LOG_TRUE;
-   else if (flush == ESMF_LOG_FALSE)
-      flush=ESMF_LOG_FALSE;
-   else {
-      printf("Flush must be set to ESMF_LOG_FALSE or ESMF_LOG_TRUE.\n");
-      ESMC_LogExit();
-   }
-   if (haltOnError == ESMF_LOG_TRUE)
-      haltOnErr=ESMF_LOG_TRUE;
-   else if (haltOnError == ESMF_LOG_FALSE)
-      haltOnErr=ESMF_LOG_FALSE;
-   else {
-      printf("haltOnError must be set to ESMF_LOG_FALSE or ESMF_LOG_TRUE.\n");
-      ESMC_LogExit();
-   }
-   if (haltOnWarning == ESMF_LOG_TRUE)
-      haltOnWarn=ESMF_LOG_TRUE;
-   else if (haltOnWarning == ESMF_LOG_FALSE)
-      haltOnWarn=ESMF_LOG_FALSE;
-   else {
-      printf("haltOnWarning must be set to ESMF_LOG_FALSE or ESMF_LOG_TRUE.\n");
-      ESMC_LogExit();
-   }
-   numFilePtr=numCFiles;
-   numCFiles++;
-   numFileFort=numFortFiles;
-   numFortFiles++;
-   logErrCFilePtr[numFilePtr]=stdout;
-   logErrFortFile[numFileFort]=ESMF_LOG_FORT_STDOUT;
-   standardOut=ESMF_LOG_TRUE;
-   fortIsOpen=ESMF_LOG_FALSE;
-   oneLogErrFile=ESMF_LOG_TRUE; 
-   unitNumber=ESMF_LOG_FORT_STDOUT;
-   nameLogErrFile[0]='\0';
-
- } // end ESMC_LogErrInit
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_LogInfo - print contents of a Log
@@ -338,8 +264,8 @@ void ESMC_Log::ESMC_LogInfo(
 
 {
 
- if (verbose == ESMF_LOG_FALSE) return;
- int fortIO=ESMF_LOG_FALSE;
+ if (verbose == ESMF_TF_FALSE) return;
+ int fortIO=ESMF_TF_FALSE;
  ESMC_LogPrintHeader(fortIO);
  char* chPtr;
  va_list argp;
@@ -348,7 +274,7 @@ void ESMC_Log::ESMC_LogInfo(
  for (chPtr=fmt; *chPtr; chPtr++) {
    if ( *chPtr != '%') {
     fprintf(logErrCFilePtr[numFilePtr],"%c",*chPtr);
-    if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+    if (flush==ESMF_TF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
     continue;
    }
    chPtr++;
@@ -357,29 +283,29 @@ void ESMC_Log::ESMC_LogInfo(
    switch (*chPtr) {
      case 'c':
       fprintf(logErrCFilePtr[numFilePtr],"%c ",(char)(va_arg(argp, int)));
-      if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+      if (flush==ESMF_TF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
       break;
      case 's':
       fprintf(logErrCFilePtr[numFilePtr],"%s ",va_arg(argp, char*));
-      if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+      if (flush==ESMF_TF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
       break;
      case 'd':
       fprintf(logErrCFilePtr[numFilePtr],"%d ",va_arg(argp, int));
-      if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+      if (flush==ESMF_TF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
       break;
      case 'f':
       fprintf(logErrCFilePtr[numFilePtr],"%f ",va_arg(argp, double));
-      if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+      if (flush==ESMF_TF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
       break;
      default:
       printf("Error in character descriptor.");
-      if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+      if (flush==ESMF_TF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
       ESMC_LogExit();
     }
   }
   fprintf(logErrCFilePtr[numFilePtr],"\n");
   fprintf(logErrCFilePtr[numFilePtr],"\n");
-  if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+  if (flush==ESMF_TF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
   va_end(argp);
 } // end ESMC_LogErrInfo
 
@@ -427,8 +353,8 @@ void ESMC_Log::ESMC_LogInfoFortran(
 {
 
 
- if (verbose == ESMF_LOG_FALSE) return;
- int fortIO=ESMF_LOG_TRUE;
+ if (verbose == ESMF_TF_FALSE) return;
+ int fortIO=ESMF_TF_TRUE;
  ESMC_LogPrintHeader(fortIO);
  int numStr=0;
  char* chPtr;
@@ -488,7 +414,7 @@ void ESMC_Log::ESMC_LogInfoFortran(
 //    none 
 //
 // !ARGUMENTS:
-     int fortIO       //if set to ESMF_LOG_TRUE, use fortran io libraries
+     int fortIO       //if set to ESMF_TF_TRUE, use fortran io libraries
 
    )
 //
@@ -513,7 +439,7 @@ void ESMC_Log::ESMC_LogInfoFortran(
   timeAsc=asctime(timePtr);
   int len1=strlen(timeAsc);
   timeAsc[len1-1]='\0';
-  if (fortIO == ESMF_LOG_TRUE) { 
+  if (fortIO == ESMF_TF_TRUE) { 
    FTN(f_esmf_logprintstring)(&unitNumber,timeAsc,&flush,len1);
    len1=strlen(underline);
    FTN(f_esmf_logprintstring)(&unitNumber,underline,&flush,len1);
@@ -521,26 +447,26 @@ void ESMC_Log::ESMC_LogInfoFortran(
   } else {
     fprintf(logErrCFilePtr[numFilePtr],"%s",timeAsc);
     fprintf(logErrCFilePtr[numFilePtr],"%s",underline);
-    if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+    if (flush==ESMF_TF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
   } 
 #ifdef HAS_MPI
   rank=MPI::COMM_WORLD.Get_rank();
-  if (fortIO == ESMF_LOG_TRUE) { 
+  if (fortIO == ESMF_TF_TRUE) { 
    sprintf(stringToPrint,"PE: %d",rank);
    FTN(f_esmf_logprintstring)(&unitNumber,stringToPrint,&flush,72);
   } else {
     fprintf(logErrCFilePtr[numFilePtr],"PE: %d",rank);
-    if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+    if (flush==ESMF_TF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
   } 
 #endif
 }
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LogWrite - used in conjunction with standard Fortran write
+// !IROUTINE:  ESMC_LogGetUnit - used in conjunction with standard Fortran write
 // to write data to log file. 
 //
 // !INTERFACE:
-int ESMC_Log::ESMC_LogWrite(
+int ESMC_Log::ESMC_LogGetUnit(
 //
 // !RETURN VALUE:
 //    unit number 
@@ -567,7 +493,7 @@ int ESMC_Log::ESMC_LogWrite(
   int rank;
 #endif
 
-  int fortIO=ESMF_LOG_TRUE;
+  int fortIO=ESMF_TF_TRUE;
   ESMC_LogPrintHeader(fortIO);
   return unitNumber;
 }
@@ -634,8 +560,8 @@ void ESMC_Log::ESMC_LogCloseFortFile(
 //EOP
 {
   int i,j;
-  if (standardOut == ESMF_LOG_FALSE) {
-    if (fortIsOpen==ESMF_LOG_TRUE) {
+  if (standardOut == ESMF_TF_FALSE) {
+    if (fortIsOpen==ESMF_TF_TRUE) {
       FTN(f_esmf_logclosefortran)(&unitNumber);
       for( i=0; i<numFortFiles; i++)
         if (strcmp(nameLogErrFile,listOfFortFileNames[i])  == 0) {
@@ -674,7 +600,7 @@ void ESMC_Log::ESMC_LogCloseCFile(
 {
   int i,j;
 
-   if (standardOut == ESMF_LOG_FALSE) {
+   if (standardOut == ESMF_TF_FALSE) {
      if (logErrCFilePtr[numFilePtr] != NULL) {
        fclose(logErrCFilePtr[numFilePtr]);
      }
@@ -715,13 +641,13 @@ ESMC_Log::ESMC_Log(
 
 {
  nameLogErrFile[0]='\0';
- oneLogErrFile=0;
- standardOut=ESMF_LOG_TRUE;
- verbose=ESMF_LOG_TRUE; 
- fortIsOpen=ESMF_LOG_FALSE;
+ oneLogErrFile=ESMF_TF_TRUE;
+ standardOut=ESMF_TF_TRUE;
+ verbose=ESMF_TF_TRUE; 
+ fortIsOpen=ESMF_TF_FALSE;
  numFilePtr=numCFiles;
  unitNumber=50;
- flush=ESMF_LOG_FALSE;
+ flush=ESMF_TF_FALSE;
 }
 
 //----------------------------------------------------------------------
@@ -749,14 +675,14 @@ void ESMC_Log::ESMC_LogErr_(
 
 {
 
-   if (verbose == ESMF_LOG_FALSE) return;
-   int fortIO=ESMF_LOG_FALSE;
+   if (verbose == ESMF_TF_FALSE) return;
+   int fortIO=ESMF_TF_FALSE;
    char msg[1];
    msg[0]='\0';
    ESMC_LogPrintHeader(fortIO);
    ESMC_LogPrint(fortIO,errCode,line,file,dir,msg);
 
-   if (haltOnErr==ESMF_LOG_TRUE) {
+   if (haltOnErr==ESMF_TF_TRUE) {
     ESMC_LogCloseCFile();
     ESMC_LogExit();
    }
@@ -789,12 +715,12 @@ void ESMC_Log::ESMC_LogErrMsg_(
 
 {
 
-   if (verbose == ESMF_LOG_FALSE) return;
-   int fortIO=ESMF_LOG_FALSE;
+   if (verbose == ESMF_TF_FALSE) return;
+   int fortIO=ESMF_TF_FALSE;
    ESMC_LogPrintHeader(fortIO);
    ESMC_LogPrint(fortIO,errCode,line,file,dir,msg);
 
-   if (haltOnErr==ESMF_LOG_TRUE) {
+   if (haltOnErr==ESMF_TF_TRUE) {
     ESMC_LogCloseCFile();
     ESMC_LogExit();
    }
@@ -824,14 +750,14 @@ void ESMC_Log::ESMC_LogErrMsg_(
 //EOP
 { 
 
- if (verbose == ESMF_LOG_FALSE) return;
- int fortIO=ESMF_LOG_FALSE;
+ if (verbose == ESMF_TF_FALSE) return;
+ int fortIO=ESMF_TF_FALSE;
  char msg[1];
  msg[0]='\0';
  ESMC_LogPrintHeader(fortIO);
  ESMC_LogPrint(fortIO,errCode,line,file,dir,msg);
 
- if (haltOnWarn == ESMF_LOG_TRUE) {
+ if (haltOnWarn == ESMF_TF_TRUE) {
     ESMC_LogCloseCFile();
     ESMC_LogExit();
  }
@@ -861,12 +787,12 @@ void ESMC_Log::ESMC_LogErrMsg_(
 //EOP
 { 
 
- if (verbose==ESMF_LOG_FALSE) return;
- int fortIO=ESMF_LOG_FALSE;
+ if (verbose==ESMF_TF_FALSE) return;
+ int fortIO=ESMF_TF_FALSE;
  ESMC_LogPrintHeader(fortIO);
  ESMC_LogPrint(fortIO,errCode,line,file,dir,msg);
 
- if (haltOnWarn == ESMF_LOG_TRUE) {
+ if (haltOnWarn == ESMF_TF_TRUE) {
     ESMC_LogCloseCFile();
     ESMC_LogExit();
  }
@@ -932,13 +858,13 @@ void ESMC_Log::ESMC_LogErrFortran(
 
 {
 
-  if (verbose == ESMF_LOG_FALSE) return;
-  int fortIO=ESMF_LOG_TRUE;
+  if (verbose == ESMF_TF_FALSE) return;
+  int fortIO=ESMF_TF_TRUE;
   ESMC_LogPrintHeader(fortIO);
   ESMC_LogPrint(fortIO,errCode,line,file,dir,msg);
 
 
-  if (haltOnErr == ESMF_LOG_TRUE) {
+  if (haltOnErr == ESMF_TF_TRUE) {
     ESMC_LogCloseFortFile();
     ESMC_LogExit();
   }
@@ -973,12 +899,12 @@ void ESMC_Log::ESMC_LogWarnFortran(
 //EOP
 
 {
- if (verbose == ESMF_LOG_FALSE) return;
- int fortIO=ESMF_LOG_TRUE;
+ if (verbose == ESMF_TF_FALSE) return;
+ int fortIO=ESMF_TF_TRUE;
  ESMC_LogPrintHeader(fortIO);
  ESMC_LogPrint(fortIO,errCode,line,file,dir,msg);
 
- if (haltOnWarn == ESMF_LOG_TRUE) {
+ if (haltOnWarn == ESMF_TF_TRUE) {
     ESMC_LogCloseFortFile();
     ESMC_LogExit();
  }
@@ -996,7 +922,7 @@ void ESMC_Log:: ESMC_LogPrint(
 
 // !ARGUMENTS:
 
-   int fortIO,          //if set to ESMF_LOG_TRUE use Fortran IO libraries
+   int fortIO,          //if set to ESMF_TF_TRUE use Fortran IO libraries
    int errCode,
    int line,            // see LogErr for a definition
    char file[],         // of these variables
@@ -1014,7 +940,7 @@ void ESMC_Log:: ESMC_LogPrint(
  char stringToPrint[72];
  int len;
  ESMC_LogGetErrMsg(errCode,errMsg);
- if (fortIO == ESMF_LOG_TRUE) {
+ if (fortIO == ESMF_TF_TRUE) {
 
   sprintf(stringToPrint,"Error Code: %d",errCode);
   len=strlen(stringToPrint);
@@ -1043,18 +969,18 @@ void ESMC_Log:: ESMC_LogPrint(
   FTN(f_esmf_logprintnewline)(&unitNumber,&flush);
  } else {
   fprintf(logErrCFilePtr[numFilePtr],"Error Code: %d\n",errCode);
-  if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+  if (flush==ESMF_TF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
   fprintf(logErrCFilePtr[numFilePtr],"%s\n",errMsg);
-  if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+  if (flush==ESMF_TF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
   fprintf(logErrCFilePtr[numFilePtr],"Directory: %s \n",dir);
-  if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+  if (flush==ESMF_TF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
   fprintf(logErrCFilePtr[numFilePtr],"File: %s\n",file);
-  if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+  if (flush==ESMF_TF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
   fprintf(logErrCFilePtr[numFilePtr],"Line: %d\n",line);
-  if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+  if (flush==ESMF_TF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
   if ((msg != NULL) && (msg[0] != '\0')) {
     fprintf(logErrCFilePtr[numFilePtr],"Comments: %s\n",msg);
-    if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+    if (flush==ESMF_TF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
   }
   fprintf(logErrCFilePtr[numFilePtr],"\n");
   fprintf(logErrCFilePtr[numFilePtr],"\n");
