@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldMacros.h,v 1.2 2004/03/09 22:21:32 svasquez Exp $
+! $Id: ESMF_FieldMacros.h,v 1.3 2004/03/11 16:21:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -132,10 +132,7 @@
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
 ! @\
- @\
-! @\
 !EOP @\
-! !REQUIREMENTS: @\
  @\
         ! Local variables @\
         type (ESMF_Array) :: array          ! array object @\

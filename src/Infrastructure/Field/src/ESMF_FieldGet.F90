@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.F90,v 1.2 2004/02/05 22:28:50 nscollins Exp $
+! $Id: ESMF_FieldGet.F90,v 1.3 2004/03/11 16:21:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -24,6 +24,7 @@
 ! INCLUDES
 ! < ignore blank lines below. they are created by the files which
 ! define various macros. >
+#include "ESMF.h"
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
@@ -46,7 +47,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet.F90,v 1.2 2004/02/05 22:28:50 nscollins Exp $'
+      '$Id: ESMF_FieldGet.F90,v 1.3 2004/03/11 16:21:59 nscollins Exp $'
 
 !==============================================================================
 !
@@ -137,25 +138,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -222,25 +217,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -307,25 +296,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -392,25 +375,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -477,25 +454,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -562,25 +533,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -647,25 +612,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -732,25 +691,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -817,25 +770,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -902,25 +849,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -987,25 +928,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -1072,25 +1007,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -1157,25 +1086,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -1242,25 +1165,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -1327,25 +1244,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -1412,25 +1323,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -1497,25 +1402,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -1582,25 +1481,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -1667,25 +1560,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -1752,25 +1639,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -1837,25 +1718,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -1922,25 +1797,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -2007,25 +1876,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -2092,25 +1955,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 
@@ -2177,25 +2034,19 @@ end interface
 ! \begin{description} 
 ! \item[field] 
 ! The {\tt ESMF\_Field} to query. 
-! 
 ! \item[f90ptr] 
 ! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the Field. When this call returns successfully, the pointer will now reference 
 ! the data in the Field. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
-! 
 ! \item[{[copyflag]}] 
 ! Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
 ! copy of the data will be made and the pointer will point at the copy. 
-! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
- 
-! 
 !EOP 
-! !REQUIREMENTS: 
  
  ! Local variables 
  type (ESMF_Array) :: array ! array object 

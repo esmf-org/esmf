@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet_F90.cpp,v 1.1 2004/02/05 21:50:12 nscollins Exp $
+! $Id: ESMF_FieldGet_F90.cpp,v 1.2 2004/03/11 16:21:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,12 +25,13 @@
 ! < ignore blank lines below.  they are created by the files which
 !   define various macros. >
 #include "ESMF_FieldMacros.h"
+^include "ESMF.h"
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
-      !use ESMF_LocalArrayMod
-      !use ESMF_ArrayBaseMod
-      !use ESMF_ArrayExpandMod
+      use ESMF_LocalArrayMod
+      use ESMF_ArrayBaseMod
+      use ESMF_ArrayExpandMod
       use ESMF_FieldMod
       implicit none
 
@@ -47,7 +48,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet_F90.cpp,v 1.1 2004/02/05 21:50:12 nscollins Exp $'
+      '$Id: ESMF_FieldGet_F90.cpp,v 1.2 2004/03/11 16:21:59 nscollins Exp $'
 
 !==============================================================================
 ! 
