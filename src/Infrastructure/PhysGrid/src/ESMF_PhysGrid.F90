@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.31 2003/07/15 18:17:34 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.32 2003/07/28 19:36:12 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -178,7 +178,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.31 2003/07/15 18:17:34 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.32 2003/07/28 19:36:12 dneckels Exp $'
 
 !==============================================================================
 !
@@ -2078,10 +2078,31 @@
 !
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
+      integer :: i
 
-!
-!  code goes here
-!
+! This code will surely change, but for development purposes it
+! is necessary to have some information available currently.
+
+      print *, 'Physgrid:'
+      print *, ' Dimensions:', physgrid%ptr%dim_num
+
+      print *, ' Coordinate Extents:'
+
+! The global and local coordinate extents
+      print *, '  Global Extents:'
+      do i=1, physgrid%ptr%dim_num
+         print *, '   ', physgrid%ptr%global_min(i), &
+         ',', physgrid%ptr%global_max(i)
+      if (i .ne. physgrid%ptr%dim_num) print *, '      x'
+      enddo
+
+      print *, '  Local Extents:'
+      do i=1, physgrid%ptr%dim_num
+         print *, '   ', physgrid%ptr%local_min(i), &
+         ',', physgrid%ptr%local_max(i)
+      if (i .ne. physgrid%ptr%dim_num) print *, '      x'
+      enddo
+
       end subroutine ESMF_PhysGridPrint
 
 !------------------------------------------------------------------------------
