@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.4 2003/06/06 21:08:17 jwolfe Exp $ 
+# $Id: base.site,v 1.5 2003/06/06 22:36:59 jwolfe Exp $ 
 
 #
 #  This file contains site-specific information.  The definitions below
@@ -30,4 +30,8 @@ MPIRUN         = ${ESMF_TOP_DIR}/scripts/mpirun.rs6000_sp
 MPI64_LIB      = -L/usr/local/mpi64/ppe.poe/lib -lmpi_r -lvtd_r \
 		 -L/usr/local/mpi64/ppe.poe/lib/us -lmpci_r
 HDF_INCLUDE    = -I/usr/local/include/hdf
+#
+# Location of STL files for C++
+#
+LOCAL_INCLUDE += -I/usr/vacpp/include
 
