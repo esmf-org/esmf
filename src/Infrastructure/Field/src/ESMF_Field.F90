@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.147 2004/05/20 21:58:42 slswift Exp $
+! $Id: ESMF_Field.F90,v 1.148 2004/05/26 18:29:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -225,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.147 2004/05/20 21:58:42 slswift Exp $'
+      '$Id: ESMF_Field.F90,v 1.148 2004/05/26 18:29:35 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3220,15 +3220,15 @@
                              vertRelloc=vertRelloc, rc=status)
       else
         if (gridRank .eq. 1) then
-          call ESMF_FieldDataMapInit(ftype%mapping, ESMF_INDEX_I, &
+          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_I, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
         else if (gridRank .eq. 2) then
-          call ESMF_FieldDataMapInit(ftype%mapping, ESMF_INDEX_IJ, &
+          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_IJ, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
         else if (gridRank .eq. 3) then
-          call ESMF_FieldDataMapInit(ftype%mapping, ESMF_INDEX_IJK, &
+          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_IJK, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
         endif
@@ -3353,15 +3353,15 @@
       else
         ! create default datamap with 1-for-1 correspondence to grid
         if (gridRank .eq. 1) then
-          call ESMF_FieldDataMapInit(ftype%mapping, ESMF_INDEX_I, &
+          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_I, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
         else if (gridRank .eq. 2) then
-          call ESMF_FieldDataMapInit(ftype%mapping, ESMF_INDEX_IJ, &
+          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_IJ, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
         else if (gridRank .eq. 3) then
-          call ESMF_FieldDataMapInit(ftype%mapping, ESMF_INDEX_IJK, &
+          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_IJK, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
         endif

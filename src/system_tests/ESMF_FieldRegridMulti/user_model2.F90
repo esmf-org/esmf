@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.20 2004/05/24 23:07:26 jwolfe Exp $
+! $Id: user_model2.F90,v 1.21 2004/05/26 18:31:32 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -149,7 +149,7 @@
       order(1) = 0
       order(2) = 1
       order(3) = 2
-      call ESMF_FieldDataMapInit(datamap, 3, order, horzRelloc=ESMF_CELL_NFACE, &
+      call ESMF_FieldDataMapSetDefault(datamap, 3, order, horzRelloc=ESMF_CELL_NFACE, &
                                    counts=counts(1:1), rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 

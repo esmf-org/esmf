@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.53 2004/05/25 11:03:09 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.54 2004/05/26 18:29:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.53 2004/05/25 11:03:09 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.54 2004/05/26 18:29:37 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -347,7 +347,7 @@
       ! Fields may be created as in FLD1.1.1 with a data array passed into 
       ! the argument list. The data array is referenced and not copied.
       ! Verifing that a Field can be created with a Grid and Array
-      call ESMF_FieldDataMapInit(dm, ESMF_INDEX_IJ)
+      call ESMF_FieldDataMapSetDefault(dm, ESMF_INDEX_IJ)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 2, dm, "Field 0", ios, rc)
       write(failMsg, *) ""

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.19 2004/05/24 23:07:15 jwolfe Exp $
+! $Id: user_model1.F90,v 1.20 2004/05/26 18:31:31 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -148,7 +148,7 @@
         order(1) = 0
         order(2) = 1
         order(3) = 2
-        call ESMF_FieldDataMapInit(datamap, 3, order, counts=counts(1:1), rc=status)
+        call ESMF_FieldDataMapSetDefault(datamap, 3, order, counts=counts(1:1), rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Create the field 

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.3 2004/05/12 13:42:17 nscollins Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.4 2004/05/26 18:23:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -189,7 +189,7 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-      public ESMF_ArrayDataMapInit
+      public ESMF_ArrayDataMapSetDefault
       public ESMF_ArrayDataMapSetInvalid
 
       public ESMF_ArrayDataMapGet, ESMF_ArrayDataMapSet
@@ -209,7 +209,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.3 2004/05/12 13:42:17 nscollins Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.4 2004/05/26 18:23:24 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -222,14 +222,14 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayDataMapInit - Initialize a ArrayDataMap type
+! !IROUTINE: ESMF_ArrayDataMapSetDefault - Set all defaults in a ArrayDataMap
 
 ! !INTERFACE:
-      interface ESMF_ArrayDataMapInit
+      interface ESMF_ArrayDataMapSetDefault
 
 ! !PRIVATE MEMBER FUNCTIONS:
-       module procedure ESMF_ArrayDataMapInitIndex
-       module procedure ESMF_ArrayDataMapInitExplicit
+       module procedure ESMF_ArrayDataMapSetDefaultIndex
+       module procedure ESMF_ArrayDataMapSetDefaultExplicit
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for {\tt ESMF\_ArrayDataMap}
@@ -323,11 +323,11 @@ end function
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_ArrayDataMapInit - initialize the contents of a ArrayDataMap
+! !IROUTINE:  ESMF_ArrayDataMapSetDefault - initialize the contents of a ArrayDataMap
 
 ! !INTERFACE:
-      ! Private name: scCall using ESMF_ArrayDataMapInit()
-      subroutine ESMF_ArrayDataMapInitIndex(datamap, dataIorder, counts, rc)
+      ! Private name: scCall using ESMF_ArrayDataMapSetDefault()
+      subroutine ESMF_ArrayDataMapSetDefaultIndex(datamap, dataIorder, counts, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_ArrayDataMap) :: datamap
@@ -432,7 +432,7 @@ end function
             datamap%dataDimOrder(3) = 2
 
           case default 
-            print *, "ERROR: ESMF_ArrayDataMapInit - unrecognized grid index order"
+            print *, "ERROR: ESMF_ArrayDataMapSetDefault - unrecognized grid index order"
             return
         end select
 
@@ -447,13 +447,13 @@ end function
         ! if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayDataMapInitIndex
+        end subroutine ESMF_ArrayDataMapSetDefaultIndex
 
 
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      subroutine ESMF_ArrayDataMapInitExplicit(datamap, dataRank, dataIndices, &
+      subroutine ESMF_ArrayDataMapSetDefaultExplicit(datamap, dataRank, dataIndices, &
                                                                    counts, rc)
 !
 ! !ARGUMENTS:
@@ -528,7 +528,7 @@ end function
         ! if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayDataMapInitExplicit
+        end subroutine ESMF_ArrayDataMapSetDefaultExplicit
 
 
 !------------------------------------------------------------------------------

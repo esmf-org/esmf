@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMapUTest.F90,v 1.2 2004/05/07 21:46:09 svasquez Exp $
+! $Id: ESMF_BundleDataMapUTest.F90,v 1.3 2004/05/26 18:27:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleDataMapUTest.F90,v 1.2 2004/05/07 21:46:09 svasquez Exp $'
+      '$Id: ESMF_BundleDataMapUTest.F90,v 1.3 2004/05/26 18:27:50 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -67,10 +67,10 @@
 
 !-------------------------------------------------------------------------------
       !NEX_UTest
-      ! Test BumdleDataMap Init
-      call ESMF_BundleDataMapInit(bundleDataMap1, rc=rc)
+      ! Test BundleDataMap Initialization
+      call ESMF_BundleDataMapSetDefault(bundleDataMap1, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Init BumdleDataMap Test"
+      write(name, *) "SetDefault BundleDataMap Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! return number of failures to environment; 0 = success (all pass)

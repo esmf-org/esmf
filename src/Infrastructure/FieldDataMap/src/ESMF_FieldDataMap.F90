@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.3 2004/05/07 12:09:19 nscollins Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.4 2004/05/26 18:30:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-      public ESMF_FieldDataMapInit
+      public ESMF_FieldDataMapSetDefault
       public ESMF_FieldDataMapSetInvalid
 
       public ESMF_FieldDataMapGet, ESMF_FieldDataMapSet
@@ -111,7 +111,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.3 2004/05/07 12:09:19 nscollins Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.4 2004/05/26 18:30:39 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -124,14 +124,14 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldDataMapInit - Initialize a FieldDataMap type
+! !IROUTINE: ESMF_FieldDataMapSetDefault - Initialize a FieldDataMap type
 
 ! !INTERFACE:
-      interface ESMF_FieldDataMapInit
+      interface ESMF_FieldDataMapSetDefault
 
 ! !PRIVATE MEMBER FUNCTIONS:
-       module procedure ESMF_FieldDataMapInitIndex
-       module procedure ESMF_FieldDataMapInitExplicit
+       module procedure ESMF_FieldDataMapSetDefaultIndex
+       module procedure ESMF_FieldDataMapSetDefaultExplicit
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for {\tt ESMF\_FieldDataMap}
@@ -158,11 +158,11 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_FieldDataMapInit - initialize the contents of a FieldDataMap
+! !IROUTINE:  ESMF_FieldDataMapSetDefault - initialize the contents of a FieldDataMap
 
 ! !INTERFACE:
-      ! Private name: scCall using ESMF_FieldDataMapInit()
-      subroutine ESMF_FieldDataMapInitIndex(datamap, dataIorder, counts, &
+      ! Private name: scCall using ESMF_FieldDataMapSetDefault()
+      subroutine ESMF_FieldDataMapSetDefaultIndex(datamap, dataIorder, counts, &
                                        horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
@@ -219,7 +219,7 @@
         endif
 
         ! initialize the contents of the internal array datamap
-        call ESMF_ArrayDataMapInit(datamap%adm, dataIorder, counts, status)
+        call ESMF_ArrayDataMapSetDefault(datamap%adm, dataIorder, counts, status)
         if (status .ne. ESMF_SUCCESS) return
 
         ! assume scalar data and use the relloc the caller gave
@@ -243,13 +243,13 @@
         ! if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_FieldDataMapInitIndex
+        end subroutine ESMF_FieldDataMapSetDefaultIndex
 
 
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      subroutine ESMF_FieldDataMapInitExplicit(datamap, dataRank, dataIndices, &
+      subroutine ESMF_FieldDataMapSetDefaultExplicit(datamap, dataRank, dataIndices, &
                                           counts, horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
@@ -310,7 +310,7 @@
         endif
 
         ! initialize the contents of the internal array datamap
-        call ESMF_ArrayDataMapInit(datamap%adm, dataRank, dataIndices, &
+        call ESMF_ArrayDataMapSetDefault(datamap%adm, dataRank, dataIndices, &
                                    counts, status)
         if (status .ne. ESMF_SUCCESS) return
 
@@ -329,7 +329,7 @@
         ! if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_FieldDataMapInitExplicit
+        end subroutine ESMF_FieldDataMapSetDefaultExplicit
 
 
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.12 2004/05/24 23:08:23 jwolfe Exp $
+! $Id: user_model2.F90,v 1.13 2004/05/26 18:32:21 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -131,7 +131,7 @@
       horzStagger     = ESMF_GRID_HORZ_STAGGER_D_NE
       coordOrder      = ESMF_COORD_ORDER_YXZ
 
-      call ESMF_FieldDataMapInit(datamap, ESMF_INDEX_IJ, rc=rc)
+      call ESMF_FieldDataMapSetDefault(datamap, ESMF_INDEX_IJ, rc=rc)
       if (status .ne. ESMF_SUCCESS) goto 10
 
       grid1 = ESMF_GridCreateHorz_XY( minGlobalCoordPerDim=min, &

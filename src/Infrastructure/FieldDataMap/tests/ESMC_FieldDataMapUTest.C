@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldDataMapUTest.C,v 1.1 2004/05/04 13:53:27 nscollins Exp $
+// $Id: ESMC_FieldDataMapUTest.C,v 1.2 2004/05/26 18:30:44 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_FieldDataMapUTest.C,v 1.1 2004/05/04 13:53:27 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_FieldDataMapUTest.C,v 1.2 2004/05/26 18:30:44 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -88,8 +88,8 @@
 
    // test initialization of members of statically allocated ESMC_FieldDataMap
    //   may want to read back values via Get methods for comparison
-   rc = fielddatamap_ptr->ESMC_FieldDataMapInit(args);
-   sprintf(name, "ESMC_FieldDataMapInit"); 
+   rc = fielddatamap_ptr->ESMC_FieldDataMapSetDefault(args);
+   sprintf(name, "ESMC_FieldDataMapSetDefault"); 
    sprintf(failMsg, "rc = %d, args = %f", rc, args);
    ESMC_Test((rc==ESMF_SUCCESS),
               name, failMsg, &result, ESMF_SRCLINE);

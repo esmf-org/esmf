@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.5 2004/05/12 12:15:09 nscollins Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.6 2004/05/26 18:27:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@
 !
       ! TODO: this may need to become Create/Destroy (because it may need
       ! to be a deep object instead of a shallow one.)
-      public ESMF_BundleDataMapInit
+      public ESMF_BundleDataMapSetDefault
       public ESMF_BundleDataMapSetInvalid
 
       public ESMF_BundleDataMapGet, ESMF_BundleDataMapSet
@@ -129,7 +129,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.5 2004/05/12 12:15:09 nscollins Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.6 2004/05/26 18:27:50 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -183,15 +183,15 @@ end function
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
-! This section includes the BundleDataMap Init and Invalidate routines
+! This section includes the BundleDataMap SetDefault and Invalidate routines
 !
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_BundleDataMapInit - initialize the contents of a BundleDataMap
+! !IROUTINE:  ESMF_BundleDataMapSetDefault - initialize the contents of a BundleDataMap
 
 ! !INTERFACE:
-      subroutine ESMF_BundleDataMapInit(bundledatamap, bundleInterleave, rc)
+      subroutine ESMF_BundleDataMapSetDefault(bundledatamap, bundleInterleave, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap) :: bundledatamap
@@ -242,7 +242,7 @@ end function
         ! if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_BundleDataMapInit
+        end subroutine ESMF_BundleDataMapSetDefault
 
 
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMapUTest.F90,v 1.1 2004/05/04 13:53:27 nscollins Exp $
+! $Id: ESMF_FieldDataMapUTest.F90,v 1.2 2004/05/26 18:30:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldDataMapUTest.F90,v 1.1 2004/05/04 13:53:27 nscollins Exp $'
+      '$Id: ESMF_FieldDataMapUTest.F90,v 1.2 2004/05/26 18:30:45 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -90,8 +90,8 @@
 
       ! test initialization of members of statically allocated ESMF_FieldDataMap
       !   may want to read back values via Get methods for comparison
-      call ESMF_FieldDataMapInit(fielddatamap, args, rc)
-      write(name, *) "ESMF_FieldDataMapInit"
+      call ESMF_FieldDataMapSetDefault(fielddatamap, args, rc)
+      write(name, *) "ESMF_FieldDataMapSetDefault"
       write(failMsg, *) "rc =", rc, ", args =", args
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)

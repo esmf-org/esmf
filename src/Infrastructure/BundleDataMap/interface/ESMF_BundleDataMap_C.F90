@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap_C.F90,v 1.2 2004/05/10 13:23:23 nscollins Exp $
+! $Id: ESMF_BundleDataMap_C.F90,v 1.3 2004/05/26 18:27:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 !==============================================================================
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_BundleDataMap_C.F90,v 1.2 2004/05/10 13:23:23 nscollins Exp $'
+!      '$Id: ESMF_BundleDataMap_C.F90,v 1.3 2004/05/26 18:27:49 nscollins Exp $'
 !==============================================================================
 ! 
 !------------------------------------------------------------------------------
@@ -40,7 +40,7 @@
 !! for shallow classes, use init instead of create and destroy
 
 !------------------------------------------------------------------------------
-    subroutine f_esmf_bundledatamapinit(bdmp, btype, rc)
+    subroutine f_esmf_bundledatamapsetdefault(bdmp, btype, rc)
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_BundleDataMapMod
 
@@ -49,9 +49,9 @@
       integer, intent(out), optional :: rc
      
 
-      call ESMF_BundleDataMapInit(bdmp, btype, rc)
+      call ESMF_BundleDataMapSetDefault(bdmp, btype, rc)
     
-    end subroutine f_esmf_bundledatamapinit
+    end subroutine f_esmf_bundledatamapsetdefault
   
 
 !------------------------------------------------------------------------------
