@@ -1374,7 +1374,7 @@
 ! !INTERFACE:
 
 	function luavail()
-	  use m_stdio_Config
+	  !!!use m_stdio_Config
 	  implicit none
 	  integer :: luavail	! result
 
