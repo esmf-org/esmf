@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.25 2004/01/26 21:28:21 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.26 2004/02/18 01:44:51 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,8 +17,8 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include "ESMC.h"
-#include "ESMC_TimeInterval.h"
+#include <ESMC.h>
+#include <ESMC_TimeInterval.h>
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
