@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.20 2004/03/15 20:43:26 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.21 2004/03/19 20:33:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@ extern "C" {
 // these interface subroutine names MUST be in lower case
 extern "C" {
 
-  void FTN(c_esmc_compreturn)(
+  void FTN(c_esmc_compwait)(
     ESMC_VM **ptr_vm_parent,  // p2 to the parent VM
     ESMC_VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
     void **vm_info,           // p2 to member which holds info
