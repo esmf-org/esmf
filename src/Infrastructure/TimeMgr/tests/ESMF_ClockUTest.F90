@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.6 2003/04/17 20:51:35 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.7 2003/04/17 21:34:09 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,6 +14,9 @@
 
 !------------------------------------------------------------------------------
 !
+
+#include <ESMF_Macros.inc>
+ 
 !==============================================================================
 !BOP
 ! !PROGRAM: ESMF_ClockTest - Test Clock initialization and time-stepping
@@ -33,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.6 2003/04/17 20:51:35 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.7 2003/04/17 21:34:09 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -145,11 +148,21 @@
 
       ! initialize clock time intervals and instants
       !call ESMF_TimeIntervalInit(timeStep, S=1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Time Interval Initiation Test"
       call ESMF_TimeIntervalInit(timeStep, H=1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Start Time Initiation Test"
       call ESMF_TimeInit(startTime, YR=2003, MM=3, DD=13, &
                                    cal=gregorianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Stop Time Initiation Test"
       call ESMF_TimeInit(stopTime, YR=2003, MM=3, DD=14, &
                                    cal=gregorianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! initialize the clock
       call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
