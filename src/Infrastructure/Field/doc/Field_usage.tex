@@ -1,4 +1,4 @@
-% $Id: Field_usage.tex,v 1.2 2003/07/31 21:21:30 nscollins Exp $
+% $Id: Field_usage.tex,v 1.3 2003/11/14 20:53:10 jwolfe Exp $
 
 %\subsection{Design}
 
@@ -44,20 +44,17 @@ is done.
 There are ten methods which involve movement of data between DEs.
 The first three are higher level functions which are intended to
 map closely to needs of applications programs.  They are:
-\begin{description}
-\item[Halo]
-Synchronizing the data on the boundaries of each data decomposition 
-block with data on neighboring DEs.
-\item[Regridding]
-Moving data between DEs where interpolation, averaging,
-summation, conservation, and other operations which change the data 
-may be required.
-\item[Redistribution] 
-Moving data between DEs where interpolation is not required.  The operation
-may involve reordering the data in memory or 
-change the distribution of data onto a different set of DEs, but 
-the individual data values themselves are not altered. 
-\end{description}
+
+\subsubsection{Halo}
+\input{../Infrastructure/ArrayComm/doc/ArrayHalo_desc.tex}
+
+\subsubsection{Regrid}
+\input{../Infrastructure/Regrid/doc/Regrid_usage.tex}
+
+\subsubsection{Redist}
+\input{../Infrastructure/ArrayComm/doc/ArrayRedist_desc.tex}
+
+\subsubsection{Lower Level Functions}
 The last seven correspond closely to the lower level
 MPI communications primitives.  They are:
 \begin{description}

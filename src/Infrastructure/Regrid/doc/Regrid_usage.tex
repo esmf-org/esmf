@@ -1,9 +1,27 @@
-% $Id: Regrid_usage.tex,v 1.2 2003/05/07 19:32:40 jwolfe Exp $
+% $Id: Regrid_usage.tex,v 1.3 2003/11/14 20:53:50 jwolfe Exp $
 
 %\subsection{Design}
 
 % <Describe strategy for overall class design.>
 
+Regridding includes any process that transforms a field from one ESMF
+Grid to another.  The following regridding methods are supported:
+\begin{description}
+\item[ESMF\_RegridMethod\_FieldCopy] same Grid, just copy the field
+\item[ESMF\_RegridMethod\_Redist  ] same PhysGrid just redistribute field
+\item[ESMF\_RegridMethod\_Bilinear] bilinear (logically-rectangular grids)
+\item[ESMF\_RegridMethod\_Bicubic ] bicubic  (logically-rectangular grids)
+\item[ESMF\_RegridMethod\_Conserv1] first-order conservative
+\item[ESMF\_RegridMethod\_Conserv2] second-order conservative
+\item[ESMF\_RegridMethod\_Raster  ] regrid by rasterizing domain
+\item[ESMF\_RegridMethod\_NearNbr ] nearest-neighbor distance-weighted average
+\item[ESMF\_RegridMethod\_Fourier ] Fourier transform
+\item[ESMF\_RegridMethod\_Legendre] Legendre transform
+\item[ESMF\_RegridMethod\_Index   ] index-space regridding (shift, stencil)
+\item[ESMF\_RegridMethod\_Linear  ] linear for 1-d regridding
+\item[ESMF\_RegridMethod\_Spline  ] cubic spline for 1-d regridding
+\item[ESMF\_RegridMethod\_User    ] user-supplied method
+\end{description}
 
 Regrid is designed to be called with Field or Bundle
 arguments in order to utilize information embedded in
