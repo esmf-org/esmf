@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.3 2004/09/27 19:59:42 nscollins Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.4 2004/10/05 15:29:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldGatherUTest.F90,v 1.3 2004/09/27 19:59:42 nscollins Exp $'
+      '$Id: ESMF_FieldGatherUTest.F90,v 1.4 2004/10/05 15:29:43 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -85,7 +85,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 20
 
       ! test script needs this to compute right numbers for test results
-      print *, "NUMBER_OF_PROCESSORS ", npets
+      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
 
       if (npets .eq. 1) then
         print *, "This test must run with > 1 processor"
