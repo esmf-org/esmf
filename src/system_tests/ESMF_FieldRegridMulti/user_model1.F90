@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.17 2004/04/28 23:12:14 cdeluca Exp $
+! $Id: user_model1.F90,v 1.18 2004/05/10 15:50:23 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -92,7 +92,7 @@
         type(ESMF_Field) :: humidity
         type(ESMF_VM) :: vm
         type(ESMF_DELayout) :: delayout
-        type(ESMF_DataMap) :: datamap
+        type(ESMF_FieldDataMap) :: datamap
         type(ESMF_Grid) :: grid1
         type(ESMF_Array) :: array1
         type(ESMF_ArraySpec) :: arrayspec
@@ -153,7 +153,7 @@
         order(1) = 0
         order(2) = 1
         order(3) = 2
-        call ESMF_DataMapInit(datamap, 3, order, counts=counts(1:1), rc=status)
+        call ESMF_FieldDataMapInit(datamap, 3, order, counts=counts(1:1), rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Create the field 

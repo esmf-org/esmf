@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.7 2004/04/28 23:12:15 cdeluca Exp $
+! $Id: user_coupler.F90,v 1.8 2004/05/10 15:51:02 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -69,7 +69,7 @@
         type(ESMF_DELayout) :: cpllayout
         type(ESMF_Grid) :: grid1
         type(ESMF_Array) :: array1
-        type(ESMF_DataMap) :: datamap1
+        type(ESMF_FieldDataMap) :: datamap1
         type(ESMF_ArraySpec) :: arrayspec1
         integer :: rank1, counts(2)
         type(ESMF_DataKind) :: dk1

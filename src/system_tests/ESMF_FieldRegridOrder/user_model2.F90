@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.10 2004/04/28 23:12:14 cdeluca Exp $
+! $Id: user_model2.F90,v 1.11 2004/05/10 15:50:48 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -85,7 +85,7 @@
       type(ESMF_Field) :: humidity
       type(ESMF_VM) :: vm
       type(ESMF_DELayout) :: delayout
-      type(ESMF_DataMap) :: datamap
+      type(ESMF_FieldDataMap) :: datamap
       type(ESMF_Grid) :: grid1
       type(ESMF_Array) :: array1
       type(ESMF_ArraySpec) :: arrayspec
@@ -135,7 +135,7 @@
       horzCoordSystem = ESMF_CoordSystem_Cartesian
       coordOrder      = ESMF_CoordOrder_YXZ
 
-      call ESMF_DataMapInit(datamap, ESMF_INDEX_IJ, rc=rc)
+      call ESMF_FieldDataMapInit(datamap, ESMF_INDEX_IJ, rc=rc)
       if (status .ne. ESMF_SUCCESS) goto 10
 
       grid1 = ESMF_GridCreateLogRect(2, counts=(/ 40, 50 /), &
