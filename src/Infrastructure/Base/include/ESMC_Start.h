@@ -1,4 +1,4 @@
-// $Id: ESMC_Start.h,v 1.5 2004/05/20 11:41:03 nscollins Exp $
+// $Id: ESMC_Start.h,v 1.6 2005/02/03 17:46:01 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -26,6 +26,9 @@
 // #include "ESMF_LogMacros.inc"
 
 // system dependent #defines from build process
+// first those which apply uniformly to F90 and C++, then those
+// specifically needed for C++ code.
+#include "ESMF_Conf.inc"
 #include "ESMC_Conf.h"
 
 
