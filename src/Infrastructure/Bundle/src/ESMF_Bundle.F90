@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.3 2003/10/21 04:08:44 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.4 2003/10/22 15:37:47 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -380,8 +380,8 @@ end function
 !     \end{description}
 !
 !
-! !REQUIREMENTS:  
 !EOP
+! !REQUIREMENTS:  
 
       type(ESMF_BundleType), pointer :: btypep         ! Pointer to new bundle
       integer :: status                                ! Error status
@@ -456,8 +456,9 @@ end function
 !     \end{description}
 !
 !
-! !REQUIREMENTS:  
 !EOP
+! !REQUIREMENTS:  
+
 
       type(ESMF_BundleType), pointer :: btypep   ! Pointer to new bundle
       integer :: status                          ! Error status
@@ -523,8 +524,9 @@ end function
 !
 !
 !
-! !REQUIREMENTS:  FLD2.4
 !EOP
+! !REQUIREMENTS:  FLD2.4
+
 
       ! Local variables
       integer :: status                           ! Error status
@@ -814,10 +816,10 @@ end function
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}
-
 !
-! !REQUIREMENTS:  FLD2.5.6
 !EOP
+! !REQUIREMENTS:  FLD2.5.6
+
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -909,10 +911,10 @@ end function
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}
-
 !
-! !REQUIREMENTS:  FLD2.5.6
 !EOP
+! !REQUIREMENTS:  FLD2.5.6
+
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -978,9 +980,8 @@ end function
 ! !DESCRIPTION:
 !      Return pointers to all fields in a {\tt ESMF\_Bundle}.
 !
-! !REQUIREMENTS:  FLD2.5.6
 !EOP
-
+! !REQUIREMENTS:  FLD2.5.6
 !
 !  TODO: code goes here
 !
@@ -1004,8 +1005,9 @@ end function
 !      same {\tt ESMF\_Grid} as the rest of the {\tt ESMF\_Field}s in the {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
 !      packed data, this will mean copying the data to add this field.
 ! 
-! !REQUIREMENTS:  FLD2.5.2
 !EOP
+! !REQUIREMENTS:  FLD2.5.2
+
       type(ESMF_Field) :: temp_list(1)
       type(ESMF_BundleType), pointer :: btype
 
@@ -1067,8 +1069,9 @@ end function
 !
 !     \end{description}
 ! 
-! !REQUIREMENTS:  FLD2.5.2
 !EOP
+! !REQUIREMENTS:  FLD2.5.2
+
       type(ESMF_BundleType), pointer :: btype
 
       ! Initialize return code in case we return early.
@@ -1246,8 +1249,9 @@ end function
 !      Delete a Field reference from an existing {\tt ESMF\_Bundle}.  If the {\tt ESMF\_Bundle} 
 !      has packed data this will mean copying the data to remove this field.
 !
-! !REQUIREMENTS:  FLD2.5.2
 !EOP
+! !REQUIREMENTS:  FLD2.5.2
+
 
 !
 !  TODO: code goes here
@@ -1296,8 +1300,9 @@ end function
 !     \end{description}
 !
 !
-! !REQUIREMENTS:  FLD2.1.1, FLD2.2, FLD2.5.9
 !EOP
+! !REQUIREMENTS:  FLD2.1.1, FLD2.2, FLD2.5.9
+
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1367,9 +1372,9 @@ end function
 !
 !     \end{description}
 !
-!
-! !REQUIREMENTS:  FLD2.1.1, FLD2.2, FLD2.5.9
 ! !!IEOP
+! !REQUIREMENTS:  FLD2.1.1, FLD2.2, FLD2.5.9
+
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1416,8 +1421,9 @@ end function
 !      setting the desired options in an {\tt ESMF\_DataMap} type and then passing it in
 !      as a parameter to this routine.
 !
-! !REQUIREMENTS:  FLD2.2, FLD2.3
 !EOP
+! !REQUIREMENTS:  FLD2.2, FLD2.3
+
 
 !
 !  TODO: code goes here
@@ -1443,8 +1449,9 @@ end function
 !      {\tt ESMF\_Bundle} interface instead of detaching data and setting it in a loop.
 !      Various restrictions on data types may be imposed.
 ! 
-! !REQUIREMENTS:  FLD2.5.5
 !EOP
+! !REQUIREMENTS:  FLD2.5.5
+
 
 !
 !  TODO: code goes here
@@ -1469,8 +1476,9 @@ end function
 !      exclusive access from ESMF interfaces. (See comments in the corresponding
 !      {\tt ESMF\_Field} section for more details on access.)
 !
-! !REQUIREMENTS:  FLD2.5.3
 !EOP
+! !REQUIREMENTS:  FLD2.5.3
+
 
 !
 !  TODO: code goes here
@@ -1492,8 +1500,9 @@ end function
 !     Returns a data buffer marked as having ReadOnly access.  Multiple
 !     requests for RO access will be accepted by the framework.
 !
-! !REQUIREMENTS:  FLD2.5.3
 !EOP
+! !REQUIREMENTS:  FLD2.5.3
+
 
 !
 !  TODO: code goes here
@@ -1520,8 +1529,9 @@ end function
 !      The original bundle data is still attached and is left accessible.
 !      If specified, the copy can be a subset of the original data.
 !
-! !REQUIREMENTS:  FLD2.5.4
 !EOP
+! !REQUIREMENTS:  FLD2.5.4
+
 
 !
 !  TODO: code goes here
@@ -1543,8 +1553,9 @@ end function
 ! !DESCRIPTION:
 !      Returns responsibility for R/W data back to ESMF.
 !
-! !REQUIREMENTS:  FLD2.5.3
 !EOP
+! !REQUIREMENTS:  FLD2.5.3
+
 
 !
 !  TODO: code goes here
@@ -1563,8 +1574,9 @@ end function
 ! !DESCRIPTION:
 !      Returns responsibility for ReadOnly data back to ESMF.
 !
-! !REQUIREMENTS:  FLD2.5.3
 !EOP
+! !REQUIREMENTS:  FLD2.5.3
+
 
 !
 !  TODO: code goes here
@@ -1584,8 +1596,9 @@ end function
 !      Convenience routine for freeing memory associated with data copy.
 !      Note this routine does not need the {\tt ESMF\_Bundle} as an input.
 !
-! !REQUIREMENTS:  FLD2.5.4
 !EOP
+! !REQUIREMENTS:  FLD2.5.4
+
 
 !
 !  TODO: code goes here
@@ -1629,8 +1642,9 @@ end function
 !     \end{description}
 !
 !
-! !REQUIREMENTS: FLD2.5.7
 !EOP
+! !REQUIREMENTS: FLD2.5.7
+
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1682,8 +1696,9 @@ end function
 ! !DESCRIPTION:
 !      Find out how many dimensions are in the {\tt ESMF\_Grid} associated with this {\tt ESMF\_Bundle}.
 !
-! !REQUIREMENTS: (none. added for completeness)
 !EOP
+! !REQUIREMENTS: (none. added for completeness)
+
 
 !
 !  TODO: code goes here
@@ -1707,8 +1722,9 @@ end function
 !      For both the local decomposition and the global grid, 
 !      return the number of items in each dimension.
 !
-! !REQUIREMENTS: (none. added for completeness)
 !EOP
+! !REQUIREMENTS: (none. added for completeness)
+
 
 !
 !  TODO: code goes here
@@ -1729,8 +1745,9 @@ end function
 ! !DESCRIPTION:
 !      Return in what order the indicies of the {\tt ESMF\_Grid} is specified.
 !
-! !REQUIREMENTS: (none. added for completeness)
 !EOP
+! !REQUIREMENTS: (none. added for completeness)
+
 
 !
 !  TODO: code goes here
@@ -1753,9 +1770,8 @@ end function
 !      For both the local decomposition and the global grid, return the 
 !       number of items in each.
 !
-! !REQUIREMENTS: FLD2.6.4
 !EOP
-
+! !REQUIREMENTS: FLD2.6.4
 !
 !  TODO: code goes here
 !
@@ -1778,8 +1794,9 @@ end function
 !      For both the local decomposition and the global grid, return the 
 !      number of items in each.
 !
-! !REQUIREMENTS: FLD2.6.4
 !EOP
+! !REQUIREMENTS: FLD2.6.4
+
 
 !
 !  TODO: code goes here
@@ -1826,8 +1843,9 @@ end function
 !     \end{description}
 !
 !
-! !REQUIREMENTS:  FLD2.6.1 (pri 2)
 !EOP
+! !REQUIREMENTS:  FLD2.6.1 (pri 2)
+
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1884,8 +1902,9 @@ end function
 !      Information is returned in the {\tt ESMF\_DataMap} type, and then can
 !      be queried by {\tt ESMF\_DataMap} subroutines for details.
 !
-! !REQUIREMENTS:  FLD2.5.8 (pri 2)
 !EOP
+! !REQUIREMENTS:  FLD2.5.8 (pri 2)
+
 
 !
 !  TODO: code goes here
@@ -1919,8 +1938,9 @@ end function
 !
 !     \end{description}
 ! 
-! !REQUIREMENTS:  FLD2.5.6, FLD2.6.3
 !EOP
+! !REQUIREMENTS:  FLD2.5.6, FLD2.6.3
+
 
 
       integer :: status                           ! Error status
@@ -1986,8 +2006,9 @@ end function
 !     \end{description}
 !
 !
-! !REQUIREMENTS:  FLD2.6.2
 !EOP
+! !REQUIREMENTS:  FLD2.6.2
+
 
 !
 !  TODO: code goes here
@@ -2044,6 +2065,8 @@ end function
 !
 !EOP
 ! !REQUIREMENTS: 
+
+
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -2400,8 +2423,9 @@ end function
 !      same I/O interfaces as Read/Write
 !      but will default to the fastest options.
 !
-! !REQUIREMENTS:  FLD2.5.10
 !EOP
+! !REQUIREMENTS:  FLD2.5.10
+
 
 !
 !  TODO: code goes here
@@ -2428,8 +2452,9 @@ end function
 !      all data associated with a {\t ESMF\_Bundle} 
 !      from the last call to WriteRestart.
 !
-! !REQUIREMENTS:  FLD2.5.10
 !EOP
+! !REQUIREMENTS:  FLD2.5.10
+
 
 !
 !  TODO: code goes here
@@ -2459,8 +2484,9 @@ end function
 !      Used to write data to persistent storage in a variety of formats.  
 !      (see WriteRestart/ReadRestart for quick data dumps.)
 !
-! !REQUIREMENTS:  FLD3.1, FLD3.2, FLD3.3, FLD3.4, FLD3.5
 !EOP
+! !REQUIREMENTS:  FLD3.1, FLD3.2, FLD3.3, FLD3.4, FLD3.5
+
 
 !
 !  TODO: code goes here
@@ -2486,8 +2512,8 @@ end function
 ! !DESCRIPTION:
 !      Used to read data from persistent storage in a variety of formats.
 !
-! !REQUIREMENTS:  (which req number is this?)
 !EOP
+! !REQUIREMENTS:  (which req number is this?)
 
 !
 !  TODO: code goes here
@@ -2516,8 +2542,9 @@ end function
 !      Validates that the {\tt ESMF\_Bundles} is internally consistent.
 !      Returns error code if problems are found.
 !
-! !REQUIREMENTS:  FLD4.1
 !EOP
+! !REQUIREMENTS:  FLD4.1
+
 
       ! Local variables
       integer :: status                           ! Error status
@@ -2564,8 +2591,9 @@ end function
 !      Print information about a {\tt ESMF\_Bundle}.  The options control the
 !      type of information and level of detail.
 !
-! !REQUIREMENTS:  
 !EOP
+! !REQUIREMENTS:  
+
 
 !
 !  TODO: code goes here
