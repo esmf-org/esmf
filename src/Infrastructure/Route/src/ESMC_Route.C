@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.81 2004/03/01 18:52:22 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.82 2004/03/06 00:03:20 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.81 2004/03/01 18:52:22 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.82 2004/03/06 00:03:20 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -985,10 +985,8 @@ static int maxroutes = 10;
       delete [] their_XP;
     }
 
-
     // free the old exclusive my_XP before computing the total my_XP
     delete [] my_XP;
-
 
     // Calculate the receiving table.
  
@@ -1070,36 +1068,44 @@ static int maxroutes = 10;
 //    int error return code
 //
 // !ARGUMENTS:
-      int rank,                  // in  - rank of data in both Fields
-      int dstMyDE,               // in  - DE identifier in the DELayout of
-                                 //       the destination Field
-      ESMC_AxisIndex *dstAI,     // in  - array of axis indices for all DE's
-                                 //       in the DELayout for the destination
-                                 //       Field
-      int dstAICount,            // in  - number of sets of AI's in the dst
-                                 //       array (should be the same as the 
-                                 //       number of DE's in the dst layout)
-      int *dstGlobalStart,       // in  - array of global starting indices
-                                 //       for all DE's in the DELayout and in
-                                 //       each direction for the destination
-                                 //       Field
-      int *dstGlobalCount,       // in  - array of global strides for each
-                                 //       direction for the receiving Field
-      ESMC_DELayout *dstLayout,  // in  - pointer to the rcv DELayout
-      int srcMyDE,               // in  - DE identifier in the DELayout of
-                                 //       the source Field
-      ESMC_AxisIndex *srcAI,     // in  - array of axis indices for all DE's
-                                 //       in the DELayout for the source
-                                 //       Field
-      int srcAICount,            // in  - number of sets of AI's in the src
-                                 //       array (should be the same as the
-                                 //       number of DE's in the src layout)
-      int *srcGlobalStart,       // in  - array of global starting indices
-                                 //       for all DE's in the DELayout and in
-                                 //       each direction for the source
-                                 //       Field
-      int *srcGlobalCount,       // in  - array of global strides for each
-                                 //       direction for the source Field
+      int rank,                   // in  - rank of data in both Fields
+      int dstMyDE,                // in  - DE identifier in the DELayout of
+                                  //       the destination Field
+      ESMC_AxisIndex *dstCompAI,  // in  - array of axis indices for all DE's
+                                  //       in the DELayout for the destination
+                                  //       Field covering the computational
+                                  //       domain
+      ESMC_AxisIndex *dstTotalAI, // in  - array of axis indices for all DE's
+                                  //       in the DELayout for the destination
+                                  //       Field covering the total domain
+      int dstAICount,             // in  - number of sets of AI's in the dst
+                                  //       array (should be the same as the 
+                                  //       number of DE's in the dst layout)
+      int *dstGlobalStart,        // in  - array of global starting indices
+                                  //       for all DE's in the DELayout and in
+                                  //       each direction for the destination
+                                  //       Field
+      int *dstGlobalCount,        // in  - array of global strides for each
+                                  //       direction for the receiving Field
+      ESMC_DELayout *dstLayout,   // in  - pointer to the rcv DELayout
+      int srcMyDE,                // in  - DE identifier in the DELayout of
+                                  //       the source Field
+      ESMC_AxisIndex *srcCompAI,  // in  - array of axis indices for all DE's
+                                  //       in the DELayout for the source
+                                  //       Field covering the computational
+                                  //       domain
+      ESMC_AxisIndex *srcTotalAI, // in  - array of axis indices for all DE's
+                                  //       in the DELayout for the source
+                                  //       Field covering the total domain
+      int srcAICount,             // in  - number of sets of AI's in the src
+                                  //       array (should be the same as the
+                                  //       number of DE's in the src layout)
+      int *srcGlobalStart,        // in  - array of global starting indices
+                                  //       for all DE's in the DELayout and in
+                                  //       each direction for the source
+                                  //       Field
+      int *srcGlobalCount,        // in  - array of global strides for each
+                                  //       direction for the source Field
       ESMC_DELayout *srcLayout) { // in  - pointer to the src DELayout 
 //
 // !DESCRIPTION:
@@ -1134,7 +1140,7 @@ static int maxroutes = 10;
       // TODO:  this is NOT going to work for data dims which are not
       //  equal the grid dims, e.g. a 2d grid with 4d data.
       for (k=0; k<rank; k++) {
-        myAI[k]          =          srcAI[srcMyDE + k*srcAICount];
+        myAI[k]          =      srcCompAI[srcMyDE + k*srcAICount];
       //  my_AI_exc[k].max = my_AI_tot[k].max;
         myGlobalStart[k] = srcGlobalStart[srcMyDE + k*srcAICount];
       }
@@ -1158,7 +1164,7 @@ static int maxroutes = 10;
 
           // get "their" AI out of the dstAI array
           for (k=0; k<rank; k++) {
-            theirAI[k] = dstAI[theirDE + k*dstAICount];
+            theirAI[k] = dstCompAI[theirDE + k*dstAICount];
        //     theirAI_exc[k].max = their_AI_tot[k].max;
           }
  
@@ -1200,7 +1206,7 @@ static int maxroutes = 10;
  
       // get "my" AI out of the dstAI array
       for (k=0; k<rank; k++) {
-        myAI[k]          =          dstAI[dstMyDE + k*dstAICount];
+        myAI[k]          =      dstCompAI[dstMyDE + k*dstAICount];
     //    myAI_exc[k].max = myAI_tot[k].max;
         myGlobalStart[k] = dstGlobalStart[dstMyDE + k*dstAICount];
       }
@@ -1221,14 +1227,14 @@ static int maxroutes = 10;
 	     cout << "theirDE = " << theirDE << ", parentDE = " 
                   << theirDEParent << endl;
 
-          // get "their" AI out of the dstAI array
+          // get "their" AI out of the srcAI array
           for (k=0; k<rank; k++) {
-            theirAI[k] = dstAI[theirDE + k*dstAICount];
+            theirAI[k] = srcCompAI[theirDE + k*srcAICount];
      //       theirAI_exc[k].max = theirAI_tot[k].max;
           }
  
           // calculate "their" XPacket in the sense of the global data
-          rc = ESMC_XPacketFromAxisIndex(theirAI, rank, dstGlobalCount,
+          rc = ESMC_XPacketFromAxisIndex(theirAI, rank, srcGlobalCount,
                                          NULL, &theirXP, &theirXPCount);
 
           // calculate the intersection
@@ -1257,8 +1263,8 @@ static int maxroutes = 10;
     // add this route to the cache table
     if (didsomething)
         ESMC_RouteAddCache(rank, 
-                           dstMyDE, dstAI, NULL, dstAICount, dstLayout,
-                           srcMyDE, srcAI, NULL, srcAICount, srcLayout,
+                           dstMyDE, dstCompAI, dstTotalAI, dstAICount, dstLayout,
+                           srcMyDE, srcCompAI, srcTotalAI, srcAICount, srcLayout,
                            NULL);
 
 
