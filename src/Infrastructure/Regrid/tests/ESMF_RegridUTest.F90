@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridUTest.F90,v 1.10 2004/12/23 17:04:51 svasquez Exp $
+! $Id: ESMF_RegridUTest.F90,v 1.11 2004/12/28 20:53:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridUTest.F90,v 1.10 2004/12/23 17:04:51 svasquez Exp $'
+      '$Id: ESMF_RegridUTest.F90,v 1.11 2004/12/28 20:53:29 svasquez Exp $'
 !------------------------------------------------------------------------------
       type(ESMF_VM):: vm
 
@@ -190,7 +190,6 @@
       ! the tests are really regrid tests.
       !------------------------------------------------------------------------
       
-#if 0
       !------------------------------------------------------------------------
       ! These are fields on different Grids - call RegridStore to set
       ! up the Regrid structure
@@ -218,7 +217,6 @@
       write(failMsg, *) "regrid release rc =", rc
       write(name, *) "regrid release rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#endif
     
 #ifdef ESMF_EXHAUSTIVE
       ! add more tests here.
