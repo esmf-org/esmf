@@ -1,7 +1,7 @@
-! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.1 2004/02/17 15:57:39 nscollins Exp $
+! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.2 2004/02/20 22:00:28 nscollins Exp $
 !
-! System test code FieldRegrid
-!  Description on Sourceforge under System Test #79497
+! System test code FieldRegridMulti
+!  Description on Sourceforge under System Test #xxxxx
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -9,8 +9,11 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test FieldRegrid.  
-!   Regrid test.  2 components and 1 coupler, one-way coupling.
+! System test FieldRegridMulti.  
+!   Regrid test with a 2D grid and a 3D data field, where the 3rd dimension
+!                 is multiple values corresponding to the same grid cell.
+!
+!                 2 components and 1 coupler, one-way coupling.
 !                 The first component has a uniform A-grid.  It has
 !                 a Field whose data is set to a given geometric function,
 !
@@ -24,7 +27,7 @@
 !
 !\begin{verbatim}
 
-    program FieldRegrid
+    program FieldRegridMulti
 
 #include <ESMF_Macros.inc>
 
@@ -67,9 +70,9 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    print *, "-------------------------------- "
-    print *, "Start of System Test FieldRegrid:"
-    print *, "-------------------------------- "
+    print *, "------------------------------------- "
+    print *, "Start of System Test FieldRegridMulti:"
+    print *, "------------------------------------- "
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -248,21 +251,21 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test FieldRegrid complete!"
+10    print *, "System Test FieldRegridMulti complete!"
 
       ! Only on de 0 or any DE with an error. 
       if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
 
         ! Normal ESMF Test output
         write(failMsg, *) "System Test failure"
-        write(testname, *) "System Test FieldRegrid: Field Regrid"
+        write(testname, *) "System Test FieldRegrid: Field Regrid Multi"
   
         call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                           testname, failMsg, testresult, ESMF_SRCLINE)
   
         ! Separate message to console, for quick confirmation of success/failure
         if (rc .eq. ESMF_SUCCESS) then
-          write(finalMsg, *) "SUCCESS!! Regrid test finished correctly."
+          write(finalMsg, *) "SUCCESS!! Regrid Multi test finished correctly."
         else
           write(finalMsg, *) "System Test did not succeed.  Error code ", rc
         endif
@@ -275,7 +278,7 @@
     
       call ESMF_Finalize(rc) 
 
-      end program FieldRegrid
+      end program FieldRegridMulti
     
 !\end{verbatim}
     
