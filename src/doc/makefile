@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.29 2003/05/07 06:58:58 cdeluca Exp $ 
+# $Id: makefile,v 1.30 2003/05/07 15:12:41 flanigan Exp $ 
 ALL: alldoc 
 
 
@@ -33,6 +33,8 @@ HTMLFILES =	${ESMC_DOCDIR}/ESMF_reqdoc \
 		${ESMC_DOCDIR}/ESMF_usrdoc \
                 ${ESMC_DOCDIR}/ESMF_refdoc
 
+
+
 #
 # Files that a doc depends on.  Do not list the the ctex file !  
 # The ctex file is listed in the rule found in the build/common file.
@@ -49,9 +51,18 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   = ESMF_reqdoc ESMF_usrdoc ESMF_refdoc
-CLEANFILES  = *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG ESMF_reqdoc.tex ESMF_refdoc.tex
+CLEANDIRS   = ESMF_reqdoc ESMF_usrdoc ESMF_refdoc $(HTMLFILE)
+CLEANFILES  = *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG ESMF_reqdoc.tex ESMF_refdoc.tex $(PDFFILES) $(DVIFILES)
 CLOBBERDIRS = 
+
+#
+# Shortcut targets
+#
+refpdf: $(ESMC_DOCDIR)/ESMF_refdoc.pdf
+reqpdf: $(ESMC_DOCDIR)/ESMF_reqdoc.pdf
+usrpdf: $(ESMC_DOCDIR)/ESMF_usrdoc.pdf
+
+
 
 #
 # The build rules for the req are in 
