@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.14 2004/06/09 22:15:51 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.15 2004/06/14 23:25:36 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -185,12 +185,12 @@
     call ESMF_LocalArrayDestroy(array1)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-    !Commented out because it crashes
-    !write(failMsg, *) "Did not return ESMF_SUCCESS."
-    !write(name, *) "Local Array Destroy a destroyed Array Test"
-    !call ESMF_LocalArrayDestroy(array1)
-    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    !print *, "array 1 destroy returned"
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS."
+    write(name, *) "Local Array Destroy a destroyed Array Test"
+    call ESMF_LocalArrayDestroy(array1)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    print *, "array 1 destroy returned"
 
 
 !-------------------------------------------------------------------------------
@@ -449,13 +449,11 @@
 
     print *, "array 4 create returned"
 
-    ! The following test is commented out because it crashes.
-    ! Bug report 790766 has been filed. When the bug report is
-    ! closed this code will be uncommented.
-    !write(failMsg, *) "Did not return ESMF_SUCCESS"
-    !write(name, *) "Getting Local Array 3D Real Data with wrong dimension array Test"
-    !call ESMF_LocalArrayGetData(array4, realptr2, ESMF_DATA_COPY, rc)
-    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Getting Local Array 3D Real Data with wrong dimension array Test"
+    call ESMF_LocalArrayGetData(array4, realptr2, ESMF_DATA_COPY, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
    !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -556,11 +554,11 @@
 
     deallocate(real3dptr)
 
-    !Commented out because it crashes
-    !write(failMsg, *) "Did not return ESMF_FAILURE"
-    !write(name, *) "Creating a Local Array 3D DATA_COPY Real Data with deallocated array Test"
-    !array4 = ESMF_LocalArrayCreate(real3dptr, ESMF_DATA_REF, rc)
-    !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_FAILURE"
+    write(name, *) "Creating a Local Array 3D DATA_COPY Real Data with deallocated array Test"
+    array4 = ESMF_LocalArrayCreate(real3dptr, ESMF_DATA_REF, rc)
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     print *, "array 4 create returned"
 
@@ -675,7 +673,7 @@
     write(failMsg, *) "Did not return ESMF_FAILURE"
     write(name, *) "Creating an Array from a Spec with rank of 10 Test"
     array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc=rc)
-    call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
     arank = 5
