@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.34 2004/11/24 00:36:14 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.35 2005/04/02 00:15:30 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -148,6 +148,14 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(dayOfYear_r8),
                        ESMC_NOT_PRESENT_FILTER(dayOfYear_intvl) );
           if (ESMC_PRESENT(status)) *status = rc;
+       }
+
+       void FTN(c_esmc_timeisleapyear)(ESMC_Time *ptr,
+                                       int *esmf_timeIsLeapYear,
+                                       int *status) {
+           *esmf_timeIsLeapYear =
+                 (int) (ptr)->ESMC_TimeIsLeapYear(
+                              ESMC_NOT_PRESENT_FILTER(status) );
        }
 
        void FTN(c_esmc_timeissamecalendar)(ESMC_Time *ptr, ESMC_Time *time,
