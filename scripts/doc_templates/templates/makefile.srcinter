@@ -1,4 +1,4 @@
-# $Id: makefile.srcinter,v 1.1 2002/10/08 23:06:38 eschwab Exp $
+# $Id: makefile.srcinter,v 1.2 2003/01/23 20:25:33 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -15,6 +15,8 @@ SOURCEC	  =
 SOURCEF	  = 
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
+# list all .h files which should be copied to common include dir
+STOREH	  = 
 
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
