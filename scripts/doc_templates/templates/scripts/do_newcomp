@@ -1,0 +1,78 @@
+#!/bin/csh -f
+#
+# $Id: do_newcomp,v 1.1 2002/10/07 16:35:08 eschwab Exp $
+#
+#===============================================================================
+# do_newcomp
+#===============================================================================
+#
+# Create and fill a directory tree with source template files for a new
+# component.
+#
+# Usage: do_newcomp <comp> <core language>> 
+#
+#        <comp> is the name of the new component, library, or module
+#
+#        <core language> is one of the following:
+#               f - f90
+#               c - C++
+#        
+# If a directory called <comp> doesn't already exist, it will be created in 
+# the directory where the script is called.  If the <comp> directory does exist, 
+# the template files needed to create the new component will be added to it.  
+# Template files that relate to the entire component have <comp> as the root 
+# of their filename.  Template files that pertain to classes or modules have 
+# "class" as the root of their filename.
+#
+# E. Schwab                                                       Oct 7, 2002
+#===============================================================================
+ 
+if($#argv != 2) then
+  echo "Usage:  do_newcomp <component> <core language [c|f]>"
+  exit
+else 
+  set comp=$1
+  set lang=$2
+endif
+
+# Create new component source directories if needed
+  foreach dir ($comp $comp/src $comp/include $comp/interface $comp/doc $comp/examples)
+    set newdir=$cwd/$dir
+    if(!(-d $newdir)) then
+      mkdir $newdir 
+    endif 
+  end
+
+  set srcdir=$cwd/$comp/src
+  set intfdir=$cwd/$comp/interface
+  set exdir=$cwd/$comp/examples
+  set incdir=$cwd/$comp/include
+  set DOCT_DIR=$DOC_DIR/templates
+
+# Fill the source directories with template files
+
+# include files
+  if(!(-r $incdir/ESMF_$comp.h)) cat $DOCT_DIR/ESMF_comp.h | \
+      sed 's/<Comp>/'$comp'/g' > $incdir/ESMF_$comp.h
+  if(!(-r $incdir/ESMC_class.h)) cat $DOCT_DIR/ESMC_class.h | \
+      sed 's/<Comp>/'$comp'/g' > $incdir/ESMC_class.h
+  if(!(-r $incdir/ESMC_$comp.h)) cat $DOCT_DIR/ESMC_comp.h | \
+      sed 's/<Comp>/'$comp'/g' > $incdir/ESMC_$comp.h
+
+# src files
+  switch ($lang) 
+  case f:
+      if(!(-r $srcdir/ESMF_class.F90)) cat $DOCT_DIR/ESMF_class.F90 | \
+          sed 's/<Comp>/'$comp'/g' > $srcdir/ESMF_class.F90
+      if(!(-r $intfdir/ESMC_class.C)) cp $DOCT_DIR/ESMC_class.C $intfdir
+      breaksw
+  case c:
+      if(!(-r $srcdir/ESMC_class.C)) cp $DOCT_DIR/ESMC_class.C $srcdir
+      if(!(-r $intfdir/ESMF_class.F90)) cat $DOCT_DIR/ESMF_class.F90 | \
+          sed 's/<Comp>/'$comp'/g' > $intfdir/ESMF_class.F90
+      breaksw
+  default:
+    echo "Valid options are: [ c | f]"
+    exit
+  endsw
+endif
