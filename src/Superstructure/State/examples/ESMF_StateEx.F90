@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.6 2004/01/28 23:15:10 nscollins Exp $
+! $Id: ESMF_StateEx.F90,v 1.7 2004/02/11 17:48:43 svasquez Exp $
 
 
 !-------------------------------------------------------------------------
@@ -11,22 +11,15 @@
 ! See the following code fragments for examples of how to create {\tt States}.
 ! Also see the Programming Model section of this document.
 !
-!
-
-!
 !\begin{verbatim}
 !
 ! Example code showing various ways of creating States.
 
-
     program ESMF_StateExample
-    
 
 !   ! ESMF Framework module
     use ESMF_Mod
-    
     implicit none
-    
 !   ! Local variables
     integer :: x, y, rc
     character(ESMF_MAXSTR) :: compname, statename, bundlename, dataname
@@ -35,10 +28,8 @@
     type(ESMF_State) :: state1, state2, state3, state4
 !\end{verbatim}
 !EOP
-
     integer :: finalrc
     finalrc = ESMF_SUCCESS
-
 !BOP
 !\begin{verbatim}
 !-------------------------------------------------------------------------
@@ -52,7 +43,6 @@
 !   ! This will probably be called from inside the Component Init code
     compname = "Atmosphere"
     state1 = ESMF_StateCreate(compname, statetype=ESMF_STATEIMPORT, rc=rc)  
-
     print *, "State Create returned, name = ", trim(compname)
 
     ! Data would be added here and the State reused inside the run
@@ -61,11 +51,9 @@
     print *, "State Example 1 finished"
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
 !-------------------------------------------------------------------------
@@ -81,64 +69,48 @@
     print *, "State Create returned, name = ", trim(compname)
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
 !BOP
 !\begin{verbatim}
     bundlename = "Temperature"
-
     bundle1 = ESMF_BundleCreate(name=bundlename, rc=rc)
-
     print *, "Bundle Create returned", rc
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
     call ESMF_StateAddData(state2, bundle1, rc)
-
     print *, "StateAddData returned", rc
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
-    
 !BOP
 !\begin{verbatim}
     ! Loop here, updating Bundle contents each time step
-
     call ESMF_StateDestroy(state2, rc)
-
     print *, "State Destroy returned", rc
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
     call ESMF_BundleDestroy(bundle1, rc)
-
     print *, "Bundle Destroy returned", rc
-
     print *, "State Example 2 finished"
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
 !-------------------------------------------------------------------------
@@ -155,48 +127,37 @@
 
     ! The producing Component creates the menu of data items available.
     compname = "Ocean"
-
     state3 = ESMF_StateCreate(compname, statetype=ESMF_STATEEXPORT, rc=rc)  
-
     print *, "State Create returned", rc, " name = ", trim(compname)
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
 !BOP
 !\begin{verbatim}
     dataname = "Downward wind"
-
     call ESMF_StateAddData(state3, dataname, rc)
-
     print *, "StateAddData returned", rc, " name = ", trim(dataname)
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
-    
 !BOP
 !\begin{verbatim}
     dataname = "Humidity"
-
     call ESMF_StateAddData(state3, dataname, rc)
-
     print *, "StateAddData returned", rc, " name = ", trim(dataname)
-    
+
     ! See next example for how this is used.
 
     print *, "State Example 3 finished"
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
 !-------------------------------------------------------------------------
@@ -210,18 +171,13 @@
     ! is given an opportunity to mark which data items are needed.
 
     dataname = "Downward wind"
-
     call ESMF_StateSetNeeded(state3, dataname, ESMF_STATEDATAISNEEDED, rc)
-
     print *, "StateSetNeeded returned", rc
-
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
-    
 !BOP
 !\begin{verbatim}
 !-------------------------------------------------------------------------
@@ -238,47 +194,35 @@
     if (ESMF_StateIsNeeded(state3, dataname, rc)) then
 !\end{verbatim}
 !EOP
-
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
-
 !BOP
 !\begin{verbatim}
       bundlename = dataname
-
       bundle2 = ESMF_BundleCreate(name=bundlename, rc=rc)
-
       print *, "Bundle Create returned", rc, "name = ", trim(bundlename)
 !\end{verbatim}
 !EOP
-
       if (rc.NE.ESMF_SUCCESS) then
          finalrc = ESMF_FAILURE
       end if
-      
 !BOP
 !\begin{verbatim}
       call ESMF_StateAddData(state3, bundle2, rc)
-
       print *, "StateAddData returned", rc
 !\end{verbatim}
 !EOP
-
       if (rc.NE.ESMF_SUCCESS) then
          finalrc = ESMF_FAILURE
       end if
-
 !BOP
 !\begin{verbatim}
     else
       print *, "Data marked as not needed", trim(statename)
     endif
-    
     call ESMF_StateDestroy(state3, rc)
-
     print *, "State Destroy returned", rc
-
     print *, "State Example 5 finished"
 
 !-------------------------------------------------------------------------
@@ -289,18 +233,14 @@
 !-------------------------------------------------------------------------
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
-
-
     if (finalrc.EQ.ESMF_SUCCESS) then
         print *, "PASS: ESMF_StateExample.F90"
     else
         print *, "FAIL: ESMF_StateExample.F90"
     end if
-
 !BOP
 !\begin{verbatim}
     end program ESMF_StateExample
