@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.5 2005/02/03 17:50:09 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.6 2005/02/03 18:05:51 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -26,8 +26,8 @@ ditto for the sequence bug described below.
 
 #if 0
 the PGI compiler has a bug which prevents forward pointer references from
-working if also using the sequence keyword.  again, on the "things which
-are hard for one compiler might be hard for another" theory, don't sequence
+working if also using the sequence keyword.  again, on the -- things which
+are hard for one compiler might be hard for another --  theory, do not sequence
 the forward references in states here either.   this is currently turned off
 and seems to be working, but in case of problems, it is available to be
 reactivated.
@@ -37,4 +37,18 @@ reactivated.
 -#-define ESMF_SEQUENCE_BUG 1
 #endif
 
+<<<<<<< ESMF_Conf.inc
+#if 0
+this build is not running the field exclusive system test;
+it is hanging in the state reconcile call.  to prevent the entire
+build from freezing on this one test, simply error out until we
+find and fix the problem.
+#endif
+
+#if 0
+-#-define ESMF_FieldExcl_AUTO_FAIL 1
+#endif
+
+=======
+>>>>>>> 1.5
 
