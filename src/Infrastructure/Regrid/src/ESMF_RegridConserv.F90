@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.24 2004/05/07 16:07:33 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.25 2004/05/10 12:56:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -71,7 +71,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.24 2004/05/07 16:07:33 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.25 2004/05/10 12:56:49 nscollins Exp $'
 
 !==============================================================================
 
@@ -1548,7 +1548,7 @@
       ! in a transformed coordinate system to avoid pole singularity
       if (coordSystem == ESMF_CoordSystem_Spherical) then
         if (yb > northThreshold .or. yb < southThreshold) then
-          call ESMF_RegridConservIntersectPole1D(nLoc, &
+          call ESMF_RegridConservXPole1D(nLoc, &
                                      xIntersect, yIntersect, &
                                      xoff, yoff, lcoinc,               &
                                      xbeg, ybeg, xend, yend, fullLine, &
@@ -2022,7 +2022,7 @@
       ! in a transformed coordinate system to avoid pole singularity
       if (coordSystem == ESMF_CoordSystem_Spherical) then
         if (yb > northThreshold .or. yb < southThreshold) then
-          call ESMF_RegridConservIntersectPole2D(iLoc, jLoc, &
+          call ESMF_RegridConservXPole2D(iLoc, jLoc, &
                                      xIntersect, yIntersect, &
                                      xoff, yoff, lcoinc,               &
                                      xbeg, ybeg, xend, yend, fullLine, &
@@ -2318,10 +2318,10 @@
 
 !-----------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_RegridConservIntersectPole1D
+! !IROUTINE: ESMF_RegridConservXPole1D
 ! !INTERFACE:
 
-      subroutine ESMF_RegridConservIntersectPole1D(nLoc,        &
+      subroutine ESMF_RegridConservXPole1D(nLoc,        &
                                  xIntersect, yIntersect, &
                                  xoff, yoff, lcoinc,               &
                                  xbeg, ybeg, xend, yend, fullLine, &
@@ -2732,14 +2732,14 @@
       deallocate(xcorner, ycorner)
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_RegridConservIntersectPole1D
+      end subroutine ESMF_RegridConservXPole1D
 
 !-----------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_RegridConservIntersectPole2D
+! !IROUTINE: ESMF_RegridConservXPole2D
 ! !INTERFACE:
 
-      subroutine ESMF_RegridConservIntersectPole2D(iLoc, jLoc,        &
+      subroutine ESMF_RegridConservXPole2D(iLoc, jLoc,        &
                                  xIntersect, yIntersect, &
                                  xoff, yoff, lcoinc,               &
                                  xbeg, ybeg, xend, yend, fullLine, &
@@ -3161,7 +3161,7 @@
       deallocate(xcorner, ycorner)
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_RegridConservIntersectPole2D
+      end subroutine ESMF_RegridConservXPole2D
 
 !----------------------------------------------------------------------
 !BOPI
