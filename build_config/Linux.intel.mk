@@ -1,4 +1,4 @@
-# $Id: Linux.intel.mk,v 1.7 2003/09/12 19:01:52 nscollins Exp $ 
+# $Id: Linux.intel.mk,v 1.8 2003/09/16 19:42:27 nscollins Exp $ 
 
 # Location of MPI (Message Passing Interface) software
 
@@ -51,17 +51,17 @@ C_CXXF90LD         = ecc  -size_lp64
 C_CXXSO            = ecc -shared -size_lp64
 endif
 ifeq ($(ESMF_PREC),32)
-C_CC		   = ecc
-C_FC		   = efc
-C_CLINKER	   = ecc
-C_FLINKER	   = efc
-CXX_CC		   = ecc
-CXX_FC		   = efc -mp
-CXX_CLINKER	   = ecc
-CXX_FLINKER	   = ecc
-C_F90CXXLD         = efc -mp
-C_CXXF90LD         = ecc 
-C_CXXSO            = ecc -shared 
+C_CC		   = icc
+C_FC		   = ifc
+C_CLINKER	   = icc
+C_FLINKER	   = ifc
+CXX_CC		   = icc
+CXX_FC		   = ifc -mp
+CXX_CLINKER	   = icc
+CXX_FLINKER	   = icc
+C_F90CXXLD         = ifc -mp
+C_CXXF90LD         = icc 
+C_CXXSO            = icc -shared 
 endif
 # ######################### C and Fortran compiler flags ####################
 C_FC_MOD           = -I
