@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.9 2004/12/03 20:47:51 nscollins Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.10 2004/12/08 20:54:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.9 2004/12/03 20:47:51 nscollins Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.10 2004/12/08 20:54:53 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -264,7 +264,7 @@
              bptr => si%blindsend(:,i)
              call ESMF_BundleSerialize(stateitem%datap%bp, bptr, bufsize, &
                                        offset, localrc)
-            print *, "setting bundle, obj=", si%objsend(i), " id=", si%idsend(i)
+           !print *, "setting bundle, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_FIELD%ot)
              call c_ESMC_GetID(stateitem%datap%fp%ftypep, si%idsend(i), localrc)
@@ -272,7 +272,7 @@
              bptr => si%blindsend(:,i)
              call ESMF_FieldSerialize(stateitem%datap%fp, bptr, &
                                        bufsize, offset, localrc)
-            print *, "setting field, obj=", si%objsend(i), " id=", si%idsend(i)
+           !print *, "setting field, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_ARRAY%ot)
              call c_ESMC_GetID(stateitem%datap%ap, si%idsend(i), localrc)
@@ -280,7 +280,7 @@
              bptr => si%blindsend(:,i)
              call c_ESMC_ArraySerializeNoData(stateitem%datap%ap, bptr(1), &
                                        bufsize, offset, localrc)
-            print *, "setting array, obj=", si%objsend(i), " id=", si%idsend(i)
+           !print *, "setting array, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_STATE%ot)
              call c_ESMC_GetID(stateitem%datap%spp, si%idsend(i), localrc)
@@ -288,31 +288,31 @@
              bptr => si%blindsend(:,i)
              wrapper%statep => stateitem%datap%spp
              call ESMF_StateSerialize(wrapper, bptr, bufsize, offset, localrc)
-            print *, "setting state, obj=", si%objsend(i), " id=", si%idsend(i)
+           !print *, "setting state, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_NAME%ot)
-             print *, "placeholder name"
+            !print *, "placeholder name"
              si%idsend(i) = -1
              si%objsend(i) = 0
              bptr => si%blindsend(:,i)
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
-            print *, "setting placeholder, name=", stateitem%namep
+           !print *, "setting placeholder, name=", stateitem%namep
              localrc = ESMF_SUCCESS
            case (ESMF_STATEITEM_INDIRECT%ot)
-             print *, "field inside a bundle"
+            !print *, "field inside a bundle"
              si%idsend(i) = -2
              si%objsend(i) = 0
              bptr => si%blindsend(:,i)
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
-            print *, "setting field-in-bundle, name=", stateitem%namep
+           !print *, "setting field-in-bundle, name=", stateitem%namep
              localrc = ESMF_SUCCESS
            case (ESMF_STATEITEM_UNKNOWN%ot)
-             print *, "unknown type"
+            !print *, "unknown type"
              si%idsend(i) = -3
              si%objsend(i) = 0
              bptr => si%blindsend(:,i)
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
-            print *, "setting unknown, name=", stateitem%namep
+           !print *, "setting unknown, name=", stateitem%namep
              localrc = ESMF_SUCCESS
         end select
         if (ESMF_LogMsgFoundError(localrc, &
@@ -440,10 +440,10 @@
        ! each takes turns sending to all, everyone else receives
        if (mypet .eq. j) then
            ! i am the sender, send in turn to each other pet
-           print *, j, "sends to everyone else"
+          !print *, j, "sends to everyone else"
            do i = 0, pets-1
                if (i .eq. j) cycle
-               print *, "calling send to", i
+              !print *, "calling send to", i
                ! count must be integer array
                count(1) = si%mycount
                call ESMF_VMSend(vm, count, 1, i, rc=localrc)
@@ -456,8 +456,8 @@
                                          ESMF_CONTEXT, rc)) return
                si%theircount = count(1)
                if (si%theircount .ne. si%mycount) then
-                   print *, "object counts not same; ", &
-                          si%mycount, " .ne. ", si%theircount
+                  !print *, "object counts not same; ", &
+                  !        si%mycount, " .ne. ", si%theircount
                endif
 
                ! at this point i know how many objects they have
@@ -480,7 +480,7 @@
                    do m = 1, si%mycount
                      bptr => si%blindsend(:,m)
                      call ESMF_VMSend(vm, bptr, bufsize, i, rc=localrc)
-                     print *, "back from buf send, localrc=", localrc
+                    ! print *, "back from buf send, localrc=", localrc
                      if (ESMF_LogMsgFoundError(localrc, &
                                                ESMF_ERR_PASSTHRU, &
                                                ESMF_CONTEXT, rc)) return
@@ -490,7 +490,7 @@
                ! done sending to the next pet
            enddo
        else  ! i was not the sender this time, so i am receiving
-           print *, mypet, "receives from", j
+          ! print *, mypet, "receives from", j
            call ESMF_VMRecv(vm, count, 1, j, rc=localrc)
            if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
@@ -504,8 +504,8 @@
                                      ESMF_CONTEXT, rc)) return
 
            if (si%theircount .ne. si%mycount) then
-               print *, "object counts not same; ", &
-                          si%mycount, " .ne. ", si%theircount
+              ! print *, "object counts not same; ", &
+              !            si%mycount, " .ne. ", si%theircount
            endif
   
            ! at this point, i know how many objects they have.
@@ -542,7 +542,7 @@
                do m = 1, si%theircount
                    bptr => si%blindrecv(:,m)
                    call ESMF_VMRecv(vm, bptr, bufsize, j, rc=localrc)
-                   print *, "got buf ", m, " localrc=", localrc
+                  ! print *, "got buf ", m, " localrc=", localrc
                    if (ESMF_LogMsgFoundError(localrc, &
                                              ESMF_ERR_PASSTHRU, &
                                              ESMF_CONTEXT, rc)) return
@@ -554,12 +554,12 @@
            ! if there are any which are missing from our list.
 
            do k=1, si%mycount
-             print *, "i am", mypet, " my send ids and objs are:", &
-                            k, si%idsend(k), si%objsend(k)
+            ! print *, "i am", mypet, " my send ids and objs are:", &
+            !                k, si%idsend(k), si%objsend(k)
            enddo
            do k=1, si%theircount
-             print *, "i am", mypet, " my recv ids and objs are:", &
-                            k, si%idrecv(k), si%objrecv(k)
+            ! print *, "i am", mypet, " my recv ids and objs are:", &
+            !                k, si%idrecv(k), si%objrecv(k)
            enddo
 
            !!! TODO: 
@@ -578,49 +578,49 @@
                 offset = 0  
                 select case (si%objrecv(k))
                    case (ESMF_ID_BUNDLE%objectID)
-                    print *, "need to create proxy bundle, id=", si%idrecv(k)
+                   ! print *, "need to create proxy bundle, id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
                     bundle = ESMF_BundleDeserialize(vm, bptr, offset, localrc)
                     call ESMF_StateAddBundle(state, bundle, rc=localrc)
 
                    case (ESMF_ID_FIELD%objectID)
-                    print *, "need to create proxy field, id=", si%idrecv(k)
+                   ! print *, "need to create proxy field, id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
                     field = ESMF_FieldDeserialize(vm, bptr, offset, localrc)
                     call ESMF_StateAddField(state, field, rc=localrc)
 
                    case (ESMF_ID_ARRAY%objectID)
-                    print *, "need to create proxy array, id=", si%idrecv(k)
+                   ! print *, "need to create proxy array, id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
                     call c_ESMC_ArrayDeserializeNoData(array, bptr, offset, localrc)
                     call ESMF_StateAddArray(state, array, rc=localrc)
 
                    case (ESMF_ID_STATE%objectID)
-                    print *, "need to create proxy state, id=", si%idrecv(k)
+                   ! print *, "need to create proxy state, id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
                     substate = ESMF_StateDeserialize(vm, bptr, offset, localrc)
                     call ESMF_StateAddState(state, substate, rc=localrc)
 
                    case (ESMF_STATEITEM_NAME%ot)
-                     print *, "placeholder name"
+                    ! print *, "placeholder name"
                      call c_ESMC_StringDeserialize(thisname, &
                                                    bptr(1), offset, localrc)
                      call ESMF_StateAddNameOnly(state, thisname, rc=localrc)
          
                    case (ESMF_STATEITEM_INDIRECT%ot)
-                     print *, "field inside a bundle"
+                    ! print *, "field inside a bundle"
                      call c_ESMC_StringDeserialize(thisname, &
                                                    bptr(1), offset, localrc)
                      ! do nothing here
             
                    case (ESMF_STATEITEM_UNKNOWN%ot)
-                     print *, "unknown type"
+                    ! print *, "unknown type"
                      call c_ESMC_StringDeserialize(thisname, &
                                                    bptr(1), offset, localrc)
                      ! do nothing here
 
                    case default
-                    print *, "not needed yet, id=", si%idrecv(k)
+                   ! print *, "not needed yet, id=", si%idrecv(k)
                 end select
              endif
            enddo
