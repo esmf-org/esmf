@@ -1,4 +1,4 @@
-// $Id: ESMC_ArrayComm.C,v 1.15 2004/06/07 10:40:24 nscollins Exp $
+// $Id: ESMC_ArrayComm.C,v 1.16 2004/06/14 22:16:48 theurich Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -40,7 +40,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_ArrayComm.C,v 1.15 2004/06/07 10:40:24 nscollins Exp $";
+            "$Id: ESMC_ArrayComm.C,v 1.16 2004/06/14 22:16:48 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -90,78 +90,7 @@
 
 
 
-//-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayGather"
-//BOP
-// !IROUTINE:  ESMC_ArrayGather - gather a distributed Array onto 1 DE
-//
-// !INTERFACE:
-      int ESMC_Array::ESMC_ArrayGather(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_DELayout *delayout,     // in  - layout (temporarily)
-      int decompids[],           // in  - decomposition identifier for each
-                                 //       axis for the Array
-      int size_decomp,           // in  - size of decomp array
-      int global_dimlengths[],   // in  - array of global dimensions
-      int local_maxlength[],     // in  - array of maximum counts on any DE per dim
-      int deid,                  // in  - the DE to collect the data on
-      ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
-//
-// !DESCRIPTION:
-//     
-//
-//EOP
-
-    int rc = ESMF_FAILURE;
-    int i, j, k, l, m;     // general counter vars
-    int thisde;
-    int i_exc, j_exc;
-    int counts[ESMF_MAXDIM];
-    ESMC_Array *gathered;
-
-//  allocate global-sized array on 1 DE and fill with distributed data
-//  from each current Array
-    int gsize=1;
-    int lsize=1;
-    for (i=0; i<rank; i++) {
-      gsize = gsize * global_dimlengths[i];
-      lsize = lsize * (ai_comp[i].max - ai_comp[i].min+1);
-      counts[i] = global_dimlengths[i];
-    }
-
-    delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, 0, &thisde,
-                                  NULL, NULL, NULL, 0);
-
-    // create array with global data buffer
-    if (thisde == deid) {
-        gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
-
-        // call something which will do a receive
- //jw       delayout->ESMC_DELayoutGatherArray(this->base_addr, global_dimlengths, 
- //jw                                             decompids, size_decomp, 
- //jw                                             // FIXME: localAxisCounts should be an arg
- //jw                                             NULL, local_maxlength,
- //jw                                             //localAxisCounts, local_maxlength,
- //jw                                             ai_comp, ai_total, 
- //jw                                             this->kind, gathered->base_addr);
-        //gathered->ESMC_ArrayPrint();
-    } else {
-        // call something which will do a send
- //jw       delayout->ESMC_DELayoutGatherArray(this->base_addr, global_dimlengths, 
- //jw                                             decompids, size_decomp, 
- //jw                                             // FIXME: localAxisCounts should be an arg
- //jw                                             NULL, local_maxlength,
- //jw                                             //localAxisCounts, local_maxlength,
- //jw                                             ai_comp, ai_total, 
- //jw                                             this->kind, NULL);
-    }
-
-#if 0
+#if 1
 //-----------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMC_newDELayoutGatherArray"
@@ -169,12 +98,15 @@
 // !IROUTINE:  ESMC_DELayoutGatherArray - all gather a distributed array
 //
 // !INTERFACE:
-      int ESMC_newDELayout::ESMC_newDELayoutGatherArray(
+//      int ESMC_newDELayout::ESMC_newDELayoutGatherArray(
+static int ESMC_newDELayoutGatherArray(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
+      ESMC_DELayout *delayout,
+      int root,
       void *DistArray,           // in  - distributed array
       int global_dimlength[],    // in
       int decompids[],           // in  - decomposition identifier for each
@@ -200,7 +132,7 @@
 
   // get layout size
   int nx, ny, nde, ncount[2], thisde;
-  delayout->ESMC_newDELayoutGet(&nde, NULL, NULL, NULL, 0, &thisde,
+  delayout->ESMC_DELayoutGet(&nde, NULL, NULL, NULL, 0, &thisde,
                             NULL, NULL, ncount, 2);
   nx = ncount[0];
   ny = ncount[1];
@@ -287,9 +219,8 @@
             
           }
           // call layout gather routine
-          layout->ESMC_newDELayoutGatherV(sendbuf, sendcount, 
-                                          recvbuf, recvcounts, 
-                                          displs, ESMC_TRUE);
+          delayout->ESMC_DELayoutGatherV((void **)sendbuf, (void **)recvbuf, recvcounts, 
+                                         displs, datatype, root, ESMF_TRUE);
           //comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
           //                         displs, datatype);
         }
@@ -377,8 +308,8 @@
               }
             }
           // call layout gather routine
-          comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
-                                   displs, datatype);
+          //comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
+//                                   displs, datatype);
           }
         }
         delete [] recvcounts;
@@ -395,6 +326,80 @@
 
  } // end ESMC_newDELayoutGatherArray
 #endif
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayGather"
+//BOP
+// !IROUTINE:  ESMC_ArrayGather - gather a distributed Array onto 1 DE
+//
+// !INTERFACE:
+      int ESMC_Array::ESMC_ArrayGather(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_DELayout *delayout,     // in  - layout (temporarily)
+      int decompids[],           // in  - decomposition identifier for each
+                                 //       axis for the Array
+      int size_decomp,           // in  - size of decomp array
+      int global_dimlengths[],   // in  - array of global dimensions
+      int local_maxlength[],     // in  - array of maximum counts on any DE per dim
+      int deid,                  // in  - the DE to collect the data on
+      ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
+//
+// !DESCRIPTION:
+//     
+//
+//EOP
+
+    int rc = ESMF_FAILURE;
+    int i, j, k, l, m;     // general counter vars
+    int thisde;
+    int i_exc, j_exc;
+    int counts[ESMF_MAXDIM];
+    ESMC_Array *gathered;
+
+//  allocate global-sized array on 1 DE and fill with distributed data
+//  from each current Array
+    int gsize=1;
+    int lsize=1;
+    for (i=0; i<rank; i++) {
+      gsize = gsize * global_dimlengths[i];
+      lsize = lsize * (ai_comp[i].max - ai_comp[i].min+1);
+      counts[i] = global_dimlengths[i];
+    }
+
+    delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, 0, &thisde,
+                                  NULL, NULL, NULL, 0);
+
+    // create array with global data buffer
+    printf("arraygather: %d, %d\n", thisde, deid);
+    if (thisde == deid) {
+      printf("arraygather: I am root\n");
+        gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
+
+        // call something which will do a receive
+        ESMC_newDELayoutGatherArray(delayout, deid, this->base_addr, global_dimlengths, 
+                                              decompids, size_decomp, 
+                                              // FIXME: localAxisCounts should be an arg
+                                              NULL, local_maxlength,
+                                              //localAxisCounts, local_maxlength,
+                                              ai_comp, ai_total, 
+                                              this->kind, gathered->base_addr);
+        //gathered->ESMC_ArrayPrint();
+    } else {
+      printf("arraygather: I am not root\n");
+        // call something which will do a send
+       ESMC_newDELayoutGatherArray(delayout, deid, this->base_addr, global_dimlengths, 
+                                             decompids, size_decomp, 
+                                             // FIXME: localAxisCounts should be an arg
+                                             NULL, local_maxlength,
+                                             //localAxisCounts, local_maxlength,
+                                             ai_comp, ai_total, 
+                                             this->kind, NULL);
+    }
 
     if (thisde == deid)
        *Array_out = gathered;

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.50 2004/06/13 05:25:42 cdeluca Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.51 2004/06/14 22:16:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.50 2004/06/13 05:25:42 cdeluca Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.51 2004/06/14 22:16:48 theurich Exp $'
 !
 !==============================================================================
 !
@@ -299,7 +299,8 @@
     integer, dimension(ESMF_MAXDIM) :: decompids
     integer, dimension(:,:), pointer :: localAxisLengths, tempCCPDEPD
     integer, dimension(ESMF_MAXDIM) :: dimOrder, dimlengths
-    integer, dimension(ESMF_MAXGRIDDIM) :: decomps, size_decomp
+    integer, dimension(ESMF_MAXGRIDDIM) :: decomps
+    integer:: size_decomp
     integer, dimension(ESMF_MAXDIM) :: localMaxDimCount, globalCellDim
     integer, dimension(:), allocatable :: tempMLCCPD, tempGCCPD
 
@@ -308,7 +309,8 @@
  
     ! extract necessary information from the grid
     call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, rc=status)
-    call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=status)
+    call ESMF_DELayoutGet(delayout, deCount=nDEs, dimCount=size_decomp, &
+      rc=status)
     allocate(localAxisLengths(nDEs,ESMF_MAXDIM), stat=status)
     allocate( tempMLCCPD(     gridrank), stat=status)
     allocate(  tempGCCPD(     gridrank), stat=status)
@@ -332,7 +334,7 @@
     if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-    size_decomp = size(decompids)
+    ! size_decomp = size(decompids) ! already have this value
     decomps(1) = 1    ! TODO: remove this once the grid call is created
     decomps(2) = 2
 
