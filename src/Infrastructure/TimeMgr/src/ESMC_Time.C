@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.20 2003/04/21 19:05:22 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.21 2003/04/21 20:20:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.20 2003/04/21 19:05:22 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.21 2003/04/21 20:20:53 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -186,12 +186,14 @@
     if (YR != ESMC_NULL_POINTER && MM !=ESMC_NULL_POINTER &&
         DD != ESMC_NULL_POINTER) {
       if (Calendar != ESMC_NULL_POINTER) {
-        Calendar->ESMC_CalendarConvertToTime(*YR, *MM, *DD, 0, this);
+        if (Calendar->ESMC_CalendarConvertToTime(*YR, *MM, *DD, 0, this) ==
+            ESMF_FAILURE) return (ESMF_FAILURE);
       } else return (ESMF_FAILURE);
     }
     if (D != ESMC_NULL_POINTER) {
       if (Calendar != ESMC_NULL_POINTER) {
-        Calendar->ESMC_CalendarConvertToTime(0, 0, 0, *D, this);
+        if (Calendar->ESMC_CalendarConvertToTime(0, 0, 0, *D, this) ==
+            ESMF_FAILURE) return (ESMF_FAILURE);
       } else return (ESMF_FAILURE);
     }
     
@@ -212,7 +214,8 @@
     if (d_ != ESMC_NULL_POINTER) {
       // integer part
       if (Calendar != ESMC_NULL_POINTER) {
-        Calendar->ESMC_CalendarConvertToTime(0, 0, 0, (int) *d_, this);
+        if (Calendar->ESMC_CalendarConvertToTime(0, 0, 0, (int) *d_, this) ==
+            ESMF_FAILURE) return (ESMF_FAILURE);
       } else return (ESMF_FAILURE);
 
       // fractional part
@@ -444,12 +447,14 @@
     if (YR != ESMC_NULL_POINTER && MM !=ESMC_NULL_POINTER &&
         DD != ESMC_NULL_POINTER) {
       if (Calendar != ESMC_NULL_POINTER) {
-        Calendar->ESMC_CalendarConvertToTime(*YR, *MM, *DD, 0, this);
+        if (Calendar->ESMC_CalendarConvertToTime(*YR, *MM, *DD, 0, this) ==
+            ESMF_FAILURE) return (ESMF_FAILURE);
       } else return (ESMF_FAILURE);
     }
     if (D != ESMC_NULL_POINTER) {
       if (Calendar != ESMC_NULL_POINTER) {
-        Calendar->ESMC_CalendarConvertToTime(0, 0, 0, *D, this);
+        if (Calendar->ESMC_CalendarConvertToTime(0, 0, 0, *D, this) ==
+            ESMF_FAILURE) return (ESMF_FAILURE);
       } else return (ESMF_FAILURE);
     }
     
@@ -470,7 +475,8 @@
     if (d_ != ESMC_NULL_POINTER) {
       // integer part
       if (Calendar != ESMC_NULL_POINTER) {
-        Calendar->ESMC_CalendarConvertToTime(0, 0, 0, (int) *d_, this);
+        if (Calendar->ESMC_CalendarConvertToTime(0, 0, 0, (int) *d_, this) ==
+            ESMF_FAILURE) return (ESMF_FAILURE);
       } else return (ESMF_FAILURE);
 
       // fractional part
