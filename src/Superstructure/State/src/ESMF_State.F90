@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.5 2004/01/15 15:45:44 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.6 2004/01/15 16:22:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -273,7 +273,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.5 2004/01/15 15:45:44 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.6 2004/01/15 16:22:23 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -2638,7 +2638,7 @@ end function
       nstates = size(statelist)
       do i = 1, nstates
   
-        stypep = statelist(i)%statep
+        stypep => statelist(i)%statep
   
         if (.not. associated(stypep)) then
           print *, "uninitialized State in list, number", i
@@ -2657,7 +2657,7 @@ end function
         endif
   
         if (statename .eq. tryname) then
-          ESMF_StateGetFromList%statep = stypep
+          ESMF_StateGetFromList%statep => stypep
           if (present(rc)) rc=ESMF_SUCCESS
           return
         endif
