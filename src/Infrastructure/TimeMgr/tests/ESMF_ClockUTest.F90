@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.23 2003/06/07 00:42:01 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.24 2003/07/07 19:54:29 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.23 2003/06/07 00:42:01 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.24 2003/07/07 19:54:29 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -68,6 +68,9 @@
       !   see #else below for non-exhaustive tests
       ! future release will use run-time switching mechanism
 
+
+      ! initialize ESMF framework
+      call ESMF_FrameworkInitialize(rc)
 
       ! initialize calendar to be Gregorian type
       call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
@@ -362,4 +365,7 @@
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
   
+      ! finalize ESMF framework
+      call ESMF_FrameworkFinalize(rc)
+
       end program ESMF_ClockTest

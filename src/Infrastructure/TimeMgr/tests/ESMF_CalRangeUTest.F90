@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.5 2003/06/07 00:42:01 eschwab Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.6 2003/07/07 19:54:30 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.5 2003/06/07 00:42:01 eschwab Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.6 2003/07/07 19:54:30 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -65,6 +65,17 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
 
+!------------------------------------------------------------------------------- -
+!     The unit tests are divided into Sanity and Exhaustive. The Sanity tests ar e
+!     always run. When the environment variable, EXHAUSTIVE, is set to ON then
+!     the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is se t
+!     to OFF, then only the sanity unit tests.
+!     Special strings (Non-exhaustive and exhaustive) have been
+!     added to allow a script to count the number and types of unit tests.
+!-------------------------------------------------------------------------------
+
+      ! initialize ESMF framework
+      call ESMF_FrameworkInitialize(rc)
 
       ! Julian Calendar
 
@@ -300,6 +311,9 @@
         end if
 
       end do
+
+      ! finalize ESMF framework
+      call ESMF_FrameworkFinalize(rc)
 
 !==============================================================================
 
