@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.94 2004/02/19 20:54:03 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.95 2004/02/19 21:25:18 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -362,8 +362,8 @@
 
 ! !INTERFACE:
       function ESMF_DistGridCreateInternal(numDims, counts, layout, decompIDs, &
-                                           periodic, coversDomain, &
                                            countsPerDEDim1, countsPerDEDim2, &
+                                           periodic, coversDomain, &
                                            name, rc)
 !
 ! !RETURN VALUE:
@@ -374,10 +374,10 @@
       integer, dimension(numDims), intent(in) :: counts
       type(ESMF_DELayout), intent(in) :: layout
       integer, dimension(numDims), intent(in) :: decompIDs
+      integer, dimension(:), intent(in) :: countsPerDEDim1
+      integer, dimension(:), intent(in), optional :: countsPerDEDim2
       type(ESMF_Logical), dimension(numDims), intent(in), optional :: periodic
       type(ESMF_Logical), dimension(numDims), intent(in), optional :: coversDomain
-      integer, dimension(:), intent(in), optional :: countsPerDEDim1
-      integer, dimension(:), intent(in), optional :: countsPerDEDim2
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
 
@@ -420,11 +420,6 @@
       type(ESMF_DistGridType), pointer :: dgtype    ! Pointer to new distgrid
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
-      integer :: i
-      integer :: nDEs(ESMF_MAXDECOMPDIM)
-      integer, dimension(:), allocatable :: countsPerDEDim1Use, &
-                                            countsPerDEDim2Use
-      logical, dimension(ESMF_MAXDECOMPDIM) :: need
 
 !     Initialize pointers
       nullify(dgtype)
@@ -446,40 +441,9 @@
         return
       endif
 
-!     if there is an axis to decompose, either grab the specfied countsPerDE
-!     or parse the global count
-      need = .false.
-      do i = 1,numDims
-        if (decompIDs(i).eq.1) need(1)=.true.
-        if (decompIDs(i).eq.2) need(2)=.true.
-      enddo
-
-      call ESMF_DELayoutGetSize(layout, nDEs(1), nDEs(2), rc)
-      allocate(countsPerDEDim1Use(nDEs(1)), stat=status)
-      allocate(countsPerDEDim2Use(nDEs(2)), stat=status)
-      countsPerDEDim1Use(:) = counts(1)
-      countsPerDEDim2Use(:) = counts(2)
-
-      if (need(1)) then
-        if(present(countsPerDEDim1)) then
-          countsPerDEDim1Use = countsPerDEDim1
-        else
-          call ESMF_DELayoutParse(layout, 1, counts(decompIDs(1)), &
-                                  countsPerDEDim1Use, rc)
-        endif
-      endif
-      if (need(2)) then
-        if(present(countsPerDEDim2)) then
-          countsPerDEDim2Use = countsPerDEDim2
-        else
-          call ESMF_DELayoutParse(layout, 2, counts(decompIDs(2)), &
-                                  countsPerDEDim2Use, rc)
-        endif
-      endif
-
 !     Call construction method to allocate and initialize grid internals.
       call ESMF_DistGridConstruct(dgtype, numDims, layout, decompIDs, counts, &
-                                  countsPerDEDim1Use, countsPerDEDim2Use, &
+                                  countsPerDEDim1, countsPerDEDim2, &
                                   periodic=periodic, &
                                   coversDomain=coversDomain, &
                                   name=name, rc=rc)
@@ -671,7 +635,7 @@
       integer, dimension(numDims), intent(in) :: decompIDs
       integer, dimension(numDims), intent(in) :: counts
       integer, dimension(:), intent(in) :: countsPerDEDim1
-      integer, dimension(:), intent(in) :: countsPerDEDim2
+      integer, dimension(:), intent(in), optional :: countsPerDEDim2
       integer, intent(in), optional :: gridBoundaryWidth
       type(ESMF_Logical), dimension(numDims), intent(in), optional :: periodic
       type(ESMF_Logical), dimension(numDims), intent(in), optional :: coversDomain
@@ -721,8 +685,8 @@
       logical :: rcpresent                          ! Return code present
       integer :: globalCellCount
       integer :: i, j, nDE, bnd
-      integer, dimension(ESMF_MAXDECOMPDIM) :: decompCount
-      integer, dimension(numDims) :: globalCellCountPerDim, nDEs
+      integer, dimension(ESMF_MAXDECOMPDIM) :: decompCount, &
+               globalCellCountPerDim, nDEs
       type(ESMF_DistGridLocal),  pointer :: me
       type(ESMF_DistGridGlobal), pointer :: glob
 
@@ -788,6 +752,7 @@
         return
       endif
       ! call internal routine to set counts per DE
+
       call ESMF_DistGridSetCounts(dgtype, numDims, nDEs, &
                                   countsPerDEDim1, countsPerDEDim2, &
                                   periodic, total=.FALSE., rc=status)
@@ -1363,10 +1328,10 @@
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype
       integer, intent(in) :: numDims
-      integer, dimension(numDims), intent(in) :: nDE
+      integer, dimension(:), intent(in) :: nDE
       integer, dimension(:), intent(in) :: countsPerDEDim1
-      integer, dimension(:), intent(in) :: countsPerDEDim2
-      type(ESMF_Logical), dimension(numDims), intent(in), optional :: periodic
+      integer, dimension(:), intent(in), optional :: countsPerDEDim2
+      type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc            
 
@@ -1431,10 +1396,13 @@
       do i = 1,nDE(1)
         do j = 1,nDE(2)
           de = (j-1)*nDE(1) + i
-          glob%cellCountPerDE(de) = (countsPerDEDim1(i) + bnd) &
-                                  * (countsPerDEDim2(j) + bnd)
+          glob%cellCountPerDE(de) = countsPerDEDim1(i) + bnd
           glob%cellCountPerDEPerDim(de,1) = countsPerDEDim1(i) + bnd
-          glob%cellCountPerDEPerDim(de,2) = countsPerDEDim2(j) + bnd
+          if (numDims.eq.2) then
+            glob%cellCountPerDE(de) = glob%cellCountPerDE(de) &
+                                    * (countsPerDEDim2(j) + bnd)
+            glob%cellCountPerDEPerDim(de,2) = countsPerDEDim2(j) + bnd
+          endif
         enddo
       enddo
 
@@ -1460,45 +1428,49 @@
           glob%AIPerDEPerDim(de,1)%stride = globalEnd
           if (present(periodic)) then
             if (periodic(1).eq.ESMF_TRUE) &
-            glob%AIPerDEPerDim(de,1)%stride = globalEnd + countsPerDEDim1(1) &
-                                                     + countsPerDEDim1(nDE(1))
+            glob%AIPerDEPerDim(de,1)%stride = globalEnd &
+                                            + countsPerDEDim1(1) &
+                                            + countsPerDEDim1(nDE(1))
           endif
         enddo
       enddo
 
-      ! Then the 2 decomposition
-      globalStart = 1
-      globalEnd   = bnd
-      ! TODO: this code was removed from the 1 decomp case above.  should it be
-      !  removed from here as well?
-      if (present(periodic)) then
-        if (periodic(2).eq.ESMF_TRUE) then
-          globalStart = countsPerDEDim2(nDE(2)) + 1
-          globalEnd   = countsPerDEDim2(nDE(2))
+      ! Then the 2 decomposition if applicable
+      if (numDims.eq.2) then
+        globalStart = 1
+        globalEnd   = bnd
+        ! TODO: this code was removed from the 1 decomp case above.  should it be
+        !  removed from here as well?
+        if (present(periodic)) then
+          if (periodic(2).eq.ESMF_TRUE) then
+            globalStart = countsPerDEDim2(nDE(2)) + 1
+            globalEnd   = countsPerDEDim2(nDE(2))
+          endif
         endif
-      endif
 
-      do j = 1,nDE(2)
-        globalEnd = globalEnd + countsPerDEDim2(j)
-        do i = 1,nDE(1)
-          de = (j-1)*nDE(1) + i
-          glob%globalStartPerDEPerDim(de,2) = globalStart - 1
-          glob%AIPerDEPerDim(de,2)%min = globalStart
-          glob%AIPerDEPerDim(de,2)%max = globalEnd
+        do j = 1,nDE(2)
+          globalEnd = globalEnd + countsPerDEDim2(j)
+          do i = 1,nDE(1)
+            de = (j-1)*nDE(1) + i
+            glob%globalStartPerDEPerDim(de,2) = globalStart - 1
+            glob%AIPerDEPerDim(de,2)%min = globalStart
+            glob%AIPerDEPerDim(de,2)%max = globalEnd
+          enddo
+          globalStart = globalEnd - bnd + 1
         enddo
-        globalStart = globalEnd - bnd + 1
-      enddo
-      do j = 1,nDE(2)
-        do i = 1,nDE(1)
-          de = (j-1)*nDE(1) + i
-          glob%AIPerDEPerDim(de,2)%stride = globalEnd
-          if (present(periodic)) then
-            if (periodic(2).eq.ESMF_TRUE) &
-            glob%AIPerDEPerDim(de,2)%stride = globalEnd + countsPerDEDim2(1) &
-                                                     + countsPerDEDim2(nDE(2))
-          endif
+        do j = 1,nDE(2)
+          do i = 1,nDE(1)
+            de = (j-1)*nDE(1) + i
+            glob%AIPerDEPerDim(de,2)%stride = globalEnd
+            if (present(periodic)) then
+              if (periodic(2).eq.ESMF_TRUE) &
+              glob%AIPerDEPerDim(de,2)%stride = globalEnd &
+                                              + countsPerDEDim2(1) &
+                                              + countsPerDEDim2(nDE(2))
+            endif
+          enddo
         enddo
-      enddo
+      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1892,7 +1864,7 @@
                                                  global2D, local2D, &
                                                  globalAI1D, localAI1D, &
                                                  globalAI2D, localAI2D, &
-                                                 total, rc)
+                                                 dimOrder, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype
@@ -1904,6 +1876,7 @@
       type(ESMF_AxisIndex), dimension(:), optional, intent(out) :: localAI1D
       type(ESMF_AxisIndex), dimension(:,:), optional, intent(in) ::  globalAI2D
       type(ESMF_AxisIndex), dimension(:,:), optional, intent(out) :: localAI2D
+      integer, dimension(:), optional, intent(in) :: dimOrder
       logical, optional, intent(in) :: total
       integer, intent(out), optional :: rc
 !
@@ -1949,6 +1922,7 @@
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
       integer :: i, j, base, l1, r1, l2, r2
+      integer, dimension(:), allocatable :: dimOrderUse
       type(ESMF_DistGridLocal), pointer :: me
       type(ESMF_DistGridGlobal), pointer :: glob
 
@@ -2053,11 +2027,30 @@
                    "equal"
           return
         endif
+        ! calculate default if dimOrder is not present
+        allocate(dimOrderUse(size(globalAI1D)))
+        if (present(dimOrder)) then
+          dimOrderUse(:) = dimOrder(:)
+        else
+          do i = 1,size(dimOrderUse)
+            dimOrderUse(i) = i
+          enddo
+        endif
+
         do i = 1, size(globalAI1D)
-          localAI1D(i)%min = globalAI1D(i)%min - me%globalStartPerDim(i)
-          localAI1D(i)%max = globalAI1D(i)%max - me%globalStartPerDim(i)
+          if     (dimOrderUse(i).eq.0) then
+            localAI1D(i)%min = globalAI1D(i)%min
+            localAI1D(i)%max = globalAI1D(i)%max
+          elseif (dimOrderUse(i).eq.dgtype%decompIds(1)) then
+            localAI1D(i)%min = globalAI1D(i)%min - me%globalStartPerDim(1)
+            localAI1D(i)%max = globalAI1D(i)%max - me%globalStartPerDim(1)
+          elseif (dimOrderUse(i).eq.dgtype%decompIds(2)) then
+            localAI1D(i)%min = globalAI1D(i)%min - me%globalStartPerDim(2)
+            localAI1D(i)%max = globalAI1D(i)%max - me%globalStartPerDim(2)
+          endif
           localAI1D(i)%stride = localAI1D(i)%max - localAI1D(i)%min + 1
         enddo
+        deallocate(dimOrderUse)
       endif
 
       !2-D AxisIndex translation here
@@ -2075,15 +2068,36 @@
           return
         endif
 
+        ! calculate default if dimOrder is not present
+        allocate(dimOrderUse(size(globalAI2D,2)))
+        if (present(dimOrder)) then
+          dimOrderUse(:) = dimOrder(:)
+        else
+          do i = 1,size(dimOrderUse)
+            dimOrderUse(i) = i
+          enddo
+        endif
+
         do j = 1, size(globalAI2D,2)
           do i = 1, size(globalAI2D,1)
-            localAI2D(i,j)%min    = globalAI2D(i,j)%min &
-                                  - glob%globalStartPerDEPerDim(i,j)
-            localAI2D(i,j)%max    = globalAI2D(i,j)%max &
-                                  - glob%globalStartPerDEPerDim(i,j)
+            if     (dimOrderUse(j).eq.0) then
+              localAI2D(i,j)%min    = globalAI2D(i,j)%min
+              localAI2D(i,j)%max    = globalAI2D(i,j)%max
+            elseif (dimOrderUse(j).eq.dgtype%decompIds(1)) then
+              localAI2D(i,j)%min    = globalAI2D(i,j)%min &
+                                    - glob%globalStartPerDEPerDim(i,1)
+              localAI2D(i,j)%max    = globalAI2D(i,j)%max &
+                                    - glob%globalStartPerDEPerDim(i,1)
+            elseif (dimOrderUse(j).eq.dgtype%decompIds(2)) then
+              localAI2D(i,j)%min    = globalAI2D(i,j)%min &
+                                    - glob%globalStartPerDEPerDim(i,2)
+              localAI2D(i,j)%max    = globalAI2D(i,j)%max &
+                                    - glob%globalStartPerDEPerDim(i,2)
+            endif
             localAI2D(i,j)%stride = localAI2D(i,j)%max - localAI2D(i,j)%min + 1
           enddo
         enddo
+        deallocate(dimOrderUse)
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -2384,7 +2398,7 @@
 
 !     check error status
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
+        print *, "ERROR in ESMF_DistGridAllocate: allocate"
         return
       endif
 
