@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.22 2004/06/14 22:52:41 jwolfe Exp $
+! $Id: ESMF_RHandle.F90,v 1.23 2004/07/29 22:59:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -133,7 +133,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.22 2004/06/14 22:52:41 jwolfe Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.23 2004/07/29 22:59:41 jwolfe Exp $'
 
 !==============================================================================
 
@@ -1020,15 +1020,17 @@
          return
        endif
 
-       if(present(options)) then
-           call c_ESMC_RouteHandleValidate(rhandle, options, status)   
-       else
-           call c_ESMC_RouteHandleValidate(rhandle, defaultopts, status)
-       endif
+       ! TODO: the following code is commented out because the C-side
+       !       validate routine is empty
+       !if(present(options)) then
+       !    call c_ESMC_RouteHandleValidate(rhandle, options, status)   
+       !else
+       !    call c_ESMC_RouteHandleValidate(rhandle, defaultopts, status)
+       !endif
 
-       if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+       !if (ESMF_LogMsgFoundError(status, &
+       !                           ESMF_ERR_PASSTHRU, &
+       !                           ESMF_CONTEXT, rc)) return
 
        ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS
