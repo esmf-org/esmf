@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.3 2002/11/07 22:18:27 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.4 2002/11/07 23:10:59 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.3 2002/11/07 22:18:27 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.4 2002/11/07 23:10:59 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -185,6 +185,7 @@
 //
      ESMC_Array *a = new ESMC_Array;
   
+     *rc = ESMF_SUCCESS;
      return a;
 
  } // end ESMC_ArrayCreate_F
