@@ -1,4 +1,4 @@
-/*$Id: mpi.c,v 1.1 2004/06/04 15:48:02 nscollins Exp $*/
+/*$Id: mpi.c,v 1.2 2005/01/13 22:10:08 jwolfe Exp $*/
 
 /*
       This provides a few of the MPI-uni functions that cannot be implemented
@@ -223,6 +223,27 @@ void MPIUNI_STDCALL  MPI_FINALIZE(int *ierr)
   *ierr = MPI_SUCCESS;
 }
 
+/******mpi_barrier*******/
+void MPIUNI_STDCALL  mpi_barrier(int *ierr)
+{
+  *ierr = MPI_SUCCESS;
+}
+
+void MPIUNI_STDCALL  mpi_barrier_(int *ierr)
+{
+  *ierr = MPI_SUCCESS;
+}
+
+void MPIUNI_STDCALL  mpi_barrier__(int *ierr)
+{
+  *ierr = MPI_SUCCESS;
+}
+
+void MPIUNI_STDCALL  MPI_BARRIER(int *ierr)
+{
+  *ierr = MPI_SUCCESS;
+}
+
 /******mpi_comm_size*******/
 void MPIUNI_STDCALL mpi_comm_size(MPI_Comm *comm,int *size,int *ierr) 
 {
@@ -270,6 +291,27 @@ void MPIUNI_STDCALL mpi_comm_rank__(MPI_Comm *comm,int *rank,int *ierr)
 void MPIUNI_STDCALL MPI_COMM_RANK(MPI_Comm *comm,int *rank,int *ierr)
 {
   *rank=0;
+  *ierr=MPI_SUCCESS;
+}
+
+/******mpi_comm_dup*******/
+void MPIUNI_STDCALL mpi_comm_dup(MPI_Comm *comm1,MPI_Comm *comm2,int *ierr)
+{
+  *ierr=MPI_SUCCESS;
+}
+
+void MPIUNI_STDCALL mpi_comm_dup_(MPI_Comm *comm,MPI_Comm *comm2,int *ierr)
+{
+  *ierr=MPI_SUCCESS;
+}
+
+void MPIUNI_STDCALL mpi_comm_dup__(MPI_Comm *comm,MPI_Comm *comm2,int *ierr)
+{
+  *ierr=MPI_SUCCESS;
+}
+
+void MPIUNI_STDCALL MPI_COMM_DUP(MPI_Comm *comm,MPI_Comm *comm2,int *ierr)
+{
   *ierr=MPI_SUCCESS;
 }
 
@@ -325,8 +367,6 @@ void MPIUNI_STDCALL MPI_ALLREDUCE(void *sendbuf,void *recvbuf,int *count,int *da
    allows compilation, which is the whole point of mpiuni. */
 int
 	mpi_initialized_,
-	mpi_comm_dup_,
-	mpi_barrier_,
 	mpi_comm_split_,
 	mpi_comm_free_,
 	mpi_type_indexed_,
