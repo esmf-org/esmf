@@ -1,4 +1,4 @@
-! $Id: ESMF_StateGet.F90,v 1.2 2004/02/05 22:29:31 nscollins Exp $
+! $Id: ESMF_StateGet.F90,v 1.3 2004/02/13 16:01:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -48,7 +48,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateGet.F90,v 1.2 2004/02/05 22:29:31 nscollins Exp $'
+      '$Id: ESMF_StateGet.F90,v 1.3 2004/02/13 16:01:53 nscollins Exp $'
 
 !==============================================================================
 !
@@ -146,7 +146,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -249,7 +249,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -352,7 +352,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -455,7 +455,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -558,7 +558,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -661,7 +661,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -764,7 +764,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -867,7 +867,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -970,7 +970,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -1073,7 +1073,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -1176,7 +1176,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -1279,7 +1279,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -1382,7 +1382,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -1485,7 +1485,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -1588,7 +1588,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -1691,7 +1691,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -1794,7 +1794,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -1897,7 +1897,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -2000,7 +2000,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -2103,7 +2103,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -2206,7 +2206,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -2309,7 +2309,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -2412,7 +2412,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -2515,7 +2515,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
@@ -2618,7 +2618,7 @@ end interface
 ! The name of the Bundle, Field, or Array to return. 
 ! 
 ! \item[f90ptr] 
-! An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
+! An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data 
 ! in the State. When this call returns successfully, the pointer will now reference 
 ! the data in the State. This is either a reference or a copy, depending on the 
 ! setting of the following argument. The default is to return a reference. 
