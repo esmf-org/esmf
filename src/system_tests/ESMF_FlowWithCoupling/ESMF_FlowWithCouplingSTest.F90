@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.11 2004/04/09 19:54:18 eschwab Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.12 2004/04/14 21:52:19 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -40,7 +40,8 @@
 
     ! States and Layouts
     character(len=ESMF_MAXSTR) :: cnameIN, cnameFS, cplname
-    type(ESMF_DELayout) :: layoutDef, layoutIN, layoutFS
+    type(ESMF_newDELayout) :: layoutDef, layoutIN, layoutFS
+    type(ESMF_VM) :: vm
     type(ESMF_State) :: INimp, INexp, FSimp, FSexp
 
     integer :: de_id, ndes, rc, delist(16)
@@ -79,15 +80,19 @@
     call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
+    ! get the default global VM
+    call ESMF_VMGetGlobal(vm, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
     ! Query for the default layout
-    layoutDef = ESMF_DELayoutCreate(rc)
+    layoutDef = ESMF_newDELayoutCreate(vm, rc=rc)
 
     ! Get our DE number for later
-    call ESMF_DELayoutGetDEId(layoutDef, de_id, rc)
+    call ESMF_newDELayoutGetDEId(layoutDef, de_id, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Sanity check the number of DEs we were started on.
-    call ESMF_DELayoutGetNumDEs(layoutDef, ndes, rc)
+    call ESMF_newDELayoutGetNumDEs(layoutDef, ndes, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     if ((ndes .lt. 4) .or. (ndes .gt. 16)) then
         print *, "This test needs to run at least 4-way and no more than 16-way."
@@ -112,13 +117,13 @@
     !  run on a 2 x N/2 layout, the second will be on a 4 x N/4 layout.
     !  The coupler will run on the original default 1 x N layout.
     cnameIN = "Injector model"
-    layoutIN = ESMF_DELayoutCreate(delist, 2, (/ mid, 2 /), (/ 0, 0 /), rc)
+    layoutIN = ESMF_newDELayoutCreate(delist, (/ mid, 2 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     INcomp = ESMF_GridCompCreate(cnameIN, delayout=layoutIN, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cnameFS = "Flow Solver model"
-    layoutFS = ESMF_DELayoutCreate(delist, 2, (/ quart, 4 /), (/ 0, 0 /), rc)
+    layoutFS = ESMF_newDELayoutCreate(delist, (/ quart, 4 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     FScomp = ESMF_GridCompCreate(cnameFS, delayout=layoutFS, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -295,9 +300,9 @@
       call ESMF_CplCompDestroy(cpl, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_DELayoutDestroy(layoutIN, rc)
+      call ESMF_newDELayoutDestroy(layoutIN, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_DELayoutDestroy(layoutFS, rc)
+      call ESMF_newDELayoutDestroy(layoutFS, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
 

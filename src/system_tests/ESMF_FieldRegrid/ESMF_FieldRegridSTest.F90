@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.16 2004/04/09 19:54:16 eschwab Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.17 2004/04/14 21:52:19 nscollins Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -41,7 +41,8 @@
     ! Local variables
     integer :: i, de_id, ndes, mid, rc, delist(64), pid, cid
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
-    type(ESMF_DELayout) :: layout1, layout2, layout3
+    type(ESMF_newDELayout) :: layout1, layout2, layout3
+    type(ESMF_VM) :: vm
     type(ESMF_State) :: c1exp, c2imp
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
@@ -80,10 +81,13 @@
     ! Initialize framework
     call ESMF_Initialize(rc=rc)
 
-    ! Query for default layout.
-    layout1 = ESMF_DELayoutCreate(rc)
+    ! get default vm
+    call ESMF_VMGetGlobal(vm, rc=rc)
 
-    call ESMF_DELayoutGetNumDEs(layout1, ndes, rc=rc)
+    ! Query for default layout.
+    layout1 = ESMF_newDELayoutCreate(vm, rc=rc)
+
+    call ESMF_newDELayoutGetNumDEs(layout1, ndes, rc=rc)
     if (ndes .lt. 6) then
       print *, "This system test needs to run at least 6-way, current np = ", ndes
       goto 10
@@ -93,18 +97,20 @@
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-    delist = (/ (i, i=0, ndes-1) /)
-    layout2 = ESMF_DELayoutCreate(layout1, 2, (/ 2, mid /), (/ 0, 0 /), &
-                                  de_indices=delist, rc=rc)
+    !delist = (/ (i, i=0, ndes-1) /)
+    !layout2 = ESMF_DELayoutCreate(layout1, 2, (/ 2, mid /), (/ 0, 0 /), &
+    !                              de_indices=delist, rc=rc)
+    layout2 = ESMF_newDELayoutCreate(layout1, (/ 2, mid /), rc=rc)
     comp1 = ESMF_GridCompCreate(cname1, delayout=layout2, rc=rc)
     print *, "Created component ", trim(cname1), "rc =", rc
   !  call ESMF_GridCompPrint(comp1, "", rc)
 
 
     cname2 = "user model 2"
-    delist = (/ (i, i=0, ndes-1) /)
-    layout3 = ESMF_DELayoutCreate(layout1, 2, (/ mid, 2 /), (/ 0, 0 /), &
-                                  de_indices=delist, rc=rc)
+    !delist = (/ (i, i=0, ndes-1) /)
+    !layout3 = ESMF_newDELayoutCreate(layout1, 2, (/ mid, 2 /), (/ 0, 0 /), &
+    !                              de_indices=delist, rc=rc)
+    layout3 = ESMF_newDELayoutCreate(layout1, (/ mid, 2 /), rc=rc)
 
     comp2 = ESMF_GridCompCreate(cname2, delayout=layout3, rc=rc)
     print *, "Created component ", trim(cname2), "rc =", rc
@@ -212,7 +218,7 @@
 
 
       ! Figure out our local processor id for message below.
-      call ESMF_DELayoutGetDEID(layout1, de_id, rc)
+      call ESMF_newDELayoutGetDEID(layout1, de_id, rc)
 
 
       print *, "------------------------------------------------------------"
@@ -241,8 +247,8 @@
       call ESMF_GridCompDestroy(comp2, rc)
       call ESMF_CplCompDestroy(cpl, rc)
 
-      call ESMF_DELayoutDestroy(layout2, rc)
-      call ESMF_DELayoutDestroy(layout3, rc)
+      call ESMF_newDELayoutDestroy(layout2, rc)
+      call ESMF_newDELayoutDestroy(layout3, rc)
 
       print *, "All Destroy routines done"
 

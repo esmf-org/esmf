@@ -1,4 +1,4 @@
-! $Id: ESMF_SimpleCouplingSTest.F90,v 1.12 2004/04/14 21:13:03 nscollins Exp $
+! $Id: ESMF_SimpleCouplingSTest.F90,v 1.13 2004/04/14 21:52:19 nscollins Exp $
 !
 ! System test code SimpleCoupling
 !  Description on Sourceforge under System Test #62502
@@ -92,8 +92,8 @@
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-    delist = (/ 0, 1, 2, 3 /)
-    layout2 = ESMF_newDELayoutCreate(vm, rc=rc)
+    !delist = (/ 0, 1, 2, 3 /)
+    layout2 = ESMF_newDELayoutCreate(vm, /( 4, 1 /), rc=rc)
     !layout2 = ESMF_newDELayoutCreate(delist, 2, (/ 4, 1 /), (/ 0, 0 /), rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     comp1 = ESMF_GridCompCreate(cname1, delayout=layout2, rc=rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.5 2004/04/09 19:54:15 eschwab Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.6 2004/04/14 21:52:18 nscollins Exp $
 !
 ! System test ArrayRedist
 !  Description on Sourceforge under System Test #70384
@@ -38,6 +38,7 @@
     integer, dimension(3) :: global_counts, decompids1, decompids2, rank_trans
     character(len=ESMF_MAXSTR) :: sname, gname, fname, aname
     type(ESMF_DELayout) :: layout0, layout1, layout2
+    type(ESMF_VM) :: vm
     type(ESMF_Array) :: array1, array1a, array2, array2a, array3
     type(ESMF_AxisIndex) :: indexlist1(3), indexlist2(3), indexlist3(3)
     type(ESMF_State) :: state1
@@ -66,10 +67,13 @@
     call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
-    ! Create a default 1xN DELayout
-    layout0 = ESMF_DELayoutCreate(rc=rc)
+    call ESMF_VMGetGlobal(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_DELayoutGetNumDES(layout0, ndes, rc)
+ 
+    ! Create a default 1xN DELayout
+    layout0 = ESMF_newDELayoutCreate(vm, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_newDELayoutGetNumDES(layout0, ndes, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     if (ndes .eq. 1) then
@@ -80,9 +84,8 @@
     nde(1) = 2
     nde(2) = ndes/2
     allocate(delist(ndes))
-    delist = (/ (i, i=0, ndes-1) /)
-    layout1 = ESMF_DELayoutCreate(layout0, 2, (/ nde(1), nde(2) /), (/ 0, 0 /), &
-                                                      de_indices=delist, rc=rc)
+    !delist = (/ (i, i=0, ndes-1) /)
+    layout1 = ESMF_newDELayoutCreate(layout0, (/ nde(1), nde(2) /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "DELayout Create finished, rc =", rc
     if (rc .ne. ESMF_SUCCESS) goto 20

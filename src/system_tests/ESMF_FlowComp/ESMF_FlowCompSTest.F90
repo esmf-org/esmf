@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.10 2004/04/09 19:54:17 eschwab Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.11 2004/04/14 21:52:19 nscollins Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
@@ -30,7 +30,8 @@
     integer :: i, de_id, ndes, delist(64), rc
 
     character(len=ESMF_MAXSTR) :: cname1
-    type(ESMF_DELayout) :: layout1, layout2
+    type(ESMF_newDELayout) :: layout1, layout2
+    type(ESMF_VM) :: vm
     type(ESMF_State) :: c1exp
     type(ESMF_GridComp) :: comp1
 
@@ -69,10 +70,14 @@
     call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    ! Query for the default layout
-    layout1 = ESMF_DELayoutCreate(rc)
+    ! get the default global VM
+    call ESMF_VMGetGlobal(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
+
+    ! Query for the default layout
+    layout1 = ESMF_newDELayoutCreate(vm, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    call ESMF_newDELayoutGetNumDEs(layout1, ndes, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     if (ndes .lt. 4) then
         print *, "This system test needs to run at least 4-way, current np = ", ndes
@@ -82,8 +87,9 @@
 
     ! Create the model component
     cname1 = "fluid flow"
-    delist = (/ (i, i=0, ndes-1) /)
-    layout2 = ESMF_DELayoutCreate(delist, 2, (/ ndes/2, 2 /), (/ 0 ,0 /), rc)
+    !delist = (/ (i, i=0, ndes-1) /)
+    !layout2 = ESMF_DELayoutCreate(delist, 2, (/ ndes/2, 2 /), (/ 0 ,0 /), rc)
+    layout2 = ESMF_newDELayoutCreate(delist, (/ ndes/2, 2 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     comp1 = ESMF_GridCompCreate(cname1, delayout=layout2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -172,7 +178,7 @@
       print *, "Component Finalize finished, rc =", rc
 
       ! Figure out our local processor id for message below.
-      call ESMF_DELayoutGetDEID(layout1, de_id, rc)
+      call ESMF_newDELayoutGetDEID(layout1, de_id, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       print *, "-----------------------------------------------------------------"
@@ -203,7 +209,7 @@
       call ESMF_GridCompDestroy(comp1, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_DELayoutDestroy(layout2, rc)
+      call ESMF_newDELayoutDestroy(layout2, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       print *, "All Destroy routines done"

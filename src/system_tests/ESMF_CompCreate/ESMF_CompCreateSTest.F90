@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.5 2004/04/13 22:00:42 nscollins Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.6 2004/04/14 21:52:18 nscollins Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -78,8 +78,8 @@
 
     ! Create a child DELayout for the Component which is 2 by half the
     !  total number of procs.
-    delist = (/ (i, i=0, ndes-1) /)
-    layout2 = ESMF_newDELayoutCreate(vm, rc=rc)
+    layout2 = ESMF_newDELayoutCreate(vm, (/ mid, by2 /), rc=rc)
+    !delist = (/ (i, i=0, ndes-1) /)
     !layout2 = ESMF_DELayoutCreate(vm, layout1, 2, (/ mid, by2 /), (/ 0, 0 /), &
     !                                               de_indices=delist, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.15 2004/04/09 19:54:15 eschwab Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.16 2004/04/14 21:52:18 nscollins Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -52,7 +52,8 @@
 
     ! Global variables
     type(ESMF_GridComp) :: comp1
-    type(ESMF_DELayout) :: layout1, deflayout
+    type(ESMF_newDELayout) :: layout1, deflayout
+    type(ESMF_VM) :: vm
     integer, dimension(32) :: delist
     integer, dimension(2) :: shape
     integer :: de_id
@@ -86,17 +87,21 @@
 !
     call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    deflayout = ESMF_DELayoutCreate(rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_DELayoutGetNumDEs(deflayout, ndes, rc)
+
+    call ESMF_VMGetGlobal(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    call ESMF_DELayoutGetDEId(deflayout, de_id, rc) 
+    deflayout = ESMF_newDELayoutCreate(vm, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    call ESMF_newDELayoutGetNumDEs(deflayout, ndes, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+    call ESMF_newDELayoutGetDEId(deflayout, de_id, rc) 
     if (rc .ne. ESMF_SUCCESS) goto 10
     
 !   Create a DELayout for the Component
     ! assign default DE numbers and only use as many as we get procs
-    delist = (/ (i, i=0, 31) /)
+    !delist = (/ (i, i=0, 31) /)
     select case (ndes)
        case (4)
            shape(1) = 2
@@ -123,7 +128,7 @@
            shape(1) = ndes
            shape(2) = 1
     end select
-    layout1 = ESMF_DELayoutCreate(delist, 2, shape, (/ 0, 0 /), rc)
+    layout1 = ESMF_newDELayoutCreate(delist, shape, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! print out shape of DELayout
@@ -185,7 +190,7 @@
 !     Destroy section
 ! 
 
-    call ESMF_DELayoutDestroy(layout1, rc)
+    call ESMF_newDELayoutDestroy(layout1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompDestroy(comp1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -268,7 +273,7 @@
 
       ! Local variables
       integer :: i, j
-      type(ESMF_DELayout) :: layout1 
+      type(ESMF_newDELayout) :: layout1 
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       type(ESMF_Field) :: field(4)
       type(ESMF_Grid) :: grid(4), thisgrid
@@ -380,7 +385,7 @@
       if (verbose) print *, "Grid Create returned"
 
       ! Figure out our local processor id to use as data in the Field.
-      call ESMF_DELayoutGetDEID(layout1, de_id, rc=rc)
+      call ESMF_newDELayoutGetDEID(layout1, de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Create an arrayspec for a 2-D array 
@@ -660,7 +665,7 @@
       type(ESMF_Logical) :: pflags(2)
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: layout
       type(ESMF_Grid) :: grid1
       type(ESMF_Array) :: array1
       character(len=ESMF_MAXSTR) :: fname
@@ -683,7 +688,7 @@
       if (verbose) print *, "name back from field"
 
       ! Get our de_id from layout
-      call ESMF_DELayoutGetDEID(layout, de_id, rc=rc)
+      call ESMF_newDELayoutGetDEID(layout, de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 40
 
       ! Get a pointer to the start of the data
@@ -700,9 +705,9 @@
 
       ! get info about total number of DEs in each dim and which one
       ! we are.  then use them to compute the values in the halo.
-      call ESMF_DELayoutGetSize(layout, nx, ny, rc)
+      call ESMF_newDELayoutGetSize(layout, nx, ny, rc)
       if (rc .ne. ESMF_SUCCESS) goto 40
-      call ESMF_DELayoutGetDEPosition(layout, xpos, ypos, rc)
+      call ESMF_newDELayoutGetDEPosition(layout, xpos, ypos, rc)
       if (rc .ne. ESMF_SUCCESS) goto 40
      
       ! for the calculations below we need the first xpos=0, not 1
