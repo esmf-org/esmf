@@ -1,4 +1,4 @@
-% $Id: DistGrid_design.tex,v 1.3 2003/05/07 18:44:49 jwolfe Exp $
+% $Id: DistGrid_design.tex,v 1.4 2003/05/07 18:50:16 jwolfe Exp $
 
 %\subsection{Design}
 
@@ -22,7 +22,7 @@ represent the same Grid but have different mappings (staggerings) and can
 be aggregated by the same Grid object. The DistGrid class maintains the
 mapping between the global Grid and the local data distribution;  it has
 methods to aid in the collection and communication of global data.  
-DistGrids alos contain information about how the data on different DEs
+DistGrids also contain information about how the data on different DEs
 overlap, which is necessary to synchronize values between the boundaries
 of distributed data for Halo methods.
 
