@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.45 2004/06/03 12:18:32 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.46 2004/06/03 21:52:20 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.45 2004/06/03 12:18:32 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.46 2004/06/03 21:52:20 cdeluca Exp $'
 !
 !==============================================================================
 !
@@ -85,7 +85,7 @@
 !
 !==============================================================================
 !BOPI
-! !IROUTINE: ESMF_ArrayHalo - halo a distributed array
+! !IROUTINE: ESMF_ArrayHalo - Halo a distributed array
 !
 ! !INTERFACE:
       interface ESMF_ArrayHalo
@@ -104,7 +104,7 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayRedist - redistribute a distributed array
+! !IROUTINE: ESMF_ArrayRedist - Redistribute a distributed array
 !
 ! !INTERFACE:
       interface ESMF_ArrayRedist
@@ -115,7 +115,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides both the revised entry point for
-!      calling Redistribute on an {\tt ESMF\_Array} object, and temporarily
+!      calling redistribute on an {\tt ESMF\_Array} object, and temporarily
 !      for backwards compatibility an older interface into the same code.
 
 !EOPI
@@ -124,7 +124,7 @@
 #if 0
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayAllGather - gather a distributed array to all DEs
+! !IROUTINE: ESMF_ArrayAllGather - Gather a distributed array to all DEs
 !
 ! !INTERFACE:
       interface ESMF_ArrayAllGather
@@ -252,7 +252,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayGather"
 !BOP
-! !IROUTINE: ESMF_ArrayGather - gather a distributed Array
+! !IROUTINE: ESMF_ArrayGather - Gather a distributed Array
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayGather(array, grid, datamap, rootDE, gatheredArray, rc)
