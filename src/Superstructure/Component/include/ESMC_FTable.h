@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.h,v 1.5 2003/04/01 23:47:56 nscollins Exp $
+// $Id: ESMC_FTable.h,v 1.6 2003/09/23 15:16:25 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,16 +47,25 @@
 
 // !PRIVATE TYPES:
 
+// These are the types of functions which can be entered in the function
+// table.  The types are the arguments that will be stored in the table
+// and that the function will be called with.  There are a few generic 
+// types (called with an int, 2 ints, etc) and then some very specific
+// types used by the framework (e.g. a grid component called with a list 
+// of void's and a final int * for the return code.)
+// The typedefs are to ease the declarations of the function entry point
+// itself.
 enum ftype { FT_VOID=1, FT_INT, FT_2INT, FT_INTP, FT_VOIDP, FT_VOIDPINTP,
-              FT_INITFINAL, FT_RUN, FT_GRID, FT_CPL };
+              FT_INITFINAL, FT_RUN, FT_COMP1STAT, FT_COMP2STAT, FT_COMPSLIST };
 typedef void (*VoidFunc)(void);
 typedef void (*IntFunc)(int);
 typedef void (*Int2Func)(int, int);
 typedef void (*IntPtrFunc)(int *);
 typedef void (*VoidPtrFunc)(void *);
 typedef void (*VoidPtrIntPtrFunc)(void *, int *);
-typedef void (*GridCall)(void *, void *, void *, void *, int *);
-typedef void (*CplCall)(void *, void *, void *, int *);
+typedef void (*C1SFunc)(void *, void *, void *, int *);
+typedef void (*C2SFunc)(void *, void *, void *, void *, int *);
+typedef void (*CSLFunc)(void *, void *, void *, int *);
 
 struct funcinfo {
    char *funcname;

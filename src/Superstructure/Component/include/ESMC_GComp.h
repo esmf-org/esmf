@@ -1,4 +1,4 @@
-// $Id: ESMC_GComp.h,v 1.4 2003/03/21 17:58:01 flanigan Exp $
+// $Id: ESMC_GComp.h,v 1.5 2003/09/23 15:16:25 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,7 +25,6 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
-#include <ESMC_Comp.h> 
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -43,6 +42,7 @@
 // 
 // !USES:
  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
+#include <ESMC_Comp.h> 
  //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
                         // composites, associates, friends)
 

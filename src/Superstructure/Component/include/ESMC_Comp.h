@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.7 2003/03/21 17:58:01 flanigan Exp $
+// $Id: ESMC_Comp.h,v 1.8 2003/09/23 15:16:25 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,8 +22,6 @@
 
 //-----------------------------------------------------------------------------
 
-#include "ESMC_DELayout.h"
-#include "ESMC_State.h"
 
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
@@ -53,14 +51,18 @@ enum ESMC_ModelType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE,
 //-----------------------------------------------------------------------------
 // 
 // !USES:
+#include "ESMC.h"
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
+#include "ESMC_DELayout.h"
 #include "ESMC_State.h"
-
 #include "ESMC_FTable.h"  // function & data pointer table 
 
 // !PUBLIC TYPES:
  class ESMC_CompConfig;
  class ESMC_Comp;
+
+// TODO: need C++ interface to config objects.  REMOVE THIS WHEN READY.
+#define ESMC_Config char
 
 // !PRIVATE TYPES:
 
@@ -89,9 +91,9 @@ enum ESMC_ModelType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE,
     int ESMC_CompGetConfig(ESMC_CompConfig *config) const;
     int ESMC_CompSetConfig(const ESMC_CompConfig *config);
 
- // accessor methods for class members
-    //int ESMC_CompGet(<value type> *value) const;
-    //int ESMC_CompSet(<value type>  value);
+ // accessor methods for class members.  these need more options.
+    int ESMC_CompGet(char *name) const;
+    int ESMC_CompSet(const char *name);
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_CompValidate(const char *options) const;
@@ -127,14 +129,19 @@ enum ESMC_ModelType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE,
                                       char *filepath, int *rc);
  int ESMC_CompDestroy(ESMC_Comp *comp);
 
+ int ESMC_FrameworkInitialize(void);
+ int ESMC_FrameworkFinalize(void);
 
 // prototypes for fortran interface routines
 extern "C" {
-   void FTN(f_esmf_compcreate)(ESMC_Comp **compp, char *name, int *rc);
-   void FTN(f_esmf_compdestroy)(ESMC_Comp **compp, char *name, int *rc);
-   void FTN(f_esmf_compinit)(ESMC_Comp **compp, char *name, void *func, int *rc);
-   void FTN(f_esmf_comprun)(ESMC_Comp **compp, char *name, int *rc);
-   void FTN(f_esmf_compfinalize)(ESMC_Comp **compp, char *name, int *rc);
+   void FTN(f_esmf_compcreate)(ESMC_Comp *compp, char *name, int *rc, int nlen);
+   void FTN(f_esmf_compdestroy)(ESMC_Comp *compp, char *name, int *rc, int nlen);
+   void FTN(f_esmf_compinit)(ESMC_Comp *compp, char *name, void *func, int *rc, int nlen);
+   void FTN(f_esmf_comprun)(ESMC_Comp *compp, char *name, int *rc, int nlen);
+   void FTN(f_esmf_compfinalize)(ESMC_Comp *compp, char *name, int *rc, int nlen);
+
+   void FTN(f_esmf_frameworkinitialize)(int *rc);
+   void FTN(f_esmf_frameworkfinalize)(int *rc);
 };
 
  #endif  // ESMC_Comp_H

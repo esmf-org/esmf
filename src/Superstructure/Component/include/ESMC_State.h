@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.5 2003/03/21 17:58:01 flanigan Exp $
+// $Id: ESMC_State.h,v 1.6 2003/09/23 15:16:25 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -53,23 +53,23 @@
 
 // !PRIVATE TYPES:
 
-enum ESMC_StateType { 
+typedef enum ESMC_StateType { 
                 ESMC_StateImport=1, ESMC_StateExport, 
                 ESMC_StateImpExp, ESMC_StateUnknown };
 
-enum objtype { Bundle=1, Field=2, Array=3 };
-enum needed { Needed=1, NotNeeded=2 };
-enum ready { ReadyToRead=1, ReadyToWrite=2 };
+typedef enum ESMC_Objtype { Bundle=1, Field=2, Array=3 };
+typedef enum ESMC_Needed { Needed=1, NotNeeded=2 };
+typedef enum ESMC_Ready { ReadyToRead=1, ReadyToWrite=2 };
 
 struct ESMC_DataHolder {
-    enum objtype ot;
+    ESMC_Objtype ot;
     union Holder {
         ESMC_Bundle *bp;
         ESMC_Field *fp;
         ESMC_Array *ap;
     } *holder;
-    enum needed nt;
-    enum ready ready;
+    ESMC_Needed nt;
+    ESMC_Ready ready;
 };
     
  // class configuration type
@@ -82,12 +82,8 @@ struct ESMC_DataHolder {
  class ESMC_State : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
-      // name is in base object
-      // base obj also allows attributes to be set
-      enum ESMC_StateType st;
-      struct ESMC_DataHolder *holder;
-      int dalloc;   // how many holders are allocated
-      int dcount;   // how many holders are active
+      void *statep;    // object implemented in F90
+
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
@@ -142,5 +138,36 @@ struct ESMC_DataHolder {
 
  ESMC_State *ESMC_StateCreate(int *rc);
  int ESMC_StateDestroy(ESMC_State *state);
+
+ extern "C" {
+#if 0
+      TODO: finish these prototypes
+      FTN(f_esmf_statecreate)(char *statename, statetype, compname,
+            bundles, fields, arrays, nestedstates, names, itemcount, int *rc);
+      FTN(f_esmf_statedestroy)(ESMC_State *state, int *rc);
+      FTN(f_esmf_stateaddbundle)(ESMC_State *state, ESMC_Bundle *bundle, int *rc);
+      FTN(f_esmf_stateaddfield)(ESMC_State *state, ESMC_Field *field, int *rc);
+      FTN(f_esmf_stateaddarray)(ESMC_State *state, ESMC_Array *array, int *rc);
+      FTN(f_esmf_stateaddstate)(ESMC_State *state, nestedstate, int *rc);
+      FTN(f_esmf_stateadddataname)(ESMC_State *state, char *name, int *rc);
+      FTN(f_esmf_stategetinfo)(ESMC_State *state, char *statename, 
+                          statetype, char *compname,
+                          int *itemcount, char *itemnames, objtypes, int *rc);
+      FTN(f_esmf_stategetname)(ESMC_State *state, char *statename, int *rc);
+      FTN(f_esmf_stateisneeded)(ESMC_State *state, char *dataname, int *rc);
+      FTN(f_esmf_stategetneeded)(ESMC_State *state, char *dataname, 
+                                 needed, int *rc);
+      FTN(f_esmf_statesetneeded)(ESMC_State *state, char *dataname, needed, int *rc);
+      FTN(f_esmf_stategetbundle)(ESMC_State *state, char *name, ESMC_Bundle *bundle, int *rc);
+      FTN(f_esmf_stategetfield)(ESMC_State *state, char *name, ESMC_Field *field, int *rc);
+      FTN(f_esmf_stategetarray)(ESMC_State *state, char *name, ESMC_Array *array, int *rc);
+      FTN(f_esmf_stategetstate)(ESMC_State *state, char *name, nestedstate, int *rc);
+      FTN(f_esmf_statetransform)(ESMC_State *state, xformchar *name, xform, int *rc);
+      FTN(f_esmf_statewriterestart)(ESMC_State *state, iospec, int *rc);
+      FTN(f_esmf_statereadrestart)(char *name, iospec, int *rc);
+      FTN(f_esmf_statevalidate)(ESMC_State *state, char *options, int *rc);
+      FTN(f_esmf_stateprint)(ESMC_State *state, char *options, int *rc);
+#endif
+ }
 
  #endif  // ESMC_State_H
