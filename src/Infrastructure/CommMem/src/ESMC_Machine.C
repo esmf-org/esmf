@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.C,v 1.1 2002/10/25 19:21:33 cdeluca Exp $
+// $Id: ESMC_Machine.C,v 1.2 2002/12/06 19:27:24 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,7 +24,17 @@
 //-----------------------------------------------------------------------------
 //
  // insert any higher level, 3rd party or system includes here
- #include <ESMC_Util.h>
+
+#ifdef ESMF_ARCH_ALPHA
+#include <unistd.h>               // gethostname
+#include <sys/sysinfo.h>          // getsysinfo
+#include <machine/hal_sysinfo.h>  // getsysinfo
+#include <stdlib.h>               // atoi
+#include <string.h>               // strpbrk
+#endif
+
+ #include <iostream>
+ #include <ESMC.h>
 
  // associated class definition file
  #include <ESMC_Machine.h>
@@ -32,7 +42,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Machine.C,v 1.1 2002/10/25 19:21:33 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Machine.C,v 1.2 2002/12/06 19:27:24 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -45,125 +55,6 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_MachineCreate - Create a new Machine
-//
-// !INTERFACE:
-      ESMC_Machine *ESMC_Machine::ESMC_MachineCreate(
-//
-// !RETURN VALUE:
-//     pointer to newly allocated ESMC_Machine
-//
-// !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3     // in
-      int *rc) {           // out - return code
-//
-// !DESCRIPTION:
-//      Create a new Machine. Allocates memory for a new Machine
-//      object and uses the internal routine ESMC_MachineContruct to
-//      initialize it.  Define for deep classes only, for shallow classes only
-//      define and use ESMC_MachineInit.
-//      There can be multiple overloaded methods with the same name, but
-//      different argument lists.
-//
-//EOP
-// !REQUIREMENTS:  AAAn.n.n
-
-//
-//
-
- } // end ESMC_MachineCreate
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_MachineDestroy - free a Machine created with Create
-//
-// !INTERFACE:
-      int ESMC_Machine::ESMC_MachineDestroy(void) {
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//      ESMF routine which destroys a Machine object previously allocated
-//      via an ESMC_MachineCreate routine.  Define for deep classes only.
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-//
-//  code goes here
-//
-
- } // end ESMC_MachineDestroy
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_MachineConstruct - fill in an already allocated Machine
-//
-// !INTERFACE:
-      int ESMC_Machine::ESMC_MachineConstruct(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
-//
-// !DESCRIPTION:
-//      ESMF routine which fills in the contents of an already
-//      allocated Machine object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC_MachineDestruct
-//      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC_MachineCreate, which calls
-//      ESMC_MachineConstruct.  Define for deep classes only.
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-//
-//  code goes here
-//
-
- } // end ESMC_MachineConstruct
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_MachineDestruct - release resources associated w/a Machine
-//
-// !INTERFACE:
-      int ESMC_Machine::ESMC_MachineDestruct(void) {
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//      ESMF routine which deallocates any space allocated by
-//      ESMF_MachineConstruct, does any additional cleanup before the
-//      original Machine object is freed.  Intended for internal ESMF
-//      use only; end-users use ESMC_MachineDestroy, which calls
-//      ESMC_MachineDestruct.  Define for deep classes only.
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-//
-//  code goes here
-//
-
- } // end ESMC_MachineDestruct
-
-//-----------------------------------------------------------------------------
-//BOP
 // !IROUTINE:  ESMC_MachineInit - initializes a Machine object
 //
 // !INTERFACE:
@@ -173,25 +64,41 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
+      int nodes,          // in - number of nodes in machine or domain
+      int cpus,           // in - number of cpus in machine or domain
+      int cpuspernode,    // in - number of cpus per node in machine
+      bool hasmpi,        // in - machine supports MPI 1.2
+      bool hasopenmp,     // in - machine supports OpenMP 1.0
+      bool hasshmem,      // in - machine supports Shmem
+      int shmemlat,       // in - shared memory latency
+      int shmemband,      // in - shared memory bandwidth
+      int distmemlat,     // in - distributed memory latency
+      int distmemband) {  // in - distributed memory bandwidth
+      
 //
 // !DESCRIPTION:
 //      ESMF routine which only initializes Machine values; it does not
-//      allocate any resources.  Define for shallow classes only,
-//      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like ESMC_MachineCreate.
+//      allocate any resources. 
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-//
-//  code goes here
-//
+  numNodes = nodes;
+  numCPUs = cpus;
+  numCPUsperNode = cpuspernode;
+  hasMPI = hasmpi;
+  hasOpenMP = hasopenmp;
+  hasShmem = hasshmem;
+  shMemLatency = shmemlat;
+  shMemBandwidth = shmemband;
+  distMemLatency = distmemlat;
+  distMemBandwidth = distmemband;
+
+  return(ESMF_SUCCESS);
 
  } // end ESMC_MachineInit
 
+#if 0
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_MachineGetConfig - get configuration info from a Machine
@@ -293,6 +200,7 @@
 //
 
  } // end ESMC_MachineSet<Value>
+#endif
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -305,7 +213,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      const char *options) const {    // in - validate options
+      void) const {    // in - validate options
 //
 // !DESCRIPTION:
 //      Validates that a Machine is internally consistent.
@@ -314,9 +222,7 @@
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-//
-//  code goes here
-//
+  return(ESMF_SUCCESS);
 
  } // end ESMC_MachineValidate
 
@@ -332,7 +238,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      const char *options) const {     //  in - print options
+      void) const {     //  in - print options
 //
 // !DESCRIPTION:
 //      Print information about a Machine.  The options control the
@@ -341,9 +247,7 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-//
-//  code goes here
-//
+  return(ESMF_SUCCESS);
 
  } // end ESMC_MachinePrint
 
@@ -358,9 +262,7 @@
 //    none
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
+      void) {  // in
 //
 // !DESCRIPTION:
 //      Calls standard ESMF deep or shallow methods for initialization
@@ -399,3 +301,101 @@
 //
 
  } // end ~ESMC_Machine
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_MachineGetCpuID - get the machine-specific Cpu ID
+//
+// !INTERFACE:
+      int ESMC_Machine::ESMC_MachineGetCpuID(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *cpuid) const {     // out - Cpu ID
+//
+// !DESCRIPTION:
+//     Returns the Cpu ID of the calling process/thread
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+#ifdef ESMF_ARCH_ALPHA
+  long curr_cpu;
+  int start = 0;
+
+  // get cpu id we're on now (transient & relative, e.g. 0-3 on halem)
+  getsysinfo(GSI_CURRENT_CPU, (char *)&curr_cpu, sizeof(long), &start);
+//std::cout << "curr_cpu = " << curr_cpu << "\n";
+  *cpuid = (int) curr_cpu;
+#endif
+ 
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_MachineGet<Value>
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_MachineGetNodeID - get the machine-specific Node ID
+//
+// !INTERFACE:
+      int ESMC_Machine::ESMC_MachineGetNodeID(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *nodeid) const {     // out - Node ID
+//
+// !DESCRIPTION:
+//     Returns the Node ID of the calling process/thread
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+#ifdef ESMF_ARCH_ALPHA
+  char hname[32];
+
+  // get node id we're on (absolute, e.g. 0-347 on halem)
+  gethostname(hname, 128);
+//std::cout << "hostname = " << hname << "\n";
+  *nodeid = atol(strpbrk(hname, "0123456789"));
+#endif
+ 
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_MachineGetNodeID
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_MachineGetNodeCpuMax - get the max Cpus per Node
+//
+// !INTERFACE:
+      int ESMC_Machine::ESMC_MachineGetNodeCpuMax(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *maxcpus) const {     // out - max cpus per node
+//
+// !DESCRIPTION:
+//     Returns the maximum number of cpus per node
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+#ifdef ESMF_ARCH_ALPHA
+  int max_cpu;
+  int start = 0;
+
+  // get max cpus on a node
+  getsysinfo(GSI_MAX_CPU, (char *)&max_cpu, sizeof(int), &start);
+//std::cout << "max_cpu = " << max_cpu << "\n";
+  *maxcpus = max_cpu;
+#endif
+ 
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_MachineGetNodeCpuMax
