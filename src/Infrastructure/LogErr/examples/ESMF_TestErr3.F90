@@ -11,7 +11,7 @@ program test_err
     call ESMF_LogInit(anErr,verbose=ESMF_LOG_FALSE,haltOnErr=ESMF_LOG_FALSE,   &
     		  haltOnWarn=ESMF_LOG_TRUE)
     call ESMF_LogErrMsg(anErr,ESMF_FATAL,"This is a test.")
-    call ESMF_LogNotVerbose(anErr)
+    call ESMF_LogVerbose(anErr)
     call ESMF_LogErrMsg(anErr,ESMF_FATAL,"This is a test.")
     call ESMF_LogWarn(anErr,ESMF_FATAL)
     

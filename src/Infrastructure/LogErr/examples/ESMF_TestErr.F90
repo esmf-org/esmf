@@ -24,8 +24,6 @@ program test_log
     call ESMF_LogWarn(anErr2,ESMF_FATAL)
     call ESMF_LogInfo(anErr,"Hi there %c",ch)
     call ESMF_LogCloseFile(anErr)
-    call ESMF_LogErrMsg(anErr,ESMF_FATAL,"oy")
-    call ESMF_LogCloseFile(anErr)
     call ESMF_LogHaltOnWarn(anErr2)
     call ESMF_LogWarnMsg(anErr2,ESMF_FATAL,"Hi there")
     write(6,*)'did I get here?'

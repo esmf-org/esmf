@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrInterface.C,v 1.6 2003/04/03 20:05:12 nscollins Exp $
+// $Id: ESMC_LogErrInterface.C,v 1.7 2003/04/14 16:40:44 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -19,14 +19,16 @@
 #include <string.h>
 
 #include <ESMC.h>
+//#include "/home/sjs/ESMF/esmf/esmf/src/include/ESMC.h"
+//#include "../include/ESMC_LogErr.h"
 #include "ESMC_LogErr.h"
 
 //Global Variables
-extern FILE* logErrFilePtr[10];
-extern int numFileGlobal;
-extern int logErrFileFortran[10];
-extern int numFileFortGlobal;
-extern char listOfFileNames[20][32];
+extern FILE* logErrCFilePtr[10];
+extern int numCFiles;
+extern int logErrFortFile[10];
+extern int numFortFiles;
+extern char listOfCFileNames[20][32];
 extern char listOfFortFileNames[20][32];
 
 extern "C" {
@@ -47,7 +49,7 @@ extern "C" {
 //EOP
 void FTN(esmf_logclosefile)(ESMC_Log* aLog)
 {
-       aLog->ESMC_LogCloseFileForWrite();
+       aLog->ESMC_LogCloseFortFile();
 }
 
 void FTN(esmf_loginit_c)(ESMC_Log* aLog,int* verbose, int* flush,
@@ -96,7 +98,7 @@ void FTN(esmf_logopenfile)(ESMC_Log* aLog,int* numFiles,char name[])
     i++;
   }
   if (!foundSpace) c_name[32]='\0';
-    aLog->ESMC_LogOpenFileForWrite(*numFiles, c_name);
+    aLog->ESMC_LogOpenFortFile(*numFiles, c_name);
 }
 
 //-----------------------------------------------------------------------
@@ -270,6 +272,10 @@ void FTN(esmf_logwarnmsg_)(ESMC_Log* aLog,int* errCode, int* line,
   char file[],char dir[],char msg[])
 
 {
+   char* strPtr;        
+		   
+   strPtr=strstr(file,"F90")+3;
+   *strPtr=NULL; 
    aLog->ESMC_LogWarnFortran(*errCode, *line,file,dir,msg);
 
 }
@@ -297,7 +303,12 @@ void FTN(esmf_logwarn_)(ESMC_Log* aLog,int* errCode, int* line,
 
 {
    char msg[32];      
+   char* strPtr;        
    msg[0]=NULL;
+
+		   
+   strPtr=strstr(file,"F90")+3;
+   *strPtr=NULL; 
    aLog->ESMC_LogWarnFortran(*errCode, *line,file,dir,msg);
 
 }
@@ -454,6 +465,10 @@ int  FTN(logwrite)(ESMC_Log *aLog)
 void FTN(esmf_logerrmsg_)(ESMC_Log* aLog, int* errCode,int* line, char file[],
                      char dir[],char msg[])
 {
+    char* strPtr;
+
+    strPtr=strstr(file,"F90")+3;
+    *strPtr=NULL;
     aLog->ESMC_LogErrFortran(*errCode,*line,file,dir,msg);
 } 
 
@@ -481,7 +496,11 @@ void FTN(esmf_logerr_)(ESMC_Log* aLog, int* errCode, int* line, char file[],
                      char dir[])
 {
     char msg[32];
+    char* strPtr;        
     msg[0]=NULL;
+   
+    strPtr=strstr(file,"F90")+3;
+    *strPtr=NULL; 
     aLog->ESMC_LogErrFortran(*errCode,*line,file,dir,msg);
 } 
 
