@@ -1,6 +1,6 @@
-
 #include <stdio.h>
 #include <string.h>
+#include "conf.h"
 
 typedef void (*FUNC)(int *, int *, int *, int *);
 typedef void (*FUNC2)(int *, int *, char *, int *, int *, int);
@@ -8,8 +8,9 @@ typedef void (*FUNC3)(int *, char *, int *, char *, int *, int *, int, int);
 
 extern "C" {
 
-      void c_strings(FUNC f90cb, FUNC2 f90cb2, FUNC3 f90cb3, int *i1, int *i2, 
-                                    char *fstr, int *i3, int *i4, int slen) {
+      void FTN(c_strings)(FUNC f90cb, FUNC2 f90cb2, FUNC3 f90cb3, 
+                          int *i1, int *i2, char *fstr,
+                          int *i3, int *i4, int slen) {
 
       int ni1, ni2, ni3, ni4;
       int clen, clen2;
