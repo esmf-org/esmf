@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2003/05/23 16:12:47 flanigan Exp $
+# $Id: makefile,v 1.13 2003/09/22 19:51:05 svasquez Exp $
 
 ALL:  tests
 
@@ -15,20 +15,24 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/TimeMgr/tests
 
 TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_ClockUTest \
-		$(ESMC_TESTDIR)/ESMF_CalRangeUTest
+		$(ESMC_TESTDIR)/ESMF_CalendarUTest \
+		$(ESMC_TESTDIR)/ESMF_CalRangeUTest 
 #	        $(ESMC_TESTDIR)/ESMC_ClockUTest 
 # remove temporarily
 
 TESTS_RUN     = RUN_ESMF_ClockUTest \
-		RUN_ESMF_CalRangeUTest
+		RUN_ESMF_CalendarUTest \
+		RUN_ESMF_CalRangeUTest \
 #		RUN_ESMC_ClockUTest 
 
 TESTS_RUN_UNI = RUN_ESMF_ClockUTestUNI \
-		RUN_ESMF_CalRangeUTestUNI
+		RUN_ESMF_CalendarUTestUNI \
+		RUN_ESMF_CalRangeUTestUNI 
 #		RUN_ESMC_ClockUTestUNI 
 
 TESTS_RM      = ESMF_ClockUTest.rm \
-		ESMF_CalRangeUTest.rm
+		ESMF_CalendarUTest.rm \
+		ESMF_CalRangeUTest.rm \
 #               ESMC_ClockUTest.rm
 
 include ${ESMF_DIR}/makefile
@@ -54,6 +58,24 @@ RUN_ESMF_ClockUTestUNI:
 
 ESMF_ClockUTest.rm:
 	echo "ESMF_ClockTest.rm target called here."
+
+
+
+#
+#
+#
+
+RUN_ESMF_CalendarUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_CalendarUTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CalendarUTest > $(ESMC_TESTDIR)/ESMF_CalendarUTest.stdout
+
+RUN_ESMF_CalendarUTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_CalendarUTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CalendarUTest > $(ESMC_TESTDIR)/ESMF_CalendarUTest.stdout
+
+ESMF_CalendarUTest.rm:
+	echo "ESMF_CalendarTest.rm target called here."
+
 
 #
 #
@@ -88,5 +110,3 @@ RUN_ESMF_CalRangeUTestUNI:
 
 ESMF_CalRangeUTest.rm:
 	echo "ESMF_CalRangeTest.rm target called here."
-
-
