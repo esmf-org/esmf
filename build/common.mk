@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.74 2004/09/22 22:28:11 nscollins Exp $
+#  $Id: common.mk,v 1.75 2004/10/26 19:09:35 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -72,6 +72,17 @@ endif
 
 endif
 
+# This is ok to remain as default
+ifndef ESMF_SITE
+export ESMF_SITE = default
+endif
+
+#-------------------------------------------------------------------------------
+#  Include site specific makefile fragment.
+#-------------------------------------------------------------------------------
+include $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk
+
+
 # if PREC not already set, default to 64.  architectures which
 # have only one word size set this variable in their compiler/platform
 # dependent files, so this only applies to platforms which support
@@ -81,11 +92,6 @@ export ESMF_PREC = 64
 endif
 ifeq ($(ESMF_PREC),default)
 export ESMF_PREC = 64
-endif
-
-# This is ok to remain as default
-ifndef ESMF_SITE
-export ESMF_SITE = default
 endif
 
 #
@@ -121,10 +127,12 @@ endif
 # ESMF_MOD_INSTALL - Directory for install target to place mod files.
 #-------------------------------------------------------------------------------
 
-# Comment out the following flag if you want to allow VM to use Pthreads
-CPPFLAGS       += -DVM_DONT_SPAWN_PTHREADS
+# Comment out the following flags if you want to allow VM to use Pthreads
+##FPPFLAGS       += $(FPP_PREFIX)-DVM_DONT_SPAWN_PTHREADS
+##CPPFLAGS       += -DVM_DONT_SPAWN_PTHREADS
 
 # Comment out the following lines if you want to include the IO code
+FPPFLAGS       += $(FPP_PREFIX)-DESMF_NO_IOCODE
 CPPFLAGS       += -DESMF_NO_IOCODE
 export ESMF_NO_IOCODE = true
 
@@ -174,8 +182,9 @@ ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 
 CCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} -DS${ESMF_PREC}=1 ${CPPFLAGS} \
 	 	  -D__SDIR__='"${LOCDIR}"'
-FCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} -DS${ESMF_PREC}=1 ${CPPFLAGS} \
-                   $(FCPP_EXHAUSTIVE)
+FCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} $(FPP_PREFIX)-DS${ESMF_PREC}=1 \
+                   ${FPPFLAGS} $(FCPP_EXHAUSTIVE)
+
 C_SH_LIB_PATH	= ${CLINKER_SLFLAG}${LDIR} ${C_DYLIBPATH}
 F_SH_LIB_PATH	= ${FLINKER_SLFLAG}${LDIR} ${F_DYLIBPATH}
 
@@ -1222,9 +1231,4 @@ $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 #-------------------------------------------------------------------------------
 .PRECIOUS: %.o
 
-
-#-------------------------------------------------------------------------------
-#  Include site specific makefile fragment.
-#-------------------------------------------------------------------------------
-include $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk
 
