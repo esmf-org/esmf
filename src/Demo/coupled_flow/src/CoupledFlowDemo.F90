@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.2 2003/06/27 16:44:34 nscollins Exp $
+! $Id: CoupledFlowDemo.F90,v 1.3 2003/08/06 20:32:44 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -240,10 +240,9 @@
                                vert_stagger=vert_stagger, &
                                horz_coord_system=horz_coord_system, &
                                vert_coord_system=vert_coord_system, &
-                               !halo_width=halo_width, &
                                rc=rc)
 
-    gridIN = ESMF_GridCreate(i_max=counts(1), j_max=counts(2), &
+    gridIN = ESMF_GridCreate(counts=counts, &
                              x_min=mincoords(1), x_max=maxcoords(1), &
                              y_min=mincoords(2), y_max=maxcoords(2), &
                              layout=layoutIN, &
@@ -253,12 +252,11 @@
                              vert_stagger=vert_stagger, &
                              horz_coord_system=horz_coord_system, &
                              vert_coord_system=vert_coord_system, &
-                             halo_width=halo_width, &
                              name="Injector grid", rc=rc)
 
     call ESMF_GridCompSet(INcomp, grid=gridIN, rc=rc)
 
-    gridFS = ESMF_GridCreate(i_max=counts(1), j_max=counts(2), &
+    gridFS = ESMF_GridCreate(counts=counts, &
                              x_min=mincoords(1), x_max=maxcoords(1), &
                              y_min=mincoords(2), y_max=maxcoords(2), &
                              layout=layoutFS, &
@@ -268,7 +266,6 @@
                              vert_stagger=vert_stagger, &
                              horz_coord_system=horz_coord_system, &
                              vert_coord_system=vert_coord_system, &
-                             halo_width=halo_width, &
                              name="Flow Solver grid", rc=rc)
 
     call ESMF_GridCompSet(FScomp, grid=gridFS, rc=rc)

@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.5 2003/06/24 00:17:57 nscollins Exp $
+! $Id: CoupledFlowApp.F90,v 1.6 2003/08/06 20:32:43 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -45,6 +45,7 @@
     type(ESMF_Time) :: stopTime
 
     ! Variables related to grid and clock
+    integer :: counts(2)
     integer :: i_max, j_max
     real :: x_min, x_max, y_min, y_max
     integer :: s_month, s_day, s_hour, s_min
@@ -171,11 +172,11 @@
 !     And then we set the start time and stop time to input values for the month,
 !     day, and hour (assuming the year to be 2003):
 !\begin{verbatim}
-      call ESMF_TimeSet(startTime, YR=2003, &
+      call ESMF_TimeSet(startTime, YR_i4=2003, &
                          MM=s_month, DD=s_day, H=s_hour, M=s_min, S=0, &
                          cal=gregorianCalendar, rc=rc)
 
-      call ESMF_TimeSet(stopTime, YR=2003, &
+      call ESMF_TimeSet(stopTime, YR_i4=2003, &
                          MM=e_month, DD=e_day, H=e_hour, M=e_min, S=0, &
                          cal=gregorianCalendar, rc=rc)
 !\end{verbatim}
@@ -202,14 +203,15 @@
 !     be horizontal and cartesian x-y with an Arakawa C staggering.  The Halo width
 !     for the Grid is set to one and the name to "source grid":
 !\begin{verbatim}
-      grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+      counts(1) = i_max
+      counts(2) = j_max
+      grid = ESMF_GridCreate(counts = counts, &
                              x_min=x_min, x_max=x_max, &
                              y_min=y_min, y_max=y_max, &
                              layout=layoutApp, &   
                              horz_gridtype=ESMF_GridType_XY, &
                              horz_stagger=ESMF_GridStagger_C, &
                              horz_coord_system=ESMF_CoordSystem_Cartesian, &
-                             halo_width=1, &
                              name="source grid", rc=rc)
 !\end{verbatim}
 !     The Grid can then be attached to the Gridded Component with a Set call:
@@ -260,7 +262,6 @@
 
       call ESMF_DELayoutDestroy(layoutApp, rc)
 
-      call ESMF_AppCompDestroy(compApp, rc)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -280,6 +281,8 @@
                  "ran to completion!"
         write(0, *) ""
       endif
+
+      call ESMF_AppCompDestroy(compApp, rc)
 
       end program ESMF_ApplicationWrapper
     
