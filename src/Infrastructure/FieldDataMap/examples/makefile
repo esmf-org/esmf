@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.2 2004/05/14 22:34:25 slswift Exp $
+# $Id: makefile,v 1.3 2004/06/03 15:34:11 nscollins Exp $
 
 # makefile template for the examples directory.
 
-ALL:  build_examples
+ALL: build_examples
 
 CFLAGS    =
 FFLAGS    =
@@ -16,33 +16,28 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/FieldDataMap/examples
 
-TESTEXAMPLES_3  = \
-	ESMF_FieldDataMapEx RUN_ESMF_FieldDataMapEx ESMF_FieldDataMapEx.rm
+EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldDataMapEx
 
-TESTEXAMPLES_9  = \
-	ESMF_FieldDataMapEx RUN_ESMF_FieldDataMapExUNI ESMF_FieldDataMapEx.rm
+# List the example run targets in EXAMPLES_RUN and
+# EXAMPLES_RUN_UNI.  All of the run targets should be defined
+# in this makefile.
+#       
+EXAMPLES_RUN = run_ESMF_FieldDataMapEx
 
-EXAMPLESF       = ESMF_FieldDataMapEx.F90
+EXAPMLES_RUN_UNI = run_ESMF_FieldDataMapEx_uni
+
 
 include ${ESMF_DIR}/makefile
 
 DIRS = 
 
-ESMF_FieldDataMapDir:
-	mkdir -p ${ESMC_TESTDIR}
+CLEANDIRS   = coredir.*
+CLEANFILES  = *.o *.mod *.txt *.stdout NULL core $(EXAMPLES_BUILD)
+CLOBBERDIRS =
 
-ESMF_FieldDataMapEx: ESMF_FieldDataMapEx.o  chkopts
-	${F90CXXLD} -g -o ESMF_FieldDataMapEx ESMF_FieldDataMapEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
-	${RM} ESMF_FieldDataMapEx.o
-
-RUN_ESMF_FieldDataMapEx:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldDataMapEx.tmps
+run_ESMF_FieldDataMapEx:
 	${MPIRUN} -np 4 ESMF_FieldDataMapEx > ESMF_FieldDataMapEx.stdout
 
-RUN_ESMF_FieldDataMapExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldDataMapEx.tmps
+run_ESMF_FieldDataMapEx_uni:
 	${MPIRUN} -np 1 ESMF_FieldDataMapEx > ESMF_FieldDataMapEx.stdout
-
-ESMF_FieldDataMapEx.rm:
-	echo "ESMF_FieldDataMapEx.rm target called here."
 
