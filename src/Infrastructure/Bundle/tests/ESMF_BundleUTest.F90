@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.4 2004/01/28 17:48:34 nscollins Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.5 2004/01/28 22:50:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.4 2004/01/28 17:48:34 nscollins Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.5 2004/01/28 22:50:26 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -146,7 +146,7 @@
 
       !NEX_UTest
       ! Add a field to an empty Bundle
-      grid = ESMF_GridCreateEmpty(rc=rc)
+      grid = ESMF_GridCreate(rc=rc)
       simplefield = ESMF_FieldCreateNoData(grid=grid, name="rh", rc=rc)
       call ESMF_BundleAddFields(bundle2, simplefield, rc=rc);
       write(failMsg, *) ""
