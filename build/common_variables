@@ -29,7 +29,7 @@ ESMC_MODDIR	= ${ESMF_BUILD}/mod/mod${BOPT}/${ESMF_ARCH}
 # Building in the moddir solves problems about trying to copy module files
 # in after the fact.
 ESMC_OBJDIR	= ${ESMC_MODDIR}
-ESMC_TESTDIR	= ${ESMF_DIR}/test${BOPT}/${ESMF_ARCH}
+ESMC_TESTDIR	= ${ESMF_DIR}/test/test${BOPT}/${ESMF_ARCH}
 ESMC_DOCDIR	= ${ESMF_DIR}/doc
 PROTEX		= ${ESMF_DIR}/scripts/doc_templates/templates/protex 
 DO_LATEX	= ${ESMF_DIR}/scripts/doc_templates/templates/scripts/do_latex
