@@ -1,4 +1,4 @@
-\section{General Design Concepts}
+\section{Design Strategies}
 
 Given the computational demands of Earth system modeling, the ESMF is by 
 necessity complicated software running on complicated hardware.  However,
@@ -52,6 +52,8 @@ OO design, the basic concepts of component-based design are not especially
 easy to grasp and are not widely understood throughout the Earth system 
 modeling community.  We therefore go into some detail.
 
+\subsubsection{What is Component-Based Design?}
+
 In component-based design, applications are constructed using software entities 
 called components, which are accessed only through {\it interfaces}.  
 An interface is an array of function pointers.  Components usually have multiple 
@@ -91,6 +93,41 @@ interfaces.  \footnote{In practice IDLs tend to look a lot like C++.}  Although
 an IDL isn't central to the notion of component architectures, it does enable 
 niceties such as allowing the ORB to automatically generate proxies and stubs.
 
+\subsubsection{ESMF Components}
+
+The ESMF architecture is based on those aspects of component-based design that
+provide the most immediate benefits, are feasible to implement within the
+timeframe of our project, and will enable us to be compatible with projects 
+such as the CCA as those projects evolve.  
+
+For example, the ESMF architecture includes a a base class for
+all ESMF components that defines a set of common and consistent attributes
+and methods.  This enables a variety of components - with different functionality, from different sources, at both large scales and small - to be handled
+in a coherent way and to reuse the same control, communication and utility
+mechanisms.  It also provides a clear definition of ESMF components so that
+project such as CCA can understand and support them.  
+
+The ESMF, like CCA, requires that all cross-process communication occur
+within a component, and that all inter-component calls exchange only
+local data.  This greatly simplifies the architecture, without 
+imposing undue restrictions on communication mechanisms within component
+models or the ESMF.
+
+There are also aspects of component-based design that we will not adopt.
+IDLs require significant effort to implement and there is currently no
+IDL which supports the languages we require, F90 and C++.  We see no pressing
+reason to develop one or to use ESMF resources to accelerate the development
+of one.  We will continue to track the 
+development of and experiment with the Scientific IDL (SIDL) being 
+developed by CCA, as described in the {\it ESMF Implementation Report}.
+
+We do not anticipate using function pointers exclusively to manipulate
+components in our initial implementation of ESMF.  We will conceptually
+group related component methods into interfaces, and wherever possible 
+make them consistent across different types of components.
+
+\end{itemize}
+
 \subsection{Layered Architecture}
 
 The ESMF and the applications that use it will be layered.  Layering generally 
@@ -99,6 +136,8 @@ of and/or call other pieces.  This is true of most software systems, so
 saying simply that the ESMF is layered does not add much to our understanding.  
 It is more useful to look at a number of layering strategies, 
 and identify which of these apply to ESMF.
+
+\subsubsection{Types of Layering}
 
 We use the term {\it hardware layering} to refer to a strategy to encapsulate 
 programming constructs and tools that reflect the structure of the underlying 
@@ -156,6 +195,8 @@ model calcuations using more complex data objects can encapsulate some of
 these details and simplify codes.  Overture is an example of a framework 
 that provides such complex data objects.
 
+\subsubsection{ESMF Layers}
+
 The ESMF utility infrastructure and superstructure utilize hardware layering, 
 and multi-component applications running under ESMF can be viewed as 
 being task layered.  The ESMF ``sandwich'' diagram presented in 
@@ -176,6 +217,8 @@ of the application rather than the computing domain.
 The ESMF does not place any restriction on the computational strategy used 
 within models.  Both the array-only WRF approach and the pervasive data 
 objects of Overture, etc. are compatible with the ESMF.
+
+
 
 
 

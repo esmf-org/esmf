@@ -1,0 +1,48 @@
+\section{Introduction}
+
+In this {\it Earth System Modeling Framework (ESMF) Architecture Document} we describe 
+the main design features that will enable us to achieve interoperability, ease of 
+use, performance portability, and reuse for climate, weather, and data assimilation
+applications.  Our goal is to create a software system capable of satisfying
+the extensive functional requirements laid out in the {\it ESMF 
+Requirements Document}, while retaining in its design a measure of intuitiveness
+and simplicity. 
+
+We define a framework as a structured collection of software building blocks 
+that can be used or customized to develop model components, assemble them into an 
+application, and run the application.  Unlike a software library, in a framework some
+software elements are partly defined or unimplemented.  For example, a framework
+may require that a gridded model provide a {\tt GetGrid} method, and specify 
+a format for describing the grid, but leave the implementation of the method up
+to the framework user.  This relatively non-intrusive standardization enables 
+different model components to interoperate with each other, and to use fully
+complete, general methods provided by the framework (in this case, perhaps a 
+{\tt Regrid} method).
+
+The functional split between developing and combining components is the
+foremost feature of the ESMF architecture.  The simplest view of the ESMF 
+is that it consists of an {\it infrastructure} of utilities and data 
+structures for building model components and a {\it superstructure} for coupling 
+and running them.  This document describes the interplay between ESMF 
+infrastructure and superstructure, and how they relate to user-provided components.
+
+We provide in the remainder of this introductory section a summary of the 
+scope of the ESMF.  The scope and motivating requirements are explained in more detail in the {\it ESMF Requirements Document}.  The three sections that follow are the core of the {\it Architecture Document.} The first of these is 
+a {\it Design Overview}.  It includes 
+a description of the basic structure of an ESMF application and a discussion of 
+the design strategies
+used in ESMF.  The second, {\it ESMF Classes}, is  a description of the 
+major classes in the framework, their structure, their relationships to each other, 
+and the sequence of events for key interactions.  The third, {\it 
+Framework-Wide Design Elements}, describes in detail the conventions and behavior
+that we wish to apply across the ESMF software.  It
+includes a description of function naming conventions and a base class whose behavior all 
+framework classes will share.  At the very end is a glossary of terms.
+
+
+
+
+
+
+
+
