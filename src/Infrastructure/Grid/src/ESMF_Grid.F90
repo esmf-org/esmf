@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.97 2003/09/12 20:07:17 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.98 2003/09/12 22:36:50 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -148,7 +148,8 @@
     public ESMF_GridValidate
     public ESMF_GridPrint
     public ESMF_GridComputeDistance
-    public ESMF_GridBoxIntersect
+    public ESMF_GridBoxIntersectRecv
+    public ESMF_GridBoxIntersectSend
     !public ESMF_GridSearch
 
 !------------------------------------------------------------------------------
@@ -219,7 +220,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.97 2003/09/12 20:07:17 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.98 2003/09/12 22:36:50 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1530,11 +1531,6 @@
         print *, "ERROR in ESMF_GridConstructInternalSpecd: Add physgrid"
         return
       endif
-  !    call ESMF_GridSetCoord(grid, physgridId, status)
-  !    if(status .NE. ESMF_SUCCESS) then
-  !      print *, "ERROR in ESMF_GridConstructInternal: Grid set coord compute"
-  !      return
-  !    endif
       physgridId = physgridId + 1 
 
 !     Create any other physgrids necessary for horizontal grid stagger
@@ -1555,11 +1551,6 @@
             print *, "ERROR in ESMF_GridConstructInternalSpecd: Add physgrid"
             return
           endif
-  !        call ESMF_GridSetCoord(grid, physgridId, status)
-  !        if(status .NE. ESMF_SUCCESS) then
-  !          print *, "ERROR in ESMF_GridConstructInternal: Grid set coord compute"
-  !          return
-  !        endif
           physgridId = physgridId + 1 
 
         ! Arakawa C (velocities at cell faces)
@@ -1573,11 +1564,6 @@
             print *, "ERROR in ESMF_GridConstructInternalSpecd: Add physgrid"
             return
           endif
-  !        call ESMF_GridSetCoord(grid, physgridId, status)
-  !        if(status .NE. ESMF_SUCCESS) then
-  !          print *, "ERROR in ESMF_GridConstructInternal: Grid set coord compute"
-  !          return
-  !        endif
           physgridId = physgridId + 1 
 
         ! Arakawa D
@@ -1591,16 +1577,11 @@
             print *, "ERROR in ESMF_GridConstructInternalSpecd: Add physgrid"
             return
           endif
-  !        call ESMF_GridSetCoord(grid, physgridId, status)
-  !        if(status .NE. ESMF_SUCCESS) then
-  !          print *, "ERROR in ESMF_GridConstructInternal: Grid set coord compute"
-  !          return
-  !        endif
           physgridId = physgridId + 1 
 
       end select
 
-!     Create vertical physgrid if requested
+!     Create vertical physgrid if requested  TODO
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternalSpecd: Grid construct"
@@ -2018,18 +1999,18 @@
       enddo
 
       grid%physgrids(physgrid_id) = ESMF_PhysGridCreate(dim_num=2, &
-                                   relloc=relloc, &
-                                   delta1=delta1_local, &
-                                   delta2=delta2_local, &
-                                   local_min=local_min, &
-                                   local_max=local_max, &
-                                   global_min=global_min, &
-                                   global_max=global_max, &
-                                   counts=counts, &
-                                   dim_names=dim_names, &
-                                   dim_units=dim_units, &
-                                   name=physgrid_name, &
-                                   rc=status)
+                                    relloc=relloc, &
+                                    delta1=delta1_local, &
+                                    delta2=delta2_local, &
+                                    local_min=local_min, &
+                                    local_max=local_max, &
+                                    global_min=global_min, &
+                                    global_max=global_max, &
+                                    counts=counts, &
+                                    dim_names=dim_names, &
+                                    dim_units=dim_units, &
+                                    name=physgrid_name, &
+                                    rc=status)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -2782,7 +2763,9 @@
 
 ! !INTERFACE:
       subroutine ESMF_GridGlobalToLocalIndex(grid, global1D, local1D, &
-                                             global2D, local2D, rc)
+                                             global2D, local2D, &
+                                             globalAI1D, localAI1D, &
+                                             globalAI2D, localAI2D, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -2790,6 +2773,10 @@
       integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: local1D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) :: global2D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(out) :: local2D
+      type(ESMF_AxisIndex), dimension(:), optional, intent(in) :: globalAI1D
+      type(ESMF_AxisIndex), dimension(:), optional, intent(out) ::  localAI1D
+      type(ESMF_AxisIndex), dimension(:,:), optional, intent(in) :: globalAI2D
+      type(ESMF_AxisIndex), dimension(:,:), optional, intent(out) ::  localAI2D
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -2812,6 +2799,14 @@
 !     \item[{[local2D]}]
 !          Two-dimensional {\tt ESMF\_LocalArray} of local identifiers corresponding to
 !          global identifiers.
+!     \item[{[globalAI1D]}]
+!          One-dimensional array of global AxisIndices to be translated.
+!     \item[{[localAI1D]}]
+!          One-dimensional array of local AxisIndices corresponding to global AIs.
+!     \item[{[globalAI2D]}]
+!          Two-dimensional array of global AxisIndices to be translated.
+!     \item[{[localAI2D]}]
+!          Two-dimensional array of local AxisIndices corresponding to global AIs.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2834,7 +2829,9 @@
 !     to the application level
       call ESMF_DistGridGlobalToLocalIndex(grid%ptr%distgrid%ptr, &
                                            global1D, local1D, &
-                                           global2D, local2D, status)
+                                           global2D, local2D, &
+                                           globalAI1D, localAI1D, &
+                                           globalAI2D, localAI2D, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGlobalToLocalIndex: distgrid global to local"
         return
@@ -4424,11 +4421,11 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridBoxIntersect - Determine a DomainList covering a box
+! !IROUTINE: ESMF_GridBoxIntersectRecv - Determine a DomainList covering a box
 !
 ! !INTERFACE:
-      subroutine ESMF_GridBoxIntersect(grid, local_min, local_max, domainList, &
-                                       rc)
+      subroutine ESMF_GridBoxIntersectRecv(grid, local_min, local_max, &
+                                           domainList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -4439,7 +4436,10 @@
 
 ! !DESCRIPTION:
 !     This routine computes the DomainList necessary to cover a given "box"
-!     described by an array of min/max's.
+!     described by an array of min/max's.  This routine is for the case of
+!     a DE that is part of a destination Grid determining which DEs it will
+!     receive data from.
+
 !
 !     The arguments are:
 !     \begin{description}
@@ -4468,7 +4468,7 @@
       integer :: size, totalPoints
       integer :: counts(ESMF_MAXDIM)
       real, dimension(:,:,:), pointer :: boxes
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: grid_ai
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: grid_ai, localAI
       type(ESMF_Domain) :: domain
       type(ESMF_LocalArray) :: array
 
@@ -4494,6 +4494,11 @@
          print *, "allocation error, grid_ai(nDE,rank) =", nDEs, rank
          return
       endif
+      allocate(localAI(nDEs,rank), stat=status)
+      if (status .ne. 0) then
+         print *, "allocation error"
+         return
+      endif
       allocate(boxes(nDEs,2**rank,rank), stat=status)
       if (status .ne. 0) then
          print *, "allocation error, boxes(nDE,2^rank,rank) =", nDEs,2**rank,rank
@@ -4505,6 +4510,10 @@
 
       ! get set of axis indices from grid   TODO: should these come in from Array?
       call ESMF_GridGetAllAxisIndex(grid, grid_ai, status)
+
+      ! translate the AIs from global to local
+      call ESMF_GridGlobalToLocalIndex(grid, globalAI2D=grid_ai, &
+                                       localAI2D=localAI, rc=status)
 
       ! loop through bounding boxes, looking for overlap with our "box"
       ! TODO: a better algorithm
@@ -4533,12 +4542,12 @@
             (local_min(2).gt.max(boxes(j,3,2),boxes(j,4,2))) .or. &
             (local_max(2).lt.min(boxes(j,1,2),boxes(j,2,2)))) cycle
         num_domains = num_domains + 1
-        domainList%domains(num_domains)%DE   = j
+        domainList%domains(num_domains)%DE   = j - 1  ! DEs start with 0
         domainList%domains(num_domains)%rank = rank
         size = 1
         do i = 1,rank
-          domainList%domains(num_domains)%ai(i) = grid_ai(j,i)
-          size = size * (grid_ai(j,i)%max - grid_ai(j,i)%min + 1)
+          domainList%domains(num_domains)%ai(i) = localAI(j,i)
+          size = size * (localAI(j,i)%max - localAI(j,i)%min + 1)
         enddo
         totalPoints = totalPoints + size
       enddo
@@ -4587,7 +4596,181 @@
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridBoxIntersect
+      end subroutine ESMF_GridBoxIntersectRecv
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridBoxIntersectSend - Determine a DomainList covering a box
+!
+! !INTERFACE:
+      subroutine ESMF_GridBoxIntersectSend(grid, local_min, local_max, myAI, &
+                                           domainList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      real, dimension(:), intent(in) :: local_min        ! array of local mins
+      real, dimension(:), intent(in) :: local_max        ! array of local maxs
+      type(ESMF_AxisIndex), dimension(:), intent(in) :: myAI
+      type(ESMF_DomainList), intent(inout) :: domainlist ! domain list
+      integer, intent(out), optional :: rc               ! return code
+
+! !DESCRIPTION:
+!     This routine computes the DomainList necessary to cover a given "box"
+!     described by an array of min/max's.  This routine is for the case of
+!     a DE that is part of a source Grid determining which DEs it will send
+!     its data to.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Destination {\tt ESMF\_Grid} to use to calculate the resulting
+!          {\tt ESMF\_DomainList}.
+!     \item[local\_min]
+!          Array of local minimum coordinates, one per rank of the array,
+!          defining the "box."
+!     \item[local\_max]
+!          Array of local maximum coordinates, one per rank of the array,
+!          defining the "box."
+!     \item[myAI]
+!          {\tt ESMF\_AxisIndex} for this DE on the sending (source)
+!          {\tt ESMF\_Grid}, assumed to be in global indexing.
+!     \item[domainlist]
+!          Resulting {\tt ESMF\_DomainList} containing the set of 
+!          {\tt ESMF\_Domains} necessary to cover the box.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: i, j, rank, nDEs, num_domains
+      integer :: size, totalPoints
+      integer :: counts(ESMF_MAXDIM)
+      real, dimension(:,:,:), pointer :: boxes
+      type(ESMF_AxisIndex), dimension(:), pointer :: myLocalAI
+      type(ESMF_Domain) :: domain
+      type(ESMF_LocalArray) :: array
+
+      ! Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! get set of bounding boxes from the grid
+      call ESMF_GridGetBoundingBoxes(grid%ptr, array, status)
+
+      ! get rank and counts from the bounding boxes array
+      call ESMF_LocalArrayGet(array, counts=counts, rc=status)
+      nDEs = counts(1)
+      rank = counts(3)
+
+      ! allocate arrays now
+      allocate(boxes(nDEs,2**rank,rank), stat=status)
+      if (status .ne. 0) then
+         print *, "allocation error"
+         return
+      endif
+      allocate(myLocalAI(rank), stat=status)
+      if (status .ne. 0) then
+         print *, "allocation error"
+         return
+      endif
+
+      ! translate myAI to local index
+      call ESMF_GridGlobalToLocalIndex(grid, globalAI1D=myAI, &
+                                       localAI1D=myLocalAI, rc=status)
+
+      ! get pointer to the actual bounding boxes data
+      call ESMF_LocalArrayGetData(array, boxes, rc=status)
+
+      ! loop through bounding boxes, looking for overlap with our "box"
+      ! TODO: a better algorithm
+
+      ! go through list of DEs to calculate the number of domains
+      ! TODO: use David's DomainList routines, but they are untested
+      num_domains = 0
+      do i = 1,nDEs
+        if ((local_min(1).gt.max(boxes(i,2,1),boxes(i,3,1))) .or. &
+            (local_max(1).lt.min(boxes(i,1,1),boxes(i,4,1))) .or. &
+            (local_min(2).gt.max(boxes(i,3,2),boxes(i,4,2))) .or. &
+            (local_max(2).lt.min(boxes(i,1,2),boxes(i,2,2)))) cycle
+        num_domains = num_domains + 1
+      enddo
+
+      domainList = ESMF_DomainListCreate(num_domains)
+
+      ! now fill in the domain list  TODO: only one loop instead of two, one that
+      ! figures the number of domains and one that fills it in
+      ! TODO: move some of this code to Base and add a DomainList method
+      num_domains = 0
+      totalPoints  = 0
+      do j = 1,nDEs
+        if ((local_min(1).gt.max(boxes(j,2,1),boxes(j,3,1))) .or. &
+            (local_max(1).lt.min(boxes(j,1,1),boxes(j,4,1))) .or. &
+            (local_min(2).gt.max(boxes(j,3,2),boxes(j,4,2))) .or. &
+            (local_max(2).lt.min(boxes(j,1,2),boxes(j,2,2)))) cycle
+        num_domains = num_domains + 1
+        domainList%domains(num_domains)%DE   = j - 1  ! DEs start with 0
+        domainList%domains(num_domains)%rank = rank
+        size = 1
+        do i = 1,rank
+          domainList%domains(num_domains)%ai(i) = myLocalAI(i)
+          size = size * (myLocalAI(i)%max - myLocalAI(i)%min + 1)
+        enddo
+        totalPoints = totalPoints + size
+      enddo
+      domainList%total_points = totalPoints
+
+      ! TODO:  the code below is taken from Phil's regrid routines and needs
+      !        to be incorporated at some point
+      !
+      ! if spherical coordinates, set up constants for longitude branch cut
+      !
+
+      !if (dst_phys_grid%coord_system == ESMF_CoordSystem_Spherical) then
+      !   if (units = 'degrees') then
+      !      lon_thresh = 270.0
+      !      lon_cycle  = 360.0
+      !   else if (units = 'radians') then
+      !      lon_thresh = 1.5*pi
+      !      lon_cycle  = 2.0*pi
+      !   endif
+      !endif
+      !
+      ! correct for longitude crossings if spherical coords
+      ! assume degrees and x is longitude
+      !
+      !if (dst_phys_grid%coord_system == ESMF_CoordSystem_Spherical) then
+      !   if (dst_DE_bbox(2) - dst_DE_bbox(1) >  lon_thresh) &
+      !      dst_DE_bbox(2) = dst_DE_bbox(2) - lon_cycle
+      !   if (dst_DE_bbox(2) - dst_DE_bbox(1) < -lon_thresh) &
+      !      dst_DE_bbox(2) = dst_DE_bbox(2) + lon_cycle
+      !endif
+      !
+      ! make sure src bbox is in same longitude range as dst bbox
+      ! assume degrees and x is longitude
+      !
+      !   if (src_phys_grid%coord_system == ESMF_CoordSystem_Spherical) then
+      !      if (src_DE_bbox(1) - dst_DE_bbox(1) >  lon_thresh) &
+      !         src_DE_bbox(1) = src_DE_bbox(1) - lon_cycle
+      !      if (src_DE_bbox(1) - dst_DE_bbox(1) < -lon_thresh) &
+      !         src_DE_bbox(1) = src_DE_bbox(1) + lon_cycle
+      !      if (src_DE_bbox(2) - dst_DE_bbox(1) >  lon_thresh) &
+      !         src_DE_bbox(2) = src_DE_bbox(2) - lon_cycle
+      !      if (src_DE_bbox(2) - dst_DE_bbox(1) < -lon_thresh) &
+      !         src_DE_bbox(2) = src_DE_bbox(2) + lon_cycle
+      !   endif ! Spherical coords
+
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridBoxIntersectSend
 
 !------------------------------------------------------------------------------
 !!BOP
