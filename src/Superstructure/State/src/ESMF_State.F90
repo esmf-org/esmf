@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.27 2004/03/09 17:53:11 svasquez Exp $
+! $Id: ESMF_State.F90,v 1.28 2004/03/10 23:40:53 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -284,7 +284,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.27 2004/03/09 17:53:11 svasquez Exp $'
+      '$Id: ESMF_State.F90,v 1.28 2004/03/10 23:40:53 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -3299,7 +3299,7 @@ end function
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateWriteRestart -- Save the internal data for a State
 !
 ! !INTERFACE:
@@ -3326,11 +3326,15 @@ end function
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !
 ! TODO: code goes here
+!
+! The flags BOP/EOP have been changed to BOPI/EOPI because
+! the subroutine has not been implemented. When the code is
+! completed change back to BOP/EOP.
 !
         end subroutine ESMF_StateWriteRestart
 
