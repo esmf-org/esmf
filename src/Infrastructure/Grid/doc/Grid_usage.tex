@@ -1,4 +1,4 @@
-% $Id: Grid_usage.tex,v 1.7 2004/06/22 23:13:45 cdeluca Exp $
+% $Id: Grid_usage.tex,v 1.8 2004/08/12 19:50:22 jwolfe Exp $
 
 %\subsection{Design and Implementation Notes}
 
@@ -16,7 +16,10 @@ parameters defining the horizontal grid.  A vertical subGrid can then be attache
 to the Grid via an {\tt ESMF\_GridAddVert<VertGridType>()} call.  Currently a Grid can have only a single
 vertical subGrid.  The last call, {\tt ESMF\_GridDistribute()}, allocates some of
 the Grid subclasses and distributes the Grid in either a default or
-user-specified decomposition.  Currently, these calls must be made in this order
-(i.e. it is not possible to add a vertical subGrid to an already distributed
-Grid).
+user-specified decomposition.  Please note that {\tt ESMF\_GridDistribute()} must
+be called, even if mpiuni is used for communication.  Currently, these calls must
+be made in this order (i.e. it is not possible to add a vertical subGrid to an
+already distributed Grid), and while an {\tt ESMF\_GridAddVert<VertGridType>()} call
+is optional, both an {\tt ESMF\_GridCreate<GridType>()} and
+{\tt ESMF\_GridDistribute()} call are required.
 
