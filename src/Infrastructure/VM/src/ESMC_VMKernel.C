@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.28 2005/02/23 05:06:07 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.29 2005/02/25 22:10:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -144,17 +144,32 @@ int vmkt_join(vmkt_t *vmkt){
 
 
 void ESMC_VMK::vmk_obtain_args(void){
-  // use sus3 shell features to obtain command line args for this process
+  // obtain command line args for this process
   int mypid = getpid();
-  char command[160], fname[80], args[8000];
-  sprintf(command, "env COLUMNS=8000 ps -p %d -o args= > .args.%d", mypid,
-    mypid);
+  char command[160], fname[80], uname[80], args[8000];
+  sprintf(command, "uname > .uname.%d", mypid);
+  system(command);
+  sprintf(fname, ".uname.%d", mypid);
+  FILE *fp=fopen(fname, "r");
+  fscanf(fp, "%[^\n]", uname);
+  fclose(fp);
+  // determine whether this is a SUS3=sysV or BSD derived OS
+  int bsdflag=0;
+  if (!strcmp(uname, "Darwin")) bsdflag=1;    // Darwin is BSD
+  // choose the correct ps option  
+  if (bsdflag)
+    sprintf(command, "env COLUMNS=8000 ps -p %d -o command > .args.%d", mypid,
+      mypid);
+  else
+    sprintf(command, "env COLUMNS=8000 ps -p %d -o args > .args.%d", mypid,
+      mypid);
   system(command);
   sprintf(fname, ".args.%d", mypid);
-  FILE *fp=fopen(fname, "r");
-  fscanf(fp, "%[^\n]", args);
+  fp=fopen(fname, "r");
+  fgets(args, 8000, fp);  // scan off header line of ps output
+  fgets(args, 8000, fp);
   fclose(fp);
-  sprintf(command, "rm -f .args.%d", mypid);
+  sprintf(command, "rm -f .args.%d .uname.%d", mypid, mypid);
   system(command);
   // now the string 'args' holds the complete command line with arguments
   // next prepare the argc and argv variables
@@ -179,9 +194,9 @@ void ESMC_VMK::vmk_obtain_args(void){
   argv[argc][j] = '\0';
   ++argc;
   // now argc and argv are valid
-//  printf("argc=%d\n", argc);
-//  for (i=0; i<argc; i++)
-//    printf("%s\n", argv[i]);
+  //printf("argc=%d\n", argc);
+  //for (i=0; i<argc; i++)
+  //  printf("%s\n", argv[i]);
 }
 
 
