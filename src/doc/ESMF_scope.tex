@@ -112,44 +112,49 @@ All inter-component communication in the framework occurs through
 component calls to the superstructure. Here we provide a synopsis of the
 requirements that the superstructure layer will have to meet.
 Detailed, tangible requirements for the superstructure, that can
-be validated, are given in the {\it Control} and the {\it Coupler and
+be validated, are given in the {\bf \it Control} and the {\bf \it Coupler and
 Gridded Component Interfaces} detailed requirements sections -
-parts \ref{part:Superstructure:_Control} and \ref{part:Superstructure:_Components} of this document. \\
+parts {\bf \ref{part:Superstructure:_Control}} and {\bf \ref{part:Superstructure:_Components}} 
+of this document. \\
 
 \noindent The main functions that ESMF superstructure enables (either
 directly or through services provided by lower layer functions) are:
 
-\begin{itemize}
+\begin{enumerate}
 \item any merging, interpolation, or regridding 
 of data necessary for communication between components
-(see parts \ref{part:Superstructure:_Components} 
-and \ref{part:Infrastructure_Fields_and_Grids:_Regridding} for detailed requirements relating
+(see parts {\bf \ref{part:Superstructure:_Components} }
+and {\bf \ref{part:Infrastructure_Fields_and_Grids:_Regridding} } for detailed requirements relating
 to this function);
-\item transfering data between components (see part \ref{part:Superstructure:_Control} for detailed 
+\item transfering data between components (see part {\bf \ref{part:Superstructure:_Control} } for detailed 
 requirements relating to this function);
 \item sharing attribute information between components
-(see part \ref{part:Superstructure:_Control} for detailed requirements relating
+(see part {\bf \ref{part:Superstructure:_Control} } for detailed requirements relating
 to this function);
 \item to coordinate execution, checkpointing and restarting of
-  components (see part \ref{part:Superstructure:_Control} for detailed 
+  components (see part {\bf \ref{part:Superstructure:_Control} } for detailed 
 requirements relating to this function).
-\end{itemize}
+\end{enumerate}
 
 The superstructure provides a high-level interface that enables 
 applications to be assembled from multiple components.  It coordinates
 the transfer of distributed grid data and ungridded 
 observational data between components.  The superstructure will be able 
-to merge data originating from multiple source grids, and will 
-provide spatial and temporal averaging of data.
+to direct the merging of data originating from multiple source grids, and will 
+provide spatial and temporal averaging of data (see parts 
+{\bf \ref{part:Superstructure:_Control}}, {\bf \ref{part:Superstructure:_Components}}
+and {\bf \ref{part:Infrastructure_Fields_and_Grids:_Regridding} }).
 
 The ESMF will be capable of operating in multiple modes of execution.
 components may exist within the same executable, within multiple 
 executables, and in mixed modes.  Components may execute serially, 
-concurrently, and in mixed modes.  
+concurrently, and in mixed modes (see {\bf \ref{req:CTL:control_element}},
+part {\bf \ref{part:Superstructure:_Control}}).
+
 
 Functionality for regridding, interpolation, redistribution and other 
 data communication will be abstracted away from the high-level coupling
-interface.  It is provided by a parallel support layer, described next.  
+interface.  It is provided by a support layer.  
 This support layer can be used within components
 to perform efficient parallel grid operations.
 
@@ -173,7 +178,10 @@ by metadata, a description of its associated distributed grid, and field
 data itself.
 The detailed requirements, with formal validation criteria
 and relative rankings, for this aspect of ESMF are given
-in parts \ref{part:Infrastructure_Fields_and_Grids:_Physical_Grids} and \ref{part:Infrastructure_Fields_and_Grids:_Distributed_Grids} of this document.
+in parts {\bf \ref{part:Infrastructure_Fields_and_Grids:_Physical_Grids} },
+{\bf \ref{part:Infrastructure_Fields_and_Grids:_Regridding} }
+and 
+{\bf \ref{part:Infrastructure_Fields_and_Grids:_Distributed_Grids} } of this document.
 Here we provide a brief synopsis of the areas that are covered
 in that part of the document.
 
@@ -182,7 +190,7 @@ in that part of the document.
 The ESMF supports regridding, interpolation, redistribution,
 transfer, and merging of data discretized on the following types of grids:
 
-\begin{itemize}
+\begin{enumerate}
 \item logically rectilinear grids: physical co-ordinates may be
   curvilinear. Logically rectilinear grids include such grids as the
   tripolar and the cubed sphere;
@@ -192,18 +200,28 @@ transfer, and merging of data discretized on the following types of grids:
 \item nested grids;
 \item observational data streams (temporal sequences of ungridded data);
 \item other grids (e.g icosahedral).
-\end{itemize}
+\end{enumerate}
+
 
 The supplied implementation will include highly-optimized versions of
-these operations for the most commonly-used grid types. The detailed 
-requirements for this aspect of ESMF of given in parts \ref{part:Infrastructure_Fields_and_Grids:_Physical_Grids} and \ref{part:Infrastructure_Fields_and_Grids:_Distributed_Grids} of this document.
+these operations for the commonly-used and representative grid types. The detailed 
+requirements for this aspect of ESMF of given in parts 
+{\bf \ref{part:Infrastructure_Fields_and_Grids:_Physical_Grids} } ({\it Physical Grids}
+detailed requirements - which deals with what continuous spaces and disrete forms
+need to be represented) and 
+{\bf \ref{part:Infrastructure_Fields_and_Grids:_Distributed_Grids} } 
+({\it Distributed Grids} detailed requirements - which deals with parallel representations
+of these grids)
+of this document.
+The detailed requirements include explicit requirements for future extensibility mechanisms to allow
+support for other grids to be easily introduced.
 
 \subsubsection{Grid operations}
 
 The ESMF provides interpolation algorithms for supported grids.  
 The detailed requirements, with formal validation criteria
 and relative rankings, for this aspect of ESMF are given
-in part \ref{part:Infrastructure_Fields_and_Grids:_Regridding}.
+in part {\bf \ref{part:Infrastructure_Fields_and_Grids:_Regridding}}.
 Here we provide a brief synopsis of the areas that are covered
 in that part of the document.
 All interpolation algorithms included in ESMF are {\it linear} in the data
@@ -225,13 +243,14 @@ The ESMF includes general purpose utility routines for use by both
 the ESMF coupler and application codes.
 The detailed requirements, with formal validation criteria
 and relative rankings, for this aspect of ESMF are given
-in parts \ref{part:Infrastructure_Utilities:_Time_Management} -
- \ref{part:Infrastructure Utilities:_I/O} of this document.
+in parts {\bf \ref{part:Infrastructure_Utilities:_Time_Management}} -
+ {\bf \ref{part:Infrastructure Utilities:_I/O}} of this document.
 Here we provide a brief synopsis of the areas that are covered
 in that part of the document.
-These utilities include 
-but are not limited to:
-\begin{itemize}
+These utilities, described in parts {\bf \ref{part:Infrastructure_Utilities:_Time_Management}} to 
+{\bf \ref{part:Infrastructure Utilities:_I/O}},
+include but are not limited to:
+\begin{enumerate}
 \item communication primitives;
 \item a generic machine interface;
 \item I/O utilities;
@@ -246,7 +265,7 @@ or ranking.
 \item performance profiling;
 \item time management; and
 \item error handling (see \ref{req:gr:error_handling}).
-\end{itemize}
+\end{enumerate}
 
 \subsubsection{Communication primitives}
 
@@ -293,7 +312,7 @@ provided.
 The following are capabilities that might conceivably have been
 included in ESMF, but will not be developed under CAN 00-OES-01
 funding:
-\begin{itemize}
+\begin{enumerate}
 \item a Graphical User Interface;
 \item mathematical libraries for operations other than regridding and
   interpolation;
@@ -303,7 +322,7 @@ funding:
 \item a database for storing experiments and related information;
 \item a mechanism for job submission (e.g Globus);
 \item optimization for additional model grids.
-\end{itemize}
+\end{enumerate}
 
 If additional resources are made available, the ESMF project foresees
 extending the initial framework.  Each of the features listed above is

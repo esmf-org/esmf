@@ -44,10 +44,15 @@
 \tableofcontents
 
 \newpage
+%\section{Synopsis}
+\input{ESMF_syn}
+
+\newpage
 \begin{htmlonly}
 \addcontentsline{toc}{part}{General Requirements}
 \end{htmlonly}
 \part{General Requirements}
+\label{part:General_Requirements}
 
 %===============================================================================
 \section{Target codes and review team}
@@ -76,9 +81,6 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 %===============================================================================
 
 \newpage
-%\section{Synopsis}
-\input{ESMF_syn}
-
 %\section{Introduction}
 \input{ESMF_intro}
 
@@ -195,7 +197,7 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 \input{../Infrastructure/Regrid/doc/Regrid_reqdoc}
-
+%====================================================================================================
 \newpage
 \begin{htmlonly}
 \addcontentsline{toc}{part}{Infrastructure Utilities: Time Management}
@@ -209,7 +211,36 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 \input{../Infrastructure/TimeMgmt/doc/TimeMgmt_reqdoc}
+%====================================================================================================
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Utilities: Communication and Memory Kernels}
+\end{htmlonly}
+\part{Infrastructure Utilities: Communication and Memory Kernels}
+\label{part:Infrastructure_Utilities:_Communication_and_Memory_Kernels}
 
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+\input{../Infrastructure/CommMem/doc/CommMem_reqdoc}
+%====================================================================================================
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Utilities: Configuration Attributes}
+\end{htmlonly}
+\part{Infrastructure Utilities: Configuration Atrributes}
+\label{part:Infrastructure_Utilities:_Configuration_Attributes}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+\input{../Infrastructure/ConfigAttr/doc/ConfigAttr_reqdoc}
+%====================================================================================================
 \newpage
 \begin{htmlonly}
 \addcontentsline{toc}{part}{Infrastructure Utilities: Performance Profiling}
