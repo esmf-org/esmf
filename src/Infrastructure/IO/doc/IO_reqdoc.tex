@@ -1,4 +1,4 @@
-% $Id: IO_reqdoc.tex,v 1.5 2002/05/17 21:21:04 cdeluca Exp $
+% $Id: IO_reqdoc.tex,v 1.6 2002/05/17 22:43:18 cdeluca Exp $
 
 %\documentclass[english]{article}
 %\usepackage{babel}
@@ -28,6 +28,11 @@ Young,
 Mark Iredell}
 %=============================================================================
 
+\setcounter{section}{0}
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
 %\begin{document}
 
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
@@ -40,7 +45,7 @@ Mark Iredell}
 
 \newpage
 \begin{htmlonly}
-\addcontentsline{toc}{part}{\longname Overview}
+\addcontentsline{toc}{chapter}{\longname Overview}
 \end{htmlonly}
 \part{\longname Overview}
 
@@ -89,13 +94,13 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 
 \newpage
 
-%\setcounter{section}{0}
-%\renewcommand{\thesection}{\shortname\arabic{section}}
-%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 \begin{htmlonly}
-\addcontentsline{toc}{part}{\longname Requirements}
+\addcontentsline{toc}{chapter}{\longname Requirements}
 \end{htmlonly}
 \part{\longname Requirements}
 

@@ -124,16 +124,21 @@ exhange.
   metadata that a component can make available for exchange 
   with other components. This may be data at a physical boundary 
   (e.g land-atmosphere interface) or in other cases, it might be the 
-  entire model state.  See state, import state.
+  entire model state.  See also restart state, import state.
 
 \item[Field] \label{glos:Field} A field is a physical quantity
   defined within a region of space.  A field includes a grid 
   and any metadata necessary for a full description of the field data.
 
+\item[Generic component] \label{glos:GenericTrans} A generic component
+  is one supplied by the framework.  The user is not expected to 
+  customize or otherwise modify it.  See also user component.
+
 \item[Generic transform] \label{glos:GenericTrans} A generic transform 
   is a operation supplied by the framework, for example, a method 
   that converts gridded data from one supported physical grid and/or 
-  decomposition to another using a specified technique.  
+  decomposition to another using a specified technique.  See also user 
+  transform.
 
 \item[Global physical grid] \label{glos:GlobPhysGrid} 
   A global physical grid contains physical information about the entire, 
@@ -145,11 +150,11 @@ exhange.
 
 \item[Global reduction] \label{glos:GlobReduction} 
   Reduction operations (sum, max, min, etc.) on
-  data defined on a distributed grid.  See global broadcast.
+  data defined on a distributed grid.  See also global broadcast.
 
 \item[Global broadcast] \label{glos:GlobBroadcast}
   Scatter operations on data defined on a distributed grid.
-  See global reduction.
+  See also global reduction.
 
 \item[Grid] \label{glos:Grid} The discrete division of space associated with
   a particular coordinate system.  A grid contains all physical grid and memory 
@@ -188,6 +193,7 @@ exhange.
 
 \item[Import state] \label{glos:ImportState} The data and metadata 
   that a component requires from other components in order to run.  
+  See also export state, restart state.
 
 \item[Index] \label{glos:Index} An integer value associated with a set
   of coordinates that describe a cell or location in physical space.
@@ -198,7 +204,7 @@ exhange.
 
 \item[Index space location] \label{glos:IndexSpaceloc} 
   A location within index space.  A index space location may be fractional.
-  See physical location.
+  See also physical location.
 
 \item[Layout] \label{glos:Layout} A layout specifies a PE list, 
   decomposition strategy (thread and process), and the dimensionality 
@@ -249,7 +255,7 @@ and days per month as in a non-leap year of a Gregorian calendar.
 \item[PE] \label{glos:PE} Short for processing element.
 
 \item[PE list] \label{glos:PElist} A list of processor IDs associated 
-  with a component.  See layout.
+  with a component.  See also layout.
 
 \item[Physical grid] \label{term:PhysGrid} 
   A physical grid contains a variety of information
@@ -297,11 +303,14 @@ calendar.  Time intervals may be negative.  The periods 2 days and 10 seconds,
 Mathematical operations such as addition, multiplication and subdivision 
 can be applied to time intervals.
 
+\item [User component] \label{UserComp} A component that is customized or
+written by the user.  See also generic component.
+
 \item [User time] \label{UserTime} Processor time actually spent executing a process's code.
 
 \item[User transform] \label{glos:UserTrans} A user-supplied 
   method that is used to extend framework capabilities beyond generic 
-  transforms.
+  transforms.  
 
 \item [Wall clock time] \label{WallClockTime} Elapsed time (i.e. difference between start time minus
 stop time, measured in world time units).

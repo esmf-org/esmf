@@ -1,4 +1,4 @@
-% $Id: PhysGrid_reqdoc.tex,v 1.9 2002/05/17 21:21:05 cdeluca Exp $
+% $Id: PhysGrid_reqdoc.tex,v 1.10 2002/05/17 22:43:19 cdeluca Exp $
 
 %\documentclass[english]{article}
 %\usepackage{babel}
@@ -29,6 +29,11 @@
 \renewcommand{\myauthors}{Robert Hallberg, Arlindo da Silva, Matt Harrison}
 %===============================================================================
 
+\setcounter{section}{0}
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
 %\begin{document}
 
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
@@ -41,9 +46,9 @@
 
 \newpage
 \begin{htmlonly}
-\addcontentsline{toc}{part}{\longname Overview}
+\addcontentsline{toc}{chapter}{\longname Overview}
 \end{htmlonly}
-\part{\longname Overview}
+\chapter{\longname Overview}
 
 %===============================================================================
 \section{Target Codes and Review Team}
@@ -95,9 +100,9 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 \begin{htmlonly}
-\addcontentsline{toc}{part}{\longname Requirements}
+\addcontentsline{toc}{chapter}{\longname Requirements}
 \end{htmlonly}
-\part{\longname Requirements}
+\chapter{\longname Requirements}
 
 \input{../Infrastructure/PhysGrid/doc/PhysGrid_req}
 
