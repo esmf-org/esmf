@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.1 2003/03/10 21:54:21 cdeluca Exp $
+// $Id: ESMC_Field.h,v 1.2 2003/10/25 12:03:28 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,16 +35,9 @@
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
 
 // !PUBLIC TYPES:
- class ESMC_FieldConfig;
  class ESMC_Field;
 
 // !PRIVATE TYPES:
-
- // class configuration type
- class ESMC_FieldConfig {
-   private:
-     int conf_count;
- };
 
  // fortran interface declarations
 extern "C" {
@@ -95,3 +88,10 @@ ESMC_Field *ESMC_FieldCreate(int *rc);
 int ESMC_FieldDestroy(ESMC_Field *f);
 
 #endif  // ESMC_Field_H
+
+
+
+
+
+
+

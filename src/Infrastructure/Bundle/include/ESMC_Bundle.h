@@ -1,4 +1,4 @@
-// $Id: ESMC_Bundle.h,v 1.1 2003/09/17 21:26:29 cdeluca Exp $
+// $Id: ESMC_Bundle.h,v 1.2 2003/10/25 12:03:27 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,16 +35,9 @@
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
 
 // !PUBLIC TYPES:
- class ESMC_BundleConfig;
  class ESMC_Bundle;
 
 // !PRIVATE TYPES:
-
- // class configuration type
- class ESMC_BundleConfig {
-   private:
-     int conf_count;
- };
 
  // fortran interface declarations
 extern "C" {
@@ -96,3 +89,11 @@ ESMC_Bundle *ESMC_BundleCreate(int *rc);
 int ESMC_BundleDestroy(ESMC_Bundle *f);
 
 #endif  // ESMC_Bundle_H
+
+
+
+
+
+
+
+

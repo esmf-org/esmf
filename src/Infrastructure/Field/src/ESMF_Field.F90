@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.82 2003/10/22 17:13:51 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.83 2003/10/25 12:03:29 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -176,7 +176,6 @@
    public ESMF_FieldGet                ! Generic Get() routine, replaces others
 
    public ESMF_FieldGetName            ! Get Field name
-   public ESMF_FieldGetConfig          ! e.g., has associated Grid or data
  
    public ESMF_FieldGetGrid            ! Return a Grid pointer
    public ESMF_FieldGetGlobalGridInfo  ! Return global Grid info
@@ -235,7 +234,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.82 2003/10/22 17:13:51 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.83 2003/10/25 12:03:29 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1817,34 +1816,6 @@
 
       end subroutine ESMF_FieldGetIntegerAttribute
 
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldGetConfig - Return information about a Field
-!
-! !INTERFACE:
-      subroutine ESMF_FieldGetConfig(field, hasgrid, hasarray, hasbuffer, rc)
-!
-! !ARGUMENTS:
-       type(ESMF_Field), intent(in) :: field      
-       logical, intent(out), optional :: hasgrid            
-       logical, intent(out), optional :: hasarray            
-       logical, intent(out), optional :: hasbuffer           
-       integer, intent(out), optional :: rc       
-!
-! !DESCRIPTION:
-!      Returns whether a {\tt ESMF\_Field} has a grid, array, or buffer 
-!      associated with it.
-!
-!EOP
-! !REQUIREMENTS: FLD1.6.2, FLD1.1.3
-
-
-!
-! TODO: code goes here
-!
-        end subroutine ESMF_FieldGetConfig
-
-!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_FieldGetGrid - Return the Grid associated with a Field

@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.3 2003/06/26 15:13:20 rstaufer Exp $
+// $Id: ESMC_Field.C,v 1.4 2003/10/25 12:03:28 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Field.C,v 1.3 2003/06/26 15:13:20 rstaufer Exp $";
+             "$Id: ESMC_Field.C,v 1.4 2003/10/25 12:03:28 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -115,56 +115,6 @@ int ESMC_FieldDestroy(ESMC_Field *f) {
     return ESMF_FAILURE;
 
  } // end ESMC_FieldDestruct
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_FieldGetConfig - get configuration info from a Field
-//
-// !INTERFACE:
-      //int ESMC_Field::ESMC_FieldGetConfig(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      //ESMC_FieldConfig *config) const {  // out - resources
-//
-// !DESCRIPTION:
-//    Returns the set of resources the {\tt ESMC\_Field} object was configured with.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
-// } // end ESMC_FieldGetConfig
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_FieldSetConfig - set configuration info for a Field
-//
-// !INTERFACE:
-  //    int ESMC_Field::ESMC_FieldSetConfig(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-   //   const ESMC_FieldConfig *config) {     // in - resources
-//
-// !DESCRIPTION:
-//    Configures the {\tt ESMC\_Field} object with set of resources given.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
-// } // end ESMC_FieldSetConfig
 
 //-----------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.5 2003/10/22 15:54:03 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.6 2003/10/25 12:03:28 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -163,7 +163,6 @@
 !      public ESMF_BundleDetachData   ! Disassociate data with a Bundle
 
        public ESMF_BundleGetName      ! Get Bundle name
-!      public ESMF_BundleGetConfig    ! Has associated Grid or data
 
        public ESMF_BundleGetFieldCount ! Get count of Fields 
        public ESMF_BundleGetFields    ! Get one or more Fields by name or number
