@@ -1,4 +1,4 @@
-! $Id: ESMF_class.F90,v 1.15 2003/02/04 18:56:07 eschwab Exp $
+! $Id: ESMF_class.F90,v 1.16 2003/03/04 15:03:36 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,7 +20,8 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include <ESMF_<Comp>.h>
+#include "ESMF.h"
+! #include "ESMF_<Comp>.h"
 !==============================================================================
 !BOP
 ! !MODULE: ESMF_<Class>Mod - One line general statement about this class
@@ -53,16 +54,31 @@
       end type
 
 !------------------------------------------------------------------------------
+!     !  ESMF_<Class>Type
+!
+!     ! Description of ESMF_<Class>Type. 
+!     !  <this is used for a deep class only.>
+
+      type ESMF_<Class>Type
+      sequence
+      private
+        type (ESMF_Base) :: base
+        integer :: dummy
+!       < insert other class members here >
+      end type
+
+!------------------------------------------------------------------------------
 !     !  ESMF_<Class>
 !
-!     ! Description of ESMF_<Class>. 
+!     ! Description of ESMF_<Class>
 
       type ESMF_<Class>
       sequence
       private
-!       type (ESMF_Base) :: base
-        integer :: dummy
-!       < insert other class members here >
+        ! < for a deep class, this is a pointer to the underlying type. >
+        type (ESMF_<Class>Type), pointer :: <class>type
+        ! < for a shallow class, the actual values go here. > 
+        ! integer :: shallow
       end type
 
 !------------------------------------------------------------------------------
@@ -82,16 +98,14 @@
 ! the following routines apply to deep classes only
       public ESMF_<Class>Create                 ! interface only, deep class
       public ESMF_<Class>Destroy                ! interface only, deep class
-      public ESMF_<Class>Construct              ! internal only, deep class
-      public ESMF_<Class>Destruct               ! internal only, deep class
 
 ! the following routine applies to a shallow class
       public ESMF_<Class>Init                   ! shallow class
 
       public ESMF_<Class>GetConfig
       public ESMF_<Class>SetConfig
-      public ESMF_<Class>GetValue               ! Get<Value>
-      public ESMF_<Class>SetValue               ! Set<Value>
+      public ESMF_<Class>Get                    ! Get multiple <Values>
+      public ESMF_<Class>Set                    ! Set multiple <Values>
  
       public ESMF_<Class>Validate
       public ESMF_<Class>Print
@@ -104,7 +118,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_class.F90,v 1.15 2003/02/04 18:56:07 eschwab Exp $'
+      '$Id: ESMF_class.F90,v 1.16 2003/03/04 15:03:36 nscollins Exp $'
 
 !==============================================================================
 !
@@ -142,7 +156,7 @@
 ! !IROUTINE: ESMF_<Class>CreateNew - Create a new <Class>
 
 ! !INTERFACE:
-      function ESMF_<Class>CreateNew(arg1, arg2, arg3, rc)
+      function ESMF_<Class>CreateNew(arg1, arg2, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_<Class>) :: ESMF_<Class>CreateNew
@@ -150,7 +164,7 @@
 ! !ARGUMENTS:
       integer, intent(in) :: arg1                        
       integer, intent(in) :: arg2                        
-      character (len = *), intent(in), optional :: arg3  
+      character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -163,8 +177,8 @@
 !          Argument 1.
 !     \item[arg2]
 !          Argument 2.         
-!     \item[{[arg3]}] 
-!          Argument 3.
+!     \item[{[name]}] 
+!          Optional object name.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -172,9 +186,42 @@
 !EOP
 ! !REQUIREMENTS:  AAAn.n.n
 
-!
-!  code goes here
-!
+
+        ! local variables
+        type (ESMF_<Class>Type), pointer :: <class>type  ! new <Class>
+        integer :: status                                ! local error status
+        logical :: rcpresent                             ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        nullify(ESMF_<Class>CreateNew%<class>type)
+        nullify(<class>type)
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif  
+
+        allocate(<class>type, stat=status)
+        if (status .ne. 0) then             ! fortran rc, not esmf
+          print *, "<Class> create error"
+          return
+        endif
+
+        ! Call Construct method to fill in contents.
+        call ESMF_<Class>Construct(<class>type, arg1, arg2, name, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "<Class> create error"
+          return
+        endif
+
+        ! Set return value
+        ESMF_<Class>CreateNew%<class>type => <class>type
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
       end function ESMF_<Class>CreateNew
 
 !------------------------------------------------------------------------------
@@ -203,9 +250,41 @@
 !EOP
 ! !REQUIREMENTS: 
 
-!
-!  code goes here
-!
+      ! local vars
+      integer :: status                       ! local error status
+      logical :: rcpresent                    ! did user specify rc?
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! Test for an already destroyed object
+      if (.not. associated(<class>%<class>type)) then
+        print *, "Calling <Class>Destroy on an empty object" 
+        return
+      endif
+
+      ! Call Destruct to release resources
+      call ESMF_<Class>Destruct(<class>%<class>type, status)
+      if (status .ne. ESMF_SUCCESS) then
+        return
+      endif
+
+      ! Deallocate the <class>struct itself
+      deallocate(<class>%<class>type, stat=status)
+      if (status .ne. 0) then
+        print *, "<Class> contents destruction error"
+        return
+      endif
+      nullify(<class>%<class>type)
+
+      ! Set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+ 
       end subroutine ESMF_<Class>Destroy
 
 !------------------------------------------------------------------------------
@@ -213,14 +292,14 @@
 ! !IROUTINE: ESMF_<Class>Construct - Construct the internals of an allocated <Class>
 
 ! !INTERFACE:
-      subroutine ESMF_<Class>Construct(<class>, arg1, arg2, arg3, rc)
+      subroutine ESMF_<Class>Construct(<class>type, arg1, arg2, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_<Class>), intent(in) :: <class>   ! <class> to be initialized
-      integer, intent(in) :: arg1                        ! arg1
-      integer, intent(in) :: arg2                        ! arg2
-      character (len = *), intent(in), optional :: arg3  ! arg3
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_<Class>Type), pointer :: <class>type
+      integer, intent(in) :: arg1
+      integer, intent(in) :: arg2
+      character (len = *), intent(in), optional :: name
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
@@ -232,14 +311,14 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[<class>] 
+!     \item[<class>type] 
 !          The class to be constructed.
 !     \item[arg1]
 !          Argument 1.
 !     \item[arg2]
 !          Argument 2.         
-!     \item[{[arg3]}] 
-!          Argument 3.
+!     \item[{[name]}] 
+!          Optional object name.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -247,9 +326,34 @@
 !EOP
 ! !REQUIREMENTS: 
 
-!
-!  code goes here
-!
+      ! local vars
+      integer :: status                                ! local error status
+      logical :: rcpresent                             ! did user specify rc?
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! TODO: fill in values here.
+      call ESMF_SetName(<class>type%base, name, "<Class>", status)
+
+      if (present(arg1)) then
+        <class>type%arg1 = arg1
+      else 
+        <class>type%arg1 = default_value
+      endif
+
+      !
+      !  code goes here
+      !
+
+      ! Set return values
+      if (rcpresent) rc = ESMF_SUCCESS
+
       end subroutine ESMF_<Class>Construct
 
 !------------------------------------------------------------------------------
@@ -257,10 +361,10 @@
 ! !IROUTINE: ESMF_<Class>Destruct - Free any <Class> memory allocated internally
 
 ! !INTERFACE:
-      subroutine ESMF_<Class>Destruct(<class>, rc)
+      subroutine ESMF_<Class>Destruct(<class>type, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_<Class>), intent(in) :: <class>    
+      type(ESMF_<Class>Type), pointer :: <class>type    
       integer, intent(out), optional :: rc         
 !
 ! !DESCRIPTION:
@@ -272,7 +376,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[<class>] 
+!     \item[<class>type] 
 !          The class to be destructed.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -281,9 +385,35 @@
 !EOP
 ! !REQUIREMENTS: 
 
-!
-!  code goes here
-!
+      ! local vars
+      integer :: status                       ! local error status
+      logical :: rcpresent                    ! did user specify rc?
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! release any storage that was allocated
+      if (associated(<class>type%pointer)) then
+         deallocate(<class>type%pointer, stat=status)
+         if (status .ne. 0) then
+           print *, "<Class> contents destruction error"
+           return
+         endif
+         nullify(<class>type%pointer)
+      endif
+
+      !
+      !  code goes here
+      !
+
+      ! Set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+
       end subroutine ESMF_<Class>Destruct
 
 !------------------------------------------------------------------------------
@@ -291,13 +421,13 @@
 ! !IROUTINE: ESMF_<Class>Init - Initialize a <Class> 
 
 ! !INTERFACE:
-      subroutine ESMF_<Class>Init(<class>, arg1, arg2, arg3, rc)
+      subroutine ESMF_<Class>Init(<class>, arg1, arg2, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_<Class>), intent(in) :: <class>   
-      integer, intent(in) :: arg1                       
-      integer, intent(in) :: arg2                       
-      character (len = *), intent(in), optional :: arg3 
+      integer, intent(in), optional :: arg1                       
+      integer, intent(in), optional :: arg2                       
+      character (len = *), intent(in), optional :: name 
       integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -311,12 +441,12 @@
 !     \begin{description}
 !     \item[<class>]
 !          Class to be initialized.
-!     \item[arg1] 
+!     \item[{[arg1]}]
 !          Argument 1.
-!     \item[arg2]
+!     \item[{[arg2]}]
 !          Argument 2.         
-!     \item[{[arg3]}] 
-!          Argument 3.
+!     \item[{[name]}] 
+!          Optional object name.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -324,9 +454,33 @@
 !EOP
 ! !REQUIREMENTS: 
 
-!
-!  code goes here
-!
+      ! local vars
+      integer :: status                                ! local error status
+      logical :: rcpresent                             ! did user specify rc?
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! TODO: fill in values here.
+
+      if (present(arg1)) then
+        <class>%arg1 = arg1
+      else
+        <class>%arg1 = default_value
+      endif
+
+      !
+      !  code goes here
+      !
+
+      ! Set return values
+      if (rcpresent) rc = ESMF_SUCCESS
+
       end subroutine ESMF_<Class>Init
 
 !------------------------------------------------------------------------------
@@ -398,26 +552,28 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_<Class>GetValue - Get <Value> for a <Class>
+! !IROUTINE: ESMF_<Class>Get - Get information from a <Class>
 
 ! !INTERFACE:
-      subroutine ESMF_<Class>GetValue(<class>, value, rc)
+      subroutine ESMF_<Class>Get(<class>, value1, value2, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_<Class>), intent(in) :: <class>
-      integer, intent(out) :: value
+      integer, intent(out), optional :: value1
+      integer, intent(out), optional :: value2
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!     Returns the value of <Class> attribute <Value>.
-!     May be multiple routines, one per attribute.
+!     Returns information from a <Class> object.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[<class>] 
 !          Class to be queried.
-!     \item[value]
+!     \item[{[value1]}]
+!          Value to be retrieved.         
+!     \item[{[value2]}]
 !          Value to be retrieved.         
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -426,33 +582,66 @@
 !EOP
 ! !REQUIREMENTS: 
 
-!
-!  code goes here
-!
-      end subroutine ESMF_<Class>GetValue
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.  
+        rc = ESMF_FAILURE
+      endif
+
+      if (present(value1)) then
+        !
+        !  code goes here
+        !
+      endif
+
+      if (present(value2)) then
+        !
+        !  code goes here
+        !
+      endif
+
+      !
+      !  code goes here
+      !
+
+      if(status .NE. ESMF_SUCCESS) then    
+        print *, "ERROR in ESMF_<Class>Get"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_<Class>Get
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_<Class>SetValue - Set <Value> for a <Class>
+! !IROUTINE: ESMF_<Class>Set - Set information in a <Class> object.
 
 ! !INTERFACE:
-      subroutine ESMF_<Class>SetValue(<Class>, value, rc)
+      subroutine ESMF_<Class>Set(<Class>, value1, value2, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_<Class>), intent(in) :: <class>
-      integer, intent(in) :: value
+      integer, intent(in), optional :: value1
+      integer, intent(in), optional :: value2
       integer, intent(out), optional :: rc            
 
 !
 ! !DESCRIPTION:
-!     Set a <Class> attribute with the given value.
-!     May be multiple routines, one per attribute.
+!     Set <Class> values.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[<class>] 
 !          Class to be modified.
-!     \item[value]
+!     \item[{[value1]}]
+!          Value to be set.         
+!     \item[{[value2]}]
 !          Value to be set.         
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -461,10 +650,42 @@
 !EOP
 ! !REQUIREMENTS: 
 
-!
-!  code goes here
-!
-      end subroutine ESMF_<Class>SetValue
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.  
+        rc = ESMF_FAILURE
+      endif
+
+      if (present(value1)) then
+        !
+        !  code goes here
+        !
+      endif
+
+      if (present(value2)) then
+        !
+        !  code goes here
+        !
+      endif
+
+      !
+      !  code goes here
+      !
+
+      if(status .NE. ESMF_SUCCESS) then    
+        print *, "ERROR in ESMF_<Class>Set"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_<Class>Set
 
 !------------------------------------------------------------------------------
 !BOP
@@ -494,9 +715,32 @@
 !EOP
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 
-!
-!  code goes here
-!
+      integer :: status                       ! local error status
+      logical :: rcpresent                    ! did user specify rc?
+      character (len=6) :: defaultopts
+
+      ! Initialize return code; assume failure until success is certain  
+      status = ESMF_FAILURE       
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      defaultopts = "quick"
+
+      ! Decide at what level of detail to verify.
+      if(present(opt)) then
+          ! TODO:  decide how much checking to do
+      endif
+
+      !
+      !  TODO: code goes here
+      !
+
+      ! Set return values
+      if (rcpresent) rc = ESMF_SUCCESS
+
       end subroutine ESMF_<Class>Validate
 
 !------------------------------------------------------------------------------
@@ -508,7 +752,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_<Class>), intent(in) :: <class>      
-      character (len=*), intent(in) :: opt      
+      character (len=*), intent(in), optional :: opt      
       integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
@@ -519,7 +763,7 @@
 !     \item[<class>] 
 !          Class to be queried.
 !     \item[{[opt]}]
-!          Print ptions that control the type of information and level of 
+!          Print options that control the type of information and level of 
 !          detail.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -528,9 +772,35 @@
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-!
-!  code goes here
-!
+      integer :: status                       ! local error status
+      logical :: rcpresent                    ! did user specify rc?
+      character (len=6) :: defaultopts
+      character (len=ESMF_MAXSTR) :: name
+
+      ! Initialize return code; assume failure until success is certain  
+      status = ESMF_FAILURE       
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      defaultopts = "brief"
+
+      ! Decide what to print.
+      if(present(opt)) then
+          ! TODO:  decide what to print
+      endif
+
+      call ESMF_GetName(<class>%<class>type%base, name, status)
+      print *, "<Class> print:"
+      print *, "  name = ", trim(name)
+
+      ! TODO: add more info here
+
+      ! Set return values
+      if (rcpresent) rc = ESMF_SUCCESS
+
       end subroutine ESMF_<Class>Print
 
 !------------------------------------------------------------------------------
