@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.1 2003/10/17 19:34:55 nscollins Exp $"
+"$Id: ESMC_Conf.h,v 1.2 2004/02/18 01:52:32 eschwab Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -75,6 +75,8 @@ Licensed under the GPL.
 #define ESMC_HAVE_ACCEPT_SIZE_T
 
 #define ESMC_HAVE_SYS_UTSNAME_H
+
+#define ESMF_AIX_8_INITBUG 1
 
 #define ESMC_HAVE_SLEEP_RETURNS_EARLY
 #define ESMC_USE_KBYTES_FOR_SIZE
