@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.6 2003/09/04 18:57:57 cdeluca Exp $
+! $Id: user_model1.F90,v 1.7 2003/09/12 22:42:30 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -117,7 +117,7 @@
         x_min = 0.0
         x_max = 60.0
         y_min = 0.0
-        y_max = 60.0
+        y_max = 50.0
         horz_gridtype = ESMF_GridType_XY
         horz_stagger = ESMF_GridStagger_A
         horz_coord_system = ESMF_CoordSystem_Cartesian
