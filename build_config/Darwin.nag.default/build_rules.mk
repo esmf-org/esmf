@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.9 2004/06/07 17:06:34 slswift Exp $
+#  $Id: build_rules.mk,v 1.10 2004/10/13 17:10:24 nscollins Exp $
 #
 #  Darwin.nag.default.mk
 #
@@ -148,9 +148,9 @@ CXX_CCV		   = ${CXX_CC} --version
 LOCAL_INCLUDE      =
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 C_F90CXXLD         = ${CXX_CC}
-C_F90CXXLIBS       = ${MPI_LIB} -lstdc++ -lf90math -lfio -lf77math
+C_F90CXXLIBS       = ${MPI_LIB} -L/usr/local/lib/NAGware -lstdc++ -lf90math -lfio -lf77math
 C_CXXF90LD         = ${CXX_CC}
-C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -lf90math -lfio -lf77math
+C_CXXF90LIBS       = ${MPI_LIB} -L/usr/local/lib/NAGware -lstdc++ -lf90math -lfio -lf77math
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
