@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.84 2005/02/24 22:23:10 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.85 2005/02/25 03:07:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.84 2005/02/24 22:23:10 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.85 2005/02/25 03:07:38 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -366,6 +366,12 @@ end interface
 !EOP
 
       type(ESMF_Array) :: temp_list(1)
+      integer :: localrc
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       temp_list(1) = array
 
@@ -413,9 +419,16 @@ end interface
 !
 !EOP
 
-        call ESMF_StateClassAddArrayList(state%statep, arrayCount, arrayList, rc)
+      integer :: localrc
 
-        end subroutine ESMF_StateAddArrayList
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      call ESMF_StateClassAddArrayList(state%statep, arrayCount, arrayList, rc)
+
+      end subroutine ESMF_StateAddArrayList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -456,7 +469,13 @@ end interface
 !
 !EOP
 
+      integer :: localrc
       type(ESMF_Bundle) :: temp_list(1)
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       temp_list(1) = bundle
 
@@ -503,11 +522,17 @@ end interface
 !     \end{description}
 !
 !EOP
+      integer :: localrc
 
-        call ESMF_StateClassAddBundleList(state%statep, bundleCount, &
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      call ESMF_StateClassAddBundleList(state%statep, bundleCount, &
                                           bundleList, rc)
 
-        end subroutine ESMF_StateAddBundleList
+      end subroutine ESMF_StateAddBundleList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -548,7 +573,13 @@ end interface
 !
 !EOP
 
+      integer :: localrc
       type(ESMF_Field) :: temp_list(1)
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       temp_list(1) = field
 
@@ -595,6 +626,12 @@ end interface
 !     \end{description}
 !
 !EOP
+      integer :: localrc
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       call ESMF_StateClassAddFieldList(state%statep, fieldCount, fieldList, rc)
 
@@ -637,8 +674,14 @@ end interface
 !
 !EOP
 
+      integer :: localrc
       character(len=ESMF_MAXSTR) :: temp_list(1)
       
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       temp_list(1) = name
 
       call ESMF_StateAddNameList(state, 1, temp_list, rc)      
@@ -688,6 +731,13 @@ end interface
 !
 !
 !EOP
+      integer :: localrc
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
 
       call ESMF_StateClassAddDataNameList(state%statep, namecount, namelist, rc)      
       end subroutine ESMF_StateAddNameList
@@ -732,7 +782,14 @@ end interface
 !
 !EOP
 
+      integer :: localrc
       type(ESMF_State) :: temp_list(1)
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
 
       temp_list(1) = nestedState
 
@@ -781,10 +838,17 @@ end interface
 !     \end{description}
 !
 !EOP
+      integer :: localrc
 
-        call ESMF_StateClassAddStateList(state%statep, nestedStateCount, nestedStateList, rc)
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-        end subroutine ESMF_StateAddStateList
+      call ESMF_StateClassAddStateList(state%statep, nestedStateCount, &
+                                                         nestedStateList, rc)
+
+      end subroutine ESMF_StateAddStateList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -942,16 +1006,11 @@ end interface
         if (present(rc)) rc = ESMF_FAILURE
 
         ! Simple sanity checks
-        if (.not.associated(state%statep)) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "State uninitialized or already destroyed", &
-                                 ESMF_CONTEXT, rc)) return
-        endif
-        if (state%statep%st .eq. ESMF_STATE_INVALID) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "State uninitialized or already destroyed", &
-                                 ESMF_CONTEXT, rc)) return
-        endif
+        call ESMF_StateValidate(state, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
 
         ! Call Destruct to release resources
         call ESMF_StateDestruct(state%statep, localrc)
@@ -1024,17 +1083,11 @@ end interface
       type(ESMF_StateClass), pointer :: stypep
       type(ESMF_StateItem), pointer :: nextitem
 
-      if (.not.associated(state%statep)) then
-        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or invalid State", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-      stypep => state%statep
-      if (stypep%statestatus .ne. ESMF_STATUS_READY) then
-        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or invalid State", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
 
       if (present(name)) call c_ESMC_GetName(stypep%base, name, localrc)
       if (present(statetype)) statetype = stypep%st
@@ -1121,6 +1174,11 @@ end interface
 
       localrc = ESMF_FAILURE
        
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       ! Assume failure until we know we will succeed
       if (present(rc)) rc=ESMF_FAILURE
       ! TODO: do we need an empty (or invalid) array to mark failure?
@@ -1205,6 +1263,11 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
                                     ESMF_DATA_INTEGER, ESMF_I4, 1, &
                                     value, localrc)
@@ -1260,6 +1323,11 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       limit = size(valueList)
       if (count > limit) then
@@ -1318,6 +1386,11 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
                                     ESMF_DATA_INTEGER, ESMF_I8, 1, &
                                     value, localrc)
@@ -1373,6 +1446,11 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       limit = size(valueList)
       if (count > limit) then
@@ -1432,6 +1510,11 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
                                     ESMF_DATA_REAL, ESMF_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1486,6 +1569,11 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       limit = size(valueList)
       if (count > limit) then
@@ -1545,6 +1633,11 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
                                     ESMF_DATA_REAL, ESMF_R8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1599,6 +1692,11 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       limit = size(valueList)
       if (count > limit) then
@@ -1658,6 +1756,11 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
                                     ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
                                     value, localrc)
@@ -1713,6 +1816,11 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       limit = size(valueList)
       if (count > limit) then
@@ -1772,6 +1880,11 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call c_ESMC_AttributeGetChar(state%statep%base, name, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1818,6 +1931,11 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetCount(state%statep%base, count, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1886,6 +2004,11 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       call c_ESMC_AttributeGetAttrInfoName(state%statep%base, name, &
                                            localDt, localDk, localCount, localrc)
@@ -1964,6 +2087,11 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call c_ESMC_AttributeGetAttrInfoNum(state%statep%base, attributeIndex, &
                                           localName, localDt, localDk, &
                                           localCount, localrc)
@@ -2039,6 +2167,11 @@ end interface
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
       ! TODO: do we need an empty bundle to mark failure?
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (present(nestedStateName)) then
           exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
@@ -2141,6 +2274,11 @@ end interface
       if (present(rc)) rc = ESMF_FAILURE
       ! TODO: do we need an empty field to mark failure?
 
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       if (present(nestedStateName)) then
           exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
                                                           dataitem, rc=localrc)
@@ -2237,17 +2375,11 @@ end interface
       type(ESMF_StateClass), pointer :: stypep
       type(ESMF_StateItem), pointer :: nextitem
 
-      if (.not.associated(state%statep)) then
-        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or invalid State", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-      stypep => state%statep
-      if (stypep%statestatus .ne. ESMF_STATUS_READY) then
-        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or invalid State", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
 
       ! Start out assuming the name does not exist, and if it is found
       ! then overwrite the type and jump out of the loop.   It will not be
@@ -2313,6 +2445,11 @@ end interface
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
 
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
                                       dataitem, rc=localrc)
       if (.not. exists) then
@@ -2371,6 +2508,11 @@ end interface
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
       ! TODO: do we need an empty state to mark failure?
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
                                                          dataitem, rc=localrc)
@@ -2437,6 +2579,11 @@ end interface
       if (present(rc)) rc = ESMF_FAILURE
       ESMF_StateIsNeeded = .FALSE.
 
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       ! TODO: decide on the behavior:
       ! should it be an error to ask about a state which doesn't exist?
       ! if the 3rd arg below is .true. then it's an error, if it's .false.
@@ -2491,6 +2638,7 @@ end interface
        character (len=6) :: defaultopts
        type(ESMF_StateClass), pointer :: sp
        type(ESMF_StateItem), pointer :: dp
+       character(len=ESMF_MAXSTR) :: name
        character (len=1024) :: outbuf
        integer :: localrc                          ! local error status
        integer :: i
@@ -2513,15 +2661,25 @@ end interface
            rc = ESMF_SUCCESS
            return
        endif
+       if (state%statep%st .eq. ESMF_STATE_INVALID) then
+           !nsc call ESMF_LogWrite("Uninitialized or already destroyed State", &
+           !nsc                   ESMF_LOG_INFO)
+           print *, "Uninitialized or already destroyed State"
+           rc = ESMF_SUCCESS
+           return
+       endif
+
        sp => state%statep
 
-       call ESMF_BasePrint(sp%base, rc=localrc)
+       call c_ESMC_GetName(sp%base, name, localrc)
+       !call ESMF_BasePrint(sp%base, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-       if (sp%st .eq. ESMF_STATE_IMPORT) write(msgbuf, *) "  Import State"
-       if (sp%st .eq. ESMF_STATE_EXPORT) write(msgbuf, *) "  Export State"
-       if (sp%st .eq. ESMF_STATE_UNSPECIFIED) write(msgbuf, *) "  State Type Unspecified"
+       print *, "  State name = ", trim(name)
+       if (sp%st .eq. ESMF_STATE_IMPORT) write(msgbuf, *) " Import State"
+       if (sp%st .eq. ESMF_STATE_EXPORT) write(msgbuf, *) " Export State"
+       if (sp%st .eq. ESMF_STATE_UNSPECIFIED) write(msgbuf, *) " State Type Unspecified"
        if (sp%st .eq. ESMF_STATE_INVALID) then
            call ESMF_LogWrite("Uninitialized or already destroyed State", &
                                 ESMF_LOG_INFO)
@@ -2674,6 +2832,11 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
                                     ESMF_DATA_INTEGER, ESMF_I4, 1, &
                                     value, localrc)
@@ -2732,6 +2895,11 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
   
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
@@ -2791,6 +2959,11 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
                                     ESMF_DATA_INTEGER, ESMF_I8, 1, &
                                     value, localrc)
@@ -2849,6 +3022,11 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
   
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
@@ -2909,6 +3087,11 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
                                     ESMF_DATA_REAL, ESMF_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -2965,6 +3148,11 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       limit = size(valueList)
       if (count > limit) then
@@ -3026,6 +3214,11 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
                                     ESMF_DATA_REAL, ESMF_R8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -3082,6 +3275,11 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       limit = size(valueList)
       if (count > limit) then
@@ -3142,6 +3340,11 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
                                     ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
                                     value, localrc)
@@ -3199,6 +3402,11 @@ end interface
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       limit = size(valueList)
       if (count > limit) then
@@ -3259,6 +3467,11 @@ end interface
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call c_ESMC_AttributeSetChar(state%statep%base, name, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3309,6 +3522,11 @@ end interface
 
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
                                       dataitem, rc=localrc)
@@ -3815,9 +4033,7 @@ end interface
 !EOPI
 
         ! Local vars
-        type(ESMF_StateItem), pointer :: nextitem
-        integer :: i
-        integer :: localrc                   ! local error status
+        integer :: localrc
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
@@ -3934,7 +4150,7 @@ end interface
       ! For each array...
       do i=1, acount
 
-        call ESMF_ArrayValidate(arrays(i), "", localrc)
+        call ESMF_ArrayValidate(arrays(i), rc=localrc)
         if (localrc .ne. ESMF_SUCCESS) then
             write(errmsg, *) "item", i
             call ESMF_LogMsgSetError(localrc, errmsg, &
@@ -4125,7 +4341,7 @@ end interface
       ! For each field...
       do i=1, fcount
 
-        call ESMF_FieldValidate(fields(i), "", localrc)
+        call ESMF_FieldValidate(fields(i), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
@@ -4290,7 +4506,7 @@ end interface
       ! get a count of all fields in all bundles
       fruncount = 0
       do i=1, bcount
-        call ESMF_BundleValidate(bundles(i), "", localrc)
+        call ESMF_BundleValidate(bundles(i), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4648,17 +4864,40 @@ end interface
         ! TODO: add state number to error msg
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-        call ESMF_StateGet(states(i), name=sname, rc=status)
+                                  ESMF_CONTEXT, rc)) then
+          deallocate(stodo, stat=status)
+          return
+        endif
+
+        ! Do a one-level check for adding a State to itself, but no deeper.
+        ! If a nested State is added to another State, and then the combined
+        ! State is added to the original State, this code is not going to 
+        ! detect that loop.
+        if (associated(stypep, states(i)%statep)) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+                                    "Cannot add a State to itself", &
+                                    ESMF_CONTEXT, rc)
+          deallocate(stodo, stat=status)
+          return
+        endif
+   
+        call c_ESMC_GetName(stypep%base, sname, status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+          deallocate(stodo, stat=status)
+          return
+        endif
     
         ! See if this name is already in the state
-        exists = ESMF_StateClassFindData(stypep, sname, .false., dataitem, sindex, status)
+        exists = ESMF_StateClassFindData(stypep, sname, .false., dataitem, &
+                                         sindex, status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+          deallocate(stodo, stat=status)
+          return
+        endif
    
         ! If not, in the second pass we will need to add it.
         if (.not. exists) then
@@ -4692,7 +4931,10 @@ end interface
       call ESMF_StateClassExtendList(stypep, newcount, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+          deallocate(stodo, stat=status)
+          return
+      endif
 
 
       ! There is enough space now to add new states to the list.
@@ -4707,10 +4949,13 @@ end interface
             nextitem%otype = ESMF_STATEITEM_STATE
 
             ! Add name
-            call ESMF_StateGet(states(i), name=nextitem%namep, rc=status)
+            call c_ESMC_GetName(states(i)%statep%base, nextitem%namep, status)
             if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then
+              deallocate(stodo, stat=status)
+              return
+            endif
 
             nextitem%datap%spp => states(i)%statep
  
@@ -4798,17 +5043,8 @@ end interface
 
       itemfound = .FALSE.
   
-      ! Check for invalid state pointers
-      if (.not.associated(stypep)) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                              "Error: invalid or uninitialized state object", &
-                                  ESMF_CONTEXT, rc)) return
-      endif
-      if (stypep%statestatus .ne. ESMF_STATUS_READY) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                              "Error: invalid or uninitialized state object", &
-                                  ESMF_CONTEXT, rc)) return
-      endif
+      ! This function is only called internally, so we do not need to check
+      ! the validity of the state - it has been checked before we get here.
 
       ! For each item in the array, check the name
       dcount = stypep%datacount
@@ -5136,6 +5372,11 @@ end interface
 
       ! shortcut to internals
       sp => state%statep
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       call c_ESMC_BaseSerialize(sp%base, buffer(1), length, offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
