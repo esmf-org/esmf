@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/09/18 22:26:08 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2003/09/19 21:38:31 jwolfe Exp $ 
 
 ALL:  system_tests
 
@@ -16,7 +16,7 @@ DIRS	  =
 LOCDIR	  = src/system_tests/FieldHalo
 
 
-SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/FieldHalo
+SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldHaloSTest
 
 # Object files other than SysTest%.o that the
 # system tests executable will depend on.
@@ -40,12 +40,12 @@ CLOBBERDIRS =
 
 
 RUN_FieldHalo:
-	-@rm -f testlog stdlog.* logfile.* FieldHalo.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/FieldHalo > $(ESMC_TESTDIR)/FieldHalo.stdout
+	-@rm -f testlog stdlog.* logfile.* ESMF_FieldHaloSTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FieldHaloSTest > $(ESMC_TESTDIR)/ESMF_FieldHaloSTest.stdout
 
 RUN_FieldHaloUNI:
-	-@rm -f testlog stdlog.* logfile.* FieldHalo.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/FieldHalo > $(ESMC_TESTDIR)/FieldHalo.stdout
+	-@rm -f testlog stdlog.* logfile.* ESMF_FieldHaloSTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldHaloSTest > $(ESMC_TESTDIR)/ESMF_FieldHaloSTest.stdout
 
 FieldHalo.rm:
 	echo "FieldHalo.rm target called here."
