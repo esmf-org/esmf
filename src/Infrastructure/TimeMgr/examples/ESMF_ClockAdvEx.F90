@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockAdvEx.F90,v 1.19 2004/01/06 17:00:34 svasquez Exp $
+! $Id: ESMF_ClockAdvEx.F90,v 1.20 2004/01/07 19:04:10 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
       program ESMF_ClockAdvEx
 
 !------------------------------------------------------------------------------
-!
+!EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOP
 !\begin{verbatim}
