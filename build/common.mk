@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.46 2004/03/23 18:16:58 nscollins Exp $
+#  $Id: common.mk,v 1.47 2004/03/24 14:54:00 nscollins Exp $
 #===============================================================================
 #   common.mk
 #
@@ -384,6 +384,7 @@ system_tests: chkopts build_libs chkdir_tests
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_system_tests tree
+	$(DO_ST_RESULTS)
 
 tree_system_tests: tree_build_system_tests tree_run_system_tests
 
@@ -401,6 +402,7 @@ system_tests_uni: chkopts chkdir_tests
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_system_tests_uni tree
+	$(DO_ST_RESULTS)
 
 
 tree_system_tests_uni: tree_build_system_tests tree_run_system_tests_uni
@@ -445,6 +447,7 @@ run_system_tests:  chkopts chkdir_tests
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_system_tests tree
+	$(DO_ST_RESULTS)
 
 tree_run_system_tests: $(SYSTEM_TESTS_RUN) 
 
@@ -462,6 +465,7 @@ run_system_tests_uni:  chkopts chkdir_tests
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_system_tests_uni tree
+	$(DO_ST_RESULTS)
 
 tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 
