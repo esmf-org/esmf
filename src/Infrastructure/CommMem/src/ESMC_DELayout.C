@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.13 2003/04/01 14:21:56 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.14 2003/04/02 15:52:35 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.13 2003/04/01 14:21:56 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.14 2003/04/02 15:52:35 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -431,7 +431,7 @@
 
   // TODO: create true child communicators 
   MPI_Comm_group(MPI_COMM_WORLD, &mpigroup);
-  MPI_Comm_create(MPI_COMM_WORLD, mpigroup, decomm.mpicomm);
+  MPI_Comm_create(MPI_COMM_WORLD, mpigroup, &decomm.mpicomm);
 
     //cout << "ESMC_DELayoutConstruct() successful\n";
   return(ESMF_SUCCESS);
@@ -1598,7 +1598,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   } else {
       if (MPI_Sendrecv(sbuf, snum, mpidatatype, rde_index, ESMF_MPI_TAG, 
 		       rbuf, rnum, mpidatatype, sde_index, MPI_ANY_TAG, 
-		       *decomm.mpicomm, &status) == MPI_SUCCESS) {
+		       decomm.mpicomm, &status) == MPI_SUCCESS) {
         rc = ESMF_SUCCESS;
       }
       else {
@@ -1640,7 +1640,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   mpidatatype = comm.ESMC_DatatypeToMPI[type];
 
   if (MPI_Bcast(buf, num, mpidatatype, rootde_index, 
-                *decomm.mpicomm) == MPI_SUCCESS) {
+                decomm.mpicomm) == MPI_SUCCESS) {
     rc = ESMF_SUCCESS;
   }
   else {

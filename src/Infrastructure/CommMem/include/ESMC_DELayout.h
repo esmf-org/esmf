@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.10 2003/03/31 20:03:39 cdeluca Exp $
+// $Id: ESMC_DELayout.h,v 1.11 2003/04/02 15:52:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@
 
   class ESMC_DEComm {
     public: 
-      MPI_Comm *mpicomm;      // MPI communicator for this set of DEs
+      MPI_Comm mpicomm;      // MPI communicator for this set of DEs
   };
 
 // hint type about the most performance critical communication direction
