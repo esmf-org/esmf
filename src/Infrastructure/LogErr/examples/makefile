@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2004/04/21 19:56:15 cpboulder Exp $ 
+# $Id: makefile,v 1.16 2004/06/09 05:19:33 cpboulder Exp $ 
 
 ALL: examples
 
@@ -58,8 +58,8 @@ LOCDIR	  = src/Infrastructure/LogErr/examples
 # depend on this naming convention being followed.
 #
 
-EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_TestLog1Ex\
-		 $(ESMF_EXDIR)/ESMC_TestLog1Ex\
+EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_LogErrEx\
+		 $(ESMF_EXDIR)/ESMC_LogErrEx\
 
 #
 # List the example run targets in EXAMPLES_RUN and 
@@ -67,12 +67,12 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_TestLog1Ex\
 # in this makefile.
 #
 
-EXAMPLES_RUN = run_ESMF_TestLog1Ex\
-	       run_ESMC_TestLog1Ex  
+EXAMPLES_RUN = run_ESMF_LogErrEx\
+	       run_ESMC_LogErrEx  
 
 
-UNI_EXAMPLES_RUN = run_ESMF_TestLog1Ex_uni\
-                   run_ESMC_TestLog1Ex_uni 
+UNI_EXAMPLES_RUN = run_ESMF_LogErrEx_uni\
+                   run_ESMC_LogErrEx_uni 
 
 
 include $(ESMF_DIR)/makefile
@@ -85,24 +85,24 @@ CLOBBERDIRS =
 
 
 #
-#  ESMF_TestLog1Ex
+#  ESMF_LogErrEx
 #
-run_ESMF_TestLog1Ex:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_TestLog1Ex > $(ESMF_EXDIR)/ESMF_TestLog1Ex.stdout
+run_ESMF_LogErrEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_LogErrEx > $(ESMF_EXDIR)/ESMF_LogErrEx.stdout
 
 
-run_ESMF_TestLog1Ex_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_TestLog1Ex > $(ESMF_EXDIR)/ESMF_TestLog1Ex_uni.stdout
+run_ESMF_LogErrEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_LogErrEx > $(ESMF_EXDIR)/ESMF_LogErrEx_uni.stdout
 
 #
-#  ESMC_TestLog1Ex
+#  ESMC_LogErrEx
 #
-run_ESMC_TestLog1Ex:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_TestLog1Ex > $(ESMF_EXDIR)/ESMC_TestLog1Ex.stdout
+run_ESMC_LogErrEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_LogErrEx > $(ESMF_EXDIR)/ESMC_LogErrEx.stdout
 
 
-run_ESMC_TestLog1Ex_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_TestLog1Ex > $(ESMF_EXDIR)/ESMC_TestLog1Ex_uni.stdout
+run_ESMC_LogErrEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_LogErrEx > $(ESMF_EXDIR)/ESMC_LogErrEx_uni.stdout
 
 
 

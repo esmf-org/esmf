@@ -1,7 +1,7 @@
 
 #include "ESMC_LogErr.h"
 #include "ESMF_LogMacros.inc"
-#define ESMC_METHOD "TestLog1Ex"
+#define ESMC_METHOD "ESMC_LogErrEx"
 
 int main() {
 int *rc;
