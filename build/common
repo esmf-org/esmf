@@ -1,4 +1,4 @@
-# $Id: common,v 1.14 2003/02/04 22:20:13 flanigan Exp $ 
+# $Id: common,v 1.15 2003/02/05 17:11:32 nscollins Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -80,7 +80,7 @@ vpathlib:
 	dir=`pwd`; cd ${ESMC_OBJDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile lib
 
 # Builds library
-lib: chk_dir ${SOURCE}
+lib:: chk_dir ${SOURCE}
 	@if [ "${STOREH}" != "" ] ; then \
 	   ${OMAKE} -f ${MAKEFILE} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} storeh; fi
 	@if [ "${SOURCEC}" != "" ] ; then \
