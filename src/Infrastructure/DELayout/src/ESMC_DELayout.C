@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.23 2004/11/04 22:22:32 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.24 2004/11/05 00:10:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.23 2004/11/04 22:22:32 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.24 2004/11/05 00:10:58 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -527,12 +527,12 @@ int ESMC_DELayout::ESMC_DELayoutGetDELocalInfo(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DELayoutGetDEMatch()"
+#define ESMC_METHOD "ESMC_DELayoutGetDEMatchDE()"
 //BOP
-// !IROUTINE:  ESMC_DELayoutGetDEMatch
+// !IROUTINE:  ESMC_DELayoutGetDEMatchDE
 //
 // !INTERFACE:
-int ESMC_DELayout::ESMC_DELayoutGetDEMatch(
+int ESMC_DELayout::ESMC_DELayoutGetDEMatchDE(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -567,6 +567,58 @@ int ESMC_DELayout::ESMC_DELayoutGetDEMatch(
   if (len_deMatchList >= j)
     for (int i=0; i<j; i++)
       deMatchList[i] = tempMatchList[i];
+  delete [] tempMatchList;
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGetDEMatchPET()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutGetDEMatchPET
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutGetDEMatchPET(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  int DEid,                     // in  - DE id of DE to be matched
+  ESMC_VM &vmMatch,             // in  - vm to match against
+  int *petMatchCount,           // out - number of matching PETs in vmMatch
+  int *petMatchList,            // out - list of matching DEs in layoutMatch
+  int len_petMatchList          // in  - size of deMatchList
+  ){              
+//
+// !DESCRIPTION:
+//    Match DEid in the current DELayout object against the PETs in the 
+//    provided vmMatch VM. Return number of matched PETs and a list of the
+//    matching pet id's that operate in the same virtual address space in which
+//    DEid lies.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int npets = vmMatch.vmk_npets();  // maximum number of PETs in vmMatch
+  int *tempMatchList = new int[npets];
+  int tempMatchCount = 0;
+  int comparePID = des[DEid].pid; // this is the virtual address space id
+  int j=0;
+  for (int i=0; i<npets; i++)
+    if (vmMatch.vmk_pid(i) == comparePID){
+      tempMatchList[j] = i;
+      ++j;
+    }
+  // now j is equal to the number of PETs in vmMatch which operate in the 
+  // same virtual address space as "DEid" does in this layout.
+  if (petMatchCount != ESMC_NULL_POINTER)
+    *petMatchCount = j;
+  if (len_petMatchList >= j)
+    for (int i=0; i<j; i++)
+      petMatchList[i] = tempMatchList[i];
   delete [] tempMatchList;
   return ESMF_SUCCESS;
 }

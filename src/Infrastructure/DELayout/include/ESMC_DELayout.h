@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.15 2004/11/04 22:22:32 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.16 2004/11/05 00:12:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,8 +91,10 @@ class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
       ESMC_Logical *logRectFlag, int *deCountPerDim, int len_deCountPerDim);
     int ESMC_DELayoutGetDELocalInfo(int DEid, int *DEcoord, int len_coord, 
       int *DEcde, int len_cde, int *DEcw, int len_cw, int *nDEc);
-    int ESMC_DELayoutGetDEMatch(int DEid, ESMC_DELayout &layoutMatch,
+    int ESMC_DELayoutGetDEMatchDE(int DEid, ESMC_DELayout &layoutMatch,
       int *deMatchCount, int *deMatchList, int len_deMatchList);
+    int ESMC_DELayoutGetDEMatchPET(int DEid, ESMC_VM &vmMatch,
+      int *petMatchCount, int *petMatchList, int len_petMatchList);
     // IO and validation
     int ESMC_DELayoutPrint(void);
     int ESMC_DELayoutValidate(void);
