@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.2 2004/12/18 16:54:30 nscollins Exp $
+# $Id: makefile,v 1.3 2005/02/02 20:59:32 jwolfe Exp $
 
-ALL: demo
+ALL: demos
 
 CFLAGS    =
 FFLAGS    =
@@ -14,21 +14,21 @@ LIBBASE	  =
 LOCDIR	  = src/demo/interacting_flow/src
 
 
-DEMO_BUILD    = $(ESMC_TESTDIR)/InteractingFlowApp
+DEMOS_BUILD    = $(ESMC_TESTDIR)/InteractingFlowApp
 
 # Object files other than main that the
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
-DEMO_OBJ      = FlowArraysMod.o InjectArraysMod.o \
-                FlowSolverMod.o InjectorMod.o CouplerMod.o \
-                InteractingFlowApp.o
+DEMOS_OBJ      = FlowArraysMod.o InjectArraysMod.o \
+                 FlowSolverMod.o InjectorMod.o CouplerMod.o \
+                 InteractingFlowApp.o
 
-DEMO_RUN      = RUN_InteractingFlowApp  
+DEMOS_RUN      = RUN_InteractingFlowApp  
 
-DEMO_RUN_UNI  = RUN_InteractingFlowAppUNI
+DEMOS_RUN_UNI  = RUN_InteractingFlowAppUNI
 
-DEMO_RM       = ESMF_InteractingFlowApp.rm
+DEMOS_RM       = ESMF_InteractingFlowApp.rm
 
 FlowSolverMod.o:: FlowArraysMod.o
 
