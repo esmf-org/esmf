@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseUTest.F90,v 1.13 2004/06/21 22:47:58 svasquez Exp $
+! $Id: ESMF_BaseUTest.F90,v 1.14 2004/08/26 19:28:31 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,14 +33,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BaseUTest.F90,v 1.13 2004/06/21 22:47:58 svasquez Exp $'
+      '$Id: ESMF_BaseUTest.F90,v 1.14 2004/08/26 19:28:31 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc
+      integer :: rc, npets
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -54,6 +54,7 @@
       !type(ESMF_BaseConfig) :: config_set
       !type(ESMF_BaseConfig) :: config_get
       character(ESMF_MAXSTR) :: name_set, name_get
+      type(ESMF_VM):: vm
 
       ! instantiate a Base 
       type(ESMF_Base) :: base
@@ -67,7 +68,10 @@
 !  added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
 
-      call ESMF_Initialize(rc=rc)
+      call ESMF_Initialize(vm=vm, rc=rc)
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
+      print *, "NUMBER_OF_PROCESSORS ", npets
+
 
       !NEX_UTest
       ! test creation of base objects
