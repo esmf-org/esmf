@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.67 2003/08/26 22:41:41 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.68 2003/08/28 15:50:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -219,7 +219,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.67 2003/08/26 22:41:41 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.68 2003/08/28 15:50:28 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2874,22 +2874,14 @@
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
-      logical :: hascachedroute    ! can we reuse an existing route?
-      integer :: i, gridrank, datarank, thisdim
-      integer :: nx, ny
+      integer :: i
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
                                          global_dimlengths
       integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
       integer :: my_src_DE, my_dst_DE, my_DE
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_exc, dst_AI_exc
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_tot, dst_AI_tot
-      type(ESMF_LocalArray) :: src_local_array, dst_local_array
-      integer, dimension(ESMF_MAXGRIDDIM) :: src_global_count
-      integer, dimension(:,:), allocatable :: src_global_start
-      integer, dimension(ESMF_MAXGRIDDIM) :: dst_global_count
-      integer, dimension(:,:), allocatable :: dst_global_start
-      type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
-      integer :: AI_snd_count, AI_rcv_count
+      type(ESMF_Array) :: src_array, dst_array
+      type(ESMF_Grid) :: src_grid, dst_grid
+      type(ESMF_DataMap) :: src_datamap, dst_datamap
 
    
       ! Initialize return code   
@@ -2923,6 +2915,9 @@
       if (hassrcdata) then
           ! don't ask for our de number if this de isn't part of the layout
           call ESMF_DELayoutGetDEid(srclayout, my_src_DE, status)
+          src_grid = stypep%grid
+          src_array = stypep%localfield%localdata
+          src_datamap = stypep%mapping
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
@@ -2933,6 +2928,9 @@
       if (hasdstdata) then
           ! don't ask for our de number if this de isn't part of the layout
           call ESMF_DELayoutGetDEid(dstlayout, my_dst_DE, status)
+          dst_grid = dtypep%grid
+          dst_array = dtypep%localfield%localdata
+          dst_datamap = dtypep%mapping
       endif
 
       ! if neither are true this DE cannot be involved in the communication
@@ -2942,119 +2940,13 @@
           return
       endif
 
-      ! if src field exists on this DE, query it for information
-      if (hassrcdata) then
-          ! Query the datamap and set info for grid so it knows how to
-          !  match up the array indices and the grid indices.
-          call ESMF_DataMapGet(stypep%mapping, gridrank=gridrank, &
-                                               dimlist=dimorder, rc=status)
-          if(status .NE. ESMF_SUCCESS) then 
-            print *, "ERROR in FieldRegrid: DataMapGet returned failure"
-            return
-          endif 
 
-          ! And get the Array sizes
-          call ESMF_ArrayGet(stypep%localfield%localdata, rank=datarank, &
-                                               counts=dimlengths, rc=status)
-          if(status .NE. ESMF_SUCCESS) then 
-             print *, "ERROR in FieldRegrid: ArrayGet returned failure"
-             return
-          endif 
-      endif 
-
-      ! if dst field exists on this DE, query it for information
-      if (hasdstdata) then
-          ! Query the datamap and set info for grid so it knows how to
-          !  match up the array indices and the grid indices.
-          call ESMF_DataMapGet(dtypep%mapping, gridrank=gridrank, &
-                                               dimlist=dimorder, rc=status)
-          if(status .NE. ESMF_SUCCESS) then 
-            print *, "ERROR in FieldRegrid: DataMapGet returned failure"
-            return
-          endif 
-
-          ! And get the Array sizes
-          call ESMF_ArrayGet(dtypep%localfield%localdata, rank=datarank, &
-                                               counts=dimlengths, rc=status)
-          if(status .NE. ESMF_SUCCESS) then 
-             print *, "ERROR in FieldRegrid: ArrayGet returned failure"
-             return
-          endif 
-      endif
-
-      ! set up things we need to find a cached route or precompute one
-      if (hassrcdata) then
-          call ESMF_DELayoutGetSize(srclayout, nx, ny);
-          AI_snd_count = nx * ny
-
-          allocate(src_global_start(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_GridGet(stypep%grid, global_cell_dim=src_global_count, &
-                            global_start=src_global_start, rc=status)
-
-          allocate(src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_ArrayGetAllAxisIndices(stypep%localfield%localdata, &
-                                           stypep%grid, src_AI_tot, &
-                                           src_AI_exc, rc=rc)
-      else
-          AI_snd_count = 0
-      endif
-      if (hasdstdata) then
-          call ESMF_DELayoutGetSize(dstlayout, nx, ny);
-          AI_rcv_count = nx * ny
-
-          allocate(dst_global_start(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_GridGet(dtypep%grid, global_cell_dim=dst_global_count, &
-                            global_start=dst_global_start, rc=status)
-
-          allocate(dst_AI_tot(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(dst_AI_exc(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_ArrayGetAllAxisIndices(dtypep%localfield%localdata, &
-                                           dtypep%grid, dst_AI_tot, &
-                                           dst_AI_exc, rc=rc)
-      else
-          AI_rcv_count = 0
-      endif
-          
-      ! periodic only matters for halo operations
-      do i=1, ESMF_MAXGRIDDIM
-        periodic(i) = ESMF_TF_FALSE
-      enddo
-
-      ! Does this same route already exist?  If so, then we can drop
-      ! down immediately to RouteRun.
-      call ESMF_RouteGetCached(datarank, &
-                               my_dst_DE, dst_AI_exc, dst_AI_tot, &
-                               AI_rcv_count, dstlayout, &
-                               my_src_DE, src_AI_exc, src_AI_tot, &
-                               AI_snd_count, srclayout, periodic, &
-                               hascachedroute, route, rc=status)
-
-      if (.not. hascachedroute) then
-          ! Create the route object.  This needs to be the parent layout which
-          ! includes the DEs from both fields.
-          route = ESMF_RouteCreate(parentlayout, rc) 
-
-          call ESMF_RoutePrecomputeRegrid(route, datarank, &
-                                    my_dst_DE, dst_AI_exc, dst_AI_tot, &
-                                    AI_rcv_count, dst_global_start, &
-                                    dst_global_count, dstlayout,  &
-                                    my_src_DE, src_AI_exc, src_AI_tot, &
-                                    AI_snd_count, src_global_start, &
-                                    src_global_count, srclayout, &
-                                    rc=status)
-
-      endif
+      call ESMF_ArrayRegridStore(src_array, src_grid, src_datamap, &      
+                                       dst_grid, dst_datamap, parentlayout, &
+                                       routehandle, regridtype, &    
+                                       srcmask, dstmask, blocking, status)
 
       call ESMF_RouteHandleSet(routehandle, route1=route, rc=status)
-
-      ! get rid of temporary arrays
-      if (associated(src_AI_tot)) deallocate(src_AI_tot, stat=status)
-      if (associated(src_AI_exc)) deallocate(src_AI_exc, stat=status)
-      if (associated(dst_AI_tot)) deallocate(dst_AI_tot, stat=status)
-      if (associated(dst_AI_exc)) deallocate(dst_AI_exc, stat=status)
-      if (allocated(src_global_start)) deallocate(src_global_start, stat=status)
-      if (allocated(dst_global_start)) deallocate(dst_global_start, stat=status)
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -3122,7 +3014,7 @@
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
       integer :: my_src_DE, my_dst_DE, my_DE
-      type(ESMF_LocalArray) :: src_local_array, dst_local_array
+      type(ESMF_Array) :: src_array, dst_array
 
    
       ! Initialize return code   
@@ -3176,23 +3068,21 @@
       endif
 
 
-      ! Fetch route from handle, and execute what it represents
-      call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
-
       ! There are 3 possible cases - src+dst, src only, dst only
       !  (if both are false then we've already returned.)
       if ((hassrcdata) .and. (.not. hasdstdata)) then
-          src_local_array=stypep%localfield%localdata
-          call ESMF_RouteRun(route, srcarray=src_local_array, rc=status) 
-
+          src_array=stypep%localfield%localdata
+          !call ESMF_ArrayRegrid(src_array, dst_array, routehandle, &       
+          !                        srcmask, dstmask, blocking, rc)
       else if ((.not. hassrcdata) .and. (hasdstdata)) then
-          dst_local_array=dtypep%localfield%localdata
-          call ESMF_RouteRun(route, dstarray=dst_local_array, rc=status)
-
+          dst_array=dtypep%localfield%localdata
+          !call ESMF_ArrayRegrid(src_array, dst_array, routehandle, &       
+          !                        srcmask, dstmask, blocking, rc)
       else
-          src_local_array=stypep%localfield%localdata
-          dst_local_array=dtypep%localfield%localdata
-          call ESMF_RouteRun(route, src_local_array, dst_local_array, status)
+          src_array=stypep%localfield%localdata
+          dst_array=dtypep%localfield%localdata
+          call ESMF_ArrayRegrid(src_array, dst_array, routehandle, &       
+                                  srcmask, dstmask, blocking, rc)
       endif
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldRegrid: RouteRun returned failure"
