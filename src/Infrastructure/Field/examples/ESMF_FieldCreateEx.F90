@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.14 2004/02/13 19:09:50 nscollins Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.15 2004/02/13 20:00:49 svasquez Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -64,7 +64,7 @@
 !BOC
     field1 = ESMF_FieldCreate(grid, arraya, &
                          horizRelloc=ESMF_CELL_CENTER, name="pressure", rc=rc)
-!EOP
+!EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     call ESMF_FieldGetName(field1, fname, rc)
