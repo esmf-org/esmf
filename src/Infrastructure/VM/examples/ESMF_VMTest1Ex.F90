@@ -1,9 +1,18 @@
-!BOC
 ! Simple ESMF application demonstrating VM features
+!
+!BOP
+!
+! !DESCRIPTION:
+! This example demonstrates the simplest ESMF application, consisting of only a 
+! main program without any components. The global default VM is obtained through
+! the framwork initialization call and then used in several VM query calls.
+!
+!EOP
+!
+!BOC
 
 program vm_test1
 
-  ! modules
   use ESMF_Mod
   
   implicit none
@@ -11,26 +20,21 @@ program vm_test1
   ! local variables
   integer:: rc
   type(ESMF_VM):: vm
-  integer:: mypet, npets, npes, ssiid
+  integer:: localPet, petCount, peCount, ssiId
   
+  call ESMF_Initialize(vm=vm, rc=rc)
 
-  print *, 'hi from program vm_test1'
-
-  call ESMF_Initialize(rc=rc)
-  if (rc /= ESMF_SUCCESS) stop
- 
-  call ESMF_VMGetGlobal(vm, rc)
   call ESMF_VMPrint(vm, rc)
 
-  call ESMF_VMGet(vm, mypet, npets, npes, rc=rc)
-  print *, 'mypet is: ', mypet,' out of a total of ',npets,' PETs.'
-  print *, 'there are ', npes,' PEs referenced by this VM'
+  call ESMF_VMGet(vm, localPet, petCount, peCount, rc=rc)
+  print *, 'localPet is: ', localPet,' out of a total of ',petCount,' PETs.'
+  print *, 'there are ', peCount,' PEs referenced by this VM'
 
-  call ESMF_VMGetPET(vm, mypet, npes, ssiid, rc)
-  print *, 'mypet is: ', mypet,' and I am claiming ',npes,' PEs on SSI ',ssiid
+  call ESMF_VMGetPET(vm, localPet, peCount, ssiId, rc)
+  print *, 'localPet is: ', localPet,' and it is claiming ',peCount,&
+    ' PEs on SSI ', ssiId
 
   call ESMF_Finalize(rc)
-  print *, '======================= finished ================================='
   
 end program
 !EOC

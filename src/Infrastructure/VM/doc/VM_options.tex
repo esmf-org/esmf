@@ -1,4 +1,4 @@
-% $Id: VM_options.tex,v 1.2 2004/05/20 02:05:37 theurich Exp $
+% $Id: VM_options.tex,v 1.3 2004/05/21 22:21:28 theurich Exp $
 
 \subsubsection{ESMF\_BlockingFlag}
 
@@ -16,4 +16,21 @@ Valid values are:
          initiating the requested operation. It is unsafe to modify
          or use participating local data before all local operations have     
          completed.
+\end{description}
+
+
+
+\subsubsection{ESMF\_Operation}
+
+{\sf DESCRIPTION:\\}
+ESMF flag used in {\tt Reduce()} methods to specify the desired reduction operation.
+
+Valid values are:
+\begin{description}
+   \item [{\tt ESMF\_SUM}]
+         Use arithmetic sum to add all data elements.
+   \item [{\tt ESMF\_MIN}]
+         Determine the minimum of all data elements.
+   \item [{\tt ESMF\_MAX}]
+         Determine the maximum of all data elements.
 \end{description}
