@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.3 2004/05/18 23:37:08 eschwab Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.4 2004/05/20 22:10:16 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.3 2004/05/18 23:37:08 eschwab Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.4 2004/05/20 22:10:16 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -104,10 +104,19 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
 
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==1 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+#ifdef ESMF_EXHAUSTIVE
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting Stop Time 
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       call ESMF_TimeSet(stopTime, yy=2004, mm=1, dd=29, h=12, m=17, s=58, &
@@ -118,7 +127,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Time have the same calendar
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       bool =  ESMF_TimeIsSameCalendar(stopTime, stopTime, rc=rc)
@@ -128,7 +137,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting Start Time 2
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       call ESMF_TimeSet(startTime2, yy=2004, mm=1, dd=29, h=12, m=17, s=59, &
@@ -139,7 +148,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Testing the ==  operator 
       ! resultTime = ESMF_Time(==)(time, time)
       write(failMsg, *) "The result is not correct."
@@ -151,7 +160,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Testing the ==  operator 
       ! resultTime = ESMF_TimeOperator(==)(time, time)
       write(failMsg, *) "The result is not correct."
@@ -162,7 +171,7 @@
       
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Testing the /=  operator 
       ! resultTime = ESMF_TimeOperator(/=)(time, time)
       write(failMsg, *) "The result is not correct."
@@ -174,7 +183,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Testing the /=  operator 
       ! resultTime = ESMF_TimeIntervalOperator(/=)(time, time)
       write(failMsg, *) "The result is not correct."
@@ -186,7 +195,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Testing the >  operator 
       ! resultTime = ESMF_TimeOperator(>)(time, time)
       write(failMsg, *) "The result is not correct."
@@ -198,7 +207,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Testing the >  operator 
       ! resultTime = ESMF_TimeOperator(>)(time, time)
       write(failMsg, *) "The result is not correct."
@@ -210,7 +219,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Testing the >  operator 
       ! resultTime = ESMF_TimeOperator(>)(time, time)
       write(failMsg, *) "The result is not correct."
@@ -222,7 +231,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Testing the <=  operator 
       ! resultTime = ESMF_TimeOperator(<=)(time, time)
       write(failMsg, *) "The result is not correct."
@@ -234,7 +243,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Testing the <=  operator 
       ! resultTime = ESMF_TimeOperator(<=)(time, time)
       write(failMsg, *) "The result is not correct."
@@ -246,7 +255,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Testing the <=  operator 
       ! resultTime = ESMF_TimeOperator(<=)(time, time)
       write(failMsg, *) "The result is not correct."
@@ -258,7 +267,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Testing the <  operator 
       ! resultTime = ESMF_TimeOperator(<)(time, time)
       write(failMsg, *) "The result is not correct."
@@ -270,7 +279,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Testing the <  operator 
       ! resultTime = ESMF_TimeOperator(<)(time, time)
       write(failMsg, *) "The result is not correct."
@@ -282,7 +291,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Testing the <  operator 
       ! resultTime = ESMF_TimeOperator(<)(time, time)
       write(failMsg, *) "The result is not correct."
@@ -294,7 +303,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Testing the >=  operator 
       ! resultTime = ESMF_TimeOperator(>=)(time, time)
       write(failMsg, *) "The result is not correct."
@@ -306,7 +315,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Testing the >=  operator 
       ! resultTime = ESMF_TimeOperator(>=)(time, time)
       write(failMsg, *) "The result is not correct."
@@ -318,7 +327,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Testing the >=  operator 
       ! resultTime = ESMF_TimeOperator(>=)(time, time)
       write(failMsg, *) "The result is not correct."
@@ -329,7 +338,7 @@
       
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting Stop Time 
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       call ESMF_TimeSet(stopTime, yy=2004, mm=1, dd=29, h=12, m=17, s=58, &
@@ -339,7 +348,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
   ! ----------------------------------------------------------------------------
       
-      !NEX_UTest
+      !EX_UTest
       ! Test Time have the same calendar
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       bool =  ESMF_TimeIsSameCalendar(stopTime, stopTime, rc=rc)
@@ -352,6 +361,8 @@
 
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
+
+#endif
   
       ! finalize ESMF framework
       call ESMF_Finalize(rc)
