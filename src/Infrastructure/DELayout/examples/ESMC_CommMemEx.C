@@ -1,4 +1,4 @@
-// $Id: ESMC_CommMemEx.C,v 1.5 2004/01/09 21:58:00 svasquez Exp $
+// $Id: ESMC_CommMemEx.C,v 1.6 2004/03/08 22:43:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,8 +45,8 @@
 #define ESMC_COMM_NTHREADSPERPROC 4
 #define ESMC_COMM_NPROCS 2
 
-static const success = ESMF_SUCCESS;
-static const failure = ESMF_FAILURE;
+static const int success = ESMF_SUCCESS;
+static const int failure = ESMF_FAILURE;
 
 
 // pthread start function requires C-linkage
