@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.58 2004/07/21 20:11:24 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.59 2004/07/21 20:31:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -924,23 +924,23 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetIntAttr"
+#define ESMF_METHOD "ESMF_BundleGetInt4Attr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an integer attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 4-byte integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetIntAttr(bundle, name, value, rc)
+      subroutine ESMF_BundleGetInt4Attr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character (len = *), intent(in) :: name
-      integer, intent(out) :: value
+      integer(ESMF_KIND_I4), intent(out) :: value
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!     Returns an integer attribute from the {\tt bundle}.
+!     Returns a 4-byte integer attribute from the {\tt bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -958,41 +958,36 @@ end function
 !EOP
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, 1, value, status)
+                                    ESMF_DATA_INTEGER, ESMF_I4, 1, &
+                                    value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleGetIntAttr
+      end subroutine ESMF_BundleGetInt4Attr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetIntListAttr"
+#define ESMF_METHOD "ESMF_BundleGetInt4ListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an integer list attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 4-byte integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetIntListAttr(bundle, name, count, valueList, rc)
+      subroutine ESMF_BundleGetInt4ListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      integer, dimension(:), intent(out) :: valueList
+      integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
@@ -1018,16 +1013,10 @@ end function
 !EOP
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(valueList)
       if (count > limit) then
@@ -1037,34 +1026,149 @@ end function
       endif
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, count, valueList, status)
+                                    ESMF_DATA_INTEGER, ESMF_I4, count, &
+                                    valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleGetIntListAttr
+      end subroutine ESMF_BundleGetInt4ListAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetRealAttr"
+#define ESMF_METHOD "ESMF_BundleGetInt8Attr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a real attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 8-byte integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetRealAttr(bundle, name, value, rc)
+      subroutine ESMF_BundleGetInt8Attr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character (len = *), intent(in) :: name
-      real, intent(out) :: value
+      integer(ESMF_KIND_I8), intent(out) :: value
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from the {\tt bundle}.
+!     Returns a 8-byte integer attribute from the {\tt bundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The integer value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, 1, &
+                                    value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleGetInt8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetInt8ListAttr"
+!BOP
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 8-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleGetAttribute()
+      subroutine ESMF_BundleGetInt8ListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns an integer list attribute from the {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the list.
+!     \item [valueList]
+!           The integer values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleGetInt8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetReal4Attr"
+!BOP
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 4-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleGetAttribute()
+      subroutine ESMF_BundleGetReal4Attr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R4), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a 4-byte real attribute from the {\tt bundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1081,46 +1185,40 @@ end function
 !EOP
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_REAL, 1, value, status)
+                                    ESMF_DATA_REAL, ESMF_R4, 1, value, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleGetRealAttr
+      end subroutine ESMF_BundleGetReal4Attr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_BundleGetRealListAttr"
+#define ESMF_METHOD "ESMF_BundleGetReal4ListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a real list attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 4-byte real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetRealListAttr(bundle, name, count, valueList, rc)
+      subroutine ESMF_BundleGetReal4ListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      real, dimension(:), intent(out) :: valueList
+      real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!     Returns a real list attribute from the {\tt bundle}.
+!     Returns a 4-byte real list attribute from the {\tt bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1141,16 +1239,10 @@ end function
 !EOP
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       integer :: limit
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(valueList)
       if (count > limit) then
@@ -1160,14 +1252,127 @@ end function
       endif
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_REAL, count, valueList, status)
+                                    ESMF_DATA_REAL, ESMF_R4, count, &
+                                    valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleGetRealListAttr
+      end subroutine ESMF_BundleGetReal4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetReal8Attr"
+!BOP
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 8-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleGetAttribute()
+      subroutine ESMF_BundleGetReal8Attr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R8), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a 8-byte real attribute from the {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The real value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R8, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleGetReal8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleGetReal8ListAttr"
+!BOP
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 8-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleGetAttribute()
+      subroutine ESMF_BundleGetReal8ListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns a 8-byte real list attribute from the {\tt bundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the list.
+!     \item [valueList]
+!           The real values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R8, count, &
+                                    valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleGetReal8ListAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2465,6 +2670,7 @@ end function
 !
 !
 !EOP
+      integer :: status 
       integer :: limit
 
       limit = size(valueList)
@@ -2523,6 +2729,7 @@ end function
 !
 !
 !EOP
+      integer :: status
       integer :: limit
 
       limit = size(valueList)
