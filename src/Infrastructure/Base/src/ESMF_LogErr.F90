@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.35 2004/10/14 20:23:36 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.36 2004/10/15 20:18:06 nscollins Exp $
 !
 ! Earth System Modeling Frameworkls
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -579,6 +579,7 @@ end subroutine ESMF_LogGet
 !EOPI
 	
     integer 				          :: status, i, rc2	
+    type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
 	
     if (present(rc)) rc=ESMF_FAILURE
     ESMF_LogDefault%FileIsOpen=ESMF_FALSE
@@ -589,7 +590,16 @@ end subroutine ESMF_LogGet
     ESMF_LogDefault%dirty = ESMF_FALSE
     ESMF_LogDefault%fIndex = 1
     ESMF_LogDefault%maxElements = 1
-    allocate(ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%maxElements),stat=status)
+    ! BEWARE:  absoft 8.0 compiler bug - if you try to allocate directly
+    ! you get an error.  if you allocate a local buffer and then point the
+    ! derived type buffer at it, it works.  go figure.
+    allocate(localbuf(ESMF_LogDefault%maxElements),stat=status)
+    if (status .ne. 0) then
+      print *, "allocation of buffer failed"
+      if (present(rc)) rc = ESMF_FAILURE
+      return
+    endif
+    ESMF_LogDefault%LOG_ENTRY => localbuf
     ESMF_LogDefault%unitnumber=ESMF_LOG_FORT_STDOUT   
     do i=ESMF_LogDefault%unitnumber, ESMF_LOG_UPPER
         inquire(unit=i,iostat=status)
@@ -897,6 +907,7 @@ end subroutine ESMF_LogOpen
 ! 
 !EOPI 
     integer :: status
+    type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
 	if (present(rc)) rc=ESMF_FAILURE
 	if (present(verbose)) log%verbose=verbose
 	if (present(flush)) log%flushImmediately=flush
@@ -906,8 +917,10 @@ end subroutine ESMF_LogOpen
 	if (present(stream)) log%stream=stream
 	if (present(maxElements) .and. maxElements .gt. 0) then
 	    if (log%maxElements .ne. maxElements) then
+		allocate(localbuf(maxElements),stat=status)
+                ! TODO: copy old contents over, or flush first!!
 	        deallocate(log%LOG_ENTRY,stat=status)
-		allocate(log%LOG_ENTRY(maxElements),stat=status)
+                log%LOG_ENTRY => localbuf
 		log%maxElements=maxElements
 	    endif
 	endif    
