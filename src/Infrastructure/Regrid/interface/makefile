@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/02/27 17:54:49 flanigan Exp $
+# $Id: makefile,v 1.4 2003/03/05 20:35:26 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -12,17 +12,20 @@ FFLAGS    =
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  = 
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  = 
+SOURCEF	  =  
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
+# list .h files to be copied to higher level common include directory
+STOREH	  = 
 
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
+
+# is MANSEC something about documentation?
 MANSEC	  = Regridobj
 LIBBASE	  = libesmf
-
 
 
 # the following line must be set to the current subdir name relative
@@ -36,17 +39,3 @@ include $(ESMF_DIR)/makefile
 
 # leave the following line blank.
 DIRS	  = 
-
-# if you have class files which need to be compiled in a particular
-# order, list the dependencies below, with no rules following.
-#
-# e.g.:
-#
-# ESMF_Field.o:   ESMF_DataArray.o
-#
-# ESMF_Bundle.o:  ESMF_Field.o
-#
-
-
-
-

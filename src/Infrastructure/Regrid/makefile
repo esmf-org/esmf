@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/02/27 17:54:48 flanigan Exp $
+# $Id: makefile,v 1.4 2003/03/05 20:35:25 nscollins Exp $
 
 
 
@@ -13,4 +13,5 @@ include $(ESMF_DIR)/makefile
 # the DIRS line needs to contain all subdirectories which exist 
 #  directly below this directory, and have either library,
 #  example/test code, or documents which need to be generated.
-DIRS	  = src interface examples doc
+DIRS	  = src interface examples doc tests
+
