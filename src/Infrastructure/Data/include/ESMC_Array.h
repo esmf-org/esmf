@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.9 2003/01/16 22:29:25 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.10 2003/01/23 20:21:24 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -18,7 +18,6 @@
 
 //-----------------------------------------------------------------------------
 
-#include "ESMC_Data.h" 
 #include "ESMC_Alloc.h"
 
 //-----------------------------------------------------------------------------
@@ -47,12 +46,19 @@
  // dummy structure which is the right size for an F90 pointer on
  //  each architcture.  ESMF_F90_PTR_SIZE is defined in conf.h in
  //  the build directories for each architecture
+ //  TODO: check that this is a fixed size and does not vary per rank
+ //  TODO: check if we can simply save the wrapper and save that and not
+ //        have to save the full pointer/dopev
 struct c_F90ptr {
-   char pad[ESMF_F90_PTR_SIZE];   
+   unsigned char pad[ESMF_F90_PTR_SIZE];   
 };
 
 
 // !PRIVATE TYPES:
+
+enum ESMC_ArrayOrigin { ESMC_FROM_FORTRAN = 1, 
+                        ESMC_FROM_CPLUSPLUS, 
+                        ESMC_UNKNOWN};
 
 // class configuration type
 class ESMC_ArrayConfig {
@@ -62,8 +68,8 @@ class ESMC_ArrayConfig {
 
 // private static data - address of fortran callback funcs
 extern "C" {
-static void (*allocfuncaddr)(struct c_F90ptr *, int *, int *, int *) = 0;
-static void (*deallocfuncaddr)(struct c_F90ptr *, int *, int *, int *) = 0;
+ static void (*allocfuncaddr)(struct c_F90ptr *, int *, int *, int *) = 0;
+ static void (*deallocfuncaddr)(struct c_F90ptr *, int *, int *, int *) = 0;
 }
 
 
@@ -81,6 +87,8 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     enum ESMC_Logical iscontig;    // optimization possible if all contig
     struct c_F90ptr f90dopev;      // opaque object which is real f90 ptr
                                    // potentially these could be needed... 
+    enum ESMC_ArrayOrigin origin;  // was the create called from F90 or C++
+    int needs_dealloc;             // is array responsible for deallocation?
  // int lbounds[ESMF_MAXDIM];      // real lower indicies
  // int ubounds[ESMF_MAXDIM];      // real upper indicies
  // void *first_element;           // memory address of the first element
@@ -127,18 +135,31 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     void ESMC_ArraySetKind(enum ESMC_DataKind kind) { this->kind = kind; }
     enum ESMC_DataKind ESMC_ArrayGetKind() { return this->kind; }
 
+    void ESMC_ArraySetLengths(int n, int *l) { for (int i = 0; i < n; i++)
+                                                   this->length[i] = l[i]; }
     void ESMC_ArraySetLengths(int ni) { this->length[0] = ni; }
     void ESMC_ArraySetLengths(int ni, int nj) { 
            this->length[0] = ni; this->length[1] = nj; }
     void ESMC_ArraySetLengths(int ni, int nj, int nk) { 
            this->length[0] = ni; this->length[1] = nj; this->length[2] = nk; }
+    void ESMC_ArraySetLengths(int ni, int nj, int nk, int nl) { 
+           this->length[0] = ni; this->length[1] = nj; 
+           this->length[2] = nk; this->length[3] = nl; }
 
     void ESMC_ArraySetBaseAddr(void *base_addr) { this->base_addr = base_addr; }
     void ESMC_ArrayGetBaseAddr(void *base_addr) { base_addr = this->base_addr; }
 
+    void ESMC_ArraySetOrigin(enum ESMC_ArrayOrigin o) { this->origin = o; }
+    void ESMC_ArrayGetOrigin(enum ESMC_ArrayOrigin *o) { *o = this->origin; }
+
     // copy the contents using an assignment
     void ESMC_ArraySetF90Ptr(struct c_F90ptr *p) { this->f90dopev = *p; }
     void ESMC_ArrayGetF90Ptr(struct c_F90ptr *p) { *p = this->f90dopev; }
+
+    // set/get the dealloc flag
+    void ESMC_ArraySetNoDealloc(void) { this->needs_dealloc = 0; }
+    void ESMC_ArraySetDealloc(void)   { this->needs_dealloc = 1; }
+    int ESMC_ArrayNeedsDealloc(void)  { return this->needs_dealloc; }
 
     //int offset[ESMF_MAXDIM];       // byte offset from base to 1st element/dim
     //int stride[ESMF_MAXDIM];       // byte spacing between elements/dim
