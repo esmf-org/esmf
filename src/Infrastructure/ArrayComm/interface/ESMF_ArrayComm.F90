@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.40 2004/04/19 22:10:45 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.41 2004/04/22 22:27:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.40 2004/04/19 22:10:45 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.41 2004/04/22 22:27:06 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -153,9 +153,10 @@
 #if 0
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayAllGatherList - gather a distributed Array
+! !IROUTINE: ESMF_ArrayAllGather - gather a distributed Array
 !
 ! !INTERFACE:
+      ! Private name; call using ESMF_ArrayAllGather
       subroutine ESMF_ArrayAllGatherList(array, delayout, decompids, &
                                          localAxisLengths, globalDimLengths, &
                                          local_maxlengths, array_out, rc)
@@ -389,7 +390,7 @@
         end subroutine ESMF_ArrayGather
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayGetAllAxisIndices - Get all AIs associated with a Grid
 !
 ! !INTERFACE:
@@ -410,7 +411,7 @@
 !    associated with a {\tt ESMF\_Grid}.  This computes the values
 !    instead of broadcasting them.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: status, nDEs, i, j, gridrank, datarank
