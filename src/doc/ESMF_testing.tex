@@ -1,4 +1,4 @@
-% $Id: ESMF_testing.tex,v 1.1 2003/03/17 21:15:59 btwomack Exp $
+% $Id: ESMF_testing.tex,v 1.2 2003/03/20 20:03:11 btwomack Exp $
 
 \section{Testing}
 \label{testing}
@@ -41,8 +41,8 @@ The following test procedures assume that ESMF library source code has been buil
 
 The following commands are used to build and run the unit tests provided with the ESMF:
 \begin{verbatim}
-        gmake BOPT=<g,O> [EXHAUSTIVE=<ON,OFF>] tests
-        gmake BOPT=<g,O> [EXHAUSTIVE=<ON,OFF>] tests_uni
+        gmake BOPT=<g,O> [ESMF_EXHAUSTIVE=<ON,OFF>] tests
+        gmake BOPT=<g,O> [ESMF_EXHAUSTIVE=<ON,OFF>] tests_uni
 \end{verbatim}
 
 The results of the test can be found in the following location:
@@ -65,7 +65,7 @@ and your platform and compiler configuration is:
 and you want to run a debug version of exhaustive unit tests,
 then you use the command:
 \begin{verbatim}
-       gmake BOPT=g EXHAUSTIVE=ON tests_uni
+       gmake BOPT=g ESMF_EXHAUSTIVE=ON tests_uni
 \end{verbatim}
 
 and will find the results in:
