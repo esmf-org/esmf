@@ -182,8 +182,8 @@
 
       use ESMF_DELayoutMod
       use ESMF_LogErrMod
-      use m_ioutil_Config 
-      use m_stdio_Config
+!!!      use m_ioutil_Config 
+!!!      use m_stdio_Config
       implicit none
       private
 !------------------------------------------------------------------------------
@@ -225,16 +225,35 @@
        character, parameter :: NULL= achar(00)   ! what it says
        
        character(len=*), parameter :: myname='ESMF_ConfigMod'
+
+
+!    Defines standar i/o units.
+
+        integer, parameter :: stdin  = 5
+        integer, parameter :: stdout = 6
+
+#ifdef  sysHP-UX
+        ! Special setting for HP-UX
+
+        integer, parameter :: stderr = 7
+#else
+        ! Generic setting for UNIX other than HP-UX
+
+        integer, parameter :: stderr = 0
+#endif
+
+	integer,parameter :: MX_LU=255
+
 !-----------------------------------------------------------------------
 !------------------------------------------------------------------------------
 ! !OPEQUE TYPES:
 !------------------------------------------------------------------------------
        type ESMF_Config
           sequence
-          private
-          integer :: nbuf                              ! actual size of buffer
+          private              
           character(len=NBUF_MAX),pointer :: buffer    ! hold the whole file?
           character(len=LSZ),     pointer :: this_line ! the current line
+          integer :: nbuf                              ! actual size of buffer 
           integer :: next_line                         ! index_ for next line 
                                                        ! on buffer
        end type ESMF_Config
@@ -402,7 +421,7 @@
                                                  !     number (strange!)
                                                  ! -98 talk to a wizzard
                                                  ! -99 out of memory: increase
-                                                 !     NBUF_MAX in 'i90.h'
+                                                 !     NBUF_MAX 
                                                  !     other iostat from open 
                                                  !     statement.
 !
@@ -1353,4 +1372,218 @@
       end subroutine ESMF_Config_pad
 
     
+
+
+
+!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!       NASA/GSFC, Data Assimilation Office, Code 910.3, GEOS/DAS      !
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: luavail - locate the next available unit
+!
+! !DESCRIPTION:
+!
+!    luavail() Look for an available (not opened and not statically
+!    assigned to any I/O attributes to) logical unit.
+!
+! !INTERFACE:
+
+	function luavail()
+	  use m_stdio_Config
+	  implicit none
+	  integer :: luavail	! result
+
+! !REVISION HISTORY:
+! 	23Apr98 - Jing Guo <guo@thunder> - new prototype/prolog/code
+!			- with additional unit constraints for SunOS.
+!
+! 	: Jing Guo, [09-Oct-96]
+! 		+ Checking also Cray assign() attributes, with some
+! 		  changes to the code.  See also other routines.
+!
+! 	: Jing Guo, [01-Apr-94]
+! 		+ Initial code.
+!EOP ___________________________________________________________________
+
+  character(len=*),parameter :: myname_=myname//'::luavail'
+
+	integer lu,ios
+	logical inuse
+	character*8 attr
+
+	lu=-1
+	ios=0
+	inuse=.true.
+
+	do while(ios.eq.0.and.inuse)
+	  lu=lu+1
+
+		! Test #1, reserved
+
+	  inuse = lu.eq.stdout .or. lu.eq.stdin .or. lu.eq.stderr
+
+#ifdef sysSunOS
+		! Reserved units under SunOS
+	  inuse = lu.eq.100 .or. lu.eq.101 .or. lu.eq.102
+#endif
+
+		! Test #2, in-use
+
+	  if(.not.inuse) inquire(unit=lu,opened=inuse,iostat=ios)
+
+#ifdef _UNICOS
+		! Test #3, if the user has reserved the unit through
+		! UNICOS' assign().
+
+	  if(ios.eq.0 .and. .not.inuse) then
+	    call asnqunit(lu,attr,ios)
+
+		! see asnqunig(3f):
+		!
+		! ios ==  0, has been assigned to some attributes
+		!        -1, not been assigned any attributes
+		!     >   0, an error condition, but who cares why.
+
+	    inuse=ios.ne.-1		! the unit is in-use
+	    if(ios >= -1) ios=0		! still a valid test
+	  endif
+#endif
+
+	  if(lu >= MX_LU) ios=-1
+	end do
+
+	if(ios.ne.0) lu=-1
+	luavail=lu
+end function luavail
+
+
+
+
+!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!       NASA/GSFC, Data Assimilation Office, Code 910.3, GEOS/DAS      !
+!-----------------------------------------------------------------------
+!BOP
+!
+! !IROUTINE: opntext - portablly open a text file
+!
+! !DESCRIPTION:
+!
+!	Open a text (ASCII) file.  Under FORTRAN, it is defined as
+!	"formatted" with "sequential" access.
+!
+! !INTERFACE:
+
+    subroutine opntext(lu,fname,status,ier)
+      implicit none
+
+      integer,         intent(in) :: lu     ! logical unit number
+      character(len=*),intent(in) :: fname  ! filename to be opended
+      character(len=*),intent(in) :: status ! the value for STATUS=<>
+      integer,         intent(out):: ier    ! the status
+
+
+! !REVISION HISTORY:
+!
+!	02Feb95 - Jing G. - First version included in PSAS and libpsas.a
+! 	09Oct96 - J. Guo  - modified to allow assign() call under UNICOS
+!			  = and now, it is a module in Fortran 90.
+!EOP
+!_______________________________________________________________________
+
+		! local parameter
+	character(len=*),parameter :: myname_=myname//'::opntext'
+
+	integer,parameter :: iA=ichar('a')
+	integer,parameter :: mA=ichar('A')
+	integer,parameter :: iZ=ichar('z')
+
+	character(len=len(status)) :: Ustat
+	integer :: i,ic
+
+#ifdef _UNICOS
+	call asnunit(lu,'-R',ier)	! remove any set attributes
+	if(ier.ne.0) return		! let the parent handle it
+#endif
+
+	do i=1,len(status)
+	  ic=ichar(status(i:i))
+	  if(ic >= iA .and. ic <= iZ) ic=ic+(mA-iA)
+	  Ustat(i:i)=char(ic)
+	end do
+
+	select case(Ustat)
+
+	case ('APPEND')
+
+	  open(				&
+	    unit	=lu,		&
+	    file	=fname,		&
+	    form	='formatted',	&
+	    access	='sequential',	&
+	    status	='unknown',	&
+	    position	='append',	&
+	    iostat	=ier		)
+
+	case default
+
+	  open(				&
+	    unit	=lu,		&
+	    file	=fname,		&
+	    form	='formatted',	&
+	    access	='sequential',	&
+	    status	=status,	&
+	    position	='asis',	&
+	    iostat	=ier		)
+
+	end select
+
+	end subroutine opntext
+
+
+!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!       NASA/GSFC, Data Assimilation Office, Code 910.3, GEOS/DAS      !
+!-----------------------------------------------------------------------
+!BOP
+!
+! !IROUTINE: clstext - close a text file opend with an opntext() call
+!
+! !DESCRIPTION:
+!
+! !INTERFACE:
+
+    subroutine clstext(lu,ier,status)
+      implicit none
+
+      integer,                    intent(in)  :: lu     ! a logical unit to close
+      integer,                    intent(out) :: ier    ! the status
+      Character(len=*), optional, intent(In)  :: status ! keep/delete
+
+! !REVISION HISTORY:
+! 	09Oct96 - J. Guo	- (to do)
+!EOP
+!_______________________________________________________________________
+          character(len=*), parameter :: myname_ = myname//'::clsitext'
+          Character(Len=6) :: status_
+
+          status_ = 'KEEP'
+          If (Present(status)) Then
+             Select Case (Trim(status))
+             Case ('DELETE','delete')
+                status_ = 'DELETE'
+             Case  ('KEEP','keep')
+                status_ = 'KEEP'
+             Case Default
+                ier = -997
+                return
+             End Select
+          End If
+
+	close(lu,iostat=ier,status=status_)
+#ifdef _UNICOS
+	if(ier == 0) call asnunit(lu,'-R',ier)	! remove any attributes
+#endif
+
+	end subroutine clstext
+
+
     end module ESMF_ConfigMod
