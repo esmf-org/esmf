@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.C,v 1.8 2003/01/10 00:51:58 eschwab Exp $
+// $Id: ESMC_Layout.C,v 1.9 2003/02/11 16:40:21 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Layout.C,v 1.8 2003/01/10 00:51:58 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Layout.C,v 1.9 2003/02/11 16:40:21 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -806,6 +806,73 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   return(ESMF_SUCCESS);
 
  } // end ESMC_LayoutGetDEid
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_LayoutSetAxisIndex - set an axis index from a layout
+//
+// !INTERFACE:
+      int ESMC_Layout::ESMC_LayoutSetAxisIndex(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int global_counts[],      // in  - total (global) number of
+                                //       elements per axis (array)
+      int size_gcount,          // in  - size of global_counts array
+      int decompids[],          // in  - decomposition identifier for each
+                                //       axis (array)
+      int size_decomp,          // in  - size of decomp array
+      ESMC_AxisIndex *AIPtr) {  // out - pointer to array of AxisIndex
+                                //       structures
+//
+// !DESCRIPTION:
+//    returns an array of AxisIndex types representing the decomposition of
+//    an arbitrary number of axis by a layout
+//
+//EOP
+// !REQUIREMENTS:
+
+// check and make sure global_counts and decompids arrays are the same size
+  if (size_gcount != size_decomp) {
+    return(ESMF_FAILURE);
+  }
+
+  int x, y;
+  this->ESMC_LayoutGetDEPosition( &x, &y);
+  // loop to set AxisIndex array
+  for (int i=0; i<size_gcount; i++, AIPtr++) {
+    AIPtr->decomp = decompids[i];
+    // check if decomp is out of bounds
+    if ((decompids[i] < 0) || (decompids[i] > 2)) {
+      return(ESMF_FAILURE);
+    }
+    // if decomp is 0, no decomposition of the axis
+    if (decompids[i] == 0) {
+      AIPtr->l = 0;
+      AIPtr->r = global_counts[i];
+      AIPtr->max = global_counts[i];
+    }
+    // if decomp is 1, use nxLayout
+    if (decompids[i] == 1) {
+      int n1 = (global_counts[i]+nxLayout-1)/nxLayout; // round to nearest
+      AIPtr->l = x*n1;
+      AIPtr->r = ((x+1)*n1)-1;
+      AIPtr->max = global_counts[i];
+    }
+    // if decomp is 2, use nyLayout
+    if (decompids[i] == 2) {
+      int n2 = (global_counts[i]+nyLayout-1)/nyLayout; // round to nearest
+      AIPtr->l = y*n2;
+      AIPtr->r = ((y+1)*n2)-1;
+      AIPtr->max = global_counts[i];
+    }
+  }
+   
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_LayoutSetAxisIndex
 
 //-----------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-! $Id: ESMF_Layout.F90,v 1.4 2003/01/09 18:32:27 eschwab Exp $
+! $Id: ESMF_Layout.F90,v 1.5 2003/02/11 16:41:34 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Layout.F90,v 1.4 2003/01/09 18:32:27 eschwab Exp $'
+      '$Id: ESMF_Layout.F90,v 1.5 2003/02/11 16:41:34 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -505,6 +505,54 @@ end interface
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_LayoutGetDEid
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_LayoutSetAxisIndex(layout, global_counts, decompids, &
+                                         AIPtr, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Layout) :: layout
+      integer, dimension(:), intent(in) :: global_counts
+      integer, dimension(:), intent(in) :: decompids
+      type(ESMF_AxisIndex), dimension(:), pointer :: AIPtr
+      integer, intent(out), optional :: rc             
+!
+! !DESCRIPTION:
+!      Returns information about the layout.  For queries where the caller
+!      only wants a single value, specify the argument by name.
+!      All the arguments after the layout input are optional to facilitate this.
+!
+!EOP
+! !REQUIREMENTS:
+
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: size_gcount              ! size of the global counts array
+        integer :: size_decomp              ! size of the decompids array
+
+!       initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       Routine which interfaces to the C++ routine.
+        size_gcount = size(global_counts)
+        size_decomp = size(decompids)
+        call c_ESMC_LayoutSetAxisIndex(layout, global_counts, size_gcount, &
+                                       decompids, size_decomp, AIPtr, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_LayoutSetAxisIndex error"
+          return
+        endif
+
+!       set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_LayoutSetAxisIndex
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------

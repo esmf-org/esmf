@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.h,v 1.5 2003/01/09 19:55:31 eschwab Exp $
+// $Id: ESMC_Layout.h,v 1.6 2003/02/11 16:40:43 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -116,6 +116,9 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
     int ESMC_LayoutGetDEPosition(ESMC_DE *de, int *x, int *y, int *z) const;
     int ESMC_LayoutGetDEPosition(int *x, int *y) const;
     int ESMC_LayoutGetDEid(int *deid) const;
+    int ESMC_LayoutSetAxisIndex(int global_counts[], int size_gcount,
+                                int decompids[], int size_decomp,
+                                ESMC_AxisIndex *AIPtr);
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_LayoutValidate(void) const;
