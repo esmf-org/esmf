@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.46 2003/04/28 19:00:37 cdeluca Exp $
+! $Id: ESMF_DistGrid.F90,v 1.47 2003/04/28 20:24:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -158,7 +158,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.46 2003/04/28 19:00:37 cdeluca Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.47 2003/04/28 20:24:25 nscollins Exp $'
 
 !==============================================================================
 !
@@ -704,11 +704,14 @@
         rc = ESMF_FAILURE
       endif
 
-      call ESMF_DELayoutDestroy(distgrid%ptr%layout, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridDestruct: DELayout destroy"
-        return
-      endif
+      ! TODO: Agree that this is correct.  The Grid is passed in a layout
+      !  created outside this grid (and perhaps shared amongst many grids)
+      !  so it seems that it should not be destroyed here.)
+      !call ESMF_DELayoutDestroy(distgrid%ptr%layout, status)
+      !if(status .NE. ESMF_SUCCESS) then
+      !  print *, "ERROR in ESMF_DistGridDestruct: DELayout destroy"
+      !  return
+      !endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
