@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.30 2005/03/04 20:19:55 nscollins Exp $
+# $Id: build_rules.mk,v 1.31 2005/03/04 20:57:43 nscollins Exp $
 #
 # Linux.intel.default.mk
 #
@@ -71,7 +71,7 @@ endif
 ifeq ($(ESMF_COMM),lam)
 ifdef MPI_HOME
 MPI_INCLUDE    = -I${MPI_HOME}/include
-MPI_LIB        = -L${MPI_HOME} -llamf77mpi -lmpi -llam
+MPI_LIB        = -L${MPI_HOME}/lib -llamf77mpi -lmpi -llam
 MPIRUN         =  ${MPI_HOME}/bin/mpirun
 else
 MPI_INCLUDE    = 
@@ -89,7 +89,7 @@ endif
 ifeq ($(ESMF_COMM),mpich)
 ifdef MPI_HOME
 MPI_INCLUDE    = -I${MPI_HOME}/include -DESMF_MPICH=1
-MPI_LIB        = -L${MPI_HOME} -lmpich
+MPI_LIB        = -L${MPI_HOME}/lib -lmpich
 MPIRUN         =  ${MPI_HOME}/bin/mpirun $(ESMF_NODES)
 else
 MPI_INCLUDE    = -DESMF_MPICH=1
@@ -106,7 +106,7 @@ endif
 ifeq ($(ESMF_COMM),mpich2)
 ifdef MPI_HOME
 MPI_INCLUDE    = -I${MPI_HOME}/include -DESMF_MPICH=1
-MPI_LIB        = -L${MPI_HOME} -lmpich
+MPI_LIB        = -L${MPI_HOME}/lib -lmpich
 MPIRUN         =  ${MPI_HOME}/bin/mpirun $(ESMF_NODES)
 else
 MPI_INCLUDE    = -DESMF_MPICH=1
@@ -154,6 +154,7 @@ C_CC	   = icc
 CXX_CC	   = icpc
 C_FC	   = ifort
 endif
+endif
 
 # if you are using mpich, then however the mpich wrappers have been built
 # will determine which compilers you are using.
@@ -195,6 +196,7 @@ ifeq ($(ESMF_PTHREADS),ON)
 C_CC    +=  -pthread
 CXX_CC  +=  -pthread
 C_FC    +=  -threads
+endif
 
 # Which compiler to call when
 C_CLINKER	   = ${C_CC}
