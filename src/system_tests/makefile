@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2004/03/22 19:46:53 nscollins Exp $ 
+# $Id: makefile,v 1.12 2004/03/24 21:03:17 nscollins Exp $ 
 
 ALL: build_system_tests
 
@@ -17,12 +17,13 @@ DIRS     = ESMF_RowReduce \
            ESMF_FieldRegridMulti \
            ESMF_FieldRegridOrder \
            ESMF_SimpleCoupling \
-           ESMF_MergeCoupling \
            ESMF_FlowComp \
            ESMF_FlowWithCoupling
 
-# new tests not yet ready
-#DIRS     = ESMF_CplOnExclDEs
+# tests not yet ready
+#           ESMF_MergeCoupling \
+#           ESMF_CplOnExclDEs \
+#
 
 CLEANDIRS   =
 CLEANFILES  =
