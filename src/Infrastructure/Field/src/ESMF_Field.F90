@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.46 2003/07/28 17:37:42 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.47 2003/07/29 16:43:19 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.46 2003/07/28 17:37:42 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.47 2003/07/29 16:43:19 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2144,7 +2144,7 @@
       enddo
 
       ! Attach this info to the array
-      call ESMF_ArraySetAxisIndex(ftypep%localfield%localdata, compindex=axis, &
+      call ESMF_ArraySetAxisIndex(ftypep%localfield%localdata, totalindex=axis, &
                                   rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldAllGather: ArraySetAxisIndex returned failure"
