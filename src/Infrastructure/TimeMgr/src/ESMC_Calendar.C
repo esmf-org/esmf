@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.51 2004/03/05 00:51:08 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.52 2004/03/08 20:01:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.51 2004/03/05 00:51:08 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.52 2004/03/08 20:01:14 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static calendar instance counter
@@ -991,6 +991,8 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5
 
+// TODO: share common code with Decrement method
+
     // intialize result to given time to prepare for the case of
     //   only a non-calendar (h,m,s) increment
     //    (copies calendar & timezone properties)
@@ -1002,6 +1004,7 @@ int ESMC_Calendar::count=0;
     switch (calendarType)
     {
         case ESMC_CAL_GREGORIAN:
+        // case ESMC_CAL_JULIAN:   TODO:  uncomment when implemented
         case ESMC_CAL_NOLEAP:
         case ESMC_CAL_360DAY:
         {
@@ -1074,16 +1077,17 @@ int ESMC_Calendar::count=0;
                                  // TODO: use native C++ interface when
                                  //   ready
             }
-
-            // convert any relative days increment to absolute time based
-            //   on this calendar and add to non-calendar units increment
-            if (timeInterval.d != 0) {
-                ESMC_TimeInterval daysTi(timeInterval.d * secondsPerDay);
-                nonCalTi.ESMC_BaseTime::operator+=(daysTi);
-            }
         }
         default:
             break;
+    }
+
+    // convert any relative days increment to absolute time based
+    //   on this calendar and add to non-calendar units increment
+    //   (applies to all calendars since secondsPerDay is defined for all)
+    if (timeInterval.d != 0) {
+        ESMC_TimeInterval daysTi(timeInterval.d * secondsPerDay);
+        nonCalTi.ESMC_BaseTime::operator+=(daysTi);
     }
 
     // perform the remaining increment with the non-calendar and
@@ -1117,6 +1121,8 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5
 
+// TODO: share common code with Increment method
+
     // intialize result to given time to prepare for the case of
     //   only a non-calendar (h,m,s) decrement
     //    (copies calendar & timezone properties)
@@ -1128,6 +1134,7 @@ int ESMC_Calendar::count=0;
     switch (calendarType)
     {
         case ESMC_CAL_GREGORIAN:
+        // case ESMC_CAL_JULIAN:   TODO:  uncomment when implemented
         case ESMC_CAL_NOLEAP:
         case ESMC_CAL_360DAY:
         {
@@ -1200,16 +1207,17 @@ int ESMC_Calendar::count=0;
                                   // TODO: use native C++ interface when
                                   //   ready
             }
-
-            // convert any relative days increment to absolute time based
-            //   on this calendar and add to non-calendar units increment
-            if (timeInterval.d != 0) {
-                ESMC_TimeInterval daysTi(timeInterval.d * secondsPerDay);
-                nonCalTi.ESMC_BaseTime::operator+=(daysTi);
-            }
         }
         default:
             break;
+    }
+
+    // convert any relative days increment to absolute time based
+    //   on this calendar and add to non-calendar units increment
+    //   (applies to all calendars since secondsPerDay is defined for all)
+    if (timeInterval.d != 0) {
+        ESMC_TimeInterval daysTi(timeInterval.d * secondsPerDay);
+        nonCalTi.ESMC_BaseTime::operator+=(daysTi);
     }
 
     // perform the remaining decrement with the non-calendar and
