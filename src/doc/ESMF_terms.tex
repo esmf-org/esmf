@@ -32,7 +32,7 @@ it is "ringing", an alarm is "read" by an explicit application action.
 
 \item[Background grid] \label{glos:BackGrid} 
   A background grid associates each point in a location stream with a 
-  in a grid. A single grid cell may contain zero or more location 
+  location on a grid. A single grid cell may contain zero or more location 
   stream points.  
 
 \item[Bundle] \label{glos:Bundle} A bundle refers to a set of fields that 
@@ -49,13 +49,14 @@ one month -- default behavior must be carefully specified.
 
 \item[Cell] \label{glos:Cell} A physical location that is specified by both 
   its extent (vertices) and nominal central location, and is associated with 
-  a single integer index value.  
+  a single integer index value or a set of integer index values ( e.g.
+  (i) for 1-d, (i,j) for 2-d, (i,j,k) for 3d ).
 
 \item[Clock] \label{glos:Clock} A clock tracks the passage of time and 
 reports the current time instant, like a real clock.  However, most clocks 
 used in ESMF components have a key difference to a real clock. Clocks 
 in an ESMF component are generally stepped forward by the component, as an 
-explicitly coded step within the overall component.
+explicitly coded time step within the overall component.
 
 \item[Component] \label{glos:Component} A large-scale computational entity 
   associated with a particular physical process or computational function, 
@@ -321,8 +322,8 @@ written by the user.  See also generic component.
   method that is used to extend framework capabilities beyond generic 
   transforms.  
 
-\item [Wall clock time] \label{WallClockTime} Elapsed time (i.e. difference between start time minus
-stop time, measured in world time units).
+\item [Wall clock time] \label{WallClockTime} Elapsed real-world time (i.e. difference between start time minus
+stop time).
 
 \end{description}
 
