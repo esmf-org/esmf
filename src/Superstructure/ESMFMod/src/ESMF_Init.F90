@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.10 2004/06/02 07:51:34 nscollins Exp $
+! $Id: ESMF_Init.F90,v 1.11 2004/06/07 09:11:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_Init.F90"
 !
 !     ESMF Init module
       module ESMF_InitMod
