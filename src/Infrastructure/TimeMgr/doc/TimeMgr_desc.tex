@@ -1,4 +1,4 @@
-% $Id: TimeMgr_desc.tex,v 1.19 2004/09/13 18:15:25 eschwab Exp $
+% $Id: TimeMgr_desc.tex,v 1.20 2005/04/01 23:58:54 eschwab Exp $
 
 The ESMF Time Manager utility includes software for time and date 
 representation and calculations, model time advancement, and the 
@@ -65,9 +65,10 @@ and days per year.  The flexible definition of Calendars allows them
 to be defined for planetary bodies other than Earth.  The set of supported 
 calendars includes:
 \begin{description}
-\item [Gregorian] The standard Gregorian calendar, proleptic to 3/1/-4800.
+\item [Gregorian] The standard Gregorian calendar.
 \item [no-leap] The Gregorian calendar with no leap years.
-\item [Julian Day] A Julian days calendar.
+\item [Julian] The standard Julian date calendar.
+\item [Julian Day] The standard Julian days calendar.
 \item [360-day] A 30-day-per-month, 12-month-per-year calendar.
 \item [no calendar] Tracks only elapsed model time in seconds.
 \end{description}
