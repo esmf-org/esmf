@@ -1,4 +1,4 @@
-% $Id: Field_desdoc.ctex,v 1.7 2003/09/19 22:13:44 cdeluca Exp $
+% $Id: Field_desdoc.ctex,v 1.8 2003/11/14 18:14:57 nscollins Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -38,13 +38,6 @@
 \input{Field_syn}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Field/doc/Field_syn}
-#endif
-
-\section{Programming Model}
-#ifdef STANDALONE
-\input{Field_prog}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Field_prog}
 #endif
 
 \section{Object Model}
