@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.5 2003/04/28 21:39:50 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.6 2003/05/02 14:11:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.5 2003/04/28 21:39:50 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.6 2003/05/02 14:11:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -365,6 +365,43 @@ static int globalCount = 0;
      if (gstart) *gstart = ai->gstart;
 
      return ESMF_SUCCESS;
+};
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AxisIndexEqual - Compare two AxisIndex structs for equality
+//
+// !INTERFACE:
+    ESMC_Logical ESMC_AxisIndexEqual(
+//
+// !RETURN VALUE:
+//    ESMC_Logical
+// 
+// !ARGUMENTS:
+     ESMC_AxisIndex *ai1,
+     ESMC_AxisIndex *ai2) {
+// 
+// !DESCRIPTION:
+//     Compare two AxisIndex objects for equality.
+//
+//EOP
+
+     // if both null, say ok.
+     if ((ai1 == NULL) && (ai2 == NULL))
+        return ESMF_TF_TRUE;   // in some sense...
+
+     // if only 1 null, can't be equal.
+     if ((ai1 == NULL) || (ai2 == NULL))
+        return ESMF_TF_FALSE;
+
+     if ((ai1->l != ai2->l) ||
+         (ai1->r != ai2->r) ||
+         (ai1->max != ai2->max) ||
+         (ai1->decomp != ai2->decomp) ||
+         (ai1->gstart != ai2->gstart))
+         return ESMF_TF_FALSE;
+
+     return ESMF_TF_TRUE;
 };
 
 //-----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.35 2003/04/30 21:23:49 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.36 2003/05/02 14:11:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -316,7 +316,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.35 2003/04/30 21:23:49 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.36 2003/05/02 14:11:04 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -330,6 +330,7 @@ interface operator (.eq.)
  module procedure ESMF_dkeq
  module procedure ESMF_opeq
  module procedure ESMF_tfeq
+ module procedure ESMF_aieq
 end interface
 
 interface operator (.ne.)
@@ -338,6 +339,7 @@ interface operator (.ne.)
  module procedure ESMF_dkne
  module procedure ESMF_opne
  module procedure ESMF_tfne
+ module procedure ESMF_aine
 end interface
 
 interface assignment (=)
@@ -433,6 +435,7 @@ function ESMF_opne(op1, op2)
 end function
 
 
+!------------------------------------------------------------------------------
 ! function to compare two ESMF_Logicals to see if they're the same or not
 ! also need assignment to real f90 logical?
 
@@ -448,6 +451,33 @@ function ESMF_tfne(tf1, tf2)
  type(ESMF_Logical), intent(in) :: tf1, tf2
 
  ESMF_tfne = (tf1%value .ne. tf2%value)
+end function
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_AxisIndex to see if they're the same or not
+
+function ESMF_aieq(ai1, ai2)
+ logical ESMF_aieq
+ type(ESMF_AxisIndex), intent(in) :: ai1, ai2
+
+ ESMF_aieq = ((ai1%l .eq. ai2%l) .and. &
+              (ai1%r .eq. ai2%r) .and. &
+              (ai1%max .eq. ai2%max) .and. &
+              (ai1%decomp .eq. ai2%decomp) .and. &
+              (ai1%gstart .eq. ai2%gstart))
+
+end function
+
+function ESMF_aine(ai1, ai2)
+ logical ESMF_aine
+ type(ESMF_AxisIndex), intent(in) :: ai1, ai2
+
+ ESMF_aine = ((ai1%l .ne. ai2%l) .or. &
+              (ai1%r .ne. ai2%r) .or. &
+              (ai1%max .ne. ai2%max) .or. &
+              (ai1%decomp .ne. ai2%decomp) .or. &
+              (ai1%gstart .ne. ai2%gstart))
+
 end function
 
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.15 2003/04/28 21:39:49 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.16 2003/05/02 14:11:03 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -231,5 +231,6 @@ int ESMC_AxisIndexInit(ESMC_AxisIndex *ai, int l, int r, int max,
                            int decomp, int gstart);
 int ESMC_AxisIndexGet(ESMC_AxisIndex *ai, int *l, int *r, int *max, 
                            int *decomp, int *gstart);
+ESMC_Logical ESMC_AxisIndexGet(ESMC_AxisIndex *ai1, ESMC_AxisIndex *ai2);
 
 #endif  // ESMC_BASE_H
