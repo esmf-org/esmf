@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.18 2004/06/07 05:21:08 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.19 2004/06/15 07:17:41 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -196,6 +196,9 @@
 #define LocalArrayCreateByFlPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
+^undef  ESMF_METHOD @\
+!define ESMF_METHOD "ESMF_LocalArrCreateByFlPtr##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_LocalArrCreateByFlPtr" @\
  @\
       function ESMF_LocalArrCreateByFlPtr##mrank##D##mtypekind(fptr, docopy, rc) @\
  @\
@@ -329,6 +332,9 @@
 #define LocalArrConstrF90PtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
+^undef  ESMF_METHOD @\
+!define ESMF_METHOD "ESMF_LocalArrConstrF90Ptr##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_LocalArrConstrF90Ptr" @\
  @\
       subroutine ESMF_LocalArrConstrF90Ptr##mrank##D##mtypekind(array, counts, fptr, docopy, lbounds, ubounds, rc) @\
  @\
@@ -481,6 +487,9 @@
 #define LocalArrayGetDataMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
+^undef  ESMF_METHOD @\
+!define ESMF_METHOD "ESMF_LocalArrayGetData##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_LocalArrayGetData" @\
       subroutine ESMF_LocalArrayGetData##mrank##D##mtypekind(array, fptr, docopy, rc) @\
  @\
       type(ESMF_LocalArray) :: array @\
@@ -585,6 +594,9 @@
 #define LocalArrayDeallocateMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
+^undef  ESMF_METHOD @\
+!define ESMF_METHOD "ESMF_LocalArrayDeallocate##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_LocalArrayDeallocate" @\
       subroutine ESMF_LocalArrayDeallocate##mrank##D##mtypekind(array, wrap, rc) @\
  @\
       type(ESMF_LocalArray) :: array @\
