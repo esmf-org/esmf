@@ -1,4 +1,4 @@
-// $Id: ESMC_GCompEx.C,v 1.6 2004/04/13 17:30:31 nscollins Exp $
+// $Id: ESMC_GCompEx.C,v 1.7 2004/04/23 16:13:47 nscollins Exp $
 //
 // Example/test code which creates a new comp.
 
@@ -25,6 +25,7 @@
 #include "ESMC_Comp.h"
 #include "ESMC_GridComp.h"
 #include "ESMC_CplComp.h"
+#include "ESMC_Init.h"
 #include "ESMC_State.h"
 
 #include <stdio.h>

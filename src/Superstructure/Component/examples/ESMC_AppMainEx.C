@@ -1,4 +1,4 @@
-// $Id: ESMC_AppMainEx.C,v 1.9 2004/04/15 19:09:06 nscollins Exp $
+// $Id: ESMC_AppMainEx.C,v 1.10 2004/04/23 16:13:47 nscollins Exp $
 //
 // Example code which creates a main Application program.
 // This is the cap component which creates other components below it.
@@ -26,6 +26,7 @@
 #include "ESMC_Comp.h"
 #include "ESMC_GridComp.h"
 #include "ESMC_CplComp.h"
+#include "ESMC_Init.h"
 #include "ESMC_State.h"
 
 void ATM_SetServices(ESMC_GridComp *gc, int *rc);
