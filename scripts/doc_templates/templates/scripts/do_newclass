@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newclass,v 1.10 2003/03/04 22:42:29 eschwab Exp $
+# $Id: do_newclass,v 1.11 2003/03/14 22:22:48 eschwab Exp $
 #
 #===============================================================================
 # do_newclass
@@ -118,15 +118,15 @@ endif
 # get unit test drivers in both languages (implementation and interface)
 
   # F90 unit test driver
-  if(!(-r ../tests/ESMF_${class}Test.F90)) then
-    cat $DOCT_DIR/ESMF_classTest.F90 | \
+  if(!(-r ../tests/ESMF_${class}UTest.F90)) then
+    cat $DOCT_DIR/ESMF_classUTest.F90 | \
     sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
-    sed 's/<Comp>/'$comp'/g' > ../tests/ESMF_${class}Test.F90
+    sed 's/<Comp>/'$comp'/g' > ../tests/ESMF_${class}UTest.F90
   endif
 
   # C++ unit test driver
-  if(!(-r ../tests/ESMC_${class}Test.C)) then
-    cat $DOCT_DIR/ESMC_classTest.C | \
+  if(!(-r ../tests/ESMC_${class}UTest.C)) then
+    cat $DOCT_DIR/ESMC_classUTest.C | \
     sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
-    sed 's/<Comp>/'$comp'/g' > ../tests/ESMC_${class}Test.C
+    sed 's/<Comp>/'$comp'/g' > ../tests/ESMC_${class}UTest.C
   endif

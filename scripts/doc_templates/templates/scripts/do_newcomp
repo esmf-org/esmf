@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newcomp,v 1.10 2003/03/04 01:12:57 eschwab Exp $
+# $Id: do_newcomp,v 1.11 2003/03/14 22:22:47 eschwab Exp $
 #
 #===============================================================================
 # do_newcomp
@@ -175,13 +175,13 @@ endif
 #
 
   # F90 unit test driver
-  if(!(-r $tstdir/ESMF_classTest.F90)) then
-    cat $DOCT_DIR/ESMF_classTest.F90 | \
-    sed 's/<Comp>/'$comp'/g' > $tstdir/ESMF_classTest.F90
+  if(!(-r $tstdir/ESMF_classUTest.F90)) then
+    cat $DOCT_DIR/ESMF_classUTest.F90 | \
+    sed 's/<Comp>/'$comp'/g' > $tstdir/ESMF_classUTest.F90
   endif
 
   # C++ unit test driver
-  if(!(-r $tstdir/ESMC_classTest.C)) then
-    cat $DOCT_DIR/ESMC_classTest.C | \
-    sed 's/<Comp>/'$comp'/g' > $tstdir/ESMC_classTest.C
+  if(!(-r $tstdir/ESMC_classUTest.C)) then
+    cat $DOCT_DIR/ESMC_classUTest.C | \
+    sed 's/<Comp>/'$comp'/g' > $tstdir/ESMC_classUTest.C
   endif
