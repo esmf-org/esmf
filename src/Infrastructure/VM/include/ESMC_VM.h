@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.3 2004/03/05 19:45:18 theurich Exp $
+// $Id: ESMC_VM.h,v 1.4 2004/03/22 14:55:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -60,9 +60,8 @@ class ESMC_VM : public vmachine {   // inherits from vmachine class
       ESMF_KIND_I4 *petid,          // in  - petid for this PET
       ESMF_KIND_I4 *npes,           // out - number of PEs for this PET
       ESMF_KIND_I4 *ssiid,          // out - ssid for this PET
-      ESMF_KIND_I4 *mthpet,         // out - thread master pet for this PET
-      ESMF_KIND_I4 *nthpet,         // out - number of treads in group with PET
-      ESMF_KIND_I4 *tidpet);        // out - thread id for this PET
+      ESMF_KIND_I4 *nthreads,       // out - number of treads in group with PET
+      ESMF_KIND_I4 *tid);           // out - thread id for this PET
     // ESMC_VMFillFromVmachine allows to "copy" a vmachine object into a 
     // ESMC_VM object. This is necessary because calling vmachine_enter on 
     // a ESMC_VM object returns the child vmachine object and NOT an ESMC_VM

@@ -143,9 +143,8 @@ class vmachine{
     int vmachine_ncpet(int i);          // return ncpet
     int vmachine_ssiid(int i);          // return ssiid
     MPI_Comm vmachine_mpi_comm(void);   // return mpi_c
-    int vmachine_mthpet(int i);         // return master pet for PET
-    int vmachine_nthpet(int i);         // return number of threads in group PET
-    int vmachine_tidpet(int i);         // return tid for PET
+    int vmachine_nthreads(int i);       // return number of threads in group PET
+    int vmachine_tid(int i);            // return tid for PET
     
     
     // communication calls

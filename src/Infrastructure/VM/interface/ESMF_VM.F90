@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.4 2004/03/05 19:46:53 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.5 2004/03/22 14:55:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.4 2004/03/05 19:46:53 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.5 2004/03/22 14:55:54 theurich Exp $'
 
 !==============================================================================
 
@@ -410,16 +410,15 @@ module ESMF_VMMod
 ! !IROUTINE: ESMF_VMGetPET - Get VM PET internals
 
 ! !INTERFACE:
-  subroutine ESMF_VMGetPET(vm, petid, npes, ssiid, mthpet, nthpet, tidpet, rc)
+  subroutine ESMF_VMGetPET(vm, petid, npes, ssiid, nthreads, tid, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM), intent(in)            :: vm
     integer,       intent(in)            :: petid
     integer,       intent(out), optional :: npes
     integer,       intent(out), optional :: ssiid
-    integer,       intent(out), optional :: mthpet
-    integer,       intent(out), optional :: nthpet
-    integer,       intent(out), optional :: tidpet
+    integer,       intent(out), optional :: nthreads
+    integer,       intent(out), optional :: tid
     integer,       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -435,11 +434,9 @@ module ESMF_VMMod
 !        Number of PEs in VM.
 !   \item[{[ssiid]}]
 !        SSI id this PET is running on.
-!   \item[{[mthpet]}]
-!        PET id of master thread for this PET's thread group
-!   \item[{[nthpet]}]
+!   \item[{[nthreads]}]
 !        Number of PETs in this PET's thread group.
-!   \item[{[tidpet]}]
+!   \item[{[tid]}]
 !        Thread id of this PET.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -449,7 +446,7 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMGetPET(vm, petid, npes, ssiid, mthpet, nthpet, tidpet, rc)
+    call c_ESMC_VMGetPET(vm, petid, npes, ssiid, nthreads, tid, rc)
  
   end subroutine ESMF_VMGetPET
 !------------------------------------------------------------------------------

@@ -1038,22 +1038,15 @@ MPI_Comm vmachine::vmachine_mpi_comm(void){
 }
 
 
-int vmachine::vmachine_mthpet(int i){
-  int j;
-  for (j=0; j<npets; j++)
-    if (pid[j]==pid[i] && tid[j]==0) break;
-  return j;
-}
-
-
-int vmachine::vmachine_nthpet(int i){
+int vmachine::vmachine_nthreads(int i){
   int n=0;
   for (int j=0; j<npets; j++)
     if (pid[j]==pid[i]) ++n;
   return n;
 }
 
-int vmachine::vmachine_tidpet(int i){
+
+int vmachine::vmachine_tid(int i){
   return tid[i];
 }
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.3 2004/03/05 19:47:34 theurich Exp $
+// $Id: ESMC_VM.C,v 1.4 2004/03/22 14:55:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.3 2004/03/05 19:47:34 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.4 2004/03/22 14:55:55 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -165,9 +165,8 @@ int ESMC_VM::ESMC_VMGetPET(
   ESMF_KIND_I4 *petid,          // in  - petid for this PET
   ESMF_KIND_I4 *npes,           // out - number of PEs for this PET
   ESMF_KIND_I4 *ssiid,          // out - ssiid for this PET
-  ESMF_KIND_I4 *mthpet,         // out - thread master pet for this PET
-  ESMF_KIND_I4 *nthpet,         // out - number of treads in group with PET
-  ESMF_KIND_I4 *tidpet){        // out - thread id for this PET
+  ESMF_KIND_I4 *nthreads,       // out - number of treads in group with PET
+  ESMF_KIND_I4 *tid){           // out - thread id for this PET
 //
 // !DESCRIPTION:
 //    Get PET specific information about a VM object
@@ -178,12 +177,10 @@ int ESMC_VM::ESMC_VMGetPET(
     *npes = this->vmachine_ncpet(*petid);
   if (ssiid != ESMC_NULL_POINTER)
     *ssiid = this->vmachine_ssiid(*petid);
-  if (mthpet != ESMC_NULL_POINTER)
-    *mthpet = this->vmachine_mthpet(*petid);
-  if (nthpet != ESMC_NULL_POINTER)
-    *nthpet = this->vmachine_nthpet(*petid);
-  if (tidpet != ESMC_NULL_POINTER)
-    *tidpet = this->vmachine_tidpet(*petid);
+  if (nthreads != ESMC_NULL_POINTER)
+    *nthreads = this->vmachine_nthreads(*petid);
+  if (tid != ESMC_NULL_POINTER)
+    *tid = this->vmachine_tid(*petid);
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
