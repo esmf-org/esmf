@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.18 2003/04/28 23:17:47 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.19 2003/04/29 23:02:05 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,6 +21,7 @@
 //
  // higher level, 3rd party or system includes here
  #include <iostream.h>
+ #include <string.h>
 
  // associated class definition file
  #include <ESMC_Clock.h>
@@ -28,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.18 2003/04/28 23:17:47 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.19 2003/04/29 23:02:05 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -804,18 +805,83 @@
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
     cout << "Clock ----------------------------------" << endl;
-    cout << "TimeStep = "  << endl; TimeStep.ESMC_TimeIntervalPrint(options);
-    cout << "StartTime = " << endl; StartTime.ESMC_TimePrint(options);
-    cout << "StopTime = "  << endl; StopTime.ESMC_TimePrint(options);
-    cout << "RefTime = "   << endl; RefTime.ESMC_TimePrint(options);
-    cout << "CurrTime = "  << endl; CurrTime.ESMC_TimePrint(options);
-    cout << "PrevTime = "  << endl; PrevTime.ESMC_TimePrint(options);
-    cout << "AdvanceCount = " << AdvanceCount << endl;
-    cout << "NumAlarms = "    << NumAlarms << endl;
-    cout << "AlarmList = " << endl;
-    for (int i=0; i<NumAlarms; i++) {
-      cout << AlarmList[i]->ESMC_AlarmPrint(options);
+
+    // print out individually selected components
+    // TODO: enable multiple simultaneous options (token parsing)
+    //       (currently mutually exclusive)
+    if (options != ESMC_NULL_POINTER) {
+      if (strncmp(options, "timestep", 8) == 0) {
+        cout << "TimeStep = " << endl;
+        TimeStep.ESMC_TimeIntervalPrint(ESMC_NULL_POINTER);
+      }
+      else if (strncmp(options, "starttime", 9) == 0) {
+        cout << "StartTime = " << endl;
+        if (strstr(options, "string") != ESMC_NULL_POINTER) {
+          StartTime.ESMC_TimePrint("string");
+        } else {
+          StartTime.ESMC_TimePrint(ESMC_NULL_POINTER);
+        }
+      }
+      else if (strncmp(options, "stoptime", 8) == 0) {
+        cout << "StopTime = " << endl;
+        if (strstr(options, "string") != ESMC_NULL_POINTER) {
+          StopTime.ESMC_TimePrint("string");
+        } else {
+          StopTime.ESMC_TimePrint(ESMC_NULL_POINTER);
+        }
+      }
+      else if (strncmp(options, "reftime", 7) == 0) {
+        cout << "RefTime = " << endl;
+        if (strstr(options, "string") != ESMC_NULL_POINTER) {
+          RefTime.ESMC_TimePrint("string");
+        } else {
+          RefTime.ESMC_TimePrint(ESMC_NULL_POINTER);
+        }
+      }
+      else if (strncmp(options, "currtime", 8) == 0) {
+        cout << "CurrTime = " << endl;
+        if (strstr(options, "string") != ESMC_NULL_POINTER) {
+          CurrTime.ESMC_TimePrint("string");
+        } else {
+          CurrTime.ESMC_TimePrint(ESMC_NULL_POINTER);
+        }
+      }
+      else if (strncmp(options, "prevtime", 8) == 0) {
+        cout << "PrevTime = " << endl;
+        if (strstr(options, "string") != ESMC_NULL_POINTER) {
+          PrevTime.ESMC_TimePrint("string");
+        } else {
+          PrevTime.ESMC_TimePrint(ESMC_NULL_POINTER);
+        }
+      }
+      else if (strncmp(options, "advancecount", 12) == 0) {
+        cout << "AdvanceCount = " << AdvanceCount << endl;
+      }
+      else if (strncmp(options, "numalarms", 9) == 0) {
+        cout << "NumAlarms = " << NumAlarms << endl;
+      }
+      else if (strncmp(options, "alarmlist", 9) == 0) {
+        cout << "AlarmList = " << endl;
+        for (int i=0; i<NumAlarms; i++) {
+          cout << AlarmList[i]->ESMC_AlarmPrint(ESMC_NULL_POINTER);
+        }
+      }
+    // print out all components
+    } else{
+      cout << "TimeStep = "  << endl; TimeStep.ESMC_TimeIntervalPrint(options);
+      cout << "StartTime = " << endl; StartTime.ESMC_TimePrint(options);
+      cout << "StopTime = "  << endl; StopTime.ESMC_TimePrint(options);
+      cout << "RefTime = "   << endl; RefTime.ESMC_TimePrint(options);
+      cout << "CurrTime = "  << endl; CurrTime.ESMC_TimePrint(options);
+      cout << "PrevTime = "  << endl; PrevTime.ESMC_TimePrint(options);
+      cout << "AdvanceCount = " << AdvanceCount << endl;
+      cout << "NumAlarms = "    << NumAlarms << endl;
+      cout << "AlarmList = " << endl;
+      for (int i=0; i<NumAlarms; i++) {
+        cout << AlarmList[i]->ESMC_AlarmPrint(options);
+      }
     }
+
     cout << "end Clock ------------------------------" << endl << endl;
 
     // TODO print ClockMutex ?
