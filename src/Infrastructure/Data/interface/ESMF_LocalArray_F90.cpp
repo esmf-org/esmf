@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.11 2003/07/24 21:53:24 jwolfe Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.12 2003/08/15 21:33:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -125,7 +125,7 @@
 
       type ESMF_LocalArray
       sequence
-      private
+      !!private
         ! opaque pointer to the C++ class data
         !type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
         type(ESMF_Pointer) :: this
@@ -177,7 +177,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.11 2003/07/24 21:53:24 jwolfe Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.12 2003/08/15 21:33:07 nscollins Exp $'
 
 !==============================================================================
 ! 
