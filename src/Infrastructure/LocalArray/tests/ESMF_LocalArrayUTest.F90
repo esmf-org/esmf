@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.21 2004/06/18 22:01:37 jwolfe Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.22 2004/06/19 05:09:23 nscollins Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -56,7 +56,7 @@
 !   !  Data is type Integer, 1D.
     print *, ">>> Test 1:"
  
-!   ! Allocate and set initial data values, using a lower bound != 1
+    ! Allocate and set initial data values, using a lower bound != 1
     !NEX_UTest
     ni = 515 
     allocate(intptr(5:ni+5))
@@ -142,7 +142,7 @@
     print *, ">>> Test 2:"
  
  
-!   ! Allocate and set initial data values
+    ! Allocate and set initial data values
     ni = 835 
     allocate(intptr(ni))
     do i=1,ni
@@ -201,7 +201,7 @@
     print *, ">>> Test 2a:"
  
  
-!   ! Allocate and set initial data values
+    ! Allocate and set initial data values
     ni = 1022 
     allocate(intptr(ni))
     do i=1,ni
@@ -249,8 +249,8 @@
  
  
     ! Allocate and set initial data values
-    ni = 5000
-    nj = 3000
+    ni = 50
+    nj = 30
     allocate(realptr(3:ni+3,7:nj+7))
     do i=3,ni+3
      do j=7,nj+7
@@ -259,7 +259,7 @@
     enddo
     print *, "partial print of realptr data = ", realptr(3:6,7:9)
 
-    !-X_UTest
+    !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating Local Array with 2D Real Data Test"
     print *, "Creating array2"
@@ -278,7 +278,7 @@
     enddo
     print *, "realptr data changed after nocopy set, now = ", realptr(3:6,7:9)
 
-    !-X_UTest
+    !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array 2D Real Data Test"
     call ESMF_LocalArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
@@ -286,7 +286,7 @@
     print *, "bounds: ", lbound(realptr2), ubound(realptr2)
     print *, "partial print of realptr2 data = ", realptr2(3:7,7:9)
 
-    !-X_UTest
+    !EX_UTest
     do i=3,ni+3
      do j=7,nj+7
         if (realptr(i,j).eq.realptr2(i,j)) then
@@ -301,7 +301,7 @@
     write(name, *) "Compare Local Array 2D Real Data Test"
     call ESMF_Test((result.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
-    !-X_UTest
+    !EX_UTest
     call ESMF_LocalArrayDestroy(array2, rc)
     print *, "array 2a destroy returned"
     deallocate(realptr)
@@ -313,9 +313,9 @@
     print *, ">>> Test 4:"
  
  
-!   ! Allocate and set initial data values
-    ni = 1015 
-    nj = 1013 
+    ! Allocate and set initial data values
+    ni = 15 
+    nj = 13 
     allocate(realptr(ni,nj))
     do i=1,ni
      do j=1,nj
@@ -366,9 +366,9 @@
     print *, ">>> Test 5:"
  
  
-!   ! Allocate and set initial data values
+    ! Allocate and set initial data values
     ni = 4015 
-    nj = 413 
+    nj = 13 
     allocate(realptr(ni,nj))
     do i=1,ni
      do j=1,nj
@@ -431,10 +431,10 @@
     print *, ">>> Test 6:"
  
  
-!   ! Allocate and set initial data values
-    ni = 315 
-    nj = 413 
-    nk = 59
+    ! Allocate and set initial data values
+    ni = 5 
+    nj = 43 
+    nk = 8
     allocate(real3dptr(ni,nj,nk))
     do i=1,ni
      do j=1,nj
@@ -452,13 +452,13 @@
 
     print *, "array 4a create returned"
 
-    !-X_UTest
+   !EX_UTest
     !write(failMsg, *) "Did returned ESMF_SUCCESS incorrectly"
     !write(name, *) "Getting Local Array 3D Real Data with wrong dimension array Test"
     !call ESMF_LocalArrayGetData(array4, realptr2, ESMF_DATA_COPY, rc)
     !call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-    !-X_UTest
+   !EX_UTest
     nullify(real3d2ptr)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array 3D Real Data without allocating array size Test"
@@ -523,13 +523,13 @@
 
  
  
-!   ! Allocate and free different sizes testing end of array printing code
+    ! Allocate and free different sizes testing end of array printing code
     ni = 33 
-    nj = 87 
+    nj = 8 
     nk = 160
     allocate(real3dptr(ni,nj,nk))
 
-    !EX_UTest
+   !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Local Array 3D DATA_COPY Real Data Test"
     array4 = ESMF_LocalArrayCreate(real3dptr, ESMF_DATA_REF, rc)
@@ -544,7 +544,7 @@
     call ESMF_LocalArrayDestroy(array4, rc)
     print *, "array 4b destroy returned"
 
-!   ! Allocate and free different sizes testing end of array printing code
+    ! Allocate and free different sizes testing end of array printing code
     ni = 10 
     nj = 3 
     nk = 40
@@ -594,7 +594,7 @@
     !print *, "array 4d destroy returned"
     deallocate(real3dptr)
 
-!   ! Allocate and free different sizes testing end of array printing code
+    ! Allocate and free different sizes testing end of array printing code
     ni = 11 
     nj = 3 
     nk = 40
@@ -712,7 +712,7 @@
     print *, ">>> Test 8:"
  
  
-!   ! Allocate and set initial data values
+    ! Allocate and set initial data values
     ni = 35 
     nj = 40
     allocate(int2Dptr(ni,nj))
