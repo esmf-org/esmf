@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.26 2003/11/10 23:55:53 nscollins Exp $
+#  $Id: common.mk,v 1.27 2003/11/11 00:15:35 nscollins Exp $
 #===============================================================================
 #  common.mk
 #
@@ -701,7 +701,7 @@ chkdir_quick_start:
 build_quick_start: chkdir_quick_start
 	$(MAKE) BOPT=$(BOPT) ACTION=tree_build_quick_start tree
 
-tree_build_quick_start:
+tree_build_quick_start: chkdir_quick_start
 	@for DIR in $(QUICKSTART_COPYDIRS) foo ; do \
 	   if [ $$DIR != "foo" ] ; then \
 	      echo "Copying $$DIR files to $(QUICKSTART_DIR)" ;\
