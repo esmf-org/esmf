@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.12 2003/04/08 20:03:48 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.13 2003/04/11 23:49:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.12 2003/04/08 20:03:48 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.13 2003/04/11 23:49:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -61,8 +61,9 @@
     // TODO: ensure initialization if called via F90 interface;
     //       cannot call constructor, because destructor is subsequently
     //       called automatically, returning initialized values to garbage.
-    for (int i=0; i<MONTHSPERYEAR; i++) DaysPerMonth[i] = 0;
+    for (int i=0; i<MONTHS_PER_YEAR; i++) DaysPerMonth[i] = 0;
     SecondsPerDay  = 0;
+    SecondsPerYear = 0;
     DaysPerYear.D  = 0;
     DaysPerYear.Dn = 0;
     DaysPerYear.Dd = 1;
@@ -85,6 +86,7 @@
             DaysPerMonth[8]  = 30; DaysPerMonth[9]  = 31;
             DaysPerMonth[10] = 30; DaysPerMonth[11] = 31;
             SecondsPerDay  = SECONDS_PER_DAY;
+            SecondsPerYear = SECONDS_PER_DAY * 365;
             DaysPerYear.D  = 365;
             DaysPerYear.Dn = 0;
             DaysPerYear.Dd = 1;
@@ -94,8 +96,9 @@
         case ESMC_CAL_JULIAN:
             // Days is the highest resolution of time, i.e. there is no
             //   concept of months or years ??
-            for (int i=0; i<MONTHSPERYEAR; i++) DaysPerMonth[i] = 0;
+            for (int i=0; i<MONTHS_PER_YEAR; i++) DaysPerMonth[i] = 0;
             SecondsPerDay  = SECONDS_PER_DAY;
+            SecondsPerYear = 0;
             DaysPerYear.D  = 0;
             DaysPerYear.Dn = 0;
             DaysPerYear.Dd = 1;
@@ -104,8 +107,9 @@
 
         case ESMC_CAL_360DAY:
             // 12 months of 30 days each
-            for (int i=0; i<MONTHSPERYEAR; i++) DaysPerMonth[i] = 30;
+            for (int i=0; i<MONTHS_PER_YEAR; i++) DaysPerMonth[i] = 30;
             SecondsPerDay  = SECONDS_PER_DAY;
+            SecondsPerYear = SECONDS_PER_DAY * 360;
             DaysPerYear.D  = 360;
             DaysPerYear.Dn = 0;
             DaysPerYear.Dd = 1;
@@ -114,8 +118,9 @@
 
         case ESMC_CAL_NOCALENDAR:
             // no calendar needed, convert base time up to days only
-            for (int i=0; i<MONTHSPERYEAR; i++) DaysPerMonth[i] = 0;
+            for (int i=0; i<MONTHS_PER_YEAR; i++) DaysPerMonth[i] = 0;
             SecondsPerDay  = 0;
+            SecondsPerYear = 0;
             DaysPerYear.D  = 0;
             DaysPerYear.Dn = 0;
             DaysPerYear.Dd = 1;
@@ -163,8 +168,9 @@
     // TODO: ensure initialization if called via F90 interface;
     //       cannot call constructor, because destructor is subsequently
     //       called automatically, returning initialized values to garbage.
-    for (int i=0; i<MONTHSPERYEAR; i++) this->DaysPerMonth[i] = 0;
+    for (int i=0; i<MONTHS_PER_YEAR; i++) this->DaysPerMonth[i] = 0;
     this->SecondsPerDay  = 0;
+    this->SecondsPerYear = 0;
     this->DaysPerYear.D  = 0;
     this->DaysPerYear.Dn = 0;
     this->DaysPerYear.Dd = 1;
@@ -177,7 +183,7 @@
 
     Type = ESMC_CAL_GENERIC;
 
-    for(int i=0; i<MONTHSPERYEAR; i++)
+    for(int i=0; i<MONTHS_PER_YEAR; i++)
     { 
            this->DaysPerMonth[i] = DaysPerMonth[i];
     }
@@ -185,6 +191,7 @@
     this->DaysPerYear.D  = DaysPerYear;
     this->DaysPerYear.Dn = DaysPerYearDn;
     this->DaysPerYear.Dd = DaysPerYearDd;
+    this->SecondsPerYear = SecondsPerDay * DaysPerYear;
 
     return(ESMF_SUCCESS);
 
@@ -211,7 +218,12 @@
 //
 //     The Gregorian <-> Julian conversion algorithm is from Henry F. Fliegel
 //     and Thomas C. Van Flandern, in Communications of the ACM,
-//     CACM, volume 11, number 10, October 1968, p. 657.
+//     CACM, volume 11, number 10, October 1968, p. 657.  Julian day refers
+//     to the number of days since a reference day.  For the algorithm used,
+//     this reference day is November 24, -4713 in the Gregorian calendar.
+//     The algorithm is valid through all future dates, assuming standard
+//     leap-year corrections are applied (every 4 years, 100 years, and
+//     400 years).
 //
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
@@ -233,6 +245,20 @@
 
             // convert Julian days to basetime seconds (>= 64 bit)
             T->S = (ESMF_IKIND_I8) jdays * (ESMF_IKIND_I8) SecondsPerDay;
+            break;
+        }
+        // convert No Leap Date => Time
+        // TODO:  assumes time zero = 1/1/0000 00:00:00, make same as
+        //        Gregorian/Julian time zero = 11/24/-4713 00:00:00 ?
+        case ESMC_CAL_NOLEAP:
+        {
+            T->S = (ESMF_IKIND_I8) (YR-1) * (ESMF_IKIND_I8) SecondsPerYear;
+
+            for(int month=0; month < MM-1; month++) {
+              T->S += DaysPerMonth[month] * SecondsPerDay;
+            }
+            T->S += (DD-1) * SecondsPerDay;
+            
             break;
         }
         // convert Julian Date => Time
@@ -271,7 +297,12 @@
 //
 //     The Gregorian <-> Julian conversion algorithm is from Henry F. Fliegel
 //     and Thomas C. Van Flandern, in Communications of the ACM,
-//     CACM, volume 11, number 10, October 1968, p. 657.
+//     CACM, volume 11, number 10, October 1968, p. 657.  Julian day refers
+//     to the number of days since a reference day.  For the algorithm used,
+//     this reference day is November 24, -4713 in the Gregorian calendar.
+//     The algorithm is valid through all future dates, assuming standard
+//     leap-year corrections are applied (every 4 years, 100 years, and
+//     400 years).
 //
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
@@ -305,6 +336,23 @@
             *MM = tempj + 2 - ( 12 * templ );
             *YR = 100 * ( tempn - 49 ) + tempi + templ;
 
+            break;
+        }
+        // convert Time => No Leap Date
+        // TODO:  assumes time zero = 1/1/0000 00:00:00, make same as
+        //        Gregorian/Julian time zero = 11/24/-4713 00:00:00 ?
+        case ESMC_CAL_NOLEAP:
+        {
+            *YR     = (T->S / SecondsPerYear) + 1;
+            int day = ((T->S % SecondsPerYear) / SecondsPerDay) + 1;
+
+            int month;
+            for(month=0; day > DaysPerMonth[month]; month++) {
+              day -= DaysPerMonth[month];
+            }
+            *MM = month + 1;
+            *DD = day;
+            
             break;
         }
         // convert Time => Julian Date
@@ -352,7 +400,7 @@
     }
 
     Type = type;
-    for (int i=0; i<MONTHSPERYEAR; i++)
+    for (int i=0; i<MONTHS_PER_YEAR; i++)
     {
         DaysPerMonth[i] = daysPerMonth[i];    
     }
@@ -360,6 +408,7 @@
     DaysPerYear.D  = daysPerYear;
     DaysPerYear.Dn = daysPerYearDn;
     DaysPerYear.Dd = daysPerYearDd;
+    SecondsPerYear = secondsPerDay * daysPerYear;
 
     return(ESMF_SUCCESS);
 
@@ -400,7 +449,7 @@
     }
 
     *type = Type;
-    for (int i=0; i<MONTHSPERYEAR; i++)
+    for (int i=0; i<MONTHS_PER_YEAR; i++)
     {
         daysPerMonth[i] = DaysPerMonth[i];    
     }
@@ -459,12 +508,13 @@
     cout << "Calendar -------------------------------" << endl;
     cout << "Type = " << Type << endl;
     cout << "DaysPerMonth = " << endl;
-    for (int i=0; i<MONTHSPERYEAR; i++) cout << DaysPerMonth[i] << " ";
+    for (int i=0; i<MONTHS_PER_YEAR; i++) cout << DaysPerMonth[i] << " ";
     cout << endl;
-    cout << "SecondsPerDay = " << SecondsPerDay  << endl;
-    cout << "DaysPerYear = "   << DaysPerYear.D  << endl;
-    cout << "DaysPerYearDn = " << DaysPerYear.Dn << endl;
-    cout << "DaysPerYearDd = " << DaysPerYear.Dd << endl;
+    cout << "SecondsPerDay = "  << SecondsPerDay  << endl;
+    cout << "SecondsPerYear = " << SecondsPerYear << endl;
+    cout << "DaysPerYear = "    << DaysPerYear.D  << endl;
+    cout << "DaysPerYearDn = "  << DaysPerYear.Dn << endl;
+    cout << "DaysPerYearDd = "  << DaysPerYear.Dd << endl;
     cout << "end Calendar ---------------------------" << endl << endl;
     
     return(ESMF_SUCCESS);
@@ -492,8 +542,9 @@
 // !REQUIREMENTS: 
 
     Type = ESMC_CAL_NOCALENDAR;
-    for (int i=0; i<MONTHSPERYEAR; i++) DaysPerMonth[i] = 0;
+    for (int i=0; i<MONTHS_PER_YEAR; i++) DaysPerMonth[i] = 0;
     SecondsPerDay  = 0;
+    SecondsPerYear = 0;
     DaysPerYear.D  = 0;
     DaysPerYear.Dn = 0;
     DaysPerYear.Dd = 1;
