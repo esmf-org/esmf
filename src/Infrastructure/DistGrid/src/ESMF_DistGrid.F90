@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.129 2004/12/09 17:47:28 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.130 2004/12/17 19:41:07 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,6 +44,9 @@
       use ESMF_BaseMod
       use ESMF_LogErrMod
       use ESMF_DELayoutMod
+      use ESMF_VMTypesMod
+      use ESMF_VMBaseMod
+      use ESMF_VMCommMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -77,6 +80,7 @@
         type (ESMF_AxisIndex), dimension(:), pointer :: globalAIPerDim
                                             ! (min/max/stride) per axis relative
                                             ! to the global grid origin
+        integer, dimension(:,:), pointer :: localIndices
       end type
 
 !------------------------------------------------------------------------------
@@ -148,6 +152,7 @@
 
         type (ESMF_Base) :: base          ! standard ESMF base object
         integer :: dimCount               ! Number of dimensions
+        integer :: vector                 ! identifier for vector storage
         integer :: gridBoundaryWidth      ! # of exterior cells/edge
         type(ESMF_DELayout) :: delayout    ! the delayout for this grid
 
@@ -194,7 +199,6 @@
     public ESMF_DistGridSetConfig
     public ESMF_DistGridGet
     public ESMF_DistGridSet
-    public ESMF_DistGridGetCounts
     public ESMF_DistGridSetCounts
     public ESMF_DistGridGetDE
     public ESMF_DistGridSetDE
@@ -206,7 +210,6 @@
     public ESMF_DistGridSetValue
     public ESMF_DistGridLocalToGlobalIndex
     public ESMF_DistGridGlobalToLocalIndex
-    public ESMF_DistGridAllocate
     public ESMF_DistGridValidate
     public ESMF_DistGridPrint
     public ESMF_DistGridSerialize
@@ -217,7 +220,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.129 2004/12/09 17:47:28 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.130 2004/12/17 19:41:07 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -261,6 +264,22 @@
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
+      interface ESMF_DistGridGetAllAxisIndex
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_DistGridGetAllAIBlock
+         module procedure ESMF_DistGridGetAllAIVect
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that get
+!     the complete set of AxisIndices from a {\tt ESMF\_DistGrid}.
+!
+!EOPI
+      end interface 
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
       interface ESMF_DistGridSetCounts
 
 ! !PRIVATE MEMBER FUNCTIONS:
@@ -285,22 +304,6 @@
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
 !     extent counts in a {\tt ESMF\_DistGrid}.
-!
-!EOPI
-      end interface 
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !INTERFACE:
-      interface ESMF_DistGridAllocate
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_DistGridAllocateBlock
-         module procedure ESMF_DistGridAllocateVect
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that set
-!     allocate arrays in the derived types of a {\tt ESMF\_DistGrid}.
 !
 !EOPI
       end interface 
@@ -470,8 +473,8 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_DistGridCreate()
-      function ESMF_DistGridCreateVect(dimCount, myCount, delayout, decompIDs, &
-                                       name, rc)
+      function ESMF_DistGridCreateVect(dimCount, myCount, myIndices, counts, &
+                                       delayout, decompIDs, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_DistGrid) :: ESMF_DistGridCreateVect
@@ -479,6 +482,8 @@
 ! !ARGUMENTS:
       integer, intent(in) :: dimCount
       integer, intent(in) :: myCount
+      integer, dimension(:,:), intent(in) :: myIndices
+      integer, dimension(:), intent(in) :: counts
       type(ESMF_DELayout), intent(in), optional :: delayout
       integer, dimension(dimCount), intent(in) :: decompIDs
       character (len = *), intent(in), optional :: name  
@@ -495,6 +500,13 @@
 !          Number of dimensions described by this DistGrid.
 !     \item[myCount]
 !          Number of computational cells on this DE.
+!     \item[myIndices]
+!          Array of grid indices to be distributed to this DE, as (i,j) pairs.
+!          The size of this array must be at least [myCount] in the first
+!          dimension and 2 in the second.
+!     \item[counts]
+!          Array of global numbers of computational cells per dimension for
+!          the Grid.
 !     \item[delayout]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[decompIDs]
@@ -523,8 +535,8 @@
                                      ESMF_CONTEXT, rc)) return
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_DistGridConstruct(dgtype, dimCount, delayout, decompIDs, &
-                                  myCount, name, rc)
+      call ESMF_DistGridConstructVect(dgtype, dimCount, delayout, decompIDs, &
+                                      myCount, myIndices, counts, name, rc)
 
 !     Set return values.
       ESMF_DistGridCreateVect%ptr => dgtype
@@ -640,6 +652,7 @@
 !                                          as defaults
 !     DistGridType contents here:
       dgtype%dimCount          = 0
+      dgtype%vector            = 0
       dgtype%gridBoundaryWidth = 1   ! TODO: this must be settable
       nullify(dgtype%decompIDs)
       nullify(dgtype%coversDomain)
@@ -651,6 +664,7 @@
       nullify(me%localCellCountPerDim)
       nullify(me%globalStartPerDim)
       nullify(me%globalAIPerDim)
+      nullify(me%localIndices)
 
 !     myDEComp contents here:
       me => dgtype%myDEComp
@@ -659,6 +673,7 @@
       nullify(me%localCellCountPerDim)
       nullify(me%globalStartPerDim)
       nullify(me%globalAIPerDim)
+      nullify(me%localIndices)
 
 !     globalTotal contents here:
       glob => dgtype%globalTotal
@@ -780,7 +795,7 @@
 
       ! Allocate resources based on number of DE's
       call ESMF_DELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
-                               logRectFlag=lrFlag, rc=localrc)
+                            logRectFlag=lrFlag, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -816,7 +831,7 @@
                                    ESMF_CONTEXT, rc)
         return
       endif
-      call ESMF_DistGridAllocate(dgtype, nDE, dimCount, localrc)
+      call ESMF_DistGridAllocateBlock(dgtype, nDE, dimCount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -926,14 +941,17 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_DistGridConstruct()
       subroutine ESMF_DistGridConstructVect(dgtype, dimCount, delayout, &
-                                            decompIDs, myCount, name, rc)
+                                            decompIDs, myCount, myIndices, &
+                                            counts, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype 
       integer, intent(in) :: dimCount
       type(ESMF_DELayout), intent(in) :: delayout
-      integer, dimension(dimCount), intent(in) :: decompIDs
+      integer, dimension(:), intent(in) :: decompIDs
       integer, intent(in) :: myCount
+      integer, dimension(:,:), intent(in) :: myIndices
+      integer, dimension(:), intent(in) :: counts
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
 !
@@ -957,6 +975,13 @@
 !          Identifier for which Grid axes are decomposed by the layout.
 !     \item[myCount]
 !          Number of computational cells on this DE.
+!     \item[myIndices]
+!          Array of grid indices to be distributed to this DE, as (i,j) pairs.
+!          The size of this array must be at least [myCount] in the first
+!          dimension and 2 in the second.
+!     \item[counts]
+!          Array of global numbers of computational cells per dimension for
+!          the Grid.
 !     \item[{[name]}] 
 !          {\tt ESMF\_DistGrid} name.
 !     \item[{[rc]}] 
@@ -967,7 +992,10 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: i, ndim
+      integer :: i, ndim, nDEs
+      integer :: globalCellCount, globalCellCountPerDim(2)
+      type(ESMF_DistGridLocal),  pointer :: me
+      type(ESMF_DistGridGlobal), pointer :: glob
       type(ESMF_Logical):: otoFlag, lrFlag
 
       ! Initialize return code; assume failure until success is certain
@@ -987,34 +1015,63 @@
 
       ! Allocate resources based on number of DE's
       call ESMF_DELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
-                            logRectFlag=lrFlag, rc=localrc)
+                            logRectFlag=lrFlag, deCount=nDEs, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! Check DELayout attributes
-      if (otoFlag .ne. ESMF_TRUE) then    ! ensure this is 1-to-1 layoutu
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_FOUND, &
-                                   "not a 1-to-1 layout", &
-                                   ESMF_CONTEXT, rc)
-        return
-      endif
+    !  ! Check DELayout attributes
+    !  if (otoFlag .ne. ESMF_TRUE) then    ! ensure this is 1-to-1 layoutu
+    !    call ESMF_LogMsgSetError(ESMF_RC_NOT_FOUND, &
+    !                               "not a 1-to-1 layout", &
+    !                               ESMF_CONTEXT, rc)
+    !    return
+    !  endif
 
       ! Allocate necessary arrays
-      call ESMF_DistGridAllocate(dgtype, dimCount, localrc)
+      call ESMF_DistGridAllocateVect(dgtype, nDEs, size(counts), myCount, &
+                                     localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! Fill in distgrid derived type with input
       dgtype%dimCount = dimCount
+      dgtype%vector   = 1
       dgtype%delayout = delayout
       do i = 1,dimCount
         dgtype%decompIDs(i) = decompIDs(i)
       enddo
 
+      ! Calculate values for computational domain -- for vector storage
+      ! there is no difference
+      glob => dgtype%globalComp
+      me   => dgtype%myDEComp
+      globalCellCount = 1
+      do i = 1,2                               ! TODO: fix this
+        globalCellCountPerDim(i)      = counts(i)   ! TODO: fix for reordering
+        glob%globalCellCountPerDim(i) = counts(i)
+        if (globalCellCountPerDim(i).ne.0) &
+            globalCellCount = globalCellCount * globalCellCountPerDim(i)
+      enddo
+      if (globalCellCount.le.0) then
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_FOUND, &
+                                 "globalCellCount le 0", &
+                                 ESMF_CONTEXT, rc)
+        return
+      endif
+      glob%globalCellCount       = globalCellCount
+
+      ! call internal routine to set counts per DE
+      call ESMF_DistGridSetCountsVect(dgtype, dimCount, delayout, counts, &
+                                      myCount, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      glob%maxLocalCellCount = maxval(glob%cellCountPerDE)
+
       ! Fill in DE derived type
-      call ESMF_DistGridSetDE(dgtype, myCount, localrc)
+      call ESMF_DistGridSetDE(dgtype, myCount, myIndices, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1078,7 +1135,7 @@
 ! !IROUTINE: ESMF_DistGridGet - Get information from a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGet(distgrid, coversDomain, &
+      subroutine ESMF_DistGridGet(distgrid, dimCount, coversDomain, &
                                   globalCellCount, globalCellCountPerDim, &
                                   globalStartPerDEPerDim, maxLocalCellCount, &
                                   maxLocalCellCountPerDim, delayout, &
@@ -1086,6 +1143,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DistGrid), target, intent(in) :: distgrid
+      integer, intent(inout), optional :: dimCount
       logical, dimension(:), intent(inout), optional :: coversDomain
       integer, intent(inout), optional :: globalCellCount
       integer, dimension(:), intent(inout), optional :: globalCellCountPerDim
@@ -1104,6 +1162,8 @@
 !     \begin{description}
 !     \item[distgrid] 
 !          Class to be queried.
+!     \item[{[dimCount]}]
+!          Number of dimensions in the {\tt ESMF\_DistGrid}.
 !     \item[{[coversDomain]}]
 !          Array of logical identifiers if distgrid covers the entire physical domain.
 !     \item[{[globalCellCount]}]
@@ -1131,7 +1191,7 @@
 ! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
-      integer :: i, j, nndes
+      integer :: i, j, nndes, count
       type(ESMF_DistGridGlobal), pointer :: glob
       type(ESMF_DistGridType), pointer :: dgtype
 
@@ -1146,7 +1206,11 @@
         if (total) glob => dgtype%globalTotal
       endif
 
+      ! set count -- helps set the correct size for vector distribution
+      count = dgtype%dimCount + dgtype%vector
+
       ! If present, get information from distgrid derived type
+      if (present(dimCount))     dimCount     = dgtype%dimCount
       if (present(coversDomain)) coversDomain = dgtype%coversDomain
 
       if (present(globalCellCount)) &
@@ -1155,7 +1219,7 @@
       if (present(globalCellCountPerDim)) then
                  ! TODO: add check that globalCellCountPerDim is large enough
                  !       or use the size of the array for the loop limit
-        do i = 1,dgtype%dimCount
+        do i = 1,count
           globalCellCountPerDim(i) = glob%globalCellCountPerDim(i)
         enddo
       endif
@@ -1165,7 +1229,7 @@
                  !       or use the size of the array for the loop limit
         call ESMF_DELayoutGet(dgtype%delayout, deCount=nndes, rc=rc)
         do i = 1, nndes
-          do j = 1,dgtype%dimCount
+          do j = 1,count
             globalStartPerDEPerDim(i,j) = glob%globalStartPerDEPerDim(i,j)
           enddo
         enddo
@@ -1176,7 +1240,7 @@
       if (present(maxLocalCellCountPerDim)) then
                  ! TODO: add check that maxLocalCellCountPerDim is large enough
                  !       or use the size of the array for the loop limit
-        do i = 1,dgtype%dimCount
+        do i = 1,count
           maxLocalCellCountPerDim(i) = glob%maxLocalCellCountPerDim(i)
         enddo
       endif
@@ -1448,94 +1512,6 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridGetCounts"
-!BOPI
-! !IROUTINE: ESMF_DistGridGetCounts - Get extent counts for a DistGrid for a given DE
-
-! !INTERFACE:
-      subroutine ESMF_DistGridGetCounts(dgtype, DEID, localCellCountPerDim, &
-                                        globalCellStartPerDim, &
-                                        globalCellEndPerDim, total, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_DistGridType), pointer :: dgtype
-      integer, intent(in) :: DEID
-      integer, dimension(:), intent(inout), optional :: localCellCountPerDim
-      integer, dimension(:), intent(inout), optional :: globalCellStartPerDim
-      integer, dimension(:), intent(inout), optional :: globalCellEndPerDim
-      logical, intent(in), optional :: total
-      integer, intent(out), optional :: rc            
-
-!
-! !DESCRIPTION:
-!     Get {\tt ESMF\_DistGrid} extent counts for a given {\tt ESMF\_DE}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[dgtype] 
-!          Class to be modified.
-!     \item[DEID]
-!          Given {\tt ESMF\_DE}'s identifier.
-!     \item[{[localCellCountPerDim]}]
-!          Array of the number of cells per dimension for this {\tt ESMF\_DE}.
-!     \item[{[globalCellStartPerDim]}]
-!          Array of the starting position, in the global decompostion, for
-!          the cells per dimension for this {\t ESMF\_DE}.
-!     \item[{[globalCellEndPerDim]}]
-!          Array of the ending position, in the global decompostion, for
-!          the cells per dimension for this {\tt ESMF\_DE}.
-!     \item[{[total]}]
-!          Logical; if TRUE, return counts for total cells including boundary cells.
-!          Default is FALSE, return only computational cells.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS: 
-
-      !integer :: localrc                          ! Error status
-      type(ESMF_DistGridGlobal), pointer :: glob
-      integer :: i
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
-
-      ! If total is true, set info for the total cells including
-      ! boundary areas; otherwise set only computational areas.
-      glob => dgtype%globalComp
-      if (present(total)) then
-        if (total) glob => dgtype%globalTotal
-      endif
-
-!     Retrieve extent counts for each axis from the de identifier
-!     TODO:  check validity of DEID
-      if (present(localCellCountPerDim)) then
-        ! TODO:  add check for array size or use size for loop limit
-        do i = 1,dgtype%dimCount
-          localCellCountPerDim(i) = glob%AIPerDEPerDim(DEID,i)%max &
-                                  - glob%AIPerDEPerDim(DEID,i)%min + 1
-        enddo
-      endif
-      if (present(globalCellStartPerDim)) then
-        ! TODO:  add check for array size or use size for loop limit
-        do i = 1,dgtype%dimCount
-          globalCellStartPerDim(i) = glob%AIPerDEPerDim(DEID,i)%min
-        enddo
-      endif
-      if (present(globalCellEndPerDim)) then
-        ! TODO:  add check for array size or use size for loop limit
-        do i = 1,dgtype%dimCount
-          globalCellEndPerDim(i) = glob%AIPerDEPerDim(DEID,i)%max
-        enddo
-      endif
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_DistGridGetCounts
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridSetCountsBlock"
 !BOPI
 ! !IROUTINE: ESMF_DistGridSetCountsBlock - Set extent counts for a DistGrid
@@ -1775,6 +1751,93 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridSetCountsVect"
+!BOPI
+! !IROUTINE: ESMF_DistGridSetCountsVect - Set extent counts for a DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridSetCountsVect(dgtype, dimCount, delayout, &
+                                            counts, myCount, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType), pointer :: dgtype
+      integer, intent(in) :: dimCount
+      type(ESMF_DELayout), intent(in) :: delayout
+      integer, dimension(:), intent(in) :: counts
+      integer, intent(in) :: myCount
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Set {\tt ESMF\_DistGrid} extent counts
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[dgtype] 
+!          Class to be modified.
+!     \item[dimCount] 
+!          Number of dimensions.
+!     \item[delayout]
+!          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
+!     \item[counts]
+!          Array of global numbers of computational cells per dimension for
+!          the Grid.
+!     \item[myCount]
+!          Number of computational cells on this DE.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS: 
+
+      integer :: localrc                          ! Error status
+      integer :: i, j, thisCount(1), nDEs, myDE, thisDE
+      type(ESMF_DistGridGlobal), pointer :: glob
+      type(ESMF_VM) :: vm
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! pointer to data
+      glob => dgtype%globalComp
+
+      ! set defaults
+      glob%cellCountPerDE(:)           = 1
+      glob%cellCountPerDEPerDim(:,:)   = 1
+      glob%globalStartPerDEPerDim(:,:) = 0
+      glob%AIPerDEPerDim(:,:)%min      = 1
+      glob%AIPerDEPerDim(:,1)%max      = counts(1)
+      glob%AIPerDEPerDim(:,1)%stride   = counts(1)
+      glob%AIPerDEPerDim(:,2)%max      = counts(2)
+      glob%AIPerDEPerDim(:,2)%stride   = counts(2)
+
+      ! Allocate resources based on number of DE's
+
+      ! first, query the delayout for information
+      call ESMF_DELayoutGet(delayout, deCount=nDEs, localDe=myDE, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_DELayoutGetVM(delayout, vm, localrc)
+ 
+      ! collective call to gather count from all DEs
+      do j     = 1,nDEs
+        thisDE = j - 1
+        if (myDE.eq.thisDE) then
+          thisCount(1) = myCount
+        endif
+        call ESMF_VMBroadcast(vm, thisCount, thisCount, 1, thisDE, rc=localrc)
+        glob%cellCountPerDE(j)         = thisCount(1)
+        glob%cellCountPerDEPerDim(j,1) = thisCount(1)
+      enddo
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridSetCountsVect
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridGetDE"
 !BOPI
 ! !IROUTINE: ESMF_DistGridGetDE - Get DE information for a DistGrid
@@ -1979,11 +2042,12 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_DistGridSetDE()
-      subroutine ESMF_DistGridSetDEVect(dgtype, myCount, rc)
+      subroutine ESMF_DistGridSetDEVect(dgtype, myCount, myIndices, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype
       integer, intent( in) :: myCount
+      integer, dimension(:,:), intent(in) :: myIndices
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -2002,40 +2066,36 @@
 ! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
-      integer :: DEID
-      integer :: myDEx, myDEy, nDEx, nDEy
-      integer :: localDE, deCountPerDim(2), coord(2)
-      type(ESMF_DistGridLocal),  pointer :: localC, localT
+      integer :: i, n, myDE
+      type(ESMF_DistGridGlobal), pointer :: glob
+      type(ESMF_DistGridLocal),  pointer :: local
 
       ! Initialize return code; assume failure until success is certain
       rc = ESMF_FAILURE
 
-      call ESMF_DELayoutGet(dgtype%delayout, localDe=localDE, &
-                            deCountPerDim=deCountPerDim, rc=localrc)
+      call ESMF_DELayoutGet(dgtype%delayout, localDe=myDE, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_DELayoutGetDELocalInfo(dgtype%delayout, de=localDE, &
-                                       coord=coord, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+      ! change myDE to F90 style, 1-based
+      myDE = myDE + 1
 
-      ! bring things into the form that the local code expects them in
-      nDEx  = deCountPerDim(1)
-      nDEy  = deCountPerDim(2)
-      myDEx = coord(1)
-      myDEy = coord(2)
-      DEID = (myDEy-1)*nDEx + myDEx
+      ! set pointers for ease of use
+      glob  => dgtype%globalComp
+      local => dgtype%myDEComp
 
-      localC => dgtype%myDEComp
-      localT => dgtype%myDETotal
-
-      localC%MyDE           = DEID
-      localT%MyDE           = DEID
-      localC%localCellCount = myCount
-      localT%localCellCount = myCount
+      ! set local derived type information
+      local%MyDE           = myDE
+      local%localCellCount = myCount
+      do i = 1,2
+        local%globalAIPerDim(i)       = glob%AIPerDEPerDim(myDE,i)
+        local%globalStartPerDim(i)    = glob%globalStartPerDEPerDim(myDE,i)
+        local%localCellCountPerDim(i) = glob%cellCountPerDEPerDim(myDE,i)
+        do n = 1,myCount
+          local%localIndices(n,i)     = myIndices(n,i)
+        enddo
+      enddo
 
       rc = ESMF_SUCCESS
 
@@ -2043,12 +2103,12 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridGetAllAxisIndex"
+#define ESMF_METHOD "ESMF_DistGridGetAllAIBlock"
 !BOPI
-! !IROUTINE: ESMF_DistGridGetAllAxisIndex - Get array of AxisIndices for DistGrid
+! !IROUTINE: ESMF_DistGridGetAllAIBlock - Get array of AxisIndices for DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGetAllAxisIndex(dgtype, AI, total, rc)
+      subroutine ESMF_DistGridGetAllAIBlock(dgtype, AI, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype
@@ -2104,7 +2164,101 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_DistGridGetAllAxisIndex
+      end subroutine ESMF_DistGridGetAllAIBlock
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridGetAllAIVect"
+!BOPI
+! !IROUTINE: ESMF_DistGridGetAllAIVect - Get array of AxisIndices for DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridGetAllAIVect(dgtype, AI, AIcountPerDE, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType), pointer :: dgtype
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI
+      integer, dimension(:), intent(out), pointer :: AIcountPerDE
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[dgtype]
+!          Class to be modified.
+!     \item[AI]
+!          Array of {\tt AxisIndices} corresponding to the {\tt DistGrid}.
+!     \item[{[total]}]
+!          Logical; if TRUE return AIs for all cells including boundary cells.
+!          Default is FALSE, returning AIs which describe only computational cells.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS: 
+
+      integer :: localrc                          ! Error status
+      integer :: i, i1, i2, j
+      integer :: nDEs, myDE, thisDE
+      integer, dimension(:), allocatable :: indices
+      type(ESMF_DistGridGlobal), pointer :: glob
+      type(ESMF_DistGridLocal), pointer :: me
+      type(ESMF_VM) :: vm
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! set pointers to data
+      glob => dgtype%globalComp
+      me   => dgtype%myDEComp
+
+      ! allocate local array
+      allocate(indices(2*glob%maxLocalCellCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "indices", &
+                                     ESMF_CONTEXT, rc)) return
+
+      ! first get the appropriate VM
+      call ESMF_DELayoutGetVM(dgtype%delayout, vm, localrc)
+      call ESMF_DELayoutGet(dgtype%delayout, deCount=nDEs, rc=localrc)
+      call ESMF_VMGet(vm, localPet=myDE, rc=localrc)   ! fix this
+
+      i1    = 0
+      do j  = 1,nDEs
+        thisDE = j - 1
+        if (myDE.eq.thisDE) then
+          do i = 1,me%localCellCount
+            i2 = i + me%localCellCount
+            indices(i)  = me%localIndices(i,1)
+            indices(i2) = me%localIndices(i,2)
+          enddo
+        endif
+        call ESMF_VMBroadcast(vm, indices, indices, 2*glob%cellCountPerDE(j), &
+                              thisDE, rc=localrc)
+        ! unload into the big AI array
+        AICountPerDE(j) = glob%cellCountPerDE(j)
+        do i = 1,glob%cellCountPerDE(j)
+          i1 = i1 + 1
+          i2 = i + glob%cellCountPerDE(j)
+          AI(i1,1)%min    = indices(i)
+          AI(i1,1)%max    = indices(i)
+          AI(i1,1)%stride = glob%globalCellCountPerDim(1)
+          AI(i1,2)%min    = indices(i2)
+          AI(i1,2)%max    = indices(i2)
+          AI(i1,2)%stride = glob%globalCellCountPerDim(2)
+        enddo
+      enddo
+
+      ! clean up
+      deallocate(indices, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                     ESMF_CONTEXT, rc)) return
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridGetAllAIVect
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2679,10 +2833,9 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridAllocateBlock"
 !BOPI
-! !IROUTINE: ESMF_DistGridAllocate - Allocate arrays in a DistGrid
+! !IROUTINE: ESMF_DistGridAllocateBlock - Allocate arrays in a DistGrid
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_DistGridAllocate()
       subroutine ESMF_DistGridAllocateBlock(dgtype, nDEs, dimCount, rc)
 !
 ! !ARGUMENTS:
@@ -2768,15 +2921,16 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridAllocateVect"
 !BOPI
-! !IROUTINE: ESMF_DistGridAllocate - Allocate arrays in a DistGrid
+! !IROUTINE: ESMF_DistGridAllocateVect - Allocate arrays in a DistGrid
 
 ! !INTERFACE:
-      ! Private name; call using ESMF_DistGridAllocate()
-      subroutine ESMF_DistGridAllocateVect(dgtype, dimCount, rc)
+      subroutine ESMF_DistGridAllocateVect(dgtype, nDEs, dimCount, myCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype 
+      integer, intent(in) :: nDEs
       integer, intent(in) :: dimCount
+      integer, intent(in) :: myCount
       integer, intent(out) :: rc            
 !
 ! !DESCRIPTION:
@@ -2796,6 +2950,8 @@
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 
       integer :: localrc                          ! Error status
+      type(ESMF_DistGridLocal), pointer :: me
+      type(ESMF_DistGridGlobal), pointer :: glob
 
       ! Initialize return code; assume failure until success is certain
       rc = ESMF_FAILURE
@@ -2804,6 +2960,25 @@
       allocate(dgtype%decompIDs   (dimCount), &
                dgtype%coversDomain(dimCount), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "distgrid contents", &
+                                     ESMF_CONTEXT, rc)) return
+
+      ! myDEComp contents here:
+      me => dgtype%myDEComp
+      allocate(me%localCellCountPerDim(dimCount), &
+               me%globalStartPerDim   (dimCount), &
+               me%globalAIPerDim      (dimCount), &
+               me%localIndices(myCount,dimCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "myDETotal contents", &
+                                     ESMF_CONTEXT, rc)) return
+
+      ! globalComp contents here:
+      glob => dgtype%globalComp
+      allocate(glob%globalCellCountPerDim  (     dimCount), &
+               glob%globalStartPerDEPerDim (nDEs,dimCount), &
+               glob%cellCountPerDE         (nDEs         ), &
+               glob%cellCountPerDEPerDim   (nDEs,dimCount), &
+               glob%AIPerDEPerDim          (nDEs,dimCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "globalTotal contents", &
                                      ESMF_CONTEXT, rc)) return
 
       rc = ESMF_SUCCESS

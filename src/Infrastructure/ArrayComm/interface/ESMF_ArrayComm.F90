@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.59 2004/12/03 20:47:44 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.60 2004/12/17 19:41:37 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.59 2004/12/03 20:47:44 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.60 2004/12/17 19:41:37 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -397,8 +397,9 @@
 ! !IROUTINE: ESMF_ArrayGetAllAxisIndices - Get all AIs associated with a Grid
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayGetAllAxisIndices(array, grid, datamap, totalindex, &
-                                             compindex, exclindex, rc)
+      subroutine ESMF_ArrayGetAllAxisIndices(array, grid, datamap, &
+                                             totalindex, compindex, exclindex, &
+                                             AICountPerDE, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: array
@@ -407,6 +408,7 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: totalindex
       type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: compindex
       type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: exclindex
+      integer, dimension(:), pointer, optional :: AIcountPerDE
       integer, intent(out), optional :: rc
 ! 
 ! !DESCRIPTION:
@@ -418,37 +420,65 @@
 !
 !EOPI
 
-      integer :: status, nDEs, i, j, gridrank, datarank
-      integer, dimension(:), allocatable :: dimOrder
+      integer :: status, nDEs, nAIs, i, j
+      integer :: gridrank, datarank, maxrank
+      integer, dimension(:), allocatable :: dimOrder, countPerDim
       type(ESMF_AxisIndex), dimension(:), pointer :: arrayindex
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gridindex, globalindex
-      type (ESMF_DELayout) :: delayout
+      type(ESMF_DELayout) :: delayout
+      type(ESMF_GridStorage) :: gridStorage
       type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
       ! get layout from the grid in order to get the number of DEs
       call ESMF_ArrayGet(array, rank=datarank, rc=status)
-      call ESMF_GridGet(grid, dimCount=gridrank, rc=status)
-      call ESMF_GridGet(grid, delayout=delayout, rc=status)
+      call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, &
+                        gridStorage=gridStorage, rc=status)
       call ESMF_DELayoutGet(delayout, nDEs, rc=status)
 
       ! allocate dimOrder array and get from datamap
-      allocate(dimOrder(datarank), stat=status)
+      maxrank = max(datarank, gridrank)
+      if (gridStorage.eq.ESMF_GRID_STORAGE_VECTOR) &
+        maxrank = max(datarank+1, gridrank)     ! possible for vector storage
+      allocate(dimOrder(maxrank), stat=status)
       call ESMF_FieldDataMapGet(datamap, dataIndexList=dimOrder, &
                            horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                            rc=status)
+    
+      ! for vector storage, modify the dimOrder array
+      if (gridStorage.eq.ESMF_GRID_STORAGE_VECTOR) then
+        do i = maxrank,gridrank,-1
+          dimOrder(i) = dimOrder(i-1)
+        enddo
+        dimOrder(gridrank) = 2
+      endif
+
+      ! set the number of AIs based on the grid storage
+      nAIs = nDEs
+      if (gridStorage.eq.ESMF_GRID_STORAGE_VECTOR) then
+        allocate(countPerDim(gridrank))
+        call ESMF_GridGet(grid, horzrelloc=horzRelLoc, vertrelloc=vertRelLoc, &
+                          globalCellCountPerDim=countPerDim, rc=status)
+        nAIs = 1
+        do i = 1,gridrank
+          nAIs = nAIs * countPerDim(i)
+        enddo
+        deallocate(countPerDim)
+      endif
 
       ! allocate arrayindex array and get all of them from the array
       allocate(arrayindex(datarank), stat=status)
       call ESMF_ArrayGetAxisIndex(array, arrayindex, rc=status)
 
       ! allocate gridindex array and get all of them from the grid
-      allocate(gridindex(nDEs,gridrank), stat=status)
-      call ESMF_GridGetAllAxisIndex(grid, gridindex, horzRelLoc=horzRelLoc, &
-                                    vertRelLoc=vertRelLoc, rc=status)
+      allocate(gridindex(nAIs,gridrank), stat=status)
+      call ESMF_GridGetAllAxisIndex(grid, gridindex, &
+                                    horzRelLoc=horzRelLoc, &
+                                    vertRelLoc=vertRelLoc, &
+                                    AICountPerDE=AICountPerDE, rc=status)
 
       ! load globalindex with arrayindex and gridindex
-      allocate(globalindex(nDEs,datarank), stat=status)
-      do i = 1,datarank
+      allocate(globalindex(nAIs, maxrank), stat=status)
+      do i = 1,maxrank
         if (dimOrder(i).eq.0) then
           globalindex(:,i) = arrayindex(i)
         else
@@ -456,9 +486,21 @@
         endif
       enddo
 
-      if (present(totalindex)) then
+      if (gridStorage.eq.ESMF_GRID_STORAGE_VECTOR) then
+        if (present(compindex)) then
+          do j=1,size(compindex, 2)
+            do i=1, nAIs
+              compindex(i,j)%min    = globalindex(i,j)%min
+              compindex(i,j)%max    = globalindex(i,j)%max
+              compindex(i,j)%stride = globalindex(i,j)%stride
+            enddo
+          enddo
+       endif
+
+      else
+        if (present(totalindex)) then
           call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_TOTAL, &
-                                           globalindex, nDEs, datarank, &
+                                           globalindex, nAIs, datarank, &
                                            totalindex, status)
           if (status .ne. ESMF_SUCCESS) goto 10
           ! translate from C++ to F90
@@ -468,11 +510,11 @@
               totalindex(i,j)%max = totalindex(i,j)%max + 1
             enddo
           enddo
-      endif
+        endif
 
-      if (present(compindex)) then
+        if (present(compindex)) then
           call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
-                                           globalindex, nDEs, datarank, &
+                                           globalindex, nAIs, datarank, &
                                            compindex, status)
           if (status .ne. ESMF_SUCCESS) goto 10
           ! translate from C++ to F90
@@ -482,11 +524,11 @@
               compindex(i,j)%max = compindex(i,j)%max + 1
             enddo
           enddo
-      endif
+        endif
 
-      if (present(exclindex)) then
+        if (present(exclindex)) then
           call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_EXCLUSIVE, &
-                                           globalindex, nDEs, datarank, &
+                                           globalindex, nAIs, datarank, &
                                            exclindex, status)
           if (status .ne. ESMF_SUCCESS) goto 10
           ! translate from C++ to F90
@@ -496,6 +538,7 @@
               exclindex(i,j)%max = exclindex(i,j)%max + 1
             enddo
           enddo
+        endif
       endif
 
       status = ESMF_SUCCESS
@@ -1083,24 +1126,27 @@
 !EOP
 
       integer :: status         ! local error status
-      type(ESMF_DELayout) :: dstDElayout, srcDElayout
-      type(ESMF_VM) :: vm
-      type(ESMF_Logical), dimension(:), allocatable :: periodic
+      integer :: dstAICount, srcAICount
+      integer :: dstDEs, srcDEs, dstMyDE, srcMyDE
+      integer :: gridrank, datarank
+      integer, dimension(ESMF_MAXDIM) :: dstDimOrder, srcDimOrder, dimlengths
+      integer, dimension(:), allocatable :: dstCellCountPerDim, decompids, &
+                                            srcCellCountPerDim
+      integer, dimension(:), pointer :: dstAICountPerDE, srcAICountPerDE
+      integer, dimension(:,:), allocatable :: dstStartPerDEPerDim, &
+                                              srcStartPerDEPerDim
+      logical :: dstVector, srcVector
       type(ESMF_AxisIndex), dimension(:,:), pointer :: dstCompAI, srcCompAI, &
                                                      dstTotalAI, srcTotalAI, &
                                                    dstCLocalAI, srcCLocalAI, &
                                                    dstTLocalAI, srcTLocalAI
+      type(ESMF_DELayout) :: dstDElayout, srcDElayout
+      type(ESMF_GridStorage) :: dstStorage, srcStorage
+      type(ESMF_Logical), dimension(:), allocatable :: periodic
       type(ESMF_RelLoc) :: dstHorzRelLoc, srcHorzRelLoc, &
                            dstVertRelLoc, srcVertRelLoc
       type(ESMF_Route) :: route
-      integer, dimension(:), allocatable :: dstCellCountPerDim, decompids, &
-                                            srcCellCountPerDim
-      integer, dimension(ESMF_MAXDIM) :: dstDimOrder, srcDimOrder, dimlengths
-      integer, dimension(:,:), allocatable :: dstStartPerDEPerDim, &
-                                              srcStartPerDEPerDim
-      integer :: nDEs, dstMyDE, srcMyDE
-      integer :: gridrank, datarank
-      logical :: hascachedroute     ! can we reuse an existing route?
+      type(ESMF_VM) :: vm
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -1108,137 +1154,222 @@
       ! create the routehandle
       routehandle = ESMF_RouteHandleCreate(status)
 
-      ! Extract layout information from the Grids
-      call ESMF_GridGet(dstGrid, delayout=dstDElayout, rc=status)
-      call ESMF_GridGet(srcGrid, delayout=srcDElayout, rc=status)
-      call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=status)
+      ! Query the datamap and set info for grid so it knows how to
+      ! match up the array indices and the grid indices.
+      call ESMF_FieldDataMapGet(dstDataMap, horzRelLoc=dstHorzRelLoc, &
+                                vertRelLoc=dstVertRelLoc, &
+                                dataIndexList=dstDimOrder, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_FieldDataMapGet(srcDataMap, horzRelLoc=srcHorzRelLoc, &
+                                vertRelLoc=srcVertRelLoc, &
+                                dataIndexList=srcDimOrder, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! Extract information from the Grids
+      call ESMF_GridGet(dstGrid, delayout=dstDElayout, &
+                        gridStorage=dstStorage, &
+                        horzRelLoc=dstHorzRelLoc, vertRelLoc=dstVertRelLoc, &
+                        rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_GridGet(srcGrid, delayout=srcDElayout, &
+                        gridStorage=srcStorage, dimCount=gridrank, &
+                        horzRelLoc=srcHorzRelLoc, vertRelLoc=srcVertRelLoc, &
+                        rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Our DE number in the layout and the total number of DEs
-      call ESMF_DELayoutGet(dstDElayout, deCount=nDEs, localDe=dstMyDE, &
-                               rc=status)
-      call ESMF_DELayoutGet(srcDElayout, localDE=srcMyDE, rc=status)
+      call ESMF_DELayoutGet(dstDElayout, deCount=dstDEs, localDe=dstMyDE, &
+                            rc=status)
+      call ESMF_DELayoutGet(srcDElayout, deCount=srcDEs, localDE=srcMyDE, &
+                            rc=status)
 
       ! Allocate temporary arrays
-      allocate(           periodic(      gridrank), stat=status)
-      allocate(          decompids(      gridrank), stat=status)
-      allocate( dstCellCountPerDim(      gridrank), stat=status)
-      allocate(dstStartPerDEPerDim(nDEs, gridrank), stat=status)
-      allocate( srcCellCountPerDim(      gridrank), stat=status)
-      allocate(srcStartPerDEPerDim(nDEs, gridrank), stat=status)
-      allocate(          dstCompAI(nDEs, gridrank), stat=status)
-      allocate(          srcCompAI(nDEs, gridrank), stat=status)
-      allocate(         dstTotalAI(nDEs, gridrank), stat=status)
-      allocate(         srcTotalAI(nDEs, gridrank), stat=status)
-      allocate(        dstCLocalAI(nDEs, gridrank), stat=status)
-      allocate(        srcCLocalAI(nDEs, gridrank), stat=status)
-      allocate(        dstTLocalAI(nDEs, gridrank), stat=status)
-      allocate(        srcTLocalAI(nDEs, gridrank), stat=status)
+      dstVector = .false.
+      srcVector = .false.
+      allocate(          periodic(gridrank), &
+                        decompids(gridrank), &
+               dstCellCountPerDim(gridrank), &
+               srcCellCountPerDim(gridrank), stat=status)
+      allocate(dstStartPerDEPerDim(dstDEs, gridrank), &
+               srcStartPerDEPerDim(srcDEs, gridrank), stat=status)
 
-      ! Query the datamap and set info for grid so it knows how to
-      ! match up the array indicies and the grid indicies.
-      call ESMF_FieldDataMapGet(dstDataMap, horzRelLoc=dstHorzRelLoc, &
-                           vertRelLoc=dstVertRelLoc, &
-                           dataIndexList=dstDimOrder, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-      call ESMF_FieldDataMapGet(srcDataMap, horzRelLoc=srcHorzRelLoc, &
-                           vertRelLoc=srcVertRelLoc, &
-                           dataIndexList=srcDimOrder, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      if (dstStorage.eq.ESMF_GRID_STORAGE_LOGRECT) then
+        allocate(  dstCompAI(dstDEs, gridrank), &
+                  dstTotalAI(dstDEs, gridrank), &
+                 dstCLocalAI(dstDEs, gridrank), &
+                 dstTLocalAI(dstDEs, gridrank), stat=status)
+      endif
+      if (srcStorage.eq.ESMF_GRID_STORAGE_LOGRECT) then
+        allocate(  srcCompAI(srcDEs, gridrank), &
+                  srcTotalAI(srcDEs, gridrank), &
+                 srcCLocalAI(srcDEs, gridrank), &
+                 srcTLocalAI(srcDEs, gridrank), stat=status)
+      endif
 
-      ! Extract more information from the Grids
-      ! TODO: get decompids?
+      ! get more grid information
       call ESMF_GridGet(dstGrid, &
                         horzRelLoc=dstHorzRelLoc, vertRelLoc=dstVertRelLoc, &
                         globalCellCountPerDim=dstCellCountPerDim, &
                         globalStartPerDEPerDim=dstStartPerDEPerDim, rc=status)
       if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       call ESMF_GridGet(srcGrid, &
                         horzRelLoc=srcHorzRelLoc, vertRelLoc=srcVertRelLoc, &
                         globalCellCountPerDim=srcCellCountPerDim, &
                         globalStartPerDEPerDim=srcStartPerDEPerDim, rc=status)
       if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! allocate more local arrays for vector storage
+      if (dstStorage.eq.ESMF_GRID_STORAGE_VECTOR) then
+        dstVector  = .true.
+        dstAICount = dstCellCountPerDim(1)*dstCellCountPerDim(2)
+        allocate(  dstCompAI(dstAICount, gridrank), &
+                  dstTotalAI(dstAICount, gridrank), stat=status)
+      endif
+      if (srcStorage.eq.ESMF_GRID_STORAGE_VECTOR) then
+        srcVector  = .true.
+        srcAICount = srcCellCountPerDim(1)*srcCellCountPerDim(2)
+        allocate(  srcCompAI(srcAICount, gridrank), &
+                  srcTotalAI(srcAICount, gridrank), stat=status)
+      endif
+      if (dstVector .OR. srcVector) then
+        allocate(dstAICountPerDE(dstDEs), &
+                 srcAICountPerDE(srcDEs), stat=status)
+        dstAICountPerDE = 1
+        srcAICountPerDE = 1
+      endif
 
       ! And get the Array sizes
       call ESMF_ArrayGet(srcArray, rank=datarank, counts=dimlengths, rc=status)
       if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      if (srcStorage.eq.ESMF_GRID_STORAGE_VECTOR) datarank = datarank + 1
 
       ! TODO: apply dimorder and decompids to get mapping of array to data
 
-      ! set up things we need to find a cached route or precompute one
-      call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
-                                       compindex =dstCLocalAI, &
-                                       totalindex=dstTLocalAI, rc=status)
-      call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
-                                       compindex =srcCLocalAI, &
-                                       totalindex=srcTLocalAI, rc=status)
-
-      ! translate AI's into global numbering
-      call ESMF_GridDELocalToGlobalAI(dstGrid, &
-                                      horzRelLoc=dstHorzRelLoc, &
-                                      vertRelLoc=dstVertRelLoc, &
-                                      localAI2D=dstCLocalAI, &
-                                      globalAI2D=dstCompAI, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      ! set up things we need to precompute a route
+      if (dstStorage.eq.ESMF_GRID_STORAGE_LOGRECT) then
+        call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+                                         compindex =dstCLocalAI, &
+                                         totalindex=dstTLocalAI, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridDELocalToGlobalAI(dstGrid, &
-                                      horzRelLoc=dstHorzRelLoc, &
-                                      vertRelLoc=dstVertRelLoc, &
-                                      localAI2D=dstTLocalAI, &
-                                      globalAI2D=dstTotalAI, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+        ! translate AI's into global numbering
+        call ESMF_GridDELocalToGlobalAI(dstGrid, &
+                                        horzRelLoc=dstHorzRelLoc, &
+                                        vertRelLoc=dstVertRelLoc, &
+                                        localAI2D=dstCLocalAI, &
+                                        globalAI2D=dstCompAI, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        call ESMF_GridDELocalToGlobalAI(dstGrid, &
+                                        horzRelLoc=dstHorzRelLoc, &
+                                        vertRelLoc=dstVertRelLoc, &
+                                        localAI2D=dstTLocalAI, &
+                                        globalAI2D=dstTotalAI, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridDELocalToGlobalAI(srcGrid, &
-                                      horzRelLoc=srcHorzRelLoc, &
-                                      vertRelLoc=srcVertRelLoc, &
-                                      localAI2D=srcCLocalAI, &
-                                      globalAI2D=srcCompAI, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      elseif (dstStorage.eq.ESMF_GRID_STORAGE_VECTOR) then
+        call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+                                         compindex=dstCompAI, &
+                                         AICountPerDE=dstAICountPerDE, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+                                         compindex=dstTotalAI, &
+                                         AICountPerDE=dstAICountPerDE, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      ! now the source grid
+      if (srcStorage.eq.ESMF_GRID_STORAGE_LOGRECT) then
+        call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+                                         compindex =srcCLocalAI, &
+                                         totalindex=srcTLocalAI, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        call ESMF_GridDELocalToGlobalAI(srcGrid, &
+                                        horzRelLoc=srcHorzRelLoc, &
+                                        vertRelLoc=srcVertRelLoc, &
+                                        localAI2D=srcCLocalAI, &
+                                        globalAI2D=srcCompAI, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        call ESMF_GridDELocalToGlobalAI(srcGrid, &
+                                        horzRelLoc=srcHorzRelLoc, &
+                                        vertRelLoc=srcVertRelLoc, &
+                                        localAI2D=srcTLocalAI, &
+                                        globalAI2D=srcTotalAI, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridDELocalToGlobalAI(srcGrid, &
-                                      horzRelLoc=srcHorzRelLoc, &
-                                      vertRelLoc=srcVertRelLoc, &
-                                      localAI2D=srcTLocalAI, &
-                                      globalAI2D=srcTotalAI, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      elseif (srcStorage.eq.ESMF_GRID_STORAGE_VECTOR) then
+        call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+                                         compindex=srcCompAI, &
+                                         AICountPerDE=srcAICountPerDE, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+        call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+                                         compindex=srcTotalAI, &
+                                         AICountPerDE=srcAICountPerDE, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      endif
 
-      ! Does this same route already exist?  If so, then we can drop
-      ! down immediately to RouteRun.
-      call ESMF_RouteGetCached(datarank, &
-                            dstMyDE, dstCompAI, dstTotalAI, nDEs, dstDElayout, &
-                            srcMyDE, srcCompAI, srcTotalAI, nDEs, srcDElayout, &
-                            periodic, hascachedroute, route, status)
+      ! Get the associated VM
+      call ESMF_DELayoutGetVM(parentDElayout, vm, rc=status)
 
-      if (.not. hascachedroute) then
-          ! Get the associated VM
-          call ESMF_DELayoutGetVM(parentDElayout, vm, rc=status)
+      ! Create the route object.
+      route = ESMF_RouteCreate(vm, rc)
 
-          ! Create the route object.
-          route = ESMF_RouteCreate(vm, rc)
-
-          call ESMF_RoutePrecomputeRedist(route, datarank, dstMyDE, dstCompAI, &
-                                       dstTotalAI, dstStartPerDEPerDim, &
-                                       dstCellCountPerDim, dstDElayout, &
-                                       srcMyDE, srcCompAI, srcTotalAI, &
-                                       srcStartPerDEPerDim, &
-                                       srcCellCountPerDim, srcDElayout, status)
+      if (dstVector .OR. srcVector) then
+        call ESMF_RoutePrecomputeRedistV(route, datarank, &
+                                         dstMyDE, dstVector, &
+                                         dstCompAI, dstTotalAI, &
+                                         dstAICountPerDE, dstStartPerDEPerDim, &
+                                         dstCellCountPerDim, dstDElayout, &
+                                         srcMyDE, srcVector, &
+                                         srcCompAI, srcTotalAI, &
+                                         srcAICountPerDE, srcStartPerDEPerDim, &
+                                         srcCellCountPerDim, srcDElayout, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      else
+        call ESMF_RoutePrecomputeRedist(route, datarank, dstMyDE, dstCompAI, &
+                                        dstTotalAI, dstStartPerDEPerDim, &
+                                        dstCellCountPerDim, dstDElayout, &
+                                        srcMyDE, srcCompAI, srcTotalAI, &
+                                        srcStartPerDEPerDim, &
+                                        srcCellCountPerDim, srcDElayout, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       ! and set route into routehandle object
@@ -1252,6 +1383,8 @@
       if (allocated( srcCellCountPerDim)) deallocate(srcCellCountPerDim)
       if (allocated(dstStartPerDEPerDim)) deallocate(dstStartPerDEPerDim)
       if (allocated(srcStartPerDEPerDim)) deallocate(srcStartPerDEPerDim)
+      if (associated(   dstAICountPerDE)) deallocate(dstAICountPerDE)
+      if (associated(   srcAICountPerDE)) deallocate(srcAICountPerDE)
       if (associated(         dstCompAI)) deallocate(dstCompAI)
       if (associated(         srcCompAI)) deallocate(srcCompAI)
       if (associated(        dstTotalAI)) deallocate(dstTotalAI)

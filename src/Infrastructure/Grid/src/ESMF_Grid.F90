@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.206 2004/12/14 15:38:18 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.207 2004/12/17 19:40:42 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.206 2004/12/14 15:38:18 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.207 2004/12/17 19:40:42 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -137,6 +137,24 @@
 !EOPI
       end interface
 !
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridDistribute - Grid Distribute routines
+!
+! !INTERFACE:
+      interface ESMF_GridDistribute
+
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_GridDistributeBlock
+        module procedure ESMF_GridDistributeVect
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that distribute
+!     (or decompose) an {\tt ESMF\_Grid}.
+
+!EOPI
+      end interface
+
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_GridGet - Grid Get routines
@@ -1128,13 +1146,14 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridDistribute"
+#define ESMF_METHOD "ESMF_GridDistributeBlock"
 !BOP
-! !IROUTINE: ESMF_GridDistribute - Distribute a Grid that has already been initialized
+! !IROUTINE: ESMF_GridDistribute - Distribute a Grid with block storage 
 
 ! !INTERFACE:
-      subroutine ESMF_GridDistribute(grid, delayout, countsPerDEDim1, &
-                                     countsPerDEDim2, decompIds, name, rc)
+     ! Private name; call using ESMF_GridDistribute()
+      subroutine ESMF_GridDistributeBlock(grid, delayout, countsPerDEDim1, &
+                                          countsPerDEDim2, decompIds, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -1218,8 +1237,9 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridDistribute(grid%ptr, delayout, countsPerDEDim1, &
-                                   countsPerDEDim2, decompIds, name, localrc)
+        call ESMF_LRGridDistributeBlock(grid%ptr, delayout, countsPerDEDim1, &
+                                        countsPerDEDim2, decompIds, name, &
+                                        localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -1255,7 +1275,128 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridDistribute
+      end subroutine ESMF_GridDistributeBlock
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridDistributeVect"
+!BOP
+! !IROUTINE: ESMF_GridDistribute - Distribute a Grid with vector storage 
+
+! !INTERFACE:
+     ! Private name; call using ESMF_GridDistribute()
+      subroutine ESMF_GridDistributeVect(grid, delayout, myCount, myIndices, &
+                                         decompIds, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      type(ESMF_DELayout), intent(in) :: delayout
+      integer, intent(in) :: myCount
+      integer, dimension(:,:), intent(in) :: myIndices
+      integer, dimension(:), intent(in), optional :: decompIds
+      character (len = *), intent(in), optional :: name
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Sets the decomposition of the {\tt grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          {\tt ESMF\_Grid} to be distributed.
+!     \item[delayout]
+!         {\tt ESMF\_DELayout} on which the {\tt grid} is to be decomposed.
+!     \item[myCount]
+!          Number of grid cells to be distributed to this DE.
+!     \item[myIndices]
+!          Array of grid indices to be distributed to this DE, as (i,j) pairs.
+!          The size of this array must be at least [myCount] in the first
+!          dimension and 2 in the second.
+!     \item[{[decompIds]}]
+!          Integer array identifying which {\tt grid} axes are decomposed.
+!          This array describes the relationship between the {\tt grid} and the
+!          {\tt delayout}.  The elements of this array contains decompostion
+!          information for the corresponding grid axis.  The following is a
+!          list of valid values and the meaning of each:
+!                  0   the grid axis is not distributed;
+!                  1   the grid axis is distributed by the first decomposition
+!                      axis in the {\tt delayout};
+!                  2   the grid axis is distributed by the second decomposition
+!                      axis in the {\tt delayout}.
+!          The number of array elements should be greater or equal to the number
+!          of grid dimensions.  The default is that the first grid axis is
+!          distributed by the first decompostion axis, the second grid axis is
+!          distributed by the second decomposition axis, and the third grid axis
+!          (if applicable) is not distributed.  The relationship between data
+!          axes (from an {\tt ESMF\_Field} or {\tt ESMF\_Array}) and {\tt grid}
+!          axes are defined elsewhere in {\tt ESMF\_FieldDataMap} and
+!          {\tt ESMF\_ArrayDataMap} interfaces.
+!     \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!EOP
+
+      integer :: localrc                          ! local error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Call GridDistribute routines based on GridStructure
+
+      select case(grid%ptr%gridStructure%gridStructure)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
+      case(0)
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT
+      case(1)
+        call ESMF_LRGridDistributeVect(grid%ptr, delayout, myCount, myIndices, &
+                                       decompIds, name, localrc)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
+      case(2)
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
+      case(3)
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_USER
+      case(4)
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
+
+      !-------------
+      case default
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
+      end select
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridDistributeVect
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1269,7 +1410,8 @@
                                      horzgridtype, vertgridtype, &
                                      horzstagger, vertstagger, &
                                      horzcoordsystem, vertcoordsystem, &
-                                     coordorder, dimCount, &
+                                     coordorder, &
+                                     dimCount, distDimCount, gridStorage, &
                                      minGlobalCoordPerDim, maxGlobalCoordPerDim, &
                                      periodic, delayout, name, rc)
 !
@@ -1283,6 +1425,8 @@
       type(ESMF_CoordSystem), intent(out), optional :: vertcoordsystem
       type(ESMF_CoordOrder),  intent(out), optional :: coordorder
       integer, intent(out), optional :: dimCount
+      integer, intent(out), optional :: distDimCount
+      type(ESMF_GridStorage), intent(out), optional :: gridStorage
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
                             minGlobalCoordPerDim
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
@@ -1321,6 +1465,10 @@
 !          ordering for the Grid and all related Fields (i.e. KIJ).
 !     \item[{[dimCount]}]
 !          Number of dimensions represented by this {\tt grid}.
+!     \item[{[distDimCount]}]
+!          Number of dimensions represented by the distribution of this {\tt grid}.
+!     \item[{[gridStorage]}]
+!          {\tt ESMF\_GridStorage} specifier to denote grid storage.
 !     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
 !     \item[{[maxGlobalCoordPerDim]}]
@@ -1373,6 +1521,8 @@
             present(vertcoordsystem        ) .OR. &
             present(coordorder             ) .OR. &
             present(dimCount               ) .OR. &
+            present(distDimCount           ) .OR. &
+            present(gridStorage            ) .OR. &
             present(minGlobalCoordPerDim   ) .OR. &
             present(maxGlobalCoordPerDim   ) .OR. &
             present(periodic               ) .OR. &
@@ -1392,7 +1542,9 @@
                             vertStagger=vertstagger, &
                             horzCoordSystem=horzcoordsystem, &
                             vertCoordSystem=vertcoordsystem, &
-                            coordOrder=coordorder, dimCount=dimCount, &
+                            coordOrder=coordorder, &
+                            dimCount=dimCount, distDimCount=distDimCount, &
+                            gridStorage=gridStorage, &
                             minGlobalCoordPerDim=minGlobalCoordPerDim, &
                             maxGlobalCoordPerDim=maxGlobalCoordPerDim, &
                             periodic=periodic, delayout=delayout, &
@@ -1447,7 +1599,8 @@
                                         horzgridtype, vertgridtype, &
                                         horzstagger, vertstagger, &
                                         horzcoordsystem, vertcoordsystem, &
-                                        coordorder, dimCount, &
+                                        coordorder, &
+                                        dimCount, distDimCount, gridStorage, &
                                         minGlobalCoordPerDim, &
                                         maxGlobalCoordPerDim, &
                                         globalCellCountPerDim, &
@@ -1468,6 +1621,8 @@
       type(ESMF_CoordSystem), intent(out), optional :: vertcoordsystem
       type(ESMF_CoordOrder),  intent(out), optional :: coordorder
       integer, intent(out), optional :: dimCount
+      integer, intent(out), optional :: distDimCount
+      type(ESMF_GridStorage), intent(out), optional :: gridStorage
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
                             minGlobalCoordPerDim
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
@@ -1516,6 +1671,10 @@
 !          ordering for the Grid and all related Fields (i.e. KIJ).
 !     \item[{[dimCount]}]
 !          Number of dimensions represented by this {\tt grid}.
+!     \item[{[distDimCount]}]
+!          Number of dimensions represented by the distribution of this {\tt grid}.
+!     \item[{[gridStorage]}]
+!          {\tt ESMF\_GridStorage} specifier to denote grid storage.
 !     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
 !     \item[{[maxGlobalCoordPerDim]}]
@@ -1576,6 +1735,8 @@
             present(vertcoordsystem        ) .OR. &
             present(coordorder             ) .OR. &
             present(dimCount               ) .OR. &
+            present(distDimCount           ) .OR. &
+            present(gridStorage            ) .OR. &
             present(minGlobalCoordPerDim   ) .OR. &
             present(maxGlobalCoordPerDim   ) .OR. &
             present(globalCellCountPerDim  ) .OR. &
@@ -1596,10 +1757,11 @@
                             horzgridtype, vertgridtype, &
                             horzstagger, vertstagger, &
                             horzcoordsystem, vertcoordsystem, &
-                            coordorder, dimCount, minGlobalCoordPerDim, &
-                            maxGlobalCoordPerDim, globalCellCountPerDim, &
-                            globalStartPerDEPerDim, maxLocalCellCountPerDim, &
-                            cellCountPerDEPerDim, periodic, delayout=delayout, &
+                            coordorder, dimCount, distDimCount, gridStorage, &
+                            minGlobalCoordPerDim, maxGlobalCoordPerDim, &
+                            globalCellCountPerDim, maxLocalCellCountPerDim, &
+                            globalStartPerDEPerDim, cellCountPerDEPerDim, &
+                            periodic, delayout=delayout, &
                             name=name, rc=localrc)
 
       !-------------
@@ -4872,13 +5034,14 @@
 
 ! !INTERFACE:
       subroutine ESMF_GridGetAllAxisIndex(grid, globalAI, horzrelloc, &
-                                          vertrelloc, total, rc)
+                                          vertrelloc, AICountPerDE, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(:,:), pointer :: globalAI
       type(ESMF_RelLoc), intent(in) :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
+      integer, dimension(:), pointer, optional :: AICountPerDE
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
@@ -4891,6 +5054,7 @@
 !          Class to be queried.
 !     \item[globalAI]
 !          Global axis indices on all DE's.
+!     \item[{[AICountPerDE]}]
 !     \item[{[total]}]
 !          Logical flag for whether the axis indices should be for total
 !          cells or not.  Default is false, which infers computational cells.
@@ -4921,7 +5085,7 @@
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridGetAllAxisIndex(grid, globalAI, horzrelloc, vertrelloc, &
-                                        total, localrc)
+                                        AICountPerDE, total, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
