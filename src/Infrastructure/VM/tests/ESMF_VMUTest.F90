@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.11 2004/12/03 17:15:00 rfaincht Exp $
+! $Id: ESMF_VMUTest.F90,v 1.12 2004/12/06 18:59:46 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -18,7 +18,7 @@
 
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_VMTest - One line general statement about this test
+! !PROGRAM: ESMF_VMTest - This unit test file verifies VM methods.
 !
 ! !DESCRIPTION:
 !
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.11 2004/12/03 17:15:00 rfaincht Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.12 2004/12/06 18:59:46 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -108,7 +108,6 @@
 
 
       !------------------------------------------------------------------------
-      !EX_UTest
 
       ! allocate data arrays
       nsize = 2
