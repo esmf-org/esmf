@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.7 2004/03/24 22:56:05 jwolfe Exp $
+! $Id: InjectorMod.F90,v 1.8 2004/04/16 15:40:37 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -151,7 +151,7 @@
       ! Local variables
       !
       integer :: i, j
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: layout
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       integer :: on_month, on_day, on_hour, on_min

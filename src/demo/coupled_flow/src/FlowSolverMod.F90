@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.10 2004/03/24 22:54:52 jwolfe Exp $
+! $Id: FlowSolverMod.F90,v 1.11 2004/04/16 15:40:37 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -163,7 +163,7 @@
 ! Local variables
 !
       integer :: i, j
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: layout
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_min_coord
@@ -413,11 +413,11 @@
 !
       integer :: status
       logical :: rcpresent
-      integer :: i, j, n, x, y, nx, ny
+      integer :: i, j, n, x, y, nx, ny, ncounts(2), pos(2), de_id
       integer, dimension(1,2) :: local, global
       real(ESMF_KIND_R8) :: s_
       type(ESMF_Grid) :: grid
-      type(ESMF_DElayout) :: layout
+      type(ESMF_newDELayout) :: layout
 !
 ! Set initial values
 !
@@ -473,16 +473,21 @@
         print *, "ERROR in Flowinit:  grid comp get"
         return
       endif
-      call ESMF_DELayoutGetSize(layout, nx, ny, status)
+      call ESMF_newDELayoutGet(layout, deCountPerDim=ncounts, localDE=de_id, &
+                               rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get size"
         return
       endif
-      call ESMF_DELayoutGetDEPosition(layout, x, y, status)
+      nx = ncounts(1)
+      ny = ncounts(2)
+      call ESMF_newDELayoutGetDE(layout, de_id, coord=pos, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get position"
         return
       endif
+      x = pos(1)
+      y = pos(2)
 !
 ! Set all cells to 0 by default
 !
@@ -1594,7 +1599,7 @@
       integer(kind=ESMF_KIND_I8) :: frame
       type(ESMF_Array) :: outarray
       type(ESMF_Grid) :: grid
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: layout
       type(ESMF_AxisIndex), dimension(2) :: indext, indexe
       character(len=ESMF_MAXSTR) :: filename
 !
@@ -1613,7 +1618,7 @@
 ! Collect results on DE 0 and output to a file
 !
       call ESMF_GridCompGet(gcomp, delayout=layout, rc=status)
-      call ESMF_DELayoutGetDEID(layout, de_id, status)
+      call ESMF_newDELayoutGet(layout, localDE=de_id, rc=status)
 !
 ! Frame number from computation
 !

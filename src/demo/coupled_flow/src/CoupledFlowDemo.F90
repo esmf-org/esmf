@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.12 2004/03/24 22:58:22 jwolfe Exp $
+! $Id: CoupledFlowDemo.F90,v 1.13 2004/04/16 15:40:37 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -35,7 +35,7 @@
 
     ! States and Layouts for the Subcomponents
     character(len=ESMF_MAXSTR) :: cnameIN, cnameFS, cplname
-    type(ESMF_DELayout) :: layoutTop, layoutIN, layoutFS
+    type(ESMF_newDELayout) :: layoutTop, layoutIN, layoutFS
     type(ESMF_State), save :: INimp, INexp, FSimp, FSexp
 
     ! Public entry point
@@ -138,15 +138,17 @@
     type(ESMF_GridType) :: horz_gridtype, vert_gridtype
     type(ESMF_GridStagger) :: horz_stagger, vert_stagger
     type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
+    type(ESMF_VM) :: vm
     integer :: halo_width = 1
 
 
 
     ! Get our layout and grid from the component
     call ESMF_GridCompGet(gcomp, delayout=layoutTop, grid=gridTop, rc=rc)
+    call ESMF_VMGetGlobal(vm, rc)
 
     ! Sanity check the number of DEs we were started on.
-    call ESMF_DELayoutGetNumDEs(layoutTop, ndes, rc)
+    call ESMF_newDELayoutGet(layoutTop, deCount=ndes, rc=rc)
     if (ndes .eq. 1) then
       mid = 1
       by2 = 1
@@ -189,13 +191,13 @@
 !   different connectivity.
 !\begin{verbatim}
     cnameIN = "Injector model"
-    layoutIN = ESMF_DELayoutCreate(delist, 2, (/ mid, by2 /), (/ 0, 0 /), rc)
+    layoutIN = ESMF_newDELayoutCreate(vm, (/ mid, by2 /), rc=rc)
     INcomp = ESMF_GridCompCreate(cnameIN, delayout=layoutIN, rc=rc)
 !\end{verbatim}
 !EOP
 
     cnameFS = "Flow Solver model"
-    layoutFS = ESMF_DELayoutCreate(delist, 2, (/ quart, by4 /), (/ 0, 0 /), rc)
+    layoutFS = ESMF_newDELayoutCreate(vm, (/ quart, by4 /), rc=rc)
     FScomp = ESMF_GridCompCreate(cnameFS, delayout=layoutFS, rc=rc)
 
     cplname = "Two-way coupler"
@@ -245,7 +247,7 @@
     gridIN = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                              minGlobalCoordPerDim=mincoords, &
                              maxGlobalCoordPerDim=maxcoords, &
-                             layout=layoutIN, &
+                             delayout=layoutIN, &
                              horzGridType=horz_gridtype, &
                              vertGridType=vert_gridtype, &       
                              horzStagger=horz_stagger, &      
@@ -259,7 +261,7 @@
     gridFS = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                              minGlobalCoordPerDim=mincoords, &
                              maxGlobalCoordPerDim=maxcoords, &
-                             layout=layoutFS, &
+                             delayout=layoutFS, &
                              horzGridType=horz_gridtype, &
                              vertGridType=vert_gridtype, &       
                              horzStagger=horz_stagger, &      
@@ -449,8 +451,8 @@ end subroutine coupledflow_run
       call ESMF_GridCompDestroy(FScomp, rc)
       call ESMF_CplCompDestroy(cpl, rc)
 
-      call ESMF_DELayoutDestroy(layoutIN, rc)
-      call ESMF_DELayoutDestroy(layoutFS, rc)
+      call ESMF_newDELayoutDestroy(layoutIN, rc)
+      call ESMF_newDELayoutDestroy(layoutFS, rc)
 
     end subroutine coupledflow_final
 

@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.12 2004/04/10 00:34:17 nscollins Exp $
+! $Id: CoupledFlowApp.F90,v 1.13 2004/04/16 15:40:36 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -29,7 +29,8 @@
     type(ESMF_GridComp) :: compGridded
 
     ! States and Layouts
-    type(ESMF_DELayout) :: layoutTop
+    type(ESMF_newDELayout) :: layoutTop
+    type(ESMF_VM) :: vm
     type(ESMF_State) :: flowstate
     integer :: de_id
 
@@ -126,9 +127,12 @@
     ! Initialize the ESMF Framework
     call ESMF_Initialize(rc=rc)
 
+    ! Get global VM 
+    call ESMF_VMGetGlobal(vm, rc)
+
     ! Create a default layout and save our DE id number.
-    layoutTop = ESMF_DELayoutCreate(rc=rc)
-    call ESMF_DELayoutGetDEId(layoutTop, de_id, rc)
+    layoutTop = ESMF_newDELayoutCreate(vm, rc=rc)
+    call ESMF_newDELayoutGet(layoutTop, localDE=de_id, rc=rc)
 
    
     ! Create the Gridded component, passing in the default layout.
@@ -212,7 +216,7 @@
       grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                              minGlobalCoordPerDim=g_min, &
                              maxGlobalCoordPerDim=g_max, &
-                             layout=layoutTop, &   
+                             delayout=layoutTop, &   
                              horzGridType=ESMF_GridType_XY, &
                              horzStagger=ESMF_GridStagger_C_NE, &
                              horzCoordSystem=ESMF_CoordSystem_Cartesian, &
@@ -270,7 +274,7 @@
 
       call ESMF_GridCompDestroy(compGridded, rc)
 
-      call ESMF_DELayoutDestroy(layoutTop, rc)
+      call ESMF_newDELayoutDestroy(layoutTop, rc)
 
 
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.7 2004/03/24 14:54:48 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.8 2004/04/16 15:40:37 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -113,7 +113,7 @@
     type(ESMF_State) :: toflow, fromflow
     type(ESMF_State) :: toinject, frominject
     type(ESMF_Field) :: src_field, dst_field
-    type(ESMF_DELayout) :: cpllayout
+    type(ESMF_newDELayout) :: cpllayout
     character(ESMF_MAXSTR) :: statename
 
     print *, "Coupler Init starting"
