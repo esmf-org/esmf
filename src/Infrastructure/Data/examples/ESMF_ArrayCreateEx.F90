@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.2 2002/12/09 23:16:39 nscollins Exp $
+! $Id: ESMF_ArrayCreateEx.F90,v 1.3 2002/12/10 22:45:09 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -22,20 +22,12 @@
     use ESMF_ArrayMod
     implicit none
 
-    type fred
-    sequence
-       real (selected_real_kind(6,45)), dimension(:,:), pointer :: barney
-    end type
- 
 !   ! Local variables
     integer :: nx, ny, rc       
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array1, array2, array3
-    character (len = 20) :: fieldname
     real (selected_real_kind(6,45)), dimension(:,:), pointer :: realptr
 
-    type(fred) :: fredlist(10)
-    
     
 !   ! Example 1:
 !   !
@@ -47,7 +39,6 @@
 
     call ESMF_ArrayPrint(array1, "foo", rc)
     print *, "array 1 print returned"
-
 
     call ESMF_ArrayDestroy(array1)
     print *, "array 1 destroy returned"
