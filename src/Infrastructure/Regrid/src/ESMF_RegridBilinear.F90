@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.55 2004/03/23 17:57:40 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.56 2004/03/24 16:04:34 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.55 2004/03/23 17:57:40 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.56 2004/03/24 16:04:34 jwolfe Exp $'
 
 !==============================================================================
 
@@ -128,6 +128,7 @@
       integer :: srcSizeX, srcSizeY, srcSizeXComp, srcSizeYComp, size
       integer :: i, j, num_domains, dstCounts(3), srcCounts(3), ij
       integer :: datarank
+      integer, dimension(3) :: srcOrder, dstOrder
       logical, dimension(:), pointer :: srcUserMask, dstUserMask
       logical, dimension(:,:), pointer :: found
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: foundCount, srcLocalMask
@@ -173,7 +174,12 @@
                  "returned failure"
         return
       endif
-      
+
+      ! set reordering information
+      srcOrder(:) = gridOrder(:,srcGrid%ptr%coordOrder%order,2)
+      dstOrder(:) = gridOrder(:,dstGrid%ptr%coordOrder%order,2)
+      write(*,*) 'gridOrder = ', gridOrder
+
       ! get destination grid info
       !TODO: Get grid masks?
       call ESMF_DataMapGet(dstDataMap, horzRelloc=dstRelLoc, rc=status)
@@ -184,7 +190,8 @@
       endif
       dstCounts(3) = 2
       call ESMF_GridGetDE(dstGrid, horzRelLoc=dstRelLoc, &
-                          localCellCountPerDim=dstCounts(1:2), rc=status)
+                          localCellCountPerDim=dstCounts(1:2), &
+                          reorder=.false., rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: GridGetDE ", &
                  "returned failure"
@@ -193,7 +200,8 @@
 
       allocate(dstLocalCoordArray(2))    ! TODO:
       call ESMF_GridGetCoord(dstGrid, horzRelLoc=dstRelLoc, &
-                             centerCoord=dstLocalCoordArray, rc=status)
+                             centerCoord=dstLocalCoordArray, &
+                             reorder=.false., rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: GridGetCoord ", &
                  "returned failure"
@@ -213,7 +221,8 @@
       endif
       srcCounts(3) = 2
       call ESMF_GridGetDE(srcGrid, horzRelLoc=srcRelLoc, &
-                          localCellCountPerDim=srcCounts(1:2), rc=status)
+                          localCellCountPerDim=srcCounts(1:2), &
+                          reorder=.false., rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: GridGetDE ", &
                  "returned failure"
@@ -223,7 +232,7 @@
       allocate(srcLocalCoordArray(2))   ! TODO
       call ESMF_GridGetCoord(srcGrid, horzRelLoc=srcRelLoc, &
                              centerCoord=srcLocalCoordArray, &
-                             total=.true., rc=status)
+                             reorder=.false., total=.true., rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: GridGetCoord ", &
                  "returned failure"
@@ -263,13 +272,15 @@
                                             recvDomainList, &
                                             srcDataMap=srcDataMap, &
                                             dstDataMap=dstDataMap, &
-                                            total=.false., rc=status)
+                                            reorder=.false., total=.false., &
+                                            rc=status)
       ! but this is the one we want to use for gathering grid data
       tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
                                             recvDomainListTot, &
                                             srcDataMap=srcDataMap, &
                                             dstDataMap=dstDataMap, &
-                                            total=.true., rc=status)
+                                            reorder=.false., total=.true., &
+                                            rc=status)
 
       ! Now use temporary route to gather necessary coordinates
       ! Create arrays for gathered coordinates 
@@ -337,7 +348,8 @@
                                        coordSystem, srcSizeX, srcSizeY, &
                                        startComp-1, srcSizeXComp, &
                                        dstCounts(1), dstCounts(2), &
-                                       indexMod, found, foundCount, &
+                                       indexMod, srcOrder, dstOrder, &
+                                       found, foundCount, &
                                        srcGatheredCoordX(start:stop), &
                                        srcGatheredCoordY(start:stop), &
                                        dstLocalCoordX, dstLocalCoordY, &
@@ -372,7 +384,8 @@
       subroutine ESMF_RegridBilinearSearch(tv, domain, coordSystem, &
                                            srcSizeX, srcSizeY, &
                                            srcStart, srcICount, &
-                                           dstSizeX, dstSizeY, indexMod, &
+                                           dstSizeX, dstSizeY, &
+                                           indexMod, srcOrder, dstOrder, &
                                            found, foundCount, &
                                            srcCenterX, srcCenterY, &
                                            dstCenterX, dstCenterY, &
@@ -390,6 +403,8 @@
       integer, intent(in) :: dstSizeX  ! in the lines below.
       integer, intent(in) :: dstSizeY
       integer, dimension(:), intent(in) :: indexMod
+      integer, dimension(:), intent(in) :: srcOrder
+      integer, dimension(:), intent(in) :: dstOrder
       logical, dimension(dstSizeX,dstSizeY), intent(inout) :: found
       integer, dimension(dstSizeX,dstSizeY), intent(inout) :: foundCount
       real(ESMF_KIND_R8), dimension(srcSizeX,srcSizeY), intent(in) :: srcCenterX
@@ -432,44 +447,48 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      integer ::           &
-         i,j,n,iter,       &! loop counters
-         iii,jjj,          &! more loop counters
-         ip1,jp1,          &! neighbor indices
-         ibDst, ieDst,     &! beg, end of exclusive domain in i-dir of dest grid
-         jbDst, jeDst,     &! beg, end of exclusive domain in j-dir of dest grid
-         ibSrc, ieSrc,     &! beg, end of exclusive domain in i-dir of source grid
-         jbSrc, jeSrc,     &! beg, end of exclusive domain in j-dir of source grid
-         srcCount, srcValidCount
-
-      integer :: srcAdd,   &! address in gathered source grid
-                 dstAdd(2)  ! address in dest grid
+      integer :: i,j,n,iter                       ! loop counters
+      integer :: iii,jjj                          ! more loop counters
+      integer :: ip1,jp1                          ! neighbor indices
+      integer :: ibDst, ieDst                     ! beg, end of excl domain in
+                                                  ! i-dir of dest grid
+      integer :: jbDst, jeDst                     ! beg, end of excl domain in
+                                                  ! j-dir of dest grid
+      integer :: ibSrc, ieSrc                     ! beg, end of excl domain in
+                                                  ! i-dir of source grid
+      integer :: jbSrc, jeSrc                     ! beg, end of excl domain in
+                                                  ! j-dir of source grid
+      integer :: srcCount, srcValidCount
+      integer :: srcAdd, dstAdd(2), srcTmp(2)     ! address in gathered source
+                                                  ! and grid address in dest grid
          
-      real (ESMF_KIND_R8) ::  &
-         lonThresh,     &! threshold for checking longitude crossing
-         lonCycle,      &! 360 for degrees, 2pi for radians
-         dx1, dx2, dx3, &! differences for iterative scheme
-         dy1, dy2, dy3, &! differences for iterative scheme
-         iguess, jguess,&! initial guess for location within grid box
-         deli, delj,    &! change in i,j position from last iteration
-         mat1, mat2,    &! matrix elements for 2x2 matrix in iterative scheme
-         mat3, mat4,    &! ditto
-         dxp, dyp,      &
-         dstX, dstY,    &
-         determinant,   &! determinant of above matrix
-         sumWts,        &
-         zero, half, one, pi
+      real (ESMF_KIND_R8) :: lonThresh
+                           ! threshold for checking longitude crossing
+      real (ESMF_KIND_R8) :: lonCycle
+                           ! 360 for degrees, 2pi for radians
+      real (ESMF_KIND_R8) :: dx1, dx2, dx3, dy1, dy2, dy3
+                           ! differences for iterative scheme
+      real (ESMF_KIND_R8) :: iguess, jguess
+                           ! initial guess for location within grid box
+      real (ESMF_KIND_R8) :: deli, delj
+                           ! change in i,j position from last iteration
+      real (ESMF_KIND_R8) :: mat1, mat2
+                           ! matrix elements for 2x2 matrix in iterative scheme
+      real (ESMF_KIND_R8) :: mat3, mat4
+      real (ESMF_KIND_R8) :: dxp, dyp
+      real (ESMF_KIND_R8) :: dstX, dstY
+      real (ESMF_KIND_R8) :: determinant
+      real (ESMF_KIND_R8) :: sumWts, zero, half, one, pi
+      real (ESMF_KIND_R8), dimension(4) :: srcX
+                                           ! x coordinate of bilinear box corners
+      real (ESMF_KIND_R8), dimension(4) :: srcY
+                                           ! y coordinate of bilinear box corners
+      real (ESMF_KIND_R8), dimension(4) :: weights
+                                           ! bilinear weights for single box
 
-      real (ESMF_KIND_R8), dimension(4) ::     &
-         srcX,         &! x coordinate of bilinear box corners
-         srcY,         &! y coordinate of bilinear box corners
-         weights        ! bilinear weights for single box
-
-      integer, parameter :: &
-         maxIter = 100   ! max iteration count for i,j iteration
-
-      real (ESMF_KIND_R8), parameter :: &
-         converge = 1.e-10  ! convergence criterion
+      integer, parameter :: maxIter = 100                  ! max iteration count
+                                                           ! for i,j iteration
+      real (ESMF_KIND_R8), parameter :: converge = 1.e-10  ! convergence criterion
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -716,31 +735,35 @@
 
             ! now store this link into address, weight arrays
             if (srcUserMask(iii,jjj) .and. (srcGridMask(iii,jjj).eq.0)) then
-              dstAdd(1) = i
-              dstAdd(2) = j
-              srcAdd = (jjj-1+indexMod(2))*srcICount + (iii+indexMod(1)) &
-                     + srcStart
+              dstAdd(dstOrder(1)) = i
+              dstAdd(dstOrder(2)) = j
+              srcTmp(srcOrder(1)) = iii+indexMod(1)
+              srcTmp(srcOrder(2)) = jjj+indexMod(2)
+              srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), rc)
             endif
             if (srcUserMask(ip1,jjj) .and. (srcGridMask(ip1,jjj).eq.0)) then
-              dstAdd(1) = i
-              dstAdd(2) = j
-              srcAdd = (jjj-1+indexMod(2))*srcICount + (ip1+indexMod(1)) &
-                     + srcStart
+              dstAdd(dstOrder(1)) = i
+              dstAdd(dstOrder(2)) = j
+              srcTmp(srcOrder(1)) = ip1+indexMod(1)
+              srcTmp(srcOrder(2)) = jjj+indexMod(2)
+              srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(2), rc)
             endif
             if (srcUserMask(ip1,jp1) .and. (srcGridMask(ip1,jp1).eq.0)) then
-              dstAdd(1) = i
-              dstAdd(2) = j
-              srcAdd = (jp1-1+indexMod(2))*srcICount + (ip1+indexMod(1)) &
-                     + srcStart
+              dstAdd(dstOrder(1)) = i
+              dstAdd(dstOrder(2)) = j
+              srcTmp(srcOrder(1)) = ip1+indexMod(1)
+              srcTmp(srcOrder(2)) = jp1+indexMod(2)
+              srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(3), rc)
             endif
             if (srcUserMask(iii,jp1) .and. (srcGridMask(iii,jp1).eq.0)) then
-              dstAdd(1) = i
-              dstAdd(2) = j
-              srcAdd = (jp1-1+indexMod(2))*srcICount + (iii+indexMod(1)) &
-                     + srcStart
+              dstAdd(dstOrder(1)) = i
+              dstAdd(dstOrder(2)) = j
+              srcTmp(srcOrder(1)) = iii+indexMod(1)
+              srcTmp(srcOrder(2)) = jp1+indexMod(2)
+              srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(4), rc)
             endif
 
