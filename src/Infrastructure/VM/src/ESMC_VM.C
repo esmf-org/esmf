@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.24 2005/01/12 23:23:54 theurich Exp $
+// $Id: ESMC_VM.C,v 1.25 2005/01/13 18:30:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.24 2005/01/12 23:23:54 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.25 2005/01/13 18:30:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -277,6 +277,7 @@ int ESMC_VM::ESMC_VMGetPETMatchPET(
 //-----------------------------------------------------------------------------
 
 
+
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_VMGetGlobal - Get Global VM
@@ -333,39 +334,6 @@ ESMC_VM *ESMC_VMGetCurrent(
   // found a match
   *rc = ESMF_SUCCESS;
   return matchArray_vm[i];
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_VMGetCurrentID - Get ID of current VM
-//
-// !INTERFACE:
-ESMC_VMId *ESMC_VMGetCurrentID(
-//
-// !RETURN VALUE:
-//    ID of current VM
-//
-// !ARGUMENTS:
-//
-  int *rc){   // return code
-//
-// !DESCRIPTION:
-//   Get the ID of the current {\tt ESMC\_VM} object.
-//
-//EOP
-//-----------------------------------------------------------------------------
-  *rc = ESMF_FAILURE; // assume failure
-  pthread_t mytid = pthread_self();
-  int i;
-  for (i=0; i<matchArray_count; i++)
-    if (matchArray_tid[i] == mytid) break;
-  if (i == matchArray_count)
-    return NULL;
-  // found a match
-  *rc = ESMF_SUCCESS;
-  return &matchArray_vmID[i];
 }
 //-----------------------------------------------------------------------------
 
@@ -455,9 +423,51 @@ void ESMC_VMFinalize(
 
 // - - brand new stuff for ESMC_VMId - -
 
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_VMGetCurrentID - Get ID of current VM
+//
+// !INTERFACE:
+ESMC_VMId *ESMC_VMGetCurrentID(
+//
+// !RETURN VALUE:
+//    ID of current VM
+//
+// !ARGUMENTS:
+//
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//   Get the ID of the current {\tt ESMC\_VM} object.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  *rc = ESMF_FAILURE; // assume failure
+  pthread_t mytid = pthread_self();
+  int i;
+  for (i=0; i<matchArray_count; i++)
+    if (matchArray_tid[i] == mytid) break;
+  if (i == matchArray_count)
+    return NULL;
+  // found a match
+  *rc = ESMF_SUCCESS;
+  return &matchArray_vmID[i];
+}
+//-----------------------------------------------------------------------------
+
+
 void ESMC_VMIdPrint(ESMC_VMId *vmID){
   printf("ESMC_VMIdPrint:\n");
+  if (vmID==NULL){
+    printf("this is not a valid VMId!\n");
+    return;
+  }
   printf("vmID located at: %p\n", vmID);
+  if (vmID->vmKey==NULL){
+    printf("this VMId does not contain a valid vmKey!\n");
+    return;
+  }
   printf("  vmKey=0x");
   int bitmap=0;
   int k=0;
@@ -500,3 +510,18 @@ void ESMC_VMIdDestroy(ESMC_VMId *vmID, int *rc){
   }
   *rc = ESMF_SUCCESS;
 }
+
+
+
+void ESMC_VM::ESMC_VMSendVMId(ESMC_VMId *vmID, int dest){
+  vmk_send(vmID->vmKey, vmKeyWidth, dest);
+  vmk_send(&(vmID->localID), sizeof(int), dest);
+}
+
+void ESMC_VM::ESMC_VMRecvVMId(ESMC_VMId *vmID, int source){
+  vmk_recv(vmID->vmKey, vmKeyWidth, source);
+  vmk_send(&(vmID->localID), sizeof(int), source);
+}
+
+
+

@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.53 2005/01/12 23:23:44 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.54 2005/01/13 18:30:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -141,11 +141,14 @@ module ESMF_VMMod
   public ESMF_VMGet
   public ESMF_VMGetGlobal
   public ESMF_VMGetCurrent
+  public ESMF_VMGetCurrentID
   public ESMF_VMGetPETLocalInfo
   public ESMF_VMPrint
   public ESMF_VMRecv
+  public ESMF_VMRecvVMId
   public ESMF_VMScatter
   public ESMF_VMSend
+  public ESMF_VMSendVMId
   public ESMF_VMSendRecv
   public ESMF_VMThreadBarrier
   public ESMF_VMWait
@@ -159,6 +162,7 @@ module ESMF_VMMod
   public ESMF_VMPlanMaxPEs
   public ESMF_VMPlanMaxThreads
   public ESMF_VMPlanMinThreads
+  public ESMF_VMIdPrint
   public ESMF_VMIdCreate
   public ESMF_VMIdDestroy
 
@@ -168,7 +172,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.53 2005/01/12 23:23:44 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.54 2005/01/13 18:30:12 theurich Exp $'
 
 !==============================================================================
 
@@ -1771,6 +1775,47 @@ module ESMF_VMMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMGetCurrent
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMGetCurrentID - Get Current VMId
+
+! !INTERFACE:
+  subroutine ESMF_VMGetCurrentID(vmId, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMId), intent(out)            :: vmId
+    integer,         intent(out), optional  :: rc           
+!
+! !DESCRIPTION:
+!   Get the {\tt ESMF\_VMId} of the current execution context.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmId] 
+!     Upon return this holds the {\tt ESMF\_VMId} of the current context.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMGetCurrentID(vmId, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMGetCurrentID
 !------------------------------------------------------------------------------
 
 
@@ -4182,6 +4227,49 @@ module ESMF_VMMod
 
 ! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMIdPrint()"
+!BOPI
+! !IROUTINE: ESMF_VMIdPrint - Print an ESMF_VMId object
+
+! !INTERFACE:
+  subroutine ESMF_VMIdPrint(vmId, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMId),   intent(in)            :: vmId
+    integer,           intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!   Print an ESMF_VMId object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmId] 
+!        ESMF_VMId object
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface
+    call c_ESMC_VMIdPrint(vmId, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMIdPrint
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMIdCreate()"
 !BOPI
 ! !IROUTINE: ESMF_VMIdCreate - Create an ESMF_VMId object
@@ -4194,7 +4282,7 @@ module ESMF_VMMod
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Create an  ESMF_VMId object. This allocates memory on the C side
+!   Create an ESMF_VMId object. This allocates memory on the C side
 !
 !   The arguments are:
 !   \begin{description}
@@ -4264,6 +4352,107 @@ module ESMF_VMMod
 
   end subroutine ESMF_VMIdDestroy
 !------------------------------------------------------------------------------
+
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMRecvVMId()"
+!BOPI
+! !IROUTINE: ESMF_VMRecvVMId - Receive VMId
+
+! !INTERFACE:
+  subroutine ESMF_VMRecvVMId(vm, vmID, src, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    type(ESMF_VMId),          intent(out)             :: vmId
+    integer,                  intent(in)              :: src
+    integer,                  intent(out),  optional  :: rc           
+!
+! !DESCRIPTION:
+!   Receive {\tt ESMF\_VMId}. 
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[vmId] 
+!        {\tt ESMF\_VMId} to be received.
+!   \item[src] 
+!        Id of the source PET within the {\tt ESMF\_VM} object.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMRecvVMId(vm, vmId, src, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMRecvVMId
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSendVMId()"
+!BOPI
+! !IROUTINE: ESMF_VMSendVMId - Send VMId
+
+! !INTERFACE:
+  subroutine ESMF_VMSendVMId(vm, vmID, dst, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    type(ESMF_VMId),          intent(in)              :: vmId
+    integer,                  intent(in)              :: dst
+    integer,                  intent(out),  optional  :: rc           
+!
+! !DESCRIPTION:
+!   Receive {\tt ESMF\_VMId}. 
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[vmId] 
+!        {\tt ESMF\_VMId} to be send.
+!   \item[dst] 
+!        Id of the destination PET within the {\tt ESMF\_VM} object.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMSendVMId(vm, vmId, dst, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMSendVMId
+!------------------------------------------------------------------------------
+
+
 
 end module ESMF_VMMod
 

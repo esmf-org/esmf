@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.29 2005/01/12 23:23:44 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.30 2005/01/13 18:30:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -461,7 +461,22 @@ extern "C" {
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-    void FTN(c_esmc_vmidcreate)(ESMC_VMId **vmid, int *rc){
+  void FTN(c_esmc_vmgetcurrentid)(ESMC_VMId **vmid, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmgetcurrentid()"
+    int localrc;
+    *vmid = ESMC_VMGetCurrentID(&localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+  }
+
+  void FTN(c_esmc_vmidprint)(ESMC_VMId **vmid, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmidprint()"
+    ESMC_VMIdPrint(*vmid);
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+  }
+
+  void FTN(c_esmc_vmidcreate)(ESMC_VMId **vmid, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmidcreate()"
     int localrc;
@@ -470,14 +485,31 @@ extern "C" {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
   }
 
-    void FTN(c_esmc_vmiddestroy)(ESMC_VMId **vmid, int *rc){
+  void FTN(c_esmc_vmiddestroy)(ESMC_VMId **vmid, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmiddestroy()"
     int localrc;
     ESMC_VMIdDestroy(*vmid, &localrc);  // free memory for internal members
     delete *vmid;                       // free memory for this VMId
+    *vmid=NULL;
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
   }
 
-  
+
+  void FTN(c_esmc_vmsendvmid)(ESMC_VM **ptr, ESMC_VMId **vmid, int *dest,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmsendvmid()"
+    (*ptr)->ESMC_VMSendVMId(*vmid, *dest);
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+  }
+
+  void FTN(c_esmc_vmrecvvmid)(ESMC_VM **ptr, ESMC_VMId **vmid, int *source,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmrecvvmid()"
+    (*ptr)->ESMC_VMRecvVMId(*vmid, *source);
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+  }
+    
 };

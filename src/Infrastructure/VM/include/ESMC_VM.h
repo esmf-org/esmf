@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.17 2005/01/12 23:23:44 theurich Exp $
+// $Id: ESMC_VM.h,v 1.18 2005/01/13 18:30:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -83,6 +83,8 @@ class ESMC_VM : public ESMC_VMK {   // inherits from ESMC_VMK class
       int *petMatchCount,           // out - number of matching PETs in vmMatch
       int *petMatchList,            // out - list of matching PETs in vmMatch
       int len_petMatchList);        // in  - size of petMatchList
+    void ESMC_VMSendVMId(ESMC_VMId *vmid, int dest);
+    void ESMC_VMRecvVMId(ESMC_VMId *vmid, int source);
 };// end class ESMC_VM
 
 // external ESMC_VM methods:
