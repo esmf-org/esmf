@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.8 2004/04/15 22:05:11 nscollins Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.9 2004/04/26 15:48:04 nscollins Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -62,30 +62,8 @@
     ! get the default global VM
     call ESMF_VMGetGlobal(vm, rc)
 
-    ! Create a default 1xN DELayout
-    layout1 = ESMF_newDELayoutCreate(vm, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_newDELayoutGet(layout1, deCount=ndes, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-
-    if (ndes .le. 1) then
-     mid = 1
-     by2 = 1
-    else
-     mid = ndes/2
-     by2 = 2
-    endif
-
-    ! Create a child DELayout for the Component which is 2 by half the
-    !  total number of procs.
-    layout2 = ESMF_newDELayoutCreate(vm, (/ mid, by2 /), rc=rc)
-    !delist = (/ (i, i=0, ndes-1) /)
-    !layout2 = ESMF_DELayoutCreate(vm, layout1, 2, (/ mid, by2 /), (/ 0, 0 /), &
-    !                                               de_indices=delist, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-
     cname = "System Test CompCreate"
-    comp1 = ESMF_GridCompCreate(cname, delayout=layout2, gridcompType=ESMF_ATM, rc=rc)
+    comp1 = ESMF_GridCompCreate(cname, gridcompType=ESMF_ATM, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompPrint(comp1)
 
