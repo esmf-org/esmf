@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_chprotex,v 1.3 2003/02/27 18:16:03 eschwab Exp $
+# $Id: do_chprotex,v 1.4 2003/02/27 20:14:12 eschwab Exp $
 #
 #===============================================================================
 # chprotex
@@ -18,9 +18,9 @@
 #
 # Usage: co_chprotex [-i] <class> <C++ filename.h>
 #
-#        [-i] is an optional argument to protex to cause printing of !BOPI
-#             prologues, which are intended for Reference Manuals but not
-#             User Guides.
+#        [-i] is an optional argument to protex to cause non-printing of
+#             BOPI -- EOPI internal prologues, which are intended for
+#             Reference Manuals but not User Guides.
 #
 #        <class> is the name of the class whose definition/methods
 #                are instrumented for ProTeX (e.g., ESMC_TimeInstant)

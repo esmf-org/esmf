@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_fprotex,v 1.4 2003/02/27 18:16:02 eschwab Exp $
+# $Id: do_fprotex,v 1.5 2003/02/27 20:14:13 eschwab Exp $
 #
 #===============================================================================
 # do_fprotex
@@ -18,9 +18,9 @@
 #
 # Usage: do_fprotex [-i] <class> <fortran filename>
 #
-#        [-i] is an optional argument to protex to cause printing of !BOPI
-#             prologues, which are intended for Reference Manuals but not
-#             User Guides.
+#        [-i] is an optional argument to protex to cause non-printing of
+#             BOPI -- EOPI internal prologues, which are intended for
+#             Reference Manuals but not User Guides.
 #
 #        <class> is the name of the class or module whose functions
 #               are instrumented for ProTeX (e.g., date)
