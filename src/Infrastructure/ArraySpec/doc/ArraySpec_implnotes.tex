@@ -1,8 +1,8 @@
-% $Id: ArraySpec_implnotes.tex,v 1.1 2004/03/18 05:24:22 cdeluca Exp $
+% $Id: ArraySpec_implnotes.tex,v 1.2 2004/06/09 09:12:13 nscollins Exp $
 
-C and C++ arrays are simple pointers to memory.
-Fortran arrays contain shape and stride definitions and are strongly
-typed. To enable interoperability between the languages the C++ code
-must be able to obtain this information from the Fortran description
-(which is called the "dope vector" in Fortran), either through a priori
-knowledge or through query.
+The information contained in an {\tt ESMF\_ArraySpec} is used to create 
+{\tt ESMF\_Array} objects. 
+
+{\tt ESMF\_ArraySpec} is a shallow class, and only set and get methods
+are needed.  They do not need to be created or destroyed.
+
