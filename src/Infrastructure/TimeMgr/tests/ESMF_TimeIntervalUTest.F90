@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.25 2004/05/20 21:04:02 svasquez Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.26 2004/05/21 17:22:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.25 2004/05/20 21:04:02 svasquez Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.26 2004/05/21 17:22:47 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1498,7 +1498,7 @@
       write(failMsg, *) "should return ESMF_FAILURE."
       call ESMF_TimeIntervalSet(timeStep, yy=2, mm=30, d=720, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, yy=years, d=days, rc=rc)
-      call ESMF_Test((rc==ESMF_FAILURE), &
+      call ESMF_Test((rc/=ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, " rc = ", rc
@@ -1520,7 +1520,7 @@
       write(failMsg, *) "should return ESMF_FAILURE."
       call ESMF_TimeIntervalSet(timeStep, yy=1, mm=48, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, yy=years, rc=rc)
-      call ESMF_Test((rc==ESMF_FAILURE), &
+      call ESMF_Test((rc/=ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "rc = ", rc

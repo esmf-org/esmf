@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.22 2004/05/20 22:13:35 svasquez Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.23 2004/05/21 17:22:42 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.22 2004/05/20 22:13:35 svasquez Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.23 2004/05/21 17:22:42 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -131,7 +131,7 @@
       write(failMsg, *) " Should not return ESMF_SUCCESS"
       write(name, *) "Validate un-initialized Calendar Test"
       call ESMF_CalendarValidate(gregorianCalendar, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
@@ -463,7 +463,7 @@
 					daysPerYear=100000000, &
 					daysPerYearDn=1, &
 					daysPerYearDd=1, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_CalendarDestroy(customCalendar, rc)
 
@@ -486,7 +486,7 @@
       write(failMsg, *) " Should not return ESMF_SUCCESS"
       write(name, *) "Validate Bad Custom Type Calendar Test"
       call ESMF_CalendarValidate(customCalendar, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
@@ -500,7 +500,7 @@
 					daysPerYear=1, &
 					daysPerYearDn=1, &
 					daysPerYearDd=0, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_CalendarDestroy(customCalendar, rc)
 
@@ -524,7 +524,7 @@
       write(failMsg, *) " Should not return ESMF_SUCCESS"
       write(name, *) "Validate Custom Type Calendar Test"
       call ESMF_CalendarValidate(customCalendar, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       ! ----------------------------------------------------------------------------
 
@@ -538,7 +538,7 @@
 					daysPerYear=1, &
 					daysPerYearDn=1, &
 					daysPerYearDd=0, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_CalendarDestroy(customCalendar, rc)
 
@@ -561,7 +561,7 @@
       write(failMsg, *) " Should not return ESMF_SUCCESS"
       write(name, *) "Validate Custom Type Calendar Test"
       call ESMF_CalendarValidate(customCalendar, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
@@ -591,7 +591,7 @@
       write(name, *) "Set Start Time at lower limit minus 1 second of Gregorian Calendar Test"
       call ESMF_TimeSet(startTime, yy=-4800, mm=3, dd=1, s=-1, &
                                    calendar=gregorianCalendar, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_FAILURE), & 
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), & 
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
@@ -634,7 +634,7 @@
       year=292277019914_ESMF_KIND_I8
       call ESMF_TimeSet(stopTime, yy_i8=year, mm=10, dd=29, s=86400, &
                                    calendar=gregorianCalendar, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_FAILURE), & 
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), & 
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
