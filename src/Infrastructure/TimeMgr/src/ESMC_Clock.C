@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.52 2004/02/18 01:48:04 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.53 2004/02/18 21:28:50 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.52 2004/02/18 01:48:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.53 2004/02/18 21:28:50 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -107,7 +107,10 @@ int ESMC_Clock::count=0;
 
     if (timeStep  != ESMC_NULL_POINTER) clock->timeStep  = *timeStep;
     if (startTime != ESMC_NULL_POINTER) clock->startTime = *startTime;
-    if (stopTime  != ESMC_NULL_POINTER) clock->stopTime  = *stopTime;
+    if (stopTime  != ESMC_NULL_POINTER) {
+      clock->stopTime  = *stopTime;
+      clock->stopTimeSet = true;
+    }
 
     if (runDuration != ESMC_NULL_POINTER) {
       clock->stopTime = clock->startTime + *runDuration;
@@ -988,60 +991,87 @@ int ESMC_Clock::count=0;
     // validate required individual properties
     if(timeStep.ESMC_TimeIntervalValidate() != ESMF_SUCCESS ||
        startTime.ESMC_TimeValidate() != ESMF_SUCCESS ||
+       refTime.ESMC_TimeValidate()   != ESMF_SUCCESS ||
        currTime.ESMC_TimeValidate()  != ESMF_SUCCESS ||
        prevTime.ESMC_TimeValidate()  != ESMF_SUCCESS) return(ESMF_FAILURE);
 
+    // validate optional stopTime property if set
+    if (stopTimeSet) {
+      if(stopTime.ESMC_TimeValidate() != ESMF_SUCCESS) return(ESMF_FAILURE);
+
+// TODO: uncomment this section when LogErr implemented (ESMF_WARNING defined)
+//       and users approve.
+//  will fix bugs 801366, 801409, & 806784
 #if 0
-    // TODO: validate optional properties if set
-    if(stopTime.ESMC_TimeValidate() != ESMF_SUCCESS ||
-       refTime.ESMC_TimeValidate()) != ESMF_SUCCESS) return(ESMF_FAILURE);
 
-    // startTime and stopTime calendars should be the same
-    //   (TODO: only if stopTime set)
-    // TODO: use native C++ Get, not F90 entry point, when ready
-    ESMC_Calendar *startCal, *stopCal;
-    startTime.ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, 
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, &startCal);
-    stopTime.ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, 
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, &stopCal);
-    if (startCal == ESMC_NULL_POINTER || stopCal == ESMC_NULL_POINTER)
-      return(ESMF_FAILURE);
-    if (*startCal != *stopCal) return(ESMF_FAILURE);
+// TODO: put into ESMF_Base.F90 & ESMC_Macros.h, share with LogErr ?
+#define ESMF_WARNING 1
 
-    // check if timeStep positive, then stoptime > startTime, and vice versa
-    // similarly for currTime and prevTime (TODO: if only stopTime set)
-    ESMC_TimeInterval zeroTimeStep(0,0,1,0,0,0);
-    if(timeStep > zeroTimeStep) {
-      if (stopTime <= startTime) return(ESMF_FAILURE);
-      if (currTime <  prevTime)  return(ESMF_FAILURE);
-    } else if(timeStep < zeroTimeStep) {
-      if (stopTime >= startTime) return(ESMF_FAILURE);
-      if (currTime >  prevTime)  return(ESMF_FAILURE);
-    } else return(ESMF_FAILURE);  // timeStep == zeroTimeStep
+      // startTime and stopTime calendars should generally be the same.
+      //   (Conceptually could be different, if based on same zero-point).
+      //   So only produce ESMF_WARNING if different.
+      //   (TODO: check only if stopTime set)
+      // TODO: use native C++ Get, not F90 entry point, when ready
+      ESMC_Calendar *startCal, *stopCal;
+      startTime.ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, 
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, &startCal);
+      stopTime.ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, 
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, &stopCal);
+      if (startCal == ESMC_NULL_POINTER || stopCal == ESMC_NULL_POINTER)
+        return(ESMF_FAILURE);
+      if (*startCal != *stopCal) return(ESMF_WARNING); 
 
-TODO:  if timeStep > 0, then currTime >= prevTime and vice versa
+      // The following checks only produce ESMF_WARNING because the user
+      // may want or need to do these things.
+
+      // check if current time is now out-of-range or will be out-of-range
+      //   upon the next time step (positive or negative)
+      if (stopTime > startTime) {
+        if (currTime < startTime || (currTime + timeStep) < startTime ||
+            currTime > stopTime  || (currTime + timeStep) > stopTime) {
+          return(ESMF_WARNING);
+        }
+      } else if (stopTime < startTime) {
+        if (currTime > startTime || (currTime + timeStep) > startTime ||
+            currTime < stopTime  || (currTime + timeStep) < stopTime) {
+          return(ESMF_WARNING);
+        }
+      } else { // stopTime == startTime
+        return(ESMF_WARNING);
+      }
+
+      // check for zero time step
+      ESMC_TimeInterval zeroTimeStep(0,0,1,0,0,0);
+      if(timeStep == zeroTimeStep) return(ESMF_WARNING);
+
+      // note:  don't check prevTime relative to currTime, as user could
+      //        change direction with a variable time step.  Also, prevTime
+      //        is exclusively maintained internally.
 
 #endif
+
+    } // endif stopTimeSet
+
 
     return(ESMF_SUCCESS);
 
@@ -1195,6 +1225,7 @@ TODO:  if timeStep > 0, then currTime >= prevTime and vice versa
     name[0] = '\0';
     advanceCount = 0;
     alarmCount = 0;
+    stopTimeSet = false;
     id = ++count;  // TODO: inherit from ESMC_Base class
 
  } // end ESMC_Clock

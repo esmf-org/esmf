@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.34 2004/02/18 01:47:10 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.35 2004/02/18 21:28:50 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -96,6 +96,8 @@
                                                 //   time steps taken so far)
     int               alarmCount;               // number of defined alarms
     ESMC_Alarm       *alarmList[MAX_ALARMS];    // associated alarms
+
+    bool              stopTimeSet;  // true if optional property set
 
     int               id;         // unique identifier. used for equality
                                   //    checks and to generate unique default
