@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.33 2004/05/26 22:24:55 jwolfe Exp $
+! $Id: ESMF_GridUTest.F90,v 1.34 2004/06/02 22:54:53 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.33 2004/05/26 22:24:55 jwolfe Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.34 2004/06/02 22:54:53 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,7 @@
 
       ! local variables needed to pass into function/subroutine calls
       character(ESMF_MAXSTR) :: validate_options
-      character(ESMF_MAXSTR) :: print_options
+      character(ESMF_MAXSTR) :: print_options, gname
       !type(ESMF_GridConfig) :: config_set
       !type(ESMF_GridConfig) :: config_get
       ! when get/set value routines enabled, comment these in and set
@@ -255,8 +255,35 @@
 
       !------------------------------------------------------------------------
 
+      !EX_UTest
+      ! Test adding a name to an empty Grid
+      call ESMF_GridAddAttribute(grid1, name="GRID_ONE", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding a name to a Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
 
 
+      !EX_UTest
+      ! Test getting the name from an empty Grid
+      call ESMF_GridGetAttributes(grid1, name=gname, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting a name from a Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+
+      !EX_UTest
+      ! Verify the name from an empty Grid is correct
+      write(failMsg, *) "Returned wrong name"
+      write(name, *) "Verifying a name from a Grid Test"
+      call ESMF_Test((gname.eq."GRID_ONE"), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "gname= ", gname
 
       !------------------------------------------------------------------------
       ! The following code crashes, bug 722780 has been filed
