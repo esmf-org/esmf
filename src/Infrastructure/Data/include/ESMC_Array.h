@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.1 2002/11/04 22:16:08 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.2 2002/11/05 23:38:50 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
 // !DESCRIPTION:
 //
 // The code in this file defines the C++ Array members and declares method 
-// signatures (prototypes).  The companion file ESMC_Array.C contains
+// signatures (prototypes).  The companion file ESMC\_Array.C contains
 // the definitions (full code bodies) for the Array methods.
 //
 // < insert a paragraph or two explaining what you'll find in this file >
