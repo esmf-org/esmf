@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.30 2004/02/11 18:36:39 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.31 2004/02/11 20:11:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -119,7 +119,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.30 2004/02/11 18:36:39 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.31 2004/02/11 20:11:26 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -489,7 +489,7 @@ end subroutine
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_BaseSetName(array, name, status)
+      call c_ESMC_ArraySetName(array, name, status)
       if(status .eq. ESMF_FAILURE) then
         print *, "ERROR in ESMF_ArraySetName"
         return
