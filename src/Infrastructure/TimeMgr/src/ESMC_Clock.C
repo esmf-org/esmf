@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.47 2004/02/04 02:12:25 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.48 2004/02/04 23:24:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.47 2004/02/04 02:12:25 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.48 2004/02/04 23:24:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -841,7 +841,7 @@ int ESMC_Clock::count=0;
 //
 // !DESCRIPTION:
 //      Compare for equality the current object's (this) {\tt ESMC\_Clock} with
-//      given {\tt ESMC\_Clock}, return result
+//      given {\tt ESMC\_Clock}, return result.  Comparison is based on IDs.
 //   
 //EOP
 // !REQUIREMENTS:
@@ -849,6 +849,31 @@ int ESMC_Clock::count=0;
     return(id == clock.id);
 
 }  // end ESMC_Clock::operator==
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Clock(!=) - Clock inequality comparison
+// 
+// !INTERFACE:
+      bool ESMC_Clock::operator!=(
+//   
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_Clock &clock) const {   // in - ESMC_Clock to compare
+//
+// !DESCRIPTION:
+//      Compare for inequality the current object's (this)
+//      {\tt ESMC\_Clock} with given {\tt ESMC\_Clock}, return result.
+//      Comparison is based on IDs.
+//   
+//EOP
+// !REQUIREMENTS:
+
+    return(id != clock.id);
+
+}  // end ESMC_Clock::operator!=
 
 //-------------------------------------------------------------------------
 //BOP

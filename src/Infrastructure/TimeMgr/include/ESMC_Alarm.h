@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.23 2004/02/02 19:11:57 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.24 2004/02/04 23:23:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -204,6 +204,7 @@ class ESMC_Alarm {
                          // Can be basis for asynchronous alarm reporting
 
     bool operator==(const ESMC_Alarm &) const; 
+    bool operator!=(const ESMC_Alarm &) const; 
 
     // required methods inherited and overridden from the ESMC_Base class
 

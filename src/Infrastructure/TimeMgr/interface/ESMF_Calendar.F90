@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.50 2004/02/04 02:08:46 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.51 2004/02/04 23:24:01 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,15 +109,13 @@
       public ESMF_CalendarPrint
 
       public operator(==)
-      private ESMF_CalendarEQ
-      private ESMF_CalendarTypeEQ
-
+      public operator(/=)
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.50 2004/02/04 02:08:46 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.51 2004/02/04 23:24:01 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -158,18 +156,154 @@
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_CalendarOverloadedOperator(==) - Test if Calendar 1 is equal to Calendar 2
+!
 ! !INTERFACE:
-       interface operator(==)
-
-! !PRIVATE MEMBER FUNCTIONS:
-       module procedure ESMF_CalendarEQ
-       module procedure ESMF_CalendarTypeEQ
-
+      interface operator(==)
+!     if (calendar1 == calendar2) then ... endif
+!                  OR
+!     result = (calendar1 == calendar2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_Calendar), intent(in) :: calendar1
+!     type(ESMF_Calendar), intent(in) :: calendar2
+!
 ! !DESCRIPTION:
-!     This interface overloads the == operator for the
-!     {\tt ESMF\_Calendar} class.
-! 
+!     Overloads the (==) operator for the {\tt ESMF\_Calendar} class.
+!     Compare two calendar objects for equality; return true if equal,
+!     false otherwise.  Comparison is based on the calendar type.
+!
+!     The arguments are:
+!     \begin{description}   
+!     \item[calendar1]
+!          The first {\tt ESMF\_Calendar} in comparison.
+!     \item[calendar2]
+!          The second {\tt ESMF\_Calendar} in comparison.
+!     \end{description}
+!
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+       module procedure ESMF_CalendarEQ      ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMGx.x.x
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_CalendarTypeOverloadedOperator(==) - Test if Calendar Type 1 is equal to Calendar Type 2
+!
+! !INTERFACE:
+!     interface operator(==)
+!     if (calendarType1 == calendarType2) then ... endif
+!                  OR
+!     result = (calendarType1 == calendarType2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_CalendarType), intent(in) :: calendarType1
+!     type(ESMF_CalendarType), intent(in) :: calendarType2
+!
+! !DESCRIPTION:
+!     Overloads the (==) operator for the {\tt ESMF\_Calendar} class.
+!     Compare two calendar types for equality; return true if equal,
+!     false otherwise.
+!
+!     The arguments are:
+!     \begin{description}   
+!     \item[calendarType1]
+!          The first {\tt ESMF\_CalendarType} in comparison.
+!     \item[calendarType2]
+!          The second {\tt ESMF\_CalendarType} in comparison.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+       module procedure ESMF_CalendarTypeEQ      ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMGx.x.x
+!
+       end interface    
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_CalendarOverloadedOperator(/=) - Test if Calendar 1 is not equal to Calendar 2
+!
+! !INTERFACE:
+      interface operator(/=)
+!     if (calendar1 /= calendar2) then ... endif
+!                  OR
+!     result = (calendar1 /= calendar2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_Calendar), intent(in) :: calendar1
+!     type(ESMF_Calendar), intent(in) :: calendar2
+!
+! !DESCRIPTION:
+!     Overloads the (/=) operator for the {\tt ESMF\_Calendar} class.
+!     Compare two calendar objects for inequality; return true if not equal,
+!     false otherwise.  Comparison is based on the calendar type.
+!
+!     The arguments are:
+!     \begin{description}   
+!     \item[calendar1]
+!          The first {\tt ESMF\_Calendar} in comparison.
+!     \item[calendar2]
+!          The second {\tt ESMF\_Calendar} in comparison.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+       module procedure ESMF_CalendarNE      ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMGx.x.x
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_CalendarTypeOverloadedOperator(/=) - Test if Calendar Type 1 is not equal to Calendar Type 2
+!
+! !INTERFACE:
+!     interface operator(/=)
+!     if (calendarType1 /= calendarType2) then ... endif
+!                  OR
+!     result = (calendarType1 /= calendarType2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_CalendarType), intent(in) :: calendarType1
+!     type(ESMF_CalendarType), intent(in) :: calendarType2
+!
+! !DESCRIPTION:
+!     Overloads the (/=) operator for the {\tt ESMF\_Calendar} class.
+!     Compare two calendar types for inequality; return true if not equal,
+!     false otherwise.
+!
+!     The arguments are:
+!     \begin{description}   
+!     \item[calendarType1]
+!          The first {\tt ESMF\_CalendarType} in comparison.
+!     \item[calendarType2]
+!          The second {\tt ESMF\_CalendarType} in comparison.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+       module procedure ESMF_CalendarTypeNE      ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMGx.x.x
+!
        end interface    
 !
 !==============================================================================
@@ -667,7 +801,7 @@
       end subroutine ESMF_CalendarGet
     
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_CalendarEQ - Compare two Calendars for equality
 !
 ! !INTERFACE:
@@ -681,28 +815,17 @@
       type(ESMF_Calendar), intent(in) :: calendar2
 
 ! !DESCRIPTION:
-!     Compare two calendars for equality; return true if equal, false otherwise.
-!     Takes two calendar objects as input.
-!     Maps to overloaded (==) operator interface function.
+!     This method overloads the (==) operator for the {\tt ESMF\_Calendar}
+!     class.  See "interface operator(==)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}   
-!     \item[calendar1]
-!          The first {\tt ESMF\_Calendar} to compare.
-!     \item[calendar2]
-!          The second {\tt ESMF\_Calendar} to compare.
-!     \end{description}
-!             
-!EOP
-! !REQUIREMENTS:
-
+!EOPI
 !     invoke C to C++ entry point
       call c_ESMC_CalendarEQ(calendar1, calendar2, ESMF_CalendarEQ)
 
       end function ESMF_CalendarEQ
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_CalendarTypeEQ - Compare two Calendar types for equality
 !
 ! !INTERFACE:
@@ -716,26 +839,64 @@
       type(ESMF_CalendarType), intent(in) :: calendarType2
 
 ! !DESCRIPTION:
-!     Compare two calendars for equality; return true if equal, false otherwise.
-!     Takes two calendar type variables as input.
-!     Maps to overloaded (==) operator interface function.
-!
-!     The arguments are:
-!     \begin{description}   
-!     \item[calendarType1]
-!          The first {\tt ESMF\_CalendarType} to compare.
-!     \item[calendarType2]
-!          The second {\tt ESMF\_CalendarType} to compare.
-!     \end{description}
+!     This method overloads the (==) operator for the {\tt ESMF\_Calendar}
+!     class.  See "interface operator(==)" above for complete description.
 !             
-!EOP
-! !REQUIREMENTS:
-
+!EOPI
 !     invoke C to C++ entry point
       call c_ESMC_CalendarTypeEQ(calendarType1, calendarType2, &
                                  ESMF_CalendarTypeEQ)
 
       end function ESMF_CalendarTypeEQ
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  ESMF_CalendarNE - Compare two Calendars for inequality
+!
+! !INTERFACE:
+      function ESMF_CalendarNE(calendar1, calendar2)
+! 
+! !RETURN VALUE:
+      logical :: ESMF_CalendarNE
+
+! !ARGUMENTS:
+      type(ESMF_Calendar), intent(in) :: calendar1
+      type(ESMF_Calendar), intent(in) :: calendar2
+
+! !DESCRIPTION:
+!     This method overloads the (/=) operator for the {\tt ESMF\_Calendar}
+!     class.  See "interface operator(/=)" above for complete description.
+!             
+!EOPI
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarNE(calendar1, calendar2, ESMF_CalendarNE)
+
+      end function ESMF_CalendarNE
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  ESMF_CalendarTypeNE - Compare two Calendar types for inequality
+!
+! !INTERFACE:
+      function ESMF_CalendarTypeNE(calendarType1, calendarType2)
+! 
+! !RETURN VALUE:
+      logical :: ESMF_CalendarTypeNE
+
+! !ARGUMENTS:
+      type(ESMF_CalendarType), intent(in) :: calendarType1
+      type(ESMF_CalendarType), intent(in) :: calendarType2
+
+! !DESCRIPTION:
+!     This method overloads the (/=) operator for the {\tt ESMF\_Calendar}
+!     class.  See "interface operator(/=)" above for complete description.
+!             
+!EOPI
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarTypeNE(calendarType1, calendarType2, &
+                                 ESMF_CalendarTypeNE)
+
+      end function ESMF_CalendarTypeNE
 
 !------------------------------------------------------------------------------
 ! 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.30 2004/02/04 02:12:25 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.31 2004/02/04 23:24:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.30 2004/02/04 02:12:25 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.31 2004/02/04 23:24:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -845,7 +845,7 @@ int ESMC_Alarm::count=0;
 //
 // !DESCRIPTION:
 //      Compare for equality the current object's (this) {\tt ESMC\_Alarm} with
-//      given {\tt ESMC\_Alarm}, return result
+//      given {\tt ESMC\_Alarm}, return result.  Comparison is based on IDs.
 //
 //EOP
 // !REQUIREMENTS:
@@ -853,6 +853,31 @@ int ESMC_Alarm::count=0;
     return(id == alarm.id);
 
 }  // end ESMC_Alarm::operator==
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Alarm(!=) - Alarm inequality comparison    
+//
+// !INTERFACE:
+      bool ESMC_Alarm::operator!=(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_Alarm &alarm) const {   // in - ESMC_Alarm to compare
+//
+// !DESCRIPTION:
+//      Compare for inequality the current object's (this)
+//      {\tt ESMC\_Alarm} with given {\tt ESMC\_Alarm}, return result.
+//      Comparison is based on IDs.
+//
+//EOP
+// !REQUIREMENTS:
+
+    return(id != alarm.id);
+
+}  // end ESMC_Alarm::operator!=
 
 //-------------------------------------------------------------------------
 //BOP

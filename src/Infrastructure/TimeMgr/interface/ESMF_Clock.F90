@@ -79,6 +79,7 @@
       public ESMF_ClockSyncToRealTime
 
       public operator(==)
+      public operator(/=)
 
 ! Required inherited and overridden ESMF_Base class methods
 
@@ -95,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.42 2004/02/04 02:14:16 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.43 2004/02/04 23:24:01 eschwab Exp $'
 
 !==============================================================================
 !
@@ -121,15 +122,74 @@
 !BOP
 ! !INTERFACE:
       interface operator(==)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_ClockEQ
-
+!     if (clock1 == clock2) then ... endif
+!                  OR
+!     result = (clock1 == clock2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_Clock), intent(in) :: clock1
+!     type(ESMF_Clock), intent(in) :: clock2
+!
 ! !DESCRIPTION:
-!     This interface overloads the == operator for the
-!     {\tt ESMF\_Clock} class.
+!     Overloads the (==) operator for the {\tt ESMF\_Clock} class.
+!     Compare two clocks for equality; return true if equal,
+!     false otherwise.  Comparison is based on IDs.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[clock1]
+!          The first {\tt ESMF\_Clock} in comparison.
+!     \item[clock2]
+!          The second {\tt ESMF\_Clock} in comparison.
+!     \end{description}
 !
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_ClockEQ
+!
+! !REQUIREMENTS:
+!     TMGx.x.x
+
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface operator(/=)
+!     if (clock1 /= clock2) then ... endif
+!                  OR
+!     result = (clock1 /= clock2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_Clock), intent(in) :: clock1
+!     type(ESMF_Clock), intent(in) :: clock2
+!
+! !DESCRIPTION:
+!     Overloads the (/=) operator for the {\tt ESMF\_Clock} class.
+!     Compare two clocks for inequality; return true if not equal,
+!     false otherwise.  Comparison is based on IDs.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[clock1]
+!          The first {\tt ESMF\_Clock} in comparison.
+!     \item[clock2]
+!          The second {\tt ESMF\_Clock} in comparison.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_ClockNE
+!
+! !REQUIREMENTS:
+!     TMGx.x.x
+
       end interface
 !
 !==============================================================================
@@ -768,7 +828,7 @@
       end subroutine ESMF_ClockSyncToRealTime
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_ClockEQ - Compare two Clocks for equality
 !
 ! !INTERFACE:
@@ -782,24 +842,38 @@
       type(ESMF_Clock), intent(in) :: clock2
 
 ! !DESCRIPTION:
-!     Compare two clocks for equality; return true if equal, false otherwise.
-!     Maps to overloaded (==) operator interface function.
+!     This method overloads the (==) operator for the {\tt ESMF\_Clock}
+!     class.  See "interface operator(==)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[clock1]
-!          The first {\tt ESMF\_Clock} to compare.
-!     \item[clock2]
-!          The second {\tt ESMF\_Clock} to compare.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
+!EOPI
 !     invoke C to C++ entry point
       call c_ESMC_ClockEQ(clock1, clock2, ESMF_ClockEQ)
 
       end function ESMF_ClockEQ
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  ESMF_ClockNE - Compare two Clocks for inequality
+!
+! !INTERFACE:
+      function ESMF_ClockNE(clock1, clock2)
+!
+! !RETURN VALUE:
+      logical :: ESMF_ClockNE
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(in) :: clock1
+      type(ESMF_Clock), intent(in) :: clock2
+
+! !DESCRIPTION:
+!     This method overloads the (/=) operator for the {\tt ESMF\_Clock}
+!     class.  See "interface operator(/=)" above for complete description.
+!
+!EOPI
+!     invoke C to C++ entry point
+      call c_ESMC_ClockNE(clock1, clock2, ESMF_ClockNE)
+
+      end function ESMF_ClockNE
 
 !------------------------------------------------------------------------------
 !

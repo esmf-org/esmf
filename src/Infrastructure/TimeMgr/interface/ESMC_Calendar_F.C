@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.25 2004/02/04 02:08:46 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.26 2004/02/04 23:24:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -199,6 +199,18 @@ extern "C" {
                                        ESMC_CalendarType *calendarType2,
                                        int *esmf_calendarTypeEQ) {
            *esmf_calendarTypeEQ = (int) (*calendarType1 == *calendarType2);
+       }
+
+       void FTN(c_esmc_calendarne)(ESMC_Calendar **calendar1,
+                                   ESMC_Calendar **calendar2,
+                                   int *esmf_calendarNE) {
+           *esmf_calendarNE = (int) (**calendar1 != **calendar2);
+       }
+
+       void FTN(c_esmc_calendartypene)(ESMC_CalendarType *calendarType1,
+                                       ESMC_CalendarType *calendarType2,
+                                       int *esmf_calendarTypeNE) {
+           *esmf_calendarTypeNE = (int) (*calendarType1 != *calendarType2);
        }
 
        void FTN(c_esmc_calendarreadrestart)(ESMC_Calendar **ptr, int *nameLen,

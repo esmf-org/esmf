@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.30 2004/02/02 19:11:57 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.31 2004/02/04 23:24:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -171,6 +171,7 @@
     // (see ESMC_Time::SyncToRealTime()
 
     bool operator==(const ESMC_Clock &) const;
+    bool operator!=(const ESMC_Clock &) const;
 
     // required methods inherited and overridden from the ESMC_Base class
 

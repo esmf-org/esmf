@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.44 2004/02/04 02:08:46 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.45 2004/02/04 23:24:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.44 2004/02/04 02:08:46 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.45 2004/02/04 23:24:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static calendar instance counter
@@ -948,6 +948,30 @@ int ESMC_Calendar::count=0;
     return(calendarType == calendar.calendarType);
 
 }  // end ESMC_Calendar::operator==
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Calendar(!=) - Calendar inequality comparison
+//
+// !INTERFACE:
+      bool ESMC_Calendar::operator!=(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_Calendar &calendar) const {   // in - ESMC_Calendar to compare
+//
+// !DESCRIPTION:
+//      Compare for inequality the current object's (this) {\tt ESMC\_Calendar}
+//      with given {\tt ESMC\_Calendar}, return result
+//
+//EOP
+// !REQUIREMENTS:
+
+    return(calendarType != calendar.calendarType);
+
+}  // end ESMC_Calendar::operator!=
 
 //-------------------------------------------------------------------------
 //BOP

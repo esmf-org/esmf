@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.20 2004/02/02 19:11:58 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.21 2004/02/04 23:24:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -252,6 +252,11 @@ extern "C" {
        void FTN(c_esmc_alarmeq)(ESMC_Alarm **alarm1, ESMC_Alarm **alarm2,
                                    int *esmf_alarmEQ) {
            *esmf_alarmEQ = (int) (**alarm1 == **alarm2);
+       }
+
+       void FTN(c_esmc_alarmne)(ESMC_Alarm **alarm1, ESMC_Alarm **alarm2,
+                                   int *esmf_alarmNE) {
+           *esmf_alarmNE = (int) (**alarm1 != **alarm2);
        }
 
        void FTN(c_esmc_alarmreadrestart)(ESMC_Alarm **ptr, int *nameLen,

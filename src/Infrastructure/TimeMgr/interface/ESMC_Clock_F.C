@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.25 2004/02/02 19:11:58 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.26 2004/02/04 23:24:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -248,6 +248,11 @@ extern "C" {
        void FTN(c_esmc_clockeq)(ESMC_Clock **clock1, ESMC_Clock **clock2,
                                    int *esmf_clockEQ) {
            *esmf_clockEQ = (int) (**clock1 == **clock2);
+       }
+
+       void FTN(c_esmc_clockne)(ESMC_Clock **clock1, ESMC_Clock **clock2,
+                                   int *esmf_clockNE) {
+           *esmf_clockNE = (int) (**clock1 != **clock2);
        }
 
        void FTN(c_esmc_clockreadrestart)(ESMC_Clock **ptr, int *nameLen,

@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.41 2004/02/04 02:14:15 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.42 2004/02/04 23:24:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -92,6 +92,7 @@
       public ESMF_AlarmIsSticky
 
       public operator(==)
+      public operator(/=)
  
 ! Required inherited and overridden ESMF_Base class methods
 
@@ -108,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.41 2004/02/04 02:14:15 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.42 2004/02/04 23:24:00 eschwab Exp $'
 
 !==============================================================================
 !
@@ -134,17 +135,74 @@
 !BOP
 ! !INTERFACE:
       interface operator(==)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_AlarmEQ
-!     pointer version ESMF_pteq defined in base class
-
+!     if (alarm1 == alarm2) then ... endif
+!                  OR
+!     result = (alarm1 == alarm2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_Alarm), intent(in) :: alarm1
+!     type(ESMF_Alarm), intent(in) :: alarm2
+!
 ! !DESCRIPTION:
-!     This interface overloads the == operator for the 
-!     {\tt ESMF\_Alarm} class.  It allows for passing either the direct
-!     alarm object or a pointer to it.
+!     Overloads the (==) operator for the {\tt ESMF\_Alarm} class.
+!     Compare two alarms for equality; return true if equal,
+!     false otherwise.  Comparison is based on IDs.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm1]
+!          The first {\tt ESMF\_Alarm} in comparison.
+!     \item[alarm2]
+!          The second {\tt ESMF\_Alarm} in comparison.
+!     \end{description}
 !
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_AlarmEQ
+!
+! !REQUIREMENTS:
+!     TMGx.x.x
+
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface operator(/=)
+!     if (alarm1 /= alarm2) then ... endif
+!                  OR
+!     result = (alarm1 /= alarm2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_Alarm), intent(in) :: alarm1
+!     type(ESMF_Alarm), intent(in) :: alarm2
+!
+! !DESCRIPTION:
+!     Overloads the (/=) operator for the {\tt ESMF\_Alarm} class.
+!     Compare two alarms for inequality; return true if not equal,
+!     false otherwise.  Comparison is based on IDs.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm1]
+!          The first {\tt ESMF\_Alarm} in comparison.
+!     \item[alarm2]
+!          The second {\tt ESMF\_Alarm} in comparison.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_AlarmNE
+!
+! !REQUIREMENTS:
+!     TMGx.x.x
+
       end interface
 !
 !==============================================================================
@@ -907,7 +965,7 @@
       end function ESMF_AlarmIsSticky
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_AlarmEQ - Compare two Alarms for equality
 !
 ! !INTERFACE:
@@ -921,24 +979,38 @@
       type(ESMF_Alarm), intent(in) :: alarm2
 
 ! !DESCRIPTION:
-!     Compare two alarms for equality; return true if equal, false otherwise.
-!     Maps to overloaded (==) operator interface function.
+!     This method overloads the (==) operator for the {\tt ESMF\_Alarm}
+!     class.  See "interface operator(==)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm1]
-!          The first {\tt ESMF\_Alarm} to compare.
-!     \item[alarm2]
-!          The second {\tt ESMF\_Alarm} to compare.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  
-
+!EOPI
 !     invoke C to C++ entry point
       call c_ESMC_AlarmEQ(alarm1, alarm2, ESMF_AlarmEQ)
 
       end function ESMF_AlarmEQ
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  ESMF_AlarmNE - Compare two Alarms for inequality
+!
+! !INTERFACE:
+      function ESMF_AlarmNE(alarm1, alarm2)
+!
+! !RETURN VALUE:
+      logical :: ESMF_AlarmNE
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(in) :: alarm1
+      type(ESMF_Alarm), intent(in) :: alarm2
+
+! !DESCRIPTION:
+!     This method overloads the (/=) operator for the {\tt ESMF\_Alarm}
+!     class.  See "interface operator(/=)" above for complete description.
+!
+!EOPI
+!     invoke C to C++ entry point
+      call c_ESMC_AlarmNE(alarm1, alarm2, ESMF_AlarmNE)
+
+      end function ESMF_AlarmNE
 
 !------------------------------------------------------------------------------
 !
