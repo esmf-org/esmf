@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.26 2003/10/14 20:32:11 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.27 2003/10/16 19:36:22 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -114,7 +114,7 @@
 
 #include "../Infrastructure/TimeMgr/doc/TimeMgr_refdoc.ctex"
 
-#include "../Infrastructure/CommMem/doc/CommMem_refdoc.ctex"
+#include "../Infrastructure/DELayout/doc/CommMem_refdoc.ctex"
 
 #include "../Infrastructure/Config/doc/Config_refdoc.ctex"
 
