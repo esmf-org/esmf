@@ -1,4 +1,4 @@
-! $Id: ESMF_VMBase.F90,v 1.1 2004/12/03 20:47:45 nscollins Exp $
+! $Id: ESMF_VMBase.F90,v 1.2 2004/12/03 22:53:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@ module ESMF_VMBaseMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VMBase.F90,v 1.1 2004/12/03 20:47:45 nscollins Exp $'
+      '$Id: ESMF_VMBase.F90,v 1.2 2004/12/03 22:53:26 nscollins Exp $'
 
 !==============================================================================
 
@@ -149,6 +149,8 @@ module ESMF_VMBaseMod
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGet(vm, localPet, petCount, peCount, mpiCommunicator, &
       okOpenMpFlag, localrc)
+
+    if (present(rc)) rc = localrc
 
     !! Use LogErr to handle return code
     !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -255,6 +257,8 @@ module ESMF_VMBaseMod
     call c_ESMC_VMGetPETLocalInfo(vm, pet, peCount, ssiId, threadCount, &
       threadId, localrc)
 
+    if (present(rc)) rc = localrc
+
     !! Use LogErr to handle return code
     !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     !  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -298,6 +302,8 @@ module ESMF_VMBaseMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMPrint(vm, localrc) 
+
+    if (present(rc)) rc = localrc
 
     !! Use LogErr to handle return code
     !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
