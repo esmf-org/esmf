@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.9 2004/02/12 22:23:31 svasquez Exp $
+! $Id: ESMF_ArrayCreateEx.F90,v 1.10 2004/02/23 22:05:33 jwolfe Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -50,7 +50,7 @@
     enddo
     print *, "intptr data = ", intptr
 
-    array1 = ESMF_ArrayCreate(intptr, ESMF_DATA_REF, rc)
+    array1 = ESMF_ArrayCreate(intptr, ESMF_DATA_REF, rc=rc)
 
     print *, "array 1 create returned"
 !EOC
@@ -108,7 +108,7 @@
     enddo
     print *, "realptr data = ", realptr
 
-    array2 = ESMF_ArrayCreate(realptr, ESMF_DATA_REF, rc)
+    array2 = ESMF_ArrayCreate(realptr, ESMF_DATA_REF, rc=rc)
 
     print *, "array 2 create returned"
 !EOC
