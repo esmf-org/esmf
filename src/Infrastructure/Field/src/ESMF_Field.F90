@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.95 2004/01/26 17:42:11 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.96 2004/01/27 18:01:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -216,7 +216,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.95 2004/01/26 17:42:11 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.96 2004/01/27 18:01:26 nscollins Exp $'
 
 !==============================================================================
 !
@@ -347,13 +347,15 @@
       interface ESMF_FieldSetAttribute 
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldSetIntegerAttribute
-        !module procedure ESMF_FieldSetRealAttribute
-        !module procedure ESMF_FieldSetCharAttribute
+        module procedure ESMF_FieldSetIntAttr
+        !module procedure ESMF_FieldSetIntListAttr
+        !module procedure ESMF_FieldSetRealAttr
+        !module procedure ESMF_FieldSetRealListAttr
+        !module procedure ESMF_FieldSetCharAttr
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that attach
-!     attributes to a {\tt ESMF\_Field}.
+!     attributes to an {\tt ESMF\_Field}.
  
 !EOP
       end interface
@@ -366,13 +368,15 @@
       interface ESMF_FieldGetAttribute 
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldGetIntegerAttribute
-        !module procedure ESMF_FieldGetRealAttribute
-        !module procedure ESMF_FieldGetCharAttribute
+        module procedure ESMF_FieldGetIntAttr
+        !module procedure ESMF_FieldGetIntListAttr
+        !module procedure ESMF_FieldGetRealAttr
+        !module procedure ESMF_FieldGetRealListAttr
+        !module procedure ESMF_FieldGetCharAttr
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that retrieve
-!     attributes from a {\tt ESMF\_Field}.
+!     attributes from an {\tt ESMF\_Field}.
  
 !EOP
       end interface
@@ -1745,10 +1749,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldGetIntegerAttribute - Retrieve an Attribute from a Field
+! !IROUTINE: ESMF_FieldGetIntAttr - Retrieve an Attribute from a Field
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldGetIntegerAttribute(field, name, value, rc)
+      subroutine ESMF_FieldGetIntAttr(field, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
@@ -1788,15 +1792,15 @@
           rc = ESMF_FAILURE
       endif
 
-      !call ESMF_GetIntegerAttribute(field%ftypep%base, name, value, status)
-      !if(status .ne. ESMF_SUCCESS) then 
-      !  print *, "ERROR in ESMF_FieldGetAttribute"
-      !  return
-      !endif 
+      call c_ESMC_AttributeGetInt(field%ftypep%base, name, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldGetAttribute"
+        return
+      endif 
 
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldGetIntegerAttribute
+      end subroutine ESMF_FieldGetIntAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2176,10 +2180,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldSetIntegerAttribute - Set an Attribute on a Field
+! !IROUTINE: ESMF_FieldSetIntAttr - Set an Attribute on a Field
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldSetIntegerAttribute(field, name, value, rc)
+      subroutine ESMF_FieldSetIntAttr(field, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
@@ -2189,7 +2193,7 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt ESMF\_Field}.
+!      Attaches an integer attribute to a {\tt ESMF\_Field}.
 !
 ! 
 !     \begin{description}
@@ -2198,7 +2202,7 @@
 !     \item [name]
 !           The name of the Attribute to set.
 !     \item [value]
-!           The integer value of the named Attribute.
+!           The integer value of the Attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -2219,15 +2223,15 @@
           rc = ESMF_FAILURE
       endif
 
-      !call ESMF_SetIntegerAttribute(field%ftypep%base, name, value, status)
-      !if(status .ne. ESMF_SUCCESS) then 
-      !  print *, "ERROR in ESMF_FieldSetAttribute"
-      !  return
-      !endif 
+      call c_ESMC_AttributeSetInt(field%ftypep%base, name, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldSetAttribute"
+        return
+      endif 
 
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldSetIntegerAttribute
+      end subroutine ESMF_FieldSetIntAttr
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -2312,8 +2316,14 @@
           return
         endif
 
+        call ESMF_BasePrint(fp%base, str, status)
+        if(status .NE. ESMF_SUCCESS) then 
+          if (present(rc)) rc = ESMF_FAILURE
+          return
+        endif
+
         fp => field%ftypep
-        call ESMF_StatusString(fp%fieldstatus, str, rc)
+        call ESMF_StatusString(fp%fieldstatus, str, status)
         print *, "Field status = ", trim(str)
 
         if (fp%fieldstatus .ne. ESMF_STATE_READY) then
@@ -2328,19 +2338,19 @@
         endif 
         print *, "  Name = '",  trim(name), "'"
 
-        call ESMF_StatusString(fp%gridstatus, str, rc)
+        call ESMF_StatusString(fp%gridstatus, str, status)
         print *, "Grid status = ", trim(str)
         if (fp%gridstatus .eq. ESMF_STATE_READY) then 
-           call ESMF_GridPrint(fp%grid, "", rc)
+           call ESMF_GridPrint(fp%grid, "", status)
         endif
 
-        call ESMF_StatusString(fp%datastatus, str, rc)
+        call ESMF_StatusString(fp%datastatus, str, status)
         print *, "Data status = ", trim(str)
         if (fp%datastatus .eq. ESMF_STATE_READY) then 
-           call ESMF_ArrayPrint(fp%localfield%localdata, "", rc)
+           call ESMF_ArrayPrint(fp%localfield%localdata, "", status)
         endif
 
-        call ESMF_DataMapPrint(fp%mapping, "", rc)
+        call ESMF_DataMapPrint(fp%mapping, "", status)
 
         !TODO: add code here to print more info
 

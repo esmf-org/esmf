@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.24 2003/10/20 20:13:56 cdeluca Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.25 2004/01/27 18:01:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.24 2003/10/20 20:13:56 cdeluca Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.25 2004/01/27 18:01:27 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -70,14 +70,13 @@
       type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: status, myde
 
-!--------------------------------------------------------------------------------
-!     The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-!     always run. When the environment variable, EXHAUSTIVE, is set to ON then
-!     the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
-!     Special strings (Non-exhaustive and exhaustive) have been
-!     added to allow a script to count the number and types of unit tests.
-!--------------------------------------------------------------------------------
-
+!------------------------------------------------------------------------------
+!   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+!   always run. When the environment variable, EXHAUSTIVE, is set to ON then
+!   the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+!   Special strings (Non-exhaustive and exhaustive) have been
+!   added to allow a script to count the number and types of unit tests.
+!------------------------------------------------------------------------------
 
 
       print *, "*************FIELD ROUTE UNIT TESTS***************************"

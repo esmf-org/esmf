@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.26 2003/10/20 20:13:56 cdeluca Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.27 2004/01/27 18:01:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.26 2003/10/20 20:13:56 cdeluca Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.27 2004/01/27 18:01:27 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -50,7 +50,7 @@
       character(ESMF_MAXSTR) :: name
 
 !     !LOCAL VARIABLES:
-      integer :: x, y
+      integer :: x, y, intattr
       type(ESMF_Grid) :: grid, grid2, grid3, grid4
       type(ESMF_Array) :: arr, arr2
       type(ESMF_ArraySpec) :: arrayspec
@@ -206,7 +206,7 @@
 
       !NEX_UTest
       ! Verifing that a Grid can be created
-      grid =  ESMF_GridCreate("atmgrid", rc=rc)
+      grid =  ESMF_GridCreateEmpty(name="atmgrid", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -251,7 +251,7 @@
 
       !NEX_UTest
       ! Verifing that recreating a created Grid is allowed.
-      grid =  ESMF_GridCreate("landgrid", rc=rc)
+      grid =  ESMF_GridCreateEmpty(name="landgrid", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Recreating a created Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -381,7 +381,7 @@
       ! It will be uncommented when the query function is written.
       ! Bug 705196 "Unable to query Grid name"
       gname="oceangrid"
-      grid =  ESMF_GridCreate(name=gname, rc=rc)
+      grid =  ESMF_GridCreateEmpty(name=gname, rc=rc)
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                                    1, dm, "Field 0", ios, rc)
@@ -394,7 +394,27 @@
       call ESMF_GridPrint(grid3, "", rc=rc)
       call ESMF_Test((gname.eq.gname3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+#endif
 
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Req. xxx  - setting and getting Attributes from a Field
+      grid =  ESMF_GridCreateEmpty(name=gname, rc=rc)
+      arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
+      f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
+                                   1, dm, "Field 0", ios, rc)
+      call ESMF_FieldPrint(f3, "", rc)
+      call ESMF_FieldSetAttribute(f3, "Scale Factor", 4, rc)
+      call ESMF_FieldPrint(f3, "", rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting an Integer Attribute back from a Field"
+      call ESMF_FieldGetAttribute(f3, "Scale Factor", intattr, rc)
+      print *, "Scale Factor should be 4, is: ", intattr
+      call ESMF_Test((intattr.eq.4), name, failMsg, result, ESMF_SRCLINE)
+
+#ifdef ESMF_EXHAUSTIVE
+      !------------------------------------------------------------------------
       ! Requirement 1.2 Local memory layout 
       ! It shall be possible to specify whether the field data is row major or column 
       ! major at field creation and to rearrange it (assumes local copy).
