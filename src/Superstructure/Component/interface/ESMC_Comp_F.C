@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.26 2004/08/25 21:58:44 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.27 2004/09/17 13:56:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@ static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase,
 
      //printf("ptr = 0x%08x\n", (unsigned long)ptr);
      //printf("*ptr = 0x%08x\n", (unsigned long)(*(int*)ptr));
-     if ((ptr == ESMC_NULL_POINTER) || ((*(int*)ptr) == ESMC_NULL_POINTER)) {
+     if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
                                               "null pointer found", status);
         return;
@@ -125,7 +125,7 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
      //printf("ptr = 0x%08x\n", (unsigned long)ptr);
      //printf("*ptr = 0x%08x\n", (unsigned long)(*(int*)ptr));
      //if ((ptr == ESMC_NULL_POINTER)) {
-     if ((ptr == ESMC_NULL_POINTER) || ((*(int*)ptr) == ESMC_NULL_POINTER)) {
+     if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
                                               "null pointer found", status);
         return;
