@@ -1,4 +1,4 @@
-% $Id: Demo_usrdoc.ctex,v 1.1 2003/05/07 07:09:06 cdeluca Exp $
+% $Id: Demo_usrdoc.ctex,v 1.2 2003/05/07 07:49:55 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -15,6 +15,7 @@
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{Coupled Flow Demonstration}
 \newcommand{\myauthors}{Jon Wolfe, Nancy Collins, Cecelia DeLuca}
+\newcommand{\myversion}{Version 1.0}
 #endif
 
 #ifdef STANDALONE
