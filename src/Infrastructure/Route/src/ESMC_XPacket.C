@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.28 2003/07/24 21:55:05 jwolfe Exp $
+// $Id: ESMC_XPacket.C,v 1.29 2003/08/04 22:54:52 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.28 2003/07/24 21:55:05 jwolfe Exp $";
+              "$Id: ESMC_XPacket.C,v 1.29 2003/08/04 22:54:52 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -289,7 +289,7 @@
 // !IROUTINE:  ESMC_XPacketFromAxisIndex - calculate an XPacket from an AxisIndex
 //
 // !INTERFACE:
-      int ESMC_XPacket::ESMC_XPacketFromAxisIndex(
+      int ESMC_XPacketFromAxisIndex(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -299,57 +299,113 @@
       int size_axisindex,         // in  - size of AxisIndex array
       int *global_start,          // in  - array of global starting numbers
                                   //       per dimension
-      int *global_stride) {       // in  - array of global strides per
+      int *global_stride,         // in  - array of global strides per
                                   //       dimension
+      ESMC_Logical *periodic,     // in  - for each dim, is it periodic?
+      ESMC_XPacket *xp_list,      // out - list of xp's created
+      int *xp_count) {            // out - count of xp's created
 //
 // !DESCRIPTION:
-//      Translates a set of AxisIndices into a corresponding XPacket.
-//      Returns an XPacket and error code if problems are found.
+//      Translates a set of AxisIndices into one or more XPackets.
+//      If internal or non-periodic boundary, will only return 1 xp.
+//      If external along a periodic boundary, may return multiple xp's.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
+    int i, nxp, nextxp;
     int rc = ESMF_FAILURE;
-    int i;
 
     // switch based on array rank  TODO: is this necessary?
     switch (size_axisindex) {
-      case 1:
-        {
-          printf("no code to handle %d AxisIndices yet\n", size_axisindex);
-        }
-      break;
       case 2:
         {
           int global_l[2];
           int global_r[2];
-          this->rank = 2;
+
+          // printf("incoming AxisIndex:\n");
+          // for (i=0; i<size_axisindex; i++) 
+               //printf("[%d] offset=%d, contig_length=%d, stride=%d\n",
+               // i, indexlist[i].min, indexlist[i].max, indexlist[i].stride);
+
+          nxp = 1;
+          if ((periodic[0] == ESMF_TF_TRUE) && 
+              (indexlist[0].min < global_start[0])) nxp++;
+          if ((periodic[1] == ESMF_TF_TRUE) && 
+              (indexlist[1].min < global_start[1])) nxp++;
+
+          xp_list = new ESMC_XPacket[nxp];
+           *xp_count = nxp;
+
+          // there's always 1.
+          nextxp = 0;
+
           // calculate global offsets and contig_lengths for the index space
           for (i=0; i<size_axisindex; i++) {
-   //printf("incoming AxisIndex: [%d] offset=%d, contig_length=%d, stride=%d",
-   // i, indexlist[i].min, indexlist[i].max, indexlist[i].stride);
             global_l[i] = indexlist[i].min + global_start[i];
             global_r[i] = indexlist[i].max + global_start[i];
           }
-          this->offset  = global_l[1]*global_stride[0] + global_l[0];
-          this->contig_length = global_r[0] - global_l[0] + 1;
-          this->stride[0] = global_stride[0];
-          this->rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+
+          xp_list[nextxp].rank = 2;
+          xp_list[nextxp].offset  = global_l[1]*global_stride[0] + global_l[0];
+          xp_list[nextxp].contig_length = global_r[0] - global_l[0] + 1;
+          xp_list[nextxp].stride[0] = global_stride[0];
+          xp_list[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+
+          // if periodic along the first axis and this piece along boundary:
+          if ((periodic[0] == ESMF_TF_TRUE) && 
+              (indexlist[0].min < global_start[0])) {
+ 
+              nextxp++;
+
+              xp_list[nextxp].rank = 2;
+
+              // calculate global offsets and contig_lengths for the index space
+              for (i=0; i<size_axisindex; i++) {
+                global_l[i] = indexlist[i].min + global_start[i];
+                global_r[i] = indexlist[i].max + global_start[i];
+              }
+              global_l[0] += global_stride[0];
+              global_r[0] += global_stride[0];
+    
+              xp_list[nextxp].offset  = global_l[1]*global_stride[0] + global_l[0];
+              xp_list[nextxp].contig_length = global_r[0] - global_l[0] + 1;
+              xp_list[nextxp].stride[0] = global_stride[0];
+              xp_list[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+    
+          }
+
+          // if periodic along the second axis and this piece along boundary:
+          if ((periodic[1] == ESMF_TF_TRUE) && 
+              (indexlist[1].min < global_start[1])) {
+
+              nextxp++;
+
+              xp_list[nextxp].rank = 2;
+
+              // calculate global offsets and contig_lengths for the index space
+              for (i=0; i<size_axisindex; i++) {
+                global_l[i] = indexlist[i].min + global_start[i];
+                global_r[i] = indexlist[i].max + global_start[i];
+              }
+              global_l[1] += global_stride[1];
+              global_r[1] += global_stride[1];
+    
+              xp_list[nextxp].offset  = global_l[1]*global_stride[0] + global_l[0];
+              xp_list[nextxp].contig_length = global_r[0] - global_l[0] + 1;
+              xp_list[nextxp].stride[0] = global_stride[0];
+              xp_list[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+    
+          }
+
  //    printf("outgoing ");
- //    this->ESMC_XPacketPrint();
+ //    for (j=0; j<nxp; j++)
+ //        xp_list[j].ESMC_XPacketPrint();
+
         }
       break;
-      case 3:
-        {
-          printf("no code to handle %d AxisIndices yet\n", size_axisindex);
-        }
-      break;
-      case 4:
-        {
-          printf("no code to handle %d AxisIndices yet\n", size_axisindex);
-        }
-      break;
-      case 5:
+
+      default:
         {
           printf("no code to handle %d AxisIndices yet\n", size_axisindex);
         }

@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.20 2003/07/17 19:51:38 jwolfe Exp $
+// $Id: ESMC_XPacket.h,v 1.21 2003/08/04 22:54:52 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,9 +78,6 @@
  // miscellaneous fun stuff
     int ESMC_XPacketIntersect(ESMC_XPacket *xpacket1, 
                               ESMC_XPacket *xpacket2);
-    int ESMC_XPacketFromAxisIndex(struct ESMC_AxisIndex *indexlist,
-                                  int size_axisindex,
-                                  int *global_start, int* global_stride);
     int ESMC_XPacketGlobalToLocal(ESMC_XPacket *global_XP,
                                   ESMC_AxisIndex *indexlist, int rank,
                                   int *global_start, int* global_stride);
@@ -93,6 +90,12 @@
 	~ESMC_XPacket(void);
   
   
+    friend int ESMC_XPacketFromAxisIndex(struct ESMC_AxisIndex *indexlist,
+                                         int size_axisindex, 
+                                         int *global_start, int* global_stride,
+                                         ESMC_Logical *periodic,
+                                         ESMC_XPacket *xp_list, int *xp_count);
+
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private: 
@@ -103,5 +106,11 @@
 
  };   // end class ESMC_XPacket
 
+// non-class method - creates a list of xp's to return
+int ESMC_XPacketFromAxisIndex(struct ESMC_AxisIndex *indexlist,
+                              int size_axisindex, 
+                              int *global_start, int* global_stride,
+                              ESMC_Logical *periodic,
+                              ESMC_XPacket *xp_list, int *xp_count);
 
  #endif  // ESMC_XPacket_H
