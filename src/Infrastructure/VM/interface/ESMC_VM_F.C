@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.10 2004/05/21 05:04:12 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.11 2004/05/21 08:27:51 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMC_VM.h"
-#include "ESMC.h"                         // for LogErr
+#include "ESMC_LogErr.h"
 #include "ESMF_LogMacros.inc"             // for LogErr
 //------------------------------------------------------------------------------
 //BOP
