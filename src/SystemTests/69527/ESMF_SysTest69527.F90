@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.11 2003/04/25 18:11:48 jwolfe Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.12 2003/04/28 21:16:59 nscollins Exp $
 !
 ! System test code #69527
 
@@ -55,6 +55,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
+    call ESMF_FrameworkInitialize(rc)
 
 !   ! Create a DELayout 
     layout1 = ESMF_DELayoutCreate(rc)
@@ -206,8 +207,8 @@
 
     call ESMF_FieldDestroy(field1, rc)
     call ESMF_GridDestroy(grid1, rc)
-    !call ESMF_ArrayDestroy(array1, rc)
-    !call ESMF_DELayoutDestroy(layout1, rc)
+    call ESMF_ArrayDestroy(array1, rc)
+    call ESMF_DELayoutDestroy(layout1, rc)
     print *, "All Destroy routines done"
 
 
@@ -216,6 +217,7 @@
     print *, "System Test #69527 complete!"
 
     
+    call ESMF_FrameworkFinalize(rc)
 
     end program ESMF_SysTest69527
     

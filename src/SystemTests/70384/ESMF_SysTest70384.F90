@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.13 2003/04/24 16:43:16 nscollins Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.14 2003/04/28 21:17:01 nscollins Exp $
 !
 ! System test code #70384
 
@@ -50,6 +50,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
+    call ESMF_FrameworkInitialize(rc)
 
     ! Create a DELayout
     delist = (/ 0, 1, 2, 3, 4, 5 /)
@@ -250,6 +251,7 @@
 20    print *, "System Test #70384 complete!"
 
     
+    call ESMF_FrameworkFinalize(rc)
 
     end program ESMF_SysTest70384
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74558.F90,v 1.10 2003/04/25 22:16:55 nscollins Exp $
+! $Id: ESMF_SysTest74558.F90,v 1.11 2003/04/28 21:17:02 nscollins Exp $
 !
 ! System test code #74558
 
@@ -179,6 +179,8 @@
       call ESMF_GridCompDestroy(comp1, status)
 
       call ESMF_DELayoutDestroy(layout2, status)
+
+      call ESMF_AppCompDestroy(app, status)
 
       print *, "All Destroy routines done"
 
