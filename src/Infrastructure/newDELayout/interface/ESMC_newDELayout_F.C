@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout_F.C,v 1.17 2004/04/23 21:56:23 nscollins Exp $
+// $Id: ESMC_newDELayout_F.C,v 1.18 2004/04/26 13:38:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -120,6 +120,18 @@ extern "C" {
   
   // ~~~ Communications ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
        
+  void FTN(c_esmc_ndelayoutcopy)(ESMC_newDELayout **ptr,
+    void ***datain, void ***dataout, int *blen, int *src, int *dest,
+    ESMC_Logical *oneToOneFlag, int *status){
+    if (*oneToOneFlag == ESMF_TRUE){
+      *status = (*ptr)->ESMC_newDELayoutCopy((void **)datain, (void **)dataout,
+        *blen, *src, *dest, *oneToOneFlag);
+    }else{
+      *status = (*ptr)->ESMC_newDELayoutCopy(*datain, *dataout, *blen,
+        *src, *dest, *oneToOneFlag);
+    }
+  }
+  
   void FTN(c_esmc_ndelayoutcopycopy)(ESMC_newDELayout **ptr,
     void ***datain1, void ***datain2, void ***dataout1, void ***dataout2, 
     int *blen1, int *blen2, int *de1, int *de2,
@@ -131,18 +143,6 @@ extern "C" {
     }else{
       *status = (*ptr)->ESMC_newDELayoutCopyCopy(*datain1, *datain2, *dataout1,
         *dataout2, *blen1, *blen2, *de1, *de2, *oneToOneFlag);
-    }
-  }
-  
-  void FTN(c_esmc_ndelayoutcopy)(ESMC_newDELayout **ptr,
-    void ***datain, void ***dataout, int *blen, int *src, int *dest,
-    ESMC_Logical *oneToOneFlag, int *status){
-    if (*oneToOneFlag == ESMF_TRUE){
-      *status = (*ptr)->ESMC_newDELayoutCopy((void **)datain, (void **)dataout,
-        *blen, *src, *dest, *oneToOneFlag);
-    }else{
-      *status = (*ptr)->ESMC_newDELayoutCopy(*datain, *dataout, *blen,
-        *src, *dest, *oneToOneFlag);
     }
   }
   

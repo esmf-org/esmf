@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.17 2004/04/23 21:56:37 nscollins Exp $
+// $Id: ESMC_newDELayout.C,v 1.18 2004/04/26 13:38:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.17 2004/04/23 21:56:37 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.18 2004/04/26 13:38:05 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -605,80 +605,6 @@ int ESMC_newDELayout::ESMC_newDELayoutValidate(){
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_newDELayoutCopyCopy
-//
-// !INTERFACE:
-int ESMC_newDELayout::ESMC_newDELayoutCopyCopy(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//
-  void **srcData1,    // input array
-  void **srcData2,    // input array
-  void **dstData1,    // output array
-  void **dstData2,    // output array
-  int blen1,          // size in bytes to copy from srcData1 to dstData2
-  int blen2,          // size in bytes to copy from srcData2 to dstData1
-  int de1,            // de for data1
-  int de2,            // de for data2
-  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
-//
-// !DESCRIPTION:
-//
-//EOP
-//-----------------------------------------------------------------------------
-  if (de1<=de2){
-    ESMC_newDELayoutCopy(srcData1, dstData2, blen1, de1, de2, oneToOneFlag);
-    ESMC_newDELayoutCopy(srcData2, dstData1, blen2, de2, de1, oneToOneFlag);
-  }else{
-    ESMC_newDELayoutCopy(srcData2, dstData1, blen2, de2, de1, oneToOneFlag);
-    ESMC_newDELayoutCopy(srcData1, dstData2, blen1, de1, de2, oneToOneFlag);
-  }
-  return ESMF_SUCCESS;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_newDELayoutCopyCopy
-//
-// !INTERFACE:
-int ESMC_newDELayout::ESMC_newDELayoutCopyCopy(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//
-  void **srcData1,    // input array
-  void **srcData2,    // input array
-  void **dstData1,    // output array
-  void **dstData2,    // output array
-  int len1,           // size in elements to copy from srcData1 to dstData2
-  int len2,           // size in elements to copy from srcData2 to dstData1
-  ESMC_DataKind dtk1, // data type kind
-  ESMC_DataKind dtk2, // data type kind
-  int de1,            // de for data1
-  int de2,            // de for data2
-  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
-//
-// !DESCRIPTION:
-//
-//EOP
-//-----------------------------------------------------------------------------
-  int blen1 = len1 * ESMC_DataKindSize(dtk1);
-  int blen2 = len2 * ESMC_DataKindSize(dtk2);
-  return ESMC_newDELayoutCopyCopy(srcData1, srcData2, dstData1, dstData2, 
-    blen1, blen2, de1, de2, oneToOneFlag);
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-//BOP
 // !IROUTINE:  ESMC_newDELayoutCopy
 //
 // !INTERFACE:
@@ -771,6 +697,80 @@ int ESMC_newDELayout::ESMC_newDELayoutCopy(
   int blen = len * ESMC_DataKindSize(dtk);
   return ESMC_newDELayoutCopy(srcdata, destdata, blen, srcDE, destDE, 
     oneToOneFlag);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutCopyCopy
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutCopyCopy(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcData1,    // input array
+  void **srcData2,    // input array
+  void **dstData1,    // output array
+  void **dstData2,    // output array
+  int blen1,          // size in bytes to copy from srcData1 to dstData2
+  int blen2,          // size in bytes to copy from srcData2 to dstData1
+  int de1,            // de for data1
+  int de2,            // de for data2
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  if (de1<=de2){
+    ESMC_newDELayoutCopy(srcData1, dstData2, blen1, de1, de2, oneToOneFlag);
+    ESMC_newDELayoutCopy(srcData2, dstData1, blen2, de2, de1, oneToOneFlag);
+  }else{
+    ESMC_newDELayoutCopy(srcData2, dstData1, blen2, de2, de1, oneToOneFlag);
+    ESMC_newDELayoutCopy(srcData1, dstData2, blen1, de1, de2, oneToOneFlag);
+  }
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutCopyCopy
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutCopyCopy(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcData1,    // input array
+  void **srcData2,    // input array
+  void **dstData1,    // output array
+  void **dstData2,    // output array
+  int len1,           // size in elements to copy from srcData1 to dstData2
+  int len2,           // size in elements to copy from srcData2 to dstData1
+  ESMC_DataKind dtk1, // data type kind
+  ESMC_DataKind dtk2, // data type kind
+  int de1,            // de for data1
+  int de2,            // de for data2
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int blen1 = len1 * ESMC_DataKindSize(dtk1);
+  int blen2 = len2 * ESMC_DataKindSize(dtk2);
+  return ESMC_newDELayoutCopyCopy(srcData1, srcData2, dstData1, dstData2, 
+    blen1, blen2, de1, de2, oneToOneFlag);
 }
 //-----------------------------------------------------------------------------
 
