@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.38 2005/03/22 22:31:58 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.39 2005/04/05 23:44:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -251,6 +251,7 @@ void ESMC_VMK::vmk_init(void){
   // and the main_vmachine is all MPI pets we can do the following:
   npets=size;           // user is required to start with #processes=#cores!!!!
   mypet=rank;
+  mypthid=pthread_self();
 #ifdef ESMF_MPIUNI
   mpionly = 0;          // this way the commtype will be checked in comm calls
 #else
@@ -1509,7 +1510,7 @@ void ESMC_VMK::vmk_shutdown(class ESMC_VMKPlan *vmp, void *arg){
 void ESMC_VMK::vmk_print(void){
   // print info about the ESMC_VMK object
   printf("--- vmk_print start ---\n");
-  printf("this vm: %p\n", this);
+  printf("vm located at: %p\n", this);
   printf("npets = %d, mypet=%d\n", npets, mypet);
   printf("  pth_mutex =\t\t %p\n"
          "  pth_finish_count =\t %p\n"
