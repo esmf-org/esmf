@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.16 2004/10/08 15:43:10 nscollins Exp $
+# $Id: build_rules.mk,v 1.17 2004/10/08 22:22:47 nscollins Exp $
 #
 # Linux.intel.default.mk
 #
@@ -120,28 +120,31 @@ SED		   = /bin/sed
 ifneq ($(ESMF_COMM),mpich)
 ifeq ($(ESMF_PREC),64)
 C_CC		   = icc -size_lp64
+CXX_CC		   = icpc
 C_FC		   = ifort -size_lp64
 endif
 ifeq ($(ESMF_PREC),32)
 C_CC		   = icc
+CXX_CC		   = icpc
 C_FC		   = ifort
 endif
 endif
 
 ifeq ($(ESMF_COMM),mpich)
 ifeq ($(ESMF_PREC),64)
-C_CC		   = icc -size_lp64
-C_FC		   = ifort -size_lp64
+C_CC		   = mpicc -size_lp64
+CXX_CC		   = mpiCC -size_lp64
+C_FC		   = mpif90 -size_lp64
 endif
 ifeq ($(ESMF_PREC),32)
-C_CC		   = icc
-C_FC		   = ifort
+C_CC		   = mpicc
+CXX_CC		   = mpiCC 
+C_FC		   = mpif90
 endif
 endif
 
 C_CLINKER	   = ${C_CC}
 C_FLINKER	   = ${C_FC}
-CXX_CC		   = ${C_CC}
 CXX_FC		   = ${C_FC} -mp
 CXX_CLINKER	   = ${C_CC}
 CXX_FLINKER	   = ${C_CC}
@@ -188,7 +191,7 @@ C_CXXF90LIBS       =  -lrt
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
 # ------------------------- BOPT - O_c++ options ------------------------------
-OCXX_COPTFLAGS	   = -O 
+OCXX_COPTFLAGS	   = -O
 OCXX_FOPTFLAGS	   = -O
 # -------------------------- BOPT - g_complex options ------------------------
 GCOMP_COPTFLAGS	   = -g
