@@ -76,7 +76,7 @@ defined for any application; it initially allocates resources and tracks
 application-wide information. 
 The {\tt Application Component} must be instantiated on 
 any {\tt Decomposition Elements}\footnote{In ESMF {\tt Decomposition Elements} are the
-basic abstration that provides platform neutral parallelism, they are discussed in detail
+basic abstraction that provides platform neutral parallelism, they are discussed in detail
 in Section~\ref{sec:progmodel}} or {\tt DE}s on 
 which other components
 within the application are defined.  This is true whether the 
@@ -139,7 +139,9 @@ controls the coupling sequence.
 \caption[{Scoping of Components in a Coupled Application}]{A coupled
 application may itself be composed of other coupled systems.}
 \label{fig:couplerscaling}
+\begin{center}
 \scalebox{0.7}{\includegraphics{CouplerScaling.eps}}
+\end{center}
 \end{figure}
 
 
@@ -212,10 +214,10 @@ Here we describe a number of example scenarios of ESMF usage. The examples are
 described in text and illustrated using UML sequence diagrams. In these diagrams
 The vertical axis is time, positive
 downward, and the horizontal axis shows the objects that are involved in the
-exchange.  Arrow'd lines to text boxes mean that the source of the arrow has
+exchange.  Arrowed lines to text boxes mean that the source of the arrow has
 created the object in the box.  Solid lines to the start of a vertical
 box indicate a method call.  Dashed lines indicate a return.
-The overall flow of eceution is partitioned into four stages in this
+The overall flow of execution is partitioned into four stages in this
 discussion, {\it Create Sequence}, {\it Configure Sequence}, {\it Run Sequence}
 and {\it Termination Sequence}.
  
@@ -230,12 +232,14 @@ component creations steps for different types of component.
 
 \subsubsection{Application Creation}
 Figure \ref{fig:ApplicationComponentCreate} shows the sequence associated with
-creation of components from an {\tt Application Component}. In the diagram
+creation of components from an {\tt Application Component}. In the diagram,
 creation of child components executes concurrently. The application component
 proceeds through three phases which are serialized with respect to one another.
-First the applicaiton component creates a registry object for this application,
-next it creates two gridded components and finally it creates two coupler
+First the application component creates a registry object for this application,
+next it creates two gridded components, finally it creates two coupler
 components for transporting and translating data between gridded components.
+The actions within each phase can be parallelized, however, the phases
+themselves execute sequentially.
 \begin{figure}
 \caption[{Application Component Create}]
 {The UML sequence for application component creation}
@@ -244,11 +248,12 @@ components for transporting and translating data between gridded components.
 \end{figure}
 
 \subsubsection{Coupler Component Creation}
-Figure \ref{fig:CouplerComponentCreate} shows the general sequence associated 
+Figure \ref{fig:CouplerComponentCreate} shows the sequence associated
 with creation in a {\tt Coupler Component}. The key steps involved are
 the creation of import and export states that respectively hold inputs and
-outputs of the coupler component. Coupler component creation can also involve 
-internal, coupler component specific initialization.
+outputs of the coupler component. Coupler component creation may also involve
+internal, coupler component specific initialization and, additionally,
+registering the coupler components presence with the global registry entity.
 
 \begin{figure}
 \caption[{Coupler Component Create}]
@@ -261,9 +266,11 @@ internal, coupler component specific initialization.
 
 \subsubsection{Gridded Component Creation}
 Figure \ref{fig:GriddedComponentCreate} shows the sequence associated with
-creation in a {\tt Gridded Component}. The key steps in Gridded Component
-creation are the creation of import and export states for transferring 
-data to and from other components.
+creation in a {\tt Gridded Component}. A key step in Gridded Component
+creation is the creation of import and export states for transferring 
+data to and from other components. In addition there may be component
+specific computation that is executed during creation as well as execution
+of a registration function to register the component in the global registry.
 
 \begin{figure}
 \caption[{Gridded Component Create}]
@@ -275,7 +282,7 @@ data to and from other components.
 \end{figure}
 
 \subsection{Configure Sequences}
-Once components are created a configuration step is invoked. This step
+Following component creation a configuration step is invoked. This step
 invokes component specific logic that is responsible for setting the component
 initial state. Figures \ref{fig:ApplicationComponentConfigure}, 
 \ref{fig:CouplerComponentConfigure} and 
@@ -288,8 +295,11 @@ with configuration in an {\tt Application Component}. The sequence begins
 with internal configuration of the application component. The application
 component then invokes the configuration methods for the gridded components
 within its scope and for the coupler components within its scope.
-Gridded component configuration complets before coupler component
-configuration in invoked.
+Gridded component configuration completes before coupler component
+configuration in invoked. In the example shown in the figure configuration
+for the individual gridded components executes concurrently as does 
+configuration for the individual coupler components.
+
 
 \begin{figure}
 \caption[{Application Component Configuration}]
@@ -304,11 +314,13 @@ configuration in invoked.
 Figure \ref{fig:CouplerComponentConfigure} shows the sequence associated 
 with configuration of a {\tt Coupler Component}. A coupler components
 configuration method is invoked from its parent
-component (the {\tt Application Componet} in the case of
-figure \ref{fig:CouplerComponentConfigure}) Once invoked the method
-is responsible for setting the coupler's import and export states 
-to a known condition. Additional computation, specific to a particular
-coupler component, may also be included.
+component (the {\tt Application Component} in the case of
+figure \ref{fig:CouplerComponentConfigure}). Once invoked the method
+is responsible for initializing the coupler's import and export states 
+to a known, valid condition. Additional computation, specific to a particular
+coupler component, may also be included. This could include precalculation
+of interpolation weights that are repeatedly used in a specific regridding
+operation.
 
 \begin{figure}
 \caption[{Coupler Component Configuration}]
@@ -323,9 +335,9 @@ coupler component, may also be included.
 Figure \ref{fig:GriddedComponentConfigure} shows the sequence associated 
 with configuration in a {\tt Gridded Component}. The component configuration
 method is invoked from the parent component (the {\tt Application Component}
-in figure \ref{fig:GriddedComponentComfigure}). Once invoked the method
-is responsible for configuring the import and export states for the 
-component to a known status. Component configuration may also include
+in figure \ref{fig:GriddedComponentConfigure}). Once invoked the configuration
+stage is responsible for configuring the import and export states for the 
+component to a known, valid status. Component configuration may also include
 specialized configuration steps specific to that particular
 component. On completion the configuration method returns to the
 parent component.
@@ -341,7 +353,7 @@ parent component.
 
 \subsection{Run sequences}
 This section shows sequence diagrams for a number of different run scenarios.
-For each sequence, preceding component creation and component configuration 
+For each sequence, the preceding component creation and component configuration 
 phases are omitted for clarity.
 
 \subsubsection{Concurrent coupled atmosphere ocean sequence}
@@ -353,34 +365,37 @@ sending data back to the atmosphere.  Atmosphere and ocean components are
 configured for concurrent execution.
 
 \begin{figure}
-\caption[{Basic Run Application}]{Sequence for basic Run Application process.\\}
+\caption[{Basic Run Application}]{A prototypical UML sequence for a basic Run Application stage.\\}
 \label{fig:RunApplicationDiagram}
 \scalebox{1.0}{\includegraphics{runApplicationDiagram.eps}}
 \end{figure}
 
-Following {\tt Apllication Component} startup (and coupler and component
-creation and configuration) the run methods of the components are 
-invoked. This procedure is shown in figure \ref{fig:RunApplicationDiagram}. In 
-the example given the {\tt Application Component} invokes the run method of 
-the of the Atmosphere and Ocean components concurrently. The application 
-component waits until these stages are complete before it invokes the coupling 
-components that take export states from the atmosphere and ocean respectively. 
-These are also invoked to run concurrently with one another. Before iterating 
-onto a second time step the {\tt Aplication Component} selectively invokes the 
+Following {\tt Application Component} startup (and coupler and component
+creation and configuration) the run methods of components are 
+invoked. An example of this procedure is illustrated in figure 
+\ref{fig:RunApplicationDiagram}. In 
+the example given, the {\tt Application Component} invokes the run method of 
+the of the Atmosphere and Ocean gridded components concurrently. The 
+application 
+component then waits until these stages are complete before it invokes the 
+coupler components run methods. The coupler components
+take export states from the atmosphere and ocean respectively. 
+The coupler components are invoked to run concurrently with one another. Before iterating 
+onto the next time step the {\tt Application Component} selectively invokes the 
 checkpoint/restart methods of the Ocean and Atmosphere components, again 
-concurrently. Finally the {\tt Application Component} evaluates whether it is 
-time to exit or whether to return to the start of the run loop for subsequent 
+concurrently. Finally the {\tt Application Component} evaluates whether
+to exit or whether to return to the start of the run loop for subsequent 
 iteration.
 
 \subsubsection{Sequential Components Run Sequence}
 
-Figure \ref{fig:SequentialComponentsRunSequence} show the UML sequence
+Figure \ref{fig:SequentialComponentsRunSequence} shows the UML sequence
 for a multi-component application in which components execute serially
 with respect to one another. Each component may itself be a parallel
 computation, however, execution of methods in one component do not overlap 
 with execution of methods in other component in this example.
 For an individual object the event sequence mirrors the procedure in 
-figure \ref{fig:RunApplicationDiagram}. However in the sequential
+figure \ref{fig:RunApplicationDiagram}. However, in the sequential
 case only one event is active at any time.
 \begin{figure}
 \caption[{Sequential Component Run}]{Sequence for serial multi-component
@@ -396,11 +411,11 @@ Figure \ref{fig:SubcomponentRunSequence} shows the execution of an
 application with components and subcomponents. In this case the 
 two components (atmospheric physics and atmospheric dynamics) are 
 subcomponents
-of an atmospher component. This requires that extra coupler components
-also be employed that map between import and export states of the
-physics and dynamics components within the the scope of the
+of a parent atmosphere component. This configuration requires that extra 
+coupler components be employed. These map between import and export states of 
+the physics and dynamics components within the the scope of the
 parent atmosphere component. In this scenario the sequencing of
-subcomponents is controlled by their parent ( the atmospher component )
+subcomponents is controlled by their parent (the atmosphere component)
 and not by the application component.
 
 \begin{figure}
@@ -413,14 +428,14 @@ application.\\}
 \end{figure}
 
 \subsubsection{Ensemble Run Sequence}
-Figre \ref{fig:EnsembleComponentsRunSequence} shows an ensemble scenario
+Figure \ref{fig:EnsembleComponentsRunSequence} shows an ensemble scenario
 in which multiple instances of the same component execute in parallel.
 The run sequence is driven from the application component. However,
-an extra level of coupling indirection is required. This is provided by
+an extra level of coupling indirection is required. This is provided by a
 coupler component that merges (in some user defined manner) the export
 state of multiple ocean components. The output from this coupler
 component is then passed to a coupler component that transforms from an
-ocean exprt state to an
+ocean export state to an
 atmosphere component import state.
 \begin{figure}
 \caption[{Ensemble component Run}]{Sequence for ensemble components
@@ -432,12 +447,13 @@ application scenario.\\}
 \end{figure}
 
 \subsubsection{Ensemble Coupler Component Run Sequence}
-Figre \ref{fig:EnsembleComponentsCouplerRunSequence} shows the
-coupler component run sequence in an ensemble scenario. The sequencing
+Figure \ref{fig:EnsembleComponentsCouplerRunSequence} shows the
+{\tt Coupler Component} run sequence in an ensemble scenario. The sequencing
 illustrated is invoked from the application component. It proceeds by
 first merging two ocean import states into a composite form. The composite
 form then serves to update a merged ocean export state that is
-configured for import into an ocean to atmosphere coupler component.
+configured for import into an ocean-to-atmosphere coupler component 
+(labeled {\tt ocn to atmos cpler:} in the figure).
 \begin{figure}
 \caption[{Ensemble Coupler Run}]{Sequence for ensemble coupler
 scenario.\\}
@@ -449,12 +465,11 @@ scenario.\\}
 
 \subsubsection{Gridded Component Run Sequence}
 Figure \ref{fig:GriddedComponentsRunSequence} shows the internal sequence
-that a gridded component run methods executes. This sequence consists
-of decoding and parsing the import state, ''stepping forward'' the components
-internal state and setting an appropriate export state. The component then
-returns to the parent level. As indicated on the diagram the internala merged ocean export state that is
-configured for import into an ocean to atmosphere coupler component.
-state processing and advancing within a component may entail iteration.
+that a typical gridded component run method executes. This sequence, 
+executed when the components run method is invoked,
+consists of decoding and parsing the import state, ''stepping forward'' the 
+components internal state, and setting an appropriate export state. The 
+component then returns to the parent level.
 \begin{figure}
 \caption[{Sequence in a Component Run}]{Sequence for a component
 run stage.\\}
@@ -466,9 +481,9 @@ run stage.\\}
 
 \subsubsection{Coupler Component Run Sequence}
 Figure \ref{fig:CouplerComponentsRunSequence} shows the internal sequence
-that a coupler component run method executes. After innvocation
+that a typical coupler component run method executes. After invocation
 from the parent level, this sequence consists
-of decoding and parsing the export state from another component.
+of acquiring, decoding and parsing the export state from another component.
 The state is then transformed through regridding and other conversion
 procedures. The transformed state is then posted as the import state
 for another component and flow returns to the parent component.
@@ -481,22 +496,22 @@ run stage.\\}
 \end{center}
 \end{figure}
 
-\subsection{Termination Sequence}
+\subsection{Finalize Sequence}
 Shut down of an ESMF application follows a regular sequence for each component
 type. Figures 
 \ref{fig:ApplicationFinalizeSequence}, 
 \ref{fig:CouplerFinalizeSequence} and 
-\ref{fig:GriddedComponentFinalizeSeqeunce} show the shut down sequence for 
+\ref{fig:GriddedComponentFinalizeSequence} show the shut down sequence for 
 {\tt Application Components}, {\tt Coupler Components} and {\tt Gridded Components} respectively.
 \subsubsection{Application Finalize Sequence}
 
 Figure \ref{fig:ApplicationFinalizeSequence} shows the termination sequence
 for an {\tt Application Component}. This sequence is executed at
-the end of an ESMF application. The sequence consists of an innvocation
+the end of an ESMF application. The sequence consists of an invocation
 of the application destroy method which then invokes the destruction methods 
-of all the application's child components. After the child components are
-destroyed the registry object and any other high-level structures are 
-also destroyed.
+of all the application component's child components. After the child 
+components are destroyed the registry object and any other high-level 
+structures are also destroyed.
 
 \begin{figure}
 \caption[{Application Finalize}]{Sequence for finalizing an application
@@ -513,7 +528,7 @@ a {\tt  Coupler Component}. The sequence is initiated by the parent
 component (in this example the {\tt Application Component}). Upon 
 initiation a {\tt Coupler Component} destroy method will delete
 the import and export state objects it instantiated at creation and
-also perform standard file and network I/O cleanup operations.
+also perform file and network I/O cleanup operations.
 Flow then returns to the parent component.
 \begin{figure}
 \caption[{Coupler Finalize}]{Sequence for finalizing a coupler component}
@@ -526,10 +541,10 @@ Flow then returns to the parent component.
 \subsubsection{Gridded Component Finalize Sequence}
 Figure \ref{fig:GriddedComponentFinalizeSequence} shows the termination 
 sequence in a {\tt Gridded Component}. After being invoked from the
-its parent component a gridded componet finalize method destroys
+its parent component a gridded component finalize method destroys
 export state and import state objects it created along with any
 internal structures it has created. Then file and network I/O objects
-are closed. Fiannly flow returns to the parent component.
+are closed. Finally flow returns to the parent component.
 \begin{figure}
 \caption[{Gridded Component Finalize}]{Sequence for finalizing a gridded component}
 \begin{center}
@@ -580,7 +595,7 @@ encompasses all the functionality needed to communicate data between two or
 more {\tt Component}s.  A {\tt Coupler} has a coupling initiation method that 
 defines and returns a set of {\tt Transform}s. In general, a {\tt Coupler Component} does not instantiate, schedule or run components whose purpose is unrelated 
 to coupling, although it may mediate data exchanges among such components.
-However, any component may instantiate subcomponents. It is possibel
+However, any component may instantiate subcomponents. It is possible
 for a {\tt Coupler Component} to instantiate a subcomponent to handle a
 specific part of the coupling functionality, such as calculating fluxes
 or interpolation weights.
