@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.9 2004/05/21 03:54:06 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.10 2004/05/21 05:04:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,32 +45,32 @@ extern "C" {
   // ESMC_VM interfaces
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-  void FTN(c_esmc_vmget)(ESMC_VM **ptr, int *mypet, int *npets, int *npes, 
-    int *mpic, ESMC_Logical *ok_openmp, int *rc){
+  void FTN(c_esmc_vmget)(ESMC_VM **ptr, int *localPet, int *petCount, 
+    int *peCount, int *mpiCommunicator, ESMC_Logical *okOpenMpFlag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmget()"
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_VMGet(
-      ESMC_NOT_PRESENT_FILTER(mypet), 
-      ESMC_NOT_PRESENT_FILTER(npets), 
-      ESMC_NOT_PRESENT_FILTER(npes),
-      ESMC_NOT_PRESENT_FILTER(mpic), 
-      ESMC_NOT_PRESENT_FILTER(ok_openmp)),
+      ESMC_NOT_PRESENT_FILTER(localPet), 
+      ESMC_NOT_PRESENT_FILTER(petCount), 
+      ESMC_NOT_PRESENT_FILTER(peCount),
+      ESMC_NOT_PRESENT_FILTER(mpiCommunicator), 
+      ESMC_NOT_PRESENT_FILTER(okOpenMpFlag)),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_vmgetpet)(ESMC_VM **ptr, int *petid, int *npes, int *ssiid,
-    int *nthreads, int *tid, int *rc){
+  void FTN(c_esmc_vmgetpet)(ESMC_VM **ptr, int *pet, int *peCount, int *ssiId,
+    int *threadCount, int *threadId, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmgetpet()"
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_VMGetPET(
-      *petid, 
-      ESMC_NOT_PRESENT_FILTER(npes), 
-      ESMC_NOT_PRESENT_FILTER(ssiid), 
-      ESMC_NOT_PRESENT_FILTER(nthreads), 
-      ESMC_NOT_PRESENT_FILTER(tid)),
+      *pet, 
+      ESMC_NOT_PRESENT_FILTER(peCount), 
+      ESMC_NOT_PRESENT_FILTER(ssiId), 
+      ESMC_NOT_PRESENT_FILTER(threadCount), 
+      ESMC_NOT_PRESENT_FILTER(threadId)),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -154,7 +154,7 @@ extern "C" {
       (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
     }
     (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
-    rc = ESMF_SUCCESS;  // TODO: error handling, catching allocation failure
+    *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
   }
 
   void FTN(c_esmc_vmplandestruct)(ESMC_VMPlan **ptr, int *rc){
@@ -165,7 +165,7 @@ extern "C" {
     delete [] (*ptr)->myvmachs;
     // Now delete the actual ESMC_VMPlan object
     delete (*ptr);
-    rc = ESMF_SUCCESS;  // TODO: error handling, catching allocation failure
+    *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
   }
   
   void FTN(c_esmc_vmplanmaxthreads)(ESMC_VMPlan **ptr, ESMC_VM **ptr_vm,
@@ -209,7 +209,7 @@ extern "C" {
       (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
     }
     (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
-    rc = ESMF_SUCCESS;  // TODO: error handling, catching allocation failure
+    *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
   }
   
   void FTN(c_esmc_vmplanminthreads)(ESMC_VMPlan **ptr, ESMC_VM **ptr_vm,
@@ -253,7 +253,7 @@ extern "C" {
       (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
     }
     (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
-    rc = ESMF_SUCCESS;  // TODO: error handling, catching allocation failure
+    *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
   }
   
   void FTN(c_esmc_vmplanmaxpes)(ESMC_VMPlan **ptr, ESMC_VM **ptr_vm,
@@ -297,7 +297,7 @@ extern "C" {
       (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
     }
     (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
-    rc = ESMF_SUCCESS;  // TODO: error handling, catching allocation failure
+    *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
   }
        
 };

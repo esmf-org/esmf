@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.8 2004/04/26 15:58:14 theurich Exp $
+// $Id: ESMC_VM.h,v 1.9 2004/05/21 05:04:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -50,18 +50,18 @@ class ESMC_VM : public vmachine {   // inherits from vmachine class
   public:
     // Get method that supports the F90 optional arguments interface
     int ESMC_VMGet(
-      ESMF_KIND_I4 *mypet,          // out - petid
-      ESMF_KIND_I4 *npets,          // out - number of PETs
-      ESMF_KIND_I4 *npes,           // out - number of PEs
-      int          *mpic,           // out - MPI Intracommunicator for VM
-      ESMC_Logical *ok_openmp);     // out - user-level OpenMP o.k.?
+      int          *localPet,       // out - id of local PET
+      int          *petCount,       // out - number of PETs
+      int          *peCount,        // out - number of PEs
+      int          *mpiCommunicator,// out - MPI Intracommunicator for VM
+      ESMC_Logical *okOpenMpFlag);  // out - flag whether user-level OpenMP o.k.
     // GetPET method that supports the F90 optional arguments interface
     int ESMC_VMGetPET(
-      ESMF_KIND_I4 *petid,          // in  - petid for this PET
-      ESMF_KIND_I4 *npes,           // out - number of PEs for this PET
-      ESMF_KIND_I4 *ssiid,          // out - ssid for this PET
-      ESMF_KIND_I4 *nthreads,       // out - number of treads in group with PET
-      ESMF_KIND_I4 *tid);           // out - thread id for this PET
+      int pet,            // in  - id of specified PET
+      int *peCount,       // out - number of PEs for specified PET
+      int *ssiId,         // out - ssiid for specified PET
+      int *threadCount,   // out - number of treads in thread group with PET
+      int *threadId);     // out - thread id for specified PET
 };// end class ESMC_VM
 
 // external ESMC_VM methods:

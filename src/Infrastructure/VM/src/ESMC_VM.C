@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.9 2004/05/19 02:15:36 theurich Exp $
+// $Id: ESMC_VM.C,v 1.10 2004/05/21 05:04:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,7 +21,7 @@
 // Currently class {\tt ESMC\_VM} is derived from base class {\tt vmachine}
 // and class {\tt ESMC\_VMPlan} is derived from base class {\tt vmplan}. There
 // are only very few new features that the derived classes add to their base
-// classes, thus most of the implementing code is located in {vmachine.C}.
+// classes, thus most of the implementing code is located in {\tt vmachine.C}.
 //
 //-----------------------------------------------------------------------------
 
@@ -33,10 +33,14 @@
 // associated class definition file
 #include <ESMC_VM.h>
 
+// LogErr
+#include "ESMC.h"                         // for LogErr
+#include "ESMF_LogMacros.inc"             // for LogErr
+
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.9 2004/05/19 02:15:36 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.10 2004/05/21 05:04:12 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -52,6 +56,116 @@ static ESMC_VM *GlobalVM = NULL;
 //
 // This section includes all the VM routines
 //
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_VMGetGlobal - Get Global VM
+//
+// !INTERFACE:
+ESMC_VM *ESMC_VMGetGlobal(
+//
+// !RETURN VALUE:
+//    Pointer to global VM
+//
+// !ARGUMENTS:
+//
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//   Get the global default {\tt ESMC\_VM} object. This is the {\tt ESMC\_VM}
+//   object that was created during {\tt ESMC\_Initialize()} and is the ultimate
+//   parent of all {\tt ESMC\_VM} objects in an ESMF application.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  *rc = ESMF_SUCCESS;
+  return GlobalVM;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_VMGet
+//
+// !INTERFACE:
+int ESMC_VM::ESMC_VMGet(
+//
+// !RETURN VALUE:
+//    Error return code
+//
+// !ARGUMENTS:
+//
+  int          *localPet,       // out - id of local PET
+  int          *petCount,       // out - number of PETs
+  int          *peCount,        // out - number of PEs
+  int          *mpiCommunicator,// out - MPI Intracommunicator for VM
+  ESMC_Logical *okOpenMpFlag){  // out - flag whether user-level OpenMP o.k.
+//
+// !DESCRIPTION:
+//   Get internal information about the specified {\tt ESMC\_VM} object.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  if (localPet != ESMC_NULL_POINTER)
+    *localPet = this->vmachine_mypet();
+  if (petCount != ESMC_NULL_POINTER)
+    *petCount = this->vmachine_npets();
+  if (peCount != ESMC_NULL_POINTER){
+    int npets = this->vmachine_npets();
+    *peCount = 0; // reset
+    for (int i=0; i<npets; i++)
+      *peCount += this->vmachine_ncpet(i);
+  }
+  if (mpiCommunicator != ESMC_NULL_POINTER){
+    // TODO: Ensure that all of the MPI implementations have this MPI-2
+    // function implemented. If not then deal with those cases by static 
+    // type cast (int). LAM has it and needs the MPI-2 interlanguage cast.
+    *mpiCommunicator = (int) MPI_Comm_c2f(this->vmachine_mpi_comm());
+  }
+  if (okOpenMpFlag != ESMC_NULL_POINTER)
+    *okOpenMpFlag = ESMF_TRUE;    // TODO: Determine this at compile time...
+  return ESMF_SUCCESS;            // TODO: Do some real error handling here...
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_VMGetPET
+//
+// !INTERFACE:
+int ESMC_VM::ESMC_VMGetPET(
+//
+// !RETURN VALUE:
+//    Error return code
+//
+// !ARGUMENTS:
+//
+  int pet,            // in  - id of specified PET
+  int *peCount,       // out - number of PEs for specified PET
+  int *ssiId,         // out - ssiid for specified PET
+  int *threadCount,   // out - number of treads in thread group with PET
+  int *threadId){     // out - thread id for specified PET
+//
+// !DESCRIPTION:
+//   Get internal information about the specified PET within the specified
+//   {\tt ESMF\_VM} object.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  if (peCount != ESMC_NULL_POINTER)
+    *peCount = this->vmachine_ncpet(pet);
+  if (ssiId != ESMC_NULL_POINTER)
+    *ssiId = this->vmachine_ssiid(pet);
+  if (threadCount != ESMC_NULL_POINTER)
+    *threadCount = this->vmachine_nthreads(pet);
+  if (threadId != ESMC_NULL_POINTER)
+    *threadId = this->vmachine_tid(pet);
+  return ESMF_SUCCESS;            // TODO: Do some real error handling here...
+}
 //-----------------------------------------------------------------------------
 
 
@@ -76,8 +190,8 @@ ESMC_VM *ESMC_VMInitialize(
 //EOP
 //-----------------------------------------------------------------------------
   GlobalVM = new ESMC_VM;
-  GlobalVM->vmachine_init();             // set up default vmachine (all MPI)
-  *rc = ESMF_SUCCESS;
+  GlobalVM->vmachine_init();      // set up default vmachine (all MPI)
+  *rc = ESMF_SUCCESS;             // TODO: Do some real error handling here...
   return GlobalVM;
 }
 //-----------------------------------------------------------------------------
@@ -103,116 +217,6 @@ void ESMC_VMFinalize(
 //EOP
 //-----------------------------------------------------------------------------
   GlobalVM->vmachine_finalize();
-  *rc = ESMF_SUCCESS;
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_VMGetGlobal
-//
-// !INTERFACE:
-ESMC_VM *ESMC_VMGetGlobal(
-//
-// !RETURN VALUE:
-//    pointer to global VM
-//
-// !ARGUMENTS:
-//
-  int *rc){   // return code
-//
-// !DESCRIPTION:
-//    Return pointer to global VM
-//
-//EOP
-//-----------------------------------------------------------------------------
-  *rc = ESMF_SUCCESS;
-  return GlobalVM;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_VMGet
-//
-// !INTERFACE:
-int ESMC_VM::ESMC_VMGet(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//
-  ESMF_KIND_I4 *mypet,          // out - petid
-  ESMF_KIND_I4 *npets,          // out - number of PETs
-  ESMF_KIND_I4 *npes,           // out - number of PEs
-  int          *mpic,           // out - MPI Intracommunicator for VM
-  ESMC_Logical *ok_openmp){     // out - indicate whether user-level OpenMP o.k.
-//
-// !DESCRIPTION:
-//    Get information about a VM object
-//
-//EOP
-//-----------------------------------------------------------------------------
-  if (mypet != ESMC_NULL_POINTER)
-    *mypet = this->vmachine_mypet();
-  if (npets != ESMC_NULL_POINTER)
-    *npets = this->vmachine_npets();
-  if (npes != ESMC_NULL_POINTER){
-    int npets = this->vmachine_npets();
-    *npes = 0; // reset
-    for (int i=0; i<npets; i++)
-      *npes += this->vmachine_ncpet(i);
-  }
-  if (mpic != ESMC_NULL_POINTER){
-    // TODO:  Note:  on SunOS, MPI_Comm is defined as pointer to a structure,
-    //        so mpic should only be used as a reference container not to be
-    //        changed by the user.
-    //*mpic = (int) this->vmachine_mpi_comm();
-    // TODO: Ensure that all of the MPI implementations have this MPI-2
-    // function implemented. If not then deal with those cases by static 
-    // type cast (as above). LAM has it and needs the MPI-2 interlanguage cast.
-    *mpic = (int) MPI_Comm_c2f(this->vmachine_mpi_comm());
-  }
-  if (ok_openmp != ESMC_NULL_POINTER)
-    *ok_openmp = ESMF_TRUE;   // TODO: Determine this at compile time...
-  return ESMF_SUCCESS;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_VMGetPET
-//
-// !INTERFACE:
-int ESMC_VM::ESMC_VMGetPET(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//
-  ESMF_KIND_I4 *petid,          // in  - petid for this PET
-  ESMF_KIND_I4 *npes,           // out - number of PEs for this PET
-  ESMF_KIND_I4 *ssiid,          // out - ssiid for this PET
-  ESMF_KIND_I4 *nthreads,       // out - number of treads in group with PET
-  ESMF_KIND_I4 *tid){           // out - thread id for this PET
-//
-// !DESCRIPTION:
-//    Get PET specific information about a VM object
-//
-//EOP
-//-----------------------------------------------------------------------------
-  if (npes != ESMC_NULL_POINTER)
-    *npes = this->vmachine_ncpet(*petid);
-  if (ssiid != ESMC_NULL_POINTER)
-    *ssiid = this->vmachine_ssiid(*petid);
-  if (nthreads != ESMC_NULL_POINTER)
-    *nthreads = this->vmachine_nthreads(*petid);
-  if (tid != ESMC_NULL_POINTER)
-    *tid = this->vmachine_tid(*petid);
-  return ESMF_SUCCESS;
+  *rc = ESMF_SUCCESS;             // TODO: Do some real error handling here...
 }
 //-----------------------------------------------------------------------------
