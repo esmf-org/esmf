@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5 2004/03/16 18:00:53 nscollins Exp $
+# $Id: build_rules.mk,v 1.6 2004/03/16 22:10:48 nscollins Exp $
 #
 # Linux.intel.default.mk
 #
@@ -57,18 +57,16 @@ OMAKE		   = ${MAKE}
 RANLIB		   = ranlib
 SHELL		   = /bin/sh
 SED		   = /bin/sed
-SH_LD		   = ecc 
-#
-# Compilers, Linkers, and Loaders 
+# ################## Compilers, Linkers, and Loaders ########################
 #
 ifneq ($(ESMF_COMM),mpich)
 ifeq ($(ESMF_PREC),64)
-C_CC		   = ecc -size_lp64
-C_FC		   = efc -size_lp64
+C_CC		   = icc -size_lp64
+C_FC		   = ifort -size_lp64
 endif
 ifeq ($(ESMF_PREC),32)
 C_CC		   = icc
-C_FC		   = ifc
+C_FC		   = ifort
 endif
 endif
 
@@ -92,6 +90,7 @@ CXX_FLINKER	   = ${C_CC}
 C_F90CXXLD         = ${C_FC} -mp
 C_CXXF90LD         = ${C_CC}
 C_CXXSO            = ${C_CC} -shared
+SH_LD              = ${C_CC}
 
 #
 # C and Fortran compiler flags 
@@ -119,17 +118,12 @@ CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CCV		   = ${CXX_CC} -V -c -w -x c++
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
-<<<<<<< build_rules.mk
-C_F90CXXLIBS       = -lcprts
-C_CXXF90LIBS       = -lCEPCF90 -lIEPCF90 -lF90 -lintrins
-=======
 #CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
 C_F90CXXLIBS       = -Wl,-rpath,/opt/intel_cc_80/lib -L/opt/intel_cc_80/lib \
                      -lcprts
 #C_F90CXXLIBS       = -lcprts
 C_CXXF90LIBS       = 
 #C_CXXF90LIBS       = -lCEPCF90 -lIEPCF90 -lF90 -lintrins
->>>>>>> 1.3
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
