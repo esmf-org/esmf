@@ -1,30 +1,23 @@
-% $Id: ESMF_buildreq.tex,v 1.5 2003/03/20 00:00:44 btwomack Exp $
+% $Id: ESMF_buildreq.tex,v 1.6 2003/07/09 22:03:25 flanigan Exp $
 
 \sreq{Build}
 
-\ssreq{Build system will use GNU Make}
-The build system will utilize the Build program Make from
-GNU.  Other vendors' make programs will not be supported.
-\begin{reqlist}
-{\bf Priority:} 1. \\
-{\bf Source:} ESMF-Core \\
-{\bf Status:} proposed \\
-{\bf Verification:} inspection
-\end{reqlist}
-
 \ssreq{Library Archive Files}
-Both .a and .so archive files will be created by the 
-build system.
+The build system will create  archive library files and when
+possible, shared object library files. Archive library files commonly
+have the file name extension .a.  Shared object library files commonly
+have .so as their file name extension.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF-Core \\
+{\bf Source:} Application Group \\
 {\bf Status:}  proposed \\
 {\bf Verification:} inspection
 \end{reqlist}
 
 \ssreq{Common Targets}
 The build system tasks will be controlled with a series of
-makefile targets. These are the targets that will be available
+makefile targets. Standard targets will be used whenever 
+possible. These are the targets that will be available
 for all releases:
 
 \begin{description}
@@ -37,14 +30,10 @@ for all releases:
 
 \item[tests] Builds and runs the unit tests
 \item[tests\_uni] Builds and runs single processor unit tests.
-\item[build\_tests] Builds the unit tests.
-\item[run\_tests] Runs unit tests.
+
 \item[run\_tests\_uni] Runs the single processor tests.
 \item[system\_tests] Builds and runs system tests.
 \item[system\_tests\_uni] Builds and runs single processor system tests.
-\item[build\_system\_tests] Builds system tests.
-\item[run\_system\_tests] Runs system tests.
-\item[run\_system\_tests\_uni] Runs single processor system tests.
 
 \item[alldoc] Builds all formats of the documentation.
 \item[dvi] Builds dvi documentation files.
@@ -52,12 +41,12 @@ for all releases:
 \item[html] Builds html documentation files.
 \item[clean] Removes all products for current architecture.
 \item[clobber] Removes all products for all architectures.
-\item[cleandoc] Removes all the processed documentation files.
+
 \end{description}
 
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF-Core \\
+{\bf Source:} Application Group \\
 {\bf Status:} proposed \\
 {\bf Verification:} code inspection
 \end{reqlist}
@@ -70,7 +59,7 @@ Only build tasks within and below the current working directory
 will be processed.  
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF-Core \\
+{\bf Source:} Application Group \\
 {\bf Status:} proposed \\
 {\bf Verification:} inspection
 \end{reqlist}
@@ -80,18 +69,18 @@ Documentation will exist to explain the structure and
 internal workings of the Build System.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF-Core \\
+{\bf Source:} Application Group \\
 {\bf Status:} proposed \\
 {\bf Verification:} inspection
 \end{reqlist}
 
 \ssreq{User Documentation}
-Documentation will exist to cover steps needed to build ESMF
+Documentation will exist to cover steps needed to build ESMF,
 EVA and Implementation Report  source trees.  This will include procedures for 
 changing the compile and link options.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF-Core \\
+{\bf Source:} Application Group \\
 {\bf Status:} proposed \\
 {\bf Verification:} inspection
 \end{reqlist}
@@ -101,17 +90,19 @@ Documentation will exist to cover steps needed to add source
 code to the ESMF and EVA source trees.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF-Core \\
+{\bf Source:} Application Group \\
 {\bf Status:} proposed \\
 {\bf Verification:} inspection
 \end{reqlist}
 
 \ssreq{EVA Builds}
-EVA will access the build system
-of a checked out and built  ESMF release.
+EVA will will be able to access the build system
+of a checked out and built  ESMF release.  EVA will
+have the ability to use .a or .so ESMF library files
+without access to ESMF source code tree.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF-Core \\
+{\bf Source:} Application Group \\
 {\bf Status:} proposed \\
 {\bf Verification:} inspection
 \end{reqlist}
@@ -119,10 +110,12 @@ of a checked out and built  ESMF release.
 
 \ssreq{Concurrent Builds}
 The same set of files can be used for builds on separate 
-system architectures concurrently.
+system architectures concurrently.  This requirement also
+applies to building and running of all unit and system
+tests.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF-Core \\
+{\bf Source:} Application Group \\
 {\bf Status:} proposed \\
 {\bf Verification:} inspection
 \end{reqlist}
@@ -132,7 +125,7 @@ The build system will take into account the dependencies
 between source code files and build products.  
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF-Core \\
+{\bf Source:} Application Group \\
 {\bf Status:} proposed \\
 {\bf Verification:} system test
 \end{reqlist}
@@ -142,7 +135,7 @@ The build system will scan source code files to
 generate dependency lists.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF-Core \\
+{\bf Source:} Application Group \\
 {\bf Status:} proposed \\
 {\bf Verification:} system test
 \end{reqlist}
@@ -152,7 +145,7 @@ Status and error log files will be generated by
 the build system.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF-Core \\
+{\bf Source:} Application Group \\
 {\bf Status:} proposed \\
 {\bf Verification:} inspection
 \end{reqlist}
@@ -162,7 +155,7 @@ The build system will check for the required system
 libraries and utilities.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} ESMF-Core \\
+{\bf Source:} Application Group \\
 {\bf Status:} proposed \\
 {\bf Verification:} test
 \end{reqlist}
@@ -172,7 +165,7 @@ The ESMF shall have the ability to easily customize the build environment.
 System libraries that are required can be set easily, without modifying 
 the build files directly. If the paths to required system libraries 
 are not provided or incorrect the build system will let the user know 
-how to set them and die gracefully.  
+how to set them and die gracefully.
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} CCSM-CPL. \\
@@ -180,3 +173,41 @@ how to set them and die gracefully.
 {\bf Verification:} Set library paths correctly and incorrectly and test that 
 the build acts appropriately.
 \end{reqlist}
+
+\ssreq{Build from read only directory}
+The ESMF library and it test applications
+will be able to be built from ESMF
+source code that is stored in a
+read only directory.
+
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} Application Group \\
+{\bf Status:} proposed \\
+{\bf Verification:} test
+\end{reqlist}
+
+\ssreq{Build system can be used to build ESMF applications}
+The makefile fragments of the build system will 
+be designed so that they can used in the makefiles 
+of applications that use ESMF.
+
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} Application Group \\
+{\bf Status:} proposed \\
+{\bf Verification:} test
+\end{reqlist}
+
+\ssreq{Build rules will be easily overridden}
+Rules that define compile and link commands will be
+easily overridden.
+
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} Application Group \\
+{\bf Status:} proposed \\
+{\bf Verification:} test
+\end{reqlist}
+
+
