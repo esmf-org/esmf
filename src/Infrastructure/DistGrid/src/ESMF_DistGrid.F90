@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.42 2003/04/24 17:52:22 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.43 2003/04/25 18:10:22 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.42 2003/04/24 17:52:22 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.43 2003/04/25 18:10:22 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1537,12 +1537,15 @@
 ! !IROUTINE: ESMF_DistGridGlobalToLocalIndex - translate global indexing to local
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGlobalToLocalIndex(distgrid, global, local, rc)
+      subroutine ESMF_DistGridGlobalToLocalIndex(distgrid, global1D, local1D, &
+                                                 global2D, local2D, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), intent(in) :: distgrid
-      integer(ESMF_IKIND_I4), dimension(:), intent(in) :: global
-      integer(ESMF_IKIND_I4), dimension(:), intent(out) :: local
+      integer(ESMF_IKIND_I4), dimension(:), optional, intent(in) :: global1D
+      integer(ESMF_IKIND_I4), dimension(:), optional, intent(out) :: local1D
+      integer(ESMF_IKIND_I4), dimension(:,:), optional, intent(in) :: global2D
+      integer(ESMF_IKIND_I4), dimension(:,:), optional, intent(out) :: local2D
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1552,10 +1555,18 @@
 !     \begin{description}
 !     \item[distgrid] 
 !          Class to be used.
-!     \item[[global]]
-!          Array of global identifiers to be translated.
-!     \item[[local]]
-!          Array of local identifiers corresponding to global identifiers.
+!     \item[[global1D]]
+!          One-dimensional Array of global identifiers to be translated.
+!          Infers translating between positions in memory.
+!     \item[[local1D]]
+!          One-dimensional Array of local identifiers corresponding to
+!          global identifiers.
+!     \item[[global2D]]
+!          Two-dimensional Array of global identifiers to be translated.
+!          Infers translating between indices in ij space.
+!     \item[[local2D]]
+!          Two-dimensional Array of local identifiers corresponding to
+!          global identifiers.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1573,20 +1584,62 @@
         rc = ESMF_FAILURE
       endif
 
+!     memory translation here
+      if(present(global1D)) then
+
+!     make sure local array is present as well
+        if(.not. present(local1D)) then
+          print *, "ERROR in ESMF_DistGridLocalToGlobal: local array not ", &
+                   "present"
+          return
+        endif
 !     make sure array lengths are the same
-      if(size(local) .NE. size(global)) then
-        print *, "ERROR in ESMF_DistGridGlobalToLocal: array lengths not equal"
-        return
-      endif
+        if(size(global1D) .NE. size(local1D)) then
+          print *, "ERROR in ESMF_DistGridLocalToGlobal: array lengths not ", &
+                   "equal"
+          return
+        endif
 
 !     the following code works only for grid where the global data is
 !     organized (indexed) by DE  !TODO add coding for other cases
 !     TODO: decide where enumerator for grid organization should be
 !     TODO: this assumes exclusive indexing for local cells - total too?
-      base = distgrid%MyDE%gcellexc_start
-      do i = 1, size(global)
-        local(i) = global(i) - base
-      enddo
+        base = distgrid%MyDE%gcellexc_start
+        do i = 1, size(global1D)
+          local1D(i) = global1D(i) - base
+        enddo
+  
+      endif
+
+!     index translation here
+      if(present(global2D)) then
+
+!     make sure local array is present as well
+        if(.not. present(local2D)) then
+          print *, "ERROR in ESMF_DistGridLocalToGlobal: global array not ", &
+                   "present"
+          return
+        endif
+!     make sure array lengths are the same
+        if(size(global2D) .NE. size(local2D)) then
+          print *, "ERROR in ESMF_DistGridLocalToGlobal: array lengths not ", &
+                   "equal"
+          return
+        endif
+
+        do i = 1, size(global2D,1)
+          local2D(i,1) = -1    ! TODO:  make an ESMF_NOTFOUND to use instead of -1
+          local2D(i,2) = -1
+          if(global2D(i,1).ge.distgrid%MyDE%lcellexc_index(1)%l .and. &
+             global2D(i,1).le.distgrid%MyDE%lcellexc_index(1)%r .and. &
+             global2D(i,2).ge.distgrid%MyDE%lcellexc_index(2)%l .and. &
+             global2D(i,2).le.distgrid%MyDE%lcellexc_index(2)%r ) then
+            local2D(i,1) = global2D(i,1) - distgrid%MyDE%lcellexc_index(1)%gstart
+            local2D(i,2) = global2D(i,2) - distgrid%MyDE%lcellexc_index(2)%gstart
+          endif
+        enddo
+  
+      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1597,12 +1650,15 @@
 ! !IROUTINE: ESMF_DistGridLocalToGlobalIndex - translate local indexing to global
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridLocalToGlobalIndex(distgrid, local, global, rc)
+      subroutine ESMF_DistGridLocalToGlobalIndex(distgrid, local1D, global1D, &
+                                                 local2D, global2D, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), intent(in) :: distgrid
-      integer(ESMF_IKIND_I4), dimension(:), intent(in) :: local
-      integer(ESMF_IKIND_I4), dimension(:), intent(out) :: global
+      integer(ESMF_IKIND_I4), dimension(:), optional, intent(in) :: local1D
+      integer(ESMF_IKIND_I4), dimension(:), optional, intent(out) :: global1D
+      integer(ESMF_IKIND_I4), dimension(:,:), optional, intent(in) :: local2D
+      integer(ESMF_IKIND_I4), dimension(:,:), optional, intent(out) :: global2D
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1612,10 +1668,18 @@
 !     \begin{description}
 !     \item[distgrid] 
 !          Class to be used.
-!     \item[[local]]
-!          Array of local identifiers to be translated.
-!     \item[[global]]
-!          Array of global identifiers corresponding to local identifiers.
+!     \item[[local1D]]
+!          One-dimensional Array of local identifiers to be translated.
+!          Infers translating between positions in memory.
+!     \item[[global1D]]
+!          One-dimensional Array of global identifiers corresponding to
+!          local identifiers.
+!     \item[[local2D]]
+!          Two-dimensional Array of local identifiers to be translated.
+!          Infers translating between indices in ij space.
+!     \item[[global2D]]
+!          Two-dimensional Array of global identifiers corresponding to
+!          local identifiers.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1633,20 +1697,56 @@
         rc = ESMF_FAILURE
       endif
 
+!     memory translation here
+      if(present(local1D)) then
+
+!     make sure global array is present as well
+        if(.not. present(global1D)) then
+          print *, "ERROR in ESMF_DistGridLocalToGlobal: global array not ", &
+                   "present"
+          return
+        endif
 !     make sure array lengths are the same
-      if(size(global) .NE. size(local)) then
-        print *, "ERROR in ESMF_DistGridLocalToGlobal: array lengths not equal"
-        return
-      endif
+        if(size(global1D) .NE. size(local1D)) then
+          print *, "ERROR in ESMF_DistGridLocalToGlobal: array lengths not ", &
+                   "equal"
+          return
+        endif
 
 !     the following code works only for grid where the global data is
 !     organized (indexed) by DE  !TODO add coding for other cases
 !     TODO: decide where enumerator for grid organization should be
 !     TODO: this assumes exclusive indexing for local cells - total too?
-      base = distgrid%MyDE%gcellexc_start
-      do i = 1, size(local)
-        global(i) = local(i) + base
-      enddo
+        base = distgrid%MyDE%gcellexc_start
+        do i = 1, size(local1D)
+          global1D(i) = local1D(i) + base
+        enddo
+  
+      endif
+
+!     index translation here
+      if(present(local2D)) then
+
+!     make sure global array is present as well
+        if(.not. present(global2D)) then
+          print *, "ERROR in ESMF_DistGridLocalToGlobal: global array not ", &
+                   "present"
+          return
+        endif
+!     make sure array lengths are the same
+        if(size(global2D) .NE. size(local2D)) then
+          print *, "ERROR in ESMF_DistGridLocalToGlobal: array lengths not ", &
+                   "equal"
+          return
+        endif
+
+        base = distgrid%MyDE%gcellexc_start
+        do i = 1, size(local2D,1)
+          global2D(i,1) = local2D(i,1) + distgrid%MyDE%lcellexc_index(1)%gstart
+          global2D(i,2) = local2D(i,2) + distgrid%MyDE%lcellexc_index(2)%gstart
+        enddo
+  
+      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 

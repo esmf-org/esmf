@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.44 2003/04/24 17:51:02 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.45 2003/04/25 18:10:04 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -205,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.44 2003/04/24 17:51:02 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.45 2003/04/25 18:10:04 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1690,12 +1690,15 @@
 ! !IROUTINE: ESMF_GridGlobalToLocalIndex - translate global indexing to local
 
 ! !INTERFACE:
-      subroutine ESMF_GridGlobalToLocalIndex(grid, global, local, rc)
+      subroutine ESMF_GridGlobalToLocalIndex(grid, global1D, local1D, &
+                                             global2D, local2D, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      integer(ESMF_IKIND_I4), dimension(:), intent(in) :: global
-      integer(ESMF_IKIND_I4), dimension(:), intent(out) :: local
+      integer(ESMF_IKIND_I4), dimension(:), optional, intent(in) :: global1D
+      integer(ESMF_IKIND_I4), dimension(:), optional, intent(out) :: local1D
+      integer(ESMF_IKIND_I4), dimension(:,:), optional, intent(in) :: global2D
+      integer(ESMF_IKIND_I4), dimension(:,:), optional, intent(out) :: local2D
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1706,10 +1709,18 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be used.
-!     \item[[global]]
-!          Array of cell identifiers in global indexing.
-!     \item[[local]]
-!          Array of cell identifiers in local indexing.
+!     \item[[global1D]]
+!          One-dimensional Array of global identifiers to be translated.
+!          Infers translating between positions in memory.
+!     \item[[local1D]]
+!          One-dimensional Array of local identifiers corresponding to
+!          global identifiers.
+!     \item[[global2D]]
+!          Two-dimensional Array of global identifiers to be translated.
+!          Infers translating between indices in ij space.
+!     \item[[local2D]]
+!          Two-dimensional Array of local identifiers corresponding to
+!          global identifiers.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1729,7 +1740,8 @@
 !     call DistGrid method to retrieve information otherwise not available
 !     to the application level
       call ESMF_DistGridGlobalToLocalIndex(grid%ptr%distgrid%ptr, &
-                                           global, local, status)
+                                           global1D, local1D, &
+                                           global2D, local2D, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGlobalToLocalIndex: distgrid global to local"
         return
@@ -1744,12 +1756,15 @@
 ! !IROUTINE: ESMF_GridLocalToGlobalIndex - translate global indexing to local
 
 ! !INTERFACE:
-      subroutine ESMF_GridLocalToGlobalIndex(grid, local, global, rc)
+      subroutine ESMF_GridLocalToGlobalIndex(grid, local1D, global1D, &
+                                             local2D, global2D, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      integer(ESMF_IKIND_I4), dimension(:), intent(in) :: local
-      integer(ESMF_IKIND_I4), dimension(:), intent(out) :: global
+      integer(ESMF_IKIND_I4), dimension(:), optional, intent(in) :: local1D
+      integer(ESMF_IKIND_I4), dimension(:), optional, intent(out) :: global1D
+      integer(ESMF_IKIND_I4), dimension(:,:), optional, intent(in) :: local2D
+      integer(ESMF_IKIND_I4), dimension(:,:), optional, intent(out) :: global2D
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1760,10 +1775,18 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be used.
-!     \item[[local]]
-!          Array of cell identifiers in local indexing.
-!     \item[[global]]
-!          Array of cell identifiers in global indexing.
+!     \item[[local1D]]
+!          One-dimensional Array of local identifiers to be translated.
+!          Infers translating between positions in memory.
+!     \item[[global1D]]
+!          One-dimensional Array of global identifiers corresponding to
+!          local identifiers.
+!     \item[[local2D]]
+!          Two-dimensional Array of local identifiers to be translated.
+!          Infers translating between indices in ij space.
+!     \item[[global2D]]
+!          Two-dimensional Array of global identifiers corresponding to
+!          local identifiers.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1783,7 +1806,8 @@
 !     call DistGrid method to retrieve information otherwise not available
 !     to the application level
       call ESMF_DistGridLocalToGlobalIndex(grid%ptr%distgrid%ptr, &
-                                           local, global, status)
+                                           local1D, global1D, &
+                                           local2D, global2D, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridLocalToGlobalIndex: distgrid local to global"
         return
