@@ -2,6 +2,7 @@
 ! Example/test code which creates a new grid.
 
 !-------------------------------------------------------------------------
+!EXAMPLE        String used by test script to count examples.
 !-------------------------------------------------------------------------
 
 !BOP

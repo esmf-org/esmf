@@ -1,8 +1,9 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.6 2003/12/16 17:02:09 svasquez Exp $
+! $Id: ESMF_ArrayCreateEx.F90,v 1.7 2004/01/07 21:15:53 svasquez Exp $
 !
 ! Example/test code which creates a new field.
 
 !-------------------------------------------------------------------------------
+!EXAMPLE        String used by test script to count examples.
 !-------------------------------------------------------------------------------
 
 !BOP
