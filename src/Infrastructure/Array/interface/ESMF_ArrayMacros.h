@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.9 2003/12/02 21:59:37 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.10 2004/02/11 21:55:36 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -317,7 +317,6 @@
         !endif @\
  @\
         ! Always supply a halo value, setting it to 0 if not specified. @\
-        ! Lower and upper bounds also. @\
         if (present(halo_width)) then @\
           hwidth = halo_width @\
         else @\
