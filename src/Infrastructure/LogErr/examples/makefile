@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/06/12 18:08:09 jwolfe Exp $ 
+# $Id: makefile,v 1.7 2003/07/28 17:39:14 jwolfe Exp $ 
 
 ALL: 
 
@@ -58,7 +58,7 @@ ESMF_TestErrCreateDir:
 
 ESMF_TestErr: ESMF_TestErr.o  chkopts
 	-${F90CXXLD} -o ESMF_TestErr ESMF_TestErr.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_TestErr.o
+	-${RM} ESMF_TestErr.o
 
 RUN_ESMF_TestErr:
 	-@rm -f testlog stdlog.* logfile.* ESMF_TestErr.tmps
@@ -74,7 +74,7 @@ ESMF_TestErr.rm:
 
 ESMF_TestErr2: ESMF_TestErr2.o  chkopts
 	-${F90CXXLD} -o ESMF_TestErr2 ESMF_TestErr2.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_TestErr2.o
+	-${RM} ESMF_TestErr2.o
 
 RUN_ESMF_TestErr2:
 	-@rm -f testlog stdlog.* logfile.* ESMF_TestErr2.tmps
@@ -90,7 +90,7 @@ ESMF_TestErr2.rm:
 
 ESMF_TestErr3: ESMF_TestErr3.o  chkopts
 	-${F90CXXLD} -o ESMF_TestErr3 ESMF_TestErr3.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_TestErr3.o
+	-${RM} ESMF_TestErr3.o
 
 RUN_ESMF_TestErr3:
 	-@rm -f testlog stdlog.* logfile.* ESMF_TestErr3.tmps
@@ -105,7 +105,7 @@ ESMF_TestErr3.rm:
 
 ESMF_TestLog: ESMF_TestLog.o  chkopts
 	-${F90CXXLD} -o ESMF_TestLog ESMF_TestLog.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_TestLog.o
+	-${RM} ESMF_TestLog.o
 
 RUN_ESMF_TestLog:
 	-@rm -f testlog stdlog.* logfile.* ESMF_TestLog.tmps
@@ -120,7 +120,7 @@ ESMF_TestLog.rm:
 
 ESMF_TestLog2: ESMF_TestLog2.o  chkopts
 	-${F90CXXLD} -o ESMF_TestLog2 ESMF_TestLog2.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_TestLog2.o
+	-${RM} ESMF_TestLog2.o
 
 RUN_ESMF_TestLog2:
 	-@rm -f testlog stdlog.* logfile.* ESMF_TestLog2.tmps
