@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.28 2004/07/06 21:21:40 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.29 2004/07/06 21:33:21 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.28 2004/07/06 21:21:40 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.29 2004/07/06 21:33:21 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -420,7 +420,7 @@
       write(name, *) "Get a Bundle Data Pointer Test"
       call ESMF_BundleGetDataPointer(bundle1, fieldName="heat flux", dataPointer=f90ptr2, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      
+      print *, "rc =",  rc
       !------------------------------------------------------------------------
 
 
