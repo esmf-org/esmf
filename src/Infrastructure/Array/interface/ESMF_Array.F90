@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.9 2004/06/02 13:27:54 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.10 2004/06/02 23:12:48 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -124,7 +124,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.9 2004/06/02 13:27:54 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.10 2004/06/02 23:12:48 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -710,8 +710,8 @@ end subroutine
 
         ! call c routine to do work
         dlength = size(decompids)
-        call c_ESMC_ArrayComputeAxisIndex(array, delayout, decompids, &
-                                          dlength, status)
+   !     call c_ESMC_ArrayComputeAxisIndex(array, delayout, decompids, &
+   !                                       dlength, status)
 
         if (present(rc)) rc = status
 
