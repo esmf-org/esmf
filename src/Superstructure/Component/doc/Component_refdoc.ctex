@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.17 2003/12/18 21:52:31 svasquez Exp $
+% $Id: Component_refdoc.ctex,v 1.18 2003/12/18 22:28:49 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -54,15 +54,11 @@
 \input{../Superstructure/Component/doc/comp_desc}
 #endif
 
-\subsection{Use and Examples}
+\subsection{Usage}
 #ifdef STANDALONE
 \input{comp_usage}
-\input{ESMF_GCompEx_fapi}
-\input{ESMF_CplEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/Component/doc/comp_usage}
-\input{../Superstructure/Component/doc/ESMF_GCompEx_fapi}
-\input{../Superstructure/Component/doc/ESMF_CplEx_fapi}
 #endif
 
 \subsubsection{Restrictions}
@@ -90,11 +86,13 @@
 \input{../Superstructure/Component/doc/gcomp_desc}
 #endif
 
-\subsection{Usage}
+\subsection{Use and Examples}
 #ifdef STANDALONE
 \input{gcomp_usage}
+\input{ESMF_GCompEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/Component/doc/gcomp_usage}
+\input{../Superstructure/Component/doc/ESMF_GCompEx_fapi}
 #endif
 
 \subsubsection{Restrictions}
@@ -130,11 +128,13 @@
 \input{../Superstructure/Component/doc/cpl_desc}
 #endif
 
-\subsection{Usage}
+\subsection{Use and Examples}
 #ifdef STANDALONE
 \input{cpl_usage}
+\input{ESMF_CplEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/Component/doc/cpl_usage}
+\input{../Superstructure/Component/doc/ESMF_CplEx_fapi}
 #endif
 
 \subsubsection{Restrictions}
