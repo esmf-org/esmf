@@ -1,0 +1,9 @@
+&input
+     counts(1) = 156,     counts(2) = 72,
+     x_min = 0.0,         x_max = 2.0e+05,
+     y_min = 0.0,         y_max = 5.0e+04,
+     printout = -1,    
+
+     in_energy = 600.0,
+     in_velocity = 4.5,
+     in_rho = 2.0 /
