@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.10 2004/03/08 16:03:22 nscollins Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.11 2004/03/11 17:56:51 jwolfe Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -28,42 +28,55 @@
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_DataMap) :: datamap
     type(ESMF_DELayout) :: delayout
-    type(ESMF_RelLoc) :: relativelocation
     character (len = ESMF_MAXSTR) :: bname1, bname2, fname1, fname2
     type(ESMF_IOSpec) :: iospec
     type(ESMF_Field) :: field(10), returnedfield1, returnedfield2, simplefield
     type(ESMF_Bundle) :: bundle1, bundle2, bundle3
     real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr1, f90ptr2
     integer :: counts(2)
-    real(ESMF_KIND_R8) :: min_coord(2)
+    real(ESMF_KIND_R8) :: min_coord(2), max_coord(2)
 !\end{verbatim}
 !EOP
 
     integer :: finalrc
     finalrc = ESMF_SUCCESS
         
-
 !-------------------------------------------------------------------------
+    ! Initialize framework
+    call ESMF_Initialize(rc)
+
 !   !  Create several Fields and add them to a new Bundle.
  
     counts = (/ 100, 200 /)
-    min_coord = (/ 0.0, 0.0 /)
+    min_coord = (/  0.0,  0.0 /)
+    max_coord = (/ 50.0, 60.0 /)
     delayout = ESMF_DELayoutCreate(rc=rc)
-    grid = ESMF_GridCreateLogRectUniform(2, counts, min_coord, layout=delayout, rc=rc)
+    grid = ESMF_GridCreateLogRectUniform(2, counts, min_coord, max_coord, &
+                horzGridKind=ESMF_GridKind_XY, &
+                horzStagger=ESMF_GridStagger_A, &
+                horzCoordSystem=ESMF_CoordSystem_Cartesian, &
+                layout=delayout, rc=rc)
+
     call ESMF_ArraySpecInit(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
-    field(1) = ESMF_FieldCreate(grid, arrayspec, name="pressure", rc=rc)
+    field(1) = ESMF_FieldCreate(grid, arrayspec, &
+                                horzRelloc=ESMF_CELL_CENTER, &
+                                name="pressure", rc=rc)
 !EOC
     
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    field(2) = ESMF_FieldCreate(grid, arrayspec, name="temperature", rc=rc)
+    field(2) = ESMF_FieldCreate(grid, arrayspec, &
+                                horzRelloc=ESMF_CELL_CENTER, &
+                                name="temperature", rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    field(3) = ESMF_FieldCreate(grid, arrayspec, name="heat flux", rc=rc)
+    field(3) = ESMF_FieldCreate(grid, arrayspec, &
+                                horzRelloc=ESMF_CELL_CENTER, &
+                                name="heat flux", rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -209,6 +222,8 @@
     else
        print *, "FAIL: ESMF_BundleCreateEx.F90"
     end if
+
+      call ESMF_Finalize(rc)
 
 !BOC
      end program ESMF_BundleCreateEx
