@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.82 2004/04/13 17:30:46 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.83 2004/04/14 17:47:40 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -149,6 +149,7 @@
  
       ! A 1 x N global delayout, currently only for debugging but maybe
       !  has more uses?
+      type(ESMF_VM):: GlobalVM
       type(ESMF_newDELayout) :: GlobalLayout
 
 !------------------------------------------------------------------------------
@@ -194,7 +195,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.82 2004/04/13 17:30:46 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.83 2004/04/14 17:47:40 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -359,8 +360,9 @@ end function
         if (present(delayout)) then
           compp%delayout = delayout
         else
+          ! TODO: error check for presence of VM?
           ! Create a default 1xN delayout over all processors.
-          compp%delayout = ESMF_newDELayoutCreate(rc=status) 
+          compp%delayout = ESMF_newDELayoutCreate(vm, rc=status) 
         endif 
 
         ! for gridded components, the model type it represents
@@ -609,8 +611,8 @@ end function
 
         ! See if this is currently running on a DE which is part of the
         ! proper delayout.
-	call ESMF_newDELayoutGetDEID(GlobalLayout, gde_id, status)
-	call ESMF_newDELayoutGetDEID(compp%delayout, lde_id, status)
+	call ESMF_newDELayoutGet(GlobalLayout, localDE=gde_id, rc=status)
+	call ESMF_newDELayoutGet(compp%delayout, localDE=lde_id, rc=status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
           print *, "Global DE ", gde_id, " is not present in this delayout"
@@ -739,8 +741,8 @@ end function
 
         ! See if this is currently running on a DE which is part of the
         ! proper delayout.
-	call ESMF_newDELayoutGetDEID(GlobalLayout, gde_id, status)
-	call ESMF_newDELayoutGetDEID(compp%delayout, lde_id, status)
+	call ESMF_newDELayoutGet(GlobalLayout, localDE=gde_id, rc=status)
+	call ESMF_newDELayoutGet(compp%delayout, localDE=lde_id, rc=status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
           print *, "Global DE ", gde_id, " is not present in this delayout"
@@ -828,8 +830,8 @@ end function
 
         ! See if this is currently running on a DE which is part of the
         ! proper delayout.
-	call ESMF_newDELayoutGetDEID(GlobalLayout, gde_id, status)
-	call ESMF_newDELayoutGetDEID(compp%delayout, lde_id, status)
+	call ESMF_newDELayoutGet(GlobalLayout, localDE=gde_id, rc=status)
+	call ESMF_newDELayoutGet(compp%delayout, localDE=lde_id, rc=status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
           print *, "Global DE ", gde_id, " is not present in this delayout"
@@ -936,8 +938,8 @@ end function
 
         ! See if this is currently finalizening on a DE which is part of the
         ! proper delayout.
-	call ESMF_newDELayoutGetDEID(GlobalLayout, gde_id, status)
-	call ESMF_newDELayoutGetDEID(compp%delayout, lde_id, status)
+	call ESMF_newDELayoutGet(GlobalLayout, localDE=gde_id, rc=status)
+	call ESMF_newDELayoutGet(compp%delayout, localDE=lde_id, rc=status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
           print *, "Global DE ", gde_id, " is not present in this delayout"
@@ -1083,8 +1085,8 @@ end function
 
         ! See if this is currently running on a DE which is part of the
         ! proper delayout.
-	call ESMF_newDELayoutGetDEID(GlobalLayout, gde_id, status)
-	call ESMF_newDELayoutGetDEID(compp%delayout, lde_id, status)
+	call ESMF_newDELayoutGet(GlobalLayout, localDE=gde_id, rc=status)
+	call ESMF_newDELayoutGet(compp%delayout, localDE=lde_id, rc=status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
           print *, "Global DE ", gde_id, " is not present in this delayout"
@@ -1614,8 +1616,15 @@ end function
           return
       endif
 
+      ! Create a global VM
+      call ESMF_VMGetGlobal(GlobalVM, rc)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error getting global vm"
+          return
+      endif
+
       ! Create a global newDELayout
-      GlobalLayout = ESMF_newDELayoutCreate(status)
+      GlobalLayout = ESMF_newDELayoutCreate(GlobalVM, rc=status)
       if (status .ne. ESMF_SUCCESS) then
           print *, "Error creating global delayout"
           return
