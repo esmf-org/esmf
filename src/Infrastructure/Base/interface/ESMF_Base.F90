@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.25 2003/02/26 20:11:12 jwolfe Exp $
+! $Id: ESMF_Base.F90,v 1.26 2003/03/04 16:15:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -255,7 +255,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.25 2003/02/26 20:11:12 jwolfe Exp $'
+               '$Id: ESMF_Base.F90,v 1.26 2003/03/04 16:15:23 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -422,7 +422,7 @@ end function
 
 !-------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_GetName - set the name of this object
+! !IROUTINE:  ESMF_GetName - get the name of this object
 !
 ! !INTERFACE:
       subroutine ESMF_GetName(anytype, name, rc)
