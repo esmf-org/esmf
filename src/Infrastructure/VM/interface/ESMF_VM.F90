@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.3 2004/02/27 21:02:37 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.4 2004/03/05 19:46:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.3 2004/02/27 21:02:37 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.4 2004/03/05 19:46:53 theurich Exp $'
 
 !==============================================================================
 
@@ -363,15 +363,16 @@ module ESMF_VMMod
 ! !IROUTINE: ESMF_VMGet - Get VM internals
 
 ! !INTERFACE:
-  subroutine ESMF_VMGet(vm, mypet, npets, npes, mpic, rc)
+  subroutine ESMF_VMGet(vm, mypet, npets, npes, mpic, ok_openmp, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM), intent(in)            :: vm
-    integer,       intent(out), optional :: mypet
-    integer,       intent(out), optional :: npets
-    integer,       intent(out), optional :: npes
-    integer,       intent(out), optional :: mpic
-    integer,       intent(out), optional :: rc
+    type(ESMF_VM),      intent(in)            :: vm
+    integer,            intent(out), optional :: mypet
+    integer,            intent(out), optional :: npets
+    integer,            intent(out), optional :: npes
+    integer,            intent(out), optional :: mpic
+    type(ESMF_Logical), intent(out), optional :: ok_openmp
+    integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Get VM internals
@@ -388,6 +389,8 @@ module ESMF_VMMod
 !        Number of PEs referenced by VM.
 !   \item[{[mpic]}]
 !        MPI Intracommunicator for VM.
+!   \item[{[ok_openmp]}]
+!        Indicate whether user-level OpenMP threading can be supported
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -396,8 +399,8 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMGet(vm, mypet, npets, npes, mpic, rc)
- 
+    call c_ESMC_VMGet(vm, mypet, npets, npes, mpic, ok_openmp, rc)
+    
   end subroutine ESMF_VMGet
 !------------------------------------------------------------------------------
 

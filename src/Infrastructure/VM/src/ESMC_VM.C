@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.2 2004/02/26 20:41:54 theurich Exp $
+// $Id: ESMC_VM.C,v 1.3 2004/03/05 19:47:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.2 2004/02/26 20:41:54 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.3 2004/03/05 19:47:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -123,7 +123,8 @@ int ESMC_VM::ESMC_VMGet(
   ESMF_KIND_I4 *mypet,          // out - petid
   ESMF_KIND_I4 *npets,          // out - number of PETs
   ESMF_KIND_I4 *npes,           // out - number of PEs
-  int          *mpic){          // out - MPI Intracommunicator for VM
+  int          *mpic,           // out - MPI Intracommunicator for VM
+  ESMC_Logical *ok_openmp){     // out - indicate whether user-level OpenMP o.k.
 //
 // !DESCRIPTION:
 //    Get information about a VM object
@@ -142,6 +143,8 @@ int ESMC_VM::ESMC_VMGet(
   }
   if (mpic != ESMC_NULL_POINTER)
     *mpic = this->vmachine_mpi_comm();
+  if (ok_openmp != ESMC_NULL_POINTER)
+    *ok_openmp = ESMF_TRUE;   // TODO: Determine this at compile time...
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------

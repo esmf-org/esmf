@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.3 2004/02/27 16:51:53 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.4 2004/03/05 19:46:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_vmget)(ESMC_VM **ptr, int *mypet, int *npets, int *npes, 
-    int *mpic, int *status){
+    int *mpic, ESMC_Logical *ok_openmp, int *status){
     // Sort out the non-present F90 optional arguments. 
     // The detection of non-present F90 optional arguemtns is compiler/platform
     // dependent. Currently we expect either a pointer to NULL or (NULL - 1).
@@ -63,9 +63,10 @@ extern "C" {
     (void*)npets    == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : npets;
     (void*)npes     == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : npes;
     (void*)mpic     == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : mpic;
+    (void*)ok_openmp== (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : ok_openmp;
     (void*)status   == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : status;
     // Done sorting out non-present F90 optional arguments.
-    int rc = (*ptr)->ESMC_VMGet(mypet, npets, npes, mpic);
+    int rc = (*ptr)->ESMC_VMGet(mypet, npets, npes, mpic, ok_openmp);
     if (status != ESMC_NULL_POINTER) 
       *status = rc;
   }
