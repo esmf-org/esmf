@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.1 2003/01/23 21:02:31 nscollins Exp $
+// $Id: ESMC_Comp.h,v 1.2 2003/02/25 18:26:46 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,8 +52,7 @@ enum ESMC_ModelType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE,
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
 #include "ESMC_State.h"
 
- //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
-                        // composites, associates, friends)
+#include "ESMC_FTable.h"  // function & data pointer table 
 
 // !PUBLIC TYPES:
  class ESMC_CompConfig;
@@ -71,31 +70,15 @@ enum ESMC_ModelType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE,
  class ESMC_Comp : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
-    // name should be in base obj
-    // as can be attributes
-    char compname[ESMF_MAXSTR];
-    ESMC_Layout *layout;
-    enum ESMC_CompType ctype;
-    enum ESMC_ModelType mtype;
-    char filepath[ESMF_MAXSTR];
-    ESMC_State import_state;
-    ESMC_State export_state;
-    ESMC_State *statelist;
-    int instance_id;   // for ensemble/multiple concurrent runs
-    void *(ESMC_Init)(ESMC_Comp);
-    void *(ESMC_Run)(ESMC_Comp /*, time, is, os, *sl */ );
-    void *(ESMC_Finalize)(ESMC_Comp);
-    //void *(ESMC_Create)(void);
-    //void *(ESMC_Destroy)(void);
+    void *fortranclass;
+    ESMC_FTable localtable;   // table of functions & data ptrs
     
- //  < insert class members here >  // real class definition
-
 // !PUBLIC MEMBER FUNCTIONS:
 //
   public:
     int ESMC_CompInit(void);
     int ESMC_CompRun(int timesteps);
-    int ESMC_CompFinalize(void);
+    int ESMC_CompFinal(void);
 
  // optional configuration methods
     int ESMC_CompGetConfig(ESMC_CompConfig *config) const;
@@ -105,6 +88,9 @@ enum ESMC_ModelType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE,
     //int ESMC_CompGet<Value>(<value type> *value) const;
     //int ESMC_CompSet<Value>(<value type>  value);
     
+ // misc routines
+    int ESMC_CompTableCreate(void *table);
+
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_CompValidate(const char *options) const;
     int ESMC_CompPrint(const char *options) const;
@@ -145,5 +131,15 @@ enum ESMC_ModelType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE,
                                       enum ESMC_ModelType mtype,
                                       char *filepath, int *rc);
  int ESMC_CompDestroy(ESMC_Comp *comp);
+
+
+// prototypes for fortran interface routines
+extern "C" {
+   void FTN(f_esmf_compcreate)(ESMC_Comp **compp, char *name, int *rc);
+   void FTN(f_esmf_compdestroy)(ESMC_Comp **compp, char *name, int *rc);
+   void FTN(f_esmf_compinit)(ESMC_Comp **compp, char *name, void *func, int *rc);
+   void FTN(f_esmf_comprun)(ESMC_Comp **compp, char *name, int *rc);
+   void FTN(f_esmf_compfinalize)(ESMC_Comp **compp, char *name, int *rc);
+};
 
  #endif  // ESMC_Comp_H

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.5 2003/02/19 18:50:49 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.6 2003/02/25 18:27:09 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -64,16 +64,24 @@ extern "C" {
 
      // the rest of these routines follow the normal naming conventions and
      // are called from the framework internals.
+  
+     void FTN(c_esmc_comptablecreate)(ESMC_Comp **ptr, void *table, int *status) {
+         *status = (*ptr)->ESMC_CompTableCreate(table);
+     }
+  
      void FTN(c_esmc_compcallroutine)(ESMC_Comp **ptr, int type, int *status) {
          //*status = (*ptr)->ESMC_CompCallRoutine(type, func);
+         *status = ESMF_FAILURE;
      }
 
      void FTN(c_esmc_compgetroutine)(ESMC_Comp **ptr, int type, int *status) {
          //*status = (*ptr)->ESMC_CompGetRoutine(type, func);
+         *status = ESMF_FAILURE;
      }
 
      void FTN(c_esmc_compgetdataptr)(ESMC_Comp **ptr, int type, int *status) {
          //*status = (*ptr)->ESMC_CompGetDataPtr(type, func);
+         *status = ESMF_FAILURE;
      }
 
 };

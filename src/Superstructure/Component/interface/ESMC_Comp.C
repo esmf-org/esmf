@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.5 2003/02/19 18:50:47 nscollins Exp $
+// $Id: ESMC_Comp.C,v 1.6 2003/02/25 18:27:09 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.5 2003/02/19 18:50:47 nscollins Exp $";
+           "$Id: ESMC_Comp.C,v 1.6 2003/02/25 18:27:09 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -85,13 +85,11 @@
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
 
-    ESMC_Comp *comp = new ESMC_Comp;
+    ESMC_Comp *comp;
 
-    // TODO: this is remnants of the original template code which
-    // was going to do the implementation in C++.  this needs to be
-    // turned into a call to the f_esmf_XXX interface code.
-    // Same goes for the rest of the functions in this file.
-    *rc = comp->ESMC_CompConstruct(name, layout, ctype, mtype, filepath);
+    // TODO: make this match the correct calling convention
+
+    //f_esmf_compcreate(&comp, name, layout, ctype, mtype, filepath, rc)
 
     return comp;
 
@@ -120,91 +118,16 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-    component->ESMC_CompDestruct();
-    delete component;
+    int rc;
 
-    return ESMF_SUCCESS;
-//
-//  code goes here
-//
+    // TODO: fix the calling conventions
+
+    //f_esmf_compdestroy(comp, &rc)
+
+    return rc;
 
  } // end ESMC_CompDestroy
 
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_CompConstruct - fill in an already allocated Component
-//
-// !INTERFACE:
-      int ESMC_Comp::ESMC_CompConstruct(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      char *name,
-      ESMC_Layout *layout,
-      enum ESMC_CompType ctype,
-      enum ESMC_ModelType mtype,
-      char *filepath) {
-//
-// !DESCRIPTION:
-//      ESMF routine which fills in the contents of an already
-//      allocated Component object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC\_CompDestruct
-//      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC\_CompCreate, which calls
-//      ESMC\_CompConstruct.  Define for deep classes only.
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-//
-//  code goes here
-//
-    int len;
-
-    len = min(strlen(name), ESMF_MAXSTR-1); 
-    strncpy(this->compname, name, len);
-   
-    this->layout = layout;
-    this->ctype = ctype;
-    this->mtype = mtype;
-
-    len = min(strlen(filepath), ESMF_MAXSTR-1);
-    strncpy(this->filepath, filepath, len);
-
-    return ESMF_SUCCESS ;
-
- } // end ESMC_CompConstruct
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_CompDestruct - release resources associated w/a Component
-//
-// !INTERFACE:
-      int ESMC_Comp::ESMC_CompDestruct(void) {
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//      ESMF routine which deallocates any space allocated by
-//      ESMF\_ComponentConstruct, does any additional cleanup before the
-//      original Component object is freed.  Intended for internal ESMF
-//      use only; end-users use ESMC\_CompDestroy, which calls
-//      ESMC\_CompDestruct. 
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-    // TODO: add any needed code here to free/release resources
-
-    return ESMF_SUCCESS;
-
- } // end ESMC_CompDestruct
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -225,10 +148,10 @@
 // !REQUIREMENTS:  developer's guide for classes
 
 //
-//  code goes here
+//  TODO: add call to f_esmf_compinit() here
 //
     printf("ComponentInit method called \n");
-    return ESMF_SUCCESS;
+    return ESMF_FAILURE;
 
  } // end ESMC_CompInit
 
@@ -251,19 +174,19 @@
 // !REQUIREMENTS:  developer's guide for classes
 
 //
-//  code goes here
+//  TODO: add call to f_esmf_comprun() here
 //
     printf("ComponentRun method called \n");
-    return ESMF_SUCCESS;
+    return ESMF_FAILURE;
 
  } // end ESMC_CompRun
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CompFinalize - call the Component finalize routine
+// !IROUTINE:  ESMC_CompFinal - call the Component finalize routine
 //
 // !INTERFACE:
-      int ESMC_Comp::ESMC_CompFinalize(
+      int ESMC_Comp::ESMC_CompFinal(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -277,12 +200,12 @@
 // !REQUIREMENTS:  developer's guide for classes
 
 //
-//  code goes here
+//  TODO: add call to f_esmf_compfinal() here
 //
-    printf("ComponentFinalize method called \n");
-    return ESMF_SUCCESS;
+    printf("ComponentFinal method called \n");
+    return ESMF_FAILURE;
 
- } // end ESMC_CompFinalize
+ } // end ESMC_CompFinal
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -387,6 +310,34 @@
 //
 
  //} // end ESMC_CompSet<Value>
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CompTableCreate - Set up the function jump table
+//
+// !INTERFACE:
+      int ESMC_Comp::ESMC_CompTableCreate(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      void *table) {   // newly created table space
+//
+// !DESCRIPTION:
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+    ESMC_FTable *ftable = new ESMC_FTable;
+
+    printf("ComponentTableCreate method called \n");
+   
+    table = (void *)ftable;
+    return ESMF_SUCCESS;
+
+ } // end ESMC_CompTableCreate
 
 //-----------------------------------------------------------------------------
 //BOP
