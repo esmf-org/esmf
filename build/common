@@ -1,4 +1,4 @@
-# $Id: common,v 1.7 2002/01/14 19:48:25 dneckels Exp $ 
+# $Id: common,v 1.8 2002/01/23 21:48:52 dneckels Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -129,11 +129,15 @@ clean_recursive:
 #   17 - requires PYTHON (uses urlget.py) and popen()
 #
 testexamples_1: ${TESTEXAMPLES_1}
+vtestexamples_1:
+	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_1
 testexamples_2: ${TESTEXAMPLES_2}
 testexamples_3: ${TESTEXAMPLES_3}
 vtestexamples_3:
 	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_3
 testexamples_4: ${TESTEXAMPLES_4}
+vtestexamples_4:
+	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_4
 testexamples_5: ${TESTEXAMPLES_5}
 testexamples_6: ${TESTEXAMPLES_6}
 testexamples_7: ${TESTEXAMPLES_7}
