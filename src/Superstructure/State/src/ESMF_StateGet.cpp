@@ -1,4 +1,4 @@
-! $Id: ESMF_StateGet.cpp,v 1.4 2004/06/08 09:27:21 nscollins Exp $
+! $Id: ESMF_StateGet.cpp,v 1.5 2004/06/10 21:46:08 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,11 +49,10 @@
 
       public ESMF_StateGetDataPointer
  
-!EOP
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateGet.cpp,v 1.4 2004/06/08 09:27:21 nscollins Exp $'
+      '$Id: ESMF_StateGet.cpp,v 1.5 2004/06/10 21:46:08 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -64,7 +63,7 @@
 
 !------------------------------------------------------------------------------
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetDataPointer -- Get an F90 pointer to the data contents
 
 ! !INTERFACE:
@@ -79,7 +78,7 @@ InterfaceMacro(StateGetDataPointer)
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_StateGetDataPointer} subroutines.   
 !  
-!EOP 
+!EOPI
 end interface
 
 !==============================================================================

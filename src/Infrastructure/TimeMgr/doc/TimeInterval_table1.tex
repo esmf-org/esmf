@@ -1,14 +1,16 @@
-% $Id: TimeInterval_table1.tex,v 1.3 2004/04/27 22:59:31 eschwab Exp $
+% $Id: TimeInterval_table1.tex,v 1.4 2004/06/10 21:46:08 cdeluca Exp $
 
 \subsubsection [API Usage Tables] {API Usage Tables}
 \newpage
 
 The ISO 8601 standard states that Time Intervals can be specified in one of four ways:
 
-  -- By a relative duration of time. \\
-  -- By a starting time instant and a duration. \\
-  -- By a duration and an ending time instant. \\
-  -- By the duration of time specified by both a starting and ending time instant. (also possible via {\tt ESMF\_Time's} "Ti = T1 - T2" overloaded operator (-) (see table further below)).
+\begin{itemize}
+\item By a relative duration of time. 
+\item By a starting time instant and a duration. 
+\item By a duration and an ending time instant. 
+\item By the duration of time specified by both a starting and ending time instant. (also possible via {\tt ESMF\_Time's} "Ti = T1 - T2" overloaded operator (-) (see table further below)).
+\end{itemize}
 
 The first specification method is handled by simply using the various time unit arguments of {\tt ESMF\_TimeIntervalSet()}.  The second, third, and fourth methods are handled within {\tt ESMF\_TimeInterval} by using the optional arguments startTime and endTime to {\tt ESMF\_TimeIntervalSet()}.
 
@@ -22,7 +24,7 @@ If a calendar is not specified for a time interval, the default is "No-Cal," whi
 
 \caption{\label{table:timeIntervalSet}ESMF\_TimeIntervalSet() Method {\bf Input} Argument Usage for Time Intervals using years, months and/or days}
 
-\begin{tabular}{|p{1.5in}|p{1.25in}|p{1.25in}|p{1.25in}|p{1.25in}|p{1.25in}|}
+\begin{tabular}{|p{1.15in}|p{1.15in}|p{1.15in}|p{1.15in}|p{1.15in}|p{1.15in}|}
 \hline
 
 % column headers

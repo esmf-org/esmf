@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleGet.cpp,v 1.5 2004/06/08 09:27:15 nscollins Exp $
+! $Id: ESMF_BundleGet.cpp,v 1.6 2004/06/10 21:46:08 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,11 +47,10 @@
 
       public ESMF_BundleGetDataPointer
  
-!EOP
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleGet.cpp,v 1.5 2004/06/08 09:27:15 nscollins Exp $'
+      '$Id: ESMF_BundleGet.cpp,v 1.6 2004/06/10 21:46:08 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -62,7 +61,7 @@
 
 !------------------------------------------------------------------------------
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleGetDataPointer -- Get a Fortran pointer to the data contents
 
 ! !INTERFACE:
@@ -77,7 +76,7 @@ InterfaceMacro(BundleGetDataPointer)
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_BundleGetDataPointer} subroutines.   
 !  
-!EOP 
+!EOPI
 end interface
 
 !==============================================================================
