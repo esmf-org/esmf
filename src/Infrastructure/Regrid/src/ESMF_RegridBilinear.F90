@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.11 2003/08/27 14:25:58 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.12 2003/08/27 15:58:50 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.11 2003/08/27 14:25:58 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.12 2003/08/27 15:58:50 jwolfe Exp $'
 
 !==============================================================================
 
@@ -188,11 +188,11 @@
       ! create Route
       ! TODO: my_DE
       ! TODO: should route be a route handle?
-      call ESMF_RoutePrecomputeDomainList(route, 2, my_DE, sendDomainList, &
-                                          recvDomainList, status)
+      call ESMF_RoutePrecomputeDomList(route, 2, my_DE, sendDomainList, &
+                                       recvDomainList, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConsByFieldBilinear: ", &
-                 "RoutePrecomputeDomainList returned failure"
+                 "RoutePrecomputeDomList returned failure"
         return
       endif
 
@@ -470,7 +470,6 @@
                 mat2 = dx2 + dx3*iguess
                 mat3 = dy1 + dy3*jguess
                 mat4 = dy2 + dy3*iguess
-
                 determinant = mat1*mat4 - mat2*mat3
 
                 ! solve 2x2 system for deli, delj
