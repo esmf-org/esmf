@@ -1,4 +1,4 @@
-% $Id: Alarm_fex.tex,v 1.10 2004/01/26 21:28:01 eschwab Exp $
+% $Id: Alarm_fex.tex,v 1.11 2004/01/31 03:24:03 eschwab Exp $
 
 \begin{verbatim}
 use ESMF_Mod
@@ -18,10 +18,10 @@ alarm2 = ESMF_AlarmCreate("Example Alarm 2", clock, ringInterval=alarmInterval)
 
 ! Time step, clock reports active alarms in RingingAlarms list
 call ESMF_ClockAdvance(clock, ringingAlarmList=ringingAlarm, &
-                       numRingingAlarms=numRingingAlarms)
+                       ringingAlarmCount=ringingAlarmCount)
 
 ! Process any ringing alarms
-do i = 1, numRingingAlarms
+do i = 1, ringingAlarmCount
   call ProcessAlarm(ringingAlarm(i))  ! user method
 
  ! after processing alarms, turn off interval alarm to reset for next
