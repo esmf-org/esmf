@@ -1,4 +1,4 @@
-! $Id: ESMF_VMBarrierUTest.F90,v 1.1 2005/01/24 17:20:25 rfaincht Exp $
+! $Id: ESMF_VMBarrierUTest.F90,v 1.2 2005/01/25 18:40:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMBarrierUTest.F90,v 1.1 2005/01/24 17:20:25 rfaincht Exp $'
+      '$Id: ESMF_VMBarrierUTest.F90,v 1.2 2005/01/25 18:40:00 jwolfe Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -124,7 +124,7 @@
 
       contains
 
-      function get_time
+      function get_time()
       implicit none
       real(ESMF_KIND_R8) get_time
       integer count,count_rate,count_max
@@ -133,7 +133,7 @@
       get_time = real(count)/real(count_rate)
       end function get_time
 
-      function get_time_max
+      function get_time_max()
       implicit none
       real(ESMF_KIND_R8) get_time_max
       integer count,count_rate,count_max
