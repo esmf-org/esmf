@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.32 2004/05/17 16:04:02 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.33 2004/05/19 17:12:41 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,8 +35,8 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOSpecMod
-      !use ESMF_MachineMod
       use ESMF_VMMod
+      use ESMF_LogErrMod
       use ESMF_ConfigMod
       use ESMF_ClockMod
       use ESMF_GridMod
@@ -86,7 +86,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.32 2004/05/17 16:04:02 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.33 2004/05/19 17:12:41 nscollins Exp $'
 
 !==============================================================================
 !
@@ -164,11 +164,17 @@
 !  The arguments are:
 !  \begin{description}
 !   \item[name]
-!    CplComp name.
+!    Name of the newly-created component.  This name can be altered 
+!    by the new component once the initialize routine is called. 
 !   \item[config]
-!    CplComp-specific configuration object.  
+!    An already-created {\tt ESMF\_Config} configuration object 
+!    from which the new component
+!    can read in namelist-type information to set parameters for this run.
 !   \item[clock]
-!    CplComp-specific clock object.  
+!    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
+!    queried and updated by the new component as it chooses.  This should
+!    not be the parent component clock, which should be maintained and passed
+!    down to the Initialize/Run/Finalize routines separately.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -177,40 +183,27 @@
 
         ! local vars
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
-        integer :: status                                ! local error status
-        logical :: rcpresent                             ! did user specify rc?
+        integer :: localrc                               ! local error status
 
         ! Initialize the pointer to null.
         nullify(ESMF_CplCompCreateNew%compp)
         nullify(compclass)
 
         ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        if (present(rc)) rc = ESMF_FAILURE
 
         ! Allocate a new comp class
-        allocate(compclass, stat=status)
-        if(status .NE. 0) then
-          print *, "ERROR in ESMF_CplCompCreate: Allocate"
-          return
-        endif
+        allocate(compclass, stat=localrc)
+	if (ESMF_LogMsgFoundAllocError(localrc, "Component class", rc)) return
 
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
-                                    config=config, clock=clock, rc=status)
-        ! if (ESMF_LogPassFoundError(status, rc)) return
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "CplComp construction error"
-          return
-        endif
+                                    config=config, clock=clock, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
         ! Set return values
         ESMF_CplCompCreateNew%compp => compclass
-        if (rcpresent) rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_CplCompCreateNew
 
@@ -243,14 +236,26 @@
 !  The arguments are:
 !  \begin{description}
 !   \item[{[name]}]
-!    CplComp name.
+!    Name of the newly-created component.  This name can be altered 
+!    by the new component once the initialize routine is called. 
 !   \item[{[config]}]
-!    Already created {\tt ESMF\_Config} object.  If specified, takes
-!    priority over config filename.
+!    An already-created {\tt ESMF\_Config} configuration object 
+!    from which the new component
+!    can read in namelist-type information to set parameters for this run.
+!    If both are specified, this object takes priority over {\tt configFile}.
 !   \item[{[configFile]}]
-!    CplComp-specific configuration filename. 
+!    The filename of an {\tt ESMF\_Config} format file.  
+!    If specified, this file is opened, an {\tt ESMF\_Config} configuration
+!    object is created for the file, and attached to the new component.  
+!    The component
+!    can then use {\tt ESMF\_CplCompGet()} to get and use the object.
+!    If both are specified, the {\tt config} object takes priority 
+!    over this one.
 !   \item[{[clock]}]
-!    CplComp-specific clock.
+!    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
+!    queried and updated by the new component as it chooses.  This should
+!    not be the parent component clock, which should be maintained and passed
+!    down to the Initialize/Run/Finalize routines separately.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -259,41 +264,28 @@
 
         ! local vars
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
-        integer :: status                                ! local error status
-        logical :: rcpresent                             ! did user specify rc?
+        integer :: localrc                                ! local error localrc
 
         ! Initialize the pointer to null.
         nullify(ESMF_CplCompCreateConf%compp)
         nullify(compclass)
 
         ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        if (present(rc)) rc = ESMF_FAILURE
 
         ! Allocate a new comp class
-        allocate(compclass, stat=status)
-        if(status .NE. 0) then
-          print *, "ERROR in ESMF_CplCplCompCreate: Allocate"
-          return
-        endif
+        allocate(compclass, stat=localrc)
+	if (ESMF_LogMsgFoundAllocError(localrc, "Component class", rc)) return
    
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
-                                clock=clock, rc=status)
-        ! if (ESMF_LogPassFoundError(status, rc)) return
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "CplComp construction error"
-          return
-        endif
+                                clock=clock, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
         ! Set return values
         ESMF_CplCompCreateConf%compp => compclass
-        if (rcpresent) rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_CplCompCreateConf
     
@@ -329,22 +321,35 @@
 !  The arguments are:
 !  \begin{description}
 !   \item[vm]
-!    VM of the component out of which this {\tt ESMF\_CplCompCreate()}
-!    call is issued.
+!    {\tt ESMF\_VM} object for the parent component out of which 
+!    this {\tt ESMF\_CplCompCreate()} call is issued.
 !    This will become the parent VM of the newly created Coupler Component.
 !   \item[{[name]}]
-!    Name of the new Coupler Component.
+!    Name of the newly-created component.  This name can be altered 
+!    by the new component once the initialize routine is called. 
 !   \item[{[config]}]
-!    Already created {\tt Config} object.  If specified, takes
-!    priority over config filename.
+!    An already-created {\tt ESMF\_Config} configuration object 
+!    from which the new component
+!    can read in namelist-type information to set parameters for this run.
+!    If both are specified, this object takes priority over {\tt configFile}.
 !   \item[{[configFile]}]
-!    CplComp-specific configuration filename. 
+!    The filename of an {\tt ESMF\_Config} format file.  
+!    If specified, this file is opened, an {\tt ESMF\_Config} configuration
+!    object is created for the file, and attached to the new component.  
+!    The component
+!    can then use {\tt ESMF\_CplCompGet()} to get and use the object.
+!    If both are specified, the {\tt config} object takes priority 
+!    over this one.
 !   \item[{[clock]}]
-!    CplComp-specific clock.
+!    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
+!    queried and updated by the new component as it chooses.  This should
+!    not be the parent component clock, which should be maintained and passed
+!    down to the Initialize/Run/Finalize routines separately.
 !   \item[{[petList]}]
-!    List of PET in vm that the parent component is giving to the created child 
-!    component. If petList is not provided all of the parent's PETs will be 
-!    given to the child component.
+!    List of {\tt PET}s in the given {\tt ESMF\_VM} that the parent 
+!    component is giving to the created child 
+!    component. If {\tt petList} is not specified all of the 
+!    parent's {\tt PET}s will be given to the child component.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -353,41 +358,28 @@
 
         ! local vars
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
-        integer :: status                                ! local error status
-        logical :: rcpresent                             ! did user specify rc?
+        integer :: localrc                                ! local error localrc
 
         ! Initialize the pointer to null.
         nullify(ESMF_CplCompCreateVM%compp)
         nullify(compclass)
 
         ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        if (present(rc)) rc = ESMF_FAILURE
 
         ! Allocate a new comp class
-        allocate(compclass, stat=status)
-        if(status .NE. 0) then
-          print *, "ERROR in ESMF_CplCplCompCreate: Allocate"
-          return
-        endif
+        allocate(compclass, stat=localrc)
+	if (ESMF_LogMsgFoundAllocError(localrc, "Component class", rc)) return
    
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
-                                clock=clock, vm=vm, petList=petList, rc=status)
-        ! if (ESMF_LogPassFoundError(status, rc)) return
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "CplComp construction error"
-          return
-        endif
+                                clock=clock, vm=vm, petList=petList, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
         ! Set return values
         ESMF_CplCompCreateVM%compp => compclass
-        if (rcpresent) rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_CplCompCreateVM
 
@@ -424,20 +416,37 @@
 !  The arguments are:
 !  \begin{description}
 !   \item[{[parent]}]
-!    Parent component.
+!    The Parent component object.  The child component will inherit all
+!    the {\tt PET}s from the parent.
 !   \item[{[name]}]
-!    CplComp name.
+!    Name of the newly-created component.  This name can be altered 
+!    by the new component once the initialize routine is called. 
 !   \item[{[config]}]
-!    Already created {\tt Config} object.  If specified, takes
-!    priority over config filename.
+!    An already-created {\tt ESMF\_Config} configuration object 
+!    from which the new component
+!    can read in namelist-type information to set parameters for this run.
+!    If both are specified, this object takes priority over {\tt configFile}.
 !   \item[{[configFile]}]
-!    CplComp-specific configuration filename. 
+!    The filename of an {\tt ESMF\_Config} format file.  
+!    If specified, this file is opened, an {\tt ESMF\_Config} configuration
+!    object is created for the file, and attached to the new component.  
+!    The component
+!    can then use {\tt ESMF\_CplCompGet()} to get and use the object.
+!    If both are specified, the {\tt config} object takes priority 
+!    over this one.
 !   \item[{[clock]}]
-!    CplComp-specific clock.
+!    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
+!    queried and updated by the new component as it chooses.  This should
+!    not be the parent component clock, which should be maintained and passed
+!    down to the Initialize/Run/Finalize routines separately.
 !   \item[{[vm]}]
-!    Virtual machine.  If unspecified, inherit parent VM.
+!    {\tt ESMF\_VM} virtual machine object.  If unspecified, 
+!    inherit parent's {\tt VM}.
 !   \item[{[petlist]}]
-!    List of {\tt PET}s assigned to this component.
+!    List of {\tt PET}s in the given {\tt ESMF\_VM} that the parent 
+!    component is giving to the created child 
+!    component. If {\tt petList} is not specified all of the 
+!    parent's {\tt PET}s will be given to the child component.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -446,42 +455,29 @@
 
         ! local vars
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
-        integer :: status                                ! local error status
-        logical :: rcpresent                             ! did user specify rc?
+        integer :: localrc                               ! local error status
 
         ! Initialize the pointer to null.
         nullify(ESMF_CplCompCreateGPar%compp)
         nullify(compclass)
 
         ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        if (present(rc)) rc = ESMF_FAILURE
 
         ! Allocate a new comp class
-        allocate(compclass, stat=status)
-        if(status .NE. 0) then
-          print *, "ERROR in ESMF_CplCplCompCreate: Allocate"
-          return
-        endif
+        allocate(compclass, stat=localrc)
+	if (ESMF_LogMsgFoundAllocError(localrc, "Component class", rc)) return
    
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
                                 parent=parent%compp, &
-                                vm=vm, petList=petList, clock=clock, rc=status)
-        ! if (ESMF_LogPassFoundError(status, rc)) return
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "CplComp construction error"
-          return
-        endif
+                                vm=vm, petList=petList, clock=clock, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
         ! Set return values
         ESMF_CplCompCreateGPar%compp => compclass
-        if (rcpresent) rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_CplCompCreateGPar
 
@@ -518,20 +514,37 @@
 !  The arguments are:
 !  \begin{description}
 !   \item[{[parent]}]
-!    Parent component.
+!    The Parent component object.  The child component will inherit all
+!    the {\tt PET}s from the parent.
 !   \item[{[name]}]
-!    CplComp name.
+!    Name of the newly-created component.  This name can be altered 
+!    by the new component once the initialize routine is called. 
 !   \item[{[config]}]
-!    Already created {\tt Config} object.  If specified, takes
-!    priority over config filename.
+!    An already-created {\tt ESMF\_Config} configuration object 
+!    from which the new component
+!    can read in namelist-type information to set parameters for this run.
+!    If both are specified, this object takes priority over {\tt configFile}.
 !   \item[{[configFile]}]
-!    CplComp-specific configuration filename. 
+!    The filename of an {\tt ESMF\_Config} format file.  
+!    If specified, this file is opened, an {\tt ESMF\_Config} configuration
+!    object is created for the file, and attached to the new component.  
+!    The component
+!    can then use {\tt ESMF\_CplCompGet()} to get and use the object.
+!    If both are specified, the {\tt config} object takes priority 
+!    over this one.
 !   \item[{[clock]}]
-!    CplComp-specific clock.
+!    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
+!    queried and updated by the new component as it chooses.  This should
+!    not be the parent component clock, which should be maintained and passed
+!    down to the Initialize/Run/Finalize routines separately.
 !   \item[{[vm]}]
-!    Virtual machine.  If unspecified, inherit parent VM.
+!    {\tt ESMF\_VM} virtual machine object.  If unspecified, 
+!    inherit parent's {\tt VM}.
 !   \item[{[petlist]}]
-!    List of {\tt PET}s assigned to this component.
+!    List of {\tt PET}s in the given {\tt ESMF\_VM} that the parent 
+!    component is giving to the created child 
+!    component. If {\tt petList} is not specified all of the 
+!    parent's {\tt PET}s will be given to the child component.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -540,42 +553,29 @@
 
         ! local vars
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
-        integer :: status                                ! local error status
-        logical :: rcpresent                             ! did user specify rc?
+        integer :: localrc                                ! local error status
 
         ! Initialize the pointer to null.
         nullify(ESMF_CplCompCreateCPar%compp)
         nullify(compclass)
 
         ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        if (present(rc)) rc = ESMF_FAILURE
 
         ! Allocate a new comp class
-        allocate(compclass, stat=status)
-        if(status .NE. 0) then
-          print *, "ERROR in ESMF_CplCplCompCreate: Allocate"
-          return
-        endif
+        allocate(compclass, stat=localrc)
+	if (ESMF_LogMsgFoundAllocError(localrc, "Component class", rc)) return
    
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
                                 parent=parent%compp, &
-                                vm=vm, petList=petList, clock=clock, rc=status)
-        ! if (ESMF_LogPassFoundError(status, rc)) return
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "CplComp construction error"
-          return
-        endif
+                                vm=vm, petList=petList, clock=clock, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
         ! Set return values
         ESMF_CplCompCreateCPar%compp => compclass
-        if (rcpresent) rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_CplCompCreateCPar
 
@@ -599,7 +599,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[cplcomp]
-!       Destroy contents of this {\tt ESMF\_CplComp}.
+!       Release all resources associated with this {\tt ESMF\_CplComp}
+!       and mark the object as invalid.  It is an error to pass this
+!       object into any other component routines after being destroyed.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -607,16 +609,10 @@
 !EOP
 
         ! local vars
-        integer :: status                       ! local error status
-        logical :: rcpresent                    ! did user specify rc?
+        integer :: localrc                       ! local error localrc
 
         ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        if (present(rc)) rc = ESMF_FAILURE
 
         ! Check to see if already destroyed
         if (.not.associated(cplcomp%compp)) then  
@@ -625,24 +621,17 @@
         endif
 
         ! call Destruct to release resources
-        call ESMF_CompDestruct(cplcomp%compp, status)
-        ! if (ESMF_LogPassFoundError(status, rc)) return
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "CplComp contents destruction error"
-          return
-        endif
+        call ESMF_CompDestruct(cplcomp%compp, localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
         ! Deallocate the cplcomp struct itself
-        deallocate(cplcomp%compp, stat=status)
-        ! if (ESMF_LogFoundAllocError(status, "deallocating cplcomp", rc)) return
-        if (status .ne. 0) then
-          print *, "CplComp contents destruction error"
-          return
-        endif
+        deallocate(cplcomp%compp, stat=localrc)
+	if (ESMF_LogMsgFoundAllocError(localrc, "deallocating Component class",&
+                                                                    rc)) return
         nullify(cplcomp%compp)
  
         ! Set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_CplCompDestroy
 
@@ -666,20 +655,36 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user finalize code for a cplcomp.
+!  Call the associated user-supplied finalization routine for a child 
+!  coupler component.
 !
 !    
 !  The arguments are: 
 !  \begin{description} 
 !   \item[cplcomp]
-!    CplComp to call Finalize routine for.
+!    {\tt ESMF\_CplComp} object to call Finalize routine for.
 !   \item[{[importState]}]
-!       ESMF\_State containing import data for coupling.
+!    {\tt ESMF\_State} containing import data for coupling.
 !   \item[{[exportState]}]
-!       ESMF\_State containing export data for coupling.
-!   \item[{[clock]}]  External clock for passing in time information.
-!   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!    {\tt ESMF\_State} containing export data for coupling.
+!   \item[{[clock]}]  
+!    External {\tt ESMF\_Clock} for passing in time information.  
+!    This is generally the parent component's clock, and will be treated
+!    as read-only by the child component.  The child component can maintain
+!    a private clock for its own internal time computations.
+!   \item[{[phase]}]  
+!      Component providers must document whether their each of their
+!      routines are {\em single-phase} or {\em multi-phase}.  
+!      Single-phase routines require only one invocation to complete
+!      their work.  
+!      Multi-phase routines provide multiple subroutines to accomplish
+!      the work, accomodating components which must complete part of their
+!      work, return to the caller and allow other processing to occur,
+!      and then continue the original operation.
+!      For single-phase child components this argument is optional, but   
+!      if specified it must be {\tt ESMF\_SINGLEPHASE}.
+!      For multiple-phase child components, this is the integer phase 
+!      number to be invoked.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -713,25 +718,24 @@
 
 !
 ! !DESCRIPTION:
-!      Returns information about the coupler component.  
+!      Returns information about an {\tt ESMF\_CplComp} coupler component.  
 !      For queries where the caller
 !      only wants a single value, specify the argument by name.
-!      All the arguments after the cplcomp input are optional 
+!      All the arguments after the {\tt cplcomp} argument are optional 
 !      to facilitate this.
 !
 !  The arguments are:
 !  \begin{description}
 !   \item[cplcomp]
-!    CplComp to query.
+!    {\tt ESMF\_CplComp} object to query.
 !   \item[{[name]}]
-!    CplComp name.
+!    Return the name of the {\tt ESMF\_CplComp}.
 !   \item[{[clock]}]
-!    CplComp-specific clock.
+!    Return the private clock for this {\tt ESMF\_CplComp}.
 !   \item[{[configFile]}]
-!    CplComp-specific configuration filename.
+!    Return the configuration filename for this {\tt ESMF\_CplComp}.
 !   \item[{[config]}]
-!    Already created {\tt Config} object.  If specified, takes
-!    priority over config filename.
+!    Return the {\tt ESMF\_Config} object for this {\tt ESMF\_CplComp}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -768,14 +772,29 @@
 !  The arguments are: 
 !  \begin{description} 
 !   \item[cplcomp]
-!    CplComp to call Initialization routine for.
+!    {\tt ESMF\_CplComp} object to call Initialize routine for.
 !   \item[{[importState]}]  
-!       {\tt ESMF\_State} containing source data for coupling.
+!    {\tt ESMF\_State} containing import data for coupling.
 !   \item[{[exportState]}]  
-!       {\tt ESMF\_State} containing destination data for coupling.
-!   \item[{[clock]}]  External clock for passing in time information.
-!   \item[{[phase]}]  If multiple-phase init, which phase number this is.
-!      Pass in {\tt 0} or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!    {\tt ESMF\_State} containing export data for coupling.
+!   \item[{[clock]}]
+!    External {\tt ESMF\_Clock} for passing in time information.  
+!    This is generally the parent component's clock, and will be treated
+!    as read-only by the child component.  The child component can maintain
+!    a private clock for its own internal time computations.
+!   \item[{[phase]}] 
+!      Component providers must document whether their each of their
+!      routines are {\em single-phase} or {\em multi-phase}.  
+!      Single-phase routines require only one invocation to complete
+!      their work.  
+!      Multi-phase routines provide multiple subroutines to accomplish
+!      the work, accomodating components which must complete part of their
+!      work, return to the caller and allow other processing to occur,
+!      and then continue the original operation.
+!      For single-phase child components this argument is optional, but   
+!      if specified it must be {\tt ESMF\_SINGLEPHASE}.
+!      For multiple-phase child components, this is the integer phase 
+!      number to be invoked.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -809,9 +828,9 @@
 !  The arguments are:
 !  \begin{description}
 !   \item[cplcomp]
-!    CplComp to print.
+!    {\tt ESMF\_CplComp} object to print.
 !   \item[{[options]}]
-!    Options on print.
+!    Print options.  See ref XX for the list of standard options.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -846,12 +865,28 @@
 !  The arguments are: 
 !  \begin{description} 
 !   \item[cplcomp]
-!    CplComp to call ReadRestart routine for.
+!    {\tt ESMF\_CplComp} object to call ReadRestart routine for.
 !   \item[{[iospec]}]
-!    {\tt IOSpec} object which describes I/O options.
+!    {\tt ESMF\_IOSpec} object which describes I/O options.
 !   \item[{[clock]}]  
-!     External clock for passing in time information.
+!    External {\tt ESMF\_Clock} for passing in time information.  
+!    This is generally the parent component's clock, and will be treated
+!    as read-only by the child component.  The child component can maintain
+!    a private clock for its own internal time computations.
+!    {\tt ESMF\_State} containing export data for coupling.
 !   \item[{[phase]}]  
+!      Component providers must document whether their each of their
+!      routines are {\em single-phase} or {\em multi-phase}.  
+!      Single-phase routines require only one invocation to complete
+!      their work.  
+!      Multi-phase routines provide multiple subroutines to accomplish
+!      the work, accomodating components which must complete part of their
+!      work, return to the caller and allow other processing to occur,
+!      and then continue the original operation.
+!      For single-phase child components this argument is optional, but   
+!      if specified it must be {\tt ESMF\_SINGLEPHASE}.
+!      For multiple-phase child components, this is the integer phase 
+!      number to be invoked.
 !      If multiple-phase restore, which phase number this is.
 !      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !   \item[{[rc]}]
@@ -888,16 +923,32 @@
 !  The arguments are: 
 !  \begin{description} 
 !   \item[cplcomp]
-!    CplComp to call Run routine for.
+!    {\tt ESMF\_CplComp} object to call Run routine for.
 !   \item[{[importState]}]
-!     {\tt ESMF\_State} containing import data for coupling.
+!    {\tt ESMF\_State} containing import data for coupling.
 !   \item[{[exportState]}]
-!     {\tt ESMF\_State} containing export data for coupling.
+!    {\tt ESMF\_State} containing export data for coupling.
 !   \item[{[clock]}]  
-!     External clock for passing in time information.
+!    External {\tt ESMF\_Clock} for passing in time information.  
+!    This is generally the parent component's clock, and will be treated
+!    as read-only by the child component.  The child component can maintain
+!    a private clock for its own internal time computations.
 !   \item[{[phase]}]  
-!      If multiple-phase run, which phase number this is.
+!      Component providers must document whether their each of their
+!      routines are {\em single-phase} or {\em multi-phase}.  
+!      Single-phase routines require only one invocation to complete
+!      their work.  
+!      Multi-phase routines provide multiple subroutines to accomplish
+!      the work, accomodating components which must complete part of their
+!      work, return to the caller and allow other processing to occur,
+!      and then continue the original operation.
+!      For single-phase child components this argument is optional, but   
+!      if specified it must be {\tt ESMF\_SINGLEPHASE}.
+!      For multiple-phase child components, this is the integer phase 
+!      number to be invoked.
+!      If multiple-phase restore, which phase number this is.
 !      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!     External clock for passing in time information.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -929,7 +980,8 @@
 
 !
 ! !DESCRIPTION:
-!      Sets or resets information about the cplcomp.  When the caller
+!      Sets or resets information about a {\tt ESMF\_CplComp} Coupler
+!      component.  When the caller
 !      only wants to set a single value specify the argument by name.
 !      All the arguments after the cplcomp input are optional 
 !      to facilitate this.
@@ -937,16 +989,15 @@
 !  The arguments are:
 !  \begin{description}
 !   \item[cplcomp]
-!    CplComp to set information for. 
+!    {\tt ESMF\_CplComp} object to change.
 !   \item[{[name]}]
-!    CplComp name.
+!    Set the name of the {\tt ESMF\_CplComp}.
 !   \item[{[clock]}]
-!    CplComp-specific clock.
+!    Set the private clock for this {\tt ESMF\_CplComp}.
 !   \item[{[configFile]}]
-!    CplComp-specific configuration filename.
+!    Set the configuration filename for this {\tt ESMF\_CplComp}.
 !   \item[{[config]}]
-!    Already created {\tt Config} object.  If specified, takes
-!    priority over config filename.
+!    Set the {\tt ESMF\_Config} object for this {\tt ESMF\_CplComp}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -978,9 +1029,9 @@
 !  The arguments are:
 !  \begin{description}
 !   \item[cplcomp]
-!    CplComp to validate.
+!    {\tt ESMF\_CplComp} object to validate.
 !   \item[{[options]}]
-!    Object to be validated.
+!    Validation options.  See ref XX for the list of standard options.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1016,14 +1067,27 @@
 !  \begin{description} 
 !  
 !   \item[cplcomp]
-!    CplComp to call WriteRestart routine for.
+!    {\tt ESMF\_CplComp} object to call WriteRestart routine for.
 !   \item[{[iospec]}]
 !    {\tt ESMF\_IOSpec} object which describes I/O options.
 !   \item[{[clock]}]  
-!     External clock for passing in time information.
+!    External {\tt ESMF\_Clock} for passing in time information.  
+!    This is generally the parent component's clock, and will be treated
+!    as read-only by the child component.  The child component can maintain
+!    a private clock for its own internal time computations.
 !   \item[{[phase]}]  
-!     If multiple-phase checkpoint, which phase number this is.
-!     Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!      Component providers must document whether their each of their
+!      routines are {\em single-phase} or {\em multi-phase}.  
+!      Single-phase routines require only one invocation to complete
+!      their work.  
+!      Multi-phase routines provide multiple subroutines to accomplish
+!      the work, accomodating components which must complete part of their
+!      work, return to the caller and allow other processing to occur,
+!      and then continue the original operation.
+!      For single-phase child components this argument is optional, but   
+!      if specified it must be {\tt ESMF\_SINGLEPHASE}.
+!      For multiple-phase child components, this is the integer phase 
+!      number to be invoked.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1074,28 +1138,18 @@
 !
 !EOPI
 
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer :: localrc                     ! local error localrc
 
     ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
+    if (present(rc)) rc = ESMF_FAILURE
 
     ! call CompClass method
     call ESMF_CompSetVMMaxThreads(cplcomp%compp, max, &
-                   pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
-    ! if (ESMF_LogPassFoundError(status, rc)) return
-    if (status .ne. ESMF_SUCCESS) then
-      print *, "ESMF_CompSetVMMaxThreads error"
-      return
-    endif
+                   pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
     ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_CplCompSetVMMaxThreads
 
@@ -1138,28 +1192,18 @@
 !
 !EOPI
 
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer :: localrc                     ! local error localrc
 
     ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
+    if (present(rc)) rc = ESMF_FAILURE
 
     ! call CompClass method
     call ESMF_CompSetVMMinThreads(cplcomp%compp, max, &
-                  pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
-    ! if (ESMF_LogPassFoundError(status, rc)) return
-    if (status .ne. ESMF_SUCCESS) then
-      print *, "ESMF_CompSetVMMinThreads error"
-      return
-    endif
+                  pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
     ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_CplCompSetVMMinThreads
 !------------------------------------------------------------------------------
@@ -1203,28 +1247,18 @@
 !
 !EOPI
 
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer :: localrc                     ! local error localrc
 
     ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
+    if (present(rc)) rc = ESMF_FAILURE
 
     ! call CompClass method
     call ESMF_CompSetVMMaxPEs(cplcomp%compp, max, &
-                   pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
-    ! if (ESMF_LogPassFoundError(status, rc)) return
-    if (status .ne. ESMF_SUCCESS) then
-      print *, "ESMF_CompSetVMMaxPEs error"
-      return
-    endif
+                   pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
     ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_CplCompSetVMMaxPEs
 !------------------------------------------------------------------------------
@@ -1244,39 +1278,30 @@
     integer,            intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!     Wait for an {\tt ESMF\_CplComp} to return.
+!     When components are executing asychronously, 
+!     wait for an {\tt ESMF\_CplComp} to return.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[cplcomp] 
-!      cplcomp object
+!       {\tt ESMF\_CplComp} object to wait for. 
 !     \item[{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
 
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer :: localrc                     ! local error localrc
 
     ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
+    if (present(rc)) rc = ESMF_FAILURE
 
     ! call CompClass method
-    call ESMF_CompWait(cplcomp%compp, status)
-    ! if (ESMF_LogPassFoundError(status, rc)) return
-    if (status .ne. ESMF_SUCCESS) then
-      print *, "ESMF_CompWait error"
-      return
-    endif
+    call ESMF_CompWait(cplcomp%compp, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
     ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_CplCompWait
 !------------------------------------------------------------------------------
