@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.19 2003/08/28 17:43:25 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.20 2003/08/28 20:04:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -105,7 +105,8 @@
 
       public ESMF_ArrayHaloStore, ESMF_ArrayHalo, ESMF_ArrayHaloRelease
       public ESMF_ArrayRedistStore, ESMF_ArrayRedist, ESMF_ArrayRedistRelease
-      public ESMF_ArrayRegridStore, ESMF_ArrayRegrid, ESMF_ArrayRegridRelease
+      ! Regrid methods moved to ESMF_Regrid.F90
+      !public ESMF_ArrayRegridStore, ESMF_ArrayRegrid, ESMF_ArrayRegridRelease
 
       public ESMF_ArrayAllGather, ESMF_ArrayGather, ESMF_ArrayScatter
       !!public ESMF_ArrayReduce, ESMF_ArrayAllReduce
@@ -125,7 +126,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.19 2003/08/28 17:43:25 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.20 2003/08/28 20:04:25 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -411,213 +412,6 @@ end subroutine
 
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayRegridStore(srcarray, srcgrid, srcdatamap, &
-                                       dstgrid, dstdatamap, parentlayout, &
-                                       routehandle, regridtype, &
-                                       srcmask, dstmask, blocking, rc) 
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: srcarray
-      type(ESMF_Grid), intent(in) :: srcgrid
-      type(ESMF_DataMap), intent(in) :: srcdatamap
-      type(ESMF_Grid), intent(in) :: dstgrid
-      type(ESMF_DataMap), intent(in) :: dstdatamap
-      type(ESMF_DELayout) :: parentlayout
-      type(ESMF_RouteHandle), intent(inout) :: routehandle
-      integer, intent(in), optional :: regridtype
-      type(ESMF_Mask), intent(in), optional :: srcmask
-      type(ESMF_Mask), intent(in), optional :: dstmask
-      type(ESMF_Async), intent(inout), optional :: blocking
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used to Regrid data in an Array.
-!
-!     \begin{description}
-!     \item [srcarray]
-!           {\tt ESMF\_Array} containing source data.
-!     \item [srcgrid]
-!           {\tt ESMF\_Grid} which corresponds to how the data in the
-!           source array has been decomposed.  
-!     \item [srcdatamap]
-!           {\tt ESMF\_DataMap} which describes how the array maps to
-!           the specified source grid.
-!     \item [dstgrid]
-!           {\tt ESMF\_Grid} which corresponds to how the data in the
-!           destination array should be decomposed.  
-!     \item [dstdatamap]
-!           {\tt ESMF\_DataMap} which describes how the array should map to
-!           the specified destination grid.
-!     \item [parentlayout]
-!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Field}s,
-!           most commonly the layout
-!           of the Coupler if the regridding is inter-component, but could
-!           also be the individual layout for a component if the
-!           regridding is intra-component.
-!     \item [routehandle]
-!           Returned value which identifies the precomputed Route and other
-!           necessary information.
-!     \item [{[regridtype]}]
-!           Type of regridding to do.  A set of predefined types are
-!           supplied.
-!     \item [{[srcmask]}]
-!           Optional {\tt ESMF\_Mask} identifying valid source data.
-!     \item [{[dstmask]}]
-!           Optional {\tt ESMF\_Mask} identifying valid destination data.
-!     \item [{[blocking]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-
-!
-!
-!EOP
-! !REQUIREMENTS:
-        integer :: status         ! local error status
-        logical :: rcpresent      ! did user specify rc?
-        integer :: size_rank_trans
-        integer :: size_decomp
-        type(ESMF_Array) :: dstarray     ! is this really needed?
-
-        ! assume failure until success certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! TODO: add code here
-        !  The form of this code depends on how we organize the interfaces
-        !  between the Regrid code and this code.  This is the lowest level
-        !  public interface to the Regrid code, so anything we do below
-        !  here will be internal interfaces and not public.  The interfaces
-        !  need to be as useful to the regrid code as possible.
-
-        call ESMF_RegridCreate(srcarray, srcgrid, srcdatamap, &   
-                               dstarray, dstgrid, dstdatamap, &
-                               routehandle, regridtype, &
-                               srcmask, dstmask, &
-                               blocking, status)
-
-        ! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArrayRegridStore
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayRegrid(srcarray, dstarray, routehandle, &
-                                  srcmask, dstmask, blocking, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: srcarray
-      type(ESMF_Array), intent(inout) :: dstarray
-      type(ESMF_RouteHandle), intent(in) :: routehandle
-      type(ESMF_Mask), intent(in), optional :: srcmask
-      type(ESMF_Mask), intent(in), optional :: dstmask
-      type(ESMF_Async), intent(inout), optional :: blocking
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Perform a {\tt Regrid} operation over the data in an {\tt ESMF\_Array}.
-!     This routine updates the data inside the {\tt ESMF\_Array} in place.
-!     It uses a precomputed {\tt ESMF\_Route} for the communications
-!     pattern.
-!
-!     \begin{description}
-!     \item [srcarray]
-!           {\tt ESMF\_Array} containing source data to be regridded.
-!     \item [dstarray]
-!           {\tt ESMF\_Array} containing locations to put regridded data.
-!     \item [routehandle]
-!           {\tt ESMF\_RouteHandle} has been precomputed.
-!     \item [{[srcmask]}]
-!           Optional {\tt ESMF\_Mask} identifying valid source data.
-!     \item [{[dstmask]}]
-!           Optional {\tt ESMF\_Mask} identifying valid destination data.
-!     \item [{[blocking]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS:
-      integer :: status         ! local error status
-      logical :: rcpresent      ! did user specify rc?
-      type(ESMF_LocalArray) :: srclocalarray, dstlocalarray
-      type(ESMF_Route) :: route
-
-      ! initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
- 
-      call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
-
-      ! Execute the communications call.
-      srclocalarray = srcarray  ! this is only a cast
-      dstlocalarray = dstarray  ! ditto
-      call ESMF_RouteRun(route, srclocalarray, dstlocalarray, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayRegrid: RouteRun returned failure"
-        return
-      endif
-
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArrayRegrid
-
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayRegridRelease(routehandle, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_RouteHandle), intent(inout) :: routehandle
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Release the information stored about this Regrid operation.
-!
-!     \begin{description}
-!     \item [routehandle]
-!           {\tt ESMF\_RouteHandle} associated with Regrid that is no longer
-!           needed.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!
-!
-!EOP
-
-      call ESMF_RouteHandleDestroy(routehandle, rc=rc)
-
-      end subroutine ESMF_ArrayRegridRelease
-
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP

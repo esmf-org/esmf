@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.18 2003/08/01 23:01:48 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.19 2003/08/28 20:04:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -161,7 +161,6 @@
 
    ! These are the recommended entry points; the code itself is in Array:
    public ESMF_BundleRedist   ! Redistribute existing arrays, matching grids
-   public ESMF_BundleRegrid   ! Regridding and interpolation, different grids
    public ESMF_BundleHalo     ! Halo updates
 
    !public ESMF_BundleGather   ! Combine 1 decomposed bundle into 1 on 1 DE
@@ -2280,73 +2279,6 @@ end function
       end subroutine ESMF_BundleHalo
 
 
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleRegrid - Data Regrid operation on a Bundle
-
-! !INTERFACE:
-      subroutine ESMF_BundleRegrid(srcbundle, dstbundle, parentlayout, async, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: srcbundle                 
-      type(ESMF_Bundle), intent(inout) :: dstbundle                 
-      type(ESMF_DELayout), intent(in) :: parentlayout
-      type(ESMF_Async), intent(inout), optional :: async
-      integer, intent(out), optional :: rc               
-!
-! !DESCRIPTION:
-!     Perform a {\tt ESMF\_Regrid} operation over the data
-!     in a {\tt ESMF\_Bundle}.  This routine reads the source bundle and 
-!     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
-!     {\tt ESMF\_DataMap} information in the destination bundle to
-!     control the transformation of data.  The array data in the 
-!     destination bundle is overwritten by this call.
-!
-!     \begin{description}
-!     \item [srcbundle] 
-!           {\tt ESMF\_Bundle} containing source data.
-!     \item [dstbundle] 
-!           {\tt ESMF\_Bundle} containing destination grid and data map.
-!     \item [parentlayout]
-!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Bundle}s, 
-!           most commonly the layout
-!           of the Coupler if the regridding is inter-component, but could 
-!           also be the individual layout for a component if the 
-!           regridding is intra-component.  
-!     \item [{[async]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-   
-      ! Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
-
-
-      !TODO: add code  here
-
-
-      ! Set return values.
-      !if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleRegrid
 
 !------------------------------------------------------------------------------
 !BOP
