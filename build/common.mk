@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.97 2005/03/01 20:53:08 nscollins Exp $
+#  $Id: common.mk,v 1.98 2005/03/01 21:14:33 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -485,10 +485,12 @@ tree_cppfiles:  $(CPPFILES)
 # before the clobber actions are taken.
 # ------------------------------------------------------------------------------
 
-# default list of files and dirs to clean
-CLEAN_DEFDIRS = "coredir.*"
-CLEAN_DEFAULTS = "*.o *.mod *.txt *.stdout NULL core UTestLog *ESMF_LogFile"
-CLEAN_TEXFILES = "*.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG"
+# default list of files and dirs to clean (and surprisingly to me, 
+# you cannot enclose these in quotes - they are preserved and the quotes
+# prevent the wildcards from being expanded.)
+CLEAN_DEFDIRS = coredir.*
+CLEAN_DEFAULTS = *.o *.mod *.txt *.stdout NULL core UTestLog *ESMF_LogFile
+CLEAN_TEXFILES = *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG
 
 clean:
 	$(MAKE) ACTION=tree_clean tree
