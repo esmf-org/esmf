@@ -1,6 +1,6 @@
-! $Id: ESMF_LogErr.F90,v 1.29 2004/09/03 22:20:09 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.30 2004/09/13 19:41:27 cpboulder Exp $
 !
-! Earth System Modeling Framework
+! Earth System Modeling Frameworkls
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
@@ -155,7 +155,7 @@ end type ESMF_Log
 !  Overloaded = operator functions
    public operator(.eq.),operator(.gt.)
    
-! overload .eq. with additional derived types so you can compare 
+! overload .eq. and .gt. with additional derived types so you can compare 
 !  them as if they were simple integers.
  
 
@@ -175,27 +175,27 @@ type(ESMF_Log),SAVE::ESMF_LogDefault
 contains
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_DataTypes to see if they're the same or not
+! functions to compare two ESMF_DataTypes to see if they're the same or not
 
 function ESMF_lhteq(ht1, ht2)
- logical ESMF_lhteq
- type(ESMF_HaltType), intent(in) :: ht1,ht2
-
- ESMF_lhteq = (ht1%htype .eq. ht2%htype)
+logical ESMF_lhteq
+type(ESMF_HaltType), intent(in) :: ht1,ht2
+    
+    ESMF_lhteq = (ht1%htype .eq. ht2%htype)
 end function
 
 function ESMF_lmteq(mt1, mt2)
- logical ESMF_lmteq
- type(ESMF_MsgType), intent(in) :: mt1,mt2
+logical ESMF_lmteq
+type(ESMF_MsgType), intent(in) :: mt1,mt2
 
- ESMF_lmteq = (mt1%mtype .eq. mt2%mtype)
+    ESMF_lmteq = (mt1%mtype .eq. mt2%mtype)
 end function
 
 function ESMF_lmtgt(mt1, mt2)
- logical ESMF_lmtgt
- type(ESMF_MsgType), intent(in) :: mt1,mt2
+logical ESMF_lmtgt
+type(ESMF_MsgType), intent(in) :: mt1,mt2
 
- ESMF_lmtgt = (mt1%mtype .gt. mt2%mtype)
+    ESMF_lmtgt = (mt1%mtype .gt. mt2%mtype)
 end function
 
 !--------------------------------------------------------------------------
@@ -275,6 +275,92 @@ end subroutine ESMF_LogClose
 	
 end subroutine ESMF_LogFinalize
 
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogFlush - Flushes the Log file(s)
+
+! !INTERFACE: 
+	subroutine ESMF_LogFlush(log,rc)
+!
+!
+! !ARGUMENTS:
+	type(ESMF_LOG)				:: log
+	integer, intent(out),optional		:: rc
+
+! !DESCRIPTION:
+!      This subroutine flushes a log associated with an {\tt ESMF\_Log}.
+!
+!      The arguments are:
+!      \begin{description}
+! 
+!      \item [{[log]}]
+!            An optional {\tt ESMF\_Log} object that can be used instead
+!	     of the default log.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+! 
+!EOP
+    integer 			    :: i,j,ok,status
+
+    if (present(rc)) rc=ESMF_FAILURE
+    
+    if ((log%FileIsOpen .eq. ESMF_TRUE) .AND. (log%flushed .eq. ESMF_FALSE)) then	
+    	ok=0
+    	do i=1, ESMF_LOG_MAXTRYOPEN
+    	    OPEN(UNIT=log%unitnumber, File=log%nameLogErrFile, POSITION="APPEND", &
+    		ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=status)
+            if (status.eq.0) then
+	        do j=1, log%findex
+    		    if (log%LOG_ENTRY(j)%lineflag) then								
+    		        if (log%LOG_ENTRY(j)%methodflag) then
+    			    WRITE(log%unitnumber,122) &
+                                  log%LOG_ENTRY(j)%d     , " ", log%LOG_ENTRY(j)%h   , &
+                                  log%LOG_ENTRY(j)%m     ,      log%LOG_ENTRY(j)%s   , ".", &
+                                  log%LOG_ENTRY(j)%ms    , " ", log%LOG_ENTRY(j)%lt  , " ", &
+                                  log%LOG_ENTRY(j)%file  , " ", log%LOG_ENTRY(j)%line, " ", &
+                                  log%LOG_ENTRY(j)%method, " ", log%LOG_ENTRY(j)%msg
+    		        else
+    			    WRITE(log%unitnumber,123) &
+                                  log%LOG_ENTRY(j)%d   , " ", log%LOG_ENTRY(j)%h   , &
+                                  log%LOG_ENTRY(j)%m   ,      log%LOG_ENTRY(j)%s   , ".", &
+                                  log%LOG_ENTRY(j)%ms  , " ", log%LOG_ENTRY(j)%lt  , " ", &
+                                  log%LOG_ENTRY(j)%file, " ", log%LOG_ENTRY(j)%line, " ", &
+                                  log%LOG_ENTRY(j)%msg
+    		        endif	
+                    else
+    		        if (log%LOG_ENTRY(j)%methodflag) then
+    		            WRITE(log%unitnumber,132) &
+                                  log%LOG_ENTRY(j)%d     , " ", log%LOG_ENTRY(j)%h  , &
+                                  log%LOG_ENTRY(j)%m     ,      log%LOG_ENTRY(j)%s  , ".", &
+                                  log%LOG_ENTRY(j)%ms    , " ", log%LOG_ENTRY(j)%lt , "  ", &
+    			          log%LOG_ENTRY(j)%method, " ", log%LOG_ENTRY(j)%msg
+    		        else
+    		            WRITE(log%unitnumber,133) &
+                                  log%LOG_ENTRY(j)%d  , " ", log%LOG_ENTRY(j)%h , &
+                                  log%LOG_ENTRY(j)%m  ,      log%LOG_ENTRY(j)%s , ".", &
+                                  log%LOG_ENTRY(j)%ms , " ", log%LOG_ENTRY(j)%lt, "  ", &
+                                  log%LOG_ENTRY(j)%msg
+    		        endif	
+    	            endif
+		enddo    
+    	        CLOSE(UNIT=log%unitnumber)
+    	        ok=1
+    	    endif	
+    	    if (ok.eq.1) exit    
+       enddo
+   endif
+   
+   log%findex = 1 
+   122  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a,a,a)
+   123  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a)
+   132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a)
+   133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a)
+   
+   log%flushed = ESMF_TRUE
+   rc=ESMF_SUCCESS	
+      
+end subroutine ESMF_LogFlush
 !--------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_LogFoundAllocError - Check Fortran status for allocation error
@@ -827,93 +913,6 @@ end subroutine ESMF_LogOpen
 	endif    
 	if (present(rc)) rc=ESMF_SUCCESS 
 end subroutine ESMF_LogSet
-
-!--------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_LogFlush - Flushes the Log file(s)
-
-! !INTERFACE: 
-	subroutine ESMF_LogFlush(log,rc)
-!
-!
-! !ARGUMENTS:
-	type(ESMF_LOG)				:: log
-	integer, intent(out),optional		:: rc
-
-! !DESCRIPTION:
-!      This subroutine flushes a log associated with an {\tt ESMF\_Log}.
-!
-!      The arguments are:
-!      \begin{description}
-! 
-!      \item [{[log]}]
-!            An optional {\tt ESMF\_Log} object that can be used instead
-!	     of the default log.
-!      \item [{[rc]}]
-!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!      \end{description}
-! 
-!EOP
-    integer 			    :: i,j,ok,status
-
-    if (present(rc)) rc=ESMF_FAILURE
-    
-    if ((log%FileIsOpen .eq. ESMF_TRUE) .AND. (log%flushed .eq. ESMF_FALSE)) then	
-    	ok=0
-    	do i=1, ESMF_LOG_MAXTRYOPEN
-    	    OPEN(UNIT=log%unitnumber, File=log%nameLogErrFile, POSITION="APPEND", &
-    		ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=status)
-            if (status.eq.0) then
-	        do j=1, log%findex
-    		    if (log%LOG_ENTRY(j)%lineflag) then								
-    		        if (log%LOG_ENTRY(j)%methodflag) then
-    			    WRITE(log%unitnumber,122) &
-                                  log%LOG_ENTRY(j)%d     , " ", log%LOG_ENTRY(j)%h   , &
-                                  log%LOG_ENTRY(j)%m     ,      log%LOG_ENTRY(j)%s   , ".", &
-                                  log%LOG_ENTRY(j)%ms    , " ", log%LOG_ENTRY(j)%lt  , " ", &
-                                  log%LOG_ENTRY(j)%file  , " ", log%LOG_ENTRY(j)%line, " ", &
-                                  log%LOG_ENTRY(j)%method, " ", log%LOG_ENTRY(j)%msg
-    		        else
-    			    WRITE(log%unitnumber,123) &
-                                  log%LOG_ENTRY(j)%d   , " ", log%LOG_ENTRY(j)%h   , &
-                                  log%LOG_ENTRY(j)%m   ,      log%LOG_ENTRY(j)%s   , ".", &
-                                  log%LOG_ENTRY(j)%ms  , " ", log%LOG_ENTRY(j)%lt  , " ", &
-                                  log%LOG_ENTRY(j)%file, " ", log%LOG_ENTRY(j)%line, " ", &
-                                  log%LOG_ENTRY(j)%msg
-    		        endif	
-                    else
-    		        if (log%LOG_ENTRY(j)%methodflag) then
-    		            WRITE(log%unitnumber,132) &
-                                  log%LOG_ENTRY(j)%d     , " ", log%LOG_ENTRY(j)%h  , &
-                                  log%LOG_ENTRY(j)%m     ,      log%LOG_ENTRY(j)%s  , ".", &
-                                  log%LOG_ENTRY(j)%ms    , " ", log%LOG_ENTRY(j)%lt , "  ", &
-    			          log%LOG_ENTRY(j)%method, " ", log%LOG_ENTRY(j)%msg
-    		        else
-    		            WRITE(log%unitnumber,133) &
-                                  log%LOG_ENTRY(j)%d  , " ", log%LOG_ENTRY(j)%h , &
-                                  log%LOG_ENTRY(j)%m  ,      log%LOG_ENTRY(j)%s , ".", &
-                                  log%LOG_ENTRY(j)%ms , " ", log%LOG_ENTRY(j)%lt, "  ", &
-                                  log%LOG_ENTRY(j)%msg
-    		        endif	
-    	            endif
-		enddo    
-    	        CLOSE(UNIT=log%unitnumber)
-    	        ok=1
-    	    endif	
-    	    if (ok.eq.1) exit    
-       enddo
-   endif
-   
-   log%findex = 1 
-   122  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a,a,a)
-   123  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a)
-   132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a)
-   133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a)
-   
-   log%flushed = ESMF_TRUE
-   rc=ESMF_SUCCESS	
-      
-end subroutine ESMF_LogFlush
 
 !--------------------------------------------------------------------------
 !BOP
