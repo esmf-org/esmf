@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.11 2004/04/14 21:52:19 nscollins Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.12 2004/04/15 22:05:12 nscollins Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
@@ -77,7 +77,7 @@
     ! Query for the default layout
     layout1 = ESMF_newDELayoutCreate(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_newDELayoutGetNumDEs(layout1, ndes, rc)
+    call ESMF_newDELayoutGet(layout1, deCount=ndes, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     if (ndes .lt. 4) then
         print *, "This system test needs to run at least 4-way, current np = ", ndes
@@ -89,7 +89,7 @@
     cname1 = "fluid flow"
     !delist = (/ (i, i=0, ndes-1) /)
     !layout2 = ESMF_DELayoutCreate(delist, 2, (/ ndes/2, 2 /), (/ 0 ,0 /), rc)
-    layout2 = ESMF_newDELayoutCreate(delist, (/ ndes/2, 2 /), rc=rc)
+    layout2 = ESMF_newDELayoutCreate(vm, (/ ndes/2, 2 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     comp1 = ESMF_GridCompCreate(cname1, delayout=layout2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -178,7 +178,7 @@
       print *, "Component Finalize finished, rc =", rc
 
       ! Figure out our local processor id for message below.
-      call ESMF_newDELayoutGetDEID(layout1, de_id, rc)
+      call ESMF_newDELayoutGet(layout1, localDe=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       print *, "-----------------------------------------------------------------"

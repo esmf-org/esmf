@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.20 2004/04/15 21:31:55 nscollins Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.21 2004/04/15 22:05:12 nscollins Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -83,7 +83,7 @@
         goto 10
     endif
 
-    call ESMF_newDELayoutGetDE(deflayout, de=de_id, rc=rc) 
+    call ESMF_newDELayoutGet(deflayout, localDe=de_id, rc=rc) 
     if (rc .ne. ESMF_SUCCESS) goto 10
     
 !   Create a DELayout for the Component
@@ -282,7 +282,7 @@
       print *, "Grid Create returned"
 
       ! Figure out our local processor id to use as data in the Field.
-      call ESMF_newDELayoutGetDE(layout1, de=de_id, rc=rc)
+      call ESMF_newDELayoutGet(layout1, localDe=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Create an arrayspec for a 2-D array 
@@ -425,7 +425,7 @@
       ! Get layout from component
       call ESMF_GridCompGet(comp, delayout=layout, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_newDELayoutGetDE(layout, de=de_id, rc=rc)
+      call ESMF_newDELayoutGet(layout, localDe=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get Field from import state

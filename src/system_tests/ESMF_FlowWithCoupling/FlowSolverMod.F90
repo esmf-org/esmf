@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.8 2004/04/15 19:35:04 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.9 2004/04/15 22:05:13 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -1357,7 +1357,7 @@
 ! Collect results on DE 0 and output to a file
 !
       call ESMF_GridCompGet(gcomp, delayout=layout, rc=status)
-      call ESMF_newDELayoutGetDE(layout, de=de_id, status)
+      call ESMF_newDELayoutGet(layout, localDe=de_id, status)
 !
 ! Frame number from computation
 !

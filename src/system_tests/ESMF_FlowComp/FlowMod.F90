@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.6 2004/03/20 03:55:04 cdeluca Exp $
+! $Id: FlowMod.F90,v 1.7 2004/04/15 22:05:12 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -60,7 +60,7 @@
 ! Local variables
 !      
       integer :: i, j
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: layout
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8) :: g_min(2), g_max(2)
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
@@ -96,7 +96,7 @@
         grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                                minGlobalCoordPerDim=g_min, &
                                maxGlobalCoordPerDim=g_max, &
-                               layout=layout, &
+                               delayout=layout, &
                                horzGridType=horz_gridtype, &
                                vertGridType=vert_gridtype, &
                                horzStagger=horz_stagger, &
@@ -136,10 +136,10 @@
 !
 ! Local variables
 !
-      integer :: i, j, x, y, nx, ny
+      integer :: i, j, x, y, nx, ny, ncounts(2), pos(2), de_id
       double precision :: s_
       type(ESMF_Grid) :: grid
-      type(ESMF_DElayout) :: layout
+      type(ESMF_newDELayout) :: layout
 !
 ! Set initial values
 !
@@ -200,16 +200,22 @@
         print *, "ERROR in Flowinit:  grid comp get"
         return
       endif
-      call ESMF_DELayoutGetSize(layout, nx, ny, rc)
+      !call ESMF_DELayoutGetSize(layout, nx, ny, rc)
+      call ESMF_newDELayoutGet(layout, localde=de_id, deCountPerDim=ncounts, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get size"
         return
       endif
-      call ESMF_DELayoutGetDEPosition(layout, x, y, rc)
+      nx = ncounts(1)
+      ny = ncounts(2)
+      !call ESMF_DELayoutGetDEPosition(layout, x, y, rc)
+      call ESMF_newDELayoutGetDE(layout, de_id, coord=pos, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get position"
         return
       endif
+      x = pos(1)
+      y = pos(2)
       do j = jmin_t, jmax_t
         do i = imin_t, imax_t
           flag(i,j) = 0.0
@@ -904,7 +910,7 @@
       integer(kind=ESMF_KIND_I8) :: frame
       type(ESMF_Array) :: array2
       type(ESMF_Grid) :: grid
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: layout
       real, dimension(:,:), pointer :: ldata
       character(len=ESMF_MAXSTR) :: filename
 !
@@ -919,7 +925,7 @@
 
       ! Collect results on DE 0 and output to a file
       call ESMF_GridCompGet(gcomp, delayout=layout, rc=rc)
-      call ESMF_DELayoutGetDEID(layout, de_id, rc)
+      call ESMF_newDELayoutGet(layout, localDe=de_id, rc=rc)
 
       ! Frame number from computation
       call ESMF_ClockGet(clock, advanceCount=frame, rc=rc)

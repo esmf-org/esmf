@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.12 2004/04/15 19:35:04 nscollins Exp $
+! $Id: user_model1.F90,v 1.13 2004/04/15 22:05:13 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -132,7 +132,7 @@
                                 name="source grid", rc=status)
 
         ! Figure out our local processor id
-        call ESMF_newDELayoutGetDE(layout, de=de_id, rc=rc)
+        call ESMF_newDELayoutGet(layout, localDe=de_id, rc=rc)
 
         ! Set up a 2D integer array
         call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &

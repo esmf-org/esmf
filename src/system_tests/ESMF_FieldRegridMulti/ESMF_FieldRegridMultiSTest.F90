@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.8 2004/04/15 21:43:19 nscollins Exp $
+! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.9 2004/04/15 22:05:12 nscollins Exp $
 !
 ! System test code FieldRegridMulti
 !  Description on Sourceforge under System Test #xxxxx
@@ -221,7 +221,7 @@
 
 
       ! Figure out our local processor id for message below.
-      call ESMF_newDELayoutGetDE(layout1, de=de_id, rc=rc)
+      call ESMF_newDELayoutGet(layout1, localDe=de_id, rc=rc)
 
 
       print *, "------------------------------------------------------------"

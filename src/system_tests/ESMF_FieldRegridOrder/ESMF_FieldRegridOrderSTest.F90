@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.5 2004/04/15 21:50:31 nscollins Exp $
+! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.6 2004/04/15 22:05:12 nscollins Exp $
 !
 ! System test code FieldRegridOrder
 !  Description on Sourceforge under System Test #xxxxxx
@@ -219,7 +219,7 @@
 
 
       ! Figure out our local processor id for message below.
-      call ESMF_newDELayoutGetDE(layout1, de=de_id, rc=rc)
+      call ESMF_newDELayoutGet(layout1, localDe=de_id, rc=rc)
 
 
       print *, "------------------------------------------------------------"

@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.13 2004/04/15 19:34:56 nscollins Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.14 2004/04/15 22:05:12 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -88,7 +88,7 @@
     layoutDef = ESMF_newDELayoutCreate(vm, rc=rc)
 
     ! Get our DE number for later
-    call ESMF_newDELayoutGetDE(layoutDef, de=de_id, rc=rc)
+    call ESMF_newDELayoutGet(layoutDef, localDe=de_id, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Sanity check the number of DEs we were started on.

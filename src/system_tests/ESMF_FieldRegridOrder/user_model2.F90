@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.6 2004/04/15 21:50:31 nscollins Exp $
+! $Id: user_model2.F90,v 1.7 2004/04/15 22:05:12 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -103,7 +103,7 @@
 
       ! Initially import state contains a field with a grid but no data.
       call ESMF_GridCompGet(comp, delayout=layout, rc=status)
-      call ESMF_newDELayoutGetDE(layout, de=de_id, rc=status)
+      call ESMF_newDELayoutGet(layout, localDe=de_id, rc=status)
 
       print *, de_id, "User Comp 2 Init starting"
 
@@ -142,7 +142,7 @@
                                      name="source grid", rc=status)
 
       ! Figure out our local processor id
-      call ESMF_newDELayoutGetDE(layout, de=de_id, rc=rc)
+      call ESMF_newDELayoutGet(layout, localDe=de_id, rc=rc)
 
       ! Set up a 2D real array
       call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &

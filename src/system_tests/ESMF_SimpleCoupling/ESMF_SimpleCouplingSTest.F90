@@ -1,4 +1,4 @@
-! $Id: ESMF_SimpleCouplingSTest.F90,v 1.14 2004/04/15 19:35:04 nscollins Exp $
+! $Id: ESMF_SimpleCouplingSTest.F90,v 1.15 2004/04/15 22:05:13 nscollins Exp $
 !
 ! System test code SimpleCoupling
 !  Description on Sourceforge under System Test #62502
@@ -237,7 +237,7 @@
 
 
       ! Figure out our local processor id for message below.
-      call ESMF_newDELayoutGetDE(layout1, de=de_id, rc=rc)
+      call ESMF_newDELayoutGet(layout1, localDe=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
 
