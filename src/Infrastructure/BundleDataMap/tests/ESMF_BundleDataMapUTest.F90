@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMapUTest.F90,v 1.10 2004/06/15 07:57:27 nscollins Exp $
+! $Id: ESMF_BundleDataMapUTest.F90,v 1.11 2004/06/15 09:12:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleDataMapUTest.F90,v 1.10 2004/06/15 07:57:27 nscollins Exp $'
+      '$Id: ESMF_BundleDataMapUTest.F90,v 1.11 2004/06/15 09:12:43 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -53,7 +53,7 @@
 
       ! local variables needed to pass into function/subroutine calls
       type(ESMF_BundleDataMap) :: bundleDataMap1, bundleDataMap2, bundleDataMap3
-      type(ESMF_BundleInterleave) :: interleave
+      type(ESMF_Interleave) :: interleave
 
       !------------------------------------------------------------------------
       ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
