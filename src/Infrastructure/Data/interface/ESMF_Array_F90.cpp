@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.26 2003/04/24 16:45:42 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.27 2003/04/25 14:51:01 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -158,7 +158,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.26 2003/04/24 16:45:42 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.27 2003/04/25 14:51:01 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -176,6 +176,11 @@ ArrayAllTypeMacro()
 !
         module procedure ESMF_ArrayCreateByList      ! specify TKR
         module procedure ESMF_ArrayCreateBySpec      ! specify ArraySpec
+   
+        ! Plus interfaces for each T/K/R 
+
+!EOP
+        
 
 !       ! < interfaces for each T/K/R >
 ! --Array--InterfaceMacro(ArrayCreateByMTArr)
@@ -190,6 +195,7 @@ ArrayInterfaceMacro(ArrayCreateByMTPtr)
 ArrayInterfaceMacro(ArrayCreateByFullPtr)
 
 
+!BOP
 ! !DESCRIPTION: 
 ! This interface provides a single (heavily overloaded) entry point for 
 !  the various types of {\tt ESMF\_ArrayCreate} functions.   
@@ -213,7 +219,7 @@ ArrayInterfaceMacro(ArrayCreateByFullPtr)
 !    when the {\tt ESMF\_Array} is destroyed it will not release the space.
 !  \end{description}
 !
-!  There are 4 options for 
+!  There are 3 options for 
 !  specifying the type/kind/rank of the {\tt ESMF\_Array} data:
 !  \begin{description}
 !  \item[List]
@@ -222,9 +228,9 @@ ArrayInterfaceMacro(ArrayCreateByFullPtr)
 !  \item[ArraySpec]
 !    A previously created {\tt ESMF\_ArraySpec} object is given which
 !    describes the characteristics.
-!  \item[Fortran array]
-!    An existing Fortran array is used to describe the characteristics.
-!    (Only available from the Fortran interface.)
+!  %\item[Fortran array]
+!  %  An existing Fortran array is used to describe the characteristics.
+!  %  (Only available from the Fortran interface.)
 !  \item[Fortran 90 Pointer]
 !    An associated or unassociated Fortran 90 array pointer is used to 
 !    describe the array.
@@ -236,8 +242,8 @@ ArrayInterfaceMacro(ArrayCreateByFullPtr)
 !  {\tt ESMF\_ArraySpec} object which can then be used repeatedly in
 !  subsequent {\tt Array} Create calls.
 !  
-!EOP 
 end interface
+!EOP 
 
 !------------------------------------------------------------------------------
 
