@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2003/04/23 21:31:26 svasquez Exp $ 
+# $Id: makefile,v 1.18 2003/04/25 22:13:21 nscollins Exp $ 
 
 ALL:  tests
 
@@ -86,7 +86,10 @@ $(ESMC_TESTDIR)/ESMF_FRouteUTest: ESMF_FRouteUTest.o
 
 RUN_ESMF_FRouteUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_FRouteUTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest4.stdout
+	-${MPIRUN} -np 8 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest8.stdout
+	-${MPIRUN} -np 12 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest12.stdout
+	-${MPIRUN} -np 16 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest16.stdout
 
 RUN_ESMF_FRouteUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_FRouteUTest.tmps
