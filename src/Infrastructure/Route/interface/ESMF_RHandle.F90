@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.16 2004/01/28 21:46:49 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.17 2004/03/08 16:27:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.16 2004/01/28 21:46:49 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.17 2004/03/08 16:27:35 nscollins Exp $'
 
 !==============================================================================
 
@@ -149,7 +149,7 @@
       type(ESMF_TransformValues) :: ESMF_TransformValuesCreate
 !
 ! !ARGUMENTS:
-      integer, intent(out), optional :: count               
+      integer, intent(in), optional :: count               
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
