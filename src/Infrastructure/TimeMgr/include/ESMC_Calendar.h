@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.21 2003/10/22 01:17:18 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.22 2003/11/06 17:47:18 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -126,20 +126,20 @@ class ESMC_Calendar {
 // persistence in times/clocks.
 
     int ESMC_CalendarSet(ESMC_CalendarType type);
-    int ESMC_CalendarSetGeneric(int          *monthsPerYear,
-                                int          *daysPerMonth,
-                                ESMF_KIND_I4 *secondsPerDay,
-                                ESMF_KIND_I4 *daysPerYear,
-                                ESMF_KIND_I4 *daysPerYearDn,
-                                ESMF_KIND_I4 *daysPerYearDd);
-    int ESMC_CalendarGet(ESMC_CalendarType *type,
-                         int              *monthsPerYear,
-                         int              *daysPerMonth,
-                         ESMF_KIND_I4     *secondsPerDay,
-                         ESMF_KIND_I4     *secondsPerYear,
-                         ESMF_KIND_I4     *daysPerYear,
-                         ESMF_KIND_I4     *daysPerYeardN,
-                         ESMF_KIND_I4     *daysPerYeardD);
+    int ESMC_CalendarSetGeneric(int          *monthsPerYear=0,
+                                int          *daysPerMonth=0,
+                                ESMF_KIND_I4 *secondsPerDay=0,
+                                ESMF_KIND_I4 *daysPerYear=0,
+                                ESMF_KIND_I4 *daysPerYearDn=0,
+                                ESMF_KIND_I4 *daysPerYearDd=0);
+    int ESMC_CalendarGet(ESMC_CalendarType *type=0,
+                         int              *monthsPerYear=0,
+                         int              *daysPerMonth=0,
+                         ESMF_KIND_I4     *secondsPerDay=0,
+                         ESMF_KIND_I4     *secondsPerYear=0,
+                         ESMF_KIND_I4     *daysPerYear=0,
+                         ESMF_KIND_I4     *daysPerYeardN=0,
+                         ESMF_KIND_I4     *daysPerYeardD=0);
 
     // Calendar doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
