@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.7 2003/04/02 17:24:53 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.8 2003/04/05 01:48:50 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -112,8 +112,8 @@
     // methods are not required
 
     int ESMC_ClockAddAlarm(ESMC_Alarm *alarm);  // (TMG 4.1, 4.2)
-    int ESMC_ClockGetAlarmList(ESMC_Alarm *alarmList, int *NumAlarms);
-    int ESMC_ClockGetNumAlarms(int *numAlarms); // (TMG 4.3)
+    int ESMC_ClockGetAlarmList(ESMC_Alarm *alarmList, int *NumAlarms) const;
+    int ESMC_ClockGetNumAlarms(int *numAlarms) const; // (TMG 4.3)
 
     int ESMC_ClockSyncToWallClock(void); // TMG3.4.5
     // (see ESMC_Time::GetRealTime()
@@ -126,23 +126,25 @@
 
     // accessor methods
 
-    int ESMC_ClockGetAdvanceCount(ESMF_IKIND_I8 *advanceCount);    // TMG3.5.1
+    int ESMC_ClockGetAdvanceCount(ESMF_IKIND_I8 *advanceCount) const;// TMG3.5.1
 
-    int ESMC_ClockGetTimeStep(ESMC_TimeInterval *timeStep);
+    int ESMC_ClockGetTimeStep(ESMC_TimeInterval *timeStep) const;
                                                                    // TMG3.5.2
     int ESMC_ClockSetTimeStep(ESMC_TimeInterval *timeStep);
                                                                    // TMG3.4.2
 
-    int ESMC_ClockGetCurrTime(ESMC_Time *currTime);    // TMG3.5.4
-    int ESMC_ClockSetCurrTime(ESMC_Time *currTime);    // TMG3.4.3
+    int ESMC_ClockGetCurrTime(ESMC_Time *currTime) const;    // TMG3.5.4
+    int ESMC_ClockSetCurrTime(ESMC_Time *currTime);          // TMG3.4.3
 
-    int ESMC_ClockGetStartTime(ESMC_Time *startTime);  // TMG3.5.3
-    int ESMC_ClockGetStopTime(ESMC_Time *stopTime);    // TMG3.5.3
-    int ESMC_ClockGetRefTime(ESMC_Time *refTime);      // TMG3.5.3
-    int ESMC_ClockGetPrevTime(ESMC_Time *prevTime);    // TMG3.5.4
+    int ESMC_ClockGetStartTime(ESMC_Time *startTime) const;  // TMG3.5.3
+    int ESMC_ClockGetStopTime(ESMC_Time *stopTime) const;    // TMG3.5.3
+    int ESMC_ClockGetRefTime(ESMC_Time *refTime) const;      // TMG3.5.3
+    int ESMC_ClockGetPrevTime(ESMC_Time *prevTime) const;    // TMG3.5.4
 
-    int ESMC_ClockGetCurrSimTime(ESMC_TimeInterval *currSimTime);   // TMG3.5.5
-    int ESMC_ClockGetPrevSimTime(ESMC_TimeInterval *prevSimTime);   // TMG3.5.5
+    int ESMC_ClockGetCurrSimTime(ESMC_TimeInterval *currSimTime) const;
+                                                                    // TMG3.5.5
+    int ESMC_ClockGetPrevSimTime(ESMC_TimeInterval *prevSimTime) const;
+                                                                    // TMG3.5.5
 
     // required methods inherited and overridden from the ESMC_Base class
 

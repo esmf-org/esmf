@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.12 2003/04/02 22:48:49 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.13 2003/04/05 01:51:42 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.12 2003/04/02 22:48:49 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.13 2003/04/05 01:51:42 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -148,7 +148,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 *advanceCount) {      // out - advance count
+      ESMF_IKIND_I8 *advanceCount) const {      // out - advance count
 //
 // !DESCRIPTION:
 //     Get the number of times a clock has been advanced (time stepped)
@@ -179,7 +179,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_TimeInterval *timeStep) {      // out - time step
+      ESMC_TimeInterval *timeStep) const {      // out - time step
 //
 // !DESCRIPTION:
 //     Get the clock's time step
@@ -241,7 +241,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Time *currTime) {      // out - current time
+      ESMC_Time *currTime) const {      // out - current time
 //
 // !DESCRIPTION:
 //     Get the clock's current time
@@ -303,7 +303,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Time *startTime) {      // out - start time
+      ESMC_Time *startTime) const {      // out - start time
 //
 // !DESCRIPTION:
 //     Get the clock's start time
@@ -334,7 +334,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Time *stopTime) {      // out - stop time
+      ESMC_Time *stopTime) const {      // out - stop time
 //
 // !DESCRIPTION:
 //     Get the clock's stop time
@@ -365,7 +365,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Time *refTime) {      // out - reference time
+      ESMC_Time *refTime) const {      // out - reference time
 //
 // !DESCRIPTION:
 //     Get the clock's reference (base) time
@@ -396,7 +396,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Time *prevTime) {      // out - previous time
+      ESMC_Time *prevTime) const {      // out - previous time
 //
 // !DESCRIPTION:
 //     Get the clock's previous time
@@ -427,7 +427,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_TimeInterval *currSimTime) {      // out - current simulation time
+      ESMC_TimeInterval *currSimTime) const {  // out - current simulation time
 //
 // !DESCRIPTION:
 //     Get the clock's current simulation time
@@ -459,7 +459,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_TimeInterval *prevSimTime) {      // out - previous simulation time
+      ESMC_TimeInterval *prevSimTime) const { // out - previous simulation time
 //
 // !DESCRIPTION:
 //     Get the clock's previous simulation time
