@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrInterface.C,v 1.1 2003/03/19 16:04:30 shep_smith Exp $
+// $Id: ESMC_LogErrInterface.C,v 1.2 2003/03/28 21:36:14 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,51 +8,43 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
 
-// ESMC Log method implementation (body) file
-
-//-----------------------------------------------------------------------------
-//
-// !DESCRIPTION:
-//
-// The LogErr class (defined in ESMC_Log.C and declared in
-// the companion file ESMC_LogErr.h) provides the user a way to write Log data.
-//
-// The following public methods are defined: ESMC_LogInfo (native C/C++ 
-// method for writing to information to a log file),
-// ESMC_LogInfoFortran (the fortran version
-// of ESMC_LogPrint), ESMC_LogWrite (another way to write to the log file using
-// the fortran write statement) ESMC_LogErrClose (closes any log file which are
-// still open), and ESMC_LogErrOpen (initializes and opens the log file).
-// See below for a more detailed definition of these methods.
-//
-//-----------------------------------------------------------------------------
-//
-// insert any higher level, 3rd party or system includes here
 // #include <ESMC.h>
+//---------------------------------------------------------------------------
+// This Fortran interface to the ESMC_Log class is written in both C and
+// Fortran.  This file contains the interface code written in C.
+//----------------------------------------------------------------------------
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <ctype.h>
 #include <string.h>
+//Global Variables
 extern FILE* logErrFilePtr[10];
 extern int numFileGlobal;
-extern FILE* logErrFileFortran[10];
+extern int logErrFileFortran[10];
 extern int numFileFortGlobal;
 extern char listOfFileNames[20][32];
+extern char listOfFortFileNames[20][32];
 #include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMC_LogErr.h"
-//------------------------------------------------------------------------
-// Interface layer for F90
-// These routines are used by the wrapper routines to call the corresponding
-// Log methods.
-//---------------------------------------------------------------------
-//
 
 extern "C" {
-
-
+//------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMF_LogCloseFile - closes a file from Fortran code
+//
+// !INTERFACE 
+// subroutine ESMF\_LogCloseFile(aLog)
+//
+// !ARGUMENTS:
+//   typdef(ESMF\_Log) :: aLog
+// 
+// !DESCRIPTION:
+// Calls the method ESMC\_LogCloseFileForWrite to close aLog's 
+// log file.
+//
+//EOP
 void FTN(esmf_logclosefile)(ESMC_Log* aLog)
 {
-//     aLog->ESMC_LogCloseFile();
        aLog->ESMC_LogCloseFileForWrite();
 }
 
@@ -61,6 +53,30 @@ void FTN(esmf_loginit_c)(ESMC_Log* aLog,int* verbose, int* flush,
 {
    aLog->ESMC_LogInit(*verbose,*flush,*haltOnErr,*haltOnWarn);
 }
+
+//--------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMF_LogOpenFile - opens a log file
+// !INTERFACE: 
+// subroutine ESMF_LogOpenFile(aLog, numFile, name)
+//
+// !ARGUMENTS:
+//
+//  typdef(ESMF\_Log) :: aLog
+//
+//  integer :: numFile           !! set to either ESMF_SINGLE_FILE
+//                               !! or ESMF_MULTIPLE_FILE 
+//
+//  characlter(len=*) :: name    !! name of file
+//
+// !DESCRIPTION:
+// This routine finds the first space in the array name and inserts a
+// a null character. It then calls ESMC\_LogOpenFileForWrote an ESMC\_Log method
+// for opening files.
+//
+//EOP
+//----------------------------------------------------------------------------
 
 void FTN(esmf_logopenfile)(ESMC_Log* aLog,int* numFiles,char name[])
 {
@@ -78,10 +94,34 @@ void FTN(esmf_logopenfile)(ESMC_Log* aLog,int* numFiles,char name[])
     i++;
   }
   if (!foundSpace) c_name[32]='\0';
-//  aLog->ESMC_LogOpenFile(*numFiles, c_name);
     aLog->ESMC_LogOpenFileForWrite(*numFiles, c_name);
 }
 
+//-----------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMF_LogInfo -  writes miscellaneous information to 
+//             a log file
+//
+// !INTERFACE:
+//   
+//  ESMF\_LogInfo(aLog, fmt, ...)
+//
+// !ARGUMENTS:
+//
+//  typedef(ESMF\_LogInfo) :: aLog   ! log object
+//  character(len=*) :: fmt         !c-style character descriptior
+//
+// !DESCRIPTION:
+//  This routine allows the user to write miscellaneous information the
+//  Log file. It uses a printf style character descriptor, e.g. 
+//  ESMF\_LogInfo(aLog,"Hi there, %s ", shep), where shep here would be
+//  a character string. The routine takes a variable number of arguments,
+//  so that any number of data items can be written to the Log file.
+//  Currently, only character, strings, integers, and reals are supported.
+//  However, field widths, precisions, and flags are ignored.
+//
+//EOP
+//-----------------------------------------------------------------------
 void FTN(esmf_loginfo)(ESMC_Log* aLog, char* fmt,...){
     int intData[32];
     double floatData[32];
@@ -180,11 +220,51 @@ void FTN(esmf_loginfo)(ESMC_Log* aLog, char* fmt,...){
 
 	  
 	  
-//    #include "ESMF_LogPrintf.inc"
     aLog->ESMC_LogInfoFortran(fmt, charData,strData, intData, floatData);
   }
 
           
+//-----------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMF_LogWarnMsg  - writes a warning message to the log file
+//
+// !INTERFACE:
+//
+//  subroutine ESMF\_LogWarnMsg(aLog, errCode, line,file,dir,msg)
+//
+// !ARGUMENTS:
+//    typdef(ESMF\_Log)::aLog
+//
+//    integer :: errCode         !integer value for error code         
+//
+//    character(len=*) :: msg    !msg written to log file
+//
+//    integer :: line            !line number of warning; argument
+//                               !supplied by macro
+//
+//    character(len=*) :: file   !file where warning occurred in;
+//                               !argument supplied by macro
+//
+//    character(len=*) :: dir    !directory where warning occurred in;
+//                               !argument supplied by macro
+//
+// !DESCRIPTION:
+//    This routine writes a warning message to the log file.  This warning
+//    message consists of the erroCode, a description of the warning, the 
+//    line number, file, and directory of the error, and a message. A 
+//    preprocessor macro adds the predefined preprocessor symbolic
+//    constants \_\_LINE\_\_, \_\_FILE\_\_, and \_\_DIR\_\_.
+//    The macro operates on
+//    the file from which these routines are called.  Note,
+//    the value of \_\_DIR\_\_ 
+//    must be suppliled by the user (usually done in
+//    the makefile.).  By default, execution continues after encountering
+//    a warning, but by calling the routine ESMF\_LogWarnHalt(), the user
+//    can halt on warnings.
+//
+//EOP
+//--------------------------------------------------------------------------
 void FTN(esmf_logwarnmsg_)(ESMC_Log* aLog,int* errCode, int* line,
   char file[],char dir[],char msg[])
 
@@ -194,6 +274,23 @@ void FTN(esmf_logwarnmsg_)(ESMC_Log* aLog,int* errCode, int* line,
 }
 
 
+//-----------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMF_LogWarn - writes a warnng message to log file
+//
+// !INTERFACE:
+//    ESMF\_LogWarn(aLog, errCode)
+//
+// !ARGUMENTS:
+//   typdef(ESMF\_Log) :: aLog
+//   integer :: errCode
+//
+// !DESCRIPTION:
+//   This routine is identical to ESMF\_LogWarnMsg, except a msg is
+//   not written to the log file.
+//
+//EOP
+//-----------------------------------------------------------------------
 void FTN(esmf_logwarn_)(ESMC_Log* aLog,int* errCode, int* line,
   char file[],char dir[])
 
@@ -203,32 +300,155 @@ void FTN(esmf_logwarn_)(ESMC_Log* aLog,int* errCode, int* line,
    aLog->ESMC_LogWarningFortran(*errCode, *line,file,dir,msg);
 
 }
+
+//------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMF_LogFlush - flushes output
+//
+// !INTERFACE:
+//    ESMF\_logflush(aLog)
+//
+// !ARGUMENTS:
+//    typdef(ESMF\_Log) :: aLog
+//
+// !DESCRIPTION:
+//    This routine calls the Log method ESMC\_LogFlush() which sets a flag
+//    that causes all output from the buffers.
+//
+//EOP
+//---------------------------------------------------------------------------
 void FTN(esmf_logflush)(ESMC_Log* aLog)
 {
    aLog->ESMC_LogFlush();
 }
+
+//---------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMF_LogNotFlush - prevents output from being flushed
+//
+// !INTERFACE:
+//    ESMF\_LogNotFlush(aLog)
+//
+// !ARGUMENTS:
+//    typdef(ESMF\_Log) :: aLog
+// !DESCRIPTION:
+//    This routine calls the Log method ESMC\_LogNotFlush() which sets a flag
+//    that turns off flushing. By default, this flag is set.
+//
+//EOP
+//---------------------------------------------------------------------------
 
 void FTN(esmf_lognotflush)(ESMC_Log* aLog)
 {
    aLog->ESMC_LogNotFlush();
 }
 
+//---------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMF_LogVerbose -  causes output to be written to the Log
+//
+// !INTERFACE:
+//   ESMF\_LogVerbose(aLog)
+// !ARGUMENTS:
+//    typdef(ESMF\_Log) :: aLog
+//
+// !DESCRIPTION:
+//    This routine sets a flag that causes all output associated with
+//    the aLog ESMC\_Log handle to be written.
+//EOP
+//------------------------------------------------------------------------
+
 void FTN(esmf_logverbose)(ESMC_Log* aLog)
 {
   aLog->ESMC_LogVerbose();
 }
 
-void FTN(esmf_lognoflush)(ESMC_Log* aLog)
+//---------------------------------------------------------------------------
+//BOP                    
+// !IROUTINE: ESMF_LogNotVerbose -  causes output not to be written to the Log
+//                       
+// !INTERFACE:            
+//   ESMF\_LogVerbose(aLog)
+// !ARGUMENTS:            
+//    typdef(ESMF\_Log) :: aLog
+//
+// !DESCRIPTION:
+//    This routine sets a flag that forces all output associated with
+//    the aLog ESMC\_Log handle from being written.
+//EOP
+//------------------------------------------------------------------------
+			 
+void FTN(esmf_lognotverbose)(ESMC_Log* aLog)
 {
-   aLog->ESMC_LogNotFlush();
+   aLog->ESMC_LogNotVerbose();
 }
 
 
+
+//------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: LogWrite - Fortran style method to write to log file.
+//
+// !INTERFACE:
+//    LogWrite(aLog)
+// !ARGUMENTS:
+//   typdef(ESMF\_Log) :: aLog
+//
+// !DESCRIPTION:
+//    This function called from with a Fortran write statement, e.g.
+//    write(LogWrite(aLog),*)"Hi".  The LogWrite function appends some
+//    header information (time,date etc.) to what ever is printed out
+//    from the write, e.g. Hi.
+//EOP
+//-------------------------------------------------------------------------------
 int  FTN(logwrite)(ESMC_Log *aLog)
 {
     return aLog->ESMC_LogWrite();
 }
 
+
+//-----------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMF_LogErrMsg - writes a err message to the log file
+//
+// !INTERFACE:
+//
+//  subroutine ESMF\_LogErrMsg(aLog, errCode, line,file,dir,msg)
+//
+// !ARGUMENTS:
+//    typdef(ESMF\_Log)::aLog
+//
+//    integer :: errCode         !integer value for error code
+//
+//    character(len=*) :: msg    !msg written to log file
+//
+//    integer :: line            !line number of warning; argument
+//                               !supplied by macro
+//
+//    character(len=*) :: file   !file where warning occurred in;
+//                               !argument supplied by macro
+//
+//    character(len=*) :: dir    !directory where warning occurred in;
+//                               !argument supplied by macro
+//
+// !DESCRIPTION:
+//    This routine writes a warning message to the log file.  This warning
+//    message consists of the erroCode, a description of the warning, the
+//    line number, file, and directory of the error, and a message. A
+//    preprocessor macro adds the predefined preprocessor symbolic
+//    constants \_\_LINE\_\_, \_\_FILE\_\_, and \_\_DIR\_\_.
+//    The macro operates on
+//    the file from which these routines are called.  Note,
+//    the value of \_\_DIR\_\_
+//    must be suppliled by the user (usually done in
+//    the makefile).  By default, execution continues after encountering
+//    a warning, but by calling the routine ESMF\_LogWarnHalt(), the user
+//    can halt on warnings.
+//
+//EOP
+//--------------------------------------------------------------------------
 
 void FTN(esmf_logerrmsg_)(ESMC_Log* aLog, int* errCode,int* line, char file[],
                      char dir[],char msg[])
@@ -236,6 +456,25 @@ void FTN(esmf_logerrmsg_)(ESMC_Log* aLog, int* errCode,int* line, char file[],
     aLog->ESMC_LogErrFortran(*errCode,*line,file,dir,msg);
 } 
 
+
+
+//-----------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMF_LogErr - writes a warnng message to log file
+//
+// !INTERFACE:
+//    ESMF\_LogErr(aLog, errCode)
+//
+// !ARGUMENTS:
+//   typdef(ESMF\_Log) :: aLog
+//   integer :: errCode
+//
+// !DESCRIPTION:
+//   This routine is identical to ESMF\_LogErrMsg, except a msg is
+//   not written to the log file.
+//
+//EOP
+//-----------------------------------------------------------------------
 
 void FTN(esmf_logerr_)(ESMC_Log* aLog, int* errCode, int* line, char file[],
                      char dir[])
@@ -245,24 +484,86 @@ void FTN(esmf_logerr_)(ESMC_Log* aLog, int* errCode, int* line, char file[],
     aLog->ESMC_LogErrFortran(*errCode,*line,file,dir,msg);
 } 
 
-
-
+//---------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMF_LogHaltOnErr - program halts on encountering an error
+//
+// !INTERFACE:
+//    subroutine ESMF_LogHaltOnErr(aLog)
+// !ARGUMENTS;
+//    typdef(ESMF\_Log) :: aLog
+//
+// !DESCRIPTION:
+//    This routine calls a Log method that sets a flag to stop execution on
+//    reaching an error. This is the default behavior of the Log class.
+//EOP
+//--------------------------------------------------------------------------
 void FTN(esmf_loghaltonerr)(ESMC_Log* aLog) 
 {
     aLog->ESMC_LogHaltOnErr();
 }
 
 
+//---------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMF_LogNotHaltOnErr - program does not halt
+//                                   on encountering an error
+//
+// !INTERFACE:
+//    subroutine ESMF\_LogNotHaltOnErr(aLog)
+// !ARGUMENTS:
+//    typdef(ESMF\_Log) :: aLog
+//
+// !DESCRIPTION:
+//    This routine calls a Log method that sets a flag to prevent the program
+//    from stopping reaching an error. 
+//EOP
+//--------------------------------------------------------------------------
+
 void FTN(esmf_lognothaltonerr)(ESMC_Log* aLog)
 {
     aLog->ESMC_LogNotHaltOnErr();
 }
 
+//---------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMF_LogHaltOnWarn - program halts on encountering a warning
+//
+// !INTERFACE:
+//    subroutine ESMF\_LogHaltOnWarn(aLog)
+// !ARGUMENTS:
+//    typdef(ESMF\_Log) :: aLog
+//
+// !DESCRIPTION:
+//    This routine calls a Log method that sets a flag to stop execution on
+//    reaching a warning.
+//EOP
+//--------------------------------------------------------------------------
 void FTN(esmf_loghaltonwarn)(ESMC_Log* aLog)
 {
    aLog->ESMC_LogHaltOnWarn();
 }
 
+
+//---------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMF_LogNotHaltOnWarn - program does not halt
+//                                   on encountering a warning
+//
+// !INTERFACE;
+//    subroutine ESMF\_LogNotHaltOnWarn(aLog)             
+// !ARGUMENTS:                                        
+//    typdef(ESMF\_Log) :: aLog                                        
+//                              
+// !DESCRIPTION:                              
+//    This routine calls a Log method that sets a flag to prevent the program
+//    from stopping reaching an error.                            
+//EOP                                                                           
+//--------------------------------------------------------------------------
 
 void FTN(esmf_lognothaltonwarn)(ESMC_Log* aLog)
 {
