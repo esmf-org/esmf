@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.34 2005/02/11 16:19:35 theurich Exp $
+// $Id: ESMC_VM.C,v 1.35 2005/02/15 21:46:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.34 2005/02/11 16:19:35 theurich Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.35 2005/02/15 21:46:00 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -57,6 +57,7 @@ static const char *const version = "$Id: ESMC_VM.C,v 1.34 2005/02/11 16:19:35 th
 // calling ESMC_VMFinalize(). 
 static ESMC_VM *GlobalVM = NULL;  
 //-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 // Module arrays to hold association between tid <-> vm <-> vmID
