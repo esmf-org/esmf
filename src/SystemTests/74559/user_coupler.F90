@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.4 2003/04/28 17:46:37 nscollins Exp $
+! $Id: user_coupler.F90,v 1.5 2003/04/28 19:08:43 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -67,17 +67,17 @@
         print *, "User Coupler Init starting"
         call ESMF_StateGetData(statelist, "name?", toflow, rc)
 
-        call ESMF_StateIsNeeded(toflow, "SIE", rc)
-        call ESMF_StateIsNeeded(toflow, "V", rc)
-        call ESMF_StateIsNeeded(toflow, "RHO", rc)
-        call ESMF_StateIsNeeded(toflow, "FLAG", rc)
+        call ESMF_StateSetNeeded(toflow, "SIE", rc)
+        call ESMF_StateSetNeeded(toflow, "V", rc)
+        call ESMF_StateSetNeeded(toflow, "RHO", rc)
+        call ESMF_StateSetNeeded(toflow, "FLAG", rc)
 
         call ESMF_StateGetData(statelist, "name?", fromflow, rc)
 
-        call ESMF_StateIsNeeded(fromflow, "SIE", rc)
-        call ESMF_StateIsNeeded(fromflow, "V", rc)
-        call ESMF_StateIsNeeded(fromflow, "RHO", rc)
-        call ESMF_StateIsNeeded(fromflow, "FLAG", rc)
+        call ESMF_StateSetNeeded(fromflow, "SIE", rc)
+        call ESMF_StateSetNeeded(fromflow, "V", rc)
+        call ESMF_StateSetNeeded(fromflow, "RHO", rc)
+        call ESMF_StateSetNeeded(fromflow, "FLAG", rc)
 
         ! do we set up coupling now?  the flow solver reads in the
         ! initial conditions file, so the first coupling is solver
