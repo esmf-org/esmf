@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.40 2003/08/01 22:47:58 jwolfe Exp $
+// $Id: ESMC_DELayout.C,v 1.41 2003/08/13 22:58:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.40 2003/08/01 22:47:58 jwolfe Exp $";
+           "$Id: ESMC_DELayout.C,v 1.41 2003/08/13 22:58:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -388,7 +388,7 @@ static int verbose = 1;
       this->commType[i] = ESMC_COMMTYPE_SHR;
 
   if (verbose) {
-    cout << "ESMC_DELayoutConstruct (default 1xN) successful\n";
+    //cout << "ESMC_DELayoutConstruct (default 1xN) successful\n";
     //cout << "Create default 1xN Layout:" << endl;
     //ESMC_DELayoutPrint();
   }
@@ -576,7 +576,7 @@ static int verbose = 1;
   //peList->ESMC_PEListPrint();
 
   if (verbose) {
-    cout << "ESMC_DELayoutConstruct (from Parent) successful\n";
+    //cout << "ESMC_DELayoutConstruct (from Parent) successful\n";
     //cout << "Create Layout from Parent:" << endl;
     //ESMC_DELayoutPrint();
   }
@@ -750,7 +750,7 @@ static int verbose = 1;
   }
 
   if (verbose) {
-    cout << "ESMC_DELayoutConstruct (from delist) successful\n";
+    //cout << "ESMC_DELayoutConstruct (from delist) successful\n";
     //cout << "Create Layout from delist:" << endl;
     //ESMC_DELayoutPrint();
   }
@@ -903,7 +903,7 @@ static int verbose = 1;
   }
 
   if (verbose) {
-    cout << "ESMC_DELayoutConstruct (from pelist) successful\n";
+    //cout << "ESMC_DELayoutConstruct (from pelist) successful\n";
     //cout << "Create Layout from pelist:" << endl;
     //ESMC_DELayoutPrint();
   }

@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.35 2003/08/13 21:53:02 jwolfe Exp $
+// $Id: ESMC_XPacket.C,v 1.36 2003/08/13 23:00:21 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.35 2003/08/13 21:53:02 jwolfe Exp $";
+              "$Id: ESMC_XPacket.C,v 1.36 2003/08/13 23:00:21 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -355,7 +355,7 @@
             if (boundary[i][1] == ESMF_TF_TRUE) nxp++;
           }
 
-          printf("Incoming: %d XPackets\n", nxp);
+          //printf("Incoming: %d XPackets\n", nxp);
           xps = new ESMC_XPacket[nxp];
         
            *xp_list = xps; 
@@ -413,7 +413,7 @@
             }
           }
 
-//     printf("outgoing ");
+//     printf("Outgoing ");
 //     for (j=0; j<nxp; j++)
 //         xps[j].ESMC_XPacketPrint();
 
