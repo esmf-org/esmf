@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.76 2004/10/26 22:53:05 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.77 2004/10/26 23:10:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
 
 !------------------------------------------------------------------------------
  
-#include <ESMF_Macros.inc>
+#include <ESMF.h>
 
 !==============================================================================
 !BOP
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.76 2004/10/26 22:53:05 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.77 2004/10/26 23:10:19 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
