@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.35 2004/02/05 23:25:17 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.36 2004/02/06 17:46:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.35 2004/02/05 23:25:17 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.36 2004/02/06 17:46:48 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,7 @@
       type(ESMF_Grid) :: grid, grid2, grid3, grid4
       type(ESMF_Array) :: arr, arr2
       type(ESMF_ArraySpec) :: arrayspec
-      real, dimension(:,:), pointer :: f90ptr1
+      real, dimension(:,:), pointer :: f90ptr1, f90ptr2
       type(ESMF_DataMap) :: dm
       type(ESMF_RelLoc) :: rl
       character (len = 20) :: fname, fname1, fname2
@@ -405,6 +405,17 @@
       !------------------------------------------------------------------------
 #endif
 
+      !NEX_UTest
+      ! Req. xxx - getting a data pointer directly from a field
+      grid =  ESMF_GridCreate(name=gname, rc=rc)
+      arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
+      f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
+                                   1, dm, "Field 0", ios, rc)
+      call ESMF_FieldGetDataPointer(f3, f90ptr2, rc=rc)
+      print *, "data = ", f90ptr2(1,1)
+      write(failMsg, *) ""
+      write(name, *) "Getting an F90 pointer directly back from a Field"
+      call ESMF_Test((associated(f90ptr2)), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !NEX_UTest
