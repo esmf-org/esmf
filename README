@@ -1,4 +1,4 @@
- $Id: README,v 1.50 2004/06/23 16:08:12 cdeluca Exp $
+ $Id: README,v 1.50.2.1 2004/07/06 22:19:25 svasquez Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2004, University Corporation for Atmospheric Research,
@@ -15,7 +15,7 @@ Licensed under the GPL.
 
 ================================================================================
 
-README file for ESMF v2.0.0 release.
+README file for ESMF v2.0.0rp1 release.
 
 The files contained here include the ESMF source code and build system.
 
