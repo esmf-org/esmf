@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.1 2002/10/04 17:40:49 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.2 2002/10/08 15:27:37 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF Base module
@@ -46,11 +46,21 @@
           integer :: state
       end type
 
+      type(ESMF_State), parameter :: ESMF_STATE_UNINIT = ESMF_State(1), &
+                                     ESMF_STATE_ALLOCATED = ESMF_State(2), &
+                                     ESMF_STATE_BUSY = ESMF_State(3), &
+                                     ESMF_STATE_INVALID = ESMF_State(4)
+
       type ESMF_DataType
       sequence
       private
           integer :: dtype
       end type
+
+      type(ESMF_DataType), parameter :: ESMF_DATA_INTEGER = ESMF_DataType(1), &
+                                        ESMF_DATA_REAL = ESMF_DataType(2), &
+                                        ESMF_DATA_LOGICAL = ESMF_DataType(3), &
+                                        ESMF_DATA_CHARACTER = ESMF_DataType(4)
 
       type ESMF_DataKind
       sequence
@@ -58,9 +68,15 @@
           integer :: dkind
       end type
 
+!     i'll need some help with kinds...
+      type(ESMF_DataKind), parameter :: ESMF_KIND_WHAT = ESMF_DataKind(1)
+
+
       type ESMF_DataValue
       sequence
       private
+          type(ESMF_DataType) :: dt
+          integer :: rank
           ! how do you do values of all types here ?
           ! in C++ i'd do a union w/ overloaded access funcs
           integer :: vi
@@ -77,6 +93,9 @@
       private
           logical :: truefalse
       end type
+
+      type(ESMF_Flag), parameter :: ESMF_TRUE = ESMF_Flag(.true.), &
+                                    ESMF_FALSE = ESMF_Flag(.false.)
 
       type ESMF_Attribute
       sequence
@@ -410,6 +429,10 @@
       end subroutine ESMF_AttributeCopyAll
 
 
+!-------------------------------------------------------------------------
+! put Print and Validate skeletons here - but they should be
+!  overridden by higher level more specialized functions.
+!-------------------------------------------------------------------------
 
       end module ESMF_BaseMod
 
