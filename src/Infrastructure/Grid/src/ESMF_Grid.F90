@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.89 2003/09/02 21:24:39 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.90 2003/09/03 23:08:44 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.89 2003/09/02 21:24:39 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.90 2003/09/03 23:08:44 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -376,6 +376,22 @@
 !! !DESCRIPTION:
 !!     This interface provides a single entry point for methods that
 !!     search a {\tt ESMF\_Grid} for point(s).
+!!
+!!EOP
+       end interface
+!!
+!------------------------------------------------------------------------------
+!!BOP
+!! !INTERFACE:
+       interface ESMF_GridSetBoundingBoxes
+!
+!! !PRIVATE MEMBER FUNCTIONS:
+          module procedure ESMF_GridSetBoundingBoxesInt
+          module procedure ESMF_GridSetBoundingBoxesSpecd
+!
+!! !DESCRIPTION:
+!!     This interface provides a single entry point for methods that
+!!     set bounding boxes for all the DEs in a {\tt ESMF\_Grid}.
 !!
 !!EOP
        end interface
@@ -1216,6 +1232,9 @@
       integer :: physgridId                   ! integer identifier for physgrid
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
+      integer :: numDE1, numDE2
+      integer, dimension(:,:), pointer :: countsPerAxis
+      real :: delta1, delta2
       type(ESMF_RelLoc) :: relloc
 
 !     Initialize return code
@@ -1248,6 +1267,23 @@
                                           periodic=periodic, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternal: Distgrid create"
+        return
+      endif
+
+!     Create the BoundingBoxes structure
+      if (counts(1).ne.0) then
+        delta1 = (x_max-x_min) / real(counts(1))
+      endif
+      if (counts(2).ne.0) then
+        delta2 = (y_max-y_min) / real(counts(2))
+      endif
+      call ESMF_DELayoutGetSize(layout, numDE1, numDE2, status)
+      allocate(countsPerAxis(numDE1*numDE2, ESMF_MAXGRIDDIM), stat=status)
+      call ESMF_DistGridGetAllCounts(grid%distgrid%ptr, countsPerAxis, status)
+      call ESMF_GridSetBoundingBoxes(grid, x_min, y_min, delta1, delta2, &
+                                     countsPerAxis, numDE1, numDE2, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridConstructInternal: Grid set boxes"
         return
       endif
 
@@ -3845,11 +3881,133 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridSetBoundingBoxes - Set the array of bounding boxes per DE
+! !IROUTINE: ESMF_GridSetBoundingBoxesInt - Set the array of bounding boxes per DE
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetBoundingBoxes(grid, min, delta1, delta2, &
-                                           countsPerDE1, countsPerDE2, rc)
+      subroutine ESMF_GridSetBoundingBoxesInt(grid, x_min, y_min, delta1, &
+                                              delta2, countsPerAxis, numDE1, &
+                                              numDE2, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridType), intent(inout) :: grid
+      real, intent(in) :: x_min
+      real, intent(in) :: y_min
+      real, intent(in) :: delta1
+      real, intent(in) :: delta2
+      integer, dimension(:,:), intent(in) :: countsPerAxis
+      integer, intent(in) :: numDE1
+      integer, intent(in) :: numDE2
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     This version of set assumes the region identifier data exists already
+!     and is being passed in through an {\tt ESMF\_LocalArray}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
+!     \item[x\_min]
+!          Minimum physical coordinate in the first direction.
+!     \item[y\_min]
+!          Minimum physical coordinate in the second direction.
+!     \item[delta1]
+!          Physical increment between nodes in the first direction.
+!     \item[delta2]
+!          Physical increment between nodes in the second direction.
+!     \item[countsPerAxis]
+!          Array of number of grid increments per DE in each direction.
+!     \item[numDE1]
+!          Number of DEs in the first direction of the decomposition.
+!     \item[numDE2]
+!          Number of DEs in the second direction of the decomposition.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status                       ! Error status
+      logical :: rcpresent                    ! Return code present
+      integer :: DE, numDEs, rank, npts
+      integer :: i, j, jDE
+      real :: start, stop
+      real(kind=ESMF_IKIND_R4), dimension(:,:,:), pointer :: boxes
+
+!     Initialize return code
+      status = ESMF_SUCCESS
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      numDEs = numDE1*numDE2
+      rank   = 2   ! TODO: hard-coded for now
+      npts   = 2**rank
+
+!     TODO: break out by rank?
+!     Assume the following starage for bounding boxes:
+!       number of DEs * npts * rank
+!       where npts is the number of points necessary to describe a bounding box
+!       and rank is the number of dimensions.  For the time being, the points
+!       are stored in the following order:
+!                     1. (Xmin,Ymin,Zmin)
+!                     2. (Xmax,Ymin,Zmin)
+!                     3. (Xmax,Ymax,Zmin)
+!                     4. (Xmin,Ymax,Zmin)
+!                     5. (Xmin,Ymin,Zmax)
+!                     6. (Xmax,Ymin,Zmax)
+!                     7. (Xmax,Ymax,Zmax)
+!                     8. (Xmin,Ymax,Zmax)
+      allocate(boxes(numDEs,npts,rank))
+
+!     Calculate box for each DE
+!     Direction 1 first
+      start = x_min
+      stop  = x_min
+      do j = 1,numDE1
+        stop = stop + delta1*real(countsPerAxis(j,1))
+        do i = 1,numDE2
+          DE = (i-1)*numDE1 + j
+          boxes(DE,1,1) = start
+          boxes(DE,2,1) = stop
+          boxes(DE,3,1) = stop
+          boxes(DE,4,1) = start
+        enddo
+        start = stop
+      enddo
+
+!     Direction 2 next
+      start = y_min
+      stop  = y_min
+      do j = 1,numDE2
+        jDE  = (j-1)*numDE1 + 1
+        stop = stop + delta2*real(countsPerAxis(jDE,2))
+        do i = 1,numDE1
+          DE = (j-1)*numDE1 + i
+          boxes(DE,1,2) = start
+          boxes(DE,2,2) = stop
+          boxes(DE,3,2) = stop
+          boxes(DE,4,2) = start
+        enddo
+        start = stop
+      enddo
+
+      grid%boundingBoxes = ESMF_LocalArrayCreate(boxes, ESMF_DATA_REF, status)
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetBoundingBoxesInt
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridSetBoundingBoxesSpecd - Set the array of bounding boxes per DE
+
+! !INTERFACE:
+      subroutine ESMF_GridSetBoundingBoxesSpecd(grid, min, delta1, delta2, &
+                                                countsPerDE1, countsPerDE2, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType), intent(inout) :: grid
@@ -3964,7 +4122,7 @@
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridSetBoundingBoxes
+      end subroutine ESMF_GridSetBoundingBoxesSpecd
 
 !------------------------------------------------------------------------------
 !BOP
