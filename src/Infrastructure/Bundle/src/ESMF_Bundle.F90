@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.41 2004/05/17 17:26:09 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.42 2004/05/24 14:16:01 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,8 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+!
+#define ESMF_FILENAME "ESMF_Bundle.F90"
 !
 !     ESMF Bundle Module
       module ESMF_BundleMod 
@@ -475,7 +477,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an integer list attribute to an {\tt ESMF\_Bundle}.
+!     Attaches an integer list attribute to an {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1250,13 +1252,13 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           The {\tt Bundle} object to query.
+!           The {\tt ESMF\_Bundle} object to query.
 !     \item [{[grid]}]
-!           The {\tt ESMF\_Grid} associated with the {\tt Bundle}.
-!     \item [fieldCount]
-!           Returned {\tt ESMF\_Field} count.
+!           The {\tt ESMF\_Grid} associated with the {\tt ESMF\_Bundle}.
+!     \item [{[fieldCount]}]
+!           Number of {\tt ESMF\_Field}s in the {\tt ESMF\_Bundle}.
 !     \item [{[name]}]
-!           A character string where the {\tt Bundle} name is returned.
+!           A character string where the {\tt ESMF\_Bundle} name is returned.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1338,12 +1340,12 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Return pointers to all fields in an {\tt ESMF\_Bundle}.
+!     Return pointers to all {\tt ESMF\_Field}s in an {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           The {\tt ESMF\_Bundle} to query for {\tt ESMF\_Field}.
+!           The {\tt ESMF\_Bundle} to query for the {\tt ESMF\_Field}s.
 !     \item [fieldptrs]
 !           {\tt ESMF\_Field} pointer array.
 !     \item [{[count]}]
@@ -1378,24 +1380,18 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from an {\tt ESMF\_Bundle}.
-!
+!     Returns an integer attribute from an {\tt ESMF\_Bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
-!
 !     \item [name]
 !           The name of the Attribute to retrieve.
-!
 !     \item [value]
 !           The integer value of the named Attribute.
-!
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !
@@ -1443,7 +1439,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an integer list attribute from an {\tt ESMF\_Bundle}.
+!     Returns an integer list attribute from an {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1452,9 +1448,10 @@ end function
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values to be set.
+!           The number of values in the list.
 !     \item [value]
-!           The integer values of the named Attribute.
+!           The list (fortran array) of integer values of the named Attribute.
+!           The list must be at least {\tt count} item long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1568,7 +1565,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from an {\tt ESMF\_Bundle}.
+!     Returns a real list attribute from an {\tt ESMF\_Bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1577,9 +1574,10 @@ end function
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values to be set.
+!           The number of values in the list.
 !     \item [value]
-!           The real values of the named Attribute.
+!           The list (fortran array) of real values of the named Attribute.
+!           The list must be at least {\tt count} item long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1703,9 +1701,10 @@ end function
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values to be set.
+!           The number of values in the list.
 !     \item [value]
-!           The logical values of the named Attribute.
+!           The list (fortran array) of logical values of the named Attribute.
+!           The list must be at least {\tt count} item long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2014,7 +2013,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           The {\tt Bundle} object to query.
+!           The {\tt ESMF\_Bundle} object to query.
 !     \item [datamap]
 !           The current order/interleaf.
 !     \item [{[rc]}]
@@ -2907,7 +2906,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Validates that the {\tt ESMF\_Bundles} is internally consistent.
+!      Validates that the {\tt ESMF\_Bundle} is internally consistent.
 !      Returns error code if problems are found.
 !
 !     The arguments are:
@@ -2915,7 +2914,7 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [{[options]}]
-!           The validate options.
+!           The validate options.  See {\ref xx} for standard option strings.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
