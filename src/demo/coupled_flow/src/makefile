@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2005/02/02 20:52:09 jwolfe Exp $
+# $Id: makefile,v 1.10 2005/02/02 20:56:49 jwolfe Exp $
 
 ALL: tree_build_demos
 
@@ -22,9 +22,9 @@ DEMOS_BUILD    = $(ESMC_TESTDIR)/CoupledFlowApp
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
-DEMO_OBJ      = FlowArraysMod.o InjectArraysMod.o \
-                FlowSolverMod.o InjectorMod.o CouplerMod.o \
-                CoupledFlowApp.o
+DEMOS_OBJ      = FlowArraysMod.o InjectArraysMod.o \
+                 FlowSolverMod.o InjectorMod.o CouplerMod.o \
+                 CoupledFlowApp.o
 
 DEMOS_RUN      = RUN_CoupledFlowApp  
 
