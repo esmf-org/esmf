@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.17 2005/03/29 17:24:12 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.18 2005/03/29 21:11:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,14 +37,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.17 2005/03/29 17:24:12 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.18 2005/03/29 21:11:29 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc
+      integer :: rc, k
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
@@ -53,6 +53,7 @@
       character(1) :: pet_char
       character(4) :: my_pet_char
       character(8) :: my_todays_date, todays_date
+      integer, allocatable:: itime(:)
 
       character :: random_char
       character (5) :: random_string, msg_string
@@ -309,7 +310,11 @@
 
       !------------------------------------------------------------------------
       ! Generate a random string and write it to log file
-      call random_seed()
+      !call random_seed(generator=2)
+      call random_seed(size=k)
+      allocate(itime(k))
+      call system_clock(count_max=itime(3), count=itime(1), count_rate=itime(2)) 
+      call random_seed(put=itime)
       do i=1, 5
       	call random_number(r1)
       	ran_num = int(26.0*r1) + 65
