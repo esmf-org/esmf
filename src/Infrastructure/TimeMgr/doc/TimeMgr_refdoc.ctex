@@ -13,7 +13,7 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{\Large {\bf Time Manager Design}}
+\newcommand{\mytitle}{\Large {\bf Time Manager Reference}}
 \newcommand{\myauthors}{\large {\it Earl Schwab}}
 #endif
 

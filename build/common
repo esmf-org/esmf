@@ -1,4 +1,4 @@
-# $Id: common,v 1.25 2003/04/02 21:05:54 flanigan Exp $ 
+# $Id: common,v 1.26 2003/04/03 23:15:02 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -351,6 +351,45 @@ tex:
 %_ccapi.tex : ../examples/%.C
 	export PROTEX=$(PROTEX) ;\
 	$(CC_PROTEX) $* $<
+
+
+#
+# Pattern run for making dvi, pdf and html
+# A little braindead yes, but this is 
+# makefile land you know....
+#
+
+#
+#  dvi
+#
+$(ESMC_DOCDIR)/%_desdoc.dvi : %_desdoc.ctex 
+	$(DO_LATEX) $* des
+	mv -f $(@F) $(ESMC_DOCDIR)
+
+$(ESMC_DOCDIR)/%_refdoc.dvi : %_refdoc.ctex
+	$(DO_LATEX) $* ref
+	mv -f $(@F) $(ESMC_DOCDIR)
+
+$(ESMC_DOCDIR)/%_reqdoc.dvi : %_reqdoc.ctex
+	$(DO_LATEX) $* req
+	mv -f $(@F) $(ESMC_DOCDIR)
+
+# Pdf files
+${ESMC_DOCDIR}/%.pdf: ${ESMC_DOCDIR}/%.dvi
+	dvipdf $< $@
+
+# Html Files
+$(ESMC_DOCDIR)/%_desdoc: %_desdoc.ctex 
+	${DO_L2H} $* des
+	mv -f $(@F) $(ESMC_DOCDIR)
+
+$(ESMC_DOCDIR)/%_refdoc: %_refdoc.ctex 
+	${DO_L2H} $* ref
+	mv -f $(@F) $(ESMC_DOCDIR)
+
+$(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex 
+	${DO_L2H} $* req
+	mv -f $(@F) $(ESMC_DOCDIR)
 
 
 

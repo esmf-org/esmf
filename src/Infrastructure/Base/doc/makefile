@@ -4,6 +4,13 @@ All: tex
 
 LOCDIR = src/Infrastructure/Base/doc
 
+DVIFILES  = ${ESMC_DOCDIR}/Base_refdoc.dvi
+
+PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
+
+HTMLFILES = ${ESMC_DOCDIR}/Base_refdoc
+
+
 #
 # Tex Files to make
 #
@@ -24,8 +31,7 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   =
-CLEANFILES  = $(TEXFILES_TO_MAKE)
+CLEANDIRS   = Base_reqdoc Base_desdoc Base_refdoc 
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi Base_reqdoc.tex Base_desdoc.tex Base_refdoc.tex 
 CLOBBERDIRS =
-
 

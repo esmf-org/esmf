@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/04/02 19:51:43 flanigan Exp $ 
+# $Id: makefile,v 1.9 2003/04/03 23:15:03 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -84,3 +84,4 @@ ${ESMC_DOCDIR}/CommMem_reqdoc:
 ${ESMC_DOCDIR}/CommMem_refdoc: 
 	${DO_L2H} CommMem ref
 	mv -f CommMem_refdoc ${ESMC_DOCDIR}
+

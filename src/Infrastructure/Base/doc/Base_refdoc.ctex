@@ -1,4 +1,4 @@
-% $Id: comp_refdoc.ctex,v 1.4 2003/04/03 23:15:02 flanigan Exp $
+% $Id: 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,56 +42,56 @@
 #endif
 
 %\section{Synopsis}
-#ifdef STANDALONE
-\input{comp_syn}
-#elif defined(CONSTITUENT)
-\input{comppath/comp_syn}
-#endif
+% #ifdef STANDALONE
+% \input{Base_syn}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Base/doc/Base_syn}
+% #endif
 
 \section{Installation and General Usage}
 See the \htmladdnormallink{ESMF User's Guide}{http://www.esmf.ucar.edu/esmf_docs/ESMF_usrdoc/} for installation instructions and a discussion of overall 
 usage of the ESMF libraries.
 
 %\section{Architecture}
-#ifdef STANDALONE
-\input{comp_arch}
-#elif defined(CONSTITUENT)
-\input{comppath/comp_arch}
-#endif
+% #ifdef STANDALONE
+% \input{Base_arch}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Base/doc/Base_arch}
+% #endif
 
 \newpage
 \section{<Name1> Class}
 
-\subsection{Description}
-#ifdef STANDALONE
-\input{class_desc}
-#elif defined(CONSTITUENT)
-\input{comppath/class_desc}
-#endif
+% \subsection{Description}
+% #ifdef STANDALONE
+% \input{class_desc}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Base/doc/class_desc}
+% #endif
 
-\subsection{Restrictions}
-#ifdef STANDALONE
-\input{class_rest}
-#elif defined(CONSTITUENT)
-\input{comppath/class_rest}
-#endif
+% \subsection{Restrictions}
+% #ifdef STANDALONE
+% \input{class_rest}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Base/doc/class_rest}
+% #endif
 
-\subsection{Use and Examples}
-#ifdef STANDALONE
-%\input{class_ex} 
-#elif defined(CONSTITUENT)
-%\input{comppath/class_ex} 
-#endif
+% \subsection{Use and Examples}
+% #ifdef STANDALONE
+% %\input{class_ex} 
+% #elif defined(CONSTITUENT)
+% %\input{../Infrastructure/Base/doc/class_ex} 
+% #endif
 
 \newpage
 \section{<Name2> Class} ...
 
 #ifdef STANDALONE
 %\section{Glossary}
-\input{comp_glos}
+%\input{Base_glos}
 
 %\section{Bibliography}
-\bibliography{comp} 
+\bibliography{Base} 
 \bibliographystyle{plain}
 \addcontentsline{toc}{section}{Bibliography}
 
@@ -115,7 +115,11 @@ usage of the ESMF libraries.
 
 \subsection{Public Classes}
 
-%\input{<Name1>}
+#ifdef STANDALONE
+%\input{ESMC_Base_chapi}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Base/doc/ESMC_Base_chapi}
+#endif
 
 \subsection{Private Classes}
 

@@ -162,7 +162,24 @@
 
 #include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
 
-====================================================================================================
+%====================================================================================================
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Utilities: Base}
+\end{htmlonly}
+\part{Infrastructure Utilities: Base}
+\label{part:Infrastructure_Utilities:_Base}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+#include "../Infrastructure/TimeMgr/doc/Base_refdoc.ctex"
+
+
+
+%====================================================================================================
 \newpage
 \begin{htmlonly}
 \addcontentsline{toc}{part}{Infrastructure Utilities: Time Management}
@@ -239,6 +256,21 @@
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 #include "../Infrastructure/LogErr/doc/Log_refdoc.ctex"
+
+%====================================================================================================
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Utilities: Machine}
+\end{htmlonly}
+\part{Infrastructure Utilities: Machine}
+\label{part:Infrastructure_Utilities:_Machine}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+#include "../Infrastructure/Machine/doc/Machine_refdoc.ctex"
 
 %====================================================================================================
 %\newpage

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2003/03/25 23:13:41 flanigan Exp $ 
+# $Id: makefile,v 1.14 2003/04/03 23:15:03 flanigan Exp $ 
 
 all: alldoc
 
@@ -40,15 +40,6 @@ REQTEXFILES = Component_reqdoc.ctex
 # programmers's reference document
 REFREXFILES = Component_refdoc.ctex
 
-## TODO: need to generate <class>_fapi.tex and <class>_ccapi.tex
-## files from the real source code here using protex:
-#
-# e.g. comp_fapi.tex: ../interface/ESMF_Component.F90
-#                     do_fprotex comp ../interface/ESMF_Component.F90
-#
-#      comp_ccapi.tex: ../src/ESMC_Component.C
-#                     do_ccprotex comp ../src/ESMC_Component.C
-#
 
 #
 # Tex Files to make

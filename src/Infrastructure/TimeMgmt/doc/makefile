@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/03/10 03:03:08 cdeluca Exp $ 
+# $Id: makefile,v 1.4 2003/04/03 23:15:03 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -29,6 +29,7 @@ HTMLFILES = \
 include $(ESMF_DIR)/makefile
 
 DIRS = 
+
 
 # Dvi files
 ${ESMC_DOCDIR}/TimeMgmt_desdoc.dvi:
