@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.20 2003/04/30 07:39:35 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.21 2003/05/02 01:01:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -85,12 +85,13 @@
     int ESMC_TimeInit(ESMC_Calendar *cal, int tz, const char *timeList, ...);
 
     // Init method to support the F90 optional arguments interface
-    int ESMC_TimeInit(ESMF_IKIND_I8 *YR, int *MM, int *DD, ESMF_IKIND_I8 *D,
-                      int *H, int *M, ESMF_IKIND_I8 *S,
-                      int *MS, int *US, int *NS,
-                      double *d_, double *h_, double *m_, double *s_,
-                      double *ms_, double *us_, double *ns_,
-                      int *Sn, int *Sd, ESMC_Calendar *cal, int *tz);
+    int ESMC_TimeInit(ESMF_IKIND_I8 *YR=0, int *MM=0, int *DD=0,
+                      ESMF_IKIND_I8 *D=0,
+                      int *H=0, int *M=0, ESMF_IKIND_I8 *S=0,
+                      int *MS=0, int *US=0, int *NS=0,
+                      double *d_=0, double *h_=0, double *m_=0, double *s_=0,
+                      double *ms_=0, double *us_=0, double *ns_=0,
+                      int *Sn=0, int *Sd=0, ESMC_Calendar *cal=0, int *tz=0);
 
     // Time doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
@@ -108,19 +109,21 @@
     // e.g. ESMC_TimeSet("s" , (double) s);
 
     // Get/Set methods to support the F90 optional arguments interface
-    int ESMC_TimeGet(ESMF_IKIND_I8 *YR, int *MM, int *DD, ESMF_IKIND_I8 *D,
-                     int *H, int *M, ESMF_IKIND_I8 *S,
-                     int *MS, int *US, int *NS,
-                     double *d_, double *h_, double *m_, double *s_,
-                     double *ms_, double *us_, double *ns_,
-                     int *Sn, int *Sd) const;
+    int ESMC_TimeGet(ESMF_IKIND_I8 *YR=0, int *MM=0, int *DD=0,
+                     ESMF_IKIND_I8 *D=0,
+                     int *H=0, int *M=0, ESMF_IKIND_I8 *S=0,
+                     int *MS=0, int *US=0, int *NS=0,
+                     double *d_=0, double *h_=0, double *m_=0, double *s_=0,
+                     double *ms_=0, double *us_=0, double *ns_=0,
+                     int *Sn=0, int *Sd=0) const;
 
-    int ESMC_TimeSet(ESMF_IKIND_I8 *YR, int *MM, int *DD, ESMF_IKIND_I8 *D,
-                     int *H, int *M, ESMF_IKIND_I8 *S,
-                     int *MS, int *US, int *NS,
-                     double *d_, double *h_, double *m_, double *s_,
-                     double *ms_, double *us_, double *ns_,
-                     int *Sn, int *Sd);
+    int ESMC_TimeSet(ESMF_IKIND_I8 *YR=0, int *MM=0, int *DD=0,
+                     ESMF_IKIND_I8 *D=0,
+                     int *H=0, int *M=0, ESMF_IKIND_I8 *S=0,
+                     int *MS=0, int *US=0, int *NS=0,
+                     double *d_=0, double *h_=0, double *m_=0, double *s_=0,
+                     double *ms_=0, double *us_=0, double *ns_=0,
+                     int *Sn=0, int *Sd=0);
 
     int ESMC_TimeGetCalendar(ESMC_Calendar **calendar) const;  // pointer
     int ESMC_TimeGetCalendar(ESMC_Calendar  *calendar) const;  // copy

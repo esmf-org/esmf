@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.16 2003/04/28 23:09:41 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.17 2003/05/02 01:01:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -90,12 +90,13 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     int ESMC_TimeIntervalInit(const char *timeList, ...);
 
     // Init method to support the F90 optional arguments interface
-    int ESMC_TimeIntervalInit(ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
-                              ESMF_IKIND_I8 *D, int *H, int *M,
-                              ESMF_IKIND_I8 *S, int *MS, int *US, int *NS,
-                              double *d_, double *h_, double *m_, double *s_,
-                              double *ms_, double *us_, double *ns_,
-                              int *Sn, int *Sd);
+    int ESMC_TimeIntervalInit(ESMF_IKIND_I8 *YY=0, ESMF_IKIND_I8 *MO=0,
+                              ESMF_IKIND_I8 *D=0,
+                              int *H=0, int *M=0, ESMF_IKIND_I8 *S=0,
+                              int *MS=0, int *US=0, int *NS=0,
+                              double *d_=0, double *h_=0, double *m_=0,
+                              double *s_=0, double *ms_=0, double *us_=0,
+                              double *ns_=0, int *Sn=0, int *Sd=0);
 
     // accessor methods
 
@@ -114,19 +115,21 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     // e.g. Set("s" , (double) s);
 
     // Get/Set methods to support the F90 optional arguments interface
-    int ESMC_TimeIntervalGet(ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
-                             ESMF_IKIND_I8 *D, int *H, int *M,
-                             ESMF_IKIND_I8 *S, int *MS, int *US, int *NS,
-                             double *d_, double *h_, double *m_, double *s_,
-                             double *ms_, double *us_, double *ns_,
-                             int *Sn, int *Sd) const;
+    int ESMC_TimeIntervalGet(ESMF_IKIND_I8 *YY=0, ESMF_IKIND_I8 *MO=0,
+                             ESMF_IKIND_I8 *D=0,
+                             int *H=0, int *M=0, ESMF_IKIND_I8 *S=0,
+                             int *MS=0, int *US=0, int *NS=0,
+                             double *d_=0, double *h_=0, double *m_=0,
+                             double *s_=0, double *ms_=0, double *us_=0,
+                             double *ns_=0, int *Sn=0, int *Sd=0) const;
 
-    int ESMC_TimeIntervalSet(ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
-                             ESMF_IKIND_I8 *D, int *H, int *M,
-                             ESMF_IKIND_I8 *S, int *MS, int *US, int *NS,
-                             double *d_, double *h_, double *m_, double *s_,
-                             double *ms_, double *us_, double *ns_,
-                             int *Sn, int *Sd);
+    int ESMC_TimeIntervalSet(ESMF_IKIND_I8 *YY=0, ESMF_IKIND_I8 *MO=0,
+                             ESMF_IKIND_I8 *D=0,
+                             int *H=0, int *M=0, ESMF_IKIND_I8 *S=0,
+                             int *MS=0, int *US=0, int *NS=0,
+                             double *d_=0, double *h_=0, double *m_=0,
+                             double *s_=0, double *ms_=0, double *us_=0,
+                             double *ns_=0, int *Sn=0, int *Sd=0);
 
     // return in string format (TMG 1.5.9)
     int ESMC_TimeIntervalGetString(char *timeString) const;
