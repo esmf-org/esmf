@@ -1,4 +1,4 @@
-#  $Id: Darwin.default.mk,v 1.3 2003/09/11 19:24:43 nscollins Exp $
+#  $Id: Darwin.default.mk,v 1.4 2003/09/23 15:31:46 nscollins Exp $
 #
 #  Darwin.default.mk
 #
@@ -32,7 +32,7 @@ ESMF_PREC = 32
 ifeq ($(ESMF_MPI),lam)
 # with lam-mpi installed in /usr/local:
 MPI_HOME       = 
-MPI_LIB        = -lmpi -llam
+MPI_LIB        = -lmpi -llam 
 MPI_INCLUDE    = 
 MPIRUN         =  mpirun
 endif
@@ -54,6 +54,14 @@ MPI_INCLUDE    = -I${MPI_HOME}
 MPIRUN         =  ${MPI_HOME}/mpirun
 endif
 
+ifeq ($(ESMF_VTK),1)
+MPI_LIB += -L/usr/local/lib/vtk -L/usr/X11R6/lib -lvtkRendering -lvtkIO \
+           -lvtkGraphics -lvtkImaging -lSM -lICE \
+           -lX11 -lXext -framework Carbon -lvtkftgl \
+           -framework AGL -framework OpenGL -lvtkfreetype \
+           -lXt -lvtkFiltering -lvtkCommon -framework AppKit -lpthread -lm -lvtkpng \
+           -lvtktiff -lvtkzlib -lvtkjpeg -lvtkexpat 
+endif
 
 # MP_LIB is for openMP
 #MP_LIB          = 
@@ -117,10 +125,13 @@ CXX_CCV		   = ${CXX_CC} --version
 #CXX_SYS_LIB	   = -ldl -lc -lf2c -lm
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 #CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
-C_F90CXXLD         = f95 
-C_F90CXXLIBS       = ${MPI_LIB} -lstdc++
-C_CXXF90LD         = f95
-C_CXXF90LIBS       = ${MPI_LIB}  
+#C_F90CXXLD         = f95 
+C_F90CXXLD         = g++
+C_F90CXXLIBS       = ${MPI_LIB} -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math
+#C_CXXF90LD         = f95
+C_CXXF90LD         = g++
+#C_CXXF90LIBS       = ${MPI_LIB}  
+C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
