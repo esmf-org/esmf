@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.9 2003/04/09 23:48:42 flanigan Exp $ 
+# $Id: base_variables,v 1.10 2003/04/10 22:44:17 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -67,7 +67,7 @@ SL_SUFFIX   = so
 SL_LIBOPTS  = -shared
 #SL_LINKOPTS = -rpath $(ESMF_LIBDIR)
 SL_LINKOPTS = 
-SL_F_LINKER = $(F90CXXLD)
+SL_F_LINKER = $(F90CXXLD) -rpath $(ESMF_LIBDIR)
 SL_C_LINKER = $(CXXF90LD)
 
 include $(ESMF_BUILD_DIR)/common_variables
