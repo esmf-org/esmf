@@ -1,4 +1,4 @@
-// $Id: ESMC_Component.h,v 1.3 2003/01/09 19:51:13 nscollins Exp $
+// $Id: ESMC_Component.h,v 1.4 2003/01/09 23:18:49 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ enum ESMC_ModelType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE,
 
    private:
     char compname[ESMF_MAXSTR];
-    ESMC_Layout layout;
+    ESMC_Layout *layout;
     enum ESMC_CompType ctype;
     enum ESMC_ModelType mtype;
     char filepath[ESMF_MAXSTR];
