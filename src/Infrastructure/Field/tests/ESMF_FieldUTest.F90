@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.46 2004/04/09 19:53:59 eschwab Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.47 2004/04/15 17:16:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.46 2004/04/09 19:53:59 eschwab Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.47 2004/04/15 17:16:02 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -51,7 +51,8 @@
 
 !     !LOCAL VARIABLES:
       integer :: x, y, i, count
-      type(ESMF_DELayout) :: delayout
+      type(ESMF_newDELayout) :: delayout
+      type(ESMF_VM) :: vm
       type(ESMF_Grid) :: grid, grid2, grid3, grid4
       type(ESMF_Array) :: arr, arr2
       type(ESMF_ArraySpec) :: arrayspec
@@ -82,11 +83,12 @@
       print *, "Starting job"
 
       call ESMF_Initialize(rc=rc)
+      call ESMF_VMGetGlobal(vm, rc)
 
       !------------------------------------------------------------------------
       ! several calls to field need a valid grid.  these will be used in
       ! the grid create calls.
-      delayout = ESMF_DELayoutCreate(rc=rc)
+      delayout = ESMF_newDELayoutCreate(vm, rc=rc)
       minCoord(:) = (/ 0.0, 0.0 /)
 
       !------------------------------------------------------------------------
@@ -232,7 +234,7 @@
       !NEX_UTest
       ! Verifing that a Grid can be created
       grid =  ESMF_GridCreateLogRectUniform(2, (/ 10, 20 /), minCoord, &
-                                     name="landgrid", layout=delayout, rc=rc)
+                                     name="landgrid", delayout=delayout, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -279,7 +281,7 @@
       ! Verifing that recreating a created Grid is allowed.
       ! and create a valid grid which can be used below. 
       grid =  ESMF_GridCreateLogRectUniform(2, (/ 10, 20 /), minCoord, &
-                                     name="landgrid", layout=delayout, rc=rc)
+                                     name="landgrid", delayout=delayout, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Recreating a created Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -402,7 +404,7 @@
       ! Bug 705196 "Unable to query Grid name"
       gname="oceangrid"
       grid =  ESMF_GridCreateLogRectUniform(2, (/ 10, 20 /), minCoord, &
-                                     name=gname, layout=delayout, rc=rc)
+                                     name=gname, delayout=delayout, rc=rc)
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
