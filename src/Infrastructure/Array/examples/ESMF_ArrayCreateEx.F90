@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.4 2003/12/03 23:40:45 svasquez Exp $
+! $Id: ESMF_ArrayCreateEx.F90,v 1.5 2003/12/13 00:23:17 svasquez Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -23,15 +23,20 @@
     implicit none
 
 !   ! Local variables
-    integer :: nx, ny, arank, rc, finalrc 
+    integer :: nx, ny, arank, rc
     integer :: i, j, ni, nj
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array1, array2, array3
     real(selected_real_kind(6,45)), dimension(:,:), pointer :: realptr, realptr2
     integer(selected_int_kind(5)), dimension(:), pointer :: intptr, intptr2
+!\end{verbatim}
+!EOP
+
+    integer :: nx, ny, arank, rc, finalrc 
     finalrc = ESMF_SUCCESS
 
-    
+!BOP
+!\begin{verbatim}
 !-------------------------------------------------------------------------------
 !   ! Example 1:
 !   !  Create based on an existing, allocated F90 pointer. 
@@ -46,27 +51,39 @@
     print *, "intptr data = ", intptr
 
     array1 = ESMF_ArrayCreate(intptr, ESMF_DATA_REF, rc)
+!\end{verbatim}
+!EOP
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
 
+!BOP
+!\begin{verbatim}
     print *, "array 1 create returned"
 
     call ESMF_ArrayPrint(array1, "foo", rc)
+!\end{verbatim}
+!EOP
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
 
+!BOP
+!\begin{verbatim}
     print *, "array 1 print returned"
 
     call ESMF_ArrayGetData(array1, intptr2, ESMF_DATA_REF, rc)
+!\end{verbatim}
+!EOP
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
 
+!BOP
+!\begin{verbatim}
     print *, "array 1 getdata returned"
     print *, "intptr2 data = ", intptr2
 
@@ -91,37 +108,52 @@
     print *, "realptr data = ", realptr
 
     array2 = ESMF_ArrayCreate(realptr, ESMF_DATA_REF, rc)
+!\end{verbatim}
+!EOP
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
 
+!BOP
+!\begin{verbatim}
     print *, "array 2 create returned"
 
     call ESMF_ArrayPrint(array2, "foo", rc)
-
+!\end{verbatim}
+!EOP
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         print *, "FAILED"
     end if
 
+!BOP
+!\begin{verbatim}
     print *, "array 2 print returned"
 
     call ESMF_ArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
+!\end{verbatim}
+!EOP
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
 
+!BOP
+!\begin{verbatim}
     print *, "array 2 getdata returned"
     print *, "realptr2 data = ", realptr2
 
     call ESMF_ArrayDestroy(array2, rc)
+!\end{verbatim}
+!EOP
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
 
+!BOP
+!\begin{verbatim}
     print *, "array 2 destroy returned"
 
 
@@ -134,6 +166,8 @@
     !                                         nx, ny, rc)
 
 !   !   array2 = ESMF_ArrayCreate(arrayspec, ESMF_NO_DATA, rc)
+!\end{verbatim}
+!EOP
 
     if (finalrc.EQ.ESMF_SUCCESS) then
         print *, "PASS: ESMF_ArrayCreateEx.F90"
@@ -141,9 +175,9 @@
         print *, "FAIL: ESMF_ArrayCreateEx.F90"
     end if
 
-
-
+!BOP
+!\begin{verbatim}
      end program ESMF_ArrayCreateEx
-    
 !\end{verbatim}
+!EOP
     
