@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.25 2003/08/14 21:57:27 jwolfe Exp $
+// $Id: ESMC_XPacket.h,v 1.26 2003/08/22 21:58:29 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -74,6 +74,12 @@
     int ESMC_XPacketGet(int *nrank, int *noffset, int *ncontig_length, 
                         int *nstride, int *nrep_count);
     //int ESMC_XPacketSet(<value type>  value);
+
+ // get/set methods for internal data
+    int ESMC_XPacketSetOffset(int offset) { this->offset = offset;
+                                            return ESMF_SUCCESS; }
+
+    int ESMC_XPacketGetOffset(void) { return this->offset; }
 
  // miscellaneous fun stuff
     int ESMC_XPacketIntersect(ESMC_XPacket *xpacket1, 
