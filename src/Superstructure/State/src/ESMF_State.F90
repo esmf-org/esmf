@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.9 2004/01/28 20:31:35 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.10 2004/01/29 17:56:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -277,7 +277,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.9 2004/01/28 20:31:35 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.10 2004/01/29 17:56:07 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -3151,7 +3151,7 @@ end function
       exists = ESMF_StateTypeFindData(top%statep, fieldname, .true., &
                                                           dataitem, rc=status)
       if (.not. exists) then
-          print *, "ESMF_StateGetfield: no field named ", fieldname
+          print *, "ESMF_StateGetField: no field named ", fieldname
           if (present(rc)) rc = status
           return
       endif
