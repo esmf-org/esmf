@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.5 2003/03/26 01:07:22 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.6 2003/03/27 01:52:51 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.5 2003/03/26 01:07:22 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.6 2003/03/27 01:52:51 eschwab Exp $'
 
 !==============================================================================
 
@@ -149,8 +149,8 @@
 !     TMG3.1, TMG3.4.4
 !EOP
 
-!      call c_ESMC_ClockInit(clock, TimeStep, StartTime, StopTime, &
-!                            RefTime, rc)
+      call c_ESMC_ClockInit(clock, TimeStep, StartTime, StopTime, &
+                            RefTime, rc)
     
       end subroutine ESMF_ClockInit
 
