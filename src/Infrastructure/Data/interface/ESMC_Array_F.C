@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.14 2003/01/16 22:29:26 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.15 2003/01/23 20:23:39 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -82,6 +82,22 @@ extern "C" {
 
      void FTN(c_esmc_arraygetf90ptr)(ESMC_Array **ptr, struct c_F90ptr *p, int *status) {
           (*ptr)->ESMC_ArrayGetF90Ptr(p);
+          *status = ESMF_SUCCESS;
+     }
+
+     void FTN(c_esmc_arraysetdealloc)(ESMC_Array **ptr, int *status) {
+          (*ptr)->ESMC_ArraySetDealloc();
+          *status = ESMF_SUCCESS;
+     }
+
+     void FTN(c_esmc_arraysetnodealloc)(ESMC_Array **ptr, int *status) {
+          (*ptr)->ESMC_ArraySetNoDealloc();
+          *status = ESMF_SUCCESS;
+     }
+
+     void FTN(c_esmc_arrayneedsdealloc)(ESMC_Array **ptr, int flag, int *status) {
+      
+          flag = (*ptr)->ESMC_ArrayNeedsDealloc();
           *status = ESMF_SUCCESS;
      }
 
