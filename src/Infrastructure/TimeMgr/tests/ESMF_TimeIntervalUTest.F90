@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.36 2004/11/18 23:04:46 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.37 2004/11/19 00:29:24 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.36 2004/11/18 23:04:46 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.37 2004/11/19 00:29:24 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -2438,6 +2438,16 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Multiply rational fraction Time Interval by an integer Test 2"
+      write(failMsg, *) " Did not return 3/4 seconds and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeInterval1, sN=1, sD=8, rc=rc)
+      timeInterval2 = timeInterval1 * 6
+      call ESMF_TimeIntervalGet(timeInterval2, s=S, sN=sN, sD=sD, rc=rc)
+      call ESMF_Test((S.eq.0.and.sN.eq.3.and.sD.eq.4.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
 
       !EX_UTest
       ! Suggested by John Michalakes/WRF
@@ -2448,6 +2458,39 @@
       timeInterval3 = timeInterval1 + timeInterval2
       call ESMF_TimeIntervalGet(timeInterval3, s=S, sN=sN, sD=sD, rc=rc)
       call ESMF_Test((S.eq.6.and.sN.eq.1.and.sD.eq.21.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Suggested by John Michalakes/WRF
+      write(name, *) "Sum of two fractional Time Intervals Test 4"
+      write(failMsg, *) " Did not return 1/3 second and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeInterval1, sN=1, sD=6, rc=rc)
+      call ESMF_TimeIntervalSet(timeInterval2, sN=1, sD=6, rc=rc)
+      timeInterval3 = timeInterval1 + timeInterval2
+      call ESMF_TimeIntervalGet(timeInterval3, s=S, sN=sN, sD=sD, rc=rc)
+      call ESMF_Test((S.eq.0.and.sN.eq.1.and.sD.eq.3.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(name, *) "Simplification of fractional Time Intervals Test 1"
+      write(failMsg, *) " Did not return -1/3 second and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeInterval1, s=2, sN=7, sD=-3, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s=S, sN=sN, sD=sD, rc=rc)
+      call ESMF_Test((S.eq.0.and.sN.eq.-1.and.sD.eq.3.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(name, *) "Simplification of fractional Time Intervals Test 2"
+      write(failMsg, *) " Did not return -1/7 second and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeInterval1, s=-3, sN=20, sD=7, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s=S, sN=sN, sD=sD, rc=rc)
+      call ESMF_Test((S.eq.0.and.sN.eq.-1.and.sD.eq.7.and.rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
