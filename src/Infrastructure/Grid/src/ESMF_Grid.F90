@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.3 2002/11/01 17:56:39 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.4 2002/11/03 19:54:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,10 +10,6 @@
 !
 ! ESMF Grid Module
 !
-! (all lines below between the !BOP and !EOP markers will be included in 
-!  the automated document processing.)
-!------------------------------------------------------------------------------
-
 !------------------------------------------------------------------------------
 ! put any constants or macros which apply to the whole component in this 
 !  include file.  anything public or esmf-wide should be up higher at
@@ -40,29 +36,29 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_Base    ! ESMF base class
+!      use ESMF_Base    ! ESMF base class
 !     use ESMF_XXXMod  < if needed >
       implicit none
 !
 ! !PRIVATE TYPES:
       private
 
-      type ESMF_GridConfig
-      private
-      sequence
+!      type ESMF_GridConfig
+!      private
+!      sequence
 !       < insert resource items here >
-      end type
+!      end type
 
       type ESMF_Grid
       private
       sequence
-        type (ESMF_Base) :: base
+!        type (ESMF_Base) :: base
         integer :: basestate
 !       < insert other class members here >
       end type
 
 ! !PUBLIC TYPES:
-      public ESMF_GridConfig
+!      public ESMF_GridConfig
       public ESMF_Grid
 
 
@@ -83,10 +79,10 @@
 ! the following routine applies to a shallow class
     public ESMF_GridInit                   ! (shallow class)
 
-    public ESMF_GridGetconfig
-    public ESMF_GridSetconfig
-    public ESMF_GridGet<Value>
-    public ESMF_GridSet<Value>
+    public ESMF_GridGetConfig
+    public ESMF_GridSetConfig
+    public ESMF_GridGet
+    public ESMF_GridSet
  
     public ESMF_GridValidate
     public ESMF_GridPrint
@@ -100,15 +96,9 @@
 !------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: ESMF_Grid.F90,v 1.3 2002/11/01 17:56:39 jwolfe Exp $
+      character(*), parameter, private :: &
+      version = '$Id: ESMF_Grid.F90,v 1.4 2002/11/03 19:54:56 cdeluca Exp $'
 !------------------------------------------------------------------------------
-
-! interface blocks for functions which are going to have a single
-! name for ease-of-use, but internally will be implemented as separate
-! subprograms.  the non-optional parts of the argument lists must be 
-! distinguishable for this to work.  the following example is appropriate
-! for deep classes; shallow objects will only have init routines and
-! no creates.
 !
 !BOP
 ! !IROUTINE: ESMF_GridCreate - Generic interface to create a new Grid object
@@ -118,8 +108,6 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridCreateNew
-         module procedure ESMF_GridCreateCopy
-         module procedure ESMF_GridCreateRemap
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -204,7 +192,7 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
@@ -234,7 +222,7 @@
 !      ESMF_GridConstruct.  Define for deep classes only.
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
@@ -261,7 +249,7 @@
 !      ESMF_GridDestruct.  Define for deep classes only.
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
@@ -291,7 +279,7 @@
 !      via interface blocks.
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
@@ -300,14 +288,14 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridGetConfig - get configuration information from a Grid
+! !IROUTINE: ESMF_GridGetConfig - Get configuration information from a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridGetConfig(grid, config, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_GridConfig), intent(out) :: config    ! resources
+      integer, intent(out) :: config    ! resources
       integer, intent(out), optional :: rc               ! return code
 
 !
@@ -315,7 +303,7 @@
 !     Returns the set of resources the Grid object was configured with.
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
@@ -331,7 +319,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_GridConfig), intent(in) :: config    ! resources
+      integer, intent(in) :: config    ! resources
       integer, intent(out), optional :: rc              ! return code
 
 !
@@ -339,7 +327,7 @@
 !     Configures the Grid object with set of resources given.
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
@@ -348,14 +336,14 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridGet<Value> - get <Value> for a Grid
+! !IROUTINE: ESMF_GridGet - get <Value> for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGet<Value>(grid, value, rc)
+      subroutine ESMF_GridGet(grid, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      <value type>, intent(out) :: value
+      integer, intent(out) :: value
       integer, intent(out), optional :: rc              ! return code
 
 !
@@ -364,49 +352,49 @@
 !     Can be multiple routines, one per value
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
 !
-      end subroutine ESMF_GridGet<Value>
+      end subroutine ESMF_GridGet
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridSet<Value> - set <Value> for a Grid
+! !IROUTINE: ESMF_GridSet - set <Value> for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridSet<Value>(grid, value, rc)
+      subroutine ESMF_GridSet(grid, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      <value type>, intent(in) :: value
-      integer, intent(out), optional :: rc              ! return code
+      integer, intent(in) :: value
+      integer, intent(out), optional :: rc        
 
 !
 ! !DESCRIPTION:
 !     Sets the Grid member <Value> with the given value.
-!     Can be multiple routines, one per value
+!     Can be multiple routines, one per value.
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
 !
-      end subroutine ESMF_GridSet<Value>
+      end subroutine ESMF_GridSet
 
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_GridValidate - internal consistency check for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridValidate(grid, options, rc)
+      subroutine ESMF_GridValidate(grid, opt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid        ! grid to be checked
-      character (len=*), intent(in) :: options         ! validate options
-      integer, intent(out), optional :: rc             ! return code
+      type(ESMF_Grid), intent(in) :: grid        
+      character (len=*), intent(in) :: opt   
+      integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
 !      Validates that a Grid is internally consistent.
@@ -419,12 +407,11 @@
 !
 !  code goes here
 !
-      end function ESMF_GridValidate
-
+      end subroutine ESMF_GridValidate
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridPrint - print contents of a Grid
+! !IROUTINE: ESMF_GridPrint - Print contents of a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridPrint(grid, options, rc)
