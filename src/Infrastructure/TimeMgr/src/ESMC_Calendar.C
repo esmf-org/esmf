@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.23 2003/05/01 00:31:27 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.24 2003/05/01 06:21:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.23 2003/05/01 00:31:27 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.24 2003/05/01 06:21:45 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -221,7 +221,7 @@
 //     CACM, volume 11, number 10, October 1968, p. 657.  Julian day refers
 //     to the number of days since a reference day.  For the algorithm used,
 //     this reference day is November 24, -4713 in the Gregorian calendar.
-//     This algorithm is valid from 3/1/-4900 forward and takes into
+//     This algorithm is valid from 3/1/-4800 forward and takes into
 //     account leap years.  However, it does not take into account the
 //     Gregorian Reformation where 10 days were eliminated from the calendar
 //     in September 1752.
@@ -237,11 +237,11 @@
             //
             // Validate inputs 
             //
-            if (YR < -4900 || MM < 1 || MM > 12 || DD < 1) {
+            if (YR < -4800 || MM < 1 || MM > 12 || DD < 1) {
               return (ESMF_FAILURE);
             }
-            // invalid before 3/1/-4900
-            if (YR == -4900 && MM < 3) {
+            // invalid before 3/1/-4800
+            if (YR == -4800 && MM < 3) {
               return (ESMF_FAILURE);
             }
 
