@@ -1,6 +1,6 @@
 #!/bin/csh -f
 #
-# $Id: do_newdoc,v 1.4 2002/02/26 16:09:21 cnh Exp $
+# $Id: do_newdoc,v 1.5 2002/07/25 17:26:18 eschwab Exp $
 #
 #===============================================================================
 # do_newdoc
@@ -84,10 +84,15 @@ endif
       if(!(-r $newdir/$1_req.tex)) cp $DOCT_DIR/comp_req.tex $newdir/$1_req.tex
       if(!(-r $newdir/$1_arch.tex)) cp $DOCT_DIR/comp_arch.tex $newdir/$1_arch.tex
       if(!(-r $newdir/class_desc.tex)) cp $DOCT_DIR/class_desc.tex $newdir
+      if(!(-r $newdir/class_design.tex)) cp $DOCT_DIR/class_design.tex $newdir
+      if(!(-r $newdir/class_def.tex)) cp $DOCT_DIR/class_def.tex $newdir
       if(!(-r $newdir/class_rest.tex)) cp $DOCT_DIR/class_rest.tex $newdir
       if(!(-r $newdir/class_fparam.tex)) cp $DOCT_DIR/class_fparam.tex $newdir
       if(!(-r $newdir/class_fex.tex)) cp $DOCT_DIR/class_fex.tex $newdir      
       if(!(-r $newdir/prologue.F)) cp $DOCT_DIR/prologue.F $newdir      
+      if(!(-r $newdir/class_ccparam.tex)) cp $DOCT_DIR/class_ccparam.tex $newdir
+      if(!(-r $newdir/class_ccex.tex)) cp $DOCT_DIR/class_ccex.tex $newdir      
+      if(!(-r $newdir/prologue.cc)) cp $DOCT_DIR/prologue.cc $newdir      
       if(!(-r $newdir/$1_glos.tex)) cp $DOCT_DIR/comp_glos.tex $newdir/$1_glos.tex
       if(!(-r $newdir/$1.bib)) cp $DOCT_DIR/comp.bib $newdir/$1.bib
       breaksw
