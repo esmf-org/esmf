@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62502.F90,v 1.11 2003/04/22 19:22:28 eschwab Exp $
+! $Id: ESMF_SysTest62502.F90,v 1.12 2003/04/22 19:45:52 eschwab Exp $
 !
 ! System test code #62502
 
@@ -39,7 +39,7 @@
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
-    integer(ESMF_IKIND_I8) :: YR, advanceCount
+    integer(ESMF_IKIND_I8) :: advanceCount
 
         
 !-------------------------------------------------------------------------
@@ -119,14 +119,12 @@
       call ESMF_TimeIntervalInit(timeStep, H=4, rc=rc)
 
       ! initialize start time to 3/28/2003
-      YR = 2003
-      call ESMF_TimeInit(startTime, YR=YR, MM=3, DD=28, &
-                         cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeInit(startTime, YR=int(2003,kind=ESMF_IKIND_I8), &
+                         MM=3, DD=28, cal=gregorianCalendar, rc=rc)
 
       ! initialize stop time to 3/29/2003
-      YR = 2003
-      call ESMF_TimeInit(stopTime, YR=YR, MM=3, DD=29, &
-                         cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeInit(stopTime, YR=int(2003,kind=ESMF_IKIND_I8), &
+                         MM=3, DD=29, cal=gregorianCalendar, rc=rc)
 
       ! initialize the clock with the above values
       call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
