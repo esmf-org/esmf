@@ -1,0 +1,133 @@
+% $Id: ArrayRedist_refdoc.ctex,v 1.1 2004/05/17 22:30:43 jwolfe Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the GPL.
+
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage{alltt}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{<Title>}
+\newcommand{\myauthors}{<Authors>}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../../scripts/doc_templates/templates/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+#endif
+
+\section{Redist Method}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{ArrayRedist_desc}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/ArrayComm/doc/ArrayRedist_desc}
+#endif
+
+%\subsection{Use and Examples}
+%#ifdef STANDALONE
+%\input{ArrayRedist_usage}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/ArrayComm/doc/ArrayRedist_usage}
+%#endif
+
+%\subsection{Restrictions and Future Work}
+%#ifdef STANDALONE
+%\input{ArrayRedist_rest}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/ArrayComm/doc/ArrayRedist_rest}
+%#endif
+
+%\subsection{Design and Implementation Notes}
+%#ifdef STANDALONE
+%\input{ArrayRedist_implnotes}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/ArrayComm/doc/ArrayRedist_implnotes}
+%#endif
+
+%\subsection{Object Model}
+%#ifdef STANDALONE
+%\input{ArrayRedist_obj}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/ArrayComm/doc/ArrayRedist_obj}
+%#endif
+
+%\subsection{Class API: Basic Array Methods}
+%#ifdef STANDALONE
+%\input{../../Array/doc/ESMF_ArrayRedist_fapi}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Array/doc/ESMF_ArrayRedist_fapi}
+%#endif
+
+%\subsection{Class API: Array Communications}
+%#ifdef STANDALONE
+%\input{ESMF_ArrayComm_fapi}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/ArrayComm/doc/ESMF_ArrayComm_fapi}
+%#endif
+
+#ifdef STANDALONE
+%\section{Glossary}
+%\input{Data_glos}
+
+%\section{Bibliography}
+%\bibliography{Data} 
+%\bibliographystyle{plain}
+%\addcontentsline{toc}{section}{Bibliography}
+
+\newpage
+\setcounter{section}{1}
+\renewcommand{\thesection}{\Alph{section}}
+\renewcommand{\thesubsection}{\thesection\arabic{subsection}}
+
+%\input{}
+
+\newpage
+\setcounter{section}{2}
+\renewcommand{\thesection}{\Alph{section}}
+\renewcommand{\thesubsection}{\thesection\arabic{subsection}}
+
+\subsection{Public Classes}
+
+
+%
+% No FORTRAN interface
+%
+#ifdef STANDALONE
+%\input{}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/ArrayComm/doc/}
+#endif
+
+
+#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif
