@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.15 2004/03/20 03:55:04 cdeluca Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.16 2004/03/23 17:59:06 jwolfe Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -37,7 +37,7 @@
     integer :: status
     real(ESMF_KIND_R8) :: min(2), max(2)
     integer(ESMF_KIND_I4), dimension(:), pointer :: idata, ldata, rowdata
-    type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
+    type(ESMF_AxisIndex), dimension(2) :: index
     character(len=ESMF_MAXSTR) :: cname, gname, fname
     type(ESMF_DELayout) :: layout1 
     type(ESMF_Grid) :: grid1
