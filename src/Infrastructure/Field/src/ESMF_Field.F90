@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.28 2003/06/19 15:13:35 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.29 2003/06/19 15:47:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -213,7 +213,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.28 2003/06/19 15:13:35 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.29 2003/06/19 15:47:26 nscollins Exp $'
 
 !==============================================================================
 !
@@ -714,7 +714,7 @@
       ! Call field construction method
       call ESMF_FieldConstructNoArray(ftype, grid, relloc, datamap, &
                                                  name, iospec, status)
-      if(status .NE. 0) then 
+      if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldCreateNoArray: Construct"
         return
       endif 
@@ -784,7 +784,7 @@
 
       ! Call field construction method
       call ESMF_FieldConstructNoGridArray(ftype, name, iospec, status)
-      if(status .NE. 0) then 
+      if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldCreateNoGridArray: Construct"
         return
       endif 
@@ -991,7 +991,7 @@
 
       call ESMF_FieldConstructNoArray(ftype, grid, relloc, datamap, & 
                                       name, iospec, status)
-      if(status .NE. ESMF_SUCCESS) then 
+      if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldConstructNew: Field construct NoA"
         return
       endif 
@@ -1085,13 +1085,13 @@
 
       call ESMF_FieldConstructNoArray(ftype, grid, relloc, datamap, & 
                                       name, iospec, status)
-      if(status .NE. ESMF_SUCCESS) then 
+      if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldConstructNew: Field construct NoA 2"
         return
       endif 
 
       ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJ, relloc, status)
-      if(status .NE. ESMF_SUCCESS) then 
+      if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldConstructNew: datamap create"
         return
       endif 
@@ -1168,7 +1168,7 @@
  
       ! Construct a default name if one is not given
       call ESMF_SetName(ftype%base, name, "Fields", status)
-      if(status .NE. 0) then 
+      if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldConstructNoBuffer: SetName"
         return
       endif 
@@ -1263,7 +1263,7 @@
 
       ! Construct a default name if one is not given
       call ESMF_SetName(ftype%base, name, "Fields", status)
-      if(status .NE. 0) then 
+      if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldConstructNoArray: SetName"
         return
       endif 
@@ -1322,7 +1322,7 @@
 
       ! Construct a default name if one is not given
       call ESMF_SetName(ftypep%base, name, "Fields", status)
-      if(status .NE. 0) then 
+      if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldConstructNoGridArray: SetName"
         return
       endif 
@@ -1566,7 +1566,7 @@
       endif
 
       call ESMF_GetName(field%ftypep%base, name, status)
-      if(status .NE. 0) then 
+      if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldGetName"
         return
       endif 
@@ -1620,7 +1620,7 @@
       endif
 
       !call ESMF_GetIntegerAttribute(field%ftypep%base, name, value, status)
-      !if(status .NE. 0) then 
+      !if(status .ne. ESMF_SUCCESS) then 
       !  print *, "ERROR in ESMF_FieldGetAttribute"
       !  return
       !endif 
@@ -2831,7 +2831,7 @@
       endif
 
       !call ESMF_SetIntegerAttribute(field%ftypep%base, name, value, status)
-      !if(status .NE. 0) then 
+      !if(status .ne. ESMF_SUCCESS) then 
       !  print *, "ERROR in ESMF_FieldSetAttribute"
       !  return
       !endif 
@@ -2879,7 +2879,6 @@
       endif 
 
       if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-      !if (ESMF_sfne(field%ftypep%fieldstatus, ESMF_STATE_READY)) then
           print *, "Uninitialized or Destroyed Field"
           return
       endif 
