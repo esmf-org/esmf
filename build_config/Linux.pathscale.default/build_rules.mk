@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.1 2005/02/03 17:51:44 nscollins Exp $
+#  $Id: build_rules.mk,v 1.2 2005/03/03 23:49:22 nscollins Exp $
 #
 #  Linux.pathscale.default makefile
 #
@@ -106,28 +106,35 @@ SH_LD		   = cc
 # C and Fortran compiler 
 #
 ifneq ($(ESMF_COMM),mpich)
-C_CC                = cc
-C_FC                = f95
-CXX_CC              = g++ -fPIC
-CXX_FC              = f95
-FFLAGS              = -YEXT_NAMES=LCS -s  -YEXT_SFX=_
+C_CC                = pathcc
+C_FC                = pathf90
+CXX_CC              = pathCC
+CXX_FC              = pathf90
+FFLAGS              = 
 endif
 
 ifeq ($(ESMF_COMM),mpich)
 C_CC               = mpicc
 C_FC               = mpif90 
-CXX_CC             = mpiCC -fPIC
+CXX_CC             = mpiCC 
 CXX_FC             = mpif90
-FFLAGS             = -YEXT_NAMES=LCS -s 
+FFLAGS             = 
 endif
 
-C_FC_MOD           = -p
+ifeq ($(ESMF_PREC),64)
+C_CC   += -default64
+CXX_CC += -default64
+C_FC   += -default64
+CXX_FC += -default64
+endif
+
+C_FC_MOD           = -I
 C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
 C_CLINKER	   = ${C_CC}
 C_FLINKER	   = ${C_FC}
-C_CCV		   = ${C_CC} --version
-C_FCV              = f90fe -V    # docs say f95 -V should work but causes error
+C_CCV		   = ${C_CC} -v
+C_FCV              = ${C_F} -v 
 C_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS	   = -g 
@@ -137,24 +144,24 @@ O_COPTFLAGS	   = -O
 O_FOPTFLAGS	   = -O
 # ########################## Fortran compiler ##############################
 #
-F_FREECPP       = -ffree
-F_FIXCPP        = -ffixed
-F_FREENOCPP     = -ffree
-F_FIXNOCPP      = -ffixed
+F_FREECPP       = -freeform -cpp
+F_FIXCPP        = -fixedform -cpp
+F_FREENOCPP     = -freeform
+F_FIXNOCPP      = -fixedform
 # ########################## C++ compiler ##################################
 #
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CLINKER	   = ${CXX_CC}
 CXX_FLINKER	   = ${CXX_CC}
-CXX_CCV		   = ${CXX_CC} --version
+CXX_CCV		   = ${CXX_CC} -v
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 C_F90CXXLD         = ${CXX_FC}
-CXXLIBBASE         = /usr/lib/gcc-lib/i386-redhat-linux/2.96
-C_F90CXXLIBS       = ${MPI_LIB} -L${CXXLIBBASE} -lf90math -lfio -lf77math -lrt -lstdc++
+CXXLIBBASE         = /usr/lib
+C_F90CXXLIBS       = ${MPI_LIB} -L${CXXLIBBASE}
 C_CXXF90LD         = ${CXX_CC} 
-F90LIBBASE         = /soft/com/packages/absoft-8.0/opt/absoft/lib
-C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -L${F90LIBBASE} -lf90math -lrt -lfio -lf77math
+F90LIBBASE         = /usr/lib
+C_CXXF90LIBS       = ${MPI_LIB} -L${F90LIBBASE}
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
