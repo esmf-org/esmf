@@ -1,5 +1,5 @@
 
-#include "ESMC.h"
+#include "ESMF.h"
 #include "ESMF_LogErr.inc"
 
 program test_log
