@@ -1,0 +1,349 @@
+
+This glossary defines terms used in Earth system modeling to describe 
+parallel computer architectures, grids and grid decompositions, and 
+numerical and computational methods.  While some of the concepts in 
+the glossary may eventually appear as computational objects, many 
+will not.  The goal here is not to define a framework design or an 
+object model but simply to achieve a common language.
+
+\begin{description}
+
+\item[Accumulator] \label{glos:Accumulator} A facility for collecting and 
+  averaging data values.  Generally accumulators are associated with 
+  temporal averaging, although they might be associated with 
+  other weighted averaging operations.    
+  
+\item[Address space] \label{glos:ASP}A standard term to refer to the memory
+  seen by a computer program that it can write to directly using
+  simple language primitives. 
+
+\item[Alarm] \label{glos:Alarm} An event 
+  that occurs at a particular time (or set of times).  It is like an
+   alarm on a real alarm clock except that in order to determine whether 
+it is "ringing", an alarm is "read" by an explicit application action.
+
+\item[Application] \label{glos:Application} A coherent computational 
+  entity run 
+  as a single executable or set of communicating executables.  It 
+  typically consists of a set of interacting components.
+
+\item[Background grid] \label{glos:BackGrid} 
+  A background grid associates each point in a location stream with a 
+  in a grid. A single grid cell may contain zero or more location 
+  stream points.  
+
+\item[Bundle] \label{glos:Bundle} A bundle refers to a set of fields that 
+  are associated with the same physical grid and distributed in a similar 
+  fashion across the same physical axes.  Fields within a bundle may be
+  staggered differently and may have different dimensions.
+
+\item[Calendar interval] \label{glos:CalInt} A period of time specified
+in calendar-based units that may be used to increment or decrement time instants.  
+One year and three months is an example of a calendar interval.  Since 
+mathematical operations involving calendar intervals may be ambiguously 
+defined -- for example, incrementing January 31 in the Gregorian calendar by 
+one month -- default behavior must be carefully specified.  
+
+\item[Cell] \label{glos:Cell} A physical location that is specified by both 
+  its extent (vertices) and nominal central location, and is associated with 
+  a single integer index value.  
+
+\item[Clock] \label{glos:Clock} A clock tracks the passage of time and 
+reports the current time instant, like a real clock.  However, most clocks 
+used in ESMF components have a key difference to a real clock. Clocks 
+in an ESMF component are generally stepped forward by the component, as an 
+explicitly coded step within the overall component.
+
+\item[Component] \label{glos:Component} A large-scale computational entity 
+  associated with a particular physical process or computational function, 
+  such as a land model.  Components may be generic or user-supplied.  
+  See also gridded component, coupler component.
+
+\item[Compute resource] \label{glos:CompResource} Something that appears as a
+  physical or virtual computer resource. Example of compute resources
+  are a CPU, a network connection, a communication API, a protocol, a 
+  particular network fabric or a piece of computer memory. 
+
+\item[Coupler component] \label{glos:Coupler}
+  A component that includes all data and actions needed to enable 
+  communication between two or more other components.
+
+\item[Data dependency] \label{glos:DataDep} The property of a computational
+  operator that defines the data indices required to perform
+  the computation at a point.  For instance, a forward differencing
+  operation in X at $(i,j)$ has a dependency on $(i+1,j)$.
+
+\item[Data transpose] \label{glos:DataTranspose} Rearrangement of data arrays 
+  between two distributed grids sharing the same global domain.
+
+\item[Day of year] \label{glos:DayOfYear} The day number in the calendar year. 
+January 1 is day 1 of the year. Day of year expressed in a floating point 
+format is used to express the day number plus the time of day. 
+For example, assuming a Gregorian calendar:
+
+\begin{tabular}{ll}
+{\bf date}              & {\bf day of year} \\
+\hline 
+10 January 2000, 6Z     & 10.25 \\
+31 December 2000, 18Z   & 366.75 
+\end{tabular}
+
+\item[Distributed grid] \label{glos:DistGrid}
+  A distributed grid defines the decomposition of the global index space 
+  across the layout and methods on the indexed data.
+
+\item[Distribution] \label{glos:Distribution} The function that expresses
+the relationship between the indices in a distributed grid and the elements 
+in a layout.  
+
+\item[Domain decomposition] \label{glos:DomainDecomp} The act of grid 
+  distribution: creating a layout; and associating gridpoints with the layout. 
+  The dimensionality of the domain decomposition is the dimensionality of 
+  the associated layout.
+
+\item [Exact] \label{glos:Exact} The word exact is used
+to denote entities, such as time instants and time intervals, for which truncation-free arithmetic is required. 
+
+\item[Exchange grid] \label{glos:ExchangeGrid} A grid whose vertices are
+formed by the intersection of the vertices of two overlying grids.  Each 
+cell in the exchange grid overlies exactly one cell in each grid of the 
+exhange.
+
+\item[Exchange packets] \label{glos:EP} The data exchanged by components.  
+  Exchange packets may or may not contain contiguous data, and may contain 
+  both field and other forms of data.
+
+\item[Exclusive domain] \label{glos:ExcDomain} The set of indices whose 
+  data is exclusively and definitively updated by a particular PE.
+
+\item[Executable] \label{glos:Exec} 
+  A parallel program that is under independent control by the operating 
+  system.
+
+\item[Export state] \label{glos:ExportState} The data and 
+  metadata that a component can make available for exchange 
+  with other components. This may be data at a physical boundary 
+  (e.g land-atmosphere interface) or in other cases, it might be the 
+  entire model state.  See state, import state.
+
+\item[Field] \label{glos:Field} A field is a physical quantity
+  defined within a region of space.  A field includes a grid 
+  and any metadata necessary for a full description of the field data.
+
+\item[Generic transform] \label{glos:GenericTrans} A generic transform 
+  is a operation supplied by the framework, for example, a method 
+  that converts gridded data from one supported physical grid and/or 
+  decomposition to another using a specified technique.  
+
+\item[Global physical grid] \label{glos:GlobPhysGrid} 
+  A global physical grid contains physical information about the entire, 
+  undecomposed domain.  No distributed grid need be associated with a global 
+  physical grid.  
+
+\item[Global domain] \label{glos:GlobDomain}
+  The global range of indices of data points.
+
+\item[Global reduction] \label{glos:GlobReduction} 
+  Reduction operations (sum, max, min, etc.) on
+  data defined on a distributed grid.  See global broadcast.
+
+\item[Global broadcast] \label{glos:GlobBroadcast}
+  Scatter operations on data defined on a distributed grid.
+  See global reduction.
+
+\item[Grid] \label{glos:Grid} The discrete division of space associated with
+  a particular coordinate system.  A grid contains all physical grid and memory 
+  organization information (via distributed grid and layout) required to manipulate 
+  fields, as well as to create and execute grid transforms. 
+
+\item[Grid metrics] \label{glos:GridMetrics} Terms relating measurements 
+  in index space to physical gris quantities like distances and areas.
+
+\item[Grid staggering] \label{glos:GridStagger} 
+  A descriptor of relative locations
+  of scalar and vector data on a structured grid. On different
+  staggered grids, vector data may lie at cell faces or vertices,
+  while scalar data may lie in the interior. The staggered locations
+  are often written in a notation like $(i+\frac12,j+\frac12)$ to
+  describe the offset of a corner with respect to the cell $(i,j)$.
+
+\item[Grid topology] \label{glos:GridTopo} Description of data 
+  connectivities in index space.
+
+\item[Grid union] \label{glos:GridUnion} The formation of a new grid
+  by taking the union of the vertices of two input grids. 
+
+\item[Gridded component] \label{glos:GridComp}
+  A component that is associated with one or more grids.  No requirements 
+  may be placed on the physical content of a gridded component's data or 
+  on the nature of its computations. 
+
+\item[Halo] \label{glos:Halo} 
+  The points in the data domain outside the local domain. 
+
+\item[Halo update] \label{glos:HaloUpdate}
+  Halo points are associated with other PEs'
+  local domains, and the halo update operation involves
+  synchronization of some or all halo points with other PEs. 
+
+\item[Import state] \label{glos:ImportState} The data and metadata 
+  that a component requires from other components in order to run.  
+
+\item[Index] \label{glos:Index} An integer value associated with a set
+  of coordinates that describe a cell or location in physical space.
+
+\item[Index space] \label{glos:IndexSpace} The space implied 
+  by a set of indices.  An index space has a defined dimensionality and 
+  connectivity.
+
+\item[Index space location] \label{glos:IndexSpaceloc} 
+  A location within index space.  A index space location may be fractional.
+  See physical location.
+
+\item[Layout] \label{glos:Layout} A layout specifies a PE list, 
+  decomposition strategy (thread and process), and the dimensionality 
+  and connectivity of the decomposition.  Multiple distributed 
+  grids may be defined per layout.
+
+\item[Local domain] \label{glos:LocalDomain} This includes the exclusive 
+  domain, as well as the points with whom the exclusive points have data 
+  dependencies.
+
+\item[Local physical grid] \label{glos:LocPhysGrid} The portion of a 
+  physical grid associated with a local domain.  
+
+\item[Location stream] \label{glos:LocStream} A list of
+  locations with no assumed relationship between these locations.  The
+  elements of a location stream are assumed to share the same data
+  items and metadata, though some elements may have blank entries for
+  particular data or attributes.
+
+\item[Logically rectangular grid] \label{glos:RecGrid} A grid in 
+  which sequential indices are physically adjacent, and in which the 
+  extent of each index is independent of the other indices.
+
+\item[Loose bundle] \label{glos:LooseBundle} A loose bundle consists of 
+  fields whose data is not contiguous in memory.
+
+\item[Mask] \label{glos:Mask} A field marking a span within a larger grid.
+
+\item[Memory domain] \label{glos:MemDomain} The portion of memory 
+  associated with an local domain.  The memory domain is always at least 
+  as large as the local domain.
+
+\item[MPMD] \label{glos:MPMD} Multiple Program Multiple Datastream.
+  Multiple executables, any of which could itself be an SPMD
+  executable, executing independently within an application.
+
+\item [No-leap calendar] \label{glos:NoLeap} Every year uses the same months 
+and days per month as in a non-leap year of a Gregorian calendar.
+
+\item[Packed bundle] \label{glos:PackedBundle} A packed bundle is arranged
+  so that field data is contiguous in memory.
+
+\item[Partition] \label{glos:Partition} In a multi-threaded application, the subset of a
+  computational domain that is associated with a logically independent
+  sequence of operations. The logical independence requirement is so
+  that partitions may be scheduled as separable concurrent tasks.
+
+\item[PE] \label{glos:PE} Short for processing element.
+
+\item[PE list] \label{glos:PElist} A list of processor IDs associated 
+  with a component.  See layout.
+
+\item[Physical grid] \label{term:PhysGrid} 
+  A physical grid contains a variety of information
+  on the location in physical space and physical metrics (area,
+  grid lengths, etc.) of various grid points.
+
+\item[Physical location] \label{glos:PhysLoc} The point in physical space 
+  to which data pertain. 
+
+\item[Platform] \label{glos:Platform} 
+  The processor hardware, operating system, compiler and
+  parallel library that together form a unique compilation target.
+
+\item[Restart state] \label{glos:RestartState} The component 
+  data that 
+  is needed for an exact restart. This can include, in addition to 
+  a physical state,  time information, static field data,
+  metadata and control information. 
+
+\item[Scheduler] \label{glos:Scheduler} An operating system component 
+  that assigns system
+  resources (processors, memory, CPU time, I/O channels, etc.) to
+  executables.
+
+\item[Span] \label{glos:Span} The physical extent associated with a grid.
+
+\item[SPMD] \label{glos:SPMD] Single Program Multiple Datastream. 
+  A single executable, possibly with many 
+  components (representing for example the atmosphere, the ocean, 
+  land surface) executing serially or concurrently.
+
+\item [System time] \label{SysTime}Time spent doing system tasks such as I/O or in system calls.  May also
+include time spent running other processes on a multiprocessor system.
+
+\item [Time instant] \label{glos:TimeInstant}
+Generic name for an absolute time and date specification. A time instant is made 
+up of a time and date and an associated calendar. It may include a time zone.
+``Jan 3rd 1999, 03:30:24.56s, UTC'' is one example of a time instant.
+
+\item [Time interval] \label{glos:TimeInterval} A time interval is the
+period between any two time instants, measured in units, such as days, 
+seconds, and fractions of a second, that are not associated with a specific
+calendar.  Time intervals may be negative.  The periods 2 days and 10 seconds, 
+86400 and 1/3 seconds and 31104000.75 seconds are all examples of time intervals.  
+Mathematical operations such as addition, multiplication and subdivision 
+can be applied to time intervals.
+
+\item [User time] \label{UserTime} Processor time actually spent executing a process's code.
+
+\item[User transform] \label{glos:UserTrans} A user-supplied 
+  method that is used to extend framework capabilities beyond generic 
+  transforms.
+
+\item [Wall clock time] \label{WallClockTime} Elapsed time (i.e. difference between start time minus
+stop time, measured in world time units).
+
+\end{description}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
