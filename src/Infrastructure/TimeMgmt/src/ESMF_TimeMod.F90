@@ -1,12 +1,11 @@
-! $Id: ESMF_TimeMod.F90,v 1.1 2002/12/11 16:22:44 nscollins Exp $
+! $Id: ESMF_TimeMod.F90,v 1.2 2002/12/11 21:50:13 nscollins Exp $
       module ESMF_TimeMod
 !===============================================================================
 !BOP
 ! !MODULE: ESMF_TimeMod
 ! !USES:
 !jw	use ESMF_BasicUtilMod
-! nsc - the return codes are in the following mod now
-        use ESMF_TimeMgmtMod
+#include "ESMF_Macros.inc"
 	use ESMF_TODMod
 !
 ! !PUBLIC TYPES:

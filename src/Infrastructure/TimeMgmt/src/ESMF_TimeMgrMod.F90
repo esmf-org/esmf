@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeMgrMod.F90,v 1.1 2002/12/11 16:22:42 nscollins Exp $
+! $Id: ESMF_TimeMgrMod.F90,v 1.2 2002/12/11 21:50:13 nscollins Exp $
       module ESMF_TimeMgrMod
 !===============================================================================
 !BOP
@@ -6,8 +6,7 @@
 !
 ! !USES:
 	use ESMF_DateMod
-! nsc - the return codes are in the following mod now.
-        use ESMF_TimeMgmtMod
+#include "ESMF_Macros.inc"
 !
 ! !PUBLIC TYPES:
       implicit none
