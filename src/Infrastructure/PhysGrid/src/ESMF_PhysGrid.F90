@@ -1,10 +1,10 @@
-! $Id: ESMF_PhysGrid.F90,v 1.8 2002/12/04 21:29:51 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.9 2002/12/09 16:57:02 jwolfe Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the GPL.
 !
@@ -15,61 +15,46 @@
 !
 !==============================================================================
 !
-! This file contains the PhysGrid class definition and all PhysGrid class 
+! This file contains the PhysGrid class definition and all PhysGrid class
 ! methods.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include <ESMF_PhysGrid.h>
-#include <ESMF_Macros.inc>
+#include "ESMF_PhysGrid.h"
+#include "ESMF_Macros.inc"
 !==============================================================================
 !BOP
-! !MODULE: ESMF_PhysGridMod - contains the physical space properties of a Grid
+! !MODULE: ESMF_PhysGridMod - Physical properties of Grid
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt PhysGrid} class, which provides a
-! discrete representation of a continuous physical space. It contains the
-! physical coordinates, sometimes as data values, but possibly as a parametric
-! description of the actual locations. The {\tt PhysGrid} class provides
-! methods for creating a variety of grid types, including both reading grid 
-! information and generating grids from parameters. It provides methods for
-! regridding, or translating one grid to another, used for example when 
-! exchanging data through the coupler. The {\tt PhysGrid} class interacts
-! closely with the {\tt DistGrid} class, which handles grid decomposition
-! issues related to distributed processing.
+! The code in this file implements the {\tt PhysGrid} class and is responsible
+! for computing or initializing physical properties of grids.   Such
+! properties include coordinate information necessary for describing grids,
+! metric information for grid distances, grid masks and assignment of
+! region identifiers to grids.
 !
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod    ! ESMF base class
-!     use ESMF_<XXX>Mod   ! any other dependencies
+      use ESMF_ArrayMod
       implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
       private
-!------------------------------------------------------------------------------
-!     ! ESMF_PhysGridConfig
-!
-!     ! Description of ESMF_PhysGridConfig
-
-      type ESMF_PhysGridConfig
-      sequence
-      private
-        integer :: dummy
-!       < insert other class members here >
-      end type
 
 !------------------------------------------------------------------------------
-!     !  ESMF_PhysGridSpec
+!     !  ESMF_PhysGridType
 !
-!     ! Definition for a PhysGridSpec class.
+!     !  Description of ESMF_PhysGrid.
 
-      type ESMF_PhysGridSpec
+      type ESMF_PhysGridType
       sequence
       private
 
-        type (ESMF_Base) :: base         ! base class object
+        type (ESMF_Base) :: base
+
         integer :: num_corners           ! number of corners for
                                          ! each grid cell
         integer :: num_faces             ! likely assume same as num_corners
@@ -85,43 +70,32 @@
         integer :: num_region_ids        ! a counter for the number of
                                          ! region identifiers for this
                                          ! subgrid
-        real, dimension(:), pointer :: center_x   ! x-coord of center of
-                                                  ! each cell
-        real, dimension(:), pointer :: center_y   ! y-coord of center of
-                                                  ! each cell
-        real, dimension(:,:), pointer :: corner_x ! x-coord of each corner
-                                                  ! of each cell
-        real, dimension(:,:), pointer :: corner_y ! y-coord of each corner
-                                                  ! of each cell
-        real, dimension(:,:), pointer :: face_x   ! x-coord of each face
-                                                  ! center of each cell
-        real, dimension(:,:), pointer :: face_y   ! y-coord of each face
-                                                  ! center of each cell
-        real, dimension(:,:), pointer :: metrics  ! an array of defined metrics
-                                                  ! for each cell
+        real :: global_min_coord1        ! coordinate extents in first coord
+        real :: global_max_coord1        !    direction
+        real :: global_min_coord2        ! coordinate extents in second coord
+        real :: global_max_coord2        !    direction
+        type (ESMF_Array) :: center_coord1   ! coord of center of
+                                             ! each cell in 1st direction
+        type (ESMF_Array) :: center_coord2   ! coord of center of
+                                             ! each cell in 2nd direction
+        type (ESMF_Array) :: corner_coord1   ! coord of corner of
+                                             ! each cell in 1st direction
+        type (ESMF_Array) :: corner_coord2   ! coord of corner of
+                                             ! each cell in 2nd direction
+        type (ESMF_Array) :: face_coord1     ! coord of face center of
+                                             ! each cell in 1st direction
+        type (ESMF_Array) :: face_coord2     ! coord of face center of
+                                             ! each cell in 2nd direction
+        type (ESMF_Array) :: metrics         ! an array of defined metrics
+                                             ! for each cell
         character (len=ESMF_MAXSTR), dimension(:), pointer :: metric_names
-        logical, dimension(:,:), pointer :: lmask ! an array of defined logical
-                                                  ! masks for each cell
-        real, dimension(:,:), pointer :: mmask    ! an array of defined
-                                                  ! multiplicative masks for
-                                                  ! each cell
-        integer, dimension(:,:), pointer :: region_id ! an array of defined
-                                                      ! region identifiers
-                                                      ! for each cell
+        type (ESMF_Array) :: lmask     ! an array of defined logical
+                                       ! masks for each cell
+        type (ESMF_Array) :: mmask     ! an array of defined
+                                       ! multiplicative masks for each cell
+        type (ESMF_Array) :: region_id ! an array of defined region identifiers
+                                       ! for each cell
 
-      end type
-
-!------------------------------------------------------------------------------
-!     !  ESMF_PhysGridType
-!
-!     !  Description of ESMF_PhysGrid. 
-
-      type ESMF_PhysGridType
-      sequence
-      private
-        type (ESMF_Base) :: base
-        integer :: dummy
-!       < insert other class members here >
       end type
 
 !------------------------------------------------------------------------------
@@ -137,40 +111,53 @@
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_PhysGridConfig
-      public ESMF_PhysGridSpec
-      public ESMF_PhysGrid
+   public ESMF_PhysGrid
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-!  Pick one or the other of the init/create sections depending on
-!  whether this is a deep class (the class/derived type has pointers to
-!  other memory which must be allocated/deallocated) or a shallow class
-!  (the class/derived type is self-contained) and needs no destroy methods
-!  other than deleting the memory for the object/derived type itself.
-
-! the following routines apply to deep classes only
-    public ESMF_PhysGridCreate                 ! interface only, deep class
-    public ESMF_PhysGridDestroy                ! interface only, deep class
-
-    public ESMF_PhysGridGetConfig
-    public ESMF_PhysGridSetConfig
-    public ESMF_PhysGridGetValue               ! Get<Value>
-    public ESMF_PhysGridSetValue               ! Set<Value>
+   public ESMF_PhysGridCreate
+   public ESMF_PhysGridDestroy
+!   public ESMF_PhysGridGetCoord
+!   public ESMF_PhysGridSetCoord
+!   public ESMF_PhysGridGetMetric
+!   public ESMF_PhysGridSetMetric
+!   public ESMF_PhysGridGetLMask
+!   public ESMF_PhysGridSetLMask
+!   public ESMF_PhysGridGetMMask
+!   public ESMF_PhysGridSetMMask
+!   public ESMF_PhysGridGetRegionID
+!   public ESMF_PhysGridSetRegionID
+   public ESMF_PhysGridValidate
+   public ESMF_PhysGridPrint
  
-    public ESMF_PhysGridValidate
-    public ESMF_PhysGridPrint
- 
-! < list the rest of the public interfaces here >
+!------------------------------------------------------------------------------
 !
-!
+! !PUBLIC DATA MEMBERS:
+
+   integer, parameter ::                     &! internally-recognized grid metrics
+      ESMF_GridMetric_Unknown          =  0, &! unknown or undefined metric
+      ESMF_GridMetric_Area             =  1, &! area of grid cell
+      ESMF_GridMetric_Volume           =  2, &! volume of 3-d grid cell
+      ESMF_GridMetric_NorthFaceLength  =  3, &! length of horiz grid cell along north face
+      ESMF_GridMetric_EastFaceLength   =  4, &! length of horiz grid cell along east  face
+      ESMF_GridMetric_WestFaceLength   =  5, &! length of horiz grid cell along west  face
+      ESMF_GridMetric_SouthFaceLength  =  6, &! length of horiz grid cell along south face
+      ESMF_GridMetric_NNbrDist         =  7, &! cell center to north nbr center dist
+      ESMF_GridMetric_ENbrDist         =  8, &! cell center to east  nbr center dist
+      ESMF_GridMetric_WNbrDist         =  9, &! cell center to west  nbr center dist
+      ESMF_GridMetric_SNbrDist         = 10, &! cell center to south nbr center dist
+      ESMF_GridMetric_NFaceDist        = 12, &! cell center to north face distance
+      ESMF_GridMetric_EFaceDist        = 13, &! cell center to east  face distance
+      ESMF_GridMetric_WFaceDist        = 14, &! cell center to west  face distance
+      ESMF_GridMetric_SFaceDist        = 15   ! cell center to south face distance
+
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.8 2002/12/04 21:29:51 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.9 2002/12/09 16:57:02 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -179,10 +166,18 @@
 !==============================================================================
 !BOP
 ! !INTERFACE:
-      interface ESMF_PhysGridCreate 
+      interface ESMF_PhysGridCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_PhysGridCreateNew
+!        module procedure ESMF_PhysGridCreateEmpty
+!        module procedure ESMF_PhysGridCreateInternal
+!        module procedure ESMF_PhysGridCreateStagger
+!        module procedure ESMF_PhysGridCreateRead
+!        module procedure ESMF_PhysGridCreateCopy
+!        module procedure ESMF_PhysGridCreateCutout
+!        module procedure ESMF_PhysGridCreateChangeResolution
+!        module procedure ESMF_PhysGridCreateExchange
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for PhysGrid create
@@ -190,6 +185,42 @@
 !
 !EOP
       end interface 
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_PhysGridSetCoord
+
+! !PRIVATE MEMBER FUNCTIONS:
+!        module procedure ESMF_PhysGridSetCoordFromArray
+!        module procedure ESMF_PhysGridSetCoordInternal
+!        module procedure ESMF_PhysGridSetCoordStagger
+!        module procedure ESMF_PhysGridSetCoordRead
+
+! !DESCRIPTION:
+!     This interface provides a single function for various methods of
+!     computing grid coordinates.
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_PhysGridSetMetric
+
+! !PRIVATE MEMBER FUNCTIONS:
+!        module procedure ESMF_PhysGridSetMetricFromArray
+!        module procedure ESMF_PhysGridSetMetricInternal
+!        module procedure ESMF_PhysGridSetMetricStagger
+!        module procedure ESMF_PhysGridSetMetricRead
+
+! !DESCRIPTION:
+!     This interface provides a single function for computing or initializing
+!     grid metric information.
+!
+!EOP
+      end interface
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -206,10 +237,6 @@
 !EOP
       end interface 
 !
-!------------------------------------------------------------------------------
-
-!    < add other interfaces here>
-
 !==============================================================================
 
       contains
