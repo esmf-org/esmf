@@ -16,11 +16,13 @@ if($arg =~ /np/){
 $env .= " BGLMPI_SIZE=$procs";
 my $exe = shift;
 my $dir = getcwd();
+
+$dir =~ s/auto\/export-bglsim/bgl/;
+
 #if($exe =~ /(.*\/)[^\/]+$/){
 #  $dir = $1;
 #}
 my $runcmd = "bglconsole <<EOF
-redirect $block on
 submitjob $block $exe $dir $env
 quit
 EOF";
