@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.20 2003/07/17 20:02:47 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.21 2003/08/22 21:35:33 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -61,17 +61,6 @@
       private
 
 !------------------------------------------------------------------------------
-!     ! ESMF_RegridConfig
-!
-!     ! Description of ESMF_RegridConfig
-
-      type ESMF_RegridConfig
-      sequence
-      private
-        integer :: dummy
-      end type
-
-!------------------------------------------------------------------------------
 !     !  ESMF_Regrid
 !
 !     !  The Regrid data structure that is passed between languages.
@@ -85,7 +74,6 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 !
-      public ESMF_RegridConfig
       public ESMF_Regrid
 
 !------------------------------------------------------------------------------
@@ -106,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.20 2003/07/17 20:02:47 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.21 2003/08/22 21:35:33 nscollins Exp $'
 
 !==============================================================================
 !
@@ -741,73 +729,6 @@
 
 !EOC
    end subroutine ESMF_RegridRunBundle
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_RegridGetConfig - Get configuration information from a Regrid
-
-! !INTERFACE:
-      subroutine ESMF_RegridGetConfig(regrid, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid
-      integer, intent(out) :: config
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Returns the set of resources the Regrid object was configured with.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[regrid]
-!          Class to be queried.
-!     \item[config]
-!          Configuration information.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-!
-!  code goes here
-!
-      end subroutine ESMF_RegridGetConfig
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_RegridSetConfig - Set configuration information for a Regrid
-
-! !INTERFACE:
-      subroutine ESMF_RegridSetConfig(regrid, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid
-      integer, intent(in) :: config
-      integer, intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!     Configures the Regrid object with set of resources given.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[regrid]
-!          Class to be configured.
-!     \item[config]
-!          Configuration information.
-!     \item[[rc]]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-!
-!  code goes here
-!
-      end subroutine ESMF_RegridSetConfig
 
 !------------------------------------------------------------------------------
 !BOP
