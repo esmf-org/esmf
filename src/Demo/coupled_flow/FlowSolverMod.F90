@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.1 2003/05/02 19:24:24 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.2 2003/05/02 20:53:48 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -98,7 +98,7 @@
 !
 ! Read in input file
 !
-      open(10, status="old", file="coupled_wave_input")
+      open(10, status="old", file="coupled_flow_input")
       read(10, input, end=20)
    20 continue
 !
@@ -532,12 +532,11 @@
               sie(i,j-1) = sie(i,j)
               v(i,j-1) = v(i,j)
               rho(i,j-1) = rho(i,j)
-            else
-              rhoi(i,j) = rho(i,j)*sie(i,j)
-              rhov(i,j) = rho(i,j)*v(i,j)
-              rhou(i,j) = 0.0
-              u(i,j) = 0.0
             endif
+            rhoi(i,j) = rho(i,j)*sie(i,j)
+            rhov(i,j) = rho(i,j)*v(i,j)
+            rhou(i,j) = 0.0
+            u(i,j) = 0.0
           endif
         enddo
       enddo
