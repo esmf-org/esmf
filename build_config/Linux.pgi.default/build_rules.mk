@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.16 2005/03/09 22:03:37 jwolfe Exp $
+# $Id: build_rules.mk,v 1.17 2005/03/11 23:20:19 jwolfe Exp $
 #
 #  Linux.pgi.default.mk
 #
@@ -152,7 +152,7 @@ endif
 # already set ESMF_C_COMPILER to gcc.  if you want to still compile with pgi
 # but link with the gcc libs anyway, set ESMF_C_LIBRARY to gcc before building.
 ifeq ($(ESMF_C_COMPILER),gcc)
-PGI_C_LIB_FLAG = 
+PGI_C_LIB_FLAG =
 PGI_C_LIB_NEEDED = -lstdc++
 else 
 ifeq ($(ESMF_C_LIBRARY),gcc)
@@ -160,7 +160,7 @@ PGI_C_LIB_FLAG = -cxxlib-gcc
 PGI_C_LIB_NEEDED = -lstdc++
 else
 PGI_C_LIB_FLAG =
-PGI_C_LIB_NEEDED =
+PGI_C_LIB_NEEDED = -lC
 endif
 endif
 
