@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.14 2004/06/18 08:01:59 nscollins Exp $
+! $Id: ESMF_Config.F90,v 1.14.2.1 2004/07/22 20:51:25 nscollins Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -437,7 +437,7 @@
       i = index_ ( config%buffer(1:config%nbuf), EOL//label ) + 1
       if ( i .eq. 1 ) then
          config%this_line = BLK // EOL
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, &
                                 "label not found", &
                                  ESMF_CONTEXT, rc)) return
          !iret = -2
@@ -523,6 +523,9 @@
       if(present( label )) then
          call ESMF_ConfigFindLabel( config, label, iret )
          if ( iret /= 0 ) then
+            if (present(default)) then
+               iret = ESMF_SUCCESS
+            end if
             if ( present (rc )) rc = iret
             return
          endif
@@ -626,6 +629,11 @@
       if ( iret .eq. 0 ) then
            read(string,*,iostat=iret) x
            if ( iret .ne. 0 ) iret = -2
+      else
+         if( present( default )) then
+            x = default
+            iret = ESMF_SUCCESS
+         endif
       end if
 
       if ( iret .eq. 0 ) then
@@ -702,6 +710,11 @@
       if ( iret .eq. 0 ) then
            read(string,*,iostat=iret) x
            if ( iret .ne. 0 ) iret = -2
+      else
+         if( present( default )) then
+            x = default
+            iret = ESMF_SUCCESS
+         endif
       end if
 
       if ( iret .eq. 0 ) then
@@ -782,20 +795,16 @@
       endif
 
 ! Processing
+      if (present( label )) then
+         call ESMF_ConfigFindLabel( config, label, rc = iret )
+      end if
+
       do i = 1, count
          
-         if (present( label )) then
-            if(present( default )) then
-               call ESMF_ConfigGetFloatR4( config, valueList(i), label, default, iret)
-            else
-               call ESMF_ConfigGetFloatR4( config, valueList(i), label, rc = iret)
-            endif
+         if(present( default )) then
+            call ESMF_ConfigGetFloatR4( config, valueList(i), default=default, rc=iret )
          else
-            if(present( default )) then
-               call ESMF_ConfigGetFloatR4( config, valueList(i), default=default, rc=iret )
-            else
-               call ESMF_ConfigGetFloatR4( config, valueList(i), rc = iret)
-            endif
+            call ESMF_ConfigGetFloatR4( config, valueList(i), rc = iret)
          endif
       enddo
 
@@ -870,20 +879,16 @@
       endif
 
 ! Processing
+      if (present( label )) then
+         call ESMF_ConfigFindLabel( config, label, rc = iret )
+      end if
+
       do i = 1, count
          
-         if (present( label )) then
-            if(present( default )) then
-               call ESMF_ConfigGetFloatR8( config, valueList(i), label, default, iret)
-            else
-               call ESMF_ConfigGetFloatR8( config, valueList(i), label, rc = iret)
-            endif
+         if(present( default )) then
+            call ESMF_ConfigGetFloatR8( config, valueList(i), default=default, rc=iret )
          else
-            if(present( default )) then
-               call ESMF_ConfigGetFloatR8( config, valueList(i), default=default, rc=iret )
-            else
-               call ESMF_ConfigGetFloatR8( config, valueList(i), rc = iret)
-            endif
+            call ESMF_ConfigGetFloatR8( config, valueList(i), rc = iret)
          endif
       enddo
 
@@ -960,6 +965,7 @@
       else
          if( present( default )) then
             n = default
+            iret = ESMF_SUCCESS
          else
             n = 0
          endif
@@ -1043,6 +1049,7 @@
       else
          if( present( default )) then
             n = default
+            iret = ESMF_SUCCESS
          else
             n = 0
          endif
@@ -1123,20 +1130,16 @@
       endif
 
 ! Processing 
+      if (present( label )) then
+         call ESMF_ConfigFindLabel( config, label, rc = iret )
+      end if
+
       do i = 1, count
          
-         if (present( label )) then
-            if(present( default )) then
-               call ESMF_ConfigGetIntI4( config, valueList(i), label, default, iret)
-            else
-               call ESMF_ConfigGetIntI4( config, valueList(i), label, rc = iret)
-            endif
+         if(present( default )) then
+            call ESMF_ConfigGetIntI4( config, valueList(i), default = default, rc = iret)
          else
-            if(present( default )) then
-               call ESMF_ConfigGetIntI4( config, valueList(i), default = default, rc = iret)
-            else
-               call ESMF_ConfigGetIntI4( config, valueList(i), rc = iret)
-            endif
+            call ESMF_ConfigGetIntI4( config, valueList(i), rc = iret)
          endif
       enddo
 
@@ -1211,20 +1214,16 @@
       endif
 
 ! Processing 
+      if (present( label )) then
+         call ESMF_ConfigFindLabel( config, label, rc = iret )
+      end if
+
       do i = 1, count
          
-         if (present( label )) then
-            if(present( default )) then
-               call ESMF_ConfigGetIntI8( config, valueList(i), label, default, iret)
-            else
-               call ESMF_ConfigGetIntI8( config, valueList(i), label, rc = iret)
-            endif
+         if(present( default )) then
+            call ESMF_ConfigGetIntI8( config, valueList(i), default = default, rc = iret)
          else
-            if(present( default )) then
-               call ESMF_ConfigGetIntI8( config, valueList(i), default = default, rc = iret)
-            else
-               call ESMF_ConfigGetIntI8( config, valueList(i), rc = iret)
-            endif
+            call ESMF_ConfigGetIntI8( config, valueList(i), rc = iret)
          endif
       enddo
 
@@ -1293,6 +1292,10 @@
 
       if ( iret .eq. 0 ) then
          value = string(1:1)
+      else
+         if( present( default )) then
+            iret = ESMF_SUCCESS
+         endif
       end if
 
       if (present( rc )) rc = iret
