@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.30 2004/10/27 00:19:58 nscollins Exp $
+! $Id: user_model2.F90,v 1.31 2005/02/26 00:05:18 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -199,8 +199,8 @@
   !    call ESMF_FieldPrint(humidity, "", rc=status)
     
       ! This is where the model specific computation goes.
-      call ESMF_FieldGetArray(humidity, array1, rc=status)
-      print *, "Imported Array in user model 2:"
+  !    call ESMF_FieldGetArray(humidity, array1, rc=status)
+  !    print *, "Imported Array in user model 2:"
   !    call ESMF_ArrayPrint(array1, "", rc)
 
       print *, "User Comp Run returning"
@@ -309,8 +309,8 @@
       print *, "rc from array get data = ", rc
       !if (associated(data)) print *, "pointer is associated"
       !if (.not.associated(data)) print *, "pointer is *NOT* associated"
-      call ESMF_ArrayPrint(array)
-      print *, "data in validate: ", data(1,1), data(1, 2), data(2, 1)
+      ! call ESMF_ArrayPrint(array)
+      !print *, "data in validate: ", data(1,1), data(1, 2), data(2, 1)
 
       ! allocate array for computed results and fill it
       allocate(calc(counts(1), counts(2)))
