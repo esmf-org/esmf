@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74559.F90,v 1.12 2003/06/07 00:47:52 eschwab Exp $
+! $Id: ESMF_SysTest74559.F90,v 1.13 2003/06/16 17:18:06 jwolfe Exp $
 !
 ! ESMF Coupled Flow Demo
 !
@@ -151,8 +151,9 @@
       call ESMF_TimeSet(startTime, YR=2003, MM=5, DD=12, H=9, &
                         cal=gregorianCalendar, rc=rc)
 
-      ! initialize stop time to 15May2003, 9:00 am
-      call ESMF_TimeSet(stopTime, YR=2003, MM=5, DD=15, H=9, &
+      ! initialize stop time to 12May2003, 3:00 pm -- shortened from 15May, 9:00 am
+      ! to keep runtime down
+      call ESMF_TimeSet(stopTime, YR=2003, MM=5, DD=12, H=15, &
                         cal=gregorianCalendar, rc=rc)
 
       ! initialize the clock with the above values
