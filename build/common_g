@@ -1,4 +1,4 @@
-# $Id: common_g,v 1.2 2002/01/14 19:48:25 dneckels Exp $ 
+# $Id: common_g,v 1.3 2002/01/15 22:13:38 dneckels Exp $ 
 
 CC	       = ${C_CC}
 CXX	       = ${CXX_CC}
@@ -8,6 +8,13 @@ FLINKER_SLFLAG = ${C_FLINKER_SLFLAG}
 CLINKER	       = ${C_CLINKER} ${COPTFLAGS} ${C_SH_LIB_PATH}
 FLINKER	       = ${C_FLINKER} ${FOPTFLAGS} ${F_SH_LIB_PATH}
 SYS_LIB	       = ${C_SYS_LIB}
+
+# C++ <=> F90 
+F90CXXLD       = ${C_F90CXXLD}
+F90CXXLIBS     = ${C_F90CXXLIBS}
+
+CXXF90LD       = ${C_CXXF90LD}
+CXXF90LIBS     = ${C_CXXF90LIBS}
 
 ALICEFLAGS     = ${G_ALICEFLAGS}
 COPTFLAGS      = ${G_COPTFLAGS}

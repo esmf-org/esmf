@@ -1,4 +1,4 @@
-# $Id: common_variables,v 1.7 2001/12/14 19:06:03 cdeluca Exp $ 
+# $Id: common_variables,v 1.8 2002/01/15 22:13:38 dneckels Exp $ 
 #
 # LDIR (defined from $ESMF_DIR) determines the libraries that are linked.
 # PDIR (defined from $ESMF_DIR) determines where the libraries are built.
@@ -37,7 +37,7 @@ PDIR	       = ${ESMF_BUILD}/lib/lib${BOPT}/${ESMF_ARCH}
 LIBNAME	       = ${PDIR}/${LIBBASE}.a
 SOURCE	       = ${SOURCEC} ${SOURCEF}
 OBJS	       = ${OBJSC} ${OBJSF}
-ESMC_INCLUDE     = -I${ESMF_DIR} -I${ESMF_DIR}/src/include -I/usr/local/include -I${ESMF_DIR}/build/${ESMF_ARCH} -I${ESMF_DIR}/include ${MPE_INCLUDE} ${AMS_INCLUDE} ${MPI_INCLUDE} ${MP_INCLUDE} ${PCL_INCLUDE}
+ESMC_INCLUDE     = -I${ESMF_DIR}/${LOCDIR} -I${ESMF_DIR} -I${ESMF_DIR}/src/include -I/usr/local/include -I${ESMF_DIR}/build/${ESMF_ARCH} -I${ESMF_DIR}/include ${MPE_INCLUDE} ${AMS_INCLUDE} ${MPI_INCLUDE} ${MP_INCLUDE} ${PCL_INCLUDE} -I${ESMF_DIR}/timing
 CCPPFLAGS      = ${ESMC_INCLUDE} ${PCONF} ${ALICEFLAGS} ${ESMC_PARCH} ${CPPFLAGS} \
 		 -D__SDIR__='"${LOCDIR}"'
 FCPPFLAGS      = ${ESMC_INCLUDE} ${PCONF} ${ALICEFLAGS} ${ESMC_PARCH} ${FPPFLAGS}

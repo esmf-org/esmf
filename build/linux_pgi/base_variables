@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: base_variables,v 1.2 2002/01/15 22:13:39 dneckels Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -32,8 +32,8 @@ O_COPTFLAGS	   = -O -Wall -Wshadow  -fomit-frame-pointer
 O_FOPTFLAGS	   = -O
 # ########################## C++ compiler ##################################
 #
-CXX_CC		   = pgCC -mp
-CXX_FC		   = pgf90 -mp
+CXX_CC		   = pgCC -mp -tlocal
+CXX_FC		   = pgf90 -mp -tlocal
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CLINKER	   = pgCC
@@ -42,6 +42,10 @@ CXX_CCV		   = ${CXX_CC} --version
 #CXX_SYS_LIB	   = -ldl -lc -lf2c -lm
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
 #CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
+C_F90CXXLD         = pgf90 -mp
+C_F90CXXLIBS       = -lpgc -lstd -lC
+C_CXXF90LD         = pgCC 
+C_CXXF90LIBS       = -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
