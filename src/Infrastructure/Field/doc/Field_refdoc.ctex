@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.18 2004/03/16 00:04:10 cdeluca Exp $
+% $Id: Field_refdoc.ctex,v 1.19 2004/03/16 00:12:01 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -68,14 +68,14 @@
 \input{../Infrastructure/Field/doc/Field_usage}
 #endif
 
-%\subsubsection{Restrictions}
+\subsubsection{Restrictions}
 #ifdef STANDALONE
 \input{Field_rest}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Field/doc/Field_rest}
 #endif
 
-%\subsubsection{Design and Implementation Notes}
+\subsubsection{Design and Implementation Notes}
 #ifdef STANDALONE
 \input{Field_implnotes}
 #elif defined(CONSTITUENT)
