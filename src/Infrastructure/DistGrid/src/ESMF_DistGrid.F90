@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.92 2004/02/05 18:45:17 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.93 2004/02/13 23:11:04 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -806,6 +806,8 @@
       enddo
 
       ! now repeat the process, accounting for boundary cells
+      glob => dgtype%globalTotal
+      me   => dgtype%myDETotal
       bnd = dgtype%gridBoundaryWidth
       globalCellCount = 1
       do i = 1,numDims
