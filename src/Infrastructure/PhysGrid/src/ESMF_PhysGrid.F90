@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.16 2003/01/10 18:31:21 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.17 2003/01/15 21:05:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,7 +55,9 @@
       private
 
         type (ESMF_Base) :: base
-
+        integer :: dim_num               ! number of dimensions
+        type (ESMF_Array) :: dim_name    ! dimension names
+        type (ESMF_Array) :: dim_units   ! dimension units
         integer :: num_corners           ! number of corners for
                                          ! each grid cell
         integer :: num_faces             ! likely assume same as num_corners
@@ -182,7 +184,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.16 2003/01/10 18:31:21 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.17 2003/01/15 21:05:03 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -504,7 +506,7 @@
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
 !     allocated {\tt PhysGrid} object.  May perform additional allocations
-!     as needed.  Must call the corresponding ESMF_PhysGridDestruct
+!     as needed.  Must call the corresponding ESMF\_PhysGridDestruct
 !     routine to free the additional memory.  Intended for internal
 !     ESMF use only; end-users use {\tt ESMF\_PhysGridCreate}, which calls
 !     {\tt ESMF\_PhysGridConstruct}. 
@@ -620,7 +622,7 @@
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
 !     allocated {\tt PhysGrid} object.  May perform additional allocations
-!     as needed.  Must call the corresponding ESMF_PhysGridDestruct
+!     as needed.  Must call the corresponding ESMF\_PhysGridDestruct
 !     routine to free the additional memory.  Intended for internal
 !     ESMF use only; end-users use {\tt ESMF\_PhysGridCreate}, which calls
 !     {\tt ESMF\_PhysGridConstruct}. 

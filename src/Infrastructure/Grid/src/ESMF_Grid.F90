@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.25 2003/01/14 20:41:30 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.26 2003/01/15 21:04:06 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -195,7 +195,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.25 2003/01/14 20:41:30 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.26 2003/01/15 21:04:06 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -216,7 +216,7 @@
          module procedure ESMF_GridCreateExchange
 
 ! !DESCRIPTION:
-!     This interface provides a single entry point for Grid create
+!     This interface provides a single entry point for {\tt Grid} create
 !     methods.
 !
 !EOP
@@ -264,6 +264,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridSetLMaskFromArray
          module procedure ESMF_GridSetLMaskFromBuffer
+         module procedure ESMF_GridSetLMaskFromMMask
          module procedure ESMF_GridSetLMaskCopy
 
 ! !DESCRIPTION:
@@ -281,6 +282,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridSetMMaskFromArray
          module procedure ESMF_GridSetMMaskFromBuffer
+         module procedure ESMF_GridSetMMaskFromLMask
          module procedure ESMF_GridSetMMaskCopy
 
 ! !DESCRIPTION:
@@ -451,37 +453,19 @@
 !     \item[[nDE\_j]]
 !          Number of DE's in 2nd dir.
 !     \item[[layout]]
-!         Layout of DE's.
+!          Layout of DE's.
 !     \item[[horz\_gridtype]]
-!          Integer specifier to denote horizontal gridtype:
-!             horz\_gridtype=1   equally-spaced lat/lon grid
-!             TODO:  fill out
+!          Integer specifier to denote horizontal gridtype.
 !     \item[[vert\_gridtype]]
-!          Integer specifier to denote vertical gridtype:
-!             vert\_gridtype=0   no vertical grid
-!             TODO:  fill out
+!          Integer specifier to denote vertical gridtype.
 !     \item[[horz\_stagger]]
-!          Integer specifier to denote horizontal grid stagger:
-!             horz\_stagger=1   Arakawa A (centered velocity)
-!             horz\_stagger=2   Arakawa B (velocities at grid corners)
-!             horz\_stagger=3   Arakawa C (velocities at cell faces)
-!             TODO:  fill out
+!          Integer specifier to denote horizontal grid stagger.
 !     \item[[vert\_stagger]]
-!          Integer specifier to denote vertical grid stagger:
-!             vert\_stagger=1   Arakawa A (centered velocity)
-!             vert\_stagger=2   Arakawa B (velocities at grid corners)
-!             vert\_stagger=3   Arakawa C (velocities at cell faces)
-!             TODO:  fill out
+!          Integer specifier to denote vertical grid stagger.
 !     \item[[horz\_coord\_system]]
-!          Integer specifier to denote horizontal coordinate system:
-!             horz\_coord\_system=1   spherical
-!             horz\_coord\_system=2   Cartesian
-!             horz\_coord\_system=3   cylindrical
+!          Integer specifier to denote horizontal coordinate system.
 !     \item[[vert\_coord\_system]]
-!          Integer specifier to denote vertical coordinate system:
-!             vert\_coord\_system=1   spherical
-!             vert\_coord\_system=2   Cartesian
-!             vert\_coord\_system=3   cylindrical
+!          Integer specifier to denote vertical coordinate system.
 !     \item[[x\_min]]
 !          Minimum physical coordinate in the x-direction.
 !     \item[[x\_max]]
@@ -1512,43 +1496,43 @@
 !     \item[grid]
 !          Class to be queried.
 !     \item[[MyDE]]
-!
+!          Identifier for this DE.
 !     \item[[MyDEx]]
-!
+!          Identifier for this DE's position in the 1st dir decomposition.
 !     \item[[MyDEy]]
-!
-!     \item[[DE_E]]
-!
-!     \item[[DE_W]]
-!
-!     \item[[DE_N]]
-!
-!     \item[[DE_S]]
-!
-!     \item[[DE_NE]]
-!
-!     \item[[DE_NW]]
-!
-!     \item[[DE_SE]]
-!
-!     \item[[DE_SW]]
-!
+!          Identifier for this DE's position in the 2nd dir decomposition.
+!     \item[[DE\_E]]
+!          Identifier for the DE to the east of this DE.
+!     \item[[DE\_W]]
+!          Identifier for the DE to the west of this DE.
+!     \item[[DE\_N]]
+!          Identifier for the DE to the north of this DE.
+!     \item[[DE\_S]]
+!          Identifier for the DE to the south of this DE.
+!     \item[[DE\_NE]]
+!          Identifier for the DE to the northeast of this DE.
+!     \item[[DE\_NW]]
+!          Identifier for the DE to the northwest of this DE.
+!     \item[[DE\_SE]]
+!          Identifier for the DE to the southeast of this DE.
+!     \item[[DE\_SW]]
+!          Identifier for the DE to the southwest of this DE.
 !     \item[[lsize]]
-!
+!          Local (on this DE) number of cells.
 !     \item[[gstart]]
-!
-!     \item[[n_dir1_start]]
-!
-!     \item[[n_dir1_end]]
-!
-!     \item[[n_dir1_size]]
-!
-!     \item[[n_dir2_start]]
-!
-!     \item[[n_dir2_end]]
-!
-!     \item[[n_dir2_size]]
-!
+!          Global index of starting count.
+!     \item[[n\_dir1\_start]]
+!          Starting index of this DE in 1st dir decomposition.
+!     \item[[n\_dir1\_end]]
+!          Ending index of this DE in 1st dir decomposition.
+!     \item[[n\_dir1\_size]]
+!          Size of the 1st dir decomposition on this DE.
+!     \item[[n\_dir2\_start]]
+!          Starting index of this DE in 2nd dir decomposition.
+!     \item[[n\_dir2\_end]]
+!          Ending index of this DE in 2nd dir decomposition.
+!     \item[[n\_dir2\_size]]
+!          Size of the 2nd dir decomposition on this DE.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2012,6 +1996,43 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_GridSetLMaskFromMMask - Set a logical mask in a Grid from an existing multiplicative mask
+
+! !INTERFACE:
+      subroutine ESMF_GridSetLMaskFromMMask(Grid, mmask, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in) :: mmask        ! TODO: name?
+      character (len=*), intent(in), optional :: name
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     This version of set assumes the logical mask data will be
+!     created from an existing multiplicative mask.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Pointer to a {\tt Grid} to be modified.
+!     \item[[mmask]]
+!          Multiplicative mask identifier.
+!     \item [[name]]
+!           {\tt LMask} name.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetLMaskFromMMask
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_GridSetLMaskCopy - Copies a logical mask from one grid to another.
 
 ! !INTERFACE:
@@ -2122,6 +2143,43 @@
 !  code goes here
 !
       end subroutine ESMF_GridSetMMaskFromBuffer
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridSetMMaskFromLMask - Set a multiplicative mask in a Grid from an existing logical mask
+
+! !INTERFACE:
+      subroutine ESMF_GridSetMMaskFromLMask(Grid, lmask, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in) :: lmask
+      character (len=*), intent(in), optional :: name
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     This version of set assumes the multiplicative mask data will be
+!     created from an existing logical mask.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Pointer to a {\tt Grid} to be modified.
+!     \item[lmask]
+!          Logical mask identifier.
+!     \item [[name]]
+!           {\tt MMask} name.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetMMaskFromLMask
 
 !------------------------------------------------------------------------------
 !BOP

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.21 2003/01/14 20:41:07 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.22 2003/01/15 21:04:34 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -97,8 +97,10 @@
       sequence
 !     private
         integer :: MyDE     ! identifier for this DE
-        integer :: MyDEx
-        integer :: MyDEy
+        integer :: MyDEx    ! identifier for this DE's position in the 1st dir
+                            ! decomposition
+        integer :: MyDEy    ! identifier for this DE's position in the 2nd dir
+                            ! decomposition
         integer :: DE_E     ! identifier for DE to the east
         integer :: DE_W     ! identifier for DE to the west
         integer :: DE_N     ! identifier for DE to the north
@@ -107,10 +109,10 @@
         integer :: DE_NW    ! identifier for DE to the northwest
         integer :: DE_SE    ! identifier for DE to the southeast
         integer :: DE_SW    ! identifier for DE to the southwest
-        integer :: lsize                  ! local (on this DE) number of cells
-        integer :: gstart                 ! global index of starting count
-                                          ! currently as the constant that
-                                          ! should be added to local index
+        integer :: lsize    ! local (on this DE) number of cells
+        integer :: gstart   ! global index of starting count
+                            ! currently as the constant that should be added
+                            ! to local index  TODO: really an array?
         type (ESMF_DecompAxis) :: n_dir1  ! local cell count in 1st dir, in
                                           ! global index
         type (ESMF_DecompAxis) :: n_dir2  ! local cell count in 2nd dir, in
@@ -197,7 +199,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.21 2003/01/14 20:41:07 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.22 2003/01/15 21:04:34 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -448,7 +450,7 @@
 !
 ! !DESCRIPTION:
 !     Destroys a {\tt DistGrid} object previously allocated
-!     via an {\tt ESMF_DistGridCreate routine}.
+!     via an {\tt ESMF\_DistGridCreate routine}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -490,7 +492,7 @@
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
 !     allocated {\tt DistGrid} object.  May perform additional allocations
-!     as needed.  Must call the corresponding ESMF_DistGridDestruct
+!     as needed.  Must call the corresponding ESMF\_DistGridDestruct
 !     routine to free the additional memory.  Intended for internal
 !     ESMF use only; end-users use {\tt ESMF\_DistGridCreate}, which calls
 !     {\tt ESMF\_DistGridConstruct}. 
@@ -602,7 +604,7 @@
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
 !     allocated {\tt DistGrid} object.  May perform additional allocations
-!     as needed.  Must call the corresponding ESMF_DistGridDestruct
+!     as needed.  Must call the corresponding ESMF\_DistGridDestruct
 !     routine to free the additional memory.  Intended for internal
 !     ESMF use only; end-users use {\tt ESMF\_DistGridCreate}, which calls
 !     {\tt ESMF\_DistGridConstruct}. 
@@ -699,8 +701,6 @@
       allocate(distgrid%end2(lDE_i*lDE_j), stat=status)
       allocate(distgrid%size2(lDE_i*lDE_j), stat=status)
       allocate(distgrid%gstart(lDE_i*lDE_j), stat=status)
-!     allocate(distgrid%global_dir1(lDE_i*lDE_j), stat=status)
-!     allocate(distgrid%global_dir2(lDE_i*lDE_j), stat=status)
 
 !jw   allocate(distgrid%DEids(lDE_i*lDE_j), stat=status)  TODO: use ESMF_ArrayCreate
 !jw   allocate(distgrid%DEx(lDE_i*lDE_j), stat=status)
@@ -1118,16 +1118,6 @@
 
 !     Retrieve extent counts for each axis from the de identifier
 !     TODO:  check validity of DE_id
-!     if(present(size_dir1)) size_dir1 = distgrid%global_dir1(DE_id)%size
-!     if(present(size_dir2)) size_dir2 = distgrid%global_dir2(DE_id)%size
-!     if(present(global_start_dir1)) &
-!                global_start_dir1 = distgrid%global_dir1(DE_id)%start
-!     if(present(global_end_dir1)) &
-!                global_end_dir1 = distgrid%global_dir1(DE_id)%end
-!     if(present(global_start_dir2)) &
-!                global_start_dir2 = distgrid%global_dir2(DE_id)%start
-!     if(present(global_end_dir2)) &
-!                global_end_dir2 = distgrid%global_dir2(DE_id)%end
       if(present(size_dir1)) size_dir1 = distgrid%size1(DE_id)
       if(present(size_dir2)) size_dir2 = distgrid%size2(DE_id)
       if(present(global_start_dir1)) &
@@ -1211,9 +1201,6 @@
           distgrid%start1(de) = global_s
           distgrid%end1(de) = global_e
           distgrid%size1(de) = global_e - global_s + 1
-!         distgrid%global_dir1%start = global_s
-!         distgrid%global_dir1%end = global_e
-!         distgrid%global_dir1%size = global_e - global_s + 1
         enddo
         global_s = global_e + 1
       enddo
@@ -1228,9 +1215,6 @@
           distgrid%start2(de) = global_s
           distgrid%end2(de) = global_e
           distgrid%size2(de) = global_e - global_s + 1
-!         distgrid%global_dir2%start = global_s
-!         distgrid%global_dir2%end = global_e
-!         distgrid%global_dir2%size = global_e - global_s + 1
         enddo
         global_s = global_e + 1
       enddo
@@ -1290,47 +1274,47 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[distgrid] 
+!     \item[distgrid]
 !          Class to be modified.
-!     \item[[MyDE]] 
-!          
-!     \item[[MyDEx]] 
-!          
-!     \item[[MyDEy]] 
-!          
-!     \item[[DE_E]] 
-!          
-!     \item[[DE_W]] 
-!          
-!     \item[[DE_N]] 
-!          
-!     \item[[DE_S]] 
-!          
-!     \item[[DE_NE]] 
-!          
-!     \item[[DE_NW]] 
-!          
-!     \item[[DE_SE]] 
-!          
-!     \item[[DE_SW]] 
-!          
-!     \item[[lsize]] 
-!          
-!     \item[[gstart]] 
-!          
-!     \item[[n_dir1_start]] 
-!          
-!     \item[[n_dir1_end]] 
-!          
-!     \item[[n_dir1_size]] 
-!          
-!     \item[[n_dir2_start]] 
-!          
-!     \item[[n_dir2_end]] 
-!          
-!     \item[[n_dir2_size]] 
-!          
-!     \item[[rc]] 
+!     \item[[MyDE]]
+!          Identifier for this DE.
+!     \item[[MyDEx]]
+!          Identifier for this DE's position in the 1st dir decomposition.
+!     \item[[MyDEy]]
+!          Identifier for this DE's position in the 2nd dir decomposition.
+!     \item[[DE\_E]]
+!          Identifier for the DE to the east of this DE.
+!     \item[[DE\_W]]
+!          Identifier for the DE to the west of this DE.
+!     \item[[DE\_N]]
+!          Identifier for the DE to the north of this DE.
+!     \item[[DE\_S]]
+!          Identifier for the DE to the south of this DE.
+!     \item[[DE\_NE]]
+!          Identifier for the DE to the northeast of this DE.
+!     \item[[DE\_NW]]
+!          Identifier for the DE to the northwest of this DE.
+!     \item[[DE\_SE]]
+!          Identifier for the DE to the southeast of this DE.
+!     \item[[DE\_SW]]
+!          Identifier for the DE to the southwest of this DE.
+!     \item[[lsize]]
+!          Local (on this DE) number of cells.
+!     \item[[gstart]]
+!          Global index of starting count.
+!     \item[[n\_dir1\_start]]
+!          Starting index of this DE in 1st dir decomposition.
+!     \item[[n\_dir1\_end]] 
+!          Ending index of this DE in 1st dir decomposition.
+!     \item[[n\_dir1\_size]]
+!          Size of the 1st dir decomposition on this DE.
+!     \item[[n\_dir2\_start]]
+!          Starting index of this DE in 2nd dir decomposition.
+!     \item[[n\_dir2\_end]]
+!          Ending index of this DE in 2nd dir decomposition.
+!     \item[[n\_dir2\_size]]
+!          Size of the 2nd dir decomposition on this DE.
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1393,7 +1377,6 @@
 ! !ARGUMENTS:
       type(ESMF_DistGridType) :: distgrid
       integer, intent(out), optional :: rc            
-
 !
 ! !DESCRIPTION:
 !     Set a DistGrid attribute with the given value.
