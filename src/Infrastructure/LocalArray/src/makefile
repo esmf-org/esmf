@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2003/09/18 13:34:32 cdeluca Exp $
+# $Id: makefile,v 1.1 2003/09/18 15:57:07 cdeluca Exp $
 
 # leave alone.
 ALL: lib 
@@ -22,7 +22,7 @@ LIBBASE	  = libesmf
 
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
-LOCDIR	  = src/Infrastructure/Data/src
+LOCDIR	  = src/Infrastructure/LocalArray/src
 
 include $(ESMF_DIR)/makefile
 

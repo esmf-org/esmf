@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.9 2003/09/04 18:57:55 cdeluca Exp $
+! $Id: ESMF_ArrayCreateEx.F90,v 1.1 2003/09/18 15:57:02 cdeluca Exp $
 !
 ! Example/test code which creates a new field.
 

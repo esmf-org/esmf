@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2003/05/29 20:59:07 flanigan Exp $ 
+# $Id: makefile,v 1.1 2003/09/18 15:57:02 cdeluca Exp $ 
 ALL: alldoc
 
 CFLAGS    =

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.5 2003/09/04 22:24:21 cdeluca Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.1 2003/09/18 15:57:07 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,

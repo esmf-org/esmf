@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.10 2003/09/04 22:24:20 cdeluca Exp $
+// $Id: ESMC_LocalArray.h,v 1.1 2003/09/18 15:57:06 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
