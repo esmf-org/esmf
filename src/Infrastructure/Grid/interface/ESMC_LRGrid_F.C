@@ -1,4 +1,4 @@
-// $Id: ESMC_LRGrid_F.C,v 1.1 2004/12/04 00:35:54 jwolfe Exp $
+// $Id: ESMC_LRGrid_F.C,v 1.2 2004/12/16 20:59:16 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_LRGrid_F.C,v 1.1 2004/12/04 00:35:54 jwolfe Exp $";
+             "$Id: ESMC_LRGrid_F.C,v 1.2 2004/12/16 20:59:16 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -51,6 +51,7 @@ void FTN(c_esmc_lrgridserialize)(int *dimCount,
                                  int *offset, int *localrc){
 
     int *ip, i;
+    long l;
     double *dp;
 
     // TODO: verify length > needed, and if not, make room.
@@ -59,6 +60,13 @@ void FTN(c_esmc_lrgridserialize)(int *dimCount,
     *ip++ = *dimCount; 
     for (i=0; i<*dimCount; i++)
       *ip++ = countPerDim[i]; 
+
+    // make sure pointer is aligned on good double address before the cast
+    l = (long) ip;
+    if (l%8) {
+        l += 8 - (l%8);
+        ip = (int *)l;
+    }
 
     dp = (double *) ip;
     for (i=0; i<*dimCount; i++)
@@ -77,12 +85,20 @@ void FTN(c_esmc_lrgriddeserialize)(int *countPerDim,            // array of ints
                                    void *buffer, int *offset, int *localrc){
 
     int *ip, i, dimCount;
+    long l;
     double *dp;
 
     ip = (int *)((char *)(buffer) + *offset);
     dimCount = *ip++;
     for (i=0; i<dimCount; i++)
       countPerDim[i] = *ip++; 
+
+    // make sure pointer is aligned on good double address before the cast
+    l = (long) ip;
+    if (l%8) {
+        l += 8 - (l%8);
+        ip = (int *)l;
+    }
 
     dp = (double *) ip;
     for (i=0; i<dimCount; i++)
