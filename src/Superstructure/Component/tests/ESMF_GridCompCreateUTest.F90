@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.13 2004/12/09 00:24:55 nscollins Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.14 2004/12/15 17:42:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -129,10 +129,9 @@
     write(name, *) "Validating a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !-------------------------------------------------------------------------
-!   !EX_UTest
-    !This test crashes
-    ! bug report 986728
-!   !  Test Wait for a component
+!   !
+    !EX_UTest
+    ! Wait for a concurrent component to finish executing.
 
     call ESMF_GridCompWait(comp1, rc=rc)
 

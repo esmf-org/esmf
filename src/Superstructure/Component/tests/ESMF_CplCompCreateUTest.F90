@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.8 2004/10/04 22:30:57 svasquez Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.9 2004/12/15 17:42:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -208,15 +208,14 @@
 
 !-------------------------------------------------------------------------
 !   !
-    !This test is commented out because it crashes
-    ! Bug report 986728 opened
-!   !  Wait for a component
+    !EX_UTest
+    ! Wait for a concurrent component to finish executing.
 
-    !call ESMF_CplCompWait(cpl, rc=rc)
+    call ESMF_CplCompWait(cpl, rc=rc)
 
-    !write(failMsg, *) "Did not return ESMF_SUCCESS"
-    !write(name, *) "Wait for a Coupler Component Test"
-    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Wait for a Coupler Component Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
