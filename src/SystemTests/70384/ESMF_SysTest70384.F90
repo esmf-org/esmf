@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.20 2003/07/29 16:44:55 jwolfe Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.21 2003/08/01 17:26:36 nscollins Exp $
 !
 ! System test code #70384
 
@@ -344,7 +344,7 @@
                         testname, failMsg, testresult, ESMF_SRCLINE)
 
       ! Separate message to console, for quick confirmation of success/failure
-      if (rc .eq. ESMF_SUCCESS) then
+      if ((miscount.eq.0) .and. (rc .eq. ESMF_SUCCESS)) then
         write(finalMsg, *) "SUCCESS!! Data transposed twice same as original"
       else
         write(finalMsg, *) "System Test did not succeed. ", &
