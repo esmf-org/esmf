@@ -106,11 +106,11 @@
 %#endif
 
 %\subsection{Use and Examples}
-%#ifdef STANDALONE
-%\input{Regrid_fex}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Regrid/doc/Regrid_fex}
-%#endif
+#ifdef STANDALONE
+\input{ESMF_RegridEx_fapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Regrid/doc/ESMF_RegridEx_fapi}
+#endif
 
 %\subsection{Parameters and Definitions}
 %#ifdef STANDALONE
@@ -127,8 +127,8 @@
 %#endif
 
 #ifdef STANDALONE
-\section{Review Status}
-\input{Regrid_desrev}
+%\section{Review Status}
+%\input{Regrid_desrev}
 #endif
 
 #ifdef STANDALONE
