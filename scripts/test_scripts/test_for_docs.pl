@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# $Id: test_for_docs.pl,v 1.5 2004/05/13 16:29:52 svasquez Exp $
+# $Id: test_for_docs.pl,v 1.6 2004/06/21 21:26:46 svasquez Exp $
 #
 # test_for_docs.pl
 # 
@@ -49,39 +49,7 @@ sub GetNewDocs($);
 #  
 @esmf_docs     = ("ESMF_refdoc",
 		  "ESMF_reqdoc",
-		  "ESMF_usrdoc",
-		  "Array_refdoc",
-		  "ArrayDataMap_refdoc",
-		  "ArraySpec_refdoc",
-		  "Base_refdoc",
-		  "Component_refdoc",
-		  "Component_reqdoc",
-		  "Config_refdoc",
-		  "Config_reqdoc",
-		  "DistGrid_desdoc",
-		  "DistGrid_refdoc",
-		  "DistGrid_reqdoc",
-		  "Field_refdoc",
-		  "Field_reqdoc",
-		  "Grid_desdoc",
-		  "Grid_refdoc",
-		  "IO_reqdoc",
-		  "IOSpec_refdoc",
-		  "LogErr_refdoc",
-		  "LogErr_reqdoc",
-		  "PerfProf_desdoc",
-		  "PerfProf_refdoc",
-		  "PerfProf_reqdoc",
-		  "PhysGrid_desdoc",
-		  "PhysGrid_refdoc",
-		  "PhysGrid_reqdoc",
-		  "Regrid_refdoc",
-		  "Regrid_reqdoc",
-		  "Route_refdoc",
-		  "TimeMgr_desdoc",
-		  "TimeMgr_refdoc",
-		  "TimeMgr_reqdoc",
-		  "VM_refdoc");
+		  "ESMF_usrdoc");
 
 #
 #  List of impl_rep docs to look for.
