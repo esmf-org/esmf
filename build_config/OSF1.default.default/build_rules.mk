@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.4 2003/11/11 18:55:28 nscollins Exp $
+#  $Id: build_rules.mk,v 1.5 2004/02/24 14:05:30 theurich Exp $
 #
 #  OSF1.default.default.mk
 #
@@ -61,7 +61,7 @@ MPIRUN           = ${ESMF_TOP_DIR}/scripts/mpirun.alpha
 MPI64_LIB        = 
 
 # For pthreads (or omp)
-THREAD_LIB        = -lpthread
+THREAD_LIB        = -lpthread -lrt
 
 
 ############################################################
