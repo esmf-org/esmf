@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.39 2003/06/19 15:23:57 rstaufer Exp $
+// $Id: ESMC_Array_F.C,v 1.40 2003/06/19 16:58:54 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -64,6 +64,10 @@ extern "C" {
                                ESMC_Logical *contig, ESMC_Logical *dealloc,
                                int *status) {
       
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
          *status = (*ptr)->ESMC_ArraySetInfo(fptr, base, counts, 
                                             lbounds, ubounds, strides, offsets, 
                                             *contig, *dealloc);
@@ -71,41 +75,73 @@ extern "C" {
 
      void FTN(c_esmc_arraysetlengths)(ESMC_Array **ptr, int *rank, int *lengths, int *status) {
       
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
          *status = (*ptr)->ESMC_ArraySetLengths(*rank, lengths);
      }
 
      void FTN(c_esmc_arraygetlengths)(ESMC_Array **ptr, int *rank, int *lengths, int *status) {
       
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
          *status = (*ptr)->ESMC_ArrayGetLengths(*rank, lengths);
      }
 
      void FTN(c_esmc_arraygetrank)(ESMC_Array **ptr, int *rank, int *status) {
       
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
          *rank = (*ptr)->ESMC_ArrayGetRank();
          *status = ESMF_SUCCESS;
      }
 
      void FTN(c_esmc_arraygettype)(ESMC_Array **ptr, int *type, int *status) {
       
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
          *type = (*ptr)->ESMC_ArrayGetType();
          *status = ESMF_SUCCESS;
      }
 
      void FTN(c_esmc_arraygetkind)(ESMC_Array **ptr, int *kind, int *status) {
       
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
          *kind = (*ptr)->ESMC_ArrayGetKind();
          *status = ESMF_SUCCESS;
      }
 
      void FTN(c_esmc_arraydestroy)(ESMC_Array **ptr, int *status) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
          *status = ESMC_ArrayDestroy(*ptr);
      }
 
      void FTN(c_esmc_arraysetaxisindex)(ESMC_Array **ptr, ESMC_AxisIndex *ai, int *status) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
           *status = (*ptr)->ESMC_ArraySetAxisIndex(ai);
      }
 
      void FTN(c_esmc_arraygetaxisindex)(ESMC_Array **ptr, ESMC_AxisIndex *ai, int *status) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
           *status = (*ptr)->ESMC_ArrayGetAxisIndex(ai);
      }
 
@@ -113,6 +149,10 @@ extern "C" {
                                   int *rank_trans, int *size_rank_trans, 
                                   int *olddecompids, int *decompids,  int *size_decomp,
                                   ESMC_Array **RedistArray, int *status) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
           *status = (*ptr)->ESMC_ArrayRedist(*layout, rank_trans, *size_rank_trans,
                                              olddecompids, decompids, *size_decomp,
                                              *RedistArray);
@@ -122,6 +162,10 @@ extern "C" {
                                 int *decompids,  int *size_decomp,
                                 ESMC_AxisIndex *AI_exc, ESMC_AxisIndex *AI_tot,
                                 int *status) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
           *status = (*ptr)->ESMC_ArrayHalo(*layout, decompids, *size_decomp,
                                            AI_exc, AI_tot);
      }
@@ -131,6 +175,10 @@ extern "C" {
                                      ESMC_AxisIndex *AI_exc, 
                                      ESMC_AxisIndex *AI_tot,
                                      ESMC_Array **Array_out, int *status) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
           *status = (*ptr)->ESMC_ArrayAllGather(*layout, decompids, 
                                                 *size_decomp, AI_exc, AI_tot,
                                                  Array_out);
@@ -141,6 +189,10 @@ extern "C" {
                                          ESMC_AxisIndex *AI_exc, 
                                          ESMC_AxisIndex *AI_tot, int *deid,
                                          ESMC_Array **Array_out, int *status) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
           *status = (*ptr)->ESMC_ArrayGather(*layout, decompids, 
                                              *size_decomp, AI_exc, AI_tot,
                                              *deid, Array_out);
@@ -151,41 +203,73 @@ extern "C" {
                                          ESMC_AxisIndex *AI_exc, 
                                          ESMC_AxisIndex *AI_tot, int *deid,
                                          ESMC_Array **Array_out, int *status) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
           *status = (*ptr)->ESMC_ArrayScatter(*layout, decompids, 
                                               *size_decomp, AI_exc, AI_tot,
                                               *deid, Array_out);
      }
 
      void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array **ptr, float *base, int *status) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
           *status = (*ptr)->ESMC_ArraySetBaseAddr((void *)(base));
      }
 
      void FTN(c_esmc_arraygetbaseaddr)(ESMC_Array **ptr, float **base, int *status) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
           *status = (*ptr)->ESMC_ArrayGetBaseAddr((void **)base);
      }
 
      void FTN(c_esmc_arraysetf90ptr)(ESMC_Array **ptr, struct c_F90ptr *p, int *status) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
         //fprintf(stderr, "interface code, setting f90 ptr to %lx, this = %lx, &this = %lx\n", 
         //                                (long int)p, (long int)(*ptr), (long int)ptr);
           *status = (*ptr)->ESMC_ArraySetF90Ptr(p);
      }
 
      void FTN(c_esmc_arraygetf90ptr)(ESMC_Array **ptr, struct c_F90ptr *p, int *status) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
         //fprintf(stderr, "interface code, getting f90 ptr into %lx, this = %lx, &this = %lx\n", 
         //                                (long int)p, (long int)(*ptr), (long int)ptr);
           *status = (*ptr)->ESMC_ArrayGetF90Ptr(p);
      }
 
      void FTN(c_esmc_arraysetdealloc)(ESMC_Array **ptr, int *status) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
           *status = (*ptr)->ESMC_ArraySetDealloc();
      }
 
      void FTN(c_esmc_arraysetnodealloc)(ESMC_Array **ptr, int *status) {
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
           *status = (*ptr)->ESMC_ArraySetNoDealloc();
      }
 
      void FTN(c_esmc_arrayneedsdealloc)(ESMC_Array **ptr, int flag, int *status) {
-      
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              flag = ESMC_ARRAY_NO_ALLOCATE;
+              *status = ESMF_FAILURE;
+              return;
+          }
           flag = (*ptr)->ESMC_ArrayNeedsDealloc();
           *status = ESMF_SUCCESS;
      }
@@ -194,6 +278,10 @@ extern "C" {
                                                                  int clen) {
          char *temp = NULL;
 
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
          // make a local copy because opts may be non-writable or not
          // long enough to add a trailing null safely.
          if (opts && (clen > 0)) {
@@ -213,6 +301,10 @@ extern "C" {
          char *opttemp = NULL;
          char *filetemp = NULL;
 
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
          // make a local copy because opts may be non-writable or not
          // long enough to add a trailing null safely.
          if (opts && (optlen > 0)) {
