@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.94 2004/05/17 16:04:01 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.95 2004/05/18 10:18:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -215,7 +215,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.94 2004/05/17 16:04:01 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.95 2004/05/18 10:18:49 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -497,7 +497,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
 
         ! local vars
         integer :: status                       ! local error status
@@ -513,6 +512,7 @@ end function
 
         ! call C++ to release function and data pointer tables.
         call c_ESMC_FTableDestroy(compp%this, status)
+        ! if (ESMF_LogPassFoundError(status, rc)) return
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component contents destruction error"
           return
@@ -520,6 +520,7 @@ end function
 
         ! Release attributes and other things on base class
         call ESMF_BaseDestroy(compp%base, status)
+        ! if (ESMF_LogPassFoundError(status, rc)) return
         if (status .ne. ESMF_SUCCESS) then
           print *, "Base Component contents destruction error"
           return
@@ -527,7 +528,6 @@ end function
         
         ! Deallocate space held for petlist
         deallocate(compp%petlist)
-!       print *, '------------------------- petlist is being deallocated --'
 
         ! destruct the VMPlan
         call ESMF_VMPlanDestruct(compp%vmplan)
@@ -552,7 +552,7 @@ end function
 
 ! !INTERFACE:
       recursive subroutine ESMF_CompInitialize(compp, importState, &
-        exportState, clock, phase, blockingFlag, rc)
+                                 exportState, clock, phase, blockingFlag, rc)
 !
 !
 ! !ARGUMENTS:
@@ -567,7 +567,6 @@ end function
 ! !DESCRIPTION:
 !  Call the associated user initialization code for a component.
 !
-!    
 !  The arguments are:
 !  \begin{description}
 !
@@ -587,7 +586,6 @@ end function
 !   \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
 
 
         ! local vars
@@ -718,8 +716,6 @@ end function
 !   \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
-
 
         ! local vars
         integer :: status                       ! local error status
@@ -795,8 +791,6 @@ end function
 !   \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
-
 
         ! local vars
         integer :: status                       ! local error status
@@ -880,8 +874,6 @@ end function
 !   \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
-
 
         ! local vars
         integer :: status                       ! local error status
@@ -1017,8 +1009,6 @@ end function
 !   \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
-
 
         ! local vars
         integer :: status                       ! local error status
@@ -1146,8 +1136,6 @@ end function
 !      to facilitate this.
 !
 !EOPI
-! !REQUIREMENTS:
-
         ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
@@ -1233,8 +1221,6 @@ end function
 !      to facilitate this.
 !
 !EOPI
-! !REQUIREMENTS:
-
         ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
@@ -1312,7 +1298,6 @@ end function
 !
 !
 !EOPI
-! !REQUIREMENTS:
 
 !
 ! TODO: code goes here
@@ -1344,7 +1329,6 @@ end function
 !
 !
 !EOPI
-! !REQUIREMENTS:
 
 !
 ! TODO: code goes here
@@ -1379,7 +1363,6 @@ end function
 !      Routine to ensure a Component is valid.
 !
 !EOPI
-! !REQUIREMENTS:
 
 !
 ! TODO: code goes here
@@ -1434,7 +1417,6 @@ end function
 !      Routine to print information about a component.
 !
 !EOPI
-! !REQUIREMENTS:
 
        integer :: status                       ! local error status
        logical :: rcpresent                    ! did user specify rc?
@@ -1510,7 +1492,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
     integer :: status                     ! local error status
     logical :: rcpresent
@@ -1527,6 +1508,7 @@ end function
     call ESMF_VMPlanMaxThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       compp%npetlist, compp%petlist, status)
+    ! if (ESMF_LogPassFoundError(status, rc)) return
     if (status .ne. ESMF_SUCCESS) then
       print *, "ESMF_VMPlanMaxThreads error"
       return
@@ -1592,6 +1574,7 @@ end function
     call ESMF_VMPlanMinThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       compp%npetlist, compp%petlist, status)
+    ! if (ESMF_LogPassFoundError(status, rc)) return
     if (status .ne. ESMF_SUCCESS) then
       print *, "ESMF_VMPlanMinThreads error"
       return
@@ -1641,7 +1624,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
     integer :: status                     ! local error status
     logical :: rcpresent
@@ -1658,6 +1640,7 @@ end function
     call ESMF_VMPlanMaxPEs(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       compp%npetlist, compp%petlist, status)
+    ! if (ESMF_LogPassFoundError(status, rc)) return
     if (status .ne. ESMF_SUCCESS) then
       print *, "ESMF_VMPlanMaxPEs error"
       return
@@ -1694,7 +1677,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
     integer :: status                     ! local error status
     logical :: rcpresent
@@ -1710,7 +1692,9 @@ end function
 
     ! call into C++ 
     call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-      compp%vm_cargo, callrc, status)
+                         compp%vm_cargo, callrc, status)
+    ! TODO: what is the relationship between callrc and status and rc
+    ! if (ESMF_LogPassFoundError(status, rc)) return
     if (status .ne. ESMF_SUCCESS) then
       print *, "c_ESMC_CompWait error"
       return
