@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.35 2003/02/18 15:04:56 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.36 2003/02/21 18:12:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.35 2003/02/18 15:04:56 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.36 2003/02/21 18:12:57 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3949,10 +3949,39 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
-        end subroutine ESMF_ArrayGet
+      integer :: status ! Error status
+      logical :: rcpresent ! Return code present
+
+! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+
+      if (present(rank)) then
+         call c_ESMC_ArrayGetRank(array, rank)
+      endif
+
+      if (present(type)) then
+         call c_ESMC_ArrayGetType(array, type)
+      endif
+
+      if (present(kind)) then
+         call c_ESMC_ArrayGetKind(array, kind)
+      endif
+
+      ! TODO: add these methods
+      !integer, dimension(:), intent(out), optional :: lbounds
+      !integer, dimension(:), intent(out), optional :: ubounds
+      !integer, dimension(:), intent(out), optional :: strides
+      !type(ESMF_Pointer), intent(out), optional :: base
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayGet
 
 !------------------------------------------------------------------------------
 !BOP
