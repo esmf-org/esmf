@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/09/18 15:57:02 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2003/09/18 17:15:35 cdeluca Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -11,21 +11,13 @@ OBJSF     =
 TEXFILES  = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/Infrastructure/Data/doc
+LOCDIR	  = src/Infrastructure/Array/doc
 
-DVIFILES  = 	Data_refdoc.dvi \
-#		Data_reqdoc.dvi \
-#		Data_desdoc.dvi 
+DVIFILES  = 	Array_refdoc.dvi 
 
+PDFFILES  =     ${ESMC_DOCDIR}/Array_refdoc.pdf
 
-PDFFILES  =     ${ESMC_DOCDIR}/Data_refdoc.pdf \
-#		${ESMC_DOCDIR}/Data_reqdoc.pdf \
-#		${ESMC_DOCDIR}/Data_desdoc.pdf \
-
-HTMLFILES = 	${ESMC_DOCDIR}/Data_refdoc \
-#		${ESMC_DOCDIR}/Data_reqdoc \
-#		${ESMC_DOCDIR}/Data_desdoc \
-
+HTMLFILES = 	${ESMC_DOCDIR}/Array_refdoc 
 
 #
 # Tex Files to make
@@ -58,9 +50,9 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = Data_refdoc $(HTMLFILES)
+CLEANDIRS   = Array_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi \
-              *.ORIG Data_refdoc.tex $(PDFFILES)
+              *.ORIG Array_refdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 
 
