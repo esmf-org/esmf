@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.9 2004/03/05 19:18:45 nscollins Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.10 2004/03/05 20:09:08 nscollins Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -326,6 +326,7 @@
       enddo
 
       ! and have the framework precompute the halo communication patterns
+      routehandle = ESMF_RouteHandleCreate(rc)
       call ESMF_FieldHaloStore(field1, routehandle, rc=rc)
 
       print *, "Exiting Initialization routine"
@@ -418,6 +419,8 @@
 
       ! release the saved information about the communications
       call ESMF_FieldHaloRelease(routehandle, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      call ESMF_RouteHandleDestroy(routehandle, rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get layout from component
