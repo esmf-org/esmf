@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.9 2003/01/22 03:07:46 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.10 2003/01/23 18:02:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -163,7 +163,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Regrid.F90,v 1.9 2003/01/22 03:07:46 nscollins Exp $'
+      '$Id: ESMF_Regrid.F90,v 1.10 2003/01/23 18:02:37 nscollins Exp $'
 
 !==============================================================================
 !
@@ -232,8 +232,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridCreateFromField - Creates Regrid structure for a field pair
+! !IROUTINE: ESMF_RegridCreateFromField - Creates Regrid structure for a field pair
 
 ! !INTERFACE:
       function ESMF_RegridCreateFromField(src_field, dst_field, method, name, rc)
@@ -324,8 +323,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridCreateFromBundle - Creates Regrid structure for a bundle pair
+! !IROUTINE: ESMF_RegridCreateFromBundle - Creates Regrid structure for a bundle pair
 
 ! !INTERFACE:
       function ESMF_RegridCreateFromBundle(src_bundle, dst_bundle, method, name, rc)
@@ -416,8 +414,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridCreateFromRegrid - Creates Regrid structure from existing regrid
+! !IROUTINE: ESMF_RegridCreateFromRegrid - Creates Regrid structure from existing regrid
 
 ! !INTERFACE:
       function ESMF_RegridCreateFromRegrid(old_regrid, method, &
@@ -510,8 +507,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridDestroy - Free all resources associated with a Regrid
+! !IROUTINE: ESMF_RegridDestroy - Free all resources associated with a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridDestroy(regrid, rc)
@@ -522,7 +518,7 @@
 !
 ! !DESCRIPTION:
 !     Destroys a {\tt Regrid} object previously allocated
-!     via an {\tt ESMF_RegridCreate routine}.
+!     via an {\tt ESMF\_RegridCreate routine}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -561,8 +557,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridConstructFromField - Constructs Regrid structure for a field pair
+! !IROUTINE:  ESMF_RegridConstructFromField - Constructs Regrid structure for a field pair
 
 ! !INTERFACE:
       subroutine ESMF_RegridConstructFromField(regrid, src_field, dst_field, &
@@ -673,8 +668,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridConstructFromBundle - Constructs Regrid structure for a bundle pair
+! !IROUTINE:  ESMF_RegridConstructFromBundle - Constructs Regrid structure for a bundle pair
 
 ! !INTERFACE:
       subroutine ESMF_RegridConstructFromBundle(regrid, src_bundle, dst_bundle, &
@@ -786,8 +780,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridConstructFromRegrid - Constructs Regrid structure from existing Regrid
+! !IROUTINE:  ESMF_RegridConstructFromRegrid - Constructs Regrid structure from existing Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridConstructFromRegrid(regrid, old_regrid, &
@@ -909,8 +902,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridDestruct - Free any Regrid memory allocated internally
+! !IROUTINE:  ESMF_RegridDestruct - Free any Regrid memory allocated internally
 
 ! !INTERFACE:
       subroutine ESMF_RegridDestruct(regrid, rc)
@@ -921,10 +913,10 @@
 !
 ! !DESCRIPTION:
 !     ESMF routine which deallocates any space allocated by
-!    {\tt  ESMF\_RegridConstruct}, does any additional cleanup before the
+!    {\tt ESMF\_RegridConstruct}, does any additional cleanup before the
 !     original Regrid object is freed.  Intended for internal ESMF
 !     use only; end-users use {\tt ESMF\_RegridDestroy}, which calls
-!     {\tt ESMF_RegridDestruct}.
+!     {\tt ESMF\_RegridDestruct}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -961,8 +953,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridGetConfig - Get configuration information from a Regrid
+! !IROUTINE:  ESMF_RegridGetConfig - Get configuration information from a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridGetConfig(regrid, config, rc)
@@ -995,8 +986,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridSetConfig - Set configuration information for a Regrid
+! !IROUTINE: ESMF_RegridSetConfig - Set configuration information for a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridSetConfig(regrid, config, rc)
@@ -1030,8 +1020,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridGetValue - Get <Value> for a Regrid
+! !IROUTINE:  ESMF_RegridGetValue - Get <Value> for a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridGetValue(regrid, value, rc)
@@ -1066,8 +1055,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridSetValue - Set <Value> for a Regrid
+! !IROUTINE:  ESMF_RegridSetValue - Set <Value> for a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridSetValue(Regrid, value, rc)
@@ -1102,8 +1090,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridValidate - Check internal consistency of a Regrid
+! !IROUTINE:  ESMF_RegridValidate - Check internal consistency of a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridValidate(regrid, opt, rc)
@@ -1136,8 +1123,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridPrint - Print the contents of a Regrid
+! !IROUTINE:  ESMF_RegridPrint - Print the contents of a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridPrint(regrid, opt, rc)
