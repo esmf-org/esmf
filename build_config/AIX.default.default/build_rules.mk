@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.17 2004/10/28 22:11:26 nscollins Exp $
+#  $Id: build_rules.mk,v 1.18 2004/11/22 14:59:45 jedwards Exp $
 #
 #  AIX.default.default.mk
 #
@@ -7,12 +7,18 @@
 # Default MPI setting.
 #
 ifndef ESMF_COMM
-export ESMF_COMM := mpi
+  export ESMF_COMM := mpi
+  MPIPREFIX=mp
+  CC = mpCC_r
 endif
 ifeq ($(ESMF_COMM),default)
-export ESMF_COMM := mpi
+  export ESMF_COMM := mpi
+  MPIPREFIX=mp
+  CC = mpCC_r
 endif
-
+ifeq ($(ESMF_COMM),mpiuni)
+  CC=xlC_r
+endif
 
 ############################################################
 #
@@ -72,6 +78,8 @@ MPI64_LIB      = -lmpi_r -lvtd_r -lmpci_r
 endif
 
 ifeq ($(ESMF_COMM),mpiuni)
+MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/stubs/mpiuni
+MPI_INCLUDE    = -I${MPI_HOME}
 endif
 
 #
@@ -137,18 +145,18 @@ C_64BIT			= -q64
 REAL8			= -qrealsize=8
 FPPFLAGS		= $(addprefix $(FPP_PREFIX), $(FPPOPTS))
 # C and Fortran compiler
-C_CC			= mpcc_r 
-C_FC			= mpxlf90_r 
+C_CC			= $(MPIPREFIX)cc_r 
+C_FC			= $(MPIPREFIX)xlf90_r 
 C_FC_MOD		= -I
-C_CLINKER		= mpcc_r -bmaxdata:0x70000000  -qcheck 
+C_CLINKER		= $(MPIPREFIX)cc_r -bmaxdata:0x70000000  -qcheck 
 # you may need to add -bI:/usr/lpp/xlf/lib/lowsys.exp to C_LINKER
-C_FLINKER		= mpxlf90_r -bmaxdata:0x70000000 -lC_r -qcheck 
+C_FLINKER		= $(MPIPREFIX)xlf90_r -bmaxdata:0x70000000 -lC_r -qcheck 
 # C++ compiler
-CXX_CC			= mpCC_r 
-CXX_FC			= mpxlf90_r
-CXX_CLINKER		= mpCC_r -qcheck 
-CXX_FLINKER		= mpxlf90_r -qcheck 
-SL_LIB_LINKER 		= mpCC_r -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
+CXX_CC			= $(CC) 
+CXX_FC			= $(MPIPREFIX)xlf90_r
+CXX_CLINKER		= $(CC) -qcheck 
+CXX_FLINKER		= $(MPIPREFIX)xlf90_r -qcheck 
+SL_LIB_LINKER 		= $(CC) -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
 endif
 # end 32 bit section
 
@@ -164,18 +172,18 @@ C_64BIT			= -q64
 REAL8			= -qrealsize=8
 FPPFLAGS		= $(addprefix $(FPP_PREFIX), $(FPPOPTS))
 # C and Fortran
-C_CC			= mpcc_r -q64
-C_FC			= mpxlf90_r -q64
+C_CC			= $(MPIPREFIX)cc_r -q64
+C_FC			= $(MPIPREFIX)xlf90_r -q64
 C_FC_MOD		= -I
-C_CLINKER		= mpcc_r -q64
+C_CLINKER		= $(MPIPREFIX)cc_r -q64
 # you may need to add -bI:/usr/lpp/xlf/lib/lowsys.exp to C_LINKER
-C_FLINKER		= mpxlf90_r -q64 -lC_r
+C_FLINKER		= $(MPIPREFIX)xlf90_r -q64 -lC_r
 # C++ compiler
-CXX_CC			= mpCC_r -q64
-CXX_FC			= mpxlf90_r -q64
-CXX_CLINKER		= mpCC_r -q64
-CXX_FLINKER		= mpCC_r -q64
-SL_LIB_LINKER 		= mpCC_r -q64 -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
+CXX_CC			= $(CC) -q64
+CXX_FC			= $(MPIPREFIX)xlf90_r -q64
+CXX_CLINKER		= $(CC) -q64
+CXX_FLINKER		= $(CC) -q64
+SL_LIB_LINKER 		= $(CC) -q64 -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
 endif
 # end 64 bit section
 
@@ -204,7 +212,7 @@ C_CXXF90LIBS		= -L. -lm_r -lxlf90_r -lC_r
 
 C_F90CXXLIBS		= -L. -lxlf90_r -lC_r
 
-C_CXXSO			= mpCC_r -G
+C_CXXSO			= $(CC) -G
 
 C_CXXSOLIBS		= -L. -lm_r -lxlf90_r -lC_r
 
