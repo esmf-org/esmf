@@ -1,4 +1,4 @@
-% $Id: LogErr_implnotes.tex,v 1.5 2004/03/17 22:51:50 cdeluca Exp $
+% $Id: LogErr_implnotes.tex,v 1.6 2004/03/17 23:12:24 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,19 +20,19 @@ These utility functions call the standard Fortran write, open and close function
 If you call the Log methods from C/C++ code, you bypass the utility functions
 and all I/O is done with the C I/O libraries.
 
-At initialization a LogArray} is created.  This array is a container 
-that holds multiple Logs}.  Within the LogArray, one or more Logs may be created.  
+At initialization a {\tt ESMF\_LogArray} is created.  This array is a container 
+that holds multiple Logs.  Within the LogArray, one or more Logs may be created.  
 Each Log stores information for a specific Log file.   When working with 
 more than one Log file, multiple Logs are required (one Log for each Log file).  
 For each Log, a handle is returned through the {\tt ESMF\_LogOpen()} method so 
 that the user can manage the various Logs.  The properties of a specific 
 Log are set with the {\tt ESMF\_LogSet()} method.  Additionally, buffering 
-occurs within a Log.  Every time the {\tt ESMF_LogWrite()} method is called, 
+occurs within a Log.  Every time the {\tt ESMF\_LogWrite()} method is called, 
 LogEntry element is populated with the {\tt ESMF\_LogWrite()} information.  
 The user can set the number of LogEntry elements in the Log buffer.  When 
 the buffer is full (i.e., when all the LogEntry elements are populated), 
 the buffer will be flushed and all the contents will be written to file.  
-If buffering is not needed ({\tt autoflush=false}), the {\tt ESMF_LogWrite()} 
+If buffering is not needed ({\tt autoflush=false}), the {\tt ESMF\_LogWrite()} 
 method will immediately write to the Log files. 
 
 Buffering allows ESMF to manage output data streams in a desired way.  
