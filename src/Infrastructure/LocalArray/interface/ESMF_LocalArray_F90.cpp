@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.13 2004/03/04 22:30:01 nscollins Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.14 2004/03/09 23:00:06 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -187,7 +187,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.13 2004/03/04 22:30:01 nscollins Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.14 2004/03/09 23:00:06 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -356,37 +356,29 @@ end function
 !
 ! The arguments are:
 ! \begin{description}
-!
 ! \item[rank]
 !   In this version of the call rank must be 1.   (This interface is simply
 !   to allow counts to be a scalar instead of dimension(1), which fortran
 !   finds to be a different argument signature.)
-!
 ! \item[type]
 ! Array type. Valid types include {\tt ESMF\_DATA\_INTEGER},
 ! {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL},
 ! {\tt ESMF\_DATA\_CHARACTER}.
-!
 ! \item[kind]
 ! Array kind. Valid kinds include {\tt ESMF\_KIND\_I4},
 ! {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
 ! {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
-!
 ! \item[counts]
 ! The number of items in the single dimension of the array.   This is a
 ! scalar.  Note that if you call {\tt ESMF\_LocalArrayCreate} with 
 ! rank $>$ 1 then you must specify a 1D array of counts and the compiler
 ! will match the ByList version of this interface instead of this one.
-!
 !  \item[{[lbounds]}]
 !   An integer with the lower index for each dimension.
-!
 !  \item[{[ubounds]}]
 !   An integer with the upper index for each dimension.
-!
 ! \item[{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 ! \end{description}
 !
 !EOP
@@ -433,33 +425,25 @@ end function
 !    
 !  The arguments are:
 !  \begin{description}
-!
 !  \item[rank]
 !    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 5D.
-!
 !  \item[type]
 !    Array type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
 !    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
 !    {\tt ESMF\_DATA\_CHARACTER}.
-!
 !  \item[kind]
 !    Array kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
 !    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
 !    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
-!
 !  \item[counts]
 !    The number of items in each dimension of the array.  This is a 1D
 !    integer array the same length as the rank.
-!
 !  \item[{[lbounds]}]
 !   An integer array of length rank, with the lower index for each dimension.
-!
 !  \item[{[ubounds]}]
 !   An integer array of length rank, with the upper index for each dimension.
-
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -534,23 +518,17 @@ end function
 !    
 !  The arguments are:
 !  \begin{description}
-!
 !  \item[arrayspec]
 !    ArraySpec object.
-!
 !  \item[counts]
 !   The number of items in each dimension of the array.  This is a 1D
 !   integer array the same length as the rank.
-!
 !  \item[{[lbounds]}]
 !   An integer array of length rank, with the lower index for each dimension.
-!
 !  \item[{[ubounds]}]
 !   An integer array of length rank, with the upper index for each dimension.
-!
 !  \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !  \end{description}
 !
 !EOP
@@ -610,40 +588,31 @@ end function
 !    
 !  The arguments are:
 !  \begin{description}
-!
 !  \item[array]
 !    Partially created {\tt ESMF\_LocalArray} object.  This entry point is used
 !    during both the C++ and F90 create calls if we need to create an F90
 !    pointer to be used later.
-!
 !  \item[counts]
 !    The number of items in each dimension of the array.  This is a 1D
 !    integer array the same length as the rank.
-!
 !  \item[rank]
 !    Array rank.
 !    This must match what is already in the array - it is here only as
 !    a convienience.
-!
 !  \item[type]
 !    Array type.
 !    This must match what is already in the array - it is here only as
 !    a convienience.
-!
 !  \item[kind]
 !    Array kind. 
 !    This must match what is already in the array - it is here only as
 !    a convienience.
-!
 !   \item[lbounds]
 !    The lower index values per rank.
-!  
 !   \item[ubounds]
 !    The upper index values per rank.
-!
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -1226,13 +1195,10 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[array]
 !       Destroy contents of this {\tt ESMF\_LocalArray}.
-!
 !     \item[[rc]]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !  To reduce the depth of crossings of the F90/C++ boundary we first
@@ -1420,26 +1386,20 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !    
 !  The arguments are:
 !  \begin{description}
-!
 !  \item[arrayspec]
 !    Uninitialized array spec.
-!
 !  \item[rank]
 !    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 7D.
-!
 !  \item[type]
 !    {\tt ESMF\_Array} type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
 !    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
 !    {\tt ESMF\_DATA\_CHARACTER}.
-!
 !  \item[kind]
 !    {\tt ESMF\_Array} kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
 !    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
 !    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
-!
 !   \item[[rc]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -1638,27 +1598,21 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !
 !  The arguments are:
 !  \begin{description}
-!
 !  \item[arrayspec]
 !    An {\tt ESMF\_ArraySpec} object.
-!
 !  \item[rank]
 !    {\tt ESMF\_Array} rank (dimensionality, 1D, 2D, etc).  Maximum
 !    allowed is 7D.
-!
 !  \item[type]
 !    {\tt ESMF\_Array} type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
 !    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
 !    {\tt ESMF\_DATA\_CHARACTER}.
-!
 !  \item[kind]
 !    {\tt ESMF\_Array} kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
 !    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
 !    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
-!
 !   \item[[rc]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
