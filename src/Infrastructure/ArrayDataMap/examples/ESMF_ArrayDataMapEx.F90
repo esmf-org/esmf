@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMapEx.F90,v 1.2 2004/06/08 10:46:01 nscollins Exp $
+! $Id: ESMF_ArrayDataMapEx.F90,v 1.3 2004/06/08 12:51:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -114,8 +114,7 @@
 !EOP
 
 !BOC
-      call ESMF_ArrayDataMapSet(arrayDM, drank, dlist, dcounts, rc=rc)
-      call ESMF_ArrayDataMapGet(arrayDM, rc=rc)
+      call ESMF_ArrayDataMapGet(arrayDM, drank, dlist, dcounts, rc=rc)
       print *, "Returned values from Array DataMap:"
       print *, "rank =", drank
       print *, "correspondance to grid indices = ", dlist
