@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.C,v 1.2 2004/04/23 17:30:06 nscollins Exp $
+// $Id: ESMC_Init.C,v 1.3 2004/04/23 20:22:58 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,7 +22,7 @@
  // insert any higher level, 3rd party or system includes here
 #include <string.h>
 #include <stdio.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
 //#include "ESMC_Machine.h"
 #include "ESMC_Init.h"
 
