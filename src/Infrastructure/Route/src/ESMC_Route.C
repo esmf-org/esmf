@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.36 2003/04/24 22:32:18 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.37 2003/04/25 22:09:50 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.36 2003/04/24 22:32:18 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.37 2003/04/25 22:09:50 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -383,7 +383,7 @@
 
         // look up the corresponding send/recv xpackets in the rtables
         rc = sendRT->ESMC_RTableGetEntry(theirdeid, &xscount, &sendxp);
-        if (xscount > 1) fprintf(stderr, "cannot handle multiple xps yet\n");
+        if (xscount > 1) printf("WARNING! cannot handle multiple xps yet\n");
         if (xscount > 0) {
             rc = sendxp->ESMC_XPacketGet(&srank, &sleft, &sright, sstrides, snums);
             //printf("RouteRun: sendxp\n");
@@ -400,7 +400,7 @@
         }
 
         rc = recvRT->ESMC_RTableGetEntry(theirdeid, &xrcount, &recvxp);
-        if (xrcount > 1) fprintf(stderr, "cannot handle multiple xps yet\n");
+        if (xrcount > 1) printf("WARNING! cannot handle multiple xps yet\n");
         if (xrcount > 0) {
             rc = recvxp->ESMC_XPacketGet(&rrank, &rleft, &rright, rstrides, rnums);
             //printf("RouteRun: recvxp\n");
