@@ -103,9 +103,9 @@ the method in which they were declared has returned.
 
 An exception to this is when a shallow object, such as an IOSpec, 
 is used to carry values into a deep object, for example during an 
-{\tt ESMF_FieldCreate} call during an application initialization 
+{\tt ESMF\_FieldCreate} call during an application initialization 
 phase.  In this case an IOSpec is passed
-in through the {\tt ESMF_FieldCreate} argument list and the values 
+in through the {\tt ESMF\_FieldCreate} argument list and the values 
 of the IOSpec are copied into the new Field object.  Although the 
 IOSpec is destroyed when the initialization phase ends, 
 the Field carries a copy of the IOSpec in persistent memory.  This 
