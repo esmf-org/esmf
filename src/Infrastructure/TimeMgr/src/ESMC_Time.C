@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.72 2004/11/30 22:03:42 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.73 2004/12/01 00:10:16 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.72 2004/11/30 22:03:42 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.73 2004/12/01 00:10:16 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -131,6 +131,16 @@
       this->timeZone = 0;                 // default is UTC
     } else {
       // only calendar and/or timezone specified
+
+      // TODO: ? validate calendar conversions? 
+      // Allow  Gregorian <-> Julian Day <-> Julian (triangular paths)
+      //        360-Day <-> No Leap
+      //        Custom <-> any other calendar
+      //        No Calendar <-> any other calendar
+      // Forbid Gregorian <-> 360-Day, Gregorian <-> No Leap,
+      //        Julian Day <-> 360-Day, Julian Day <-> No Leap
+      // Otherwise, need conversion method/offset value: See TODO: ? in
+      // ESMC_Calendar.C
 
       // set calendar type
       if (calendar != ESMC_NULL_POINTER) {             // 1st choice
