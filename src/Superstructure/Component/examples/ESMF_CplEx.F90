@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.5 2003/03/10 03:23:12 cdeluca Exp $
+! $Id: ESMF_CplEx.F90,v 1.6 2003/04/04 15:26:46 nscollins Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -17,38 +17,33 @@
 !   ! Example module showing Coupler calls to the Component routines.
     module ESMF_CouplerEx
     
-!   ! Some common definitions.  This requires the C preprocessor.
-    #include "ESMF.h"
-
-!   ! Other ESMF modules which are needed by Comps
-    use ESMF_IOMod
-    use ESMF_DELayoutMod
-    use ESMF_CompMod
+!   ! ESMF Framework module
+    use ESMF_Mod
     
     implicit none
 
-    public CPL_Register
+    public CPL_SetServices
     
     contains
 
         
 !-------------------------------------------------------------------------
-!   !  The Register routine sets the subroutines to be called
+!   !  The SetServices routine sets the subroutines to be called
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
  
-    subroutine CPL_Register(comp, rc)
-        type(ESMF_Comp) :: comp
+    subroutine CPL_SetServices(comp, rc)
+        type(ESMF_CplComp) :: comp
         integer :: rc
 
-        ! Register the callback routines.
-        call ESMF_CompSetRoutine(comp, "init", 1, CPL_Init, rc)
-        call ESMF_CompSetRoutine(comp, "run", 1, CPL_Run, rc)
-        call ESMF_CompSetRoutine(comp, "final", 1, CPL_Final, rc)
+        ! SetServices the callback routines.
+        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, CPL_Init, 0, rc)
+        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, CPL_Run, 0, rc)
+        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, CPL_Final, 0, rc)
 
         ! If desired, this routine can register a private data block
         ! to be passed in to the routines above:
-        ! call ESMF_CompSetData(comp, mydatablock, rc)
+        ! call ESMF_CplCompSetInternalState(comp, mydatablock, rc)
 
     end subroutine
 
@@ -58,18 +53,14 @@
 !   !   Initialization routine.
  
     
-    subroutine CPL_Init(comp, clock, rc)
-        type(ESMF_Comp) :: comp
+    subroutine CPL_Init(comp, statelist, clock, rc)
+        type(ESMF_CplComp) :: comp
+        type(ESMF_State) :: statelist(*)
         type(ESMF_Clock) :: clock
         integer :: rc
 
-!     ! Local variables
-        type(ESMF_State), pointer :: statelist(:)
-
         print *, "Coupler Init starting"
     
-        !call ESMF_CompGetState(comp, statelist, rc)
-
         ! Add whatever code here needed
         ! Precompute any needed values, fill in any inital values
         !  needed in Import States
@@ -83,18 +74,13 @@
 !   !  The Run routine where data is exchanged.
 !   !
  
-    subroutine CPL_Run(comp, clock, timestep, rc)
-        type(ESMF_Comp) :: comp(:)
+    subroutine CPL_Run(comp, statelist, clock, rc)
+        type(ESMF_CplComp) :: comp
+        type(ESMF_State) :: statelist(*)
         type(ESMF_Clock) :: clock
-        integer :: timestep
-        intger :: rc
-
-!     ! Local variables
-        type(ESMF_State), pointer :: statelist(:)
+        integer :: rc
 
         print *, "Coupler Run starting"
-
-        !call ESMF_CompGetState(comp, statelist, rc)
 
         ! Add whatever code needed here to transform Export state data
         !  into Import states for the next timestep.  
@@ -108,18 +94,14 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-    subroutine CPL_Final(comp, clock, rc)
-        type(ESMF_Comp) :: comp
+    subroutine CPL_Final(comp, statelist, clock, rc)
+        type(ESMF_CplComp) :: comp
+        type(ESMF_State) :: statelist(*)
         type(ESMF_Clock) :: clock
         integer :: rc
 
-!     ! Local variables
-        type(ESMF_State), pointer :: statelist(:)
-
         print *, "Coupler Final starting"
     
-        !call ESMF_CompGetState(comp, statelist, rc)
-
         ! Add whatever code needed here to compute final values and
         !  finish the computation.
 
