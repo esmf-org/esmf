@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2005/03/01 21:05:35 nscollins Exp $ 
+# $Id: makefile,v 1.15 2005/03/15 22:59:22 theurich Exp $ 
 
 ALL:  build_tests
 
@@ -72,7 +72,7 @@ RUN_ESMF_VMSendRecvUTest:
 	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_VMSendRecvUTest > $(ESMF_TESTDIR)/ESMF_VMSendRecvUTest.stdout
 
 RUN_ESMF_VMSendRecvUTestUNI:
-	echo "PASS: ESMF_VMSendRecvUTest not set up to run on one processor." > $(ESMF_TESTDIR)/ESMF_VMSendRecvUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_VMSendRecvUTest > $(ESMC_TESTDIR)/ESMF_VMSendRecvUTest.stdout
 
 #
 # VM Scatter 
