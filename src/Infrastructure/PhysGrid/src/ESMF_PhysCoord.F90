@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.13 2004/06/08 09:27:19 nscollins Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.14 2004/07/22 14:46:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -221,7 +221,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.13 2004/06/08 09:27:19 nscollins Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.14 2004/07/22 14:46:56 nscollins Exp $'
 
 !==============================================================================
 !
@@ -700,7 +700,7 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
       logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
@@ -756,7 +756,7 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
       logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
@@ -810,7 +810,7 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
       logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
@@ -863,7 +863,7 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
       logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
@@ -924,7 +924,7 @@
       integer :: localrc                             ! Error status
       logical :: dummy
       character (len=ESMF_MAXSTR) :: units           ! units of coord
-      real (ESMF_KIND_R8) :: i, minlon, maxlon, pi   ! for treating double-value
+      real (ESMF_KIND_R8) :: minlon, maxlon, pi      ! for treating double-value
                                                      ! issue in longitude
       type(ESMF_CoordType) :: coordType              ! kind of coord
 

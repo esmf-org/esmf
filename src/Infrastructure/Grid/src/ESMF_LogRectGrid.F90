@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.87 2004/06/23 16:25:50 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.88 2004/07/22 14:46:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.87 2004/06/23 16:25:50 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.88 2004/07/22 14:46:29 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3073,7 +3073,8 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: i, i1, i2, gridBoundWidth, myDE(0:2)
+      integer :: i, i1, i2, gridBoundWidth 
+      !integer :: myDE(0:2)
       character(len=ESMF_MAXSTR) :: coordName, coordUnit
       logical :: coordAligned, coordEqualSpaced, coordCyclic
       integer :: count, compCount, localStart
@@ -3082,9 +3083,9 @@
       real(ESMF_KIND_R8) :: localMinCoord, localMaxCoord
       real(ESMF_KIND_R8), dimension(:), allocatable :: coordUse
       type(ESMF_CoordType) :: coordType
-      type(ESMF_DELayout) :: delayout
+      !type(ESMF_DELayout) :: delayout
       type(ESMF_PhysCoord) :: tempCoord
-      type(ESMF_Grid) :: gridp
+      !type(ESMF_Grid) :: gridp
       type(ESMF_PhysGrid) :: physGrid
       type(ESMF_CoordSystem) :: coordSystem
 
@@ -5763,7 +5764,7 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
       integer :: i                                ! loop index
 
       ! Initialize return code; assume failure until success is certain
@@ -6463,7 +6464,7 @@
 !
 !EOPI
 
-      character(len=ESMF_MAXSTR) :: name, str
+      character(len=ESMF_MAXSTR) :: name
       type(ESMF_GridClass), pointer :: gp
       integer :: localrc                          ! Error status
 
@@ -7026,7 +7027,7 @@
 ! !REQUIREMENTS:
 
       ! Local variables.
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
       integer :: total, i
 
       ! Initialize return code; assume failure until success is certain

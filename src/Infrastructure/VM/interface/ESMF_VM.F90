@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.33 2004/07/19 19:46:22 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.34 2004/07/22 14:47:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -148,7 +148,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.33 2004/07/19 19:46:22 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.34 2004/07/22 14:47:09 nscollins Exp $'
 
 !==============================================================================
 
@@ -358,7 +358,7 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    integer :: size
+    !integer :: size
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
@@ -445,7 +445,7 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    integer :: size
+    !integer :: size
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
@@ -532,7 +532,7 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    integer :: size
+    !integer :: size
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
@@ -619,7 +619,7 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    integer :: size
+    !integer :: size
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
@@ -706,7 +706,7 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    integer :: size
+    !integer :: size
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
@@ -793,7 +793,7 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    integer :: size
+    !integer :: size
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE

@@ -216,7 +216,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.117 2004/06/21 19:38:33 theurich Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.118 2004/07/22 14:46:44 nscollins Exp $'
 
 !==============================================================================
 !
@@ -471,7 +471,7 @@
 ! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
-      logical :: dummy
+      !logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -859,7 +859,7 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -1053,7 +1053,7 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
       type(ESMF_DistGridGlobal), pointer :: glob
       integer :: i
 
@@ -1299,7 +1299,7 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
       type(ESMF_DistGridGlobal), pointer :: glob
       integer :: i
 
@@ -1389,7 +1389,7 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
       integer :: i, j, de, bnd
       integer :: globalStart, globalEnd           ! global counters
       character(len=ESMF_MAXSTR) :: logMsg
@@ -1620,7 +1620,7 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
       integer :: i, i2
       character(len=ESMF_MAXSTR) :: logMsg
       logical :: dummy
@@ -1795,7 +1795,7 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
       integer :: i, i2, j, j2
       type(ESMF_DistGridGlobal), pointer :: glob
 
@@ -1861,7 +1861,7 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
       type(ESMF_DistGridGlobal), pointer :: glob
       integer :: i, j, nndes
 
@@ -1919,7 +1919,7 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -2262,7 +2262,7 @@
 !EOPI
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
       integer :: i, j,  base, localCount
       character(len=ESMF_MAXSTR) :: logMsg
       logical :: dummy

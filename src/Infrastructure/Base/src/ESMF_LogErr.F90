@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.17 2004/06/17 12:59:54 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.18 2004/07/22 14:45:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -166,8 +166,8 @@ contains
 ! 
 !EOP
 
-	character(len=10) 					:: t
-	character(len=8) 					:: d
+	!character(len=10) 					:: t
+	!character(len=8) 					:: d
 	
 	if (present(rc)) then
 	  	rc=ESMF_FAILURE
@@ -640,8 +640,8 @@ end function ESMF_LogMsgFoundError
 !EOP
 	
 	integer 				    :: status, i
-	character(len=10) 			:: t
-	character(len=8) 			:: d
+	!character(len=10) 			:: t
+	!character(len=8) 			:: d
 	
 	if (present(rc)) rc=ESMF_FAILURE
 	log%FileIsOpen=ESMF_FALSE
@@ -767,7 +767,7 @@ end subroutine ESMF_LogSet
     character(len=10)               :: t
     character(len=8)                :: d
     character(len=7)                :: lt
-    character(len=32)               :: f
+    !character(len=32)               :: f
     character(len=32)               ::tmethod,tfile
     integer			    ::status,tline
     integer                         ::ok
