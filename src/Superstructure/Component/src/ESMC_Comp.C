@@ -1,4 +1,4 @@
-// $Id: ESMC_Component.C,v 1.5 2003/01/09 23:18:49 nscollins Exp $
+// $Id: ESMC_Comp.C,v 1.1 2003/01/23 22:24:50 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the C++ Component methods declared
-// in the companion file ESMC_Component.h
+// in the companion file ESMC_Comp.h
 //
 // < insert a paragraph or two explaining what you'll find in this file >
 //
@@ -27,7 +27,7 @@
 #include "ESMC.h"
 
  // associated class definition file
-#include <ESMC_Component.h>
+#include "ESMC_Comp.h"
 
  // return min value 
 #define min(a,b)  (((a)<(b))?(a):(b))
@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Component.C,v 1.5 2003/01/09 23:18:49 nscollins Exp $";
+           "$Id: ESMC_Comp.C,v 1.1 2003/01/23 22:24:50 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -49,13 +49,13 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !ROUTINE:  ESMC_ComponentCreate - Create a new Component
+// !ROUTINE:  ESMC_CompCreate - Create a new Component
 //
 // !INTERFACE:
-      ESMC_Component *ESMC_ComponentCreate(
+      ESMC_Comp *ESMC_CompCreate(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_Component
+//     pointer to newly allocated ESMC_Comp
 //
 // !ARGUMENTS:
       char *name,
@@ -67,47 +67,47 @@
 //
 // !DESCRIPTION:
 //      Create a new Component.  Allocates memory for a new Component
-//      object and uses the internal routine ESMC_ComponentContruct to
+//      object and uses the internal routine ESMC\_CompContruct to
 //      initialize it. 
 //
 //      Note: this is a class helper function, not a class method
-//      (see declaration in ESMC_Component.h)
+//      (see declaration in ESMC\_Comp.h)
 //
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
 
-    ESMC_Component *comp = new ESMC_Component;
+    ESMC_Comp *comp = new ESMC_Comp;
 
-    *rc = comp->ESMC_ComponentConstruct(name, layout, ctype, mtype, filepath);
+    *rc = comp->ESMC_CompConstruct(name, layout, ctype, mtype, filepath);
 
     return comp;
 
- } // end ESMC_ComponentCreate
+ } // end ESMC_CompCreate
 
 //-----------------------------------------------------------------------------
 //BOP
-// !ROUTINE:  ESMC_ComponentDestroy - free a Component created with Create
+// !ROUTINE:  ESMC_CompDestroy - free a Component created with Create
 //
 // !INTERFACE:
-      int ESMC_ComponentDestroy(
+      int ESMC_CompDestroy(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Component *component) {    // in - component object to destroy
+      ESMC_Comp *component) {    // in - component object to destroy
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a Component object previously allocated
-//      via an ESMC_ComponentCreate routine. 
+//      via an ESMC\_CompCreate routine. 
 //
 //      Note: this is a class helper function, not a class method
-//      (see declaration in ESMC_Component.h)
+//      (see declaration in ESMC\_Comp.h)
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-    component->ESMC_ComponentDestruct();
+    component->ESMC_CompDestruct();
     delete component;
 
     return ESMF_SUCCESS;
@@ -115,14 +115,14 @@
 //  code goes here
 //
 
- } // end ESMC_ComponentDestroy
+ } // end ESMC_CompDestroy
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ComponentConstruct - fill in an already allocated Component
+// !IROUTINE:  ESMC_CompConstruct - fill in an already allocated Component
 //
 // !INTERFACE:
-      int ESMC_Component::ESMC_ComponentConstruct(
+      int ESMC_Comp::ESMC_CompConstruct(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -137,10 +137,10 @@
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
 //      allocated Component object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC_ComponentDestruct
+//      as needed.  Must call the corresponding ESMC\_CompDestruct
 //      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC_ComponentCreate, which calls
-//      ESMC_ComponentConstruct.  Define for deep classes only.
+//      ESMF use only; end-users use ESMC\_CompCreate, which calls
+//      ESMC\_CompConstruct.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -162,14 +162,14 @@
 
     return ESMF_SUCCESS ;
 
- } // end ESMC_ComponentConstruct
+ } // end ESMC_CompConstruct
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ComponentDestruct - release resources associated w/a Component
+// !IROUTINE:  ESMC_CompDestruct - release resources associated w/a Component
 //
 // !INTERFACE:
-      int ESMC_Component::ESMC_ComponentDestruct(void) {
+      int ESMC_Comp::ESMC_CompDestruct(void) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -181,8 +181,8 @@
 //      ESMF routine which deallocates any space allocated by
 //      ESMF_ComponentConstruct, does any additional cleanup before the
 //      original Component object is freed.  Intended for internal ESMF
-//      use only; end-users use ESMC_ComponentDestroy, which calls
-//      ESMC_ComponentDestruct. 
+//      use only; end-users use ESMC\_CompDestroy, which calls
+//      ESMC\_CompDestruct. 
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -191,14 +191,14 @@
 
     return ESMF_SUCCESS;
 
- } // end ESMC_ComponentDestruct
+ } // end ESMC_CompDestruct
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ComponentInit - call the Component init Routine
+// !IROUTINE:  ESMC_CompInit - call the Component init Routine
 //
 // !INTERFACE:
-      int ESMC_Component::ESMC_ComponentInit(
+      int ESMC_Comp::ESMC_CompInit(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -217,14 +217,14 @@
     printf("ComponentInit method called \n");
     return ESMF_SUCCESS;
 
- } // end ESMC_ComponentInit
+ } // end ESMC_CompInit
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ComponentRun - call the Component run routine
+// !IROUTINE:  ESMC_CompRun - call the Component run routine
 //
 // !INTERFACE:
-      int ESMC_Component::ESMC_ComponentRun(
+      int ESMC_Comp::ESMC_CompRun(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -243,14 +243,14 @@
     printf("ComponentRun method called \n");
     return ESMF_SUCCESS;
 
- } // end ESMC_ComponentRun
+ } // end ESMC_CompRun
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ComponentFinalize - call the Component finalize routine
+// !IROUTINE:  ESMC_CompFinalize - call the Component finalize routine
 //
 // !INTERFACE:
-      int ESMC_Component::ESMC_ComponentFinalize(
+      int ESMC_Comp::ESMC_CompFinalize(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -269,20 +269,20 @@
     printf("ComponentFinalize method called \n");
     return ESMF_SUCCESS;
 
- } // end ESMC_ComponentFinalize
+ } // end ESMC_CompFinalize
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ComponentGetConfig - get configuration info from a Component
+// !IROUTINE:  ESMC_CompGetConfig - get configuration info from a Component
 //
 // !INTERFACE:
-      int ESMC_Component::ESMC_ComponentGetConfig(
+      int ESMC_Comp::ESMC_CompGetConfig(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_ComponentConfig *config) const {  // out - resources
+      ESMC_CompConfig *config) const {  // out - resources
 //
 // !DESCRIPTION:
 //    Returns the set of resources the Component object was configured with.
@@ -294,20 +294,20 @@
 //  code goes here
 //
 
- } // end ESMC_ComponentGetConfig
+ } // end ESMC_CompGetConfig
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ComponentSetConfig - set configuration info for a Component
+// !IROUTINE:  ESMC_CompSetConfig - set configuration info for a Component
 //
 // !INTERFACE:
-      int ESMC_Component::ESMC_ComponentSetConfig(
+      int ESMC_Comp::ESMC_CompSetConfig(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      const ESMC_ComponentConfig *config) {     // in - resources
+      const ESMC_CompConfig *config) {     // in - resources
 //
 // !DESCRIPTION:
 //    Configures the Component object with set of resources given.
@@ -319,14 +319,14 @@
 //  code goes here
 //
 
- } // end ESMC_ComponentSetConfig
+ } // end ESMC_CompSetConfig
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ComponentGet<Value> - get <Value> for a Component
+// !IROUTINE:  ESMC_CompGet<Value> - get <Value> for a Component
 //
 // !INTERFACE:
-      //int ESMC_Component::ESMC_ComponentGet<Value>(
+      //int ESMC_Comp::ESMC_CompGet<Value>(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -345,14 +345,14 @@
 //  code goes here
 //
 
- //} // end ESMC_ComponentGet<Value>
+ //} // end ESMC_CompGet<Value>
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ComponentSet<Value> - set <Value> for a Component
+// !IROUTINE:  ESMC_CompSet<Value> - set <Value> for a Component
 //
 // !INTERFACE:
-      //int ESMC_Component::ESMC_ComponentSet<Value>(
+      //int ESMC_Comp::ESMC_CompSet<Value>(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -371,14 +371,14 @@
 //  code goes here
 //
 
- //} // end ESMC_ComponentSet<Value>
+ //} // end ESMC_CompSet<Value>
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ComponentValidate - internal consistency check for a Component
+// !IROUTINE:  ESMC_CompValidate - internal consistency check for a Component
 //
 // !INTERFACE:
-      int ESMC_Component::ESMC_ComponentValidate(
+      int ESMC_Comp::ESMC_CompValidate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -397,15 +397,15 @@
 //  code goes here
 //
 
- } // end ESMC_ComponentValidate
+ } // end ESMC_CompValidate
 
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ComponentPrint - print contents of a Component
+// !IROUTINE:  ESMC_CompPrint - print contents of a Component
 //
 // !INTERFACE:
-      int ESMC_Component::ESMC_ComponentPrint(
+      int ESMC_Comp::ESMC_CompPrint(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -415,7 +415,7 @@
 //
 // !DESCRIPTION:
 //      Print information about a Component.  The options control the
-//      type of information and level of detail.  ESMC_Base class method.
+//      type of information and level of detail.  ESMC\_Base class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -424,14 +424,14 @@
 //  code goes here
 //
 
- } // end ESMC_ComponentPrint
+ } // end ESMC_CompPrint
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Component - native C++ constructor
+// !IROUTINE:  ESMC_Comp - native C++ constructor
 //
 // !INTERFACE:
-      ESMC_Component::ESMC_Component(
+      ESMC_Comp::ESMC_Comp(
 //
 // !RETURN VALUE:
 //    none
@@ -450,14 +450,14 @@
 //  code goes here
 //
 
- } // end ESMC_Component
+ } // end ESMC_Comp
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ~ESMC_Component - native C++ destructor
+// !IROUTINE:  ~ESMC_Comp - native C++ destructor
 //
 // !INTERFACE:
-      ESMC_Component::~ESMC_Component(void) {
+      ESMC_Comp::~ESMC_Comp(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -475,4 +475,4 @@
 //  code goes here
 //
 
- } // end ~ESMC_Component
+ } // end ~ESMC_Comp
