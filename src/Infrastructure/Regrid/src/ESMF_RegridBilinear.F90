@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.37 2003/10/20 15:00:00 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.38 2003/10/20 23:25:47 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -60,7 +60,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.37 2003/10/20 15:00:00 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.38 2003/10/20 23:25:47 jwolfe Exp $'
 
 !==============================================================================
 
@@ -137,7 +137,6 @@
       real(ESMF_KIND_R8), dimension(:), pointer :: srcGatheredCoordX, srcGatheredCoordY
       real(ESMF_KIND_R8), dimension(:,:), pointer :: srcLocalCoordX, srcLocalCoordY
       real(ESMF_KIND_R8), dimension(:,:), pointer :: dstLocalCoordX, dstLocalCoordY
-      real(ESMF_KIND_R8), dimension(:), pointer :: tempCrud
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: dstMin, dstMax
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: srcMin, srcMax
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: myAI, myTotalAI
@@ -399,8 +398,7 @@
                                           size, status)
       dstindex = ESMF_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMF_I4, &
                                           size*2, status) 
-      allocate(tempCrud(size))
-      weights = ESMF_LocalArrayCreate(tempCrud, ESMF_DATA_REF, status)
+      weights  = ESMF_LocalArrayCreate(1, ESMF_DATA_REAL, ESMF_R8, size, status)
  
       ! set the values in the TV
       call ESMF_TransformValuesSet(tv, 0, srcindex=srcindex, dstindex=dstindex, &
