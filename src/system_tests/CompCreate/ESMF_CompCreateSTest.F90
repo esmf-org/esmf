@@ -1,4 +1,4 @@
-! $Id: CompCreate.F90,v 1.2 2003/09/18 22:15:59 cdeluca Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.1 2003/09/19 21:22:33 jwolfe Exp $
 !
 ! System test CompCreate
 
