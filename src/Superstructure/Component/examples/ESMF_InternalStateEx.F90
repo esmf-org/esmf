@@ -1,0 +1,119 @@
+! $Id: ESMF_InternalStateEx.F90,v 1.1 2004/10/27 22:19:51 nscollins Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!
+!==============================================================================
+!
+      program ESMF_InternalStateEx
+
+!==============================================================================
+!BOP
+! !PROGRAM: ESMF_InternalStateEx - Example of using Set/Get Internal State
+!
+! !DESCRIPTION:
+!  Example of using the Component level Internal State routines.
+!  These include:
+!  \begin{description}
+!   \item[ESMF_GridCompGetInternalState]
+!   \item[ESMF_GridCompSetInternalState]
+!   \item[ESMF_CplCompGetInternalState]
+!   \item[ESMF_CplCompSetInternalState]
+!  \end{description}
+!
+!   These routines save the address of an internal, private data block
+!   during the execution of a Component's Initialize, Run, or Finalize
+!   code, and retrieve the address back during a different invocation 
+!   of these routines.   See the code below for examples of use.
+!  
+!
+!-------------------------------------------------------------------------
+!
+! !USES:
+    use ESMF_Mod
+    implicit none
+    
+    type(ESMF_GridComp) :: comp1
+    integer :: rc, finalrc
+
+    ! Internal State Variables
+    type testData
+    sequence
+        integer :: testValue
+        real    :: testScaling
+    end type
+
+    type dataWrapper
+    sequence
+        type(testData), pointer :: p
+    end type
+
+    type (dataWrapper) :: wrap1, wrap2
+    type(testData), target :: data1, data2
+
+
+    finalrc = ESMF_SUCCESS
+!-------------------------------------------------------------------------
+        
+    call ESMF_Initialize(rc=rc)
+    if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+
+
+!-------------------------------------------------------------------------
+
+!   !  Creation of a Component
+    comp1 = ESMF_GridCompCreate(name="test", rc=rc)  
+    if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+
+!-------------------------------------------------------------------------
+!   This could be called, for example, during a routine's initialize phase.
+
+!   !  Set Internal State
+    data1%testValue = 4567
+    data1%testScaling = 0.5
+    wrap1%p => data1
+
+    call ESMF_GridCompSetInternalState(comp1, wrap1, rc)
+    if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+
+!-------------------------------------------------------------------------
+!   And this could be called, for example, during a routine's run phase.
+
+!   ! Get Internal State
+!   !   note that we do not assign the pointer inside wrap2 - this call
+!   !   does that.
+    call ESMF_GridCompGetInternalState(comp1, wrap2, rc)
+    if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+
+    data2 = wrap2%p 
+    if ((data2%testValue .ne. 4567) .or. (data2%testScaling .ne. 0.5)) then
+       print *, "did not get same values back"
+       finalrc = ESMF_FAILURE
+    else
+       print *, "got same values back from GetInternalState as original"
+    endif
+
+
+!-------------------------------------------------------------------------
+!   !  Destroying a component
+
+    call ESMF_GridCompDestroy(comp1, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+
+    call ESMF_Finalize(rc)
+    if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+
+    if (finalrc .eq. ESMF_SUCCESS) then
+        print *, "PASS: ESMF_InternalStateEx.F90"
+    else 
+        print *, "FAIL: ESMF_InternalStateEx.F90"
+    end if
+
+
+    end program ESMF_InternalStateEx
+    

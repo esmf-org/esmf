@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2004/08/03 19:33:51 nscollins Exp $ 
+# $Id: makefile,v 1.20 2004/10/27 22:19:51 nscollins Exp $ 
 
 ALL:  build_examples
 
@@ -62,7 +62,8 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_AppMainEx \
                  $(ESMF_EXDIR)/ESMC_GCompEx \
                  $(ESMF_EXDIR)/ESMF_AppMainEx \
                  $(ESMF_EXDIR)/ESMF_CplEx \
-                 $(ESMF_EXDIR)/ESMF_GCompEx 
+                 $(ESMF_EXDIR)/ESMF_GCompEx \
+                 $(ESMF_EXDIR)/ESMF_InternalStateEx 
 
 #
 # List the example run targets in EXAMPLES_RUN and 
@@ -75,7 +76,8 @@ EXAMPLES_RUN   = run_ESMC_AppMainEx \
                  run_ESMC_GCompEx \
                  run_ESMF_AppMainEx \
                  run_ESMF_CplEx \
-                 run_ESMF_GCompEx 
+                 run_ESMF_GCompEx \
+                 run_ESMF_InternalStateEx 
 
 
 EXAMPLES_RUN_UNI = run_ESMC_AppMainEx_uni \
@@ -83,7 +85,8 @@ EXAMPLES_RUN_UNI = run_ESMC_AppMainEx_uni \
                    run_ESMC_GCompEx_uni \
                    run_ESMF_AppMainEx_uni \
                    run_ESMF_CplEx_uni \
-                   run_ESMF_GCompEx_uni 
+                   run_ESMF_GCompEx_uni \
+                   run_ESMF_InternalStateEx_uni 
 
 include $(ESMF_DIR)/makefile
 
@@ -147,3 +150,13 @@ run_ESMF_GCompEx:
 
 run_ESMF_GCompEx_uni:
 	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_GCompEx > $(ESMF_EXDIR)/ESMF_GCompEx.stdout
+
+#
+# ESMF_InternalStateEx
+#
+run_ESMF_InternalStateEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_InternalStateEx > $(ESMF_EXDIR)/ESMF_InternalStateEx.stdout
+
+run_ESMF_InternalStateEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_InternalStateEx > $(ESMF_EXDIR)/ESMF_InternalStateEx.stdout
+
