@@ -355,7 +355,7 @@ end function ESMF_LogWrite
     if (present(rc)) rc = status
     if (status .NE. ESMF_SUCCESS) then
         logrc = ESMF_LogWrite("StandardError",ESMF_LOG_ERROR,line,file,method)
-        if (logrc .ne. .TRUE.) then
+        if (.not. logrc) then
             print *, "Error writing previous error to log file"
             ! what now?  we're already in the error code...
             ! just fall through and return i guess.
@@ -408,7 +408,7 @@ end function ESMF_LogFoundError
 	rc=status
 	if (status .NE. ESMF_SUCCESS) then
 	    logrc = ESMF_LogWrite(msg,ESMF_LOG_ERROR,line,file,method)
-        if (logrc .ne. .TRUE.) then
+        if (.not. logrc) then
             print *, "Error writing previous error to log file"
             ! what now?  we're already in the error code...
             ! just fall through and return i guess.
@@ -452,18 +452,18 @@ end function ESMF_LogMsgFoundError
 !      \end{description}
 ! 
 !EOP
-    integer :: logrc
+    logical :: logrc
 	
-	ESMF_LogFoundAllocError=.FALSE.
-	if (status .NE. 0) then
-		logrc = ESMF_LogWrite("Alloc Error "//msg,ESMF_LOG_ERROR,line,file,method)
-		if (logrc .ne. .TRUE.) then
+    ESMF_LogFoundAllocError=.FALSE.
+    if (status .NE. 0) then
+	logrc = ESMF_LogWrite("Alloc Error "//msg,ESMF_LOG_ERROR,line,file,method)
+	if (.not. logrc) then
             print *, "Error writing previous error to log file"
             ! what now?  we're already in the error code...
             ! just fall through and return i guess.
         endif
-		ESMF_LogFoundAllocError=.TRUE.
-	endif	
+	ESMF_LogFoundAllocError=.TRUE.
+    endif	
        
 end function ESMF_LogFoundAllocError
 
