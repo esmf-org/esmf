@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.13 2004/02/10 00:07:19 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.14 2004/02/10 21:59:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.13 2004/02/10 00:07:19 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.14 2004/02/10 21:59:38 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1523,7 +1523,7 @@
 
       if (associated(grid%gridSpecific%logRectGrid%coords)) then
         allocate(coords(numDims))
-        coords = grid%gridSpecific%logRectGrid%coords
+        coords => grid%gridSpecific%logRectGrid%coords
       endif
       do i = 1,numDims
         counts(i)   = grid%gridSpecific%logRectGrid%countPerDim(i)
