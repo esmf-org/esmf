@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.86 2004/02/24 15:35:15 theurich Exp $
+! $Id: ESMF_Base.F90,v 1.87 2004/02/24 19:21:00 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -411,7 +411,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.86 2004/02/24 15:35:15 theurich Exp $'
+               '$Id: ESMF_Base.F90,v 1.87 2004/02/24 19:21:00 svasquez Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -705,15 +705,32 @@ end function
       subroutine ESMF_AttributeSet(base, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: base              ! any ESMF type
-      character (len = *), intent(in) :: name          ! attribute name
-      type(ESMF_DataValue), intent(in) :: value        ! attribute value
-      integer, intent(out), optional :: rc             ! return code
+      type(ESMF_Base), intent(in) :: base
+      character (len = *), intent(in) :: name 
+      type(ESMF_DataValue), intent(in) :: value 
+      integer, intent(out), optional :: rc  
 
 !
 ! !DESCRIPTION:
 !     Associate a (name,value) pair with any type in the system.
-
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[base]
+!       Any ESMF type.
+!
+!     \item[name]
+!       The name of the attribute to set.
+!
+!     \item[value]
+!       The value of the attribute.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:  FLD1.5, FLD1.5.3
@@ -735,14 +752,32 @@ end function
       subroutine ESMF_AttributeGet(base, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: base             ! any ESMF type
-      character (len = *), intent(in) :: name         ! attribute name
-      type(ESMF_DataValue), intent(out) :: value      ! attribute value
-      integer, intent(out), optional :: rc            ! return code
+      type(ESMF_Base), intent(in) :: base 
+      character (len = *), intent(in) :: name 
+      type(ESMF_DataValue), intent(out) :: value 
+      integer, intent(out), optional :: rc 
 
 !
-! !DESCRIPTION:
-
+! !DESCRIPTION: Get a (name,value) pair with any type in the system.
+!
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[base]
+!       Any ESMF type.
+!
+!     \item[name]
+!       The name of the attribute to get.
+!
+!     \item[value]
+!       The value of the attribute.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:  FLD1.5.1, FLD1.5.3
@@ -772,7 +807,22 @@ end function
 !
 ! !DESCRIPTION:
 ! Returns number of attributes present.
-
+!
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[anytype]
+!       Any ESMF type.
+!
+!     \item[count]
+!       The number of attributes.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:  FLD1.7.5
@@ -783,23 +833,48 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-! !IROUTINE:  ESMF_AttributeGetbyNumber - get an ESMF object's attribute by num ber
+! !IROUTINE:  ESMF_AttributeGetbyNumber - get an ESMF object's attribute by number
 !
 ! !INTERFACE:
       subroutine ESMF_AttributeGetbyNumber(anytype, number, name, type, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: anytype             ! any ESMF type
-      integer, intent(in) :: number                      ! attribute number
-      character (len = *), intent(in) :: name            ! attribute name
-      type(ESMF_DataType), intent(out) :: type               ! all possible data types
-      type(ESMF_DataValue), intent(out) :: value             ! attribute value
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_Base), intent(in) :: anytype
+      integer, intent(in) :: number
+      character (len = *), intent(in) :: name
+      type(ESMF_DataType), intent(out) :: type
+      type(ESMF_DataValue), intent(out) :: value
+      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
 ! Allows the caller to get attributes by number instead of by name.
 ! This can be useful in iterating through all attributes in a loop.
+!
+!
+!     The arguments are:
+!     \begin{description}
+!     
+!     \item[anytype]
+!       Any ESMF type.
+!       
+!     \item[number]
+!       The attribute number.
+!       
+!     \item[name]
+!       The attribute name.
+!       
+!     \item[type]
+!       The attribute datatype.
+!       
+!     \item[type]
+!       The attribute value.
+!       
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       
+!     \end{description}
+!     
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -816,15 +891,31 @@ end function
       subroutine ESMF_AttributeGetNameList(anytype, count, namelist, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: anytype             ! any ESMF type
-      integer, intent(out) :: count                      ! attribute count
-      character (len = *), dimension (:), intent(inout) :: namelist   ! attribute names
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_Base), intent(in) :: anytype
+      integer, intent(out) :: count
+      character (len = *), dimension (:), intent(inout) :: namelist
+      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
 ! Return a list of all attribute names without returning the values.
-
+!
+!     The arguments are:
+!     \begin{description}
+!   
+!     \item[anytype]
+!       Any ESMF type.
+!
+!     \item[count]
+!       The number of attributes.
+!
+!     \item[namelist]
+!       The list of attribute names.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  FLD1.7.3
@@ -845,15 +936,34 @@ end function
 
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: anytype             ! any ESMF type
-      character (len = *), dimension (:), intent(in) :: namelist    ! attribute names
-      type(ESMF_DataValue), dimension (:), intent(in) :: valuelist      ! attribute values
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_Base), intent(in) :: anytype
+      character (len = *), dimension (:), intent(in) :: namelist
+      type(ESMF_DataValue), dimension (:), intent(in) :: valuelist
+      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
 ! Set multiple attributes on an object in one call.  Depending on what is
 ! allowed by the interface, all attributes may have to have the same type.
+!
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[anytype]
+!       Any ESMF type.
+!
+!     \item[namelist]
+!       The list of attribute names.
+!
+!     \item[valuelist]
+!       The list of attribute values.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:  (none.  added for completeness)
@@ -870,16 +980,36 @@ end function
       subroutine ESMF_AttributeGetList(anytype, namelist, typelist, valuelist, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: anytype             ! any ESMF type
-      character (len = *), dimension (:), intent(in) :: namelist    ! attribute names
-      type(ESMF_DataType), dimension (:), intent(out) :: typelist       ! all possible data types
-      type(ESMF_DataValue), dimension (:), intent(out) :: valuelist     ! attribute values
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_Base), intent(in) :: anytype
+      character (len = *), dimension (:), intent(in) :: namelist
+      type(ESMF_DataType), dimension (:), intent(out) :: typelist
+      type(ESMF_DataValue), dimension (:), intent(out) :: valuelist
+      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
 ! Get multiple attributes from an object in a single call.
-
+!
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[anytype]
+!       Any ESMF type.
+!
+!     \item[namelist]
+!       The list of attribute names.
+!
+!     \item[typelist]
+!       The list of attribute types.
+!
+!     \item[valuelist]
+!       The list of attribute values.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  FLD1.7.4
@@ -896,15 +1026,32 @@ end function
       subroutine ESMF_AttributeSetObjectList(anytypelist, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), dimension (:), intent(in) :: anytypelist     ! list of any ESMF types
-      character (len = *), intent(in) :: name            ! attribute name
-      type(ESMF_DataValue), dimension (:), intent(in) :: value          ! attribute value
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_Base), dimension (:), intent(in) :: anytypelist
+      character (len = *), intent(in) :: name
+      type(ESMF_DataValue), dimension (:), intent(in) :: value
+      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
 ! Set the same attribute on multiple objects in one call.
-
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[anytypelist]
+!       A list of any ESMF types.
+!
+!     \item[name]
+!       The attribute name.
+!
+!     \item[typelist]
+!       The attribute value.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:  FLD1.5.5 (pri 2)
@@ -922,16 +1069,36 @@ end function
       subroutine ESMF_AttributeGetObjectList(anytypelist, name, typelist, valuelist, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), dimension (:), intent(in) :: anytypelist     ! list of any ESMF types
-      character (len = *), intent(in) :: name            ! attribute name
-      type(ESMF_DataType), dimension (:), intent(out) :: typelist       ! all possible data types
-      type(ESMF_DataValue), dimension (:), intent(out) :: valuelist     ! attribute values
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_Base), dimension (:), intent(in) :: anytypelist
+      character (len = *), intent(in) :: name
+      type(ESMF_DataType), dimension (:), intent(out) :: typelist
+      type(ESMF_DataValue), dimension (:), intent(out) :: valuelist
+      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
 ! Get the same attribute name from multiple objects in one call.
-
+!
+!     The arguments are:
+!     \begin{description}
+! 
+!     \item[anytypelist]
+!       The list of any ESMF types.
+!     
+!     \item[name]
+!       The attribute name.
+!     
+!     \item[typelist]
+!       The list of all possible data types.
+!     
+!     \item[valuelist]
+!       The list of attribute values.
+!     
+!     \item[{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:  FLD1.5.5 (pri 2)
@@ -948,10 +1115,10 @@ end function
       subroutine ESMF_AttributeCopy(name, source, destination, rc)
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: name            ! attribute name
-      type(ESMF_Base), intent(in) :: source              ! any ESMF type
-      type(ESMF_Base), intent(in) :: destination         ! any ESMF type
-      integer, intent(out), optional :: rc               ! return code
+      character (len = *), intent(in) :: name
+      type(ESMF_Base), intent(in) :: source
+      type(ESMF_Base), intent(in) :: destination
+      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -959,8 +1126,24 @@ end function
 ! copied to the destination object.  << does this assume overwriting the
 ! attribute if it already exists in the output or does this require yet
 ! another arg to say what to do with collisions? >>
-
-
+! 
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[name]
+!       The attribute name.
+!   
+!     \item[source]
+!       The source ESMF object.
+!
+!     \item[destination]
+!       The destination ESMF object.
+!     
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     
+!     \end{description}
+!     
 !
 !EOP
 ! !REQUIREMENTS:  FLD1.5.4
@@ -978,9 +1161,9 @@ end function
       subroutine ESMF_AttributeCopyAll(source, destination, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: source              ! any ESMF type
-      type(ESMF_Base), intent(in) :: destination         ! any ESMF type
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_Base), intent(in) :: source
+      type(ESMF_Base), intent(in) :: destination
+      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -988,7 +1171,22 @@ end function
 ! destination object.  Some attributes will have to be considered
 ! {\tt read only} and won't be updated by this call.  (e.g. an attribute
 ! like {\tt name} must be unique and therefore can't be duplicated.)
-
+!
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[source]
+!       The source ESMF object.
+!
+!     \item[destination]
+!       The destination ESMF object.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:  FLD1.5.4
@@ -1080,7 +1278,20 @@ end function
 !
 ! !DESCRIPTION:
 !     Return the name of any type in the system.
-
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[base]
+!       Any ESMF type.
+!
+!     \item[name]
+!       The name of the ESMF type.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  FLD1.5, FLD1.5.3
@@ -1112,7 +1323,21 @@ end function
 !
 ! !DESCRIPTION:
 !  Interface to call through to C++ and print base object values.
-
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[base]
+!       Any ESMF type.
+!
+!     \item[options]
+!       Print options.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:  FLD1.5.4
@@ -1149,13 +1374,20 @@ end function
       type(ESMF_DomainList) :: ESMF_DomainListCreate
 !
 ! !ARGUMENTS:
-      integer :: num_domains      ! A suggestion on the number of
-                                  ! domains the object will hold.
+      integer :: num_domains
 
 !
 ! !DESCRIPTION:
 ! Create a domain list.  Initializes the array of domains.  Preallocates
 ! some storage, hopefully enough.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[num_domains]
+!	A suggestion on the number of domains the object will hold.
+!
+!     \end{description}
 !
 !EOPI
       integer :: status
@@ -1187,6 +1419,14 @@ end function
 ! !DESCRIPTION:
 ! Deallocate memory used by creation routine.
 !
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[domainlist]
+!       A list of domains to destroy.
+!
+!     \end{description}
+!
 !EOPI
       integer :: status
 
@@ -1209,6 +1449,14 @@ end function
 ! !DESCRIPTION:
 ! Dump the contents of a domain list to screen, i.e. for 
 ! debugging during development.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[domainlist]
+!       A list of domains to print.
+!
+!     \end{description}
 !
 !EOPI
       integer :: status, i, j
@@ -1243,16 +1491,43 @@ end function
 !
 ! !ARGUMENTS:
      type(ESMF_DomainList), intent(inout) :: domainlist
-     integer :: min1         ! Minimimun in first direction
-     integer :: max1         ! Maximimun in first direction
-     integer :: stride1      ! stride in first direction
-     integer :: min2         ! Minimimun in second direction
-     integer :: max2         ! Maximimun in second direction
-     integer :: stride2      ! stride in second direction
+     integer :: min1
+     integer :: max1
+     integer :: stride1
+     integer :: min2
+     integer :: max2
+     integer :: stride2
 !
 ! !DESCRIPTION:
 !    Convenience function for adding a 2d domain.  Avoids the 
 !    unnecessary hassle of creating a domain, etc...
+!
+!
+!     The arguments are:
+!     \begin{description}
+!     
+!     \item[domainlist]
+!       The ESMF\_DomainList.
+!       
+!     \item[min1]
+!	Minimimun in first direction.
+!       
+!     \item[max1]
+!	Maximum in first direction.
+!       
+!     \item[stride1]
+!	Stride in first direction.
+!       
+!     \item[min2]
+!	Minimimun in second direction.
+!       
+!     \item[max2]
+!	Maximimun in second direction.
+!       
+!     \item[stride2]
+!	Stride in second direction.
+!       
+!     \end{description}
 !
 !EOPI
       type(ESMF_Domain) :: newdomain          ! temp variable to use
@@ -1279,19 +1554,54 @@ end function
 !
 ! !ARGUMENTS:
      type(ESMF_DomainList), intent(inout) :: domainlist
-     integer :: min1         ! Minimimun in first direction
-     integer :: max1         ! Maximimun in first direction
-     integer :: stride1      ! stride in first direction
-     integer :: min2         ! Minimimun in second direction
-     integer :: max2         ! Maximimun in second direction
-     integer :: stride2      ! stride in second direction
-     integer :: min3         ! Minimimun in third direction
-     integer :: max3         ! Maximimun in third direction
-     integer :: stride3      ! stride in third direction
+     integer :: min1
+     integer :: max1
+     integer :: stride1
+     integer :: min2
+     integer :: max2 
+     integer :: stride2
+     integer :: min3
+     integer :: max3
+     integer :: stride3
 !
 ! !DESCRIPTION:
 !    Convenience function for adding a 3d domain.  Avoids the 
 !    unnecessary hassle of creating a domain, etc...
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[domainlist]
+!       The ESMF\_DomainList.
+!
+!     \item[min1]
+!       Minimimun in first direction.
+!
+!     \item[max1]
+!       Maximum in first direction.
+!
+!     \item[stride1]
+!       Stride in first direction.
+!
+!     \item[min2]
+!       Minimimun in second direction.
+!
+!     \item[max2]
+!       Maximimun in second direction.
+!
+!     \item[stride2]
+!       Stride in second direction.
+!
+!     \item[min3]
+!       Minimimun in third direction.
+!
+!     \item[max3]
+!       Maximimun in third direction.
+!
+!     \item[stride3]
+!       Stride in third direction.
+!
+!     \end{description}
 !
 !EOPI
       type(ESMF_Domain) :: newdomain          ! temp variable to use
@@ -1322,6 +1632,17 @@ end function
 !   The other add routines should end by using this call.  It takes care of
 !   the memory management issues, i.e. it reallocs the list if it has grown
 !   too large. 
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[domainlist]
+!       The ESMF\_DomainList.
+!
+!     \item[newdomain]
+!       The ESMF\_Domain to add to the list.
+!
+!     \end{description}
 !
 !EOPI
       type(ESMF_Domain), dimension(:), allocatable, target :: temp_domains
@@ -1377,7 +1698,26 @@ end function
 !
 ! !DESCRIPTION:
 !   Set the contents of an AxisIndex type.
-
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[ai]
+!       The ESMF\_AxisIndex.
+!
+!     \item[min]
+!       The minimimun.
+!
+!     \item[max]
+!       The maximum.
+!
+!     \item[stride]
+!       The stride.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     
+!     \end{description}
 !
 !EOPI
 
@@ -1404,7 +1744,27 @@ end function
 !
 ! !DESCRIPTION:
 !   Get the contents of an AxisIndex type.
-
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[ai]
+!       The ESMF\_AxisIndex.
+!
+!     \item[min]
+!       The minimimun.
+!
+!     \item[max]
+!       The maximum.
+!
+!     \item[stride]
+!       The stride.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
 !
 !EOPI
 
@@ -1434,7 +1794,20 @@ end function
 !
 ! !DESCRIPTION:
 !   Set the contents of an opaque pointer type.
-
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[ptype]
+!       ESMF\_Pointer.
+!
+!     \item[contents]
+!       The contents to set.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
 !
 !EOPI
 
@@ -1459,7 +1832,19 @@ end function
 !
 ! !DESCRIPTION:
 !   Set the contents of an opaque pointer type.
-
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[ptype]
+!       ESMF\_Pointer.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!
 !
 !EOPI
 
@@ -1486,7 +1871,18 @@ end function
 !
 ! !DESCRIPTION:
 !   Get the contents of an opaque pointer type.
-
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[ptype]
+!       ESMF\_Pointer.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
 !
 !EOPI
 
@@ -1512,7 +1908,22 @@ end function
 !
 ! !DESCRIPTION:
 !   Return a status variable as a string.
-
+!
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[status]
+!       The ESMF\_Status of a string.
+!
+!     \item[string]
+!       The status string.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:
@@ -1543,7 +1954,22 @@ end function
 !
 ! !DESCRIPTION:
 !   Return a datatype variable as a string.
-
+!
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[datatype]
+!       The ESMF\_DataType of a string.
+!
+!     \item[string]
+!       The status string.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:
@@ -1572,7 +1998,21 @@ end function
 !
 ! !DESCRIPTION:
 !   Return a datakind variable as a string.
-
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[datakind]
+!       The ESMF\_DataKind of a string.
+!
+!     \item[string]
+!       The status string.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:
@@ -1605,7 +2045,21 @@ end function
 !
 ! !DESCRIPTION:
 !   Return a tf variable as a string.
-
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[tf]
+!       The ESMF\_Logical of a string.
+!
+!     \item[string]
+!       The status string.
+!
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:
