@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.1 2004/07/07 17:26:42 svasquez Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.2 2004/08/23 16:09:34 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -42,6 +42,18 @@
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
     integer :: result = 0
+    
+    ! Internal State Variables
+    type testData
+	integer :: testNumber
+    end type
+
+    type dataWrapper
+	type(testData), pointer :: p
+    end type
+    
+    type (dataWrapper) :: wrap1, wrap2
+    type(testData), target :: data1, data2
 
 !-------------------------------------------------------------------------------
 !   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -149,22 +161,26 @@
 
 
 !-------------------------------------------------------------------------
-!   Emailed Nancy about these tests.
 !   !  Set Internal State
+    !EX_UTest
+    data1%testnumber=4567
+    wrap1%p=>data1
 
-    !write(failMsg, *) "Did not return ESMF_SUCCESS"
-    !write(name, *) "Set Internal State Test"
-    !call ESMF_CplCompSetInternalState(cpl, dataPointer=pointer, rc=rc)
-    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set Internal State Test"
+    call ESMF_CplCompSetInternalState(cpl, wrap1, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
 !   !  Get Internal State
 
-    !write(failMsg, *) "Did not return ESMF_SUCCESS"
-    !write(name, *) "Get Internal State Test"
-    !call ESMF_CplCompGetInternalState(comp1, dataPointer=pointer, rc=rc)
-    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    wrap2%p=>data2
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Get Internal State Test"
+    call ESMF_CplCompGetInternalState(cpl, wrap2, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
