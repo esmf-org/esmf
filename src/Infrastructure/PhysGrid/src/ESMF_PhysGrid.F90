@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.77 2004/06/08 09:27:19 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.78 2004/06/18 13:33:58 atrayanov Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -321,7 +321,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.77 2004/06/08 09:27:19 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.78 2004/06/18 13:33:58 atrayanov Exp $'
 
 !==============================================================================
 !
@@ -1496,7 +1496,7 @@
                                     ESMF_CONTEXT, rc)) return
 
           if (trim(name) == trim(name_tmp)) then
-            maskArray = physgrid%ptr%masks(id)%data
+            maskArray = physgrid%ptr%masks(n)%data
             found = .true.
             exit name_loop
           endif
