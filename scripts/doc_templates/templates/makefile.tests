@@ -1,4 +1,4 @@
-# $Id: makefile.tests,v 1.4 2003/03/14 06:21:16 eschwab Exp $
+# $Id: makefile.tests,v 1.5 2003/03/17 22:22:14 flanigan Exp $
 
 ALL:  tests
 
@@ -32,7 +32,7 @@ include ${ESMF_DIR}/makefile
 DIRS	  = 
 
 $(ESMC_TESTDIR)/ESMF_<Class>UTest: chkopts ESMF_<Class>UTest.o
-	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_<Class>UTest ESMF_<Class>UTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_<Class>UTest ESMF_<Class>UTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_<Class>UTest.o
 
 RUN_ESMF_<Class>UTest:
@@ -48,7 +48,7 @@ ESMF_<Class>UTest.rm:
 
 
 $(ESMC_TESTDIR)/ESMC_<Class>UTest: chkopts ESMC_<Class>UTest.o
-	-${CXXF90LD} -o $(ESMC_TESTDIR)/ESMC_<Class>UTest ESMC_<Class>UTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	-${CXXF90LD} -o $(ESMC_TESTDIR)/ESMC_<Class>UTest ESMC_<Class>UTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMC_<Class>UTest.o
 
 RUN_ESMC_<Class>UTest:

@@ -1,4 +1,4 @@
-# $Id: makefile.examp,v 1.4 2003/03/04 17:39:50 flanigan Exp $
+# $Id: makefile.examp,v 1.5 2003/03/17 22:22:14 flanigan Exp $
 
 # makefile template for the examples directory.
 
@@ -32,26 +32,16 @@ ESMF_<Comp>Dir:
 	mkdir -p ${ESMC_TESTDIR}
 
 ESMF_<Comp>Ex: ESMF_<Comp>Ex.o  chkopts
-	${F90CXXLD} -g -o ESMF_<Comp>Ex ESMF_<Comp>Ex.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
+	${F90CXXLD} -g -o ESMF_<Comp>Ex ESMF_<Comp>Ex.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_<Comp>Ex.o
 
 RUN_ESMF_<Comp>Ex:
 	-@rm -f testlog stdlog.* logfile.* ESMF_<Comp>Ex.tmps
 	${MPIRUN} -np 4 ESMF_<Comp>Ex > ESMF_<Comp>Ex.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_<Comp>Ex.tmp
-	#@if (diff ESMF_<Comp>Ex.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_<Comp>Ex.out) then \
-	#echo "PASS <Comp>Ex test" > ${ESMC_TESTDIR}/ESMF_<Comp>Ex.log; else \
-	#echo "FAIL <Comp>Ex test" > ${ESMC_TESTDIR}/ESMF_<Comp>Ex.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_<Comp>Ex.tmp optlog
 
 RUN_ESMF_<Comp>ExUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_<Comp>Ex.tmps
 	${MPIRUN} -np 1 ESMF_<Comp>Ex > ESMF_<Comp>Ex.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_<Comp>Ex.tmp
-	#@if (diff ESMF_<Comp>Ex.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_<Comp>Ex.outuni) then \
-	#echo "PASS <Comp>Ex test" > ${ESMC_TESTDIR}/ESMF_<Comp>Ex.log; else \
-	#echo "FAIL <Comp>Ex test" > ${ESMC_TESTDIR}/ESMF_<Comp>Ex.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_<Comp>Ex.tmp optlog
 
 ESMF_<Comp>Ex.rm:
 	echo "ESMF_<Comp>Ex.rm target called here."
