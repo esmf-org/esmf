@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.7 2002/12/10 21:47:20 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.8 2002/12/10 22:53:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -90,8 +90,8 @@ extern "C" {
           *status = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_arrayprint)(ESMC_Array *ptr, int *status) {
-         *status = ptr->ESMC_ArrayPrint("");
+     void FTN(c_esmc_arrayprint)(ESMC_Array *ptr, char *opts, int *status) {
+         *status = ptr->ESMC_ArrayPrint(opts);
      }
 
 };
