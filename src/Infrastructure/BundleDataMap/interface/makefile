@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2004/05/05 15:40:26 nscollins Exp $
+# $Id: makefile,v 1.2 2004/05/10 13:23:23 nscollins Exp $
 
 # leave alone.
 ALL: build_here
@@ -29,7 +29,7 @@ LIBBASE	  = libesmf
 
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
-LOCDIR	  = src/Infrastructure/BundleDataMap/<subdir>
+LOCDIR	  = src/Infrastructure/BundleDataMap/interface
 
 # leave these alone 
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))

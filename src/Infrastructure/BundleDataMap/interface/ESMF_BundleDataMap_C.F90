@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap_C.F90,v 1.1 2004/05/05 15:40:26 nscollins Exp $
+! $Id: ESMF_BundleDataMap_C.F90,v 1.2 2004/05/10 13:23:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -7,11 +7,6 @@
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 ! NASA Goddard Space Flight Center.
 ! Licensed under the GPL.
-!
-!==============================================================================
-!
-!     ESMF BundleDataMap module
-      module ESMF_BundleDataMapMod
 !
 !==============================================================================
 !
@@ -35,151 +30,83 @@
 
 !==============================================================================
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleDataMap_C.F90,v 1.1 2004/05/05 15:40:26 nscollins Exp $'
-
+!      character(*), parameter, private :: version = &
+!      '$Id: ESMF_BundleDataMap_C.F90,v 1.2 2004/05/10 13:23:23 nscollins Exp $'
 !==============================================================================
 ! 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!
-! This section includes the BundleDataMap Create and Destroy methods for 
-!  deep classes only.  See the Init methods for shallow classes.
-
-!------------------------------------------------------------------------------
-    subroutine f_esmf_bundledatamapcreate(bundledatamapp, arg1, arg2, arg3, rc)
-      use ESMF_BaseMod       ! ESMF_Base class
-      use ESMF_BundleDataMapMod
-
-      type(ESMF_BundleDataMap), pointer :: bundledatamapp
-      integer, intent(in) :: arg1
-      integer, intent(in) :: arg2
-      integer, intent(in) :: arg3
-      integer, intent(out), :: rc
-
-      ! Local variable
-      type(ESMF_BundleDataMap), target :: thebundledatamap
-     
-      thebundledatamap = ESMF_BundleDataMapCreate(bundledatamapp, arg1, arg2, arg3, rc)
-    
-      bundledatamapp => thebundledatamap
-    end subroutine f_esmf_bundledatamapcreate
-  
-!------------------------------------------------------------------------------
-    subroutine f_esmf_bundledatamapdestroy(bundledatamapp, rc)
-      use ESMF_BaseMod       ! ESMF_Base class
-      use ESMF_BundleDataMapMod
-
-      type(ESMF_BundleDataMap), pointer :: bundledatamapp
-      integer, intent(out), :: rc
-
-     
-      call ESMF_BundleDataMapDestroy(bundledatamapp, rc)
-    
-    end subroutine f_esmf_bundledatamapdestroy
-  
-
 !------------------------------------------------------------------------------
 !! for shallow classes, use init instead of create and destroy
 
 !------------------------------------------------------------------------------
-    subroutine f_esmf_bundledatamapinit(bundledatamapp, arg1, arg2, arg3, rc)
+    subroutine f_esmf_bundledatamapinit(bdmp, btype, rc)
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_BundleDataMapMod
 
-      type(ESMF_BundleDataMap), pointer :: bundledatamapp
-      integer, intent(in) :: arg1
-      integer, intent(in) :: arg2
-      integer, intent(in) :: arg3
-      integer, intent(out), :: rc
+      type(ESMF_BundleDataMap), pointer :: bdmp
+      type(ESMF_BundleInterleave), intent(in) :: btype
+      integer, intent(out), optional :: rc
      
 
-      call ESMF_BundleDataMapInit(bundledatamapp, arg1, arg2, arg3, rc)
+      call ESMF_BundleDataMapInit(bdmp, btype, rc)
     
     end subroutine f_esmf_bundledatamapinit
   
 
 !------------------------------------------------------------------------------
-    subroutine f_esmf_bundledatamapgetconfig(bundledatamapp, config, rc)
+    subroutine f_esmf_bundledatamapget(bdmp, btype, rc)
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_BundleDataMapMod
 
-      type(ESMF_BundleDataMap), pointer :: bundledatamapp
-      type(ESMF_BundleDataMapConfig), pointer :: config
-      integer, intent(out), :: rc
-     
-
-      call ESMF_BundleDataMapGetConfig(bundledatamapp, config, rc)
-    
-    end subroutine f_esmf_bundledatamapgetconfig
-  
-!------------------------------------------------------------------------------
-    subroutine f_esmf_bundledatamapsetconfig(bundledatamapp, config, rc)
-      use ESMF_BaseMod       ! ESMF_Base class
-      use ESMF_BundleDataMapMod
-
-      type(ESMF_BundleDataMap), pointer :: bundledatamapp
-      type(ESMF_BundleDataMapConfig), pointer :: config
-      integer, intent(out), :: rc
-     
-
-      call ESMF_BundleDataMapSetConfig(bundledatamapp, config, rc)
-    
-    end subroutine f_esmf_bundledatamapsetconfig
-  
-!------------------------------------------------------------------------------
-    subroutine f_esmf_bundledatamapget(bundledatamapp, value, rc)
-      use ESMF_BaseMod       ! ESMF_Base class
-      use ESMF_BundleDataMapMod
-
-      type(ESMF_BundleDataMap), pointer :: bundledatamapp
-      integer, intent(out) :: value
+      type(ESMF_BundleDataMap), pointer :: bdmp
+      type(ESMF_BundleInterleave), intent(out) :: btype
       integer, intent(out) :: rc
      
 
-      call ESMF_BundleDataMapGet(bundledatamapp, <value>, rc)
+      call ESMF_BundleDataMapGet(bdmp, btype, rc)
     
     end subroutine f_esmf_bundledatamapget
   
 !------------------------------------------------------------------------------
-    subroutine f_esmf_bundledatamapset(bundledatamapp, <value>, rc)
+    subroutine f_esmf_bundledatamapset(bdmp, btype, rc)
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_BundleDataMapMod
 
-      type(ESMF_BundleDataMap), pointer :: bundledatamapp
-      integer, intent(in) :: value
+      type(ESMF_BundleDataMap), pointer :: bdmp
+      type(ESMF_BundleInterleave), intent(in) :: btype
       integer, intent(out) :: rc
      
 
-      call ESMF_BundleDataMapSet(bundledatamapp, <value>, rc)
+      call ESMF_BundleDataMapSet(bdmp, btype, rc)
     
     end subroutine f_esmf_bundledatamapset
   
 !------------------------------------------------------------------------------
-    subroutine f_esmf_bundledatamapvalidate(bundledatamapp, options, rc)
+    subroutine f_esmf_bundledatamapvalidate(bdmp, options, rc)
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_BundleDataMapMod
 
-      type(ESMF_BundleDataMap), pointer :: bundledatamapp
+      type(ESMF_BundleDataMap), pointer :: bdmp
       character(len=*) :: options
-      integer, intent(out), :: rc
+      integer, intent(out), optional :: rc
      
 
-      call ESMF_BundleDataMapValidate(bundledatamapp, options, rc)
+      call ESMF_BundleDataMapValidate(bdmp, options, rc)
     
     end subroutine f_esmf_bundledatamapvalidate
   
 !------------------------------------------------------------------------------
-    subroutine f_esmf_bundledatamapprint(bundledatamapp, options, rc)
+    subroutine f_esmf_bundledatamapprint(bdmp, options, rc)
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_BundleDataMapMod
 
-      type(ESMF_BundleDataMap), pointer :: bundledatamapp
+      type(ESMF_BundleDataMap), pointer :: bdmp
       character(len=*) :: options
-      integer, intent(out), :: rc
+      integer, intent(out), optional :: rc
      
 
-      call ESMF_BundleDataMapPrint(bundledatamapp, options, rc)
+      call ESMF_BundleDataMapPrint(bdmp, options, rc)
     
     end subroutine f_esmf_bundledatamapprint
   

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.3 2004/05/07 12:08:57 nscollins Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.4 2004/05/10 13:23:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -58,34 +58,19 @@
       private
 
 !------------------------------------------------------------------------------
-!  ! Interleaved types are used when there are multiple variables or
-!  ! if individual data items are > scalar
-
-      type ESMF_BundleInterleaveType
-      sequence
-      private
-          integer :: bil_type
-      end type
-
-      type(ESMF_BundleInterleaveType), parameter ::  &
-                    ESMF_BIL_BLOCK = ESMF_BundleInterleaveType(1), &
-                    ESMF_BIL_ITEM  = ESMF_BundleInterleaveType(2)
-
-!------------------------------------------------------------------------------
-!  ! Expected to be used most often for packed bundles, to allow access to
-!  ! data for an individual field.  Can also be used to describe vector data
-!  ! that is packed into a single array.
+!  ! Interleave for packed arrays - are data for different fields 
+!  ! concatenated or interleaved by item,
 
       type ESMF_BundleInterleave
       sequence
       private
-         type(ESMF_BundleInterleaveType) :: bil_type
-         integer :: bil_start
-         integer :: bil_end
-         integer :: bil_strides 
+          integer :: bil
       end type
 
- 
+      type(ESMF_BundleInterleave), parameter ::  &
+                    ESMF_BIL_BYFIELD = ESMF_BundleInterleave(1), &
+                    ESMF_BIL_BYITEM  = ESMF_BundleInterleave(2)
+
 !------------------------------------------------------------------------------
 !  ! ESMF_BundleDataMap
 !  ! The data map type, which should fully describe the mapping
@@ -101,14 +86,12 @@
 #else
         type(ESMF_Status) :: status 
 #endif
-        ! only the bundle interleaves needed here because each field contains
-        ! it's own private data map.   
-        ! TODO: is this a single item or an array, one per field?
-        ! (i believe it's one per field.)
+        ! only the bundle interleave needed here because each field contains
+        ! its own private data map.   
 #ifndef ESMF_NO_INITIALIZERS
-        type(ESMF_BundleInterleave), dimension(:), pointer :: bil => NULL()
+        type(ESMF_BundleInterleave) :: bil = ESMF_BIL_BYFIELD
 #else
-        type(ESMF_BundleInterleave), dimension(:), pointer :: bil
+        type(ESMF_BundleInterleave) :: bil
 #endif
       end type
 
@@ -118,8 +101,8 @@
 !
       public ESMF_BundleDataMap
 
-      public ESMF_BundleInterleave, ESMF_BundleInterleaveType
-      public ESMF_BIL_BLOCK, ESMF_BIL_ITEM
+      public ESMF_BundleInterleave
+      public ESMF_BIL_BYFIELD, ESMF_BIL_BYITEM
 
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -146,7 +129,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.3 2004/05/07 12:08:57 nscollins Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.4 2004/05/10 13:23:23 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -179,20 +162,20 @@ end interface
 
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_BundleInterleaveType flags 
+! function to compare two ESMF_BundleInterleave flags 
 
 function ESMF_bileq(il1, il2)
  logical ESMF_bileq
- type(ESMF_BundleInterleaveType), intent(in) :: il1, il2
+ type(ESMF_BundleInterleave), intent(in) :: il1, il2
 
- ESMF_bileq = (il1%bil_type .eq. il2%bil_type)
+ ESMF_bileq = (il1%bil .eq. il2%bil)
 end function
 
 function ESMF_bilne(il1, il2)
  logical ESMF_bilne
- type(ESMF_BundleInterleaveType), intent(in) :: il1, il2
+ type(ESMF_BundleInterleave), intent(in) :: il1, il2
 
- ESMF_bilne = (il1%bil_type .ne. il2%bil_type)
+ ESMF_bilne = (il1%bil .ne. il2%bil)
 end function
 
 
@@ -208,16 +191,11 @@ end function
 ! !IROUTINE:  ESMF_BundleDataMapInit - initialize the contents of a BundleDataMap
 
 ! !INTERFACE:
-      subroutine ESMF_BundleDataMapInit(bundledatamap, fieldNum, btype, &
-                                                       start, end, stride, rc)
+      subroutine ESMF_BundleDataMapInit(bundledatamap, btype, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap) :: bundledatamap
-      integer, intent(in), optional :: fieldNum
-      type(ESMF_BundleInterleaveType), intent(in), optional :: btype
-      integer, intent(in), optional :: start
-      integer, intent(in), optional :: end
-      integer, intent(in), optional :: stride
+      type(ESMF_BundleInterleave), intent(in), optional :: btype
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -227,7 +205,13 @@ end function
 !     \begin{description} 
 !     \item [bundledatamap]
 !           An {\tt ESMF\_BundleDataMap} object.
-!     \item[TODO] add missing documentation here
+!     \item [{[btype]}]
+!           Type of interleave for {\tt ESMF\_Bundle} data if packed into
+!           a single array.  Options are {\tt ESMF\_BIL\_BYITEM} and
+!           {\tt ESMF\_BIL\_BYFIELD}.  If not specified, the default
+!           is interleave by field.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
@@ -246,10 +230,12 @@ end function
           rcpresent = .FALSE.
         endif
 
-        ! initialize the contents of the bundle datamap
-  
-        ! TODO: add init code here
+        ! set the default
+        bundledatamap%bil = ESMF_BIL_BYFIELD
 
+        ! initialize the contents of the bundle datamap
+        if (present(btype)) bundledatamap%bil = btype
+  
         ! mark object as initialized and ready to be used
         bundledatamap%status = ESMF_STATE_READY
 
@@ -280,7 +266,7 @@ end function
 !           An {\tt ESMF\_BundleDataMap} object.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
+!     \end{description}
 !
 !
 !EOP
@@ -304,26 +290,26 @@ end function
 ! !IROUTINE: ESMF_BundleDataMapGet - Get object from a BundleDataMap type.
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleDataMapGet(bundledatamap, fieldNum, btype, &
-                                                       start, end, stride, rc)
+      subroutine ESMF_BundleDataMapGet(bundledatamap, btype, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap), intent(in) :: bundledatamap  
-      integer, intent(in), optional :: fieldNum
-      type(ESMF_BundleInterleaveType), intent(in), optional :: btype
-      integer, intent(in), optional :: start
-      integer, intent(in), optional :: end
-      integer, intent(in), optional :: stride
+      type(ESMF_BundleInterleave), intent(out), optional :: btype
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
-!   Return info about the current {\tt ESMF\_BundleDataMap} described by this object.
+!   Return info about the {\tt ESMF\_BundleDataMap} described by this object.
 !
 !   The arguments are:
 !     \begin{description}
 !     \item [bundledatamap]
 !           An {\tt ESMF\_BundleDataMap} object.
-!     \item[TODO] add missing documentation here
+!     \item [{[btype]}]
+!           Type of interleave for {\tt ESMF\_Bundle} data if packed into
+!           a single array.  Possible values are {\tt ESMF\_BIL\_BYITEM} and
+!           {\tt ESMF\_BIL\_BYFIELD}. 
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -342,7 +328,8 @@ end function
           rc = ESMF_FAILURE
         endif
 
-        ! TODO: add code which queries dm
+        ! if specified, return value
+        if (present(btype)) btype = bundledatamap%bil
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -354,16 +341,11 @@ end function
 ! !IROUTINE: ESMF_BundleDataMapSet - Set a BundleDataMap type object.
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleDataMapSet(bundledatamap, fieldNum, btype, &
-                                                       start, end, stride, rc)
+      subroutine ESMF_BundleDataMapSet(bundledatamap, btype, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap), intent(inout) :: bundledatamap  
-      integer, intent(in), optional :: fieldNum
-      type(ESMF_BundleInterleaveType), intent(in), optional :: btype
-      integer, intent(in), optional :: start
-      integer, intent(in), optional :: end
-      integer, intent(in), optional :: stride
+      type(ESMF_BundleInterleave), intent(in), optional :: btype
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -373,7 +355,10 @@ end function
 !     \begin{description}
 !     \item [bundledatamap]
 !           An {\tt ESMF\_BundleDataMap} object.
-!     \item[TODO] add missing documentation here
+!     \item [{[btype]}]
+!           Type of interleave for {\tt ESMF\_Bundle} data if packed into
+!           a single array.  Options are {\tt ESMF\_BIL\_BYITEM} and
+!           {\tt ESMF\_BIL\_BYFIELD}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -395,7 +380,8 @@ end function
         endif
 
 
-        ! TODO: add missing code here
+        ! if specified, set value
+        if (present(btype)) bundledatamap%bil = btype
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -666,6 +652,8 @@ end function
         endif
 
         ! TODO: add print code here
+        call ESMF_BundleInterleaveString(bundledatamap%bil, str, rc)
+        print *, " Data: ", str
   
         if (present(rc)) rc = ESMF_SUCCESS
       
@@ -681,7 +669,7 @@ end function
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_BundleInterleaveType), intent(in) :: interleave
+      type(ESMF_BundleInterleave), intent(in) :: interleave
       character (len = *), intent(out) :: string
       integer, intent(out), optional :: rc
 !
@@ -702,8 +690,8 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
-        if (interleave .eq. ESMF_BIL_BLOCK) string = "Block Interleave"
-        if (interleave .eq. ESMF_BIL_ITEM) string = "Item Interleave"
+        if (interleave .eq. ESMF_BIL_BYFIELD) string = "Interleave by Field"
+        if (interleave .eq. ESMF_BIL_BYITEM) string = "Interleave by Item"
 
         if (present(rc)) rc = ESMF_SUCCESS
 
