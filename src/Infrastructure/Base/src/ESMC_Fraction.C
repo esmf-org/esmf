@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.C,v 1.7 2004/12/04 01:39:53 eschwab Exp $
+// $Id: ESMC_Fraction.C,v 1.8 2004/12/10 22:50:20 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -22,7 +22,7 @@
  #define ESMC_FILENAME "ESMC_Fraction.C"
 
  // higher level, 3rd party or system includes
- #include <iostream.h>
+ #include <stdio.h>
  #include <limits.h>
 
  #include <ESMC_LogErr.h>
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Fraction.C,v 1.7 2004/12/04 01:39:53 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Fraction.C,v 1.8 2004/12/10 22:50:20 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1240,11 +1240,11 @@
 //EOP
 // !REQUIREMENTS:  
 
-    cout << "Fraction -------------------------------" << endl;
-    cout << "w = " << w << endl;
-    cout << "n = " << n << endl;
-    cout << "d = " << d << endl;
-    cout << "end Fraction ---------------------------" << endl << endl;
+    printf("Fraction -------------------------------\n");
+    printf("w = %lld\n", w);
+    printf("n = %d\n", n);
+    printf("d = %d\n", d);
+    printf("end Fraction ---------------------------\n\n");
 
     return(ESMF_SUCCESS);
 
