@@ -1,4 +1,4 @@
-% $Id: Regrid_req.tex,v 1.4 2002/03/25 23:25:48 miredell Exp $
+% $Id: Regrid_req.tex,v 1.5 2002/03/26 00:34:34 pwjones Exp $
 
 %===============================================================================
 % Requirements may be itemized under a main topic:
@@ -37,6 +37,35 @@ Applications must be able to destroy regriddings to free up memory.
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
+\end{reqlist}
+
+%-------------------------------------------------------------------------------
+\sreq{Reading}
+
+Applications may be able to read regridding information from a file.
+
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} POP, CICE, CAM desired \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test \\
+{\bf Notes:} Useful if creating regriddings is time-consuming to avoid
+             start-up costs.
+\end{reqlist}
+
+%-------------------------------------------------------------------------------
+\sreq{Writing}
+
+Applications may be able to write regridding information to a file.
+
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} POP, CICE, CAM desired \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test \\
+{\bf Notes:} Useful if creating regriddings is time-consuming - compute once
+             and save for later re-use.  Also useful for any off-line
+             use of same regridding info.
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
@@ -83,21 +112,21 @@ to perform regridding.
 {\bf Source:} Required by all. \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection  \\
-{\bf Notes:} Supporting map projections from spherical to x-y grids is
-             beyond the scope of ESMF.  Also, vertical regridding
-             between all possible vertical grid systems is problematic.
+{\bf Notes:} A horizontal grid pair must be either both in x-y units (m) 
+             with the same origin or both in lat-lon (deg) units unless 
+             we decide to include arbitrary projection information as part 
+             of a PhysGrid structure. 
+             Also, vertical regridding between all possible vertical grid 
+             systems is problematic.
              \\
-             MI - I assume this requirement does not preclude support
-             of interfacing, say, 
-             a sea ice model on a polar stereographic grid
-             with an atmospheric model on a lat-lon grid.
+            
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
 \sreq{Independence of field}
 
 At least one regridding method must be completely independent of
-field information.  Whenever possible, regridding should formulated to be 
+field information.  Whenever possible, regridding should be formulated to be 
 independent of the field being regridded.  For regridding schemes which might 
 require field information (eg gradients of the field or a velocity for 
 upwind regridding), the required field information must be passed as arguments.
@@ -130,15 +159,18 @@ At least one regridding method between two gridded fields must be
 {\bf Verification:} Unit test \\
 {\bf Notes:} The methods of Jones (1999, \cite{Jones1999}) can be used
              for 2-d fields. A Monte Carlo method could be used for
-             3-d fields.  Obviously, conservation has no meaning
-             for ungridded data.
-             \\
-             MI - Some grids may not have conservation properties
-             associated with them (e.g., grid point values rather
-             than grid cell values) and so would not have this requirement.
-             Some grids may have a higher-order integration method
+             3-d fields.  Conservation has no meaning
+             for ESMF grids without an area or volume attribute
+             (eg ungridded data, spectral-space grids), so this
+             requirement does not apply to such grids.
+
+             MI - Some grids may have a higher-order integration method
              associated with them (overlappping functions as weights),
              potentially making conservative regridding difficult and expensive.
+             PJ - Second order conservative is part of SCRIP currently,
+             but is expensive (3x 1st-order); higher than second order is not 
+             feasible at this time for conservative schemes.
+             \\
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
@@ -164,7 +196,7 @@ At least one regridding method must be \htmlref{monotone}{glos:monotone}.
 At least one regridding method must be higher than first
 \htmlref{order}{glos:order}.  This is required for preventing
 ``patchwork'' patterns when regridding from coarse to fine
-methods and for preventing discontinuities in gradients of
+grids and for preventing discontinuities in gradients of
 regridded fields.
 
 \begin{reqlist}
@@ -173,9 +205,9 @@ regridded fields.
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} This will require either internal approximations to
-             gradients (eg bilinear) or will require user
-             to pass such information.  See requirements on field
-             dependence.
+             gradients (eg bilinear, bicubic) or will require user
+             to pass gradient information (eg second-order conservative 
+             methods).  See requirements on field dependence.
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
@@ -215,27 +247,15 @@ to cell sides.
 \sreq{Fourier transforms}
 
 Methods shall be supplied for regridding between physical space and
-Fourier space.  The adjoints shall also be supplied.
+Fourier space.  The adjoints shall also be supplied.  Ordering in
+Fourier space will be defined by DistGrid.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:}  NCEP-GSM, NCEP-SSI (milestone) \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
-{\bf Notes:} Still not sure whether this is really the right place
-             for this functionality.
-             Lots of unknowns here, particularly related to
-             spectral-space ordering and packing.
-             \\
-             MI - We have declared that Regridding involves linear transforms
-             from one Physical Distributed Grid to another.
-             We have declared that Fourier space and physical space are
-             Physical Distributed Grids.
-             Therefore, Fourier transforms belong in Regridding.
-             We have also noted that Regridding would contain the
-             compute intensive part of the Infrastructure,
-             which surely includes transforms.
-             Yes ordering must be addressed, presumably in Distributed Grids.
+{\bf Notes:} 
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
@@ -271,9 +291,10 @@ The adjoints shall also be supplied.
 %-------------------------------------------------------------------------------
 \sreq{Interpolating with ungridded data}
 
-All methods shall work with ungridded data, except that
-no interpolation will be required FROM ungridded data,
-and no conservation properties are required.
+All methods shall work with for regridding FROM gridded data TO ungridded 
+data, except that no conservation properties are required.
+Methods for regridding FROM ungridded data TO gridded data may be
+supplied (eg nearest-neighbor distance-weighted schemes).
 The adjoints shall be supplied for interpolation TO ungridded data.
 
 \begin{reqlist}
@@ -323,8 +344,8 @@ cells of two grids shall be available.
 %-------------------------------------------------------------------------------
 \sreq{Grid search}
 
-Methods must be supplied for searching a grid to find the cell
-containing a point or set of points.
+Methods must be supplied for searching a grid to find the cell(s)
+containing a point (or set of points).
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -333,6 +354,8 @@ containing a point or set of points.
 {\bf Verification:} Unit test \\
 {\bf Notes:} This is required for some of the above functions, but
              should it be here or in one of the other grid modules?
+             If it is located in another module, I (PJ) would be
+             willing to supply the necessary code.
              \\
              MI - It should be in the same place as its inverse.
              That is, this requirement is
