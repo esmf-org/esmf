@@ -1,7 +1,8 @@
-# $Id: Linux.intel.mk,v 1.1 2003/09/09 15:17:43 nscollins Exp $ 
+# $Id: Linux.intel.mk,v 1.2 2003/09/09 19:39:24 nscollins Exp $ 
+
+ESMF_PREC = 32
 
 # Location of MPI (Message Passing Interface) software
-
 #ESMC_MPIRUN      = 
 MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/mpiuni
 MPI_LIB        = -lmpiuni

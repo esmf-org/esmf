@@ -1,6 +1,6 @@
-# $Id: Linux.pgi.mk,v 1.1 2003/09/09 15:17:43 nscollins Exp $ 
+# $Id: Linux.pgi.mk,v 1.2 2003/09/09 19:39:24 nscollins Exp $ 
 #
-ESMF_PREC 32
+ESMF_PREC = 32
 
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
