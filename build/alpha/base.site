@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.6 2003/03/06 17:33:14 flanigan Exp $ 
+# $Id: base.site,v 1.7 2003/07/01 17:41:40 jwolfe Exp $ 
 
 #
 #  This file contains site-specific information.  The definitions below
@@ -20,7 +20,7 @@ BLAS_LIB       =
 LAPACK_LIB     = -L/usr/lib -lcxml
 NETCDF_LIB     = -L/usr/ulocal/netcdf-3.5.0/lib -lnetcdf
 NETCDF_INCLUDE = -I/usr/ulocal/netcdf-3.5.0/include
-NETCDF64_LIB   = 
+NETCDF64_LIB   = -L/usr/ulocal/netcdf-3.5.0/lib -lnetcdf
 HDF_LIB	       = /usr/ulocal/HDF4.1r5/lib/libmfhdf.a \
                  /usr/ulocal/HDF4.1r5/lib/libdf.a \
                  /usr/ulocal/HDF4.1r5/lib/libjpeg.a \
