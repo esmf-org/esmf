@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.39 2004/11/09 21:43:36 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.40 2004/11/09 21:53:07 cpboulder Exp $
 !
 ! Earth System Modeling Frameworkls
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -577,7 +577,7 @@ end subroutine ESMF_LogGet
 !      \item [{[filename]}]
 !            Name of file.
 !      \item [{[flognone]}]
-!            Turns off logging if equal to {\tt ESMF\_LOGNONE}
+!            Turns off logging if equal to {\tt ESMF\_LOG\_NONE}
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
