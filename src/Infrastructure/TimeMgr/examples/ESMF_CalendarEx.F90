@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.22 2004/02/04 02:09:46 eschwab Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.23 2004/02/11 06:51:54 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -79,7 +79,15 @@
 !BOP
 !\begin{verbatim}
       call ESMF_CalendarGet(gregorianCalendar, calendarType=calType, rc=rc)
-    
+!\end{verbatim}
+!EOP
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+!BOP
+!\begin{verbatim}
       ! demonstrate ESMF_CalendarType (==) overloaded operator
       if (calType == ESMF_CAL_GREGORIAN) then
           print *, "gregorianCalendar is of type ESMF_CAL_GREGORIAN."
@@ -93,11 +101,7 @@
       else
           print *, "julianDayCalendar is not the same as gregorianCalendar."
       end if
-!\end{verbatim}
-!EOP
 
-!BOP
-!\begin{verbatim}
       !
       ! Gregorian Calendar examples
       !
