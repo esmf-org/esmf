@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.F90,v 1.9 2004/02/11 21:54:55 nscollins Exp $
+! $Id: ESMF_LocalArray.F90,v 1.10 2004/02/11 22:11:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -321,7 +321,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.F90,v 1.9 2004/02/11 21:54:55 nscollins Exp $'
+      '$Id: ESMF_LocalArray.F90,v 1.10 2004/02/11 22:11:24 nscollins Exp $'
 
 !==============================================================================
 !
@@ -17959,11 +17959,13 @@ end function
         if (rank.ge.1 .and. rank.le.ESMF_MAXDIM) then
           as%rank = rank
         else
-          status = ESMF_FAILURE
           print *, "ERROR in ESMF_ArraySpecInit: bad rank"
+          as%rank = 0 ! something to trigger on next time that this is bad
           return
         endif
-        ! TODO: similar for type and kind
+
+        ! Since type and kind are derived types, you cannot set them to
+        ! illegal values, so no additional tests are needed.
         as%type = type
         as%kind = kind
 
