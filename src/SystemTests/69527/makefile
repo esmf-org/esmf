@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003/03/25 00:18:36 flanigan Exp $ 
+# $Id: makefile,v 1.6 2003/04/02 18:50:40 nscollins Exp $ 
 
 ALL: system_tests
 
@@ -33,7 +33,7 @@ CLOBBERDIRS =
 
 $(ESMC_TESTDIR)/ESMF_SysTest69527: ESMF_SysTest69527.o  chkopts
 	${F90CXXLD} -o ESMF_SysTest69527 ESMF_SysTest69527.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	mv -f ESMF_SysText69527 $(ESMC_TESTDIR)
+	mv -f ESMF_SysTest69527 $(ESMC_TESTDIR)
 	${RM} ESMF_SysTest69527.o
 
 RUN_ESMF_SysTest69527:
