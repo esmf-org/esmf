@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.18 2004/03/19 23:35:57 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.19 2004/03/20 00:08:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -52,7 +52,7 @@
 !------------------------------------------------------------------------------
 !  For now, add derived types for specific grid structures here:
 !  These derived types contain all the necessary information beyond the
-!  GridType derived type.
+!  GridClass derived type.
 !------------------------------------------------------------------------------
 !     ! ESMF_LogRectGrid
 !
@@ -153,11 +153,11 @@
       end type
 
 !------------------------------------------------------------------------------
-!     !  ESMF_GridType
+!     !  ESMF_GridClass
 !
 !     ! Definition for the Grid class.
 
-      type ESMF_GridType
+      type ESMF_GridClass
       sequence
 !      private
 
@@ -224,9 +224,9 @@
       sequence
 !      private
 #ifndef ESMF_NO_INITIALIZERS
-        type (ESMF_GridType), pointer :: ptr => NULL()
+        type (ESMF_GridClass), pointer :: ptr => NULL()
 #else
-        type (ESMF_GridType), pointer :: ptr
+        type (ESMF_GridClass), pointer :: ptr
 #endif
       end type
 
@@ -236,7 +236,7 @@
 
       public ESMF_LogRectGrid, ESMF_GridSpecific, ESMF_GridStatus
       public ESMF_GridStructure
-      public ESMF_GridType,    ESMF_GridKind,     ESMF_GridStagger
+      public ESMF_GridClass,    ESMF_GridKind,     ESMF_GridStagger
       public ESMF_CoordOrder,  ESMF_CoordIndex,   ESMF_Grid
 
 !------------------------------------------------------------------------------
@@ -418,7 +418,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.18 2004/03/19 23:35:57 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.19 2004/03/20 00:08:40 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -478,7 +478,7 @@
       subroutine ESMF_GridConstructNew(grid, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType) :: grid
+      type(ESMF_GridClass) :: grid
       character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -942,7 +942,7 @@
       subroutine ESMF_GridAddDistGrid(grid, distgrid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType), intent(inout) :: grid
+      type(ESMF_GridClass), intent(inout) :: grid
       type(ESMF_DistGrid), intent(in)    :: distgrid
       integer, intent(out), optional :: rc
 !
@@ -1000,7 +1000,7 @@
       subroutine ESMF_GridMakeDistGridSpace(gridp, newcount, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType) :: gridp
+      type(ESMF_GridClass) :: gridp
       integer, intent(in) :: newcount
       integer, intent(out) :: rc
 !
@@ -1012,7 +1012,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[gridp]
-!          Pointer to an {\tt ESMF\_GridType}, the internal structure
+!          Pointer to an {\tt ESMF\_GridClass}, the internal structure
 !          which holds the {\tt Grid} information.
 !     \item[newcount]
 !          Make sure there are enough space in the array to hold
@@ -1107,7 +1107,7 @@
       subroutine ESMF_GridAddPhysGrid(grid, physgrid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType), intent(inout) :: grid
+      type(ESMF_GridClass), intent(inout) :: grid
       type(ESMF_PhysGrid), intent(in)    :: physgrid
       integer, intent(out), optional :: rc
 !
@@ -1165,7 +1165,7 @@
       subroutine ESMF_GridMakePhysGridSpace(gridp, newcount, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType) :: gridp
+      type(ESMF_GridClass) :: gridp
       integer, intent(in) :: newcount
       integer, intent(out) :: rc
 !
@@ -1177,7 +1177,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[gridp]
-!          Pointer to an {\tt ESMF\_GridType}, the internal structure
+!          Pointer to an {\tt ESMF\_GridClass}, the internal structure
 !          which holds the {\tt Grid} information.
 !     \item[newcount]
 !          Make sure there are enough space in the array to hold
@@ -1294,7 +1294,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGrid), intent(out) :: physgrid
-      type(ESMF_GridType), intent(in)  :: grid
+      type(ESMF_GridClass), intent(in)  :: grid
       type(ESMF_RelLoc), intent(in), optional :: relloc
       character(*), intent(in), optional :: name
       integer, intent(out), optional :: rc
@@ -1395,7 +1395,7 @@
       subroutine ESMF_GridGetPhysGridID(grid, relloc, physGridId, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType), intent(in) :: grid
+      type(ESMF_GridClass), intent(in) :: grid
       type(ESMF_RelLoc), intent(in) :: relloc
       integer, intent(out) :: physGridId
       integer, intent(out), optional :: rc
@@ -1459,7 +1459,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DistGrid), intent(out) :: distgrid
-      type(ESMF_GridType), intent(in)  :: grid
+      type(ESMF_GridClass), intent(in)  :: grid
       character(*), intent(in) :: name
       integer, intent(out), optional :: rc
 !
@@ -1527,7 +1527,7 @@
       subroutine ESMF_GridGetBoundingBoxes(grid, array, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType), intent(in) :: grid
+      type(ESMF_GridClass), intent(in) :: grid
       type(ESMF_LocalArray), intent(inout) :: array
       integer, intent(out), optional :: rc
 !

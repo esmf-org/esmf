@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.130 2004/03/19 23:33:00 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.131 2004/03/20 00:08:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -121,12 +121,12 @@
         type (ESMF_Status) :: fieldstatus = ESMF_STATE_UNINIT
         type (ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT
         type (ESMF_Status) :: datastatus = ESMF_STATE_UNINIT
-        type (ESMF_GridType), pointer :: gridp => NULL()  ! for faster access
+        type (ESMF_GridClass), pointer :: gridp => NULL()  ! for faster access
 #else
         type (ESMF_Status) :: fieldstatus
         type (ESMF_Status) :: gridstatus
         type (ESMF_Status) :: datastatus
-        type (ESMF_GridType), pointer :: gridp
+        type (ESMF_GridClass), pointer :: gridp
 #endif
         type (ESMF_Grid) :: grid             ! save to satisfy query routines
         type (ESMF_LocalField) :: localfield ! this differs per DE
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.130 2004/03/19 23:33:00 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.131 2004/03/20 00:08:39 cdeluca Exp $'
 
 !==============================================================================
 !

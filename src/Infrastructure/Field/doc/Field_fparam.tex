@@ -1,81 +1,39 @@
-% $Id: Field_fparam.tex,v 1.1 2003/03/10 21:54:19 cdeluca Exp $
+% $Id: Field_fparam.tex,v 1.2 2004/03/20 00:08:39 cdeluca Exp $
 
-%\subsection{Parameters}
+\subsection{Flags}
 
-\begin{description}
+%--------------------------------------------------------------------------------
 
-\item [Field] A Field derived type consists of the following:
-\begin{verbatim}
-type ESMF_Field
-sequence
-    type (ESMF_Base) :: base
-    integer :: fieldstate
-    type (ESMF_Grid), pointer :: gridp
-    integer :: gridstate
-    type (ESMF_FieldLocal), pointer :: my_localp
-    integer :: total_count
-    type (ESMF_IOSpec) :: iospec
-    integer :: iostate
-    integer :: communications_group
-    integer :: comm_handle
-end type
+\begin{tabular}{|l|l|}
+\hline
 
-type ESMF_FieldLocal
-sequence
-private
-    type (ESMF_Base) :: base
-    integer :: localstate
-    integer :: total_subsets
-    integer :: my_subset_id
-    type (ESMF_DistGrid), pointer :: dgp
-    integer :: gridstate
-    type (ESMF_DataArray) :: localdata
-    integer :: datastate
-    integer :: data_to_grid_mapping
-    integer :: rwaccess
-    integer :: accesscount
-    type (ESMF_IOSpec) :: iospec
-    integer :: iostate
-    integer :: detached
-end type
+\multicolumn{2}{l}
+{\bf ESMF\_CopyFlag} \\ \hline
 
-\end{verbatim}
+\multicolumn{2}{p{4in}}  
+{{\it Purpose}:  
+Indicates whether to reference a data item or make a copy of it.} \\ \hline
 
-\item [Grid] A Grid derived type is the following:
-\begin{verbatim}
-type ESMF_Grid
-sequence
-    type (ESMF_Base) :: base
-    integer :: gridstate
-    type (ESMF_PhysGrid) :: physgrid
-    integer :: pgridstate
-    integer :: gridtype
-    type (ESMF_DistGrid) :: distgrid
-    integer :: dgridstate
-    integer :: decompcount
-end type
-\end{verbatim}
+ESMF\_DATA\_COPY & Copy the data item to another buffer. \\ \hline
 
-\item [Array] An Array derived type is the following:
-\begin{verbatim}
-type ESMF_DataArray
-sequence
-private
-    type (ESMF_Base) :: base
-    integer :: rank                    ! number of dimensions
-    type(ESMF_DataType) :: type        ! real/float, integer, etc enum
-    type(ESMF_DataKind) :: kind        ! fortran "kind" enum/integer
-    integer, dimension(ESMF_MAXDIM, 3) :: rinfo ! (lower/upper/stride) per rank
-    type(ESMF_Pointer) :: base_address ! addr for: arraystart or 1st elem?
-    logical :: allcontig  ! optimizations possible if all strides=1
-end type
-\end{verbatim}
+ESMF\_DATA\_REF & Reference the data item. \\ \ hline
+\end{tabular}
 
-\item [Attribute] An Attribute type will be defined in C++ and an
-interface from F90 will be provided.  It will consist of a (name,value)
-pair, where names must be unique per object.
+%--------------------------------------------------------------------------------
 
-\end{description}
+\begin{tabular}{|l|l|}
+\hline
 
+\multicolumn{2}{l}
+{\bf ESMF\_DataAllocate} \\ \hline
 
+\multicolumn{2}{p{4in}}  
+{{\it Purpose}:  
+Indicates whether to allocate data or not.} \\ \hline
 
+ESMF\_DO\_ALLOCATE & Allocate data. \\ \hline
+
+ESMF\_NO\_ALLOCATE & Do not allocate data at this time. \\ \ hline
+\end{tabular}
+
+%--------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.41 2004/03/19 23:36:57 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.42 2004/03/20 00:08:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.41 2004/03/19 23:36:57 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.42 2004/03/20 00:08:40 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -334,7 +334,7 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
+      type(ESMF_GridClass), pointer :: grid        ! Pointer to new grid
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
@@ -517,7 +517,7 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      type(ESMF_GridType), pointer :: grid    ! Pointer to new grid
+      type(ESMF_GridClass), pointer :: grid    ! Pointer to new grid
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
 
@@ -611,7 +611,7 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
+      type(ESMF_GridClass), pointer :: grid        ! Pointer to new grid
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
@@ -681,7 +681,7 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
+      type(ESMF_GridClass), pointer :: grid        ! Pointer to new grid
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
@@ -757,7 +757,7 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
+      type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
@@ -837,7 +837,7 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
+      type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
@@ -910,7 +910,7 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
+      type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
@@ -1010,7 +1010,7 @@
                                              periodic, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType) :: grid
+      type(ESMF_GridClass) :: grid
       integer, intent(in) :: dimCount
       integer, dimension(dimCount), intent(in) :: counts
       real(ESMF_KIND_R8), dimension(dimCount), intent(in) :: minGlobalCoordPerDim
@@ -1239,7 +1239,7 @@
                                            periodic, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType) :: grid
+      type(ESMF_GridClass) :: grid
       integer, intent(in) :: dimCount
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord1
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
@@ -1524,7 +1524,7 @@
                                        decompIds, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType) :: grid
+      type(ESMF_GridClass) :: grid
       type(ESMF_DELayout), intent(in) :: layout
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp1
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp2
@@ -2157,7 +2157,7 @@
       subroutine ESMF_LRGridDestruct(grid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType) :: grid
+      type(ESMF_GridClass) :: grid
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2253,7 +2253,7 @@
                                         distGridName, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType), target :: grid
+      type(ESMF_GridClass), target :: grid
       integer, intent(out) :: distGridId
       integer, intent(in) :: dimCount 
       integer, dimension(dimCount), intent(in) :: counts
@@ -2350,7 +2350,7 @@
                                         physGridName, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType), target :: grid
+      type(ESMF_GridClass), target :: grid
       integer, intent(out) :: physGridId
       type(ESMF_RelLoc), intent(in) :: relloc
       integer, intent(in) :: dimCount 
@@ -2646,7 +2646,7 @@
                                             countsPerDEDim, physGridName, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType), target :: grid
+      type(ESMF_GridClass), target :: grid
       integer, intent(out) :: physGridId
       type(ESMF_RelLoc), intent(in) :: relloc
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord
@@ -4002,7 +4002,7 @@
                                       total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType) :: grid
+      type(ESMF_GridClass) :: grid
       integer, intent(in) :: physGridId
       integer, intent(in) :: dimCount
       integer, dimension(dimCount), intent(in) :: counts
@@ -4371,7 +4371,7 @@
       integer, dimension(ESMF_MAXGRIDDIM) :: order
       integer, dimension(:), allocatable :: gCCPDUse, mLCCPDUse
       integer, dimension(:,:), allocatable :: gSPDEPDUse, cCPDEPDUse
-      type(ESMF_GridType), pointer :: gridp
+      type(ESMF_GridClass), pointer :: gridp
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -4598,7 +4598,7 @@
                               maxGlobalCoordPerDim, periodic, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType) :: grid
+      type(ESMF_GridClass) :: grid
       type(ESMF_GridKind), intent(in), optional :: horzGridKind
       type(ESMF_GridKind), intent(in), optional :: vertGridKind
       type(ESMF_GridStagger), intent(in), optional :: horzStagger
@@ -4792,7 +4792,7 @@
                                         cellType2, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType) :: grid
+      type(ESMF_GridClass) :: grid
       integer, intent(in) :: physGridId
       integer, intent(in) :: dimCount
       integer, dimension(dimCount), intent(in) :: counts
@@ -5206,7 +5206,7 @@
                                              countsPerDEDim2, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType), intent(inout) :: grid
+      type(ESMF_GridClass), intent(inout) :: grid
       integer, intent(in) :: dimCount
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord1
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord2
@@ -5354,7 +5354,7 @@
 !EOPI
 
       character(len=ESMF_MAXSTR) :: name, str
-      type(ESMF_GridType), pointer :: gp
+      type(ESMF_GridClass), pointer :: gp
       integer :: status
 
       if (present(rc)) rc = ESMF_FAILURE

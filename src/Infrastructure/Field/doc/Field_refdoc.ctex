@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.23 2004/03/18 00:21:03 cdeluca Exp $
+% $Id: Field_refdoc.ctex,v 1.24 2004/03/20 00:08:39 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -33,25 +33,6 @@
 \newpage
 #endif
 
-% Field_obj.tex wants to include the graphics  file
-% fieldclassNH.eps.  In processing in CONSTITUENT
-% mode, this file can not be found.
-%
-%
-%% \section{Object Model}
-%% #ifdef STANDALONE
-%% \input{Field_obj}
-%% #elif defined(CONSTITUENT)
-%% \input{../Infrastructure/Field/doc/Field_obj}
-%% #endif
-
-% %\section{Global Parameters and Definitions}
-% #ifdef STANDALONE
-% %\input{Field_param}
-% #elif defined(CONSTITUENT)
-% %\input{../Infrastructure/Field/doc/Field_param}
-% #endif
-
 \section{Field Class}
 
 \subsection{Description}
@@ -84,6 +65,13 @@
 \input{../Infrastructure/Field/doc/Field_implnotes}
 #endif
 
+\subsection{Flags and Options}
+#ifdef STANDALONE
+\input{Field_fparam}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Field/doc/Field_fparam}
+#endif
+
 \subsection{Class API: Basic Field Methods}
 #ifdef STANDALONE
 \input{ESMF_Field_fapi}
@@ -103,11 +91,6 @@
 #ifdef STANDALONE
 \section{Review Status}
 \input{Field_desrev}
-#endif
-
-#ifdef STANDALONE
-%\section{Glossary}
-\input{Field_glos}
 #endif
 
 #ifdef STANDALONE

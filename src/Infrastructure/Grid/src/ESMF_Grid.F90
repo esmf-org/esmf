@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.150 2004/03/19 23:35:10 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.151 2004/03/20 00:08:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.150 2004/03/19 23:35:10 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.151 2004/03/20 00:08:40 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -231,7 +231,7 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
+      type(ESMF_GridClass), pointer :: grid        ! Pointer to new grid
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
@@ -1945,7 +1945,7 @@
 !EOP
 
       character(len=ESMF_MAXSTR) :: name, str
-      type(ESMF_GridType), pointer :: gp
+      type(ESMF_GridClass), pointer :: gp
       integer :: i
       integer :: status
 
@@ -2007,7 +2007,7 @@
                               maxGlobalCoordPerDim, periodic, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType) :: grid
+      type(ESMF_GridClass) :: grid
       type(ESMF_GridKind), intent(in), optional :: horzGridKind
       type(ESMF_GridKind), intent(in), optional :: vertGridKind
       type(ESMF_GridStagger), intent(in), optional :: horzStagger

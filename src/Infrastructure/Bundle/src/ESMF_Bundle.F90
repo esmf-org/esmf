@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.32 2004/03/18 22:23:55 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.33 2004/03/20 00:08:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -84,12 +84,12 @@
       !private
         type(ESMF_Array) :: packed_data               ! local packed array
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
-        type(ESMF_GridType), pointer :: gridp => NULL() ! local data
+        type(ESMF_GridClass), pointer :: gridp => NULL() ! local data
         type(ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT    ! is grid set 
         type(ESMF_Status) :: arraystatus = ESMF_STATE_UNINIT   ! is array set 
         integer :: accesscount = 0                    ! reserved for future use
 #else
-        type(ESMF_GridType), pointer :: gridp
+        type(ESMF_GridClass), pointer :: gridp
         type(ESMF_Status) :: gridstatus
         type(ESMF_Status) :: arraystatus
         integer :: accesscount
@@ -107,13 +107,13 @@
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
         type(ESMF_Status) :: bundlestatus = ESMF_STATE_UNINIT
         type(ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT     ! is grid set
-        type(ESMF_GridType), pointer :: gridp => NULL() ! shortcut
+        type(ESMF_GridClass), pointer :: gridp => NULL() ! shortcut
         type(ESMF_Field), dimension(:), pointer :: flist => NULL() 
         integer :: field_count = 0                ! how many fields in here
 #else
         type(ESMF_Status) :: bundlestatus
         type(ESMF_Status) :: gridstatus
-        type(ESMF_GridType), pointer :: gridp
+        type(ESMF_GridClass), pointer :: gridp
         type(ESMF_Field), dimension(:), pointer :: flist
         integer :: field_count
 #endif
