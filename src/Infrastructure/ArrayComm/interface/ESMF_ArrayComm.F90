@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.53 2004/06/15 22:46:31 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.54 2004/06/22 22:07:54 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.53 2004/06/15 22:46:31 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.54 2004/06/22 22:07:54 cdeluca Exp $'
 !
 !==============================================================================
 !
@@ -1255,7 +1255,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayScatter"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayScatter - Scatter a single Array across multiple DEs
 !
 ! !INTERFACE:
@@ -1291,7 +1291,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
         integer :: localrc         ! local error status
         integer :: size_decomp
