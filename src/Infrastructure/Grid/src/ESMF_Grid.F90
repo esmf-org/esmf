@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.92 2003/09/04 22:24:21 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.93 2003/09/05 20:28:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -71,16 +71,17 @@
         integer :: coord_order              ! enum for mapping of xyz 
                                             ! to ijk
         integer :: coord_index              ! enum for global or local indexing
-        integer :: num_physgrids            ! number of grid descriptors
-                                            ! necessary to support
-                                            ! staggering, vertical
-                                            ! grids, background grids
         type (ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
                                             ! logical identifier to indicate
                                             ! periodic boundary conditions in
                                             ! each direction
+        integer :: num_physgrids            ! number of grid descriptors
+                                            ! necessary to support
+                                            ! staggering, vertical
+                                            ! grids, background grids
+        integer :: num_physgrids_alloc      ! number of physgrids allocated
         type (ESMF_PhysGrid), dimension(:), pointer :: physgrids
-                                            ! grid info for all grid descriptions
+                                            ! info for all grid descriptions
                                             ! necessary to define horizontal, 
                                             ! staggered and vertical grids
         type (ESMF_DistGrid) :: distgrid    ! decomposition and other
@@ -214,7 +215,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.92 2003/09/04 22:24:21 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.93 2003/09/05 20:28:43 nscollins Exp $'
 
 !==============================================================================
 !
@@ -457,7 +458,7 @@
       allocate(grid, stat=status)
 !     If error write message and return.
 !     Formal error handling will be added asap.
-      if(status .NE. ESMF_SUCCESS) then
+      if(status .NE. 0) then
         print *, "ERROR in ESMF_GridCreateEmpty: Allocate"
         return
       endif
@@ -568,7 +569,7 @@
       allocate(grid, stat=status)
 !     If error write message and return.
 !     Formal error handling will be added asap.
-      if(status .NE. ESMF_SUCCESS) then
+      if(status .NE. 0) then
         print *, "ERROR in ESMF_GridCreateInternal: Allocate"
         return
       endif
@@ -689,7 +690,7 @@
       allocate(grid, stat=status)
 !     If error write message and return.
 !     Formal error handling will be added asap.
-      if(status .NE. ESMF_SUCCESS) then
+      if(status .NE. 0) then
         print *, "ERROR in ESMF_GridCreateInternal: Allocate"
         return
       endif
@@ -765,7 +766,7 @@
       allocate(grid, stat=status)
 !     If error write message and return.
 !     Formal error handling will be added asap.
-      if(status .NE. ESMF_SUCCESS) then
+      if(status .NE. 0) then
         print *, "ERROR in ESMF_GridCreateRead: Allocate"
         return
       endif
@@ -835,7 +836,7 @@
       allocate(grid, stat=status)
 !     If error write message and return.
 !     Formal error handling will be added asap.
-      if(status .NE. ESMF_SUCCESS) then
+      if(status .NE. 0) then
         print *, "ERROR in ESMF_GridCreateCopy: Allocate"
         return
       endif
@@ -918,7 +919,7 @@
       allocate(grid, stat=status)
 !     If error write message and return.
 !     Formal error handling will be added asap.
-      if(status .NE. ESMF_SUCCESS) then
+      if(status .NE. 0) then
         print *, "ERROR in ESMF_GridCreateCutout: Allocate"
         return
       endif
@@ -1001,7 +1002,7 @@
       allocate(grid, stat=status)
 !     If error write message and return.
 !     Formal error handling will be added asap.
-      if(status .NE. ESMF_SUCCESS) then
+      if(status .NE. 0) then
         print *, "ERROR in ESMF_GridCreateChangeResolution: Allocate"
         return
       endif
@@ -1074,7 +1075,7 @@
       allocate(grid, stat=status)
 !     If error write message and return.
 !     Formal error handling will be added asap.
-      if(status .NE. ESMF_SUCCESS) then
+      if(status .NE. 0) then
         print *, "ERROR in ESMF_GridCreateExchange: Allocate"
         return
       endif
@@ -1144,7 +1145,7 @@
       endif
 
       deallocate(grid%ptr, stat=status)
-      if(status .NE. ESMF_SUCCESS) then
+      if(status .NE. 0) then
         print *, "ERROR in ESMF_GridDestroy: Grid deallocate"
         return
       endif
@@ -1279,6 +1280,10 @@
       endif
       call ESMF_DELayoutGetSize(layout, numDE1, numDE2, status)
       allocate(countsPerAxis(numDE1*numDE2, ESMF_MAXGRIDDIM), stat=status)
+      if (status .ne. 0) then
+         print *, "allocation error"
+         return
+      endif
       call ESMF_DistGridGetAllCounts(grid%distgrid%ptr, countsPerAxis, status)
       call ESMF_GridSetBoundingBoxes(grid, x_min, y_min, delta1, delta2, &
                                      countsPerAxis, numDE1, numDE2, status)
@@ -1663,10 +1668,11 @@
       grid%horz_coord_system = ESMF_CoordSystem_Unknown
       grid%vert_coord_system = ESMF_CoordSystem_Unknown
       grid%coord_order = ESMF_CoordOrder_Unknown
-      grid%num_physgrids = 0
       do i=1,ESMF_MAXGRIDDIM
         grid%periodic(i) = ESMF_FALSE
       enddo
+      grid%num_physgrids = 0
+      grid%num_physgrids_alloc = 0
       nullify(grid%physgrids)
 
       grid%distgrid = ESMF_DistGridCreate(name, rc)
@@ -1784,10 +1790,8 @@
       real :: global_max_coord(2)
       integer :: global_nmax(2)
       integer :: i
-      type(ESMF_PhysGrid), dimension(:), pointer :: temp_pgrids
-                                             ! temporary array of physgrids
 
-!     Initialize return code
+      ! Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -1795,34 +1799,17 @@
         rc = ESMF_FAILURE
       endif
 
-!     Increment the number of physgrids in the grid and allocate memory
-      grid%num_physgrids = grid%num_physgrids + 1
-      if(grid%num_physgrids .eq. 1) then
-        allocate(grid%physgrids(3), stat=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridAddPhysGrid: physgrids allocate"
-          return
-        endif
-!        allocate(temp_pgrids(grid%num_physgrids), stat=status)
-!        if(status .NE. ESMF_SUCCESS) then
-!          print *, "ERROR in ESMF_GridAddPhysGrid: temp_pgrids allocate"
-!          return
-!        endif
-!      else
-!        allocate(temp_pgrids(grid%num_physgrids), stat=status)
-!        if(status .NE. ESMF_SUCCESS) then
-!          print *, "ERROR in ESMF_GridAddPhysGrid: temp_pgrids allocate"
-!          return
-!        endif
-!        do i = 1, grid%num_physgrids - 1
-!          temp_pgrids(i) = grid%physgrids(i)
-!        enddo
- !       deallocate(grid%physgrids, stat=status)
- !       if(status .NE. ESMF_SUCCESS) then
- !         print *, "ERROR in ESMF_GridAddPhysGrid: physgrids deallocate"
- !         return
- !       endif
+      ! Increment the number of physgrids in the grid and allocate memory
+      ! This subroutine should be called before incrementing num_physgrids
+      ! because it uses the old value internally.
+      call ESMF_GridMakePhysGridSpace(grid, grid%num_physgrids+1, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridAddPhysGrid: temp_pgrids allocate"
+        return
       endif
+      grid%num_physgrids = grid%num_physgrids + 1
+
+      ! Now initialize some values
       physgrid_id = grid%num_physgrids 
 
       if (real(counts(1)).ne.0.0) then
@@ -1851,8 +1838,9 @@
       global_min_coord(2)=y_min
       global_max_coord(2)=y_max
       global_nmax(2)=counts(2)
- !     temp_pgrids(physgrid_id)=ESMF_PhysGridCreate(dim_num=2, &
-      grid%physgrids(physgrid_id)=ESMF_PhysGridCreate(dim_num=2, &
+
+      ! Create the actual physgrid object
+      grid%physgrids(physgrid_id) = ESMF_PhysGridCreate(dim_num=2, &
                                       relloc=relloc, &
                                       local_min=local_min_coord, &
                                       local_max=local_max_coord, &
@@ -1861,7 +1849,6 @@
                                       global_max=global_max_coord, &
                                       global_nmax=global_nmax, &
                                       name=physgrid_name, rc=status)
- !     grid%physgrids => temp_pgrids
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1933,10 +1920,8 @@
       real, dimension(:), allocatable :: delta1_local, delta2_local
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: gridp
-      type(ESMF_PhysGrid), dimension(:), allocatable, target :: temp_pgrids
-                                              ! temporary array of physgrids
 
-!     Initialize return code
+      ! Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -1944,38 +1929,21 @@
         rc = ESMF_FAILURE
       endif
 
-!     Increment the number of physgrids in the grid and allocate memory
-      grid%num_physgrids = grid%num_physgrids + 1
-      if(grid%num_physgrids .eq. 1) then
-        allocate(grid%physgrids(3), stat=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridAddPhysGridSpecd: physgrids allocate"
-          return
-        endif
-!        allocate(temp_pgrids(grid%num_physgrids), stat=status)
-!        if(status .NE. ESMF_SUCCESS) then
-!          print *, "ERROR in ESMF_GridAddPhysGridSpecd: temp_pgrids allocate"
-!          return
-!        endif
-!      else
-!        allocate(temp_pgrids(grid%num_physgrids), stat=status)
-!        if(status .NE. ESMF_SUCCESS) then
-!          print *, "ERROR in ESMF_GridAddPhysGridSpecd: temp_pgrids allocate"
-!          return
-!        endif
-!        do i = 1, grid%num_physgrids - 1
-!          temp_pgrids(i) = grid%physgrids(i)
-!        enddo
- !       deallocate(grid%physgrids, stat=status)
- !       if(status .NE. ESMF_SUCCESS) then
- !         print *, "ERROR in ESMF_GridAddPhysGridSpecd: physgrids deallocate"
- !         return
- !       endif
+      ! Increment the number of physgrids in the grid and allocate memory
+      ! This subroutine should be called before incrementing num_physgrids
+      ! because it uses the old value internally.
+      call ESMF_GridMakePhysGridSpace(grid, grid%num_physgrids+1, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridAddPhysGrid: temp_pgrids allocate"
+        return
       endif
+      grid%num_physgrids = grid%num_physgrids + 1
+
+
+      ! Now set up the current physgrid. 
       physgrid_id = grid%num_physgrids 
 
-      ! Now set up the current physgrid.  First calculate global_mins and
-      ! global_maxs
+      ! First calculate global_mins and global_maxs
       global_min(1) = min(1)
       global_min(2) = min(2)
       global_max(1) = min(1)
@@ -2003,8 +1971,16 @@
       counts(2) = countsPerDE2(myDE(2))
 
       ! allocate and load local deltas
-      allocate(delta1_local(counts(1)))
-      allocate(delta2_local(counts(2)))
+      allocate(delta1_local(counts(1)), stat=status)
+      if (status .ne. 0) then
+         print *, "allocation error"
+         return
+      endif
+      allocate(delta2_local(counts(2)), stat=status)
+      if (status .ne. 0) then
+         print *, "allocation error"
+         return
+      endif
       local_min(1) = global_min(1)
       local_min(2) = global_min(2)
       local_start(1) = 0
@@ -2036,7 +2012,6 @@
         local_max(2) = local_max(2) + delta2(i+local_start(2))
       enddo
 
-!      temp_pgrids(physgrid_id) = ESMF_PhysGridCreate(dim_num=2, &
       grid%physgrids(physgrid_id) = ESMF_PhysGridCreate(dim_num=2, &
                                    relloc=relloc, &
                                    delta1=delta1_local, &
@@ -2050,11 +2025,115 @@
                                    dim_units=dim_units, &
                                    name=physgrid_name, &
                                    rc=status)
-!      grid%physgrids => temp_pgrids
 
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridAddPhysGridSpecd
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridMakePhysGridSpace - Allocate or extend physgrid array
+
+! !INTERFACE:
+      subroutine ESMF_GridMakePhysGridSpace(gridp, newcount, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridType) :: gridp
+      integer, intent(in) :: newcount
+      integer, intent(out) :: rc
+!
+! !DESCRIPTION:
+!     Internal routine which verifies there is enough array space to
+!     hold the specified number of physgrids.  Allocates more space and
+!     copies the contents into the new space if not.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[gridp]
+!          Pointer to an {\tt ESMF\_GridType}, the internal structure
+!          which holds the {\tt Grid} information.
+!     \item[newcount]
+!          Make sure there are enough space in the array to hold 
+!          {\tt newcount} items.
+!     \item[rc]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      ! note: this is an internal routine.  rc isn't optional - so we
+      ! don't have to fool with rcpresent and status here.
+
+      ! the save attribute is to be sure that the temp space isn't
+      ! deallocated automatically by the compiler at the return of
+      ! this routine. it's going to be pointed to by the physgrids pointer
+      ! in the grid structure, but that might not be obvious to the compiler.
+      type(ESMF_PhysGrid), dimension(:), pointer, save :: temp_pgrids
+      integer :: i, oldcount, alloccount, allocrc
+
+      ! number of currently used and available entries
+      oldcount = gridp%num_physgrids
+      alloccount = gridp%num_physgrids_alloc
+
+      ! if there are already enough, we are done. 
+      if (alloccount .ge. newcount) then
+         rc = ESMF_SUCCESS
+         return
+      endif
+
+#define CHUNK 4
+
+      ! if none are allocated yet, allocate and return.
+      ! the chunksize is 4 because it is a round number in base 2.
+      if (alloccount .eq. 0) then
+        allocate(gridp%physgrids(CHUNK), stat=allocrc)
+        if(allocrc .ne. 0) then
+          print *, "ERROR in ESMF_GridAddPhysGrid: physgrids allocate"
+          rc = ESMF_FAILURE
+          return
+        endif
+        gridp%num_physgrids_alloc = CHUNK
+        rc = ESMF_SUCCESS
+        return
+      endif
+
+     ! ok, if you're here then there's already a list and you
+     ! need to extend it.  i don't know of any fortran intrinsic functions
+     ! to do that, so this: allocates a longer temp list, copies the old
+     ! contents over, deallocates the old array, and sets the pointer to 
+     ! point to the new list.
+
+     alloccount = alloccount + CHUNK
+
+     ! make larger temp space
+     allocate(temp_pgrids(alloccount), stat=allocrc)
+     if(allocrc .ne. 0) then
+       print *, "ERROR in ESMF_GridAddPhysGrid: temp_pgrids allocate"
+       return
+     endif
+
+     ! copy old contents over (note use of = and not => )
+     do i = 1, oldcount
+       temp_pgrids(i) = gridp%physgrids(i) 
+     enddo
+
+     ! deallocate old array
+     deallocate(gridp%physgrids, stat=allocrc)
+     if(allocrc .ne. 0) then
+       print *, "ERROR in ESMF_GridAddPhysGrid: physgrids deallocate"
+       return
+     endif
+
+     ! and set original pointer to the new space
+     gridp%physgrids => temp_pgrids
+ 
+     ! update count of how many items are currently allocated
+     gridp%num_physgrids_alloc = alloccount
+
+     rc = ESMF_SUCCESS
+
+     end subroutine ESMF_GridMakePhysGridSpace
 
 !------------------------------------------------------------------------------
 !BOP
@@ -3961,7 +4040,12 @@
 !                     6. (Xmax,Ymin,Zmax)
 !                     7. (Xmax,Ymax,Zmax)
 !                     8. (Xmin,Ymax,Zmax)
-      allocate(boxes(numDEs,npts,rank))
+      allocate(boxes(numDEs,npts,rank), stat=status)
+      if (status .ne. 0) then
+         print *, "allocation error"
+         return
+      endif
+      
 
 !     Calculate box for each DE
 !     Direction 1 first
@@ -4078,7 +4162,11 @@
 !                     6. (Xmax,Ymin,Zmax)
 !                     7. (Xmax,Ymax,Zmax)
 !                     8. (Xmin,Ymax,Zmax)
-       allocate(boxes(numDEs,npts,rank))
+      allocate(boxes(numDEs,npts,rank), stat=status)
+      if (status .ne. 0) then
+         print *, "allocation error"
+         return
+      endif
 
 !     Calculate box for each DE
 !     Direction 1 first
@@ -4394,8 +4482,16 @@
       rank = counts(3)
 
       ! allocate arrays now
-      allocate(grid_ai(nDEs,rank))
-      allocate(boxes(nDEs,2**rank,rank))
+      allocate(grid_ai(nDEs,rank), stat=status)
+      if (status .ne. 0) then
+         print *, "allocation error"
+         return
+      endif
+      allocate(boxes(nDEs,2**rank,rank), stat=status)
+      if (status .ne. 0) then
+         print *, "allocation error"
+         return
+      endif
 
       ! get pointer to the actual bounding boxes data
       call ESMF_LocalArrayGetData(array, boxes, rc=status)
