@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.23 2003/07/11 01:00:00 eschwab Exp $
+// $Id: ESMC_Comm.C,v 1.24 2003/07/18 01:47:15 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.23 2003/07/11 01:00:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.24 2003/07/18 01:47:15 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -69,7 +69,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
  // initialize local inter-thread buffer TODO: beginnings of memory mgmt ?
  void *ESMC_Comm::lbuf = 0;
  int  ESMC_Comm::lbufSize = 4096;              // TODO:  from config file ?
- ESMC_Datatype ESMC_Comm::lbufType = ESMC_INT;   // TODO: from config file ?
+ ESMC_DataKind ESMC_Comm::lbufType = ESMF_KIND_I4;   // TODO: from config file ?
 
  // initialize inter-thread comm variables
  pthread_mutex_t ESMC_Comm::bufMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -90,6 +90,18 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
  // finalization flag
  bool ESMC_Comm::commFinal = false;
 
+// type conversion maps from ESMF to MPI
+ MPI_Datatype ESMC_Comm::ESMC_DataKindToMPI[] =
+   // ESMF_KIND_I1 ESMF_KIND_I2 ESMF_KIND_I4 ESMF_KIND_I8 ESMF_KIND_R4
+  {0, MPI_CHAR,    MPI_SHORT,   MPI_INT,     MPI_LONG,    MPI_FLOAT,
+
+   // ESMF_KIND_R8 ESMF_KIND_C8 ESMF_KIND_C16
+      MPI_DOUBLE,  MPI_DOUBLE, MPI_LONG_DOUBLE };
+   // MPI_DOUBLE,  MPI_COMPLEX, MPI_DOUBLE_COMPLEX }; // for MPI implementations
+                                                      // that support COMPLEX
+
+ MPI_Op ESMC_Comm::ESMC_OpToMPI[] = {0, MPI_SUM, MPI_MIN, MPI_MAX };
+                                   //   ESMC_SUM ESMC_MIN ESMC_MAX
 //
 // This section includes all the Comm routines
 //
@@ -140,7 +152,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
       int nthreadsperproc,    // in - number of threads per process
       int nprocs,             // in - number of processes
       int lbufsize,           // in - number of local message buffer elements
-      ESMC_Datatype lbuftype) { // in - type of local message buffer elements
+      ESMC_DataKind lbuftype) { // in - type of local message buffer elements
 //
 // !DESCRIPTION:
 //      ESMF routine which only initializes Comm values; it does not
@@ -179,7 +191,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
     if (lbuf == 0) {
       switch (lbufType)
       {
-        case ESMC_INT:
+        case ESMF_KIND_I4:
           try {
             lbuf = new int[lbufSize];
           }
@@ -191,7 +203,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
             return(ESMF_FAILURE);
           }
           break;
-        case ESMC_LONG:
+        case ESMF_KIND_I8:
           try {
             lbuf = new long[lbufSize];
           }
@@ -203,7 +215,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
             return(ESMF_FAILURE);
           }
           break;
-        case ESMC_FLOAT:
+        case ESMF_KIND_R4:
           try {
             lbuf = new float[lbufSize];
           }
@@ -215,7 +227,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
             return(ESMF_FAILURE);
           }
           break;
-        case ESMC_DOUBLE:
+        case ESMF_KIND_R8:
           try {
             lbuf = new double[lbufSize];
           }
@@ -264,17 +276,6 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
       nodeRank = DE->pID;
       pthread_cond_broadcast(&initCV);
     pthread_mutex_unlock(&initMutex);
-
-    // initialize ESMC data type map to MPI types TODO: ??
-    ESMC_DatatypeToMPI[ESMC_INT] = MPI_INT;
-    ESMC_DatatypeToMPI[ESMC_LONG] = MPI_LONG;
-    ESMC_DatatypeToMPI[ESMC_FLOAT] = MPI_FLOAT;
-    ESMC_DatatypeToMPI[ESMC_DOUBLE] = MPI_DOUBLE;
-
-    // initialize ESMC operation type map to MPI types TODO: ??
-    ESMC_OpToMPI[ESMC_SUM] = MPI_SUM;
-    //ESMC_OpToMPI[ESMC_MIN] = MPI_MIN;
-    //ESMC_OpToMPI[ESMC_MAX] = MPI_MAX;
 
   } // end ESMC_PROCESS
 
@@ -572,7 +573,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
       int nthreadsperproc,    // in - number of threads per process
       int nprocs,             // in - number of processes
       int lbufsize,           // in - number of local message buffer elements
-      ESMC_Datatype lbuftype) { // in - type of local message buffer elements
+      ESMC_DataKind lbuftype) { // in - type of local message buffer elements
 //
 // !DESCRIPTION:
 //      Calls standard ESMF deep or shallow methods for initialization
@@ -628,7 +629,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 // !ARGUMENTS:
       void *buf,
       int num,
-      ESMC_Datatype type,
+      ESMC_DataKind type,
       ESMC_DE *dest,
       int tag,
       int *request) {
@@ -644,7 +645,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 
 #ifdef MPI
   MPI_Request req;
-  MPI_Isend(buf, num, ESMC_DatatypeToMPI[type], destpID, tag, MPI_COMM_WORLD, &req);
+  MPI_Isend(buf, num, ESMC_DataKindToMPI[type], destpID, tag, MPI_COMM_WORLD, &req);
   // add req to linked list TODO:
 #endif
 
@@ -758,7 +759,7 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
       void *sbuf,
       void *rbuf,
       int num,
-      ESMC_Datatype type,
+      ESMC_DataKind type,
       ESMC_DE *rootDE) {
 //
 // !DESCRIPTION:
@@ -779,8 +780,8 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
 
   //printf("ESMC_CommScatter(): rootDE's rootPID = %d\n", rootpID);
 
-  MPI_Scatter(sbuf, num, ESMC_DatatypeToMPI[type],
-              rbuf, num, ESMC_DatatypeToMPI[type],
+  MPI_Scatter(sbuf, num, ESMC_DataKindToMPI[type],
+              rbuf, num, ESMC_DataKindToMPI[type],
               rootpID, MPI_COMM_WORLD);
 
   return(ESMF_SUCCESS);
@@ -803,7 +804,7 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
       void *rbuf,
       int *rlen,
       int *rdispls,
-      ESMC_Datatype type) {
+      ESMC_DataKind type) {
 //
 // !DESCRIPTION:
 //      
@@ -813,15 +814,15 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
 
 //cout << "entered ESMC_CommAllGatherV(), tidx = " << DE->tID << endl;
 
-    MPI_Allgatherv(sbuf, slen, ESMC_DatatypeToMPI[type],
-                   rbuf, rlen, rdispls, ESMC_DatatypeToMPI[type],
+    MPI_Allgatherv(sbuf, slen, ESMC_DataKindToMPI[type],
+                   rbuf, rlen, rdispls, ESMC_DataKindToMPI[type],
                    MPI_COMM_WORLD);
 
 #if 0
   // copy our data into common buffer
   switch (type)
   {
-    case ESMC_INT:
+    case ESMF_KIND_I4:
       // copy sbuf to our lbuf slot (don't need to mutex protect since
       //   we're writing to our own unique thread-specific slot)
       //  TODO:  use memcpy for speed ??
@@ -862,8 +863,8 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
     pthread_mutex_unlock(&barrierMutex);
 
     // then exchange data with other nodes
-    MPI_Allgatherv(lbuf, num*nThreadsPerProc, ESMC_DatatypeToMPI[type],
-                   rbuf, num*nThreadsPerProc, ESMC_DatatypeToMPI[type],
+    MPI_Allgatherv(lbuf, num*nThreadsPerProc, ESMC_DataKindToMPI[type],
+                   rbuf, num*nThreadsPerProc, ESMC_DataKindToMPI[type],
                    MPI_COMM_WORLD);
 
   } // end if ESMC_PROCESS
@@ -893,7 +894,7 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
       void *sbuf,
       void *rbuf,
       int num,
-      ESMC_Datatype type) {
+      ESMC_DataKind type) {
 //
 // !DESCRIPTION:
 //      
@@ -906,7 +907,7 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
   // copy our data into common buffer
   switch (type)
   {
-    case ESMC_INT:
+    case ESMF_KIND_I4:
       // copy sbuf to our lbuf slot (don't need to mutex protect since
       //   we're writing to our own unique thread-specific slot)
       //  TODO:  use memcpy for speed ??
@@ -948,8 +949,8 @@ int nMPIprocs;
 MPI_Comm_size(MPI_COMM_WORLD, &nMPIprocs);
 //cout << "number of MPI procs = " << nMPIprocs << endl;
 //sleep(60);
-    MPI_Allgather(lbuf, num*nThreadsPerProc, ESMC_DatatypeToMPI[type],
-                  rbuf, num*nThreadsPerProc, ESMC_DatatypeToMPI[type],
+    MPI_Allgather(lbuf, num*nThreadsPerProc, ESMC_DataKindToMPI[type],
+                  rbuf, num*nThreadsPerProc, ESMC_DataKindToMPI[type],
                   MPI_COMM_WORLD);
 //cout << "MPI_Allgather() complete" << endl;
   }  // end if ESMC_PROCESS
@@ -979,7 +980,7 @@ MPI_Comm_size(MPI_COMM_WORLD, &nMPIprocs);
       void *sbuf,
       void *rbuf,
       int num,
-      ESMC_Datatype type) {
+      ESMC_DataKind type) {
 //
 // !DESCRIPTION:
 //      
@@ -988,8 +989,8 @@ MPI_Comm_size(MPI_COMM_WORLD, &nMPIprocs);
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
 #ifdef MPI
-  MPI_Alltoall(sbuf, num, ESMC_DatatypeToMPI[type],
-               rbuf, num, ESMC_DatatypeToMPI[type],
+  MPI_Alltoall(sbuf, num, ESMC_DataKindToMPI[type],
+               rbuf, num, ESMC_DataKindToMPI[type],
                MPI_COMM_WORLD);
 #endif
 
@@ -1011,7 +1012,7 @@ MPI_Comm_size(MPI_COMM_WORLD, &nMPIprocs);
       void *sbuf,
       void *rbuf,
       int num,
-      ESMC_Datatype type,
+      ESMC_DataKind type,
       ESMC_Op op) {
 //
 // !DESCRIPTION:
@@ -1028,7 +1029,7 @@ MPI_Comm_size(MPI_COMM_WORLD, &nMPIprocs);
     // add our data into common buffer
     switch (type)
     {
-      case ESMC_INT:
+      case ESMF_KIND_I4:
         pthread_mutex_lock(&bufMutex);
           if(!lbufCleared) {
             memset(lbuf, 0, num*sizeof(int)); // 1st DE in clears lbuf
@@ -1075,7 +1076,7 @@ MPI_Comm_size(MPI_COMM_WORLD, &nMPIprocs);
     // then reduce data with other nodes
 //cout << "calling MPI_Allreduce" << endl;
     memset(rbuf, 0, num*sizeof(int)); // clear gbuf
-    MPI_Allreduce(lbuf, rbuf, num, ESMC_DatatypeToMPI[type],
+    MPI_Allreduce(lbuf, rbuf, num, ESMC_DataKindToMPI[type],
                   ESMC_OpToMPI[op], MPI_COMM_WORLD);
   }
 
