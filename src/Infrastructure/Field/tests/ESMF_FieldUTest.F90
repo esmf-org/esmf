@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.69 2004/08/30 16:33:27 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.70 2004/09/17 22:09:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.69 2004/08/30 16:33:27 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.70 2004/09/17 22:09:02 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -516,7 +516,18 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Setting a data pointer directly in a Field
+      ! Setting a (bad) data pointer directly in a Field
+      nullify(f90ptr4)
+      call ESMF_FieldSetDataPointer(f2, f90ptr4, rc=rc)
+      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(name, *) "Setting a null F90 pointer directly in a Field"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Setting a (good) data pointer directly in a Field
+      allocate(f90ptr4(4,4))
+      f90ptr4(:,:) = 3.14159
       call ESMF_FieldSetDataPointer(f2, f90ptr4, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an F90 pointer directly in a Field"
@@ -527,7 +538,6 @@
       !EX_UTest
       ! Getting the data pointer back from a Field
       call ESMF_FieldGetDataPointer(f2, f90ptr3, rc=rc)
-      ! This print crashes
       print *, "data = ", f90ptr3(1,1)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting an F90 pointer directly back from a Field"
