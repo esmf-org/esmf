@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.4 2004/03/18 22:03:11 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.5 2004/03/18 22:25:12 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -11,7 +11,7 @@
 !==============================================================================
 !
 !     ESMF Array module
-      module ESMF_ArrayMod
+      module ESMF_ArrayBaseMod
 !
 !==============================================================================
 !
@@ -24,7 +24,7 @@
 #include "ESMF.h"
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !MODULE: ESMF_ArrayMod - Manage data arrays uniformly between F90 and C++     
 !
 ! !DESCRIPTION:
@@ -107,21 +107,21 @@
 
       public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex  
 
-      public ESMF_ArrayCheckpoint
-      public ESMF_ArrayRestore
+      public ESMF_ArrayWriteRestart
+      public ESMF_ArrayReadRestart
       public ESMF_ArrayWrite
       public ESMF_ArrayRead
  
       public ESMF_ArrayValidate
       public ESMF_ArrayPrint
-!EOP
+!EOPI
 
       public assignment(=)
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.4 2004/03/18 22:03:11 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.5 2004/03/18 22:25:12 cdeluca Exp $'
 !
 !==============================================================================
 !
@@ -147,215 +147,6 @@ subroutine ESMF_aras(daval, saval)
 end subroutine
 
 
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArraySetAxisIndex
-!
-! !INTERFACE:
-      subroutine ESMF_ArraySetAxisIndex(array, totalindex, compindex, &
-                                        exclindex, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: array 
-      type(ESMF_AxisIndex), intent(inout), optional :: totalindex(:)
-      type(ESMF_AxisIndex), intent(inout), optional :: compindex(:)
-      type(ESMF_AxisIndex), intent(inout), optional :: exclindex(:)
-      integer, intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!      Used to annotate an Array with information used to manage halo
-!      regions.
-!           
-!     The arguments are:
-!     \begin{description}
-!     \item [array]
-!           A {\tt ESMF\_Array} object.
-!     \item [totalindex]
-!	    An array of index spaces for the total array size.
-!     \item [{[compindex]}]
-!	    An array of index spaces for the computational array size.
-!     \item [{[exclindex]}]
-!	    An array of index spaces for the exclusive array size.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!       
-!
-!EOP
-
-        integer :: status
-        integer :: i
-
-        ! call c routine to add index
-        if (present(totalindex)) then
-          do i=1,size(totalindex)
-            totalindex(i)%min = totalindex(i)%min - 1
-            totalindex(i)%max = totalindex(i)%max - 1
-          enddo
-          call c_ESMC_ArraySetAxisIndex(array, ESMF_DOMAIN_TOTAL, &
-                                        totalindex, status)
-          if (status .ne. ESMF_SUCCESS) goto 10
-          do i=1,size(totalindex)
-            totalindex(i)%min = totalindex(i)%min + 1
-            totalindex(i)%max = totalindex(i)%max + 1
-          enddo
-        endif
-
-        if (present(compindex)) then
-          do i=1,size(compindex)
-            compindex(i)%min = compindex(i)%min - 1
-            compindex(i)%max = compindex(i)%max - 1
-          enddo
-          call c_ESMC_ArraySetAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
-                                        compindex, status)
-          if (status .ne. ESMF_SUCCESS) goto 10
-          do i=1,size(compindex)
-            compindex(i)%min = compindex(i)%min + 1
-            compindex(i)%max = compindex(i)%max + 1
-          enddo
-        endif
-
-        if (present(exclindex)) then
-          do i=1,size(exclindex)
-            exclindex(i)%min = exclindex(i)%min - 1
-            exclindex(i)%max = exclindex(i)%max - 1
-          enddo
-          call c_ESMC_ArraySetAxisIndex(array, ESMF_DOMAIN_EXCLUSIVE, &
-                                        exclindex, status)
-          if (status .ne. ESMF_SUCCESS) goto 10
-          do i=1,size(exclindex)
-            exclindex(i)%min = exclindex(i)%min + 1
-            exclindex(i)%max = exclindex(i)%max + 1
-          enddo
-        endif
-
-        status = ESMF_SUCCESS
-
- 10   continue
-        if (present(rc)) rc = status
-        end subroutine ESMF_ArraySetAxisIndex
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayGetAxisIndex
-!
-! !INTERFACE:
-      subroutine ESMF_ArrayGetAxisIndex(array, totalindex, compindex, &
-                                        exclindex, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: array 
-      type(ESMF_AxisIndex), intent(inout), optional :: totalindex(:)
-      type(ESMF_AxisIndex), intent(inout), optional :: compindex(:)
-      type(ESMF_AxisIndex), intent(inout), optional :: exclindex(:)
-      integer, intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!      Used to retrieve the index annotation from an Array.
-!
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [array]
-!           A {\tt ESMF\_Array} object.
-!     \item [totalindex]
-!           An array of index spaces for the total array size.
-!     \item [{[compindex]}]
-!           An array of index spaces for the computational array size.
-!     \item [{[exclindex]}]
-!           An array of index spaces for the exclusive array size.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS:
-
-        integer :: status, i
-
-        ! call c routine to get index
-        if (present(totalindex)) then
-          call c_ESMC_ArrayGetAxisIndex(array, ESMF_DOMAIN_TOTAL, totalindex,&
-                                        status)
-          if (status .ne. ESMF_SUCCESS) goto 10
-          do i=1,size(totalindex)
-            totalindex(i)%min = totalindex(i)%min + 1
-            totalindex(i)%max = totalindex(i)%max + 1
-          enddo
-        endif
-
-        if (present(compindex)) then
-          call c_ESMC_ArrayGetAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
-                                        compindex, status)
-          if (status .ne. ESMF_SUCCESS) goto 10
-          do i=1,size(compindex)
-            compindex(i)%min = compindex(i)%min + 1
-            compindex(i)%max = compindex(i)%max + 1
-          enddo
-        endif
-
-        if (present(exclindex)) then
-          call c_ESMC_ArrayGetAxisIndex(array, ESMF_DOMAIN_EXCLUSIVE, &
-                                        exclindex, status)
-          if (status .ne. ESMF_SUCCESS) goto 10
-          do i=1,size(exclindex)
-            exclindex(i)%min = exclindex(i)%min + 1
-            exclindex(i)%max = exclindex(i)%max + 1
-          enddo
-        endif
-
-        status = ESMF_SUCCESS
-
- 10   continue
-        if (present(rc)) rc = status
-
-        end subroutine ESMF_ArrayGetAxisIndex
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_ArrayReorder
-!
-! !INTERFACE:
-      subroutine ESMF_ArrayReorder(array, newarrayspec, newarray, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array) :: array 
-      type(ESMF_ArraySpec), intent(in) :: newarrayspec
-      type(ESMF_Array):: newarray   
-      integer, intent(out), optional :: rc       
-!
-! !DESCRIPTION:
-!      Used to alter the local memory ordering (layout) of this Array.
-!
-!  !TODO: remove this note before generating user documentation
-!
-!      (i am not sure this makes sense now, or that the routine should be
-!      in this class.  but i am leaving this here as a reminder that we
-!      might need some low level reorder functions.  maybe the argument
-!      should be another array or an arrayspec which describes what you
-!      want, and the input array is what exists, and this routine can then
-!      make one into the other.   is this a type of create?  or is this
-!      a copy?)
-!
-!EOPI
-! !REQUIREMENTS:
-
-!
-! TODO: code goes here
-!	Changed BOP/EOP to BOPI/EOPI until code is written.
-!
-        if (present(rc)) rc = ESMF_FAILURE
-
-        end subroutine ESMF_ArrayReorder
-
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-! 
-! Query for information from the array.
-!
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_ArrayGet
@@ -480,6 +271,83 @@ end subroutine
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayGetAxisIndex
+!
+! !INTERFACE:
+      subroutine ESMF_ArrayGetAxisIndex(array, totalindex, compindex, &
+                                        exclindex, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(in) :: array 
+      type(ESMF_AxisIndex), intent(inout), optional :: totalindex(:)
+      type(ESMF_AxisIndex), intent(inout), optional :: compindex(:)
+      type(ESMF_AxisIndex), intent(inout), optional :: exclindex(:)
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Used to retrieve the index annotation from an Array.
+!
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           A {\tt ESMF\_Array} object.
+!     \item [totalindex]
+!           An array of index spaces for the total array size.
+!     \item [{[compindex]}]
+!           An array of index spaces for the computational array size.
+!     \item [{[exclindex]}]
+!           An array of index spaces for the exclusive array size.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+
+        integer :: status, i
+
+        ! call c routine to get index
+        if (present(totalindex)) then
+          call c_ESMC_ArrayGetAxisIndex(array, ESMF_DOMAIN_TOTAL, totalindex,&
+                                        status)
+          if (status .ne. ESMF_SUCCESS) goto 10
+          do i=1,size(totalindex)
+            totalindex(i)%min = totalindex(i)%min + 1
+            totalindex(i)%max = totalindex(i)%max + 1
+          enddo
+        endif
+
+        if (present(compindex)) then
+          call c_ESMC_ArrayGetAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
+                                        compindex, status)
+          if (status .ne. ESMF_SUCCESS) goto 10
+          do i=1,size(compindex)
+            compindex(i)%min = compindex(i)%min + 1
+            compindex(i)%max = compindex(i)%max + 1
+          enddo
+        endif
+
+        if (present(exclindex)) then
+          call c_ESMC_ArrayGetAxisIndex(array, ESMF_DOMAIN_EXCLUSIVE, &
+                                        exclindex, status)
+          if (status .ne. ESMF_SUCCESS) goto 10
+          do i=1,size(exclindex)
+            exclindex(i)%min = exclindex(i)%min + 1
+            exclindex(i)%max = exclindex(i)%max + 1
+          enddo
+        endif
+
+        status = ESMF_SUCCESS
+
+ 10   continue
+        if (present(rc)) rc = status
+
+        end subroutine ESMF_ArrayGetAxisIndex
+
+!------------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE: ESMF_ArrayGetName - Retrieve the name of a Array
 !
 ! !INTERFACE:
@@ -507,7 +375,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
@@ -530,6 +398,302 @@ end subroutine
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayGetName
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayPrint - Print contents of an Array object
+!
+! !INTERFACE:
+      subroutine ESMF_ArrayPrint(array, options, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Array) :: array
+      character (len = *), intent(in), optional :: options
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Routine to print information about a array.
+!
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           A {\tt ESMF\_Array} object.
+!     \item [{[options]}]
+!           The print options
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+
+       character (len=6) :: defaultopts      ! default print options 
+       integer :: status                     ! local error status
+       logical :: rcpresent        
+
+       ! Initialize return code; assume failure until success is certain
+       status = ESMF_FAILURE
+       rcpresent = .FALSE.
+       if (present(rc)) then
+         rcpresent = .TRUE.
+         rc = ESMF_FAILURE
+       endif
+
+       if (array%this .eq. ESMF_NULL_POINTER) then
+         print *, "Array Print:"
+         print *, " Empty or Uninitialized Array"
+         if (present(rc)) rc = ESMF_SUCCESS
+         return
+       endif
+
+       defaultopts = "brief"
+
+       if(present(options)) then
+           call c_ESMC_ArrayPrint(array, options, status) 
+       else
+           call c_ESMC_ArrayPrint(array, defaultopts, status) 
+       endif
+
+       if (status .ne. ESMF_SUCCESS) then
+         print *, "Array print error"
+         return
+       endif
+
+!      set return values
+       if (rcpresent) rc = ESMF_SUCCESS
+
+       end subroutine ESMF_ArrayPrint
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArrayRead
+!
+! !INTERFACE:
+      function ESMF_ArrayRead(name, iospec, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Array) :: ESMF_ArrayRead
+!
+! !ARGUMENTS:
+      character (len = *), intent(in) :: name              ! array name to read
+      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
+      integer, intent(out), optional :: rc                 ! return code
+!
+! !DESCRIPTION:
+!      Used to read data from persistent storage in a variety of formats.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           A {\tt ESMF\_Array} object.
+!     \item [{[iospece]}]
+!           The file specification.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!	Changed BOP/EOP to BOPI/EOPI until function is implemented.
+!
+        type (ESMF_Array) :: a
+
+!       this is just to shut the compiler up
+        a%this = ESMF_NULL_POINTER
+
+!
+! TODO: add code here
+!
+
+        ESMF_ArrayRead = a 
+
+        if (present(rc)) rc = ESMF_FAILURE
+
+        end function ESMF_ArrayRead
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArrayReadRestart
+!
+! !INTERFACE:
+      function ESMF_ArrayReadRestart(name, iospec, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Array) :: ESMF_ArrayReadRestart
+!
+!
+! !ARGUMENTS:
+      character (len = *), intent(in) :: name              ! array name to restore
+      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
+      integer, intent(out), optional :: rc                 ! return code
+!
+! !DESCRIPTION:
+!      Used to reinitialize
+!      all data associated with a Array from the last call to WriteRestart.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           A {\tt ESMF\_Array} object.
+!     \item [{[iospece]}]
+!           The file specification.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+        type (ESMF_Array) :: a 
+
+!       this is just to shut the compiler up
+        a%this = ESMF_NULL_POINTER
+
+!
+! TODO: add code here
+!
+
+        ESMF_ArrayReadRestart = a 
+ 
+        if (present(rc)) rc = ESMF_FAILURE
+
+        end function ESMF_ArrayReadRestart
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArrayReorder
+!
+! !INTERFACE:
+      subroutine ESMF_ArrayReorder(array, newarrayspec, newarray, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array) :: array 
+      type(ESMF_ArraySpec), intent(in) :: newarrayspec
+      type(ESMF_Array):: newarray   
+      integer, intent(out), optional :: rc       
+!
+! !DESCRIPTION:
+!      Used to alter the local memory ordering (layout) of this Array.
+!
+!  !TODO: remove this note before generating user documentation
+!
+!      (i am not sure this makes sense now, or that the routine should be
+!      in this class.  but i am leaving this here as a reminder that we
+!      might need some low level reorder functions.  maybe the argument
+!      should be another array or an arrayspec which describes what you
+!      want, and the input array is what exists, and this routine can then
+!      make one into the other.   is this a type of create?  or is this
+!      a copy?)
+!
+!EOPI
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!	Changed BOP/EOP to BOPI/EOPI until code is written.
+!
+        if (present(rc)) rc = ESMF_FAILURE
+
+        end subroutine ESMF_ArrayReorder
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArraySetAxisIndex
+!
+! !INTERFACE:
+      subroutine ESMF_ArraySetAxisIndex(array, totalindex, compindex, &
+                                        exclindex, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array 
+      type(ESMF_AxisIndex), intent(inout), optional :: totalindex(:)
+      type(ESMF_AxisIndex), intent(inout), optional :: compindex(:)
+      type(ESMF_AxisIndex), intent(inout), optional :: exclindex(:)
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Used to annotate an Array with information used to manage halo
+!      regions.
+!           
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           A {\tt ESMF\_Array} object.
+!     \item [totalindex]
+!	    An array of index spaces for the total array size.
+!     \item [{[compindex]}]
+!	    An array of index spaces for the computational array size.
+!     \item [{[exclindex]}]
+!	    An array of index spaces for the exclusive array size.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!       
+!
+!EOP
+
+        integer :: status
+        integer :: i
+
+        ! call c routine to add index
+        if (present(totalindex)) then
+          do i=1,size(totalindex)
+            totalindex(i)%min = totalindex(i)%min - 1
+            totalindex(i)%max = totalindex(i)%max - 1
+          enddo
+          call c_ESMC_ArraySetAxisIndex(array, ESMF_DOMAIN_TOTAL, &
+                                        totalindex, status)
+          if (status .ne. ESMF_SUCCESS) goto 10
+          do i=1,size(totalindex)
+            totalindex(i)%min = totalindex(i)%min + 1
+            totalindex(i)%max = totalindex(i)%max + 1
+          enddo
+        endif
+
+        if (present(compindex)) then
+          do i=1,size(compindex)
+            compindex(i)%min = compindex(i)%min - 1
+            compindex(i)%max = compindex(i)%max - 1
+          enddo
+          call c_ESMC_ArraySetAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
+                                        compindex, status)
+          if (status .ne. ESMF_SUCCESS) goto 10
+          do i=1,size(compindex)
+            compindex(i)%min = compindex(i)%min + 1
+            compindex(i)%max = compindex(i)%max + 1
+          enddo
+        endif
+
+        if (present(exclindex)) then
+          do i=1,size(exclindex)
+            exclindex(i)%min = exclindex(i)%min - 1
+            exclindex(i)%max = exclindex(i)%max - 1
+          enddo
+          call c_ESMC_ArraySetAxisIndex(array, ESMF_DOMAIN_EXCLUSIVE, &
+                                        exclindex, status)
+          if (status .ne. ESMF_SUCCESS) goto 10
+          do i=1,size(exclindex)
+            exclindex(i)%min = exclindex(i)%min + 1
+            exclindex(i)%max = exclindex(i)%max + 1
+          enddo
+        endif
+
+        status = ESMF_SUCCESS
+
+ 10   continue
+        if (present(rc)) rc = status
+        end subroutine ESMF_ArraySetAxisIndex
 
 !------------------------------------------------------------------------------
 !BOP
@@ -582,225 +746,6 @@ end subroutine
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArraySetName
-
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!
-! This section is I/O for Arrays
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayCheckpoint
-!
-! !INTERFACE:
-      subroutine ESMF_ArrayCheckpoint(array, iospec, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array):: array 
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      integer, intent(out), optional :: rc            
-!
-! !DESCRIPTION:
-!      Used to save all data to disk as quickly as possible.  
-!      (see Read/Write for other options).  Internally this routine uses the
-!      same I/O interface as Read/Write, but the default options are to
-!      select the fastest way to save data to disk.
-!     
-!     The arguments are:
-!     \begin{description}
-!     \item [array]
-!           A {\tt ESMF\_Array} object.
-!     \item [{[iospece]}]
-!           The file specification.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS:
-
-!
-! TODO: code goes here
-!
-        if (present(rc)) rc = ESMF_FAILURE
-
-        end subroutine ESMF_ArrayCheckpoint
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayRestore
-!
-! !INTERFACE:
-      function ESMF_ArrayRestore(name, iospec, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Array) :: ESMF_ArrayRestore
-!
-!
-! !ARGUMENTS:
-      character (len = *), intent(in) :: name              ! array name to restore
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
-!
-! !DESCRIPTION:
-!      Used to reinitialize
-!      all data associated with a Array from the last call to Checkpoint.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [array]
-!           A {\tt ESMF\_Array} object.
-!     \item [{[iospece]}]
-!           The file specification.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS:
-
-!
-! TODO: code goes here
-!
-        type (ESMF_Array) :: a 
-
-!       this is just to shut the compiler up
-        a%this = ESMF_NULL_POINTER
-
-!
-! TODO: add code here
-!
-
-        ESMF_ArrayRestore = a 
- 
-        if (present(rc)) rc = ESMF_FAILURE
-
-        end function ESMF_ArrayRestore
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayWrite
-!
-! !INTERFACE:
-      subroutine ESMF_ArrayWrite(array, iospec, filename, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array) :: array
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      character(len=*), intent(in), optional :: filename
-      integer, intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!      Used to write data to persistent storage in a variety of formats.  
-!      (see Checkpoint/Restore for quick data dumps.)  Details of I/O 
-!      options specified in the IOSpec derived type. 
-!
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [array]
-!           A {\tt ESMF\_Array} object.
-!     \item [{[iospece]}]
-!           The file specification.
-!     \item [{[filename]}]
-!           The file name.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!
-!EOP
-! !REQUIREMENTS:
-
-       character (len=16) :: defaultopts      ! default write options 
-       character (len=16) :: defaultfile      ! default filename
-       integer :: status                      ! local error status
-       logical :: rcpresent        
-
-       ! Initialize return code; assume failure until success is certain
-       status = ESMF_FAILURE
-       rcpresent = .FALSE.
-       if (present(rc)) then
-         rcpresent = .TRUE.
-         rc = ESMF_FAILURE
-       endif
-
-       defaultopts = "singlefile"
-       defaultfile = "datafile"
-
-       if(present(filename)) then
-           call c_ESMC_ArrayWrite(array, defaultopts, trim(filename), status) 
-       else
-           call c_ESMC_ArrayWrite(array, defaultopts, trim(defaultfile), status) 
-       endif
-
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "Array write error"
-         return
-       endif
-
-!      set return values
-       if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArrayWrite
-
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_ArrayRead
-!
-! !INTERFACE:
-      function ESMF_ArrayRead(name, iospec, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Array) :: ESMF_ArrayRead
-!
-! !ARGUMENTS:
-      character (len = *), intent(in) :: name              ! array name to read
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
-!
-! !DESCRIPTION:
-!      Used to read data from persistent storage in a variety of formats.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [array]
-!           A {\tt ESMF\_Array} object.
-!     \item [{[iospece]}]
-!           The file specification.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-! !REQUIREMENTS:
-
-!
-! TODO: code goes here
-!	Changed BOP/EOP to BOPI/EOPI until function is implemented.
-!
-        type (ESMF_Array) :: a
-
-!       this is just to shut the compiler up
-        a%this = ESMF_NULL_POINTER
-
-!
-! TODO: add code here
-!
-
-        ESMF_ArrayRead = a 
-
-        if (present(rc)) rc = ESMF_FAILURE
-
-        end function ESMF_ArrayRead
 
 
 !------------------------------------------------------------------------------
@@ -872,43 +817,45 @@ end subroutine
 
        end subroutine ESMF_ArrayValidate
 
-
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayPrint - Print contents of an Array object
+! !IROUTINE: ESMF_ArrayWrite
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayPrint(array, options, rc)
-!
+      subroutine ESMF_ArrayWrite(array, iospec, filename, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      character(len=*), intent(in), optional :: filename
+      integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Routine to print information about a array.
+!      Used to write data to persistent storage in a variety of formats.  
+!      (see WriteRestart/Restore for quick data dumps.)  Details of I/O 
+!      options specified in the IOSpec derived type. 
 !
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           A {\tt ESMF\_Array} object.
-!     \item [{[options]}]
-!           The print options
+!     \item [{[iospece]}]
+!           The file specification.
+!     \item [{[filename]}]
+!           The file name.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
+!
 !EOP
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
-       character (len=6) :: defaultopts      ! default print options 
-       integer :: status                     ! local error status
+       character (len=16) :: defaultopts      ! default write options 
+       character (len=16) :: defaultfile      ! default filename
+       integer :: status                      ! local error status
        logical :: rcpresent        
 
        ! Initialize return code; assume failure until success is certain
@@ -919,31 +866,67 @@ end subroutine
          rc = ESMF_FAILURE
        endif
 
-       if (array%this .eq. ESMF_NULL_POINTER) then
-         print *, "Array Print:"
-         print *, " Empty or Uninitialized Array"
-         if (present(rc)) rc = ESMF_SUCCESS
-         return
-       endif
+       defaultopts = "singlefile"
+       defaultfile = "datafile"
 
-       defaultopts = "brief"
-
-       if(present(options)) then
-           call c_ESMC_ArrayPrint(array, options, status) 
+       if(present(filename)) then
+           call c_ESMC_ArrayWrite(array, defaultopts, trim(filename), status) 
        else
-           call c_ESMC_ArrayPrint(array, defaultopts, status) 
+           call c_ESMC_ArrayWrite(array, defaultopts, trim(defaultfile), status) 
        endif
 
        if (status .ne. ESMF_SUCCESS) then
-         print *, "Array print error"
+         print *, "Array write error"
          return
        endif
 
 !      set return values
        if (rcpresent) rc = ESMF_SUCCESS
 
-       end subroutine ESMF_ArrayPrint
+        end subroutine ESMF_ArrayWrite
 
 
-       end module ESMF_ArrayMod
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArrayWriteRestart
+!
+! !INTERFACE:
+      subroutine ESMF_ArrayWriteRestart(array, iospec, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array):: array 
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!      Used to save all data to disk as quickly as possible.  
+!      (see Read/Write for other options).  Internally this routine uses the
+!      same I/O interface as Read/Write, but the default options are to
+!      select the fastest way to save data to disk.
+!     
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           A {\tt ESMF\_Array} object.
+!     \item [{[iospece]}]
+!           The file specification.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+        if (present(rc)) rc = ESMF_FAILURE
+
+        end subroutine ESMF_ArrayWriteRestart
+
+
+
+
+       end module ESMF_ArrayBaseMod
 
