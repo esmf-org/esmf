@@ -238,7 +238,7 @@ end subroutine ESMF_LogOpen
 	character(len=7)                :: lt
 	character(len=32)               :: f
 	character(len=32)               ::tmethod,tfile
-	integer					      	::status,tline
+	integer			      	::status,tline
 	integer                         ::ok
 	integer	                        ::i
 	integer                         ::h,m,s,ms,y,mn,dy
@@ -247,9 +247,9 @@ end subroutine ESMF_LogOpen
 	if (present(method)) tmethod=adjustl(method)
 	if (present(line)) tline=line 
 	if (present(file)) then
-		tfile=adjustl(file)
+	    tfile=adjustl(file)
 	else
-	 	tfile=""
+	    tfile=""
 	endif
 	call c_esmc_timestamp(y,mn,dy,h,m,s,ms)
 	
@@ -321,7 +321,7 @@ end function ESMF_LogWrite
 	integer, intent(in), optional                   :: line
 	character(len=*), intent(in), optional          :: file
 	character(len=*), intent(in), optional	        :: method
-	integer, intent(out),optional                    :: rc
+	integer, intent(out), optional                  :: rc
 	
 
 ! !DESCRIPTION:
@@ -330,29 +330,38 @@ end function ESMF_LogWrite
 !      The arguments are:
 !      \begin{description}
 ! 	
-!      \item [rc]
+!      \item [status]
 !            Return code to check.
-!      \item [string]
-!            User-provided context string.
-!      \item [method]
+!      \item [{{line]}]
+!            Integer source line number.  Expected to be set by
+!            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
+!      \item [{[file]}]
+!            User-provided source file name.  Expected to be set by
+!            using the preprocessor {\tt \_\_FILE\_\_} macro.
+!      \item [{[method]}]
 !            User-provided method string.
+!      \item [{[rc]}]
+!            If specified, copy the {\tt status} value to {\tt rc}.
+!            This is not the return code for this function; it allows
+!            the calling code to do an assignment of the error code
+!            at the same time it is testing the value.
 !      
 !      \end{description}
 ! 
 !EOP
     logical :: logrc
 	
-    ESMF_LogFoundError=.FALSE.
-	rc=status
-	if (status .NE. ESMF_SUCCESS) then
-	    logrc = ESMF_LogWrite("StandardError",ESMF_LOG_ERROR,line,file,method)
+    ESMF_LogFoundError = .FALSE.
+    if (present(rc)) rc = status
+    if (status .NE. ESMF_SUCCESS) then
+        logrc = ESMF_LogWrite("StandardError",ESMF_LOG_ERROR,line,file,method)
         if (logrc .ne. .TRUE.) then
             print *, "Error writing previous error to log file"
             ! what now?  we're already in the error code...
             ! just fall through and return i guess.
        endif
-	   ESMF_LogFoundError=.TRUE.
-	endif	
+       ESMF_LogFoundError = .TRUE.
+    endif	
        
 end function ESMF_LogFoundError
 
