@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.84 2003/08/28 16:42:40 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.85 2003/08/28 21:01:51 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.84 2003/08/28 16:42:40 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.85 2003/08/28 21:01:51 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1706,7 +1706,7 @@
                                            rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType) :: grid
+      type(ESMF_GridType), target :: grid
       integer, intent(out) :: physgrid_id
       real, dimension(:), intent(in), optional :: min
       real, dimension(:), intent(in) :: delta1
@@ -1814,7 +1814,7 @@
       enddo
 
       ! figure out the position of myDE to get local counts
-      gridp%ptr = grid
+      gridp%ptr => grid
       call ESMF_GridGetDELayout(gridp, layout, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridAddPhysGridSpecd: get delayout"
