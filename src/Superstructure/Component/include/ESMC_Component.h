@@ -1,4 +1,4 @@
-// $Id: ESMC_Component.h,v 1.1 2003/01/07 21:38:35 nscollins Exp $
+// $Id: ESMC_Component.h,v 1.2 2003/01/08 23:25:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,9 +22,16 @@
 
 //-----------------------------------------------------------------------------
 
+#include "ESMC_Layout.h"
+
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
+
+enum ESMC_CompType { ESMF_APPCOMP=1, ESMF_GRIDCOMP, ESMF_CPLCOMP, 
+                     ESMF_COMPTYPE_UNKNOWN };
+enum ESMC_ModelType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE, 
+                      ESMF_RIVER, ESMF_MODELUNKNOWN };
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -67,7 +74,7 @@
 //
   public:
     int ESMC_ComponentInit(void);
-    int ESMC_ComponentRun(void);
+    int ESMC_ComponentRun(int timesteps);
     int ESMC_ComponentFinalize(void);
 
  // optional configuration methods
@@ -110,7 +117,10 @@
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_Component object.
 
- ESMC_Component *ESMC_ComponentCreate(int *rc);
+ ESMC_Component *ESMC_ComponentCreate(char *name, ESMC_Layout *layout,
+                                      enum ESMC_CompType ctype,
+                                      enum ESMC_ModelType mtype,
+                                      char *filepath, int *rc);
  int ESMC_ComponentDestroy(ESMC_Component *comp);
 
  #endif  // ESMC_Component_H

@@ -1,4 +1,4 @@
-// $Id: ESMC_Component.C,v 1.1 2003/01/07 21:37:30 nscollins Exp $
+// $Id: ESMC_Component.C,v 1.2 2003/01/08 23:24:58 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Component.C,v 1.1 2003/01/07 21:37:30 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Component.C,v 1.2 2003/01/08 23:24:58 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -52,15 +52,17 @@
 //     pointer to newly allocated ESMC_Component
 //
 // !ARGUMENTS:
+      char *name,
+      ESMC_Layout *layout,
+      enum ESMC_CompType ctype,
+      enum ESMC_ModelType mtype,
+      char *filepath,
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
 //      Create a new Component from ... Allocates memory for a new Component
 //      object and uses the internal routine ESMC_ComponentContruct to
-//      initialize it.  Define for deep classes only, for shallow classes only
-//      define and use ESMC_ComponentInit.
-//      There can be multiple overloaded methods with the same name, but
-//      different argument lists.
+//      initialize it. 
 //
 //      Note: this is a class helper function, not a class method
 //      (see declaration in ESMC_Component.h)
@@ -89,7 +91,7 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a Component object previously allocated
-//      via an ESMC_ComponentCreate routine.  Define for deep classes only.
+//      via an ESMC_ComponentCreate routine. 
 //
 //      Note: this is a class helper function, not a class method
 //      (see declaration in ESMC_Component.h)
@@ -164,7 +166,7 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ComponentInit - initializes a Component object
+// !IROUTINE:  ESMC_ComponentInit - call the Component init Routine
 //
 // !INTERFACE:
       int ESMC_Component::ESMC_ComponentInit(
@@ -176,10 +178,6 @@
       void) {
 //
 // !DESCRIPTION:
-//      ESMF routine which only initializes Component values; it does not
-//      allocate any resources.  Define for shallow classes only,
-//      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like ESMC_ComponentCreate.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -189,6 +187,54 @@
 //
 
  } // end ESMC_ComponentInit
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ComponentRun - call the Component run routine
+//
+// !INTERFACE:
+      int ESMC_Component::ESMC_ComponentRun(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int timesteps) {
+//
+// !DESCRIPTION:
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+//
+//  code goes here
+//
+
+ } // end ESMC_ComponentRun
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ComponentFinalize - call the Component finalize routine
+//
+// !INTERFACE:
+      int ESMC_Component::ESMC_ComponentFinalize(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      void) {
+//
+// !DESCRIPTION:
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+//
+//  code goes here
+//
+
+ } // end ESMC_ComponentFinalize
 
 //-----------------------------------------------------------------------------
 //BOP
