@@ -1,4 +1,4 @@
-# $Id: base,v 1.2 2003/02/11 16:04:44 nscollins Exp $ 
+# $Id: base,v 1.3 2003/02/11 16:10:02 nscollins Exp $ 
 #
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base_variables
 include ${ESMF_DIR}/build/common
@@ -57,26 +57,29 @@ include ${ESMF_DIR}/build/common
 
 # This F.f rule ensures that the old *.f files are removed.
 
-.F.f:
-	-${RM} $*.f __$*.c
-	-cp $*.F __$*.c
-	-${CC} ${FCPPFLAGS} -E  __$*.c | grep -v '^ *#' > $*.f
-	-${RM} __$*.c
-
-.F.o:
-	-${RM} $*.f __$*.c
-	-cp $< __$*.c
-	-${CC} ${FCPPFLAGS} -E  __$*.c | grep -v '^ *#' > $*.f
-	-${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} $*.f
-	-${RM} $*.f __$*.c
-
-.F.a:
-	-${RM} $*.f __$*.c
-	-cp $< __$*.c
-	-${CC} ${FCPPFLAGS} -E  __$*.c | grep -v '^ *#' > $*.f
-	-${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} $*.f
-	-${AR} cr ${LIBNAME} $*.o
-	-${RM} $*.f __$*.c
+# old, still needed on this arch??  nsc 11feb03
+##
+##.F.f:
+##	-${RM} $*.f __$*.c
+##	-cp $*.F __$*.c
+##	-${CC} ${FCPPFLAGS} -E  __$*.c | grep -v '^ *#' > $*.f
+##	-${RM} __$*.c
+##
+##.F.o:
+##	-${RM} $*.f __$*.c
+##	-cp $< __$*.c
+##	-${CC} ${FCPPFLAGS} -E  __$*.c | grep -v '^ *#' > $*.f
+##	-${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} $*.f
+##	-${RM} $*.f __$*.c
+##
+##.F.a:
+##	-${RM} $*.f __$*.c
+##	-cp $< __$*.c
+##	-${CC} ${FCPPFLAGS} -E  __$*.c | grep -v '^ *#' > $*.f
+##	-${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} $*.f
+##	-${AR} cr ${LIBNAME} $*.o
+##	-${RM} $*.f __$*.c
+##
 
 shared:
 
