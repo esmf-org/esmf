@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.62 2003/08/15 17:59:08 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.63 2003/08/15 22:54:53 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -194,7 +194,9 @@
    ! These are the recommended entry points; the code itself is in Array:
    public ESMF_FieldRedist   ! Redistribute existing arrays, matching grids
    public ESMF_FieldRegrid   ! Regridding and interpolation, different grids
-   public ESMF_FieldHalo     ! Halo updates
+   public ESMF_FieldHalo               ! Halo updates
+   public ESMF_FieldHaloPrecompute     ! Halo updates
+   public ESMF_FieldHaloRun            ! Halo updates
 
    public ESMF_FieldGather   ! Combine 1 decomposed field into 1 on 1 DE
    public ESMF_FieldAllGather! Combine 1 decomposed field into N copies on N DEs
@@ -227,7 +229,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.62 2003/08/15 17:59:08 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.63 2003/08/15 22:54:53 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2442,7 +2444,6 @@
       end subroutine ESMF_FieldScatter
 
 
-
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_FieldHalo - Data Halo operation on a Field
@@ -2487,6 +2488,7 @@
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
       type(ESMF_Route) :: route
+      type(ESMF_LocalArray) :: local_array
       logical :: hascachedroute    ! can we reuse an existing route?
       integer :: nDEs
       integer :: my_DE
@@ -2585,8 +2587,8 @@
 
       ! Once table is full, execute the communications it represents.
 
-      call ESMF_RouteRun(route, ftypep%localfield%localdata, &
-                         ftypep%localfield%localdata, status)
+      local_array = ftypep%localfield%localdata
+      call ESMF_RouteRun(route, local_array, local_array, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldHalo: RouteRun returned failure"
         return
@@ -2608,6 +2610,124 @@
       end subroutine ESMF_FieldHalo
 
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldHaloPrecompute - Precompute a Data Halo operation on a Field
+
+! !INTERFACE:
+      subroutine ESMF_FieldHaloPrecompute(field, route, async, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field
+      type(ESMF_Route), intent(inout) :: route
+      type(ESMF_Async), intent(inout), optional :: async
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Perform a {\tt Halo} operation over the data
+!     in an {\tt ESMF\_Field}.  This routine updates the data 
+!     inside the {\tt ESMF\_Field} in place.
+!
+!     \begin{description}
+!     \item [field] 
+!           {\tt ESMF\_Field} containing data to be halo'd.
+!     \item [{[async]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_FieldType) :: ftypep              ! field type info
+   
+      ! Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE. 
+        rc = ESMF_FAILURE
+      endif     
+
+      ftypep = field%ftypep
+
+      call ESMF_ArrayHaloPrecompute(ftypep%localfield%localdata, ftypep%grid, &
+                                    route, ftypep%mapping, async, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldHaloPrecompute: ArrayHaloPrecompute returned failure"
+        return
+      endif 
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldHaloPrecompute
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldHaloRun - Execute a Data Halo operation on a Field
+
+! !INTERFACE:
+      subroutine ESMF_FieldHaloRun(field, route, async, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field
+      type(ESMF_Route), intent(inout) :: route
+      type(ESMF_Async), intent(inout), optional :: async
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Perform a {\tt Halo} operation over the data
+!     in an {\tt ESMF\_Field}.  This routine updates the data 
+!     inside the {\tt ESMF\_Field} in place.
+!
+!     \begin{description}
+!     \item [field] 
+!           {\tt ESMF\_Field} containing data to be halo'd.
+!     \item [{[async]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_FieldType) :: ftypep              ! field type info
+   
+      ! Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE. 
+        rc = ESMF_FAILURE
+      endif     
+
+      ftypep = field%ftypep
+
+      call ESMF_ArrayHaloRun(ftypep%localfield%localdata, route, async, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldHaloRun: ArrayHaloRun returned failure"
+        return
+      endif 
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldHaloRun
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2677,6 +2797,7 @@
       integer :: my_src_DE, my_dst_DE, my_DE
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_exc, dst_AI_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_tot, dst_AI_tot
+      type(ESMF_LocalArray) :: src_local_array, dst_local_array
       integer, dimension(ESMF_MAXGRIDDIM) :: src_global_count
       integer, dimension(:,:), allocatable :: src_global_start
       integer, dimension(ESMF_MAXGRIDDIM) :: dst_global_count
@@ -2844,16 +2965,17 @@
       ! There are 3 possible cases - src+dst, src only, dst only
       !  (if both are false then we've already returned.)
       if ((hassrcdata) .and. (.not. hasdstdata)) then
-          call ESMF_RouteRun(route, srcarray=stypep%localfield%localdata, &
-                             rc=status) 
+          src_local_array=stypep%localfield%localdata
+          call ESMF_RouteRun(route, srcarray=src_local_array, rc=status) 
 
       else if ((.not. hassrcdata) .and. (hasdstdata)) then
-          call ESMF_RouteRun(route, dstarray=dtypep%localfield%localdata, &
-                             rc=status)
+          dst_local_array=dtypep%localfield%localdata
+          call ESMF_RouteRun(route, dstarray=dst_local_array, rc=status)
 
       else
-          call ESMF_RouteRun(route, stypep%localfield%localdata, &
-                             dtypep%localfield%localdata, status)
+          src_local_array=stypep%localfield%localdata
+          dst_local_array=dtypep%localfield%localdata
+          call ESMF_RouteRun(route, src_local_array, dst_local_array, status)
       endif
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldRegrid: RouteRun returned failure"
@@ -2945,6 +3067,7 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_tot, dst_AI_tot
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI_exc, gl_dst_AI_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI_tot, gl_dst_AI_tot
+      type(ESMF_LocalArray) :: src_local_array, dst_local_array
       integer, dimension(ESMF_MAXGRIDDIM) :: src_global_count
       integer, dimension(:,:), allocatable :: src_global_start
       integer, dimension(ESMF_MAXGRIDDIM) :: dst_global_count
@@ -3126,16 +3249,17 @@
       ! There are 3 possible cases - src+dst, src only, dst only
       !  (if both are false then we've already returned.)
       if ((hassrcdata) .and. (.not. hasdstdata)) then
-          call ESMF_RouteRun(route, srcarray=stypep%localfield%localdata, &
-                             rc=status) 
+          src_local_array=stypep%localfield%localdata
+          call ESMF_RouteRun(route, srcarray=src_local_array, rc=status) 
 
       else if ((.not. hassrcdata) .and. (hasdstdata)) then
-          call ESMF_RouteRun(route, dstarray=dtypep%localfield%localdata, &
-                             rc=status)
+          dst_local_array=dtypep%localfield%localdata
+          call ESMF_RouteRun(route, dstarray=dst_local_array, rc=status)
 
       else
-          call ESMF_RouteRun(route, stypep%localfield%localdata, &
-                             dtypep%localfield%localdata, status)
+          src_local_array=stypep%localfield%localdata
+          dst_local_array=dtypep%localfield%localdata
+          call ESMF_RouteRun(route, src_local_array, dst_local_array, status)
       endif
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldRedist: RouteRun returned failure"
