@@ -1,4 +1,4 @@
-! $Id: ESMF.F90,v 1.6 2004/02/25 14:19:28 theurich Exp $
+! $Id: ESMF.F90,v 1.7 2004/03/03 18:06:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -74,7 +74,7 @@ module ESMF_Mod
     
 #ifdef ESMF_ENABLE_VM
     use ESMF_VMMod
-!    use ESMF_newDELayoutMod
+    use ESMF_newDELayoutMod
 #endif
 
 end module ESMF_Mod
