@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/04/15 20:45:21 svasquez Exp $
+# $Id: makefile,v 1.11 2003/04/25 20:49:44 nscollins Exp $
 
 ALL:  tests
 
@@ -15,22 +15,11 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/Route/tests
 
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_XPacketUTest \
-		$(ESMF_TESTDIR)/ESMC_XPacketUTest \
-		$(ESMF_TESTDIR)/ESMF_RouteUTest \
-		$(ESMC_TESTDIR)/ESMC_RouteUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_RouteUTest 
 
-TESTS_RUN     = RUN_ESMF_XPacketUTest \
-		RUN_ESMC_XPacketUTest \
-		RUN_ESMF_RouteUTest \
-		RUN_ESMC_RouteUTest
+TESTS_RUN     = RUN_ESMF_RouteUTest
 
-
-TESTS_RUN_UNI = RUN_ESMF_XPacketUTestUNI \
-		RUN_ESMC_XPacketUTestUNI \
-		RUN_ESMF_RouteUTestUNI \
-		RUN_ESMC_RouteUTestUNI
-
+TESTS_RUN_UNI = 
 
 TESTS_RM      = 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteUTest.F90,v 1.1 2003/04/09 23:48:44 flanigan Exp $
+! $Id: ESMF_RouteUTest.F90,v 1.2 2003/04/25 20:49:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -11,6 +11,8 @@
 !==============================================================================
 !
       program ESMF_RouteTest
+
+#include "ESMF_Macros.inc"
 
 !------------------------------------------------------------------------------
 !
@@ -33,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RouteUTest.F90,v 1.1 2003/04/09 23:48:44 flanigan Exp $'
+      '$Id: ESMF_RouteUTest.F90,v 1.2 2003/04/25 20:49:43 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -75,8 +77,8 @@
       srcptr = reshape( (/ (i, i=1,200) /), (/ 10, 20 /))
       allocate(dstptr(10,20))
       dstptr = reshape( (/ (i, i=201,400) /), (/ 10, 20 /))
-      srcarr = ESMF_ArrayCreate(srcptr, ESMF_NO_COPY, rc)
-      dstarr = ESMF_ArrayCreate(dstptr, ESMF_NO_COPY, rc)
+      srcarr = ESMF_ArrayCreate(srcptr, ESMF_DATA_REF, rc)
+      dstarr = ESMF_ArrayCreate(dstptr, ESMF_DATA_REF, rc)
 
       ! test dynamic allocation of ESMF_Route
       route = ESMF_RouteCreate(mylayout, rc)

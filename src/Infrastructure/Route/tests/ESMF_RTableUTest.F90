@@ -1,4 +1,4 @@
-! $Id: ESMF_RTableUTest.F90,v 1.1 2003/04/09 23:48:44 flanigan Exp $
+! $Id: ESMF_RTableUTest.F90,v 1.2 2003/04/25 20:49:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -12,6 +12,7 @@
 !
       program ESMF_RTableTest
 
+#include "ESMF_Macros.inc"
 !------------------------------------------------------------------------------
 !
 !==============================================================================
@@ -33,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RTableUTest.F90,v 1.1 2003/04/09 23:48:44 flanigan Exp $'
+      '$Id: ESMF_RTableUTest.F90,v 1.2 2003/04/25 20:49:42 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
