@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.9 2004/01/28 21:46:48 nscollins Exp $
+! $Id: ESMF_GridTypes.F90,v 1.10 2004/01/29 18:37:24 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -253,12 +253,12 @@
     public ESMF_GridGetDELayout
     public ESMF_GridSetAttributes
     public ESMF_GridGetAttributes
+    public ESMF_GridAddDistGrid
+    public ESMF_GridMakeDistGridSpace
     public ESMF_GridAddPhysGrid
     public ESMF_GridMakePhysGridSpace
     public ESMF_GridGetPhysGrid
     public ESMF_GridGetPhysGridID
-    public ESMF_GridAddDistGrid
-    public ESMF_GridMakeDistGridSpace
     public ESMF_GridGetDistGrid
     public ESMF_GridGetBoundingBoxes
 
@@ -412,7 +412,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.9 2004/01/28 21:46:48 nscollins Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.10 2004/01/29 18:37:24 jwolfe Exp $'
 
 !==============================================================================
 !
