@@ -1,4 +1,4 @@
-% $Id: ESMF_inframethodoverview.tex,v 1.1 2004/05/17 22:27:11 jwolfe Exp $
+% $Id: ESMF_inframethodoverview.tex,v 1.2 2004/08/13 21:48:29 nscollins Exp $
 
 \section{Overview of Distributed Data Methods}
 
@@ -69,9 +69,69 @@ result is delivered to all DEs in the set.
 
 \end{itemize}
 
+\subsection{Design and Implementation Notes}
+
+\begin{enumerate}
+
+\item
+
+All distributed methods use the same underlying code, provided
+in an internal Route class.  There are 3 additional internal
+classes which are related: XPacket, CommTable, and RTable.
+The implementation is in C++, with interfaces in Fortran 90.
+
+The general communication strategy is that each
+DE computes its own route information in parallel, and
+each DE has a different set of route table information
+which is all relative to itself.
+
+Exchange Packets (XPackets)
+describe a region of memory.  They have
+an offset, a contiguous run length, a stride per dimension
+and a repeat count per dimension.  It therefore can describe an
+n-dimensional cube of data to be communicated.
+The methods include basic set/get, how to turn
+a list of AxisIndex objects into an XPacket, 
+compute a local XPacket from one
+in global (undecomposed grid) space, and a method to
+compute the intersection
+of 2 XPackets and produce a 3rd XPacket describing
+that region.  An AxisIndex structure captures
+the min and max along each axis for a region -- it is an
+index space type of object.  These are  
+turned into XPackets by a Route method.
+
+The CommTable code encapsulates which other DEs this
+DE needs to talk to, and in what order.  There are
+methods to create and destroy one, methods for higher
+level code to set a DE number as having data to either
+send or receive, and query routines that return an answer
+to the question 'which DE should I talk to next'.  
+
+The Route Table (RTable) code contains a list of
+XPackets to be sent and received from other DEs.
+It has create/destroy code, code to add exchange
+packets to the list for each DE, and code
+to retrieve the XPackets from any list.
+
+Finally, the top level code is in Route.  A Route
+object contains a send RTable, a recv RTable,
+a CommTable, and the DELayout.   
+The Route methods
+include create/destroy, setting a send or recv XPacket
+for a particular DE,
+and some higher level functions specific to each
+type of communication, for example RoutePrecomputeHalo
+or RoutePrecomputeRedist.  These latter functions
+are where the XPackets are actually computed and added to
+the Route table.  Each DE computes its own set of intersections,
+either source or destination, and fills its own table.
+Then RouteRun executes the code which actually traverses
+the table and sends the information between DEs.
+
+\end{enumerate}
+
 \newpage
-
-
 
 
 
