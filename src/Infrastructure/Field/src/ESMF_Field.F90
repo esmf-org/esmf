@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.183 2004/08/28 00:12:39 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.184 2004/08/28 14:14:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.183 2004/08/28 00:12:39 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.184 2004/08/28 14:14:40 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2997,7 +2997,8 @@
         endif
 
         ! decide if we're reordering data or just setting an initial map
-        ! created field.
+        ! in an already created field without data.  (the latter is ok;
+        ! the former is not implemented yet.)
         had_data = .FALSE.
         if (field%ftypep%datastatus .eq. ESMF_STATUS_READY) had_data = .TRUE.
 
