@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.4 2004/03/16 18:00:53 nscollins Exp $
+#  $Id: build_rules.mk,v 1.5 2004/03/24 17:57:06 nscollins Exp $
 #
 #  Linus.absoft.default.mk
 #
@@ -43,7 +43,7 @@ endif
 ifeq ($(ESMF_COMM),mpich)
 # with mpich installed:
 MPI_LIB        = -lmpich
-MPI_INCLUDE    = -DESMF_MPICH=1
+MPI_INCLUDE    = -DESMF_MPICH
 MPIRUN         = mpirun $(ESMF_NODES)
 endif
 
@@ -71,7 +71,7 @@ RM		   = rm -f
 OMAKE		   = ${MAKE}
 RANLIB		   = ranlib
 SHELL		   = /bin/sh
-SED		   = /usr/bin/sed
+SED		   = /bin/sed
 SH_LD		   = cc
 #
 # C and Fortran compiler 
@@ -98,7 +98,6 @@ C_FLINKER	   = ${C_FC}
 C_CCV		   = ${C_CC} --version
 C_FCV              = f90fe -V    # docs say f95 -V should work but causes error
 C_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
-#Use /usr/lib/libf2c.a if that's what your f77 uses.
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS	   = -g 
 G_FOPTFLAGS	   = -g 
@@ -120,10 +119,11 @@ CXX_CLINKER	   = ${CXX_CC}
 CXX_FLINKER	   = ${CXX_CC}
 CXX_CCV		   = ${CXX_CC} --version
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
-C_F90CXXLD         = ${CXX_CC}
-C_F90CXXLIBS       = ${MPI_LIB} -lstdc++ -lf90math -lfio -lf77math
+C_F90CXXLD         = ${CXX_FC}
+C_F90CXXLIBS       = ${MPI_LIB} -lf90math -lfio -lf77math -lstdc++
 C_CXXF90LD         = ${CXX_CC} 
-C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -lf90math -lfio -lf77math
+F90LIBBASE         = /soft/com/packages/absoft-8.0/opt/absoft/lib
+C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -L${F90LIBBASE} -lf90math -lfio -lf77math
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
