@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_summary.pl,v 1.1 2004/08/04 22:47:00 svasquez Exp $
+# $Id: do_summary.pl,v 1.2 2004/08/05 15:43:13 svasquez Exp $
 # This prints a summary of system tests, unit tests ansd examples.
 
 # Options:
@@ -13,15 +13,10 @@ use Getopt::Std;
 use File::Find
 
 # Arrays of system tests files
-@s_t_ex = ();		# System Test executable files
-@u_t_ex = ();		# Unit Test executable files
-@ex_ex = ();		# Examples executable files
 @ex_files = (); 	# All executable files
 @all_files = (); 	# All files
 @stdout_files = (); 	# stdout files 
 @file_lines = ();	# stdout file lines
-@fail_tests = ();	# tests/examples that failed
-@pass_tests = ();	# tests/examples that passed
 %options = ();		#arguments
 
 getopts("d:e:", \%options); 
@@ -61,6 +56,7 @@ getopts("d:e:", \%options);
 		$st_fail_count = 0;
         }
 	else {
+		# Count the number of PASS and FAIL.
 		$count=0;
 		$st_pass_count=0;
 		$st_fail_count=0;
@@ -80,7 +76,8 @@ getopts("d:e:", \%options);
 			@file_lines = ();
          	}
 	}
-
+	
+	# Clear list of system tests stdout files
 	@stdout_files = ();
 	# Get count of *UTest.stdout files found
 	$ut_std_count=grep (/UTest.stdout/, @all_files);
@@ -92,6 +89,7 @@ getopts("d:e:", \%options);
 		$ut_fail_count = 0;
         }
 	else {
+		# Count the number of PASS and FAIL.
 		$count=0;
 		$ut_pass_count=0;
 		$ut_fail_count=0;
@@ -105,10 +103,15 @@ getopts("d:e:", \%options);
 			$ut_pass_count=$ut_pass_count + $count;
 			$count=grep ( /FAIL/, @file_lines);
                         $ut_fail_count=$ut_fail_count + $count;
-			$file_lines = ();
+			# Clear file lines for next loop so PASS/FAIL
+			# are not recounted.
+			@file_lines = ();
          	}
 	}
 
+	# start with cleared lists.
+	@ex_files = ();
+	@all_files = ();
         #go to the examples directory
         chdir "$EX_DIR/";
 
@@ -152,6 +155,8 @@ getopts("d:e:", \%options);
                         else {
                                 $ex_fail_count=$ex_fail_count + 1;
                         }
+			# Clear file lines for next loop so PASS/FAIL
+			# are not recounted.
                         @file_lines=();
                 }
 	}
