@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.19 2004/06/11 02:12:59 cdeluca Exp $
+! $Id: CoupledFlowDemo.F90,v 1.20 2004/06/18 22:03:23 jwolfe Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -234,13 +234,13 @@
                                globalCellCountPerDim=counts, &
                                minGlobalCoordPerDim=mincoords, &
                                maxGlobalCoordPerDim=maxcoords, &
-                               horzStagger=horz_stagger, &      
+                               horzstagger=horz_stagger, &      
                                rc=rc)
 
     gridIN = ESMF_GridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=mincoords, &
                              maxGlobalCoordPerDim=maxcoords, &
-                             horzStagger=horz_stagger, &      
+                             horzstagger=horz_stagger, &      
                              name="Injector grid", rc=rc)
     call ESMF_GridDistribute(gridIN, delayout=layoutIN, rc=rc)
 
@@ -250,7 +250,7 @@
     gridFS = ESMF_GridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=mincoords, &
                              maxGlobalCoordPerDim=maxcoords, &
-                             horzStagger=horz_stagger, &      
+                             horzstagger=horz_stagger, &      
                              name="Flow Solver grid", rc=rc)
     call ESMF_GridDistribute(gridFS, delayout=layoutFS, rc=rc)
 
