@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.4 2003/12/10 00:40:16 nscollins Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.5 2003/12/10 13:36:09 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -742,169 +742,343 @@
     //   wants data printed.
     switch (this->type) {
       case ESMF_DATA_REAL:
-        switch (this->rank) {
-          case 1:
-            printf("  Real, Dim 1, Data values:\n");
-            imax = this->counts[0];
-            tcount = imax;
-            for (i=0; i<tcount; i++) {
-                if (!opt_byline)
-                    printf("(%2d) =  %lg\n", i+1, *((float *)(this->base_addr) + i));
-                else
-                    printf("%lg ", *((float *)(this->base_addr) + i));
-                if (!opt_all && (tcount > 22) && ((i+1)==10)) {
-                   printf("%c skipping to end ...\n", beforeskip);
-                   i = tcount - 11;
-                }
-            }
-            if (opt_byline) printf("\n");
-            break;
-          case 2:
-            printf("  Real, Dim 2, Data values:\n");
-            imax = this->counts[0];
-            jmax = this->counts[1];
-            tcount = imax * jmax;
-            rcount = 0;
-            for (j=0; j<jmax; j++) {
-                if (opt_byline) printf("(*,%2d) = ", j+1);
-                for (i=0; i<imax; i++) {
+        switch (this->kind) {
+          case ESMF_R4:
+            switch (this->rank) {
+              case 1:
+                printf("  Real, *4, Dim 1, Data values:\n");
+                imax = this->counts[0];
+                tcount = imax;
+                for (i=0; i<tcount; i++) {
                     if (!opt_byline)
-                        printf("(%2d,%2d) =  %lg\n", i+1, j+1, 
-                               *((float *)(this->base_addr) + i + j*imax) );
+                        printf("(%2d) =  %lg\n", i+1, *((float *)(this->base_addr) + i));
                     else
-                        printf("%lg ",  
-                               *((float *)(this->base_addr) + i + j*imax) );
-                    rcount++;
-                    if (!opt_all && (tcount > 22) && (rcount==10)) {
+                        printf("%lg ", *((float *)(this->base_addr) + i));
+                    if (!opt_all && (tcount > 22) && ((i+1)==10)) {
                        printf("%c skipping to end ...\n", beforeskip);
-                       j = (tcount-11) / imax;
-                       i = (tcount-11) % imax;
+                       i = tcount - 11;
                     }
                 }
                 if (opt_byline) printf("\n");
+                break;
+              case 2:
+                printf("  Real, *4, Dim 2, Data values:\n");
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                tcount = imax * jmax;
+                rcount = 0;
+                for (j=0; j<jmax; j++) {
+                    if (opt_byline) printf("(*,%2d) = ", j+1);
+                    for (i=0; i<imax; i++) {
+                        if (!opt_byline)
+                            printf("(%2d,%2d) =  %lg\n", i+1, j+1, 
+                                   *((float *)(this->base_addr) + i + j*imax) );
+                        else
+                            printf("%lg ",  
+                                   *((float *)(this->base_addr) + i + j*imax) );
+                        rcount++;
+                        if (!opt_all && (tcount > 22) && (rcount==10)) {
+                           printf("%c skipping to end ...\n", beforeskip);
+                           j = (tcount-11) / imax;
+                           i = (tcount-11) % imax;
+                        }
+                    }
+                    if (opt_byline) printf("\n");
+                }
+                break;
+              case 3:
+                printf("  Real, *4, Dim 3, Data values:\n");
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                kmax = this->counts[2];
+                tcount = imax * jmax * kmax;
+                rcount = 0; 
+                for (k=0; k<kmax; k++) {
+                  for (j=0; j<jmax; j++) {
+                    if (opt_byline) printf("(*,%2d,%2d) = ", j+1, k+1);
+                    for (i=0; i<imax; i++) {
+                        if (!opt_byline)
+                            printf("(%2d,%2d,%2d) =  %g\n", 
+                                   i+1, j+1, k+1,
+                                   *((float *)(this->base_addr) + 
+                                   i + j*imax + k*jmax*imax));
+                        else
+                             printf("%g ", *((float *)(this->base_addr) + 
+                                   i + j*imax + k*jmax*imax));
+                        rcount++;
+                        if (!opt_all && (tcount > 22) && (rcount==10)) {
+                           int krem;
+                           printf("%c skipping to end ...\n", beforeskip);
+                           k = (tcount-11) / (imax*jmax);
+                           krem = (tcount-11) % (imax*jmax);
+                           j = krem / imax;
+                           i = krem % imax;
+                        }
+                    }
+                    if (opt_byline) printf("\n");
+                  }
+                }
+                break;
+              default:
+                printf("no code to handle real rank %d yet\n", this->rank);
+                break;    
             }
             break;
-          case 3:
-            printf("  Real, Dim 3, Data values:\n");
-            imax = this->counts[0];
-            jmax = this->counts[1];
-            kmax = this->counts[2];
-            tcount = imax * jmax * kmax;
-            rcount = 0; 
-            for (k=0; k<kmax; k++) {
-              for (j=0; j<jmax; j++) {
-                if (opt_byline) printf("(*,%2d,%2d) = ", j+1, k+1);
-                for (i=0; i<imax; i++) {
+          case ESMF_R8:
+            switch (this->rank) {
+              case 1:
+                printf("  Real, *8, Dim 1, Data values:\n");
+                imax = this->counts[0];
+                tcount = imax;
+                for (i=0; i<tcount; i++) {
                     if (!opt_byline)
-                        printf("(%2d,%2d,%2d) =  %g\n", 
-                               i+1, j+1, k+1,
-                               *((float *)(this->base_addr) + 
-                               i + j*imax + k*jmax*imax));
+                        printf("(%2d) =  %lg\n", i+1, *((double *)(this->base_addr) + i));
                     else
-                         printf("%g ", *((float *)(this->base_addr) + 
-                               i + j*imax + k*jmax*imax));
-                    rcount++;
-                    if (!opt_all && (tcount > 22) && (rcount==10)) {
-                       int krem;
+                        printf("%lg ", *((double *)(this->base_addr) + i));
+                    if (!opt_all && (tcount > 22) && ((i+1)==10)) {
                        printf("%c skipping to end ...\n", beforeskip);
-                       k = (tcount-11) / (imax*jmax);
-                       krem = (tcount-11) % (imax*jmax);
-                       j = krem / imax;
-                       i = krem % imax;
+                       i = tcount - 11;
                     }
                 }
                 if (opt_byline) printf("\n");
-              }
+                break;
+              case 2:
+                printf("  Real, *8, Dim 2, Data values:\n");
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                tcount = imax * jmax;
+                rcount = 0;
+                for (j=0; j<jmax; j++) {
+                    if (opt_byline) printf("(*,%2d) = ", j+1);
+                    for (i=0; i<imax; i++) {
+                        if (!opt_byline)
+                            printf("(%2d,%2d) =  %lg\n", i+1, j+1, 
+                                   *((double *)(this->base_addr) + i + j*imax) );
+                        else
+                            printf("%lg ",  
+                                   *((double *)(this->base_addr) + i + j*imax) );
+                        rcount++;
+                        if (!opt_all && (tcount > 22) && (rcount==10)) {
+                           printf("%c skipping to end ...\n", beforeskip);
+                           j = (tcount-11) / imax;
+                           i = (tcount-11) % imax;
+                        }
+                    }
+                    if (opt_byline) printf("\n");
+                }
+                break;
+              case 3:
+                printf("  Real, *8, Dim 3, Data values:\n");
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                kmax = this->counts[2];
+                tcount = imax * jmax * kmax;
+                rcount = 0; 
+                for (k=0; k<kmax; k++) {
+                  for (j=0; j<jmax; j++) {
+                    if (opt_byline) printf("(*,%2d,%2d) = ", j+1, k+1);
+                    for (i=0; i<imax; i++) {
+                        if (!opt_byline)
+                            printf("(%2d,%2d,%2d) =  %g\n", 
+                                   i+1, j+1, k+1,
+                                   *((double *)(this->base_addr) + 
+                                   i + j*imax + k*jmax*imax));
+                        else
+                             printf("%g ", *((double *)(this->base_addr) + 
+                                   i + j*imax + k*jmax*imax));
+                        rcount++;
+                        if (!opt_all && (tcount > 22) && (rcount==10)) {
+                           int krem;
+                           printf("%c skipping to end ...\n", beforeskip);
+                           k = (tcount-11) / (imax*jmax);
+                           krem = (tcount-11) % (imax*jmax);
+                           j = krem / imax;
+                           i = krem % imax;
+                        }
+                    }
+                    if (opt_byline) printf("\n");
+                  }
+                }
+                break;
+              default:
+                printf("no code to handle real rank %d yet\n", this->rank);
+                break;    
             }
             break;
-          default:
-            printf("no code to handle real rank %d yet\n", this->rank);
-            break;    
         }
         break;
       case ESMF_DATA_INTEGER:
-        switch (this->rank) {
-          case 1:
-            imax = this->counts[0];
-            tcount = imax;
-            printf("  Integer, Dim 1, Data values:\n");
-            for (i=0; i<imax; i++) {
-                if (!opt_byline)
-                    printf("(%2d) =  %d\n", i+1, 
-                           *((int *)(this->base_addr) + i));
-                else
-                    printf("%d ",
-                           *((int *)(this->base_addr) + i));
-                if (!opt_all && (tcount > 22) && ((i+1)==10)) {
-                   printf("%c skipping to end ...\n", beforeskip);
-                   i = tcount - 11;
-                }
-            }
-            if (opt_byline) printf("\n");
-            break;
-          case 2:
-            printf("  Integer, Dim 2, Data values:\n");
-            imax = this->counts[0];
-            jmax = this->counts[1];
-            tcount = imax * jmax;
-            rcount = 0; 
-            for (j=0; j<jmax; j++) {
-                if (opt_byline) printf("(*,%2d) = ", j+1);
+        switch (this->kind) {
+          case ESMF_I4:
+            switch (this->rank) {
+              case 1:
+                imax = this->counts[0];
+                tcount = imax;
+                printf("  Integer, *4, Dim 1, Data values:\n");
                 for (i=0; i<imax; i++) {
                     if (!opt_byline)
-                        printf("(%2d,%2d) =  %d\n", 
-                                i+1, j+1, 
-                             *((int *)(this->base_addr) + i + j*imax) );
+                        printf("(%2d) =  %d\n", i+1, 
+                               *((int *)(this->base_addr) + i));
                     else
-                        printf("%d ", 
-                             *((int *)(this->base_addr) + i + j*imax) );
-                    rcount++;
-                    if (!opt_all && (tcount > 22) && (rcount==10)) {
+                        printf("%d ",
+                               *((int *)(this->base_addr) + i));
+                    if (!opt_all && (tcount > 22) && ((i+1)==10)) {
                        printf("%c skipping to end ...\n", beforeskip);
-                       j = (tcount-11) / imax;
-                       i = (tcount-11) % imax;
+                       i = tcount - 11;
                     }
                 }
                 if (opt_byline) printf("\n");
+                break;
+              case 2:
+                printf("  Integer, *4, Dim 2, Data values:\n");
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                tcount = imax * jmax;
+                rcount = 0; 
+                for (j=0; j<jmax; j++) {
+                    if (opt_byline) printf("(*,%2d) = ", j+1);
+                    for (i=0; i<imax; i++) {
+                        if (!opt_byline)
+                            printf("(%2d,%2d) =  %d\n", 
+                                    i+1, j+1, 
+                                 *((int *)(this->base_addr) + i + j*imax) );
+                        else
+                            printf("%d ", 
+                                 *((int *)(this->base_addr) + i + j*imax) );
+                        rcount++;
+                        if (!opt_all && (tcount > 22) && (rcount==10)) {
+                           printf("%c skipping to end ...\n", beforeskip);
+                           j = (tcount-11) / imax;
+                           i = (tcount-11) % imax;
+                        }
+                    }
+                    if (opt_byline) printf("\n");
+                }
+                break;
+              case 3:
+                printf("  Integer, *4, Dim 3, Data values:\n");
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                kmax = this->counts[2];
+                tcount = imax * jmax * kmax;
+                rcount = 0; 
+                for (k=0; k<kmax; k++) {
+                  for (j=0; j<jmax; j++) {
+                    if (opt_byline) printf("(*,%2d,%2d) = ", j+1, k+1);
+                    for (i=0; i<imax; i++) {
+                        if (!opt_byline)
+                            printf("(%2d,%2d,%2d) =  %d\n", 
+                                   i+1, j+1, k+1,
+                                   *((int *)(this->base_addr) + 
+                                   i + j*imax + k*jmax*imax));
+                        else
+                            printf("%d ", 
+                                   *((int *)(this->base_addr) + 
+                                   i + j*imax + k*jmax*imax));
+                        rcount++;
+                        if (!opt_all && (tcount > 22) && (rcount==10)) {
+                           int krem;
+                           printf("%c skipping to end ...\n", beforeskip);
+                           k = (tcount-11) / (imax*jmax);
+                           krem = (tcount-11) % (imax*jmax);
+                           j = krem / imax;
+                           i = krem % imax;
+                        }
+                    }
+                    if (opt_byline) printf("\n");
+                  }
+                }
+                break;
+              default:
+                printf("no code to handle integer rank %d yet\n", this->rank);
+                break;    
             }
             break;
-          case 3:
-            printf("  Integer, Dim 3, Data values:\n");
-            imax = this->counts[0];
-            jmax = this->counts[1];
-            kmax = this->counts[2];
-            tcount = imax * jmax * kmax;
-            rcount = 0; 
-            for (k=0; k<kmax; k++) {
-              for (j=0; j<jmax; j++) {
-                if (opt_byline) printf("(*,%2d,%2d) = ", j+1, k+1);
+          case ESMF_I8:
+            switch (this->rank) {
+              case 1:
+                imax = this->counts[0];
+                tcount = imax;
+                printf("  Integer, *8, Dim 1, Data values:\n");
                 for (i=0; i<imax; i++) {
                     if (!opt_byline)
-                        printf("(%2d,%2d,%2d) =  %d\n", 
-                               i+1, j+1, k+1,
-                               *((int *)(this->base_addr) + 
-                               i + j*imax + k*jmax*imax));
+                        printf("(%2d) =  %ld\n", i+1, 
+                               *((long *)(this->base_addr) + i));
                     else
-                        printf("%d ", 
-                               *((int *)(this->base_addr) + 
-                               i + j*imax + k*jmax*imax));
-                    rcount++;
-                    if (!opt_all && (tcount > 22) && (rcount==10)) {
-                       int krem;
+                        printf("%ld ",
+                               *((long *)(this->base_addr) + i));
+                    if (!opt_all && (tcount > 22) && ((i+1)==10)) {
                        printf("%c skipping to end ...\n", beforeskip);
-                       k = (tcount-11) / (imax*jmax);
-                       krem = (tcount-11) % (imax*jmax);
-                       j = krem / imax;
-                       i = krem % imax;
+                       i = tcount - 11;
                     }
                 }
                 if (opt_byline) printf("\n");
-              }
+                break;
+              case 2:
+                printf("  Integer, *8, Dim 2, Data values:\n");
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                tcount = imax * jmax;
+                rcount = 0; 
+                for (j=0; j<jmax; j++) {
+                    if (opt_byline) printf("(*,%2d) = ", j+1);
+                    for (i=0; i<imax; i++) {
+                        if (!opt_byline)
+                            printf("(%2d,%2d) =  %ld\n", 
+                                    i+1, j+1, 
+                                 *((long *)(this->base_addr) + i + j*imax) );
+                        else
+                            printf("%ld ", 
+                                 *((long *)(this->base_addr) + i + j*imax) );
+                        rcount++;
+                        if (!opt_all && (tcount > 22) && (rcount==10)) {
+                           printf("%c skipping to end ...\n", beforeskip);
+                           j = (tcount-11) / imax;
+                           i = (tcount-11) % imax;
+                        }
+                    }
+                    if (opt_byline) printf("\n");
+                }
+                break;
+              case 3:
+                printf("  Integer, *8, Dim 3, Data values:\n");
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                kmax = this->counts[2];
+                tcount = imax * jmax * kmax;
+                rcount = 0; 
+                for (k=0; k<kmax; k++) {
+                  for (j=0; j<jmax; j++) {
+                    if (opt_byline) printf("(*,%2d,%2d) = ", j+1, k+1);
+                    for (i=0; i<imax; i++) {
+                        if (!opt_byline)
+                            printf("(%2d,%2d,%2d) =  %ld\n", 
+                                   i+1, j+1, k+1,
+                                   *((long *)(this->base_addr) + 
+                                   i + j*imax + k*jmax*imax));
+                        else
+                            printf("%ld ", 
+                                   *((long *)(this->base_addr) + 
+                                   i + j*imax + k*jmax*imax));
+                        rcount++;
+                        if (!opt_all && (tcount > 22) && (rcount==10)) {
+                           int krem;
+                           printf("%c skipping to end ...\n", beforeskip);
+                           k = (tcount-11) / (imax*jmax);
+                           krem = (tcount-11) % (imax*jmax);
+                           j = krem / imax;
+                           i = krem % imax;
+                        }
+                    }
+                    if (opt_byline) printf("\n");
+                  }
+                }
+                break;
+              default:
+                printf("no code to handle integer rank %d yet\n", this->rank);
+                break;    
             }
             break;
-          default:
-            printf("no code to handle integer rank %d yet\n", this->rank);
-            break;    
         }
         break;
       default:
