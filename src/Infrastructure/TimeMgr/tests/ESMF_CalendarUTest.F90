@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.4 2003/09/24 22:57:44 svasquez Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.5 2003/09/26 23:08:46 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.4 2003/09/24 22:57:44 svasquez Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.5 2003/09/26 23:08:46 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -68,6 +68,8 @@
       type(ESMF_Calendar) :: gregorianCalendar, julianDayCalendar, no_leapCalendar, esmf_360dayCalendar
       type(ESMF_Calendar) :: genericCalendar
       type(ESMF_CalendarType) :: cal_type
+      integer, dimension(MONTHS_PER_YEAR) :: days_per_month =(/30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30/)
+      integer, dimension(MONTHS_PER_YEAR) :: dayspermonth =(/1000, 0, 8900, -120, 930, 70, 80, 90, 0, -70, 90, 60/)
 
       ! instantiate Time Intervals
       type(ESMF_TimeInterval) :: timeStep
@@ -93,6 +95,17 @@
       write(name, *) "Un-initialized Calendar Print Test"
       call ESMF_CalendarPrint(gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Validate No Leap Calendar
+      ! Test that validate subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      write(name, *) "Validate un-initialized Calendar Test"
+      call ESMF_CalendarValidate(gregorianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
 
 #endif
@@ -122,6 +135,18 @@
 
 
       !NEX_UTest
+      ! Validate Gregorian Calendar
+      ! Test that validate subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should return ESMF_SUCCESS"
+      write(name, *) "Validate Gregorian Calendar Test"
+      call ESMF_CalendarValidate(gregorianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+
+      !NEX_UTest
       ! initialize secand calendar to be Julian Day type
       write(name, *) "Initialize Julian Day Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -143,6 +168,16 @@
       ! ----------------------------------------------------------------------------
 
       !NEX_UTest
+      ! Validate Julian Day Calendar
+      ! Test that validate subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should return ESMF_SUCCESS"
+      write(name, *) "Validate Julian Day Calendar Test"
+      call ESMF_CalendarValidate(julianDayCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
       ! initialize third calendar to be No Leap type
       write(name, *) "Initialize No Leap Year Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -163,6 +198,16 @@
 
       ! ----------------------------------------------------------------------------
 
+      !NEX_UTest
+      ! Validate No Leap Calendar
+      ! Test that validate subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should return ESMF_SUCCESS"
+      write(name, *) "Validate No Leap Calendar Test"
+      call ESMF_CalendarValidate(julianDayCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
 
       !NEX_UTest
       ! initialize third calendar to be 360 day type
@@ -186,19 +231,29 @@
 
 
       !NEX_UTest
-      ! initialize fourth calendar to be generic type
-      !write(name, *) "Initialize Generic Type Calendar Test"
-      !write(failMsg, *) " Did not return ESMF_SUCCESS"
-      !call ESMF_CalendarSetGeneric(genericCalendar, daysPerMonth=30, &
-!					secondsPerDay=86400, &
-!					daysPerYear=360, &
-!					daysPerYearDn=1, &
-!					daysPerYearDd=1, rc=rc)
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-!                      name, failMsg, result, ESMF_SRCLINE)
-
+      ! Validate 360 Day Calendar
+      ! Test that validate subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should return ESMF_SUCCESS"
+      write(name, *) "Validate 360 Day Calendar Test"
+      call ESMF_CalendarValidate(esmf_360dayCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! initialize fourth calendar to be generic type
+      write(name, *) "Initialize Generic Type Calendar Test"
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_CalendarSetGeneric(genericCalendar, daysPerMonth=days_per_month, &
+					secondsPerDay=86400, &
+					daysPerYear=360, &
+					daysPerYearDn=1, &
+					daysPerYearDd=1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
       !NEX_UTest
       ! print out initialized variables
       ! Test that print subroutine returns ESMF_SUCESS
@@ -210,6 +265,125 @@
 
       ! ----------------------------------------------------------------------------
 
+      !NEX_UTest
+      ! Validate Generic Type Calendar
+      ! Test that validate subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should return ESMF_SUCCESS"
+      write(name, *) "Validate Generic Type Calendar Test"
+      call ESMF_CalendarValidate(genericCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+#ifdef ESMF_EXHAUSTIVE
+
+
+      !EX_UTest
+      ! initialize fourth calendar to be generic type
+      write(name, *) "Initialize Generic Type with overflow Calendar Test"
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      call ESMF_CalendarSetGeneric(genericCalendar, daysPerMonth=dayspermonth, &
+					secondsPerDay=86400, &
+					daysPerYear=100000000, &
+					daysPerYearDn=1, &
+					daysPerYearDd=1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! print out initialized variables
+      ! Test that print subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should return ESMF_SUCCESS"
+      write(name, *) "Initialized Generic Type Calendar Print Test"
+      call ESMF_CalendarPrint(genericCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Validate Generic Type Calendar
+      ! Test that validate subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      write(name, *) "Validate Bad Generic Type Calendar Test"
+      call ESMF_CalendarValidate(genericCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! initialize fourth calendar to be generic type
+      write(name, *) "Initialize Generic Type with negative number seconds Calendar Test"
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      call ESMF_CalendarSetGeneric(genericCalendar, daysPerMonth=dayspermonth, &
+					secondsPerDay=-400, &
+					daysPerYear=1, &
+					daysPerYearDn=1, &
+					daysPerYearDd=0, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! print out initialized variables
+      ! Test that print subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should return ESMF_SUCCESS"
+      write(name, *) "Initialized Generic Type Calendar Print Test"
+      call ESMF_CalendarPrint(genericCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Validate Generic Type Calendar
+      ! Test that validate subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      write(name, *) "Validate Generic Type Calendar Test"
+      call ESMF_CalendarValidate(genericCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! initialize fourth calendar to be generic type
+      write(name, *) "Initialize Generic Type with nonsense numbers Calendar Test"
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      call ESMF_CalendarSetGeneric(genericCalendar, daysPerMonth=dayspermonth, &
+					secondsPerDay=86400, &
+					daysPerYear=1, &
+					daysPerYearDn=1, &
+					daysPerYearDd=0, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! print out initialized variables
+      ! Test that print subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should return ESMF_SUCCESS"
+      write(name, *) "Initialized Generic Type Calendar Print Test"
+      call ESMF_CalendarPrint(genericCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Validate Generic Type Calendar
+      ! Test that validate subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      write(name, *) "Validate Generic Type Calendar Test"
+      call ESMF_CalendarValidate(genericCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+#endif
       ! ----------------------------------------------------------------------------
 
       !NEX_UTest
