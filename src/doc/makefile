@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2003/04/10 03:43:21 cdeluca Exp $ 
+# $Id: makefile,v 1.26 2003/04/10 21:41:30 cdeluca Exp $ 
 ALL: alldoc 
 
 
@@ -64,12 +64,10 @@ CLOBBERDIRS =
 ${ESMC_DOCDIR}/ESMF_usrdoc.dvi: $(USRDOC_DEP_FILES)
 	export TEXINPUTS=".:$(ESMF_BUILD_DOCDIR):" ;\
 	${DO_LATEX} ESMF usr
-	mv -f ESMF_usrdoc.dvi ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
 	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	${DO_LATEX} ESMF ref
-	mv -f ESMF_refdoc.dvi ${ESMC_DOCDIR}
 
 
 # Pdf files
@@ -89,6 +87,8 @@ ${ESMC_DOCDIR}/ESMF_refdoc: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
 	-rm -rf $(ESMC_DOCDIR)/ESMF_refdoc
 	${DO_L2H} ESMF ref
 	mv -f ESMF_refdoc ${ESMC_DOCDIR}
+
+
 
 
 
