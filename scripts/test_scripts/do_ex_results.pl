@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ex_results.pl,v 1.10 2005/02/03 00:18:43 svasquez Exp $
+# $Id: do_ex_results.pl,v 1.11 2005/02/03 22:52:58 svasquez Exp $
 # This script runs at the end of the examples and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 
@@ -83,7 +83,7 @@ getopts("d:b:", \%options);
 		#The examples directory does not exist.
 		print "NOTE: There is no $EX_DIR directory,\n";
 		print "either the 'gmake ESMF_BOPT=$ESMF_BOPT build_examples' has not been run or \n";
-		print "the 'gmake  ESMF_BOPT=$ESMF_BOPT build_examples' did not build successfully. \n\n";
+		print "the 'gmake  ESMF_BOPT=$ESMF_BOPT' did not build successfully. \n\n";
 		exit 0;
 	}
 	else {
@@ -127,10 +127,22 @@ getopts("d:b:", \%options);
 		$fail_count = $ex_count - $pass_count;
 		print "\n\n";
 		if ($pass_count == $ex_count) {
-			print "There are $ex_count examples, they all passed.\n";
+                        if ($fail_count == 1) {
+                                print "There is $ex_count example, it passed.\n";
+                        }
+                        else {
+                                print "There are $ex_count examples, they all passed.\n";
+                        }
+
 		}
 		elsif ($fail_count == $ex_count) {
-			print "There are $ex_count examples, they all failed.\n";
+                        if ($fail_count == 1) {
+                                print "There is $ex_count example, it failed.\n";
+                        }
+                        else {
+                                print "There are $ex_count examples, they all failed.\n";
+                        }
+
 		}
 		else {
 			print "There are $ex_count examples, $pass_count passed and $fail_count failed.\n";
@@ -190,18 +202,19 @@ getopts("d:b:", \%options);
 			}
 			# Get *Ex files
 			@ex_x_files=grep (/Ex/, @all_files);
+			@stdout_ex_files = (); #Clear the file list.
 			# Find the example executable fles that are in the st_ex_files
 			foreach $file ( @st_ex_files) {
                                 	push @stdout_ex_files, grep (/$file/, @ex_x_files);
                 	}
 			# Count the number examples in stdout_ex_files
 			$ex_count = 0;
-			foreach $file ( @tdout_ex_files) {
+			foreach $file ( @stdout_ex_files) {
                              	$ex_count = $ex_count + 1;
                 	}
 			if ($ex_count == 0) {
 				print "NOTE: There are no executable examples files, either the 'gmake ESMF_BOPT=$ESMF_BOPT build_examples' has \n";
-				print "not been run or the 'gmake ESMF_BOPT=$ESMF_BOPT build_examples' did not build successfully. \n\n";
+				print "not been run or the 'gmake ESMF_BOPT=$ESMF_BOPT' did not build successfully. \n\n";
 			}
 		}
 		else{
