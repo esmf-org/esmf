@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldTest.F90,v 1.3 2003/03/11 23:18:10 svasquez Exp $
+! $Id: ESMF_FieldTest.F90,v 1.4 2003/03/12 21:45:49 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldTest.F90,v 1.3 2003/03/11 23:18:10 svasquez Exp $'
+      '$Id: ESMF_FieldTest.F90,v 1.4 2003/03/12 21:45:49 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -130,11 +130,11 @@
       print *
       call ESMF_FieldPrint(f2)
 
-      ! Verifing that creating a created Field is denied.
+      ! Verifing that recreating a Field is allowed.
       f2 = ESMF_FieldCreateNoData("temperature", rc=rc)
-      write(failMsg, *) "Field f2 (temperature) should not have been created"
+      write(failMsg, *) "Field f2 (temperature) should have been created"
       write(name, *) "Recreate a created Field Test"
-      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f2)
       call ESMF_FieldDestroy(f2)
 
@@ -150,7 +150,6 @@
       write(failMsg, *) "Creating a Grid Failed "
       write(name, *) "Creating a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
      
       ! Verifing that a Grid can be printed
       call ESMF_GridPrint(grid, "", rc=rc)
@@ -158,11 +157,11 @@
       write(name, *) "Printing a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      ! Verifing that creating a created Grid is denied.
+      ! Verifing that recreating a created Grid is allowed.
       grid =  ESMF_GridCreate("landgrid", rc=rc)
-      write(failMsg, *) "Grid should not have been created, it had previously been created"
+      write(failMsg, *) "Grid should have been created"
       write(name, *) "Recreating a created Grid Test"
-      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! Verifing that an Array can be created
       allocate(f90ptr1(10,20))
@@ -173,17 +172,16 @@
 
       ! Verifing that an Array can be printed
       call ESMF_ArrayPrint(arr, rc=rc)
-      print *
       write(failMsg, *) "Printing an Array Failed "
       write(name, *) "Printing an Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      ! Verifing that an Array can be printed
+      ! Verifing that recreating a created Array is allowd
       allocate(f90ptr1(10,20))
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
-      write(failMsg, *) "The array should not have been created, it had been created previously "
+      write(failMsg, *) "The array should have been created"
       write(name, *) "Recreating a created Array Test"
-      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! Verifing that a Field can be created with a Grid and Array
       f3 = ESMF_FieldCreate(grid, arr, ESMF_NO_COPY, ESMF_CELL_CENTER, &
@@ -191,7 +189,6 @@
       write(failMsg, *) "Creating an Field with a Grid and Array Failed "
       write(name, *) "Creating a Field with a Grid and Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *
       call ESMF_FieldPrint(f3)
 
       ! Verifing that a Field with a Grid and Array can be destroyed
