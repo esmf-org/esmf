@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2004/06/15 10:58:36 nscollins Exp $ 
+# $Id: makefile,v 1.18 2004/06/16 12:29:52 nscollins Exp $ 
 
 ALL: build_examples
 
@@ -71,7 +71,7 @@ EXAMPLES_RUN = run_ESMF_LogErrEx\
 	       run_ESMC_LogErrEx  
 
 
-UNI_EXAMPLES_RUN = run_ESMF_LogErrEx_uni\
+EXAMPLES_RUN_UNI = run_ESMF_LogErrEx_uni\
                    run_ESMC_LogErrEx_uni 
 
 
