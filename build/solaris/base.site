@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.4 2003/04/14 21:59:22 nscollins Exp $ 
+# $Id: base.site,v 1.5 2003/04/14 22:11:00 nscollins Exp $ 
 
 #
 #  This file contains site-specific information.  The definitions below
@@ -14,7 +14,7 @@ ESMC_MPIRUN      =
 MPI_HOME       = /opt/SUNWhpc/
 MPI_LIB        = -L/opt/SUNWhpc/lib -lmpi
 MPI_INCLUDE    = -I${MPI_HOME}/include
-MPIRUN         =  ${MPI_HOME}/mpirun
+MPIRUN         =  ${MPI_HOME}/mprun
 
 # Location of the OpenMP library
 MP_LIB         = 
