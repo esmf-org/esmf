@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.14 2003/04/14 14:51:27 nscollins Exp $ 
+# $Id: base_variables,v 1.15 2003/04/14 14:57:05 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -31,11 +31,7 @@ C_CLINKER_SLFLAG	= -L
 C_FLINKER_SLFLAG	= -L
 C_CLINKER		= mpcc_r -qsmp=omp -bmaxdata:0x70000000  -qcheck -qheapdebug
 # you may need to add -bI:/usr/lpp/xlf/lib/lowsys.exp to C_LINKER
-<<<<<<< base_variables
-C_FLINKER		= mpxlf90_r -bmaxdata:0x70000000 -lC -qcheck
-=======
 C_FLINKER		= mpxlf90_r -bmaxdata:0x70000000 -lC -qcheck 
->>>>>>> 1.11
 C_CCV			= unknown
 C_FCV			= unknown
 C_SYS_LIB		= /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lisode
