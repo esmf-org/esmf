@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.6 2004/02/11 18:40:40 nscollins Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.7 2004/02/11 19:05:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -182,7 +182,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.6 2004/02/11 18:40:40 nscollins Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.7 2004/02/11 19:05:07 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1308,6 +1308,8 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !
 ! TODO: code goes here
 !
+        if (present(rc)) rc = ESMF_FAILURE
+
         end subroutine ESMF_LocalArraySetData
 
 !------------------------------------------------------------------------------
@@ -1436,27 +1438,49 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 
       if (present(rank)) then
          call c_ESMC_LocalArrayGetRank(array, rank, status)
-         ! TODO: test status
+         if (status .ne. ESMF_SUCCESS) return
       endif
 
       if (present(type)) then
          call c_ESMC_LocalArrayGetType(array, type, status)
+         if (status .ne. ESMF_SUCCESS) return
       endif
 
       if (present(kind)) then
          call c_ESMC_LocalArrayGetKind(array, kind, status)
+         if (status .ne. ESMF_SUCCESS) return
       endif
 
       if (present(counts)) then
          call c_ESMC_LocalArrayGetRank(array, lrank, status)
+         if (status .ne. ESMF_SUCCESS) return
          call c_ESMC_LocalArrayGetLengths(array, lrank, counts, status)
+         if (status .ne. ESMF_SUCCESS) return
       endif
 
-   
-      ! TODO: add these methods
-      !integer, dimension(:), intent(out), optional :: lbounds
-      !integer, dimension(:), intent(out), optional :: ubounds
-      !type(ESMF_Pointer), intent(out), optional :: base
+      if (present(lbounds)) then
+         call c_ESMC_LocalArrayGetRank(array, lrank, status)
+         if (status .ne. ESMF_SUCCESS) return
+         call c_ESMC_LocalArrayGetLbounds(array, lrank, lbounds, status)
+         if (status .ne. ESMF_SUCCESS) return
+      endif
+
+      if (present(ubounds)) then
+         call c_ESMC_LocalArrayGetRank(array, lrank, status)
+         if (status .ne. ESMF_SUCCESS) return
+         call c_ESMC_LocalArrayGetUbounds(array, lrank, ubounds, status)
+         if (status .ne. ESMF_SUCCESS) return
+      endif
+
+      if (present(base)) then
+         call c_ESMC_LocalArrayGetBaseAddr(array, base, status)
+         if (status .ne. ESMF_SUCCESS) return
+      endif
+
+      if (present(name)) then
+         call c_ESMC_LocalArrayGetName(array, name, status)
+         if (status .ne. ESMF_SUCCESS) return
+      endif
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -2052,6 +2076,8 @@ AllocDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !
 ! TODO: code goes here
 !
+        if (present(rc)) rc = ESMF_FAILURE
+
         end subroutine ESMF_LocalArrayWriteRestart
 
 
@@ -2090,6 +2116,8 @@ AllocDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 
         ESMF_LocalArrayReadRestart = a 
  
+        if (present(rc)) rc = ESMF_FAILURE
+
         end function ESMF_LocalArrayReadRestart
 
 
@@ -2140,7 +2168,7 @@ AllocDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
          return
        endif
 
-!      set return values
+       ! set return values
        if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_LocalArrayWrite
@@ -2180,6 +2208,8 @@ AllocDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 
         ESMF_LocalArrayRead = a 
  
+        if (present(rc)) rc = ESMF_FAILURE
+
         end function ESMF_LocalArrayRead
 
 
@@ -2274,6 +2304,12 @@ AllocDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
        if (present(rc)) then
          rcpresent = .TRUE.
          rc = ESMF_FAILURE
+       endif
+
+       ! Simple validity checks
+       if (array%this .eq. ESMF_NULL_POINTER) then
+           print *, "LocalArray not initialized or Destroyed"
+           return 
        endif
 
        defaultopts = "brief"

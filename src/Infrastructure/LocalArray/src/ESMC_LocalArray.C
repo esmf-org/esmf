@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.6 2003/12/19 21:44:09 nscollins Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.7 2004/02/11 19:05:07 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -333,7 +333,7 @@
     } 
 
     // call base class routine to set name 
-    ESMC_BaseSetName(name, "Array");
+    ESMC_BaseSetName(name, "LocalArray");
     
     // TODO: memcpy from base to base_addr, proper number of bytes?
     //  if docopy flag is set.

@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.6 2004/02/11 18:40:38 nscollins Exp $
+// $Id: ESMC_LocalArray.h,v 1.7 2004/02/11 19:05:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -187,6 +187,16 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_LocalArraySetOrigin(ESMC_ArrayOrigin o) { this->origin = o; 
                                                        return ESMF_SUCCESS;}
     ESMC_ArrayOrigin ESMC_LocalArrayGetOrigin(void) { return this->origin; }
+
+    int ESMC_LocalArrayGetLbounds(int n, int *l) { for (int i = 0; i < n; i++)
+                                                      l[i] = this->lbound[i];
+                                                   return ESMF_SUCCESS;}
+    int ESMC_LocalArrayGetUbounds(int n, int *u) { for (int i = 0; i < n; i++)
+                                                      u[i] = this->ubound[i];
+                                                   return ESMF_SUCCESS;}
+
+    int ESMC_LocalArraySetName(char *name) { return ESMC_BaseSetName(name, "LocalArray"); }
+    char *ESMC_LocalArrayGetName(void) { return ESMC_BaseGetName(); }
 
     // copy the contents of an f90 ptr
     int ESMC_LocalArraySetF90Ptr(const struct c_F90ptr *p);
