@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldCreateEx.C,v 1.5 2004/02/19 23:10:58 nscollins Exp $
+// $Id: ESMC_FieldCreateEx.C,v 1.6 2004/04/23 21:54:28 nscollins Exp $
 //
 // Example/test code which creates a new field.
 
@@ -15,10 +15,9 @@
 //\begin{verbatim}
 
 //   // Example program showing various ways to create a Field object
-#include "ESMC.h"
-#include "ESMC_Field.h"
-
 #include <stdio.h>
+#include "ESMC.h"
+
     
 main(int argc, char **argv) {
 //   // Local variables

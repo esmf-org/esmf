@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.16 2004/04/23 20:19:30 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.17 2004/04/23 21:56:37 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,9 +23,9 @@
 #include <iostream.h>  // cout
 #include <stdio.h>
 #include <string.h>
+#include <ESMC_Start.h>
 #include <ESMC_Base.h>  
 #include <ESMC_VM.h>  
-#include <ESMC.h>
 
 // associated class definition file
 #include <ESMC_newDELayout.h>
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.16 2004/04/23 20:19:30 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.17 2004/04/23 21:56:37 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 

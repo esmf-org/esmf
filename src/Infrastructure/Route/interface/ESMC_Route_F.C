@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.26 2004/04/13 22:59:23 jwolfe Exp $
+// $Id: ESMC_Route_F.C,v 1.27 2004/04/23 21:58:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 #include <stdio.h>
 #include <string.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMC_newDELayout.h"
 #include "ESMC_LocalArray.h"

@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.C,v 1.4 2004/04/23 17:25:17 theurich Exp $
+// $Id: ESMC_CplComp.C,v 1.5 2004/04/23 22:11:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
  // insert any higher level, 3rd party or system includes here
 #include <string.h>
 #include <stdio.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_CplComp.C,v 1.4 2004/04/23 17:25:17 theurich Exp $";
+           "$Id: ESMC_CplComp.C,v 1.5 2004/04/23 22:11:28 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //

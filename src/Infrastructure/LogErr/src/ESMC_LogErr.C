@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.29 2004/04/22 22:31:59 cpboulder Exp $
+// $Id: ESMC_LogErr.C,v 1.30 2004/04/23 21:56:10 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,8 +27,8 @@
 #include <time.h>
 
 // associated class definition file
-#include <ESMC.h>
-#include <ESMC_Base.h>
+#include "ESMC_Start.h"
+#include "ESMC_Base.h"
 #include "ESMC_LogErr.h"
 
 //Global Variables
@@ -42,7 +42,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.29 2004/04/22 22:31:59 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.30 2004/04/23 21:56:10 nscollins Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines

@@ -1,4 +1,4 @@
-// $Id: ESMC_CplEx.C,v 1.8 2004/04/23 16:13:47 nscollins Exp $
+// $Id: ESMC_CplEx.C,v 1.9 2004/04/23 22:08:31 nscollins Exp $
 //
 // Example/test code which creates a new comp.
 
@@ -21,12 +21,6 @@
 //   // the interfaces are used under various conditions.
 
 #include "ESMC.h"
-#include "ESMC_Clock.h"
-#include "ESMC_Comp.h"
-#include "ESMC_GridComp.h"
-#include "ESMC_CplComp.h"
-#include "ESMC_Init.h"
-#include "ESMC_State.h"
 
 
 #include <stdio.h>

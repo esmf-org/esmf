@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket_F.C,v 1.4 2003/09/22 22:29:14 nscollins Exp $
+// $Id: ESMC_XPacket_F.C,v 1.5 2004/04/23 21:58:50 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 #include <stdio.h>
 #include <string.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMC_XPacket.h"
 //------------------------------------------------------------------------------

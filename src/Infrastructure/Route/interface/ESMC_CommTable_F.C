@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable_F.C,v 1.3 2003/03/25 17:39:13 nscollins Exp $
+// $Id: ESMC_CommTable_F.C,v 1.4 2004/04/23 21:58:15 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 #include <stdio.h>
 #include <string.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMC_CommTable.h"
 //------------------------------------------------------------------------------

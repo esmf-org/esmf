@@ -1,4 +1,4 @@
-// $Id: ESMC_StateEx.C,v 1.1 2003/10/22 20:09:41 cdeluca Exp $
+// $Id: ESMC_StateEx.C,v 1.2 2004/04/23 22:14:04 nscollins Exp $
 //
 // Example/test code which creates a new State.
 
@@ -20,7 +20,7 @@
 //   // the interfaces are used under various conditions.
 
 #include "ESMC.h"
-#include "ESMC_State.h"
+
 
 #include <stdio.h>
     

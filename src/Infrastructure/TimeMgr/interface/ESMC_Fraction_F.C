@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction_F.C,v 1.14 2004/02/25 03:04:46 eschwab Exp $
+// $Id: ESMC_Fraction_F.C,v 1.15 2004/04/23 22:02:47 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <ESMC.h>
+#include <ESMC_Start.h>
 #include <ESMC_F90Interface.h>
 #include <ESMC_Fraction.h>
 //------------------------------------------------------------------------------

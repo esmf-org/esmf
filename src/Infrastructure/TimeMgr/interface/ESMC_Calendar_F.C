@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.32 2004/04/14 20:43:17 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.33 2004/04/23 22:02:00 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <ESMC.h>
+#include <ESMC_Start.h>
 #include <ESMC_F90Interface.h>
 #include <ESMC_Calendar.h>
 //------------------------------------------------------------------------------

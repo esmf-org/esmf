@@ -1,4 +1,4 @@
-// $Id: ESMC_CompRun.C,v 1.6 2004/04/20 19:30:11 nscollins Exp $
+// $Id: ESMC_CompRun.C,v 1.7 2004/04/23 22:13:26 nscollins Exp $
 //
 // Test code which creates a new Component in C++.  The called
 // component is still in F90.
@@ -17,11 +17,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "ESMC.h"
-#include "ESMC_Comp.h"
-#include "ESMC_GridComp.h"
-#include "ESMC_State.h"
-#include "ESMC_Clock.h"
-#include "ESMC_Init.h"
 
 extern "C" void FTN(externaluser_setservices)(ESMC_GridComp *, int *rc);
 

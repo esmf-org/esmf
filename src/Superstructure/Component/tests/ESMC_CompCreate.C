@@ -1,4 +1,4 @@
-// $Id: ESMC_CompCreate.C,v 1.5 2004/04/20 19:30:08 nscollins Exp $
+// $Id: ESMC_CompCreate.C,v 1.6 2004/04/23 22:13:00 nscollins Exp $
 //
 // Test code which creates a new Component.
 
@@ -16,9 +16,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "ESMC.h"
-#include "ESMC_Comp.h"
-#include "ESMC_GridComp.h"
-#include "ESMC_Init.h"
 
 
 int main(int argc, char **argv)

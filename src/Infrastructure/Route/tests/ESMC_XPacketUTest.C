@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacketUTest.C,v 1.1 2003/04/09 23:48:44 flanigan Exp $
+// $Id: ESMC_XPacketUTest.C,v 1.2 2004/04/23 22:00:39 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,16 +27,13 @@
  #include <stdio.h>
  #include <ESMC.h>
 
- // associated class definition file
- #include <ESMC_XPacket.h>
-
  // ESMC_Test function
  #include <ESMC_Test.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_XPacketUTest.C,v 1.1 2003/04/09 23:48:44 flanigan Exp $";
+ static const char *const version = "$Id: ESMC_XPacketUTest.C,v 1.2 2004/04/23 22:00:39 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])

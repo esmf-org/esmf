@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle_F.C,v 1.11 2004/03/04 18:13:03 nscollins Exp $
+// $Id: ESMC_RHandle_F.C,v 1.12 2004/04/23 21:58:24 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 #include <stdio.h>
 #include <string.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMC_RHandle.h"
 #include "ESMC_LocalArray.h"

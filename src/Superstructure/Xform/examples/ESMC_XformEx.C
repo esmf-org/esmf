@@ -1,4 +1,4 @@
-// $Id: ESMC_XformEx.C,v 1.3 2004/02/11 23:20:02 nscollins Exp $
+// $Id: ESMC_XformEx.C,v 1.4 2004/04/23 22:15:48 nscollins Exp $
 //
 // Example/test code which creates a new Transforms.
 
@@ -20,8 +20,7 @@
 //   // the interfaces are used under various conditions.
 
 #include "ESMC.h"
-#include "ESMC_State.h"
-#include "ESMC_Xform.h"
+
 
 #include <stdio.h>
     

@@ -1,6 +1,5 @@
 
 #include "ESMC.h"
-#include "ESMC_LogErr.h"
 
 int main() {
     ESMC_Log aLog;

@@ -1,4 +1,4 @@
-// $Id: inter_ESMC_class_F.C,v 1.6 2003/03/28 17:15:58 eschwab Exp $
+// $Id: inter_ESMC_class_F.C,v 1.7 2004/04/23 21:52:42 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 #include <stdio.h>
 #include <string.h>
-#include "ESMC.h"
+#include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMC_<Class>.h"
 //------------------------------------------------------------------------------
