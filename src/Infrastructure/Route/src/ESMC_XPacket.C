@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.9 2003/03/12 20:33:20 jwolfe Exp $
+// $Id: ESMC_XPacket.C,v 1.10 2003/03/13 16:59:53 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.9 2003/03/12 20:33:20 jwolfe Exp $";
+              "$Id: ESMC_XPacket.C,v 1.10 2003/03/13 16:59:53 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -158,8 +158,9 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      struct ESMC_XPacket *xpacket1,      // in - first XPacket
-      struct ESMC_XPacket *xpacket2) {    // in - second XPacket
+      struct ESMC_XPacket *xpacket1,      // in  - first XPacket
+      struct ESMC_XPacket *xpacket2,      // in  - second XPacket
+      struct ESMC_XPacket *intxp) {       // out - intersection XPacket
 //
 // !DESCRIPTION:
 //      Finds the intersection of two XPackets, which is itself an XPacket.
@@ -176,40 +177,40 @@
     if (xpacket1->rank != xpacket2->rank) {
       return ESMF_FAILURE;
     }
-    this->rank = xpacket1->rank;
+    intxp->rank = xpacket1->rank;
 
     // check that the xpacket strides are the same
-    if (this->rank > 0) { 
+    if (intxp->rank > 0) { 
       for (i=0; i<xpacket1->rank-1; i++) {
         if (xpacket1->strides[i] != xpacket2->strides[i]) {
           return ESMF_FAILURE;
         }
-        this->strides[i] = xpacket1->strides[i];
+        intxp->strides[i] = xpacket1->strides[i];
       }
     }
 
     // set left, right, and nums to zero as default
-    this->left = 0;
-    this->right = 0;
-    if (this->rank > 0) { 
+    intxp->left = 0;
+    intxp->right = 0;
+    if (intxp->rank > 0) { 
       for (i=0; i<xpacket1->rank-1; i++) {
-        this->num[i] = 0;
+        intxp->num[i] = 0;
       }
     }
 
     // switch based on xpacket rank  TODO: is this necessary?
-    switch (this->rank) {
+    switch (intxp->rank) {
       case 1:
         {
           if (xpacket1->left >= xpacket2->left)
-            this->left  = xpacket1->left;
+            intxp->left  = xpacket1->left;
           else
-            this->left  = xpacket2->left;
+            intxp->left  = xpacket2->left;
           if (xpacket1->right <= xpacket2->left)
-            this->right = xpacket1->right;
+            intxp->right = xpacket1->right;
           else
-            this->right = xpacket2->right;
-          this->num[0] = 1;
+            intxp->right = xpacket2->right;
+          intxp->num[0] = 1;
         }
       break;
       case 2:
@@ -229,32 +230,32 @@
           int L2_left  = xpacket2->left  + i2*xpacket2->strides[0];
           int L2_right = xpacket2->right + i2*xpacket2->strides[0];
           if (L1_left >= L2_left)
-            this->left  = L1_left;
+            intxp->left  = L1_left;
           else
-            this->left  = L2_left;
+            intxp->left  = L2_left;
           if (L1_right <= L2_right)
-            this->right = L1_right;
+            intxp->right = L1_right;
           else
-            this->right = L2_right;
+            intxp->right = L2_right;
           if (xpacket1->num[0]-i1 <= xpacket2->num[0]-i2) 
-            this->num[0] = xpacket1->num[0]-i1;
+            intxp->num[0] = xpacket1->num[0]-i1;
           else
-            this->num[0] = xpacket2->num[0]-i2;
+            intxp->num[0] = xpacket2->num[0]-i2;
         }
       break;
       case 3:
         {
-          printf("no code to handle xpacket rank %d yet\n", this->rank);
+          printf("no code to handle xpacket rank %d yet\n", intxp->rank);
         }
       break;
       case 4:
         {
-          printf("no code to handle xpacket rank %d yet\n", this->rank);
+          printf("no code to handle xpacket rank %d yet\n", intxp->rank);
         }
       break;
       case 5:
         {
-          printf("no code to handle xpacket rank %d yet\n", this->rank);
+          printf("no code to handle xpacket rank %d yet\n", intxp->rank);
         }
       break;
     } 
@@ -267,18 +268,18 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_XPacketTransFromAxisIndex - translate an XPacket from an AxisIndex
+// !IROUTINE:  ESMC_XPacketFromAxisIndex - calculate an XPacket from an AxisIndex
 //
 // !INTERFACE:
-      int ESMC_XPacket::ESMC_XPacketTransFromAxisIndex(
+      int ESMC_XPacket::ESMC_XPacketFromAxisIndex(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      struct ESMC_AxisIndex *indexlist,  // in  - set of AxisIndices
-      int size_axisindex) {              // in  - size of AxisIndex array
-//      struct ESMC_XPacket *xpacket) {    // out - translated XPacket
+      ESMC_AxisIndex *indexlist,  // in  - set of AxisIndices
+      int size_axisindex,         // in  - size of AxisIndex array
+      ESMC_XPacket *xpacket) {    // out - translated XPacket
 //
 // !DESCRIPTION:
 //      Translates a set of AxisIndices into a corresponding XPacket.
@@ -301,16 +302,16 @@
         {
           int global_l[2];
           int global_r[2];
-          this->rank = 2;
+          xpacket->rank = 2;
           // calculate global lefts and rights for the index space
           for (i=0; i<size_axisindex; i++) {
             global_l[i] = indexlist[i].l + indexlist[i].gstart;
             global_r[i] = indexlist[i].r + indexlist[i].gstart;
           }
-          this->left  = global_l[1]*indexlist[0].max + global_l[0];
-          this->right = global_r[1]*indexlist[0].max + global_r[0];
-          this->strides[0] = indexlist[0].max;
-          this->num[0] = indexlist[1].r - indexlist[1].l + 1;
+          xpacket->left  = global_l[1]*indexlist[0].max + global_l[0];
+          xpacket->right = global_r[1]*indexlist[0].max + global_r[0];
+          xpacket->strides[0] = indexlist[0].max;
+          xpacket->num[0] = indexlist[1].r - indexlist[1].l + 1;
         }
       break;
       case 3:
@@ -333,7 +334,7 @@
     rc = ESMF_SUCCESS;
     return rc;
 
- } // end ESMC_XPacketTransFromAxisIndex
+ } // end ESMC_XPacketFromAxisIndex
 
 
 //-----------------------------------------------------------------------------
