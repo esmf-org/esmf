@@ -1,0 +1,894 @@
+// $Id: ESMC_newDELayout.C,v 1.1 2004/03/03 16:38:11 theurich Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// NASA Goddard Space Flight Center.
+// Licensed under the GPL.
+
+// ESMC DELayout method implementation (body) file
+
+//-----------------------------------------------------------------------------
+//
+// !DESCRIPTION:
+//
+// The code in this file implements the C++ newDELayout methods declared
+// in the companion file ESMC_newDELayout.h
+//
+//-----------------------------------------------------------------------------
+
+// insert any higher level, 3rd party or system includes here
+#include <iostream.h>  // cout
+#include <stdio.h>
+#include <string.h>
+#include <ESMC_Base.h>  
+#include <ESMC_VM.h>  
+#include <ESMC.h>
+
+// associated class definition file
+#include <ESMC_newDELayout.h>
+
+//-----------------------------------------------------------------------------
+ // leave the following line as-is; it will insert the cvs ident string
+ // into the object file for tracking purposes.
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.1 2004/03/03 16:38:11 theurich Exp $";
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
+// This section includes all the newDELayout routines
+//
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutCreate
+//
+// !INTERFACE:
+ESMC_newDELayout *ESMC_newDELayoutCreate(
+//
+// !RETURN VALUE:
+//    ESMC_newDELayout * to newly allocated ESMC_newDELayout
+//
+// !ARGUMENTS:
+//
+  ESMC_VM &vm,              // reference to ESMC_VM object
+  int *nDEs,                // number of DEs
+  int ndim,                 // number of dimensions
+  int *DEtoPET,             // DEtoPET list
+  int len,                  // number of DEs in DEtoPET list
+  ESMC_Logical *cyclic_opt, // cyclic boundary option
+  int *rc){                 // return code
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  ESMC_newDELayout *layout;
+  // deal with optional variables
+  ESMC_Logical cyclic = ESMF_FALSE;
+  if (cyclic_opt != ESMC_NULL_POINTER)
+    cyclic = *cyclic_opt;
+
+  // decide whether this is a 1D or an ND layout
+  if (ndim==1){
+    try {
+      layout = new ESMC_newDELayout;
+      *rc = layout->ESMC_newDELayoutConstruct1D(vm, *nDEs, DEtoPET, len,
+        cyclic);
+      return(layout);
+    }
+    catch (...) {
+      // TODO:  call ESMF log/err handler
+      cerr << "ESMC_newDELayoutCreate() memory allocation failed\n";
+      *rc = ESMF_FAILURE;
+      return(ESMC_NULL_POINTER);
+    }
+  }else{
+    try {
+      layout = new ESMC_newDELayout;
+      *rc = layout->ESMC_newDELayoutConstructND(vm, nDEs, ndim, DEtoPET, len,
+        cyclic);
+      return(layout);
+    }
+    catch (...) {
+      // TODO:  call ESMF log/err handler
+      cerr << "ESMC_newDELayoutCreate1D() memory allocation failed\n";
+      *rc = ESMF_FAILURE;
+      return(ESMC_NULL_POINTER);
+    }
+  }
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutDestroy
+//
+// !INTERFACE:
+int ESMC_newDELayoutDestroy(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  ESMC_newDELayout *layout){     // in - ESMC_newDELayout to destroy
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  if (layout != ESMC_NULL_POINTER) {
+    layout->ESMC_newDELayoutDestruct();
+    delete layout;
+    layout = ESMC_NULL_POINTER;
+    return(ESMF_SUCCESS);
+  }else{
+    return(ESMF_FAILURE);
+  }
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutConstruct1D
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutConstruct1D(ESMC_VM &vm, int nDEs,
+  int *DEtoPET, int len, ESMC_Logical cyclic){
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//    Construct the internal information structure in a new ESMC\_newDELayout
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int npets =  vm.vmachine_npets();   // get number of PETs
+  if (nDEs==0){
+    // this will be a 1:1 Layout
+    ndes = npets;                   // number of DEs to be the same as PETs
+  }else{
+    // number of DEs has been supplied
+    ndes = nDEs;
+  }
+  des = new de_type[ndes];          // allocate as many DEs as there are PETs
+  // uniquely label the DEs in the layout 
+  for (int i=0; i<ndes; i++){
+    des[i].deid = i;                // default is to use basis zero
+  }
+  // now define connectivity between the DEs
+  if (ndes>1){
+    for (int i=0; i<ndes; i++){
+      if (i==0){
+        if (cyclic==ESMF_TRUE){
+          des[i].nconnect = 2;
+          des[i].connect_de = new int[2];
+          des[i].connect_w  = new int[2];
+          des[i].connect_de[0] = ndes-1;
+          des[i].connect_w[0] = ESMF_CWGHT_NORMAL;
+          des[i].connect_de[1] = 1;
+          des[i].connect_w[1] = ESMF_CWGHT_NORMAL;
+        }else{
+          des[i].nconnect = 1;
+          des[i].connect_de = new int[1];
+          des[i].connect_w  = new int[1];
+          des[i].connect_de[0] = 1;
+          des[i].connect_w[0] = ESMF_CWGHT_NORMAL;
+        }
+      }else if (i==ndes-1){
+        if (cyclic==ESMF_TRUE){
+          des[i].nconnect = 2;
+          des[i].connect_de = new int[2];
+          des[i].connect_w  = new int[2];
+          des[i].connect_de[0] = i-1;
+          des[i].connect_w[0] = ESMF_CWGHT_NORMAL;
+          des[i].connect_de[1] = 0;
+          des[i].connect_w[1] = ESMF_CWGHT_NORMAL;
+        }else{
+          des[i].nconnect = 1;
+          des[i].connect_de = new int[1];
+          des[i].connect_w  = new int[1];
+          des[i].connect_de[0] = 0;
+          des[i].connect_w[0] = ESMF_CWGHT_NORMAL;
+        }
+      }else{
+        des[i].nconnect = 2;
+        des[i].connect_de = new int[2];
+        des[i].connect_w  = new int[2];
+        des[i].connect_de[0] = i-1;
+        des[i].connect_w[0] = ESMF_CWGHT_NORMAL;
+        des[i].connect_de[1] = i+1;
+        des[i].connect_w[1] = ESMF_CWGHT_NORMAL;
+      }        
+    }
+  }
+  // Setup the dimensionality and coordinates of this layout. This information
+  // is only kept for external use!
+  ndim = 1; // this is a 1D routine
+  for (int i=0; i<ndes; i++){
+    des[i].coord = new int[ndim];
+    des[i].coord[0] = i;
+  }
+  // DE-to-PET mapping
+  if (len==ndes){
+    // DEtoPET mapping has been provided externally
+    for (int i=0; i<ndes; i++)
+      des[i].petid = DEtoPET[i];   // copy the mapping
+  }else{
+    // Use the mapper algorithm to find good DE-to-PET mapping
+    ESMC_newDELayoutFindDEtoPET(npets);
+  }
+  // Fill local part of layout object
+  int mypet = vm.vmachine_mypet();    // get my PET id
+  ESMC_newDELayoutFillLocal(mypet);
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutConstructND
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutConstructND(ESMC_VM &vm, int *nDEs, 
+  int nndim, int *DEtoPET, int len, ESMC_Logical cyclic){
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//    Construct the internal information structure in a new ESMC\_newDELayout
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int npets =  vm.vmachine_npets();   // get number of PETs
+  // determine how many DEs there are in this layout
+  ndes = 1;
+  for (int i=0; i<nndim; i++)
+    ndes *= nDEs[i];
+  des = new de_type[ndes];          // allocate as many DEs as there are PETs
+  // uniquely label the DEs in the layout 
+  for (int i=0; i<ndes; i++){
+    des[i].deid = i;                // default is to use basis zero
+  }
+  // Setup the dimensionality and coordinates of this layout. This information
+  // is only kept for external use!
+  ndim = nndim; // set the number of dimensions
+  for (int i=0; i<ndes; i++){
+    des[i].coord = new int[ndim];
+  }
+  for (int j=0; j<ndim; j++)
+    des[0].coord[j] = 0;
+  for (int i=1; i<ndes; i++){
+    int carryover = 1;
+    for (int j=0; j<ndim; j++){
+      des[i].coord[j] = des[i-1].coord[j] + carryover;
+      if (des[i].coord[j]==nDEs[j]){
+        des[i].coord[j] = 0;
+        carryover = 1;
+      }else{
+        carryover=0;
+      }
+    }
+  }
+  // TODO: define connectivity between the DEs
+  // For now don't connect any of the DEs
+  for (int i=0; i<ndes; i++){
+    des[i].nconnect = 0;
+  }
+  // DE-to-PET mapping
+  if (len==ndes){
+    // DEtoPET mapping has been provided externally
+    for (int i=0; i<ndes; i++)
+      des[i].petid = DEtoPET[i];   // copy the mapping
+  }else{
+    // Use the mapper algorithm to find good DE-to-PET mapping
+    ESMC_newDELayoutFindDEtoPET(npets);
+  }
+  // Fill local part of layout object
+  int mypet = vm.vmachine_mypet();    // get my PET id
+  ESMC_newDELayoutFillLocal(mypet);
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutDestruct
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutDestruct(void){
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//    Destruct the internal information structure in a new ESMC\_newDELayout
+//
+//EOP
+//-----------------------------------------------------------------------------
+  for (int i=0; i<ndes; i++){
+    delete [] des[i].connect_de;
+    delete [] des[i].connect_w;
+    delete [] des[i].coord;
+  }
+  delete [] des;
+  delete [] mydes;
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutUnplug
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutUnplug(void){
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//    Unplug the layout from its VM, i.e. delete the DE-to-PET mapping and
+//    local section
+//
+//EOP
+//-----------------------------------------------------------------------------
+  plugged = ESMF_FALSE;
+  nmydes = 0;
+  delete [] mydes;
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutPlug
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutPlug(ESMC_VM &vm){
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//    Plug the layout into a VM, i.e. find DE-to-PET mapping setup local section
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // DE-to-PET mapping
+  int npets =  vm.vmachine_npets();   // get number of PETs
+  ESMC_newDELayoutFindDEtoPET(npets);
+  // Fill local part of layout object
+  int mypet = vm.vmachine_mypet();    // get my PET id
+  ESMC_newDELayoutFillLocal(mypet);
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutGet
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutGet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  int  *nDEs,             // out - Total number of DEs
+  int  *ndim,             // out - Number of dimensions in coordinate tuple
+  int  *nmyDEs,           // out - number of DEs for my PET instance
+  int  *myDEs,            // out - list DEs for my PET instance
+  int  len){              // in  - number of elements in myDEs list
+//
+// !DESCRIPTION:
+//    Get information about a DELayout object
+//
+//EOP
+//-----------------------------------------------------------------------------
+  if (nDEs != ESMC_NULL_POINTER)
+    *nDEs = ndes;
+  if (ndim != ESMC_NULL_POINTER)
+    *ndim = this->ndim;
+  if (nmyDEs != ESMC_NULL_POINTER)
+    *nmyDEs = nmydes;
+  if (len >= nmydes)
+    for (int i=0; i<nmydes; i++)
+      myDEs[i] = mydes[i];
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutGetDE
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutGetDE(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  int  DEid,              // in  - DE id of DE to be queried
+  int  *DEcoord,          // out - DE's coordinate tuple
+  int  len_coord,         // in  - dimensions in DEcoord
+  int  *DEcde,            // out - DE's connection table
+  int  len_cde,           // in  - dimensions in DEcde
+  int  *DEcw,             // out - DE's connection weight table
+  int  len_cw,            // in  - dimensions in DEcw
+  int  *nDEc              // out - DE's number of connections
+  ){              
+//
+// !DESCRIPTION:
+//    Get information about a DELayout object
+//
+//EOP
+//-----------------------------------------------------------------------------
+  if (len_coord >= ndim)
+    for (int i=0; i<ndim; i++)
+      DEcoord[i] = des[DEid].coord[i];
+  if (len_cde >= des[DEid].nconnect)
+    for (int i=0; i<des[DEid].nconnect; i++)
+      DEcde[i] = des[DEid].connect_de[i];
+  if (len_cw >= des[DEid].nconnect)
+    for (int i=0; i<des[DEid].nconnect; i++)
+      DEcw[i] = des[DEid].connect_w[i];
+  if (nDEc != ESMC_NULL_POINTER)
+    *nDEc = des[DEid].nconnect;
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutMyDE
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutMyDE(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  int  DE,                // in  - DE index
+  ESMC_Logical *value){   // out - return value indicating whether DE is in PET
+//
+// !DESCRIPTION:
+//    Determine whether a certain DE is part of the instantiating PET
+//
+//EOP
+//-----------------------------------------------------------------------------
+  *value = ESMF_FALSE;
+  for (int i=0; i<nmydes; i++)
+    if (mydes[i]==DE) *value = ESMF_TRUE;
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutPlugged
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutPlugged(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  ESMC_Logical *value){   // out - plugged or unplugged
+//
+// !DESCRIPTION:
+//    Determine whether the layout is in the plugged or unplugged state
+//
+//EOP
+//-----------------------------------------------------------------------------
+  *value = plugged;
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutPrint
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutPrint(){
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//    Print details of DELayout object 
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // print info about the vmachine object
+  printf("--- ESMC_newDELayoutPrint start ---\n");
+  printf("ndes = %d\n", ndes);
+  for (int i=0; i<ndes; i++){
+    printf("  des[%d]: deid=%d, petid=%d, nconnect=%d\n", i, 
+      des[i].deid, des[i].petid, des[i].nconnect);
+    for (int j=0; j<des[i].nconnect; j++)
+      printf("      connect_de[%d]=%d, weight=%d\n", j, des[i].connect_de[j],
+        des[i].connect_w[j]);
+  }
+  printf("nmydes=%d\n", nmydes);
+  for (int i=0; i<nmydes; i++)
+    printf("  mydes[%d]=%d\n", i, mydes[i]);
+  printf("ndim = %d\n", ndim);
+  for (int i=0; i<ndes; i++){
+    printf("[%d]: ", i);
+    int j;
+    for (j=0; j<ndim-1; j++)
+      printf("%d, ", des[i].coord[j]);
+    printf("%d\n", des[i].coord[j]);
+  }
+  printf("--- ESMC_newDELayoutPrint end ---\n");
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutCopy
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutCopy(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  ESMC_VM &vm,    // reference to ESMC_VM object
+  void **srcdata, // input array
+  void **destdata,// output array
+  int len,        // number of elements in input and output arrays
+  int srcDE,      // input DE
+  int destDE){    // output DE
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // len must be converted into bytes:
+  int blen = len * 4; // this is hard-coded for 32 bit integers
+  int mypet = vm.vmachine_mypet();
+  int srcpet = des[srcDE].petid;      // PETid where srcDE lives
+  int destpet = des[destDE].petid;    // PETid where destDE lives
+  if (srcpet==mypet && destpet==mypet){
+    // srcDE and destDE are on my PET
+    int i, j;
+    for (i=0; i<nmydes; i++)
+      if (mydes[i]==srcDE) break;
+    for (j=0; j<nmydes; j++)
+      if (mydes[j]==destDE) break;
+    // now i is this PETs srcDE index and j is this PETs destDE index
+    memcpy(destdata[j], srcdata[i], blen);
+  }else if (srcpet==mypet){
+    // srcDE is on my PET, but destDE is on another PET
+    int i;
+    for (i=0; i<nmydes; i++)
+      if (mydes[i]==srcDE) break;
+    vm.vmachine_send(srcdata[i], blen, destpet);
+  }else if (destpet==mypet){
+    // srcDE is on my PET, but destDE is on another PET
+    int i;
+    for (i=0; i<nmydes; i++)
+      if (mydes[i]==destDE) break;
+    vm.vmachine_recv(destdata[i], blen, srcpet);
+  }
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutScatter
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutScatter(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  ESMC_VM &vm,    // reference to ESMC_VM object
+  void **srcdata, // input array
+  void **destdata,// output array
+  int len,        // number of elements in input and output arrays
+  int rootDE){    // root DE
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // very crude implementation of a layout wide scatter
+  int mypet = vm.vmachine_mypet();
+  if (des[rootDE].petid==mypet){
+    // my PET holds the rootDE
+    int j;
+    for (j=0; j<nmydes; j++)
+      if (mydes[j]==rootDE) break;
+    void *rootdata = srcdata[j];    // backup the correct start of rootDE's data
+    char *tempdata = (char *)srcdata[j];
+    for (int i=0; i<ndes; i++){
+      ESMC_newDELayoutCopy(vm, srcdata, destdata, len, rootDE, i);
+      tempdata += len*4;  // hardcoded for 32bit integer data array
+      srcdata[j] = tempdata;
+    }
+    srcdata[j] = rootdata;  // restore correct start
+  }else{
+    for (int i=0; i<ndes; i++)
+      ESMC_newDELayoutCopy(vm, srcdata, destdata, len, rootDE, i);
+  }
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutGather
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutGather(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  ESMC_VM &vm,    // reference to ESMC_VM object
+  int *array,     // input array
+  int *result,    // output array
+  int len,        // number of elements in input and output arrays
+  int rootDE){    // root DE
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // simple 1:1 implementation  -> will be more complicated for general case
+  // len must be converted into bytes:
+  int blen = len * 4; // this is hard-coded for 32 bit integers
+  vm.vmachine_gather(array, result, blen, rootDE);
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutAllReduce
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutAllReduce(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  ESMC_VM &vm,    // reference to ESMC_VM object
+  int *array,     // input array
+  int *result,    // output array
+  int len,        // number of elements in input and output arrays
+  ESMC_newOp op){ // reduction operation
+//
+// !DESCRIPTION:
+//    Print details of DELayout object 
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // simple 1:1 implementation  -> will be more complicated for general case
+  vm.vmachine_allreduce(array, result, len, (vmOp)op);
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutFindDEtoPET
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutFindDEtoPET(int npets){
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//    Find best DE-to-PET mapping for the layout
+//
+//EOP
+//-----------------------------------------------------------------------------
+// TODO: Use the connectivity info to find best DE-to-PET mapping!
+// For now I simply connect in sequence...
+  if (ndes==npets){
+    // 1:1 layout
+    for (int i=0; i<ndes; i++)
+      des[i].petid = i;   // default 1:1 DE-to-PET mapping
+  }else{
+    // not a 1:1 layout
+    // first find how many DEs will be placed onto a certain PET
+    int *ndepet = new int[npets];
+    for (int i=0; i<npets; i++)
+      ndepet[i] = 0;
+    int i = 0;
+    for (int j=0; j<ndes; j++){
+      ++ndepet[i];
+      ++i;
+      if (i>=npets) i=0;
+    }
+    // now associate the DEs with their PETs
+    i=0;
+    int k=0;
+    for (int j=0; j<ndes; j++){
+      des[j].petid = i;
+      ++k;
+      if (k>=ndepet[i]){
+        k=0;
+        ++i;
+      }
+    }
+    delete [] ndepet;
+  }
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutFillLocal
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutFillLocal(int mypet){
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//    Fill local part of layout object
+//
+//EOP
+//-----------------------------------------------------------------------------
+  nmydes = 0;               // reset local de count
+  for (int i=0; i<ndes; i++)
+    if (des[i].petid == mypet) ++nmydes;
+  mydes = new int[nmydes];  // allocate space to hold ids of all of my DEs
+  int j=0;
+  for (int i=0; i<ndes; i++)
+    if (des[i].petid == mypet){
+      mydes[j]=i;
+      ++j;
+    }
+  // Indicate that now the layout is in the plugged state
+  plugged = ESMF_TRUE;
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutDataCreate
+//
+// !INTERFACE:
+void **ESMC_newDELayoutDataCreate(
+//
+// !RETURN VALUE:
+//    void* to newly allocated memory
+//
+// !ARGUMENTS:
+//
+  int n,                    // number of DE data on this PET
+  int *rc){                 // return code
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  void **array;
+  try {
+    array = new void*[n];
+    *rc = ESMF_SUCCESS;
+    return(array);
+  }
+  catch (...) {
+    // TODO:  call ESMF log/err handler
+    cerr << "ESMC_newDELayoutDataCreate() memory allocation failed\n";
+    *rc = ESMF_FAILURE;
+    return(ESMC_NULL_POINTER);
+  }
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutDataAdd
+//
+// !INTERFACE:
+int ESMC_newDELayoutDataAdd(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **ptr,               // in - DELayout data reference array
+  void *a,                  // in - DELayout data reference to be added
+  int index){               // in - DELayout data reference index
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  ptr[index] = a;
+  return(ESMF_SUCCESS);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutDataDestroy
+//
+// !INTERFACE:
+int ESMC_newDELayoutDataDestroy(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **ptr){              // in - DELayout data references to destroy
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  delete [] ptr;  
+  return(ESMF_SUCCESS);
+}
+//-----------------------------------------------------------------------------
