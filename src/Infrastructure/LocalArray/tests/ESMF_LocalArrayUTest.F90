@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.25 2004/06/23 16:58:22 eschwab Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.25.2.1 2004/07/23 19:17:15 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -565,8 +565,8 @@
     !This print of array4 is commented out becauses it crashes
     !Bug report 972679 has been filed.
     !This print statement will be uncommented when the bug is fixed
-    call ESMF_LocalArrayPrint(array4, "", rc)
-    print *, "array 4c print of bad array returned"
+    !call ESMF_LocalArrayPrint(array4, "", rc)
+    !print *, "array 4c print of bad array returned"
 
     !This test is commented out becauses it crashes
     !Bug report 791282 has been filed.
@@ -576,45 +576,6 @@
     !call ESMF_LocalArrayDestroy(array4, rc)
     !call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !print *, "array 4c re-destroy returned"
-
-
-    !EX_UTest
-    allocate(real3dptr(ni,nj,nk))
-    write(failMsg, *) "Did not return ESMF_FAILURE"
-    write(name, *) "Creating a Local Array 3D DATA_REF Real Data with an allocated array Test"
-    array4 = ESMF_LocalArrayCreate(real3dptr, ESMF_DATA_REF, rc)
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    print *, "array 4d create returned"
-
-    call ESMF_LocalArrayPrint(array4, "", rc)
-    print *, "array 4d print returned"
-
-    ! this does not delete the space, we have to do it ourselves
-    call ESMF_LocalArrayDestroy(array4, rc)
-    !print *, "array 4d destroy returned"
-    deallocate(real3dptr)
-
-    ! Allocate and free different sizes testing end of array printing code
-    ni = 11 
-    nj = 3 
-    nk = 40
-    allocate(real3dptr(ni,nj,nk))
-
-    !EX_UTest
-    write(failMsg, *) "Did not return ESMF_SUCCESS" 
-    write(name, *) "Creating a Local Array 3D DATA_REF Real Data with an allocated array Test"
-    array4 = ESMF_LocalArrayCreate(real3dptr, ESMF_DATA_REF, rc)
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    print *, "array 4e create returned"
-
-    call ESMF_LocalArrayPrint(array4, "", rc)
-    print *, "array 4e print returned"
-
-    ! this does not delete the space, we have to do it ourselves
-    call ESMF_LocalArrayDestroy(array4, rc)
-    print *, "array 4e destroy returned"
-    deallocate(real3dptr)
 
 
 !-------------------------------------------------------------------------------
