@@ -10,10 +10,10 @@ extern "C"
 		t->Init(*S, *Sn, *Sd);
 	}
 
-	void c_esmf_timedump_(ESMC_Time *t, int64 *S, int32 *Sn, int32 *Sd)
+	void c_esmf_timeprint_(ESMC_Time *t, int64 *S, int32 *Sn, int32 *Sd)
 	{
-		printf("c_esmf_timedump_ entered\n");
-		t->Dump(S, Sn, Sd);
+		printf("c_esmf_timeprint_ entered\n");
+		t->ESMC_TimePrint(S, Sn, Sd);
 	}
 
 	void c_esmf_timereads_(ESMC_Time *t, int64 *S)

@@ -7,6 +7,6 @@ extern "C"
 								 int64 *S, int32 *Sn, int32 *Sd,
 								 ESMC_Calendar **cal, int *tz)
 	{
-		ti->Init(*S, *Sn, *Sd, *cal, *tz);
+		ti->ESMC_TimeInstInit(*S, *Sn, *Sd, *cal, *tz);
 	}
 }
