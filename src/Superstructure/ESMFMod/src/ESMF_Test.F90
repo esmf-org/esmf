@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.3 2004/12/08 22:28:14 nscollins Exp $
+! $Id: ESMF_Test.F90,v 1.4 2004/12/08 22:36:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -48,7 +48,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.3 2004/12/08 22:28:14 nscollins Exp $'
+      '$Id: ESMF_Test.F90,v 1.4 2004/12/08 22:36:02 nscollins Exp $'
 
 !==============================================================================
 
@@ -200,7 +200,7 @@
         return
       endif
 
-      if (petCount .lt. numPETs) then
+      if (petCount .gt. numPETs) then
         write(failMsg, *) "This test must run on at least", petCount, "processors."
         write(msg, *) "FAIL ", trim(file), ", line", &
                       line, trim(failMsg)
