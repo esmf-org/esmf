@@ -42,13 +42,13 @@ program test_log_options
     if (rc /= ESMF_SUCCESS) call ESMF_LogWarnMsg(anErr2,rc,verySilly)
 
     call ESMF_LogSet(anErr2,haltOnWarn=ESMF_TF_TRUE)
-    call ESMF_LogSet(anErr2,haltOnErr=ESMF_TRUE)
+    call ESMF_LogSet(anErr2,haltOnErr=ESMF_TF_TRUE)
     call foo(rc)
     if (rc /= ESMF_SUCCESS) call ESMF_LogErr(anErr2,rc)
 
     call ESMF_LogSet(anErr1,flush=ESMF_TF_FALSE)
     call ESMF_LogGet(anErr1,flush=myLocalFlush)
-    write(6,*)"My local value of flush is',myLocalFlush
+!jw ?    write(*,*) "My local value of flush is", myLocalFlush
     call foo2(rc)
     if (rc /= ESMF_SUCCESS) call ESMF_LogWarn(anErr1,rc)
 
