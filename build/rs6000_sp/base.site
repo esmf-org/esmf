@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.5 2003/06/06 22:36:59 jwolfe Exp $ 
+# $Id: base.site,v 1.6 2003/07/02 14:59:18 nscollins Exp $ 
 
 #
 #  This file contains site-specific information.  The definitions below
@@ -30,8 +30,15 @@ MPIRUN         = ${ESMF_TOP_DIR}/scripts/mpirun.rs6000_sp
 MPI64_LIB      = -L/usr/local/mpi64/ppe.poe/lib -lmpi_r -lvtd_r \
 		 -L/usr/local/mpi64/ppe.poe/lib/us -lmpci_r
 HDF_INCLUDE    = -I/usr/local/include/hdf
+
 #
 # Location of STL files for C++
 #
 LOCAL_INCLUDE += -I/usr/vacpp/include
+
+#
+# location of smp library
+#
+XLSMP_LIB      = -L/usr/lpp/xlsmp/aix51 -lxlsmp
+
 
