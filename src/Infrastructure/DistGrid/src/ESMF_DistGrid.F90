@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.64 2003/08/01 16:54:35 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.65 2003/08/13 21:45:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -139,7 +139,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.64 2003/08/01 16:54:35 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.65 2003/08/13 21:45:25 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -287,7 +287,7 @@
 ! !IROUTINE: ESMF_DistGridCreateInternal - Create a new DistGrid internally
 
 ! !INTERFACE:
-      function ESMF_DistGridCreateInternal(counts, layout, name, rc)
+      function ESMF_DistGridCreateInternal(counts, layout, periodic, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_DistGrid) :: ESMF_DistGridCreateInternal
@@ -296,6 +296,7 @@
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: counts
       type (ESMF_DELayout), intent(in) :: layout
       character (len = *), intent(in), optional :: name  
+      type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       integer, intent(out), optional :: rc               
 
 ! !DESCRIPTION:
@@ -351,8 +352,8 @@
       call ESMF_DELayoutParse(layout, 2, counts(2), countsPerDE2, rc)
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_DistGridConstructInternal(distgrid, layout, countsPerDE1, &
-                                          countsPerDE2, name, rc)
+      call ESMF_DistGridConstruct(distgrid, layout, countsPerDE1, &
+                                  countsPerDE2, periodic, name, rc)
 
 !     Set return values.
       ESMF_DistGridCreateInternal%ptr => distgrid
@@ -366,7 +367,7 @@
 
 ! !INTERFACE:
       function ESMF_DistGridCreateIntSpec(countsPerDE1, countsPerDE2, &
-                                                layout, name, rc)
+                                          layout, periodic, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_DistGrid) :: ESMF_DistGridCreateIntSpec
@@ -375,6 +376,7 @@
       integer, dimension(:), intent(in) :: countsPerDE1
       integer, dimension(:), intent(in) :: countsPerDE2
       type (ESMF_DELayout), intent(in) :: layout
+      type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
 
@@ -423,8 +425,8 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_DistGridConstructInternal(distgrid, layout, countsPerDE1, &
-                                          countsPerDE2, name, rc)
+      call ESMF_DistGridConstruct(distgrid, layout, countsPerDE1, &
+                                  countsPerDE2, periodic, name, rc)
 
 !     Set return values.
       ESMF_DistGridCreateIntSpec%ptr => distgrid
@@ -575,13 +577,14 @@
 
 ! !INTERFACE:
       subroutine ESMF_DistGridConstructInternal(distgrid, layout, countsPerDE1, &
-                                                countsPerDE2, name, rc)
+                                                countsPerDE2, periodic, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType) :: distgrid 
       type (ESMF_DELayout), intent(in) :: layout
       integer, dimension(:) :: countsPerDE1
       integer, dimension(:) :: countsPerDE2
+      type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
 !
@@ -694,7 +697,7 @@
 
 !     Parse problem size
       call ESMF_DistGridSetCounts(distgrid, nDEs, countsPerDE1, countsPerDE2, &
-                                  status)
+                                  periodic, status)
         
 !     Fill in DE derived type
       call ESMF_DistGridSetDE(distgrid, status)
@@ -1168,13 +1171,14 @@
 
 ! !INTERFACE:
       subroutine ESMF_DistGridSetCountsInternal(distgrid, nDE, countsPerDE1, &
-                                                countsPerDE2, rc)
+                                                countsPerDE2, periodic, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType) :: distgrid
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: nDE
       integer, dimension(:), intent(in) :: countsPerDE1
       integer, dimension(:), intent(in) :: countsPerDE2
+      type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       integer, intent(out), optional :: rc            
 
 !
@@ -1224,6 +1228,11 @@
 
       global_start = 1
       global_end = 0
+!     if (periodic(1).eq.ESMF_TF_TRUE) then
+!       global_start = countsPerDE1(nDE(1)) + 1
+!       global_end   = countsPerDE1(nDE(1))
+!     endif
+      
       do j = 1,nDE(1)
         global_end = global_end + countsPerDE1(j)
         do i = 1,nDE(2)
@@ -1238,12 +1247,20 @@
         do i = 1,nDE(2)
           de = (i-1)*nDE(1) + j
           distgrid%ai_global(de,1)%stride = global_end
+          if (periodic(1).eq.ESMF_TF_TRUE) &
+            distgrid%ai_global(de,1)%stride = global_end + countsPerDE1(1) &
+                                            + countsPerDE1(nDE(1))
         enddo
       enddo
 
 !     Then the 2 decomposition
       global_start = 1
       global_end = 0
+      if (periodic(2).eq.ESMF_TF_TRUE) then
+        global_start = countsPerDE2(nDE(2)) + 1
+        global_end   = countsPerDE2(nDE(2))
+      endif
+
       do j = 1,nDE(2)
         global_end = global_end + countsPerDE2(j)
         do i = 1,nDE(1)
@@ -1258,6 +1275,9 @@
         do i = 1,nDE(1)
           de = (j-1)*nDE(1) + i
           distgrid%ai_global(de,2)%stride = global_end
+          if (periodic(2).eq.ESMF_TF_TRUE) &
+            distgrid%ai_global(de,2)%stride = global_end + countsPerDE2(1) &
+                                            + countsPerDE2(nDE(2))
         enddo
       enddo
 
