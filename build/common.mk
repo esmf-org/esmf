@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.56.2.5 2004/07/23 21:32:17 svasquez Exp $
+#  $Id: common.mk,v 1.56.2.6 2004/07/28 21:19:51 nscollins Exp $
 #===============================================================================
 #   common.mk
 #
@@ -432,7 +432,7 @@ tree_system_tests_uni: tree_build_system_tests tree_run_system_tests_uni
 build_system_tests: chkopts chkdir_tests
 	@if [ -d src/system_tests ] ; then cd src/system_tests; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
-	   if [ -d $(SYSTEM_TEST) ] ; \
+	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
            else \
               echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
