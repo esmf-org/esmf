@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.3 2003/07/18 02:53:15 eschwab Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.4 2003/08/04 22:01:41 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -50,7 +50,7 @@
 // !IROUTINE:  ESMC_ArrayCreate - Create a new Array
 //
 // !INTERFACE:
-      ESMC_LocalArray *ESMC_ArrayCreate(
+      ESMC_LocalArray *ESMC_LocalArrayCreate(
 //
 // !RETURN VALUE:
 //     pointer to newly allocated ESMC_Array
