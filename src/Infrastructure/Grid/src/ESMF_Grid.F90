@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.61 2003/07/15 18:17:15 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.62 2003/07/15 20:52:01 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -131,7 +131,6 @@
     public ESMF_GridSetMetric
     !public ESMF_GridGetRegionID
     public ESMF_GridSetRegionID
-    public ESMF_GridHalo
     public ESMF_GridValidate
     public ESMF_GridPrint
     public ESMF_GridComputeDistance
@@ -205,7 +204,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.61 2003/07/15 18:17:15 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.62 2003/07/15 20:52:01 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2763,60 +2762,6 @@
 !  code goes here
 !
       end subroutine ESMF_GridSetRegionIDCopy
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridHalo - Data Halo operation on a Grid
-
-! !INTERFACE:
-      subroutine ESMF_GridHalo(grid, array, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_Grid) :: grid
-      type(ESMF_LocalArray) :: array
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Call {\tt ESMF\_DistGrid} routines to perform a Halo operation over the data
-!     in a {\tt ESMF\_Grid}.  This routine updates the data inside the {\tt ESMF\_LocalArray}
-!     so there is no separate return argument.
-!
-!     \begin{description}
-!     \item [grid]
-!           {\tt ESMF\_Grid} on which data is defined.
-!     \item [array]
-!           {\tt ESMF\_LocalArray} containing data to be haloed.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      ! Call DistGrid method to perform actual work
-      call ESMF_DistGridHalo(grid%ptr%distgrid%ptr, array, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in GridHalo: DistGrid Halo returned failure"
-        return
-      endif
-
-      ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridHalo
 
 !------------------------------------------------------------------------------
 !BOP
