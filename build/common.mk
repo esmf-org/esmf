@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.49 2004/04/27 21:01:42 slswift Exp $
+#  $Id: common.mk,v 1.50 2004/04/28 22:40:27 slswift Exp $
 #===============================================================================
 #   common.mk
 #
@@ -848,7 +848,7 @@ tree: $(ACTION)
 	${RM} $*.o
 
 .F.a:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREENOCPPP} ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREENOCPP} ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
