@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.15 2003/05/02 22:15:04 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.16 2003/05/07 16:40:03 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockEx.F90,v 1.15 2003/05/02 22:15:04 eschwab Exp $'
+      '$Id: ESMF_ClockEx.F90,v 1.16 2003/05/07 16:40:03 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -44,11 +44,11 @@
       type(ESMF_Time) :: stopTime
 
       ! temp variables for Get functions
-      double precision :: d_
       integer :: MM, DD, H, M, yD
       type(ESMF_TimeInterval) :: time_step
       type(ESMF_TimeInterval) :: time_diff
       integer(ESMF_IKIND_I8) :: advanceCount, D, S
+      double precision :: d_
 
       ! result code
       integer :: rc
@@ -76,8 +76,7 @@
       call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
 
       ! print starting time (initial current time)
-      call ESMF_ClockPrint(clock, "currtime", rc)        ! default format
-      call ESMF_ClockPrint(clock, "currtime string", rc) ! string format
+      call ESMF_ClockPrint(clock, "currtime string", rc)
 
       !
       ! time step clock from start time to stop time
@@ -91,9 +90,6 @@
       !
       ! examine clock
       !
-
-      ! print entire clock state
-      call ESMF_ClockPrint(clock, rc=rc)
 
       ! get clock's time_step
       call ESMF_ClockGetTimeStep(clock, time_step, rc)
@@ -124,11 +120,5 @@
       call ESMF_TimeIntervalGet(time_diff, D=D, S=S, rc=rc)
       print *, "Difference between start and stop times = ", D, " days, ", &
                 S, " seconds."
-
-      ! sync clock to wall clock
-      call ESMF_ClockSyncToWallClock(clock, rc)
-      print *
-      print *, "Clock sync to wall clock = "
-      call ESMF_ClockPrint(clock, "currtime string", rc)
 
       end program ESMF_ClockEx
