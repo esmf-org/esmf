@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: conf.h,v 1.3 2003/01/23 22:55:47 nscollins Exp $"
+"$Id: conf.h,v 1.4 2003/02/03 06:09:05 eschwab Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -22,6 +22,7 @@
 
 #define ESMC_HAVE_FORTRAN_UNDERSCORE 
 #define ESMC_HAVE_FORTRAN_UNDERSCORE_UNDERSCORE
+#define FTN(func) func##_
 
 #define ESMC_POINTER_SIZE 4
 #define ESMC_HAVE_OMP_THREADS 1

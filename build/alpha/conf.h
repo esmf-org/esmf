@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: conf.h,v 1.3 2003/01/06 23:31:26 nscollins Exp $"
+"$Id: conf.h,v 1.4 2003/02/03 06:09:03 eschwab Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -21,6 +21,7 @@
 #define ESMC_HAVE_SYS_TIME_H 
 #define ESMC_HAVE_UNAME  
 #define ESMC_HAVE_FORTRAN_UNDERSCORE
+#define FTN(func) func##_
 
 #define ESMC_HAVE_OMP_THREADS 1
 #define ESMC_HAVE_MPI 1

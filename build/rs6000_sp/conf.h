@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: conf.h,v 1.3 2003/01/06 23:25:43 nscollins Exp $"
+"$Id: conf.h,v 1.4 2003/02/03 06:09:05 eschwab Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -39,6 +39,8 @@
 #define ESMC_HAVE_MPI 1
 
 #define ESMC_SUBSTITUTE_CTRL_CHARS 1
+
+#define FTN(func) func
 
 #define ESMC_POINTER_SIZE 8
 
