@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.23 2004/03/18 22:38:43 nscollins Exp $
+// $Id: ESMC_BaseTime.h,v 1.24 2004/09/13 17:49:27 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@
 // Any rational fractional second is expressed using two additional integers:
 // a numerator and a denominator.  Both the whole seconds and fractional
 // numerator are signed to handle negative time intervals and instants.
-// For arithmetic consistency both must carry the same sign (both positve
+// For arithmetic consistency both must carry the same sign (both positive
 // or both negative), except, of course, for zero values.  The fractional
 // seconds element (numerator) is \htmlref{normalized}{glos:Normalized}
 // (bounded) with respect to whole seconds. If the absolute value of the
