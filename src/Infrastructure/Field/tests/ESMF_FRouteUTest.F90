@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.27 2004/02/09 17:51:49 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.28 2004/02/19 23:50:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.27 2004/02/09 17:51:49 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.28 2004/02/19 23:50:56 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -146,7 +146,7 @@
 !     call 
       ! Second grid
       gname = "test grid 2"
-      grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+      grid2 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               horzGridKind=horz_gridtype, &
