@@ -5,10 +5,12 @@ ESMF software.  We adopt the standard requirements format described in
 the \htmladdnormallink{ESMF Software Developer's Guide}{http://www.esmf.ucar.edu/esmf\_docs/dev\_guide}.  The abbreviation used to identify
 these General Requirements is {\bf GR}.
 
-\req{Language Bindings}
+\req{Computational Requirements}
+
+\sreq{Language Bindings}
 ESMF software shall support the following language bindings:
 
-\sreq{Fortran 90 Interface}
+\ssreq{Fortran 90 Interface}
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} All codes except GFDL-HIM require F90 interfaces. \\
@@ -16,15 +18,15 @@ ESMF software shall support the following language bindings:
 {\bf Verification:} Interface inspection. 
 \end{reqlist}
 
-\sreq{C Interface} 
+\ssreq{C Interface} 
 \begin{reqlist}
 {\bf Priority:} 2. \\
-{\bf Source:} GFDL-HIM \\
+{\bf Source:} GFDL-HIM. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Interface inspection. 
 \end{reqlist}
 
-\sreq{C++ Interface}
+\ssreq{C++ Interface}
 \begin{reqlist}
 {\bf Priority:} 3. \\
 {\bf Source:} None of our codes currently require this. \\
@@ -32,50 +34,50 @@ ESMF software shall support the following language bindings:
 {\bf Verification:} Interface inspection.
 \end{reqlist}
 
-\req{Platforms}
+\sreq{Platforms}
 The ESMF shall operate on the following platforms:
 
-\sreq{Cray T3E}
+\ssreq{Cray T3E}
 \begin{reqlist}
 {\bf Priority:} 2. \\
-{\bf Source:} NSIPP home system. \\
+{\bf Source:} NSIPP. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Unit test and system test.
 \end{reqlist}
 
-\sreq{IBM SP}
+\ssreq{IBM SP}
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} NCAR home system. \\
+{\bf Source:} NCAR, NCEP. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Unit test and system test.
 \end{reqlist}
 
-\sreq{SGI Origin 3000}
+\ssreq{SGI Origin 3000}
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} GFDL home system.  May be part of ESMF testbed system. \\
+{\bf Source:} GFDL, LANL, NCAR.  May be part of ESMF testbed system. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Unit test and system test.
 \end{reqlist}
 
-\sreq{Compaq ES65}
+\ssreq{Compaq ES45}
 \begin{reqlist}
 {\bf Priority:} TBD. \\
-{\bf Source:} May be part of ESMF testbed system. \\
+{\bf Source:} NASA Ames.  May be part of ESMF testbed system. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Unit test and system test.
 \end{reqlist}
 
-\sreq{PC Linux platforms (including cluster)}
+\ssreq{PC Linux platforms (including cluster)}
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} Required for cluster milestones. \\
+{\bf Source:} MIT.  Required for cluster milestones. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Unit test and system test.
 \end{reqlist}
 
-\req{Performance}
+\sreq{Performance}
 The framework shall not increase the execution time of an existing code 
 written without the framework by more than 10\% on scalar 
 architectures with moderate numbers of processors (100-1000).
@@ -86,10 +88,10 @@ architectures with moderate numbers of processors (100-1000).
 {\bf Verification:} At minimum, test using NCEP-ATM.
 \end{reqlist}
 
-\req{Runtime Configurability}
+\sreq{Runtime Configurability}
 The ESMF shall allow the user to set certain application parameters at runtime.
 
-\sreq{Decomposition}
+\ssreq{Configurable Decomposition}
 ESMF shall allow domain decomposition and the number of processors, 
 nodes, and/or threads to be configurable at runtime.  The choice of
 parallelization mechanism (message passing/multithreading/combination)
@@ -101,7 +103,7 @@ must be configurable at runtime.
 {\bf Verification:} System test.
 \end{reqlist}
 
-\sreq{Resolution}
+\ssreq{Configurable Resolution}
 ESMF shall allow model resolution to be configurable at runtime.
 \begin{reqlist}
 {\bf Priority:} 1. \\
@@ -110,7 +112,7 @@ ESMF shall allow model resolution to be configurable at runtime.
 {\bf Verification:} System test.
 \end{reqlist}
 
-\req{Bit Reproducibility}
+\sreq{Bit Reproducibility}
 It is desirable to be able to provide, in a special execution 
 mode, bit-to-bit reproducibility of the same executable on different 
 platforms and/or with different parallelization techniques applied.
@@ -121,7 +123,7 @@ platforms and/or with different parallelization techniques applied.
 {\bf Verification:} System test.
 \end{reqlist}
 
-\req{Fault Tolerance}
+\sreq{Fault Tolerance}
 The ESMF shall be instrumented for error handling consistly across the
 framework.  The user shall receive ample information on errors.
 \begin{reqlist}
@@ -131,7 +133,7 @@ framework.  The user shall receive ample information on errors.
 {\bf Verification:} Interface inspection, code inspection, unit test, system test.
 \end{reqlist}
 
-\req{Modularity}
+\sreq{Modularity}
 Layers of the framework will be designed to adapt to
 restructuring of other parts of the framework and user-supplied components.  
 For example, the coupling layers should be able to adapt to different 
@@ -143,7 +145,7 @@ implementations and data structures of component models.
 {\bf Verification:} Interoperability experiments.
 \end{reqlist}
 
-\req{Ease of Adoption}
+\sreq{Ease of Adoption}
 It must be straightforward to integrate ESMF into an application 
 that is reasonably modular.  We adopt as a goal that such applications should
 need to modify no more than 2\% of their source code to utilize the coupling
@@ -155,7 +157,7 @@ features of ESMF.
 {\bf Verification:} Line count!
 \end{reqlist}
 
-\req{Maintenance}
+\req{Maintenance and Support Requirement}
 The ESMF must be maintained as a long-term commitment by at least one
 institution.  This maintenance must extend beyond adaptation to the 
 computational environment, and must include an ongoing research component
@@ -163,7 +165,7 @@ dedicated to increasing the performance, flexibility and functionality of
 the software.
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} GFDL codes. \\
+{\bf Source:} All participants. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} Publicly documented commitment, line item in 
 projected budgets.
