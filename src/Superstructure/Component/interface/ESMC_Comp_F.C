@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.28 2004/10/26 21:34:35 theurich Exp $
+// $Id: ESMC_Comp_F.C,v 1.29 2004/11/16 16:52:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -168,11 +168,14 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
      int rcc;
      ESMC_VM *vm_parent;
      FTN(f_esmf_compgetvmparent)(f90comp, &vm_parent, &rcc);
+//fprintf(stderr, "gjt debug: ESMC_SetServ, vm_parent=%p\n", vm_parent);
      ESMC_VMPlan *vmplan_p;
      FTN(f_esmf_compgetvmplan)(f90comp, &vmplan_p, &rcc);   // obtain vmplan_p
-     ESMC_VMPlan &vmplan = *vmplan_p; // turun it into a reference to VMPlan
-     void *vm_info = vm_parent->vmk_startup(vmplan,
-       ESMC_FTableCallEntryPointVMHop, NULL);
+//fprintf(stderr, "gjt debug: ESMC_SetServ, vm_plan=%p\n", vmplan_p);
+     void *vm_info = vm_parent->vmk_startup(
+      static_cast<ESMC_VMKPlan *>(vmplan_p), ESMC_FTableCallEntryPointVMHop,
+      NULL);
+//fprintf(stderr, "gjt debug: ESMC_SetServ, vm_info=%p\n", vm_info);
      FTN(f_esmf_compsetvminfo)(f90comp, &vm_info, &rcc);
      
      return;
@@ -311,11 +314,14 @@ static void *ESMC_FTableCallEntryPointVMHop(void *vm, void *cargo){
   
   // pull out info from cargo
   char *name = ((cargotype *)cargo)->name;
-  ESMC_FTable &ftable = *((cargotype *)cargo)->ftable;  // reference to ftable
+  ESMC_FTable *ftable = ((cargotype *)cargo)->ftable;  // pointer to ftable
   
   // Need to call a special call function which adds the VM to the interface
   int funcrc, localrc;
-  localrc = ftable.ESMC_FTableCallVFuncPtr(name, (ESMC_VM*)vm, &funcrc);
+  
+//  fprintf(stderr, "gjt I am in ESMC_FTableCallEntryPointVMHop\n");
+  
+  localrc = ftable->ESMC_FTableCallVFuncPtr(name, (ESMC_VM*)vm, &funcrc);
   
   // TODO: Here I need to communicate between all child PET's to find out if
   // any failed in the call to user supplied component method
@@ -351,17 +357,20 @@ void FTN(c_esmc_ftablecallentrypointvm)(
 
   // Things get a little confusing here with pointers, so I will define
   // some temp. variables that make matters a little clearer I hope:
-  ESMC_VM &vm_parent = **ptr_vm_parent;     // reference to parent VM
-  ESMC_VMPlan &vmplan = **ptr_vmplan;       // reference to VMPlan
-  ESMC_FTable &ftable = **ptr;              // reference to function table
+  ESMC_VM *vm_parent = *ptr_vm_parent;      // pointer to parent VM
+  ESMC_VMPlan *vmplan = *ptr_vmplan;        // pointer to VMPlan
+  ESMC_FTable *ftable = *ptr;               // pointer to function table
          
   cargotype *cargo = new cargotype;
   strcpy(cargo->name, name);   // copy trimmed type string
-  cargo->ftable = &ftable;     // reference to function table
+  cargo->ftable = ftable;      // pointer to function table
   cargo->rc = ESMF_SUCCESS;    // initialize return code to SUCCESS for all PETs
   *vm_cargo=(void*)cargo;      // store pointer to the cargo structure
          
-  vm_parent.vmk_enter(vmplan, *vm_info, (void*)cargo);
+//fprintf(stderr, "gjt cargo after new: %p\n", cargo);
+  
+  vm_parent->vmk_enter(static_cast<ESMC_VMKPlan *>(vmplan), *vm_info,
+    (void*)cargo);
   
   delete[] name;
   *status = ESMF_SUCCESS;
@@ -377,13 +386,24 @@ void FTN(c_esmc_ftablecallentrypointvm)(
 
     // Things get a little confusing here with pointers, so I will define
     // some temp. variables that make matters a little clearer I hope:
-    ESMC_VM &vm_parent = **ptr_vm_parent;     // reference to parent VM
-    ESMC_VMPlan &vmplan = **ptr_vmplan;       // reference to VMPlan
+    ESMC_VM *vm_parent = *ptr_vm_parent;      // pointer to parent VM
+    ESMC_VMPlan *vmplan = *ptr_vmplan;        // pointer to VMPlan
 
     // Now call the vmk_exit function which will block respective PETs
-    vm_parent.vmk_exit(vmplan, *vm_info);
+//fprintf(stderr, "gjt debug: c_esmc_compwait, vm_parent=%p\n", vm_parent);
+//fprintf(stderr, "gjt debug: c_esmc_compwait, vm_info=%p\n", *vm_info);
+//fprintf(stderr, "gjt debug: c_esmc_compwait, vm_plan=%p\n", vmplan);
+    
+//    vm_parent->vmk_print();
+//    vmplan->vmkplan_print();
+    
+    
+//    fprintf(stderr, "gjt debug: i am in c_esmc_compwait\n");
+
+    vm_parent->vmk_exit(static_cast<ESMC_VMKPlan *>(vmplan), *vm_info);
     cargotype *cargo = (cargotype *)*vm_cargo;
     *callrc = cargo->rc;
+//fprintf(stderr, "gjt cargo before delete: %p\n", cargo);
     delete cargo;
 
     if (status) *status = ESMF_SUCCESS;
