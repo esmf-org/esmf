@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.55 2003/06/06 14:36:44 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.56 2003/06/19 15:48:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
       type ESMF_Grid
       sequence
       private
-        type (ESMF_GridType), pointer :: ptr     ! pointer to a grid type
+        type (ESMF_GridType), pointer :: ptr => NULL()
       end type
 
 !------------------------------------------------------------------------------
@@ -208,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.55 2003/06/06 14:36:44 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.56 2003/06/19 15:48:56 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3047,11 +3047,32 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  XXXn.n, YYYn.n
 
-!
-!  code goes here
-!
+      character(len=ESMF_MAXSTR) :: name, str
+      type(ESMF_GridType), pointer :: gp
+      integer :: status
+
+      if (present(rc)) rc = ESMF_FAILURE
+
+      if (.not. associated(grid%ptr)) then
+        print *, "Empty or Uninitialized Grid"
+        return
+      endif
+
+      gp => grid%ptr
+      if (gp%gridstatus .ne. ESMF_STATE_READY) then
+        return
+      endif
+
+      call ESMF_GetName(gp%base, name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        return
+      endif
+
+      ! TODO: add calls to physgrid and distgrid validates
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
       end subroutine ESMF_GridValidate
 
 !------------------------------------------------------------------------------
@@ -3081,13 +3102,41 @@
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-!
-!  code goes here
-!
+      character(len=ESMF_MAXSTR) :: name, str
+      type(ESMF_GridType), pointer :: gp
+      integer :: status
+
+      if (present(rc)) rc = ESMF_FAILURE
+
       print *, "Grid Print:"
-      print *, "  (coming soon)"
+      if (.not. associated(grid%ptr)) then
+        print *, "Empty or Uninitialized Grid"
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
+      gp => grid%ptr
+      call ESMF_StatusString(gp%gridstatus, str, rc)
+      print *, "Grid status = ", trim(str)
+
+      if (gp%gridstatus .ne. ESMF_STATE_READY) then
+        if (present(rc)) rc = ESMF_FAILURE
+        return
+      endif
+
+      call ESMF_GetName(gp%base, name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridGetName"
+        return
+      endif
+      print *, "  Name = '",  trim(name), "'"
+
+      ! TODO: add calls to physgrid and distgrid prints
+
+      print *, "  (more details coming soon)"
+
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridPrint
 
