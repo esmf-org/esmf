@@ -1,4 +1,4 @@
-// $Id: ESMC_TValues.C,v 1.1 2003/09/23 17:53:53 nscollins Exp $
+// $Id: ESMC_TValues.C,v 1.2 2003/09/25 16:28:06 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TValues.C,v 1.1 2003/09/23 17:53:53 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_TValues.C,v 1.2 2003/09/25 16:28:06 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -128,7 +128,6 @@
 //EOP
 
     numlist = 0;
-    domainlist = NULL;
     srcindex = NULL;
     dstindex = NULL;
     weights = NULL;
@@ -179,7 +178,6 @@
 //
 // !ARGUMENTS:
       int *numlist,                  // out - number of domains in list
-      ESMC_DomainList **dl,          // out - domain list itself
       ESMC_LocalArray **si,          // out - source index list
       ESMC_LocalArray **di,          // out - destination index list
       ESMC_LocalArray **w) const {   // out - weights
@@ -192,7 +190,6 @@
 //EOP
 
     if (numlist) *numlist = this->numlist;
-    if (dl) *dl = domainlist;
     if (si) *si = srcindex;
     if (di) *di = dstindex;
     if (w) *w = weights;
@@ -213,7 +210,6 @@
 //
 // !ARGUMENTS:
       int numlist,                  // in - number of domains in list
-      ESMC_DomainList *dl,          // in - domain list
       ESMC_LocalArray *si,          // in - source index list
       ESMC_LocalArray *di,          // in - destination index list
       ESMC_LocalArray *w) {         // in - weights
@@ -227,7 +223,6 @@
     int len;
 
     this->numlist = numlist;
-    domainlist = dl;
     srcindex = si;
     dstindex = di;
     weights = w;
