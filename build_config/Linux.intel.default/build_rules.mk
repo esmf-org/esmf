@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.22 2004/11/24 15:01:36 theurich Exp $
+# $Id: build_rules.mk,v 1.23 2004/12/30 21:43:15 nscollins Exp $
 #
 # Linux.intel.default.mk
 #
@@ -210,19 +210,19 @@ ifeq ($(origin LD_LIBRARY_PATH), environment)
 LIB_PATHS   = $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
 LD_PATHS    = $(addprefix $(C_FLINKER_SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
 else
-ifeq ($(ESMF_COMPILER_VERSION),81)
-LIB_PATHS       = -L/opt/intel_cc_81/lib
-LD_PATHS        = $(C_FLINKER_SLFLAG)/opt/intel_cc_81/lib
-else
+ifeq ($(ESMF_COMPILER_VERSION),80)
 LIB_PATHS       = -L/opt/intel_cc_80/lib
 LD_PATHS        = $(C_FLINKER_SLFLAG)/opt/intel_cc_80/lib
+else
+LIB_PATHS       = -L/opt/intel_cc_81/lib
+LD_PATHS        = $(C_FLINKER_SLFLAG)/opt/intel_cc_81/lib
 endif
 endif
-ifeq ($(ESMF_COMPILER_VERSION),81)
+ifeq ($(ESMF_COMPILER_VERSION),80)
+C_LIB_NEEDED = -lcprts
+else
 C_LIB_NEEDED = -lstdc++
 #C_LIB_NEEDED = -L/usr/lib/gcc-lib/ia64-redhat-linux/3.2.3 -lstdc++
-else
-C_LIB_NEEDED = -lcprts
 endif
 C_F90CXXLIBS    = $(LD_PATHS) $(LIB_PATHS) $(C_LIB_NEEDED) -lifcore -lrt -ldl
 C_CXXF90LIBS    = $(LD_PATHS) $(LIB_PATHS) -lifcore -lrt -ldl
