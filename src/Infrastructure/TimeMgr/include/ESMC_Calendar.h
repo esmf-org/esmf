@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.33 2004/02/04 23:24:00 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.34 2004/02/11 06:48:28 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -149,10 +149,10 @@ class ESMC_Calendar {
     // get properties of any calendar type
     int ESMC_CalendarGet(int                nameLen,
                          int               *tempNameLen,
-                         char              *tempName=0,
+                         char              *tempName,
                          ESMC_CalendarType *calendarType=0,
                          int               *daysPerMonth=0,
-                         int               *sizeofDaysPerMonth=0,
+                         int                sizeofDaysPerMonth=0,
                          int               *monthsPerYear=0,
                          ESMF_KIND_I4      *secondsPerDay=0,
                          ESMF_KIND_I4      *secondsPerYear=0,
