@@ -1,4 +1,4 @@
-% $Id: Bundle_refdoc.ctex,v 1.5 2003/10/20 23:21:48 cdeluca Exp $
+% $Id: Bundle_refdoc.ctex,v 1.6 2003/10/20 23:53:41 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -65,11 +65,18 @@
 \input{../Infrastructure/Bundle/doc/ESMF_BundleCreateEx_fapi}
 #endif
 
-\subsubsection{Restrictions}
+\subsection{Restrictions}
 #ifdef STANDALONE
 \input{Bundle_rest}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Bundle/doc/Bundle_rest}
+#endif
+
+\subsection{Implementation Notes}
+#ifdef STANDALONE
+\input{Bundle_implnotes}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Bundle/doc/Bundle_implnotes}
 #endif
 
 % \subsection{Parameters and Definitions}

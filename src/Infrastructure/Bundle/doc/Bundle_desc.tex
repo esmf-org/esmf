@@ -1,12 +1,21 @@
-% $Id: Bundle_desc.tex,v 1.1 2003/09/17 21:26:29 cdeluca Exp $
+% $Id: Bundle_desc.tex,v 1.2 2003/10/20 23:53:41 cdeluca Exp $
 
-% <Describe class function and relation to other classes.>
+The Bundle class represents ``bundles'' of Fields that are 
+discretized on the same Grid.  Fields within the same Bundle 
+may be located at different locations relative to the vertices of
+their common Grid.  Bundles also include an IOSpec clsss that 
+contains a collective IO specification for the Fields within 
+each Bundle.
 
-The Bundle class aggregates the Grid class, the Field class,
-and the IOSpec class.
-To aggregate multiple Fields, the
-instances of Field objects must share the same or an 
-equivalent underlying Grid object.  It can optionally
-also aggregate the Array class for packed Bundle data.
+In ESMF, Bundles can be packed.  Packing means that the data from all the
+Fields that comprise the Bundle are copied into a single Array.  
+This operation is done without destroying the original Field 
+data.  Packing is useful for performing efficient regridding and 
+data communication operations.  All the Fields within a Bundle 
+can be regridded at once, rather than regridding each Field 
+separately.  Collective data operations can be performed on all the
+Fields within a Bundle, rather than having to make separate 
+communication calls for each Field.  This reduces the latency overhead
+of the communication.
 
 
