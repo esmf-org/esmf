@@ -1,4 +1,4 @@
-// $Id: ESMC_Macros.h,v 1.12 2004/04/15 17:32:20 nscollins Exp $
+// $Id: ESMC_Macros.h,v 1.13 2004/04/23 20:43:35 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,8 +10,8 @@
 
 // Public prototypes and constants for the ESMF C++ interface
 
-#ifndef ESMC_H
-#define ESMC_H
+#ifndef ESMC_MACROS_H
+#define ESMC_MACROS_H
 
 //BOP
 // -------------------------------------------------------------------------
@@ -50,5 +50,5 @@
 
 #define ESMF_VERSION_STRING "1.0.7"
 
-#endif
+#endif   // ESMC_MACROS_H
 

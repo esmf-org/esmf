@@ -1,4 +1,4 @@
-// $Id: ESMC.h,v 1.3 2004/03/04 16:36:59 nscollins Exp $
+// $Id: ESMC.h,v 1.4 2004/04/23 20:43:35 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -8,18 +8,68 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
 //
+
 // main include file which includes all others
 
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
 
-// common macros and constants
-#include "ESMC_Macros.h"
+#ifndef ESMC_H
+#define ESMC_H
 
-// shared macros between fortran and C++.  this must come first before
-// the system dependent file below.
-#include "ESMF_Macros.inc"
 
-// system dependent #defines from build process
-#include "ESMC_Conf.h"
+// common macros and constants, #defines
+#include "ESMC_Start.h"
 
-// TODO: this file needs any external include files added here
+#if 0
+// base class, I/O, and error
+#include "ESMC_Base.h"
+#include "ESMC_IOSpec.h"
+#include "ESMC_LogErr.h"
+
+// time manager
+#include "ESMC_Fraction.h"
+#include "ESMC_BaseTime.h"
+#include "ESMC_Calendar.h"
+#include "ESMC_TimeInterval.h"
+#include "ESMC_Time.h"
+#include "ESMC_Alarm.h"
+#include "ESMC_Clock.h"
+
+// local array, datamap
+#include "ESMC_ArraySpec.h"
+#include "ESMC_LocalArray.h"
+#include "ESMC_DataMap.h"
+
+// vm and layout
+#include "vmachine.h"
+#include "ESMC_VM.h"
+#include "ESMC_newDELayout.h"
+// #include "ESMC_Machine.h"
+// #include "ESMC_PE.h"
+// #include "ESMC_PEList.h"
+// #include "ESMC_DELayout.h"
+// #include "ESMC_CommMem.h"
+
+// array, grid, field, bundle, comms
+#include "ESMC_Array.h"
+#include "ESMC_Grid.h"
+#include "ESMC_Field.h"
+#include "ESMC_Bundle.h"
+#include "ESMC_ArrayComm.h"
+
+// components and related items
+#include "ESMC_Xform.h"
+#include "ESMC_State.h"
+#include "ESMC_FTable.h"
+#include "ESMC_Comp.h"
+#include "ESMC_GridComp.h"
+#include "ESMC_CplComp.h"
+
+// framework-wide initialization and finalization
+#include "ESMC_Init.h"
+
+#endif
+
+#endif  // ESMC_H
 
