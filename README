@@ -14,7 +14,7 @@
 
 ================================================================================
 
-README file for ESMF v2.1.0 release.
+README file for ESMF v2.1.1 release.
 
 The files contained here include the ESMF source code and build system.
 
@@ -209,4 +209,4 @@ documentation build procedures outlined above.
 Please contact esmf_support@ucar.edu with any questions or problems.
 
 ================================================================================
- $Id: README,v 1.53 2004/12/15 17:19:19 nscollins Exp $
+ $Id: README,v 1.54 2005/01/14 16:03:42 nscollins Exp $
