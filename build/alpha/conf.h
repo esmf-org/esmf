@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: conf.h,v 1.7 2003/06/30 20:34:33 jwolfe Exp $"
+"$Id: conf.h,v 1.8 2003/07/01 16:16:50 nscollins Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -55,5 +55,7 @@
 #define ESMF_IS_64BIT_MACHINE 1
 #define ESMF_F90_PTR_BASE_SIZE 64
 #define ESMF_F90_PTR_PLUS_RANK 24
+
+#define ESMF_NEEDS_MPI_LOGICAL8 1
 
 #endif
