@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.78 2004/10/14 19:01:22 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.79 2004/10/19 21:59:06 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.78 2004/10/14 19:01:22 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.79 2004/10/19 21:59:06 jwolfe Exp $'
 
 !==============================================================================
 
@@ -598,8 +598,7 @@
 
       integer, parameter :: maxIter = 100                  ! max iteration count
                                                            ! for i,j iteration
-!jw      real (ESMF_KIND_R8), parameter :: converge = 1.e-10  ! convergence criterion
-      real (ESMF_KIND_R8), parameter :: converge = 1.e-06  ! convergence criterion
+      real (ESMF_KIND_R8), parameter :: converge = 1.e-10  ! convergence criterion
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -643,6 +642,9 @@
           ! for this destination point, look for the proper neighbor cells in the
           ! source grid 
     5     search_loop: do jjj = jStrt,jeSrc
+            minY = minval(srcCenterY(iStrt:ieSrc+1,jjj:jjj+1))
+            maxY = maxval(srcCenterY(iStrt:ieSrc+1,jjj:jjj+1))
+            if (dstY.lt.minY .OR. dstY.gt.maxY) cycle
             do iii = iStrt,ieSrc
                
               ! assume ghost cells filled so no worries about boundaries
