@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/01/29 00:07:58 nscollins Exp $ 
+# $Id: makefile,v 1.2 2003/02/10 16:50:11 nscollins Exp $ 
 
 ALL: 
 
@@ -25,7 +25,7 @@ TESTEXAMPLES_9  = \
 
 TESTSF       = ESMF_CompCreate.F90  ESMF_StateCreate.F90
 
-test:  ESMF_CompCreate ESMF_StateCreate
+test tests:  ESMF_CompCreate ESMF_StateCreate
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 

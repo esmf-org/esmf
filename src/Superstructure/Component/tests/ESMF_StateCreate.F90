@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.1 2003/01/29 00:07:58 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.2 2003/02/10 16:50:11 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -31,7 +31,6 @@
     integer :: x, y, rc
     integer :: timestep
     integer, dimension(2) :: delist
-    logical :: isneeded
     character(ESMF_MAXSTR) :: cname, sname, bname, fname
     type(ESMF_Array) :: array1
     type(ESMF_Field) :: field1
@@ -49,7 +48,7 @@
     state1 = ESMF_StateCreate(cname, ESMF_STATEIMPORT, rc)  
     print *, "State Create returned, name = ", trim(cname)
 
-    call ESMF_StatePrint(state1, rc)
+    call ESMF_StatePrint(state1, rc=rc)
     print *, "State Print returned", rc
 
     call ESMF_StateDestroy(state1, rc)
@@ -75,7 +74,7 @@
     call ESMF_StateAddData(state2, bundle1, rc)
     print *, "StateAddData returned", rc
     
-    call ESMF_StatePrint(state2, rc)
+    call ESMF_StatePrint(state2, rc=rc)
     print *, "State Print returned", rc
 
     call ESMF_StateDestroy(state2, rc)
@@ -99,10 +98,10 @@
     print *, "State Create returned, name = ", trim(cname)
 
     sname = "Downward wind"
-    call ESMF_StateAddNameOnly(state3, sname, rc)
-    print *, "StateAddNameOnly returned", rc
+    call ESMF_StateAddData(state3, sname, rc)
+    print *, "StateAddData (name only) returned", rc
     
-    call ESMF_StatePrint(state3, rc)
+    call ESMF_StatePrint(state3, rc=rc)
     print *, "State Print returned", rc
 
     ! save for next test, do not destroy yet
@@ -120,16 +119,13 @@
     ! inherit state3 from test above
 
     sname = "Downward wind"
-    call ESMF_StateSetNeeded(state3, sname, rc)
+    call ESMF_StateSetNeeded(state3, sname, ESMF_STATEDATAISNEEDED, rc)
     print *, "StateSetNeeded returned", rc
     
-    call ESMF_StatePrint(state3, rc)
+    call ESMF_StatePrint(state3, rc=rc)
     print *, "State Print returned", rc
 
-    call ESMF_StateGetNeeded(state3, sname, isneeded, rc)
-    print *, "StateGetNeeded returned", rc
-
-    if (isneeded) then
+    if (ESMF_StateIsNeeded(state3, sname, rc)) then
       print *, "Data marked as needed", trim(sname)
 
       bname = sname
@@ -137,10 +133,10 @@
       print *, "Bundle Create returned", rc, "name =", trim(bname)
       
       fname = "Downward wind field"
-      field1 = ESMF_FieldCreate(fname, rc=rc)
+      field1 = ESMF_FieldCreateNoData(fname, rc=rc)
       print *, "Field Create returned", rc, "name =", trim(fname)
 
-      call ESMF_BundleAddField(bundle2, field1, rc) 
+      call ESMF_BundleAddFields(bundle2, field1, rc) 
       print *, "Bundle AddField returned", rc
 
       call ESMF_StateAddData(state3, bundle1, rc)
