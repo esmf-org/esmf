@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.18 2004/04/09 20:13:58 eschwab Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.19 2004/05/04 22:40:04 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.18 2004/04/09 20:13:58 eschwab Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.19 2004/05/04 22:40:04 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -332,7 +332,7 @@
 !==============================================================================
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CheckTime - Check ESMF Time values against given values
 
 ! !INTERFACE:
@@ -354,7 +354,7 @@
 ! !DESCRIPTION:
 !     Checks given values against those set/get with ESMF
 !
-!EOP
+!EOPI
 
       ! ESMF returned variables
       integer(ESMF_KIND_I8) :: rYYl, rDl
