@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.73 2004/10/11 20:14:16 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.74 2004/10/14 22:49:03 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.73 2004/10/11 20:14:16 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.74 2004/10/14 22:49:03 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -50,24 +50,25 @@
       character(ESMF_MAXSTR) :: name
 
 !     !LOCAL VARIABLES:
-      integer :: x, y, i, count, npets
+      integer :: i, count, npets
+      integer, dimension(2) :: cellCounts
       type(ESMF_DELayout) :: delayout
       type(ESMF_VM) :: vm
       type(ESMF_Grid) :: grid, grid2, grid3, grid4
       type(ESMF_Array) :: arr, arr2
       type(ESMF_ArraySpec) :: arrayspec
-      real, dimension(:,:), pointer :: f90ptr1, f90ptr2, f90ptr3, f90ptr4
+      real, dimension(:,:), pointer :: f90ptr1, f90ptr2, f90ptr3, f90ptr4, f90ptr5
       real(ESMF_KIND_R8) :: minCoord(2)
       type(ESMF_FieldDataMap) :: dm, dm1
-      type(ESMF_RelLoc) :: rl
+      !type(ESMF_RelLoc) :: rl
       character (len = 20) :: fname, fname1, fname2
       character (len = 20) :: gname, gname3
       type(ESMF_IOSpec) :: ios
-      type(ESMF_Mask) :: mask
-      type(ESMF_Field) :: f1, f2, f3, f4, f5, f6
+      !type(ESMF_Mask) :: mask
+      type(ESMF_Field) :: f1, f2, f3, f4, f5, f6, f7
       integer(ESMF_KIND_I4) :: intattr, intattr2
       integer(ESMF_KIND_I4) :: intattrlist(6)
-      real(ESMF_KIND_R8) :: rattr, rattrlist(2), diff
+      real(ESMF_KIND_R8) :: rattr, rattrlist(2)
       character (len=32) :: lattrstr
       type(ESMF_Logical) :: lattr, lattrlist(6)
       character (len=512) :: cattr, cattr2
@@ -247,26 +248,24 @@
       call ESMF_FieldPrint(f2)
       !------------------------------------------------------------------------
 
-
-      !EX_UTest
-      ! Verifing that an uninitialized Grid can be printed
-      call ESMF_GridPrint(grid, "", rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Printing an uninitialized Grid Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-
       !EX_UTest
       ! Verifing that a Grid can be created
       grid =  ESMF_GridCreateHorzXYUni((/ 10, 20 /), minCoord, &
                                      name="landgrid", rc=rc)
       call ESMF_GridDistribute(grid, delayout=delayout, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Creating a Grid Test"
+      write(name, *) "Creating a Grid to use in Field Tests"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
      
+      !EX_UTest
+      ! Get local Grid counts now for use later
+      call ESMF_GridGetDELocalInfo(grid, ESMF_CELL_CENTER, &
+                                    localCellCountPerDim=cellCounts, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting cell counts for each DE"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
       !EX_UTest
       ! Test requirement FLD1.5.1. Default name attribute 
@@ -294,41 +293,13 @@
       !------------------------------------------------------------------------
 
 
-      !EX_UTest
-      ! Verifing that a Grid can be printed
-      call ESMF_GridPrint(grid, "", rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Printing a Grid Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-
-      !EX_UTest
-      ! Verifing that recreating a created Grid is allowed.
-      ! and create a valid grid which can be used below. 
-      grid =  ESMF_GridCreateHorzXYUni((/ 10, 20 /), minCoord, &
-                                     name="landgrid", rc=rc)
-      call ESMF_GridDistribute(grid, delayout=delayout, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Recreating a created Grid Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
 
       !EX_UTest
       ! Verifing that an Array can be created
-      allocate(f90ptr1(10,20))
+      allocate(f90ptr1(cellCounts(1),cellCounts(2)))
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Creating an Array Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-
-      !EX_UTest
-      ! Verifing that an Array can be printed
-      call ESMF_ArrayPrint(arr, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Printing an Array Test"
+      write(name, *) "Creating an Array for use in Field Tests"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -343,7 +314,7 @@
       !EX_UTest
       ! Setting a data Array associated with Field
       call ESMF_FieldSetArray(f4, arr, rc=rc) 
-      write(failMsg, *) "Did not retirn ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a data Array associated with Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -352,20 +323,19 @@
       !EX_UTest
       ! Setting a Grid associated with Field
       call ESMF_FieldSetGrid(f4, grid, rc=rc) 
-      write(failMsg, *) "Did not retirn ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a Grid associated with Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
-      ! Verifing that recreating a created Array is allowed
-      allocate(f90ptr1(10,20))
-      arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Recreating a created Array Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
 
+      !EX_UTest
+      call ESMF_FieldValidate(f4, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Testing to see if Field is Valid"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test requirement FLD1.1.1
       ! Fields may be created by specifying attributes, a grid, data array 
@@ -397,7 +367,32 @@
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test FLD1.1.2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldPrint(f3)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      call ESMF_FieldValidate(f3, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Testing to see if Field is Valid"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Create a different size Grid for testing with an incompatible Array
+      grid4 =  ESMF_GridCreateHorzXYUni((/ 100, 20 /), minCoord, &
+                                     name="biglandgrid", rc=rc)
+      call ESMF_GridDistribute(grid4, delayout=delayout, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating a Grid to use in Field Tests"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+     
+      !EX_UTest
+      ! Try to create a Field with a Grid and Array of the wrong sizes
+      f6 = ESMF_FieldCreate(grid4, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
+                            ESMF_CELL_CELL, 2, dm, "Field 1", ios, rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating a Field with a mismatched Grid/Array"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -414,12 +409,16 @@
       call ESMF_FieldDestroy(f1)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !E-X-_-U-T-e-s-t
       ! Verifing that destroying a Grid in a Field is not allowed
-       call ESMF_GridDestroy(grid, rc=rc)
-       write(failMsg, *) ""
-       write(name, *) "Destroying a Grid in a Field Test"
-       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      ! TODO: we cannot tell that this has happened!  there is no way to
+      ! prevent the user from doing this!!  comment this test back in after
+      ! we have agreed as a group on the strategy for validation vs. the
+      ! cost of doing it each time you call into the framework.
+     !!call ESMF_GridDestroy(grid, rc=rc)
+     !!write(failMsg, *) ""
+     !!write(name, *) "Destroying a Grid in a Field Test"
+     !!call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -428,17 +427,24 @@
       write(failMsg, *) ""
       write(name, *) "Destroying a Field with a Grid and Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Verifing that a Field cannot be created with an uninitialized Grid and Array
+      ! Verifing that destroying the Field did not destroy the Grid
+       call ESMF_GridValidate(grid, rc=rc)
+       write(failMsg, *) ""
+       write(name, *) "Using a Grid after the Field is destroyed"
+       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Verifing that a Field cannot be created with an uninitialized Grid 
+      ! and Array.  f3 is *not* created here and should be invalid.
       f3 = ESMF_FieldCreate(grid2, arr2, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 3, dm, "Field 0", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with an uninitialized Grid and Array Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -448,7 +454,6 @@
       write(failMsg, *) ""
       write(name, *) "Destroying a destroyed Field Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldPrint(f2)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -464,28 +469,23 @@
       !EX_UTest
       ! Req. 1.6.2 Return grid 
       ! A field shall be able to return a reference to its grid.
+      ! f3 gets created here and used thru the rest of the tests.
       gname="oceangrid"
-      grid =  ESMF_GridCreateHorzXYUni((/ 10, 20 /), minCoord, &
-                                        name=gname, rc=rc)
-      call ESMF_GridDistribute(grid, delayout=delayout, rc=rc)
-      arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
       call ESMF_FieldGet(f3, grid=grid3, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a Grid from a Field created with no data Test"
+      call ESMF_GridGet(grid, name=gname, rc=rc)
       call ESMF_GridGet(grid3, name=gname3, rc=rc)
       print *, "Grid (grid3) name = ", trim(gname3)
-      call ESMF_GridPrint(grid, "", rc=rc)
-      call ESMF_GridPrint(grid3, "", rc=rc)
       call ESMF_Test((gname.eq.gname3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
       ! Req. xxx - getting a data pointer directly from a field
-      arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
-      f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                            ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
+      ! f3 exists and is valid at this point.
+      nullify(f90ptr2)
       call ESMF_FieldGetDataPointer(f3, f90ptr2, rc=rc)
       print *, "data = ", f90ptr2(1,1)
       write(failMsg, *) ""
@@ -494,16 +494,36 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Req. xxx - getting the haloWidth back from a field
-      arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, haloWidth=3, rc=rc)
-      f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
+      ! Req. xxx - setting an array with the wrong halo size.
+      ! this should fail to create.
+      allocate(f90ptr3(cellCounts(1),cellCounts(2)))
+      arr = ESMF_ArrayCreate(f90ptr3, ESMF_DATA_REF, haloWidth=3, rc=rc)
+      f7 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 3, dm, "Field 0", ios, rc)
-      call ESMF_FieldGet(f3, haloWidth=i, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Setting the wrong size Array (no halo space) in Field"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      deallocate(f90ptr3, stat=rc)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Req. xxx - Creating a Field with halo regions, this should be ok.
+      allocate(f90ptr3(cellCounts(1)+(3*2),cellcounts(2)+(3*2)))
+      arr = ESMF_ArrayCreate(f90ptr3, ESMF_DATA_REF, haloWidth=3, rc=rc)
+      f7 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
+                            ESMF_CELL_CELL, 3, dm, "Field 0", ios, rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating Field with non-zero haloWidth"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Req. xxx - getting the haloWidth back from a field
+      call ESMF_FieldGet(f7, haloWidth=i, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting haloWidth back from a Field"
       call ESMF_Test((i .eq. 3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-
 
       !EX_UTest
       ! Verifing that a Field can be created with a name
@@ -515,7 +535,7 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Setting a (bad) data pointer directly in a Field
+      ! Setting a (bad) data pointer directly in an empty Field
       nullify(f90ptr4)
       call ESMF_FieldSetDataPointer(f2, f90ptr4, rc=rc)
       write(failMsg, *) "Did not return ESMF_FAILURE"
@@ -524,7 +544,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Setting a (good) data pointer directly in a Field
+      ! Setting a (good) data pointer directly in an empty Field
       allocate(f90ptr4(4,4))
       f90ptr4(:,:) = 3.14159
       call ESMF_FieldSetDataPointer(f2, f90ptr4, rc=rc)
@@ -536,8 +556,8 @@
 
       !EX_UTest
       ! Getting the data pointer back from a Field
-      call ESMF_FieldGetDataPointer(f2, f90ptr3, rc=rc)
-      print *, "data = ", f90ptr3(1,1)
+      call ESMF_FieldGetDataPointer(f2, f90ptr4, rc=rc)
+      print *, "data = ", f90ptr4(1,1)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting an F90 pointer directly back from a Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -546,18 +566,16 @@
       !EX_UTest
       ! Bug 986852 opened
       ! Verify the pointers are equal
-      call ESMF_FieldGetDataPointer(f2, f90ptr4, rc=rc)
-      print *, "data = ", f90ptr4(1,1)
+      call ESMF_FieldGetDataPointer(f2, f90ptr5, rc=rc)
+      print *, "data = ", f90ptr5(1,1)
       write(failMsg, *) "The pointers are not equal"
       write(name, *) "Compare F90 pointers Test"
-      call ESMF_Test((associated(f90ptr3,f90ptr4)), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((associated(f90ptr4,f90ptr5)), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
       ! Adding Attributes to a Field
-      arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
-      f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                            ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
+      ! f3 exists and is valid at this point.
       call ESMF_FieldSetAttribute(f3, "Scale Factor", 4, rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding Attribute to a Field "
