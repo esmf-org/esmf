@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/03/03 16:34:14 flanigan Exp $ 
+# $Id: makefile,v 1.8 2003/03/04 16:44:55 nscollins Exp $ 
 
 ALL:
 
@@ -32,7 +32,7 @@ ESMF_SysTest63029.o: user_model.o
 $(ESMC_TESTDIR)/ESMF_SysTest63029: ESMF_SysTest63029.o  user_model.o chkopts
 	-${F90CXXLD} -o ESMF_SysTest63029 ESMF_SysTest63029.o user_model.o \
 	    -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	mv -f ESMF_SysTest63029 $(ESMC_TEST_DIR)
+	mv -f ESMF_SysTest63029 $(ESMC_TESTDIR)
 	${RM} ESMF_SysTest63029.o user_model.o *.mod
 
 RUN_ESMF_SysTest63029:
