@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.12 2004/12/16 01:11:36 theurich Exp $
+! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.13 2004/12/17 00:40:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.12 2004/12/16 01:11:36 theurich Exp $'
+      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.13 2004/12/17 00:40:44 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -148,7 +148,8 @@
       write(failMsg, *) "Wrong Local Data"
       write(name, *) "Verify local data after receive Test"
       print *,localPet, " After rcv LocalData is ", localData(1),localData(2)
-      isum=isum+ (localData(1) - src*100+1) + (localData(2) - src*100+2)
+      isum=isum+ (localData(1) - soln(1)) + (localData(2) - soln(2))
+      call ESMF_Test( (isum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
 
      !Test with REAL_KIND_R4 arguments
      !================================
