@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.47 2003/12/19 19:20:22 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.48 2004/01/16 00:30:25 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -533,31 +533,106 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Time(=) - copy or assign from BaseTime expression
+// !IROUTINE:  ESMC_Time(+) - Increment a Time with a TimeInterval
 //
 // !INTERFACE:
-      ESMC_Time& ESMC_Time::operator=(
+      ESMC_Time ESMC_Time::operator+(
 //
 // !RETURN VALUE:
-//    ESMC_Time& result
+//    ESMC_Time result
 //
 // !ARGUMENTS:
-      const ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime to copy
+      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+                                                      //      to add
 //
 // !DESCRIPTION:
-//    Assign {\tt BaseTime} expression to this time.  Supports inherited
-//    operators from {\tt ESMC\_BaseTime}
+//    Adds {\tt timeInterval} expression to this time.
 //
 //EOP
 // !REQUIREMENTS:  
 
-    // invoke base class assignment operator
-    // TODO:  should be implicit ?
-    ESMC_BaseTime::operator=(baseTime);
+//    Implementation note:  This overrides the ESMC_BaseTime (+) operator
+//                          in order to copy the ESMC_Time-only properties
+//                          (calendar & timeZone) to the result. 
+//
+    // copy this time's properties (calendar and timezone)
+    ESMC_Time sum = *this;
 
-    return(*this);
+    // then perform the increment using ESMC_BaseTime operator
+    sum += timeInterval;
 
-}  // end ESMC_Time::operator=
+    return(sum);
+
+}  // end ESMC_Time::operator+
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Time(-) - Decrement a Time with a TimeInterval
+//
+// !INTERFACE:
+      ESMC_Time ESMC_Time::operator-(
+//
+// !RETURN VALUE:
+//    ESMC_Time result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+                                                      //      to subtract
+//
+// !DESCRIPTION:
+//    Subtracts {\tt timeInterval} expression from this time.
+//
+//EOP
+// !REQUIREMENTS:  
+
+//    Implementation note:  This overrides the ESMC_BaseTime (-) operator
+//                          in order to copy the ESMC_Time-only properties
+//                          (calendar & timeZone) to the result. 
+//
+    // copy this time's properties (calendar and timezone)
+    ESMC_Time diff = *this;
+
+    // then perform the decrement using ESMC_BaseTime operator
+    diff -= timeInterval;
+
+    return(diff);
+
+}  // end ESMC_Time::operator-
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Time(-) - Return the difference between two Times
+//
+// !INTERFACE:
+      ESMC_TimeInterval ESMC_Time::operator-(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//
+// !ARGUMENTS:
+      const ESMC_Time &time) const {  // in - ESMC_Time to subtract
+//
+// !DESCRIPTION:
+//    Subtracts given {\tt time} expression from this time, returns
+//    result as {\tt ESMC_TimeInterval}.
+//
+//EOP
+// !REQUIREMENTS:  
+
+//    Implementation note:  This overrides the 2nd ESMC_BaseTime (-) operator
+//                          simply because the 1st (-) operator is overridden.
+//                          Visibility into ESMC_BaseTime is lost; if not
+//                          defined here, the compiler won't see the 2nd (-)
+//                          operator defined at ESMC_BaseTime!
+//
+    ESMC_TimeInterval diff;
+
+    // perform the decrement using the ESMC_BaseTime operator
+    diff = ESMC_BaseTime::operator-(time);
+
+    return(diff);
+
+}  // end ESMC_Time::operator-
 
 //-------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.29 2003/12/19 19:19:08 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.30 2004/01/16 00:30:25 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -138,9 +138,14 @@
     // to support ESMC_Clock::SyncToWallClock() and TMG 2.5.7
     int ESMC_TimeSyncToRealTime(void);
 
-    // copy or assign from ESMC_BaseTime expressions
-    // TODO:  should be implicit ?
-    ESMC_Time& operator=(const ESMC_BaseTime &);  
+    // override BaseTime +/- operators in order to copy ESMC_Time-only
+    // properties (calendar & timeZone) to the result
+    ESMC_Time operator+(const ESMC_TimeInterval &) const; // time + timeInterval
+    ESMC_Time operator-(const ESMC_TimeInterval &) const; // time - timeInterval
+
+    // override 2nd BaseTime (-) operator because 1st (-) operator is overridden
+    // (compiler can't find 2nd (-) operator at BaseTime!)
+    ESMC_TimeInterval operator-(const ESMC_Time&) const;  // time1 - time2
 
     // TODO: ? override BaseTime arithmetic operators with same operators
     //         which use the BaseTime operators and then specialize
