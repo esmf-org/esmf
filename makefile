@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2003/03/25 00:17:39 flanigan Exp $
+# $Id: makefile,v 1.20 2003/04/03 22:42:56 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -53,8 +53,8 @@ info:
 	-@echo "Using Fortran compiler: ${FC} ${FOPTFLAGS} ${FCPPFLAGS}"
 	-@if [ -n "${C_FCV}" -a "${C_FCV}" != "unknown" ] ; then \
 	  echo "Fortran Compiler version:" ; ${C_FCV} ; fi
-	-@if [ -f ${ESMF_DIR}/src/include/ESMF_Version.inc ] ; then \
-	  grep ESMF_VERSION_STRING ${ESMF_DIR}/src/include/ESMF_Version.inc | ${SED} "s/........//" ; fi
+	-@if [ -f ${ESMF_DIR}/src/include/ESMC_Macros.h ] ; then \
+	  fgrep ESMF_VERSION_STRING ${ESMF_DIR}/src/include/ESMC_Macros.h | ${SED} "s/^#define //" ; fi
 	-@echo "-----------------------------------------"
 	-@echo "Using ESMF flags: ${PCONF}"
 	-@echo "-----------------------------------------"
