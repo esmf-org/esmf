@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.124 2005/03/04 19:54:38 jedwards Exp $
+! $Id: ESMF_Comp.F90,v 1.125 2005/03/22 04:03:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -254,7 +254,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.124 2005/03/04 19:54:38 jedwards Exp $'
+      '$Id: ESMF_Comp.F90,v 1.125 2005/03/22 04:03:42 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1278,9 +1278,9 @@ end function
 ! !IROUTINE: ESMF_CompGet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, vm_info, &
-                              gridcomptype, grid, clock, dirPath, configFile, &
-                              config, ctype, rc)
+      recursive subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, 
+        vm_info, gridcomptype, grid, clock, dirPath, configFile, &
+        config, ctype, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
@@ -1392,8 +1392,8 @@ end function
 ! !IROUTINE: ESMF_CompSet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompSet(compp, name, vm, vm_info, gridcomptype, grid, &
-                              clock, dirPath, configFile, config, rc)
+      recursive subroutine ESMF_CompSet(compp, name, vm, vm_info, gridcomptype,&
+        grid, clock, dirPath, configFile, config, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
