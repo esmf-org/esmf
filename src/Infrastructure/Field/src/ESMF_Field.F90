@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.10 2003/04/03 23:06:31 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.11 2003/04/08 23:06:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -208,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.10 2003/04/03 23:06:31 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.11 2003/04/08 23:06:07 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2124,24 +2124,30 @@
       stypep = srcfield%ftypep
       dtypep = dstfield%ftypep
 
-      ! in case we need it, here is our DE number in the parent layout
+      ! Our DE number in the parent layout
       call ESMF_DELayoutGetDEid(parentlayout, my_DE, status)
 
       ! TODO: we need not only to know if this DE has data in the field,
       !   but also the de id for both src & dest fields
 
-      ! if srclayout ^ parentlayout == NULL, nothing to send
+      ! This routine is called on every processor in the parent layout.
+      !  It is quite possible that the source and destination fields do
+      !  not completely cover every processor on that layout.  Make sure
+      !  we do not go lower than this on the processors which are uninvolved
+      !  in this communication.
+
+      ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
       call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
-      ! call ESMF_DELayoutThisDEExists(parentlayout, srclayout, hassrcdata)
+      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hassrcdata)
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
           ! don't ask for our de number if this de isn't part of the layout
           call ESMF_DELayoutGetDEid(srclayout, my_src_DE, status)
       endif
 
-      ! if dstlayout ^ parentlayout == NULL, nothing to recv
+      ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
       call ESMF_GridGetDELayout(dtypep%grid, dstlayout, status)
-      ! call ESMF_DELayoutThisDEExists(parentlayout, dstlayout, hasdstdata)
+      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdstdata)
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
           ! don't ask for our de number if this de isn't part of the layout
