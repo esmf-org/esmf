@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.24 2003/04/17 21:34:41 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.25 2003/04/21 22:37:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -167,11 +167,12 @@
       public ESMF_ArrayValidate
       public ESMF_ArrayPrint
 !EOP
+      public operator(.eq.), operator(.ne.)
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.24 2003/04/17 21:34:41 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.25 2003/04/21 22:37:38 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -290,18 +291,10 @@ ArrayInterfaceMacro(ArrayDeallocate)
 
 !------------------------------------------------------------------------------
 interface operator (.eq.)
- module procedure cfeq
- module procedure ESMF_sfeq
- module procedure ESMF_dteq
- module procedure ESMF_dkeq
- module procedure ESMF_opeq
+ module procedure ESMF_cfeq
 end interface
 interface operator (.ne.)
- module procedure cfne
- module procedure ESMF_sfne
- module procedure ESMF_dtne
- module procedure ESMF_dkne
- module procedure ESMF_opne
+ module procedure ESMF_cfne
 end interface
 
 !==============================================================================
@@ -312,18 +305,18 @@ end interface
 
 ! functions to compare two ESMF_CopyFlags to see if they are the same or not
 
-function cfeq(cf1, cf2)
- logical cfeq
+function ESMF_cfeq(cf1, cf2)
+ logical ESMF_cfeq
  type(ESMF_CopyFlag), intent(in) :: cf1, cf2
 
- cfeq = (cf1%docopy .eq. cf2%docopy) 
+ ESMF_cfeq = (cf1%docopy .eq. cf2%docopy) 
 end function
 
-function cfne(cf1, cf2)
- logical cfne
+function ESMF_cfne(cf1, cf2)
+ logical ESMF_cfne
  type(ESMF_CopyFlag), intent(in) :: cf1, cf2
 
- cfne = (cf1%docopy .ne. cf2%docopy) 
+ ESMF_cfne = (cf1%docopy .ne. cf2%docopy) 
 end function
 
 
