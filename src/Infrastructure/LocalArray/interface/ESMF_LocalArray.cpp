@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.cpp,v 1.13 2004/06/15 07:17:56 nscollins Exp $
+! $Id: ESMF_LocalArray.cpp,v 1.14 2004/06/17 08:20:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -175,7 +175,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.cpp,v 1.13 2004/06/15 07:17:56 nscollins Exp $'
+      '$Id: ESMF_LocalArray.cpp,v 1.14 2004/06/17 08:20:07 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -931,7 +931,11 @@ DeclarationMacro(LocalArrayDeallocate)
 
 
 !------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_LocalArrayDestroy"
 !BOPI
+! !IROUTINE: ESMF_LocalArrayDestroy - Remove a LocalArray
+!
 ! !INTERFACE:
       subroutine ESMF_LocalArrayDestroy(array, rc)
 !
@@ -1125,7 +1129,11 @@ DeclarationMacro(LocalArrayDeallocate)
 ! Query for information from the array.
 !
 !------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_LocalArrayGet"
 !BOPI
+! !IROUTINE: ESMF_LocalArrayGet - return information about a LocalArray
+!
 ! !INTERFACE:
       subroutine ESMF_LocalArrayGet(array, rank, type, kind, counts, &
                                     lbounds, ubounds, base, name, rc)
@@ -1835,7 +1843,11 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 ! This section is for higher level LocalArray funcs
 !
 !------------------------------------------------------------------------------ 
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_LocalArraySlice"
 !BOPI
+! !IROUTINE: ESMF_LocalArraySlice - extract a subset from a LocalArray
+!
 ! !INTERFACE:
       function ESMF_LocalArraySlice(array, slicedim, sliceloc, rc)
 !
@@ -1943,7 +1955,11 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 ! This section is I/O for LocalArrays
 !
 !------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_LocalArrayWriteRestart"
 !BOPI
+! !IROUTINE: ESMF_LocalArrayWriteRestart - checkpoint a LocalArray
+!
 ! !INTERFACE:
       subroutine ESMF_LocalArrayWriteRestart(array, iospec, rc)
 !
@@ -1969,7 +1985,11 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
 
 !------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_LocalArrayReadRestart"
 !BOPI
+! !IROUTINE: ESMF_LocalArrayReadRestart - restore a restart file
+!
 ! !INTERFACE:
       function ESMF_LocalArrayReadRestart(name, iospec, rc)
 !
@@ -2005,7 +2025,11 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
 
 !------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_LocalArrayWrite"
 !BOPI
+! !IROUTINE: ESMF_LocalArrayWrite - save contents to file
+!
 ! !INTERFACE:
       subroutine ESMF_LocalArrayWrite(array, iospec, filename, rc)
 !
@@ -2056,7 +2080,11 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
 
 !------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_LocalArrayRead"
 !BOPI
+! !IROUTINE: ESMF_LocalArrayRead - read data contents
+!
 ! !INTERFACE:
       function ESMF_LocalArrayRead(name, iospec, rc)
 !
