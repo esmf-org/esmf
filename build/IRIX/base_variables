@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: base_variables,v 1.2 2002/01/25 20:38:38 dneckels Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -40,7 +40,10 @@ CXX_CLINKER	   = CC -n32 -mp -Wl,-woff,84,-woff,85,-woff,134
 CXX_FLINKER	   = CC -n32 -mp -Wl,-woff,84,-woff,85,-woff,134
 CXX_CCV		   = CC -version
 CXX_SYS_LIB	   = -lfpe -lcomplex -lfortran -lftn -lfastm -lmalloc 
-
+C_CXXF90LD         = CC -n32
+C_F90CXXLD         = f90 -n32 
+C_CXXF90LIBS       = -lftn90 -lftn -lfortran
+C_F90CXXLIBS       = -lCsup -lC -lc
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g
 GCXX_FOPTFLAGS	   = -g

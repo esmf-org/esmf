@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: base.site,v 1.2 2002/01/25 20:38:38 dneckels Exp $ 
 
 #
 #  This file contains site-specific information.  The definitions below
@@ -17,7 +17,7 @@ MPI_INCLUDE    = -I${MPI_HOME}
 MPIRUN         =  ${MPI_HOME}/mpirun
 
 # MP_LIB is for openMP
-MP_LIB          = -L/usr/local/pgi/linux86/lib -lpgc
-MP_INCLUDE      = -idirafter /usr/local/pgi/linux86/include
+MP_LIB          = 
+MP_INCLUDE      = 
 # For pthreads (or omp)
 THREAD_LIB      = 

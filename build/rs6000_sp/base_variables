@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: base_variables,v 1.2 2002/01/25 20:38:38 dneckels Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -33,7 +33,7 @@ O_COPTFLAGS	   = -O3 -qfullpath -qmaxmem=4000 -w -qspill=3000
 O_FOPTFLAGS	   = -O3 -qfullpath -w
 # ########################## C++ compiler ##################################
 #
-CXX_CC		   = xlC_r -+
+CXX_CC		   = mpCC_r
 CXX_FC		   = mpxlf_r
 CXX_CLINKER_SLFLAG = -L
 CXX_FLINKER_SLFLAG = -L
@@ -41,6 +41,10 @@ CXX_CLINKER	   = mpCC_r
 CXX_FLINKER	   = mpCC_r
 CXX_CCV		   = unknown
 CXX_SYS_LIB	   = /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lcomplex -lisode
+C_CXXF90LD         = ${CXX_CC}
+C_F90CXXLD         = ${CXX_CC}
+C_CXXF90LIBS       = -L/usr/lpp/ppe.poe/lib/threads -L/usr/lpp/ppe.poe/lib -L/usr/lpp/ppe.poe/lib/ip,-L/lib/threads -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser -lpthreads -lm_r -lm -lc_r -lc /usr/lpp/ppe.poe/lib/libc.a
+C_F90CXXLIBS       = -L/usr/lpp/ppe.poe/lib/threads -L/usr/lpp/ppe.poe/lib -L/usr/lpp/ppe.poe/lib/ip,-L/lib/threads -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser -lpthreads -lm_r -lm -lc_r -lc /usr/lpp/ppe.poe/lib/libc.a
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g  -qfullpath
 GCXX_FOPTFLAGS	   = -g  -qfullpath 

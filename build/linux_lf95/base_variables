@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: base_variables,v 1.2 2002/01/25 20:38:38 dneckels Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -42,6 +42,10 @@ CXX_CCV		   = ${CXX_CC} --version
 #CXX_SYS_LIB	   = -ldl -lc -lf2c -lm
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
 #CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
+C_F90CXXLD         = lf95 -verbose
+C_F90CXXLIBS       = 
+C_CXXF90LD         = g++  -L/usr/local/lf9560/bin/../lib -lfj9i6 -lfj9f6 -lfj9e6 -lfccx86_6a
+C_CXXF90LIBS       = 
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
@@ -74,6 +78,6 @@ OCOMP_ALICEFLAGS   = -DMF_DEBUG  -DMF_USE_LOG -DMF_USE_BOPT_O \
 #
 ##################################################################################
 
-PARCH		   = linux
+PARCH		   = linux_lf95
 
 include ${ESMF_DIR}/build/common_variables
