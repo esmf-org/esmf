@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.21 2004/06/15 16:02:54 nscollins Exp $
+! $Id: ESMF_CplEx.F90,v 1.22 2004/06/16 22:14:15 svasquez Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -205,12 +205,15 @@
     type(ESMF_VM) :: vm
     type(ESMF_State) :: importState, exportState
     type(ESMF_CplComp) :: cpl
+    integer :: finalrc
+    finalrc = ESMF_SUCCESS
         
 !-------------------------------------------------------------------------
 !   ! Initialize the Framework and get the default VM
     call ESMF_Initialize(vm=vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) then
         print *, "Unable to initialize ESMF Framework"
+        print *, "FAIL: ESMF_CplEx.F90"
         stop
     endif
 !-------------------------------------------------------------------------
@@ -224,8 +227,16 @@
     cname = "Atmosphere Model Coupler"
     cpl = ESMF_CplCompCreate(cname, configFile="setup.rc", rc=rc)  
 
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if    
+
     ! This single user-supplied subroutine must be a public entry point.
     call ESMF_CplCompSetServices(cpl, CPL_SetServices, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if    
 
     print *, "Comp Create returned, name = ", trim(cname)
 
@@ -233,36 +244,81 @@
     !  between components.
 
     exportState = ESMF_StateCreate(cname, ESMF_STATE_EXPORT, rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if    
+
     importState = ESMF_StateCreate(cname, ESMF_STATE_IMPORT, rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if    
+
 
     ! See the TimeMgr document for the details on the actual code needed
     !  to set up a clock.
     ! initialize calendar to be Gregorian type
     gregorianCalendar = ESMF_CalendarCreate("Gregorian", ESMF_CAL_GREGORIAN, rc)
 
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if    
+
+
     ! initialize time interval to 6 hours
     call ESMF_TimeIntervalSet(timeStep, h=6, rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if    
+
 
     ! initialize start time to 5/1/2004
     call ESMF_TimeSet(startTime, yy=2004, mm=5, dd=1, &
                       calendar=gregorianCalendar, rc=rc)
 
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if    
+
+
     ! initialize stop time to 5/2/2004
     call ESMF_TimeSet(stopTime, yy=2004, mm=5, dd=2, &
                       calendar=gregorianCalendar, rc=rc)
 
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if    
+
+
     ! initialize the clock with the above values
     tclock = ESMF_ClockCreate("top clock", timeStep, startTime, stopTime, rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if    
+
      
     ! Call the Init routine.  There is an optional index number
     !  for those components which have multiple entry points.
     call ESMF_CplCompInitialize(cpl, exportState, importState, tclock, rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if    
+
     print *, "Comp Initialize complete"
 
     ! Main run loop.
     finished = .false.
     do while (.not. finished)
         call ESMF_CplCompRun(cpl, exportState, importState, tclock, rc=rc)
+
+        if (rc.NE.ESMF_SUCCESS) then
+            finalrc = ESMF_FAILURE
+        end if    
+
         call ESMF_ClockAdvance(tclock, timestep)
         ! query clock for current time
         if (ESMF_ClockIsStopTime(tclock)) finished = .true.
@@ -271,17 +327,48 @@
 
     ! Give the component a chance to write out final results, clean up.
     call ESMF_CplCompFinalize(cpl, exportState, importState, tclock, rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if    
+
     print *, "Comp Finalize complete"
 
     ! Destroy components.
     call ESMF_ClockDestroy(tclock, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if    
+
     call ESMF_CalendarDestroy(gregorianCalendar, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if    
+
     call ESMF_CplCompDestroy(cpl, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if    
+
     print *, "Comp Destroy returned"
 
     print *, "Application Example 1 finished"
 
     call ESMF_Finalize(rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if    
+    if (finalrc.EQ.ESMF_SUCCESS) then
+        print *, "PASS: ESMF_CplEx.F90"
+    else
+        print *, "FAIL: ESMF_CplEx.F90"
+    end if
+
+
 
     end program ESMF_AppMainEx
     
