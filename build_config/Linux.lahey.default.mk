@@ -1,4 +1,4 @@
-# $Id: Linux.lahey.default.mk,v 1.1 2003/09/30 15:18:44 flanigan Exp $
+# $Id: Linux.lahey.default.mk,v 1.2 2003/10/09 16:20:20 flanigan Exp $
 #
 # Linux.default.default.mk
 #
@@ -104,7 +104,8 @@ CXX_SYS_LIB	   = -ldl -lc -lm
 
 C_F90CXXLD         = lf95 -verbose
 
-C_F90CXXLIBS       = -L/usr/lib/gcc-lib/i386-redhat-linux/2.96 -lstdc++ -lgcc 
+C_F90CXXLIBS       = -Wl,-rpath /usr/lib/gcc-lib/i386-redhat-linux/2.96 -Wl,-rpath /usr/local/lf9560/lib \
+                             -L/usr/lib/gcc-lib/i386-redhat-linux/2.96 -lstdc++ -lgcc
 #C_F90CXXLIBS       = -lstdc++ -L/usr/lib/gcc-lib/i386-glibc21-linux/egcs-2.91.66 -lgcc 
 #C_F90CXXLIBS       = /usr/lib/gcc-lib/i386-redhat-linux/2.96/libgcc.a \
 #                     /usr/lib/gcc-lib/i386-redhat-linux/2.96/libstdc++.a 
@@ -137,7 +138,7 @@ SL_LIBOPTS  =
 SL_LINKOPTS = 
 SL_F_LINKER = $(F90CXXLD) 
 #SL_F_LINKER = $(F90CXXLD) -rpath $(ESMF_LIBDIR) -rpath /usr/local/lf9560/lib
-SL_C_LINKER = $(CXXF90LD) -Wl,-rpath $(ESMF_LIBDIR) -rpath /usr/local/lf9560/lib
+SL_C_LINKER = $(CXXF90LD) -Wl,-rpath $(ESMF_LIBDIR) -Wl,-rpath /usr/local/lf9560/lib
 SL_LIB_LINKER = $(CXXF90LD) -Wl,-rpath $(ESMF_LIBDIR)
 SL_LIBS_TO_MAKE = 
 #SL_LIBS_TO_MAKE = libesmf liboldworld
