@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.29 2003/01/16 18:19:19 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.30 2003/01/17 22:21:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -125,6 +125,8 @@
     !public ESMF_GridGetCoord
     public ESMF_GridSetCoord
     public ESMF_GridGetDE    ! temporary to access DistGrid from above
+    public ESMF_GridGlobalToLocalIndex
+    public ESMF_GridLocalToGlobalIndex
     !public ESMF_GridGetInfo
     public ESMF_GridSetInfo
     !public ESMF_GridGetLMask
@@ -203,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.29 2003/01/16 18:19:19 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.30 2003/01/17 22:21:00 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1573,6 +1575,114 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetDE
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridGlobalToLocalIndex - translate global indexing to local
+
+! !INTERFACE:
+      subroutine ESMF_GridGlobalToLocalIndex(grid, global, local, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      integer(ESMF_IKIND_I4), dimension(:), intent(in) :: global
+      integer(ESMF_IKIND_I4), dimension(:), intent(out) :: local
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Provides access to a DistGrid routine that translates an array of
+!     integer cell identifiers from global indexing to local indexing
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be used.
+!     \item[[global]]
+!          Array of cell identifiers in global indexing.
+!     \item[[local]]
+!          Array of cell identifiers in local indexing.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     call DistGrid method to retrieve information otherwise not available
+!     to the application level
+      call ESMF_DistGridGlobalToLocalIndex(grid%ptr%distgrid%ptr, &
+                                           global, local, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridGlobalToLocalIndex: distgrid global to local"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGlobalToLocalIndex
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridLocalToGlobalIndex - translate global indexing to local
+
+! !INTERFACE:
+      subroutine ESMF_GridLocalToGlobalIndex(grid, local, global, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      integer(ESMF_IKIND_I4), dimension(:), intent(in) :: local
+      integer(ESMF_IKIND_I4), dimension(:), intent(out) :: global
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Provides access to a DistGrid routine that translates an array of
+!     integer cell identifiers from global indexing to local indexing
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be used.
+!     \item[[local]]
+!          Array of cell identifiers in local indexing.
+!     \item[[global]]
+!          Array of cell identifiers in global indexing.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     call DistGrid method to retrieve information otherwise not available
+!     to the application level
+      call ESMF_DistGridLocalToGlobalIndex(grid%ptr%distgrid%ptr, &
+                                           local, global, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridLocalToGlobalIndex: distgrid local to global"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridLocalToGlobalIndex
 
 !------------------------------------------------------------------------------
 !BOP
