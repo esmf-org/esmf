@@ -1,4 +1,4 @@
-# $Id: common,v 1.6 2001/12/14 21:01:08 cdeluca Exp $ 
+# $Id: common,v 1.7 2002/01/14 19:48:25 dneckels Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -346,9 +346,9 @@ manualpages:
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 .cpp.o .cc.o .C.o: 
-	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
+	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
 .cpp.a .cc.a .C.a: 
-	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
+	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 

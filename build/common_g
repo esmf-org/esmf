@@ -1,6 +1,7 @@
-# $Id: common_g,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: common_g,v 1.2 2002/01/14 19:48:25 dneckels Exp $ 
 
 CC	       = ${C_CC}
+CXX	       = ${CXX_CC}
 FC	       = ${C_FC}
 CLINKER_SLFLAG = ${C_CLINKER_SLFLAG}
 FLINKER_SLFLAG = ${C_FLINKER_SLFLAG}
