@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.38 2004/09/20 23:05:42 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.39 2004/10/05 22:48:19 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -205,6 +205,7 @@
         type (ESMF_Base) :: base              ! base class object
         type (ESMF_GridStatus) :: gridStatus  ! uninitialized, init ok, etc
         integer :: dimCount                   ! number of dimensions
+        logical :: hasLocalData
         type (ESMF_GridStructure) :: gridStructure
                                               ! enum for structure of grid
                                               ! i.e. logically rectangular, etc
@@ -522,7 +523,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.38 2004/09/20 23:05:42 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.39 2004/10/05 22:48:19 jwolfe Exp $'
 
 !==============================================================================
 !
