@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.24 2003/04/24 16:40:05 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.25 2003/05/07 16:02:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -182,7 +182,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.24 2003/04/24 16:40:05 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.25 2003/05/07 16:02:32 nscollins Exp $'
 
 !==============================================================================
 !
@@ -761,28 +761,18 @@
 ! !IROUTINE: ESMF_PhysGridGet - Get information from a PhysGrid
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridGet(physgrid, local_min_coord1, &
-                                  local_max_coord1, local_nmax1, &
+      subroutine ESMF_PhysGridGet(physgrid, local_min_coord1, local_max_coord1,&
                                   local_min_coord2, local_max_coord2, &
-                                  local_nmax2, global_min_coord1, &
-                                  global_max_coord1, global_nmax1, &
-                                  global_min_coord2, global_max_coord2, &
-                                  global_nmax2, rc)
+                                  global_min_coords, global_max_coords, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGridType) :: physgrid
       real, intent(inout), optional :: local_min_coord1
       real, intent(inout), optional :: local_max_coord1
-      integer, intent(inout), optional :: local_nmax1
       real, intent(inout), optional :: local_min_coord2
       real, intent(inout), optional :: local_max_coord2
-      integer, intent(inout), optional :: local_nmax2
-      real, intent(inout), optional :: global_min_coord1
-      real, intent(inout), optional :: global_max_coord1
-      integer, intent(inout), optional :: global_nmax1
-      real, intent(inout), optional :: global_min_coord2
-      real, intent(inout), optional :: global_max_coord2
-      integer, intent(inout), optional :: global_nmax2
+      real, intent(inout), dimension(ESMF_MAXGRIDDIM), optional :: global_min_coords
+      real, intent(inout), dimension(ESMF_MAXGRIDDIM), optional :: global_max_coords
       integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -799,26 +789,14 @@
 !          Minimum local physical coordinate in the 1st coordinate direction.
 !     \item[[local\_max\_coord1]]
 !          Maximum local physical coordinate in the 1st coordinate direction.
-!     \item[[local\_nmax1]]
-!          Number of local grid increments in the 1st coordinate direction.
 !     \item[[local\_min\_coord2]]
 !          Minimum local physical coordinate in the 2nd coordinate direction.
 !     \item[[local\_max\_coord2]]
 !          Maximum local physical coordinate in the 2nd coordinate direction.
-!     \item[[local\_nmax2]]
-!          Number of local grid increments in the 2nd coordinate direction.
-!     \item[[global\_min\_coord1]]
-!          Minimum global physical coordinate in the 1st coordinate direction.
-!     \item[[global\_max\_coord1]]
-!          Maximum global physical coordinate in the 1st coordinate direction.
-!     \item[[global\_nmax1]]
-!          Number of global grid increments in the 1st coordinate direction.
-!     \item[[global\_min\_coord2]]
-!          Minimum global physical coordinate in the 2nd coordinate direction.
-!     \item[[global\_max\_coord2]]
-!          Maximum global physical coordinate in the 2nd coordinate direction.
-!     \item[[global\_nmax2]]
-!          Number of global grid increments in the 2nd coordinate direction.
+!     \item[[global\_min\_coords]]
+!          Minimum global physical coordinates.
+!     \item[[global\_max\_coords]]
+!          Maximum global physical coordinates.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -844,14 +822,14 @@
                  local_min_coord2 = physgrid%local_min(2)
       if(present(local_max_coord2)) &
                  local_max_coord2 = physgrid%local_max(2)
-      if(present(global_min_coord1)) &
-                 global_min_coord1 = physgrid%global_min(1)
-      if(present(global_max_coord1)) &
-                 global_max_coord1 = physgrid%global_max(1)
-      if(present(global_min_coord2)) &
-                 global_min_coord2 = physgrid%global_min(2)
-      if(present(global_max_coord2)) &
-                 global_max_coord2 = physgrid%global_max(2)
+      if(present(global_min_coords)) then
+                 global_min_coords(1) = physgrid%global_min(1)
+                 global_min_coords(2) = physgrid%global_min(2)
+      endif
+      if(present(global_max_coords)) then
+                 global_max_coords(1) = physgrid%global_max(1)
+                 global_max_coords(2) = physgrid%global_max(2)
+      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
