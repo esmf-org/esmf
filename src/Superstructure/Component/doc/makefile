@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2004/03/15 20:42:43 nscollins Exp $ 
+# $Id: makefile,v 1.20 2004/03/18 00:13:27 cdeluca Exp $ 
 
 all: alldoc
 
@@ -15,17 +15,14 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Superstructure/Component/doc
 
-DVIFILES  =     Component_desdoc.dvi \
-                Component_refdoc.dvi
+DVIFILES  =     Component_refdoc.dvi
 #		Component_reqdoc.dvi \
 
 
-PDFFILES  =     $(ESMC_DOCDIR)/Component_desdoc.pdf \
-                $(ESMC_DOCDIR)/Component_refdoc.pdf
+PDFFILES  =     $(ESMC_DOCDIR)/Component_refdoc.pdf
 #		$(ESMC_DOCDIR)/Component_reqdoc.pdf \
 
-HTMLFILES =     $(ESMC_DOCDIR)/Component_desdoc \
-                $(ESMC_DOCDIR)/Component_refdoc
+HTMLFILES =     $(ESMC_DOCDIR)/Component_refdoc
 #		$(ESMC_DOCDIR)/Component_reqdoc \
 
 
@@ -63,9 +60,9 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = Component_desdoc Component_refdoc $(HTMLFILES)
+CLEANDIRS   = Component_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi \
-              Component_desdoc.tex Component_refdoc.tex $(PDFFILES) 
+              Component_refdoc.tex $(PDFFILES) 
 CLOBBERDIRS =
 
 
