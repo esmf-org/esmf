@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.32 2004/05/04 20:05:50 cpboulder Exp $
+// $Id: ESMC_LogErr.h,v 1.33 2004/05/04 20:19:08 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,7 +40,6 @@
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrConstants.inc"
 
-extern char nameLogErrFile[32];
 enum EMSC_LogFileType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
                         
 int ESMC_LogInitialize(char filename[]);
@@ -115,6 +114,7 @@ class ESMC_Log {
     //void ESMC_LogExit();
     //void ESMC_LogSet(char* option, ESMC_Logical value, ...);
     //void ESMC_LogGet(char* option, ESMC_Logical & value, ...);
+    char nameLogErrFile[32];
     FILE *ESMC_LogFile;
     //ESMC_Log();
 };
