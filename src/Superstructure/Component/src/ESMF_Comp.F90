@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.85 2004/04/19 19:52:03 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.86 2004/04/19 20:23:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -197,7 +197,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.85 2004/04/19 19:52:03 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.86 2004/04/19 20:23:54 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -594,6 +594,7 @@ end function
         logical :: isdel, esdel
         integer :: dummy
         type(ESMF_BlockingFlag):: blocking
+        integer :: callrc
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -662,7 +663,8 @@ end function
           status)
         if (blocking == ESMF_BLOCKING) then
           call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-            compp%vm_cargo, status)
+            compp%vm_cargo, callrc, status)
+          status = callrc
         endif
 #if 0
         ! Old entry point, pre-VM
@@ -921,6 +923,7 @@ end function
         logical :: isdel, esdel
         integer :: dummy
         type(ESMF_BlockingFlag):: blocking
+        integer :: callrc
 
         ! Finalize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -989,7 +992,8 @@ end function
           status)
         if (blocking == ESMF_BLOCKING) then
           call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-            compp%vm_cargo, status)
+            compp%vm_cargo, callrc, status)
+          status = callrc
         endif
 #if 0
         ! old pre-VM interface
@@ -1068,6 +1072,7 @@ end function
         logical :: isdel, esdel
         integer :: dummy
         type(ESMF_BlockingFlag):: blocking
+        integer :: callrc
 
         ! Run return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -1135,7 +1140,8 @@ end function
           compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETRUN, phase, status)
         if (blocking == ESMF_BLOCKING) then
           call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-            compp%vm_cargo, status)
+            compp%vm_cargo, callrc, status)
+          status = callrc
         endif
 #if 0
         ! old pre-VM name
@@ -1917,6 +1923,7 @@ end function
 
     integer :: status                     ! local error status
     logical :: rcpresent
+    integer :: callrc
 
     ! Initialize return code; assume failure until success is certain       
     status = ESMF_FAILURE
@@ -1928,14 +1935,14 @@ end function
 
     ! call into C++ 
     call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-      compp%vm_cargo, status)
+      compp%vm_cargo, callrc, status)
     if (status .ne. ESMF_SUCCESS) then
       print *, "c_ESMC_CompWait error"
       return
     endif
 
     ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
+    if (rcpresent) rc = callrc
  
   end subroutine ESMF_CompWait
 !------------------------------------------------------------------------------

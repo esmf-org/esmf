@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.22 2004/04/13 17:30:46 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.23 2004/04/19 20:23:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -216,6 +216,7 @@ extern "C" {
     ESMC_VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
     void **vm_info,           // p2 to member which holds info
     void **vm_cargo,          // p2 to member which holds cargo
+    int *callrc,              // return code of the user component method
     int *status) {            // return error code in status
 
     // Things get a little confusing here with pointers, so I will define
@@ -226,6 +227,7 @@ extern "C" {
     // Now call the vmachine_exit function which will block respective PETs
     vm_parent.vmachine_exit(vmplan, *vm_info);
     cargotype *cargo = (cargotype *)*vm_cargo;
+    *callrc = cargo->rc;
     delete cargo;
 
     *status = ESMF_SUCCESS;

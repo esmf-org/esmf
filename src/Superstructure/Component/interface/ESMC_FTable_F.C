@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable_F.C,v 1.14 2004/04/13 17:30:46 nscollins Exp $
+// $Id: ESMC_FTable_F.C,v 1.15 2004/04/19 20:23:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -190,18 +190,24 @@ extern "C" {
    
 // VM-enabled CallBack loop     
      
-static void *ESMC_FTableCallEntryPointVMHop(void *vm, void *cargoin){
+static void *ESMC_FTableCallEntryPointVMHop(void *vm, void *cargo){
   // This routine is the first level that gets instantiated in new VM
   // The first argument must be of type (void *) and points to a derived
   // vmachine class object.
   
-  // pull out info from cargoin
-  char *name = ((cargotype *)cargoin)->name;
-  ESMC_FTable &ftable = *((cargotype *)cargoin)->ftable;  // reference to ftable
+  // pull out info from cargo
+  char *name = ((cargotype *)cargo)->name;
+  ESMC_FTable &ftable = *((cargotype *)cargo)->ftable;  // reference to ftable
   
   // Need to call a special call function which adds the VM to the interface
   int funcrc, localrc;
   localrc = ftable.ESMC_FTableCallVFuncPtr(name, (ESMC_VM*)vm, &funcrc);
+  
+  // TODO: Here I need to communicate between all child PET's to find out if
+  // any failed in the call to user supplied component method
+  
+  // put the return code into cargo   
+  ((cargotype *)cargo)->rc = funcrc;    // TODO cargo is shared between threads
   
   return NULL;
 }
