@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.8 2004/02/13 18:52:24 nscollins Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.9 2004/02/18 21:12:02 nscollins Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -32,7 +32,7 @@
     character (len = ESMF_MAXSTR) :: bname1, bname2, fname1, fname2
     type(ESMF_IOSpec) :: iospec
     type(ESMF_Field) :: field(10), returnedfield1, returnedfield2, simplefield
-    type(ESMF_Bundle) :: bundle1, bundle2, bundle3, bundle4
+    type(ESMF_Bundle) :: bundle1, bundle2, bundle3
     real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr1, f90ptr2
     integer :: counts(2)
     real(ESMF_KIND_R8) :: min_coord(2)
@@ -54,25 +54,19 @@
     field(1) = ESMF_FieldCreate(grid, arrayspec, name="pressure", rc=rc)
 !EOC
     
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
     field(2) = ESMF_FieldCreate(grid, arrayspec, name="temperature", rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
     field(3) = ESMF_FieldCreate(grid, arrayspec, name="heat flux", rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
     bundle1 = ESMF_BundleCreate(3, field, name="atmosphere data", rc=rc)
@@ -80,9 +74,7 @@
     print *, "Bundle example 1 returned"
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
 !-------------------------------------------------------------------------
@@ -193,12 +185,6 @@
 
 !BOC
      call ESMF_BundleDestroy(bundle3, rc=rc)
-!EOC
-
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-     call ESMF_BundleDestroy(bundle4, rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
