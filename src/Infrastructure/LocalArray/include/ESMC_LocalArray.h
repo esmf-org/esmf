@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.7 2004/02/11 19:05:06 nscollins Exp $
+// $Id: ESMC_LocalArray.h,v 1.8 2004/02/12 18:09:11 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -95,10 +95,12 @@ typedef enum {
 
 // private static data - address of fortran callback funcs
 extern "C" {
- void FTN(f_esmf_localarrayf90allocate)(ESMC_LocalArray**, int *, ESMC_DataType*, 
-                                       ESMC_DataKind*, int*, int*);
- void FTN(f_esmf_localarrayf90deallocate)(ESMC_LocalArray**, int*, ESMC_DataType*, 
-                                       ESMC_DataKind *, int*);
+ void FTN(f_esmf_localarrayf90allocate)(ESMC_LocalArray**, int *, 
+                                        ESMC_DataType*, ESMC_DataKind*, 
+                                        int *, int *, int *, int *);
+ void FTN(f_esmf_localarrayf90deallocate)(ESMC_LocalArray**, int*, 
+                                          ESMC_DataType*, ESMC_DataKind *, 
+                                          int *);
 }
 
 
