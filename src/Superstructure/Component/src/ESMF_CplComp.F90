@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.45 2004/06/21 22:52:04 cdeluca Exp $
+! $Id: ESMF_CplComp.F90,v 1.46 2004/08/13 21:54:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.45 2004/06/21 22:52:04 cdeluca Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.46 2004/08/13 21:54:34 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1336,7 +1336,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompWait"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CplCompWait - Wait for a CplComp to return
 !
 ! !INTERFACE:
@@ -1357,7 +1357,7 @@
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
     integer :: localrc                     ! local error localrc
 
