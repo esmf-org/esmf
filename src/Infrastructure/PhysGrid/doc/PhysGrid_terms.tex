@@ -1,4 +1,4 @@
-% $Id: PhysGrid_terms.tex,v 1.6 2002/04/23 14:02:42 cnh Exp $
+% $Id: PhysGrid_terms.tex,v 1.7 2002/04/23 15:13:48 cnh Exp $
 
 \begin{description}
 
@@ -37,9 +37,11 @@ area or a three dimensional volume.
 \subsection{ESMF physical grid notation}
 
 The symbol $G$ is used to refer to a physical grid. A physical grid, $G$, 
-consists of a series of zero or more mappings, $g$, between an 
-$n$-dimensional index space 
-$i_{g}^n$ and an $m$-dimensional physical location space $p_{g}^m$, so that
+consists of a series of zero or more distinct sets of mappings between index space
+and physical coordinate space. A set of mappings, $g$, consists of members
+that map between an index space of $n$-dimensional indices
+$\underline{i}_{g}$ and a location space of 
+$m$-dimensional locations $\underline{p}_{g}$, so that
 \begin{equation}
 G = g_{1}, g_{2} \ldots g_{n}
 \end{equation}
@@ -51,21 +53,24 @@ g_{n}: \underline{i} \mapsto \underline{p},~~~
   \underline{p} \subset p_{g} & \text{}
 \end{cases}
 \end{equation}
-The values $\underline{i}$ are elements from the valid index space
-$i_{G}$ while the elements $\underline{p}$ are elements
-from the valid physical grid coordinate space $p_{g}$.
+The mappings $\mapsto$ may be either numerical or functional.
+The values of $\underline{i}$ are elements from the valid index space
+$i_{g}$ for the mapping set $g$, while the elements $\underline{p}$ are elements
+from the valid physical grid coordinate space $p_{g}$ for $g$.
 In a grid point physical grid $\underline{i}$ could be
 an index with $n$ dimensions, while $\underline{p}$ could
 be a coordinate of $m$ dimensions. The sizes of 
 $n$ and $m$ will be depend on the type of physical 
 grid and on the mapping operator $g$. For example, an ungridded 
-grid could be represented with a one-dimensional index space $n=1$ 
-which maps to a three-dimensional physical space $m=3$.
-For spectral codes a physical grid is used both
+grid could be represented with a one-dimensional index space
+,for which $n=1$,
+which maps to a three-dimensional physical space, for which $m=3$.
+For spectral codes a physical grid can be used both
 to hold physical coordinate grids onto which inverse transforms
-convert and to hold information onn which wave numbers map
-to which index space coordinates.
+convert and to hold information on which wave numbers map
+to which index space coordinates in spectral space.
 If a grid is not modified then the mapping for a particular
 $\underline{i}$ will always return the same $\underline{p}$.
 However, there may be multiple $\underline{i}$ values that
 can return the same $\underline{p}$ value.
+

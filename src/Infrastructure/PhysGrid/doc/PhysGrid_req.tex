@@ -1,23 +1,56 @@
-% $Id: PhysGrid_req.tex,v 1.6 2002/04/23 13:38:30 cnh Exp $
+% $Id: PhysGrid_req.tex,v 1.7 2002/04/23 15:13:48 cnh Exp $
 %===============================================================================
 \req{Initialization of a Physical Grids}
+\begin{reqlist}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\
+{\bf Notes:} Two style of initialization are required for setting up the
+sets of mappings, $g$, for a PhysGrid. One is based on numerical values
+and one is based on functions. For numerical style setting of values
+a number of different forms are desirable for specifying physical space
+information. For functional form style both pre-defined ESMF supplied
+functions and user defined functions are desirable.
+\end{reqlist}
+
 \sreq{Initialization of a zero-sized Physical Grid}
 It should be possible to create a zero-sized physical grid.
 \begin{reqlist}
 {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\
 {\bf Notes:} A zero sized physical grid will be used to allow
-a valid (i.e. non-fault generating) physical grid operations on data which 
+valid (i.e. non-error or exception generating) physical grid operations on data which 
 does not have a realizable physical grid, for example linear algebra space data values.
 \end{reqlist}
-\sreq{Initialization by Numerical Values}
-In summary numerical initialization of a Physical grid is specified through a combination
+
+\sreq{It should be possible to Set a Physical Grid using Numerical Values}
+Numerical initialization of a Physical grid is specified through a combination
 of grid cell locations, grid cell areas and grid cell volumes.
 Mechanisms shall be provided to specify grids numerically i.e.
-using pre-calculated numerical values. The values required will be dependent on 
-both the component application and on the Regridding requirements associted with the component. 
-\ssreq{Initialization of grid cell locations}
+using numerical values pre-defined by component code (i.e. user code).
+The values required will be dependent on 
+the component application, the details of the grid being represented
+and on the Regridding requirements associted with the component. 
+\begin{reqlist}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:}
+\end{reqlist}
+
+\ssreq{Mechanisms should be provided for components to set grid cell locations}
+\begin{reqlist}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ 
+{\bf Notes: Locations in a mapping are to be given in standard, S.I., units as follows.
+For horizontal locations, coordinates of meters (Cartesian domain), degrees latitude
+and degrees longitude (speherical polar domain) and meters and degrees (Cylindrical
+coordinates} are used.
+\end{reqlist}
+
 \ssreq{Initialization of grid cell areas with vertex based numerical values}
+\begin{reqlist}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:}
+\end{reqlist}
+
 \ssreq{Initialization of grid cell areas with area based numerical values}
+\begin{reqlist}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:}
+\end{reqlist}
+
 \ssreq{Initialization of grid cell volumes with vertex based numerical values}
 \ssreq{Initialization of grid cell volumes with area based numerical values}
 \ssreq{Initialization of grid cell volumes with fractional extent}
@@ -50,7 +83,14 @@ a set of numerical values that are calculated by a component application.
 \sreq{Catchment Grid software-convention}
 \sreq{Ungridded Grid software-convention}
 \sreq{Mapping queries}
+\ssreq{Index based}
+\ssreq{Lines of constant index}
 \sreq{Inverse Mapping queries}
+\ssreq{Coordinate based}
+\ssreq{Cuts - Lines of constant coordinate}
+\sreq{Underlying Physical space extents}
+\ssreq{X low and X high for cartesian}
+\ssreq{R for sphere and cylinder}
 
 \req{Physical Grid Parallelism and Scalability}
 \sreq{Memory Footprint}
