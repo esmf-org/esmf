@@ -1,4 +1,4 @@
-! $Id: ESMF_class.F90,v 1.5 2002/10/10 20:19:26 nscollins Exp $
+! $Id: ESMF_class.F90,v 1.6 2002/10/10 21:40:11 eschwab Exp $
 !
 ! ESMF <Class> Module
 !
@@ -26,7 +26,7 @@
 !BOP
 ! !MODULE: ESMF_<Class>Mod - one line general statement about this class
 !
-! !PURPOSE:
+! !DESCRIPTION:
 !
 ! The code in this file implements ...
 !
@@ -96,7 +96,7 @@
 !-------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: ESMF_class.F90,v 1.5 2002/10/10 20:19:26 nscollins Exp $
+      character(*), parameter, private :: version = '$Id: ESMF_class.F90,v 1.6 2002/10/10 21:40:11 eschwab Exp $
 !-------------------------------------------------------------------------
 
 ! interface blocks for functions which are going to have a single
