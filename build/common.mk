@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.91 2005/02/03 22:58:53 svasquez Exp $
+#  $Id: common.mk,v 1.92 2005/02/07 17:17:51 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -175,6 +175,7 @@ ESMFLIB		= $(ESMF_LIBDIR)/libesmf.a
 SOURCE		= ${SOURCEC} ${SOURCEF}
 OBJS		= ${OBJSC} ${OBJSF}
 
+CONFIG_TESTS    = ${ESMF_TESTDIR}/tests.config
 ESMF_TESTSCRIPTS    = ${ESMF_TOP_DIR}/scripts/test_scripts
 DO_UT_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ut_results.pl -d $(ESMF_TESTDIR) 
 DO_EX_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ex_results.pl -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
@@ -627,6 +628,7 @@ check_system_tests:
 #-------------------------------------------------------------------------------
 
 tests: chkopts chkdir_tests build_libs
+	$(MAKE) MULTI=Multiprocessor config_tests
 	-$(MAKE) ACTION=tree_tests tree
 	$(MAKE) check_tests
 
@@ -636,6 +638,7 @@ tree_tests: tree_build_tests tree_run_tests
 # tests_uni
 #
 tests_uni: chkopts chkdir_tests
+	$(MAKE) MULTI=Uniprocessor config_tests
 	-$(MAKE) ACTION=tree_tests_uni tree
 	$(MAKE) check_tests
 
@@ -645,6 +648,7 @@ tree_tests_uni: tree_build_tests tree_run_tests_uni
 # build_tests
 #
 build_tests: chkopts chkdir_tests
+	$(MAKE) MULTI="" config_tests
 	-$(MAKE) ACTION=tree_build_tests tree
 
 tree_build_tests: $(TESTS_BUILD)
@@ -668,6 +672,7 @@ $(ESMC_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)
 # run_tests
 #
 run_tests:  chkopts chkdir_tests
+	-@echo "Multiprocessor" >> ${CONFIG_TESTS}
 	-$(MAKE) ACTION=tree_run_tests tree
 	$(MAKE) check_tests
 
@@ -677,10 +682,23 @@ tree_run_tests: $(TESTS_RUN)
 # run_tests_uni
 #
 run_tests_uni:  chkopts chkdir_tests
+	-@echo "Uniprocessor" >> ${CONFIG_TESTS}
 	-$(MAKE) ACTION=tree_run_tests_uni tree 
 	$(MAKE) check_tests
 
 tree_run_tests_uni: $(TESTS_RUN_UNI)
+
+#
+# echo into a file how the tests were built and run, so we can
+# check them correctly.
+#
+config_tests:
+	-@echo "# This file used by test scripts, please do not delete." > ${CONFIG_TESTS}
+ifeq ($(ESMF_EXHAUSTIVE),ON) 
+	-@echo "Exhaustive " ${MULTI} >> ${CONFIG_TESTS}
+else
+	-@echo "Non-exhaustive ${MULTI} >> ${CONFIG_TESTS}
+endif
 
 #
 # report statistics on tests
