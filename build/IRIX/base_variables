@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.9 2003/04/09 23:48:41 flanigan Exp $ 
+# $Id: base_variables,v 1.10 2003/04/11 17:13:06 jwolfe Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -46,10 +46,10 @@ CXX_CLINKER	   = CC -n32 -mp -Wl,-woff,84,-woff,85,-woff,134
 CXX_FLINKER	   = CC -n32 -mp -Wl,-woff,84,-woff,85,-woff,134
 CXX_CCV		   = CC -version
 CXX_SYS_LIB	   = -lfpe -lcomplex -lfortran -lftn -lfastm -lmalloc 
-C_CXXF90LD         = CC -n32
-C_F90CXXLD         = f90 -n32 
+C_CXXF90LD         = CC -n32 /usr/lib32/c++init.o
+C_F90CXXLD         = f90 -n32 /usr/lib32/c++init.o
 C_CXXF90LIBS       = -lftn90 -lftn -lfortran
-C_F90CXXLIBS       = -lCsup -lC -lc
+C_F90CXXLIBS       = -lCsup -lC -lc 
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g
 GCXX_FOPTFLAGS	   = -g
