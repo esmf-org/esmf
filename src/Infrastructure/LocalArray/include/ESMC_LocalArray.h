@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.5 2003/12/19 21:44:09 nscollins Exp $
+// $Id: ESMC_LocalArray.h,v 1.6 2004/02/11 18:40:38 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,6 +55,12 @@ struct c_F90ptr {
 #endif
 };
 
+// THIS MUST MATCH F90 DECLARATION in ../interface file
+struct ESMC_ArraySpec {
+    int rank;
+    ESMC_DataType type;
+    ESMC_DataKind kind;    
+};
 
 // !PRIVATE TYPES:
 

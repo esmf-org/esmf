@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.5 2003/12/19 21:44:59 nscollins Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.6 2004/02/11 18:40:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -155,8 +155,8 @@ ArrayAllTypeMacro()
       public ESMF_LocalArrayCreate
       public ESMF_LocalArrayDestroy
  
-      public ESMF_LocalArraySpecInit
-      public ESMF_LocalArraySpecGet
+      public ESMF_ArraySpecInit
+      public ESMF_ArraySpecGet
 
       public ESMF_LocalArraySetData, ESMF_LocalArrayGetData
       public ESMF_LocalArraySetInfo, ESMF_LocalArrayGetInfo
@@ -182,7 +182,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.5 2003/12/19 21:44:59 nscollins Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.6 2004/02/11 18:40:40 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -526,7 +526,7 @@ end function
           rc = ESMF_FAILURE
         endif
 
-        call ESMF_LocalArraySpecGet(spec, rank, type, kind, status)
+        call ESMF_ArraySpecGet(spec, rank, type, kind, status)
         if (status .ne. ESMF_SUCCESS) return
         
         ! Call the list function to make the array
@@ -1313,7 +1313,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-     subroutine ESMF_LocalArraySpecInit(as, rank, type, kind, rc)
+     subroutine ESMF_ArraySpecInit(as, rank, type, kind, rc)
 !
 !
 ! !ARGUMENTS:
@@ -1335,15 +1335,15 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !    Uninitialized array spec.
 !
 !  \item[rank]
-!    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 5D.
+!    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 7D.
 !
 !  \item[type]
-!    {\tt ESMF\_LocalArray} type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
+!    {\tt ESMF\_Array} type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
 !    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
 !    {\tt ESMF\_DATA\_CHARACTER}.
 !
 !  \item[kind]
-!    {\tt ESMF\_LocalArray} kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
+!    {\tt ESMF\_Array} kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
 !    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
 !    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
 !
@@ -1375,7 +1375,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
           as%rank = rank
         else
           status = ESMF_FAILURE
-          print *, "ERROR in ESMF_LocalArraySpecInit: bad rank"
+          print *, "ERROR in ESMF_ArraySpecInit: bad rank"
           return
         endif
         ! TODO: similar for type and kind
@@ -1384,7 +1384,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_LocalArraySpecInit
+        end subroutine ESMF_ArraySpecInit
 
 
 
@@ -1509,7 +1509,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_LocalArraySpecGet(as, rank, type, kind, rc)
+      subroutine ESMF_ArraySpecGet(as, rank, type, kind, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_ArraySpec), intent(in) :: as
@@ -1528,16 +1528,16 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !    An {\tt ESMF\_ArraySpec} object.
 !
 !  \item[rank]
-!    {\tt ESMF\_LocalArray} rank (dimensionality, 1D, 2D, etc).  Maximum
-!    allowed is 5D.
+!    {\tt ESMF\_Array} rank (dimensionality, 1D, 2D, etc).  Maximum
+!    allowed is 7D.
 !
 !  \item[type]
-!    {\tt ESMF\_LocalArray} type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
+!    {\tt ESMF\_Array} type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
 !    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
 !    {\tt ESMF\_DATA\_CHARACTER}.
 !
 !  \item[kind]
-!    {\tt ESMF\_LocalArray} kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
+!    {\tt ESMF\_Array} kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
 !    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
 !    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
 !
@@ -1569,7 +1569,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_LocalArraySpecGet
+        end subroutine ESMF_ArraySpecGet
 
 
 !------------------------------------------------------------------------------
