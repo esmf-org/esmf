@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.15 2003/10/22 13:15:22 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.16 2003/12/19 21:42:58 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -20,12 +20,13 @@
 //-----------------------------------------------------------------------------
 //
  // associated class definition file
-#include <ESMC_Base.h>
+#include "ESMC_Base.h"
+#include <string.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.15 2003/10/22 13:15:22 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.16 2003/12/19 21:42:58 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -292,6 +293,65 @@ static int globalCount = 0;
   return baseStatus;
 
 }  // end ESMC_BaseGetStatus
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseSetName - set Base class name
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseSetName(
+// 
+// !RETURN VALUE:
+//    none
+// 
+// !ARGUMENTS:
+      char *name,           // in - base name to set
+      char *context) {      // in - context in which name should be unique
+// 
+// !DESCRIPTION:
+//     accessor to base class name
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+  static int seqnum = 1;      // fortran gets evens, C++ odds
+ 
+  // no name, no context:  generate a name "globalXXX" where xxx is a seq num
+  // no name, but a context: name is contextXXX with the seq num again
+  // name given: use it as is
+  if (!name) {
+    if (!context) 
+      sprintf(baseName, "global%03d", seqnum); 
+    else
+      sprintf(baseName, "%s%03d", context, seqnum);
+    
+    seqnum += 2;   // fortran gets evens, C++ gets odds
+  } else
+      strncpy(baseName, name, sizeof(baseName));
+
+}  // end ESMC_BaseSetName
+ 
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseGetName - get Base class status
+//
+// !INTERFACE:
+      char *ESMC_Base::ESMC_BaseGetName(void) const {
+// 
+// !RETURN VALUE:
+//    char pointer to name
+// 
+// !ARGUMENTS:
+//    none
+// 
+// !DESCRIPTION:
+//     accessor to base class status
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+  return (char * const)baseName;
+
+}  // end ESMC_BaseGetName
 
 //-----------------------------------------------------------------------------
 // Misc Utility methods

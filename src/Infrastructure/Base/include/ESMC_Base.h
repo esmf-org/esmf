@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.35 2003/10/22 13:15:22 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.36 2003/12/19 21:42:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -150,17 +150,20 @@ class ESMC_DomainList {
 
 // !PRIVATE TYPES:
 
- // class declaration type
+ // class declaration type.  WARNING: this must match layout in memory
+ // corresponding F90 base derived type.  do not change one without
+ // changing the other.
 class ESMC_Base
 {
-  private:
-    int attrCount;            // number of attributes in list
-    ESMC_Attribute *attr;     // attribute list
-
   protected:
     int           ID;         // unique ID of this instance
     int           refCount;   // number of references to this instance
     ESMC_Status   baseStatus; // status of an instance of Base derived class
+    char          baseName[ESMF_MAXSTR];  // object name
+
+  private:
+    int attrCount;            // number of attributes in list
+    ESMC_Attribute *attr;     // attribute list
 
 // !PUBLIC MEMBER FUNCTIONS:
   
@@ -196,6 +199,10 @@ class ESMC_Base
     void        ESMC_BaseSetStatus(ESMC_Status status);
     ESMC_Status ESMC_BaseGetStatus(void) const;
  
+    // accessors to base name
+    int  ESMC_BaseSetName(char *name, char *context);
+    char *ESMC_BaseGetName(void) const;
+
     // optional Read/Write methods for any ESMF class
     virtual int ESMC_Read(void);
     virtual int ESMC_Write(void) const;

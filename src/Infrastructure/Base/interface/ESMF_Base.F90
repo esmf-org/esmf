@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.69 2003/11/10 23:11:37 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.70 2003/12/19 21:42:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -218,6 +218,8 @@
 
 !------------------------------------------------------------------------------
 !
+      ! WARNING: this must match layout in memory for C++ base object.
+      ! do not change one without changing the other.
       type ESMF_Base
       sequence
       private
@@ -354,7 +356,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.69 2003/11/10 23:11:37 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.70 2003/12/19 21:42:57 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -604,18 +606,18 @@ end function
 !           derived type object.  It is expected that all specialized 
 !           derived types will include a {\tt Base} object as the first
 !           entry.
-!     \item [[name]]
+!     \item [{[name]}]
 !           Object name.  An error will be returned if a duplicate name 
 !           is specified.  If a name is not given a unique name will be
 !           generated and can be queried by the {\tt ESMF_GetName} routine.
-!     \item [[namespace]]
+!     \item [{[namespace]}]
 !           Object namespace (e.g. "Application", "Component", "Grid", etc).
 !           If given, the name will be checked that it is unique within
 !           this namespace.  If not given, the generated name will be 
 !           unique within this namespace.  If namespace is not specified,
 !           a default "global" namespace will be assumed and the same rules
 !           for names will be followed.
-!     \item [[rc]]
+!     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}
@@ -630,6 +632,7 @@ end function
       character (len = ESMF_MAXSTR) :: defaultname  ! Name if not given
       integer, save :: seqnum = 0       ! HACK - generate uniq names
                                         ! but not coordinated across procs
+                                        ! fortran gets evens, C++ odds
 
 !     !Initialize return code
       rcpresent = .FALSE.
@@ -654,7 +657,7 @@ end function
 
           write(defaultname, 20) trim(ournamespace), seqnum
 20        format(A,I3.3)
-          seqnum = seqnum + 1
+          seqnum = seqnum + 2   ! C gets odds, fortran evens
           anytype%name = defaultname
       else
           anytype%name = name
