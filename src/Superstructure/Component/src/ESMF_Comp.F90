@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.83 2004/04/14 17:47:40 jwolfe Exp $
+! $Id: ESMF_Comp.F90,v 1.84 2004/04/16 23:42:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -195,7 +195,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.83 2004/04/14 17:47:40 jwolfe Exp $'
+      '$Id: ESMF_Comp.F90,v 1.84 2004/04/16 23:42:49 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -356,13 +356,22 @@ end function
           return
         endif
 
+        ! parent VM
+        if (present(vm)) then
+          compp%vm_parent = vm
+!          print *, 'ESMF_CompConstruct, setting up compp%vm_parent'
+        else
+          ! When ESMF is fully VM-enabled this should be an error!
+          call ESMF_VMGetGlobal(compp%vm_parent)
+        endif
+      
         ! either store or create a delayout
         if (present(delayout)) then
           compp%delayout = delayout
         else
           ! TODO: error check for presence of VM?
           ! Create a default 1xN delayout over all processors.
-          compp%delayout = ESMF_newDELayoutCreate(vm, rc=status) 
+          compp%delayout = ESMF_newDELayoutCreate(compp%vm_parent, rc=status) 
         endif 
 
         ! for gridded components, the model type it represents
@@ -427,14 +436,6 @@ end function
           !!compp%clock = ESMF_NULL_POINTER
         endif
 
-        ! parent VM
-        if (present(vm)) then
-          compp%vm_parent = vm
-!          print *, 'ESMF_CompConstruct, setting up compp%vm_parent'
-        else
-          ! When ESMF is fully VM-enabled this should be an error!
-        endif
-      
         ! petlist
         if (present(petlist)) then
           compp%npetlist = size(petlist)
@@ -448,10 +449,8 @@ end function
         endif
       
         ! instantiate a default VMPlan
-        if (present(vm)) then
-          call ESMF_VMPlanConstruct(compp%vmplan, vm, compp%npetlist, &
-            compp%petlist)
-        endif
+        call ESMF_VMPlanConstruct(compp%vmplan, compp%vm_parent, &
+                                  compp%npetlist, compp%petlist)
 
         ! Create an empty subroutine/internal state table.
         call c_ESMC_FTableCreate(compp%this, status) 
