@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.37 2003/05/07 16:49:09 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.38 2003/06/11 22:13:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -316,7 +316,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.37 2003/05/07 16:49:09 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.38 2003/06/11 22:13:34 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -578,7 +578,10 @@ end function
 !EOP
 ! !REQUIREMENTS:  FLD1.5, FLD1.5.3
       logical :: rcpresent                          ! Return code present   
+      character (len = ESMF_MAXSTR) :: ournamespace ! Namespace if not given
       character (len = ESMF_MAXSTR) :: defaultname  ! Name if not given
+      integer, save :: seqnum = 0       ! HACK - generate uniq names
+                                        ! but not coordinated across procs
 
 !     !Initialize return code
       rcpresent = .FALSE.
@@ -592,9 +595,18 @@ end function
 !     !   be unique within that namespace.  Example namespaces could
 !     !   be: Applications, Components, Fields/Bundles, Grids.
 !      
+!     ! Construct a default namespace if one is not given
+      if((.not. present(namespace)) .or. (namespace .eq. "")) then
+          ournamespace = "global"
+      else
+          ournamespace = namespace
+      endif
 !     ! Construct a default name if one is not given
       if((.not. present(name)) .or. (name .eq. "")) then
-          defaultname = "default_name"
+
+          write(defaultname, 20) trim(ournamespace), seqnum
+20        format(A,I3.3)
+          seqnum = seqnum + 1
           anytype%name = defaultname
       else
           anytype%name = name
