@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.67 2004/06/21 22:52:05 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.68 2004/07/21 22:31:39 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -271,7 +271,7 @@
       ! TODO: this needs to be renamed.
       !public ESMF_StateValidate          ! is import state ready to read?
  
-      public ESMF_StateAddAttribute       ! Set and Get Attributes
+      public ESMF_StateSetAttribute       ! Set and Get Attributes
       public ESMF_StateGetAttribute       !  
 
       public ESMF_StateGetAttributeCount  ! number of Attributes
@@ -289,7 +289,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.67 2004/06/21 22:52:05 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.68 2004/07/21 22:31:39 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -447,19 +447,23 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateAddAttribute - Set a State attribute
+! !IROUTINE: ESMF_StateSetAttribute - Set a State attribute
 !
 ! !INTERFACE:
-      interface ESMF_StateAddAttribute 
+      interface ESMF_StateSetAttribute 
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_StateAddIntAttr
-        module procedure ESMF_StateAddIntListAttr
-        module procedure ESMF_StateAddRealAttr
-        module procedure ESMF_StateAddRealListAttr
-        module procedure ESMF_StateAddLogicalAttr
-        module procedure ESMF_StateAddLogicalListAttr
-        module procedure ESMF_StateAddCharAttr
+        module procedure ESMF_StateSetInt4Attr
+        module procedure ESMF_StateSetInt4ListAttr
+        module procedure ESMF_StateSetInt8Attr
+        module procedure ESMF_StateSetInt8ListAttr
+        module procedure ESMF_StateSetReal4Attr
+        module procedure ESMF_StateSetReal4ListAttr
+        module procedure ESMF_StateSetReal8Attr
+        module procedure ESMF_StateSetReal8ListAttr
+        module procedure ESMF_StateSetLogicalAttr
+        module procedure ESMF_StateSetLogicalListAttr
+        module procedure ESMF_StateSetCharAttr
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that attach
@@ -476,10 +480,14 @@ end interface
       interface ESMF_StateGetAttribute 
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_StateGetIntAttr
-        module procedure ESMF_StateGetIntListAttr
-        module procedure ESMF_StateGetRealAttr
-        module procedure ESMF_StateGetRealListAttr
+        module procedure ESMF_StateGetInt4Attr
+        module procedure ESMF_StateGetInt4ListAttr
+        module procedure ESMF_StateGetInt8Attr
+        module procedure ESMF_StateGetInt8ListAttr
+        module procedure ESMF_StateGetReal4Attr
+        module procedure ESMF_StateGetReal4ListAttr
+        module procedure ESMF_StateGetReal8Attr
+        module procedure ESMF_StateGetReal8ListAttr
         module procedure ESMF_StateGetLogicalAttr
         module procedure ESMF_StateGetLogicalListAttr
         module procedure ESMF_StateGetCharAttr
@@ -702,408 +710,6 @@ end function
         call ESMF_StateClassAddArrayList(state%statep, arrayCount, arrayList, rc)
 
         end subroutine ESMF_StateAddArrayList
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateAddIntAttr"
-!BOP
-! !IROUTINE: ESMF_StateAddAttribute - Add an integer attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateAddIntAttr(state, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an integer attribute to the {\tt state}.
-!      The attribute has a {\tt name} and a {\tt value}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!       An {\tt ESMF\_State} object.
-!     \item [name]
-!       The name of the attribute to add.
-!     \item [value]
-!       The integer value of the attribute to add.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-      integer :: localrc                          ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
-
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_INTEGER, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateAddIntAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateAddIntListAttr"
-!BOP
-! !IROUTINE: ESMF_StateAddAttribute - Add an integer list attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateAddIntListAttr(state, name, count, valueList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      integer, dimension(:), intent(in) :: valueList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Attaches an integer list attribute to the {\tt state}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
-!     The number of integer items in the {\tt valueList} is
-!     given by {\tt count}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!       An {\tt ESMF\_State} object.
-!     \item [name]
-!       The name of the attribute to add.
-!     \item [count]
-!       The number of integers in the {\tt valueList}.
-!     \item [valueList]
-!       The integer values of the attribute to add.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!      \end{description}
-!
-!
-!EOP
-
-      integer :: localrc                          ! Error status
-      integer :: limit
-      logical :: dummy
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
-  
-      limit = size(valueList)
-      if (count > limit) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                      "count longer than valueList", &
-                                      ESMF_CONTEXT, rc)
-          return
-      endif
-
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_INTEGER, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateAddIntListAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateAddRealAttr"
-!BOP
-! !IROUTINE: ESMF_StateAddAttribute - Add a real attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateAddRealAttr(state, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      real, intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a real attribute to the {\tt state}.
-!      The attribute has a {\tt name} and a {\tt value}.
-!      
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!       An {\tt ESMF\_State} object.
-!     \item [name]
-!       The name of the attribute to add.
-!     \item [value]
-!       The real value of the attribute to add.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-      integer :: localrc                          ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
-
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_REAL, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateAddRealAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateAddRealListAttr"
-!BOP
-! !IROUTINE: ESMF_StateAddAttribute - Add a real list attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateAddRealListAttr(state, name, count, valueList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      real, dimension(:), intent(in) :: valueList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Attaches a real list attribute to the {\tt state}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
-!     The number of real items in the {\tt valueList} is
-!     given by {\tt count}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!       An {\tt ESMF\_State} object.
-!     \item [name]
-!       The name of the attribute to add.
-!     \item [count]
-!       The number of reals in the {\tt valueList}.
-!     \item [value]
-!       The real values of the attribute to add.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-      integer :: localrc                           ! Error status
-      integer :: limit
-      logical :: dummy
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
-
-      limit = size(valueList)
-      if (count > limit) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                      "count longer than valueList", &
-                                      ESMF_CONTEXT, rc)
-          return
-      endif
-
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_REAL, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateAddRealListAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateAddLogicalAttr"
-!BOP
-! !IROUTINE: ESMF_StateAddAttribute - Add a logical attribute 
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateAddLogicalAttr(state, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Attaches a logical attribute to the {\tt state}.
-!     The attribute has a {\tt name} and a {\tt value}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!      An {\tt ESMF\_State} object.
-!     \item [name]
-!      The name of the attribute to add.
-!     \item [value]
-!       The logical true/false value of the attribute to add.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-      integer :: localrc                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
-
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateAddLogicalAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateAddLogicalListAttr"
-!BOP
-! !IROUTINE: ESMF_StateAddAttribute - Add a logical list attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateAddLogicalListAttr(state, name, count, valueList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(in) :: valueList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Attaches a logical list attribute to the {\tt state}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
-!     The number of logical items in the {\tt valueList} is
-!     given by {\tt count}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!       An {\tt ESMF\_State} object.
-!     \item [name]
-!       The name of the attribute to add.
-!     \item [count]
-!       The number of logicals in the {\tt valueList}.
-!     \item [valueList]
-!       The logical true/false values of the attribute.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-      integer :: localrc                           ! Error status
-      integer :: limit
-      logical :: dummy
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
-
-      limit = size(valueList)
-      if (count > limit) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                      "count longer than valueList", &
-                                      ESMF_CONTEXT, rc)
-          return
-      endif
-
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateAddLogicalListAttr
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateAddCharAttr"
-!BOP
-! !IROUTINE: ESMF_StateAddAttribute - Add a character attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateAddCharAttr(state, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      character (len = *), intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Attaches a character attribute to the {\tt state}.
-!     The attribute has a {\tt name} and a {\tt value}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!      An {\tt ESMF\_State} object.
-!     \item [name]
-!      The name of the attribute to add.
-!     \item [value]
-!      The character value of the attribute to add.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-      integer :: localrc                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
-
-      call c_ESMC_AttributeSetChar(state%statep%base, name, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateAddCharAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1864,23 +1470,23 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateGetIntAttr"
+#define ESMF_METHOD "ESMF_StateGetInt4Attr"
 !BOP
-! !IROUTINE: ESMF_StateGetAttribute - Retrieve an integer attribute 
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve a 4-byte integer attribute 
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttribute()
-      subroutine ESMF_StateGetIntAttr(state, name, value, rc)
+      subroutine ESMF_StateGetInt4Attr(state, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
       character (len = *), intent(in) :: name
-      integer, intent(out) :: value
+      integer(ESMF_KIND_I4), intent(out) :: value
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from the {\tt state}.
+!      Returns a 4-byte integer attribute from the {\tt state}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1889,7 +1495,7 @@ end function
 !     \item [name]
 !      The name of the attribute to retrieve.
 !     \item [value]
-!      The integer value of the named attribute.
+!      The 4-byte integer value of the named attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1902,35 +1508,36 @@ end function
       if (present(rc)) rc = ESMF_FAILURE
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_INTEGER, 1, value, localrc)
+                                    ESMF_DATA_INTEGER, ESMF_I4, 1, &
+                                    value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateGetIntAttr
+      end subroutine ESMF_StateGetInt4Attr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateGetIntListAttr"
+#define ESMF_METHOD "ESMF_StateGetInt4ListAttr"
 !BOP
-! !IROUTINE: ESMF_StateGetAttribute - Retrieve an integer list attribute
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve a 4-byte integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttribute()
-      subroutine ESMF_StateGetIntListAttr(state, name, count, valueList, rc)
+      subroutine ESMF_StateGetInt4ListAttr(state, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      integer, dimension(:), intent(out) :: valueList
+      integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns an integer list attribute from the {\tt state}.
+!      Returns a 4-byte integer list attribute from the {\tt state}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1941,7 +1548,7 @@ end function
 !     \item [count]
 !      The number of values in the attribute.
 !     \item [valueList]
-!      The integer values of the named attribute.
+!      The 4-byte integer values of the named attribute.
 !      The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1966,34 +1573,150 @@ end function
       endif
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, count, &
-                                    ESMF_DATA_INTEGER, count, valueList, localrc)
+                                    ESMF_DATA_INTEGER, ESMF_I4, count, &
+                                    valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateGetIntListAttr
+      end subroutine ESMF_StateGetInt4ListAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateGetRealAttr"
+#define ESMF_METHOD "ESMF_StateGetInt8Attr"
 !BOP
-! !IROUTINE: ESMF_StateGetAttribute - Retrieve a real attribute
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve an 8-byte integer attribute 
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttribute()
-      subroutine ESMF_StateGetRealAttr(state, name, value, rc)
+      subroutine ESMF_StateGetInt8Attr(state, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
       character (len = *), intent(in) :: name
-      real, intent(out) :: value
+      integer(ESMF_KIND_I8), intent(out) :: value
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from the {\tt state}.
+!      Returns an 8-byte integer attribute from the {\tt state}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!      An {\tt ESMF\_State} object.
+!     \item [name]
+!      The name of the attribute to retrieve.
+!     \item [value]
+!      The 8-byte integer value of the named attribute.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+      integer :: localrc                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, 1, &
+                                    value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetInt8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetInt8ListAttr"
+!BOP
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve an 8-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateGetAttribute()
+      subroutine ESMF_StateGetInt8ListAttr(state, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an 8-byte integer list attribute from the {\tt state}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!      An {\tt ESMF\_State} object.
+!     \item [name]
+!      The name of the attribute to retrieve.
+!     \item [count]
+!      The number of values in the attribute.
+!     \item [valueList]
+!      The 8-byte integer values of the named attribute.
+!      The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                           ! Error status
+      integer :: limit
+      logical :: dummy
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                                      "count longer than valueList", &
+                                      ESMF_CONTEXT, rc)
+          return
+      endif
+
+      call c_ESMC_AttributeGetValue(state%statep%base, name, count, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetInt8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetReal4Attr"
+!BOP
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve a 4-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateGetAttribute()
+      subroutine ESMF_StateGetReal4Attr(state, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R4), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a 4-byte real attribute from the {\tt state}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2002,7 +1725,7 @@ end function
 !     \item [name]
 !      The name of the attribute to retrieve.
 !     \item [value]
-!      The real value of the named attribute.
+!      The 4-byte real value of the named attribute.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2016,35 +1739,35 @@ end function
       if (present(rc)) rc = ESMF_FAILURE
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_REAL, 1, value, localrc)
+                                    ESMF_DATA_REAL, ESMF_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateGetRealAttr
+      end subroutine ESMF_StateGetReal4Attr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateGetRealListAttr"
+#define ESMF_METHOD "ESMF_StateGetReal4ListAttr"
 !BOP
-! !IROUTINE: ESMF_StateGetAttribute - Retrieve a real list attribute
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve a 4-byte real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttribute()
-      subroutine ESMF_StateGetRealListAttr(state, name, count, valueList, rc)
+      subroutine ESMF_StateGetReal4ListAttr(state, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      real, dimension(:), intent(out) :: valueList
+      real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns a list of real attributes from the {\tt state}.
+!      Returns a list of 4-byte real attributes from the {\tt state}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2055,7 +1778,7 @@ end function
 !     \item [count]
 !      The number of values in the attribute.
 !     \item [valueList]
-!      The real values of the named attribute.  
+!      The 4-byte real values of the named attribute.  
 !      The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2080,14 +1803,130 @@ end function
       endif
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_REAL, count, valueList, localrc)
+                                    ESMF_DATA_REAL, ESMF_R4, count, &
+                                    valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateGetRealListAttr
+      end subroutine ESMF_StateGetReal4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetReal8Attr"
+!BOP
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve an 8-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateGetAttribute()
+      subroutine ESMF_StateGetReal8Attr(state, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R8), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an 8-byte real attribute from the {\tt state}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!      An {\tt ESMF\_State} object.
+!     \item [name]
+!      The name of the attribute to retrieve.
+!     \item [value]
+!      The 8-byte real value of the named attribute.
+!     \item [{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R8, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetReal8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetReal8ListAttr"
+!BOP
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve an 8-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateGetAttribute()
+      subroutine ESMF_StateGetReal8ListAttr(state, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a list of 8-byte real attributes from the {\tt state}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!      An {\tt ESMF\_State} object.
+!     \item [name]
+!      The name of the attribute to retrieve.
+!     \item [count]
+!      The number of values in the attribute.
+!     \item [valueList]
+!      The 8-byte real values of the named attribute.  
+!      The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                           ! Error status
+      integer :: limit
+      logical :: dummy
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                                      "count longer than valueList", &
+                                      ESMF_CONTEXT, rc)
+          return
+      endif
+
+      call c_ESMC_AttributeGetValue(state%statep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R8, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetReal8ListAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2130,7 +1969,8 @@ end function
       if (present(rc)) rc = ESMF_FAILURE
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, 1, value, localrc)
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
+                                    value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2194,7 +2034,8 @@ end function
       endif
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, valueList, localrc)
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, count, &
+                                    valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2307,34 +2148,44 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttributeInfo()
-      subroutine ESMF_StateGetAttrInfoByName(state, name, datatype, count, rc)
+      subroutine ESMF_StateGetAttrInfoByName(state, name, datatype, &
+                                             datakind, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
       character(len=*), intent(in) :: name
       type(ESMF_DataType), intent(out), optional :: datatype
+      type(ESMF_DataKind), intent(out), optional :: datakind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns information associated with the named
-!      attribute, including {\tt datatype} and 
-!      {\tt count}.
+!      Returns information associated with the named attribute,
+!      including {\tt datatype}, {\tt datakind} (if applicable),
+!      and item {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
-!      An {\tt ESMF\_State} object.
+!           An {\tt ESMF\_State} object.
 !     \item [name]
-!      The name of the attribute to query.
-!     \item [datatype]
-!      The  datatype of the attribute.
-!     \item [count]
-!      The number of items in this attribute.  For character types,
-!       the length of the character string.
+!           The name of the attribute to query.
+!     \item [{[datatype]}]
+!           The data type of the attribute. One of the values
+!           {\tt ESMF\_DATA\_INTEGER}, {\tt ESMF\_DATA\_REAL},
+!           {\tt ESMF\_DATA\_LOGICAL}, or {\tt ESMF\_DATA\_CHARACTER}.
+!     \item [{[datakind]}]
+!           The datakind of the attribute, if attribute is type
+!           {\tt ESMF\_DATA\_INTEGER} or {\tt ESMF\_DATA\_REAL}.
+!           One of the values {\tt ESMF\_I4}, {\tt ESMF\_I8}, {\tt ESMF\_R4},
+!           or {\tt ESMF\_R8}.
+!           For all other types the value {\tt ESMF\_NOKIND} is returned.
+!     \item [{[count]}]
+!           The number of items in this attribute.  For character types,
+!           the length of the character string.
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2342,18 +2193,20 @@ end function
 
       integer :: localrc                           ! Error status
       type(ESMF_DataType) :: localDt
+      type(ESMF_DataKind) :: localDk
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
       call c_ESMC_AttributeGetAttrInfoName(state%statep%base, name, &
-                                           localDt, localCount, localrc)
+                                           localDt, localDk, localCount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       if (present(datatype)) datatype = localDt
+      if (present(datakind)) datakind = localDk
       if (present(count)) count = localCount
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -2368,37 +2221,47 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttributeInfo()
-      subroutine ESMF_StateGetAttrInfoByNum(state, attributeIndex, name, datatype, count, rc)
+      subroutine ESMF_StateGetAttrInfoByNum(state, attributeIndex, name, &
+                                            datatype, datakind, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out), optional :: name
       type(ESMF_DataType), intent(out), optional :: datatype
+      type(ESMF_DataKind), intent(out), optional :: datakind
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!     Returns information about an attribute by specifying 
-!     an ordinal index number.   Attributes with unknown names
-!     can be queried using this routine.
+!      Returns information associated with the indexed attribute,
+!      including {\tt datatype}, {\tt datakind} (if applicable),
+!      and item {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
-!      An {\tt ESMF\_State} object.
+!           An {\tt ESMF\_State} object.
 !     \item [attributeIndex]
-!      The index number of the attribute to query.
+!           The index number of the attribute to query.
 !     \item [name]
-!       Returns the name of the attribute.
-!     \item [datatype]
-!       Returns the datatype of the attribute.
-!     \item [count]
-!       Returns the number of items in this attribute.  For character types,
-!       this is the length of the character string.
+!           Returns the name of the attribute.
+!     \item [{[datatype]}]
+!           The data type of the attribute. One of the values
+!           {\tt ESMF\_DATA\_INTEGER}, {\tt ESMF\_DATA\_REAL},
+!           {\tt ESMF\_DATA\_LOGICAL}, or {\tt ESMF\_DATA\_CHARACTER}.
+!     \item [{[datakind]}]
+!           The datakind of the attribute, if attribute is type
+!           {\tt ESMF\_DATA\_INTEGER} or {\tt ESMF\_DATA\_REAL}.
+!           One of the values {\tt ESMF\_I4}, {\tt ESMF\_I8}, {\tt ESMF\_R4},
+!           or {\tt ESMF\_R8}.
+!           For all other types the value {\tt ESMF\_NOKIND} is returned.
+!     \item [{[count]}]
+!           Returns the number of items in this attribute.  For character types,
+!           this is the length of the character string.
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -2407,19 +2270,22 @@ end function
       integer :: localrc                           ! Error status
       character(len=ESMF_MAXSTR) :: localName
       type(ESMF_DataType) :: localDt
+      type(ESMF_DataKind) :: localDk
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
       call c_ESMC_AttributeGetAttrInfoNum(state%statep%base, attributeIndex, &
-                                        localName, localDt, localCount, localrc)
+                                          localName, localDt, localDk, &
+                                          localCount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       if (present(name)) name = localName
       if (present(datatype)) datatype = localDt
+      if (present(datakind)) datakind = localDk
       if (present(count)) count = localCount
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -3107,6 +2973,651 @@ end function
         ESMF_StateReadRestart = a 
  
         end function ESMF_StateReadRestart
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateSetInt4Attr"
+!BOP
+! !IROUTINE: ESMF_StateSetAttribute - Set a 4-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
+      subroutine ESMF_StateSetInt4Attr(state, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I4), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a 4-byte integer attribute to the {\tt state}.
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [name]
+!       The name of the attribute to set.
+!     \item [value]
+!       The 4-byte integer value of the attribute to set.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                          ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I4, 1, &
+                                    value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateSetInt4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateSetInt4ListAttr"
+!BOP
+! !IROUTINE: ESMF_StateSetAttribute - Set a 4-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
+      subroutine ESMF_StateSetInt4ListAttr(state, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a 4-byte integer list attribute to the {\tt state}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is
+!     given by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [name]
+!       The name of the attribute to set.
+!     \item [count]
+!       The number of integers in the {\tt valueList}.
+!     \item [valueList]
+!       The 4-byte integer values of the attribute to set.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                          ! Error status
+      integer :: limit
+      logical :: dummy
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+  
+      limit = size(valueList)
+      if (count > limit) then
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                                      "count longer than valueList", &
+                                      ESMF_CONTEXT, rc)
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I4, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateSetInt4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateSetInt8Attr"
+!BOP
+! !IROUTINE: ESMF_StateSetAttribute - Set an 8-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
+      subroutine ESMF_StateSetInt8Attr(state, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I8), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an 8-byte integer attribute to the {\tt state}.
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [name]
+!       The name of the attribute to set.
+!     \item [value]
+!       The 8-byte integer value of the attribute to set.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                          ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, 1, &
+                                    value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateSetInt8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateSetInt8ListAttr"
+!BOP
+! !IROUTINE: ESMF_StateSetAttribute - Set an 8-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
+      subroutine ESMF_StateSetInt8ListAttr(state, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches an 8-byte integer list attribute to the {\tt state}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is
+!     given by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [name]
+!       The name of the attribute to set.
+!     \item [count]
+!       The number of integers in the {\tt valueList}.
+!     \item [valueList]
+!       The 8-byte integer values of the attribute to set.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                          ! Error status
+      integer :: limit
+      logical :: dummy
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+  
+      limit = size(valueList)
+      if (count > limit) then
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                                      "count longer than valueList", &
+                                      ESMF_CONTEXT, rc)
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateSetInt8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateSetReal4Attr"
+!BOP
+! !IROUTINE: ESMF_StateSetAttribute - Set a 4-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
+      subroutine ESMF_StateSetReal4Attr(state, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R4), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a 4-byte real attribute to the {\tt state}.
+!      The attribute has a {\tt name} and a {\tt value}.
+!      
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [name]
+!       The name of the attribute to set.
+!     \item [value]
+!       The 4-byte real value of the attribute to set.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                          ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R4, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateSetReal4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateSetReal4ListAttr"
+!BOP
+! !IROUTINE: ESMF_StateSetAttribute - Set a 4-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
+      subroutine ESMF_StateSetReal4ListAttr(state, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a 4-byte real list attribute to the {\tt state}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is
+!     given by {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [name]
+!       The name of the attribute to set.
+!     \item [count]
+!       The number of reals in the {\tt valueList}.
+!     \item [value]
+!       The 4-byte real values of the attribute to set.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                           ! Error status
+      integer :: limit
+      logical :: dummy
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                                      "count longer than valueList", &
+                                      ESMF_CONTEXT, rc)
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R4, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateSetReal4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateSetReal8Attr"
+!BOP
+! !IROUTINE: ESMF_StateSetAttribute - Set an 8-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
+      subroutine ESMF_StateSetReal8Attr(state, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R8), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an 8-byte real attribute to the {\tt state}.
+!      The attribute has a {\tt name} and a {\tt value}.
+!      
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [name]
+!       The name of the attribute to set.
+!     \item [value]
+!       The 8-byte real value of the attribute to set.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                          ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R8, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateSetReal8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateSetReal8ListAttr"
+!BOP
+! !IROUTINE: ESMF_StateSetAttribute - Set an 8-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
+      subroutine ESMF_StateSetReal8ListAttr(state, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches an 8-byte real list attribute to the {\tt state}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is
+!     given by {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [name]
+!       The name of the attribute to set.
+!     \item [count]
+!       The number of reals in the {\tt valueList}.
+!     \item [value]
+!       The 8-byte real values of the attribute to set.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                           ! Error status
+      integer :: limit
+      logical :: dummy
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                                      "count longer than valueList", &
+                                      ESMF_CONTEXT, rc)
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R8, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateSetReal8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateSetLogicalAttr"
+!BOP
+! !IROUTINE: ESMF_StateSetAttribute - Set a logical attribute 
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
+      subroutine ESMF_StateSetLogicalAttr(state, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      type(ESMF_Logical), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a logical attribute to the {\tt state}.
+!     The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!      An {\tt ESMF\_State} object.
+!     \item [name]
+!      The name of the attribute to set.
+!     \item [value]
+!       The logical true/false value of the attribute to set.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
+                                    value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateSetLogicalAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateSetLogicalListAttr"
+!BOP
+! !IROUTINE: ESMF_StateSetAttribute - Set a logical list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
+      subroutine ESMF_StateSetLogicalListAttr(state, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      type(ESMF_Logical), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a logical list attribute to the {\tt state}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of logical items in the {\tt valueList} is
+!     given by {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [name]
+!       The name of the attribute to set.
+!     \item [count]
+!       The number of logicals in the {\tt valueList}.
+!     \item [valueList]
+!       The logical true/false values of the attribute.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                           ! Error status
+      integer :: limit
+      logical :: dummy
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                                      "count longer than valueList", &
+                                      ESMF_CONTEXT, rc)
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateSetLogicalListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateSetCharAttr"
+!BOP
+! !IROUTINE: ESMF_StateSetAttribute - Set a character attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateSetAttribute()
+      subroutine ESMF_StateSetCharAttr(state, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      character (len = *), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a character attribute to the {\tt state}.
+!     The attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!      An {\tt ESMF\_State} object.
+!     \item [name]
+!      The name of the attribute to set.
+!     \item [value]
+!      The character value of the attribute to set.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeSetChar(state%statep%base, name, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateSetCharAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
