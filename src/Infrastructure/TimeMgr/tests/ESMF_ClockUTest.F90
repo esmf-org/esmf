@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.58 2004/01/29 04:44:35 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.59 2004/01/29 17:02:35 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.58 2004/01/29 04:44:35 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.59 2004/01/29 17:02:35 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -617,7 +617,7 @@
      !EX_UTest
       write(failMsg, *) "Should return ESMF_FAILURE."
       write(name, *) "Time Initialization with hour = negative 3 Test" 
-      call ESMF_TimeSet(startTime, h=-3, rc=rc)
+      call ESMF_TimeSet(startTime, h=-3, calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -697,7 +697,7 @@
      !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
       write(name, *) "Time Initialization with seconds =  8 with no calendar type specified Test" 
-      call ESMF_TimeSet(startTime, s=8, rc=rc)
+      call ESMF_TimeSet(startTime, s=8, calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
