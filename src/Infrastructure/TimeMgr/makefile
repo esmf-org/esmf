@@ -1,7 +1,7 @@
-# $Id: makefile,v 1.6 2003/03/14 05:20:02 eschwab Exp $
+# $Id: makefile,v 1.7 2003/03/17 18:20:24 eschwab Exp $
 
 LOCDIR    = src/Infrastructure/TimeMgr/
 
 include $(ESMF_DIR)/makefile
 
-DIRS      = src interface examples tests doc
+DIRS      = src examples tests doc
