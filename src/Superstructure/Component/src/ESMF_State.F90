@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.36 2003/04/22 17:14:39 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.37 2003/04/23 16:24:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -258,7 +258,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.36 2003/04/22 17:14:39 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.37 2003/04/23 16:24:34 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -823,7 +823,8 @@ end function
 !
 !   \item[{[statetype]}]
 !    Import or Export {\tt State}.  One of {\tt ESMF\_STATEIMPORT},
-!    {\tt ESMF\_STATEEXPORT}, or {\tt ESMF\_STATELIST}.
+!    {\tt ESMF\_STATEEXPORT}, or {\tt ESMF\_STATELIST}.  Default is 
+!    {\tt ESMF\_STATELIST}.
 !
 !   \item[{[statename]}]
 !    Name of this {\tt State} object.  Optional.  If a name is not
@@ -866,8 +867,16 @@ end function
         endif
 
         ! Fill in basic information
-        stypep%st = statetype
-        stypep%compname = compname
+        if (present(statetype)) then
+          stypep%st = statetype
+        else
+          stypep%st = ESMF_STATELIST
+        endif
+        if (present(compname)) then
+          stypep%compname = compname
+        else
+          stypep%compname = "no component name specified"
+        endif
         stypep%stvalid = ESMF_STATEDATAISVALID
         stypep%alloccount = 0
         stypep%datacount = 0
