@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.38 2003/06/11 22:13:34 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.39 2003/06/19 19:35:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -316,7 +316,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.38 2003/06/11 22:13:34 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.39 2003/06/19 19:35:19 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -328,7 +328,7 @@ interface operator (.eq.)
  module procedure ESMF_sfeq
  module procedure ESMF_dteq
  module procedure ESMF_dkeq
- module procedure ESMF_opeq
+ module procedure ESMF_pteq
  module procedure ESMF_tfeq
  module procedure ESMF_aieq
 end interface
@@ -337,7 +337,7 @@ interface operator (.ne.)
  module procedure ESMF_sfne
  module procedure ESMF_dtne
  module procedure ESMF_dkne
- module procedure ESMF_opne
+ module procedure ESMF_ptne
  module procedure ESMF_tfne
  module procedure ESMF_aine
 end interface
@@ -345,6 +345,7 @@ end interface
 interface assignment (=)
  module procedure ESMF_dtas
  module procedure ESMF_dkas
+ module procedure ESMF_ptas
 end interface
 
 !------------------------------------------------------------------------------
@@ -420,20 +421,26 @@ end subroutine
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Pointers to see if they're the same or not
 
-function ESMF_opeq(op1, op2)
- logical ESMF_opeq
- type(ESMF_Pointer), intent(in) :: op1, op2
+function ESMF_pteq(pt1, pt2)
+ logical ESMF_pteq
+ type(ESMF_Pointer), intent(in) :: pt1, pt2
 
- ESMF_opeq = (op1%ptr .eq. op2%ptr)
+ ESMF_pteq = (pt1%ptr .eq. pt2%ptr)
 end function
 
-function ESMF_opne(op1, op2)
- logical ESMF_opne
- type(ESMF_Pointer), intent(in) :: op1, op2
+function ESMF_ptne(pt1, pt2)
+ logical ESMF_ptne
+ type(ESMF_Pointer), intent(in) :: pt1, pt2
 
- ESMF_opne = (op1%ptr .ne. op2%ptr)
+ ESMF_ptne = (pt1%ptr .ne. pt2%ptr)
 end function
 
+subroutine ESMF_ptas(ptval, intval)
+ type(ESMF_Pointer), intent(out) :: ptval
+ integer, intent(in) :: intval
+
+ ptval%ptr = intval
+end subroutine
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Logicals to see if they're the same or not
