@@ -308,6 +308,18 @@ to more than one data object at a time (e.g. the same Grid could
 be part of many Fields).  It is the user's responsibility to delete 
 these items when the last use of them is done.
 
+\subsection{Equality and Copying Objects}
+
+The equal sign operator in ESMF does not generate any special 
+behavior on the part of the framework.  If the user decides to set
+one object equal to another, the internal contents will simply be
+copied.  That means that if there is a pointer within the object
+being copied, the pointer will be replicated and the data pointed to 
+will be referenced by the object copy.  As a matter of style and 
+safety, users should try to avoid exploiting such implicit behavior.
+A preferable approach is to use a class creation or duplication 
+method.  Unfortunately, not all classes have duplication methods yet.
+
 \subsection{Attributes}
 
 Attributes are (name, value) pairs, where
