@@ -1,4 +1,4 @@
-// $Id: ESMC_Test.h,v 1.2 2003/03/11 03:00:39 cdeluca Exp $
+// $Id: ESMC_Test.h,v 1.3 2003/03/17 17:51:01 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -40,7 +40,8 @@
 //
 // !PUBLIC MEMBER FUNCTIONS:
 
-int ESMC_Test(int condition, char *failMsg, int *result, char *file, int line);
+int ESMC_Test(int condition, char *name, char *failMsg, int *result, 
+                                                         char *file, int line);
 
 //EOP
 
