@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.72 2004/09/20 15:20:31 nscollins Exp $
+#  $Id: common.mk,v 1.73 2004/09/20 15:21:19 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -382,7 +382,7 @@ libf:${LIBNAME}(${OBJSF})
 # subdir and it will go up to the top dir and build from there.
 build_libs: chk_dir include
 	cd $(ESMF_TOP_DIR) ;\
-	${MAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} ACTION=vpathlib tree shared
+	${MAKE} ACTION=vpathlib tree shared
 
 # Build only stuff in and below the current dir.
 build_here: chk_dir
@@ -395,15 +395,15 @@ vpathlib:
 # Builds library
 lib:: chk_dir ${SOURCE}
 	@if [ "${SOURCEC}" != "" ] ; then \
-	   $(MAKE) -f ${MAKEFILE} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} libc; fi
+	   $(MAKE) -f ${MAKEFILE} libc; fi
 	@if [ "${SOURCEF}" != "" ] ; then \
-	    $(MAKE) -f ${MAKEFILE}  ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} libf; fi
+	    $(MAKE) -f ${MAKEFILE}  libf; fi
 	@if [ "${OBJS}" != " " ] ; then \
 		${RANLIB} ${LIBNAME}; \
 		${RM} -f ${OBJS}; \
 	fi
 	@if [ "${QUICKSTART}" != "" ] ; then \
-	   $(MAKE) -f ${MAKEFILE} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} tree_build_quick_start; fi
+	   $(MAKE) -f ${MAKEFILE} tree_build_quick_start; fi
 
 #
 #  Does not work for some machines with .F fortran files.
@@ -494,7 +494,7 @@ system_tests: chkopts build_libs chkdir_tests
                exit; \
 	   fi; \
         fi; \
-	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_system_tests tree
+	$(MAKE) ACTION=tree_system_tests tree
 	$(MAKE) check_system_tests
 
 tree_system_tests: tree_build_system_tests tree_run_system_tests
@@ -512,7 +512,7 @@ system_tests_uni: chkopts chkdir_tests
               exit; \
 	   fi; \
 	fi; \
-	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_system_tests_uni tree
+	$(MAKE) ACTION=tree_system_tests_uni tree
 	$(MAKE) check_system_tests
 
 tree_system_tests_uni: tree_build_system_tests tree_run_system_tests_uni
@@ -530,7 +530,7 @@ build_system_tests: chkopts chkdir_tests
               exit; \
 	   fi; \
         fi; \
-	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_build_system_tests tree
+	$(MAKE) ACTION=tree_build_system_tests tree
 
 tree_build_system_tests:  $(SYSTEM_TESTS_BUILD) 
 
@@ -556,7 +556,7 @@ run_system_tests:  chkopts chkdir_tests
               exit; \
 	   fi; \
         fi; \
-	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_system_tests tree
+	$(MAKE) ACTION=tree_run_system_tests tree
 	$(MAKE) check_system_tests
 
 tree_run_system_tests: $(SYSTEM_TESTS_RUN) 
@@ -574,7 +574,7 @@ run_system_tests_uni:  chkopts chkdir_tests
               exit; \
 	   fi; \
         fi; \
-	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_system_tests_uni tree
+	$(MAKE) ACTION=tree_run_system_tests_uni tree
 	$(MAKE) check_system_tests
 
 tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
@@ -591,7 +591,7 @@ check_system_tests:
 #-------------------------------------------------------------------------------
 
 tests: chkopts chkdir_tests build_libs
-	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_tests tree
+	-$(MAKE) ACTION=tree_tests tree
 	$(MAKE) check_tests
 
 tree_tests: tree_build_tests tree_run_tests
@@ -625,7 +625,7 @@ $(ESMC_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o $(ESMFLIB)
 # run_tests
 #
 run_tests:  chkopts chkdir_tests
-	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_tests tree
+	-$(MAKE) ACTION=tree_run_tests tree
 	$(MAKE) check_tests
 
 tree_run_tests: $(TESTS_RUN) 
@@ -634,7 +634,7 @@ tree_run_tests: $(TESTS_RUN)
 # run_tests_uni
 #
 run_tests_uni:  chkopts chkdir_tests
-	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_tests_uni tree 
+	-$(MAKE) ACTION=tree_run_tests_uni tree 
 	$(MAKE) check_tests
 
 tree_run_tests_uni: $(TESTS_RUN_UNI)
@@ -668,7 +668,7 @@ check_tests:
 # examples
 #
 examples: chkopts chkdir_examples build_libs
-	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_examples tree
+	-$(MAKE) ACTION=tree_examples tree
 	$(MAKE) check_examples
 
 
@@ -678,7 +678,7 @@ tree_examples: tree_build_examples tree_run_examples
 # examples_uni
 #
 examples_uni: chkopts chkdir_examples  
-	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_examples_uni tree
+	-$(MAKE) ACTION=tree_examples_uni tree
 	$(MAKE) check_examples
 
 tree_examples_uni: tree_build_examples tree_run_examples_uni
@@ -687,7 +687,7 @@ tree_examples_uni: tree_build_examples tree_run_examples_uni
 # build_examples
 #
 build_examples: chkopts chkdir_examples
-	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_build_examples tree
+	-$(MAKE) ACTION=tree_build_examples tree
 
 tree_build_examples: $(EXAMPLES_BUILD) 
 
@@ -711,7 +711,7 @@ $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
 # run_examples
 #
 run_examples:  chkopts chkdir_examples
-	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_examples tree
+	-$(MAKE) ACTION=tree_run_examples tree
 	$(MAKE) check_examples
 
 tree_run_examples: $(EXAMPLES_RUN) 
@@ -720,7 +720,7 @@ tree_run_examples: $(EXAMPLES_RUN)
 # run_examples_uni
 #
 run_examples_uni:  chkopts chkdir_examples
-	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_examples_uni tree 
+	-$(MAKE) ACTION=tree_run_examples_uni tree 
 	$(MAKE) check_examples
 
 tree_run_examples_uni: $(EXAMPLES_RUN_UNI)
@@ -738,13 +738,13 @@ check_examples:
 
 demo: chkopts build_libs chkdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
-	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_demo tree
+	$(MAKE) ACTION=tree_demo tree
 
 tree_demo: tree_build_demo tree_run_demo
 
 demo_uni: chkopts build_libs chkdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
-	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_demo_uni tree
+	$(MAKE) ACTION=tree_demo_uni tree
 
 tree_demo_uni: tree_build_demo tree_run_demo_uni
 
@@ -753,7 +753,7 @@ tree_demo_uni: tree_build_demo tree_run_demo_uni
 #
 build_demo: chkopts chkdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
-	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_build_demo tree
+	$(MAKE) ACTION=tree_build_demo tree
 
 tree_build_demo: $(DEMO_BUILD) 
 
@@ -769,13 +769,13 @@ $(ESMC_TESTDIR)/%App : %Demo.o $(DEMO_OBJ) $(ESMFLIB)
 #
 run_demo:  chkopts chkdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
-	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_demo tree
+	$(MAKE) ACTION=tree_run_demo tree
 
 tree_run_demo: $(DEMO_RUN) 
 
 run_demo_uni:  chkopts chkdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
-	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_demo_uni tree
+	$(MAKE) ACTION=tree_run_demo_uni tree
 
 tree_run_demo_uni: $(DEMO_RUN_UNI) 
 
@@ -817,7 +817,7 @@ chkdir_release:
 	done
 
 build_release: chkdir_release build_libs shared
-	$(MAKE) BOPT=$(BOPT) ACTION=tree_build_release tree
+	$(MAKE) ACTION=tree_build_release tree
 
 tree_build_release:
 	@for FILES in $(RELEASE_COPYFILES) foo ; do \
@@ -855,7 +855,7 @@ chkdir_quick_start:
 	done
 
 build_quick_start: chkdir_quick_start
-	$(MAKE) BOPT=$(BOPT) ACTION=tree_build_quick_start tree
+	$(MAKE) ACTION=tree_build_quick_start tree
 
 tree_build_quick_start: chkdir_quick_start
 	@for DIR in $(QUICKSTART_COPYDIRS) foo ; do \
