@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.37 2003/07/15 22:51:26 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.38 2003/07/17 19:50:50 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.37 2003/07/15 22:51:26 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.38 2003/07/17 19:50:50 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2345,8 +2345,10 @@
       integer :: dimlengths(ESMF_MAXDIM)   
       type(ESMF_Route) :: route
       logical :: hascachedroute    ! can we reuse an existing route?
-      integer :: nx, ny
+      integer :: nDEs
       integer :: my_DE
+      integer, dimension(ESMF_MAXGRIDDIM) :: global_stride
+      integer, dimension(:,:), allocatable :: global_start
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
       integer :: AI_count
 
@@ -2383,6 +2385,16 @@
          return
       endif 
 
+      ! Get global starting counts and global strides
+      call ESMF_DElayoutGetNumDEs(layout, nDEs, rc=status)
+      allocate(global_start(nDEs, ESMF_MAXGRIDDIM), stat=status)
+      call ESMF_GridGet(ftypep%grid, global_cell_dim=global_stride, &
+                        global_start=global_start, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+         print *, "ERROR in FieldHalo: GridGet returned failure"
+         return
+      endif 
+
       ! set up things we need to find a cached route or precompute one
 !jw  need to get all AI's for all DE's
           
@@ -2399,8 +2411,9 @@
           ! Create the route object.
           route = ESMF_RouteCreate(layout, rc) 
 
-          call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, src_AI, &
-                                        dst_AI, AI_count, layout, rc=status)
+          call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, src_AI, dst_AI, &
+                                        AI_count, global_start, global_stride, &
+                                        layout, rc=status)
 
       endif
 

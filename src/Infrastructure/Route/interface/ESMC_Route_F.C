@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.10 2003/07/15 18:18:26 jwolfe Exp $
+// $Id: ESMC_Route_F.C,v 1.11 2003/07/17 19:51:55 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,27 +80,31 @@ extern "C" {
        void FTN(c_esmc_routeprecompute)(ESMC_Route **ptr, int *rank, 
                      int *my_DE_rcv, 
                      ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
-                     ESMC_AxisIndex *global_ai_rcv, 
-                     int *AI_rcv_count, ESMC_DELayout **layout_rcv,
+                     int *AI_rcv_count, int *global_start_rcv,
+                     int *global_stride_rcv, ESMC_DELayout **layout_rcv,
                      int *my_DE_snd, 
                      ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot, 
-                     ESMC_AxisIndex *global_ai_snd, int *AI_snd_count,
-                     ESMC_DELayout **layout_snd, int *status) {
+                     int *AI_snd_count, int *global_start_snd,
+                     int *global_stride_snd, ESMC_DELayout **layout_snd, 
+                     int *status) {
 
            *status = (*ptr)->ESMC_RoutePrecompute(*rank, 
-                              *my_DE_rcv, AI_rcv_exc, AI_rcv_tot, 
-                               global_ai_rcv, *AI_rcv_count, *layout_rcv,
-                              *my_DE_snd, AI_snd_exc, AI_snd_tot, 
-                               global_ai_snd, *AI_snd_count, *layout_snd);
+                             *my_DE_rcv, AI_rcv_exc, AI_rcv_tot, 
+                             *AI_rcv_count, global_start_rcv, 
+                             global_stride_rcv, *layout_rcv,
+                             *my_DE_snd, AI_snd_exc, AI_snd_tot, 
+                             *AI_snd_count, global_start_snd,
+                             global_stride_snd, *layout_snd);
        }
 
        void FTN(c_esmc_routeprecomputehalo)(ESMC_Route **ptr, int *rank, 
                    int *my_DE, ESMC_AxisIndex *AI_exc, ESMC_AxisIndex *AI_tot,
-                   ESMC_AxisIndex *global_ai, int *AI_count,
+                   int *AI_count, int *global_start, int *global_stride,
                    ESMC_DELayout **layout, int *status) {
 
            *status = (*ptr)->ESMC_RoutePrecomputeHalo(*rank, *my_DE, AI_exc,
-                             AI_tot, global_ai, *AI_count, *layout);
+                             AI_tot, *AI_count, global_start, global_stride,
+                             *layout);
        }
 
        void FTN(c_esmc_routegetcached)(int *rank, 

@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.26 2003/07/15 18:19:07 jwolfe Exp $
+// $Id: ESMC_XPacket.C,v 1.27 2003/07/17 19:52:35 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.26 2003/07/15 18:19:07 jwolfe Exp $";
+              "$Id: ESMC_XPacket.C,v 1.27 2003/07/17 19:52:35 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -294,8 +294,11 @@
 //
 // !ARGUMENTS:
       ESMC_AxisIndex *indexlist,  // in  - set of local AxisIndices
-      ESMC_AxisIndex *global_ai,  // in  - set of global AxisIndices
-      int size_axisindex) {       // in  - size of AxisIndex array
+      int size_axisindex,         // in  - size of AxisIndex array
+      int *global_start,          // in  - array of global starting numbers
+                                  //       per dimension
+      int *global_stride) {       // in  - array of global strides per
+                                  //       dimension
 //
 // !DESCRIPTION:
 //      Translates a set of AxisIndices into a corresponding XPacket.
@@ -323,12 +326,12 @@
           for (i=0; i<size_axisindex; i++) {
    //printf("incoming AxisIndex: [%d] offset=%d, contig_length=%d, stride=%d",
    // i, indexlist[i].min, indexlist[i].max, indexlist[i].stride);
-            global_l[i] = indexlist[i].min + global_ai[i].min;  // jw?
-            global_r[i] = indexlist[i].max + global_ai[i].min;  // jw?
+            global_l[i] = indexlist[i].min + global_start[i];
+            global_r[i] = indexlist[i].max + global_start[i];
           }
-          this->offset  = global_l[1]*global_ai[0].stride + global_l[0];
-          this->contig_length = global_l[1]*global_ai[0].stride + global_r[0];
-          this->stride[0] = global_ai[0].stride;
+          this->offset  = global_l[1]*global_stride[0] + global_l[0];
+          this->contig_length = global_l[1]*global_stride[0] + global_r[0];
+          this->stride[0] = global_stride[0];
           this->rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
  //    printf("outgoing ");
  //    this->ESMC_XPacketPrint();
@@ -370,8 +373,11 @@
 // !ARGUMENTS:
       ESMC_XPacket *global_XP,     // in  - global XPacket
       ESMC_AxisIndex *indexlist,   // in  - set of local AxisIndices
-      ESMC_AxisIndex *global_ai,   // in  - set of global AxisIndices
-      int rank) {                  // in  - rank of AxisIndex array
+      int rank,                    // in  - rank of AxisIndex array
+      int *global_start,           // in  - array of global starting numbers
+                                   //       per dimension
+      int *global_stride) {        // in  - array of global strides per
+                                   //       dimension
 //
 // !DESCRIPTION:
 //      Translates a global XPacket into a local XPacket.
@@ -392,12 +398,12 @@
       case 2:
         {
           int my_stride = indexlist[0].max - indexlist[0].min + 1;
-          int my_row = global_XP->offset/global_ai[0].stride;
-          int my_offset = global_XP->offset - my_row*global_ai[0].stride
-                        - global_ai[0].min;
-          int my_contig_length = global_XP->contig_length - my_row*global_ai[0].stride
-                       - global_ai[0].min;
-          my_row      = my_row - global_ai[1].min;
+          int my_row = global_XP->offset/global_stride[0];
+          int my_offset = global_XP->offset - my_row*global_stride[0] 
+                        - global_start[0];
+          int my_contig_length = global_XP->contig_length 
+                               - my_row*global_stride[0] - global_start[0];
+          my_row      = my_row - global_start[1];
           this->offset  = my_row*my_stride + my_offset;
           this->contig_length = my_row*my_stride + my_contig_length;
           this->stride[0] = my_stride;

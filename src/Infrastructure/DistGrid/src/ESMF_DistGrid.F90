@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.54 2003/07/15 18:16:41 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.55 2003/07/17 19:50:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -58,7 +58,6 @@
 !     private
         integer :: MyDE             ! identifier for this DE
         integer :: local_cell_count ! local (on this DE) number of cells
-        integer :: global_start     ! global index of starting count
         type (ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: ai_global
                                     ! local cell index in each direction using
                                     ! global indexing, covering the total domain
@@ -86,7 +85,7 @@
         integer, dimension(ESMF_MAXGRIDDIM) :: local_cell_max_dim
                                        ! maximum DE cell counts in each
                                        ! grid dimension
-        integer, dimension(:), pointer :: global_start
+        integer, dimension(:,:), pointer :: global_start
         type (ESMF_AxisIndex), dimension(:,:), pointer :: ai_global
       end type
 
@@ -136,7 +135,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.54 2003/07/15 18:16:41 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.55 2003/07/17 19:50:31 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -464,7 +463,6 @@
 !     Initialize distgrid contents
       distgrid%MyDE%MyDE = 0
       distgrid%MyDE%local_cell_count = 0
-      distgrid%MyDE%global_start = 0
       do i = 1,ESMF_MAXGRIDDIM
         distgrid%MyDE%ai_global(i)%min = 0
         distgrid%MyDE%ai_global(i)%max = 0
@@ -582,7 +580,8 @@
       distgrid%layout = layout
 
 !     Allocate resources based on number of DE's
-      allocate(distgrid%global_start(nDE_i*nDE_j), stat=status)
+      allocate(distgrid%global_start(nDE_i*nDE_j,ESMF_MAXGRIDDIM), &
+               stat=status)
       allocate(distgrid%ai_global(nDE_i*nDE_j,ESMF_MAXGRIDDIM), stat=status)
       if(status .NE. 0) then
         print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
@@ -673,14 +672,15 @@
 
 ! !INTERFACE:
       subroutine ESMF_DistGridGet(distgrid, covers_domain, global_cell_count, &
-                                  global_cell_dim, local_cell_max, &
-                                  local_cell_max_dim, rc)
+                                  global_cell_dim, global_start, &
+                                  local_cell_max, local_cell_max_dim, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType) :: distgrid
       logical, intent(inout), optional :: covers_domain
       integer, intent(inout), optional :: global_cell_count
       integer, dimension(:), intent(inout), optional :: global_cell_dim
+      integer, dimension(:,:), intent(inout), optional :: global_start
       integer, intent(inout), optional :: local_cell_max
       integer, dimension(:), intent(inout), optional :: local_cell_max_dim
       integer, intent(out), optional :: rc              
@@ -698,6 +698,9 @@
 !          Global total number of cells.
 !     \item[[global\_cell\_dim]]
 !          Array of the global number of cells in each dimension.
+!     \item[[global\_start]]
+!          Array of the global starting count on each DE in each dimension,
+!          dimensioned (nDEs, ESMF_MAXGRIDDIM)
 !     \item[[local\_cell\_max]]
 !          Maximum number of cells on any {\tt ESMF\_DE}.
 !     \item[[local\_cell\_max\_dim]]
@@ -712,7 +715,7 @@
 
       integer :: status=ESMF_SUCCESS              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
-      integer :: i
+      integer :: i, j, nDEs
 
 !     Initialize return code
       if(present(rc)) then
@@ -731,6 +734,17 @@
                  !       or use the size of the array for the loop limit
         do i = 1,ESMF_MAXGRIDDIM
           global_cell_dim(i) = distgrid%global_cell_dim(i)
+        enddo
+      endif
+
+      if(present(global_start)) then
+                 ! TODO: add check that global_start is large enough
+                 !       or use the size of the array for the loop limit
+        call ESMF_DELayoutGetNumDEs(distgrid%layout, nDEs, status)
+        do i = 1, nDEs
+          do j = 1,ESMF_MAXGRIDDIM
+            global_start(i,j) = distgrid%global_start(i,j)
+          enddo
         enddo
       endif
 
@@ -1148,7 +1162,7 @@
       do j = 1,nDE_j
         do i = 1,nDE_i
           de = (j-1)*nDE_i + i
-          distgrid%global_start(de) = global_tot
+!jw          distgrid%global_start(de) = global_tot
           global_tot = global_tot + (distgrid%ai_global(de,1)%max - &
                                      distgrid%ai_global(de,1)%min + 1)* &
                                     (distgrid%ai_global(de,2)%max - &
@@ -1173,7 +1187,7 @@
       type(ESMF_DistGridType) :: distgrid
       integer, intent(inout), optional :: MyDE
       integer, intent(inout), optional :: local_cell_count
-      integer, intent(inout), optional :: global_start
+      integer, dimension(:,:), intent(inout), optional :: global_start
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM), intent(inout), &
                         optional :: ai_global
       integer, intent(out), optional :: rc            
@@ -1216,7 +1230,7 @@
       if(present(local_cell_count)) &
                  local_cell_count = distgrid%myDE%local_cell_count
 
-      if(present(global_start)) global_start = distgrid%myDE%global_start
+!jw      if(present(global_start)) global_start = distgrid%myDE%ai_global%min
 
       if(present(ai_global)) ai_global = distgrid%myDE%ai_global
 ! TODO:  how to query for parts of an Index type
@@ -1281,7 +1295,6 @@
                                      distgrid%ai_global(DE_id,i)%min + 1)
       enddo
       distgrid%MyDE%local_cell_count = lcell_count
-      distgrid%MyDE%global_start = distgrid%global_start(DE_id)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1449,7 +1462,7 @@
 !     organized (indexed) by DE  !TODO add coding for other cases
 !     TODO: decide where enumerator for grid organization should be
 !     TODO: this assumes exclusive indexing for local cells - total too?
-        base = distgrid%MyDE%global_start
+!jw        base = distgrid%MyDE%global_start
         do i = 1, size(global1D)
           local1D(i) = global1D(i) - base
         enddo
@@ -1472,15 +1485,15 @@
           return
         endif
 
-        l1 = distgrid%MyDE%ai_global(1)%min + distgrid%MyDE%global_start
-        r1 = distgrid%MyDE%ai_global(1)%max + distgrid%MyDE%global_start
-        l2 = distgrid%MyDE%ai_global(2)%min + distgrid%MyDE%global_start
-        r2 = distgrid%MyDE%ai_global(2)%max + distgrid%MyDE%global_start
+        l1 = distgrid%MyDE%ai_global(1)%min
+        r1 = distgrid%MyDE%ai_global(1)%max
+        l2 = distgrid%MyDE%ai_global(2)%min
+        r2 = distgrid%MyDE%ai_global(2)%max
         do i = 1, size(global2D,1)
           if(global2D(i,1).ge.l1 .and. global2D(i,1).le.r1 .and. &
              global2D(i,2).ge.l2 .and. global2D(i,2).le.r2 ) then
-            local2D(i,1) = global2D(i,1) - distgrid%MyDE%global_start
-            local2D(i,2) = global2D(i,2) - distgrid%MyDE%global_start
+            local2D(i,1) = global2D(i,1) - l1
+            local2D(i,2) = global2D(i,2) - l2
           else
             local2D(i,1) = -1    ! TODO:  make an ESMF_NOTFOUND to use instead of -1
             local2D(i,2) = -1
@@ -1565,7 +1578,8 @@
 !     organized (indexed) by DE  !TODO add coding for other cases
 !     TODO: decide where enumerator for grid organization should be
 !     TODO: this assumes exclusive indexing for local cells - total too?
-        base = distgrid%MyDE%global_start
+!jw        base = distgrid%MyDE%global_start
+        base = 1
         do i = 1, size(local1D)
           global1D(i) = local1D(i) + base
         enddo
@@ -1588,10 +1602,10 @@
           return
         endif
 
-        base = distgrid%MyDE%global_start
+!jw        base = distgrid%MyDE%global_start
         do i = 1, size(local2D,1)
-          global2D(i,1) = local2D(i,1) + distgrid%MyDE%global_start
-          global2D(i,2) = local2D(i,2) + distgrid%MyDE%global_start
+          global2D(i,1) = local2D(i,1) + base
+          global2D(i,2) = local2D(i,2) + base
         enddo
   
       endif

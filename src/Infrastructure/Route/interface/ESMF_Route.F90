@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.18 2003/07/15 18:18:39 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.19 2003/07/17 19:52:08 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.18 2003/07/15 18:18:39 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.19 2003/07/17 19:52:08 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -701,8 +701,9 @@
 ! !IROUTINE: ESMF_RoutePrecomputeHalo - Precompute communication paths for a halo
 
 ! !INTERFACE:
-      subroutine ESMF_RoutePrecomputeHalo(route, rank, &
-                       my_DE, AI_exc, AI_tot, AI_count, layout, rc)
+      subroutine ESMF_RoutePrecomputeHalo(route, rank, my_DE, AI_exc, AI_tot, &
+                                          AI_count, global_start, &
+                                          global_stride, layout, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
@@ -711,6 +712,8 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_tot
       integer, intent(in) :: AI_count
+      integer, dimension(:,:), intent(in) :: global_start
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: global_stride
       type(ESMF_DELayout), intent(in) :: layout
       integer, intent(out), optional :: rc
 
@@ -757,7 +760,8 @@
 
         ! Call C++  code
         call c_ESMC_RoutePrecomputeHalo(route, rank, my_DE, AI_exc, AI_tot, &
-                                        AI_count, layout, status)
+                                        AI_count, global_start, global_stride, &
+                                        layout, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route Precompute Halo error"
           ! don't return before adding 1 back to AIs

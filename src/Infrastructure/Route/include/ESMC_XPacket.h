@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.19 2003/07/15 18:18:10 jwolfe Exp $
+// $Id: ESMC_XPacket.h,v 1.20 2003/07/17 19:51:38 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -79,13 +79,12 @@
     int ESMC_XPacketIntersect(ESMC_XPacket *xpacket1, 
                               ESMC_XPacket *xpacket2);
     int ESMC_XPacketFromAxisIndex(struct ESMC_AxisIndex *indexlist,
-                                  struct ESMC_AxisIndex *global_ai,
-                                  int size_axisindex);
+                                  int size_axisindex,
+                                  int *global_start, int* global_stride);
     int ESMC_XPacketGlobalToLocal(ESMC_XPacket *global_XP,
-                                  ESMC_AxisIndex *indexlist,
-                                  ESMC_AxisIndex *global_ai, int rank);
+                                  ESMC_AxisIndex *indexlist, int rank,
+                                  int *global_start, int* global_stride);
                          
- 
     int ESMC_XPacketEmpty();      // returns true (1) if the xp is empty
     int ESMC_XPacketPrint(void);
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.62 2003/07/15 20:52:01 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.63 2003/07/17 19:51:06 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -204,7 +204,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.62 2003/07/15 20:52:01 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.63 2003/07/17 19:51:06 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1515,14 +1515,14 @@
 ! !IROUTINE: ESMF_GridGetDE - Get DE information for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetDE(grid, MyDE, lcelltot_count, gcelltot_start, &
+      subroutine ESMF_GridGetDE(grid, MyDE, lcelltot_count, global_start, &
                                 lcelltot_index, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
       integer, intent(inout), optional :: MyDE
       integer, intent(inout), optional :: lcelltot_count
-      integer, intent(inout), optional :: gcelltot_start
+      integer, dimension(:,:), intent(inout), optional :: global_start
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM), intent(inout), &
                         optional :: lcelltot_index
       integer, intent(out), optional :: rc
@@ -1538,8 +1538,8 @@
 !          Identifier for this {\tt ESMF\_DE}.
 !     \item[{[lcelltot\_count]}]
 !          Local (on this {\tt ESMF\_DE}) number of total cells.
-!     \item[{[gcelltot\_start]}]
-!          Global index of starting count for total cells.
+!     \item[{[global\_start]}]
+!          Global index of starting counts for each dimension.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1559,7 +1559,7 @@
 !     call DistGrid method to retrieve information otherwise not available
 !     to the application level
       call ESMF_DistGridGetDE(grid%ptr%distgrid%ptr, MyDE, &
-                              lcelltot_count, gcelltot_start, lcelltot_index, &
+                              lcelltot_count, global_start, lcelltot_index, &
                               status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGetDE: distgrid get de"
@@ -2010,7 +2010,8 @@
                               horz_stagger, vert_stagger, &
                               horz_coord_system, vert_coord_system, &
                               coord_order, global_min_coords, &
-                              global_max_coords, global_nmax, name, rc)
+                              global_max_coords, global_cell_dim, &
+                              global_start, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -2023,7 +2024,8 @@
       integer, intent(out), optional :: coord_order
       real, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_min_coords
       real, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_max_coords
-      integer, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_nmax
+      integer, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_cell_dim
+      integer, intent(out), dimension(:,:), optional :: global_start
       character(len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -2104,8 +2106,10 @@
       endif
 
       ! Get distgrid info with global coordinate counts
-      if(present(global_nmax)) then
-        call ESMF_DistGridGet(gridp%distgrid%ptr, global_cell_dim=global_nmax, &
+      if(present(global_cell_dim) .or. present(global_start)) then
+        call ESMF_DistGridGet(gridp%distgrid%ptr, &
+                              global_cell_dim=global_cell_dim, &
+                              global_start=global_start, &
                               rc=status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridGet: DistGrid get"
