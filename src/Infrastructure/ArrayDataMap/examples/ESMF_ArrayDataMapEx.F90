@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMapEx.F90,v 1.5 2004/06/09 08:31:36 nscollins Exp $
+! $Id: ESMF_ArrayDataMapEx.F90,v 1.6 2004/06/11 17:36:37 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !BOC
       dlist(1:3) = (/ 1, 2, 0 /)
       dcounts(1) = 4
-      call ESMF_ArrayDataMapSet(arrayDM, dataRank=3, dataIndices=dlist, &
+      call ESMF_ArrayDataMapSet(arrayDM, dataRank=3, dataIndexList=dlist, &
                                 counts=dcounts, rc=rc)
 !EOC
 
