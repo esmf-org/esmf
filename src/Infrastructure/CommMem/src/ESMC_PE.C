@@ -1,4 +1,4 @@
-// $Id: ESMC_PE.C,v 1.9 2003/06/17 20:25:20 rstaufer Exp $
+// $Id: ESMC_PE.C,v 1.10 2003/06/17 20:42:48 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -14,7 +14,7 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt ESMC_PE} methods declared
+// The code in this file implements the C++ {\tt ESMC\_PE} methods declared
 // in the companion file ESMC_PE.h
 //
 // 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_PE.C,v 1.9 2003/06/17 20:25:20 rstaufer Exp $";
+ static const char *const version = "$Id: ESMC_PE.C,v 1.10 2003/06/17 20:42:48 rstaufer Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize peCount (class static)
@@ -60,7 +60,7 @@ int ESMC_PE::peCount = 0;
       ESMC_Machine *mach) {         // in - handle to machine model
 //
 // !DESCRIPTION:
-//      ESMF routine which only initializes {\tt ESMC_PE} values; it does not
+//      ESMF routine which only initializes {\tt ESMC\_PE} values; it does not
 //      allocate any resources.
 //
 //EOP
@@ -100,7 +100,7 @@ int ESMC_PE::peCount = 0;
       int nodeid) {         // in
 //
 // !DESCRIPTION:
-//      ESMF routine which only initializes {\tt ESMC_PE} values; it does not
+//      ESMF routine which only initializes {\tt ESMC\_PE} values; it does not
 //      allocate any resources.
 //
 //EOP
@@ -129,7 +129,7 @@ int ESMC_PE::peCount = 0;
       ESMC_PEConfig *config) const {  // out - resources
 //
 // !DESCRIPTION:
-//    Returns the set of resources the {\tt ESMC_PE} object was configured with.
+//    Returns the set of resources the {\tt ESMC\_PE} object was configured with.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -154,7 +154,7 @@ int ESMC_PE::peCount = 0;
       const ESMC_PEConfig *config) {     // in - resources
 //
 // !DESCRIPTION:
-//    Configures the {\tt ESMC_PE} object with set of resources given.
+//    Configures the {\tt ESMC\_PE} object with set of resources given.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -180,7 +180,7 @@ int ESMC_PE::peCount = 0;
       int *esmfid) const {     // out - esmfid
 //
 // !DESCRIPTION:
-//     Returns the value of {\tt ESMC_PE} member esmfID
+//     Returns the value of {\tt ESMC\_PE} member esmfID
 //
 //EOP
 // !REQUIREMENTS: 
@@ -205,7 +205,7 @@ int ESMC_PE::peCount = 0;
       int esmfid) {     // in - value
 //
 // !DESCRIPTION:
-//     Sets the {\tt ESMC_PE} member esmfID with the given value.
+//     Sets the {\tt ESMC\_PE} member esmfID with the given value.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -230,7 +230,7 @@ int ESMC_PE::peCount = 0;
       int *cpuid) const {     // out - cpuid
 //
 // !DESCRIPTION:
-//     Returns the value of {\tt ESMC_PE} member cpuID
+//     Returns the value of {\tt ESMC\_PE} member cpuID
 //
 //EOP
 // !REQUIREMENTS: 
@@ -255,7 +255,7 @@ int ESMC_PE::peCount = 0;
       int cpuid) {     // in - value
 //
 // !DESCRIPTION:
-//     Sets the {\tt ESMC_PE} member cpuID with the given value.
+//     Sets the {\tt ESMC\_PE} member cpuID with the given value.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -280,7 +280,7 @@ int ESMC_PE::peCount = 0;
       int *nodeid) const {     // out - nodeid
 //
 // !DESCRIPTION:
-//     Returns the value of {\tt ESMC_PE} member nodeID
+//     Returns the value of {\tt ESMC\_PE} member nodeID
 //
 //EOP
 // !REQUIREMENTS: 
@@ -305,7 +305,7 @@ int ESMC_PE::peCount = 0;
       int nodeid) {     // in - value
 //
 // !DESCRIPTION:
-//     Sets the {\tt ESMC_PE} member nodeID with the given value.
+//     Sets the {\tt ESMC\_PE} member nodeID with the given value.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -330,7 +330,7 @@ int ESMC_PE::peCount = 0;
       void) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a {\tt ESMC_PE} is internally consistent.
+//      Validates that a {\tt ESMC\_PE} is internally consistent.
 //      Returns error code if problems are found.  {\tt ESMC\_Base} class method.
 //
 //EOP
@@ -355,7 +355,7 @@ int ESMC_PE::peCount = 0;
       void) const {     //  in - print options
 //
 // !DESCRIPTION:
-//      Print information about a {\tt ESMC_PE}.  The options control the
+//      Print information about a {\tt ESMC\_PE}.  The options control the
 //      type of information and level of detail.  {\tt ESMC\_Base} class method.
 //
 //EOP
