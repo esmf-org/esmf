@@ -1,4 +1,4 @@
-// $Id: ESMC_CommMemEx.C,v 1.3 2003/02/21 05:28:25 eschwab Exp $
+// $Id: ESMC_CommMemEx.C,v 1.4 2003/03/10 03:22:57 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -16,8 +16,8 @@
 //
 // !DESCRIPTION:
 //
-// Excercises CommMem classes ESMC_PE, ESMC_DE, ESMC_PEList, ESMC_Layout,
-// ESMC_Comm and ESMC_Machine to build a PE List and corresponding Layout.
+// Excercises CommMem classes ESMC_PE, ESMC_DE, ESMC_PEList, ESMC_DELayout,
+// ESMC_Comm and ESMC_Machine to build a PE List and corresponding DELayout.
 // Uses mixed mode communication of MPI and pthreads to perform an "All Gather"
 // collective of PE information to create a PE list.
 //
@@ -29,7 +29,7 @@
 #include <ESMC_PE.h>
 #include <ESMC_PEList.h>
 #include <ESMC_Comm.h>
-#include <ESMC_Layout.h>
+#include <ESMC_DELayout.h>
 #include <iostream.h>
 //#include <iostream> // TODO: use when namespaces consistently implemented
 //using std::cout; 
@@ -188,24 +188,24 @@ cout << "mycpuid, mynodeid = " << mycpuid << ", " << mynodeid << "\n";
   peList->ESMC_PEListSort();
 
   // now let's create a layout, using our sorted PE list
-  // TODO:  can't currently do, since Layout now contains a Comm, which can't
+  // TODO:  can't currently do, since DELayout now contains a Comm, which can't
   //        be initialized with NPROC/NTHREAD info yet (eventually from
-  //        a config file, or expose at LayoutCreate, which doesn't seem right)
-//cout << "main: deid " << myDEid << " calling ESMC_LayoutCreate()" << endl;
-  //ESMC_Layout *layout = ESMC_LayoutCreate(2,4,1, peList, ESMC_YFAST, &rc);
-  //ESMC_Layout layout;
-  //layout.ESMC_LayoutConstruct(2,3,1, peList, ESMC_YFAST);
+  //        a config file, or expose at DELayoutCreate, which doesn't seem right)
+//cout << "main: deid " << myDEid << " calling ESMC_DELayoutCreate()" << endl;
+  //ESMC_DELayout *layout = ESMC_DELayoutCreate(2,4,1, peList, ESMC_YFAST, &rc);
+  //ESMC_DELayout layout;
+  //layout.ESMC_DELayoutConstruct(2,3,1, peList, ESMC_YFAST);
 
   // let's see what we have (show main thread DE's copy only)
   if (detype == ESMC_PROCESS) {
     peList->ESMC_PEListPrint();
-    //layout->ESMC_LayoutPrint();
+    //layout->ESMC_DELayoutPrint();
   }
 
   // now get rid of 'em
   rc = ESMC_PEListDestroy(peList);    // deallocates entire object
-  //rc = ESMC_LayoutDestroy(layout);
-  //layout.ESMC_LayoutDestruct();
+  //rc = ESMC_DELayoutDestroy(layout);
+  //layout.ESMC_DELayoutDestruct();
 
 //cout << "DE " << myDEid << " doing CommFinal" << endl;
   if (detype == ESMC_PROCESS) sleep(1);

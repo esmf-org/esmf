@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.34 2003/03/04 16:43:54 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.35 2003/03/10 03:23:09 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
       use ESMF_BaseMod        ! ESMF base class
       use ESMF_DistGridMod    ! ESMF distributed grid class
       use ESMF_IOMod          ! ESMF I/O class
-      use ESMF_LayoutMod      ! ESMF layout class
+      use ESMF_DELayoutMod      ! ESMF layout class
       use ESMF_PhysGridMod    ! ESMF physical grid class
       implicit none
 
@@ -199,7 +199,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.34 2003/03/04 16:43:54 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.35 2003/03/10 03:23:09 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -429,7 +429,7 @@
       integer, intent(in) :: j_max
       integer, intent(in), optional :: nDE_i
       integer, intent(in), optional :: nDE_j
-      type (ESMF_Layout), intent(in), optional :: layout
+      type (ESMF_DELayout), intent(in), optional :: layout
       integer, intent(in), optional :: horz_gridtype
       integer, intent(in), optional :: vert_gridtype
       integer, intent(in), optional :: horz_stagger
@@ -460,7 +460,7 @@
 !     \item[[nDE\_j]]
 !          Number of DE's in 2nd dir.
 !     \item[[layout]]
-!          Layout of DE's.
+!          DELayout of DE's.
 !     \item[[horz\_gridtype]]
 !          Integer specifier to denote horizontal gridtype.
 !     \item[[vert\_gridtype]]
@@ -957,7 +957,7 @@
       integer, intent(in) :: j_max
       integer, intent(in), optional :: nDE_i
       integer, intent(in), optional :: nDE_j
-      type (ESMF_Layout), intent(in), optional :: layout
+      type (ESMF_DELayout), intent(in), optional :: layout
       integer, intent(in), optional :: horz_gridtype
       integer, intent(in), optional :: vert_gridtype
       integer, intent(in), optional :: horz_stagger
@@ -993,7 +993,7 @@
 !     \item[[nDE\_j]]
 !          Number of DE's in 2nd dir.
 !     \item[[layout]]
-!         Layout of DE's.
+!         DELayout of DE's.
 !     \item[[horz\_gridtype]]
 !          Integer specifier to denote horizontal gridtype.
 !     \item[[vert\_gridtype]]

@@ -55,7 +55,7 @@
 \bigskip{\em USES:}
 \begin{verbatim}       use ESMF_ArrayMod
        use ESMF_BaseMod
-       use ESMF_LayoutMod
+       use ESMF_DELayoutMod
        implicit none
  
   ------------------------------------------------------------------------------\end{verbatim}{\sf PRIVATE TYPES:}
@@ -137,8 +137,8 @@
        sequence
        private
          type (ESMF_Base) :: base
-         type (ESMF_Layout), dimension(:), pointer :: layouts
-         type (ESMF_Layout) :: layout
+         type (ESMF_DELayout), dimension(:), pointer :: layouts
+         type (ESMF_DELayout) :: layout
          type (ESMF_Decomp) :: decomp       ! DE decomposition object
          type (ESMF_MyDE) :: MyDE           ! local DE identifiers
          integer :: gsize                   ! global number of cells
@@ -327,7 +327,7 @@
        integer, intent(in) :: nDE_j
        integer, intent(in) :: i_max
        integer, intent(in) :: j_max
-       type (ESMF_Layout), intent(in), optional :: layout
+       type (ESMF_DELayout), intent(in), optional :: layout
        character (len = *), intent(in), optional :: name  
        integer, intent(out), optional :: rc               
  \end{verbatim}
@@ -349,7 +349,7 @@
        \item[[j\_max]] 
             Global number of computation cells in the 2nd direction.
        \item[[layout]]
-            Layout of DE's.
+            DELayout of DE's.
        \item[[name]] 
             {\tt DistGrid} name.
        \item[[rc]] 
@@ -435,7 +435,7 @@
        integer, intent(in) :: nDE_j
        integer, intent(in) :: i_max
        integer, intent(in) :: j_max
-       type (ESMF_Layout), intent(in), optional :: layout
+       type (ESMF_DELayout), intent(in), optional :: layout
        character (len = *), intent(in), optional :: name  
        integer, intent(out), optional :: rc               \end{verbatim}
 {\sf DESCRIPTION:\\ }

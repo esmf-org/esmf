@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.34 2003/02/27 21:54:13 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.35 2003/03/10 03:23:05 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,13 +31,13 @@
 // associated class definition file
 #include "ESMC_Array.h"
 #include "ESMC_Alloc.h"
-#include "ESMC_Layout.h"
+#include "ESMC_DELayout.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.34 2003/02/27 21:54:13 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.35 2003/03/10 03:23:05 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -547,7 +547,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Layout *layout,       // in  - layout (temporarily)
+      ESMC_DELayout *layout,       // in  - layout (temporarily)
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
       int size_decomp,           // in  - size of decomp array
@@ -591,7 +591,7 @@
 
         // call layoutgather to fill this array
         ip0 = (int *)this->base_addr;
-        layout->ESMC_LayoutGatherArrayI(ip0, decompids, 
+        layout->ESMC_DELayoutGatherArrayI(ip0, decompids, 
                                         size_decomp, AI_exc, AI_tot, ip);
 
         // switch based on array rank
@@ -725,7 +725,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Layout *layout,       // in  - layout (temporarily)
+      ESMC_DELayout *layout,       // in  - layout (temporarily)
       int rank_trans[],          // in  - translation of old ranks to new
                                  //       Array
       int size_rank_trans,       // in  - size of rank_trans array
@@ -770,7 +770,7 @@
 
         // call layoutgather to fill this array
         ip0 = (int *)this->base_addr;
-        layout->ESMC_LayoutGatherArrayI(ip0, olddecompids, 
+        layout->ESMC_DELayoutGatherArrayI(ip0, olddecompids, 
                                         size_decomp, this->ai, this->ai, ip);
 
         // switch based on array rank

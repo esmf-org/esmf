@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.15 2003/02/28 23:38:31 jwolfe Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.16 2003/03/10 03:23:04 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
       use ESMF_BaseMod
       use ESMF_IOMod
       use ESMF_AllocMod
-      use ESMF_LayoutMod
+      use ESMF_DELayoutMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -157,7 +157,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.15 2003/02/28 23:38:31 jwolfe Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.16 2003/03/10 03:23:04 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -901,7 +901,7 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
-      type(ESMF_Layout) :: layout
+      type(ESMF_DELayout) :: layout
       integer, dimension(:), intent(in) :: rank_trans
       integer, dimension(:), intent(in) :: olddecompids
       integer, dimension(:), intent(in) :: decompids
@@ -950,7 +950,7 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
-      type(ESMF_Layout) :: layout
+      type(ESMF_DELayout) :: layout
       integer, dimension(:), intent(in) :: decompids
       type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_exc
       type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_tot

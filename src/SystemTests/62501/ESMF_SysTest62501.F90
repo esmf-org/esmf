@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62501.F90,v 1.1 2003/01/23 21:08:33 nscollins Exp $
+! $Id: ESMF_SysTest62501.F90,v 1.2 2003/03/10 03:23:14 cdeluca Exp $
 !
 ! System test code #62501
 
@@ -21,7 +21,7 @@
 !   ! TODO: (these will be collapsed into a single ESMD_Mod soon)
     use ESMF_BaseMod
     use ESMF_IOMod
-    use ESMF_LayoutMod
+    use ESMF_DELayoutMod
     use ESMF_ArrayMod
     use ESMF_GridMod
     use ESMF_DataMapMod
@@ -45,7 +45,7 @@
     real :: x_min, x_max, y_min, y_max
     integer(ESMF_IKIND_I4), dimension(:), pointer :: idata, idata2, rowdata
     character(len=ESMF_MAXSTR) :: cname, gname, fname
-    type(ESMF_Layout) :: layout1 
+    type(ESMF_DELayout) :: layout1 
     type(ESMF_Grid) :: grid1
     type(ESMF_Array) :: array1, array2
     type(ESMF_Field) :: field1
@@ -65,9 +65,9 @@
 !-------------------------------------------------------------------------
 !
 
-!   ! Create a Layout for the Component
+!   ! Create a DELayout for the Component
     delist = (/ 0, 1 /)
-    layout1 = ESMF_LayoutCreate(2, 1, delist, ESMF_XFAST, rc)
+    layout1 = ESMF_DELayoutCreate(2, 1, delist, ESMF_XFAST, rc)
 
     cname = "Atmosphere"
     comp1 = ESMF_CompCreate(cname, layout1, ESMF_GRIDCOMP, &
@@ -193,7 +193,7 @@
     print *, "row data = ", rowdata
 
     ! Call the Reduce code
-    call ESMF_LayoutAllReduce(layout1, rowdata, result, rowlen, ESMF_SUM, rc)
+    call ESMF_DELayoutAllReduce(layout1, rowdata, result, rowlen, ESMF_SUM, rc)
     print *, "Row Reduction operation called"
 
     ! Clean up local array
@@ -212,7 +212,7 @@
 
     call ESMF_CompFinalize(comp1, rc)
 
-    call ESMF_LayoutGetDEId(layout1, de_id, rc)
+    call ESMF_DELayoutGetDEId(layout1, de_id, rc)
 
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
@@ -234,7 +234,7 @@
     call ESMF_FieldDestroy(field1, rc)
     call ESMF_GridDestroy(grid1, rc)
     call ESMF_ArrayDestroy(array1, rc)
-    call ESMF_LayoutDestroy(layout1, rc)
+    call ESMF_DELayoutDestroy(layout1, rc)
     print *, "All Destroy routines done"
 
 

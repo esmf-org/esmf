@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest63029.F90,v 1.4 2003/03/04 16:45:27 nscollins Exp $
+! $Id: ESMF_SysTest63029.F90,v 1.5 2003/03/10 03:23:14 cdeluca Exp $
 !
 ! System test code #63029
 
@@ -21,7 +21,7 @@
 !   TODO: (these will be collapsed into a single ESMF_Mod soon)
     use ESMF_BaseMod
     use ESMF_IOMod
-    use ESMF_LayoutMod
+    use ESMF_DELayoutMod
     use ESMF_ArrayMod
     use ESMF_GridMod
     use ESMF_DataMapMod
@@ -36,7 +36,7 @@
     integer, dimension(4) :: delist
     integer :: de_id, rc
     character(len=ESMF_MAXSTR) :: cname
-    type(ESMF_Layout) :: layout1 
+    type(ESMF_DELayout) :: layout1 
     type(ESMF_Comp) :: comp1
         
 !-------------------------------------------------------------------------
@@ -51,16 +51,16 @@
 !-------------------------------------------------------------------------
 !
 
-!   Create a Layout for the Component
+!   Create a DELayout for the Component
     delist = (/ 0, 1, 2, 3 /)
-    layout1 = ESMF_LayoutCreate(2, 2, delist, ESMF_XFAST, rc)
+    layout1 = ESMF_DELayoutCreate(2, 2, delist, ESMF_XFAST, rc)
 
     cname = "System Test #63029"
     comp1 = ESMF_CompCreate(cname, layout=layout1, ctype=ESMF_GRIDCOMP, &
                       mtype=ESMF_ATM, filepath="/usr/local", rc=rc)
 
 !   Figure out our local processor id
-    call ESMF_LayoutGetDEId(layout1, de_id, rc)
+    call ESMF_DELayoutGetDEId(layout1, de_id, rc)
 
     call ESMF_CompPrint(comp1)
 
@@ -124,7 +124,7 @@
 !     Clean up
 
       call ESMF_CompDestroy(comp1, rc)
-      call ESMF_LayoutDestroy(layout1, rc)
+      call ESMF_DELayoutDestroy(layout1, rc)
       print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------

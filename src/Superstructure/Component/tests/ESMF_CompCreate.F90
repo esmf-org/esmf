@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreate.F90,v 1.3 2003/03/04 15:02:18 nscollins Exp $
+! $Id: ESMF_CompCreate.F90,v 1.4 2003/03/10 03:23:13 cdeluca Exp $
 !
 ! Test code which creates a new Component.
 
@@ -20,7 +20,7 @@
 
 !   ! Other ESMF modules which are needed by Comps
     use ESMF_IOMod
-    use ESMF_LayoutMod
+    use ESMF_DELayoutMod
     use ESMF_CompMod
     
     implicit none
@@ -30,7 +30,7 @@
     integer :: timestep
     integer, dimension(2) :: pelist
     character(ESMF_MAXSTR) :: cname
-    type(ESMF_Layout) :: layout
+    type(ESMF_DELayout) :: layout
     type(ESMF_Comp) :: comp1, comp2, comp3, comp4
         
 !-------------------------------------------------------------------------
@@ -41,7 +41,7 @@
     print *, "Component Test 1:"
 
     pelist = (/ 0, 1 /)
-    layout = ESMF_LayoutCreate(2, 1, pelist, ESMF_XFAST, rc)
+    layout = ESMF_DELayoutCreate(2, 1, pelist, ESMF_XFAST, rc)
 
     cname = "Atmosphere"
     comp1 = ESMF_CompCreate(cname, layout=layout, ctype=ESMF_GRIDCOMP, &
@@ -68,8 +68,8 @@
     call ESMF_CompDestroy(comp1, rc)
     print *, "Comp Destroy returned"
 
-    call ESMF_LayoutDestroy(layout, rc);
-    print *, "Layout Destroy returned"
+    call ESMF_DELayoutDestroy(layout, rc);
+    print *, "DELayout Destroy returned"
 
     print *, "Component Test 1 finished"
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.6 2003/02/20 21:52:00 nscollins Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.7 2003/03/10 03:23:11 cdeluca Exp $
 !
 ! Example code for a main program Application.  See ESMF_AppCompEx.F90
 !   for an example of an embeddable Application.
@@ -25,7 +25,7 @@
 
 !   ! Other ESMF modules which are needed by Comps
     use ESMF_IOMod
-    use ESMF_LayoutMod
+    use ESMF_DELayoutMod
     use ESMF_ClockMod
     use ESMF_StateMod
     use ESMF_CompMod
@@ -43,7 +43,7 @@
     type(ESMF_Clock) :: clock
     integer :: delistall(18), delist1(8), delist2(8), delist3(2)
     character(ESMF_MAXSTR) :: cname
-    type(ESMF_Layout) :: layoutall, layout1, layout2, layout3
+    type(ESMF_DELayout) :: layoutall, layout1, layout2, layout3
     type(ESMF_State) :: statelist(2)
     type(ESMF_Comp) :: app, comp1, comp2, cpl
         
@@ -53,11 +53,11 @@
  
     print *, "Application Example 1:"
 
-    ! Create the top level application component.  Create a Layout and
+    ! Create the top level application component.  Create a DELayout and
     !  a Clock to pass in.  
 
     delistall = (/ (i, i=0,17) /)
-    layoutall = ESMF_LayoutCreate(1, 18, delistall, rc)
+    layoutall = ESMF_DELayoutCreate(1, 18, delistall, rc)
 
     ! See the TimeMgr document for the details on this.
     clock = ESMF_ClockInit()
@@ -67,7 +67,7 @@
                             clock, "/home/myname/model1/setup", rc=rc)  
 
     delist1 = (/ (i, i=0,7) /)
-    layout1 = ESMF_LayoutCreate(2, 4, delist1, ESMF_XFAST, rc)
+    layout1 = ESMF_DELayoutCreate(2, 4, delist1, ESMF_XFAST, rc)
 
     cname = "Atmosphere Physics"
     comp1 = ESMF_CompCreate(cname, layout1, ESMF_GRIDCOMP, ESMF_ATM, &
@@ -83,7 +83,7 @@
     print *, "Comp Create returned, name = ", trim(cname)
 
     delist2 = (/ (i, i=8,15) /)
-    layout2 = ESMF_LayoutCreate(2, 4, delist2, ESMF_XFAST, rc)
+    layout2 = ESMF_DELayoutCreate(2, 4, delist2, ESMF_XFAST, rc)
 
     cname = "Atmosphere Dynamics"
     comp2 = ESMF_CompCreate(cname, layout2, ESMF_GRIDCOMP, ESMF_ATM, &
@@ -95,7 +95,7 @@
     print *, "Comp Create returned, name = ", trim(cname)
 
     delist3 = (/ (i, i=16,17) /)
-    layout3 = ESMF_LayoutCreate(2, 1, delist3, ESMF_XFAST, rc)
+    layout3 = ESMF_DELayoutCreate(2, 1, delist3, ESMF_XFAST, rc)
 
     cname = "Atmosphere Coupler"
     comps(1) = comp1

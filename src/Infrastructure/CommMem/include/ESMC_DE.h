@@ -1,4 +1,4 @@
-// $Id: ESMC_DE.h,v 1.3 2003/01/09 02:15:54 eschwab Exp $
+// $Id: ESMC_DE.h,v 1.4 2003/03/10 03:22:59 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@ enum ESMC_DEType_e {ESMC_PROCESS, ESMC_THREAD};
  // < declare the rest of the public interface methods here >
 
     friend class ESMC_Comm;
-    friend class ESMC_Layout;
+    friend class ESMC_DELayout;
   
 // !PRIVATE MEMBER FUNCTIONS:
 //

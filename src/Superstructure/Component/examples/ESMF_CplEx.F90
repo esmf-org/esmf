@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.4 2003/02/20 17:31:25 nscollins Exp $
+! $Id: ESMF_CplEx.F90,v 1.5 2003/03/10 03:23:12 cdeluca Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -22,7 +22,7 @@
 
 !   ! Other ESMF modules which are needed by Comps
     use ESMF_IOMod
-    use ESMF_LayoutMod
+    use ESMF_DELayoutMod
     use ESMF_CompMod
     
     implicit none

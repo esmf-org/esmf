@@ -1,4 +1,4 @@
-% $Id: CommMem_desdoc.ctex,v 1.1 2002/12/10 03:08:26 eschwab Exp $
+% $Id: CommMem_desdoc.ctex,v 1.2 2003/03/10 03:22:56 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -380,82 +380,82 @@
 \input{comppath/ESMC_PEList_ccapi}
 #endif
 
-\section{Layout Class Design}
+\section{DELayout Class Design}
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{ESMC_Layout_desc}
+\input{ESMC_DELayout_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_Layout_desc}
+\input{comppath/ESMC_DELayout_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
-\input{ESMC_Layout_design}
+\input{ESMC_DELayout_design}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_Layout_design}
+\input{comppath/ESMC_DELayout_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
-\input{ESMC_Layout_def}
+\input{ESMC_DELayout_def}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_Layout_def}
+\input{comppath/ESMC_DELayout_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
-%\input{ESMC_Layout_rest}
+%\input{ESMC_DELayout_rest}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_Layout_rest}
+%\input{comppath/ESMC_DELayout_rest}
 #endif
 
-\section{Layout Class F90 Interface}
+\section{DELayout Class F90 Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-%\input{ESMC_Layout_fex}
+%\input{ESMC_DELayout_fex}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_Layout_fex}
+%\input{comppath/ESMC_DELayout_fex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
-%\input{ESMC_Layout_fparam}
+%\input{ESMC_DELayout_fparam}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_Layout_fparam}
+%\input{comppath/ESMC_DELayout_fparam}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-%\input{ESMC_Layout_fapi}
+%\input{ESMC_DELayout_fapi}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_Layout_fapi}
+%\input{comppath/ESMC_DELayout_fapi}
 #endif
 
-\section{Layout Class C++ Interface}
+\section{DELayout Class C++ Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{ESMC_Layout_ccex}
+\input{ESMC_DELayout_ccex}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_Layout_ccex}
+\input{comppath/ESMC_DELayout_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
-%\input{ESMC_Layout_ccparam}
+%\input{ESMC_DELayout_ccparam}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_Layout_ccparam}
+%\input{comppath/ESMC_DELayout_ccparam}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{ESMC_Layout_chapi}
-\input{ESMC_Layout_ccapi}
+\input{ESMC_DELayout_chapi}
+\input{ESMC_DELayout_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_Layout_chapi}
-\input{comppath/ESMC_Layout_ccapi}
+\input{comppath/ESMC_DELayout_chapi}
+\input{comppath/ESMC_DELayout_ccapi}
 #endif
 
 \section{Comm Class Design}

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.3 2003/02/26 20:31:55 jwolfe Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.4 2003/03/10 03:23:15 cdeluca Exp $
 !
 ! System test code #70385
 
@@ -21,7 +21,7 @@
 !   TODO: (these will be collapsed into a single ESMF_Mod soon)
     use ESMF_BaseMod
     use ESMF_IOMod
-    use ESMF_LayoutMod
+    use ESMF_DELayoutMod
     use ESMF_ArrayMod
     use ESMF_GridMod
     use ESMF_DataMapMod
@@ -46,7 +46,7 @@
                                                        ldata
     character(len=ESMF_MAXSTR) :: cname, gname, fname
     type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
-    type(ESMF_Layout) :: layout1 
+    type(ESMF_DELayout) :: layout1 
     type(ESMF_Grid) :: grid1
     type(ESMF_Array) :: array1, array2
     type(ESMF_Field) :: field1
@@ -65,9 +65,9 @@
 !-------------------------------------------------------------------------
 !
 
-!   Create a Layout for the Component
+!   Create a DELayout for the Component
     delist = (/ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 /)
-    layout1 = ESMF_LayoutCreate(3, 4, delist, ESMF_XFAST, rc)
+    layout1 = ESMF_DELayoutCreate(3, 4, delist, ESMF_XFAST, rc)
 
     cname = "System Test #70385"
     comp1 = ESMF_CompCreate(cname, layout=layout1, ctype=ESMF_GRIDCOMP, &
@@ -114,7 +114,7 @@
       print *, "Grid Create returned"
 
 !     Figure out our local processor id
-      call ESMF_LayoutGetDEId(layout1, de_id, rc)
+      call ESMF_DELayoutGetDEId(layout1, de_id, rc)
 
 !     Allocate arrays.
       call ESMF_GridGetDE(grid1, lcelltot_index=index, rc=rc)
@@ -235,7 +235,7 @@
       call ESMF_FieldDestroy(field1, rc)
       call ESMF_GridDestroy(grid1, rc)
       call ESMF_ArrayDestroy(array1, rc)
-      call ESMF_LayoutDestroy(layout1, rc)
+      call ESMF_DELayoutDestroy(layout1, rc)
       print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------

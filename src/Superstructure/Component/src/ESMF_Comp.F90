@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.30 2003/03/05 17:09:29 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.31 2003/03/10 03:23:12 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOMod
-      use ESMF_LayoutMod
+      use ESMF_DELayoutMod
       use ESMF_ClockMod
       use ESMF_StateMod
       !use ESMF_RouteMod
@@ -104,7 +104,7 @@
          type(ESMF_State), dimension(:), pointer :: statelist  ! coupling list
          integer :: statecount                         ! length of statelist
          !type(ESMF_Route) :: route                     ! route 
-         type(ESMF_Layout) :: layout                   ! component layout
+         type(ESMF_DELayout) :: layout                   ! component layout
          type(ESMF_Clock) :: clock                     ! component clock
          character(len=ESMF_MAXSTR) :: filepath        ! resource filepath
          integer :: instance_id                        ! for ensembles
@@ -138,8 +138,8 @@
       !public ESMF_CompGetState  ! (component, "import"/"export"/"list", state)
       !public ESMF_CompSetState  ! (component, "import"/"export"/"list", state)
       !public ESMF_CompQueryState 
-      public ESMF_CompGet      ! Clock, Layout, CompType, ModelType, Filepath
-      public ESMF_CompSet      ! Clock, Layout, CompType, ModelType, Filepath
+      public ESMF_CompGet      ! Clock, DELayout, CompType, ModelType, Filepath
+      public ESMF_CompSet      ! Clock, DELayout, CompType, ModelType, Filepath
  
       public ESMF_CompValidate
       public ESMF_CompPrint
@@ -160,7 +160,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.30 2003/03/05 17:09:29 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.31 2003/03/10 03:23:12 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -214,7 +214,7 @@ end interface
 !
 ! !ARGUMENTS:
       character(len=*), intent(in) :: name
-      type(ESMF_Layout), intent(in), optional :: layout
+      type(ESMF_DELayout), intent(in), optional :: layout
       type(ESMF_CompType), intent(in), optional :: ctype
       type(ESMF_ModelType), intent(in), optional :: mtype 
       type(ESMF_Clock), intent(in), optional :: clock
@@ -374,7 +374,7 @@ end interface
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
       character(len=*), intent(in) :: name
-      type(ESMF_Layout), intent(in), optional :: layout
+      type(ESMF_DELayout), intent(in), optional :: layout
       type(ESMF_CompType), intent(in), optional :: ctype
       type(ESMF_ModelType), intent(in), optional :: mtype 
       type(ESMF_Clock), intent(in), optional :: clock
@@ -461,7 +461,7 @@ end interface
           compp%layout = layout
         else
           ! query for # processors and create a layout
-          ! compp%layout = ESMF_LayoutCreate()
+          ! compp%layout = ESMF_DELayoutCreate()
         endif 
 
         if (present(filepath)) then
@@ -615,8 +615,8 @@ end interface
         endif
 
         ! See if this is currently running on a DE which is part of the
-        ! proper Layout.
-	call ESMF_LayoutGetDEId(component%compp%layout, de_id, status)
+        ! proper DELayout.
+	call ESMF_DELayoutGetDEId(component%compp%layout, de_id, status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
           if (rcpresent) rc = ESMF_SUCCESS
@@ -691,8 +691,8 @@ end interface
         endif
 
         ! See if this is currently running on a DE which is part of the
-        ! proper Layout.
-	call ESMF_LayoutGetDEId(component%compp%layout, de_id, status)
+        ! proper DELayout.
+	call ESMF_DELayoutGetDEId(component%compp%layout, de_id, status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
           if (rcpresent) rc = ESMF_SUCCESS
@@ -765,8 +765,8 @@ end interface
         endif
 
         ! See if this is currently running on a DE which is part of the
-        ! proper Layout.
-	call ESMF_LayoutGetDEId(component%compp%layout, de_id, status)
+        ! proper DELayout.
+	call ESMF_DELayoutGetDEId(component%compp%layout, de_id, status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
           if (rcpresent) rc = ESMF_SUCCESS
@@ -807,7 +807,7 @@ end interface
       type(ESMF_Comp), intent(in) :: comp
       type(ESMF_State), intent(out), optional :: import
       type(ESMF_State), intent(out), optional :: export
-      type(ESMF_Layout), intent(out), optional :: layout
+      type(ESMF_DELayout), intent(out), optional :: layout
       type(ESMF_Clock), intent(out), optional :: clock
       integer, intent(out), optional :: instanceid
       type(ESMF_State), intent(out), optional :: statelist(:)
@@ -885,7 +885,7 @@ end interface
       type(ESMF_Comp), intent(inout) :: comp
       type(ESMF_State), intent(in), optional :: import
       type(ESMF_State), intent(in), optional :: export
-      type(ESMF_Layout), intent(in), optional :: layout
+      type(ESMF_DELayout), intent(in), optional :: layout
       type(ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: instanceid
       type(ESMF_State), intent(in), optional :: statelist(:)

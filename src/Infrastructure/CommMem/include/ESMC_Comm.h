@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.h,v 1.7 2003/02/21 05:19:05 eschwab Exp $
+// $Id: ESMC_Comm.h,v 1.8 2003/03/10 03:22:58 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@
 //
   public:
     int ESMC_CommInit(int *argc, char **argv[], ESMC_DE *de); // TODO: 
-                                        // supports Layout.comm.CommInit, F90
+                                        // supports DELayout.comm.CommInit, F90
     int ESMC_CommInit(int *argc, char **argv[], ESMC_DE *de, 
                       int nthreadsperproc, int nprocs,
                       int lbufsize, ESMC_Type_e lbuftype); // TODO: config file

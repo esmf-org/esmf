@@ -1,4 +1,4 @@
-! $Id: ESMF_AppCompEx.F90,v 1.6 2003/02/20 21:52:00 nscollins Exp $
+! $Id: ESMF_AppCompEx.F90,v 1.7 2003/03/10 03:23:11 cdeluca Exp $
 !
 ! Example code for a Component which can be either the Application 
 !   Component, or can be embedded in a higher level Component.
@@ -29,7 +29,7 @@
     ! Other ESMF modules which are needed by Comps
     use ESMF_BaseMod
     use ESMF_IOMod
-    use ESMF_LayoutMod
+    use ESMF_DELayoutMod
     use ESMF_StateMod
     use ESMF_CompMod
     
@@ -78,20 +78,20 @@
 
 
         type(ESMF_Comp) :: comp1, comp2, cpl, comps(2)
-        type(ESMF_Layout) :: layout1, layout2, layout3
+        type(ESMF_DELayout) :: layout1, layout2, layout3
         integer :: i, delist1(16), delist2(16), delist3(2)
         character(len=ESMF_MAXSTR) :: cname
 
         print *, "Nested Comp Init starting"
     
         delist1 = (/ (i, i=0,15) /)
-        layout1 = ESMF_LayoutCreate(4, 4, delist1, ESMF_XFAST, rc)
+        layout1 = ESMF_DELayoutCreate(4, 4, delist1, ESMF_XFAST, rc)
     
         delist2 = (/ (i, i=16,31) /)
-        layout2 = ESMF_LayoutCreate(4, 4, delist2, ESMF_XFAST, rc)
+        layout2 = ESMF_DELayoutCreate(4, 4, delist2, ESMF_XFAST, rc)
    
         delist3 = (/ 0, 16 /)
-        layout3 = ESMF_LayoutCreate(2, 1, delist3, ESMF_XFAST, rc)
+        layout3 = ESMF_DELayoutCreate(2, 1, delist3, ESMF_XFAST, rc)
     
 
         cname = "Atmosphere Physics"
@@ -215,7 +215,7 @@
 
 !   ! Other ESMF modules which are needed by Comps
     use ESMF_IOMod
-    use ESMF_LayoutMod
+    use ESMF_DELayoutMod
     use ESMF_CompMod
     
     use NATM_Mod, only: NATM_Register
@@ -228,7 +228,7 @@
     integer, dimension(32) :: delist
     logical :: finished
     character(len=ESMF_MAXSTR) :: cname
-    type(ESMF_Layout) :: layout
+    type(ESMF_DELayout) :: layout
     type(ESMF_Clock) :: clock
     type(ESMF_Comp) :: comp1
         
@@ -241,7 +241,7 @@
     print *, "Component Example Driver 1:"
 
     delist = (/ (i, i=0,31) /)
-    layout = ESMF_LayoutCreate(8, 4, delist, ESMF_XFAST, rc)
+    layout = ESMF_DELayoutCreate(8, 4, delist, ESMF_XFAST, rc)
 
     clock = ESMF_ClockInit()
 
@@ -283,8 +283,8 @@
     call ESMF_CompDestroy(comp1, rc)
     print *, "Driver Comp Destroy returned"
 
-    call ESMF_LayoutDestroy(layout, rc);
-    print *, "Driver Layout Destroy returned"
+    call ESMF_DELayoutDestroy(layout, rc);
+    print *, "Driver DELayout Destroy returned"
 
     print *, "Component Example Driver 1 finished"
 

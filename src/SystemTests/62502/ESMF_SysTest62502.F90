@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62502.F90,v 1.1 2003/03/02 19:01:43 nscollins Exp $
+! $Id: ESMF_SysTest62502.F90,v 1.2 2003/03/10 03:23:14 cdeluca Exp $
 !
 ! System test code #62502
 
@@ -21,7 +21,7 @@
     ! TODO: (these will be collapsed into a single ESMF_Mod soon)
     use ESMF_BaseMod
     use ESMF_IOMod
-    use ESMF_LayoutMod
+    use ESMF_DELayoutMod
     use ESMF_ArrayMod
     use ESMF_GridMod
     use ESMF_DataMapMod
@@ -39,7 +39,7 @@
     integer, dimension(4) :: delist
     integer :: de_id, rc
     character(len=ESMF_MAXSTR) :: aname, cname1, cname2, cplname
-    type(ESMF_Layout) :: layout1 
+    type(ESMF_DELayout) :: layout1 
     type(ESMF_State) :: c1exp, c2imp, cplstate(2)
     type(ESMF_Comp) :: app, comp1, comp2, cpl
         
@@ -56,9 +56,9 @@
 !
 
     ! TODO: move layout create down into comp after discover method ready.
-    ! Create a Layout for the Component
+    ! Create a DELayout for the Component
     delist = (/ 0, 1, 2, 3 /)
-    layout1 = ESMF_LayoutCreate(2, 2, delist, ESMF_XFAST, rc)
+    layout1 = ESMF_DELayoutCreate(2, 2, delist, ESMF_XFAST, rc)
 
     ! Create the top level application component.
     aname = "System Test #62502"
@@ -156,7 +156,7 @@
 !     Print result
 
       ! Figure out our local processor id for message below.
-      call ESMF_LayoutGetDEId(layout1, de_id, rc)
+      call ESMF_DELayoutGetDEId(layout1, de_id, rc)
 
       call ESMF_CompFinalize(comp1, rc)
       print *, "Comp 1 Finalize finished, rc =", rc
@@ -187,7 +187,7 @@
       call ESMF_CompDestroy(comp1, rc)
       call ESMF_CompDestroy(comp2, rc)
       call ESMF_CompDestroy(cpl, rc)
-      call ESMF_LayoutDestroy(layout1, rc)
+      call ESMF_DELayoutDestroy(layout1, rc)
       print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: ESMC_PE.h,v 1.3 2003/01/09 02:15:54 eschwab Exp $
+// $Id: ESMC_PE.h,v 1.4 2003/03/10 03:22:59 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@
     static int peCount;  // number of PEs instantiated
 
     ESMC_Machine *machine;  // interface to specific platform
-    // neighbor connections ?  see ESMC_Layout.h
+    // neighbor connections ?  see ESMC_DELayout.h
 
 // !PUBLIC MEMBER FUNCTIONS:
 //

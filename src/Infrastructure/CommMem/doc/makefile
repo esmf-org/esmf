@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.1 2002/12/10 03:08:26 eschwab Exp $
+# $Id: makefile,v 1.2 2003/03/10 03:22:57 cdeluca Exp $
 
 All:
 	do_chprotex ESMC_Comm ../include/ESMC_Comm.h
 	do_ccprotex ESMC_Comm ../src/ESMC_Comm.C
 	do_chprotex ESMC_DE ../include/ESMC_DE.h
 	do_ccprotex ESMC_DE ../src/ESMC_DE.C
-	do_chprotex ESMC_Layout ../include/ESMC_Layout.h
-	do_ccprotex ESMC_Layout ../src/ESMC_Layout.C
+	do_chprotex ESMC_DELayout ../include/ESMC_DELayout.h
+	do_ccprotex ESMC_DELayout ../src/ESMC_DELayout.C
 	do_chprotex ESMC_Machine ../include/ESMC_Machine.h
 	do_ccprotex ESMC_Machine ../src/ESMC_Machine.C
 	do_chprotex ESMC_PE ../include/ESMC_PE.h

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.32 2003/02/28 23:39:56 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.33 2003/03/10 03:23:08 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 ! !USES:
       use ESMF_ArrayMod
       use ESMF_BaseMod
-      use ESMF_LayoutMod
+      use ESMF_DELayoutMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -81,7 +81,7 @@
       sequence
 !     private
         type (ESMF_Base) :: base
-        type (ESMF_Layout) :: layout
+        type (ESMF_DELayout) :: layout
         type (ESMF_MyDE) :: MyDE       ! local DE identifiers
         logical :: covers_domain       ! identifier if distgrid covers
                                        ! the entire physical domain
@@ -152,7 +152,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.32 2003/02/28 23:39:56 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.33 2003/03/10 03:23:08 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -311,7 +311,7 @@
       integer, intent(in) :: i_max
       integer, intent(in) :: j_max
       integer, intent(in), optional :: halo_width
-      type (ESMF_Layout), intent(in), optional :: layout
+      type (ESMF_DELayout), intent(in), optional :: layout
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
 
@@ -335,7 +335,7 @@
 !          axes for haloing (added to the total cells but not exclusive
 !          cells).
 !     \item[[layout]]
-!          Layout of DE's.
+!          DELayout of DE's.
 !     \item[[name]] 
 !          {\tt DistGrid} name.
 !     \item[[rc]] 
@@ -412,7 +412,7 @@
         rc = ESMF_FAILURE
       endif
 
-      call ESMF_LayoutDestroy(distgrid%ptr%layout, status)
+      call ESMF_DELayoutDestroy(distgrid%ptr%layout, status)
 
       end subroutine ESMF_DistGridDestroy
 
@@ -517,7 +517,7 @@
       integer, intent(in) :: i_max
       integer, intent(in) :: j_max
       integer, intent(in), optional :: halo_width
-      type (ESMF_Layout), intent(in), optional :: layout
+      type (ESMF_DELayout), intent(in), optional :: layout
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
 !
@@ -596,9 +596,9 @@
 !     If a layout is passed in, set the distgrid layout to it.
 !     Otherwise create layout with specified decomposition.
       if(present(layout)) then
-        call ESMF_LayoutGetSize(layout, lDE_i, lDE_j, status)
+        call ESMF_DELayoutGetSize(layout, lDE_i, lDE_j, status)
         if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_DistGridConstructInternal: Layout get size"
+          print *, "ERROR in ESMF_DistGridConstructInternal: DELayout get size"
           return
         endif
         distgrid%layout = layout
@@ -611,10 +611,10 @@
         do i = 1,nDE_i*nDE_j
           PEList(i) = i - 1  ! TODO:  short-term fix to go to C++
         enddo
-        distgrid%layout = ESMF_LayoutCreate(nDE_i, nDE_j, PEList, &
+        distgrid%layout = ESMF_DELayoutCreate(nDE_i, nDE_j, PEList, &
                                             ESMF_XFAST, status)
         if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_DistGridConstructInternal: Layout create"
+          print *, "ERROR in ESMF_DistGridConstructInternal: DELayout create"
           return
         endif
         lDE_i = nDE_i
@@ -1393,7 +1393,7 @@
         rc = ESMF_FAILURE
       endif
 
-      call ESMF_LayoutGetDEid(distgrid%layout, DE_id, status)
+      call ESMF_DELayoutGetDEid(distgrid%layout, DE_id, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridSetDEInternal: layout get DEid"
         return

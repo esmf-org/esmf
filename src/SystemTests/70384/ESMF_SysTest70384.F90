@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.7 2003/02/28 23:40:55 jwolfe Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.8 2003/03/10 03:23:14 cdeluca Exp $
 !
 ! System test code #70384
 
@@ -21,7 +21,7 @@
     ! TODO: (these will be collapsed into a single ESMD_Mod soon)
     use ESMF_BaseMod
     use ESMF_IOMod
-    use ESMF_LayoutMod
+    use ESMF_DELayoutMod
     use ESMF_ArrayMod
     use ESMF_StateMod
     
@@ -39,7 +39,7 @@
     integer(ESMF_IKIND_I4), dimension(:,:,:), pointer :: srcptr, dstptr, resptr
     integer, dimension(3) :: global_counts, decompids1, decompids2, rank_trans
     character(len=ESMF_MAXSTR) :: cname, sname, gname, fname
-    type(ESMF_Layout) :: layout1 
+    type(ESMF_DELayout) :: layout1 
     type(ESMF_Array) :: array1, array1a, array2, array2a, array3
     type(ESMF_AxisIndex) :: indexlist1(3), indexlist2(3), indexlist3(3)
     type(ESMF_State) :: state1
@@ -58,12 +58,12 @@
 !-------------------------------------------------------------------------
 !
 
-    ! Create a Layout
+    ! Create a DELayout
     delist = (/ 0, 1, 2, 3, 4, 5 /)
     ndex = 2
     ndey = 3
-    layout1 = ESMF_LayoutCreate(ndex, ndey, delist, ESMF_XFAST, rc)
-    print *, "Layout Create finished, rc =", rc
+    layout1 = ESMF_DELayoutCreate(ndex, ndey, delist, ESMF_XFAST, rc)
+    print *, "DELayout Create finished, rc =", rc
 
     ! Create the State
     cname = "Atmosphere"
@@ -97,7 +97,7 @@
     allocate(dstdata(ni, nj2, nk2))
 
     ! Get our local DE id
-    call ESMF_LayoutGetDEId(layout1, de_id, rc)
+    call ESMF_DELayoutGetDEId(layout1, de_id, rc)
 
     ! Create arrays, set and get axis info here before initializing
     ! the data.
@@ -114,9 +114,9 @@
     decompids1(1) = 1
     decompids1(2) = 2
     decompids1(3) = 0
-    call ESMF_LayoutSetAxisIndex(layout1, global_counts, decompids1, &
+    call ESMF_DELayoutSetAxisIndex(layout1, global_counts, decompids1, &
                                  indexlist1, rc)
-    call ESMF_LayoutSetAxisIndex(layout1, global_counts, decompids1, &
+    call ESMF_DELayoutSetAxisIndex(layout1, global_counts, decompids1, &
                                  indexlist3, rc)
     global_counts(1) = ni*ndex
     global_counts(2) = nj*ndey
@@ -124,7 +124,7 @@
     decompids2(1) = 1
     decompids2(2) = 0
     decompids2(3) = 2
-    call ESMF_LayoutSetAxisIndex(layout1, global_counts, decompids2, &
+    call ESMF_DELayoutSetAxisIndex(layout1, global_counts, decompids2, &
                                  indexlist2, rc)
     !! TODO: set & get the axis info here.  These need to be
     !!  different on each DE.
@@ -202,7 +202,7 @@
 !-------------------------------------------------------------------------
 !   Print result
 
-    call ESMF_LayoutGetDEId(layout1, de_id, rc)
+    call ESMF_DELayoutGetDEId(layout1, de_id, rc)
 
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
@@ -247,7 +247,7 @@
     call ESMF_ArrayDestroy(array1, rc)
     call ESMF_ArrayDestroy(array2, rc)
     call ESMF_ArrayDestroy(array3, rc)
-    call ESMF_LayoutDestroy(layout1, rc)
+    call ESMF_DELayoutDestroy(layout1, rc)
     print *, "All Destroy routines done"
 
 

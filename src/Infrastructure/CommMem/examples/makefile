@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.7 2003/02/27 17:54:12 flanigan Exp $
+# $Id: makefile,v 1.8 2003/03/10 03:22:58 cdeluca Exp $
 
 # makefile template for the examples directory.
 
-ALL: ESMF_Layout_FEx ESMF_Layout_FEx2 ESMC_CommMemEx
+ALL: ESMF_DELayout_FEx ESMF_DELayout_FEx2 ESMC_CommMemEx
 
 # don't set these unless absolutely necessary - they've got to be
 #  architecture and compiler independent and should be inherited
@@ -19,7 +19,7 @@ OBJSF     =
 TEXFILES  = 
 
 # fill in the names of the F90 source files for the tests/examples
-EXAMPLESF = ESMF_Layout_FEx.F90 ESMF_Layout_FEx2.F90
+EXAMPLESF = ESMF_DELayout_FEx.F90 ESMF_DELayout_FEx2.F90
 # fill in the names of the C++ source files for the tests/examples
 EXAMPLESC = ESMC_CommMemEx.C
 
@@ -28,26 +28,26 @@ MANSEC	  =
 LIBBASE	  = 
 
 # fill in the following with the executable names
-TESTEXAMPLES = ESMF_Layout_FEx ESMF_Layout_FEx2 ESMC_CommMemEx
+TESTEXAMPLES = ESMF_DELayout_FEx ESMF_DELayout_FEx2 ESMC_CommMemEx
 
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. 
 LOCDIR	  = src/Infrastructure/CommMem/examples
 
 # leave these alone 
-CLEANFILES = $(ESMC_MODDIR)/ESMF_Layout_FEx $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
+CLEANFILES = $(ESMC_MODDIR)/ESMF_DELayout_FEx $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
 include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-ESMF_Layout_FEx: ESMF_Layout_FEx.o chkopts
-	-${F90CXXLD} -o ESMF_Layout_FEx ESMF_Layout_FEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_Layout_FEx.o
+ESMF_DELayout_FEx: ESMF_DELayout_FEx.o chkopts
+	-${F90CXXLD} -o ESMF_DELayout_FEx ESMF_DELayout_FEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${RM} ESMF_DELayout_FEx.o
 
-ESMF_Layout_FEx2: ESMF_Layout_FEx2.o chkopts
-	-${F90CXXLD} -o ESMF_Layout_FEx2 ESMF_Layout_FEx2.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_Layout_FEx2.o
+ESMF_DELayout_FEx2: ESMF_DELayout_FEx2.o chkopts
+	-${F90CXXLD} -o ESMF_DELayout_FEx2 ESMF_DELayout_FEx2.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${RM} ESMF_DELayout_FEx2.o
 
 ESMC_CommMemEx: ESMC_CommMemEx.o  chkopts
 	${CXXF90LD} -o ESMC_CommMemEx ESMC_CommMemEx.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} -lm

@@ -1,4 +1,4 @@
-! $Id: ESMF_CompEx.F90,v 1.5 2003/02/20 21:52:02 nscollins Exp $
+! $Id: ESMF_CompEx.F90,v 1.6 2003/03/10 03:23:12 cdeluca Exp $
 !
 ! Example/test code which creates a new Component
 
@@ -23,7 +23,7 @@
 
 !   ! Other ESMF modules which are needed by Comps
     use ESMF_IOMod
-    use ESMF_LayoutMod
+    use ESMF_DELayoutMod
     use ESMF_CompMod
     
     implicit none
@@ -34,7 +34,7 @@
     logical :: finished
     integer, dimension(8) :: delist
     character(ESMF_MAXSTR) :: cname
-    type(ESMF_Layout) :: layout
+    type(ESMF_DELayout) :: layout
     type(ESMF_Clock) :: clock
     type(ESMF_Comp) :: comp1
         
@@ -46,7 +46,7 @@
     print *, "Component Example 1:"
 
     delist = (/ (i, i=0,7) /)
-    layout = ESMF_LayoutCreate(4, 2, delist, ESMF_XFAST, rc)
+    layout = ESMF_DELayoutCreate(4, 2, delist, ESMF_XFAST, rc)
 
     call ESMF_ClockInit()
 
@@ -89,8 +89,8 @@
     call ESMF_CompDestroy(comp1, rc)
     print *, "Comp Destroy returned"
 
-    call ESMF_LayoutDestroy(layout, rc);
-    print *, "Layout Destroy returned"
+    call ESMF_DELayoutDestroy(layout, rc);
+    print *, "DELayout Destroy returned"
 
     print *, "Component Example 1 finished"
 

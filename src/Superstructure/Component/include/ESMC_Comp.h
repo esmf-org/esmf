@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.4 2003/03/04 15:01:09 nscollins Exp $
+// $Id: ESMC_Comp.h,v 1.5 2003/03/10 03:23:12 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,7 +22,7 @@
 
 //-----------------------------------------------------------------------------
 
-#include "ESMC_Layout.h"
+#include "ESMC_DELayout.h"
 #include "ESMC_State.h"
 
  // Put any constants or macros which apply to the whole component in this file.
@@ -121,7 +121,7 @@ enum ESMC_ModelType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE,
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_Comp object.
 
- ESMC_Comp *ESMC_CompCreate(char *name, ESMC_Layout *layout,
+ ESMC_Comp *ESMC_CompCreate(char *name, ESMC_DELayout *layout,
                                       enum ESMC_CompType ctype,
                                       enum ESMC_ModelType mtype,
                                       char *filepath, int *rc);

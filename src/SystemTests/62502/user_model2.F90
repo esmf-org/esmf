@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.2 2003/03/03 17:33:39 nscollins Exp $
+! $Id: user_model2.F90,v 1.3 2003/03/10 03:23:14 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -20,7 +20,7 @@
 
 !   ! ESMF modules
     use ESMF_IOMod
-    use ESMF_LayoutMod
+    use ESMF_DELayoutMod
     use ESMF_ClockMod
     use ESMF_FieldMod
     use ESMF_StateMod
