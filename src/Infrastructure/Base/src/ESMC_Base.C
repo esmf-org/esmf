@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.18 2004/01/27 17:55:29 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.19 2004/01/28 00:34:44 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.18 2004/01/27 17:55:29 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.19 2004/01/28 00:34:44 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -315,37 +315,58 @@ static int globalCount = 0;
       int ESMC_Base::ESMC_BaseSetName(
 // 
 // !RETURN VALUE:
-//    none
+//    return code
 // 
 // !ARGUMENTS:
       char *name,           // in - base name to set
-      char *context) {      // in - context in which name should be unique
+      char *classname) {    // in - context in which name should be unique
 // 
 // !DESCRIPTION:
 //     accessor to base class name
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
-  static int seqnum = 1;      // fortran gets evens, C++ odds
+
+  int len;
  
   // no name, no context:  generate a name "globalXXX" where xxx is a seq num
   // no name, but a context: name is contextXXX with the seq num again
   // name given: use it as is
-  if (!name) {
-    if (!context) 
-      sprintf(baseName, "global%03d", seqnum); 
-    else
-      sprintf(baseName, "%s%03d", context, seqnum);
-    
-    seqnum += 2;   // fortran gets evens, C++ gets odds
-  } else
-      strncpy(baseName, name, sizeof(baseName));
+
+  // simple error checks first
+  if (name) { 
+     len = strlen(name);
+     if (len >= ESMF_MAXSTR) {
+       fprintf(stderr, "Error: object name %d bytes longer than limit of %d\n", 
+                          len, ESMF_MAXSTR-1);
+       return ESMF_FAILURE;
+     }
+  }
+
+  if (classname) {
+     len = strlen(classname);
+     if (len >= ESMF_MAXSTR) {
+       fprintf(stderr, "Error: object type %d bytes longer than limit of %d\n",
+                          len, ESMF_MAXSTR-1);
+       return ESMF_FAILURE;
+     }
+  }
+
+  strcpy(className, classname ? classname : "global");
+  if (!name) 
+      sprintf(baseName, "%s%03d", className, ID); 
+  else
+      strcpy(baseName, name);
+
+  ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
+
+  return ESMF_SUCCESS;
 
 }  // end ESMC_BaseSetName
  
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BaseGetName - get Base class status
+// !IROUTINE:  ESMC_BaseGetName - get Base class name
 //
 // !INTERFACE:
       char *ESMC_Base::ESMC_BaseGetName(void) const {
@@ -357,7 +378,7 @@ static int globalCount = 0;
 //    none
 // 
 // !DESCRIPTION:
-//     accessor to base class status
+//     accessor to base class name
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -365,6 +386,177 @@ static int globalCount = 0;
   return (char * const)baseName;
 
 }  // end ESMC_BaseGetName
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseGetF90Name - get Base class name
+//
+// !INTERFACE:
+      char *ESMC_Base::ESMC_BaseGetF90Name(void) const {
+// 
+// !RETURN VALUE:
+//    char pointer to name.  not null terminated, space filled.
+// 
+// !ARGUMENTS:
+//    none
+// 
+// !DESCRIPTION:
+//     accessor to base class name
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+  return (char * const)baseNameF90;
+
+}  // end ESMC_BaseGetF90Name
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseSetF90Name - set Base class name
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseSetF90Name(char *name, int nlen) {
+// 
+// !RETURN VALUE:
+//    ESMF_SUCCESS or ESMF_FAILURE
+// 
+// !ARGUMENTS:
+//    char pointer to name.  not null terminated, space filled.
+// 
+// !DESCRIPTION:
+//     accessor to base class name
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+  if (nlen > ESMF_MAXSTR) {
+      fprintf(stderr, "string name %d bytes longer than limit of %d bytes\n",
+                       nlen, ESMF_MAXSTR);
+      return ESMF_FAILURE;
+  }
+
+  strncpy(baseNameF90, name, nlen);
+  if (nlen < ESMF_MAXSTR) 
+      memset(baseNameF90 + nlen, (int)' ', ESMF_MAXSTR-nlen);
+
+  ESMC_F90toCstring(baseNameF90, ESMF_MAXSTR-1, baseName, ESMF_MAXSTR);
+  return ESMF_SUCCESS;
+
+}  // end ESMC_BaseSetF90Name
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseSetClassName - set Base class name
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseSetClassName(
+// 
+// !RETURN VALUE:
+//    return code
+// 
+// !ARGUMENTS:
+      char *classname) {    // in - context in which name should be unique
+// 
+// !DESCRIPTION:
+//     accessor to base class name
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+  int len;
+ 
+  if (classname) {
+     len = strlen(classname);
+     if (len >= ESMF_MAXSTR) {
+       fprintf(stderr, "Error: object type %d bytes longer than limit of %d\n",
+                          len, ESMF_MAXSTR-1);
+       return ESMF_FAILURE;
+     }
+  }
+
+  strcpy(className, classname ? classname : "global");
+
+  return ESMF_SUCCESS;
+
+}  // end ESMC_BaseSetClassName
+ 
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseGetClassName - get Base class name
+//
+// !INTERFACE:
+      char *ESMC_Base::ESMC_BaseGetClassName(void) const {
+// 
+// !RETURN VALUE:
+//    char pointer to name
+// 
+// !ARGUMENTS:
+//    none
+// 
+// !DESCRIPTION:
+//     accessor to base class name
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+  return (char * const)className;
+
+}  // end ESMC_BaseGetClassName
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseGetF90ClassName - get Base class name
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseGetF90ClassName(char *name, int nlen) const {
+// 
+// !RETURN VALUE:
+//    char pointer to name.  not null terminated, space filled.
+// 
+// !ARGUMENTS:
+//    none
+// 
+// !DESCRIPTION:
+//     accessor to base class name
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+  // make the compiler happy:
+  return ESMC_CtoF90string((char *)className, name, nlen);
+
+}  // end ESMC_BaseGetF90ClassName
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseSetF90ClassName - set Base class name
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseSetF90ClassName(char *name, int nlen) {
+// 
+// !RETURN VALUE:
+//    ESMF_SUCCESS or ESMF_FAILURE
+// 
+// !ARGUMENTS:
+//    char pointer to name.  not null terminated, space filled.
+// 
+// !DESCRIPTION:
+//     accessor to base class name
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+  if (nlen > ESMF_MAXSTR) {
+      fprintf(stderr, "string name %d bytes longer than limit of %d bytes\n",
+                       nlen, ESMF_MAXSTR);
+      return ESMF_FAILURE;
+  }
+
+  return ESMC_F90toCstring(name, nlen, className, ESMF_MAXSTR);
+
+}  // end ESMC_BaseSetF90ClassName
+
 
 //-----------------------------------------------------------------------------
 // Misc Utility methods
@@ -1224,6 +1416,51 @@ extern "C" {
   ID = ++globalCount;
   refCount = 1;
   strcpy(baseName, "unnamed");
+  strcpy(className, "global");
+  baseStatus = ESMF_STATE_READY;
+
+ } // end ESMC_Base
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Base - native C++ constructor for ESMC_Base class
+//
+// !INTERFACE:
+      ESMC_Base::ESMC_Base(char *superclass, char *name, int nattrs) {
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//   initialization with known class name, object name, initial number
+//   of attributes to make space for.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+  ID = ++globalCount;
+  refCount = 1;
+  strcpy(className, superclass ? superclass : "global");
+  if (name)
+      // TODO: make sure this name is unique in this namespace.  This means
+      // some sort of registry utility.
+      strcpy(baseName, name);
+  else
+      sprintf(baseName, "%s%3d", className, ID);
+
+  attrCount = 0;
+  attrAlloc = 0;
+  attr = ESMC_NULL_POINTER;
+  if (nattrs > 0) {
+      if (ESMC_AttributeAlloc(nattrs) != ESMF_SUCCESS) {
+          baseStatus = ESMF_STATE_INVALID;   // can't return err, but can
+          return;                            // try to indicate unhappiness
+      }
+  }
+
   baseStatus = ESMF_STATE_READY;
 
  } // end ESMC_Base

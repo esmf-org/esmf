@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.38 2004/01/27 17:55:26 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.39 2004/01/28 00:34:44 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,6 +39,9 @@
 
 // !PUBLIC TYPES:
  class ESMC_Base;
+
+// WARNING:  the values of these enums MUST match the values defined
+//  in ../interface/ESMF_Base.F90
 
 // ESMF class states
 enum ESMC_Status { ESMF_STATE_UNINIT=1,
@@ -118,7 +121,6 @@ struct ESMC_DataValue {
 struct ESMC_Attribute {
   //private:
     char attrName[ESMF_MAXSTR];  // inline to reduce memory thrashing
-    //ESMC_DataType  attrType;   // redundant w/ dt in datavalue
     ESMC_DataValue attrValue;
 };
 
@@ -138,7 +140,7 @@ struct ESMC_Domain {
 
 // collection of AxisIndices per axis, to describe an n-dim cube
 class ESMC_DomainList {
-  public:   // TODO: fix this
+  public:   // TODO: fix this to be private?
     int num_domains;
     int current_size;
     int total_points;
@@ -152,40 +154,28 @@ class ESMC_DomainList {
 
 // !PRIVATE TYPES:
 
- // class declaration type.  WARNING: this must match layout in memory
- // corresponding F90 base derived type.  do not change one without
- // changing the other.
+ // class declaration type.
 class ESMC_Base
 {
   protected:
-    int           ID;         // unique ID of this instance
-    int           refCount;   // number of references to this instance
-    ESMC_Status   baseStatus; // status of an instance of Base derived class
-    char          baseName[ESMF_MAXSTR];  // object name
+    int           ID;           // unique ID for any object in the system
+    int           refCount;     // number of references to this instance
+    int           classID;      // unique ID relative to this class
+    ESMC_Status   baseStatus;   // status of an instance of Base derived class
+    char          baseName[ESMF_MAXSTR];  // object name, unique over class 
+    char          baseNameF90[ESMF_MAXSTR]; // same name, non-null terminated
+    char          className[ESMF_MAXSTR]; // object class
 
   private:
-    int attrCount;            // number of attributes in use in list
-    int attrAlloc;            // number of attributes currently allocated
-    ESMC_Attribute *attr;     // attribute list
+    int attrCount;              // number of attributes in use in list
+    int attrAlloc;              // number of attributes currently allocated
+    ESMC_Attribute *attr;       // attribute list
 
 // !PUBLIC MEMBER FUNCTIONS:
   
   public:
     // required & optional standard interface methods for all ESMF classes.
     // should not instantiate a ESMC_Base object directly; must sub-class first.
-
-    // for shallow classes
-//  int ESMC_BaseInit(void);
-
-    // for deep classes
-//  ESMC_Base *ESMC_BaseCreate(int *rc);
-//  int        ESMC_BaseDestroy(void);
-//  int        ESMC_BaseConstruct(void);
-//  int        ESMC_BaseDestruct(void);
-
-    // configuration methods for any ESMF class
-//  int ESMC_BaseGetConfig(void) const;
-//  int ESMC_BaseSetConfig(void);
 
     // accessor to number of class instances
     int  ESMC_BaseGetInstCount(void) const;
@@ -203,8 +193,16 @@ class ESMC_Base
     ESMC_Status ESMC_BaseGetStatus(void) const;
  
     // accessors to base name
-    int  ESMC_BaseSetName(char *name, char *context);
+    int   ESMC_BaseSetName(char *name, char *classname);
     char *ESMC_BaseGetName(void) const;
+    int   ESMC_BaseSetF90Name(char *name, int nlen);
+    char *ESMC_BaseGetF90Name(void) const;
+
+    // accessors to class name
+    int   ESMC_BaseSetClassName(char *classname);
+    char *ESMC_BaseGetClassName(void) const;
+    int   ESMC_BaseSetF90ClassName(char *name, int nlen);
+    int   ESMC_BaseGetF90ClassName(char *name, int nlen) const;
 
     // optional Read/Write methods for any ESMF class
     virtual int ESMC_Read(void);
@@ -232,11 +230,25 @@ class ESMC_Base
     int ESMC_AttributeCopy(char *name, ESMC_Base *destination);
     int ESMC_AttributeCopyAll(ESMC_Base *destination);
 
-    // constructor/destructor
+    // constructors/destructor
     ESMC_Base(void);
+    ESMC_Base(char *superclass, char *name, int nattrs);
     ~ESMC_Base(void);
 
 };   // end class ESMC_Base
+
+// fortran interface functions to base objects
+extern "C" {
+  void FTN(c_esmc_basecreate)(ESMC_Base **base, char *superclass, char *name,
+                              int *nattrs, int *rc, int sclen, int nlen);
+  void FTN(c_esmc_basedestroy)(ESMC_Base **base, int *rc);
+
+  void FTN(c_esmc_baseprint)(ESMC_Base **base, char *opts, int *rc, int nlen);
+  void FTN(c_esmc_getf90name)(ESMC_Base **base, char *name, int *rc, int nlen);
+  void FTN(c_esmc_setf90name)(ESMC_Base **base, char *name, int *rc, int nlen);
+  void FTN(c_esmc_getf90classname)(ESMC_Base **base, char *name, int *rc, int nlen);
+  void FTN(c_esmc_setf90classname)(ESMC_Base **base, char *name, int *rc, int nlen);
+}
 
 // class utility functions, not methods, since they operate on
 //  multiple objects

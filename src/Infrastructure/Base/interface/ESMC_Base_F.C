@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.1 2004/01/27 18:22:25 nscollins Exp $
+// $Id: ESMC_Base_F.C,v 1.2 2004/01/28 00:34:44 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.1 2004/01/27 18:22:25 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.2 2004/01/28 00:34:44 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -43,6 +43,260 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+//  Base object methods
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_BaseCreate - create and initialize a new Base object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_basecreate)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *superclass,         // in - F90, non-null terminated string
+      char *name,               // in (opt) - F90, non-null terminated string
+      int *nattrs,              // in - number of initial attributes to alloc
+      int *rc,                  // out - return code
+      int sclen,                // hidden/in - strlen count for superclass
+      int nlen) {               // hidden/in - strlen count for name
+// 
+// !DESCRIPTION:
+//     Create a new Base object.
+//
+//EOP
+// !REQUIREMENTS:  FLD1.5, FLD1.5.3
+
+  int i, status;
+  char *cname = NULL;
+  char *scname = NULL;
+
+  // copy and convert F90 strings to null terminated ones
+  scname = ESMC_F90toCstring(superclass, sclen);
+  if (!scname) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+  if (name != ESMC_NULL_POINTER) {
+      cname = ESMC_F90toCstring(name, nlen);
+      if (!cname) {
+          delete [] scname;
+          *rc = ESMF_FAILURE;
+          return;
+      }
+  } 
+
+  (*base) = new ESMC_Base(superclass, name, *nattrs);
+  if (*base != NULL)
+      *rc = ESMF_SUCCESS;
+  else
+      *rc = ESMF_FAILURE;
+
+  delete [] scname;
+  if (cname) delete [] cname;
+  return;
+
+}  // end c_ESMC_BaseCreate
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_BaseDestroy - release resources from a Base object
+//
+// !INTERFACE:
+      void FTN(c_esmc_basedestroy)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Free resources associated with a base object.
+//
+//EOP
+// !REQUIREMENTS:  FLD1.5, FLD1.5.3
+
+  delete (*base);
+  *rc = ESMF_SUCCESS;
+  return;
+
+}  // end c_ESMC_BaseDestroy
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_BasePrint - print Base object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_baseprint)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *opts,               // in - F90, non-null terminated string
+      int *rc,                  // out - return code
+      int nlen) {               // hidden/in - strlen count for options
+// 
+// !DESCRIPTION:
+//     Print the contents of a base object.
+//
+//EOP
+// !REQUIREMENTS:  FLD1.5, FLD1.5.3
+
+  int i, status;
+  char *copts;
+
+  // copy and convert F90 string to null terminated one
+  copts = ESMC_F90toCstring(opts, nlen);
+  if (!copts) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  *rc = (*base)->ESMC_Print(opts);
+
+  delete [] copts;
+  return;
+
+}  // end c_ESMC_BasePrint
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_GetF90Name - return the object name to an F90 caller
+//
+// !INTERFACE:
+      void FTN(c_esmc_getf90name)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *name,               // out - F90, non-null terminated string
+      int *rc,                  // out - return code
+      int nlen) {               // hidden/in - max strlen count for name
+// 
+// !DESCRIPTION:
+//     return the name to an F90 caller.
+//
+//EOP
+// !REQUIREMENTS:  FLD1.5, FLD1.5.3
+
+  int i, status;
+
+  strncpy(name, (*base)->ESMC_BaseGetF90Name(), nlen);
+
+  if (rc) *rc = ESMF_SUCCESS;
+  return;
+
+}  // end c_ESMC_GetF90Name
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_SetF90Name - set the object name from an F90 caller
+//
+// !INTERFACE:
+      void FTN(c_esmc_setf90name)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *name,               // in - F90, non-null terminated string
+      int *rc,                  // out - return code
+      int nlen) {               // hidden/in - max strlen count for name
+// 
+// !DESCRIPTION:
+//     set the name from an F90 caller.
+//
+//EOP
+// !REQUIREMENTS:  FLD1.5, FLD1.5.3
+
+  int i, status;
+
+  (*rc) = (*base)->ESMC_BaseSetF90Name(name, nlen);
+
+  if (rc) *rc = ESMF_SUCCESS;
+  return;
+
+}  // end c_ESMC_SetF90Name
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_GetF90ClassName - return the object name to an F90 caller
+//
+// !INTERFACE:
+      void FTN(c_esmc_getf90classname)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *classname,          // out - F90, non-null terminated string
+      int *rc,                  // out - return code
+      int nlen) {               // hidden/in - max strlen count for name
+// 
+// !DESCRIPTION:
+//     return the name to an F90 caller.
+//
+//EOP
+// !REQUIREMENTS:  FLD1.5, FLD1.5.3
+
+  int i, status;
+
+  *rc = (*base)->ESMC_BaseGetF90ClassName(classname, nlen);
+
+  return;
+
+}  // end c_ESMC_GetF90ClassName
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_SetF90ClassName - set the object name from an F90 caller
+//
+// !INTERFACE:
+      void FTN(c_esmc_setf90classname)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *classname,          // in - F90, non-null terminated string
+      int *rc,                  // out - return code
+      int nlen) {               // hidden/in - max strlen count for name
+// 
+// !DESCRIPTION:
+//     set the name from an F90 caller.
+//
+//EOP
+// !REQUIREMENTS:  FLD1.5, FLD1.5.3
+
+  int i, status;
+
+  (*rc) = (*base)->ESMC_BaseSetF90ClassName(classname, nlen);
+
+  if (rc) *rc = ESMF_SUCCESS;
+  return;
+
+}  // end c_ESMC_SetF90ClassName
+
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Attribute methods
 //-----------------------------------------------------------------------------
 
@@ -52,7 +306,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_AttributeSet - set attribute on an ESMF type
 //
 // !INTERFACE:
-      void c_esmc_attributesetint(
+      void FTN(c_esmc_attributesetint)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -102,7 +356,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_AttributeGet - get attribute from an ESMF type
 //
 // !INTERFACE:
-      void c_esmc_attributegetint(
+      void FTN(c_esmc_attributegetint)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -153,48 +407,12 @@ extern "C" {
 }  // end c_ESMC_AttributeGetInt
 
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_BasePrint - print Base object class
-//
-// !INTERFACE:
-      void c_esmc_baseprint(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *opts,               // in - F90, non-null terminated string
-      int *rc,                  // in - return code
-      int nlen) {               // hidden/in - strlen count for options
-// 
-// !DESCRIPTION:
-//     Print the contents of a base object.
-//
-//EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
-
-  int i, status;
-  char *copts;
-
-  // copy and convert F90 string to null terminated one
-  copts = ESMC_F90toCstring(opts, nlen);
-  if (!copts) {
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  *rc = (*base)->ESMC_Print(opts);
-
-  delete [] copts;
-  return;
-
-}  // end c_ESMC_BasePrint
-
-
 #if 0
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_AttributeGetCount - get an ESMF object's number of attributes

@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.72 2004/01/27 17:55:27 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.73 2004/01/28 00:34:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -40,22 +40,30 @@
 
 !------------------------------------------------------------------------------
 !
-!    Global integer parameters, used frequently
+!    ! Global integer parameters, used frequently
+
+!     ! WARNING: 
+!     !  constants MUST match corresponding values in ../include/ESMC_Macros.h
 
       integer, parameter :: ESMF_SUCCESS = 0, ESMF_FAILURE = -1
       integer, parameter :: ESMF_MAXSTR = 128
       integer, parameter :: ESMF_MAXDIM = 7, &
-                            ESMF_MAXDECOMPDIM=2, &
-                            ESMF_MAXGRIDDIM=3
+                            ESMF_MAXDECOMPDIM = 2, &
+                            ESMF_MAXGRIDDIM = 3
      
       integer, parameter :: ESMF_MAJOR_VERSION = 1
       integer, parameter :: ESMF_MINOR_VERSION = 0
-      integer, parameter :: ESMF_REVISION      = 4
+      integer, parameter :: ESMF_REVISION      = 5
       integer, parameter :: ESMF_PATCHLEVEL    = 0
-      character(32), parameter :: ESMF_VERSION_STRING = "1.0.4"
+      character(8), parameter :: ESMF_VERSION_STRING = "1.0.5"
 
 !------------------------------------------------------------------------------
 !
+!    ! General object status, useful for any object
+
+!     ! WARNING: 
+!     !  constants MUST match corresponding values in ../include/ESMC_Base.h
+
       type ESMF_Status
       sequence
       private
@@ -71,6 +79,13 @@
  
 !------------------------------------------------------------------------------
 !
+!    ! Generic pointer, large enough to hold a pointer on any architecture,
+!    ! but not useful directly in fortran.  Expected to be used where a
+!    ! pointer generated in C++ needs to be stored on the F90 side.
+
+!     ! WARNING: 
+!     !  constants MUST match corresponding values in ../include/ESMC_Base.h
+
       type ESMF_Pointer
       sequence
       private
@@ -83,12 +98,15 @@
 
 !------------------------------------------------------------------------------
 !
-      !! TODO: I believe if we define an assignment(=) operator to convert
-      !!   a datatype into integer, then we could use the type and kind as
-      !!   targets in a select case() statement and make the contents private.
-      !!   (see pg 248 of the "big book")
+!    ! Data type - does not specify size (*4, *8, short, long) since KIND
+!    ! takes care of that.
+
+!     ! WARNING: 
+!     !  constants MUST match corresponding values in ../include/ESMC_Base.h
+
       type ESMF_DataType
       sequence
+      ! TODO: can this be made private now?
       !!private
           integer :: dtype
       end type
@@ -99,18 +117,22 @@
                                         ESMF_DATA_CHARACTER = ESMF_DataType(4)
 
 !------------------------------------------------------------------------------
-!     ! Where we can use a derived type, the compiler will help do 
-!     ! typechecking.  For those places where the compiler refuses to allow
-!     ! anything but an Integer data type, use the second set of constants.
-      !! TODO: see comment below about defining an assignment(=) operator
-      !!  which converts a dkind into a real int.  then this could go back
-      !!  to being private.
+!
+!    ! Where we can use a derived type, the compiler will help do 
+!    ! typechecking.  For those places where the compiler refuses to allow
+!    ! anything but an Integer data type, use the second set of constants.
+
+!     ! WARNING: 
+!     !  constants MUST match corresponding values in ../include/ESMC_Base.h
+
       type ESMF_DataKind
       sequence
+      ! TODO: can this be made private now?
       !!private
         integer :: dkind
       end type
 
+      ! these work well for internal ESMF use, arguments, etc
       type(ESMF_DataKind), parameter :: &
                    ESMF_I1 = ESMF_DataKind(1), &
                    ESMF_I2 = ESMF_DataKind(2), &
@@ -121,9 +143,8 @@
                    ESMF_C8 = ESMF_DataKind(7), &
                    ESMF_C16 = ESMF_DataKind(8)
 
-      !! TODO: I believe that if we defined an assignment(=) operator for
-      !! the data kind to convert the derived type into a real integer, 
-      !! then we might be able to get rid of this second set of integer parms.
+      ! these work where you have to declare an array or something that
+      ! the compiler needs to have a fixed 'kind' for.
       integer, parameter :: &
                    ESMF_KIND_I1 = selected_int_kind(2), &
                    ESMF_KIND_I2 = selected_int_kind(4), &
@@ -135,32 +156,28 @@
                    ESMF_KIND_C16 = selected_real_kind(6,45)
 
 !------------------------------------------------------------------------------
+!
+!    ! Dummy structure which must just be big enough to hold the values.
+!    ! actual data values will always be accessed on the C++ side.
 
       type ESMF_DataValue
       sequence
       private
           type(ESMF_DataType) :: dt
           integer :: items
-          ! how do you do values of all types here ? TODO
-          ! in C++ i'm using a union w/ overloaded access funcs
-          integer :: vi
-          !integer, dimension (:), pointer :: vip
-          !real :: vr
-          !real, dimension (:), pointer :: vrp
-          !logical :: vl
-          !logical, pointer :: vlp
-          !character (len=ESMF_MAXSTR) :: vc
-          !character, pointer :: vcp
+          type(ESMF_Pointer) :: value
           integer :: pad
       end type
 
 !------------------------------------------------------------------------------
 !
+!    ! Dummy structure which must just be big enough to hold the values.
+!    ! actual data values will always be accessed on the C++ side.
+
       type ESMF_Attribute
       sequence
       private
           character (len=ESMF_MAXSTR) :: attr_name
-          !!type (ESMF_DataType) :: attr_type
           type (ESMF_DataValue) :: attr_value
       end type
 
@@ -196,18 +213,16 @@
       end type
 
 !------------------------------------------------------------------------------
-!
-      type ESMF_BasePointer
-      sequence
-      private
-          integer*8 :: basePtr
-      end type
-
-      integer :: globalCount = 0
-
 !------------------------------------------------------------------------------
 !
+!     ! Typed true/false values which are not compiler dependent, so that
+!     ! when crossing the F90/C++ language boundary with logical values we
+!     ! have a consistent interpretation.  In C/C++ 0=false, 1=true, but this
+!     ! is not defined for F90 and different compilers use different values
+!     ! for booleans.
+
 !     ! WARNING: must match corresponding values in ../include/ESMC_Base.h
+
       type ESMF_Logical
       sequence
       private
@@ -219,20 +234,20 @@
 
 !------------------------------------------------------------------------------
 !
-      ! WARNING: this must match layout in memory for C++ base object.
-      ! do not change one without changing the other.
+      ! Contains pointer to real Base object which is defined in C++
+
       type ESMF_Base
       sequence
       private
-         integer :: ID
-         integer :: refCount
-         type (ESMF_Status) :: baseStatus
-         character (len=ESMF_MAXSTR) :: name
-         integer :: attrCount
-         integer :: attrAlloc
-         type (ESMF_Pointer) :: attrList
+#ifndef ESMF_NO_INITIALIZERS
+         type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
+#else
+         type(ESMF_Pointer) :: this
+#endif
      end type
 
+!------------------------------------------------------------------------------
+!
 ! !PUBLIC TYPES:
 
       public ESMF_STATE_UNINIT, ESMF_STATE_READY, &
@@ -250,6 +265,7 @@
 
       public ESMF_NULL_POINTER, ESMF_BAD_POINTER
 
+      public ESMF_Logical, ESMF_TRUE, ESMF_FALSE
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR
@@ -259,14 +275,11 @@
       public ESMF_REVISION, ESMF_PATCHLEVEL
       public ESMF_VERSION_STRING 
 
+      public ESMF_Base
       public ESMF_Status, ESMF_Pointer, ESMF_DataType, ESMF_DataKind
       public ESMF_DataValue, ESMF_Attribute
-      public ESMF_BasePointer, ESMF_Base
       public ESMF_Domain, ESMF_DomainList
-
-      public ESMF_AxisIndex, ESMF_AxisIndexSet, ESMF_AxisIndexGet
-      public ESMF_Logical, ESMF_TRUE, ESMF_FALSE
-      public ESMF_BasePrint
+      public ESMF_AxisIndex
 
 ! !PUBLIC MEMBER FUNCTIONS:
 !
@@ -276,11 +289,9 @@
 !     routines need to be specialized by the higher level objects.
 !
 !   Base class methods
-       public ESMF_BaseInit
+       public ESMF_BaseCreate
+       public ESMF_BaseDestroy
    
-!      public ESMF_BaseGetConfig
-!      public ESMF_BaseSetConfig
-
 !      public ESMF_BaseGetInstCount
 
 !      public ESMF_BaseSetID
@@ -291,6 +302,8 @@
 
 !      public ESMF_BaseSetStatus
 !      public ESMF_BaseGetStatus
+
+       public ESMF_BasePrint
 
 !   Virtual methods to be defined by derived classes
 !      public ESMF_Read
@@ -317,6 +330,10 @@
       public ESMF_DomainListPrint
       public ESMF_DomainListAdd
  
+! AxisIndex methods
+      public ESMF_AxisIndexSet
+      public ESMF_AxisIndexGet
+
 !  Misc methods
       public ESMF_SetName
       public ESMF_GetName
@@ -361,7 +378,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.72 2004/01/27 17:55:27 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.73 2004/01/28 00:34:44 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -543,13 +560,16 @@ end function
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_BaseInit - initialize a Base object
+! !IROUTINE:  ESMF_BaseCreate - Create and initialize a Base object
 !
 ! !INTERFACE:
-      subroutine ESMF_BaseInit(base, rc)
+      subroutine ESMF_BaseCreate(base, superclass, name, nattr, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base) :: base                 
+      character(len=*), intent(in) :: superclass
+      character(len=*), intent(in), optional :: name
+      integer, intent(in), optional :: nattr 
       integer, intent(out), optional :: rc     
 
 !
@@ -558,10 +578,19 @@ end function
 !
 !     \begin{description}
 !     \item [base]
-!           In the Fortran interface, this must in fact be a {\tt Base}
-!           derived type object.  It is expected that all specialized 
-!           derived types will include a {\tt Base} object as the first
-!           entry.
+!           An {\tt ESMF\_Base} derived type.  It is expected that all 
+!           specialized derived types will include an {\tt ESMF\_Base} 
+!           object as the first entry.
+!     \item [superclass]
+!           The name of the superclass, e.g. {\tt Grid}, {\tt Array}.
+!           This sets the scope for unique object names.
+!     \item [{[name]}]
+!           If given, the unique name for this object.  If not given,
+!           a unique name will be generated.  
+!     \item [{[nattr]}]
+!           If given, the initial number of attributes to allocate space for.
+!           Additional attributes can be added at any time, but it will be
+!           more efficient if space is allocated at create time.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -570,36 +599,79 @@ end function
 !EOP
 
       logical :: rcpresent                          ! Return code present   
+      integer :: status, allocNAttrs
 
-!     !Initialize return code
+!     ! Initialize return code
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
 
-      globalCount = globalCount + 1
-      base%ID = globalCount
-      base%refCount = 1
-      base%baseStatus = ESMF_STATE_READY
-      base%name = "undefined"
-      base%attrCount = 0
-      base%attrAlloc = 0
-      base%attrList = ESMF_NULL_POINTER
+      allocNAttrs = 0   ! default value, overwrite if argument specified
+      if (present(nattr)) allocNAttrs = nattr
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(name)) then
+          call c_ESMC_BaseCreate(base, superclass, name, allocNattrs, status)
+      else
+          call c_ESMC_BaseCreate(base, superclass, ESMF_NULL_POINTER, &
+                                                    allocNattrs, status)
+      endif
 
-      end subroutine ESMF_BaseInit
+      if (rcpresent) rc = status
+
+      end subroutine ESMF_BaseCreate
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_BaseDestroy - Release resources from a Base object
+!
+! !INTERFACE:
+      subroutine ESMF_BaseDestroy(base, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base) :: base                 
+      integer, intent(out), optional :: rc     
+
+!
+! !DESCRIPTION:
+!     Release resources held by a Base object.
+!
+!     \begin{description}
+!     \item [base]
+!           An {\tt ESMF\_Base} derived type to be deleted.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+
+      logical :: rcpresent                          ! Return code present   
+      integer :: status
+
+!     ! Initialize return code
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_BaseDestroy(base, status)
+
+      if (rcpresent) rc = status
+
+      end subroutine ESMF_BaseDestroy
 
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_SetName - set the name of this object
 !
 ! !INTERFACE:
-      subroutine ESMF_SetName(anytype, name, namespace, rc)
+      subroutine ESMF_SetName(base, name, namespace, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base) :: anytype                 
+      type(ESMF_Base) :: base                 
       character (len = *), intent(in), optional :: name   
       character (len = *), intent(in), optional :: namespace
       integer, intent(out), optional :: rc     
@@ -609,7 +681,7 @@ end function
 !     Associate a name with any object in the system.
 !
 !     \begin{description}
-!     \item [anytype]
+!     \item [base]
 !           In the Fortran interface, this must in fact be a {\tt Base}
 !           derived type object.  It is expected that all specialized 
 !           derived types will include a {\tt Base} object as the first
@@ -636,39 +708,25 @@ end function
 !EOP
 ! !REQUIREMENTS:  FLD1.5, FLD1.5.3
       logical :: rcpresent                          ! Return code present   
-      character (len = ESMF_MAXSTR) :: ournamespace ! Namespace if not given
-      character (len = ESMF_MAXSTR) :: defaultname  ! Name if not given
-      integer, save :: seqnum = 0       ! HACK - generate uniq names
-                                        ! but not coordinated across procs
-                                        ! fortran gets evens, C++ odds
+      integer :: status
 
-!     !Initialize return code
+!     ! Initialize return code
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
 
-!     ! TODO: this code should generate a unique name if a name
-!     !   is not given.  If a namespace is given, the name has to
-!     !   be unique within that namespace.  Example namespaces could
-!     !   be: Applications, Components, Fields/Bundles, Grids.
-!      
-!     ! Construct a default namespace if one is not given
-      if((.not. present(namespace)) .or. (namespace .eq. "")) then
-          ournamespace = "global"
+      if (present(namespace)) then
+          call c_ESMC_SetF90ClassName(base, namespace, status)
       else
-          ournamespace = namespace
+          call c_ESMC_SetF90ClassName(base, "global", status)
       endif
-!     ! Construct a default name if one is not given
-      if((.not. present(name)) .or. (name .eq. "")) then
 
-          write(defaultname, 20) trim(ournamespace), seqnum
-20        format(A,I3.3)
-          seqnum = seqnum + 2   ! C gets odds, fortran evens
-          anytype%name = defaultname
+      if (present(name)) then
+          call c_ESMC_SetF90Name(base, name, status)
       else
-          anytype%name = name
+          call c_ESMC_SetF90Name(base, "default", status)
       endif
 
       if (rcpresent) rc = ESMF_SUCCESS
@@ -680,12 +738,12 @@ end function
 ! !IROUTINE:  ESMF_GetName - get the name of this object
 !
 ! !INTERFACE:
-      subroutine ESMF_GetName(anytype, name, rc)
+      subroutine ESMF_GetName(base, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: anytype             ! any ESMF object/type
-      character (len = *), intent(out) :: name           ! object/type name
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_Base), intent(in) :: base
+      character (len = *), intent(out) :: name
+      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -694,10 +752,10 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:  FLD1.5, FLD1.5.3
+      integer :: status
 
-      !print *, "name about to be returned is", anytype%name
-      name = trim(anytype%name)
-      if (present(rc)) rc = ESMF_SUCCESS
+      call c_ESMC_GetF90Name(base, name, status)
+      if (present(rc)) rc = status
 
       end subroutine ESMF_GetName
 
