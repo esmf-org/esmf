@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.37 2003/09/22 17:25:41 flanigan Exp $ 
+# $Id: makefile,v 1.38 2003/10/16 16:06:08 flanigan Exp $ 
 ALL: alldoc 
 
 
@@ -79,7 +79,7 @@ ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
 
 
 # Html Files
-${ESMC_DOCDIR}/ESMF_usrdoc: $(USRDOC_DEP_FILES)
+${ESMC_DOCDIR}/ESMF_usrdoc: ESMF_usrdoc.ctex $(USRDOC_DEP_FILES)
 	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	-rm -r $(ESMC_DOCDIR)/ESMF_usrdoc
 	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
