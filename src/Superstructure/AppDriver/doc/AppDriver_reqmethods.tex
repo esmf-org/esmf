@@ -1,4 +1,4 @@
-% $Id: AppDriver_reqmethods.tex,v 1.1 2004/06/23 19:22:33 cdeluca Exp $
+% $Id: AppDriver_reqmethods.tex,v 1.2 2004/12/28 18:59:23 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,8 +45,9 @@ method.
 Note that a component does not call its own set services routine;
 the AppDriver or parent component code which is creating a component 
 will first call {\tt ESMF\_<Grid/Cpl>CompCreate()} to create an "empty" 
-component, and then call the component-specific set services routine 
-to associate ESMF-standard methods to user-code methods. After set 
+component, and then must call the component-specific set services routine 
+to associate ESMF-standard methods to user-code methods, and to create
+the VM in which this component will run. After set 
 services has been called, the framework
 now will be able to call the component's initialize, run, and finalize 
 routines as required.  
