@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/10/22 20:09:41 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2003/11/27 00:05:23 svasquez Exp $ 
 
 ALL:  examples
 
@@ -57,8 +57,8 @@ LOCDIR	  = src/Superstructure/State/examples
 # depend on this naming convention being followed.
 #
 
-EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_StateEx \
-                 $(ESMF_EXDIR)/ESMF_StateEx 
+EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_StateEx 
+#                 $(ESMF_EXDIR)/ESMC_StateEx 
                  
 #
 # List the example run targets in EXAMPLES_RUN and 
@@ -66,12 +66,12 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_StateEx \
 # in this makefile.
 #
 
-EXAMPLES_RUN   = run_ESMC_StateEx \
-                 run_ESMF_StateEx 
+EXAMPLES_RUN   = run_ESMF_StateEx 
+#                 run_ESMC_StateEx 
                  
 
-EXAPMLES_RUN_UNI = run_ESMC_StateEx_uni \
-                   run_ESMF_StateEx_uni 
+EXAMPLES_RUN_UNI = run_ESMF_StateEx_uni 
+#                   run_ESMC_StateEx_uni 
                    
 include $(ESMF_DIR)/makefile
 
