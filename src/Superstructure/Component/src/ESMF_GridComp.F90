@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.16 2004/02/24 14:56:47 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.17 2004/02/25 17:38:21 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.16 2004/02/24 14:56:47 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.17 2004/02/25 17:38:21 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -609,8 +609,8 @@
 !    Component layout.
 !
 !   \item[{[mtype]}]
-!    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
-!    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.
+!    Component Model Type, where model includes {\tt ESMF\_ATM, ESMF\_LAND,
+!    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER}.
 !
 !   \item[{[grid]}]
 !    Default grid associated with this component.
@@ -680,8 +680,8 @@
 !    Component layout.
 !
 !   \item[{[mtype]}]
-!    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
-!    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.
+!    Component Model Type, where model includes {\tt ESMF\_ATM, ESMF\_LAND,
+!    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER}.
 !
 !   \item[{[grid]}]
 !    Default grid associated with this component.
@@ -1021,11 +1021,11 @@
 !          gridded component object
 !     \item[{[max]}] 
 !          Maximum threading level
-!     \item[{[pref_intra_process]}] 
+!     \item[{[pref\_intra\_process]}] 
 !          Intra process communication preference
-!     \item[{[pref_intra_ssi]}] 
+!     \item[{[pref\_intra\_ssi]}] 
 !          Intra SSI communication preference
-!     \item[{[pref_inter_ssi]}] 
+!     \item[{[pref\_inter\_ssi]}] 
 !          Inter process communication preference
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1084,11 +1084,11 @@
 !          gridded component object
 !     \item[{[max]}] 
 !          Maximum threading level
-!     \item[{[pref_intra_process]}] 
+!     \item[{[pref\_intra\_process]}] 
 !          Intra process communication preference
-!     \item[{[pref_intra_ssi]}] 
+!     \item[{[pref\_intra\_ssi]}] 
 !          Intra SSI communication preference
-!     \item[{[pref_inter_ssi]}] 
+!     \item[{[pref\_inter\_ssi]}] 
 !          Inter process communication preference
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1147,11 +1147,11 @@
 !          gridded component object
 !     \item[{[max]}] 
 !          Maximum threading level
-!     \item[{[pref_intra_process]}] 
+!     \item[{[pref\_intra\_process]}] 
 !          Intra process communication preference
-!     \item[{[pref_intra_ssi]}] 
+!     \item[{[pref\_intra\_ssi]}] 
 !          Intra SSI communication preference
-!     \item[{[pref_inter_ssi]}] 
+!     \item[{[pref\_inter\_ssi]}] 
 !          Inter process communication preference
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
