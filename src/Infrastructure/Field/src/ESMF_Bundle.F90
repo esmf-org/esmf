@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.17 2003/07/31 23:35:43 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.18 2003/08/01 23:01:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1025,8 +1025,10 @@ end function
       integer, intent(out), optional :: rc          
 !
 ! !DESCRIPTION:
-!      Add a {\tt ESMF\_Field} reference to an existing {\tt ESMF\_Bundle}.  The {\tt ESMF\_Field} must have the
-!      same {\tt ESMF\_Grid} as the rest of the {\tt ESMF\_Fields} in the {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
+!      Add a {\tt ESMF\_Field} reference to an existing {\tt ESMF\_Bundle}.  
+!      The {\tt ESMF\_Field} must have the
+!      same {\tt ESMF\_Grid} as the rest of the {\tt ESMF\_Fields} in the 
+!      {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
 !      packed data, this will mean copying the data to add this field.
 !
 !     The arguments are:
@@ -1111,6 +1113,7 @@ end function
       integer :: i                                ! temp var
       type(ESMF_Field), dimension(:), pointer :: temp_flist  
                                                   ! list of fields
+      type(ESMF_Grid) :: grid
 
       ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
@@ -1123,55 +1126,78 @@ end function
       ! Initial values
       nullify(temp_flist)
     
-
+      ! early exit.
+      if (fieldcount .le. 0) then
+          print *, "ERROR in ESMF_BundleAddFields: called with 0 Fields"
+          return
+      endif
+      
+   
 ! TODO: add consistency checks below
 !       loop over field count, get grid and check to see it's the same
 
-!     Add the fields in the list, checking for consistency.
-      if(btype%field_count .eq. 0) then
+      ! Add the fields in the list, checking for consistency.
+      if (btype%field_count .eq. 0) then
+        
           allocate(btype%flist(fieldcount), stat=status)
           if(status .NE. 0) then
             print *, "ERROR in ESMF_BundleAddFields: Fieldlist allocate"
             return
           endif
          
-!         now add the fields to the new list
+          ! now add the fields to the new list
           do i=1, fieldcount
             btype%flist(i) = fields(i)
           enddo
 
           btype%field_count = fieldcount
       else
-!         make a list the right length
+          ! make a list the right length
           allocate(temp_flist(btype%field_count + fieldcount), stat=status)
           if(status .NE. 0) then
             print *, "ERROR in ESMF_BundleConstructNew: temporary Fieldlist allocate"
             return
           endif
 
-!         preserve old contents
+          ! preserve old contents
           do i = 1, btype%field_count
             temp_flist(i) = btype%flist(i)
           enddo
 
-!         and append the new fields to the list
+          ! and append the new fields to the list
           do i=1, fieldcount
             temp_flist(btype%field_count+i) = fields(i)
           enddo
 
-!         delete old list
+          ! delete old list
           deallocate(btype%flist, stat=status)
           if(status .NE. 0) then
             print *, "ERROR in ESMF_BundleConstructNew: Fieldlist deallocate"
           endif
 
-!         and now make this the permanent list
+          ! and now make this the permanent list
           btype%flist => temp_flist
           btype%field_count = btype%field_count + fieldcount
 
       endif
 
-!     If packed data buffer requested, create or update it here.
+      ! If no grid set yet, loop and set the first grid we find to be
+      !  associated with the bundle.  Note that Fields can be created
+      !  that don't have associated grids yet, so we have to be able to
+      !  deal consistently with that.
+      if (btype%gridstatus .eq. ESMF_STATE_UNINIT) then
+          do i=1, fieldcount
+            call ESMF_FieldGetGrid(btype%flist(i), grid, status)
+            if (status .ne. ESMF_SUCCESS) cycle
+
+            btype%grid = grid
+            btype%gridstatus = ESMF_STATE_READY
+            status = ESMF_SUCCESS
+            exit
+          enddo
+      endif
+
+      ! If packed data buffer requested, create or update it here.
       if (btype%pack_flag .eq. ESMF_PACK_FIELD_DATA) then
 
          call ESMF_BundleTypeRepackData(btype, rc=rc)
