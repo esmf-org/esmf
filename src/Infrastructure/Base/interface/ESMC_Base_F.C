@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.36 2005/01/13 22:49:45 nscollins Exp $
+// $Id: ESMC_Base_F.C,v 1.37 2005/01/13 23:03:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.36 2005/01/13 22:49:45 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.37 2005/01/13 23:03:12 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -633,7 +633,7 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOPI
-// !IROUTINE:  c_ESMC_SetVMId - set the object's VMId 
+// !IROUTINE:  c_ESMC_SetVMId - allocate space and set the object's VMId 
 //
 // !INTERFACE:
       void FTN(c_esmc_setvmid)(
@@ -647,7 +647,7 @@ extern "C" {
       int *rc) {                // out - return code
 // 
 // !DESCRIPTION:
-//     return the object's VMId to a Fortran caller.
+//     allocate space and set the object's VMId.
 //
 //EOPI
 
