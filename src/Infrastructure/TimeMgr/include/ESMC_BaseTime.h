@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.24 2004/09/13 17:49:27 eschwab Exp $
+// $Id: ESMC_BaseTime.h,v 1.25 2004/10/27 18:46:16 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -107,6 +107,7 @@
 // !USES:
 #include <ESMC_Base.h>   // all classes inherit from the ESMC Base class.
 #include <ESMC_IOSpec.h> // IOSpec class for ReadRestart()/WriteRestart()
+#include <ESMC_Fraction.h>
 
 // !PUBLIC TYPES:
  class ESMC_BaseTime;
@@ -115,16 +116,11 @@
  // class configuration type:  not needed for ESMC_BaseTime
 
  // class definition type
-class ESMC_BaseTime {
+class ESMC_BaseTime : public ESMC_Fraction { // it is a fraction !
 //class ESMC_BaseTime : public ESMC_Base { // TODO: inherit from ESMC_Base class
                                            // when fully aligned with F90 equiv
 
   protected:
-
-    ESMF_KIND_I8 s;   // Integer seconds (signed)
-    ESMF_KIND_I4 sN;  // Integer fractional seconds (exact) n/d; numerator
-                       //                                         (signed)
-    ESMF_KIND_I4 sD;  // Integer fractional seconds (exact) n/d; denominator
 
     // TODO:  move ESMC_Calendar* here to define seconds per day ? then could
     //        add D (Julian Days) to Get()/Set() below, and remove secondsPerDay
@@ -149,7 +145,7 @@ class ESMC_BaseTime {
 
     int ESMC_BaseTimeSet(ESMF_KIND_I8 S, int sN, int sD);
 
-    int ESMC_BaseTimeGet(ESMF_KIND_I8 timeToConvert,
+    int ESMC_BaseTimeGet(const ESMC_BaseTime *timeToConvert,
                          ESMF_KIND_I4 *h=0, ESMF_KIND_I4 *m=0,
                          ESMF_KIND_I4 *s=0, ESMF_KIND_I8 *s_i8=0,
                          ESMF_KIND_I4 *ms=0, ESMF_KIND_I4 *us=0,
@@ -163,24 +159,9 @@ class ESMC_BaseTime {
     // ESMC_BaseTime doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
 
-    // comparison methods (TMG 1.5.3, 2.4.3, 7.2)
-    bool operator==(const ESMC_BaseTime &) const; 
-    bool operator!=(const ESMC_BaseTime &) const; 
-    bool operator< (const ESMC_BaseTime &) const; 
-    bool operator> (const ESMC_BaseTime &) const; 
-    bool operator<=(const ESMC_BaseTime &) const; 
-    bool operator>=(const ESMC_BaseTime &) const; 
-
-    // increment, decrement methods (TMG 1.5.4, 2.4.4, 2.4.5, 2.4.6, 5.1, 5.2,
-    //                                   7.2)
-    ESMC_BaseTime  operator+ (const ESMC_BaseTime &) const;
-    ESMC_BaseTime  operator- (const ESMC_BaseTime &) const;
-    ESMC_BaseTime& operator+=(const ESMC_BaseTime &);
-    ESMC_BaseTime& operator-=(const ESMC_BaseTime &);
-
-    // explicit assignment operator to support ESMC_Time & ESMC_TimeInterval
+    // explicit assignment operator to support F90 ESMF_Time & ESMF_TimeInterval
     // TODO:  should be implicit ?
-    ESMC_BaseTime& operator=(const ESMC_BaseTime &);
+    ESMC_BaseTime& operator=(const ESMC_Fraction &);
 
     // required methods inherited and overridden from the ESMC_Base class
 
