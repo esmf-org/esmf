@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.4 2003/12/19 21:44:09 nscollins Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.5 2004/02/11 21:54:55 nscollins Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -32,7 +32,7 @@
     type(ESMF_ArraySpec) :: arrayspec, spec
     type(ESMF_DataType) :: atype
     type(ESMF_DataKind) :: akind
-    integer :: counts(ESMF_MAXDIM)
+    integer :: counts(ESMF_MAXDIM), lb(1), ub(1), rlb(1), rub(1)
     type(ESMF_LocalArray) :: array1, array2, array3, array4
     real(ESMF_KIND_R8), dimension(:,:,:), pointer :: real3dptr, real3d2ptr
     real(ESMF_KIND_R8), dimension(:,:), pointer :: realptr, realptr2
@@ -55,25 +55,20 @@
 !   !  Data is type Integer, 1D.
     print *, ">>> Test 1:"
  
-!   ! Allocate and set initial data values
+!   ! Allocate and set initial data values, using a lower bound != 1
+    !NEX_UTest
     ni = 15 
     allocate(intptr(5:ni+5))
     do i=5,ni+5
        intptr(i) = i
     enddo
     print *, "intptr data = ", intptr
-
-    !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Local Array with Integer 1D Data Test"
     array1 = ESMF_LocalArrayCreate(intptr, ESMF_DATA_REF, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1 create returned"
 
-! hack code
-    call ESMF_LocalArrayGetData(array1, intptr2, ESMF_DATA_REF, rc=rc)  
-    print *, "lb, ub = ", lbound(intptr2), ubound(intptr2)
-! end hack
     !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Printing a Local Array with Integer 1D Data Test"
@@ -88,8 +83,19 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !NEX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Getting lower and upper index bounds"
+    call ESMF_LocalArrayGetData(array1, intptr2, ESMF_DATA_REF, rc)
+    call ESMF_LocalArrayGet(array1, lbounds=lb, ubounds=ub, rc=rc)  
+    rlb = lbound(intptr2)
+    rub = ubound(intptr2)
+    print *, "real lb, ub = ", rlb(1), rub(1), "  lib return lb, ub = ", lb(1), ub(1)
+    call ESMF_Test((rlb(1).eq.lb(1)).and.(rub(1).eq.ub(1)), name, failMsg, result, ESMF_SRCLINE)
+    print *, "array 1 print returned"
+
+    !NEX_UTest
     ni = 15 
-    do i=1,ni
+    do i=5,ni+5
         if (intptr(i).eq.intptr2(i)) then
             result = 0
         else
@@ -610,7 +616,7 @@
     arank = 2
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Initializing an Array Spec of rank 2 Test"
-    call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
+    call ESMF_ArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     ! set all counts to 1 first, then alter the ones you want to change
@@ -621,27 +627,27 @@
     !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Creating an Array Spec Test"
-    array2 = ESMF_LocalArrayCreate(arrayspec, counts(1:2), rc)
+    array2 = ESMF_LocalArrayCreate(arrayspec, counts(1:2), rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
     !NEX_UTest
     write(failMsg, *) "rank not correct" 
     write(name, *) "Get Spec rank and verify Test"
-    call ESMF_LocalArraySpecGet(arrayspec, rank=brank, rc=rc)
+    call ESMF_ArraySpecGet(arrayspec, rank=brank, rc=rc)
     call ESMF_Test((arank.eq.brank), name, failMsg, result, ESMF_SRCLINE)
 
 
     !NEX_UTest
     write(failMsg, *) "type not correct" 
     write(name, *) "Get Spec type and verify Test"
-    call ESMF_LocalArraySpecGet(arrayspec, type=atype, rc=rc)
+    call ESMF_ArraySpecGet(arrayspec, type=atype, rc=rc)
     call ESMF_Test((atype.eq.ESMF_DATA_REAL), name, failMsg, result, ESMF_SRCLINE)
 
     !NEX_UTest
     write(failMsg, *) "kind not correct" 
     write(name, *) "Get Spec kind and verify Test"
-    call ESMF_LocalArraySpecGet(arrayspec, kind=akind, rc=rc)
+    call ESMF_ArraySpecGet(arrayspec, kind=akind, rc=rc)
     call ESMF_Test((akind.eq.ESMF_R4), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
@@ -650,7 +656,7 @@
     arank = 10
     write(failMsg, *) "Did not return ESMF_FAILURE"
     write(name, *) "Initializing an Array Spec of rank 10 Test"
-    call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
+    call ESMF_ArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
     call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -658,21 +664,21 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_FAILURE"
     write(name, *) "Creating an Array from a Spec with rank of 10 Test"
-    array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc)
+    array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc=rc)
     call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
     arank = 5
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Initializing an Array Spec of rank 5 Test"
-    call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
+    call ESMF_ArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating an Array from a Spec with rank of 5 Test"
-    array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc)
+    array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
@@ -681,7 +687,7 @@
     arank = 4
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Initializing an Array Spec of rank 4 Test"
-    call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
+    call ESMF_ArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -689,7 +695,7 @@
     !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating an Array from a Spec with rank of 4 Test"
-    array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc)
+    array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 

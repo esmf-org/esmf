@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.4 2003/12/02 22:00:16 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.5 2004/02/11 21:54:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,6 +33,15 @@
 #define LEN3 counts(1), counts(2), counts(3)
 #define LEN4 counts(1), counts(2), counts(3), counts(4)
 #define LEN5 counts(1), counts(2), counts(3), counts(4), counts(5)
+
+#define RNG1 lb(1):ub(1)
+#define RNG2 lb(1):ub(1),lb(2):ub(2)
+#define RNG3 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3)
+#define RNG4 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4)
+#define RNG5 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5)
+#define RNG6 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5),lb(6):ub(6)
+#define RNG7 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5),lb(6):ub(6),lb(7):ub(7)
+
 
 #define LOC1 1
 #define LOC2 1,1
@@ -222,14 +231,14 @@
 !------------------------------------------------------------------------------
 #endif
 
-#define LocalArrayCreateByMTArrMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define LocalArrayCreateByMTArrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr##mtypekind##mrank##D - make an ESMF array from an unallocated F90 array @\
  @\
 ! !INTERFACE: @\
-      function ESMF_LocalArrCreateByMTArr##mtypekind##mrank##D(f90arr, counts, rc) @\
+      function ESMF_LocalArrCreateByMTArr##mtypekind##mrank##D(f90arr, counts, lbounds, ubounds, rc) @\
 ! @\
 ! !RETURN VALUE: @\
       type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArr##mtypekind##mrank##D @\
@@ -238,6 +247,8 @@
       mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: f90arr @\
       !mname (ESMF_KIND_##mtypekind), dimension(mdim), allocatable, target :: f90arr @\
       integer, dimension(:), intent(in) :: counts @\
+      integer, dimension(:), intent(in), optional :: lbounds @\
+      integer, dimension(:), intent(in), optional :: ubounds @\
       integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
@@ -255,6 +266,11 @@
 !  \item[counts] @\
 !   An integer array of counts.  Must be the same length as the rank. @\
 ! @\
+!  \item[{[lbounds]}] @\
+!  An integer array of lower index values.  Must be the same length as the rank. @\
+! @\
+!  \item[{[ubounds]}] @\
+! An integer array of upper index values.  Must be the same length as the rank. @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
@@ -297,7 +313,7 @@
  @\
         newp => f90arr    ! must be ptr assignment, => @\
         call ESMF_LocalArrConstrF90Ptr##mtypekind##mrank##D(array, counts, newp,& @\
-                                  ESMF_DATA_SPACE, status) @\
+                                  ESMF_DATA_SPACE, lbounds, ubounds, status) @\
         @\
  @\
 !       ! return value set by c_ESMC func above @\
@@ -315,7 +331,7 @@
 !------------------------------------------------------------------------------
 #endif
 
-#define LocalArrayCreateByFlArrMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define LocalArrayCreateByFlArrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
@@ -366,6 +382,8 @@
         logical :: rcpresent                ! did user specify rc? @\
         type (ESMF_CopyFlag) :: copy        ! do we copy or ref? @\
         integer, dimension(mrank) :: counts ! per dim @\
+        integer, dimension(mrank) :: lbounds ! lower index bounds @\
+        integer, dimension(mrank) :: ubounds ! upper index bounds @\
  @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: newp @\
  @\
@@ -397,10 +415,12 @@
         ! Get sizes from current array, although the construct routine @\
         !   does not need it for an already allocated array.  @\
         counts = shape(f90arr) @\
+        lbounds = lbound(f90arr) @\
+        ubounds = ubound(f90arr) @\
  @\
         ! Call create routine @\
         call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
-                                             ESMF_FROM_FORTRAN, status) @\
+                                           ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
           return @\
@@ -408,7 +428,7 @@
  @\
         newp => f90arr    ! must be ptr assignment, => @\
         call ESMF_LocalArrConstrF90Ptr##mtypekind##mrank##D(array, counts, newp,& @\
-                                  copy, status) @\
+                                  copy, lbounds, ubounds, status) @\
         @\
  @\
 !       ! return value set by c_ESMC func above @\
@@ -426,14 +446,14 @@
 !------------------------------------------------------------------------------
 #endif
 
-#define LocalArrayCreateByMTPtrMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define LocalArrayCreateByMTPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr##mtypekind##mrank##D - make an ESMF array from an unallocated F90 pointer @\
  @\
 ! !INTERFACE: @\
-      function ESMF_LocalArrCreateByMTPtr##mtypekind##mrank##D(f90ptr, counts, rc) @\
+      function ESMF_LocalArrCreateByMTPtr##mtypekind##mrank##D(f90ptr, counts, lbounds, ubounds, rc) @\
 ! @\
 ! !RETURN VALUE: @\
       type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtr##mtypekind##mrank##D @\
@@ -441,6 +461,8 @@
 ! !ARGUMENTS: @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: f90ptr @\
       integer, dimension(:), intent(in) :: counts @\
+      integer, dimension(:), intent(in), optional :: lbounds @\
+      integer, dimension(:), intent(in), optional :: ubounds @\
       integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
@@ -457,6 +479,12 @@
 ! @\
 !  \item[counts] @\
 !   An integer array of counts.  Must be the same length as the rank. @\
+! @\
+!  \item[{[lbounds]}] @\
+!  An integer array of lower index values.  Must be the same length as the rank. @\
+! @\
+!  \item[{[ubounds]}] @\
+! An integer array of upper index values.  Must be the same length as the rank. @\
 ! @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -497,7 +525,7 @@
         endif @\
  @\
         call ESMF_LocalArrConstrF90Ptr##mtypekind##mrank##D(array, counts, f90ptr,& @\
-                                  ESMF_DATA_SPACE, status) @\
+                                  ESMF_DATA_SPACE, lbounds, ubounds, status) @\
         @\
  @\
 !       ! return value set by c_ESMC func above @\
@@ -515,7 +543,7 @@
 !------------------------------------------------------------------------------
 #endif
 
-#define LocalArrayCreateByFlPtrMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define LocalArrayCreateByFlPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
@@ -565,6 +593,8 @@
         logical :: rcpresent                ! did user specify rc? @\
         type (ESMF_CopyFlag) :: copy        ! do we copy or ref? @\
         integer, dimension(mrank) :: counts ! per dim @\
+        integer, dimension(mrank) :: lbounds ! per dim @\
+        integer, dimension(mrank) :: ubounds ! per dim @\
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
@@ -594,6 +624,8 @@
         ! Get sizes from current array, although the construct routine @\
         !   does not need it for an already allocated array.  @\
         counts = shape(f90ptr) @\
+        lbounds = lbound(f90ptr) @\
+        ubounds = ubound(f90ptr) @\
  @\
         ! Call create routine @\
         call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
@@ -604,7 +636,7 @@
         endif @\
  @\
         call ESMF_LocalArrConstrF90Ptr##mtypekind##mrank##D(array, counts, f90ptr,& @\
-                                  copy, status) @\
+                                  copy, lbounds, ubounds, status) @\
         @\
  @\
 !       ! return value set by c_ESMC func above @\
@@ -623,20 +655,22 @@
 !------------------------------------------------------------------------------
 #endif
 
-#define LocalArrConstrF90PtrMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define LocalArrConstrF90PtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOPI @\
 ! !IROUTINE: ESMF_LocalArrConstrF90Ptr##mtypekind##mrank##D - Create an F90 Ptr of the proper T/K/R @\
  @\
 ! !INTERFACE: @\
-      subroutine ESMF_LocalArrConstrF90Ptr##mtypekind##mrank##D(array, counts, f90ptr, docopy, rc) @\
+      subroutine ESMF_LocalArrConstrF90Ptr##mtypekind##mrank##D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(ESMF_LocalArray), intent(inout) :: array @\
       integer, dimension(:), intent(in) :: counts @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer, optional :: f90ptr  @\
       type(ESMF_CopyFlag), intent(in), optional :: docopy @\
+      integer, dimension(:), intent(in), optional :: lbounds @\
+      integer, dimension(:), intent(in), optional :: ubounds @\
       integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
@@ -667,6 +701,12 @@
 !   An optional copy flag which can be specified if an F90 pointer is also @\
 !   given.  Can either make a new copy of the data or ref existing data. @\
 ! @\
+!  \item[{[lbounds]}] @\
+!  An integer array of lower index values.  Must be same length as the rank. @\
+! @\
+!  \item[{[ubounds]}] @\
+! An integer array of upper index values.  Must be same length as the rank. @\
+! @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
@@ -686,7 +726,7 @@
  @\
         type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap ! to pass f90 ptr to C++ @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: newp  @\
-        integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds @\
+        integer, dimension(ESMF_MAXDIM) :: lb, ub @\
         integer, dimension(ESMF_MAXDIM) :: offsets @\
  @\
         ! Initialize return code; assume failure until success is certain @\
@@ -723,7 +763,16 @@
         endif @\
  @\
         if (willalloc) then @\
-            allocate(newp ( mlen ), stat=status) @\
+            lb = 1 @\
+            ub(1:size(counts)) = counts @\
+            if (present(lbounds)) then @\
+                lb(1:size(lbounds)) = lbounds @\
+            endif @\
+            if (present(ubounds)) then @\
+                ub(1:size(ubounds)) = ubounds @\
+            endif @\
+ @\
+            allocate(newp ( mrng ), stat=status) @\
             if (status .ne. 0) then     ! f90 status, not ESMF @\
               print *, "LocalArray space allocate error" @\
               return @\
@@ -737,11 +786,7 @@
         ! Now set all the new accumulated information about the array - the @\
         ! F90 pointer, the base addr, the counts, etc. @\
  @\
-        ! TODO: query the ptr for lbounds/ubounds/offsets/whatever @\
-        !  and set them in the array object.  For now, used fixed values. @\
-        lbounds = 1 @\
-        ubounds = 1 @\
-        ubounds(1:mrank) = counts(1:mrank) @\
+        ! Until we need offsets, use 0. @\
         offsets = 0 @\
  @\
         wrap%##mtypekind##mrank##Dptr => newp @\
@@ -767,7 +812,7 @@
 !------------------------------------------------------------------------------
 #endif
 
-#define LocalArrayGetDataMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define LocalArrayGetDataMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
 !BOP @\
@@ -792,7 +837,7 @@
         logical :: copyreq                  ! did user specify copy? @\
  @\
         type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap     ! for passing f90 ptr to C++ @\
-        integer :: rank, counts(mrank)         ! size info for the array @\
+        integer :: rank, lb(mrank), ub(mrank)  ! size info for the array @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
  @\
         ! initialize return code; assume failure until success is certain @\
@@ -819,12 +864,17 @@
  @\
         ! Allocate a new buffer if requested and return a copy @\
         if (copyreq) then @\
-          call c_ESMC_LocalArrayGetLengths(array, mrank, counts, status) @\
+          call c_ESMC_ArrayGetLbounds(array, mrank, lb, status) @\
           if (status .ne. ESMF_SUCCESS) then @\
-            print *, "LocalArray - cannot retrieve array dim sizes" @\
+            print *, "Array - cannot retrieve array dim sizes" @\
             return @\
           endif @\
-          allocate(localp( mlen ), stat=status) @\
+          call c_ESMC_ArrayGetUbounds(array, mrank, ub, status) @\
+          if (status .ne. ESMF_SUCCESS) then @\
+            print *, "Array - cannot retrieve array dim sizes" @\
+            return @\
+          endif @\
+          allocate(localp( mrng ), stat=status) @\
           if (status .ne. 0) then     ! f90 status, not ESMF @\
             print *, "LocalArray do_copy allocate error" @\
             return @\
@@ -849,7 +899,7 @@
 !------------------------------------------------------------------------------
 #endif
 
-#define LocalArrayDeallocateMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define LocalArrayDeallocateMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
 !BOP @\

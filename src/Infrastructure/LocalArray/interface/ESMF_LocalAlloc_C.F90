@@ -22,9 +22,10 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LocalAlloc_C.F90,v 1.1 2003/09/18 15:57:06 cdeluca Exp $'
+!      '$Id: ESMF_LocalAlloc_C.F90,v 1.2 2004/02/11 21:54:55 nscollins Exp $'
 !==============================================================================
-   subroutine f_esmf_localarrayf90allocate(array, rank, type, kind, counts, rc)
+   subroutine f_esmf_localarrayf90allocate(array, rank, type, kind, counts, &
+                                           lbounds, ubounds, rc)
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_LocalArrayMod
      type(ESMF_LocalArray) :: array
@@ -32,10 +33,13 @@
      type(ESMF_DataType) :: type
      type(ESMF_DataKind) :: kind
      integer :: counts(rank)
+     integer :: lbounds(rank)
+     integer :: ubounds(rank)
      integer, intent(out), optional :: rc     
 
      ! Beware - these args are not in the same order
-     call ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, rc)
+     call ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, &
+                                                        lbounds, ubounds, rc)
     
    end subroutine f_esmf_localarrayf90allocate
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.F90,v 1.8 2004/02/11 19:57:55 nscollins Exp $
+! $Id: ESMF_LocalArray.F90,v 1.9 2004/02/11 21:54:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -321,7 +321,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.F90,v 1.8 2004/02/11 19:57:55 nscollins Exp $'
+      '$Id: ESMF_LocalArray.F90,v 1.9 2004/02/11 21:54:55 nscollins Exp $'
 
 !==============================================================================
 !
@@ -556,7 +556,8 @@ end function
 ! !IROUTINE: ESMF_LocalArrayCreateByLst1D -- Convenience cover for 1D counts
 
 ! !INTERFACE:
-      function ESMF_LocalArrayCreateByLst1D(rank, type, kind, counts, rc)
+      function ESMF_LocalArrayCreateByLst1D(rank, type, kind, counts, &
+                                            lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByLst1D
@@ -566,6 +567,8 @@ end function
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
       integer, intent(in) :: counts !! this is what differs from ...ByList
+      integer, intent(in), optional :: lbounds
+      integer, intent(in), optional :: ubounds
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -596,6 +599,12 @@ end function
 ! rank $>$ 1 then you must specify a 1D array of counts and the compiler
 ! will match the ByList version of this interface instead of this one.
 !
+! \item[{[lbounds]}]
+! An integer with the lower index for each dimension.
+!
+! \item[{[ubounds]}]
+! An integer with the upper index for each dimension.
+!
 ! \item[{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -605,11 +614,14 @@ end function
 ! !REQUIREMENTS:
 
         integer, dimension(1) :: countlist
+        integer, dimension(1) :: lb, ub
 
         countlist(1) = counts
+        lb(1) = lbounds
+        ub(1) = ubounds
 
-        ESMF_LocalArrayCreateByLst1D = &
-               ESMF_LocalArrayCreateByList(rank, type, kind, countlist, rc)
+        ESMF_LocalArrayCreateByLst1D = ESMF_LocalArrayCreateByList(rank, &
+                                             type, kind, countlist, lb, ub, rc)
 
         end function ESMF_LocalArrayCreateByLst1D
 
@@ -619,7 +631,8 @@ end function
 ! !IROUTINE: ESMF_LocalArrayCreateByList -- Create an LocalArray specifying all options.
 
 ! !INTERFACE:
-      function ESMF_LocalArrayCreateByList(rank, type, kind, counts, rc)
+      function ESMF_LocalArrayCreateByList(rank, type, kind, counts, &
+                                           lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByList
@@ -629,6 +642,8 @@ end function
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
       integer, dimension(:), intent(in) :: counts
+      integer, dimension(:), intent(in), optional :: lbounds
+      integer, dimension(:), intent(in), optional :: ubounds
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -655,6 +670,12 @@ end function
 ! The number of items in each dimension of the array. This is a 1D
 ! integer array the same length as the rank.
 !
+! \item[{[lbounds]}]
+! An integer array of length rank, with the lower index for each dimension.
+!
+! \item[{[ubounds]}]
+! An integer array of length rank, with the upper index for each dimension.
+
 ! \item[{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -666,6 +687,7 @@ end function
 
         ! Local vars
         type (ESMF_LocalArray) :: array ! new C++ LocalArray
+        integer, dimension(ESMF_MAXDIM) :: lb, ub ! local bounds
         integer :: status ! local error status
         logical :: rcpresent ! did user specify rc?
 
@@ -679,6 +701,16 @@ end function
           rc = ESMF_FAILURE
         endif
 
+        ! Assume defaults first, then alter if lb or ub specified.
+        lb = 1
+        ub(1:size(counts)) = counts
+        if (present(lbounds)) then
+            lb(1:size(lbounds)) = lbounds
+        endif
+        if (present(ubounds)) then
+            ub(1:size(ubounds)) = ubounds
+        endif
+
         ! TODO: should this take the counts, or not? for now i am going to
         ! set the counts after i have created the f90 array and not here.
         call c_ESMC_LocalArrayCreateNoData(array, rank, type, kind, &
@@ -688,7 +720,8 @@ end function
           return
         endif
 
-        call ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, status)
+        call ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, &
+                                       lb, ub, status)
 
         ! Set return values
         ESMF_LocalArrayCreateByList = array
@@ -702,7 +735,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrayCreateBySpec -- Create a new LocalArray from an ArraySpec
 
 ! !INTERFACE:
-      function ESMF_LocalArrayCreateBySpec(spec, counts, rc)
+      function ESMF_LocalArrayCreateBySpec(spec, counts, lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocalArray) :: ESMF_LocalArrayCreateBySpec
@@ -710,6 +743,8 @@ end function
 ! !ARGUMENTS:
       type(ESMF_ArraySpec), intent(in) :: spec
       integer, intent(in), dimension(:) :: counts
+      integer, dimension(:), intent(in), optional :: lbounds
+      integer, dimension(:), intent(in), optional :: ubounds
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -725,6 +760,12 @@ end function
 ! \item[counts]
 ! The number of items in each dimension of the array. This is a 1D
 ! integer array the same length as the rank.
+!
+! \item[{[lbounds]}]
+! An integer array of length rank, with the lower index for each dimension.
+!
+! \item[{[ubounds]}]
+! An integer array of length rank, with the upper index for each dimension.
 !
 ! \item[{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -757,7 +798,7 @@ end function
 
         ! Call the list function to make the array
         ESMF_LocalArrayCreateBySpec = ESMF_LocalArrayCreateByList(rank, type, &
-                                      kind, counts, status)
+                                         kind, counts, lbounds, ubounds, status)
         if (rcpresent) rc = status
 
         end function ESMF_LocalArrayCreateBySpec
@@ -768,7 +809,8 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90Ptr - Create and add F90 ptr to array
 
 ! !INTERFACE:
-     subroutine ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, rc)
+     subroutine ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, &
+                                          lbounds, ubounds, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_LocalArray), intent(inout) :: array
@@ -776,6 +818,8 @@ end function
       integer, intent(in) :: rank
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
+      integer, dimension(:), intent(in) :: lbounds
+      integer, dimension(:), intent(in) :: ubounds
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -809,6 +853,12 @@ end function
 ! Array kind.
 ! This must match what is already in the array - it is here only as
 ! a convienience.
+!
+! \item[lbounds]
+! The lower index values per rank.
+!
+! \item[ubounds]
+! The upper index values per rank.
 !
 ! \item[{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -848,55 +898,70 @@ end function
               case (1)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_LocalArrConstrF90PtrI21D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI21D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I4%dkind)
-                    call ESMF_LocalArrConstrF90PtrI41D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI41D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I8%dkind)
-                    call ESMF_LocalArrConstrF90PtrI81D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI81D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
 
               case (2)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_LocalArrConstrF90PtrI22D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI22D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I4%dkind)
-                    call ESMF_LocalArrConstrF90PtrI42D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI42D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I8%dkind)
-                    call ESMF_LocalArrConstrF90PtrI82D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI82D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
 
               case (3)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_LocalArrConstrF90PtrI23D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI23D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I4%dkind)
-                    call ESMF_LocalArrConstrF90PtrI43D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI43D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I8%dkind)
-                    call ESMF_LocalArrConstrF90PtrI83D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI83D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
 
               case (4)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_LocalArrConstrF90PtrI24D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI24D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I4%dkind)
-                    call ESMF_LocalArrConstrF90PtrI44D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI44D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I8%dkind)
-                    call ESMF_LocalArrConstrF90PtrI84D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI84D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
 
               case (5)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_LocalArrConstrF90PtrI25D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI25D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I4%dkind)
-                    call ESMF_LocalArrConstrF90PtrI45D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI45D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I8%dkind)
-                    call ESMF_LocalArrConstrF90PtrI85D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI85D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
 
@@ -908,45 +973,55 @@ end function
               case (1)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_LocalArrConstrF90PtrR41D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR41D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_R8%dkind)
-                    call ESMF_LocalArrConstrF90PtrR81D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR81D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
 
               case (2)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_LocalArrConstrF90PtrR42D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR42D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_R8%dkind)
-                    call ESMF_LocalArrConstrF90PtrR82D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR82D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
 
               case (3)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_LocalArrConstrF90PtrR43D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR43D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_R8%dkind)
-                    call ESMF_LocalArrConstrF90PtrR83D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR83D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
 
               case (4)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_LocalArrConstrF90PtrR44D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR44D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_R8%dkind)
-                    call ESMF_LocalArrConstrF90PtrR84D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR84D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
 
               case (5)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_LocalArrConstrF90PtrR45D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR45D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_R8%dkind)
-                    call ESMF_LocalArrConstrF90PtrR85D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR85D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
 
@@ -972,7 +1047,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrI21D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrI21D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI21D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI21D 
@@ -981,6 +1056,8 @@ end function
  integer (ESMF_KIND_I2), dimension(:), target :: f90arr 
  !integer (ESMF_KIND_I2), dimension(:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -998,6 +1075,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -1040,7 +1122,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI21D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -1059,7 +1141,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrI41D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrI41D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI41D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI41D 
@@ -1068,6 +1150,8 @@ end function
  integer (ESMF_KIND_I4), dimension(:), target :: f90arr 
  !integer (ESMF_KIND_I4), dimension(:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1085,6 +1169,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -1127,7 +1216,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI41D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -1146,7 +1235,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrI81D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrI81D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI81D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI81D 
@@ -1155,6 +1244,8 @@ end function
  integer (ESMF_KIND_I8), dimension(:), target :: f90arr 
  !integer (ESMF_KIND_I8), dimension(:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1172,6 +1263,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -1214,7 +1310,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI81D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -1233,7 +1329,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrI22D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrI22D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI22D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI22D 
@@ -1242,6 +1338,8 @@ end function
  integer (ESMF_KIND_I2), dimension(:,:), target :: f90arr 
  !integer (ESMF_KIND_I2), dimension(:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1259,6 +1357,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -1301,7 +1404,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI22D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -1320,7 +1423,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrI42D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrI42D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI42D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI42D 
@@ -1329,6 +1432,8 @@ end function
  integer (ESMF_KIND_I4), dimension(:,:), target :: f90arr 
  !integer (ESMF_KIND_I4), dimension(:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1346,6 +1451,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -1388,7 +1498,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI42D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -1407,7 +1517,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrI82D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrI82D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI82D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI82D 
@@ -1416,6 +1526,8 @@ end function
  integer (ESMF_KIND_I8), dimension(:,:), target :: f90arr 
  !integer (ESMF_KIND_I8), dimension(:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1433,6 +1545,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -1475,7 +1592,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI82D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -1494,7 +1611,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrI23D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrI23D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI23D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI23D 
@@ -1503,6 +1620,8 @@ end function
  integer (ESMF_KIND_I2), dimension(:,:,:), target :: f90arr 
  !integer (ESMF_KIND_I2), dimension(:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1520,6 +1639,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -1562,7 +1686,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI23D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -1581,7 +1705,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrI43D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrI43D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI43D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI43D 
@@ -1590,6 +1714,8 @@ end function
  integer (ESMF_KIND_I4), dimension(:,:,:), target :: f90arr 
  !integer (ESMF_KIND_I4), dimension(:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1607,6 +1733,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -1649,7 +1780,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI43D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -1668,7 +1799,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrI83D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrI83D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI83D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI83D 
@@ -1677,6 +1808,8 @@ end function
  integer (ESMF_KIND_I8), dimension(:,:,:), target :: f90arr 
  !integer (ESMF_KIND_I8), dimension(:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1694,6 +1827,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -1736,7 +1874,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI83D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -1755,7 +1893,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrI24D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrI24D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI24D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI24D 
@@ -1764,6 +1902,8 @@ end function
  integer (ESMF_KIND_I2), dimension(:,:,:,:), target :: f90arr 
  !integer (ESMF_KIND_I2), dimension(:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1781,6 +1921,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -1823,7 +1968,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI24D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -1842,7 +1987,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrI44D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrI44D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI44D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI44D 
@@ -1851,6 +1996,8 @@ end function
  integer (ESMF_KIND_I4), dimension(:,:,:,:), target :: f90arr 
  !integer (ESMF_KIND_I4), dimension(:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1868,6 +2015,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -1910,7 +2062,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI44D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -1929,7 +2081,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrI84D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrI84D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI84D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI84D 
@@ -1938,6 +2090,8 @@ end function
  integer (ESMF_KIND_I8), dimension(:,:,:,:), target :: f90arr 
  !integer (ESMF_KIND_I8), dimension(:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1955,6 +2109,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -1997,7 +2156,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI84D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -2016,7 +2175,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrI25D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrI25D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI25D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI25D 
@@ -2025,6 +2184,8 @@ end function
  integer (ESMF_KIND_I2), dimension(:,:,:,:,:), target :: f90arr 
  !integer (ESMF_KIND_I2), dimension(:,:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2042,6 +2203,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -2084,7 +2250,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI25D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -2103,7 +2269,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrI45D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrI45D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI45D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI45D 
@@ -2112,6 +2278,8 @@ end function
  integer (ESMF_KIND_I4), dimension(:,:,:,:,:), target :: f90arr 
  !integer (ESMF_KIND_I4), dimension(:,:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2129,6 +2297,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -2171,7 +2344,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI45D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -2190,7 +2363,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrI85D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrI85D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI85D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI85D 
@@ -2199,6 +2372,8 @@ end function
  integer (ESMF_KIND_I8), dimension(:,:,:,:,:), target :: f90arr 
  !integer (ESMF_KIND_I8), dimension(:,:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2216,6 +2391,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -2258,7 +2438,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI85D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -2277,7 +2457,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrR41D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrR41D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR41D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR41D 
@@ -2286,6 +2466,8 @@ end function
  real (ESMF_KIND_R4), dimension(:), target :: f90arr 
  !real (ESMF_KIND_R4), dimension(:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2303,6 +2485,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -2345,7 +2532,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR41D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -2364,7 +2551,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrR81D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrR81D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR81D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR81D 
@@ -2373,6 +2560,8 @@ end function
  real (ESMF_KIND_R8), dimension(:), target :: f90arr 
  !real (ESMF_KIND_R8), dimension(:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2390,6 +2579,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -2432,7 +2626,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR81D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -2451,7 +2645,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrR42D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrR42D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR42D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR42D 
@@ -2460,6 +2654,8 @@ end function
  real (ESMF_KIND_R4), dimension(:,:), target :: f90arr 
  !real (ESMF_KIND_R4), dimension(:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2477,6 +2673,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -2519,7 +2720,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR42D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -2538,7 +2739,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrR82D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrR82D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR82D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR82D 
@@ -2547,6 +2748,8 @@ end function
  real (ESMF_KIND_R8), dimension(:,:), target :: f90arr 
  !real (ESMF_KIND_R8), dimension(:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2564,6 +2767,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -2606,7 +2814,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR82D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -2625,7 +2833,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrR43D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrR43D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR43D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR43D 
@@ -2634,6 +2842,8 @@ end function
  real (ESMF_KIND_R4), dimension(:,:,:), target :: f90arr 
  !real (ESMF_KIND_R4), dimension(:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2651,6 +2861,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -2693,7 +2908,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR43D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -2712,7 +2927,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrR83D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrR83D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR83D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR83D 
@@ -2721,6 +2936,8 @@ end function
  real (ESMF_KIND_R8), dimension(:,:,:), target :: f90arr 
  !real (ESMF_KIND_R8), dimension(:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2738,6 +2955,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -2780,7 +3002,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR83D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -2799,7 +3021,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrR44D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrR44D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR44D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR44D 
@@ -2808,6 +3030,8 @@ end function
  real (ESMF_KIND_R4), dimension(:,:,:,:), target :: f90arr 
  !real (ESMF_KIND_R4), dimension(:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2825,6 +3049,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -2867,7 +3096,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR44D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -2886,7 +3115,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrR84D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrR84D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR84D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR84D 
@@ -2895,6 +3124,8 @@ end function
  real (ESMF_KIND_R8), dimension(:,:,:,:), target :: f90arr 
  !real (ESMF_KIND_R8), dimension(:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2912,6 +3143,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -2954,7 +3190,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR84D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -2973,7 +3209,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrR45D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrR45D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR45D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR45D 
@@ -2982,6 +3218,8 @@ end function
  real (ESMF_KIND_R4), dimension(:,:,:,:,:), target :: f90arr 
  !real (ESMF_KIND_R4), dimension(:,:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2999,6 +3237,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -3041,7 +3284,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR45D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -3060,7 +3303,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTArrR85D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTArrR85D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR85D(f90arr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR85D 
@@ -3069,6 +3312,8 @@ end function
  real (ESMF_KIND_R8), dimension(:,:,:,:,:), target :: f90arr 
  !real (ESMF_KIND_R8), dimension(:,:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -3086,6 +3331,11 @@ end function
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -3128,7 +3378,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR85D(array, counts, newp,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -3197,6 +3447,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
+ integer, dimension(1) :: lbounds ! lower index bounds 
+ integer, dimension(1) :: ubounds ! upper index bounds 
  
  integer (ESMF_KIND_I2), dimension(:), pointer :: newp 
  
@@ -3228,6 +3480,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_I2, & 
@@ -3239,7 +3493,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI21D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -3302,6 +3556,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
+ integer, dimension(1) :: lbounds ! lower index bounds 
+ integer, dimension(1) :: ubounds ! upper index bounds 
  
  integer (ESMF_KIND_I4), dimension(:), pointer :: newp 
  
@@ -3333,6 +3589,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_I4, & 
@@ -3344,7 +3602,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI41D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -3407,6 +3665,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
+ integer, dimension(1) :: lbounds ! lower index bounds 
+ integer, dimension(1) :: ubounds ! upper index bounds 
  
  integer (ESMF_KIND_I8), dimension(:), pointer :: newp 
  
@@ -3438,6 +3698,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_I8, & 
@@ -3449,7 +3711,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI81D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -3512,6 +3774,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
+ integer, dimension(2) :: lbounds ! lower index bounds 
+ integer, dimension(2) :: ubounds ! upper index bounds 
  
  integer (ESMF_KIND_I2), dimension(:,:), pointer :: newp 
  
@@ -3543,6 +3807,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_I2, & 
@@ -3554,7 +3820,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI22D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -3617,6 +3883,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
+ integer, dimension(2) :: lbounds ! lower index bounds 
+ integer, dimension(2) :: ubounds ! upper index bounds 
  
  integer (ESMF_KIND_I4), dimension(:,:), pointer :: newp 
  
@@ -3648,6 +3916,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_I4, & 
@@ -3659,7 +3929,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI42D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -3722,6 +3992,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
+ integer, dimension(2) :: lbounds ! lower index bounds 
+ integer, dimension(2) :: ubounds ! upper index bounds 
  
  integer (ESMF_KIND_I8), dimension(:,:), pointer :: newp 
  
@@ -3753,6 +4025,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_I8, & 
@@ -3764,7 +4038,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI82D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -3827,6 +4101,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
+ integer, dimension(3) :: lbounds ! lower index bounds 
+ integer, dimension(3) :: ubounds ! upper index bounds 
  
  integer (ESMF_KIND_I2), dimension(:,:,:), pointer :: newp 
  
@@ -3858,6 +4134,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_I2, & 
@@ -3869,7 +4147,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI23D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -3932,6 +4210,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
+ integer, dimension(3) :: lbounds ! lower index bounds 
+ integer, dimension(3) :: ubounds ! upper index bounds 
  
  integer (ESMF_KIND_I4), dimension(:,:,:), pointer :: newp 
  
@@ -3963,6 +4243,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_I4, & 
@@ -3974,7 +4256,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI43D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -4037,6 +4319,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
+ integer, dimension(3) :: lbounds ! lower index bounds 
+ integer, dimension(3) :: ubounds ! upper index bounds 
  
  integer (ESMF_KIND_I8), dimension(:,:,:), pointer :: newp 
  
@@ -4068,6 +4352,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_I8, & 
@@ -4079,7 +4365,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI83D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -4142,6 +4428,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
+ integer, dimension(4) :: lbounds ! lower index bounds 
+ integer, dimension(4) :: ubounds ! upper index bounds 
  
  integer (ESMF_KIND_I2), dimension(:,:,:,:), pointer :: newp 
  
@@ -4173,6 +4461,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_I2, & 
@@ -4184,7 +4474,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI24D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -4247,6 +4537,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
+ integer, dimension(4) :: lbounds ! lower index bounds 
+ integer, dimension(4) :: ubounds ! upper index bounds 
  
  integer (ESMF_KIND_I4), dimension(:,:,:,:), pointer :: newp 
  
@@ -4278,6 +4570,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_I4, & 
@@ -4289,7 +4583,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI44D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -4352,6 +4646,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
+ integer, dimension(4) :: lbounds ! lower index bounds 
+ integer, dimension(4) :: ubounds ! upper index bounds 
  
  integer (ESMF_KIND_I8), dimension(:,:,:,:), pointer :: newp 
  
@@ -4383,6 +4679,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_I8, & 
@@ -4394,7 +4692,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI84D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -4457,6 +4755,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
+ integer, dimension(5) :: lbounds ! lower index bounds 
+ integer, dimension(5) :: ubounds ! upper index bounds 
  
  integer (ESMF_KIND_I2), dimension(:,:,:,:,:), pointer :: newp 
  
@@ -4488,6 +4788,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_I2, & 
@@ -4499,7 +4801,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI25D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -4562,6 +4864,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
+ integer, dimension(5) :: lbounds ! lower index bounds 
+ integer, dimension(5) :: ubounds ! upper index bounds 
  
  integer (ESMF_KIND_I4), dimension(:,:,:,:,:), pointer :: newp 
  
@@ -4593,6 +4897,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_I4, & 
@@ -4604,7 +4910,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI45D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -4667,6 +4973,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
+ integer, dimension(5) :: lbounds ! lower index bounds 
+ integer, dimension(5) :: ubounds ! upper index bounds 
  
  integer (ESMF_KIND_I8), dimension(:,:,:,:,:), pointer :: newp 
  
@@ -4698,6 +5006,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_I8, & 
@@ -4709,7 +5019,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrI85D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -4772,6 +5082,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
+ integer, dimension(1) :: lbounds ! lower index bounds 
+ integer, dimension(1) :: ubounds ! upper index bounds 
  
  real (ESMF_KIND_R4), dimension(:), pointer :: newp 
  
@@ -4803,6 +5115,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_R4, & 
@@ -4814,7 +5128,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR41D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -4877,6 +5191,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
+ integer, dimension(1) :: lbounds ! lower index bounds 
+ integer, dimension(1) :: ubounds ! upper index bounds 
  
  real (ESMF_KIND_R8), dimension(:), pointer :: newp 
  
@@ -4908,6 +5224,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_R8, & 
@@ -4919,7 +5237,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR81D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -4982,6 +5300,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
+ integer, dimension(2) :: lbounds ! lower index bounds 
+ integer, dimension(2) :: ubounds ! upper index bounds 
  
  real (ESMF_KIND_R4), dimension(:,:), pointer :: newp 
  
@@ -5013,6 +5333,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_R4, & 
@@ -5024,7 +5346,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR42D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -5087,6 +5409,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
+ integer, dimension(2) :: lbounds ! lower index bounds 
+ integer, dimension(2) :: ubounds ! upper index bounds 
  
  real (ESMF_KIND_R8), dimension(:,:), pointer :: newp 
  
@@ -5118,6 +5442,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_R8, & 
@@ -5129,7 +5455,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR82D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -5192,6 +5518,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
+ integer, dimension(3) :: lbounds ! lower index bounds 
+ integer, dimension(3) :: ubounds ! upper index bounds 
  
  real (ESMF_KIND_R4), dimension(:,:,:), pointer :: newp 
  
@@ -5223,6 +5551,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_R4, & 
@@ -5234,7 +5564,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR43D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -5297,6 +5627,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
+ integer, dimension(3) :: lbounds ! lower index bounds 
+ integer, dimension(3) :: ubounds ! upper index bounds 
  
  real (ESMF_KIND_R8), dimension(:,:,:), pointer :: newp 
  
@@ -5328,6 +5660,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_R8, & 
@@ -5339,7 +5673,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR83D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -5402,6 +5736,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
+ integer, dimension(4) :: lbounds ! lower index bounds 
+ integer, dimension(4) :: ubounds ! upper index bounds 
  
  real (ESMF_KIND_R4), dimension(:,:,:,:), pointer :: newp 
  
@@ -5433,6 +5769,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_R4, & 
@@ -5444,7 +5782,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR44D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -5507,6 +5845,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
+ integer, dimension(4) :: lbounds ! lower index bounds 
+ integer, dimension(4) :: ubounds ! upper index bounds 
  
  real (ESMF_KIND_R8), dimension(:,:,:,:), pointer :: newp 
  
@@ -5538,6 +5878,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_R8, & 
@@ -5549,7 +5891,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR84D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -5612,6 +5954,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
+ integer, dimension(5) :: lbounds ! lower index bounds 
+ integer, dimension(5) :: ubounds ! upper index bounds 
  
  real (ESMF_KIND_R4), dimension(:,:,:,:,:), pointer :: newp 
  
@@ -5643,6 +5987,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_R4, & 
@@ -5654,7 +6000,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR45D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -5717,6 +6063,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
+ integer, dimension(5) :: lbounds ! lower index bounds 
+ integer, dimension(5) :: ubounds ! upper index bounds 
  
  real (ESMF_KIND_R8), dimension(:,:,:,:,:), pointer :: newp 
  
@@ -5748,6 +6096,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
+ lbounds = lbound(f90arr) 
+ ubounds = ubound(f90arr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_R8, & 
@@ -5759,7 +6109,7 @@ end function
  
  newp => f90arr ! must be ptr assignment, => 
  call ESMF_LocalArrConstrF90PtrR85D(array, counts, newp,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -5783,7 +6133,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrI21D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrI21D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI21D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI21D 
@@ -5791,6 +6141,8 @@ end function
 ! !ARGUMENTS: 
  integer (ESMF_KIND_I2), dimension(:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -5807,6 +6159,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -5847,7 +6205,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI21D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -5866,7 +6224,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrI41D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrI41D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI41D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI41D 
@@ -5874,6 +6232,8 @@ end function
 ! !ARGUMENTS: 
  integer (ESMF_KIND_I4), dimension(:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -5890,6 +6250,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -5930,7 +6296,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI41D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -5949,7 +6315,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrI81D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrI81D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI81D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI81D 
@@ -5957,6 +6323,8 @@ end function
 ! !ARGUMENTS: 
  integer (ESMF_KIND_I8), dimension(:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -5973,6 +6341,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -6013,7 +6387,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI81D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -6032,7 +6406,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrI22D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrI22D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI22D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI22D 
@@ -6040,6 +6414,8 @@ end function
 ! !ARGUMENTS: 
  integer (ESMF_KIND_I2), dimension(:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6056,6 +6432,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -6096,7 +6478,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI22D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -6115,7 +6497,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrI42D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrI42D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI42D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI42D 
@@ -6123,6 +6505,8 @@ end function
 ! !ARGUMENTS: 
  integer (ESMF_KIND_I4), dimension(:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6139,6 +6523,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -6179,7 +6569,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI42D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -6198,7 +6588,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrI82D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrI82D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI82D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI82D 
@@ -6206,6 +6596,8 @@ end function
 ! !ARGUMENTS: 
  integer (ESMF_KIND_I8), dimension(:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6222,6 +6614,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -6262,7 +6660,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI82D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -6281,7 +6679,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrI23D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrI23D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI23D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI23D 
@@ -6289,6 +6687,8 @@ end function
 ! !ARGUMENTS: 
  integer (ESMF_KIND_I2), dimension(:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6305,6 +6705,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -6345,7 +6751,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI23D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -6364,7 +6770,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrI43D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrI43D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI43D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI43D 
@@ -6372,6 +6778,8 @@ end function
 ! !ARGUMENTS: 
  integer (ESMF_KIND_I4), dimension(:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6388,6 +6796,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -6428,7 +6842,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI43D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -6447,7 +6861,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrI83D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrI83D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI83D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI83D 
@@ -6455,6 +6869,8 @@ end function
 ! !ARGUMENTS: 
  integer (ESMF_KIND_I8), dimension(:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6471,6 +6887,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -6511,7 +6933,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI83D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -6530,7 +6952,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrI24D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrI24D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI24D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI24D 
@@ -6538,6 +6960,8 @@ end function
 ! !ARGUMENTS: 
  integer (ESMF_KIND_I2), dimension(:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6554,6 +6978,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -6594,7 +7024,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI24D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -6613,7 +7043,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrI44D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrI44D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI44D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI44D 
@@ -6621,6 +7051,8 @@ end function
 ! !ARGUMENTS: 
  integer (ESMF_KIND_I4), dimension(:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6637,6 +7069,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -6677,7 +7115,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI44D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -6696,7 +7134,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrI84D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrI84D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI84D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI84D 
@@ -6704,6 +7142,8 @@ end function
 ! !ARGUMENTS: 
  integer (ESMF_KIND_I8), dimension(:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6720,6 +7160,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -6760,7 +7206,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI84D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -6779,7 +7225,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrI25D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrI25D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI25D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI25D 
@@ -6787,6 +7233,8 @@ end function
 ! !ARGUMENTS: 
  integer (ESMF_KIND_I2), dimension(:,:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6803,6 +7251,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -6843,7 +7297,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI25D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -6862,7 +7316,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrI45D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrI45D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI45D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI45D 
@@ -6870,6 +7324,8 @@ end function
 ! !ARGUMENTS: 
  integer (ESMF_KIND_I4), dimension(:,:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6886,6 +7342,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -6926,7 +7388,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI45D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -6945,7 +7407,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrI85D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrI85D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI85D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI85D 
@@ -6953,6 +7415,8 @@ end function
 ! !ARGUMENTS: 
  integer (ESMF_KIND_I8), dimension(:,:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6969,6 +7433,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -7009,7 +7479,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI85D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -7028,7 +7498,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrR41D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrR41D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR41D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR41D 
@@ -7036,6 +7506,8 @@ end function
 ! !ARGUMENTS: 
  real (ESMF_KIND_R4), dimension(:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7052,6 +7524,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -7092,7 +7570,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR41D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -7111,7 +7589,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrR81D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrR81D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR81D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR81D 
@@ -7119,6 +7597,8 @@ end function
 ! !ARGUMENTS: 
  real (ESMF_KIND_R8), dimension(:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7135,6 +7615,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -7175,7 +7661,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR81D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -7194,7 +7680,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrR42D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrR42D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR42D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR42D 
@@ -7202,6 +7688,8 @@ end function
 ! !ARGUMENTS: 
  real (ESMF_KIND_R4), dimension(:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7218,6 +7706,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -7258,7 +7752,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR42D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -7277,7 +7771,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrR82D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrR82D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR82D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR82D 
@@ -7285,6 +7779,8 @@ end function
 ! !ARGUMENTS: 
  real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7301,6 +7797,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -7341,7 +7843,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR82D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -7360,7 +7862,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrR43D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrR43D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR43D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR43D 
@@ -7368,6 +7870,8 @@ end function
 ! !ARGUMENTS: 
  real (ESMF_KIND_R4), dimension(:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7384,6 +7888,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -7424,7 +7934,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR43D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -7443,7 +7953,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrR83D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrR83D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR83D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR83D 
@@ -7451,6 +7961,8 @@ end function
 ! !ARGUMENTS: 
  real (ESMF_KIND_R8), dimension(:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7467,6 +7979,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -7507,7 +8025,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR83D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -7526,7 +8044,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrR44D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrR44D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR44D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR44D 
@@ -7534,6 +8052,8 @@ end function
 ! !ARGUMENTS: 
  real (ESMF_KIND_R4), dimension(:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7550,6 +8070,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -7590,7 +8116,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR44D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -7609,7 +8135,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrR84D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrR84D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR84D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR84D 
@@ -7617,6 +8143,8 @@ end function
 ! !ARGUMENTS: 
  real (ESMF_KIND_R8), dimension(:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7633,6 +8161,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -7673,7 +8207,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR84D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -7692,7 +8226,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrR45D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrR45D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR45D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR45D 
@@ -7700,6 +8234,8 @@ end function
 ! !ARGUMENTS: 
  real (ESMF_KIND_R4), dimension(:,:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7716,6 +8252,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -7756,7 +8298,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR45D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -7775,7 +8317,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtrR85D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrCreateByMTPtrR85D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR85D(f90ptr, counts, lbounds, ubounds, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR85D 
@@ -7783,6 +8325,8 @@ end function
 ! !ARGUMENTS: 
  real (ESMF_KIND_R8), dimension(:,:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7799,6 +8343,12 @@ end function
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be the same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be the same length as the rank. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -7839,7 +8389,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR85D(array, counts, f90ptr,& 
- ESMF_DATA_SPACE, status) 
+ ESMF_DATA_SPACE, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -7908,6 +8458,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
+ integer, dimension(1) :: lbounds ! per dim 
+ integer, dimension(1) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -7937,6 +8489,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_I2, & 
@@ -7947,7 +8501,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI21D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -8009,6 +8563,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
+ integer, dimension(1) :: lbounds ! per dim 
+ integer, dimension(1) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -8038,6 +8594,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_I4, & 
@@ -8048,7 +8606,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI41D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -8110,6 +8668,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
+ integer, dimension(1) :: lbounds ! per dim 
+ integer, dimension(1) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -8139,6 +8699,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_I8, & 
@@ -8149,7 +8711,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI81D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -8211,6 +8773,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
+ integer, dimension(2) :: lbounds ! per dim 
+ integer, dimension(2) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -8240,6 +8804,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_I2, & 
@@ -8250,7 +8816,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI22D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -8312,6 +8878,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
+ integer, dimension(2) :: lbounds ! per dim 
+ integer, dimension(2) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -8341,6 +8909,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_I4, & 
@@ -8351,7 +8921,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI42D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -8413,6 +8983,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
+ integer, dimension(2) :: lbounds ! per dim 
+ integer, dimension(2) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -8442,6 +9014,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_I8, & 
@@ -8452,7 +9026,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI82D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -8514,6 +9088,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
+ integer, dimension(3) :: lbounds ! per dim 
+ integer, dimension(3) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -8543,6 +9119,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_I2, & 
@@ -8553,7 +9131,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI23D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -8615,6 +9193,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
+ integer, dimension(3) :: lbounds ! per dim 
+ integer, dimension(3) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -8644,6 +9224,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_I4, & 
@@ -8654,7 +9236,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI43D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -8716,6 +9298,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
+ integer, dimension(3) :: lbounds ! per dim 
+ integer, dimension(3) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -8745,6 +9329,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_I8, & 
@@ -8755,7 +9341,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI83D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -8817,6 +9403,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
+ integer, dimension(4) :: lbounds ! per dim 
+ integer, dimension(4) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -8846,6 +9434,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_I2, & 
@@ -8856,7 +9446,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI24D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -8918,6 +9508,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
+ integer, dimension(4) :: lbounds ! per dim 
+ integer, dimension(4) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -8947,6 +9539,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_I4, & 
@@ -8957,7 +9551,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI44D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -9019,6 +9613,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
+ integer, dimension(4) :: lbounds ! per dim 
+ integer, dimension(4) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -9048,6 +9644,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_I8, & 
@@ -9058,7 +9656,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI84D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -9120,6 +9718,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
+ integer, dimension(5) :: lbounds ! per dim 
+ integer, dimension(5) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -9149,6 +9749,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_I2, & 
@@ -9159,7 +9761,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI25D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -9221,6 +9823,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
+ integer, dimension(5) :: lbounds ! per dim 
+ integer, dimension(5) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -9250,6 +9854,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_I4, & 
@@ -9260,7 +9866,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI45D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -9322,6 +9928,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
+ integer, dimension(5) :: lbounds ! per dim 
+ integer, dimension(5) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -9351,6 +9959,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_I8, & 
@@ -9361,7 +9971,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrI85D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -9423,6 +10033,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
+ integer, dimension(1) :: lbounds ! per dim 
+ integer, dimension(1) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -9452,6 +10064,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_R4, & 
@@ -9462,7 +10076,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR41D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -9524,6 +10138,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
+ integer, dimension(1) :: lbounds ! per dim 
+ integer, dimension(1) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -9553,6 +10169,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_R8, & 
@@ -9563,7 +10181,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR81D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -9625,6 +10243,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
+ integer, dimension(2) :: lbounds ! per dim 
+ integer, dimension(2) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -9654,6 +10274,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_R4, & 
@@ -9664,7 +10286,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR42D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -9726,6 +10348,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
+ integer, dimension(2) :: lbounds ! per dim 
+ integer, dimension(2) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -9755,6 +10379,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_R8, & 
@@ -9765,7 +10391,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR82D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -9827,6 +10453,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
+ integer, dimension(3) :: lbounds ! per dim 
+ integer, dimension(3) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -9856,6 +10484,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_R4, & 
@@ -9866,7 +10496,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR43D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -9928,6 +10558,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
+ integer, dimension(3) :: lbounds ! per dim 
+ integer, dimension(3) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -9957,6 +10589,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_R8, & 
@@ -9967,7 +10601,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR83D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -10029,6 +10663,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
+ integer, dimension(4) :: lbounds ! per dim 
+ integer, dimension(4) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -10058,6 +10694,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_R4, & 
@@ -10068,7 +10706,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR44D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -10130,6 +10768,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
+ integer, dimension(4) :: lbounds ! per dim 
+ integer, dimension(4) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -10159,6 +10799,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_R8, & 
@@ -10169,7 +10811,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR84D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -10231,6 +10873,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
+ integer, dimension(5) :: lbounds ! per dim 
+ integer, dimension(5) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -10260,6 +10904,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_R4, & 
@@ -10270,7 +10916,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR45D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -10332,6 +10978,8 @@ end function
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
+ integer, dimension(5) :: lbounds ! per dim 
+ integer, dimension(5) :: ubounds ! per dim 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -10361,6 +11009,8 @@ end function
  ! Get sizes from current array, although the construct routine 
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
+ lbounds = lbound(f90ptr) 
+ ubounds = ubound(f90ptr) 
  
  ! Call create routine 
  call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_R8, & 
@@ -10371,7 +11021,7 @@ end function
  endif 
  
  call ESMF_LocalArrConstrF90PtrR85D(array, counts, f90ptr,& 
- copy, status) 
+ copy, lbounds, ubounds, status) 
  
  
 ! ! return value set by c_ESMC func above 
@@ -10396,13 +11046,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrI21D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrI21D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrI21D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer (ESMF_KIND_I2), dimension(:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -10433,6 +11085,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -10452,7 +11110,7 @@ end function
  
  type (ESMF_ArrWrapI21D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_KIND_I2), dimension(:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -10489,7 +11147,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -10503,11 +11170,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:1) = counts(1:1) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%I21Dptr => newp 
@@ -10534,13 +11197,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrI41D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrI41D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrI41D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer (ESMF_KIND_I4), dimension(:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -10571,6 +11236,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -10590,7 +11261,7 @@ end function
  
  type (ESMF_ArrWrapI41D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_KIND_I4), dimension(:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -10627,7 +11298,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -10641,11 +11321,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:1) = counts(1:1) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%I41Dptr => newp 
@@ -10672,13 +11348,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrI81D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrI81D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrI81D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer (ESMF_KIND_I8), dimension(:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -10709,6 +11387,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -10728,7 +11412,7 @@ end function
  
  type (ESMF_ArrWrapI81D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_KIND_I8), dimension(:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -10765,7 +11449,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -10779,11 +11472,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:1) = counts(1:1) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%I81Dptr => newp 
@@ -10810,13 +11499,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrI22D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrI22D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrI22D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer (ESMF_KIND_I2), dimension(:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -10847,6 +11538,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -10866,7 +11563,7 @@ end function
  
  type (ESMF_ArrWrapI22D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_KIND_I2), dimension(:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -10903,7 +11600,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -10917,11 +11623,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:2) = counts(1:2) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%I22Dptr => newp 
@@ -10948,13 +11650,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrI42D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrI42D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrI42D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer (ESMF_KIND_I4), dimension(:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -10985,6 +11689,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -11004,7 +11714,7 @@ end function
  
  type (ESMF_ArrWrapI42D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_KIND_I4), dimension(:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -11041,7 +11751,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -11055,11 +11774,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:2) = counts(1:2) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%I42Dptr => newp 
@@ -11086,13 +11801,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrI82D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrI82D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrI82D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer (ESMF_KIND_I8), dimension(:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -11123,6 +11840,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -11142,7 +11865,7 @@ end function
  
  type (ESMF_ArrWrapI82D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_KIND_I8), dimension(:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -11179,7 +11902,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -11193,11 +11925,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:2) = counts(1:2) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%I82Dptr => newp 
@@ -11224,13 +11952,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrI23D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrI23D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrI23D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer (ESMF_KIND_I2), dimension(:,:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -11261,6 +11991,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -11280,7 +12016,7 @@ end function
  
  type (ESMF_ArrWrapI23D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_KIND_I2), dimension(:,:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -11317,7 +12053,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2), counts(3) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -11331,11 +12076,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:3) = counts(1:3) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%I23Dptr => newp 
@@ -11362,13 +12103,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrI43D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrI43D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrI43D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer (ESMF_KIND_I4), dimension(:,:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -11399,6 +12142,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -11418,7 +12167,7 @@ end function
  
  type (ESMF_ArrWrapI43D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_KIND_I4), dimension(:,:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -11455,7 +12204,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2), counts(3) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -11469,11 +12227,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:3) = counts(1:3) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%I43Dptr => newp 
@@ -11500,13 +12254,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrI83D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrI83D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrI83D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer (ESMF_KIND_I8), dimension(:,:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -11537,6 +12293,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -11556,7 +12318,7 @@ end function
  
  type (ESMF_ArrWrapI83D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_KIND_I8), dimension(:,:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -11593,7 +12355,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2), counts(3) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -11607,11 +12378,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:3) = counts(1:3) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%I83Dptr => newp 
@@ -11638,13 +12405,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrI24D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrI24D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrI24D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer (ESMF_KIND_I2), dimension(:,:,:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -11675,6 +12444,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -11694,7 +12469,7 @@ end function
  
  type (ESMF_ArrWrapI24D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_KIND_I2), dimension(:,:,:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -11731,7 +12506,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -11745,11 +12529,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:4) = counts(1:4) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%I24Dptr => newp 
@@ -11776,13 +12556,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrI44D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrI44D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrI44D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer (ESMF_KIND_I4), dimension(:,:,:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -11813,6 +12595,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -11832,7 +12620,7 @@ end function
  
  type (ESMF_ArrWrapI44D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_KIND_I4), dimension(:,:,:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -11869,7 +12657,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -11883,11 +12680,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:4) = counts(1:4) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%I44Dptr => newp 
@@ -11914,13 +12707,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrI84D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrI84D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrI84D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer (ESMF_KIND_I8), dimension(:,:,:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -11951,6 +12746,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -11970,7 +12771,7 @@ end function
  
  type (ESMF_ArrWrapI84D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_KIND_I8), dimension(:,:,:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -12007,7 +12808,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -12021,11 +12831,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:4) = counts(1:4) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%I84Dptr => newp 
@@ -12052,13 +12858,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrI25D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrI25D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrI25D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer (ESMF_KIND_I2), dimension(:,:,:,:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -12089,6 +12897,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -12108,7 +12922,7 @@ end function
  
  type (ESMF_ArrWrapI25D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_KIND_I2), dimension(:,:,:,:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -12145,7 +12959,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2), counts(3), counts(4), counts(5) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -12159,11 +12982,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:5) = counts(1:5) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%I25Dptr => newp 
@@ -12190,13 +13009,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrI45D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrI45D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrI45D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer (ESMF_KIND_I4), dimension(:,:,:,:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -12227,6 +13048,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -12246,7 +13073,7 @@ end function
  
  type (ESMF_ArrWrapI45D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_KIND_I4), dimension(:,:,:,:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -12283,7 +13110,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2), counts(3), counts(4), counts(5) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -12297,11 +13133,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:5) = counts(1:5) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%I45Dptr => newp 
@@ -12328,13 +13160,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrI85D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrI85D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrI85D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer (ESMF_KIND_I8), dimension(:,:,:,:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -12365,6 +13199,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -12384,7 +13224,7 @@ end function
  
  type (ESMF_ArrWrapI85D) :: wrap ! to pass f90 ptr to C++ 
  integer (ESMF_KIND_I8), dimension(:,:,:,:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -12421,7 +13261,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2), counts(3), counts(4), counts(5) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -12435,11 +13284,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:5) = counts(1:5) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%I85Dptr => newp 
@@ -12466,13 +13311,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrR41D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrR41D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrR41D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  real (ESMF_KIND_R4), dimension(:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -12503,6 +13350,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -12522,7 +13375,7 @@ end function
  
  type (ESMF_ArrWrapR41D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_KIND_R4), dimension(:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -12559,7 +13412,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -12573,11 +13435,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:1) = counts(1:1) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%R41Dptr => newp 
@@ -12604,13 +13462,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrR81D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrR81D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrR81D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  real (ESMF_KIND_R8), dimension(:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -12641,6 +13501,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -12660,7 +13526,7 @@ end function
  
  type (ESMF_ArrWrapR81D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_KIND_R8), dimension(:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -12697,7 +13563,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -12711,11 +13586,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:1) = counts(1:1) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%R81Dptr => newp 
@@ -12742,13 +13613,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrR42D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrR42D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrR42D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  real (ESMF_KIND_R4), dimension(:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -12779,6 +13652,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -12798,7 +13677,7 @@ end function
  
  type (ESMF_ArrWrapR42D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_KIND_R4), dimension(:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -12835,7 +13714,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -12849,11 +13737,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:2) = counts(1:2) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%R42Dptr => newp 
@@ -12880,13 +13764,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrR82D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrR82D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrR82D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  real (ESMF_KIND_R8), dimension(:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -12917,6 +13803,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -12936,7 +13828,7 @@ end function
  
  type (ESMF_ArrWrapR82D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_KIND_R8), dimension(:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -12973,7 +13865,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -12987,11 +13888,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:2) = counts(1:2) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%R82Dptr => newp 
@@ -13018,13 +13915,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrR43D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrR43D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrR43D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  real (ESMF_KIND_R4), dimension(:,:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -13055,6 +13954,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -13074,7 +13979,7 @@ end function
  
  type (ESMF_ArrWrapR43D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_KIND_R4), dimension(:,:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -13111,7 +14016,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2), counts(3) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -13125,11 +14039,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:3) = counts(1:3) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%R43Dptr => newp 
@@ -13156,13 +14066,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrR83D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrR83D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrR83D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  real (ESMF_KIND_R8), dimension(:,:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -13193,6 +14105,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -13212,7 +14130,7 @@ end function
  
  type (ESMF_ArrWrapR83D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_KIND_R8), dimension(:,:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -13249,7 +14167,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2), counts(3) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -13263,11 +14190,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:3) = counts(1:3) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%R83Dptr => newp 
@@ -13294,13 +14217,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrR44D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrR44D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrR44D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  real (ESMF_KIND_R4), dimension(:,:,:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -13331,6 +14256,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -13350,7 +14281,7 @@ end function
  
  type (ESMF_ArrWrapR44D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_KIND_R4), dimension(:,:,:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -13387,7 +14318,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -13401,11 +14341,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:4) = counts(1:4) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%R44Dptr => newp 
@@ -13432,13 +14368,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrR84D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrR84D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrR84D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  real (ESMF_KIND_R8), dimension(:,:,:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -13469,6 +14407,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -13488,7 +14432,7 @@ end function
  
  type (ESMF_ArrWrapR84D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_KIND_R8), dimension(:,:,:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -13525,7 +14469,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -13539,11 +14492,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:4) = counts(1:4) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%R84Dptr => newp 
@@ -13570,13 +14519,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrR45D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrR45D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrR45D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  real (ESMF_KIND_R4), dimension(:,:,:,:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -13607,6 +14558,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -13626,7 +14583,7 @@ end function
  
  type (ESMF_ArrWrapR45D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_KIND_R4), dimension(:,:,:,:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -13663,7 +14620,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2), counts(3), counts(4), counts(5) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -13677,11 +14643,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:5) = counts(1:5) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%R45Dptr => newp 
@@ -13708,13 +14670,15 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90PtrR85D - Create an F90 Ptr of the proper T/K/R 
  
 ! !INTERFACE: 
- subroutine ESMF_LocalArrConstrF90PtrR85D(array, counts, f90ptr, docopy, rc) 
+ subroutine ESMF_LocalArrConstrF90PtrR85D(array, counts, f90ptr, docopy, lbounds, ubounds, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_LocalArray), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  real (ESMF_KIND_R8), dimension(:,:,:,:,:), pointer, optional :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, dimension(:), intent(in), optional :: lbounds 
+ integer, dimension(:), intent(in), optional :: ubounds 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -13745,6 +14709,12 @@ end function
 ! An optional copy flag which can be specified if an F90 pointer is also 
 ! given. Can either make a new copy of the data or ref existing data. 
 ! 
+! \item[{[lbounds]}] 
+! An integer array of lower index values. Must be same length as the rank. 
+! 
+! \item[{[ubounds]}] 
+! An integer array of upper index values. Must be same length as the rank. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -13764,7 +14734,7 @@ end function
  
  type (ESMF_ArrWrapR85D) :: wrap ! to pass f90 ptr to C++ 
  real (ESMF_KIND_R8), dimension(:,:,:,:,:), pointer :: newp 
- integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
+ integer, dimension(ESMF_MAXDIM) :: lb, ub 
  integer, dimension(ESMF_MAXDIM) :: offsets 
  
  ! Initialize return code; assume failure until success is certain 
@@ -13801,7 +14771,16 @@ end function
  endif 
  
  if (willalloc) then 
- allocate(newp ( counts(1), counts(2), counts(3), counts(4), counts(5) ), stat=status) 
+ lb = 1 
+ ub(1:size(counts)) = counts 
+ if (present(lbounds)) then 
+ lb(1:size(lbounds)) = lbounds 
+ endif 
+ if (present(ubounds)) then 
+ ub(1:size(ubounds)) = ubounds 
+ endif 
+ 
+ allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
  return 
@@ -13815,11 +14794,7 @@ end function
  ! Now set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:5) = counts(1:5) 
+ ! Until we need offsets, use 0. 
  offsets = 0 
  
  wrap%R85Dptr => newp 
@@ -13869,7 +14844,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI21D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(1) ! size info for the array 
+ integer :: rank, lb(1), ub(1) ! size info for the array 
  integer (ESMF_KIND_I2), dimension(:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -13896,12 +14871,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 1, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 1, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 1, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -13945,7 +14925,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI41D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(1) ! size info for the array 
+ integer :: rank, lb(1), ub(1) ! size info for the array 
  integer (ESMF_KIND_I4), dimension(:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -13972,12 +14952,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 1, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 1, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 1, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -14021,7 +15006,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI81D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(1) ! size info for the array 
+ integer :: rank, lb(1), ub(1) ! size info for the array 
  integer (ESMF_KIND_I8), dimension(:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -14048,12 +15033,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 1, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 1, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 1, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -14097,7 +15087,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI22D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(2) ! size info for the array 
+ integer :: rank, lb(2), ub(2) ! size info for the array 
  integer (ESMF_KIND_I2), dimension(:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -14124,12 +15114,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 2, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 2, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 2, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -14173,7 +15168,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI42D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(2) ! size info for the array 
+ integer :: rank, lb(2), ub(2) ! size info for the array 
  integer (ESMF_KIND_I4), dimension(:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -14200,12 +15195,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 2, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 2, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 2, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -14249,7 +15249,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI82D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(2) ! size info for the array 
+ integer :: rank, lb(2), ub(2) ! size info for the array 
  integer (ESMF_KIND_I8), dimension(:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -14276,12 +15276,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 2, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 2, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 2, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -14325,7 +15330,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI23D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(3) ! size info for the array 
+ integer :: rank, lb(3), ub(3) ! size info for the array 
  integer (ESMF_KIND_I2), dimension(:,:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -14352,12 +15357,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 3, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 3, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2), counts(3) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 3, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -14401,7 +15411,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI43D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(3) ! size info for the array 
+ integer :: rank, lb(3), ub(3) ! size info for the array 
  integer (ESMF_KIND_I4), dimension(:,:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -14428,12 +15438,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 3, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 3, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2), counts(3) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 3, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -14477,7 +15492,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI83D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(3) ! size info for the array 
+ integer :: rank, lb(3), ub(3) ! size info for the array 
  integer (ESMF_KIND_I8), dimension(:,:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -14504,12 +15519,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 3, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 3, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2), counts(3) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 3, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -14553,7 +15573,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI24D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(4) ! size info for the array 
+ integer :: rank, lb(4), ub(4) ! size info for the array 
  integer (ESMF_KIND_I2), dimension(:,:,:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -14580,12 +15600,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 4, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 4, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 4, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -14629,7 +15654,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI44D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(4) ! size info for the array 
+ integer :: rank, lb(4), ub(4) ! size info for the array 
  integer (ESMF_KIND_I4), dimension(:,:,:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -14656,12 +15681,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 4, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 4, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 4, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -14705,7 +15735,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI84D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(4) ! size info for the array 
+ integer :: rank, lb(4), ub(4) ! size info for the array 
  integer (ESMF_KIND_I8), dimension(:,:,:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -14732,12 +15762,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 4, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 4, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 4, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -14781,7 +15816,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI25D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(5) ! size info for the array 
+ integer :: rank, lb(5), ub(5) ! size info for the array 
  integer (ESMF_KIND_I2), dimension(:,:,:,:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -14808,12 +15843,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 5, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 5, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2), counts(3), counts(4), counts(5) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 5, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -14857,7 +15897,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI45D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(5) ! size info for the array 
+ integer :: rank, lb(5), ub(5) ! size info for the array 
  integer (ESMF_KIND_I4), dimension(:,:,:,:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -14884,12 +15924,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 5, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 5, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2), counts(3), counts(4), counts(5) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 5, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -14933,7 +15978,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI85D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(5) ! size info for the array 
+ integer :: rank, lb(5), ub(5) ! size info for the array 
  integer (ESMF_KIND_I8), dimension(:,:,:,:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -14960,12 +16005,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 5, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 5, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2), counts(3), counts(4), counts(5) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 5, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -15009,7 +16059,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapR41D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(1) ! size info for the array 
+ integer :: rank, lb(1), ub(1) ! size info for the array 
  real (ESMF_KIND_R4), dimension(:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -15036,12 +16086,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 1, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 1, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 1, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -15085,7 +16140,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapR81D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(1) ! size info for the array 
+ integer :: rank, lb(1), ub(1) ! size info for the array 
  real (ESMF_KIND_R8), dimension(:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -15112,12 +16167,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 1, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 1, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 1, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -15161,7 +16221,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapR42D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(2) ! size info for the array 
+ integer :: rank, lb(2), ub(2) ! size info for the array 
  real (ESMF_KIND_R4), dimension(:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -15188,12 +16248,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 2, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 2, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 2, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -15237,7 +16302,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapR82D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(2) ! size info for the array 
+ integer :: rank, lb(2), ub(2) ! size info for the array 
  real (ESMF_KIND_R8), dimension(:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -15264,12 +16329,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 2, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 2, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 2, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -15313,7 +16383,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapR43D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(3) ! size info for the array 
+ integer :: rank, lb(3), ub(3) ! size info for the array 
  real (ESMF_KIND_R4), dimension(:,:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -15340,12 +16410,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 3, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 3, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2), counts(3) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 3, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -15389,7 +16464,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapR83D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(3) ! size info for the array 
+ integer :: rank, lb(3), ub(3) ! size info for the array 
  real (ESMF_KIND_R8), dimension(:,:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -15416,12 +16491,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 3, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 3, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2), counts(3) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 3, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -15465,7 +16545,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapR44D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(4) ! size info for the array 
+ integer :: rank, lb(4), ub(4) ! size info for the array 
  real (ESMF_KIND_R4), dimension(:,:,:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -15492,12 +16572,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 4, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 4, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 4, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -15541,7 +16626,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapR84D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(4) ! size info for the array 
+ integer :: rank, lb(4), ub(4) ! size info for the array 
  real (ESMF_KIND_R8), dimension(:,:,:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -15568,12 +16653,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 4, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 4, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 4, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -15617,7 +16707,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapR45D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(5) ! size info for the array 
+ integer :: rank, lb(5), ub(5) ! size info for the array 
  real (ESMF_KIND_R4), dimension(:,:,:,:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -15644,12 +16734,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 5, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 5, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2), counts(3), counts(4), counts(5) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 5, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -15693,7 +16788,7 @@ end function
  logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapR85D) :: wrap ! for passing f90 ptr to C++ 
- integer :: rank, counts(5) ! size info for the array 
+ integer :: rank, lb(5), ub(5) ! size info for the array 
  real (ESMF_KIND_R8), dimension(:,:,:,:,:), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
@@ -15720,12 +16815,17 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_LocalArrayGetLengths(array, 5, counts, status) 
+ call c_ESMC_ArrayGetLbounds(array, 5, lb, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "LocalArray - cannot retrieve array dim sizes" 
+ print *, "Array - cannot retrieve array dim sizes" 
  return 
  endif 
- allocate(localp( counts(1), counts(2), counts(3), counts(4), counts(5) ), stat=status) 
+ call c_ESMC_ArrayGetUbounds(array, 5, ub, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray do_copy allocate error" 
  return 
@@ -17096,7 +18196,8 @@ end function
 ! !IROUTINE: ESMF_LocalArrayF90Allocate - Allocate an F90 pointer and set LocalArray info
 !
 ! !INTERFACE:
-     subroutine ESMF_LocalArrayF90Allocate(array, rank, type, kind, counts, rc)
+     subroutine ESMF_LocalArrayF90Allocate(array, rank, type, kind, counts, &
+                                           lbounds, ubounds, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_LocalArray), intent(inout) :: array
@@ -17104,6 +18205,8 @@ end function
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
       integer, dimension(:), intent(in) :: counts
+      integer, dimension(:), intent(in) :: lbounds
+      integer, dimension(:), intent(in) :: ubounds
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -17120,6 +18223,10 @@ end function
 ! The {\tt ESMF\_LocalArray} kind (short/2, long/8, etc).
 ! \item[counts]
 ! An integer array, size {\tt rank}, of each dimension length.
+! \item[lbounds]
+! An integer array, size {\tt rank}, of each dimensions lower index.
+! \item[ubounds]
+! An integer array, size {\tt rank}, of each dimensions upper index.
 ! \item[{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -17128,7 +18235,7 @@ end function
 ! !REQUIREMENTS:
 
     integer :: status ! local error status
-    integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds
+    integer, dimension(ESMF_MAXDIM) :: lb, ub
     integer, dimension(ESMF_MAXDIM) :: offsets
     integer :: localkind, localtype
 
@@ -17175,6 +18282,9 @@ end function
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
 
+    lb(1:size(lbounds)) = lbounds
+    ub(1:size(ubounds)) = ubounds
+
     localtype = type%dtype
     localkind = kind%dkind
 
@@ -17186,7 +18296,7 @@ end function
             select case (localkind)
               case (ESMF_I2%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localI21D%I21Dptr( counts(1) ), stat=status) 
+ allocate(localI21D%I21Dptr( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17195,11 +18305,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:1) = counts(1:1) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localI21D, & 
@@ -17215,7 +18321,7 @@ end function
 
               case (ESMF_I4%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localI41D%I41Dptr( counts(1) ), stat=status) 
+ allocate(localI41D%I41Dptr( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17224,11 +18330,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:1) = counts(1:1) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localI41D, & 
@@ -17244,7 +18346,7 @@ end function
 
               case (ESMF_I8%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localI81D%I81Dptr( counts(1) ), stat=status) 
+ allocate(localI81D%I81Dptr( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17253,11 +18355,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:1) = counts(1:1) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localI81D, & 
@@ -17278,7 +18376,7 @@ end function
             select case (localkind)
               case (ESMF_I2%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localI22D%I22Dptr( counts(1), counts(2) ), stat=status) 
+ allocate(localI22D%I22Dptr( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17287,11 +18385,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:2) = counts(1:2) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localI22D, & 
@@ -17307,7 +18401,7 @@ end function
 
               case (ESMF_I4%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localI42D%I42Dptr( counts(1), counts(2) ), stat=status) 
+ allocate(localI42D%I42Dptr( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17316,11 +18410,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:2) = counts(1:2) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localI42D, & 
@@ -17336,7 +18426,7 @@ end function
 
               case (ESMF_I8%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localI82D%I82Dptr( counts(1), counts(2) ), stat=status) 
+ allocate(localI82D%I82Dptr( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17345,11 +18435,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:2) = counts(1:2) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localI82D, & 
@@ -17370,7 +18456,7 @@ end function
             select case (localkind)
               case (ESMF_I2%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localI23D%I23Dptr( counts(1), counts(2), counts(3) ), stat=status) 
+ allocate(localI23D%I23Dptr( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17379,11 +18465,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:3) = counts(1:3) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localI23D, & 
@@ -17399,7 +18481,7 @@ end function
 
               case (ESMF_I4%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localI43D%I43Dptr( counts(1), counts(2), counts(3) ), stat=status) 
+ allocate(localI43D%I43Dptr( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17408,11 +18490,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:3) = counts(1:3) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localI43D, & 
@@ -17428,7 +18506,7 @@ end function
 
               case (ESMF_I8%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localI83D%I83Dptr( counts(1), counts(2), counts(3) ), stat=status) 
+ allocate(localI83D%I83Dptr( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17437,11 +18515,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:3) = counts(1:3) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localI83D, & 
@@ -17462,7 +18536,7 @@ end function
             select case (localkind)
               case (ESMF_I2%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localI24D%I24Dptr( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
+ allocate(localI24D%I24Dptr( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17471,11 +18545,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:4) = counts(1:4) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localI24D, & 
@@ -17491,7 +18561,7 @@ end function
 
               case (ESMF_I4%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localI44D%I44Dptr( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
+ allocate(localI44D%I44Dptr( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17500,11 +18570,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:4) = counts(1:4) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localI44D, & 
@@ -17520,7 +18586,7 @@ end function
 
               case (ESMF_I8%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localI84D%I84Dptr( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
+ allocate(localI84D%I84Dptr( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17529,11 +18595,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:4) = counts(1:4) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localI84D, & 
@@ -17554,7 +18616,7 @@ end function
             select case (localkind)
               case (ESMF_I2%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localI25D%I25Dptr( counts(1), counts(2), counts(3), counts(4), counts(5) ), stat=status) 
+ allocate(localI25D%I25Dptr( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17563,11 +18625,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:5) = counts(1:5) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localI25D, & 
@@ -17583,7 +18641,7 @@ end function
 
               case (ESMF_I4%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localI45D%I45Dptr( counts(1), counts(2), counts(3), counts(4), counts(5) ), stat=status) 
+ allocate(localI45D%I45Dptr( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17592,11 +18650,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:5) = counts(1:5) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localI45D, & 
@@ -17612,7 +18666,7 @@ end function
 
               case (ESMF_I8%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localI85D%I85Dptr( counts(1), counts(2), counts(3), counts(4), counts(5) ), stat=status) 
+ allocate(localI85D%I85Dptr( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17621,11 +18675,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:5) = counts(1:5) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localI85D, & 
@@ -17651,7 +18701,7 @@ end function
             select case (localkind)
               case (ESMF_R4%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localR41D%R41Dptr( counts(1) ), stat=status) 
+ allocate(localR41D%R41Dptr( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17660,11 +18710,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:1) = counts(1:1) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localR41D, & 
@@ -17680,7 +18726,7 @@ end function
 
               case (ESMF_R8%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localR81D%R81Dptr( counts(1) ), stat=status) 
+ allocate(localR81D%R81Dptr( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17689,11 +18735,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:1) = counts(1:1) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localR81D, & 
@@ -17714,7 +18756,7 @@ end function
             select case (localkind)
               case (ESMF_R4%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localR42D%R42Dptr( counts(1), counts(2) ), stat=status) 
+ allocate(localR42D%R42Dptr( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17723,11 +18765,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:2) = counts(1:2) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localR42D, & 
@@ -17743,7 +18781,7 @@ end function
 
               case (ESMF_R8%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localR82D%R82Dptr( counts(1), counts(2) ), stat=status) 
+ allocate(localR82D%R82Dptr( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17752,11 +18790,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:2) = counts(1:2) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localR82D, & 
@@ -17777,7 +18811,7 @@ end function
             select case (localkind)
               case (ESMF_R4%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localR43D%R43Dptr( counts(1), counts(2), counts(3) ), stat=status) 
+ allocate(localR43D%R43Dptr( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17786,11 +18820,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:3) = counts(1:3) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localR43D, & 
@@ -17806,7 +18836,7 @@ end function
 
               case (ESMF_R8%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localR83D%R83Dptr( counts(1), counts(2), counts(3) ), stat=status) 
+ allocate(localR83D%R83Dptr( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17815,11 +18845,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:3) = counts(1:3) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localR83D, & 
@@ -17840,7 +18866,7 @@ end function
             select case (localkind)
               case (ESMF_R4%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localR44D%R44Dptr( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
+ allocate(localR44D%R44Dptr( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17849,11 +18875,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:4) = counts(1:4) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localR44D, & 
@@ -17869,7 +18891,7 @@ end function
 
               case (ESMF_R8%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localR84D%R84Dptr( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
+ allocate(localR84D%R84Dptr( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17878,11 +18900,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:4) = counts(1:4) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localR84D, & 
@@ -17903,7 +18921,7 @@ end function
             select case (localkind)
               case (ESMF_R4%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localR45D%R45Dptr( counts(1), counts(2), counts(3), counts(4), counts(5) ), stat=status) 
+ allocate(localR45D%R45Dptr( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17912,11 +18930,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:5) = counts(1:5) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localR45D, & 
@@ -17932,7 +18946,7 @@ end function
 
               case (ESMF_R8%dkind)
 ! <Created by macro - do not edit directly > 
- allocate(localR85D%R85Dptr( counts(1), counts(2), counts(3), counts(4), counts(5) ), stat=status) 
+ allocate(localR85D%R85Dptr( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then 
  print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
@@ -17941,11 +18955,7 @@ end function
  ! Set all the new accumulated information about the array - the 
  ! F90 pointer, the base addr, the counts, etc. 
  
- ! TODO: query the ptr for lbounds/ubounds/offsets/whatever 
- ! and set them in the array object. For now, used fixed values. 
- lbounds = 1 
- ubounds = 1 
- ubounds(1:5) = counts(1:5) 
+ ! Set offsets for now to 0, since this is apparently unused. 
  offsets = 0 
  
  call c_ESMC_LocalArraySetInternal(array, localR85D, & 
@@ -18337,7 +19347,7 @@ end function
         integer :: rank
         type (ESMF_DataKind) :: kind
         type (ESMF_DataType) :: type
-        integer :: i, counts(ESMF_MAXDIM)
+        integer :: i, counts(ESMF_MAXDIM), lb(ESMF_MAXDIM), ub(ESMF_MAXDIM)
 
         status = ESMF_FAILURE
         rcpresent = .FALSE.
@@ -18382,7 +19392,8 @@ end function
           return
         endif
 
-        call ESMF_LocalArrConstrF90Ptr(newarray, counts, rank, type, kind, status)
+        call ESMF_LocalArrConstrF90Ptr(newarray, counts, rank, type, kind, &
+                                          lb, ub, status)
 
         ! At this point the new array exists, and has space allocated, but it
         ! does not contain data from the old array. Now we have a T/K/R prob.

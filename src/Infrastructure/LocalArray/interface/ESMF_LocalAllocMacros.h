@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalAllocMacros.h,v 1.2 2003/10/08 21:36:51 nscollins Exp $
+! $Id: ESMF_LocalAllocMacros.h,v 1.3 2004/02/11 21:54:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,9 +23,9 @@
 ! Allocate the contents of the array.
 !------------------------------------------------------------------------------
 #endif
-#define AllocAllocateMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define AllocAllocateMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 ! <Created by macro - do not edit directly >  @\
-        allocate(local##mtypekind##mrank##D%mtypekind##mrank##Dptr( mlen ), stat=status) @\
+        allocate(local##mtypekind##mrank##D%mtypekind##mrank##Dptr( mrng ), stat=status) @\
         if (status .ne. 0) then @\
           print *, "ESMC_LocalArrayCreate: Allocation error" @\
           return @\
@@ -34,11 +34,7 @@
         ! Set all the new accumulated information about the array - the @\
         ! F90 pointer, the base addr, the counts, etc. @\
  @\
-        ! TODO: query the ptr for lbounds/ubounds/offsets/whatever @\
-        !  and set them in the array object.  For now, used fixed values. @\
-        lbounds = 1 @\
-        ubounds = 1 @\
-        ubounds(1:mrank) = counts(1:mrank) @\
+        ! Set offsets for now to 0, since this is apparently unused. @\
         offsets = 0 @\
  @\
         call c_ESMC_LocalArraySetInternal(array, local##mtypekind##mrank##D, & @\
@@ -57,7 +53,7 @@
 ! Deallocate the contents of the array.
 !------------------------------------------------------------------------------
 #endif
-#define AllocDeallocateMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define AllocDeallocateMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 ! <Created by macro - do not edit directly >  @\
         call c_ESMC_LocalArrayGetF90Ptr(array, local##mtypekind##mrank##D, status) @\
         deallocate(local##mtypekind##mrank##D%mtypekind##mrank##Dptr, stat=status)  @\

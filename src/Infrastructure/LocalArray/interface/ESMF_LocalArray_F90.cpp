@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.8 2004/02/11 19:57:03 nscollins Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.9 2004/02/11 21:54:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -186,7 +186,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.8 2004/02/11 19:57:03 nscollins Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.9 2004/02/11 21:54:55 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -334,7 +334,8 @@ end function
 ! !IROUTINE: ESMF_LocalArrayCreateByLst1D -- Convenience cover for 1D counts
 
 ! !INTERFACE:
-      function ESMF_LocalArrayCreateByLst1D(rank, type, kind, counts, rc)
+      function ESMF_LocalArrayCreateByLst1D(rank, type, kind, counts, &
+                                            lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByLst1D
@@ -344,6 +345,8 @@ end function
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
       integer, intent(in) :: counts   !! this is what differs from ...ByList
+      integer, intent(in), optional :: lbounds
+      integer, intent(in), optional :: ubounds
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -374,6 +377,12 @@ end function
 ! rank $>$ 1 then you must specify a 1D array of counts and the compiler
 ! will match the ByList version of this interface instead of this one.
 !
+!  \item[{[lbounds]}]
+!   An integer with the lower index for each dimension.
+!
+!  \item[{[ubounds]}]
+!   An integer with the upper index for each dimension.
+!
 ! \item[{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -383,11 +392,14 @@ end function
 ! !REQUIREMENTS:
 
         integer, dimension(1) :: countlist
+        integer, dimension(1) :: lb, ub
 
         countlist(1) = counts
+        lb(1) = lbounds
+        ub(1) = ubounds
         
-        ESMF_LocalArrayCreateByLst1D = &
-               ESMF_LocalArrayCreateByList(rank, type, kind, countlist, rc)
+        ESMF_LocalArrayCreateByLst1D = ESMF_LocalArrayCreateByList(rank, &
+                                             type, kind, countlist, lb, ub, rc)
 
         end function ESMF_LocalArrayCreateByLst1D
 
@@ -397,7 +409,8 @@ end function
 ! !IROUTINE: ESMF_LocalArrayCreateByList -- Create an LocalArray specifying all options.
 
 ! !INTERFACE:
-      function ESMF_LocalArrayCreateByList(rank, type, kind, counts, rc)
+      function ESMF_LocalArrayCreateByList(rank, type, kind, counts, &
+                                           lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByList
@@ -407,6 +420,8 @@ end function
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
       integer, dimension(:), intent(in) :: counts
+      integer, dimension(:), intent(in), optional :: lbounds
+      integer, dimension(:), intent(in), optional :: ubounds
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -433,6 +448,12 @@ end function
 !    The number of items in each dimension of the array.  This is a 1D
 !    integer array the same length as the rank.
 !
+!  \item[{[lbounds]}]
+!   An integer array of length rank, with the lower index for each dimension.
+!
+!  \item[{[ubounds]}]
+!   An integer array of length rank, with the upper index for each dimension.
+
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -444,6 +465,7 @@ end function
 
         ! Local vars
         type (ESMF_LocalArray) :: array     ! new C++ LocalArray
+        integer, dimension(ESMF_MAXDIM) :: lb, ub  ! local bounds
         integer :: status                   ! local error status
         logical :: rcpresent                ! did user specify rc?
 
@@ -457,6 +479,16 @@ end function
           rc = ESMF_FAILURE
         endif
 
+        ! Assume defaults first, then alter if lb or ub specified. 
+        lb = 1
+        ub(1:size(counts)) = counts
+        if (present(lbounds)) then 
+            lb(1:size(lbounds)) = lbounds
+        endif 
+        if (present(ubounds)) then 
+            ub(1:size(ubounds)) = ubounds
+        endif 
+
         ! TODO: should this take the counts, or not?  for now i am going to
         !  set the counts after i have created the f90 array and not here.
         call c_ESMC_LocalArrayCreateNoData(array, rank, type, kind, &
@@ -466,7 +498,8 @@ end function
           return
         endif
 
-        call ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, status)
+        call ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, &
+                                       lb, ub, status)
 
         ! Set return values
         ESMF_LocalArrayCreateByList = array 
@@ -480,7 +513,7 @@ end function
 ! !IROUTINE: ESMF_LocalArrayCreateBySpec -- Create a new LocalArray from an ArraySpec
 
 ! !INTERFACE:
-      function ESMF_LocalArrayCreateBySpec(spec, counts, rc)
+      function ESMF_LocalArrayCreateBySpec(spec, counts, lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocalArray) :: ESMF_LocalArrayCreateBySpec
@@ -488,6 +521,8 @@ end function
 ! !ARGUMENTS:
       type(ESMF_ArraySpec), intent(in) :: spec
       integer, intent(in), dimension(:) :: counts
+      integer, dimension(:), intent(in), optional :: lbounds
+      integer, dimension(:), intent(in), optional :: ubounds 
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -501,13 +536,19 @@ end function
 !    ArraySpec object.
 !
 !  \item[counts]
-!    The number of items in each dimension of the array.  This is a 1D
-!    integer array the same length as the rank.
+!   The number of items in each dimension of the array.  This is a 1D
+!   integer array the same length as the rank.
 !
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \item[{[lbounds]}]
+!   An integer array of length rank, with the lower index for each dimension.
 !
-!   \end{description}
+!  \item[{[ubounds]}]
+!   An integer array of length rank, with the upper index for each dimension.
+!
+!  \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!  \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
@@ -535,7 +576,7 @@ end function
         
         ! Call the list function to make the array
         ESMF_LocalArrayCreateBySpec = ESMF_LocalArrayCreateByList(rank, type, &
-                                      kind, counts, status)
+                                         kind, counts, lbounds, ubounds, status)
         if (rcpresent) rc = status
 
         end function ESMF_LocalArrayCreateBySpec
@@ -546,7 +587,8 @@ end function
 ! !IROUTINE: ESMF_LocalArrConstrF90Ptr - Create and add F90 ptr to array
 
 ! !INTERFACE:
-     subroutine ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, rc)
+     subroutine ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, &
+                                          lbounds, ubounds, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_LocalArray), intent(inout) :: array
@@ -554,6 +596,8 @@ end function
       integer, intent(in) :: rank
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
+      integer, dimension(:), intent(in) :: lbounds
+      integer, dimension(:), intent(in) :: ubounds
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -587,6 +631,12 @@ end function
 !    Array kind. 
 !    This must match what is already in the array - it is here only as
 !    a convienience.
+!
+!   \item[lbounds]
+!    The lower index values per rank.
+!  
+!   \item[ubounds]
+!    The upper index values per rank.
 !
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -626,55 +676,70 @@ end function
               case (1)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_LocalArrConstrF90PtrI21D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI21D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I4%dkind)
-                    call ESMF_LocalArrConstrF90PtrI41D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI41D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I8%dkind)
-                    call ESMF_LocalArrConstrF90PtrI81D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI81D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
     
               case (2)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_LocalArrConstrF90PtrI22D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI22D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I4%dkind)
-                    call ESMF_LocalArrConstrF90PtrI42D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI42D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I8%dkind)
-                    call ESMF_LocalArrConstrF90PtrI82D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI82D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
     
               case (3)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_LocalArrConstrF90PtrI23D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI23D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I4%dkind)
-                    call ESMF_LocalArrConstrF90PtrI43D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI43D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I8%dkind)
-                    call ESMF_LocalArrConstrF90PtrI83D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI83D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
     
               case (4)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_LocalArrConstrF90PtrI24D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI24D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I4%dkind)
-                    call ESMF_LocalArrConstrF90PtrI44D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI44D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I8%dkind)
-                    call ESMF_LocalArrConstrF90PtrI84D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI84D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
     
               case (5)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_LocalArrConstrF90PtrI25D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI25D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I4%dkind)
-                    call ESMF_LocalArrConstrF90PtrI45D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI45D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I8%dkind)
-                    call ESMF_LocalArrConstrF90PtrI85D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrI85D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
     
@@ -686,45 +751,55 @@ end function
               case (1)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_LocalArrConstrF90PtrR41D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR41D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_R8%dkind)
-                    call ESMF_LocalArrConstrF90PtrR81D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR81D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
     
               case (2)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_LocalArrConstrF90PtrR42D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR42D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_R8%dkind)
-                    call ESMF_LocalArrConstrF90PtrR82D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR82D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
     
               case (3)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_LocalArrConstrF90PtrR43D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR43D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_R8%dkind)
-                    call ESMF_LocalArrConstrF90PtrR83D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR83D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
     
               case (4)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_LocalArrConstrF90PtrR44D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR44D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_R8%dkind)
-                    call ESMF_LocalArrConstrF90PtrR84D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR84D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
     
               case (5)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_LocalArrConstrF90PtrR45D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR45D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_R8%dkind)
-                    call ESMF_LocalArrConstrF90PtrR85D(array, counts, rc=status)
+                    call ESMF_LocalArrConstrF90PtrR85D(array, counts, &
+                                    lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
     
@@ -744,55 +819,167 @@ end function
 
 !! < start of macros which become actual function bodies after expansion >
 
-LocalArrayCreateByMTArrMacro(integer, I2, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByMTArrMacro(integer, I2, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayCreateByMTArrMacro(integer, I4, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByMTArrMacro(integer, I4, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayCreateByMTArrMacro(integer, I8, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByMTArrMacro(integer, I8, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayCreateByMTArrMacro(integer, I2, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByMTArrMacro(integer, I2, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayCreateByMTArrMacro(integer, I4, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByMTArrMacro(integer, I4, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayCreateByMTArrMacro(integer, I8, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByMTArrMacro(integer, I8, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayCreateByMTArrMacro(integer, I2, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByMTArrMacro(integer, I2, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayCreateByMTArrMacro(integer, I4, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByMTArrMacro(integer, I4, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayCreateByMTArrMacro(integer, I8, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByMTArrMacro(integer, I8, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayCreateByMTArrMacro(integer, I2, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByMTArrMacro(integer, I2, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayCreateByMTArrMacro(integer, I4, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByMTArrMacro(integer, I4, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayCreateByMTArrMacro(integer, I8, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByMTArrMacro(integer, I8, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayCreateByMTArrMacro(integer, I2, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByMTArrMacro(integer, I2, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayCreateByMTArrMacro(integer, I4, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByMTArrMacro(integer, I4, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayCreateByMTArrMacro(integer, I8, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByMTArrMacro(integer, I8, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayCreateByMTArrMacro(real, R4, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByMTArrMacro(real, R4, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayCreateByMTArrMacro(real, R8, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByMTArrMacro(real, R8, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayCreateByMTArrMacro(real, R4, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByMTArrMacro(real, R4, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayCreateByMTArrMacro(real, R8, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByMTArrMacro(real, R8, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayCreateByMTArrMacro(real, R4, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByMTArrMacro(real, R4, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayCreateByMTArrMacro(real, R8, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByMTArrMacro(real, R8, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayCreateByMTArrMacro(real, R4, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByMTArrMacro(real, R4, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayCreateByMTArrMacro(real, R8, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByMTArrMacro(real, R8, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayCreateByMTArrMacro(real, R4, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByMTArrMacro(real, R4, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayCreateByMTArrMacro(real, R8, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByMTArrMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
+
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+!! < start of macros which become actual function bodies after expansion >
+
+LocalArrayCreateByFlArrMacro(integer, I2, 1, COL1, LEN1, RNG1, LOC1)
+
+LocalArrayCreateByFlArrMacro(integer, I4, 1, COL1, LEN1, RNG1, LOC1)
+
+LocalArrayCreateByFlArrMacro(integer, I8, 1, COL1, LEN1, RNG1, LOC1)
+
+LocalArrayCreateByFlArrMacro(integer, I2, 2, COL2, LEN2, RNG2, LOC2)
+
+LocalArrayCreateByFlArrMacro(integer, I4, 2, COL2, LEN2, RNG2, LOC2)
+
+LocalArrayCreateByFlArrMacro(integer, I8, 2, COL2, LEN2, RNG2, LOC2)
+
+LocalArrayCreateByFlArrMacro(integer, I2, 3, COL3, LEN3, RNG3, LOC3)
+
+LocalArrayCreateByFlArrMacro(integer, I4, 3, COL3, LEN3, RNG3, LOC3)
+
+LocalArrayCreateByFlArrMacro(integer, I8, 3, COL3, LEN3, RNG3, LOC3)
+
+LocalArrayCreateByFlArrMacro(integer, I2, 4, COL4, LEN4, RNG4, LOC4)
+
+LocalArrayCreateByFlArrMacro(integer, I4, 4, COL4, LEN4, RNG4, LOC4)
+
+LocalArrayCreateByFlArrMacro(integer, I8, 4, COL4, LEN4, RNG4, LOC4)
+
+LocalArrayCreateByFlArrMacro(integer, I2, 5, COL5, LEN5, RNG5, LOC5)
+
+LocalArrayCreateByFlArrMacro(integer, I4, 5, COL5, LEN5, RNG5, LOC5)
+
+LocalArrayCreateByFlArrMacro(integer, I8, 5, COL5, LEN5, RNG5, LOC5)
+
+LocalArrayCreateByFlArrMacro(real, R4, 1, COL1, LEN1, RNG1, LOC1)
+
+LocalArrayCreateByFlArrMacro(real, R8, 1, COL1, LEN1, RNG1, LOC1)
+
+LocalArrayCreateByFlArrMacro(real, R4, 2, COL2, LEN2, RNG2, LOC2)
+
+LocalArrayCreateByFlArrMacro(real, R8, 2, COL2, LEN2, RNG2, LOC2)
+
+LocalArrayCreateByFlArrMacro(real, R4, 3, COL3, LEN3, RNG3, LOC3)
+
+LocalArrayCreateByFlArrMacro(real, R8, 3, COL3, LEN3, RNG3, LOC3)
+
+LocalArrayCreateByFlArrMacro(real, R4, 4, COL4, LEN4, RNG4, LOC4)
+
+LocalArrayCreateByFlArrMacro(real, R8, 4, COL4, LEN4, RNG4, LOC4)
+
+LocalArrayCreateByFlArrMacro(real, R4, 5, COL5, LEN5, RNG5, LOC5)
+
+LocalArrayCreateByFlArrMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+!! < start of macros which become actual function bodies after expansion >
+
+LocalArrayCreateByMTPtrMacro(integer, I2, 1, COL1, LEN1, RNG1, LOC1)
+
+LocalArrayCreateByMTPtrMacro(integer, I4, 1, COL1, LEN1, RNG1, LOC1)
+
+LocalArrayCreateByMTPtrMacro(integer, I8, 1, COL1, LEN1, RNG1, LOC1)
+
+LocalArrayCreateByMTPtrMacro(integer, I2, 2, COL2, LEN2, RNG2, LOC2)
+
+LocalArrayCreateByMTPtrMacro(integer, I4, 2, COL2, LEN2, RNG2, LOC2)
+
+LocalArrayCreateByMTPtrMacro(integer, I8, 2, COL2, LEN2, RNG2, LOC2)
+
+LocalArrayCreateByMTPtrMacro(integer, I2, 3, COL3, LEN3, RNG3, LOC3)
+
+LocalArrayCreateByMTPtrMacro(integer, I4, 3, COL3, LEN3, RNG3, LOC3)
+
+LocalArrayCreateByMTPtrMacro(integer, I8, 3, COL3, LEN3, RNG3, LOC3)
+
+LocalArrayCreateByMTPtrMacro(integer, I2, 4, COL4, LEN4, RNG4, LOC4)
+
+LocalArrayCreateByMTPtrMacro(integer, I4, 4, COL4, LEN4, RNG4, LOC4)
+
+LocalArrayCreateByMTPtrMacro(integer, I8, 4, COL4, LEN4, RNG4, LOC4)
+
+LocalArrayCreateByMTPtrMacro(integer, I2, 5, COL5, LEN5, RNG5, LOC5)
+
+LocalArrayCreateByMTPtrMacro(integer, I4, 5, COL5, LEN5, RNG5, LOC5)
+
+LocalArrayCreateByMTPtrMacro(integer, I8, 5, COL5, LEN5, RNG5, LOC5)
+
+LocalArrayCreateByMTPtrMacro(real, R4, 1, COL1, LEN1, RNG1, LOC1)
+
+LocalArrayCreateByMTPtrMacro(real, R8, 1, COL1, LEN1, RNG1, LOC1)
+
+LocalArrayCreateByMTPtrMacro(real, R4, 2, COL2, LEN2, RNG2, LOC2)
+
+LocalArrayCreateByMTPtrMacro(real, R8, 2, COL2, LEN2, RNG2, LOC2)
+
+LocalArrayCreateByMTPtrMacro(real, R4, 3, COL3, LEN3, RNG3, LOC3)
+
+LocalArrayCreateByMTPtrMacro(real, R8, 3, COL3, LEN3, RNG3, LOC3)
+
+LocalArrayCreateByMTPtrMacro(real, R4, 4, COL4, LEN4, RNG4, LOC4)
+
+LocalArrayCreateByMTPtrMacro(real, R8, 4, COL4, LEN4, RNG4, LOC4)
+
+LocalArrayCreateByMTPtrMacro(real, R4, 5, COL5, LEN5, RNG5, LOC5)
+
+LocalArrayCreateByMTPtrMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
+
 
 
 !------------------------------------------------------------------------------
@@ -800,111 +987,55 @@ LocalArrayCreateByMTArrMacro(real, R8, 5, COL5, LEN5, LOC5)
 
 !! < start of macros which become actual function bodies after expansion >
 
-LocalArrayCreateByFlArrMacro(integer, I2, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByFlPtrMacro(integer, I2, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayCreateByFlArrMacro(integer, I4, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByFlPtrMacro(integer, I4, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayCreateByFlArrMacro(integer, I8, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByFlPtrMacro(integer, I8, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayCreateByFlArrMacro(integer, I2, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByFlPtrMacro(integer, I2, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayCreateByFlArrMacro(integer, I4, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByFlPtrMacro(integer, I4, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayCreateByFlArrMacro(integer, I8, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByFlPtrMacro(integer, I8, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayCreateByFlArrMacro(integer, I2, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByFlPtrMacro(integer, I2, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayCreateByFlArrMacro(integer, I4, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByFlPtrMacro(integer, I4, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayCreateByFlArrMacro(integer, I8, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByFlPtrMacro(integer, I8, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayCreateByFlArrMacro(integer, I2, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByFlPtrMacro(integer, I2, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayCreateByFlArrMacro(integer, I4, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByFlPtrMacro(integer, I4, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayCreateByFlArrMacro(integer, I8, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByFlPtrMacro(integer, I8, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayCreateByFlArrMacro(integer, I2, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByFlPtrMacro(integer, I2, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayCreateByFlArrMacro(integer, I4, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByFlPtrMacro(integer, I4, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayCreateByFlArrMacro(integer, I8, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByFlPtrMacro(integer, I8, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayCreateByFlArrMacro(real, R4, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByFlPtrMacro(real, R4, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayCreateByFlArrMacro(real, R8, 1, COL1, LEN1, LOC1)
+LocalArrayCreateByFlPtrMacro(real, R8, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayCreateByFlArrMacro(real, R4, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByFlPtrMacro(real, R4, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayCreateByFlArrMacro(real, R8, 2, COL2, LEN2, LOC2)
+LocalArrayCreateByFlPtrMacro(real, R8, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayCreateByFlArrMacro(real, R4, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByFlPtrMacro(real, R4, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayCreateByFlArrMacro(real, R8, 3, COL3, LEN3, LOC3)
+LocalArrayCreateByFlPtrMacro(real, R8, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayCreateByFlArrMacro(real, R4, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByFlPtrMacro(real, R4, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayCreateByFlArrMacro(real, R8, 4, COL4, LEN4, LOC4)
+LocalArrayCreateByFlPtrMacro(real, R8, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayCreateByFlArrMacro(real, R4, 5, COL5, LEN5, LOC5)
+LocalArrayCreateByFlPtrMacro(real, R4, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayCreateByFlArrMacro(real, R8, 5, COL5, LEN5, LOC5)
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-
-!! < start of macros which become actual function bodies after expansion >
-
-LocalArrayCreateByMTPtrMacro(integer, I2, 1, COL1, LEN1, LOC1)
-
-LocalArrayCreateByMTPtrMacro(integer, I4, 1, COL1, LEN1, LOC1)
-
-LocalArrayCreateByMTPtrMacro(integer, I8, 1, COL1, LEN1, LOC1)
-
-LocalArrayCreateByMTPtrMacro(integer, I2, 2, COL2, LEN2, LOC2)
-
-LocalArrayCreateByMTPtrMacro(integer, I4, 2, COL2, LEN2, LOC2)
-
-LocalArrayCreateByMTPtrMacro(integer, I8, 2, COL2, LEN2, LOC2)
-
-LocalArrayCreateByMTPtrMacro(integer, I2, 3, COL3, LEN3, LOC3)
-
-LocalArrayCreateByMTPtrMacro(integer, I4, 3, COL3, LEN3, LOC3)
-
-LocalArrayCreateByMTPtrMacro(integer, I8, 3, COL3, LEN3, LOC3)
-
-LocalArrayCreateByMTPtrMacro(integer, I2, 4, COL4, LEN4, LOC4)
-
-LocalArrayCreateByMTPtrMacro(integer, I4, 4, COL4, LEN4, LOC4)
-
-LocalArrayCreateByMTPtrMacro(integer, I8, 4, COL4, LEN4, LOC4)
-
-LocalArrayCreateByMTPtrMacro(integer, I2, 5, COL5, LEN5, LOC5)
-
-LocalArrayCreateByMTPtrMacro(integer, I4, 5, COL5, LEN5, LOC5)
-
-LocalArrayCreateByMTPtrMacro(integer, I8, 5, COL5, LEN5, LOC5)
-
-LocalArrayCreateByMTPtrMacro(real, R4, 1, COL1, LEN1, LOC1)
-
-LocalArrayCreateByMTPtrMacro(real, R8, 1, COL1, LEN1, LOC1)
-
-LocalArrayCreateByMTPtrMacro(real, R4, 2, COL2, LEN2, LOC2)
-
-LocalArrayCreateByMTPtrMacro(real, R8, 2, COL2, LEN2, LOC2)
-
-LocalArrayCreateByMTPtrMacro(real, R4, 3, COL3, LEN3, LOC3)
-
-LocalArrayCreateByMTPtrMacro(real, R8, 3, COL3, LEN3, LOC3)
-
-LocalArrayCreateByMTPtrMacro(real, R4, 4, COL4, LEN4, LOC4)
-
-LocalArrayCreateByMTPtrMacro(real, R8, 4, COL4, LEN4, LOC4)
-
-LocalArrayCreateByMTPtrMacro(real, R4, 5, COL5, LEN5, LOC5)
-
-LocalArrayCreateByMTPtrMacro(real, R8, 5, COL5, LEN5, LOC5)
-
+LocalArrayCreateByFlPtrMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 
 
 !------------------------------------------------------------------------------
@@ -912,221 +1043,165 @@ LocalArrayCreateByMTPtrMacro(real, R8, 5, COL5, LEN5, LOC5)
 
 !! < start of macros which become actual function bodies after expansion >
 
-LocalArrayCreateByFlPtrMacro(integer, I2, 1, COL1, LEN1, LOC1)
+LocalArrConstrF90PtrMacro(integer, I2, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayCreateByFlPtrMacro(integer, I4, 1, COL1, LEN1, LOC1)
+LocalArrConstrF90PtrMacro(integer, I4, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayCreateByFlPtrMacro(integer, I8, 1, COL1, LEN1, LOC1)
+LocalArrConstrF90PtrMacro(integer, I8, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayCreateByFlPtrMacro(integer, I2, 2, COL2, LEN2, LOC2)
+LocalArrConstrF90PtrMacro(integer, I2, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayCreateByFlPtrMacro(integer, I4, 2, COL2, LEN2, LOC2)
+LocalArrConstrF90PtrMacro(integer, I4, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayCreateByFlPtrMacro(integer, I8, 2, COL2, LEN2, LOC2)
+LocalArrConstrF90PtrMacro(integer, I8, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayCreateByFlPtrMacro(integer, I2, 3, COL3, LEN3, LOC3)
+LocalArrConstrF90PtrMacro(integer, I2, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayCreateByFlPtrMacro(integer, I4, 3, COL3, LEN3, LOC3)
+LocalArrConstrF90PtrMacro(integer, I4, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayCreateByFlPtrMacro(integer, I8, 3, COL3, LEN3, LOC3)
+LocalArrConstrF90PtrMacro(integer, I8, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayCreateByFlPtrMacro(integer, I2, 4, COL4, LEN4, LOC4)
+LocalArrConstrF90PtrMacro(integer, I2, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayCreateByFlPtrMacro(integer, I4, 4, COL4, LEN4, LOC4)
+LocalArrConstrF90PtrMacro(integer, I4, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayCreateByFlPtrMacro(integer, I8, 4, COL4, LEN4, LOC4)
+LocalArrConstrF90PtrMacro(integer, I8, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayCreateByFlPtrMacro(integer, I2, 5, COL5, LEN5, LOC5)
+LocalArrConstrF90PtrMacro(integer, I2, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayCreateByFlPtrMacro(integer, I4, 5, COL5, LEN5, LOC5)
+LocalArrConstrF90PtrMacro(integer, I4, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayCreateByFlPtrMacro(integer, I8, 5, COL5, LEN5, LOC5)
+LocalArrConstrF90PtrMacro(integer, I8, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayCreateByFlPtrMacro(real, R4, 1, COL1, LEN1, LOC1)
+LocalArrConstrF90PtrMacro(real, R4, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayCreateByFlPtrMacro(real, R8, 1, COL1, LEN1, LOC1)
+LocalArrConstrF90PtrMacro(real, R8, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayCreateByFlPtrMacro(real, R4, 2, COL2, LEN2, LOC2)
+LocalArrConstrF90PtrMacro(real, R4, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayCreateByFlPtrMacro(real, R8, 2, COL2, LEN2, LOC2)
+LocalArrConstrF90PtrMacro(real, R8, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayCreateByFlPtrMacro(real, R4, 3, COL3, LEN3, LOC3)
+LocalArrConstrF90PtrMacro(real, R4, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayCreateByFlPtrMacro(real, R8, 3, COL3, LEN3, LOC3)
+LocalArrConstrF90PtrMacro(real, R8, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayCreateByFlPtrMacro(real, R4, 4, COL4, LEN4, LOC4)
+LocalArrConstrF90PtrMacro(real, R4, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayCreateByFlPtrMacro(real, R8, 4, COL4, LEN4, LOC4)
+LocalArrConstrF90PtrMacro(real, R8, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayCreateByFlPtrMacro(real, R4, 5, COL5, LEN5, LOC5)
+LocalArrConstrF90PtrMacro(real, R4, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayCreateByFlPtrMacro(real, R8, 5, COL5, LEN5, LOC5)
-
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-
-!! < start of macros which become actual function bodies after expansion >
-
-LocalArrConstrF90PtrMacro(integer, I2, 1, COL1, LEN1, LOC1)
-
-LocalArrConstrF90PtrMacro(integer, I4, 1, COL1, LEN1, LOC1)
-
-LocalArrConstrF90PtrMacro(integer, I8, 1, COL1, LEN1, LOC1)
-
-LocalArrConstrF90PtrMacro(integer, I2, 2, COL2, LEN2, LOC2)
-
-LocalArrConstrF90PtrMacro(integer, I4, 2, COL2, LEN2, LOC2)
-
-LocalArrConstrF90PtrMacro(integer, I8, 2, COL2, LEN2, LOC2)
-
-LocalArrConstrF90PtrMacro(integer, I2, 3, COL3, LEN3, LOC3)
-
-LocalArrConstrF90PtrMacro(integer, I4, 3, COL3, LEN3, LOC3)
-
-LocalArrConstrF90PtrMacro(integer, I8, 3, COL3, LEN3, LOC3)
-
-LocalArrConstrF90PtrMacro(integer, I2, 4, COL4, LEN4, LOC4)
-
-LocalArrConstrF90PtrMacro(integer, I4, 4, COL4, LEN4, LOC4)
-
-LocalArrConstrF90PtrMacro(integer, I8, 4, COL4, LEN4, LOC4)
-
-LocalArrConstrF90PtrMacro(integer, I2, 5, COL5, LEN5, LOC5)
-
-LocalArrConstrF90PtrMacro(integer, I4, 5, COL5, LEN5, LOC5)
-
-LocalArrConstrF90PtrMacro(integer, I8, 5, COL5, LEN5, LOC5)
-
-LocalArrConstrF90PtrMacro(real, R4, 1, COL1, LEN1, LOC1)
-
-LocalArrConstrF90PtrMacro(real, R8, 1, COL1, LEN1, LOC1)
-
-LocalArrConstrF90PtrMacro(real, R4, 2, COL2, LEN2, LOC2)
-
-LocalArrConstrF90PtrMacro(real, R8, 2, COL2, LEN2, LOC2)
-
-LocalArrConstrF90PtrMacro(real, R4, 3, COL3, LEN3, LOC3)
-
-LocalArrConstrF90PtrMacro(real, R8, 3, COL3, LEN3, LOC3)
-
-LocalArrConstrF90PtrMacro(real, R4, 4, COL4, LEN4, LOC4)
-
-LocalArrConstrF90PtrMacro(real, R8, 4, COL4, LEN4, LOC4)
-
-LocalArrConstrF90PtrMacro(real, R4, 5, COL5, LEN5, LOC5)
-
-LocalArrConstrF90PtrMacro(real, R8, 5, COL5, LEN5, LOC5)
+LocalArrConstrF90PtrMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
 
-LocalArrayGetDataMacro(integer, I2, 1, COL1, LEN1, LOC1)
+LocalArrayGetDataMacro(integer, I2, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayGetDataMacro(integer, I4, 1, COL1, LEN1, LOC1)
+LocalArrayGetDataMacro(integer, I4, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayGetDataMacro(integer, I8, 1, COL1, LEN1, LOC1)
+LocalArrayGetDataMacro(integer, I8, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayGetDataMacro(integer, I2, 2, COL2, LEN2, LOC2)
+LocalArrayGetDataMacro(integer, I2, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayGetDataMacro(integer, I4, 2, COL2, LEN2, LOC2)
+LocalArrayGetDataMacro(integer, I4, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayGetDataMacro(integer, I8, 2, COL2, LEN2, LOC2)
+LocalArrayGetDataMacro(integer, I8, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayGetDataMacro(integer, I2, 3, COL3, LEN3, LOC3)
+LocalArrayGetDataMacro(integer, I2, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayGetDataMacro(integer, I4, 3, COL3, LEN3, LOC3)
+LocalArrayGetDataMacro(integer, I4, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayGetDataMacro(integer, I8, 3, COL3, LEN3, LOC3)
+LocalArrayGetDataMacro(integer, I8, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayGetDataMacro(integer, I2, 4, COL4, LEN4, LOC4)
+LocalArrayGetDataMacro(integer, I2, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayGetDataMacro(integer, I4, 4, COL4, LEN4, LOC4)
+LocalArrayGetDataMacro(integer, I4, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayGetDataMacro(integer, I8, 4, COL4, LEN4, LOC4)
+LocalArrayGetDataMacro(integer, I8, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayGetDataMacro(integer, I2, 5, COL5, LEN5, LOC5)
+LocalArrayGetDataMacro(integer, I2, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayGetDataMacro(integer, I4, 5, COL5, LEN5, LOC5)
+LocalArrayGetDataMacro(integer, I4, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayGetDataMacro(integer, I8, 5, COL5, LEN5, LOC5)
+LocalArrayGetDataMacro(integer, I8, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayGetDataMacro(real, R4, 1, COL1, LEN1, LOC1)
+LocalArrayGetDataMacro(real, R4, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayGetDataMacro(real, R8, 1, COL1, LEN1, LOC1)
+LocalArrayGetDataMacro(real, R8, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayGetDataMacro(real, R4, 2, COL2, LEN2, LOC2)
+LocalArrayGetDataMacro(real, R4, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayGetDataMacro(real, R8, 2, COL2, LEN2, LOC2)
+LocalArrayGetDataMacro(real, R8, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayGetDataMacro(real, R4, 3, COL3, LEN3, LOC3)
+LocalArrayGetDataMacro(real, R4, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayGetDataMacro(real, R8, 3, COL3, LEN3, LOC3)
+LocalArrayGetDataMacro(real, R8, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayGetDataMacro(real, R4, 4, COL4, LEN4, LOC4)
+LocalArrayGetDataMacro(real, R4, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayGetDataMacro(real, R8, 4, COL4, LEN4, LOC4)
+LocalArrayGetDataMacro(real, R8, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayGetDataMacro(real, R4, 5, COL5, LEN5, LOC5)
+LocalArrayGetDataMacro(real, R4, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayGetDataMacro(real, R8, 5, COL5, LEN5, LOC5)
+LocalArrayGetDataMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
       
-LocalArrayDeallocateMacro(integer, I2, 1, COL1, LEN1, LOC1)
+LocalArrayDeallocateMacro(integer, I2, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayDeallocateMacro(integer, I4, 1, COL1, LEN1, LOC1)
+LocalArrayDeallocateMacro(integer, I4, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayDeallocateMacro(integer, I8, 1, COL1, LEN1, LOC1)
+LocalArrayDeallocateMacro(integer, I8, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayDeallocateMacro(integer, I2, 2, COL2, LEN2, LOC2)
+LocalArrayDeallocateMacro(integer, I2, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayDeallocateMacro(integer, I4, 2, COL2, LEN2, LOC2)
+LocalArrayDeallocateMacro(integer, I4, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayDeallocateMacro(integer, I8, 2, COL2, LEN2, LOC2)
+LocalArrayDeallocateMacro(integer, I8, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayDeallocateMacro(integer, I2, 3, COL3, LEN3, LOC3)
+LocalArrayDeallocateMacro(integer, I2, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayDeallocateMacro(integer, I4, 3, COL3, LEN3, LOC3)
+LocalArrayDeallocateMacro(integer, I4, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayDeallocateMacro(integer, I8, 3, COL3, LEN3, LOC3)
+LocalArrayDeallocateMacro(integer, I8, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayDeallocateMacro(integer, I2, 4, COL4, LEN4, LOC4)
+LocalArrayDeallocateMacro(integer, I2, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayDeallocateMacro(integer, I4, 4, COL4, LEN4, LOC4)
+LocalArrayDeallocateMacro(integer, I4, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayDeallocateMacro(integer, I8, 4, COL4, LEN4, LOC4)
+LocalArrayDeallocateMacro(integer, I8, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayDeallocateMacro(integer, I2, 5, COL5, LEN5, LOC5)
+LocalArrayDeallocateMacro(integer, I2, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayDeallocateMacro(integer, I4, 5, COL5, LEN5, LOC5)
+LocalArrayDeallocateMacro(integer, I4, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayDeallocateMacro(integer, I8, 5, COL5, LEN5, LOC5)
+LocalArrayDeallocateMacro(integer, I8, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayDeallocateMacro(real, R4, 1, COL1, LEN1, LOC1)
+LocalArrayDeallocateMacro(real, R4, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayDeallocateMacro(real, R8, 1, COL1, LEN1, LOC1)
+LocalArrayDeallocateMacro(real, R8, 1, COL1, LEN1, RNG1, LOC1)
 
-LocalArrayDeallocateMacro(real, R4, 2, COL2, LEN2, LOC2)
+LocalArrayDeallocateMacro(real, R4, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
+LocalArrayDeallocateMacro(real, R8, 2, COL2, LEN2, RNG2, LOC2)
 
-LocalArrayDeallocateMacro(real, R4, 3, COL3, LEN3, LOC3)
+LocalArrayDeallocateMacro(real, R4, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
+LocalArrayDeallocateMacro(real, R8, 3, COL3, LEN3, RNG3, LOC3)
 
-LocalArrayDeallocateMacro(real, R4, 4, COL4, LEN4, LOC4)
+LocalArrayDeallocateMacro(real, R4, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
+LocalArrayDeallocateMacro(real, R8, 4, COL4, LEN4, RNG4, LOC4)
 
-LocalArrayDeallocateMacro(real, R4, 5, COL5, LEN5, LOC5)
+LocalArrayDeallocateMacro(real, R4, 5, COL5, LEN5, RNG5, LOC5)
 
-LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
+LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 
 !! < end of automatically generated function >
 
@@ -1624,7 +1699,8 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 ! !IROUTINE:  ESMF_LocalArrayF90Allocate - Allocate an F90 pointer and set LocalArray info
 !
 ! !INTERFACE: 
-     subroutine ESMF_LocalArrayF90Allocate(array, rank, type, kind, counts, rc)
+     subroutine ESMF_LocalArrayF90Allocate(array, rank, type, kind, counts, &
+                                           lbounds, ubounds, rc)
 ! 
 ! !ARGUMENTS: 
       type(ESMF_LocalArray), intent(inout) :: array 
@@ -1632,6 +1708,8 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
       integer, dimension(:), intent(in) :: counts 
+      integer, dimension(:), intent(in) :: lbounds
+      integer, dimension(:), intent(in) :: ubounds
       integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1648,6 +1726,10 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !          The {\tt ESMF\_LocalArray} kind (short/2, long/8, etc).  
 !     \item[counts]  
 !          An integer array, size {\tt rank}, of each dimension length. 
+!     \item[lbounds]
+!          An integer array, size {\tt rank}, of each dimensions lower index.
+!     \item[ubounds]
+!          An integer array, size {\tt rank}, of each dimensions upper index.
 !     \item[{[rc]}]  
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 !   \end{description} 
@@ -1656,7 +1738,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 ! !REQUIREMENTS: 
  
     integer :: status                               ! local error status 
-    integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds
+    integer, dimension(ESMF_MAXDIM) :: lb, ub
     integer, dimension(ESMF_MAXDIM) :: offsets
     integer :: localkind, localtype
 
@@ -1667,6 +1749,9 @@ ArrayAllLocalVarMacro()
     status = ESMF_FAILURE  
     if (present(rc)) rc = ESMF_FAILURE
  
+    lb(1:size(lbounds)) = lbounds
+    ub(1:size(ubounds)) = ubounds
+
     localtype = type%dtype
     localkind = kind%dkind
 
@@ -1677,55 +1762,55 @@ ArrayAllLocalVarMacro()
           case (1)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocAllocateMacro(integer, I2, 1, COL1, LEN1, LOC1)
+AllocAllocateMacro(integer, I2, 1, COL1, LEN1, RNG1, LOC1)
               case (ESMF_I4%dkind)
-AllocAllocateMacro(integer, I4, 1, COL1, LEN1, LOC1)
+AllocAllocateMacro(integer, I4, 1, COL1, LEN1, RNG1, LOC1)
               case (ESMF_I8%dkind)
-AllocAllocateMacro(integer, I8, 1, COL1, LEN1, LOC1)
+AllocAllocateMacro(integer, I8, 1, COL1, LEN1, RNG1, LOC1)
               case default
             end select
 
           case (2)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocAllocateMacro(integer, I2, 2, COL2, LEN2, LOC2)
+AllocAllocateMacro(integer, I2, 2, COL2, LEN2, RNG2, LOC2)
               case (ESMF_I4%dkind)
-AllocAllocateMacro(integer, I4, 2, COL2, LEN2, LOC2)
+AllocAllocateMacro(integer, I4, 2, COL2, LEN2, RNG2, LOC2)
               case (ESMF_I8%dkind)
-AllocAllocateMacro(integer, I8, 2, COL2, LEN2, LOC2)
+AllocAllocateMacro(integer, I8, 2, COL2, LEN2, RNG2, LOC2)
               case default
             end select
 
           case (3)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocAllocateMacro(integer, I2, 3, COL3, LEN3, LOC3)       
+AllocAllocateMacro(integer, I2, 3, COL3, LEN3, RNG3, LOC3)       
               case (ESMF_I4%dkind)
-AllocAllocateMacro(integer, I4, 3, COL3, LEN3, LOC3)       
+AllocAllocateMacro(integer, I4, 3, COL3, LEN3, RNG3, LOC3)       
               case (ESMF_I8%dkind)
-AllocAllocateMacro(integer, I8, 3, COL3, LEN3, LOC3)
+AllocAllocateMacro(integer, I8, 3, COL3, LEN3, RNG3, LOC3)
               case default
             end select
 
           case (4)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocAllocateMacro(integer, I2, 4, COL4, LEN4, LOC4)       
+AllocAllocateMacro(integer, I2, 4, COL4, LEN4, RNG4, LOC4)       
               case (ESMF_I4%dkind)
-AllocAllocateMacro(integer, I4, 4, COL4, LEN4, LOC4)       
+AllocAllocateMacro(integer, I4, 4, COL4, LEN4, RNG4, LOC4)       
               case (ESMF_I8%dkind)
-AllocAllocateMacro(integer, I8, 4, COL4, LEN4, LOC4)
+AllocAllocateMacro(integer, I8, 4, COL4, LEN4, RNG4, LOC4)
               case default
             end select
 
           case (5)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocAllocateMacro(integer, I2, 5, COL5, LEN5, LOC5)       
+AllocAllocateMacro(integer, I2, 5, COL5, LEN5, RNG5, LOC5)       
               case (ESMF_I4%dkind)
-AllocAllocateMacro(integer, I4, 5, COL5, LEN5, LOC5)       
+AllocAllocateMacro(integer, I4, 5, COL5, LEN5, RNG5, LOC5)       
               case (ESMF_I8%dkind)
-AllocAllocateMacro(integer, I8, 5, COL5, LEN5, LOC5)
+AllocAllocateMacro(integer, I8, 5, COL5, LEN5, RNG5, LOC5)
               case default
             end select
 
@@ -1737,45 +1822,45 @@ AllocAllocateMacro(integer, I8, 5, COL5, LEN5, LOC5)
           case (1)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocAllocateMacro(real, R4, 1, COL1, LEN1, LOC1)
+AllocAllocateMacro(real, R4, 1, COL1, LEN1, RNG1, LOC1)
               case (ESMF_R8%dkind)
-AllocAllocateMacro(real, R8, 1, COL1, LEN1, LOC1)
+AllocAllocateMacro(real, R8, 1, COL1, LEN1, RNG1, LOC1)
               case default
             end select
 
           case (2)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocAllocateMacro(real, R4, 2, COL2, LEN2, LOC2)
+AllocAllocateMacro(real, R4, 2, COL2, LEN2, RNG2, LOC2)
               case (ESMF_R8%dkind)
-AllocAllocateMacro(real, R8, 2, COL2, LEN2, LOC2)
+AllocAllocateMacro(real, R8, 2, COL2, LEN2, RNG2, LOC2)
               case default
             end select
 
           case (3)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocAllocateMacro(real, R4, 3, COL3, LEN3, LOC3)       
+AllocAllocateMacro(real, R4, 3, COL3, LEN3, RNG3, LOC3)       
               case (ESMF_R8%dkind)
-AllocAllocateMacro(real, R8, 3, COL3, LEN3, LOC3)
+AllocAllocateMacro(real, R8, 3, COL3, LEN3, RNG3, LOC3)
               case default
             end select
 
           case (4)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocAllocateMacro(real, R4, 4, COL4, LEN4, LOC4)       
+AllocAllocateMacro(real, R4, 4, COL4, LEN4, RNG4, LOC4)       
               case (ESMF_R8%dkind)
-AllocAllocateMacro(real, R8, 4, COL4, LEN4, LOC4)
+AllocAllocateMacro(real, R8, 4, COL4, LEN4, RNG4, LOC4)
               case default
             end select
 
           case (5)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocAllocateMacro(real, R4, 5, COL5, LEN5, LOC5)       
+AllocAllocateMacro(real, R4, 5, COL5, LEN5, RNG5, LOC5)       
               case (ESMF_R8%dkind)
-AllocAllocateMacro(real, R8, 5, COL5, LEN5, LOC5)
+AllocAllocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
               case default
             end select
 
@@ -1841,55 +1926,55 @@ ArrayAllLocalVarMacro()
           case (1)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocDeallocateMacro(integer, I2, 1, COL1, LEN1, LOC1)
+AllocDeallocateMacro(integer, I2, 1, COL1, LEN1, RNG1, LOC1)
               case (ESMF_I4%dkind)
-AllocDeallocateMacro(integer, I4, 1, COL1, LEN1, LOC1)
+AllocDeallocateMacro(integer, I4, 1, COL1, LEN1, RNG1, LOC1)
               case (ESMF_I8%dkind)
-AllocDeallocateMacro(integer, I8, 1, COL1, LEN1, LOC1)
+AllocDeallocateMacro(integer, I8, 1, COL1, LEN1, RNG1, LOC1)
               case default
             end select
 
           case (2)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocDeallocateMacro(integer, I2, 2, COL2, LEN2, LOC2)
+AllocDeallocateMacro(integer, I2, 2, COL2, LEN2, RNG2, LOC2)
               case (ESMF_I4%dkind)
-AllocDeallocateMacro(integer, I4, 2, COL2, LEN2, LOC2)
+AllocDeallocateMacro(integer, I4, 2, COL2, LEN2, RNG2, LOC2)
               case (ESMF_I8%dkind)
-AllocDeallocateMacro(integer, I8, 2, COL2, LEN2, LOC2)
+AllocDeallocateMacro(integer, I8, 2, COL2, LEN2, RNG2, LOC2)
               case default
             end select
 
           case (3)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocDeallocateMacro(integer, I2, 3, COL3, LEN3, LOC3)       
+AllocDeallocateMacro(integer, I2, 3, COL3, LEN3, RNG3, LOC3)       
               case (ESMF_I4%dkind)
-AllocDeallocateMacro(integer, I4, 3, COL3, LEN3, LOC3)       
+AllocDeallocateMacro(integer, I4, 3, COL3, LEN3, RNG3, LOC3)       
               case (ESMF_I8%dkind)
-AllocDeallocateMacro(integer, I8, 3, COL3, LEN3, LOC3)
+AllocDeallocateMacro(integer, I8, 3, COL3, LEN3, RNG3, LOC3)
               case default
             end select
 
           case (4)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocDeallocateMacro(integer, I2, 4, COL4, LEN4, LOC4)       
+AllocDeallocateMacro(integer, I2, 4, COL4, LEN4, RNG4, LOC4)       
               case (ESMF_I4%dkind)
-AllocDeallocateMacro(integer, I4, 4, COL4, LEN4, LOC4)       
+AllocDeallocateMacro(integer, I4, 4, COL4, LEN4, RNG4, LOC4)       
               case (ESMF_I8%dkind)
-AllocDeallocateMacro(integer, I8, 4, COL4, LEN4, LOC4)
+AllocDeallocateMacro(integer, I8, 4, COL4, LEN4, RNG4, LOC4)
               case default
             end select
 
           case (5)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocDeallocateMacro(integer, I2, 5, COL5, LEN5, LOC5)       
+AllocDeallocateMacro(integer, I2, 5, COL5, LEN5, RNG5, LOC5)       
               case (ESMF_I4%dkind)
-AllocDeallocateMacro(integer, I4, 5, COL5, LEN5, LOC5)       
+AllocDeallocateMacro(integer, I4, 5, COL5, LEN5, RNG5, LOC5)       
               case (ESMF_I8%dkind)
-AllocDeallocateMacro(integer, I8, 5, COL5, LEN5, LOC5)
+AllocDeallocateMacro(integer, I8, 5, COL5, LEN5, RNG5, LOC5)
               case default
             end select
 
@@ -1901,45 +1986,45 @@ AllocDeallocateMacro(integer, I8, 5, COL5, LEN5, LOC5)
           case (1)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocDeallocateMacro(real, R4, 1, COL1, LEN1, LOC1)
+AllocDeallocateMacro(real, R4, 1, COL1, LEN1, RNG1, LOC1)
               case (ESMF_R8%dkind)
-AllocDeallocateMacro(real, R8, 1, COL1, LEN1, LOC1)
+AllocDeallocateMacro(real, R8, 1, COL1, LEN1, RNG1, LOC1)
               case default
             end select
 
           case (2)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocDeallocateMacro(real, R4, 2, COL2, LEN2, LOC2)
+AllocDeallocateMacro(real, R4, 2, COL2, LEN2, RNG2, LOC2)
               case (ESMF_R8%dkind)
-AllocDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
+AllocDeallocateMacro(real, R8, 2, COL2, LEN2, RNG2, LOC2)
               case default
             end select
 
           case (3)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocDeallocateMacro(real, R4, 3, COL3, LEN3, LOC3)       
+AllocDeallocateMacro(real, R4, 3, COL3, LEN3, RNG3, LOC3)       
               case (ESMF_R8%dkind)
-AllocDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
+AllocDeallocateMacro(real, R8, 3, COL3, LEN3, RNG3, LOC3)
               case default
             end select
 
           case (4)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocDeallocateMacro(real, R4, 4, COL4, LEN4, LOC4)       
+AllocDeallocateMacro(real, R4, 4, COL4, LEN4, RNG4, LOC4)       
               case (ESMF_R8%dkind)
-AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
+AllocDeallocateMacro(real, R8, 4, COL4, LEN4, RNG4, LOC4)
               case default
             end select
 
           case (5)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocDeallocateMacro(real, R4, 5, COL5, LEN5, LOC5)       
+AllocDeallocateMacro(real, R4, 5, COL5, LEN5, RNG5, LOC5)       
               case (ESMF_R8%dkind)
-AllocDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
+AllocDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
               case default
             end select
 
@@ -1993,7 +2078,7 @@ AllocDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
         integer :: rank
         type (ESMF_DataKind) :: kind
         type (ESMF_DataType) :: type
-        integer :: i, counts(ESMF_MAXDIM)
+        integer :: i, counts(ESMF_MAXDIM), lb(ESMF_MAXDIM), ub(ESMF_MAXDIM)
 
         status = ESMF_FAILURE
         rcpresent = .FALSE.
@@ -2038,7 +2123,8 @@ AllocDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
           return
         endif
 
-        call ESMF_LocalArrConstrF90Ptr(newarray, counts, rank, type, kind, status)
+        call ESMF_LocalArrConstrF90Ptr(newarray, counts, rank, type, kind, &
+                                          lb, ub, status)
 
         ! At this point the new array exists, and has space allocated, but it
         ! does not contain data from the old array.  Now we have a T/K/R prob.
