@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.32 2003/02/26 01:40:42 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.33 2003/02/26 20:21:20 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.32 2003/02/26 01:40:42 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.33 2003/02/26 20:21:20 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -565,6 +565,7 @@
 
     int rc = ESMF_FAILURE;
     int i, j, k, l, m;     // general counter vars
+    int i_exc, j_exc;
     float *fp, *fp0;
     int *ip, *ip0;
 
@@ -591,7 +592,7 @@
         // call layoutgather to fill this array
         ip0 = (int *)this->base_addr;
         layout->ESMC_LayoutGatherArrayI(ip0, decompids, 
-                                        size_decomp, AI_exc, ip);
+                                        size_decomp, AI_exc, AI_tot, ip);
 
         // switch based on array rank
         switch (this->rank) {
@@ -610,17 +611,21 @@
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = AI_tot[i].r - AI_tot[i].l + 1;
-                lstart[i] = AI_tot[i].l;
+                lstart[i] = AI_exc[i].gstart + AI_tot[i].l;
               }
               int local, global;
               for (j=0; j<lmax[1]; j++) {
-                for (i=0; i<lmax[0]; i++) {
-                  local  = lmax[1]*lmax[0]*k +
-                           lmax[0]*j + i;
-                  global = gmax[2]*gmax[1]*(k+lstart[2]) +
-                           gmax[1]*(j+lstart[1]) +
-                           gmax[0]*(i+lstart[0]);
-                  ip0[local] = ip[global];
+                j_exc = j + lstart[1] - AI_exc[1].l;
+                if (j_exc>=0 && j_exc<AI_exc[1].max) {
+                  for (i=0; i<lmax[0]; i++) {
+                    i_exc = i + lstart[0] - AI_exc[0].l;
+                    if (i_exc>=0 && i_exc<AI_exc[0].max) {
+                      local  = lmax[0]*j + i;
+                      global = gmax[1]*j_exc +
+                               gmax[0]*i_exc;
+                      ip0[local] = ip[global];
+                    }
+                  }
                 }
               }
             }
@@ -637,7 +642,7 @@
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = AI_tot[i].r - AI_tot[i].l + 1;
-                lstart[i] = AI_tot[i].l;
+                lstart[i] = AI_tot[i].gstart + AI_tot[i].l;
               }
               int local, global;
               for (k=0; k<lmax[2]; k++) {
@@ -666,7 +671,7 @@
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = AI_tot[i].r - AI_tot[i].l + 1;
-                lstart[i] = AI_tot[i].l;
+                lstart[i] = AI_tot[i].gstart + AI_tot[i].l;
               }
               int local, global;
               for (l=0; l<lmax[3]; l++) {
@@ -766,7 +771,7 @@
         // call layoutgather to fill this array
         ip0 = (int *)this->base_addr;
         layout->ESMC_LayoutGatherArrayI(ip0, olddecompids, 
-                                        size_decomp, this->ai, ip);
+                                        size_decomp, this->ai, this->ai, ip);
 
         // switch based on array rank
         switch (this->rank) {
@@ -786,7 +791,7 @@
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = RedistArray->ai[i].r - RedistArray->ai[i].l + 1;
-                lstart[i] = RedistArray->ai[i].l;
+                lstart[i] = RedistArray->ai[i].gstart + RedistArray->ai[i].l;
               }
               int *ip2 = (int *)RedistArray->base_addr;
               int local, global;
@@ -813,7 +818,7 @@
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = RedistArray->ai[i].r - RedistArray->ai[i].l + 1;
-                lstart[i] = RedistArray->ai[i].l;
+                lstart[i] = RedistArray->ai[i].gstart + RedistArray->ai[i].l;
               }
               int *ip2 = (int *)RedistArray->base_addr;
               int local, global;
@@ -846,7 +851,7 @@
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = RedistArray->ai[i].r - RedistArray->ai[i].l + 1;
-                lstart[i] = RedistArray->ai[i].l;
+                lstart[i] = RedistArray->ai[i].gstart + RedistArray->ai[i].l;
               }
               int *ip2 = (int *)RedistArray->base_addr;
               int local, global;
