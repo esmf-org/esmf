@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.24 2004/03/24 22:24:27 nscollins Exp $
+! $Id: ESMF_GridUTest.F90,v 1.25 2004/03/31 23:26:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.24 2004/03/24 22:24:27 nscollins Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.25 2004/03/31 23:26:44 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -67,6 +67,7 @@
       integer :: counts(ESMF_MAXGRIDDIM)
       integer :: nDE_i, nDE_j
       type(ESMF_GridType) :: horz_gridtype, vert_gridtype
+      type(ESMF_GridType) :: Rhorz_gridtype, Rvert_gridtype
       type(ESMF_GridStagger) :: horz_stagger, vert_stagger
       type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: status
@@ -138,7 +139,7 @@
       ! object is left completely uninitialized.  this should be addressed.
       ! Bug report 796975 has been filed
       !NEX_UTest
-      layout2 = ESMF_DELayoutCreate(status)
+      layout2 = ESMF_DELayoutCreate(rc=rc)
       call ESMF_DELayoutDestroy(layout2, status)
       grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
@@ -177,17 +178,27 @@
       write(name, *) "Creating a Grid  with negative x_max Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !The following code is commented out because it does not compile
+      !Bug 927094 has been opened
+      ! Setting the horzGridType of a Grid
+      !horz_gridtype = ESMF_GridType_LatLon
+      !call ESMF_GridSet(grid, horzGridType=horz_gridtype,rc=rc)
+      !write(failMsg, *) "Did not return ESMF_SUCCESS"
+      !write(name, *) "Setting the horz_gridtype of  Grid Test"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
       !NEX_UTest
-
       ! Printing a Grid
       call ESMF_GridPrint(grid, "", rc=rc)
-      write(failMsg, *) ""
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Printing a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
 
+      !EX_UTest
       ! Test creating an internal Grid
       grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
@@ -198,10 +209,17 @@
                               layout=layout, &
                               name=name, rc=status)
 
-        write(failMsg, *) ""
+        write(failMsg, *) "Did not return ESMF_SUCCESS"
         write(name, *) "Creating an Internal Grid Test"
         call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Printing a Grid
+      call ESMF_GridPrint(grid, "", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Printing a Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif
@@ -209,20 +227,9 @@
       !NEX_UTest
 
 
-      ! Printing a Grid
-      call ESMF_GridPrint(grid, "", rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Printing a Grid Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-
-      !NEX_UTest
-
-
       ! Test destroy subroutine
       call  ESMF_GridDestroy(grid, rc=rc)
-      write(failMsg, *) ""
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Destroying a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -235,7 +242,7 @@
 
       ! Test creation of empty grid
       grid1 =  ESMF_GridCreate(rc=rc)
-      write(failMsg, *) ""
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating an empty Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -257,7 +264,7 @@
       !                      y_min=y_min, y_max=y_max, &
       ! 		     physgrid_name=name, rc=status)
 
-      ! write(failMsg, *) ""
+      ! write(failMsg, *) "Did not return ESMF_SUCCESS"
       ! write(name, *) "Adding a Physical Grid Test"
       ! call ESMF_Test((status.eq.ESMF_SUCCESS), &
       !                   name, failMsg, result, ESMF_SRCLINE)
