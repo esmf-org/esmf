@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.5 2004/11/01 16:57:37 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.6 2004/11/04 22:22:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -2069,19 +2069,25 @@ void ESMC_VMK::vmk_barrier(void){
 void ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
   void *recvData, int recvSize, int src){
   // p2p sendrecv
-  // A unique order of the send and receive is given by the PET index.
-  // This very simplistic implementation establishes a unique order by
-  // first transfering data to the smallest receiver PET and then to the
-  // other one. A sendrecv has two receiver PETs, one is the local PET and
-  // the other is rcv.
-  if (mypet<=dst){
-    // mypet is the first receiver
-    vmk_recv(recvData, recvSize, src);
-    vmk_send(sendData, sendSize, dst);
+  if (mpionly){
+    MPI_Status mpi_s;
+    MPI_Sendrecv(sendData, sendSize, MPI_BYTE, dst, 1000*mypet+dst, 
+      recvData, recvSize, MPI_BYTE, src, 1000*src+mypet, mpi_c, &mpi_s);
   }else{
-    // dst is first receiver
-    vmk_send(sendData, sendSize, dst);
-    vmk_recv(recvData, recvSize, src);
+    // A unique order of the send and receive is given by the PET index.
+    // This very simplistic implementation establishes a unique order by
+    // first transfering data to the smallest receiver PET and then to the
+    // other one. A sendrecv has two receiver PETs, one is the local PET and
+    // the other is rcv.
+    if (mypet<=dst){
+      // mypet is the first receiver
+      vmk_recv(recvData, recvSize, src);
+      vmk_send(sendData, sendSize, dst);
+    }else{
+      // dst is first receiver
+      vmk_send(sendData, sendSize, dst);
+      vmk_recv(recvData, recvSize, src);
+    }
   }
 }
   

@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.102 2004/11/01 23:39:13 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.103 2004/11/04 22:22:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.102 2004/11/01 23:39:13 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.103 2004/11/04 22:22:33 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -714,6 +714,9 @@ static int maxroutes = 10;
     char *srcptr, *rcvptr;
     int nbytes;
 
+    ESMC_VM *vm;
+    delayout->ESMC_DELayoutGetVM(&vm);  // get the VM for this DELayout
+    
     rc = delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, 0, &mydeid,
                                        NULL, NULL, NULL, 0);
     rc = ct->ESMC_CommTableGetCount(&ccount);
@@ -865,9 +868,10 @@ static int maxroutes = 10;
            if(mydeid == theirdeid)
 	      rcvbuf = srcbufstart;
 	   else
-              delayout->ESMC_DELayoutExchange((void **)srcbufstart, NULL,
-                (void **)rcvbufstart, NULL, srctcount*nbytes, rcvtcount*nbytes, 
-                 mydeid, theirdeid, ESMF_TRUE);
+              //delayout->ESMC_DELayoutExchange((void **)srcbufstart, NULL,
+              // (void **)rcvbufstart, NULL, srctcount*nbytes, rcvtcount*nbytes,               //  mydeid, theirdeid, ESMF_TRUE);
+              vm->vmk_sendrecv(srcbufstart, srctcount*nbytes, theirdeid,
+                rcvbufstart, rcvtcount*nbytes, theirdeid);
 
            // copy out of the recv buffer
 	   if(rcvtcount > 0) {

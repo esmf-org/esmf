@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.22 2004/10/26 21:34:20 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.23 2004/11/04 22:22:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.22 2004/10/26 21:34:20 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.23 2004/11/04 22:22:32 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -381,6 +381,33 @@ int ESMC_DELayout::ESMC_DELayoutDestruct(void){
   delete [] mydes;
   if (logRectFlag == ESMF_TRUE)
     delete [] dims;
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGetVM()"
+//BOP
+// !IROUTINE:  ESMC_DELayoutGetVM
+//
+// !INTERFACE:
+int ESMC_DELayout::ESMC_DELayoutGetVM(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  ESMC_VM **vm){              // out - VM this layout is defined on
+//
+// !DESCRIPTION:
+//    Get VM of this DELayout object
+//
+//EOP
+//-----------------------------------------------------------------------------
+  *vm = myvm;
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
