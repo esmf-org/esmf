@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.7 2003/03/13 22:57:04 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.8 2003/03/14 15:26:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.7 2003/03/13 22:57:04 nscollins Exp $";
+            "$Id: ESMC_CommTable.C,v 1.8 2003/03/14 15:26:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -70,7 +70,9 @@
 //EOP
 // !REQUIREMENTS: 
 
-    ESMC_CommTable *newc = new ESMC_CommTable(mydeid, partnercount, rc);
+    ESMC_CommTable *newc = new ESMC_CommTable;
+
+    *rc = newc->ESMC_CommTableConstruct(mydeid, partnercount);
 
     return newc;
 
@@ -114,7 +116,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int mydeid) {
+      int mydeid,
+      int partnercount) {
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
@@ -126,8 +129,33 @@
 //
 //EOP
 // !REQUIREMENTS:  
+    int i;
 
     myid = mydeid;
+    commcount = partnercount;
+    commpartner = new int[commcount];
+    commneeded = new int[commcount];
+
+    for(i=0; i<commcount; i++) 
+        commneeded[i] = 0;
+
+    switch(partnercount) {
+      case 4:
+        switch(mydeid) {
+          case 0: commpartner[0] = 1; commpartner[1] = 2; commpartner[2] = 3; 
+                  commpartner[3] = mydeid;  break;
+          case 1: commpartner[0] = 0; commpartner[1] = 3; commpartner[2] = 2; 
+                  commpartner[3] = mydeid;  break;
+          case 2: commpartner[0] = 3; commpartner[1] = 0; commpartner[2] = 1; 
+                  commpartner[3] = mydeid;  break;
+          case 3: commpartner[0] = 2; commpartner[1] = 1; commpartner[2] = 0; 
+                  commpartner[3] = mydeid;  break;
+        }
+        break;
+      default:
+        printf("no code for PE count of %d\n", partnercount);
+        break;
+    }
 
     return ESMF_SUCCESS;
 
@@ -266,42 +294,6 @@
     return ESMF_FAILURE;
 
  } // end ESMC_CommTablePrint
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_CommTable - native C++ constructor
-//
-// !INTERFACE:
-      ESMC_CommTable::ESMC_CommTable(
-//
-// !RETURN VALUE:
-//    none
-//
-// !ARGUMENTS:
-      int mydeid,
-      int paircount,
-      int *rc) {
-//
-// !DESCRIPTION:
-//
-//EOP
-// !REQUIREMENTS:
- 
-    myid = mydeid;
-    commcount = paircount;
-    commpartner = new int[commcount];
-    commneeded = new int[commcount];
-
-    for(int i=0; i<commcount; i+=2) {
-        if (i%2)
-          commpartner[i] = i+1;
-        else
-          commpartner[i] = i-1;
- 
-        commneeded[i] = 0;
-    }
-
- } // end ESMC_CommTable
 
 //-----------------------------------------------------------------------------
 //BOP
