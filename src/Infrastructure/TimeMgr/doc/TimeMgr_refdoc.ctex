@@ -116,7 +116,7 @@
 #ifdef STANDALONE
 \input{ESMC_BaseTime_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/ESMC_BaseTime_ccapi}
+\input{../Infrastructure/TimeMgr/doc/ESMF_BaseTime_fapi}
 #endif
 
 %\section{BaseTime Class C++ Interface}
