@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.22 2003/04/16 21:46:06 pwjones Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.23 2003/04/23 21:39:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@
 #include "ESMF_PhysGrid.h"
 #include "ESMF_Macros.inc"
 !==============================================================================
-!BOP
+!BOPI
 ! !MODULE: ESMF_PhysGridMod - Physical properties of Grid
 !
 ! !DESCRIPTION:
@@ -177,12 +177,12 @@
       ESMF_CellLoc_Face_X              =  5, &! cell face center, x-coordinate  
       ESMF_CellLoc_Face_Y              =  6   ! cell face center, y-coordinate  
 
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.22 2003/04/16 21:46:06 pwjones Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.23 2003/04/23 21:39:31 cdeluca Exp $'
 
 !==============================================================================
 !

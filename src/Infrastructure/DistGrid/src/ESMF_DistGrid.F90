@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.40 2003/04/17 20:40:34 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.41 2003/04/23 21:39:24 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 #include "ESMF_DistGrid.h"
 #include "ESMF_Macros.inc"
 !==============================================================================
-!BOP
+!BOPI
 ! !MODULE: ESMF_DistGridMod - contains Grid decompostion methods
 !
 ! !DESCRIPTION:
@@ -151,12 +151,12 @@
     public ESMF_DistGridValidate
     public ESMF_DistGridPrint
  
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.40 2003/04/17 20:40:34 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.41 2003/04/23 21:39:24 cdeluca Exp $'
 
 !==============================================================================
 !

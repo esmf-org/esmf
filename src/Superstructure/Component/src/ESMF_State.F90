@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.37 2003/04/23 16:24:34 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.38 2003/04/23 21:39:43 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 #include "ESMF.h"
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !MODULE: ESMF_StateMod - Data exchange between components
 !
 ! !DESCRIPTION:
@@ -253,12 +253,12 @@
       public ESMF_StatePrint, ESMF_StateValidate
 
       public operator(.eq.), operator(.ne.)
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.37 2003/04/23 16:24:34 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.38 2003/04/23 21:39:43 cdeluca Exp $'
 
 !==============================================================================
 ! 

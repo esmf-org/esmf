@@ -1,4 +1,4 @@
-! $Id: ESMF_Fraction.F90,v 1.3 2003/02/11 19:03:33 eschwab Exp $
+! $Id: ESMF_Fraction.F90,v 1.4 2003/04/23 21:39:34 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -26,7 +26,7 @@
 
       module ESMF_FractionMod
 !===============================================================================
-!BOP
+!BOPI
 !
 ! !MODULE: ESMF_FractionMod
 !
@@ -66,6 +66,6 @@
 
       ! wrappers to C++ fraction routines
 
-!EOP
+!EOPI
 !===============================================================================
       end module ESMF_FractionMod

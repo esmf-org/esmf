@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.19 2003/04/23 18:46:58 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.20 2003/04/23 21:39:35 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -22,7 +22,7 @@
 #include <ESMF_TimeMgr.inc>
 
 !==============================================================================
-!BOP
+!BOPI
 ! !MODULE: ESMF_TimeMod
 !
 ! !DESCRIPTION:
@@ -128,12 +128,12 @@
 
       public operator(.GE.)
       private ESMF_TimeGE
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.19 2003/04/23 18:46:58 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.20 2003/04/23 21:39:35 cdeluca Exp $'
 
 !==============================================================================
 !

@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.6 2003/04/18 17:55:15 cdeluca Exp $
+% $Id: Component_refdoc.ctex,v 1.7 2003/04/23 21:39:39 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,12 +98,12 @@
 %% \input{../Superstructure/Component/doc/ESMF_CompEx_fapi}
 %% #endif
 
-%\subsection{Class API}
-%#ifdef STANDALONE
-%\input{ESMF_Comp_fapi}
-%#elif defined(CONSTITUENT)
-%\input{../Superstructure/Component/doc/ESMF_Comp_fapi}
-%#endif
+\subsection{Class API}
+#ifdef STANDALONE
+\input{ESMF_Comp_fapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/Component/doc/ESMF_Comp_fapi}
+#endif
 
 %\section{Component C++ Interface}
 
@@ -278,19 +278,19 @@
 #endif
 
 %\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMF_State_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_State_fapi}
+%#ifdef STANDALONE
+%\input{ESMF_State_fapi}
+%#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/ESMF_State_fapi}
 #endif
 
 %\section{State C++ Interface}
 
 %\subsection{Use and Examples}
-%#ifdef STANDALONE
-%\input{ESMC_StateEx_ccapi}
-%#elif defined(CONSTITUENT)
-%\input{../Superstructure/Component/doc/ESMC_StateEx_ccapi}
+#ifdef STANDALONE
+\input{ESMC_StateEx_ccapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/Component/doc/ESMC_StateEx_ccapi}
 %#endif
 
 %%\subsection{Class API}

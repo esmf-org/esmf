@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.4 2003/04/21 21:38:06 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.5 2003/04/23 21:39:28 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -19,7 +19,7 @@
 #include "ESMF_Macros.inc"
 !------------------------------------------------------------------------------
 !
-!BOP
+!BOPI
 ! !MODULE: ESMF_BundleMod
 !
 ! !DESCRIPTION:
@@ -172,7 +172,7 @@
 !  !function ESMF_BundleCreateCopy(bundle, subarray, name, packflag, rc)
 !  !function ESMF_BundleCreateRemap(bundle, grid, name, packflag, rc)
 
-!EOP
+!EOPI
 
 
 
