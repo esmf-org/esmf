@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.39 2003/08/28 17:12:39 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.40 2003/08/28 21:02:35 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -182,7 +182,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.39 2003/08/28 17:12:39 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.40 2003/08/28 21:02:35 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1478,8 +1478,6 @@
 
 !     Loop over number of coordinate location specifiers
       do i = 1,ncoord_locs
-
-        nullify(temp)
 
 !       For now, a case construct for the different coordinate locations
         select case (coord_loc(i))
