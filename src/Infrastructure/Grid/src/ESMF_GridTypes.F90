@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.6 2004/01/20 23:12:31 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.7 2004/01/21 23:30:21 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -195,6 +195,7 @@
     ! the overloaded operators.
     
     public ESMF_GridCreateEmpty
+    public ESMF_GridConstructNew
     public ESMF_GridGetDELayout
     public ESMF_GridSetAttributes
     public ESMF_GridGetAttributes
@@ -343,7 +344,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.6 2004/01/20 23:12:31 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.7 2004/01/21 23:30:21 jwolfe Exp $'
 
 !==============================================================================
 !
