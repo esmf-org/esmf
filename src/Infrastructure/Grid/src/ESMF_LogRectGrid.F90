@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.69 2004/05/25 23:07:10 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.70 2004/05/26 15:29:19 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -472,7 +472,7 @@
       endif
 
       ! Call construction method to allocate and initialize grid internals.
-      call ESMF_LRGridConstructUniform(grid, 2, counts, &
+      call ESMF_LRGridConstructUniform(grid, 2, counts(1:2), &
                                        minGlobalCoordPerDim, &
                                        maxGlobalCoordPerDim, deltaPerDim, &
                                        horzGridType, horzStagger, &
@@ -739,7 +739,7 @@
       endif
 
       ! Call construction method to allocate and initialize grid internals.
-      call ESMF_LRGridConstructUniform(grid, 2, counts, &
+      call ESMF_LRGridConstructUniform(grid, 2, counts(1:2), &
                                        minGlobalCoordPerDim, &
                                        maxGlobalCoordPerDim, deltaPerDim, &
                                        horzGridType, horzStagger, &
