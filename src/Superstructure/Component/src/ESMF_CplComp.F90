@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.13 2004/02/11 22:24:45 svasquez Exp $
+! $Id: ESMF_CplComp.F90,v 1.14 2004/02/13 20:30:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.13 2004/02/11 22:24:45 svasquez Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.14 2004/02/13 20:30:11 svasquez Exp $'
 
 !==============================================================================
 !
@@ -353,10 +353,10 @@
 !    Component to call Initialization routine for.
 !
 !   \item[{[importstate]}]  
-!       State containing source data for coupling.
+!       ESMF\_State containing source data for coupling.
 !
 !   \item[{[exportstate]}]  
-!       State containing destination data for coupling.
+!       ESMF\_State containing destination data for coupling.
 !
 !   \item[{[clock]}]  External clock for passing in time information.
 !
@@ -406,10 +406,10 @@
 !    Component to call Run routine for.
 !
 !   \item[{[importstate]}]
-!       State containing import data for coupling.
+!       ESMF\_State containing import data for coupling.
 !
 !   \item[{[exportstate]}]
-!       State containing export data for coupling.
+!       ESMF\_State containing export data for coupling.
 !
 !   \item[{[clock]}]  External clock for passing in time information.
 !
@@ -652,10 +652,10 @@
 !    Component to call Finalize routine for.
 !
 !   \item[{[importstate]}]
-!       State containing import data for coupling.
+!       ESMF\_State containing import data for coupling.
 !
 !   \item[{[exportstate]}]
-!       State containing export data for coupling.
+!       ESMF\_State containing export data for coupling.
 !
 !   \item[{[clock]}]  External clock for passing in time information.
 !
