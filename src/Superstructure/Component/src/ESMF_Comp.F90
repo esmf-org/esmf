@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.98 2004/06/08 09:27:21 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.99 2004/06/08 14:59:15 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -218,7 +218,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.98 2004/06/08 09:27:21 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.99 2004/06/08 14:59:15 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -349,6 +349,7 @@ end function
         integer :: status                            ! local error status
         logical :: rcpresent                         ! did user specify rc?
         character(len=ESMF_MAXSTR) :: fullpath       ! config file + dirPath
+        character(len=ESMF_MAXSTR) :: msgbuf
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -401,8 +402,11 @@ end function
         ! a config filename are given.  the current rules are:  a config object
         ! gets priority over a name if both are specified.
         if (present(configFile) .and. present(config)) then
-            print *, "Warning: only 1 of Config object or filename should be given."
-            print *, "Using Config object; ignoring Config filename."
+            if (ESMF_LogWrite("Warning: only 1 of Config object or filename should be given.", &
+                 ESMF_LOG_WARNING)) continue
+
+            if (ESMF_LogWrite("Using Config object; ignoring Config filename.", &
+                 ESMF_LOG_WARNING)) continue
             compp%config = config
 
         ! name of a specific config file.  open it and store the config object.
@@ -418,9 +422,12 @@ end function
               ! TODO: construct a msg string and then call something here.
               ! if (ESMF_LogMsgFoundError(status, msgstr, rc)) return
               if (status .ne. 0) then
-                  print *, "ERROR: loading config file, unable to open either"
-                  print *, " name = ", trim(configFile), " or name = ", trim(fullpath)
-                  return
+                write(msgbuf, *) &
+                  "ERROR: loading config file, unable to open either", &
+                  " name = ", trim(configFile), " or name = ", trim(fullpath)
+                if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  msgbuf, &
+                                  ESMF_CONTEXT, rc)) return
               endif
           endif
         else if (present(config)) then
@@ -638,7 +645,8 @@ end function
         if (present(clock)) then
             ! all is well
         else
-            print *, "Warning: ESMF Component Initialize called without a clock"
+            if (ESMF_LogWrite("Component Initialize called without a clock", &
+                               ESMF_LOG_WARNING)) continue
         endif
 
         call ESMF_GetName(compp%base, cname, status)
@@ -664,10 +672,11 @@ end function
           status)
 #endif
 
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Component initialization error"
-          ! fall thru intentionally
-        endif
+        ! set error code but fall thru and clean up states
+        if (ESMF_LogMsgFoundError(status, &
+                                  "Component initialization error", &
+                                  ESMF_CONTEXT, rc)) continue
+        ! fall thru intentionally
 
         ! if we created dummy states, delete them here.
         if (isdel) call ESMF_StateDestroy(is, rc=dummy)
@@ -756,10 +765,12 @@ end function
         ! Call user-defined run routine
         call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETWRITERESTART, &
                                                             phase, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Component WriteRestart error"
-          ! fall thru intentionally
-        endif
+
+        ! set error code but fall thru and clean up states
+        if (ESMF_LogMsgFoundError(status, &
+                                  "Component writerestart error", &
+                                  ESMF_CONTEXT, rc)) continue
+        ! fall thru intentionally
 
         ! Set return values
         if (rcpresent) rc = status
@@ -845,10 +856,12 @@ end function
         ! Call user-defined run routine
         call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETREADRESTART, &
                                                            phase, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Component ReadRestart error"
-          ! fall thru intentionally
-        endif
+
+        ! set error code but fall thru and clean up states
+        if (ESMF_LogMsgFoundError(status, &
+                                  "Component readrestart error", &
+                                  ESMF_CONTEXT, rc)) continue
+        ! fall thru intentionally
 
         ! Set return values
         if (rcpresent) rc = status
@@ -953,7 +966,8 @@ end function
         if (present(clock)) then
             ! all is well
         else
-            print *, "Warning: ESMF Component Initialize called without a clock"
+            if (ESMF_LogWrite("Component Initialize called without a clock", &
+                               ESMF_LOG_WARNING)) continue
         endif
 
         call ESMF_GetName(compp%base, cname, status)
@@ -979,10 +993,11 @@ end function
           status)
 #endif
 
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Component finalize error"
-          ! fall thru intentionally
-        endif
+        ! set error code but fall thru and clean up states
+        if (ESMF_LogMsgFoundError(status, &
+                                  "Component finalize error", &
+                                  ESMF_CONTEXT, rc)) continue
+        ! fall thru intentionally
 
         ! if we created dummy states, delete them here.
         if (isdel) call ESMF_StateDestroy(is, rc=dummy)
@@ -1090,7 +1105,8 @@ end function
         if (present(clock)) then
             ! all is well
         else
-            print *, "Warning: ESMF Component Initialize called without a clock"
+            if (ESMF_LogWrite("Component Initialize called without a clock", &
+                               ESMF_LOG_WARNING)) continue
         endif
 
         call ESMF_GetName(compp%base, cname, status)
@@ -1115,10 +1131,11 @@ end function
           status)
 #endif
 
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Component run error"
-          ! fall thru intentionally
-        endif
+        ! set error code but fall thru and clean up states
+        if (ESMF_LogMsgFoundError(status, &
+                                  "Component run error", &
+                                  ESMF_CONTEXT, rc)) continue
+        ! fall thru intentionally
 
         ! if we created dummy states, delete them here.
         if (isdel) call ESMF_StateDestroy(is, rc=dummy)
@@ -1419,12 +1436,12 @@ end function
            ! do default validation
        endif
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "Component validate error"
-         return
-       endif
+      ! TODO: add code here
+      if (ESMF_LogMsgFoundError(ESMF_SUCCESS, &
+                                  "component validation error", &
+                                  ESMF_CONTEXT, rc)) return
 
-!      set return values
+       ! set return values
        if (rcpresent) rc = ESMF_SUCCESS
 
        end subroutine ESMF_CompValidate
@@ -1453,6 +1470,7 @@ end function
        logical :: rcpresent                    ! did user specify rc?
        character (len=6) :: defaultopts
        character (len=ESMF_MAXSTR) :: cname
+       character (len=ESMF_MAXSTR) :: msgbuf
 
        ! Initialize return code; assume failure until success is certain
        status = ESMF_FAILURE
@@ -1470,12 +1488,14 @@ end function
        endif
 
        if (.not.associated(compp)) then
-         print *, "Invalid or uninitialized Component"
-         return
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "Invalid or uninitialized Component", &
+                                  ESMF_CONTEXT, rc)) return
        endif
 
        call ESMF_GetName(compp%base, cname, status)
-       print *, "  name = ", trim(cname)
+       write (msgbuf,*) "  name = ", trim(cname)
+       if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
        
        ! TODO: add more info here
 
@@ -1539,11 +1559,9 @@ end function
     call ESMF_VMPlanMaxThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       compp%npetlist, compp%petlist, status)
-    ! if (ESMF_LogPassFoundError(status, rc)) return
-    if (status .ne. ESMF_SUCCESS) then
-      print *, "ESMF_VMPlanMaxThreads error"
-      return
-    endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! Set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -1605,11 +1623,9 @@ end function
     call ESMF_VMPlanMinThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       compp%npetlist, compp%petlist, status)
-    ! if (ESMF_LogPassFoundError(status, rc)) return
-    if (status .ne. ESMF_SUCCESS) then
-      print *, "ESMF_VMPlanMinThreads error"
-      return
-    endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! Set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -1671,11 +1687,9 @@ end function
     call ESMF_VMPlanMaxPEs(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       compp%npetlist, compp%petlist, status)
-    ! if (ESMF_LogPassFoundError(status, rc)) return
-    if (status .ne. ESMF_SUCCESS) then
-      print *, "ESMF_VMPlanMaxPEs error"
-      return
-    endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! Set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -1726,10 +1740,9 @@ end function
                          compp%vm_cargo, callrc, status)
     ! TODO: what is the relationship between callrc and status and rc
     ! if (ESMF_LogPassFoundError(status, rc)) return
-    if (status .ne. ESMF_SUCCESS) then
-      print *, "c_ESMC_CompWait error"
-      return
-    endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! Set return values
     if (rcpresent) rc = callrc
