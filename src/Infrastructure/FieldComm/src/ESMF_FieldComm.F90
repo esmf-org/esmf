@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.45 2004/06/14 22:51:32 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.46 2004/06/15 08:51:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.45 2004/06/14 22:51:32 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.46 2004/06/15 08:51:17 nscollins Exp $'
 
 !==============================================================================
 !
@@ -309,7 +309,8 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldHalo()
-      subroutine ESMF_FieldHaloRun(field, routehandle, blockingflag, commhandle, rc)
+      subroutine ESMF_FieldHaloRun(field, routehandle, blockingflag, &
+                                   commhandle, halodirection, rc)
 !
 !
 ! !ARGUMENTS:
