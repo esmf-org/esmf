@@ -1,4 +1,4 @@
-% $Id: BundleDataMap_refdoc.ctex,v 1.1 2004/05/05 15:40:26 nscollins Exp $
+% $Id: BundleDataMap_refdoc.ctex,v 1.2 2004/05/11 12:17:58 nscollins Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -13,7 +13,7 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{DataMap Design}
+\newcommand{\mytitle}{Bundle DataMap Design}
 \newcommand{\myauthors}{Nancy Collins}
 #endif
 
@@ -67,34 +67,34 @@
 % %\input{../Infrastructure/Field/doc/Field_param}
 % #endif
 
-\section{DataMap Class}
+\section{Bundle DataMap Class}
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{DataMap_desc}
+\input{BundleDataMap_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DataMap/doc/DataMap_desc}
+\input{../Infrastructure/BundleDataMap/doc/BundleDataMap_desc}
 #endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{DataMap_usage}
+\input{BundleDataMap_usage}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DataMap/doc/DataMap_usage}
+\input{../Infrastructure/BundleDataMap/doc/BundleDataMap_usage}
 #endif
 
 %\subsubsection{Restrictions and Future Work}
 #ifdef STANDALONE
-%\input{DataMap_rest}
+%\input{BundleDataMap_rest}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/DataMap/doc/DataMap_rest}
+%\input{../Infrastructure/BundleDataMap/doc/BundleDataMap_rest}
 #endif
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{../../DataMap/doc/ESMF_DataMap_fapi}
+\input{../../BundleDataMap/doc/ESMF_BundleDataMap_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DataMap/doc/ESMF_DataMap_fapi}
+\input{../Infrastructure/BundleDataMap/doc/ESMF_BundleDataMap_fapi}
 #endif
 
 %#ifdef STANDALONE
