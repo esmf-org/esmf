@@ -1,0 +1,49 @@
+% $Id: TimeMgr_background.tex,v 1.1 2002/10/08 17:16:04 eschwab Exp $
+
+Many of the components that will run and interact within the ESMF
+are prognostic simulation and data assimilation codes employing time-stepping 
+approaches to solve a numerical implementation of a set of mathematical 
+equations. Coordinating component to component interactions and coordinating 
+interactions between components and external systems, from which data is 
+ingested or to which data is exported, requires precise notions of time. The
+role of the ESMF Time Manager (\funcname) is to provide a standard set 
+of \char`\"{}time services\char`\"{}
+to components running under ESMF. The ESMF time management concepts
+have many parallels with real alarm clocks and with modern electronic
+scheduling systems. However, ESMF applications have
+a number of special requirements that go beyond the facilities that
+have become standard in mainstream software. The \funcname is
+designed to meet both the conventional needs and specialized demands
+of Earth system applications.
+
+\subsection{Location}
+
+The time management set of \char`\"{}time services\char`\"{}
+will be part of the ESMF Infrastructure layer. Including these services
+within the ESMF Infrastructure layer permits
+
+\begin{itemize}
+\item development of multiple components with compatible notions of time;
+\item development of a robust, core library of common time functions;
+\item subsequent community development of common higher-level time operations.
+\end{itemize}
+
+\subsection{Scope}
+
+The time manager is not intended to be a comprehensive set of services for
+all time related operations. For example, it will not include a complete
+time-zone capability that supports translation between all of Earth's 
+more than 300 timezones. Nor will it include
+algorithms that calculate detailed orbital quantities such as perihelion, 
+obliquity and precession.
+However, the time manager will provide a generic foundation for developing 
+libraries that do provide such custom, specialized time services. It 
+will support this in a way that permits easy interoperability and 
+code sharing. As such, the time manager is anticipated to be a library of 
+software that is targeted at both ESMF component developers and at specialized 
+library developers.
+
+
+
+
+

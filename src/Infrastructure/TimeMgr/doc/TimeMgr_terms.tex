@@ -1,0 +1,69 @@
+% $Id: TimeMgr_terms.tex,v 1.1 2002/10/08 17:16:04 eschwab Exp $
+\label{sec:terms}
+
+\begin{description}
+
+\item [time instant] \label{glos:timeinstant}
+Generic name for an absolute time and date specification. A time instant is made 
+up of a time and date and an associated calendar. It may include a time zone.
+``Jan 3rd 1999, 03:30:24.56s, UTC'' is one example of a time instant.
+
+\item [time interval] \label{glos:timeinterval} A time interval is the
+period between any two time instants, measured in units, such as days, 
+seconds, and fractions of a second, that are not associated with a specific
+calendar.  Time intervals may be negative.  The periods 2 days and 10 seconds, 
+86400 and 1/3 seconds and 31104000.75 seconds are all examples of time intervals.  
+Mathematical operations such as addition, multiplication and subdivision 
+can be applied to time intervals.
+              
+\item [alarm] \label{glos:alarm} An alarm is an event 
+that occurs at a particular time (or set of times).  It is like an
+alarm on a real alarm clock except that in order to determine whether 
+it is "ringing", an alarm is "read" by an explicit application action.
+
+\item [clock] \label{glos:clock} A clock tracks the passage of time and 
+reports the current time instant, like a real clock.  However, most clocks 
+used in ESMF components have a key difference to a real clock. Clocks 
+in an ESMF component are generally stepped forward by the component, as an 
+explicitly coded step within the overall component.
+
+\item [calendar interval] \label{glos:timeperiod} A period of time specified
+in calendar-based units that may be used to increment or decrement time instants.  
+One year and three months is an example of a calendar interval.  Since 
+mathematical operations involving calendar intervals may be ambiguously 
+defined -- for example, incrementing January 31 in the Gregorian calendar by 
+one month -- default behavior must be carefully specified.  
+
+\item [day of year] \label{glos:dayofyear} The day number in the calendar year. 
+January 1 is day 1 of the year. Day of year expressed in a floating point 
+format is used to express the day number plus the time of day. 
+For example, assuming a Gregorian calendar:
+
+\begin{tabular}{ll}
+{\bf date}              & {\bf day of year} \\
+\hline 
+10 January 2000, 6Z     & 10.25 \\
+31 December 2000, 18Z   & 366.75 
+\end{tabular}
+
+\item [exact] \label{glos:exact} The word {\em exact} is used in this document
+to denote entities (time instants and time intervals) for which truncation-free 
+arithmetic is required. An {\em exact} time operation (increment, decrement, 
+difference), when applied exclusively to {\em exact} objects, produces a
+truncation-free result.
+
+\item [no-leap calendar] \label{glos:noleap} Every year uses the same months 
+and days per month as in a non-leap year of a Gregorian calendar.
+
+\end{description}
+
+
+
+
+
+
+
+
+
+
+
