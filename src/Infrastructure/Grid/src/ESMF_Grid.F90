@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.46 2003/04/28 17:45:42 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.47 2003/04/29 19:33:13 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -207,7 +207,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.46 2003/04/28 17:45:42 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47 2003/04/29 19:33:13 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1594,11 +1594,12 @@
 ! !IROUTINE: ESMF_GridGetAllAxisIndex - Get array of AxisIndices from a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetAllAxisIndex(grid, AI, rc)
+      subroutine ESMF_GridGetAllAxisIndex(grid, AI, AI_tot, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI
+      type(ESMF_AxisIndex), dimension(:,:), optional, pointer :: AI_tot
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1628,7 +1629,8 @@
 
 !     call DistGrid method to retrieve information otherwise not available
 !     to the application level
-      call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrid%ptr, AI, status)
+      call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrid%ptr, AI, AI_tot, &
+                                        status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGetAllAxisIndex: distgrid get"
         return
