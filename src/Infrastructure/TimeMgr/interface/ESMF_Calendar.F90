@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.71 2004/06/17 18:48:07 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.72 2004/06/18 20:10:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.71 2004/06/17 18:48:07 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.72 2004/06/18 20:10:33 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -182,7 +182,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarTypeOperator(==) - Test if Calendar Type 1 is equal to Calendar Type 2
+! !IROUTINE:  ESMF_CalendarOperator(==) - Test if Calendar Type 1 is equal to Calendar Type 2
 !
 ! !INTERFACE:
 !     interface operator(==)
@@ -219,7 +219,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarCalAndTypeOperator(==) - Test if Calendar is equal to Calendar Type
+! !IROUTINE:  ESMF_CalendarOperator(==) - Test if Calendar is equal to Calendar Type
 !
 ! !INTERFACE:
 !     interface operator(==)
@@ -257,7 +257,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarTypeAndCalOperator(==) - Test if Calendar Type is equal to Calendar
+! !IROUTINE:  ESMF_CalendarOperator(==) - Test if Calendar Type is equal to Calendar
 !
 ! !INTERFACE:
 !     interface operator(==)
@@ -333,7 +333,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarTypeOperator(/=) - Test if Calendar Type 1 is not equal to Calendar Type 2
+! !IROUTINE:  ESMF_CalendarOperator(/=) - Test if Calendar Type 1 is not equal to Calendar Type 2
 !
 ! !INTERFACE:
 !     interface operator(/=)
@@ -370,7 +370,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarCalAndTypeOperator(/=) - Test if Calendar is not equal to Calendar Type
+! !IROUTINE:  ESMF_CalendarOperator(/=) - Test if Calendar is not equal to Calendar Type
 !
 ! !INTERFACE:
 !     interface operator(/=)
@@ -407,7 +407,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarTypeAndCalOperator(/=) - Test if Calendar Type is not equal to Calendar
+! !IROUTINE:  ESMF_CalendarOperator(/=) - Test if Calendar Type is not equal to Calendar
 !
 ! !INTERFACE:
 !     interface operator(/=)
