@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.6 2003/03/11 20:21:00 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.7 2003/03/11 20:28:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.6 2003/03/11 20:21:00 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.7 2003/03/11 20:28:31 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -53,7 +53,7 @@
 //     pointer to newly allocated ESMC_Route
 //
 // !ARGUMENTS:
-      ESMC_Layout *layout,
+      ESMC_DELayout *layout,
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -121,7 +121,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Layout *layout) {          // in
+      ESMC_DELayout *layout) {          // in
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
@@ -138,8 +138,8 @@
     int mype, rc;
     int pecount;         // total number of PEs in src + dst layouts
 
-    //pecount = layout->ESMC_LayoutGetPECount();
-    //mype = layout->ESMC_LayoutGetPECount();
+    //pecount = layout->ESMC_DELayoutGetPECount();
+    //mype = layout->ESMC_DELayoutGetPECount();
     //TODO: what are these funcs?
     pecount = 4;
     mype = 1;

@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.7 2003/03/11 20:20:58 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.8 2003/03/11 20:26:36 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 // 
 // !USES:
  #include <ESMC_Base.h>        // all classes inherit from the ESMC Base class.
- #include <ESMC_Layout.h>
+ #include <ESMC_DELayout.h>
  #include <ESMC_XPacket.h>
  #include <ESMC_RTable.h>
  #include <ESMC_CommTable.h>
