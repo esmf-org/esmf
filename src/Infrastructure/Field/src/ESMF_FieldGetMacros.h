@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.4 2004/06/23 10:45:28 nscollins Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.5 2004/10/26 16:24:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -102,11 +102,13 @@
         endif @\
  @\
         ! Test to see if pointer already associated, and fail if so. @\
-        if (associated(ptr)) then @\
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
-                              "Data Pointer cannot already be associated", & @\
-                              ESMF_CONTEXT, rc)) return @\
-        endif @\
+        ! TODO: check this - this test seems to always be true, even if @\
+        !  the pointer has been nullified first? @\
+        !if (associated(ptr)) then @\
+        !  if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
+        !                      "Data Pointer cannot already be associated", & @\
+        !                      ESMF_CONTEXT, rc)) return @\
+        !endif @\
  @\
         call ESMF_FieldGetArray(field, array, rc=status) @\
         if (ESMF_LogMsgFoundError(status, & @\
