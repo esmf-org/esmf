@@ -1,4 +1,4 @@
-% $Id: Field_desdoc.ctex,v 1.2 2003/03/11 04:15:01 cdeluca Exp $
+% $Id: Field_desdoc.ctex,v 1.3 2003/03/20 21:51:23 flanigan Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -37,28 +37,28 @@
 #ifdef STANDALONE
 \input{Field_syn}
 #elif defined(CONSTITUENT)
-\input{comppath/Field_syn}
+\input{../Infrastructure/Field/doc/Field_syn}
 #endif
 
 \section{Programming Model}
 #ifdef STANDALONE
 \input{Field_prog}
 #elif defined(CONSTITUENT)
-\input{comppath/Field_prog}
+\input{../Infrastructure/Field/doc/Field_prog}
 #endif
 
 \section{Object Model}
 #ifdef STANDALONE
 \input{Field_obj}
 #elif defined(CONSTITUENT)
-\input{comppath/Field_obj}
+\input{../Infrastructure/Field/doc/Field_obj}
 #endif
 
 % %\section{Global Parameters and Definitions}
 % #ifdef STANDALONE
 % %\input{Field_param}
 % #elif defined(CONSTITUENT)
-% %\input{comppath/Field_param}
+% %\input{../Infrastructure/Field/doc/Field_param}
 % #endif
 
 \section{Field Design}
@@ -67,51 +67,51 @@
 #ifdef STANDALONE
 \input{Field_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/Field_desc}
+\input{../Infrastructure/Field/doc/Field_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{Field_design}
 #elif defined(CONSTITUENT)
-\input{comppath/Field_design}
+\input{../Infrastructure/Field/doc/Field_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{Field_def}
 #elif defined(CONSTITUENT)
-\input{comppath/Field_def}
+\input{../Infrastructure/Field/doc/Field_def}
 #endif
 
 %\subsubsection{Restrictions}
 #ifdef STANDALONE
 %\input{Field_rest}
 #elif defined(CONSTITUENT)
-%\input{comppath/Field_rest}
+%\input{../Infrastructure/Field/doc/Field_rest}
 #endif
 
 \section{Field F90 Interface}
 
 \subsection{Use and Examples}
-#ifdef STANDALONE
-\input{fieldex_fapi}
-#elif defined(CONSTITUENT)
-\input{comppath/fieldex_fapi}
-#endif
+% #ifdef STANDALONE
+% \input{fieldex_fapi}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Field/doc/fieldex_fapi}
+% #endif
 
 % \subsection{Parameters and Definitions}
 % #ifdef STANDALONE
 % \input{Field_fparam}
 % #elif defined(CONSTITUENT)
-% \input{comppath/Field_fparam}
+% \input{../Infrastructure/Field/doc/Field_fparam}
 % #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{field_fapi}
+\input{ESMF_Field_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/field_fapi}
+\input{../Infrastructure/Field/doc/ESMF_Field_fapi}
 #endif
 
 \section{Field C++ Interface}
@@ -120,21 +120,21 @@
 #ifdef STANDALONE
 \input{Field_ccex}
 #elif defined(CONSTITUENT)
-\input{comppath/Field_ccex}
+\input{../Infrastructure/Field/doc/Field_ccex}
 #endif
 
 % \subsection{Parameters and Definitions}
 % #ifdef STANDALONE
 % \input{Field_ccparam}
 % #elif defined(CONSTITUENT)
-% \input{comppath/Field_ccparam}
+% \input{../Infrastructure/Field/doc/Field_ccparam}
 % #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{field_ccapi}
+\input{ESMC_Field_chapi}
 #elif defined(CONSTITUENT)
-\input{comppath/field_ccapi}
+\input{../Infrastructure/Field/doc/ESMC_Field_chapi}
 #endif
 
 \section{Bundle Design}
@@ -143,51 +143,51 @@
 #ifdef STANDALONE
 \input{Bundle_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/Bundle_desc}
+\input{../Infrastructure/Field/doc/Bundle_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{Bundle_design}
 #elif defined(CONSTITUENT)
-\input{comppath/Bundle_design}
+\input{../Infrastructure/Field/doc/Bundle_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{Bundle_def}
 #elif defined(CONSTITUENT)
-\input{comppath/Bundle_def}
+\input{../Infrastructure/Field/doc/Bundle_def}
 #endif
 
 %\subsubsection{Restrictions}
 #ifdef STANDALONE
 %\input{Bundle_rest}
 #elif defined(CONSTITUENT)
-%\input{comppath/Bundle_rest}
+%\input{../Infrastructure/Field/doc/Bundle_rest}
 #endif
 
 \section{Bundle F90 Interface}
 
 \subsection{Use and Examples}
-#ifdef STANDALONE
-\input{bundleex_fapi}
-#elif defined(CONSTITUENT)
-\input{comppath/bundleex_fapi}
-#endif
+% #ifdef STANDALONE
+% \input{bundleex_fapi}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Field/doc/bundleex_fapi}
+% #endif
 
 % \subsection{Parameters and Definitions}
 % #ifdef STANDALONE
 % \input{Bundle_fparam}
 % #elif defined(CONSTITUENT)
-% \input{comppath/Bundle_fparam}
+% \input{../Infrastructure/Field/doc/Bundle_fparam}
 % #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{bundle_fapi}
+\input{ESMF_Bundle_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/bundle_fapi}
+\input{../Infrastructure/Field/doc/ESMF_Bundle_fapi}
 #endif
 
 \section{Bundle C++ Interface}
@@ -196,22 +196,22 @@
 #ifdef STANDALONE
 \input{Bundle_ccex}
 #elif defined(CONSTITUENT)
-\input{comppath/Bundle_ccex}
+\input{../Infrastructure/Field/doc/Bundle_ccex}
 #endif
 
 % \subsection{Parameters and Definitions}
 % #ifdef STANDALONE
 % \input{Bundle_ccparam}
 % #elif defined(CONSTITUENT)
-% \input{comppath/Bundle_ccparam}
+% \input{../Infrastructure/Field/doc/Bundle_ccparam}
 % #endif
 
 %\subsection{Class API}
-#ifdef STANDALONE
-\input{bundle_ccapi}
-#elif defined(CONSTITUENT)
-\input{comppath/bundle_ccapi}
-#endif
+% #ifdef STANDALONE
+% \input{bundle_ccapi}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Field/doc/bundle_ccapi}
+% #endif
 
 
 \section{Array Design}
@@ -220,68 +220,68 @@
 #ifdef STANDALONE
 \input{Array_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/Array_desc}
+\input{../Infrastructure/Field/doc/Array_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{Array_design}
 #elif defined(CONSTITUENT)
-\input{comppath/Array_design}
+\input{../Infrastructure/Field/doc/Array_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{Array_def}
 #elif defined(CONSTITUENT)
-\input{comppath/Array_def}
+\input{../Infrastructure/Field/doc/Array_def}
 #endif
 
 %\subsubsection{Restrictions}
 #ifdef STANDALONE
 %\input{Array_rest}
 #elif defined(CONSTITUENT)
-%\input{comppath/Array_rest}
+%\input{../Infrastructure/Field/doc/Array_rest}
 #endif
 
 \section{Array F90 Interface}
 
 \subsection{Use and Examples}
-#ifdef STANDALONE
-\input{arrayex_fapi}
-#elif defined(CONSTITUENT)
-\input{comppath/arrayex_fapi}
-#endif
+% #ifdef STANDALONE
+% \input{arrayex_fapi}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Field/doc/arrayex_fapi}
+% #endif
 
 %\subsection{Class API}
-#ifdef STANDALONE
-\input{array_fapi}
-#elif defined(CONSTITUENT)
-\input{comppath/array_fapi}
-#endif
+% #ifdef STANDALONE
+% \input{array_fapi}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Field/doc/array_fapi}
+% #endif
 
 \section{Array C++ Interface}
 
 \subsection{Use and Examples}
-#ifdef STANDALONE
-\input{Array_ccex}
-#elif defined(CONSTITUENT)
-\input{comppath/Array_ccex}
-#endif
+% #ifdef STANDALONE
+% \input{Array_ccex}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Field/doc/Array_ccex}
+% #endif
 
 % \subsection{Parameters and Definitions}
 % #ifdef STANDALONE
 % \input{DataArray_ccparam}
 % #elif defined(CONSTITUENT)
-% \input{comppath/DataArray_ccparam}
+% \input{../Infrastructure/Field/doc/DataArray_ccparam}
 % #endif
 
 %\subsection{Class API}
-#ifdef STANDALONE
-\input{array_ccapi}
-#elif defined(CONSTITUENT)
-\input{comppath/array_ccapi}
-#endif
+% #ifdef STANDALONE
+% \input{array_ccapi}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Field/doc/array_ccapi}
+% #endif
 
 
 
@@ -291,28 +291,28 @@
 #ifdef STANDALONE
 \input{DataMap_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/DataMap_desc}
+\input{../Infrastructure/Field/doc/DataMap_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{DataMap_design}
 #elif defined(CONSTITUENT)
-\input{comppath/DataMap_design}
+\input{../Infrastructure/Field/doc/DataMap_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{DataMap_def}
 #elif defined(CONSTITUENT)
-\input{comppath/DataMap_def}
+\input{../Infrastructure/Field/doc/DataMap_def}
 #endif
 
 %\subsubsection{Restrictions}
 #ifdef STANDALONE
 %\input{DataMap_rest}
 #elif defined(CONSTITUENT)
-%\input{comppath/DataMap_rest}
+%\input{../Infrastructure/Field/doc/DataMap_rest}
 #endif
 
 \section{DataMap F90 Interface}
@@ -321,15 +321,15 @@
 #ifdef STANDALONE
 \input{DataMap_fex}
 #elif defined(CONSTITUENT)
-\input{comppath/DataMap_fex}
+\input{../Infrastructure/Field/doc/DataMap_fex}
 #endif
 
 %\subsection{Class API}
-#ifdef STANDALONE
-\input{datamap_fapi}
-#elif defined(CONSTITUENT)
-\input{comppath/datamap_fapi}
-#endif
+% #ifdef STANDALONE
+% \input{ESMF_DataMap_fapi}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Field/doc/ESMF_Datamap_fapi}
+% #endif
 
 \section{DataMap C++ Interface}
 
@@ -337,15 +337,15 @@
 #ifdef STANDALONE
 \input{DataMap_ccex}
 #elif defined(CONSTITUENT)
-\input{comppath/DataMap_ccex}
+\input{../Infrastructure/Field/doc/DataMap_ccex}
 #endif
 
 %\subsection{Class API}
-#ifdef STANDALONE
-\input{datamap_ccapi}
-#elif defined(CONSTITUENT)
-\input{comppath/datamap_ccapi}
-#endif
+% #ifdef STANDALONE
+% \input{datamap_ccapi}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Field/doc/datamap_ccapi}
+% #endif
 
 
 
