@@ -1,22 +1,25 @@
-// $Id: ESMC_TimeInstant.C,v 1.4 2002/10/14 16:19:40 eschwab Exp $
+// $Id: ESMC_TimeInstant.C,v 1.5 2002/10/15 03:26:28 eschwab Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2003, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+// NASA Goddard Space Flight Center.
+// Licensed under the GPL.
 //
 // ESMC TimeInstant method code (body) file
 //
-// < Something here from legal about the status of the code, like:
-//  This code developed by NASA/NCAR/ESMC whatever, and is covered by
-//  the terms of the GNU public license.  See license file for more details. >
-//
-
 //-------------------------------------------------------------------------
 //
-// !PURPOSE:
+// !DESCRIPTION:
 //
-// The code in this file implements the C++ TimeInstant methods defined
+// The code in this file implements the C++ TimeInstant methods declared
 // in the companion file ESMC_TimeInstant.h
 //
 //-------------------------------------------------------------------------
 
- // higher level or system includes
+ // higher level, 3rd party or system includes
  #include<ESMC_Util.h>
 
  // associated class definition file
@@ -25,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.4 2002/10/14 16:19:40 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.5 2002/10/15 03:26:28 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -38,7 +41,7 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInstantInit - shallow class initializer
+// !IROUTINE:  ESMC_TimeInstInit - shallow class initializer 1
 //
 // !INTERFACE:
       int ESMC_TimeInstant::ESMC_TimeInstInit(
@@ -60,7 +63,7 @@
 // !REQUIREMENTS:  
 
     // use base class Init()
-    if (ESMC_Time::Init(S, Sn, Sd) == ESMC_SUCCESS)
+    if (ESMC_Time::ESMC_TimeInit(S, Sn, Sd) == ESMC_SUCCESS)
     {
         this->Calendar = Cal;
         this->Timezone = Tz;
@@ -68,6 +71,30 @@
         return(ESMC_SUCCESS);
     }
     else return(ESMC_FAILURE);
+
+ }  // end ESMC_TimeInstInit
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInstInit - shallow class initializer 2
+//
+// !INTERFACE:
+      int ESMC_TimeInstant::ESMC_TimeInstInit(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *TimeList,    // in - initializer specifier string
+      ...) {                   // in - specifier values (variable args)
+//
+// !DESCRIPTION:
+//      Initialzes a TimeInstant with values given in variable arg list
+//
+//EOP
+// !REQUIREMENTS:  
+
+    return(ESMC_SUCCESS);
 
  }  // end ESMC_TimeInstInit
 
@@ -181,7 +208,7 @@
       ESMC_TimeInstant::~ESMC_TimeInstant(void) {
 //
 // !RETURN VALUE:
-      none
+//    none
 //
 // !ARGUMENTS:
 //    none
