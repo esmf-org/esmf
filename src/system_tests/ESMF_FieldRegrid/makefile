@@ -1,6 +1,8 @@
-# $Id: makefile,v 1.4 2004/08/03 19:33:54 nscollins Exp $ 
+# $Id: makefile,v 1.5 2004/12/09 17:25:36 nscollins Exp $ 
 
-ALL: build_system_tests
+ALL: tree_build_system_tests
+
+run: tree_run_system_tests
 
 CFLAGS    = 
 FFLAGS    =
