@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.70 2004/03/24 14:54:38 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.71 2004/04/05 17:32:47 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -20,7 +20,6 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-!!#include "ESMF_PhysGrid.h"   ! this seems unnecessary
 #include "ESMF.h"
 !==============================================================================
 !BOPI
@@ -109,13 +108,13 @@
                                   ! if variable, set this to the largest number.
                                   ! Vertices can be degenerate.
 
-        type (ESMF_Array), dimension(:,:), pointer :: vertices
+        type (ESMF_Array), dimension(:), pointer :: vertices
                                   ! coordinates in each direction for each corner
                                   ! of each region.
                                   ! The 2 dimensions are: numDims
                                   !                       numVertices
 
-        type (ESMF_Array), dimension(:,:), pointer :: bbox 
+        type (ESMF_Array), dimension(:), pointer :: bbox 
                                   ! bounding box for each region to aid search
                                   ! methods.
                                   ! The 2 dimensions are: numDims
@@ -336,7 +335,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.70 2004/03/24 14:54:38 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.71 2004/04/05 17:32:47 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1134,7 +1133,7 @@
       integer, intent(in), optional :: numVertices
                               ! max number of vertices for polygonal regions
 
-      type(ESMF_Array), dimension(:,:), pointer, optional :: &
+      type(ESMF_Array), dimension(:), pointer, optional :: &
          vertexArray          ! array of ESMF_arrays containing vertex
                               ! coordinates for each vertex of each polygonal
                               ! region in each physical dimension
@@ -1274,18 +1273,20 @@
       integer, intent(inout), optional :: numVertices
                               ! max number of vertices for polygonal regions
 
-      type (ESMF_Array), dimension(:,:), intent(inout), optional :: &
+      type (ESMF_Array), dimension(:), intent(inout), optional :: &
          vertexArray          ! array of ESMF_arrays containing vertex
                               ! coordinates for each vertex of each polygonal
                               ! region in each physical dimension
-                              ! dimensions are assumed num_vertices, numDims
+                              ! There are numDim Arrays, and the data in each
+                              ! Array is assumed to have numVertices as its
+                              ! first dimension
 
       type (ESMF_Array), dimension(2), intent(inout), optional :: &
          ellipseArray         ! array of ESMF_arrays containing ellipse
                               ! parameters describing elliptical region at
                               ! each grid point
 
-      type (ESMF_Array), dimension(:,:), intent(inout), optional :: &
+      type (ESMF_Array), dimension(:), intent(inout), optional :: &
          bboxArray            ! array of ESMF_arrays containing bounding
                               ! boxes for each region
                               ! dimensions are assumed numDims,2 (1=min,2=max)
