@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.22 2004/03/19 21:23:09 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.23 2004/03/24 20:00:59 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.22 2004/03/19 21:23:09 theurich Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.23 2004/03/24 20:00:59 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -191,7 +191,7 @@
 !  \begin{description}
 !   \item[name]
 !    CplComp name.
-!   \item[layout]
+!   \item[delayout]
 !    CplComp delayout.
 !   \item[config]
 !    CplComp-specific configuration object.  
@@ -272,7 +272,7 @@
 !  \begin{description}
 !   \item[{[name]}]
 !    CplComp name.
-!   \item[{[layout]}]
+!   \item[{[delayout]}]
 !    CplComp delayout.
 !   \item[{[config]}]
 !    Already created {\tt Config} object.  If specified, takes
@@ -360,7 +360,7 @@
 !  \begin{description}
 !   \item[{[name]}]
 !    CplComp name.
-!   \item[{[layout]}]
+!   \item[{[delayout]}]
 !    CplComp delayout.
 !   \item[{[config]}]
 !    Already created {\tt Config} object.  If specified, takes
@@ -554,7 +554,7 @@
 !    CplComp to query.
 !   \item[{[name]}]
 !    CplComp name.
-!   \item[{[layout]}]
+!   \item[{[delayout]}]
 !    CplComp delayout.
 !   \item[{[clock]}]
 !    CplComp-specific clock.
@@ -773,7 +773,7 @@
 !    CplComp to set information for. 
 !   \item[{[name]}]
 !    CplComp name.
-!   \item[{[layout]}]
+!   \item[{[delayout]}]
 !    CplComp delayout.
 !   \item[{[clock]}]
 !    CplComp-specific clock.

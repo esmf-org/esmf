@@ -1,4 +1,4 @@
-% $Id: LogErr_refdoc.ctex,v 1.12 2004/03/22 19:02:30 cdeluca Exp $
+% $Id: LogErr_refdoc.ctex,v 1.13 2004/03/24 20:00:59 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -79,26 +79,12 @@
 \input{../Infrastructure/LogErr/doc/LogErr_obj.tex}
 #endif
 
-\subsection{Global Parameters and Definitions}
-#ifdef STANDALONE
-\input{Log_param}
-\input{Err_param}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/Log_param}
-\input{../Infrastructure/LogErr/doc/Err_param}
-#endif
-
 \subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_LogErr_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/LogErr/doc/ESMF_LogErr_fapi}
 #endif
-
-%#ifdef STANDALONE
-%\section{Review Status}
-%\input{LogErr_desrev}
-%#endif
 
 %#ifdef STANDALONE
 %\section{Glossary}

@@ -1,4 +1,4 @@
-% $Id: ESMF_superoverview.tex,v 1.9 2004/02/28 00:13:18 cdeluca Exp $
+% $Id: ESMF_superoverview.tex,v 1.10 2004/03/24 20:01:00 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,8 +49,8 @@ There are a small number of classes in the ESMF superstructure:
 \item {\bf Component}  An ESMF component has two parts, one that is 
 supplied by the ESMF and one that is supplied by the user.  The
 part that is supplied by the framework is an ESMF derived type that
-is either a Gridded Component {\bf GridComp} or a Coupler 
-Component {\bf CplComp}.  A Gridded Component typically represents
+is either a Gridded Component ({\bf GridComp}) or a Coupler 
+Component ({\bf CplComp}).  A Gridded Component typically represents
 a physical domain in which data is associated with one or more 
 grids - for example, a sea ice model.  A Coupler Component 
 arranges and executes data transformations and transfers between 
@@ -59,16 +59,19 @@ Components have standard methods, which include Run, Initialize,
 and Finalize.  These methods can be multi-phase.
 
 The second part of an ESMF Component is user code, such as a
-model or data assimilation system.  Users register this code with 
+model or data assimilation system.  Users register their code with 
 the framework in order to make it part of an ESMF application.  
 In practice, registration means that within the user-written 
 software there are calls to ESMF methods that associate a 
-standard ESMF operation, such as Initialize, with the name of 
-the corresponding Fortran subroutine in user code.  
+standard ESMF operation with the name of the corresponding 
+Fortran subroutine in their user code.  For example, a user-written
+initialization routine called {\tt popOceanInit} might be 
+associated with the standard Initialize routine of an ESMF 
+Gridded Component named ``POP'' that represents an ocean model.
 
 \item {\bf State}  ESMF components exchange information with other 
 components only through States.  A State is an ESMF derived
-type that may contains Fields, Bundles, Arrays, and nested
+type that can contain Fields, Bundles, Arrays, and other
 States.  A Gridded Component  is associated with two States, an 
 {\bf Import State} and an {\bf Export State}.  Its Import State 
 holds the data that it receives from other Gridded Components.  

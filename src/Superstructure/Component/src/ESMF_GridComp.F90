@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.29 2004/03/19 20:25:57 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.30 2004/03/24 20:01:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.29 2004/03/19 20:25:57 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.30 2004/03/24 20:01:00 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -187,7 +187,7 @@
 !  \begin{description}
 !   \item[name]
 !    GridComp name.
-!   \item[layout]
+!   \item[delayout]
 !    GridComp delayout.
 !   \item[gridcomptype]
 !    GridComp Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
@@ -277,7 +277,7 @@
 !  \begin{description}
 !   \item[{[name]}]
 !    GridComp name.
-!   \item[{[layout]}]
+!   \item[{[delayout]}]
 !    GridComp delayout.
 !   \item[{[gridcomptype]}]
 !    GridComp Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
@@ -378,7 +378,7 @@
 !    GridComp name.
 !   \item[{[name]}]
 !    GridComp name.
-!   \item[{[layout]}]
+!   \item[{[delayout]}]
 !    GridComp delayout.
 !   \item[{[gridcomptype]}]
 !    GridComp model type, where model includes ESMF\_ATM, ESMF\_LAND,
@@ -585,7 +585,7 @@
 !    GridComp to query.
 !   \item[{[name]}]
 !    GridComp name.
-!   \item[{[layout]}]
+!   \item[{[delayout]}]
 !    GridComp delayout.
 !   \item[{[gridcomptype]}]
 !    GridComp Model Type, where model includes {\tt ESMF\_ATM, ESMF\_LAND,
@@ -817,7 +817,7 @@
 !    GridComp to set value for.
 !   \item[{[name]}]
 !    GridComp name.
-!   \item[{[layout]}]
+!   \item[{[delayout]}]
 !    GridComp delayout.
 !   \item[{[gridcomptype]}]
 !    GridComp Model Type, where model includes {\tt ESMF\_ATM, ESMF\_LAND,
