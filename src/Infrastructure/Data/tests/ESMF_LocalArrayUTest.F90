@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.7 2003/08/29 22:23:22 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.8 2003/09/02 20:24:25 nscollins Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -606,6 +606,8 @@
     call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_KIND_R4, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+    ! set all counts to 1 first, then alter the ones you want to change
+    counts = 1
     counts(1) = 10
     counts(2) = 20
 
@@ -652,8 +654,6 @@
     array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc)
     call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
 
-#endif
-
     !NEX_UTest
     arank = 5
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -666,6 +666,23 @@
     !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating an Array from a Spec with rank of 5 Test"
+    array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+#endif
+
+    !NEX_UTest
+    arank = 4
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Initializing an Array Spec of rank 4 Test"
+    call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_KIND_R4, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+
+    !NEX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating an Array from a Spec with rank of 4 Test"
     array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
