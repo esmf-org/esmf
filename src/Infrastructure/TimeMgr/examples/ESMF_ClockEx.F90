@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.26 2003/10/22 03:35:13 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.27 2003/12/02 23:50:06 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockEx.F90,v 1.26 2003/10/22 03:35:13 eschwab Exp $'
+      '$Id: ESMF_ClockEx.F90,v 1.27 2003/12/02 23:50:06 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -52,39 +52,79 @@
       real(ESMF_KIND_R8) :: days_r8
 
       ! result code
-      integer :: rc
+      integer :: rc, finalrc
 
       !
       ! initialization
       !
+      finalrc = ESMF_SUCCESS
 
       ! initialize calendar to be Gregorian type
       call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       ! initialize time interval to 2 days, 4 hours (6 timesteps in 13 days)
       call ESMF_TimeIntervalSet(timeStep, d=2, h=4, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
 
       ! initialize start time to 4/1/2003 2:24:00 ( 1/10 of a day )
       call ESMF_TimeSet(startTime, yr=2003, mm=4, dd=1, h=2, m=24, &
                         calendar=gregorianCalendar, rc=rc)
 
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       ! initialize stop time to 4/14/2003 2:24:00 ( 1/10 of a day )
       call ESMF_TimeSet(stopTime, yr=2003, mm=4, dd=14, h=2, m=24, &
                         calendar=gregorianCalendar, rc=rc)
 
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       ! initialize the clock with the above values
       clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, stopTime, rc=rc)
 
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       ! print starting time (initial current time)
       call ESMF_ClockPrint(clock, "currtime string", rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
 
       !
       ! time step clock from start time to stop time
       !
 
       do while (.not.ESMF_ClockIsStopTime(clock, rc))
+
+        if (rc.NE.ESMF_SUCCESS) then
+            finalrc = ESMF_FAILURE
+        end if
+
         call ESMF_ClockAdvance(clock, rc=rc)
+
+        if (rc.NE.ESMF_SUCCESS) then
+            finalrc = ESMF_FAILURE
+        end if
+
         call ESMF_ClockPrint(clock, "currtime string", rc)
+
+        if (rc.NE.ESMF_SUCCESS) then
+            finalrc = ESMF_FAILURE
+        end if
+
       end do
 
       !
@@ -93,36 +133,86 @@
 
       ! get and print clock's time_step
       call ESMF_ClockGet(clock, timeStep=time_step, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       call ESMF_ClockPrint(clock, "timestep string", rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
 
       ! get time step in integer days and seconds
       call ESMF_TimeIntervalGet(time_step, d=days, s=sec, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       print *, "Clock's timestep = ", days, " integer days, ", &
                 sec, " integer seconds."
 
       ! get time step in floating point days
       call ESMF_TimeIntervalGet(time_step, d_r8=days_r8, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       print *, "Clock's timestep = ", days_r8, " floating point days."
 
       ! get start time's floating point day of the year
       call ESMF_TimeGet(startTime, dayOfYear_r8=days_r8, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       print *, "Start time's floating point day of the year = ", days_r8
 
       ! get stop time's integer day of the year
       call ESMF_TimeGet(stopTime, dayOfYear=yD, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       print *, "Stop time's integer day of the year = ", yD
 
       ! get the number of times the clock was advanced
       call ESMF_ClockGet(clock, advanceCount=advanceCount, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       print *, "The clock was advanced ", advanceCount, " times."
   
       ! calculate the difference between the start and stop times
       time_diff = stopTime - startTime
       call ESMF_TimeIntervalGet(time_diff, d=days, s=sec, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       print *, "Difference between start and stop times = ", days, " days, ", &
                 sec, " seconds."
 
       ! destroy clock
       call ESMF_ClockDestroy(clock, rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+      if (finalrc.EQ.ESMF_SUCCESS) then
+         print *, "PASS: ESMF_ClockEx.F90"
+      else
+         print *, "FAIL: ESMF_ClockEx.F90"
+      end if
+
 
       end program ESMF_ClockEx
