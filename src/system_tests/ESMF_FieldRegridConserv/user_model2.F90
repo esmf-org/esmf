@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.4 2004/06/15 13:34:44 nscollins Exp $
+! $Id: user_model2.F90,v 1.5 2004/10/11 20:11:18 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -151,18 +151,18 @@
       ! Create the field and have it create the array internally
       humidity = ESMF_FieldCreate(grid1, arrayspec, &
                                   horzRelloc=ESMF_CELL_NFACE, &
-                                  haloWidth=0, name="humidity", rc=rc)
+                                  haloWidth=0, name="humidity", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
   
       ! Get the allocated array back and get an F90 array pointer
-      call ESMF_FieldGetArray(humidity, array1, rc)
+      call ESMF_FieldGetArray(humidity, array1, status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_ArrayGetData(array1, idata, rc=rc)
+      call ESMF_ArrayGetData(array1, idata, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
   
-      call ESMF_StateAddField(importState, humidity, rc)
+      call ESMF_StateAddField(importState, humidity, status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      !   call ESMF_StatePrint(importState, rc=rc)
+      !   call ESMF_StatePrint(importState, rc=status)
   
       print *, de_id, "User Comp 2 Init returning"
    
@@ -171,7 +171,7 @@
 
       ! get here only on error exit
 10  continue
-      rc = ESMF_FAILURE
+      rc = status
   
     end subroutine user_init
 
@@ -201,7 +201,7 @@
       ! This is where the model specific computation goes.
       call ESMF_FieldGetArray(humidity, array1, rc=status)
       print *, "Imported Array in user model 2:"
-  !    call ESMF_ArrayPrint(array1, "", rc)
+  !    call ESMF_ArrayPrint(array1, "", status)
 
       print *, "User Comp Run returning"
 
@@ -245,8 +245,8 @@
 
       ! check validity of results
       ! Get Fields from import state
-      call ESMF_StateGetField(importState, "humidity", field, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) then
+      call ESMF_StateGetField(importState, "humidity", field, rc=status)
+      if (status .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         goto 30
       endif
@@ -302,10 +302,10 @@
       call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
 
       ! update field values here
-      call ESMF_FieldGetArray(humidity, array, rc=rc)
+      call ESMF_FieldGetArray(humidity, array, rc=status)
       ! Get a pointer to the start of the data
-      call ESMF_ArrayGetData(array, data, ESMF_DATA_REF, rc)
-      print *, "rc from array get data = ", rc
+      call ESMF_ArrayGetData(array, data, ESMF_DATA_REF, status)
+      print *, "rc from array get data = ", status
       !if (associated(data)) print *, "pointer is associated"
       !if (.not.associated(data)) print *, "pointer is *NOT* associated"
       call ESMF_ArrayPrint(array)

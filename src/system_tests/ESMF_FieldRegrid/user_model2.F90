@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.28 2004/10/07 22:06:26 jwolfe Exp $
+! $Id: user_model2.F90,v 1.29 2004/10/11 20:11:18 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -151,18 +151,18 @@
       ! Create the field and have it create the array internally
       humidity = ESMF_FieldCreate(grid1, arrayspec, &
                                   horzRelloc=ESMF_CELL_NFACE, &
-                                  haloWidth=3, name="humidity", rc=rc)
+                                  haloWidth=3, name="humidity", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
   
       ! Get the allocated array back and get an F90 array pointer
-      call ESMF_FieldGetArray(humidity, array1, rc)
+      call ESMF_FieldGetArray(humidity, array1, status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_ArrayGetData(array1, idata, rc=rc)
+      call ESMF_ArrayGetData(array1, idata, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
   
-      call ESMF_StateAddField(importState, humidity, rc)
+      call ESMF_StateAddField(importState, humidity, status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      !   call ESMF_StatePrint(importState, rc=rc)
+      !   call ESMF_StatePrint(importState, rc=status)
   
       print *, de_id, "User Comp 2 Init returning"
    
@@ -171,7 +171,7 @@
 
       ! get here only on error exit
 10  continue
-      rc = ESMF_FAILURE
+      rc = status
   
     end subroutine user_init
 
@@ -245,7 +245,7 @@
 
       ! check validity of results
       ! Get Fields from import state
-      call ESMF_StateGetField(importState, "humidity", field, rc=rc)
+      call ESMF_StateGetField(importState, "humidity", field, rc=status)
       if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         goto 30
@@ -303,7 +303,7 @@
       call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
 
       ! update field values here
-      call ESMF_FieldGetArray(humidity, array, rc=rc)
+      call ESMF_FieldGetArray(humidity, array, rc=status)
       ! Get a pointer to the start of the data
       call ESMF_ArrayGetData(array, data, ESMF_DATA_REF, rc)
       print *, "rc from array get data = ", rc
@@ -351,7 +351,7 @@
       write(*,*) "   maximum percent error   = ", maxPerError
       print *, "User verifyResults returning"
    
-      rc = ESMF_SUCCESS
+      rc = status
 
     end subroutine verifyResults
 
