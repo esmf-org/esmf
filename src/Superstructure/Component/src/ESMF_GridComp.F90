@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.60 2004/12/15 05:27:58 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.61 2004/12/15 17:41:33 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.60 2004/12/15 05:27:58 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.61 2004/12/15 17:41:33 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1404,7 +1404,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompWait"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_GridCompWait - Wait for a GridComp to return
 !
 ! !INTERFACE:
@@ -1425,7 +1425,7 @@
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 
     integer :: localrc                     ! local error status
 
