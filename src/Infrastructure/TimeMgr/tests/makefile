@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/05/07 21:24:49 nscollins Exp $
+# $Id: makefile,v 1.11 2003/05/21 16:42:12 flanigan Exp $
 
 ALL:  tests
 
@@ -35,7 +35,7 @@ TESTS_RM      = ESMF_ClockUTest.rm \
 include ${ESMF_DIR}/makefile
 
 CLEANDIRS   =$
-CLEANFILES  = *.o *.mod $
+CLEANFILES  = *.o *.mod $(TESTS_BUILD) 
 CLOBBERDIRS =$
 
 
