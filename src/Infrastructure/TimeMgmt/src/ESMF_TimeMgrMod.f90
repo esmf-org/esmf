@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeMgrMod.f90,v 1.2 2002/11/26 18:25:57 jwolfe Exp $
+! $Id: ESMF_TimeMgrMod.f90,v 1.3 2002/12/11 16:06:37 nscollins Exp $
       module ESMF_TimeMgrMod
 !===============================================================================
 !BOP
@@ -6,7 +6,8 @@
 !
 ! !USES:
 	use ESMF_DateMod
-#include "ESMF_Macros.inc"
+! nsc - the return codes are in the following mod now.
+        use ESMF_TimeMgmtMod
 !
 ! !PUBLIC TYPES:
       implicit none
@@ -56,10 +57,10 @@
 !
 ! !INTERFACE:
       interface ESMF_TimeMgrInit
-        module procedure ESMF_TimeMgrInitStd,
-     &                   ESMF_TimeMgrInitNoBaseStd,
-     &                   ESMF_TimeMgrInitIS,
-     &                   ESMF_TimeMgrInitNoBaseIS
+        module procedure ESMF_TimeMgrInitStd, &
+                         ESMF_TimeMgrInitNoBaseStd, &
+                         ESMF_TimeMgrInitIS, &
+                         ESMF_TimeMgrInitNoBaseIS
       end interface
 
 ! !DESCRIPTION:
@@ -88,8 +89,8 @@
 !
 ! !INTERFACE:
       interface ESMF_TimeMgrGetStepSize
-        module procedure ESMF_TimeMgrGetStepSizeStd,
-     &                   ESMF_TimeMgrGetStepSizeIS
+        module procedure ESMF_TimeMgrGetStepSizeStd, &
+                         ESMF_TimeMgrGetStepSizeIS
       end interface
 
 ! !DESCRIPTION:
@@ -112,8 +113,8 @@
 !
 ! !INTERFACE:
       interface ESMF_TimeMgrSetStepSize
-        module procedure ESMF_TimeMgrSetStepSizeStd,
-     &                   ESMF_TimeMgrSetStepSizeIS
+        module procedure ESMF_TimeMgrSetStepSizeStd, &
+                         ESMF_TimeMgrSetStepSizeIS
       end interface
 
 ! !DESCRIPTION:
@@ -202,8 +203,8 @@
 ! !IROUTINE:  ESMF_TimeMgrInitStd
 !
 ! !INTERFACE:
-      function ESMF_TimeMgrInitStd(stepSize, startDate, 
-     &                            stopDate, baseDate, rc)
+      function ESMF_TimeMgrInitStd(stepSize, startDate,  &
+                                  stopDate, baseDate, rc)
 
 ! !RETURN VALUE:
       type(ESMF_TimeMgr) :: ESMF_TimeMgrInitStd    ! return a new time manager
@@ -223,8 +224,8 @@
 
       integer stub
 
-      call ESMC_TimeMgrInit(ESMF_TimeMgrInitStd, stepSize, 
-     &                       startDate, stopDate, baseDate, stub)
+      call ESMC_TimeMgrInit(ESMF_TimeMgrInitStd, stepSize,  &
+                             startDate, stopDate, baseDate, stub)
       if (present(rc)) rc = stub
 
       end function ESMF_TimeMgrInitStd
@@ -235,11 +236,11 @@
 ! !IROUTINE:  ESMF_TimeMgrInitIS
 !
 ! !INTERFACE:
-      function ESMF_TimeMgrInitIS(stepDays, stepSecs, 
-     &                           startCalendarDate, startTOD, 
-     &                           stopCalendarDate, stopTOD, 
-     &                           baseCalendarDate, baseTOD, 
-     &                           type, rc)     
+      function ESMF_TimeMgrInitIS(stepDays, stepSecs,  &
+                                 startCalendarDate, startTOD,  &
+                                 stopCalendarDate, stopTOD,  &
+                                 baseCalendarDate, baseTOD,  &
+                                 type, rc)     
 
 ! !RETURN VALUE:
       type(ESMF_TimeMgr) :: ESMF_TimeMgrInitIS   ! new time manager with 
@@ -266,10 +267,10 @@
 
       integer stub
 
-      call ESMC_TimeMgrInitIS(ESMF_TimeMgrInitIS, 
-     &              stepDays, stepSecs, startCalendarDate, 
-     &              startTOD, stopCalendarDate, stopTOD, 
-     &              baseCalendarDate, baseTOD, type, stub)
+      call ESMC_TimeMgrInitIS(ESMF_TimeMgrInitIS, &
+                    stepDays, stepSecs, startCalendarDate, &
+                    startTOD, stopCalendarDate, stopTOD, &
+                    baseCalendarDate, baseTOD, type, stub)
       if (present(rc)) rc = stub
 
       end function ESMF_TimeMgrInitIS
@@ -280,9 +281,9 @@
 ! !IROUTINE:  ESMF_TimeMgrInitNoBaseStd
 !
 ! !INTERFACE:
-      function ESMF_TimeMgrInitNoBaseStd(stepSize, startDate, 
-     &                                  stopDate, rc) 
-
+      function ESMF_TimeMgrInitNoBaseStd(stepSize, startDate, &
+                                         stopDate, rc) 
+ 
 ! !RETURN VALUE:
       type(ESMF_TimeMgr) :: ESMF_TimeMgrInitNoBaseStd ! return a new time manager
 
@@ -301,8 +302,8 @@
 
       integer stub
 
-      call ESMC_TimeMgrInitNoBase(ESMF_TimeMgrInitNoBaseStd, stepSize, 
-     &                          startDate, stopDate, stub)
+      call ESMC_TimeMgrInitNoBase(ESMF_TimeMgrInitNoBaseStd, stepSize, &
+                                  startDate, stopDate, stub)
       if (present(rc)) rc = stub
 
       end function ESMF_TimeMgrInitNoBaseStd
@@ -313,10 +314,10 @@
 ! !IROUTINE:  ESMF_TimeMgrInitNoBaseIS
 !
 ! !INTERFACE:
-      function ESMF_TimeMgrInitNoBaseIS(stepDays, stepSecs, 
-     &                                 startCalendarDate, startTOD, 
-     &                                 stopCalendarDate, stopTOD, 
-     &                                 type, rc)     
+      function ESMF_TimeMgrInitNoBaseIS(stepDays, stepSecs, &
+                                        startCalendarDate, startTOD, &
+                                        stopCalendarDate, stopTOD, &
+                                        type, rc)     
 
 ! !RETURN VALUE:
       type(ESMF_TimeMgr) :: ESMF_TimeMgrInitNoBaseIS  ! new time manager with 
@@ -342,9 +343,9 @@
 
       integer stub
 
-      call ESMC_TimeMgrInitNoBaseIS(ESMF_TimeMgrInitNoBaseIS, 
-     &              stepDays, stepSecs, startCalendarDate, 
-     &              startTOD, stopCalendarDate, stopTOD, type, stub)
+      call ESMC_TimeMgrInitNoBaseIS(ESMF_TimeMgrInitNoBaseIS, &
+                     stepDays, stepSecs, startCalendarDate, &
+                     startTOD, stopCalendarDate, stopTOD, type, stub)
       if (present(rc)) rc = stub
 
       end function ESMF_TimeMgrInitNoBaseIS
@@ -590,8 +591,8 @@
 
       call ESMC_DateInitUndefined(ESMF_TimeMgrGetStartDate, stub)
       if (stub == ESMF_SUCCESS) then
-        call ESMC_TimeMgrGetStartDate(timeMgr, ESMF_TimeMgrGetStartDate, 
-     &    stub)
+        call ESMC_TimeMgrGetStartDate(timeMgr, ESMF_TimeMgrGetStartDate, &
+         stub)
       end if
       if (present(rc)) rc = stub
 
@@ -622,8 +623,8 @@
 
       call ESMC_DateInitUndefined(ESMF_TimeMgrGetStopDate, stub)
       if (stub == ESMF_SUCCESS) then
-        call ESMC_TimeMgrGetStopDate(timeMgr, ESMF_TimeMgrGetStopDate, 
-     &    stub)
+        call ESMC_TimeMgrGetStopDate(timeMgr, ESMF_TimeMgrGetStopDate, &
+          stub)
       end if
       if (present(rc)) rc = stub
 
@@ -654,8 +655,8 @@
 
       call ESMC_DateInitUndefined(ESMF_TimeMgrGetBaseDate, stub)
       if (stub == ESMF_SUCCESS) then
-        call ESMC_TimeMgrGetBaseDate(timeMgr, ESMF_TimeMgrGetBaseDate, 
-     &    stub)
+        call ESMC_TimeMgrGetBaseDate(timeMgr, ESMF_TimeMgrGetBaseDate, &
+         stub)
       end if
       if (present(rc)) rc = stub
 
@@ -686,8 +687,8 @@
 
       call ESMC_DateInitUndefined(ESMF_TimeMgrGetCurrDate, stub)
       if (stub == ESMF_SUCCESS) then
-        call ESMC_TimeMgrGetCurrDate(timeMgr, ESMF_TimeMgrGetCurrDate, 
-     &    stub)
+        call ESMC_TimeMgrGetCurrDate(timeMgr, ESMF_TimeMgrGetCurrDate, &
+          stub)
       end if
       if (present(rc)) rc = stub
 
@@ -718,10 +719,10 @@
 
       integer stub
 
-      call ESMC_TimeMgrSetCurrDateIS(timeMgr,
-     &     dateYYMMDD,
-     &     tod,
-     &     stub)
+      call ESMC_TimeMgrSetCurrDateIS(timeMgr, &
+           dateYYMMDD, &
+           tod, &
+           stub)
       
       if (present(rc)) rc = stub
       
@@ -752,8 +753,8 @@
 
       call ESMC_DateInitUndefined(ESMF_TimeMgrGetPrevDate, stub)
       if (stub == ESMF_SUCCESS) then
-        call ESMC_TimeMgrGetPrevDate(timeMgr, ESMF_TimeMgrGetPrevDate, 
-     &    stub)
+        call ESMC_TimeMgrGetPrevDate(timeMgr, ESMF_TimeMgrGetPrevDate, &
+         stub)
       end if
       if (present(rc)) rc = stub
 
@@ -765,15 +766,15 @@
 ! !IROUTINE:  ESMF_TimeMgrRestartWriteIS
 !
 ! !INTERFACE:
-      subroutine ESMF_TimeMgrRestartWriteIS(timeMgr,
-     &     type,
-     &     nstep,
-     &     stepDays, stepSec,
-     &     startYYMMDD, startSec,
-     &     stopYYMMDD, stopSec,
-     &     baseYYMMDD, baseSec,
-     &     currYYMMDD, currSec,
-     &     rc)
+      subroutine ESMF_TimeMgrRestartWriteIS(timeMgr, &
+          type,  &
+          nstep,  &
+          stepDays, stepSec,  &
+          startYYMMDD, startSec,  &
+          stopYYMMDD, stopSec,  &
+          baseYYMMDD, baseSec,  &
+          currYYMMDD, currSec,  &
+          rc)
 ! !PARAMETERS:
       type(ESMF_TimeMgr), intent(in) :: timeMgr ! time Manager
       integer, intent(out) :: type ! Calendar type
@@ -798,15 +799,15 @@
 
       integer stub
 
-      call ESMC_TimeMgrRestartWriteIS(timeMgr,
-     &     type,
-     &     nstep,
-     &     stepDays, stepSec,
-     &     startYYMMDD, startSec,
-     &     stopYYMMDD, stopSec,
-     &     baseYYMMDD, baseSec,
-     &     currYYMMDD, currSec,
-     &     stub)
+      call ESMC_TimeMgrRestartWriteIS(timeMgr, &
+          type, &
+          nstep, &
+          stepDays, stepSec, &
+          startYYMMDD, startSec, &
+          stopYYMMDD, stopSec, &
+          baseYYMMDD, baseSec, &
+          currYYMMDD, currSec, &
+          stub) 
 
       if (present(rc)) rc = stub
 
@@ -818,15 +819,15 @@
 ! !IROUTINE:  ESMF_TimeMgrRestartReadIS
 !
 ! !INTERFACE:
-      function ESMF_TimeMgrRestartReadIS(
-     &     type,
-     &     nstep,
-     &     stepDays, stepSec,
-     &     startYYMMDD, startSec,
-     &     stopYYMMDD, stopSec,
-     &     baseYYMMDD, baseSec,
-     &     currYYMMDD, currSec,
-     &     rc)
+      function ESMF_TimeMgrRestartReadIS( &
+            type, &
+            nstep, &
+            stepDays, stepSec, &
+            startYYMMDD, startSec, &
+            stopYYMMDD, stopSec, &
+            baseYYMMDD, baseSec, &
+            currYYMMDD, currSec, &
+            rc)
 ! !RETURN VALUE:
       type(ESMF_TimeMgr) :: ESMF_TimeMgrRestartReadIS ! previous date
 ! !PARAMETERS:
@@ -853,16 +854,16 @@
 
       integer stub
 
-      call ESMC_TimeMgrRestartReadIS(
-     &     ESMF_TimeMgrRestartReadIS,
-     &     type,
-     &     nstep,
-     &     stepDays, stepSec,
-     &     startYYMMDD, startSec,
-     &     stopYYMMDD, stopSec,
-     &     baseYYMMDD, baseSec,
-     &     currYYMMDD, currSec,
-     &     stub)
+      call ESMC_TimeMgrRestartReadIS( &
+          ESMF_TimeMgrRestartReadIS, &
+          type, &
+          nstep, &
+          stepDays, stepSec, &
+          startYYMMDD, startSec, &
+          stopYYMMDD, stopSec, &
+          baseYYMMDD, baseSec, &
+          currYYMMDD, currSec, &
+          stub)
 
       if (present(rc)) rc = stub
 

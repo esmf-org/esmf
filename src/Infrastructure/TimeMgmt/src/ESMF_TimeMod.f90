@@ -1,11 +1,12 @@
-! $Id: ESMF_TimeMod.f90,v 1.2 2002/11/26 18:26:13 jwolfe Exp $
+! $Id: ESMF_TimeMod.f90,v 1.3 2002/12/11 16:06:37 nscollins Exp $
       module ESMF_TimeMod
 !===============================================================================
 !BOP
 ! !MODULE: ESMF_TimeMod
 ! !USES:
 !jw	use ESMF_BasicUtilMod
-#include "ESMF_Macros.inc"
+! nsc - the return codes are in the following mod now
+        use ESMF_TimeMgmtMod
 	use ESMF_TODMod
 !
 ! !PUBLIC TYPES:
@@ -42,9 +43,9 @@
 !
 ! !INTERFACE:
       interface ESMF_TimeInit
-        module procedure ESMF_TimeInitIS,
-     &                   ESMF_TimeInitUndefined,
-     &                   ESMF_TimeCopyInit
+        module procedure ESMF_TimeInitIS, &
+                   ESMF_TimeInitUndefined, &
+                   ESMF_TimeCopyInit
       end interface
 
 ! !DESCRIPTION:
@@ -349,8 +350,8 @@
 
       call ESMC_TimeInitUndefined(ESMF_TimeIncrementIS, stub)
       if (stub == ESMF_SUCCESS) then
-        call ESMC_TimeIncrementIS(time, ESMF_TimeIncrementIS, 
-     &                        days, seconds, stub)
+        call ESMC_TimeIncrementIS(time, ESMF_TimeIncrementIS, &
+                         days, seconds, stub)
       end if
       if (present(rc)) rc = stub
      
@@ -445,8 +446,8 @@
 
       call ESMC_TimeInitUndefined(ESMF_TimeDecrementIS, stub)      
       if (stub == ESMF_SUCCESS) then
-        call ESMC_TimeDecrementIS(time, ESMF_TimeDecrementIS, days, 
-     &                        seconds, stub)
+        call ESMC_TimeDecrementIS(time, ESMF_TimeDecrementIS, days, &
+                        seconds, stub)
       end if
       if (present(rc)) rc = stub
      
