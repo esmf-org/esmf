@@ -1,4 +1,4 @@
-! $Id: FlowComp.F90,v 1.2 2003/09/18 22:47:18 cdeluca Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.1 2003/09/19 21:48:28 jwolfe Exp $
 !
 ! System test FlowComp
 
