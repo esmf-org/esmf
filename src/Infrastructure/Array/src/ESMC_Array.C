@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.8 2003/07/23 16:59:06 jwolfe Exp $";
+            "$Id: ESMC_Array.C,v 1.9 2003/07/24 21:52:45 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -365,18 +365,20 @@
         bytestride[i] = strides ? strides[i] : 1;
         offset[i]     = offsets ? offsets[i] : 0;
 
-        total_stride *= counts[i];
-        ESMC_AxisIndexSet(ai_total+i, 0, counts[i]-1, total_stride);
         if (halo_width == 0) {
+            total_stride *= counts[i];
+            ESMC_AxisIndexSet(ai_total+i, 0, counts[i]-1, total_stride);
             ESMC_AxisIndexSet(ai_comp+i, 0, counts[i]-1, total_stride);
             ESMC_AxisIndexSet(ai_excl+i, 0, counts[i]-1, total_stride);
         } else {
+            total_stride *= counts[i];
             comp_stride *= counts[i] - 2*halo_width;
             excl_stride *= counts[i] - 4*halo_width;
-            ESMC_AxisIndexSet(ai_comp+i, halo_width, 
-                                         counts[i]-1-halo_width, comp_stride);
+            ESMC_AxisIndexSet(ai_total+i, 0, counts[i]-1, total_stride);
+            ESMC_AxisIndexSet(ai_comp+i, halo_width, counts[i]-halo_width-1,
+                              comp_stride);
             ESMC_AxisIndexSet(ai_excl+i, halo_width*2, 
-                                      counts[i]-1-(halo_width*2), excl_stride);
+                              counts[i]-2*halo_width-1, excl_stride);
         }
     }
     for (i=rank; i<ESMF_MAXDIM; i++) {
@@ -617,18 +619,20 @@
         bytestride[i] = strides ? strides[i] : 0;
 //        lbound[i] = lbounds ? lbounds[i] : 1;
 //        ubound[i] = ubounds ? ubounds[i] : counts[i];
-        total_stride *= counts[i];
-        ESMC_AxisIndexSet(ai_total+i, 0, counts[i]-1, total_stride);
         if (halo_width == 0) {
+            total_stride *= counts[i];
+            ESMC_AxisIndexSet(ai_total+i, 0, counts[i]-1, total_stride);
             ESMC_AxisIndexSet(ai_comp+i, 0, counts[i]-1, total_stride);
             ESMC_AxisIndexSet(ai_excl+i, 0, counts[i]-1, total_stride);
         } else {
+            total_stride *= counts[i];
             comp_stride *= counts[i] - 2*halo_width;
             excl_stride *= counts[i] - 4*halo_width;
-            ESMC_AxisIndexSet(ai_comp+i, halo_width, 
-                                         counts[i]-1-halo_width, comp_stride);
+            ESMC_AxisIndexSet(ai_total+i, 0, counts[i]-1, total_stride);
+            ESMC_AxisIndexSet(ai_comp+i, halo_width, counts[i]-halo_width-1,
+                              comp_stride);
             ESMC_AxisIndexSet(ai_excl+i, halo_width*2, 
-                                      counts[i]-1-(halo_width*2), excl_stride);
+                              counts[i]-2*halo_width-1, excl_stride);
         }
     }
     for (i=rank; i<ESMF_MAXDIM; i++) {
@@ -850,7 +854,7 @@
      for (j=0; j<ESMF_MAXGRIDDIM; j++) {
        for (i=0; i<nDEs; i++) {
          ij = j*nDEs + i;
-         count = global[ij].max - global[ij].min + 1;
+         count = global[ij].max - global[ij].min;
 
          // nsc - fixme.  please.  purty please.
 

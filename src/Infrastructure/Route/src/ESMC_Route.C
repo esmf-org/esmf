@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.45 2003/07/18 03:00:10 eschwab Exp $
+// $Id: ESMC_Route.C,v 1.46 2003/07/24 21:54:49 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.45 2003/07/18 03:00:10 eschwab Exp $";
+               "$Id: ESMC_Route.C,v 1.46 2003/07/24 21:54:49 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -837,23 +837,39 @@ static int maxroutes = 10;
     ESMC_XPacket *my_XP = new ESMC_XPacket;
     ESMC_XPacket *their_XP = new ESMC_XPacket;
     ESMC_XPacket *intersect_XP = NULL;
+    int my_global_start[ESMF_MAXDIM], their_global_start[ESMF_MAXDIM];
     ESMC_RouteCacheEntry *ep;
     int i, j, k;
     int their_de, decount;
 
     // Calculate the sending table.
  
+    //  modify global_stride to include halo widths  TODO:  pass in AIs as global
+    for (k=0; k<rank; k++) {
+      global_stride[k] = global_stride[k]
+              + AI_exc[my_DE + k*AI_count].min - AI_tot[my_DE + k*AI_count].min
+              + AI_tot[my_DE + k*AI_count].max - AI_exc[my_DE + k*AI_count].max;
+    }
+//    for (k=0; k<rank; k++) {
+//      for (j=0; j<AI_count; j++) {
+//        if (global_start[j + k*AI_count] > 0) {
+//          global_start[j + k*AI_count] = global_start[j + k*AI_count]
+//              + AI_exc[j + k*AI_count].min - AI_tot[j + k*AI_count].min;
+//        }
+//      }
+//    }
+
     // get "my" AI out of the AI_exc array
     // TODO:  this is NOT going to work for data dims which are not
     //  equal the grid dims, e.g. a 2d grid with 4d data.
     for (k=0; k<rank; k++) {
       my_AI[k] = AI_exc[my_DE + k*AI_count];
-      my_AI[k].max = AI_tot[my_DE + k*AI_count].max;
       my_AI_tot[k] = AI_tot[my_DE + k*AI_count];
+      my_global_start[k] = global_start[my_DE + k*AI_count];
     }
 
     // calculate "my" (local DE's) XPacket in the sense of the global data
-    my_XP->ESMC_XPacketFromAxisIndex(my_AI, rank, global_start, global_stride);
+    my_XP->ESMC_XPacketFromAxisIndex(my_AI, rank, my_global_start, global_stride);
 
     // loop over DE's from receiving layout to calculate send table
     layout->ESMC_DELayoutGetNumDEs(&decount);
@@ -863,10 +879,11 @@ static int maxroutes = 10;
       // get "their" AI out of the AI_tot array
       for (k=0; k<rank; k++) {
         their_AI[k] = AI_tot[their_de + k*AI_count];
+        their_global_start[k] = global_start[their_de + k*AI_count];
       }
  
       // calculate "their" XPacket in the sense of the global data
-      their_XP->ESMC_XPacketFromAxisIndex(their_AI, rank, global_start,
+      their_XP->ESMC_XPacketFromAxisIndex(their_AI, rank, their_global_start,
                                           global_stride);
 
       // calculate the intersection
@@ -882,7 +899,7 @@ static int maxroutes = 10;
 
       // translate from global to local data space
       intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot, 
-                                              rank, global_start,
+                                              rank, my_global_start,
                                               global_stride);
 
       // load the intersecting XPacket into the sending RTable
@@ -895,10 +912,11 @@ static int maxroutes = 10;
     // get "my" AI out of the AI_tot array
     for (k=0; k<rank; k++) {
       my_AI[k] = AI_tot[my_DE + k*AI_count];
+      my_global_start[k] = global_start[my_DE + k*AI_count];
     }
 
     // calculate "my" (local DE's) XPacket in the sense of the global data
-    my_XP->ESMC_XPacketFromAxisIndex(my_AI, rank, global_start, global_stride);
+    my_XP->ESMC_XPacketFromAxisIndex(my_AI, rank, my_global_start, global_stride);
 
     // loop over DE's from layout to calculate receive table
     for (i=0; i<decount; i++) {
@@ -907,11 +925,11 @@ static int maxroutes = 10;
       // get "their" AI out of the AI_exc array
       for (k=0; k<rank; k++) {
         their_AI[k] = AI_exc[their_de + k*AI_count];
-        their_AI[k].max = AI_tot[their_de + k*AI_count].max;
+        their_global_start[k] = global_start[their_de + k*AI_count];
       }
  
       // calculate "their" XPacket in the sense of the global data
-      their_XP->ESMC_XPacketFromAxisIndex(their_AI, rank, global_start,
+      their_XP->ESMC_XPacketFromAxisIndex(their_AI, rank, their_global_start,
                                           global_stride);
 
       // calculate the intersection
@@ -927,7 +945,7 @@ static int maxroutes = 10;
 
       // translate from global to local
       intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot,
-                                              rank, global_start,
+                                              rank, my_global_start,
                                               global_stride);
 
       // load the intersecting XPacket into the receiving RTable

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.21 2003/07/23 17:05:00 jwolfe Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.22 2003/07/24 21:55:32 jwolfe Exp $
 !
 ! System test code #70385
 
@@ -205,7 +205,7 @@
       ! Local variables
       integer :: i, j
       type(ESMF_DELayout) :: layout1 
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
+      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index, indexc
       type(ESMF_Grid) :: grid1
       type(ESMF_Field) :: field1
       type(ESMF_ArraySpec) :: arrayspec
@@ -261,7 +261,7 @@
       ! Create a Field using the Grid and ArraySpec created above
       fname = "DE id"
       field1 = ESMF_FieldCreate(grid1, arrayspec, relloc=ESMF_CELL_CENTER, &
-                                halo_width=2, name=fname, rc=rc)
+                                haloWidth=2, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_FieldPrint(field1, "", rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
@@ -280,7 +280,7 @@
       call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
 
       ! Set initial data values over whole array to -1
-      call ESMF_ArrayGetAxisIndex(array1, totalindex=index, rc=rc)
+      call ESMF_ArrayGetAxisIndex(array1, totalindex=index, compindex=indexc, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       do j=index(2)%min,index(2)%max
         do i=index(1)%min,index(1)%max
@@ -289,10 +289,10 @@
       enddo
 
       ! Set initial data values over computational domain to the de identifier
-      call ESMF_ArrayGetAxisIndex(array1, compindex=index, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
-      do j=index(2)%min,index(2)%max
-        do i=index(1)%min,index(1)%max
+     ! call ESMF_ArrayGetAxisIndex(array1, compindex=index, rc=rc)
+     ! if (rc .ne. ESMF_SUCCESS) goto 30
+      do j=indexc(2)%min,indexc(2)%max
+        do i=indexc(1)%min,indexc(1)%max
           ldata(i,j) =de_id
         enddo
       enddo

@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.27 2003/07/17 19:52:35 jwolfe Exp $
+// $Id: ESMC_XPacket.C,v 1.28 2003/07/24 21:55:05 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.27 2003/07/17 19:52:35 jwolfe Exp $";
+              "$Id: ESMC_XPacket.C,v 1.28 2003/07/24 21:55:05 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -221,34 +221,36 @@
         {
           // implementation of efficient intersection calculation from
           // thesis by Ramaswamy
-          int intersect1 = (xpacket2->offset-xpacket1->contig_length+xpacket1->stride[0]-1)
+          int xp1_right  = xpacket1->offset + xpacket1->contig_length - 1;
+          int xp2_right  = xpacket2->offset + xpacket2->contig_length - 1;
+          int intersect1 = (xpacket2->offset - xp1_right + xpacket1->stride[0]-1)
                          /  xpacket1->stride[0];  // rounding to nearest integer
           if (intersect1 < 0) intersect1 = 0;
-          int intersect2 = (xpacket1->offset-xpacket2->contig_length+xpacket2->stride[0]-1)
+          int intersect2 = (xpacket1->offset - xp2_right + xpacket2->stride[0]-1)
                          /  xpacket2->stride[0];  // rounding to nearest integer
           if (intersect2 < 0) intersect2 = 0;
           int i1=intersect1;
-          int L1_offset  = xpacket1->offset  + i1*xpacket1->stride[0];
-          int L1_contig_length = xpacket1->contig_length + i1*xpacket1->stride[0];
-          int i2 = (i1*xpacket1->stride[0] + xpacket1->offset - xpacket2->contig_length)
-                 / xpacket2->stride[0];
+          int L1_left  = xpacket1->offset  + i1*xpacket1->stride[0];
+          int L1_right = xp1_right         + i1*xpacket1->stride[0];
+          int i2 = (i1*xpacket1->stride[0] + xpacket1->offset -xp2_right)
+                 /  xpacket2->stride[0];
           if (i2 < intersect2) i2 = intersect2;
-          int L2_offset  = xpacket2->offset  + i2*xpacket2->stride[0];
-          int L2_contig_length = xpacket2->contig_length + i2*xpacket2->stride[0];
-          if (L1_offset >= L2_offset)
-            this->offset  = L1_offset;
+          int L2_left  = xpacket2->offset  + i2*xpacket2->stride[0];
+          int L2_right = xp2_right         + i2*xpacket2->stride[0];
+          if (L1_left >= L2_left)
+            this->offset  = L1_left;
           else
-            this->offset  = L2_offset;
-          if (L1_contig_length <= L2_contig_length)
-            this->contig_length = L1_contig_length;
+            this->offset  = L2_left;
+          if (L1_right <= L2_right)
+            this->contig_length = L1_right - this->offset + 1;
           else
-            this->contig_length = L2_contig_length;
+            this->contig_length = L2_right - this->offset + 1;
           if (xpacket1->rep_count[0]-i1 <= xpacket2->rep_count[0]-i2) 
             this->rep_count[0] = xpacket1->rep_count[0]-i1;
           else
             this->rep_count[0] = xpacket2->rep_count[0]-i2;
           // for now, just check here for a real intersection
-          if (this->offset > this->contig_length) {
+          if (this->contig_length < 0) {
             this->offset = 0;
             this->contig_length = 0;
             this->rep_count[0] = 0;
@@ -330,7 +332,7 @@
             global_r[i] = indexlist[i].max + global_start[i];
           }
           this->offset  = global_l[1]*global_stride[0] + global_l[0];
-          this->contig_length = global_l[1]*global_stride[0] + global_r[0];
+          this->contig_length = global_r[0] - global_l[0] + 1;
           this->stride[0] = global_stride[0];
           this->rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
  //    printf("outgoing ");
@@ -399,13 +401,13 @@
         {
           int my_stride = indexlist[0].max - indexlist[0].min + 1;
           int my_row = global_XP->offset/global_stride[0];
-          int my_offset = global_XP->offset - my_row*global_stride[0] 
+          int my_left = global_XP->offset - my_row*global_stride[0] 
                         - global_start[0];
-          int my_contig_length = global_XP->contig_length 
-                               - my_row*global_stride[0] - global_start[0];
+          int my_right = (global_XP->offset+global_XP->contig_length)
+                       - my_row*global_stride[0] - global_start[0];
           my_row      = my_row - global_start[1];
-          this->offset  = my_row*my_stride + my_offset;
-          this->contig_length = my_row*my_stride + my_contig_length;
+          this->offset  = my_row*my_stride + my_left;
+          this->contig_length = my_right - my_left;
           this->stride[0] = my_stride;
           this->rep_count[0] = global_XP->rep_count[0];
         }
