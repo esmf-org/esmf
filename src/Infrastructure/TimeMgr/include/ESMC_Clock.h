@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.4 2003/03/26 01:04:18 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.5 2003/03/28 01:29:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -93,7 +93,7 @@
     ESMC_Alarm       *AlarmList[MAX_ALARMS];    // associated alarms
     int               NumAlarms;                // number of defined alarms
 
-    pthread_mutex_t ClockMutex; // (TMG 7.5)
+//    pthread_mutex_t ClockMutex; // (TMG 7.5)
 
 // !PUBLIC MEMBER FUNCTIONS:
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.4 2003/03/22 05:43:10 eschwab Exp $
+// $Id: ESMC_BaseTime.h,v 1.5 2003/03/28 01:29:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@ class ESMC_BaseTime {
     int Sn;     // Integer fractional seconds (exact) n/d; numerator (signed)
     int Sd;     // Integer fractional seconds (exact) n/d; denominator
 
-    pthread_mutex_t BaseTimeMutex; // for thread safety (TMG 7.5)
+//    pthread_mutex_t BaseTimeMutex; // for thread safety (TMG 7.5)
 
 // !PUBLIC MEMBER FUNCTIONS:
 
