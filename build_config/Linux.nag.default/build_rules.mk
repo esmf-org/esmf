@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.4 2004/03/04 22:34:15 nscollins Exp $
+#  $Id: build_rules.mk,v 1.5 2004/03/15 17:44:41 nscollins Exp $
 #
 #  Linus.nag.default.mk
 #
@@ -91,7 +91,7 @@ CXX_CC		   = mpiCC -fPIC
 CXX_FC		   = mpif90
 CXX_CLINKER	   = mpiCC
 CXX_FLINKER	   = mpiCC
-C_F90CXXLD         = mpiCC
+C_F90CXXLD         = mpif90
 C_CXXF90LD         = mpiCC
 else
 C_CC		   = cc
@@ -132,8 +132,11 @@ CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CCV		   = ${CXX_CC} --version
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
-C_F90CXXLIBS       = ${MPI_LIB} -L/soft/com/packages/nag-f95-4.2/lib -lf96 -lnag
-C_CXXF90LIBS       = ${MPI_LIB} -L/soft/com/packages/nag-f95-4.2/lib -lf96 -lnag
+CXXLIBBASE         = /soft/com/packages/intel-7/compiler70/ia32/lib
+C_F90CXXLIBS       = ${MPI_LIB} -L${F90LIBBASE} -lf96 -lnag \
+                     -L${CXXLIBBASE} -lcxa -lunwind -lcprts
+F90LIBBASE         = /soft/com/packages/nag-f95-4.2/lib
+C_CXXF90LIBS       = ${MPI_LIB} -L${F90LIBBASE} -lf96 -lnag ${F90LIBBASE}/gc.o
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
