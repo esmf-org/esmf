@@ -1,4 +1,4 @@
-% $Id: GridComp_desc.tex,v 1.4 2004/04/20 19:20:05 cdeluca Exp $
+% $Id: GridComp_desc.tex,v 1.5 2004/04/20 21:24:53 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -11,7 +11,7 @@
 %\subsection{Description}
 
 In Earth system modeling, the most natural way to think about an ESMF 
-Gridded Component, or {\tt ESMF_GridComp}, is as a piece of code 
+Gridded Component, or {\tt ESMF\_GridComp}, is as a piece of code 
 representing a particular physical domain; for example, an atmospheric 
 model or an ocean model.  
 In many large modeling systems, each components is developed by its
@@ -70,10 +70,10 @@ Each Gridded Component has its own name and is allocated
 a set of computational resources, in the form of an ESMF Virtual
 Machine, or VM.
 
-The user-written part of a Gridded Component is associated with the
+The user-written part of a Gridded Component is associated with an
 {\tt ESMF\_GridComp} derived type through a routine called SetServices.
 This is a routine that the user must write, and declare public.
-Inside the SetServices routine the user makes calls to 
+Inside the SetServices routine the user must call  
 {\tt ESMF\_SetEntryPoint} methods that associate a standard ESMF 
 operation with the name of the corresponding Fortran subroutine in their user code.  
 
