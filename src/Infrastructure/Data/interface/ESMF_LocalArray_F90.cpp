@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.14 2003/08/28 22:26:24 nscollins Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.15 2003/09/02 15:59:45 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -180,7 +180,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.14 2003/08/28 22:26:24 nscollins Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.15 2003/09/02 15:59:45 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -1241,9 +1241,15 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
           rc = ESMF_FAILURE
         endif
 
-        ! Set arrayspec contents
-      
-        as%rank = rank   
+        ! Set arrayspec contents with some checking to keep Silverio at bay
+        if (rank.ge.1 .and. rank.le.ESMF_MAXDIM) then
+          as%rank = rank
+        else
+          status = ESMF_FAILURE
+          print *, "ERROR in ESMF_LocalArraySpecInit: bad rank"
+          return
+        endif
+        ! TODO: similar for type and kind
         as%type = type
         as%kind = kind
 
