@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5 2004/03/16 18:00:54 nscollins Exp $
+# $Id: build_rules.mk,v 1.6 2004/03/16 22:11:12 nscollins Exp $
 #
 # SunOS.default.default.mk
 #
@@ -59,19 +59,19 @@ SH_LD		   = /opt/SUNWspro/bin/CC
 # C and Fortran compiler 
 #
 C_CC		   = /opt/SUNWspro/bin/cc -KPIC -dalign -xtarget=native
-C_FC		   = /opt/SUNWspro/bin/f90 -openmp -xpp=cpp -dalign
+C_FC		   = /opt/SUNWspro/bin/f90 -xpp=cpp -dalign
 C_FC_MOD           = -M
 C_CLINKER_SLFLAG   = 
 C_FLINKER_SLFLAG   = 
 # Must use f90 to link C to get omp libs
-C_CLINKER	   = /opt/SUNWspro/bin/f90 -openmp -dalign
-C_FLINKER	   = /opt/SUNWspro/bin/f90 -openmp -dalign -R .
+C_CLINKER	   = /opt/SUNWspro/bin/f90 -dalign
+C_FLINKER	   = /opt/SUNWspro/bin/f90 -dalign -R .
 C_CCV		   = ${C_CC} -V
-C_FCV              = /opt/SUNWspro/bin/f90 -openmp -dalign
+C_FCV              = /opt/SUNWspro/bin/f90 -dalign
 C_SYS_LIB	   = -L/opt/SUNWspro/SC5.0/lib -lF77 -lM77 -lfsu -lsunmath -lnsl -lsocket -lgen -ldl -lm
 # ---------------------------- BOPT - g options ----------------------------
-G_COPTFLAGS	   = 
-G_FOPTFLAGS	   = 
+G_COPTFLAGS	   = -g -xs
+G_FOPTFLAGS	   = -g 
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS	   = -fast -xO4 -fsimple=2 -xtarget=native
 O_FOPTFLAGS	   = -fast
@@ -86,7 +86,7 @@ F_FIXNOCPP              = -fixed
 # C++ compiler 
 #
 CXX_CC		   = /opt/SUNWspro/bin/CC -instances=static
-CXX_FC		   = /opt/SUNWspro/bin/f90 -openmp
+CXX_FC		   = /opt/SUNWspro/bin/f90 
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CLINKER	   = /opt/SUNWspro/bin/CC 
@@ -104,14 +104,14 @@ C_CXXF90LIBS       = -L/opt/SUNWspro/lib -lfui -lfai -lfai2 -lfsumai \
 C_CXXSO            = /opt/SUNWspro/bin/CC -G
 C_CXXSOLIBS        = -Kpic  -lCstd -lCrun -lm -lw -lcx -lc
 # ------------------------- BOPT - g_c++ options ------------------------------
-GCXX_COPTFLAGS	   = 
-GCXX_FOPTFLAGS	   =
+GCXX_COPTFLAGS	   = -g
+GCXX_FOPTFLAGS	   = -g
 # ------------------------- BOPT - O_c++ options ------------------------------
 OCXX_COPTFLAGS	   = -O 
 OCXX_FOPTFLAGS	   = -O
 # -------------------------- BOPT - g_complex options ------------------------
-GCOMP_COPTFLAGS	   =
-GCOMP_FOPTFLAGS	   =
+GCOMP_COPTFLAGS	   = -g
+GCOMP_FOPTFLAGS	   = -g
 # --------------------------- BOPT - O_complex options -------------------------
 OCOMP_COPTFLAGS	   = -O
 OCOMP_FOPTFLAGS	   = -O
