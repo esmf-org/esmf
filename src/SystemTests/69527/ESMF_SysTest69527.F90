@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.14 2003/06/20 17:45:54 nscollins Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.15 2003/06/27 18:21:28 nscollins Exp $
 !
 ! System test code #69527
 
@@ -28,15 +28,14 @@
     integer, dimension(2) :: delist
     integer :: row_to_reduce
     integer :: timestep, rowlen, rowi, rstart, rend
-    integer :: result, len, de_id
+    integer :: result, len, de_id, ndes, rightvalue 
     integer :: i_max, j_max
     integer :: horz_gridtype, vert_gridtype
     integer :: horz_stagger, vert_stagger
     integer :: horz_coord_system, vert_coord_system
     integer :: status
     real :: x_min, x_max, y_min, y_max
-    integer(ESMF_IKIND_I4), dimension(:), pointer :: idata, idata2, &
-                                                     rowdata, ldata
+    integer(ESMF_IKIND_I4), dimension(:), pointer :: idata, ldata, rowdata
     type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
     character(len=ESMF_MAXSTR) :: cname, gname, fname
     type(ESMF_DELayout) :: layout1 
@@ -69,8 +68,10 @@
     call ESMF_FrameworkInitialize(rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-!   ! Create a DELayout 
+    ! Create a default 1 x N DELayout 
     layout1 = ESMF_DELayoutCreate(rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test #69527"
@@ -130,15 +131,16 @@
     call ESMF_GridLocalToGlobalIndex(grid1, local1D=ldata, global1D=idata, rc=rc) 
     if (rc .ne. ESMF_SUCCESS) goto 10
 
+    ! Delete local cell number array, not needed anymore.
+    deallocate(ldata, stat=rc)
+
     !  Create Array based on an existing, allocated F90 pointer.
     !  Data is type Integer, 1D.
     array1 = ESMF_ArrayCreate(idata, ESMF_DATA_REF, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    ! No deallocate() is needed for idata, it will be freed when the
-    !  Array is destroyed.  TODO:  it seems delete need a 'delete data' 
-    !  option so the user can choose whether to have esmf delete the space 
-    !  or continue to use the f90 array after the Array is gone?
+    ! We did the allocate outside the framework, so at the end after
+    ! the Array is destroyed we will need an explicit deallocate().
 
 
     ! Create a Field using the Grid and Arrays created above
@@ -175,7 +177,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Get a pointer to the start of the data
-    call ESMF_ArrayGetData(array2, idata2, ESMF_DATA_REF, rc)
+    call ESMF_ArrayGetData(array2, ldata, ESMF_DATA_REF, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Get the mapping between local and global indices for this DE
@@ -192,7 +194,7 @@
     allocate(rowdata(rowlen))
 
     ! and copy over the data row
-    rowdata = idata2(rstart:rend)
+    rowdata = ldata(rstart:rend)
     print *, "rowlen = ", rowlen
     print *, "rstart, rend = ", rstart, rend
     print *, "row data = ", rowdata
@@ -240,6 +242,8 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "All Destroy routines done"
 
+    deallocate(idata, stat=rc)
+
     call ESMF_FrameworkFinalize(rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -253,16 +257,21 @@
       write(failMsg, *)  "Row Reduction value incorrect"
       write(testname, *) "System Test 69527: Field Row Reduction"
 
-      call ESMF_Test((result .eq. 12205) .and. (rc.eq.ESMF_SUCCESS), &
+      rightvalue = 0
+      if (ndes .eq. 1) rightvalue = 7585
+      if (ndes .eq. 2) rightvalue = 12205
+      
+      call ESMF_Test((result .eq. rightvalue) .and. (rc.eq.ESMF_SUCCESS), &
                         testname, failMsg, testresult, ESMF_SRCLINE)
 
-      ! Separate message to console, for quick confirmation of success/failure
-      if ((result .eq. 12205) .and. (rc .eq. ESMF_SUCCESS)) then
-        write(finalMsg, *) "SUCCESS!! Row reduction value (7585) is correct"
+      ! Separate message to console for quick confirmation of success/failure
+      if ((result .eq. rightvalue) .and. (rc .eq. ESMF_SUCCESS)) then
+        write(finalMsg, *) "SUCCESS!! Row reduction value (", rightvalue, &
+                           ") is correct"
       else
         write(finalMsg, *) "System Test did not succeed. ", &
-                           "Row reduction result", result, &
-                           "not equal 12205, or error code set ", rc
+                               "Row reduction result", result, "not equal ", &
+                               rightvalue, " or error code set ", rc
       endif
       write(0, *) ""
       write(0, *) trim(testname)
