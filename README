@@ -1,4 +1,4 @@
- $Id: README,v 1.10 2003/03/06 20:52:32 flanigan Exp $
+ $Id: README,v 1.11 2003/05/08 17:14:50 cdeluca Exp $
 ================================================================================
                                    README
 
@@ -17,7 +17,7 @@ Follow the directions on that webpage to access the ESMF CVS repository.
 The following platforms are supported: Alpha, IRIX64, IBM, Linux, Sun
 
 Currently the following environment variables must be set:
-ESMF_ARCH     alpha, IRIX, IRIX64, rs6000_sp, linux_pgi, linux_gnupgi, linux_lf95, solaris, solaris_hpc
+ESMF_ARCH     alpha, IRIX64, rs6000_sp, rs6000_64
 ESMF_DIR      top-level ESMF directory
 
 
@@ -91,13 +91,13 @@ need not be passed to any make calls).
 --------------------------------------------------------------------------------
 
 The latest documentation for the project can be found at:
-http://www.esmf.ucar.edu -> User Documentation and Links
+http://www.esmf.ucar.edu -> Downloads & Documentation
 
 The documentation at this site is for the latest release.  To obtain
 the documentation that exactly matches this version, follow the documentation
 build procedures outlined above.
 
-Please contact esmf@ucar.edu with any questions or problems.
+Please contact esmf_support@ucar.edu with any questions or problems.
 
 ================================================================================
 
