@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.91 2004/01/07 22:33:15 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.92 2004/01/08 23:37:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -236,7 +236,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.91 2004/01/07 22:33:15 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.92 2004/01/08 23:37:31 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1071,7 +1071,7 @@
       endif 
 
       call ESMF_ArraySpecGet(arrayspec, rank=rank, rc=status)
-      call ESMF_GridGetDE(grid, ai_global=index, rc=status)
+      call ESMF_GridGetDE(grid, globalAIPerDim=index, rc=status)
       if(status .ne. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGetDE"
         return
@@ -2326,8 +2326,8 @@
       integer :: i, gridrank, datarank, thisdim, thislength
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
                                          global_dimlengths
-      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
-      integer, dimension(ESMF_MAXGRIDDIM) :: local_cell_max_dim, local_maxlengths
+      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, globalCellCountPerDim
+      integer, dimension(ESMF_MAXGRIDDIM) :: maxLocalCellCountPerDim, local_maxlengths
       integer, dimension(:), pointer :: decompids
    
       ! Initialize return code   
@@ -2348,8 +2348,10 @@
         print *, "ERROR in FieldGather: DataMapGet returned failure"
         return
       endif 
-      call ESMF_GridGet(ftypep%grid, global_cell_dim=global_cell_dim, rc=status)
-      call ESMF_GridGet(ftypep%grid, local_cell_max_dim=local_cell_max_dim, rc=status)
+      call ESMF_GridGet(ftypep%grid, &
+                        globalCellCountPerDim=globalCellCountPerDim, &
+                        maxLocalCellCountPerDim=maxLocalCellCountPerDim, &
+                        rc=status)
 !     call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO: add decomps
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldGather: GridGet returned failure"
@@ -2372,8 +2374,8 @@
         global_dimlengths(i) = dimlengths(i)
         if(dimorder(i).ne.0) then
           decompids(i) = decomps(dimorder(i))
-          global_dimlengths(i) = global_cell_dim(dimorder(i))
-          local_maxlengths(i) = local_cell_max_dim(dimorder(i))
+          global_dimlengths(i) = globalCellCountPerDim(dimorder(i))
+          local_maxlengths(i) = maxLocalCellCountPerDim(dimorder(i))
         endif
       enddo
 
@@ -2584,8 +2586,7 @@
       integer :: nDEs
       integer :: my_DE
       integer, dimension(ESMF_MAXGRIDDIM) :: global_count
-      integer, dimension(:,:), allocatable :: global_start
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: ai_global
+      integer, dimension(:,:), allocatable :: globalStartPerDEPerDim
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI, gl_dst_AI
       type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
@@ -2627,13 +2628,13 @@
       ! Get global starting counts and global counts
       call ESMF_DElayoutGetNumDEs(layout, nDEs, rc=status)
       AI_count = nDEs
-      allocate(global_start(nDEs, ESMF_MAXGRIDDIM), stat=status)
+      allocate(globalStartPerDEPerDim(nDEs, ESMF_MAXGRIDDIM), stat=status)
       allocate(src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
       allocate(dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
       allocate(gl_src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
       allocate(gl_dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
-      call ESMF_GridGet(ftypep%grid, global_cell_dim=global_count, &
-                        globalStart=global_start, &
+      call ESMF_GridGet(ftypep%grid, globalCellCountPerDim=global_count, &
+                        globalStartPerDEPerDim=globalStartPerDEPerDim, &
                         periodic=periodic, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
          print *, "ERROR in FieldHalo: GridGet returned failure"
@@ -2674,7 +2675,8 @@
           route = ESMF_RouteCreate(layout, rc) 
 
           call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
-                                        gl_dst_AI, AI_count, global_start, &
+                                        gl_dst_AI, AI_count, &
+                                        globalStartPerDEPerDim, &
                                         global_count, layout, periodic, status)
 
       endif
@@ -2692,7 +2694,8 @@
       !call ESMF_RouteDestroy(route, rc)
 
       ! get rid of temporary arrays
-      if (allocated(global_start)) deallocate(global_start, stat=status)
+      if (allocated(globalStartPerDEPerDim)) &
+         deallocate(globalStartPerDEPerDim, stat=status)
       if (associated(src_AI)) deallocate(src_AI, stat=status)
       if (associated(dst_AI)) deallocate(dst_AI, stat=status)
       if (associated(gl_src_AI)) deallocate(gl_src_AI, stat=status)
@@ -3063,8 +3066,9 @@
           AI_snd_count = nx * ny
 
           allocate(src_global_start(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_GridGet(stypep%grid, global_cell_dim=src_global_count, &
-                            globalStart=src_global_start, rc=status)
+          call ESMF_GridGet(stypep%grid, &
+                            globalCellCountPerDim=src_global_count, &
+                            globalStartPerDEPerDim=src_global_start, rc=status)
 
           allocate(src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           allocate(src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
@@ -3086,8 +3090,9 @@
           AI_rcv_count = nx * ny
 
           allocate(dst_global_start(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_GridGet(dtypep%grid, global_cell_dim=dst_global_count, &
-                            globalStart=dst_global_start, rc=status)
+          call ESMF_GridGet(dtypep%grid, &
+                            globalCellCountPerDim=dst_global_count, &
+                            globalStartPerDEPerDim=dst_global_start, rc=status)
 
           allocate(dst_AI_tot(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
           allocate(dst_AI_exc(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
@@ -3352,8 +3357,9 @@
           AI_snd_count = nx * ny
 
           allocate(src_global_start(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_GridGet(stypep%grid, global_cell_dim=src_global_count, &
-                            globalStart=src_global_start, rc=status)
+          call ESMF_GridGet(stypep%grid, &
+                            globalCellCountPerDim=src_global_count, &
+                            globalStartPerDEPerDim=src_global_start, rc=status)
 
           allocate(src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           allocate(src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
@@ -3375,8 +3381,9 @@
           AI_rcv_count = nx * ny
 
           allocate(dst_global_start(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_GridGet(dtypep%grid, global_cell_dim=dst_global_count, &
-                            globalStart=dst_global_start, rc=status)
+          call ESMF_GridGet(dtypep%grid, &
+                            globalCellCountPerDim=dst_global_count, &
+                            globalStartPerDEPerDim=dst_global_start, rc=status)
 
           allocate(dst_AI_tot(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
           allocate(dst_AI_exc(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
@@ -4044,7 +4051,7 @@
       if (hassrcdata) then
         ! don't ask for our de number if this de isn't part of the layout
         call ESMF_DELayoutGetDEID(srclayout, my_src_DE, status)
-        call ESMF_GridGetDE(stypep%grid, ai_global=myAI, rc=status)
+        call ESMF_GridGetDE(stypep%grid, globalAIPerDim=myAI, rc=status)
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.

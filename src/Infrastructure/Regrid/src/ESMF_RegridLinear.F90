@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.1 2004/01/07 18:59:22 jwolfe Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.2 2004/01/08 23:38:49 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.1 2004/01/07 18:59:22 jwolfe Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.2 2004/01/08 23:38:49 jwolfe Exp $'
 
 !==============================================================================
 
@@ -182,7 +182,7 @@
                  "returned failure"
         return
       endif
-      call ESMF_GridGetDE(dstGrid, local_axis_length=dstCounts, rc=status)
+      call ESMF_GridGetDE(dstGrid, localCellCountPerDim=dstCounts, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructLinear: GridGetDE ", &
                  "returned failure"
@@ -206,7 +206,7 @@
                  "returned failure"
         return
       endif
-      call ESMF_GridGetDE(srcGrid, local_axis_length=srcCounts, rc=status)
+      call ESMF_GridGetDE(srcGrid, localCellCountPerDim=srcCounts, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructLinear: GridGetDE ", &
                  "returned failure"

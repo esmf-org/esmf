@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.19 2004/01/07 22:36:12 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.20 2004/01/08 23:39:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -155,7 +155,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.19 2004/01/07 22:36:12 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.20 2004/01/08 23:39:00 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -415,7 +415,7 @@
       endif
 
       ! Extract some layout information for use in this regrid.
-      call ESMF_GridGetDE(srcGrid, ai_global=myAI, total=totalUse, rc=status)
+      call ESMF_GridGetDE(srcGrid, globalAIPerDim=myAI, total=totalUse, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: GridGetDE ", &
                  "returned failure"

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.40 2004/01/07 22:37:14 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.41 2004/01/08 23:38:38 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.40 2004/01/07 22:37:14 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.41 2004/01/08 23:38:38 jwolfe Exp $'
 
 !==============================================================================
 
@@ -186,7 +186,8 @@
         return
       endif
       dstCounts(3) = 2
-      call ESMF_GridGetDE(dstGrid, local_axis_length=dstCounts(1:2), rc=status)
+      call ESMF_GridGetDE(dstGrid, localCellCountPerDim=dstCounts(1:2), &
+                          rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: GridGetDE ", &
                  "returned failure"
@@ -214,7 +215,8 @@
         return
       endif
       srcCounts(3) = 2
-      call ESMF_GridGetDE(srcGrid, local_axis_length=srcCounts(1:2), rc=status)
+      call ESMF_GridGetDE(srcGrid, localCellCountPerDim=srcCounts(1:2), &
+                          rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: GridGetDE ", &
                  "returned failure"
