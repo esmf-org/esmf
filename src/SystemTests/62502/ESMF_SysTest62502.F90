@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62502.F90,v 1.2 2003/03/10 03:23:14 cdeluca Exp $
+! $Id: ESMF_SysTest62502.F90,v 1.3 2003/03/10 05:40:49 cdeluca Exp $
 !
 ! System test code #62502
 
@@ -156,7 +156,7 @@
 !     Print result
 
       ! Figure out our local processor id for message below.
-      call ESMF_DELayoutGetDEId(layout1, de_id, rc)
+      call ESMF_DELayoutGetDEID(layout1, de_id, rc)
 
       call ESMF_CompFinalize(comp1, rc)
       print *, "Comp 1 Finalize finished, rc =", rc

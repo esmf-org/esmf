@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.2 2003/03/10 04:16:22 cdeluca Exp $
+// $Id: ESMC_DELayout.h,v 1.3 2003/03/10 05:40:46 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !CLASS:  ESMC_DELayout - Topology of DE's mapped onto a PElist
+// !CLASS:  ESMC_DELayout - Topology of DE's mapped onto a PEList
 //
 // !DESCRIPTION:
 //

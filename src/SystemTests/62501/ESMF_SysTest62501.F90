@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62501.F90,v 1.2 2003/03/10 03:23:14 cdeluca Exp $
+! $Id: ESMF_SysTest62501.F90,v 1.3 2003/03/10 05:40:48 cdeluca Exp $
 !
 ! System test code #62501
 
@@ -212,7 +212,7 @@
 
     call ESMF_CompFinalize(comp1, rc)
 
-    call ESMF_DELayoutGetDEId(layout1, de_id, rc)
+    call ESMF_DELayoutGetDEID(layout1, de_id, rc)
 
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"

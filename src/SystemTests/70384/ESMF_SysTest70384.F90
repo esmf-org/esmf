@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.8 2003/03/10 03:23:14 cdeluca Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.9 2003/03/10 05:40:49 cdeluca Exp $
 !
 ! System test code #70384
 
@@ -97,7 +97,7 @@
     allocate(dstdata(ni, nj2, nk2))
 
     ! Get our local DE id
-    call ESMF_DELayoutGetDEId(layout1, de_id, rc)
+    call ESMF_DELayoutGetDEID(layout1, de_id, rc)
 
     ! Create arrays, set and get axis info here before initializing
     ! the data.
@@ -202,7 +202,7 @@
 !-------------------------------------------------------------------------
 !   Print result
 
-    call ESMF_DELayoutGetDEId(layout1, de_id, rc)
+    call ESMF_DELayoutGetDEID(layout1, de_id, rc)
 
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"

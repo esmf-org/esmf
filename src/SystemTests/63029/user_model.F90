@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.6 2003/03/10 03:23:14 cdeluca Exp $
+! $Id: user_model.F90,v 1.7 2003/03/10 05:40:49 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -81,7 +81,7 @@
         call ESMF_CompGet(comp, export=export, layout=mylayout, rc=rc)
  
         ! Something to show we are running on different procs
-        call ESMF_DELayoutGetDEId(mylayout, de_id, rc)
+        call ESMF_DELayoutGetDEID(mylayout, de_id, rc)
         print *, "User Comp Init running on DE ", de_id
 
         ! Add an empty "humidity" field to the export state.
@@ -126,7 +126,7 @@
         call ESMF_CompGet(comp, import=myimport, export=myexport, &
                                                   layout=mylayout, rc=status)
         ! Something to show we are running on different procs
-        call ESMF_DELayoutGetDEId(mylayout, de_id, rc=status)
+        call ESMF_DELayoutGetDEID(mylayout, de_id, rc=status)
         print *, "User Comp Run running on DE ", de_id
 
         call ESMF_StatePrint(myimport, rc=status)
@@ -166,7 +166,7 @@
         call ESMF_CompGet(comp, layout=mylayout, rc=rc)
  
         ! Something to show we are running on different procs
-        call ESMF_DELayoutGetDEId(mylayout, de_id, rc)
+        call ESMF_DELayoutGetDEID(mylayout, de_id, rc)
         print *, "User Comp Final running on DE ", de_id
 
         print *, "User Comp Final returning"

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.2 2003/03/10 03:23:14 cdeluca Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.3 2003/03/10 05:40:49 cdeluca Exp $
 !
 ! System test code #69527
 
@@ -112,7 +112,7 @@
 
 
 !   ! figure out our local processor id
-    call ESMF_DELayoutGetDEId(layout1, de_id, rc)
+    call ESMF_DELayoutGetDEID(layout1, de_id, rc)
 
 
 !   ! Allocate and set initial data values.  These are different on each DE.

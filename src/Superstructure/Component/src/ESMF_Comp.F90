@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.31 2003/03/10 03:23:12 cdeluca Exp $
+! $Id: ESMF_Comp.F90,v 1.32 2003/03/10 05:40:48 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -160,7 +160,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.31 2003/03/10 03:23:12 cdeluca Exp $'
+      '$Id: ESMF_Comp.F90,v 1.32 2003/03/10 05:40:48 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -616,7 +616,7 @@ end interface
 
         ! See if this is currently running on a DE which is part of the
         ! proper DELayout.
-	call ESMF_DELayoutGetDEId(component%compp%layout, de_id, status)
+	call ESMF_DELayoutGetDEID(component%compp%layout, de_id, status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
           if (rcpresent) rc = ESMF_SUCCESS
@@ -692,7 +692,7 @@ end interface
 
         ! See if this is currently running on a DE which is part of the
         ! proper DELayout.
-	call ESMF_DELayoutGetDEId(component%compp%layout, de_id, status)
+	call ESMF_DELayoutGetDEID(component%compp%layout, de_id, status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
           if (rcpresent) rc = ESMF_SUCCESS
@@ -766,7 +766,7 @@ end interface
 
         ! See if this is currently running on a DE which is part of the
         ! proper DELayout.
-	call ESMF_DELayoutGetDEId(component%compp%layout, de_id, status)
+	call ESMF_DELayoutGetDEID(component%compp%layout, de_id, status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
           if (rcpresent) rc = ESMF_SUCCESS

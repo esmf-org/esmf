@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.4 2003/03/10 03:23:15 cdeluca Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.5 2003/03/10 05:40:49 cdeluca Exp $
 !
 ! System test code #70385
 
@@ -114,7 +114,7 @@
       print *, "Grid Create returned"
 
 !     Figure out our local processor id
-      call ESMF_DELayoutGetDEId(layout1, de_id, rc)
+      call ESMF_DELayoutGetDEID(layout1, de_id, rc)
 
 !     Allocate arrays.
       call ESMF_GridGetDE(grid1, lcelltot_index=index, rc=rc)

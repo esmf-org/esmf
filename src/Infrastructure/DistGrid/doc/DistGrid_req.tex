@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.30 2003/03/10 03:23:08 cdeluca Exp $
+% $Id: DistGrid_req.tex,v 1.31 2003/03/10 05:40:47 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -11,7 +11,7 @@
 %===============================================================================
 
 This part covers all the requirements for defining, querying and
-relating grid distributions or domain decompositions. The PElist and
+relating grid distributions or domain decompositions. The PEList and
 the global domain are assumed retrievable (from \textbf{Control} and
 \textbf{GriddedComponent} respectively). Here we set down requirements
 that apply to all grids. The requirements specific to certain grid
@@ -21,7 +21,7 @@ types follow in Part~\ref{DG:gridtypes}.
 
 \sreq{Generation of a layout}
 
-Given a global domain and a PElist, there will be methods to derive an
+Given a global domain and a PEList, there will be methods to derive an
 appropriate layout of PEs in multiple dimensions.
 
 \begin{reqlist}
@@ -39,7 +39,7 @@ on such a sub-layout.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} Required by NCEP-SSI, MIT, GFDL. \\
-{\bf Status:} Redundant: covered by spawning of PElists. \\
+{\bf Status:} Redundant: covered by spawning of PELists. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -559,7 +559,7 @@ associated with a distributed grid.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} CCSM-CPL, GFDL, MIT. \\
-{\bf Status:} Redundant: built into PElists. \\
+{\bf Status:} Redundant: built into PELists. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
@@ -572,7 +572,7 @@ distributed grid.
 \begin{reqlist}
 {\bf Priority:} 3 \\
 {\bf Source:} CCSM-CPL, GFDL, MIT \\
-{\bf Status:}Redundant: built into PElists.  \\
+{\bf Status:}Redundant: built into PELists.  \\
 {\bf Verification:} Unit test.\\
 {\bf Notes:}
 \end{reqlist}
@@ -816,7 +816,7 @@ memory available to hold a copy of the global array.
 \sreq{Allgather}
 
 It shall be possible to create a copy on all PEs of the associated
-PElist of the entire global array from a distributed array.
+PEList of the entire global array from a distributed array.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
