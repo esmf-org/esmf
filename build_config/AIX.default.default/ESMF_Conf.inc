@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.1 2003/10/17 19:34:55 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.2 2003/10/28 23:22:11 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -11,7 +11,13 @@ Licensed under the GPL.
 #endif
 
 #if 0
-currently an empty file.  available if #defines needed
-on a per-system basis for F90 code
+Apparently the AIX xlf 8.x compiler stopped being able to handle
+initializers for derived type contents.  It accepts them
+in some places, so I have not defined the normal symbol
+which is ESMF_NO_INITIALIZERS that disables all initialization.
+This symbol selectively disables initialization in the
+places where it causes a compiler internal error.
 #endif
+
+#define ESMF_AIX_8_INITBUG 1
 

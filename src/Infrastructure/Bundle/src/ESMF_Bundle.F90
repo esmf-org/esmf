@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.6 2003/10/25 12:03:28 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.7 2003/10/28 23:22:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,9 +25,9 @@
 !
 ! !DESCRIPTION:
 ! The code in this file implements the {\tt ESMF\_Bundle} class, which 
-! represents a set of {\tt ESMF\_Fields} discretized on the same {\tt ESMF\_Grid}.
-! {\tt ESMF\_Bundle}s offer the option to pack the data from the {\tt ESMF\_Field}s
-! they contain into a single buffer. 
+! represents a set of {\tt ESMF\_Fields} discretized on the same 
+! {\tt ESMF\_Grid}.  {\tt ESMF\_Bundle}s offer the option to pack the data 
+! from the {\tt ESMF\_Field}s they contain into a single buffer. 
 !
 !  This type is implemented in Fortran 90 and a corresponding
 !  C++ interface is provided.
@@ -71,8 +71,8 @@
 !       !
 !       !  Data type to record the ordering information for multiple field
 !       !  data which is packed in a bundle.  Each has an associated
-!       !  {\tt ESMF\_DataMap} object to track the ordering of that {\tt ESMF\_Field}'s data
-!       !  in the packed buffer.
+!       !  {\tt ESMF\_DataMap} object to track the ordering of that 
+!       ! {\tt ESMF\_Field}'s data in the packed buffer.
         type ESMF_FieldInterleave
         sequence
         private
@@ -86,6 +86,7 @@
       type ESMF_LocalBundle
       sequence
       private
+        type(ESMF_Array) :: packed_data               ! local packed array
 #ifndef ESMF_NO_INITIALIZERS
         type(ESMF_GridType), pointer :: gridp => NULL() ! local data
         type(ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT    ! is grid set 
@@ -97,7 +98,6 @@
         type(ESMF_Status) :: arraystatus
         integer :: accesscount
 #endif
-        type(ESMF_Array) :: packed_data               ! local packed array
       
       end type
 
@@ -139,7 +139,7 @@
       type ESMF_Bundle
       sequence
       !private
-#ifndef ESMF_NO_INITIALIZERS
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
         type (ESMF_BundleType), pointer :: btypep => NULL()
 #else
         type (ESMF_BundleType), pointer :: btypep 

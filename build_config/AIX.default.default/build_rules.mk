@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.2 2003/10/20 22:39:38 nscollins Exp $
+#  $Id: build_rules.mk,v 1.3 2003/10/28 23:22:11 nscollins Exp $
 #
 #  AIX.default.default.mk
 #
@@ -35,20 +35,29 @@ endif
 #  If you list -lessl or -lesslp2 below you must have -DESMC_HAVE_ESSL listed in the 
 # PCONF line at the bottom of this file.
 #
-BLAS_LIB       = -lblas ${FC_LIB}
+BLAS_LIB         = -lblas ${FC_LIB}
 # LAPACK_LIB     =  -lesslp2 -L/usr/local/lib32/r4i4 -llapack
-LAPACK_LIB     =  -L/usr/local/lib32/r4i4 -llapack -lessl
-NETCDF_LIB     = -L/usr/local/lib32/r4i4 -lnetcdf
-NETCDF64_LIB   = -L/usr/local/lib64/r4i4 -lnetcdf
+LAPACK_LIB       =  -L/usr/local/lib32/r4i4 -llapack -lessl
+NETCDF_INCLUDE   = -I/usr/local/include
+NETCDF_LIB       = -L/usr/local/lib32/r4i4 -lnetcdf
+NETCDF64_INCLUDE = -I/usr/local/include
+NETCDF64_LIB     = -L/usr/local/lib64/r4i4 -lnetcdf
 #
 # Location of MPI (Message Passing Interface) software
 #
-MPI_LIB        = -L/usr/lpp/ppe.poe/lib -lmpi_r
+ifeq ($(ESMF_COMM),mpi)
+#MPI_LIB        = -L/usr/lpp/ppe.poe/lib -lmpi_r
+MPI_LIB        = -lmpi_r
 MPI_INCLUDE    = 
 MPIRUN         = ${ESMF_TOP_DIR}/scripts/mpirun.rs6000_sp
-MPI64_LIB      = -L/usr/local/mpi64/ppe.poe/lib -lmpi_r -lvtd_r \
-		 -L/usr/local/mpi64/ppe.poe/lib/us -lmpci_r
+#MPI64_LIB      = -L/usr/local/mpi64/ppe.poe/lib -lmpi_r -lvtd_r \
+#		 -L/usr/local/mpi64/ppe.poe/lib/us -lmpci_r
+MPI64_LIB      = -lmpi_r -lvtd_r -lmpci_r
 HDF_INCLUDE    = -I/usr/local/include/hdf
+endif
+
+ifeq ($(ESMF_COMM),mpiuni)
+endif
 
 #
 # Location of STL files for C++
@@ -78,6 +87,19 @@ OMAKE			= ${MAKE}
 RANLIB			= ranlib
 SHELL			= /bin/sh
 SED			= /bin/sed
+# ######################### Common compiler options #####################
+COM_MEMCHECK_FLAG      = -qcheck
+COM_FULLPATH_FLAG      = -qfullpath
+COM_DEBUG_FLAG         = -g 
+COM_ALL_DEBUG_FLAGS    = 
+#COM_ALL_DEBUG_FLAGS    = -g $(COM_MEMCHECK_FLAG) $(COM_FULLPATH_FLAG)
+COM_MAXMEM_FLAG	       = -qmaxmem=4000
+COM_NOWARN_FLAG        = -w
+COM_SPILL_FLAG         = -qspill=3000
+COM_OPT_FLAG           = -O3
+COM_ALL_OPT_FLAGS      = -O3 $(COM_MAXMEM_FLAG) $(COM_NOWARN_FLAG) $(COM_SPILL_FLAG)
+COM_PLAIN_FLAG         = 
+
 # ######################### C compiler options ######################
 #
 RESTRICTED_POINTERS	= -qkeyword=restrict
@@ -112,11 +134,11 @@ C_CCV			= unknown
 C_FCV			= unknown
 C_SYS_LIB		= /usr/lib/libxlf_r.a /usr/lib/libxlf90_r.a  -lisode
 # ---------------------------- BOPT - g options ----------------------------
-G_COPTFLAGS		= -g  -qfullpath -qcheck 
-G_FOPTFLAGS		= -g  -qfullpath -qcheck 
+G_COPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
+G_FOPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
 # ----------------------------- BOPT - O options -----------------------------
-O_COPTFLAGS		= -O3 -qmaxmem=4000 -w -qspill=3000 
-O_FOPTFLAGS		= -O3 -w 
+O_COPTFLAGS		= $(COM_ALL_OPT_FLAGS)
+O_FOPTFLAGS		= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
 FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS} $(FCPP_EXHAUSTIVE)
 # ########################## C++ compiler ##################################
 #
@@ -152,17 +174,17 @@ C_CXXSO			= mpCC_r -G
 C_CXXSOLIBS		= -L. -lm_r -lxlf90_r -lC_r
 
 # ------------------------- BOPT - g_c++ options ------------------------------
-GCXX_COPTFLAGS		= -g  -qfullpath  -qcheck
-GCXX_FOPTFLAGS		= -g  -qfullpath  -qcheck
+GCXX_COPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
+GCXX_FOPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
 # ------------------------- BOPT - O_c++ options ------------------------------
-OCXX_COPTFLAGS		= -O3  -qmaxmem=4000 -qspill=3000 
-OCXX_FOPTFLAGS		= -O3  
+OCXX_COPTFLAGS		= $(COM_ALL_OPT_FLAGS)
+OCXX_FOPTFLAGS		= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
 # -------------------------- BOPT - g_complex options ------------------------
-GCOMP_COPTFLAGS		= -g  -qfullpath  -qcheck
-GCOMP_FOPTFLAGS		= -g  -qfullpath  -qcheck
+GCOMP_COPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
+GCOMP_FOPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
 # --------------------------- BOPT - O_complex options -------------------------
-OCOMP_COPTFLAGS		= -O3  -qmaxmem=4000 -qspill=3000 
-OCOMP_FOPTFLAGS		= -O3 
+OCOMP_COPTFLAGS		= $(COM_ALL_OPT_FLAGS)
+OCOMP_FOPTFLAGS		= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
 #
 PARCH			= rs6000
 
@@ -170,7 +192,8 @@ PARCH			= rs6000
 SL_SUFFIX   = so
 SL_LIBOPTS  = -G -qmkshrobj $(C_F90CXXLIBS) $(MPI_LIB)
 SL_LINKOPTS = -brtl
-SL_LIB_LINKER = xlC -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
+SL_LIB_LINKER = mpCC_r -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
+#SL_LIB_LINKER = xlC -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
 SL_F_LINKER = $(F90CXXLD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
 SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
 SL_LIBS_TO_MAKE = libesmf liboldworld
@@ -235,11 +258,11 @@ C_CCV			= unknown
 C_FCV			= unknown
 C_SYS_LIB		= /usr/lib/libxlf_r.a /usr/lib/libxlf90_r.a  -lisode
 # ---------------------------- BOPT - g options ----------------------------
-G_COPTFLAGS		= -g  -qfullpath 
-G_FOPTFLAGS		= -g  -qfullpath
+G_COPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
+G_FOPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
 # ----------------------------- BOPT - O options -----------------------------
-O_COPTFLAGS		= -O3 -qmaxmem=4000 -w -qspill=3000
-O_FOPTFLAGS		= -O3 -w
+O_COPTFLAGS		= $(COM_ALL_OPT_FLAGS)
+O_FOPTFLAGS		= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
 FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS} $(FCPP_EXHAUSTIVE)
 
 # ########################## C++ compiler ##################################
@@ -271,17 +294,17 @@ C_CXXSO                 = mpCC_r -G
 C_CXXSOLIBS             = -L. -lm_r -lxlf90_r -lC_r
 
 # ------------------------- BOPT - g_c++ options ------------------------------
-GCXX_COPTFLAGS		= -g  -qfullpath
-GCXX_FOPTFLAGS		= -g  -qfullpath 
+GCXX_COPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
+GCXX_FOPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
 # ------------------------- BOPT - O_c++ options ------------------------------
-OCXX_COPTFLAGS		= -O3  -qmaxmem=4000 -qspill=3000
-OCXX_FOPTFLAGS		= -O3
+OCXX_COPTFLAGS		= $(COM_ALL_OPT_FLAGS)
+OCXX_FOPTFLAGS		= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
 # -------------------------- BOPT - g_complex options ------------------------
-GCOMP_COPTFLAGS		= -g  -qfullpath
-GCOMP_FOPTFLAGS		= -g  -qfullpath
+GCOMP_COPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
+GCOMP_FOPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
 # --------------------------- BOPT - O_complex options -------------------------
-OCOMP_COPTFLAGS		= -O3  -qmaxmem=4000 -qspill=3000
-OCOMP_FOPTFLAGS		= -O3
+OCOMP_COPTFLAGS		= $(COM_ALL_OPT_FLAGS)
+OCOMP_FOPTFLAGS		= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
 #
 PARCH			= rs6000_64
 
@@ -294,7 +317,8 @@ PARCH			= rs6000_64
 SL_SUFFIX   = so
 SL_LIBOPTS  = -G -qmkshrobj -q64 $(C_F90CXXLIBS) $(MPI_LIB)
 SL_LINKOPTS = -brtl
-SL_LIB_LINKER = xlC -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
+SL_LIB_LINKER = mpCC_r -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
+#SL_LIB_LINKER = xlC -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
 SL_F_LINKER = $(F90CXXLD) -bloadmap:loadmap.txt
 SL_C_LINKER = $(CXXF90LD) -bloadmap:loadmap.txt
 SL_LIBS_TO_MAKE = libesmf liboldworld
