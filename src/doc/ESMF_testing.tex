@@ -1,4 +1,4 @@
-% $Id: ESMF_testing.tex,v 1.14 2003/11/12 18:41:41 svasquez Exp $
+% $Id: ESMF_testing.tex,v 1.15 2003/11/12 22:49:32 svasquez Exp $
 
 \subsection{Running ESMF Self-Tests}
 \label{testing}
@@ -35,8 +35,8 @@ a wide range of valid and non-valid arguments are evaluated for correct behavior
 The following commands are used to build and run the unit tests provided with 
 the ESMF:
 \begin{verbatim}
-        gmake ESMF_BOPT=<g,O> [ESMF_EXHAUSTIVE=<ON,OFF>] tests
-        gmake ESMF_BOPT=<g,O> [ESMF_EXHAUSTIVE=<ON,OFF>] tests_uni
+        gmake [ESMF_EXHAUSTIVE=<ON,OFF>] tests
+        gmake [ESMF_EXHAUSTIVE=<ON,OFF>] tests_uni
 \end{verbatim}
 
 The {\tt tests\_uni} target runs the tests on a single processor. 
@@ -48,7 +48,7 @@ unit tests are being tracked and corrected by the ESMF development team.
 
 The results of running the unit tests can be found in the following location:
 \begin{verbatim}
-       ${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_COMPILER}.${ESMF_PREC}.${ESMF_SITE}
+${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_COMPILER}.${ESMF_PREC}.${ESMF_SITE}
 \end{verbatim}
 
 For example, if your esmf source files have been placed in: 
@@ -61,7 +61,7 @@ Fortran compiler and ESMF\_COMPILER has been set to lahey, then the build
 system configuration file will be:
 
 \begin{verbatim}
-      build_config/Linux.lahey.mk
+      build_config/Linux.lahey.default/build_rules.mk
 \end{verbatim}
 
 If you want to run a debug version of non-exhaustive unit tests,
@@ -138,8 +138,8 @@ and validation page is accessible from the {\bf Development} link on the navigat
 The following commands are used to build and run the system tests:
 
 \begin{verbatim}
-        gmake ESMF_BOPT=<g,O> [SYSTEM_TEST=NNNNN] system_tests
-        gmake ESMF_BOPT=<g,O> [SYSTEM_TEST=NNNNN] system_tests_uni
+        gmake [SYSTEM_TEST=NNNNN] system_tests
+        gmake [SYSTEM_TEST=NNNNN] system_tests_uni
 \end{verbatim}
 
 The {\tt system\_tests\_uni} target runs the tests on a single processor. 
@@ -150,7 +150,7 @@ are built and run.
 
 The results of the test can be found in the following location:
 \begin{verbatim}
-       ${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_COMPILER}.${ESMF_PREC}.${ESMF_SITE}
+${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_COMPILER}.${ESMF_PREC}.${ESMF_SITE}
 \end{verbatim}
 
 For example, if your ESMF source files have been placed in your home directory:
@@ -164,11 +164,10 @@ and your platform and compiler configuration is:
 \end{verbatim}
 
 and you want to run an optimized version of system test SimpleCoupling,
-then you use these commands from the directory {\tt \~/esmf} :
-
+then you use these commands from the directory \begin{verbatim} ~/esmf. \end{verbatim} 
 \begin{verbatim}
        setenv ESMF_PROJECT <project_name>
-       gmake ESMF_DIR=`pwd` ESMF_BOPT=O SYSTEM_TEST=ESMF_SimpleCoupling system_tests
+       gmake ESMF_DIR=`pwd` SYSTEM_TEST=ESMF_SimpleCoupling system_tests
 \end{verbatim}
 
 If you are using ksh then replace the setenv command with
@@ -180,7 +179,7 @@ this:
 
 The results will be in:
 \begin{verbatim}
-       ~/esmf/test/testO/OSF1.default.64.default/ESMF_SimpleCouplingSTest.stdout
+~/esmf/test/testO/OSF1.default.64.default/ESMF_SimpleCouplingSTest.stdout
 \end{verbatim}
 
 \subsubsection{Running the ESMF VAlidation (EVA) Suite}
