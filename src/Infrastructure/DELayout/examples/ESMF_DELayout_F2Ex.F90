@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_F2Ex.F90,v 1.1 2003/09/19 17:00:03 cdeluca Exp $
+! $Id: ESMF_DELayout_F2Ex.F90,v 1.2 2003/10/20 20:13:55 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -71,7 +71,7 @@ program ESMF_DELayout_FEx2
   end do
 
   ! Initialize ESMF
-  call ESMF_FrameworkInitialize(rc)
+  call ESMF_Initialize(rc)
 
   ! create 2x3 layout of DEs in X-direction
   layout = ESMF_DELayoutCreate(delist, 2, layoutDims, layoutCommTypes, rc)
@@ -207,6 +207,6 @@ program ESMF_DELayout_FEx2
   call ESMF_DELayoutDestroy(layout, rc)
 
   ! Finalize ESMF
-  call ESMF_FrameworkFinalize(rc)
+  call ESMF_Finalize(rc)
 
 end program ESMF_DELayout_FEx2

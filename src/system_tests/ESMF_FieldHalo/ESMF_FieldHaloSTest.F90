@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.2 2003/10/10 17:17:07 jwolfe Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.3 2003/10/20 20:13:58 cdeluca Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -160,7 +160,7 @@
     endif
     
     call ESMF_AppCompDestroy(app, rc)
-    ! call ESMF_FrameworkFinalize(rc)   ! when apps go away
+    ! call ESMF_Finalize(rc)   ! when apps go away
     
     end program FieldHalo
     

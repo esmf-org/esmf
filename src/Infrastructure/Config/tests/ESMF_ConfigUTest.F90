@@ -65,7 +65,7 @@
       counter_success = 0
  
 
-      call ESMF_FrameworkInitialize()
+      call ESMF_Initialize()
 
 ! Initialization:
 !----------------
@@ -114,7 +114,7 @@
       endif
 
 
-      call ESMF_FrameworkFinalize()
+      call ESMF_Finalize()
 
 
 

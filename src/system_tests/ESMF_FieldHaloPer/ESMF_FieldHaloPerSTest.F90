@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.2 2003/10/10 17:17:27 jwolfe Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.3 2003/10/20 20:13:58 cdeluca Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -81,7 +81,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    call ESMF_FrameworkInitialize(rc)
+    call ESMF_Initialize(rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     deflayout = ESMF_DELayoutCreate(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -215,7 +215,7 @@
   
     endif
     
-    call ESMF_FrameworkFinalize(rc)
+    call ESMF_Finalize(rc)
 
     end program FieldHaloPeriodic
     

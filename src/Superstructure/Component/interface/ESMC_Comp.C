@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.14 2003/10/16 22:31:58 nscollins Exp $
+// $Id: ESMC_Comp.C,v 1.15 2003/10/20 20:13:57 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,7 +52,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.14 2003/10/16 22:31:58 nscollins Exp $";
+           "$Id: ESMC_Comp.C,v 1.15 2003/10/20 20:13:57 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -379,10 +379,10 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_FrameworkInitialize - Initialize the ESMF Framework
+// !IROUTINE:  ESMC_Initialize - Initialize the ESMF Framework
 //
 // !INTERFACE:
-      int ESMC_FrameworkInitialize(
+      int ESMC_Initialize(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -401,14 +401,14 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 
     return rc;
 
- } // end ESMC_FrameworkInitialize
+ } // end ESMC_Initialize
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_FrameworkFinalize - Finalize the ESMF Framework
+// !IROUTINE:  ESMC_Finalize - Finalize the ESMF Framework
 //
 // !INTERFACE:
-      int ESMC_FrameworkFinalize(
+      int ESMC_Finalize(
 //
 // !RETURN VALUE:
 //    int error return code

@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseUTest.F90,v 1.5 2003/07/29 23:22:54 svasquez Exp $
+! $Id: ESMF_BaseUTest.F90,v 1.6 2003/10/20 20:13:53 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BaseUTest.F90,v 1.5 2003/07/29 23:22:54 svasquez Exp $'
+      '$Id: ESMF_BaseUTest.F90,v 1.6 2003/10/20 20:13:53 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -67,7 +67,7 @@
 !  added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
 
-      call ESMF_FrameworkInitialize(rc)
+      call ESMF_Initialize(rc)
 
       ! test setting of configuration values
       !call ESMF_BaseSetConfig(base, config_set, rc)
@@ -119,6 +119,6 @@
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
 
-      call ESMF_FrameworkFinalize(rc)
+      call ESMF_Finalize(rc)
   
       end program ESMF_BaseUTest

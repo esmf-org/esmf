@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.2 2003/09/25 19:14:52 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.3 2003/10/20 20:13:56 cdeluca Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -47,7 +47,7 @@
     integer :: result = 0
 
     
-    call ESMF_FrameworkInitialize()
+    call ESMF_Initialize()
 
 !-------------------------------------------------------------------------------
 !   ! Test 1:
@@ -720,7 +720,7 @@
 
 !-------------------------------------------------------------------------------
 
-    call ESMF_FrameworkFinalize()
+    call ESMF_Finalize()
 
 
     end program ESMF_LocalArrayTest

@@ -1,4 +1,4 @@
-! $Id: ESMF_Mach.F90,v 1.5 2003/10/16 22:35:26 nscollins Exp $
+! $Id: ESMF_Mach.F90,v 1.6 2003/10/20 20:13:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@
 
 !------------------------------------------------------------------------------
 !     ! Main program source
-!     !   ESMF_FrameworkInitialize is called from what language?
+!     !   ESMF_Initialize is called from what language?
       integer, parameter :: ESMF_MAIN_C=1, ESMF_MAIN_F90=2
 
 !------------------------------------------------------------------------------
@@ -85,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Mach.F90,v 1.5 2003/10/16 22:35:26 nscollins Exp $'
+      '$Id: ESMF_Mach.F90,v 1.6 2003/10/20 20:13:56 cdeluca Exp $'
 
 !==============================================================================
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.55 2003/10/16 21:45:23 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.56 2003/10/20 20:13:58 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -165,7 +165,7 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_FrameworkInitialize, ESMF_FrameworkFinalize
+      public ESMF_Initialize, ESMF_Finalize
       public ESMF_FrameworkInternalInit   ! should be private to framework
 
       ! These have to be public so other component types can call them,
@@ -185,7 +185,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.55 2003/10/16 21:45:23 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.56 2003/10/20 20:13:58 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -322,7 +322,7 @@ end function
         ! Has the Full ESMF Framework initialization been run?
         ! This only happens once per process at the start.
         if (frameworknotinit) then
-          call ESMF_FrameworkInitialize(status)
+          call ESMF_Initialize(status)
           if (status .ne. ESMF_SUCCESS) then
             if (present(rc)) rc = ESMF_FAILURE
             return
@@ -1355,10 +1355,10 @@ end function
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_FrameworkInitialize - Initialize the ESMF Framework.
+! !IROUTINE:  ESMF_Initialize - Initialize the ESMF Framework.
 !
 ! !INTERFACE:
-      subroutine ESMF_FrameworkInitialize(rc)
+      subroutine ESMF_Initialize(rc)
 !
 ! !ARGUMENTS:
       integer, intent(out), optional :: rc     
@@ -1377,7 +1377,7 @@ end function
 
       call ESMF_FrameworkInternalInit(ESMF_MAIN_F90, rc)
 
-      end subroutine ESMF_FrameworkInitialize
+      end subroutine ESMF_Initialize
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -1443,10 +1443,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_FrameworkFinalize - Clean up and close the ESMF Framework.
+! !IROUTINE:  ESMF_Finalize - Clean up and close the ESMF Framework.
 !
 ! !INTERFACE:
-      subroutine ESMF_FrameworkFinalize(rc)
+      subroutine ESMF_Finalize(rc)
 !
 ! !ARGUMENTS:
       integer, intent(out), optional :: rc     
@@ -1485,7 +1485,7 @@ end function
 
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FrameworkFinalize
+      end subroutine ESMF_Finalize
 
 end module ESMF_CompMod
 

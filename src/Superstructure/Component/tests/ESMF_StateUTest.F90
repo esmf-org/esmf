@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.24 2003/09/23 15:22:31 nscollins Exp $
+! $Id: ESMF_StateUTest.F90,v 1.25 2003/10/20 20:13:58 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.24 2003/09/23 15:22:31 nscollins Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.25 2003/10/20 20:13:58 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -78,7 +78,7 @@
 !-------------------------------------------------------------------------------
 
 
-      call ESMF_FrameworkInitialize(rc)
+      call ESMF_Initialize(rc)
 
 
       !------------------------------------------------------------------------
@@ -500,7 +500,7 @@
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
 
-      call ESMF_FrameworkFinalize(rc)
+      call ESMF_Finalize(rc)
  
   
       end program ESMF_StateUTest

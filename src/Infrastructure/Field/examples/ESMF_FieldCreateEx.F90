@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.4 2003/10/14 19:27:02 nscollins Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.5 2003/10/20 20:13:56 cdeluca Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -36,7 +36,7 @@
         
 !-------------------------------------------------------------------------
 
-    call ESMF_FrameworkInitialize(rc)
+    call ESMF_Initialize(rc)
 
 !-------------------------------------------------------------------------
 !   ! Example 1:
@@ -121,7 +121,7 @@
 
 !-------------------------------------------------------------------------
 
-     call ESMF_FrameworkFinalize(rc)
+     call ESMF_Finalize(rc)
 
 !-------------------------------------------------------------------------
 

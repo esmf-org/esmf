@@ -142,7 +142,7 @@
 #endif
     
 
-    call ESMF_FrameworkInitialize()
+    call ESMF_Initialize()
 
     !NEX_UTest
     call c_ESMF_SizePrint(sizetest1I(1), sizetest1I(2), 1)
@@ -174,7 +174,7 @@
     call c_ESMF_SizePrint(sizetest5S(1), sizetest5S(2), 5)
 #endif
 
-    call ESMF_FrameworkFinalize()
+    call ESMF_Finalize()
 
     end program test
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_AppComp.F90,v 1.5 2003/09/09 21:08:12 nscollins Exp $
+! $Id: ESMF_AppComp.F90,v 1.6 2003/10/20 20:13:57 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_AppComp.F90,v 1.5 2003/09/09 21:08:12 nscollins Exp $'
+      '$Id: ESMF_AppComp.F90,v 1.6 2003/10/20 20:13:57 cdeluca Exp $'
 
 !==============================================================================
 
@@ -360,7 +360,7 @@
         nullify(component%compp)
  
         ! When destroying App component, finalize framework
-        call ESMF_FrameworkFinalize(status)
+        call ESMF_Finalize(status)
 
         ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
