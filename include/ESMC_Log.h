@@ -1,3 +1,5 @@
+/* $Id: ESMC_Log.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
+
 #ifndef ESMC_LOGGER_H
 #define ESMC_LOGGER_H
 

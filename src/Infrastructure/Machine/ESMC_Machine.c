@@ -1,3 +1,4 @@
+/* $Id: ESMC_Machine.c,v 1.4 2001/11/15 22:56:38 dneckels Exp $ */
 
 #include "conf.h"
 

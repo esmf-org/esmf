@@ -1,4 +1,4 @@
-/* ESMC_TimeMgr.h */
+/* $Id: ESMC_TimeMgr.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
 
 #ifndef ESMC_TIME_MGR_H
 #define ESMC_TIME_MGR_H

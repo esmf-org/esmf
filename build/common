@@ -1,4 +1,4 @@
-# $Id: common,v 1.2 2001/11/13 22:33:01 dneckels Exp $ 
+# $Id: common,v 1.3 2001/11/15 22:56:37 dneckels Exp $ 
 #
 #
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -12,10 +12,19 @@ chkalice_dir:
 	  echo Making directory ${PDIR} for library; mkdir -p ${PDIR} ; fi
 	-@if [ ! -d ${ESMC_MODDIR} ]; then \
 	  echo Making directory ${ESMC_MODDIR} for *.mod files; mkdir -p ${ESMC_MODDIR} ; fi
-	-@if [ ! -d ${ESMC_TESTDIR} ]; then \
-	  echo Making directory ${ESMC_TESTDIR} for test output; mkdir -p ${ESMC_TESTDIR} ; fi
+
+chkdir_doc:
 	-@if [ ! -d ${ESMC_DOCDIR} ]; then \
 	  echo Making directory ${ESMC_DOCDIR} for documents; mkdir -p ${ESMC_DOCDIR} ; fi
+
+chkdir_tests:
+	@if [ ${BOPT}foo = foo ] ; then \
+	  echo "You must use the make variable BOPT=[g,O,Opg,O_c++,O_complex,...]" ; \
+	  echo "For example, use: make BOPT=g ex1"; \
+          echo "Remove all .o files and rerun make with appropriate BOPT"; false; fi
+	-@if [ ! -d ${ESMC_TESTDIR} ]; then \
+	  echo Making directory ${ESMC_TESTDIR} for test output; mkdir -p ${ESMC_TESTDIR} ; fi
+
 
 # 1. Checks that user has set BOPT variable
 # 2. Check if the ${LDIR} exists

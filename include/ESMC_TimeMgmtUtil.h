@@ -1,3 +1,4 @@
+/* $Id: ESMC_TimeMgmtUtil.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
 /* Time Management General Utilities */
 
 #include "ESMC_BasicUtil.h"

@@ -1,4 +1,4 @@
-#
+# $Id: base.site.in,v 1.2 2001/11/15 22:56:37 dneckels Exp $
 #  This file contains site-specific information.  The definitions below
 #  should be changed to match the locations of libraries at your site.
 #  The following naming convention is used:

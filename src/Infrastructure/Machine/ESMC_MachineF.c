@@ -1,3 +1,5 @@
+/* $Id: ESMC_MachineF.c,v 1.2 2001/11/15 22:56:38 dneckels Exp $ */
+
 #include "ESMC.h"
 
 #include "ESMC_Machine.h"

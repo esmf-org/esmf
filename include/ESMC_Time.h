@@ -1,4 +1,4 @@
-/* ESMC_Time.h */
+/* $Id: ESMC_Time.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
 
 #ifndef ESMC_TIME_H
 #define ESMC_TIME_H

@@ -1,4 +1,4 @@
-/* Basic Utilities */
+/* $Id: ESMC_BasicUtil.h,v 1.3 2001/11/15 22:56:37 dneckels Exp $ */
 
 #ifndef ESMC_BASIC_UTIL_H
 #define ESMC_BASIC_UTIL_H

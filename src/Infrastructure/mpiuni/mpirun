@@ -1,4 +1,5 @@
 #!/bin/sh
+# $Id: mpirun,v 1.2 2001/11/15 22:56:38 dneckels Exp $
 if [ $1 !=  "-np" ]; then
 progname=$*
 elif  [ $2 =  "1" ]; then

@@ -1,8 +1,9 @@
+/* $Id: ESMC_Version.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
 /*============================================================================*
  * Modeling Framework Version
  *============================================================================*/
 
-/* $Id: ESMC_Version.h,v 1.1 2001/11/13 18:35:48 dneckels Exp $ */
+/* $Id: ESMC_Version.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
 
 #if !defined(__MFVERSION_H)
 #define __MFVERSION_H

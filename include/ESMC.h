@@ -1,4 +1,4 @@
-/* ESMC.h */
+/* $Id: ESMC.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
 
 /* General header for ESMF */
 

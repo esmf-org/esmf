@@ -1,4 +1,4 @@
-/* ESMC_Calendar.h */
+/* $Id: ESMC_Calendar.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
 
 #ifndef ESMC_CALENDAR_H
 #define ESMC_CALENDAR_H

@@ -1,4 +1,4 @@
-/* esmc_fortran.h */
+/* $Id: ESMC_Fortran.h,v 1.2 2001/11/15 22:56:38 dneckels Exp $ */
 
 #include "conf.h"
 

@@ -1,3 +1,4 @@
+# $Id: makefile,v 1.2 2001/11/15 22:56:37 dneckels Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -118,7 +119,7 @@ build_fortran:
 	-@echo "========================================="
 
 # Builds MF test examples for a given BOPT and architecture
-test_cuni: info chkopts chkalice_dir
+test_cuni: info chkopts chkdir_tests
 	-@echo "Beginning to compile and run Uniprocessor C test examples"
 	-@echo "Due to different numerical round-off on certain"
 	-@echo "machines some of the numbers may not match exactly."
@@ -129,7 +130,7 @@ test_cuni: info chkopts chkalice_dir
 	-@echo "========================================="
 
 # Builds MF test examples for a given BOPT and architecture
-test_c: info chkopts chkalice_dir
+test_c: info chkopts chkdir_tests
 	-@echo "Beginning to compile and run C test examples"
 	-@echo "Due to different numerical round-off on certain"
 	-@echo "machines some of the numbers may not match exactly."
@@ -140,7 +141,7 @@ test_c: info chkopts chkalice_dir
 	-@echo "========================================="
 
 # Builds MF test examples for a given BOPT and architecture
-test_f90uni: info chkopts chkalice_dir
+test_f90uni: info chkopts chkdir_tests
 	-@echo "Beginning to compile and run Uniprocessor F90 test examples"
 	-@echo "========================================="
 	-@echo "Due to different numerical round-off on certain"
@@ -153,7 +154,7 @@ test_f90uni: info chkopts chkalice_dir
 	-@echo "========================================="
 
 # Builds MF test examples for a given BOPT and architecture
-test_f90: info chkopts chkalice_dir
+test_f90: info chkopts chkdir_tests
 	-@echo "Beginning to compile and run F90 test examples"
 	-@echo "========================================="
 	-@echo "Due to different numerical round-off on certain"
@@ -188,31 +189,31 @@ SCRIPTS    = maint/addlinks maint/builddist maint/buildlinks maint/wwwman \
 	     maint/xclude maint/crontab  \
 	     maint/autoftp include/foldinclude/generateincludes
 
-alldoc: chkalice_dir
+alldoc: chkdir_doc
 	-@echo "Building All Documentation"
 	-@echo "========================================="
 	-@${OMAKE} tex dvi pdf html
 
 
-dvi: chkalice_dir tex
+dvi: chkdir_doc tex
 	-@echo "Building dvi files"
 	-@echo "========================================="
 	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
 	   ACTION=builddvi  tree 
 
-pdf: chkalice_dir tex
+pdf: chkdir_doc tex
 	-@echo "Building dvi files"
 	-@echo "========================================="
 	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
 	   ACTION=buildpdf  tree 
 	
-tex: chkalice_dir
+tex: chkdir_doc
 	-@echo "Building .F => .tex files"
 	-@echo "========================================="
 	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
 	   ACTION=buildtex  tree 
 
-html: chkalice_dir tex
+html: chkdir_doc tex
 	-@echo "Building html files"
 	-@echo "========================================="
 	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \

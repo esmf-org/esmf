@@ -1,4 +1,4 @@
-/* ESMC_Alarm.h */
+/* $Id: ESMC_Alarm.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
 
 #ifndef ESMC_ALARM_H
 #define ESMC_ALARM_H
