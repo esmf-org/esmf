@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.4 2003/08/18 20:18:18 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.5 2003/08/19 17:07:27 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -150,6 +150,12 @@
     !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS."
     write(name, *) "Local Array Destroy Test"
+    call ESMF_LocalArrayDestroy(array1)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !NEX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS."
+    write(name, *) "Local Array Destroy a destroyed Array Test"
     call ESMF_LocalArrayDestroy(array1)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1 destroy returned"
@@ -498,7 +504,12 @@
     nk = 60
     allocate(real3dptr(ni,nj,nk))
 
+    !NEX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Local Array 3D DATA_COPY Real Data Test"
     array4 = ESMF_LocalArrayCreate(real3dptr, ESMF_DATA_REF, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
     print *, "array 4 create returned"
 
     call ESMF_LocalArrayPrint(array4, "foo", rc)
@@ -512,9 +523,46 @@
     ni = 10 
     nj = 3 
     nk = 40
-    allocate(real3dptr(ni,nj,nk))
 
+#ifdef ESMF_EXHAUSTIVE
+
+    deallocate(real3dptr)
+
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_FAILURE"
+    write(name, *) "Creating a Local Array 3D DATA_COPY Real Data with deallocated array Test"
     array4 = ESMF_LocalArrayCreate(real3dptr, ESMF_DATA_REF, rc)
+    call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+
+    print *, "array 4 create returned"
+
+    !This print of array4 is commented out becauses it crashes
+    !Bug report 791282 has been filed.
+    !This print statement will be uncommented when the bug is fixed
+    ! this deletes the space
+    !call ESMF_LocalArrayPrint(array4, "foo", rc)
+    print *, "array 4 print returned"
+
+    !This test is commented out becauses it crashes
+    !Bug report 791282 has been filed.
+    !This test will be uncommented when the bug is fixed
+    ! this deletes the space
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Local Array 3D DATA_COPY Real Data with deallocated array Test"
+    call ESMF_LocalArrayDestroy(array4)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    print *, "array 4 destroy returned"
+
+#endif
+
+    !NEX_UTest
+    allocate(real3dptr(ni,nj,nk))
+    write(failMsg, *) "Did not return ESMF_FAILURE"
+    write(name, *) "Creating a Local Array 3D DATA_COPY Real Data with an allocated array Test"
+    array4 = ESMF_LocalArrayCreate(real3dptr, ESMF_DATA_REF, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
     print *, "array 4 create returned"
 
     call ESMF_LocalArrayPrint(array4, "foo", rc)
@@ -524,14 +572,17 @@
     call ESMF_LocalArrayDestroy(array4)
     print *, "array 4 destroy returned"
 
-
 !   ! Allocate and free different sizes testing end of array printing code
     ni = 11 
     nj = 3 
     nk = 40
     allocate(real3dptr(ni,nj,nk))
 
+    !NEX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Creating a Local Array 3D DATA_COPY Real Data with an allocated array Test"
     array4 = ESMF_LocalArrayCreate(real3dptr, ESMF_DATA_REF, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 4 create returned"
 
     call ESMF_LocalArrayPrint(array4, "foo", rc)
@@ -548,13 +599,21 @@
     ! print *, ">>> Test 7:"
  
 
+    !NEX_UTest
     arank = 2
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Initializing an Array Spec of rank 2 Test"
     call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_KIND_R4, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     counts(1) = 10
     counts(2) = 20
 
+    !NEX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Creating an Array Spec Test"
     array2 = ESMF_LocalArrayCreate(arrayspec, counts(1:2), rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
 !-------------------------------------------------------------------------------
