@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.12 2003/03/21 22:36:36 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.13 2003/04/25 18:09:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.12 2003/03/21 22:36:36 nscollins Exp $";
+            "$Id: ESMC_CommTable.C,v 1.13 2003/04/25 18:09:06 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -129,7 +129,7 @@
 //
 //EOP
 // !REQUIREMENTS:  
-    int i;
+    int i, *ip;
 
     myid = mydeid;
     commcount = partnercount;
@@ -141,15 +141,39 @@
 
     switch(partnercount) {
       case 4:
-        switch(mydeid) {
-          case 0: commpartner[0] = 1; commpartner[1] = 2; commpartner[2] = 3; 
-                  commpartner[3] = mydeid;  break;
-          case 1: commpartner[0] = 0; commpartner[1] = 3; commpartner[2] = 2; 
-                  commpartner[3] = mydeid;  break;
-          case 2: commpartner[0] = 3; commpartner[1] = 0; commpartner[2] = 1; 
-                  commpartner[3] = mydeid;  break;
-          case 3: commpartner[0] = 2; commpartner[1] = 1; commpartner[2] = 0; 
-                  commpartner[3] = mydeid;  break;
+        { int ids[4][4] = { { 1,2,3,0 },
+                          { 0,3,4,1 }, 
+                          { 3,0,1,2 },
+                          { 2,1,0,3 } };
+
+          for (i=0; i<partnercount; i++)
+              commpartner[i] = ids[mydeid][i];
+        }
+        break;
+      case 6:
+        { int ids[6][6] = { { 1,2,3,4,5,0 },
+                            { 0,4,5,3,2,1 }, 
+                            { 3,0,4,5,1,2 },
+                            { 2,5,0,1,4,3 },
+                            { 5,1,2,0,3,4 },
+                            { 4,3,1,2,0,5 } };
+
+          for (i=0; i<partnercount; i++)
+              commpartner[i] = ids[mydeid][i];
+        }
+        break;
+      case 8:
+        { int ids[8][8] = { { 1,2,3,4,5,6,7,0 },
+                            { 0,7,6,5,4,3,2,1 }, 
+                            { 7,0,5,6,3,4,1,2 },
+                            { 6,5,0,7,2,1,4,3 },
+                            { 5,6,7,0,1,2,3,4 },
+                            { 4,3,2,1,0,7,6,5 },
+                            { 3,4,1,2,7,0,5,6 },
+                            { 2,1,4,3,6,5,0,7 } };
+
+          for (i=0; i<partnercount; i++)
+              commpartner[i] = ids[mydeid][i];
         }
         break;
       default:
