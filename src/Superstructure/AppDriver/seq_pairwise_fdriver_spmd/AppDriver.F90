@@ -60,8 +60,6 @@
     ! Variables related to grid and clock
     integer :: i_max, j_max
     real(ESMF_KIND_I8) :: x_min, x_max, y_min, y_max
-    integer :: s_month, s_day, s_hour, s_min
-    integer :: e_month, e_day, e_hour, e_min
 
     ! Return codes for error checks
     integer :: rc
@@ -142,12 +140,10 @@
 
       call ESMF_TimeIntervalSet(timeStep, S=2, rc=rc)
 
-      call ESMF_TimeSet(startTime, yy=2003, &
-                         mm=s_month, dd=s_day, h=s_hour, m=s_min, s=0, &
+      call ESMF_TimeSet(startTime, yy=2004, mm=9, dd=25, &
                          calendar=gregorianCalendar, rc=rc)
 
-      call ESMF_TimeSet(stopTime, yy=2003, &
-                         mm=e_month, dd=e_day, h=e_hour, m=e_min, s=0, &
+      call ESMF_TimeSet(stopTime, yy=2004, mm=9, dd=26, &
                          calendar=gregorianCalendar, rc=rc)
 
       clock = ESMF_ClockCreate("Application Clock", timeStep, startTime, &
