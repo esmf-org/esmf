@@ -1,4 +1,4 @@
-// $Id: ESMC_DE.C,v 1.11 2003/04/14 14:51:30 nscollins Exp $
+// $Id: ESMC_DE.C,v 1.12 2003/06/16 20:41:43 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DE.C,v 1.11 2003/04/14 14:51:30 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_DE.C,v 1.12 2003/06/16 20:41:43 rstaufer Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -68,7 +68,7 @@
 //      ESMF routine which only initializes DE values; it does not
 //      allocate any resources.  Define for shallow classes only,
 //      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like ESMC\_DECreate.
+//      Construct/Destruct.  Can be overloaded like {\tt ESMC\_DECreate}.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -101,7 +101,7 @@
       ESMC_DEConfig *config) const {  // out - resources
 //
 // !DESCRIPTION:
-//    Returns the set of resources the DE object was configured with.
+//    Returns the set of resources the {\tt ESMC\_DE} object was configured with.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -126,7 +126,7 @@
       const ESMC_DEConfig *config) {     // in - resources
 //
 // !DESCRIPTION:
-//    Configures the DE object with set of resources given.
+//    Configures the {\tt ESMC\_DE} object with set of resources given.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -151,7 +151,7 @@
       <value type> *value) const {     // out - value
 //
 // !DESCRIPTION:
-//     Returns the value of DE member <Value>.
+//     Returns the value of {\tt ESMC\_DE} member <Value>.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -204,7 +204,7 @@
       int esmfid) {     // in - ESMF ID
 //
 // !DESCRIPTION:
-//     Sets the ESMF ID for this DE to given value.
+//     Sets the ESMF ID for this {\tt ESMC\_DE} to given value.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -229,7 +229,7 @@
       ESMC_PE *pe) {     // in - PE
 //
 // !DESCRIPTION:
-//     Sets the DE member PE with the given pe value.
+//     Sets the {\tt ESMC\_DE} member {\tt ESMC\_PE} with the given pe value.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -254,7 +254,7 @@
       ESMC_PE **pe) {     // in - PE
 //
 // !DESCRIPTION:
-//     Gets the DE's associated PE
+//     Gets the {\tt ESMC\_DE}'s associated {\tt ESMC\_PE}
 //
 //EOP
 // !REQUIREMENTS:  
@@ -304,7 +304,7 @@
       int *pid) const {     // out - platform process id
 //
 // !DESCRIPTION:
-//     Get's the DE's platform-specific process ID (e.g. MPI rank)
+//     Get's the {\tt ESMC\_DE}'s platform-specific process ID (e.g. MPI rank)
 //
 //EOP
 // !REQUIREMENTS:  
@@ -434,7 +434,7 @@
 //
 // !DESCRIPTION:
 //      Validates that a DE is internally consistent.
-//      Returns error code if problems are found.  ESMC\_Base class method.
+//      Returns error code if problems are found.  {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -459,7 +459,7 @@
 //
 // !DESCRIPTION:
 //      Print information about a DE.  The options control the
-//      type of information and level of detail.  ESMC\_Base class method.
+//      type of information and level of detail.  {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
