@@ -43,7 +43,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.8 2004/06/11 17:07:12 svasquez Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.9 2004/06/14 16:47:13 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       type (ESMF_Config) cf 
@@ -601,7 +601,7 @@ subroutine MultPar_SingleLine_V
       ! Config Get Floats Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Get Floats Test"
-      call ESMF_ConfigGetAttribute( cf, sigV, nsize=nv, rc=rc )
+      call ESMF_ConfigGetAttribute( cf, sigV, count=nv, rc=rc )
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -747,7 +747,7 @@ subroutine MultPar_SingleLine_V
       ! Config Get Floats Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Get Floats Test"
-      call ESMF_ConfigGetAttribute( cf, sigU, nsize=6, rc=rc ) ! tokens 3 thru 8
+      call ESMF_ConfigGetAttribute( cf, sigU, count=6, rc=rc ) ! tokens 3 thru 8
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -863,7 +863,7 @@ subroutine MultPar_SingleLine_V
       ! Config Get Floats Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Get Floats Test"
-      call ESMF_ConfigGetAttribute( cf, sigV, nsize=6,rc=rc )
+      call ESMF_ConfigGetAttribute( cf, sigV, count=6,rc=rc )
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
