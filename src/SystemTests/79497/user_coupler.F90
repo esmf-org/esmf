@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.5 2003/08/21 19:58:43 nscollins Exp $
+! $Id: user_coupler.F90,v 1.6 2003/08/29 21:13:21 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -87,7 +87,7 @@
 
       ! Get location of output data
       call ESMF_StateGetData(state2, "humidity", humidity2, rc=rc)
-      call ESMF_FieldPrint(humidity1, rc=rc)
+      call ESMF_FieldPrint(humidity2, rc=rc)
 
       ! Get layout from coupler component
       call ESMF_CplCompGet(comp, layout=cpllayout, rc=rc)
@@ -143,8 +143,10 @@
       call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
 
       ! These are fields on different Grids - call Regrid to rearrange
-      !  and move the data.  The communication and weights have been
-      !  precomputed during the init phase.
+      !  the data.  nsc - i think even if we make a regrid object, that
+      !  this will still be a field method and take a regrid argument?
+      !  The communication and weights have been precomputed during the
+      !  init phase.
       call ESMF_FieldRegrid(humidity1, humidity2, routehandle, rc=status)
 
       ! Set output data
