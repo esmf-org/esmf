@@ -1,4 +1,4 @@
-# $Id: common,v 1.16 2003/02/27 17:53:47 flanigan Exp $ 
+# $Id: common,v 1.17 2003/03/03 16:00:26 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -161,7 +161,6 @@ buildexamples_13: ${TESTEXAMPLES_13}
 
 #System tests
 tree_system_tests: $(SYSTEM_TESTS_BUILD) $(SYSTEM_TESTS_RUN) 
-		   $(SYSTEM_TESTS_RM)
 
 tree_build_system_tests: $(SYSTEM_TESTS_BUILD) 
 
