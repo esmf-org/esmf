@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.27 2004/02/19 21:31:00 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.28 2004/03/01 18:49:23 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -157,7 +157,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.27 2004/02/19 21:31:00 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.28 2004/03/01 18:49:23 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -473,7 +473,6 @@
         else
           call ESMF_ArrayGetAxisIndex(srcArray, compindex=myArrayAI, rc=status)
         endif
- !       ! translate myAI to local index
         call ESMF_DataMapGet(srcDataMap, dimlist=dimOrder, rc=status)
         do i = 1,sendDomainList%num_domains
           do j = 1,sendDomainList%domains(i)%rank
@@ -510,11 +509,6 @@
           call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
                                            compindex=allAI, rc=status)
         endif
-        ! translate myAI to local index
-  !      call ESMF_DataMapGet(srcDataMap, dimlist=dimOrder, rc=status)
-  !      call ESMF_GridGlobalToLocalIndex(srcGrid, globalAI2D=allAI, &
-  !                                       localAI2D=allLocalAI, &
-  !                                       dimOrder=dimOrder, rc=status)
         do i = 1,recvDomainList%num_domains
           theirDE = recvDomainList%domains(i)%DE + 1
           do j = 1,recvDomainList%domains(i)%rank
