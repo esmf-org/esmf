@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.5 2004/01/28 22:50:26 nscollins Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.6 2004/02/17 16:35:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.5 2004/01/28 22:50:26 nscollins Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.6 2004/02/17 16:35:20 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -44,6 +44,7 @@
 !     ! Local variables
       integer :: i, x, y, rc, mycell, fieldcount
       type(ESMF_Grid) :: grid, grid2
+      type(ESMF_DELayout) :: layout
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Array) :: arraya, arrayb
       type(ESMF_DataMap) :: datamap
@@ -52,7 +53,8 @@
       type(ESMF_IOspec) :: iospec
       type(ESMF_Field) :: fields(10), returnedfield1, returnedfield2, returnedfield3, simplefield
       type(ESMF_Bundle) :: bundle1, bundle2, bundle3, bundle4
-      real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr1, f90ptr2
+      real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
+      real (ESMF_KIND_R8) :: mincoord(2)
 
 
 
@@ -146,7 +148,10 @@
 
       !NEX_UTest
       ! Add a field to an empty Bundle
-      grid = ESMF_GridCreate(rc=rc)
+      layout = ESMF_DELayoutCreate(rc=rc)
+      mincoord = (/ 0.0, 0.0 /)
+      grid = ESMF_GridCreateLogRectUniform(2, (/ 10, 20 /), mincoord, &
+                                           layout=layout, rc=rc)
       simplefield = ESMF_FieldCreateNoData(grid=grid, name="rh", rc=rc)
       call ESMF_BundleAddFields(bundle2, simplefield, rc=rc);
       write(failMsg, *) ""
