@@ -1,4 +1,4 @@
- $Id: README,v 1.20 2003/07/02 23:11:06 cdeluca Exp $
+ $Id: README,v 1.21 2003/08/19 22:19:26 flanigan Exp $
 ================================================================================
                                    README
 
@@ -6,16 +6,16 @@
 
 ================================================================================
 
-README file for ESMF v1.0.0rp2 release.
+README file for ESMF v1.0.1 release.
 
 The files contained here include the ESMF source code and build system.
 
 More information about the ESMF project can be found at the ESMF web site:
-	
-	http://www.esmf.ucar.edu
+        
+        http://www.esmf.ucar.edu
 
-For additional documentation on building and running the ESMF please see the
-ESMF User's Guide on the ESMF web site, under the "Downloads &
+For additional documentation on building and running the ESMF please
+see the ESMF User's Guide on the ESMF web site, under the "Downloads &
 Documentation" link.
 
 The ESMF library source code is also available for download at:
@@ -28,7 +28,7 @@ Follow the directions on that webpage to access the ESMF CVS repository.
 
 QuickStart information for the impatient.
 
- - set environment variables ESMF_DIR and ESMF_ARCH (see below).
+ - set environment variables ESMF_DIR (see below).
  - Type 'gmake' (the GNU make program) to build the ESMF library.
  - Type 'gmake tests' to make and run the unit tests
     (or 'gmake tests_uni' for non-mpi machines).
@@ -53,8 +53,8 @@ scripts:        Contains scripts for testing and uniprocessor runs, and some
 
 src:            Contains the source code.
 
-In addition, the following directories are created during the building and
-testing stages:
+In addition, the following directories are created during the building
+and testing stages:
 
 doc:            Contains documentation (if built).
 
@@ -68,85 +68,105 @@ test:           Contains unit and system test executables and output.
 System Information
 ------------------
 
-The following platforms are supported: Alpha, IRIX64, IBM 32-bit and 64-bit 
-addressing.
+The following platforms are supported: Alpha, IRIX64, IBM 32-bit and
+64-bit addressing.
 
 
 Environment Variables
 ---------------------
 
-Currently the following environment variables must be set on all platforms:
+Currently the ESMF_DIR environment variable must be set on all
+platforms.  ESMF_DIR should be set to the path of the top
+level ESMF directory.  
 
-ESMF_ARCH     alpha, IRIX64, rs6000_sp (32-bit), rs6000_64
-ESMF_DIR      top-level ESMF directory
+The following environment variables need to be set only if the
+default values are not acceptable.
 
-Environment variables must be set in the user's shell and not inside an ESMF 
-makefile or build system file.  Here is an example of setting an environment 
+ESMF_ARCH      Value of uname -s.  This will by AIX for IBM RS6000's.
+
+ESMF_SITE      Build configure file site name or the value default.
+               If not set, then the value of default is assumed.
+
+ESMF_PREC      Precision value of 32 or 64.  When possible the default
+               value will be 64, otherwise it will be 32.
+
+ESMF_BOPT      Build option value of g (for debug) or O (for Optimize). 
+               Default value will be O.
+
+The README file in the directory esmf_build_config documents these
+variables in more detail.
+
+Environment variables must be set in the user's shell and not inside
+an ESMF makefile or build system file.  They can also be set on the
+gmake command line.  Here is an example of setting an environment
 variable in tcsh and csh shells:
 
-	setenv ESMF_ARCH rs6000_sp
+        setenv ESMF_ARCH AIX
 
 In ksh shell environment variables are set this way:
 
-	export ESMF_ARCH=rs6000_sp
+        export ESMF_ARCH=AIX
 
 Platform notes:
 
 Compaq alpha - Before running on the Compaq, you will need to set the
-environment variable ESMF_PROJECT to a valid project number suitable for the -P
-option on bsub. If you do not know what to set this to first run with it unset
-and you should be prompted by the system for valid values for your userid. 
+environment variable ESMF_PROJECT to a valid project number suitable
+for the -P option on bsub. If you do not know what to set this to
+first run with it unset and you should be prompted by the system for
+valid values for your userid.
 
-IBM rs6000 - Before running on rs6000 machines, you will need to set an
-additional environment variable MP_RMPOOL to a valid node allocation pool.
+IBM rs6000 - Before running on rs6000 machines, you will need to set
+an additional environment variable MP_RMPOOL to a valid node
+allocation pool.
 
 
 Build Information
 -----------------
 
-GNU make is required to build the library.  On most systems this will be just 
-the command gmake.  On others it might be installed as gnumake or even just 
-make.  In any event, use the --version option with these make commands to 
-determine which is GNU make.
+GNU make is required to build the library.  On most systems this will
+be just the command gmake.  On others it might be installed as gnumake
+or even just make.  In any event, use the --version option with these
+make commands to determine which is GNU make.
 
 Build the library with the command:
  
-  gmake BOPT=g 
+  gmake ESMF_BOPT=g 
 
 for a debug version or
 
-  gmake BOPT=O
+  gmake ESMF_BOPT=O
 
 for an optimized version.
 
 To build and run the coupled fluid flow demo:
 
-  gmake BOPT=[g,O] ESMF_COUPLED_FLOW
+  gmake ESMF_BOPT=[g,O] ESMF_COUPLED_FLOW
 
 To build and run the system tests:
 
-  gmake BOPT=[g,O] system_tests
-  gmake BOPT=[g,O] system_tests_uni   ! for non-mpi machines
+  gmake ESMF_BOPT=[g,O] system_tests
+  gmake ESMF_BOPT=[g,O] system_tests_uni   ! for non-mpi machines
 
 To build and run the unit tests:
 
-  gmake BOPT=[g,O] tests
-  gmake BOPT=[g,O] tests_uni          ! for non-mpi machines
+  gmake ESMF_BOPT=[g,O] tests
+  gmake ESMF_BOPT=[g,O] tests_uni          ! for non-mpi machines
 
 To build and run the unit tests in exhaustive mode:
 
-  gmake BOPT=[g,O] ESMF_EXHAUSTIVE=ON tests
-  gmake BOPT=[g,O] ESMF_EXHAUSTIVE=ON tests_uni    ! for non-mpi machines
+  gmake ESMF_BOPT=[g,O] ESMF_EXHAUSTIVE=ON tests
+  gmake ESMF_BOPT=[g,O] ESMF_EXHAUSTIVE=ON tests_uni    ! for non-mpi machines
 
 The exhaustive unit tests option is a *compile* time option.  Use
 
   gmake clean 
 
-first if the unit tests have already been compiled without the 
+first if the unit tests have already been compiled without the
 ESMF_EXHAUSTIVE=ON option.
 
-Output files from the tests are directed to files in 
-${ESMF_DIR}/test/test${BOPT}/${ESMF_ARCH} directories.
+Output files from the tests are directed to files in
+${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_PREC).$(ESMF_SITE)
+directories.
 
 To build documentation:
 
@@ -155,7 +175,8 @@ To build documentation:
   gmake html          ! Creates the html directory.
   gmake alldoc        ! Builds all the above documents.
 
-Final documentation files will be located in the ${ESMF_DIR}/doc directory.
+Final documentation files will be located in the ${ESMF_DIR}/doc
+directory.
 
 
 Usage
@@ -164,40 +185,40 @@ Usage
 To use ESMF from Fortran, add the directory that contains
 the ESMF *.mod file(s),
 
-${ESMF_DIR}/mod/mod${BOPT}/${ESMF_ARCH}
+${ESMF_DIR}/mod/mod${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_PREC).$(ESMF_SITE)
 
-to your search path for *.mod files.  For most compilers this path 
-is identified either with a -I or a -M.  You must also link 
-with the ESMF shared object library.  This is a file called 
-{\tt libesmf.so} that is located in the following directory:
+to your search path for *.mod files.  For most compilers this path is
+identified either with a -I or a -M.  You must also link with the ESMF
+shared object library.  This is a file called libesmf.so that is
+located in the following directory:
 
-${ESMF_DIR}/lib/lib${BOPT}/${ESMF_ARCH}
+${ESMF_DIR}/lib/lib${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_PREC).$(ESMF_SITE)
 
-The details of how to link on specific platforms are included in the 
+The details of how to link on specific platforms are included in the
 next section.
 
-There is a single ESMF module, called ESMF_Mod, that should be 
-included in applications with the Fortran USE statement.  It 
-is not necessary to include any header files in Fortran.
+There is a single ESMF module, called ESMF_Mod, that should be
+included in applications with the Fortran USE statement.  It is not
+necessary to include any header files in Fortran.
 
-To use ESMF from C/C++, link with the ESMF shared object library 
-and include the ESMC.h file. 
+To use ESMF from C/C++, link with the ESMF shared object library and
+include the ESMC.h file.
 
-If you prefer standard libraries, a *.a file is provided  
-in the same library directory as the shared object file.  
+If you prefer standard libraries, a *.a file is provided in the same
+library directory as the shared object file.
 
-For information on how to link with shared libraries on a particular 
-platform, please see the ESMF User's Guide on the ESMF web site, 
-under the "Downloads & Documentation" link.
-
+For information on how to link with shared libraries on a particular
+platform, please see the ESMF User's Guide on the ESMF web site, under
+the "Downloads & Documentation" link.
+ 
 ================================================================================
 
 The latest documentation for the project can be found at:
 http://www.esmf.ucar.edu -> Downloads & Documentation
 
 The documentation at this site is for the latest release.  To obtain
-the documentation that exactly matches this version, follow the documentation
-build procedures outlined above.
+the documentation that exactly matches this version, follow the
+documentation build procedures outlined above.
 
 Please contact esmf_support@ucar.edu with any questions or problems.
 

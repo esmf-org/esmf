@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 2003/05/09 13:20:37 flanigan Exp $
+# $Id: makefile,v 1.31 2003/08/19 22:19:26 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -12,16 +12,31 @@ TOPALL: all
 #
 #  New Variables to point to build and top dirs.
 #  DFF Feb 7, 2003
-ESMF_TOP_DIR   = $(ESMF_DIR)
-ESMF_BUILD_DIR = $(ESMF_DIR)/build
-
+#ESMF_TOP_DIR   = $(ESMF_DIR)
+#ESMF_BUILD_DIR = $(ESMF_DIR)/build
 
 #Default build option.
-BOPT = g
+#BOPT = g
+
+#DIRS = src
+
+#include $(ESMF_BUILD_DIR)/$(ESMF_ARCH)/base
+
+
+#
+# Build update 
+# Aug 19, 2003
+#
+ESMF_TOP_DIR   = $(ESMF_DIR)
+ESMF_BUILD_DIR = $(ESMF_DIR)
+
+include $(ESMF_BUILD_DIR)/esmf_build/common.mk
+
+#
+#  End Build Update 1
+#
 
 DIRS = src
-
-include $(ESMF_BUILD_DIR)/$(ESMF_ARCH)/base
 
 CLEANDIRS = $(ESMF_LIBDIR) $(ESMF_MODDIR) $(ESMF_TESTDIR) doc 
 CLOBBERDIRS = $(ESMF_BUILD)/lib $(ESMF_BUILD)/mod $(ESMF_BUILD)/test 

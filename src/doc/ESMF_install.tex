@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.27 2003/05/30 21:18:37 flanigan Exp $
+% $Id: ESMF_install.tex,v 1.28 2003/08/19 22:19:26 flanigan Exp $
 
 \subsection{ESMF Download Options}
 
@@ -34,11 +34,28 @@ shared objects for are noted on the download web page.
 
 \subsubsection{ESMF Environment Variables}
 
-The following environment variables must be set:
+Currently the ESMF\_DIR environment variable must be set on all
+platforms.  ESMF\_DIR should be set to the path of the top
+level ESMF directory.  
+
+The following environment variables need to be set only if the
+default values are not acceptable.
+
 \begin{verbatim}
-  ESMF_DIR      top-level ESMF directory
-  ESMF_ARCH     platform and compiler configuration
+
+  ESMF_ARCH      Value of uname -s.  This will by AIX for IBM RS6000's.
+
+  ESMF_SITE      Build configure file site name or the value default.
+                 If not set, then the value of default is assumed.
+
+  ESMF_PREC      Precision value of 32 or 64.  When possible the default
+                 value will be 64, otherwise it will be 32.
+
+  ESMF_BOPT      Build option value of g (for debug) or O (for Optimize). 
+                 Default value will be O.
+
 \end{verbatim}
+
 
 On Alpha machines an additional environment variable needs
 to be set:
@@ -56,11 +73,11 @@ Environment variables must be set in the user's shell and not
 inside an ESMF makefile or build system file.  Here is an example 
 of setting an environment variable in tcsh and csh shells:
 \begin{verbatim}
-  setenv ESMF_ARCH rs6000_sp
+  setenv ESMF_PREC 32
 \end{verbatim}
 In ksh shell environment variables are set this way:
 \begin{verbatim}
-  export ESMF_ARCH=rs6000_sp
+  export ESMF_PREC=32
 \end{verbatim}
 
 
@@ -73,6 +90,9 @@ one restriction; the test cases may only be run on one platform at a time.
 \subsubsection{Building the ESMF Libraries}
 \label{BuildESMF}
 
+% GNU make requirement.  File in build/doc
+\input{user_make.tex}
+
 Build the library with the command:
 \begin{verbatim}
   gmake BOPT=g  
@@ -83,8 +103,6 @@ Build the library with the command:
 \end{verbatim}
   for an optimized version.
 
-% GNU make requirement.  File in build/doc
-\input{user_make.tex}
 
 Build options that enable you to copy the library and *.mod files to
 specified directories are explained in Section~\ref{BuildOptions}. 
