@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.174 2004/06/15 22:52:11 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.175 2004/06/18 21:58:36 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.174 2004/06/15 22:52:11 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.175 2004/06/18 21:58:36 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -211,7 +211,7 @@
 ! !IROUTINE: ESMF_GridAddVertHeight - Add a vertical dimension to an existing Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridAddVertHeight(grid, delta, coord, vertStagger, &
+      subroutine ESMF_GridAddVertHeight(grid, delta, coord, vertstagger, &
                                         dimName, dimUnit, name, rc)
 
 !
@@ -219,7 +219,7 @@
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord
-      type(ESMF_GridVertStagger), intent(in), optional :: vertStagger
+      type(ESMF_GridVertStagger), intent(in), optional :: vertstagger
       character(len=*), intent(in), optional :: dimName
       character(len=*), intent(in), optional :: dimUnit
       character(len=*), intent(in), optional :: name
@@ -251,7 +251,7 @@
 !          Array of physical increments in the vertical direction.
 !     \item[{[coord]}]
 !          Array of physical coordinates in the vertical direction.
-!     \item[{[vertStagger]}]
+!     \item[{[vertstagger]}]
 !          {\tt ESMF\_GridVertStagger} specifier to denote vertical grid stagger.
 !     \item[{[dimName]}]
 !          Dimension name.
@@ -296,7 +296,7 @@
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridAddVert(grid%ptr, minGlobalCoord, delta, coord, &
-                                vertGridType, vertStagger, &
+                                vertGridType, vertstagger, &
                                 vertCoordSystem, dimName, dimUnit, &
                                 name, localrc)
 
@@ -1137,11 +1137,11 @@
 ! !IROUTINE: ESMF_GridGet - Get a variety of information about a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGet(grid, horzRelLoc, vertRelLoc, &
-                              horzGridType, vertGridType, &
-                              horzStagger, vertStagger, &
-                              horzCoordSystem, vertCoordSystem, &
-                              coordOrder, dimCount, minGlobalCoordPerDim, &
+      subroutine ESMF_GridGet(grid, horzrelloc, vertrelloc, &
+                              horzgridtype, vertgridtype, &
+                              horzstagger, vertstagger, &
+                              horzcoordsystem, vertcoordsystem, &
+                              coordorder, dimCount, minGlobalCoordPerDim, &
                               maxGlobalCoordPerDim, globalCellCountPerDim, &
                               globalStartPerDEPerDim, maxLocalCellCountPerDim, &
                               cellCountPerDEPerDim, periodic, delayout, &
@@ -1149,15 +1149,15 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
-      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
-      type(ESMF_GridType),     intent(out), optional :: horzGridType
-      type(ESMF_GridVertType), intent(out), optional :: vertGridType
-      type(ESMF_GridHorzStagger), intent(out), optional :: horzStagger
-      type(ESMF_GridVertStagger), intent(out), optional :: vertStagger
-      type(ESMF_CoordSystem), intent(out), optional :: horzCoordSystem
-      type(ESMF_CoordSystem), intent(out), optional :: vertCoordSystem
-      type(ESMF_CoordOrder),  intent(out), optional :: coordOrder
+      type(ESMF_RelLoc), intent(in), optional :: horzrelloc
+      type(ESMF_RelLoc), intent(in), optional :: vertrelloc
+      type(ESMF_GridType),     intent(out), optional :: horzgridtype
+      type(ESMF_GridVertType), intent(out), optional :: vertgridtype
+      type(ESMF_GridHorzStagger), intent(out), optional :: horzstagger
+      type(ESMF_GridVertStagger), intent(out), optional :: vertstagger
+      type(ESMF_CoordSystem), intent(out), optional :: horzcoordsystem
+      type(ESMF_CoordSystem), intent(out), optional :: vertcoordsystem
+      type(ESMF_CoordOrder),  intent(out), optional :: coordorder
       integer, intent(out), optional :: dimCount
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
                             minGlobalCoordPerDim
@@ -1180,30 +1180,30 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[{[horzRelLoc]}]
+!     \item[{[horzrelloc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
 !          grid.
-!     \item[{[vertRelLoc]}]
+!     \item[{[vertrelloc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
 !          grid.
-!     \item[{[horzGridType]}]
-!          Integer specifier to denote horizontal grid type.
-!     \item[{[vertGridType]}]
-!          Integer specifier to denote vertical grid type.
-!     \item[{[horzStagger]}]
-!          Integer specifier to denote horizontal grid stagger.
-!     \item[{[vertStagger]}]
-!          Integer specifier to denote vertical grid stagger.
-!     \item[{[horzCoordSystem]}]
+!     \item[{[horzgridtype]}]
+!          {\tt ESMF\_GridType} specifier to denote horizontal grid type.
+!     \item[{[vertgridtype]}]
+!          {\tt ESMF\_GridVertType} specifier to denote vertical grid type.
+!     \item[{[horzstagger]}]
+!          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid stagger.
+!     \item[{[vertstagger]}]
+!          {\tt ESMF\_GridHorzStagger} specifier to denote vertical grid stagger.
+!     \item[{[horzcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the horizontal grid.
-!     \item[{[vertCoordSystem]}]
+!     \item[{[vertcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the vertical grid.
-!     \item[{[coordOrder]}]
-!          Integer specifier to denote coordinate ordering.
+!     \item[{[coordorder]}]
+!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
 !     \item[{[dimCount]}]
 !          Number of dimensions represented by this Grid.
 !     \item[{[minGlobalCoordPerDim]}]
@@ -1241,18 +1241,42 @@
       !-------------
       !  ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        ! the only think that can be retrieved from an empty grid is the name
+        if (present(name)) then
+          call ESMF_GetName(grid%ptr%base, name, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+        endif 
+        if (present(horzgridtype           ) .OR. &
+            present(vertgridtype           ) .OR. &
+            present(horzstagger            ) .OR. &
+            present(vertstagger            ) .OR. &
+            present(horzcoordsystem        ) .OR. &
+            present(vertcoordsystem        ) .OR. &
+            present(coordorder             ) .OR. &
+            present(dimCount               ) .OR. &
+            present(minGlobalCoordPerDim   ) .OR. &
+            present(maxGlobalCoordPerDim   ) .OR. &
+            present(globalCellCountPerDim  ) .OR. &
+            present(globalStartPerDEPerDim ) .OR. &
+            present(maxLocalCellCountPerDim) .OR. &
+            present(cellCountPerDEPerDim   ) .OR. &
+            present(periodic               ) .OR. &
+            present(delayout               )) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                    "Unknown grid structure", &
+                                    ESMF_CONTEXT, rc)) return
+        endif
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridGet(grid, horzRelLoc, vertRelLoc, &
-                            horzGridType, vertGridType, &
-                            horzStagger, vertStagger, &
-                            horzCoordSystem, vertCoordSystem, &
-                            coordOrder, dimCount, minGlobalCoordPerDim, &
+        call ESMF_LRGridGet(grid, horzrelloc, vertrelloc, &
+                            horzgridtype, vertgridtype, &
+                            horzstagger, vertstagger, &
+                            horzcoordsystem, vertcoordsystem, &
+                            coordorder, dimCount, minGlobalCoordPerDim, &
                             maxGlobalCoordPerDim, globalCellCountPerDim, &
                             globalStartPerDEPerDim, maxLocalCellCountPerDim, &
                             cellCountPerDEPerDim, periodic, delayout, &
@@ -1261,29 +1285,29 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Log Rect Block", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Unstructured", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure User", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid Grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
       end select
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1302,13 +1326,13 @@
 ! !IROUTINE: ESMF_GridGetCoord - Get the coordinates of a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetCoord(grid, horzRelLoc, vertRelLoc, centerCoord, &
+      subroutine ESMF_GridGetCoord(grid, horzrelloc, vertrelloc, centerCoord, &
                                    cornerCoord, faceCoord, reorder, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
-      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: horzrelloc
+      type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       type(ESMF_Array), intent(out), dimension(:), optional :: centerCoord
       type(ESMF_Array), intent(out), dimension(:), optional :: cornerCoord
       type(ESMF_Array), intent(out), optional :: faceCoord
@@ -1324,10 +1348,10 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be queried.
-!     \item[{[horzRelLoc]}]
+!     \item[{[horzrelloc]}]
 !          Horizontal relative location of the {\tt ESMF\_PhysGrid} to be
 !          queried.
-!     \item[{[vertRelLoc]}]
+!     \item[{[vertrelloc]}]
 !          Vertical relative location of the {\tt ESMF\_PhysGrid} to be
 !          queried.
 !     \item[{[centerCoord]}]
@@ -1377,7 +1401,7 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridGetCoord(grid, horzRelLoc, vertRelLoc, centerCoord, &
+        call ESMF_LRGridGetCoord(grid, horzrelloc, vertrelloc, centerCoord, &
                                  cornerCoord, faceCoord, reorder, total, localrc)
 
       !-------------
@@ -1423,15 +1447,15 @@
 ! !IROUTINE: ESMF_GridGetDELocalInfo - Get local DE information for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetDELocalInfo(grid, horzRelLoc, vertRelLoc, &
+      subroutine ESMF_GridGetDELocalInfo(grid, horzrelloc, vertrelloc, &
                                 myDE, localCellCount, localCellCountPerDim, &
                                 minLocalCoordPerDim, maxLocalCoordPerDim, &
                                 globalStartPerDim, reorder, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      type(ESMF_RelLoc), intent(in) :: horzRelLoc
-      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      type(ESMF_RelLoc), intent(in) :: horzrelloc
+      type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       integer, intent(inout), optional :: myDE
       integer, intent(inout), optional :: localCellCount
       integer, dimension(:), intent(inout), optional :: localCellCountPerDim
@@ -1451,16 +1475,16 @@
 !     {\tt ESMF\_Grid}, the user must supply identifiers for both the horizontal
 !     and vertical grids if querying for an array of values, like 
 !     localCellCountPerDim.  The {\tt ESMF\_DistGrid(s)} are identified
-!     using the set of input variables:  horzRelLoc and/or vertRelLoc.
+!     using the set of input variables:  horzrelloc and/or vertrelloc.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[horzRelLoc]
+!     \item[horzrelloc]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
 !          grid.
-!     \item[{[vertRelLoc]}]
+!     \item[{[vertrelloc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
 !          grid.
 !     \item[{[myDE]}]
@@ -1508,7 +1532,7 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridGetDELocalInfo(grid, horzRelLoc, vertRelLoc, &
+        call ESMF_LRGridGetDELocalInfo(grid, horzrelloc, vertrelloc, &
                               myDE, localCellCount, localCellCountPerDim, &
                               minLocalCoordPerDim, maxLocalCoordPerDim, &
                               globalStartPerDim, reorder=reorder, &
@@ -1557,15 +1581,15 @@
 ! !IROUTINE: ESMF_GridGlobalToDELocalIndex - Translate global indexing to DE local
 
 ! !INTERFACE:
-      subroutine ESMF_GridGlobalToDELocalIndex(grid, horzRelLoc, vertRelLoc, &
+      subroutine ESMF_GridGlobalToDELocalIndex(grid, horzrelloc, vertrelloc, &
                                                global1D, local1D, &
                                                global2D, local2D, &
                                                dimOrder, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      type(ESMF_RelLoc), intent(in) :: horzRelLoc
-      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      type(ESMF_RelLoc), intent(in) :: horzrelloc
+      type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       integer(ESMF_KIND_I4), dimension(:), optional, intent(in) :: global1D
       integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: local1D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) :: global2D
@@ -1619,7 +1643,7 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridGlobalToDELocalIndex(grid, horzRelLoc, vertRelLoc, &
+        call ESMF_LRGridGlobalToDELocalIndex(grid, horzrelloc, vertrelloc, &
                                              global1D, local1D, &
                                              global2D, local2D, &
                                              dimOrder, localrc)
@@ -1667,14 +1691,14 @@
 ! !IROUTINE: ESMF_GridDELocalToGlobalIndex - Translate DE local indexing to global
 
 ! !INTERFACE:
-      subroutine ESMF_GridDELocalToGlobalIndex(grid, horzRelLoc, vertRelLoc, &
+      subroutine ESMF_GridDELocalToGlobalIndex(grid, horzrelloc, vertrelloc, &
                                                local1D, global1D, &
                                                local2D, global2D, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      type(ESMF_RelLoc), intent(in) :: horzRelLoc
-      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      type(ESMF_RelLoc), intent(in) :: horzrelloc
+      type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       integer(ESMF_KIND_I4), dimension(:), optional, intent(in) ::  local1D
       integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: global1D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) ::  local2D
@@ -1727,7 +1751,7 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridDELocalToGlobalIndex(grid, horzRelLoc, vertRelLoc, &
+        call ESMF_LRGridDELocalToGlobalIndex(grid, horzrelloc, vertrelloc, &
                                              local1D, global1D, &
                                              local2D, global2D, localrc)
 
@@ -1855,21 +1879,21 @@
 ! !IROUTINE: ESMF_GridSet - Set a variety of information about a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridSet(grid, horzGridType, vertGridType, &
-                              horzStagger, vertStagger, &
-                              horzCoordSystem, vertCoordSystem, &
-                              coordOrder, minGlobalCoordPerDim, &
+      subroutine ESMF_GridSet(grid, horzgridtype, vertgridtype, &
+                              horzstagger, vertstagger, &
+                              horzcoordsystem, vertcoordsystem, &
+                              coordorder, minGlobalCoordPerDim, &
                               maxGlobalCoordPerDim, periodic, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridClass) :: grid
-      type(ESMF_GridType),     intent(in), optional :: horzGridType
-      type(ESMF_GridVertType), intent(in), optional :: vertGridType
-      type(ESMF_GridHorzStagger), intent(in), optional :: horzStagger
-      type(ESMF_GridVertStagger), intent(in), optional :: vertStagger
-      type(ESMF_CoordSystem), intent(in), optional :: horzCoordSystem
-      type(ESMF_CoordSystem), intent(in), optional :: vertCoordSystem
-      type(ESMF_CoordOrder), intent(in), optional :: coordOrder
+      type(ESMF_Grid) :: grid
+      type(ESMF_GridType),     intent(in), optional :: horzgridtype
+      type(ESMF_GridVertType), intent(in), optional :: vertgridtype
+      type(ESMF_GridHorzStagger), intent(in), optional :: horzstagger
+      type(ESMF_GridVertStagger), intent(in), optional :: vertstagger
+      type(ESMF_CoordSystem), intent(in), optional :: horzcoordsystem
+      type(ESMF_CoordSystem), intent(in), optional :: vertcoordsystem
+      type(ESMF_CoordOrder), intent(in), optional :: coordorder
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: minGlobalCoordPerDim
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: maxGlobalCoordPerDim
       type(ESMF_Logical), intent(in), optional :: periodic(:)
@@ -1883,24 +1907,24 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[{[horzGridType]}]
-!          Integer specifier to denote horizontal grid type.
-!     \item[{[vertGridType]}]
-!          Integer specifier to denote vertical grid type.
-!     \item[{[horzStagger]}]
-!          Integer specifier to denote horizontal grid stagger.
-!     \item[{[vertStagger]}]
-!          Integer specifier to denote vertical grid stagger.
-!     \item[{[horzCoordSystem]}]
+!     \item[{[horzgridType]}]
+!          {\tt ESMF\_GridType} specifier to denote horizontal grid type.
+!     \item[{[vertgridType]}]
+!          {\tt ESMF\_GridVertType} specifier to denote vertical grid type.
+!     \item[{[horzstagger]}]
+!          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid stagger.
+!     \item[{[vertstagger]}]
+!          {\tt ESMF\_GridVertStagger} specifier to denote vertical grid stagger.
+!     \item[{[horzcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the horizontal grid.
-!     \item[{[vertCoordSystem]}]
+!     \item[{[vertcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the vertical grid.
-!     \item[{[coordOrder]}]
-!          Integer specifier to denote coordinate ordering.
+!     \item[{[coordorder]}]
+!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
 !     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
 !     \item[{[maxGlobalCoordPerDim]}]
@@ -1917,35 +1941,39 @@
 
       integer :: localrc                          ! local error status
       integer :: i                                ! loop index
+      type(ESMF_GridClass), pointer :: gridp      ! Pointer to new grid
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! Initialize other variables
+      gridp = grid%ptr
+
       ! if present, set information filling in grid derived type
-      if (present(horzGridType)) grid%horzGridType = horzGridType
-      if (present(vertGridType)) grid%vertGridType = vertGridType
-      if (present(horzStagger)) grid%horzStagger = horzStagger
-      if (present(vertStagger)) grid%vertStagger = vertStagger
-      if (present(horzCoordSystem)) grid%horzCoordSystem = horzCoordSystem
-      if (present(vertCoordSystem)) grid%vertCoordSystem = vertCoordSystem
-      if (present(coordOrder)) grid%coordOrder = coordOrder
+      if (present(horzgridtype   )) gridp%horzGridType    = horzgridtype
+      if (present(vertgridtype   )) gridp%vertGridType    = vertgridtype
+      if (present(horzstagger    )) gridp%horzStagger     = horzstagger
+      if (present(vertstagger    )) gridp%vertStagger     = vertstagger
+      if (present(horzcoordsystem)) gridp%horzCoordSystem = horzcoordsystem
+      if (present(vertcoordsystem)) gridp%vertCoordSystem = vertcoordsystem
+      if (present(coordorder     )) gridp%coordOrder      = coordorder
       if (present(periodic)) then
         do i=1,ESMF_MAXGRIDDIM
           if (i > size(periodic)) exit
-          grid%periodic(i) = periodic(i)
+          gridp%periodic(i) = periodic(i)
         enddo
       endif
 
       if (present(minGlobalCoordPerDim)) then
    !     if (size(minGlobalCoordPerDim) .gt. ESMF_MAXGRIDDIM) exit  ! TODO
         do i=1,size(minGlobalCoordPerDim)
-          grid%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
+          gridp%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
         enddo
       endif
       if (present(maxGlobalCoordPerDim)) then
    !     if (size(maxGlobalCoordPerDim) .gt. ESMF_MAXGRIDDIM) exit  ! TODO
         do i=1,size(maxGlobalCoordPerDim)
-          grid%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
+          gridp%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
         enddo
       endif
 
@@ -2832,14 +2860,14 @@
 ! !IROUTINE: ESMF_GridGetAllAxisIndex - Get all axis indices for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetAllAxisIndex(grid, globalAI, horzRelLoc, &
-                                          vertRelLoc, total, rc)
+      subroutine ESMF_GridGetAllAxisIndex(grid, globalAI, horzrelloc, &
+                                          vertrelloc, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(:,:), pointer :: globalAI
-      type(ESMF_RelLoc), intent(in) :: horzRelLoc
-      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      type(ESMF_RelLoc), intent(in) :: horzrelloc
+      type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
@@ -2881,7 +2909,7 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridGetAllAxisIndex(grid, globalAI, horzRelLoc, vertRelLoc, &
+        call ESMF_LRGridGetAllAxisIndex(grid, globalAI, horzrelloc, vertrelloc, &
                                         total, localrc)
 
       !-------------
@@ -3024,14 +3052,14 @@
 ! !IROUTINE: ESMF_GridGetDELocalAI - Get local aixs index DE information for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetDELocalAI(grid, AIPerDim, horzRelLoc, &
-                                       vertRelLoc, reorder, total, rc)
+      subroutine ESMF_GridGetDELocalAI(grid, AIPerDim, horzrelloc, &
+                                       vertrelloc, reorder, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(:), intent(inout) :: AIPerDim
-      type(ESMF_RelLoc), intent(in) :: horzRelLoc
-      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      type(ESMF_RelLoc), intent(in) :: horzrelloc
+      type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       logical, intent(in), optional :: reorder
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
@@ -3043,7 +3071,7 @@
 !     {\tt ESMF\_Grid}, the user must supply identifiers for both the horizontal
 !     and vertical grids if querying for an array of values, like 
 !     localCellCountPerDim.  The {\tt ESMF\_DistGrid(s)} are identified
-!     using the set of input variables:  horzRelLoc and/or vertRelLoc.
+!     using the set of input variables:  horzrelloc and/or vertrelloc.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3051,10 +3079,10 @@
 !          Class to be queried.
 !     \item[AIPerDim]
 !          Global axis indices for each dimension.
-!     \item[horzRelLoc]
+!     \item[horzrelloc]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
 !          grid.
-!     \item[{[vertRelLoc]}]
+!     \item[{[vertrelloc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
 !          grid.
 !     \item[{[reorder]}]
@@ -3090,7 +3118,7 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridGetDELocalInfo(grid, horzRelLoc, vertRelLoc, &
+        call ESMF_LRGridGetDELocalInfo(grid, horzrelloc, vertrelloc, &
                                        globalAIPerDim=AIPerDim, &
                                        reorder=reorder, total=total, rc=localrc)
 
@@ -3137,15 +3165,15 @@
 ! !IROUTINE: ESMF_GridGlobalToDELocalAI - Translate global axis index to DE local
 
 ! !INTERFACE:
-      subroutine ESMF_GridGlobalToDELocalAI(grid, horzRelLoc, vertRelLoc, &
+      subroutine ESMF_GridGlobalToDELocalAI(grid, horzrelloc, vertrelloc, &
                                             globalAI1D, localAI1D, &
                                             globalAI2D, localAI2D, &
                                             dimOrder, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      type(ESMF_RelLoc), intent(in) :: horzRelLoc
-      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      type(ESMF_RelLoc), intent(in) :: horzrelloc
+      type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       type(ESMF_AxisIndex), dimension(:), optional, intent(in) :: globalAI1D
       type(ESMF_AxisIndex), dimension(:), optional, intent(out) ::  localAI1D
       type(ESMF_AxisIndex), dimension(:,:), optional, intent(in) :: globalAI2D
@@ -3195,7 +3223,7 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridGlobalToDELocalAI(grid, horzRelLoc, vertRelLoc, &
+        call ESMF_LRGridGlobalToDELocalAI(grid, horzrelloc, vertrelloc, &
                                           globalAI1D, localAI1D, &
                                           globalAI2D, localAI2D, &
                                           dimOrder, localrc)
@@ -3243,14 +3271,14 @@
 ! !IROUTINE: ESMF_GridDELocalToGlobalAI - Translate DE local axis index to global
 
 ! !INTERFACE:
-      subroutine ESMF_GridDELocalToGlobalAI(grid, horzRelLoc, vertRelLoc, &
+      subroutine ESMF_GridDELocalToGlobalAI(grid, horzrelloc, vertrelloc, &
                                             localAI1D, globalAI1D, &
                                             localAI2D, globalAI2D, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      type(ESMF_RelLoc), intent(in) :: horzRelLoc
-      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      type(ESMF_RelLoc), intent(in) :: horzrelloc
+      type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       type(ESMF_AxisIndex), dimension(:), optional, intent(in) ::  localAI1D
       type(ESMF_AxisIndex), dimension(:), optional, intent(out) :: globalAI1D
       type(ESMF_AxisIndex), dimension(:,:), optional, intent(in) ::  localAI2D
@@ -3299,7 +3327,7 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridDELocalToGlobalAI(grid, horzRelLoc, vertRelLoc, &
+        call ESMF_LRGridDELocalToGlobalAI(grid, horzrelloc, vertrelloc, &
                                           localAI1D, globalAI1D, &
                                           localAI2D, globalAI2D, localrc)
 
