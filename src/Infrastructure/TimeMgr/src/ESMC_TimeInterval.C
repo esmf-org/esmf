@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.76 2004/12/10 22:49:04 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.77 2005/01/07 00:13:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.76 2004/12/10 22:49:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.77 2005/01/07 00:13:45 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -388,7 +388,7 @@
 
     //---------------------------------------------------------------------
     // Reduce this time interval's units to the smallest and least number
-    //   of units possible
+    //   of units possible (ideally all seconds)
     //---------------------------------------------------------------------
 
     tiToConvert.ESMC_TimeIntervalReduce();
