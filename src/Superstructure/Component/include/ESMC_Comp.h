@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.21 2004/05/26 14:23:56 nscollins Exp $
+// $Id: ESMC_Comp.h,v 1.22 2004/05/27 21:33:34 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -131,17 +131,18 @@ extern const char *ESMC_SetReadRestart;
 
 // prototypes for fortran interface routines
 extern "C" {
+   void FTN(f_esmf_compinsertvm)(ESMC_Comp *compp, void *vm, int *rc);
    void FTN(f_esmf_compget)(ESMC_Comp *compp, ESMC_CompType *ctype, int *rc);
-   void FTN(f_esmf_compreplicate)(ESMC_Comp *compp, ESMC_Comp *compp_src, 
+   void FTN(f_esmf_compreplicate)(ESMC_Comp *compp, ESMC_Comp *compp_src,
      void *vm, int *rc);
    void FTN(f_esmf_compcopy)(ESMC_Comp *compp, ESMC_Comp *compp_src, int *rc);
    void FTN(f_esmf_compdelete)(ESMC_Comp *compp, int *rc);
    void FTN(f_esmf_compcreate)(ESMC_Comp *compp, char *name, int *rc, int nlen);
    void FTN(f_esmf_compdestroy)(ESMC_Comp *compp, char *name, int *rc, int nlen);
-   void FTN(f_esmf_compinit)(ESMC_Comp *compp, char *name, void *func, 
+   void FTN(f_esmf_compinit)(ESMC_Comp *compp, char *name, void *func,
                              int *rc, int nlen);
    void FTN(f_esmf_comprun)(ESMC_Comp *compp, char *name, int *rc, int nlen);
-   void FTN(f_esmf_compfinalize)(ESMC_Comp *compp, char *name, int *rc, 
+   void FTN(f_esmf_compfinalize)(ESMC_Comp *compp, char *name, int *rc,
                                  int nlen);
 
 };
