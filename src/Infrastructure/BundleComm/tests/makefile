@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/06/11 18:51:11 svasquez Exp $
+# $Id: makefile,v 1.4 2004/06/11 18:49:22 svasquez Exp $
 
 ALL:  build_tests
 
@@ -59,11 +59,11 @@ $(ESMC_TESTDIR)/ESMC_<Class>UTest: chkopts ESMC_<Class>UTest.o
 
 RUN_ESMC_<Class>UTest:
 	-@rm -f testlog stdlog.* logfile.* ESMC_<Class>UTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
 
 RUN_ESMC_<Class>UTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMC_<Class>UTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
+	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
 
 ESMC_<Class>UTest.rm:
 	echo "ESMC_<Class>Test.rm target called here."
