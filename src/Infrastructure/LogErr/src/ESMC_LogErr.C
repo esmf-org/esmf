@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.54 2004/05/18 17:55:08 cpboulder Exp $
+// $Id: ESMC_LogErr.C,v 1.55 2004/05/18 19:54:33 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.54 2004/05/18 17:55:08 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.55 2004/05/18 19:54:33 eschwab Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -420,7 +420,7 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
 //EOP
 {
     int result=false;
-    rcToReturn=rcToCheck;
+    *rcToReturn=rcToCheck;
     if (rcToCheck!=ESMF_SUCCESS)
     {
         ESMC_LogWrite(msg,ESMC_LOG_ERROR);
@@ -454,7 +454,7 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
 //EOP
 {
     int result=false;
-    rcToReturn=rcToCheck;
+    *rcToReturn=rcToCheck;
     if (rcToCheck!=ESMF_SUCCESS)
     {
         ESMC_LogWrite(msg,ESMC_LOG_ERROR,LINE,FILE,method);
@@ -571,7 +571,7 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
 
 //----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_LogGetErrMsg - LogGetErrMsg
+// !IROUTINE: ESMC_TimeStamp - ESMC_TimeStamp
 //
 // !INTERFACE:
 
@@ -608,6 +608,12 @@ void ESMC_TimeStamp(
     *ms=tv.tv_usec;
 }
 
+//----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_LogGetErrMsg - LogGetErrMsg
+//
+// !INTERFACE:
+
 char *ESMC_LogGetErrMsg(
 
 // !RETURN VALUE:
@@ -620,6 +626,9 @@ char *ESMC_LogGetErrMsg(
 // Gets error message corresponding to rc
 //EOP
 {
+    if (rc == ESMF_SUCCESS) return("Success ");
+    if (rc == ESMF_FAILURE) return("Failure ");
+    if (rc < 1 || rc > ESMC_MAX_ERRORS) return("Unknown error ");
     return((char *)errMsg[rc]);
 }
 
