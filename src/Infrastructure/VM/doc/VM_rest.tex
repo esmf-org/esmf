@@ -1,21 +1,12 @@
-% $Id: VM_rest.tex,v 1.4 2004/06/15 23:23:53 cdeluca Exp $
+% $Id: VM_rest.tex,v 1.5 2004/12/30 18:54:30 theurich Exp $
 
 %\subsubsection{Restrictions and Future Work}
 
 \begin{enumerate}
 
-\item {\bf Threading turned off.}  The multi-threading features of VM 
-are currently disabled in order to prevent conflicts with those 
-parts of ESMF that are not thread-safe.
+\item {\bf Nonblocking option only partially implemented.} Only for the SendRecv communication methods the non-blocking option is currently implemented.
 
-\item {\bf Concurrency support turned off.}  The concurrency features of 
-VM are currently disabled. 
-
-\item {\bf Nonblocking versions not implemented.}  Only the blocking 
-versions of the communication primitives are currently implemented.
-
-\item {\bf {\tt ESMF\_SUM} is the only reduction operation 
-currently implemented.} 
+\item {\bf ESMF-Threading not supported.} The ESMF multi-threading features of the VM are enabled but not currently supported.
 
 \item {\bf None of the topology features have been implemented.}
 
