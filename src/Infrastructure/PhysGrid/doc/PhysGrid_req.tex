@@ -1,4 +1,4 @@
-%$Id: PhysGrid_req.tex,v 1.17 2002/05/17 21:21:05 cdeluca Exp $
+%$Id: PhysGrid_req.tex,v 1.18 2002/05/20 17:18:28 michalak Exp $
 
 %===============================================================================
 \req{Physical locations}
@@ -9,7 +9,7 @@ A mechanism shall be provided for describing physical locations in space in 1,
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, 
-              CAM-FV, PSAS, MIT \\
+              CAM-FV, PSAS, MIT, WRF \\
 {\bf Status:} Proposed \\
 {\bf Verification:} System test\\
 {\bf Notes:} 
@@ -41,7 +41,7 @@ units must be assumed.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, POP, CICE, ReGrid, NCEP-GSM, NCEP-SSI,
-              PSAS, MIT \\
+              PSAS, MIT, WRF \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -135,7 +135,7 @@ http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm)
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, CAM-EUL, POP, NCEP-GSM, NCEP-SSI,
-              CAM-FV, PSAS, MIT \\
+              CAM-FV, PSAS, MIT, WRF \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection\\
 {\bf Notes:} 
@@ -145,7 +145,7 @@ http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm)
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, CAM-EUL, POP, NCEP-SSI,
-              CAM-FV, PSAS, MIT \\
+              CAM-FV, PSAS, MIT, WRF \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -559,7 +559,7 @@ cells, but the relative indices of neighbors are unpredictable.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI,
-     CAM-FV, PSAS, MIT \\
+     CAM-FV, PSAS, MIT, WRF \\
 {\bf Status:} Proposed \\
 {\bf Verification:} System test.
 \end{reqlist}
@@ -595,7 +595,7 @@ determining the PhysGrid.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM, NCEP-SSI,
-              CAM-FV, PSAS, MIT \\
+              CAM-FV, PSAS, MIT, WRF \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -617,7 +617,7 @@ Methods shall be provided to query a PhysGrid for all information in contains.
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI,
-              CAM-FV, PSAS, MIT \\
+              CAM-FV, PSAS, MIT, WRF \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -628,7 +628,7 @@ PhysGrids shall specify both the locations of cell vertices, and the locations
 of cell centers.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE, ReGrid, NCEP-GSM, MIT \\
+{\bf Source:} General Req. 8.0.2, POP, CICE, ReGrid, NCEP-GSM, MIT, WRF \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} Many models mix finite difference and finite volume concepts.
@@ -743,7 +743,7 @@ underlying DistGrid.
 \begin{reqlist}
 {\bf Priority:}  \\
 {\bf Source:} General Req. 1.5.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI,
-              CAM-FV, PSAS, MIT \\
+              CAM-FV, PSAS, MIT, WRF \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} If supported, this facility would dramatically complicate implementation,
@@ -760,6 +760,7 @@ order.
 {\bf Priority:}  \\
 {\bf Source:} Please list required orders in Fortran notation. CCSM-CPL(XY), C
 AM-EUL (XYZ, XZY, ZXY), POP(XYZ), CICE(XY), NCEP(XYZ,XZY,YXZ,ZXY,ZYX), 
+WRF(XYZ,XZY,YXZ,ZXY,ZYX),
 MIT(XYZ, XZY, ZXY, YZX),
 PSAS (XYZ,XZY) \\
 {\bf Status:} Proposed \\
@@ -1412,7 +1413,7 @@ land.  Masks are also important for nested applications.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM, NCEP-SSI, MIT \\
+{\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF \\
 {\bf Status:} Proposed \\
 {\bf Verification:} System test\\
 {\bf Notes:} 
