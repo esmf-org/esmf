@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.14 2003/08/29 05:37:00 eschwab Exp $
+! $Id: FlowMod.F90,v 1.15 2003/08/29 22:17:58 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -206,8 +206,6 @@
         return
       endif
       call ESMF_DELayoutGetDEPosition(layout, x, y, rc)
-      x = x + 1
-      y = y + 1
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get position"
         return

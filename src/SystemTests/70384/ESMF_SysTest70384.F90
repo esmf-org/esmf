@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.24 2003/08/05 21:20:18 nscollins Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.25 2003/08/29 22:14:45 nscollins Exp $
 !
 ! System test code #70384
 
@@ -125,8 +125,6 @@
     enddo
     call ESMF_DELayoutGetDEPosition(layout1, de_pos(1), de_pos(2), rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    de_pos(1) = de_pos(1) + 1  ! TODO:  Should not have to translate from C
-    de_pos(2) = de_pos(2) + 1
 
     ! Calculate global_positions -- would otherwise come from a grid call
     do i = 1,3

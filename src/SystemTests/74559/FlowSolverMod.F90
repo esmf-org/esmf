@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.16 2003/08/29 05:37:36 eschwab Exp $
+! $Id: FlowSolverMod.F90,v 1.17 2003/08/29 22:18:20 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -302,8 +302,6 @@
         return
       endif
       call ESMF_DELayoutGetDEPosition(layout, x, y, status)
-      x = x + 1        ! this is necessary because it's coming from the C++
-      y = y + 1        ! side and it has not been "translated" into Fortran
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get position"
         return

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.28 2003/08/15 22:52:21 jwolfe Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.29 2003/08/29 22:17:27 nscollins Exp $
 !
 ! System test code #70385
 
@@ -426,6 +426,7 @@
       call ESMF_DELayoutGetDEPosition(layout, xpos, ypos, rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
+   
       mismatch = 0
 
       ! check interior points
@@ -470,7 +471,7 @@
         enddo
       enddo
       ! left side middle
-      if (xpos .eq. 0) then
+      if (xpos .eq. 1) then
         target = -1
       else
         target = de_id - 1
@@ -484,7 +485,7 @@
         enddo
       enddo
       ! right side middle
-      if (xpos .eq. nx-1) then
+      if (xpos .eq. nx) then
         target = -1
       else
         target = de_id + 1
@@ -500,7 +501,7 @@
 
       ! and finally corners
       ! lower left
-      if ((xpos .eq. 0) .or. (ypos .eq. 0)) then
+      if ((xpos .eq. 1) .or. (ypos .eq. 1)) then
         target = -1
       else
         target = de_id - nx - 1
@@ -514,7 +515,7 @@
         enddo
       enddo
       ! lower right
-      if ((xpos .eq. nx-1) .or. (ypos .eq. 0)) then
+      if ((xpos .eq. nx) .or. (ypos .eq. 1)) then
         target = -1
       else
         target = de_id - nx + 1
@@ -528,7 +529,7 @@
         enddo
       enddo
       ! upper left
-      if ((xpos .eq. 0) .or. (ypos .eq. ny-1)) then
+      if ((xpos .eq. 1) .or. (ypos .eq. ny)) then
         target = -1
       else
         target = de_id + nx - 1
@@ -542,7 +543,7 @@
         enddo
       enddo
       ! upper right
-      if ((xpos .eq. nx-1) .or. (ypos .eq. ny-1)) then
+      if ((xpos .eq. nx) .or. (ypos .eq. ny)) then
         target = -1
       else
         target = de_id + nx + 1
