@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.7 2003/04/15 16:01:51 nscollins Exp $
+! $Id: ESMF_IO.F90,v 1.8 2003/04/15 18:05:53 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IO module
@@ -146,8 +146,20 @@
 
       status = ESMF_FAILURE
 
-#if ((ESMF_ARCH == IRIX) || (ESMF_ARCH == IRIX64))
+#if   defined(PARCH_linux)
+      print *, "need to call flush() here"
+#elif defined(PARCH_IRIX64)
       call flush(unitNumber, status)
+#elif defined(PARCH_rs6000)
+      call flush_(unitNumber, status)
+#elif defined(PARCH_mac_osx)
+      print *, "need to call flush() here"
+#elif defined(PARCH_solaris)
+      print *, "need to call flush() here"
+#elif defined(PARCH_alpha)
+      print *, "need to call flush() here"
+#else
+      print *, "unknown architecture in ESMF_IOFlush()"
 #endif
 
       end subroutine ESMF_IOFlush
