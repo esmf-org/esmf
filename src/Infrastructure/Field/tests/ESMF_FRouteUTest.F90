@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.20 2003/08/01 14:43:41 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.21 2003/09/22 20:28:42 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.20 2003/08/01 14:43:41 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.21 2003/09/22 20:28:42 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -63,7 +63,7 @@
       type(ESMF_Field) :: f1, f2, f3, f4, f5
       integer :: nDEs, nDE_i, nDE_j
       integer :: half, quart
-      real :: x_min, x_max, y_min, y_max
+      real (ESMF_KIND_R8):: x_min, x_max, y_min, y_max
       integer :: counts(ESMF_MAXGRIDDIM)
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
