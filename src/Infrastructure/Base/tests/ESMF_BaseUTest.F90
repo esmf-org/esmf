@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseUTest.F90,v 1.1 2003/03/26 18:02:03 nscollins Exp $
+! $Id: ESMF_BaseUTest.F90,v 1.2 2003/06/05 16:29:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BaseUTest.F90,v 1.1 2003/03/26 18:02:03 nscollins Exp $'
+      '$Id: ESMF_BaseUTest.F90,v 1.2 2003/06/05 16:29:58 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -58,15 +58,15 @@
       ! instantiate a Base 
       type(ESMF_Base) :: base
 
-#ifdef ESMF_EXHAUSTIVE
+!--------------------------------------------------------------------------------
+!     The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+!     always run. When the environment variable, EXHAUSTIVE, is set to ON then
+!     the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+!     to OFF, then only the sanity unit tests.
+!     Special strings (Non-exhaustive and exhaustive) have been
+!     added to allow a script to count the number and types of unit tests.
+!--------------------------------------------------------------------------------
 
-      ! perform exhaustive tests here;
-      !   use same templates as below
-
-      ! future release will use run-time switching mechanism
-#else
-
-      ! perform non-exhaustive tests here
 
       ! test setting of configuration values
       !call ESMF_BaseSetConfig(base, config_set, rc)
@@ -83,6 +83,7 @@
       !call ESMF_Test((rc.eq.ESMF_SUCCESS .and. config_get .eq. config_set), &
       !                name, failMsg, result, ESMF_SRCLINE)
 
+      !NEX
       ! test setting of ESMF_Base members values
       name_set = "fred"
       call ESMF_SetName(base, name_set, "Base", rc)
@@ -91,6 +92,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      !NEX
       ! test getting of ESMF_Base members values,
       !   compare to values set previously
       call ESMF_GetName(base, name_get, rc)
@@ -112,8 +114,6 @@
       !write(failMsg, *) "rc =", rc, ", print_options =", trim(print_options)
       !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
       !                name, failMsg, result, ESMF_SRCLINE)
-
-#endif
 
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
