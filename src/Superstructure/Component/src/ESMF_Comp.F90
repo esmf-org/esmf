@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.34 2003/04/01 23:47:57 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.35 2003/04/02 16:35:55 flanigan Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -200,7 +200,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.34 2003/04/01 23:47:57 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.35 2003/04/02 16:35:55 flanigan Exp $'
 
 !==============================================================================
 !
@@ -1136,7 +1136,7 @@
 !   \item[{[clock]}]  External clock for passing in time information.
 !
 !   \item[{[phase]}]  If multiple-phase init, which phase number this is.
-!      Pass in 0 or {\tt ESMF_SINGLEPHASE} for non-multiples.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1184,7 +1184,7 @@
 !   \item[{[clock]}]  External clock for passing in time information.
 !
 !   \item[{[phase]}]  If multiple-phase init, which phase number this is.
-!      Pass in 0 or {\tt ESMF_SINGLEPHASE} for non-multiples.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1251,7 +1251,7 @@
 !   \item[{[clock]}]  External clock for passing in time information.
 !
 !   \item[{[phase]}]  If multiple-phase init, which phase number this is.
-!      Pass in 0 or {\tt ESMF_SINGLEPHASE} for non-multiples.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !
 !   \item[{[gcomp]}] If gridded, actual component.  Only one of this and
 !      {\tt ccomp} can be specified.
@@ -1357,7 +1357,7 @@
 !   \item[{[clock]}]  External clock for passing in time information.
 !
 !   \item[{[phase]}]  If multiple-phase run, which phase number this is.
-!      Pass in 0 or {\tt ESMF_SINGLEPHASE} for non-multiples.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1404,7 +1404,7 @@
 !   \item[{[clock]}]  External clock for passing in time information.
 !
 !   \item[{[phase]}]  If multiple-phase run, which phase number this is.
-!      Pass in 0 or {\tt ESMF_SINGLEPHASE} for non-multiples.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1463,7 +1463,7 @@
 !   \item[{[clock]}]  External clock for passing in time information.
 !
 !   \item[{[phase]}]  If multiple-phase run, which phase number this is.
-!      Pass in 0 or {\tt ESMF_SINGLEPHASE} for non-multiples.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1564,7 +1564,7 @@
 !   \item[{[clock]}]  External clock for passing in time information.
 !
 !   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
-!      Pass in 0 or {\tt ESMF_SINGLEPHASE} for non-multiples.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1611,7 +1611,7 @@
 !   \item[{[clock]}]  External clock for passing in time information.
 !
 !   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
-!      Pass in 0 or {\tt ESMF_SINGLEPHASE} for non-multiples.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1670,7 +1670,7 @@
 !   \item[{[clock]}]  External clock for passing in time information.
 !
 !   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
-!      Pass in 0 or {\tt ESMF_SINGLEPHASE} for non-multiples.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHAS} for non-multiples.
 !
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
