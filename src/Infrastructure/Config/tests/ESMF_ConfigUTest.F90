@@ -30,23 +30,16 @@
 !      27apr2003 Leonid Zaslavsky Further corrected and debugged.
 !------------------------------------------------------------------------
 
-    program ESMF_Config_Test
-
 #include <ESMF_Macros.inc>
 
-!USES
-      use ESMF_TestMod     ! test methods
-      use ESMF_Mod
 
-      implicit none
+module config_subrs
 
-!------------------------------------------------------------------------------
-! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.10 2004/06/17 15:37:54 svasquez Exp $'
-!------------------------------------------------------------------------------
+        use ESMF_TestMod
+        use ESMF_Mod
+        public
 
-      type (ESMF_Config) cf 
+      type (ESMF_Config) :: cf 
       
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
@@ -77,99 +70,7 @@
       integer :: rc_opening
       real :: success_rate
 
-      counter_total = 0
-      counter_success = 0
- 
-!-------------------------------------------------------------------------------
-! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-! always run. When the environment variable, EXHAUSTIVE, is set to ON then
-! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
-! to OFF, then only the sanity unit tests.
-! Special strings (Non-exhaustive and exhaustive) have been
-! added to allow a script to count the number and types of unit tests.
-!-------------------------------------------------------------------------------
-
-
-      call ESMF_Initialize()
-
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Test Config Create
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Config Create Test"
-      cf = ESMF_ConfigCreate( rc )
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Test Config Destroy
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Config Destroy Test"
-      call ESMF_ConfigDestroy( cf, rc ) 
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-#ifdef ESMF_EXHAUSTIVE
-
-
-! Initialization:
-!----------------
-      call Initialization()
-      if (rc /=0) STOP            ! Catastropic Error
-
-
-! Retrieval of single parameters
-!--------------------------------
-      call SinglePar()
-
-
-! Retrieval of a group of parameters on a single line
-! ----------------------------------------------------
-
-      call  MultPar_SingleLine_U()
-
-      call  MultPar_SingleLine_v()
-
-
-! Retrieval of a group of parameters on multiple lines
-!   ----------------------------------------------------
-      call MultPar_MultLines()
-
-
-! Retrieval of Tables of unknown length
-! ---------------------------------------
-
-      call Table()
-
-
-! Finalization
-! ------------
- 
-      call Finalization()
-
-! REPORTING
-! ------------
-      
-      !EX_UTest
-      write(failMsg, *) "Config Unit test failed"
-      write(name, *) "Config Unit Test"
-      call ESMF_Test((counter_success.eq.counter_total), name, failMsg, result, ESMF_SRCLINE)
-      if  (counter_total > 0) then
-         if( counter_success == counter_total ) then 
-            print *,'ESMF_Config: All tests were successful'
-         else
-            success_rate = 100.0 * counter_success / counter_total 
-            print *,'ESMF_Config: Success rate: ', nint(success_rate),'%' 
-         endif
-      endif
-
-#endif
-
-      call ESMF_Finalize()
-
-
-
-    CONTAINS
-
+        contains
 !--------------------------------------------------------------------
       subroutine Initialization()
 !--------------------------------------------------------------------
@@ -1144,6 +1045,116 @@ subroutine MultPar_SingleLine_V
       endif
       
     end subroutine Finalization
+
+end module config_subrs
+
+
+
+    program ESMF_Config_Test
+
+
+!USES
+      use ESMF_TestMod     ! test methods
+      use ESMF_Mod
+      use config_subrs
+
+      implicit none
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+      character(*), parameter :: version = &
+      '$Id: ESMF_ConfigUTest.F90,v 1.11 2004/06/18 08:01:25 nscollins Exp $'
+!------------------------------------------------------------------------------
+
+      counter_total = 0
+      counter_success = 0
+ 
+!-------------------------------------------------------------------------------
+! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+! always run. When the environment variable, EXHAUSTIVE, is set to ON then
+! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+! to OFF, then only the sanity unit tests.
+! Special strings (Non-exhaustive and exhaustive) have been
+! added to allow a script to count the number and types of unit tests.
+!-------------------------------------------------------------------------------
+
+
+      call ESMF_Initialize()
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Test Config Create
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Create Test"
+      cf = ESMF_ConfigCreate( rc )
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Test Config Destroy
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Destroy Test"
+      call ESMF_ConfigDestroy( cf, rc ) 
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+#ifdef ESMF_EXHAUSTIVE
+
+
+! Initialization:
+!----------------
+      call Initialization()
+      if (rc /=0) STOP            ! Catastropic Error
+
+
+! Retrieval of single parameters
+!--------------------------------
+      call SinglePar()
+
+
+! Retrieval of a group of parameters on a single line
+! ----------------------------------------------------
+
+      call  MultPar_SingleLine_U()
+
+      call  MultPar_SingleLine_v()
+
+
+! Retrieval of a group of parameters on multiple lines
+!   ----------------------------------------------------
+      call MultPar_MultLines()
+
+
+! Retrieval of Tables of unknown length
+! ---------------------------------------
+
+      call Table()
+
+
+! Finalization
+! ------------
+ 
+      call Finalization()
+
+! REPORTING
+! ------------
+      
+      !EX_UTest
+      write(failMsg, *) "Config Unit test failed"
+      write(name, *) "Config Unit Test"
+      call ESMF_Test((counter_success.eq.counter_total), name, failMsg, result, ESMF_SRCLINE)
+      if  (counter_total > 0) then
+         if( counter_success == counter_total ) then 
+            print *,'ESMF_Config: All tests were successful'
+         else
+            success_rate = 100.0 * counter_success / counter_total 
+            print *,'ESMF_Config: Success rate: ', nint(success_rate),'%' 
+         endif
+      endif
+
+#endif
+
+      call ESMF_Finalize()
+
 
   end program ESMF_Config_Test
 
