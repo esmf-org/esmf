@@ -1,17 +1,24 @@
-% $Id: Clock_desc.tex,v 1.6 2003/08/15 06:15:26 cdeluca Exp $
+% $Id: Clock_desc.tex,v 1.7 2003/08/15 19:04:13 cdeluca Exp $
 
 \label{sec:Clock}
 
 The Clock class advances model time and tracks its associated
 date on a specified Calendar.  It stores start time, stop time,
-current time, and a time step (which may be changed while a 
-Component runs).  A Clock also stores a list of Alarms, which can
-be set to flag events that occur at a specified time instant or at 
+current time, previous time, and a time step.  It can also store
+a reference time, typically the time instant at which a simulation 
+originally began.  For a restart run, the reference time can be 
+different than the start time, when application execution resumes.
+
+A user can call the {\tt ESMF\_ClockSet} method and reset the time 
+step as desired.  
+
+A Clock also stores a list of Alarms, which can be set to flag 
+events that occur at a specified time instant or at 
 a specified time interval.  See Section~\ref{sec:Alarm} for 
 details on how to use Alarms.
 
-There are methods for creating a Clock and setting and getting
-the quantities associated with it.  Methods are defined for 
+There are methods for setting and getting the Times and 
+Alarms associated with a Clock.  Methods are defined for 
 advancing the Clock's current time, checking if the
-stop time is reached, and synchronizing with a real clock. 
+stop time has been reached, and synchronizing with a real clock. 
 

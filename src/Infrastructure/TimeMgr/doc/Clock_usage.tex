@@ -1,49 +1,30 @@
-% $Id: Clock_usage.tex,v 1.3 2003/08/15 17:17:53 eschwab Exp $
+% $Id: Clock_usage.tex,v 1.4 2003/08/15 19:04:13 cdeluca Exp $
 
 The following is a typical sequence for using a Clock in a 
 geophysical model.
 
 \noindent {\bf At initialization:}
 \begin{itemize}
-\item Create a Calendar.
+\item Set a Calendar.
 \item Set start time, stop time and time step as Times and 
 Time Intervals.
-\item Create a Clock using the start time, stop time and time
+\item Set a Clock using the start time, stop time and time
 step to initialize it.
 \item Define Times and Time Intervals associated with special
-events, and use these to create Alarms.
+events, and use these to set Alarms.
 \end{itemize}
 
 \noindent {\bf At run:}
 \begin{itemize}
-\item If Advance the Clock, checking for ringing alarms as needed.
+\item Advance the Clock, checking for ringing alarms as needed.
 \item Check if it is time to stop.
 \end{itemize}
 
 \noindent {\bf At finalize:}
 \begin{itemize}
-\item Destroy the Clock 
-\item Destroy the Calendar
+\item Since Clocks, Alarms, Times and TimeIntervals are all lightweight
+classes, they don't need to be explicitly destroyed at finalization.
 \end{itemize}
 
 The following code example illustrates Clock usage.
 
-
-
-
-The {\tt Clock} class contains {\tt Time} instants and a {\tt TimeInterval}
-to track and time step model time.  For tracking, {\tt Time} instants are
-instantiated for the current time, stop time, start time, reference time,
-and previous time.  For time stepping, a single {\tt TimeInterval} is
-instantiated.  There is also an integer counter for keeping track of the
-number of timesteps, and an array of associated alarms.  Methods are
-defined for advancing the clock (perform a time step), checking if the
-stop time is reached, synchronizing with a real-time clock, and getting
-values of the class attributes defined above.
-
-After performing the time step, the advance method will iterate over the
-alarm list and return the number of ringing alarms.  The user can then check
-if the the number of ringing alarms is greater than zero.  If so, the user
-goes into a loop to query the clock for each ringing alarm, one at a time.
-Each ringing alarm can then be processed using alarm methods for identifying,
-turning off, disabling or resetting the alarm.

@@ -271,19 +271,19 @@
 \input{../Infrastructure/TimeMgr/doc/ESMF_Alarm_fapi}
 #endif
 
-#ifdef STANDALONE
-\section{Review Status}
-\input{TimeMgr_desrev}
-#endif
+%#ifdef STANDALONE
+%\section{Review Status}
+%\input{TimeMgr_desrev}
+%#endif
 
-#ifdef STANDALONE
-\section{Glossary}
-\input{TimeMgr_glos}
-#endif
+%#ifdef STANDALONE
+%\section{Glossary}
+%\input{TimeMgr_glos}
+%#endif
 
 #ifdef STANDALONE
 %\section{Bibliography}
-\bibliography{comp} 
+\bibliography{TimeMgr} 
 \bibliographystyle{plain}
 \addcontentsline{toc}{section}{Bibliography}
 #endif
