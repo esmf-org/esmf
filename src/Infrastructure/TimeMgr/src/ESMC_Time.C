@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.77 2005/01/07 00:16:14 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.78 2005/02/01 00:24:04 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.77 2005/01/07 00:16:14 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.78 2005/02/01 00:24:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -402,6 +402,41 @@
         return(rc);
     }
 
+    // get any other "day" units
+    if (dayOfYear != ESMC_NULL_POINTER) {
+      rc = ESMC_TimeGetDayOfYear(dayOfYear);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
+    }
+    if (dayOfYear_r8 != ESMC_NULL_POINTER) {
+      rc = ESMC_TimeGetDayOfYear(dayOfYear_r8);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
+    }
+    if (dayOfYear_intvl != ESMC_NULL_POINTER) {
+      rc = ESMC_TimeGetDayOfYear(dayOfYear_intvl);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
+    }
+    if (dayOfWeek != ESMC_NULL_POINTER) {
+      rc = ESMC_TimeGetDayOfWeek(dayOfWeek);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
+    }
+
+    // remove any "other" day units from timeToConvert
+    if (dayOfYear       != ESMC_NULL_POINTER ||
+        dayOfYear_r8    != ESMC_NULL_POINTER ||
+        dayOfYear_intvl != ESMC_NULL_POINTER ||
+        dayOfWeek       != ESMC_NULL_POINTER) {
+      if (timeToConvert.calendar == ESMC_NULL_POINTER) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                                 ", calendar required.", &rc); return(rc);
+      }
+      timeToConvert.ESMC_FractionSetw(timeToConvert.ESMC_FractionGetw() %
+                                      timeToConvert.calendar->secondsPerDay);
+    }
+
     // use base class to get all other non-calendar dependant units
     rc = ESMC_BaseTimeGet(&timeToConvert, h, m, s, s_i8,
                           ms, us, ns, h_r8, m_r8, s_r8, ms_r8,
@@ -409,6 +444,13 @@
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
+    // handle remaining miscellaneous get arguments
+
+    if (midMonth != ESMC_NULL_POINTER) {
+      rc = ESMC_TimeGetMidMonth(midMonth);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
+    }
     if (calendar != ESMC_NULL_POINTER) {
       *calendar = this->calendar;
     }
@@ -436,31 +478,6 @@
         return(rc);
       *tempTimeStringLenISOFrac = strlen(tempTimeStringISOFrac);
       // see also method ESMC_TimePrint()
-    }
-    if (dayOfWeek != ESMC_NULL_POINTER) {
-      rc = ESMC_TimeGetDayOfWeek(dayOfWeek);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
-        return(rc);
-    }
-    if (midMonth != ESMC_NULL_POINTER) {
-      rc = ESMC_TimeGetMidMonth(midMonth);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
-        return(rc);
-    }
-    if (dayOfYear != ESMC_NULL_POINTER) {
-      rc = ESMC_TimeGetDayOfYear(dayOfYear);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
-        return(rc);
-    }
-    if (dayOfYear_r8 != ESMC_NULL_POINTER) {
-      rc = ESMC_TimeGetDayOfYear(dayOfYear_r8);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
-        return(rc);
-    }
-    if (dayOfYear_intvl != ESMC_NULL_POINTER) {
-      rc = ESMC_TimeGetDayOfYear(dayOfYear_intvl);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
-        return(rc);
     }
 
     return(ESMF_SUCCESS);
