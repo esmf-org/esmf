@@ -541,7 +541,7 @@ end subroutine ESMF_LogGet
 ! 
 !EOP
 	
-	integer 				:: status, i	
+	integer 				:: status, i, rc2	
 	if (present(rc)) rc=ESMF_FAILURE
 	gLog%FileIsOpen=ESMF_FALSE
 	if (gLog%stdOutUnitNumber .gt. ESMF_LOG_UPPER) return
@@ -556,6 +556,7 @@ end subroutine ESMF_LogGet
    	enddo 
 	if (gLog%FileIsOpen .eq. ESMF_FALSE) return
 	gLog%unitNumber = i  
+	call c_ESMC_LogInitialize(filename,len(filename),rc2)
 	if (present(rc)) rc=ESMF_SUCCESS
 	
 end subroutine ESMF_LogInitialize

@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr_F.C,v 1.1 2004/04/28 15:33:02 cpboulder Exp $
+// $Id: ESMC_LogErr_F.C,v 1.2 2004/04/28 20:14:23 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.1 2004/04/28 15:33:02 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.2 2004/04/28 20:14:23 cpboulder Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -118,6 +118,5 @@ extern "C" {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
-#endif
 
 } // extern "C"

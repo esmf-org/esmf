@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.33 2004/04/27 22:12:36 cpboulder Exp $
+// $Id: ESMC_LogErr.C,v 1.34 2004/04/28 20:14:23 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 #include "ESMC_LogErr.h"
 
 //Global Variables
-char nameLogErrFile[32];    // name of logfile.
+char nameLogErrFile[32];
 FILE* logErrCFilePtr[10];
 int numCFiles=0;
 int logErrFortFile[10];
@@ -44,7 +44,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.33 2004/04/27 22:12:36 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.34 2004/04/28 20:14:23 cpboulder Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -393,17 +393,17 @@ int ESMC_Log::ESMC_LogWrite(
 	  return ESMF_FAILURE;
 	switch(logtype)
 	{
-		case 0:
+		case ESMC_LOG_INFO:
 			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.3d %s %s %d %s %s %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,msec,"INFO",__FILE__,__LINE__,module,method,msg);
 			break;
-		case 1:
+		case ESMC_LOG_WARN:
 			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.3d %s %s %d %s %s %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,msec,"WARNING",__FILE__,__LINE__,module,method,msg);
 			break;
-		case 2:
+		case ESMC_LOG_ERROR:
 			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.3d %s %s %d %s %s %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,msec,"ERROR",__FILE__,__LINE__,module,method,msg);

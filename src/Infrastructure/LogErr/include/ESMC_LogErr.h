@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.29 2004/04/27 21:12:40 cpboulder Exp $
+// $Id: ESMC_LogErr.h,v 1.30 2004/04/28 20:14:21 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -13,8 +13,8 @@
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
 
-#ifndef ESMC_LOG
-#define ESMC_LOG
+#ifndef ESMC_LOGERR_H
+#define ESMC_LOGERR_H
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -40,6 +40,7 @@
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrConstants.inc"
 
+extern char nameLogErrFile[32];
 enum EMSC_LogFileType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
                         
 int ESMC_LogInitialize(char filename[]);
@@ -113,4 +114,4 @@ class ESMC_Log {
 
 //EOP
 
-#endif  //ESMC_LOG
+#endif  //ESMC_LOGERR_H

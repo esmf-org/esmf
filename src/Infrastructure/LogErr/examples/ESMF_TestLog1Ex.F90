@@ -9,7 +9,7 @@ program test_log_2
     integer :: rc
     logical :: ret
 
-    call ESMF_LogInitialize("testlog.txt",rc)
+    call ESMF_LogInitialize("aLog1.txt",rc)
     call ESMF_LogWrite("Log Write 2",ESMF_LOG_INFO,rc=rc)
     ret = ESMF_LogFoundError(ESMF_FAILURE,"Log Found Error 2",ESMF_LOG_INFO)
 
