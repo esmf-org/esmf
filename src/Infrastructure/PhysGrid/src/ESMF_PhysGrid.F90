@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.48 2003/10/13 22:35:54 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.49 2003/10/14 19:13:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -58,13 +58,18 @@
       private
         type (ESMF_Base)    :: base     ! mostly for name
 
-        type (ESMF_Array), dimension(:), pointer :: & !dimensioned num_dims
-          locations            ! coordinates for in each physical dimension
-                               !   for each point in grid
-                               ! Note that for aligned coordinates, the array
-                               !   is a simple vector of values along axis
-                               ! otherwise, array must have coords for all
-                               !   points in grid
+        ! One array per number of dimensions.  These contain the coordinates
+        !  for each point in the grid.  If the coordinates are aligned, then
+        !  this array is a simple vector of values along the axis.  Otherwise
+        !  the Array must have the coordinates for all points in the Grid.
+        type (ESMF_Array), dimension(:), pointer :: compLocations
+
+        ! Same as above, but with an additional boundary layer of coordinates
+        ! only used internally, for example during regridding to handle
+        ! external boundary conditions and to avoid the need for inter-DE
+        ! communication at the internal boundaries.
+        type (ESMF_Array), dimension(:), pointer :: totalLocations
+
       end type
 
 !------------------------------------------------------------------------------
@@ -88,27 +93,24 @@
       sequence
         type (ESMF_Base)    :: base     ! mostly for name
    
-        type (ESMF_RegionKind) :: &
-          region_type            ! type of region: polygon or circular
+        type (ESMF_RegionKind) :: region_type            
+                                ! type of region: polygon or circular
 
-        integer :: &
-          num_vertices           ! number of vertices for a polygonal region
+        integer :: num_vertices  ! number of vertices for a polygonal region
                                  ! if variable, should be set to largest
                                  !   number - vertices can be degenerate
    
-        type (ESMF_Array), dimension(:,:), pointer :: &
-          vertices             ! coordinates in each direction for each 
+        type (ESMF_Array), dimension(:,:), pointer :: vertices
+                               ! coordinates in each direction for each 
                                !   corner of each region 
                                ! dimensioned num_dims, num_vertices
 
-        type (ESMF_Array), dimension(:,:), pointer :: &
-          bbox                 ! bounding box for each region to aid 
-                               !   search methods
-                               ! dimensioned num_dims, 2(1=min,2=max)
+        type (ESMF_Array), dimension(:,:), pointer :: bbox 
+                          ! bounding box for each region to aid search methods
+                          ! dimensioned num_dims, 2(1=min,2=max)
 
-        type (ESMF_Array), dimension(2) :: &! elliptic, circular regions
-          ellipse              ! parameters of ellipse describing region
-                               !   around each point
+        ! parameters of ellipse describing region around each point
+        type (ESMF_Array), dimension(2) :: ellipse ! elliptic, circular regions
       
       end type
 
@@ -132,11 +134,9 @@
       type ESMF_GridMask
       sequence
    
-        type (ESMF_Base)         :: base      ! name especially
-        type (ESMF_GridMaskKind) :: mask_type ! type of mask
-
-        type (ESMF_Array), pointer :: data   ! array containing mask data at 
-                                             ! each grid point
+        type (ESMF_Base)         :: base       ! name especially
+        type (ESMF_GridMaskKind) :: mask_type  ! type of mask
+        type (ESMF_Array), pointer :: data     ! mask data at each grid point
       end type
 
 !------------------------------------------------------------------------------
@@ -266,7 +266,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.48 2003/10/13 22:35:54 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.49 2003/10/14 19:13:05 nscollins Exp $'
 
 !==============================================================================
 !
@@ -828,20 +828,15 @@
 ! !IROUTINE: ESMF_PhysGridGetLocations - Gets locations from a PhysGrid
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridGetLocations(physgrid, name, location_array, rc)
+      subroutine ESMF_PhysGridGetLocations(physgrid, name, location_array, &
+                                                                    total, rc)
 !
 ! !ARGUMENTS:
 
       type(ESMF_PhysGrid), intent(in) :: physgrid
-
-      character(*), intent(out), optional :: name ! name to assign to regions
-
-      type (ESMF_Array), dimension(:), intent(inout), optional :: &
-         location_array       ! array of ESMF_arrays containing location
-                              ! coordinates in each physical dimension 
-                              ! array dimension is assumed num_dims with
-                              ! the ESMF_Array consistent with other grid arrays
-
+      character(*), intent(out), optional :: name
+      type (ESMF_Array), dimension(:), intent(inout), optional::location_array 
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
@@ -851,15 +846,19 @@
 !     \begin{description}
 !     \item[physgrid]
 !          {\tt ESMF\_PhysGrid} holding locations to be queried.
-!     \item[[name]]
+!     \item[{[name]}]
 !          Name assigned to the locations.
-!     \item[[location\_array]]
+!     \item[{[location\_array]}]
 !          Array of {\tt ESMF\_Array}s containing the coordinates in each
 !          physical dimension for each location.
 !          The array is assumed to be dimensioned (num\_dims)
 !          while the {\tt ESMF\_Array} would typically be consistent with
 !          other grid arrays.
-!     \item[[rc]]
+!     \item[{[total]}]
+!          Logical. If TRUE, return the total coordinates including internally
+!          generated boundary cells. If FALSE return the
+!          computational cells (which is what the user will be expecting.)
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -892,7 +891,10 @@
 !     if locations requested, get them
 !
       if (present(location_array)) then
-         location_array = physgrid%ptr%locations%locations
+         location_array = physgrid%ptr%locations%compLocations
+         if (present(total)) then
+           if (total) location_array = physgrid%ptr%locations%totalLocations
+         endif
       endif
 !
 !     set return code
@@ -906,20 +908,15 @@
 ! !IROUTINE: ESMF_PhysGridSetLocations - Sets grid regions from input array.
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridSetLocations(physgrid, location_array, name, rc)
+      subroutine ESMF_PhysGridSetLocations(physgrid, location_array, name, &
+                                                                  total, rc)
 !
 ! !ARGUMENTS:
 
       type(ESMF_PhysGrid), intent(inout) :: physgrid
-
-      type (ESMF_Array), dimension(:), pointer :: &
-         location_array       ! array of ESMF_arrays containing location
-                              ! coordinates in each physical dimension 
-                              ! array dimension is assumed num_dims with
-                              ! the ESMF_Array consistent with other grid arrays
-
-      character(*), intent(in), optional :: name ! name to assign to regions
-
+      type (ESMF_Array), dimension(:), pointer :: location_array
+      character(*), intent(in), optional :: name
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
@@ -930,15 +927,19 @@
 !     \begin{description}
 !     \item[physgrid]
 !          {\tt ESMF\_PhysGrid} for which locations are to be added.
-!     \item[[name]]
-!          Optional name to assign to the locations.
-!     \item[[location\_array]]
+!     \item[{[location\_array]}]
 !          Array of {\tt ESMF\_Array}s containing the coordinates in each
 !          physical dimension for each location.
 !          The array is assumed to be dimensioned (num\_dims)
 !          while the {\tt ESMF\_Array} would typically be consistent with
 !          other grid arrays.
-!     \item[[rc]]
+!     \item[{[name]}]
+!          Optional name to assign to the locations.
+!     \item[{[total]}]
+!          Logical. If TRUE, set the total coordinates including internally
+!          generated boundary cells are to be returned.  If FALSE return the
+!          computational cells, which is what the user expects to see.
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -975,7 +976,12 @@
 !
 !     set locations
 !
-      physgrid%ptr%locations%locations => location_array
+      if (present(total)) then
+          if (total) physgrid%ptr%locations%totalLocations => location_array
+          if (.not.total) physgrid%ptr%locations%compLocations => location_array
+      else
+          physgrid%ptr%locations%compLocations => location_array
+      endif
 !
 !     set return code
 !
