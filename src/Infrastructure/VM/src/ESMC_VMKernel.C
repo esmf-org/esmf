@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.9 2004/11/11 08:50:42 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.10 2004/11/11 15:51:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1293,15 +1293,13 @@ void ESMC_VMK::vmk_exit(class ESMC_VMKPlan &vmp, void *arg){
     vmkt_catch(&(sarg[0].vmkt));
     vmkt_catch(&(sarg[0].vmkt_extra));
   }
-  // the following barrier has the effect that all parent PETs which either
-  // spawn or contribute to this child are being blocked until _all_ child
-  // PETs have been caught. However, even those parent PETs that don't 
-  // participate in the child VM will be blocked here!
-  // After reworking the vmk_enter I can take this barrier out, which will
-  // further bring down the callback overhead! Also the previous VM 
-  // behavior is restored in that only those parent PETs are blocked in a
-  // vmk_exit which participate in that child VM. 
-  //vmk_barrier();
+  // The following barrier ensures that all parent PETs block until all threads
+  // of this VM have been caught. Even parent PETs that don't participate in
+  // this child's VM will be blocked to provide correct synchronization between
+  // different child VMs. If you want two child VMs to run concurrently don't
+  // call vmk_exit until after you started _all_ concurrent child VMs. The
+  // vmk_exit() exit method is a synchronization method for the parent!
+  vmk_barrier();
 }
 
 
