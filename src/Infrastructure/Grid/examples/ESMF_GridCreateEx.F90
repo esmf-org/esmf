@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateEx.F90,v 1.25 2004/12/22 00:20:10 jwolfe Exp $
+! $Id: ESMF_GridCreateEx.F90,v 1.26 2005/01/03 23:42:49 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -91,7 +91,7 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-      ! initialize the grid with the above values
+      ! initialize a simple uniform horizontal grid with the above values
       grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
                                        minGlobalCoordPerDim=min, &
                                        maxGlobalCoordPerDim=max, &
@@ -122,6 +122,7 @@
 ! non-uniform spacing.
 !EOE
 
+!BOC
       ! set the global coordinate minima for the horizontal grid
       ! note: the vertical grid does not need a coordinate minimum
       !       because the specific call to GridAddVertHeight infers
