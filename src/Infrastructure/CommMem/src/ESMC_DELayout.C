@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.37 2003/07/23 02:11:34 eschwab Exp $
+// $Id: ESMC_DELayout.C,v 1.38 2003/07/29 16:42:22 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.37 2003/07/23 02:11:34 eschwab Exp $";
+           "$Id: ESMC_DELayout.C,v 1.38 2003/07/29 16:42:22 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1849,6 +1849,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //
 // !ARGUMENTS:
       int *DistArray,            // in  - distributed array
+      int global_dimlength[],    // in
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the array
       int size_decomp,           // in  - size of decomp arrays
@@ -1891,7 +1892,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         int rbreak[1];
         int rbcount = 0;
         for (i=0; i<size_decomp; i++) {
-          rmax[i] = AIPtr[i].stride;  // jw?  needs to be the global length
+          rmax[i] = global_dimlength[i];
           rsize[i] = AIPtr[i].max - AIPtr[i].min + 1;
           rsize_tot[i] = AIPtr2[i].max - AIPtr2[i].min + 1;
           if (decompids[i] == 0) {
@@ -1949,7 +1950,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         int rbreak[2];
         int rbcount = 0;
         for (i=0; i<size_decomp; i++) {
-          rmax[i] = AIPtr[i].stride;   // jw? same
+          rmax[i] = global_dimlength[i];
           rsize[i] = AIPtr[i].max - AIPtr[i].min + 1;
           if (decompids[i] == 0) {
             rbreak[rbcount]=i;
@@ -2025,6 +2026,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //
 // !ARGUMENTS:
       float *DistArray,          // in  - distributed array
+      int global_dimlength[],    // in
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the array
       int size_decomp,           // in  - size of decomp arrays
@@ -2069,7 +2071,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         int rbreak[1];
         int rbcount = 0;
         for (i=0; i<size_decomp; i++) {
-          rmax[i] = AIPtr[i].stride;  // jw?
+          rmax[i] = global_dimlength[i];
           rsize[i] = AIPtr[i].max - AIPtr[i].min + 1;
           rsize_tot[i] = AIPtr2[i].max - AIPtr2[i].min + 1;
           if (decompids[i] == 0) {
@@ -2127,7 +2129,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         int rbreak[2];
         int rbcount = 0;
         for (i=0; i<size_decomp; i++) {
-          rmax[i] = AIPtr[i].stride;   // jw?
+          rmax[i] = global_dimlength[i];
           rsize[i] = AIPtr[i].max - AIPtr[i].min + 1;
           if (decompids[i] == 0) {
             rbreak[rbcount]=i;
