@@ -1,4 +1,4 @@
-# $Id: IRIX64.default.default.mk,v 1.1 2003/09/25 21:21:53 flanigan Exp $
+# $Id: IRIX64.default.default.mk,v 1.2 2003/10/09 15:32:46 slswift Exp $
 # 
 # IRIX64.default.default.mk
 #
@@ -122,8 +122,8 @@ CXX_CLINKER	   = CC -n32 -mp -Wl,-woff,84,-woff,85,-woff,134
 CXX_FLINKER	   = CC -n32 -mp -Wl,-woff,84,-woff,85,-woff,134
 CXX_CCV		   = CC -version
 CXX_SYS_LIB	   = -lfpe -lcomplex -lfortran -lftn -lfastm -lmalloc 
-C_CXXF90LD         = CC -n32 /usr/lib32/c++init.o
-C_F90CXXLD         = f90 -n32 /usr/lib32/c++init.o
+C_CXXF90LD         = CC -n32
+C_F90CXXLD         = f90 -n32
 C_CXXF90LIBS       = -rpath . -lftn90 -lftn -lfortran
 C_F90CXXLIBS       = -rpath . -lCsup -lC -lCio -lc 
 # ------------------------- BOPT - g_c++ options ------------------------------
