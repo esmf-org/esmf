@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# $Id: test_for_docs.pl,v 1.4 2004/05/13 16:02:31 svasquez Exp $
+# $Id: test_for_docs.pl,v 1.5 2004/05/13 16:29:52 svasquez Exp $
 #
 # test_for_docs.pl
 # 
@@ -50,8 +50,8 @@ sub GetNewDocs($);
 @esmf_docs     = ("ESMF_refdoc",
 		  "ESMF_reqdoc",
 		  "ESMF_usrdoc",
-		  "ArrayDataMap_refdoc",
 		  "Array_refdoc",
+		  "ArrayDataMap_refdoc",
 		  "ArraySpec_refdoc",
 		  "Base_refdoc",
 		  "Component_refdoc",
