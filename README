@@ -1,4 +1,4 @@
- $Id: README,v 1.28 2003/08/27 23:09:54 flanigan Exp $
+ $Id: README,v 1.29 2003/08/29 17:09:36 flanigan Exp $
 ================================================================================
                                    README
 
@@ -181,8 +181,8 @@ To build documentation:
   gmake alldoc        ! Builds all the above documents.
 
 Final documentation files will be located in the ${ESMF_DIR}/doc
-directory.
-
+directory.  If these doc build commands are used on a Linux machine,
+set the environment variable ESFM_SITE to the value of lahey.
 
 Usage
 -----
