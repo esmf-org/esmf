@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.43 2004/11/01 23:38:45 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.44 2004/11/18 20:45:40 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.43 2004/11/01 23:38:45 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.44 2004/11/18 20:45:40 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -538,6 +538,66 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_Deserialize"
+//BOPI
+// !IROUTINE:  ESMC_Deserialize - Turn a byte stream into an object
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_Deserialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // in - byte stream to read
+      int *offset) {         // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn a stream of bytes into an object.
+//
+//EOPI
+    int fixedpart, nbytes;
+    int *ip;
+    ESMC_Status *sp;
+    char *cp;
+
+    ip = (int *)(buffer + *offset);
+    ID = *ip++;
+    refCount = *ip++;  
+    classID = *ip++;  
+    sp = (ESMC_Status *)ip;
+    baseStatus = *sp++;
+    cp = (char *)sp;
+    memcpy(baseName, cp, ESMF_MAXSTR);
+    cp += ESMF_MAXSTR;
+    memcpy(baseNameF90, cp, ESMF_MAXSTR);
+    cp += ESMF_MAXSTR;
+    memcpy(className, cp, ESMF_MAXSTR);
+    cp += ESMF_MAXSTR;
+    ip = (int *)cp;
+    attrCount = *ip++;
+    attrAlloc = *ip++;
+    cp = (char *)ip;
+    if (attrAlloc > 0) {
+         nbytes = attrAlloc * sizeof(ESMC_Attribute *);
+         attrList = (ESMC_Attribute **)malloc(nbytes);
+         memcpy((char *)attrList, cp, nbytes);
+         cp += nbytes;
+    }
+    // TODO: if vector list, have to corral those  
+
+    // update offset to point to past the current obj
+    *offset = (cp - buffer);
+   
+    
+  return ESMF_SUCCESS;
+
+ } // end ESMC_Deserialize
+
+//-----------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMC_Print"
 //BOPI
@@ -605,6 +665,75 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
   return ESMF_SUCCESS;
 
  } // end ESMC_Read
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_Serialize"
+//BOPI
+// !IROUTINE:  ESMC_Serialize - Turn the object information into a byte stream
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_Serialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // inout - byte stream to fill
+      int *length,           // inout - buf length; realloc'd here if needed
+      int *offset) {         // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn info in base class into a stream of bytes.
+//
+//EOPI
+    int fixedpart, nbytes;
+    int *ip;
+    ESMC_Status *sp;
+    char *cp;
+
+    fixedpart = sizeof(ESMC_Base);
+    if ((*length - *offset) < fixedpart) {
+        buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
+        *length += 2 * fixedpart;
+    }
+
+    ip = (int *)(buffer + *offset);
+    *ip++ = ID;
+    *ip++ = refCount;  
+    *ip++ = classID;  
+    sp = (ESMC_Status *)ip;
+    *sp++ = baseStatus;
+    cp = (char *)sp;
+    memcpy(cp, baseName, ESMF_MAXSTR);
+    cp += ESMF_MAXSTR;
+    memcpy(cp, baseNameF90, ESMF_MAXSTR);
+    cp += ESMF_MAXSTR;
+    memcpy(cp, className, ESMF_MAXSTR);
+    cp += ESMF_MAXSTR;
+    ip = (int *)cp;
+    *ip++ = attrCount;
+    *ip++ = attrAlloc;
+    cp = (char *)ip;
+    if (attrCount > 0) {
+         nbytes = sizeof(ESMC_Attribute *) * attrAlloc;
+         if ((*length - (cp-buffer)) < nbytes) {
+            buffer = (char *)realloc((void *)buffer, *length + 2*nbytes);
+            *length += 2 * nbytes;
+         }
+         memcpy(cp, (char *)attrList, nbytes);
+         cp += nbytes;
+    }
+    // TODO: if vector list, have to corral those  
+
+
+    *offset = (cp - buffer);
+   
+    
+  return ESMF_SUCCESS;
+
+ } // end ESMC_Serialize
 
 //-----------------------------------------------------------------------------
 #undef  ESMF_METHOD

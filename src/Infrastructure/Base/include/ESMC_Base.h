@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.57 2004/11/17 18:59:58 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.58 2004/11/18 20:45:39 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -239,6 +239,10 @@ class ESMC_Base
     int   ESMC_BaseSetF90ClassName(char *name, int nlen);
     int   ESMC_BaseGetF90ClassName(char *name, int nlen) const;
 
+    // flatten an object into a byte stream, and reconstitute it again
+    int ESMC_Serialize(char *buffer, int *length, int *offset);
+    int ESMC_Deserialize(char *buffer, int *offset);
+    
     // optional Read/Write methods for any ESMF class
     virtual int ESMC_Read(void);
     virtual int ESMC_Write(void) const;
@@ -313,6 +317,11 @@ extern "C" {
   void FTN(c_esmc_basecreate)(ESMC_Base **base, char *superclass, char *name,
                               int *nattrs, int *rc, int sclen, int nlen);
   void FTN(c_esmc_basedestroy)(ESMC_Base **base, int *rc);
+
+  void FTN(c_esmc_baseserialize)(ESMC_Base **base, char *buf, int *length,
+                                 int *offset, int *rc);
+  void FTN(c_esmc_basedeserialize)(ESMC_Base **base, char *buf,
+                                   int *offset, int *rc);
 
   void FTN(c_esmc_baseprint)(ESMC_Base **base, char *opts, int *rc, int nlen);
   void FTN(c_esmc_basevalidate)(ESMC_Base **base, char *opts, int *rc, int nlen);

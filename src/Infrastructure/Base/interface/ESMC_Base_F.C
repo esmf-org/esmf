@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.28 2004/11/17 21:21:35 nscollins Exp $
+// $Id: ESMC_Base_F.C,v 1.29 2004/11/18 20:45:40 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.28 2004/11/17 21:21:35 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.29 2004/11/18 20:45:40 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -182,6 +182,81 @@ extern "C" {
   return;
 
 }  // end c_ESMC_BasePrint
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_BaseSerialize - Serialize Base object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_baseserialize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *buf,                // in/out - really a byte stream
+      int *length,              // in/out - number of allocated bytes
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Serialize the contents of a base object.
+//
+//EOP
+
+  int i, status;
+
+  if (!base) {
+    //printf("uninitialized Base object\n");
+    ESMC_LogDefault.ESMC_LogWrite("Base object uninitialized", ESMC_LOG_INFO);
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+
+  *rc = (*base)->ESMC_Serialize(buf, length, offset);
+
+  return;
+
+}  // end c_ESMC_BaseSerialize
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_BaseDeserialize - Deserialize Base object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_basedeserialize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *buf,                // in/out - really a byte stream
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Deserialize the contents of a base object.
+//
+//EOP
+
+  int i, status;
+
+  if (!base) {
+    //printf("uninitialized Base object\n");
+    ESMC_LogDefault.ESMC_LogWrite("Base object uninitialized", ESMC_LOG_INFO);
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+
+  *rc = (*base)->ESMC_Deserialize(buf, offset);
+
+  return;
+
+}  // end c_ESMC_BaseDeserialize
 
 
 //-----------------------------------------------------------------------------
