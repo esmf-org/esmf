@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.165 2004/06/14 01:29:35 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.166 2004/06/14 22:47:26 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -281,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.165 2004/06/14 01:29:35 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.166 2004/06/14 22:47:26 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3829,7 +3829,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      ! make sure hRelLoc has a value before GridGetDE call
+      ! make sure hRelLoc has a value before GridGetDELocalInfo call
       if (present(horzRelLoc)) then
           hRelLoc = horzRelloc
       else
@@ -3841,8 +3841,10 @@
                                  ESMF_CONTEXT, rc)) return
           endif
       endif
-      call ESMF_GridGetDE(grid, horzRelLoc=hRelLoc, vertRelLoc=vertRelLoc, &
-                          localCellCountPerDim=gridcounts(1:gridRank), rc=status)
+      call ESMF_GridGetDELocalInfo(grid, horzRelLoc=hRelLoc, &
+                                   vertRelLoc=vertRelLoc, &
+                                   localCellCountPerDim=gridcounts(1:gridRank), &
+                                   rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4438,9 +4440,9 @@
         call ESMF_GridGet(stypep%grid, dimCount=gridrank, rc=status)
         call ESMF_FieldGet(srcField, horzRelloc=horzRelLoc, &
                            vertRelloc=vertRelLoc, rc=rc)
-        call ESMF_GridGetDE(stypep%grid, horzRelLoc=horzRelLoc, &
-                            vertRelLoc=vertRelLoc, &
-                            globalAIPerDim=myAI(1:gridrank), rc=status)
+        call ESMF_GridGetDELocalInfo(stypep%grid, horzRelLoc=horzRelLoc, &
+                                     vertRelLoc=vertRelLoc, &
+                                     globalAIPerDim=myAI(1:gridrank), rc=status)
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
@@ -4471,10 +4473,11 @@
         ! From the grid get the bounding box on this DE
         call ESMF_FieldGet(srcField, horzRelloc=horzRelLoc, &
                            vertRelloc=vertRelLoc, rc=rc)
-        call ESMF_GridGetDE(srcGrid, &
-                            horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
-                            minLocalCoordPerDim=src_min, &
-                            maxLocalCoordPerDim=src_max, rc=status)
+        call ESMF_GridGetDELocalInfo(srcGrid, &
+                                     horzRelLoc=horzRelLoc, &
+                                     vertRelLoc=vertRelLoc, &
+                                     minLocalCoordPerDim=src_min, &
+                                     maxLocalCoordPerDim=src_max, rc=status)
         call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, src_min, src_max, &
                                        myAI, sendDomainList, status)
       endif
@@ -4490,10 +4493,11 @@
         ! From the grid get the bounding box on this DE
         call ESMF_FieldGet(dstField, horzRelloc=horzRelLoc, &
                            vertRelloc=vertRelLoc, rc=rc)
-        call ESMF_GridGetDE(dstGrid, &
-                            horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
-                            minLocalCoordPerDim=dst_min, &
-                            maxLocalCoordPerDim=dst_max, rc=status)
+        call ESMF_GridGetDELocalInfo(dstGrid, &
+                                     horzRelLoc=horzRelLoc, &
+                                     vertRelLoc=vertRelLoc, &
+                                     minLocalCoordPerDim=dst_min, &
+                                     maxLocalCoordPerDim=dst_max, rc=status)
         call ESMF_GridBoxIntersectRecv(srcGrid, dst_min, dst_max, &
                                        recvDomainList, rc=status)
       endif
