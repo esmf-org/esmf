@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.1 2003/05/07 06:58:53 cdeluca Exp $
+! $Id: CoupledFlowDemo.F90,v 1.2 2003/06/27 16:44:34 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -30,14 +30,14 @@
     private
     
     ! Subcomponents
-    type(ESMF_GridComp) :: INcomp, FScomp
-    type(ESMF_CplComp) :: cpl
+    type(ESMF_GridComp), save :: INcomp, FScomp
+    type(ESMF_CplComp), save :: cpl
 
     ! States and Layouts for the Subcomponents
     character(len=ESMF_MAXSTR) :: cnameIN, cnameFS, cplname
     type(ESMF_DELayout) :: layoutTop, layoutIN, layoutFS
-    type(ESMF_State) :: INimp, INexp, FSimp, FSexp
-    type(ESMF_State) :: cplstateF2I, cplstateI2F, cplbothlists
+    type(ESMF_State), save :: INimp, INexp, FSimp, FSexp
+    type(ESMF_State), save :: cplstateF2I, cplstateI2F, cplbothlists
 
     ! Public entry point
     public CoupledFlow_register
