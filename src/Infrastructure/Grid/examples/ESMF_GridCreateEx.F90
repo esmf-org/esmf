@@ -70,7 +70,7 @@
       layout = ESMF_DELayoutCreate(vm, (/ 2, 2 /), rc=rc)
 !EOC
  
-      if (status.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       grid = ESMF_GridCreateHorzXYUni(counts=counts, &
