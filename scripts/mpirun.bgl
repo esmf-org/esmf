@@ -1,0 +1,31 @@
+#!/usr/bin/perl
+use Cwd;
+use strict;
+my $block = $ENV{BGL_BLOCK};
+$block="R00-M0-N4_1" unless defined $block;
+
+# need to gracefully parce options someday for now 
+# we just get what we know is there
+
+my $env = $ENV{BGL_ENV};
+my $arg = shift;
+my $procs;
+if($arg =~ /np/){
+  $procs = shift;
+}
+$env .= " BGLMPI_SIZE=$procs";
+my $exe = shift;
+my $dir = getcwd();
+#if($exe =~ /(.*\/)[^\/]+$/){
+#  $dir = $1;
+#}
+my $runcmd = "bglconsole <<EOF
+redirect $block on
+submitjob $block $exe $dir $env
+quit
+EOF";
+
+print "$runcmd\n";
+system($runcmd);
+
+
