@@ -297,7 +297,7 @@ platforms covering a wide variety of science scenarios
 that span research to operational forecasting.
 \end{reqlist}
 
-\sreq{Dcoumentation} An exhaustive collection of documentation
+\sreq{Documentation} An exhaustive collection of documentation
 to support ongoing evolution of ESMF is required.
 \begin{reqlist}
 {\bf Priority:} 1. \\
@@ -306,6 +306,18 @@ to support ongoing evolution of ESMF is required.
 {\bf Verification:} Compliance with software developers guide.
 {\bf Notes:} The Software Developers Guide specifies a suite of documents 
 that will be produced.
+\end{reqlist}
+
+\sreq{Systematic build, test, packaging} A systematic scheme for disseminating
+stable, versioned software and for gathering and tracking defects is required.
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} All codes\\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Compliance with software developers guide.
+{\bf Notes:} The Software Developers Guide specifies a versioning
+schemes that will be used, release schedules and mechanisms for monitoring
+and managing product quality.
 \end{reqlist}
 
 \sreq{Compatability with batch execution}
@@ -366,6 +378,18 @@ the software.
 projected budgets.
 \end{reqlist}
 
+
+\req{Integrated resource monitoring and tracking}
+The ESMF shall be instrumented to allow resource utilization
+to be tracked and monitored.
+\label{req:gr:error_handling}
+\begin{reqlist}
+  {\bf Priority:} 1. \\
+  {\bf Source:} Required by all codes. \\
+  {\bf Status:} Approved-1. \\
+  {\bf Verification:} Unit test, system test.\\
+  {\bf Notes}
+\end{reqlist}
 
 
 
