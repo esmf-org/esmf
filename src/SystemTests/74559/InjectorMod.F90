@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.1 2003/04/28 23:38:39 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.2 2003/04/29 01:05:55 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -175,13 +175,13 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       ! This is adding names only to the export list, marked by default
       !  as "not needed".  The coupler will consult with the other component
       !  and mark the ones which are needed.
-      call ESMF_StateAddDataName(exportstate, "SIE", rc)
-      call ESMF_StateAddDataName(exportstate, "U", rc)
-      call ESMF_StateAddDataName(exportstate, "V", rc)
-      call ESMF_StateAddDataName(exportstate, "RHO", rc)
-      call ESMF_StateAddDataName(exportstate, "P", rc)
-      call ESMF_StateAddDataName(exportstate, "Q", rc)
-      call ESMF_StateAddDataName(exportstate, "FLAG", rc)
+      call ESMF_StateAddData(exportstate, "SIE", rc)
+      call ESMF_StateAddData(exportstate, "U", rc)
+      call ESMF_StateAddData(exportstate, "V", rc)
+      call ESMF_StateAddData(exportstate, "RHO", rc)
+      call ESMF_StateAddData(exportstate, "P", rc)
+      call ESMF_StateAddData(exportstate, "Q", rc)
+      call ESMF_StateAddData(exportstate, "FLAG", rc)
 
       call ESMF_StatePrint(exportstate, rc=rc)
 
@@ -222,7 +222,7 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
         call ESMF_StateGetData(importstate, "FLAG", field_flag, rc=rc)
       
         ! Check time to see if we are still injecting
-        call ESMF_ClockGetCurrentTime(clock, currtime, rc)
+        call ESMF_ClockGetCurrTime(clock, currtime, rc)
         if ((currtime .lt. datablock%inject_start_time) .or. &
             (currtime .gt. datablock%inject_stop_time)) then
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/04/18 17:18:34 flanigan Exp $ 
+# $Id: makefile,v 1.4 2003/04/29 01:05:55 nscollins Exp $ 
 
 ALL: system_tests
 
@@ -20,7 +20,7 @@ SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_SysTest74559
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
-SYSTEM_TESTS_OBJ      = ArraysGlobalMod.o FlowMod.o HeatMod.o user_coupler.o
+SYSTEM_TESTS_OBJ      = ArraysGlobalMod.o FlowSolverMod.o InjectorMod.o CouplerMod.o
 
 SYSTEM_TESTS_RUN      = RUN_ESMF_SysTest74559  
 
