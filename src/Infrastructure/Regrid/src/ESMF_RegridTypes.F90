@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.44 2004/05/10 15:47:11 nscollins Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.45 2004/05/10 17:24:19 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,19 +109,17 @@
   
       integer, parameter, public ::       &! supported regrid methods
          ESMF_RegridMethod_none     =  0, &! no regridding or undefined regrid
-         ESMF_RegridMethod_FieldCopy=  1, &! same Grid so copy field
-         ESMF_RegridMethod_Redist   =  2, &! same PhysGrid, just redistribute
-         ESMF_RegridMethod_Bilinear =  3, &! bilinear (logically-rect grids)
-         ESMF_RegridMethod_Bicubic  =  4, &! bicubic  (logically-rect grids)
-         ESMF_RegridMethod_Conserv1 =  5, &! 1st-order conservative
-         ESMF_RegridMethod_Conserv2 =  6, &! 2nd-order conservative
-         ESMF_RegridMethod_Raster   =  7, &! regrid by rasterizing domain
-         ESMF_RegridMethod_NearNbr  =  8, &! nearest-neighbor dist-weighted avg
-         ESMF_RegridMethod_Fourier  =  9, &! Fourier transform
-         ESMF_RegridMethod_Legendre = 10, &! Legendre transform
-         ESMF_RegridMethod_Index    = 11, &! index-space regrid (shift, stencil)
-         ESMF_RegridMethod_Linear   = 12, &! linear for 1-d regridding
-         ESMF_RegridMethod_Spline   = 13, &! cubic spline for 1-d regridding
+         ESMF_RegridMethod_Bilinear =  1, &! bilinear (logically-rect grids)
+         ESMF_RegridMethod_Bicubic  =  2, &! bicubic  (logically-rect grids)
+         ESMF_RegridMethod_Conserv1 =  3, &! 1st-order conservative
+         ESMF_RegridMethod_Conserv2 =  4, &! 2nd-order conservative
+         ESMF_RegridMethod_Raster   =  5, &! regrid by rasterizing domain
+         ESMF_RegridMethod_NearNbr  =  6, &! nearest-neighbor dist-weighted avg
+         ESMF_RegridMethod_Fourier  =  7, &! Fourier transform
+         ESMF_RegridMethod_Legendre =  8, &! Legendre transform
+         ESMF_RegridMethod_Index    =  9, &! index-space regrid (shift, stencil)
+         ESMF_RegridMethod_Linear   = 10, &! linear for 1-d regridding
+         ESMF_RegridMethod_Spline   = 11, &! cubic spline for 1-d regridding
          ESMF_RegridMethod_RegridCopy=51, &! copy existing regrid
          ESMF_RegridMethod_Shift    = 52, &! shift addresses of existing regrid
          ESMF_RegridMethod_Adjoint  = 53, &! create adjoint of existing regrid
@@ -138,7 +136,7 @@
          ESMF_RegridNormOptUnknown  = 0, &! unknown or undefined normalization
          ESMF_RegridNormOptNone     = 1, &
          ESMF_RegridNormOptDstArea  = 2, &
-         ESMF_RegridNormOptDstFrac  = 3
+         ESMF_RegridNormOptFracArea = 3
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
@@ -161,7 +159,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.44 2004/05/10 15:47:11 nscollins Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.45 2004/05/10 17:24:19 jwolfe Exp $'
 
 !==============================================================================
 !
