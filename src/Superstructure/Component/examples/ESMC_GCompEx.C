@@ -1,4 +1,4 @@
-// $Id: ESMC_GCompEx.C,v 1.4 2003/11/07 21:55:34 nscollins Exp $
+// $Id: ESMC_GCompEx.C,v 1.5 2004/01/28 23:14:49 nscollins Exp $
 //
 // Example/test code which creates a new comp.
 
@@ -95,16 +95,19 @@ main(int argc, char **argv) {
 // the actual arguments to these routines are yet to be decided.
 int ATM_Init(ESMC_State *importS, ESMC_State *exportS, ESMC_Clock *clock) {
      // code to set up internal data for component
+    return ESMF_SUCCESS;
 }
     
 // the actual arguments to these routines are yet to be decided.
 int ATM_Run(ESMC_State *importS, ESMC_State *exportS, ESMC_Clock *clock) {
      // computational code runs model timesteps here
+    return ESMF_SUCCESS;
 }
 
 // the actual arguments to these routines are yet to be decided.
 int ATM_Final(ESMC_State *importS, ESMC_State *exportS, ESMC_Clock *clock) {
      // code to flush output, close files, release memory and shut down
+    return ESMF_SUCCESS;
 }
     
 //\end{verbatim}
