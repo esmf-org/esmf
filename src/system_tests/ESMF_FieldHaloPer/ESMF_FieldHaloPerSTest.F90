@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.23 2004/04/28 23:12:13 cdeluca Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.24 2004/04/29 16:59:00 nscollins Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -270,7 +270,7 @@
              shape(1) = 8
              shape(2) = 4
          case default
-             shape(1) = ndes
+             shape(1) = npets
              shape(2) = 1
       end select
 
