@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.31 2005/02/26 00:05:18 nscollins Exp $
+! $Id: user_model2.F90,v 1.32 2005/02/28 17:02:13 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -188,7 +188,7 @@
 
 !   ! Local variables
       type(ESMF_Field) :: humidity
-      type(ESMF_Array) :: array1
+      !type(ESMF_Array) :: array1
       integer :: status
 
       print *, "User Comp Run starting"

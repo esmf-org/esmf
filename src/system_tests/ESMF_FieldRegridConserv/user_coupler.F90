@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.2 2004/12/07 23:31:20 nscollins Exp $
+! $Id: user_coupler.F90,v 1.3 2005/02/28 17:02:32 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -67,7 +67,6 @@
       integer :: itemcount
       type(ESMF_Field) :: humidity1, humidity2
       type(ESMF_VM) :: vm
-      type(ESMF_DELayout) :: cplDElayout
 
       print *, "User Coupler Init starting"
 
