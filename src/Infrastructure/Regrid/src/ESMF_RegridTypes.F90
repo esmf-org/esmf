@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.33 2004/03/18 22:23:59 nscollins Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.34 2004/03/19 23:38:46 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -154,7 +154,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.33 2004/03/18 22:23:59 nscollins Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.34 2004/03/19 23:38:46 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -345,7 +345,7 @@
 ! !IROUTINE: ESMF_RegridRouteConstruct - Constructs a Route used to gather data
 
 ! !INTERFACE:
-      function ESMF_RegridRouteConstruct(numDims, srcGrid, dstGrid, &
+      function ESMF_RegridRouteConstruct(dimCount, srcGrid, dstGrid, &
                                          recvDomainList, srcDatamap, srcArray, &
                                          dstDatamap, dstArray, total, rc)
 !
@@ -354,7 +354,7 @@
 !
 ! !ARGUMENTS:
 
-      integer, intent(in) :: numDims
+      integer, intent(in) :: dimCount
       type(ESMF_Grid), intent(in) :: srcGrid
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_DomainList), intent(inout) :: recvDomainList
@@ -420,7 +420,7 @@
       endif
 
       ! Extract some layout information for use in this regrid.
-      call ESMF_GridGet(srcGrid, numDims=gridrank, rc=status)
+      call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=status)
       allocate (myAI(gridrank))
       call ESMF_DataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=status)
       call ESMF_GridGetDE(srcGrid, horzRelLoc=horzRelLoc, &
@@ -432,16 +432,20 @@
       endif
 
       ! From each grid get the bounding box information on this DE
-      call ESMF_GridGet(srcGrid, numDims=gridrank, rc=status)
+      call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=status)
       allocate (srcMin(gridrank))
       allocate (srcMax(gridrank))
-      call ESMF_GridGet(dstGrid, numDims=gridrank, rc=status)
+      call ESMF_GridGet(dstGrid, dimCount=gridrank, rc=status)
       allocate (dstMin(gridrank))
       allocate (dstMax(gridrank))
-      call ESMF_GridGet(srcGrid, minLocalCoordPerDim=srcMin, &
-                        maxLocalCoordPerDim=srcMax, rc=status)
-      call ESMF_GridGet(dstGrid, minLocalCoordPerDim=dstMin, &
-                        maxLocalCoordPerDim=dstMax, rc=status)
+      call ESMF_DataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=status)
+      call ESMF_GridGetDE(srcGrid, horzRelLoc=horzRelLoc, &
+                          minLocalCoordPerDim=srcMin, &
+                          maxLocalCoordPerDim=srcMax, rc=status)
+      call ESMF_DataMapGet(dstDataMap, horzRelloc=horzRelLoc, rc=status)
+      call ESMF_GridGetDE(dstGrid, horzRelLoc=horzRelLoc, &
+                          minLocalCoordPerDim=dstMin, &
+                          maxLocalCoordPerDim=dstMax, rc=status)
 
       ! calculate intersections
       call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, srcMin, srcMax, &
@@ -461,11 +465,11 @@
 
       ! Modify DomainLists for Array dimensions larger than Grid dimensions
       ! TODO: move this to its own subroutine?
-      if ((numDims.gt.gridrank) .and. (present(srcArray))) then ! TODO: fill in
+      if ((dimCount.gt.gridrank) .and. (present(srcArray))) then ! TODO: fill in
       ! sendDomainList first
-        allocate(myArrayAI(numDims))
-        allocate(myArrayLocalAI(numDims))
-        allocate(dimOrder(numDims))
+        allocate(myArrayAI(dimCount))
+        allocate(myArrayLocalAI(dimCount))
+        allocate(dimOrder(dimCount))
         if (totalUse) then
           call ESMF_ArrayGetAxisIndex(srcArray, totalindex=myArrayAI, rc=status)
         else
@@ -476,8 +480,8 @@
           do j = 1,sendDomainList%domains(i)%rank
             myAI(j) = sendDomainList%domains(i)%ai(j)
           enddo
-          sendDomainList%domains(i)%rank = numDims
-          do j = 1,numDims
+          sendDomainList%domains(i)%rank = dimCount
+          do j = 1,dimCount
             if (dimOrder(j).eq.1) then
               sendDomainList%domains(i)%ai(j) = myAI(1)
             elseif (dimOrder(j).eq.2) then
@@ -489,7 +493,7 @@
             endif
           enddo
         enddo
-        do j = 1,numDims
+        do j = 1,dimCount
           if (dimOrder(j).eq.0) then
             count = myArrayAI(j)%max - myArrayAI(j)%min + 1
             sendDomainList%total_points = sendDomainList%total_points*count
@@ -498,8 +502,8 @@
 
       ! recvDomainList next
         call ESMF_DELayoutGetNumDEs(srcDELayout, nDEs, status)
-        allocate(allAI(nDEs,numDims))
-        allocate(allLocalAI(nDEs,numDims))
+        allocate(allAI(nDEs,dimCount))
+        allocate(allLocalAI(nDEs,dimCount))
         if (totalUse) then
           call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
                                            totalindex=allAI, rc=status)
@@ -512,8 +516,8 @@
           do j = 1,recvDomainList%domains(i)%rank
             myAI(j) = recvDomainList%domains(i)%ai(j)
           enddo
-          recvDomainList%domains(i)%rank = numDims
-          do j = 1,numDims
+          recvDomainList%domains(i)%rank = dimCount
+          do j = 1,dimCount
             if (dimOrder(j).eq.1) then
               recvDomainList%domains(i)%ai(j) = myAI(1)
             elseif (dimOrder(j).eq.2) then
@@ -525,7 +529,7 @@
             endif
           enddo
         enddo
-        do j = 1,numDims
+        do j = 1,dimCount
           if (dimOrder(j).eq.0) then
             count = allAI(theirDE,j)%max - allAI(theirDE,j)%min + 1
             recvDomainList%total_points = recvDomainList%total_points*count
@@ -543,7 +547,7 @@
       ! TODO: this must be either a parent layout, or the src and dst layouts
       !  must be identical.
       route = ESMF_RouteCreate(srcDELayout, status)
-      call ESMF_RoutePrecomputeDomList(route, numDims, myDE, sendDomainList, &
+      call ESMF_RoutePrecomputeDomList(route, dimCount, myDE, sendDomainList, &
                                        recvDomainList, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridRouteConstruct: ", &
