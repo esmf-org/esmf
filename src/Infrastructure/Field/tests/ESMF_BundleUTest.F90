@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.16 2003/06/05 22:45:41 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.17 2003/06/11 19:27:26 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.16 2003/06/05 22:45:41 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.17 2003/06/11 19:27:26 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -225,6 +225,8 @@
       write(name, *) "Getting first Field by name from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldGetName(returnedfield1, fname1, rc)
+
+      !NEX_UTest
       write(failMsg, *) "Subroutine returned ESMF_FAILURE or incorrect name returned"
       write(name, *) "Getting first Field from a Bundle Test continued"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname1.eq."pressure"), name, &
