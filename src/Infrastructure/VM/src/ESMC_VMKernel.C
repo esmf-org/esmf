@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.29 2005/02/25 22:10:26 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.30 2005/03/01 23:56:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -151,8 +151,12 @@ void ESMC_VMK::vmk_obtain_args(void){
   system(command);
   sprintf(fname, ".uname.%d", mypid);
   FILE *fp=fopen(fname, "r");
-  fscanf(fp, "%[^\n]", uname);
-  fclose(fp);
+  if (fp){
+    fgets(uname, 80, fp);
+    fclose(fp);
+  }else{
+    uname[0]='\0';  // empty uname string
+  }
   // determine whether this is a SUS3=sysV or BSD derived OS
   int bsdflag=0;
   if (!strcmp(uname, "Darwin")) bsdflag=1;    // Darwin is BSD
@@ -166,9 +170,13 @@ void ESMC_VMK::vmk_obtain_args(void){
   system(command);
   sprintf(fname, ".args.%d", mypid);
   fp=fopen(fname, "r");
-  fgets(args, 8000, fp);  // scan off header line of ps output
-  fgets(args, 8000, fp);
-  fclose(fp);
+  if (fp){
+    fgets(args, 8000, fp);  // scan off header line of ps output
+    fgets(args, 8000, fp);
+    fclose(fp);
+  }else{
+    args[0]='\0'; // empty args string
+  }
   sprintf(command, "rm -f .args.%d .uname.%d", mypid, mypid);
   system(command);
   // now the string 'args' holds the complete command line with arguments
@@ -191,12 +199,15 @@ void ESMC_VMK::vmk_obtain_args(void){
     }
     ++i;
   }
-  argv[argc][j] = '\0';
-  ++argc;
+  if (i){
+    // only if this isn't for a complete NULL case
+    argv[argc][j] = '\0';
+    ++argc;
+  }
   // now argc and argv are valid
-  //printf("argc=%d\n", argc);
-  //for (i=0; i<argc; i++)
-  //  printf("%s\n", argv[i]);
+  printf("argc=%d\n", argc);
+  for (i=0; i<argc; i++)
+    printf("%s\n", argv[i]);
 }
 
 
