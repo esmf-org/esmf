@@ -1,0 +1,78 @@
+# $Id: base_variables,v 1.1 2001/11/15 23:10:20 dneckels Exp $ 
+#
+#     See the file build/base_variables.defs for a complete explanation of all these fields
+#
+AR		   = /usr/ccs/bin/ar
+AR_FLAGS	   = cr
+RM		   = rm -f
+OMAKE		   = ${MAKE}
+RANLIB		   = /usr/ccs/bin/ranlib
+SHELL		   = /bin/sh
+SED		   = /bin/sed
+SH_LD		   = /opt/SUNWhpc/bin/mpCC 
+# ######################### C and Fortran compiler ########################
+#
+C_CC		   = /opt/SUNWhpc/bin/mpcc -KPIC -dalign -xtarget=native
+C_FC		   = /opt/SUNWhpc/bin/mpf90 -openmp -xpp=cpp -dalign
+C_FC_MOD           = -M
+C_CLINKER_SLFLAG   = -R
+C_FLINKER_SLFLAG   = -R
+# Must use f90 to link C to get omp libs
+C_CLINKER	   = /opt/SUNWhpc/bin/mpf90 -openmp -dalign
+C_FLINKER	   = /opt/SUNWhpc/bin/mpf90 -openmp -dalign
+C_CCV		   = ${C_CC} --version
+C_FCV              = /opt/SUNWhpc/bin/mpf90 -openmp -dalign
+C_SYS_LIB	   = -L/opt/SUNWspro/SC5.0/lib -lF77 -lM77 -lfsu -lsunmath -lnsl -lsocket -lgen -ldl -lm
+# ---------------------------- BOPT - g options ----------------------------
+G_COPTFLAGS	   = -g -xs
+G_FOPTFLAGS	   = -g -xs
+# ----------------------------- BOPT - O options -----------------------------
+O_COPTFLAGS	   = -fast -xO4 -fsimple=2 -xtarget=native
+O_FOPTFLAGS	   = -fast
+# ########################## C++ compiler ##################################
+#
+CXX_CC		   = /opt/SUNWhpc/bin/mpCC 
+CXX_FC		   = /opt/SUNWhpc/bin/mpf90 -openmp
+CXX_CLINKER_SLFLAG = -Wl,-rpath,
+CXX_FLINKER_SLFLAG = -Wl,-rpath,
+CXX_CLINKER	   = /opt/SUNWhpc/bin/mpCC 
+CXX_FLINKER	   = /opt/SUNWhpc/bin/mpCC 
+CXX_CCV		   = ${CXX_CC} --version
+#CXX_SYS_LIB	   = -ldl -lc -lf2c -lm
+CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
+#CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
+# ------------------------- BOPT - g_c++ options ------------------------------
+GCXX_COPTFLAGS	   = -g 
+GCXX_FOPTFLAGS	   = -g
+# ------------------------- BOPT - O_c++ options ------------------------------
+OCXX_COPTFLAGS	   = -O 
+OCXX_FOPTFLAGS	   = -O
+# -------------------------- BOPT - g_complex options ------------------------
+GCOMP_COPTFLAGS	   = -g
+GCOMP_FOPTFLAGS	   = -g
+# --------------------------- BOPT - O_complex options -------------------------
+OCOMP_COPTFLAGS	   = -O
+OCOMP_FOPTFLAGS	   = -O
+# ########################### ALICE install options ###########################
+#
+G_ALICEFLAGS	   = -DESMC_DEBUG  -DESMC_USE_LOG -DESMC_USE_BOPT_g \
+                     -DESMC_USE_STACK
+O_ALICEFLAGS	   = -DUSE_FOR_KERNELS -DESMC_USE_LOG -DESMC_DEBUG  \
+	             -DESMC_USE_BOPT_O
+GCXX_ALICEFLAGS	   = -DESMC_DEBUG  -DESMC_USE_LOG -DESMC_USE_BOPT_g \
+                     -DESMC_USE_STACK 
+OCXX_ALICEFLAGS	   = -DESMC_DEBUG  -DESMC_USE_LOG -DESMC_USE_BOPT_O
+GCOMP_ALICEFLAGS   = -DESMC_DEBUG  -DESMC_USE_LOG -DESMC_USE_BOPT_g \
+                     -DESMC_USE_STACK -DESMC_USE_COMPLEX
+OCOMP_ALICEFLAGS   = -DESMC_DEBUG  -DESMC_USE_LOG -DESMC_USE_BOPT_O \
+		     -DESMC_USE_COMPLEX
+
+##################################################################################
+#
+#   ALICE installers should very rarely ever need to edit anything below this 
+#
+##################################################################################
+
+PARCH		   = solaris
+
+include ${ESMF_DIR}/build/common_variables
