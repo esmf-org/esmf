@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.12 2004/04/30 19:06:18 theurich Exp $
+// $Id: ESMC_FTable.C,v 1.13 2004/04/30 19:16:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.12 2004/04/30 19:06:18 theurich Exp $";
+           "$Id: ESMC_FTable.C,v 1.13 2004/04/30 19:16:15 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -681,6 +681,9 @@
                   funcs[i].funcarg[2], funcs[i].funcarg[3],
                  (int *)funcs[i].funcarg[4]);
             *rc = *(int *)(funcs[i].funcarg[4]);
+            // Update the original with any changes made by the child
+            FTN(f_esmf_compcopy)((ESMC_Comp *)funcs[i].funcarg[0], 
+                                 (ESMC_Comp *)comp, &rrc);
             // Delete the heap copy of the component object for this thread
             FTN(f_esmf_compdelete)((ESMC_Comp *)comp, &rrc);
             delete (ESMC_Comp *)comp;
@@ -707,6 +710,9 @@
             (*vf)(comp, funcs[i].funcarg[1],
                   funcs[i].funcarg[2], (int *)funcs[i].funcarg[3]);
             *rc = *(int *)(funcs[i].funcarg[3]);
+            // Update the original with any changes made by the child
+            FTN(f_esmf_compcopy)((ESMC_Comp *)funcs[i].funcarg[0], 
+                                 (ESMC_Comp *)comp, &rrc);
             // Delete the heap copy of the component object for this thread
             FTN(f_esmf_compdelete)((ESMC_Comp *)comp, &rrc);
             delete (ESMC_Comp *)comp;
