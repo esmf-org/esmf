@@ -1,4 +1,4 @@
-% $Id: Config_reqdoc.ctex,v 1.1 2003/05/07 06:58:55 cdeluca Exp $
+% $Id: Config_reqdoc.ctex,v 1.2 2003/05/07 07:16:22 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[english]{article}
@@ -63,7 +63,7 @@
 #ifdef STANDALONE
 \input{ConfigAttr_auth}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/ConfigAttr/doc/ConfigAttr_auth}
+\input{../Infrastructure/ConfigAttr/doc/Config_auth}
 #endif
 
 #ifdef STANDALONE
@@ -75,14 +75,14 @@
 #ifdef STANDALONE
 \input{ConfigAttr_background}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/ConfigAttr/doc/ConfigAttr_background}
+\input{../Infrastructure/ConfigAttr/doc/Config_background}
 #endif
 
 \section{Terms}
 #ifdef STANDALONE
 \input{ConfigAttr_terms}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/ConfigAttr/doc/ConfigAttr_terms}
+\input{../Infrastructure/ConfigAttr/doc/Config_terms}
 #endif
 
 #ifdef STANDALONE
@@ -97,7 +97,7 @@
 #ifdef STANDALONE
 %\input{ConfigAttr_abbr}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/ConfigAttr/doc/ConfigAttr_abbr}
+%\input{../Infrastructure/ConfigAttr/doc/Config_abbr}
 #endif
 
 \newpage
@@ -114,7 +114,7 @@
 #ifdef STANDALONE
 \input{ConfigAttr_req}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/ConfigAttr/doc/ConfigAttr_req}
+\input{../Infrastructure/ConfigAttr/doc/Config_req}
 #endif
 
 #ifdef STANDALONE
