@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.8 2003/07/22 19:52:17 nscollins Exp $
+! $Id: user_coupler.F90,v 1.9 2003/08/01 14:45:21 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -116,7 +116,7 @@
 
         ! These are fields on different layouts - call Redist to rearrange
         !  the data using the Comm routines.
-        call ESMF_FieldRedist(humidity1, humidity2, cpllayout, status)
+        call ESMF_FieldRedist(humidity1, humidity2, cpllayout, rc=status)
 
 
         ! Set output data
