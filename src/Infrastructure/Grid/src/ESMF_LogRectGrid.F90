@@ -62,10 +62,10 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 
-    public ESMF_GridCreateHorz_LatLon
-    public ESMF_GridCreateHorz_LatLonUni
-    public ESMF_GridCreateHorz_XY
-    public ESMF_GridCreateHorz_XYUni
+    public ESMF_GridCreateHorzLatLon
+    public ESMF_GridCreateHorzLatLonUni
+    public ESMF_GridCreateHorzXY
+    public ESMF_GridCreateHorzXYUni
     public ESMF_LRGridAddVert
     public ESMF_LRGridDistribute
     public ESMF_LRGridCreateRead
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.70 2004/05/26 15:29:19 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.71 2004/05/26 18:04:57 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -226,18 +226,18 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCreateHorz_LatLon - Create a new horizontal LatLon Grid
+! !IROUTINE: ESMF_GridCreateHorzLatLon - Create a new horizontal LatLon Grid
 
 ! !INTERFACE:
-      function ESMF_GridCreateHorz_LatLon(minGlobalCoordPerDim, &
-                                          delta1, delta2, coord1, coord2, &
-                                          horzStagger, dimNames, dimUnits, &
-                                          coordOrder, coordIndex, periodic, &
-                                          name, rc)
+      function ESMF_GridCreateHorzLatLon(minGlobalCoordPerDim, &
+                                         delta1, delta2, coord1, coord2, &
+                                         horzStagger, dimNames, dimUnits, &
+                                         coordOrder, coordIndex, periodic, &
+                                         name, rc)
 
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateHorz_LatLon
+      type(ESMF_Grid) :: ESMF_GridCreateHorzLatLon
 !
 ! !ARGUMENTS:
       real(ESMF_KIND_R8), dimension(:), intent(in) :: minGlobalCoordPerDim
@@ -313,7 +313,7 @@
 
       ! Initialize pointers
       nullify(grid)
-      nullify(ESMF_GridCreateHorz_LatLon%ptr)
+      nullify(ESMF_GridCreateHorzLatLon%ptr)
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -331,7 +331,7 @@
       ! If error write message and return.
       ! Formal error handling will be added asap.
       if (status .NE. 0) then
-        print *, "ERROR in ESMF_GridCreateHorz_LatLon: Allocate"
+        print *, "ERROR in ESMF_GridCreateHorzLatLon: Allocate"
         return
       endif
 
@@ -347,31 +347,31 @@
                                      coordIndex=coordIndex, &
                                      periodic=periodic, name=name, rc=status)
       if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridCreateHorz_LatLon: Grid construct"
+        print *, "ERROR in ESMF_GridCreateHorzLatLon: Grid construct"
         return
       endif
 
       ! Set return values.
-      ESMF_GridCreateHorz_LatLon%ptr => grid
+      ESMF_GridCreateHorzLatLon%ptr => grid
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end function ESMF_GridCreateHorz_LatLon
+      end function ESMF_GridCreateHorzLatLon
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCreateHorz_LatLonUni - Create a new uniform horizontal LatLon Grid
+! !IROUTINE: ESMF_GridCreateHorzLatLonUni - Create a new uniform horizontal LatLon Grid
 
 ! !INTERFACE:
-      function ESMF_GridCreateHorz_LatLonUni(counts, minGlobalCoordPerDim, &
-                                             maxGlobalCoordPerDim, &
-                                             deltaPerDim, horzStagger, &
-                                             dimNames, dimUnits, &
-                                             coordOrder, coordIndex, periodic, &
-                                             name, rc)
+      function ESMF_GridCreateHorzLatLonUni(counts, minGlobalCoordPerDim, &
+                                            maxGlobalCoordPerDim, &
+                                            deltaPerDim, horzStagger, &
+                                            dimNames, dimUnits, &
+                                            coordOrder, coordIndex, periodic, &
+                                            name, rc)
                                              
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateHorz_LatLonUni
+      type(ESMF_Grid) :: ESMF_GridCreateHorzLatLonUni
 !
 ! !ARGUMENTS:
       integer, dimension(:), intent(in) :: counts
@@ -449,7 +449,7 @@
 
       ! Initialize pointers
       nullify(grid)
-      nullify(ESMF_GridCreateHorz_LatLonUni%ptr)
+      nullify(ESMF_GridCreateHorzLatLonUni%ptr)
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -467,7 +467,7 @@
       ! If error write message and return.
       ! Formal error handling will be added asap.
       if (status .NE. 0) then
-        print *, "ERROR in ESMF_GridCreateHorz_LatLonUni: Allocate"
+        print *, "ERROR in ESMF_GridCreateHorzLatLonUni: Allocate"
         return
       endif
 
@@ -481,30 +481,30 @@
                                        coordOrder, coordIndex, periodic, &
                                        name, status)
       if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridCreateHorz_LatLonUni: Grid construct"
+        print *, "ERROR in ESMF_GridCreateHorzLatLonUni: Grid construct"
         return
       endif
 
       ! Set return values.
-      ESMF_GridCreateHorz_LatLonUni%ptr => grid
+      ESMF_GridCreateHorzLatLonUni%ptr => grid
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end function ESMF_GridCreateHorz_LatLonUni
+      end function ESMF_GridCreateHorzLatLonUni
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCreateHorz_XY - Create a new horizontal XY Grid
+! !IROUTINE: ESMF_GridCreateHorzXY - Create a new horizontal XY Grid
 
 ! !INTERFACE:
-      function ESMF_GridCreateHorz_XY(minGlobalCoordPerDim, &
-                                      delta1, delta2, coord1, coord2, &
-                                      horzStagger, dimNames, dimUnits, &
-                                      coordOrder, coordIndex, periodic, &
-                                      name, rc)
+      function ESMF_GridCreateHorzXY(minGlobalCoordPerDim, &
+                                     delta1, delta2, coord1, coord2, &
+                                     horzStagger, dimNames, dimUnits, &
+                                     coordOrder, coordIndex, periodic, &
+                                     name, rc)
 
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateHorz_XY
+      type(ESMF_Grid) :: ESMF_GridCreateHorzXY
 !
 ! !ARGUMENTS:
       real(ESMF_KIND_R8), dimension(:), intent(in) :: minGlobalCoordPerDim
@@ -580,7 +580,7 @@
 
       ! Initialize pointers
       nullify(grid)
-      nullify(ESMF_GridCreateHorz_XY%ptr)
+      nullify(ESMF_GridCreateHorzXY%ptr)
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -598,7 +598,7 @@
       ! If error write message and return.
       ! Formal error handling will be added asap.
       if (status .NE. 0) then
-        print *, "ERROR in ESMF_GridCreateHorz_XY: Allocate"
+        print *, "ERROR in ESMF_GridCreateHorzXY: Allocate"
         return
       endif
 
@@ -614,31 +614,31 @@
                                      coordIndex=coordIndex, &
                                      periodic=periodic, name=name, rc=status)
       if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridCreateHorz_XY: Grid construct"
+        print *, "ERROR in ESMF_GridCreateHorzXY: Grid construct"
         return
       endif
 
       ! Set return values.
-      ESMF_GridCreateHorz_XY%ptr => grid
+      ESMF_GridCreateHorzXY%ptr => grid
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end function ESMF_GridCreateHorz_XY
+      end function ESMF_GridCreateHorzXY
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCreateHorz_XYUni - Create a new uniform horizontal XY Grid
+! !IROUTINE: ESMF_GridCreateHorzXYUni - Create a new uniform horizontal XY Grid
 
 ! !INTERFACE:
-      function ESMF_GridCreateHorz_XYUni(counts, minGlobalCoordPerDim, &
-                                         maxGlobalCoordPerDim, &
-                                         deltaPerDim, horzStagger, &
-                                         dimNames, dimUnits, &
-                                         coordOrder, coordIndex, periodic, &
-                                         name, rc)
+      function ESMF_GridCreateHorzXYUni(counts, minGlobalCoordPerDim, &
+                                        maxGlobalCoordPerDim, &
+                                        deltaPerDim, horzStagger, &
+                                        dimNames, dimUnits, &
+                                        coordOrder, coordIndex, periodic, &
+                                        name, rc)
                                              
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateHorz_XYUni
+      type(ESMF_Grid) :: ESMF_GridCreateHorzXYUni
 !
 ! !ARGUMENTS:
       integer, dimension(:), intent(in) :: counts
@@ -716,7 +716,7 @@
 
       ! Initialize pointers
       nullify(grid)
-      nullify(ESMF_GridCreateHorz_XYUni%ptr)
+      nullify(ESMF_GridCreateHorzXYUni%ptr)
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -734,7 +734,7 @@
       ! If error write message and return.
       ! Formal error handling will be added asap.
       if (status .NE. 0) then
-        print *, "ERROR in ESMF_GridCreateHorz_XYUni: Allocate"
+        print *, "ERROR in ESMF_GridCreateHorzXYUni: Allocate"
         return
       endif
 
@@ -748,15 +748,15 @@
                                        coordOrder, coordIndex, periodic, &
                                        name, status)
       if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridCreateHorz_XYUni: Grid construct"
+        print *, "ERROR in ESMF_GridCreateHorzXYUni: Grid construct"
         return
       endif
 
       ! Set return values.
-      ESMF_GridCreateHorz_XYUni%ptr => grid
+      ESMF_GridCreateHorzXYUni%ptr => grid
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end function ESMF_GridCreateHorz_XYUni
+      end function ESMF_GridCreateHorzXYUni
 
 !------------------------------------------------------------------------------
 !BOPI
