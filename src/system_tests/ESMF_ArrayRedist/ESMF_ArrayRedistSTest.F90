@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.2 2003/10/20 20:13:58 cdeluca Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.3 2004/02/13 18:31:44 nscollins Exp $
 !
 ! System test ArrayRedist
 !  Description on Sourceforge under System Test #70384
@@ -36,7 +36,7 @@
     integer(ESMF_KIND_I4), dimension(:,:,:), pointer :: srcdata, dstdata, resdata
     integer(ESMF_KIND_I4), dimension(:,:,:), pointer :: srcptr, dstptr, resptr
     integer, dimension(3) :: global_counts, decompids1, decompids2, rank_trans
-    character(len=ESMF_MAXSTR) :: cname, sname, gname, fname
+    character(len=ESMF_MAXSTR) :: cname, sname, gname, fname, aname
     type(ESMF_DELayout) :: layout0, layout1, layout2
     type(ESMF_Array) :: array1, array1a, array2, array2a, array3
     type(ESMF_AxisIndex) :: indexlist1(3), indexlist2(3), indexlist3(3)
@@ -195,6 +195,7 @@
     !  Array is destroyed. 
 
     call ESMF_StateAddData(state1, array1, rc=rc)
+    call ESMF_ArrayGetName(array1, aname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "Source Array added to state"
 
@@ -209,7 +210,7 @@
 !-------------------------------------------------------------------------
 !
 
-    call ESMF_StateGetData(state1, "default array name", array1a, rc=rc)
+    call ESMF_StateGetData(state1, aname, array1a, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "Source Array retrieved from state"
     
