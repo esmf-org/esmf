@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.2 2002/09/20 17:51:29 jwolfe Exp $ 
+# $Id: base_variables,v 1.3 2003/02/11 16:58:13 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -11,12 +11,12 @@ SHELL		   = /bin/sh
 SED		   = /bin/sed
 # ######################### C and Fortran compiler ########################
 #
-C_CC		   = cc_r -q64
-C_FC		   = xlf90_r -q64 -qsmp=omp -qfixed=72
+C_CC		   = mpcc_r -q64
+C_FC		   = xlf90_r -q64 -qsmp=omp 
 C_FC_MOD           = -I
 C_CLINKER_SLFLAG   = -L
 C_FLINKER_SLFLAG   = -L
-C_CLINKER	   = cc_r -q64 -bmaxdata:0x70000000
+C_CLINKER	   = mpcc_r -q64 -bmaxdata:0x70000000
 # you may need to add -bI:/usr/lpp/xlf/lib/lowsys.exp to C_LINKER
 C_FLINKER	   = xlf90_r -q64 -qsmp=omp -bmaxdata:0x70000000
 C_CCV		   = unknown
@@ -30,12 +30,12 @@ O_COPTFLAGS	   = -O3 -qstrict -qspill=3000
 O_FOPTFLAGS	   = -O3 -w
 # ########################## C++ compiler ##################################
 #
-CXX_CC		   = xlC_r -+ -q64
+CXX_CC		   = mpcc_r -+ -q64
 CXX_FC		   = xlf90_r -q64
 CXX_CLINKER_SLFLAG = -L
 CXX_FLINKER_SLFLAG = -L
-CXX_CLINKER	   = xlC_r -q64
-CXX_FLINKER	   = xlC_r -q64
+CXX_CLINKER	   = mpcc_r -q64
+CXX_FLINKER	   = mpcc_r -q64
 CXX_CCV		   = unknown
 CXX_SYS_LIB	   = -lcomplex -lisode /usr/lib/libxlf.a /usr/lib/libxlf90.a
 # ------------------------- BOPT - g_c++ options ------------------------------
