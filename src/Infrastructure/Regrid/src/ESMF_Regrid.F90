@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.73 2004/05/10 15:47:10 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.74 2004/05/14 20:01:11 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -68,23 +68,8 @@
       private
 
 !------------------------------------------------------------------------------
-!     !  ESMF_Regrid
-!
-!     !  The Regrid data structure that is passed between languages.
-
-      type ESMF_Regrid
-      sequence
-      private
-        type (ESMF_RegridType), pointer :: ptr     ! pointer to a regrid type
-      end type
-
-!------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 !
-    ! TODO: This should not be a public object.  It's here right now
-    !  to get the code to compile, but it should be removed asap.
-    public ESMF_Regrid
-
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -96,7 +81,6 @@
     !  these routines must exist to be consistent with the other interfaces.  
     ! 
     public ESMF_ArrayRegridStore, ESMF_ArrayRegrid, ESMF_ArrayRegridRelease
-    public ESMF_RegridGet        ! returns value of a regrid attribute
     public ESMF_RegridDestroy    ! deallocate memory associated with a regrid
     public ESMF_RegridValidate   ! Error checking and validation
     public ESMF_RegridPrint      ! Prints various regrid info
@@ -106,7 +90,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.73 2004/05/10 15:47:10 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.74 2004/05/14 20:01:11 jwolfe Exp $'
 
 !==============================================================================
 
@@ -584,150 +568,6 @@
      ! nuke temp array
 
      end subroutine ESMF_RegridRun
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_RegridGet - Get an attribute of a Regrid
-
-! !INTERFACE:
-      subroutine ESMF_RegridGet(regrid, name,            &
-                                srcArray, dstArray,  &
-                                srcGrid,  dstGrid,   &
-                                srcDatamap,  dstDatamap,   &
-                                method, numLinks , gather, rc)
-!
-! !ARGUMENTS:
-
-      type(ESMF_Regrid),    intent(inout) :: regrid
-      character (*),        intent(out), optional :: name
-      type (ESMF_Array),    intent(out), optional :: srcArray, dstArray
-      type (ESMF_Grid),     intent(out), optional :: srcGrid,  dstGrid
-      type (ESMF_FieldDataMap),  intent(out), optional :: srcDatamap,  dstDatamap
-      integer,              intent(out), optional :: method
-      integer,              intent(out), optional :: numLinks
-      type (ESMF_Route),    intent(out), optional :: gather
-      integer,              intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!     Returns the value of a Regrid attribute.  The
-!     attribute is specified through optional arguments.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[regrid]
-!          Regrid to be queried.
-!     \item[TODO:] fix this doc - make it match arg list and fix double
-!          brackets to be bracket, curley brace, bracket.
-!     \item[{[name]}]
-!          Name for this regrid.
-!     \item[{[srcArray]}]
-!          
-!     \item[{[dstArray]}]
-!          
-!     \item[{[srcGrid]}]
-!          
-!     \item[{[dstGrid]}]
-!          
-!     \item[{[srcDatamap]}]
-!          
-!     \item[{[dstDatamap]}]
-!          
-!     \item[{[method]}]
-!          Integer enum of method used in this regrid.
-!     \item[{[numLinks]}]
-!          Number of unique links between grids for this regrid.
-!     \item[{[gather]}]
-!          Route used to gather non-local information to perform regrid.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!  TODO
-
-      logical :: rcpresent
-      integer :: status
-
-      ! Assume failure until sure of success
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then 
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-      
-      ! Get name if requested
-      if (present(name)) then
-         call ESMF_RegridTypeGet(regrid%ptr, name=name, rc=status)
-         if (status .ne. ESMF_SUCCESS) then
-             print *, "ESMF_RegridGet: failed getting regrid name"
-             return
-         endif
-      endif
-
-! TODO: make these arrays, grid, datamaps.   Are we really going to 
-!  store the arrays & grids this was based on?  why?   nsc.
-!      ! Get bundles if requested
-!      if (present(srcbundle)) then
-!         call ESMF_RegridTypeGet(regrid%ptr, srcbundle=srcbundle, rc=status)
-!        if (status .ne. ESMF_SUCCESS) then
-!            print *, "ESMF_RegridGet: failed getting regrid bundle"
-!            return
-!        endif
-!      endif
-!      if (present(dstbundle)) then
-!         call ESMF_RegridTypeGet(regrid%ptr, dstbundle=dstbundle, rc=status)
-!        if (status .ne. ESMF_SUCCESS) then
-!            print *, "ESMF_RegridGet: failed getting regrid bundle"
-!            return
-!        endif
-!      endif
-!
-!      ! Get fields if requested
-!      if (present(srcfield)) then
-!         call ESMF_RegridTypeGet(regrid%ptr, srcfield=srcfield, rc=status)
-!        if (status .ne. ESMF_SUCCESS) then
-!            print *, "ESMF_RegridGet: failed getting regrid ..."
-!            return
-!        endif
-!      endif
-!      if (present(dstfield)) then
-!         call ESMF_RegridTypeGet(regrid%ptr, dstfield=dstfield, rc=stat)
-!        if (status .ne. ESMF_SUCCESS) then
-!            print *, "ESMF_RegridGet: failed getting regrid ..."
-!            return
-!        endif
-!         if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
-!      endif
-!
-      ! get method or number of links or gather route
-      if (present(method)) then
-         call ESMF_RegridTypeGet(regrid%ptr, method=method, rc=status)
-         if (status .ne. ESMF_SUCCESS) then
-             print *, "ESMF_RegridGet: failed getting regrid ..."
-             return
-         endif
-      endif
-      if (present(numLinks)) then
-         call ESMF_RegridTypeGet(regrid%ptr, numLinks=numLinks, rc=status)
-         if (status .ne. ESMF_SUCCESS) then
-             print *, "ESMF_RegridGet: failed getting regrid ..."
-             return
-         endif
-      endif
-      if (present(gather)) then
-         call ESMF_RegridTypeGet(regrid%ptr, gather=gather, rc=status)
-         if (status .ne. ESMF_SUCCESS) then
-             print *, "ESMF_RegridGet: failed getting regrid ..."
-             return
-         endif
-      endif
-
-      if (rcpresent) rc = status
-
-      end subroutine ESMF_RegridGet
 
 !------------------------------------------------------------------------------
 !BOPI
