@@ -1,4 +1,4 @@
-#  $Id: AIX.default.mk,v 1.1 2003/08/26 17:40:16 flanigan Exp $
+#  $Id: AIX.default.mk,v 1.2 2003/08/29 16:56:05 flanigan Exp $
 #
 #  AIX.default.mk
 #
@@ -105,7 +105,7 @@ G_FOPTFLAGS		= -g  -qfullpath -qcheck
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS		= -O3 -qmaxmem=4000 -w -qspill=3000 
 O_FOPTFLAGS		= -O3 -w 
-FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS}
+FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS} $(FCPP_EXHAUSTIVE)
 # ########################## C++ compiler ##################################
 #
 ###  on one of our rs6000s the mpCC_r system cover script will not find 
@@ -228,7 +228,8 @@ G_FOPTFLAGS		= -g  -qfullpath
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS		= -O3 -qmaxmem=4000 -w -qspill=3000
 O_FOPTFLAGS		= -O3 -w
-FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS}
+FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS} $(FCPP_EXHAUSTIVE)
+
 # ########################## C++ compiler ##################################
 #
 ###  this section used to call mpCC_r, but it is currently broken on
