@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.25 2004/05/21 17:30:02 eschwab Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.26 2004/06/05 00:17:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -16,12 +16,14 @@
 !EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
-! !PROGRAM: ESMF_CalendarEx - Calendar examples
+! !PROGRAM: ESMF_CalendarEx - Calendar creation examples
 !
 ! !DESCRIPTION:
 !
-! This program shows examples of how to create different calendar types.
+! This program shows examples of how to create different calendar types
 !-----------------------------------------------------------------------------
+
+      ! ESMF Framework module
       use ESMF_Mod
       implicit none
 
@@ -31,18 +33,27 @@
       type(ESMF_Calendar) :: day360Calendar
       type(ESMF_Calendar) :: julianDayCalendar
 
-      ! temp variables for Get functions
-      integer(ESMF_KIND_I8) :: yyl, dl, sl
-      integer :: yy, mm, dd, d, h, m, s, rc
+      ! local variables for Get functions
+      integer(ESMF_KIND_I8) :: yyl, dl
+      integer :: yy, mm, dd, h, m, s
       type(ESMF_Time) :: timeZero
       type(ESMF_Time) :: checkTime
-      type(ESMF_Time) :: yearOne
       type(ESMF_CalendarType) :: calType
+
+      ! return code
+      integer:: rc
 !EOC
 
       ! result code
       integer ::  finalrc
       finalrc = ESMF_SUCCESS
+
+!BOC
+      ! initialize ESMF framework
+      call ESMF_Initialize(rc=rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       !
@@ -53,9 +64,7 @@
                                               ESMF_CAL_JULIANDAY, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       !
@@ -66,17 +75,13 @@
                                               ESMF_CAL_GREGORIAN, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_CalendarGet(gregorianCalendar, calendarType=calType, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! demonstrate ESMF_CalendarType (==) overloaded operator
@@ -100,17 +105,13 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeGet(timeZero, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Time Zero Gregorian = ", &
@@ -121,18 +122,14 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Time Zero Gregorian -4713/11/24 = " 
       call ESMF_TimePrint(timeZero, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       yy = 2003
@@ -140,25 +137,19 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimePrint(checkTime, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeGet(checkTime, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Check Time1 Gregorian = ", &
@@ -170,23 +161,17 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimePrint(checkTime, rc=rc)
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !EOC
       call ESMF_TimeGet(checkTime, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, rc=rc)
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Check Time2 Gregorian = ", &
@@ -198,25 +183,19 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.EQ.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.EQ.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimePrint(checkTime, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeGet(checkTime, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Check Time3 Gregorian = ", &
@@ -230,35 +209,26 @@
       call ESMF_TimeSet(checkTime, d_i8=dl, calendar=julianDayCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimePrint(checkTime, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! switch calendar to perform conversion
       call ESMF_TimeSet(checkTime, calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeGet(checkTime, yy_i8=yyl, mm=mm, dd=dd, h=h, m=m, s=s, rc=rc)
 !EOC
 
-
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Check Time4 Gregorian = ", &
@@ -271,34 +241,26 @@
       call ESMF_TimeSet(checkTime, d_i8=dl, calendar=julianDayCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimePrint(checkTime, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! switch calendar to perform conversion
       call ESMF_TimeSet(checkTime, calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeGet(checkTime, yy_i8=yyl, mm=mm, dd=dd, h=h, m=m, s=s, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Check Time5 Gregorian = ", &
@@ -310,26 +272,20 @@
       noLeapCalendar = ESMF_CalendarCreate("NoLeap", ESMF_CAL_NOLEAP, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeSet(timeZero, s=0, sN=0, sD=1, &
                         calendar=noLeapCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeGet(timeZero, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Time Zero No Leap = ", &
@@ -340,19 +296,14 @@
                         calendar=noLeapCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Time Zero No Leap -4713/11/24 = " 
       call ESMF_TimePrint(timeZero, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
-
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       yy = 2004
@@ -360,25 +311,19 @@
                         calendar=noLeapCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimePrint(checkTime, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeGet(checkTime, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Check Time1 No Leap = ", &
@@ -390,26 +335,20 @@
       day360Calendar = ESMF_CalendarCreate("360Day", ESMF_CAL_360DAY, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeSet(timeZero, s=0, sN=0, sD=1, &
                         calendar=day360Calendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeGet(timeZero, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Time Zero 360 Day = ", &
@@ -420,18 +359,14 @@
                         calendar=day360Calendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Time Zero 360 Day -4713/11/24 = " 
       call ESMF_TimePrint(timeZero, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       yy = 2005
@@ -439,17 +374,13 @@
                         calendar=day360Calendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimePrint(checkTime, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeGet(checkTime, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, rc=rc)
@@ -458,47 +389,44 @@
                yy, "/", mm, "/", dd, " ", h, ":", m, ":", s
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-     call ESMF_CalendarDestroy(julianDayCalendar, rc)
+      call ESMF_CalendarDestroy(julianDayCalendar, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-     call ESMF_CalendarDestroy(gregorianCalendar, rc)
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-     call ESMF_CalendarDestroy(noLeapCalendar, rc)
+      call ESMF_CalendarDestroy(noLeapCalendar, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-     call ESMF_CalendarDestroy(day360Calendar, rc)
+      call ESMF_CalendarDestroy(day360Calendar, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-     if (finalrc.EQ.ESMF_SUCCESS) then
-        print *, "PASS: ESMF_CalendarEx.F90"
-     else
-        print *, "FAIL: ESMF_CalendarEx.F90"
-     end if
+!BOC
+      ! finalize ESMF framework
+      call ESMF_Finalize(rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+      if (finalrc.EQ.ESMF_SUCCESS) then
+         print *, "PASS: ESMF_CalendarEx.F90"
+      else
+         print *, "FAIL: ESMF_CalendarEx.F90"
+      end if
 
 !BOC
       end program ESMF_CalendarEx

@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockAdvEx.F90,v 1.25 2004/04/09 20:13:38 eschwab Exp $
+! $Id: ESMF_ClockAdvEx.F90,v 1.26 2004/06/05 00:17:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -24,6 +24,8 @@
 ! simple user-defined single-shot alarm
 !
 !-----------------------------------------------------------------------------
+
+      ! ESMF Framework module
       use ESMF_Mod
       implicit none
 
@@ -40,19 +42,30 @@
       type(ESMF_Time) :: startTime, stopTime, refTime, alarmTime
       type(ESMF_TimeInterval) :: currSimTime, prevSimTime
 
-      ! temp variables for Get functions
-      integer :: yy, mm, dd, d, h, m, s, yD, rc
+      ! local variables for Get functions
+      integer :: yy, mm, dd, d, h, s, yD
       type(ESMF_TimeInterval) :: time_step, time_step_copy
       type(ESMF_TimeInterval) :: time_diff
       type(ESMF_Time) :: curr_time, curr_time_copy, prev_time
-      integer(ESMF_KIND_I8) :: advanceCount, yy_i8, d_i8, s_i8
+      integer(ESMF_KIND_I8) :: advanceCount
       double precision :: d_r8
       logical alarmRinging
+
+      ! return code
+      integer:: rc
+
 !EOC
 
       ! result code
       integer :: finalrc
       finalrc = ESMF_SUCCESS
+
+!BOC
+      ! initialize ESMF framework
+      call ESMF_Initialize(defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       !
@@ -63,9 +76,7 @@
       call ESMF_CalendarSetDefault(ESMF_CAL_GREGORIAN, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! initialize calendar to be Gregorian type
@@ -73,18 +84,14 @@
                                               ESMF_CAL_GREGORIAN, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! initialize time interval to -1 day
       call ESMF_TimeIntervalSet(timeStep, d=-1, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! initialize start time to 5/15/2003 12:00:00 noon
@@ -92,9 +99,7 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! initialize stop time to 5/15/2002 12:00:00 noon
@@ -102,9 +107,7 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! initialize reference time to 1/1/2000 00:00:00 midnight
@@ -112,9 +115,7 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! initialize the clock with the above values
@@ -122,26 +123,20 @@
                                refTime=refTime, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! print starting time (initial current time)
       call ESMF_ClockPrint(clock, "currtime", rc)        ! default format
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_ClockPrint(clock, "currtime string", rc) ! string format
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! initialize alarm time to July 4, 2002, noon
@@ -149,9 +144,7 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       alarmRinging = .false.
@@ -164,33 +157,25 @@
       do while (.not.ESMF_ClockIsStopTime(clock, rc))
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
         call ESMF_ClockAdvance(clock, rc=rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
         call ESMF_ClockPrint(clock, "currtime string", rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
         call ESMF_ClockGet(clock, currTime=curr_time, rc=rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
         if (curr_time .le. alarmTime .and. .not.alarmRinging) then
@@ -209,35 +194,27 @@
       call ESMF_ClockPrint(clock, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! get and print clock's time_step
       call ESMF_ClockGet(clock, timeStep=time_step, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_ClockPrint(clock, "timestep string", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! get time step in integer days and seconds
       call ESMF_TimeIntervalGet(time_step, d=d, s=s, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Clock's timestep = ", D, " integer days, ", &
@@ -247,9 +224,7 @@
       call ESMF_TimeIntervalGet(time_step, d_r8=d_r8, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Clock's timestep = ", d_r8, " floating point days."
@@ -258,9 +233,7 @@
       call ESMF_TimeGet(startTime, dayOfYear_r8=d_r8, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Start time's floating point day of the year = ", d_r8
@@ -269,9 +242,8 @@
       call ESMF_TimeGet(stopTime, dayOfYear=yD, rc=rc)
 
 !EOC
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Stop time's integer day of the year = ", yD
@@ -280,9 +252,7 @@
       call ESMF_ClockGet(clock, advanceCount=advanceCount, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "The clock was advanced ", advanceCount, " times."
@@ -292,9 +262,7 @@
       call ESMF_TimeIntervalGet(time_diff, d=d, s=s, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Difference between start and stop times = ", d, " days, ", &
@@ -304,17 +272,13 @@
       call ESMF_ClockGet(clock, startTime=startTime, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeGet(startTime, yy=yy, mm=mm, dd=dd, h=h, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Clock's start time = ", yy, "/", mm, "/", dd, " ", h, " hours."
@@ -323,17 +287,13 @@
       call ESMF_ClockGet(clock, stopTime=stopTime, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeGet(stopTime, yy=yy, mm=mm, dd=dd, h=h, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Clock's stop time = ", yy, "/", mm, "/", dd, " ", h, " hours."
@@ -342,17 +302,13 @@
       call ESMF_ClockGet(clock, refTime=refTime, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeGet(refTime, yy=yy, mm=mm, dd=dd, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Clock's reference time = ", yy, "/", mm, "/", dd, " midnight."
@@ -361,54 +317,42 @@
       call ESMF_ClockGet(clock, currTime=curr_time, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Clock's current time = "
       call ESMF_TimePrint(curr_time, "string", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! get clock's previous time
       call ESMF_ClockGet(clock, prevTime=prev_time, rc=rc)
 
 !EOC
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Clock's previous time = "
       call ESMF_TimePrint(prev_time, "string", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
-
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! get clock's current simulation time
       call ESMF_ClockGet(clock, currSimTime=currSimTime, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeIntervalGet(currSimTime, d=d, s=s, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Clock's current simulation time = ", d, " days", s, " seconds."
@@ -417,17 +361,13 @@
       call ESMF_ClockGet(clock, prevSimTime=prevSimTime, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeIntervalGet(prevSimTime, d=d, s=s, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Clock's previous simulation time = ", d, " days", s, " seconds."
@@ -442,9 +382,7 @@
       call ESMF_TimeIntervalPrint(time_step_copy, "string", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       curr_time_copy = curr_time
@@ -452,9 +390,7 @@
       call ESMF_TimePrint(curr_time_copy, "string", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
 
@@ -466,87 +402,67 @@
       call ESMF_ClockPrint(clock, "timestep string", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeIntervalSet(timeStep, d=2, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_ClockSet(clock, timeStep=timeStep, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Time Step reset to = "
       call ESMF_ClockPrint(clock, "timestep string", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Current time = "
       call ESMF_ClockPrint(clock, "currtime string", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Previous time = "
       call ESMF_ClockPrint(clock, "prevtime string", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeSet(curr_time, yy=1776, &
                         mm=7, dd=4, calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_ClockSet(clock, currTime=curr_time, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Current Time changed to = "
       call ESMF_ClockPrint(clock, "currtime string", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Previous Time changed to = "
       call ESMF_ClockPrint(clock, "prevtime string", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
 
@@ -557,9 +473,7 @@
       call ESMF_ClockSyncToRealTime(clock, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *
@@ -567,32 +481,33 @@
       call ESMF_ClockPrint(clock, "currtime string", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
    
 !BOC
       ! destroy clock
       call ESMF_ClockDestroy(clock, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-     call ESMF_CalendarDestroy(gregorianCalendar, rc)
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-     if (finalrc.EQ.ESMF_SUCCESS) then
-        print *, "PASS: ESMF_ClockAdvEx.F90"
-     else
-        print *, "FAIL: ESMF_ClockAdvEx.F90"
-     end if
+!BOC
+      ! finalize ESMF framework
+      call ESMF_Finalize(rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+      if (finalrc.EQ.ESMF_SUCCESS) then
+         print *, "PASS: ESMF_ClockAdvEx.F90"
+      else
+         print *, "FAIL: ESMF_ClockAdvEx.F90"
+      end if
 
 !BOC
       end program ESMF_ClockAdvEx

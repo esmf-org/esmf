@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.35 2004/04/09 20:13:38 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.36 2004/06/05 00:17:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -20,11 +20,13 @@
 !
 ! !DESCRIPTION:
 !
-! This program shows an example of how to set-up, run, and examine a basic clock
+! This program shows an example of how to create, initialize, run, and
+! examine a basic clock
 !-----------------------------------------------------------------------------
+
+      ! ESMF Framework module
       use ESMF_Mod
       implicit none
-
 
       ! instantiate a clock 
       type(ESMF_Clock) :: clock
@@ -37,7 +39,7 @@
       type(ESMF_Time) :: startTime
       type(ESMF_Time) :: stopTime
 
-      ! temp variables for Get functions
+      ! local variables for Get functions
       integer(ESMF_KIND_I4) :: days, sec, yD
       type(ESMF_TimeInterval) :: time_step
       type(ESMF_TimeInterval) :: time_diff
@@ -52,37 +54,30 @@
       finalrc = ESMF_SUCCESS
 
 !BOC
+      ! initialize ESMF framework
+      call ESMF_Initialize(defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
       !
       ! initialization
       !
-
-      ! set default time manager calendar to be Gregorian
-      call ESMF_CalendarSetDefault(ESMF_CAL_GREGORIAN, rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
-
-!BOC
 
       ! initialize calendar to be Gregorian type
       gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
                                               ESMF_CAL_GREGORIAN, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! initialize time interval to 2 days, 4 hours (6 timesteps in 13 days)
       call ESMF_TimeIntervalSet(timeStep, d=2, h=4, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! initialize start time to 4/1/2003 2:24:00 ( 1/10 of a day )
@@ -90,9 +85,7 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! initialize stop time to 4/14/2003 2:24:00 ( 1/10 of a day )
@@ -100,27 +93,21 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! initialize the clock with the above values
       clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, stopTime, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! print starting time (initial current time)
       call ESMF_ClockPrint(clock, "currTime string", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       !
@@ -130,25 +117,19 @@
       do while (.not.ESMF_ClockIsStopTime(clock, rc))
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
         call ESMF_ClockAdvance(clock, rc=rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
         call ESMF_ClockPrint(clock, "currTime string", rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       end do
@@ -160,17 +141,13 @@
       call ESMF_ClockGet(clock, timeStep=time_step, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_ClockPrint(clock, "timeStep string", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! get time step in integer days and seconds
@@ -180,9 +157,7 @@
                 sec, " integer seconds."
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! get time step in floating point days
@@ -191,9 +166,7 @@
       print *, "Clock's timestep = ", days_r8, " floating point days."
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! get start time's floating point day of the year
@@ -202,9 +175,8 @@
       print *, "Start time's floating point day of the year = ", days_r8
 
 !EOC
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! get stop time's integer day of the year
@@ -213,26 +185,21 @@
       print *, "Stop time's integer day of the year = ", yD
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! get clock's calendar
       call ESMF_ClockGet(clock, calendar=cal, rc=rc)
       print *, "Clock's calendar type = "
 !EOC
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_CalendarPrint(cal, "calendarType", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! get the number of times the clock was advanced
@@ -241,9 +208,7 @@
       print *, "The clock was advanced ", advanceCount, " times."
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
 !BOC
       ! calculate the difference between the start and stop times
@@ -254,26 +219,27 @@
                 sec, " seconds."
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! destroy clock
       call ESMF_ClockDestroy(clock, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-     call ESMF_CalendarDestroy(gregorianCalendar, rc)
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+      ! finalize ESMF framework
+      call ESMF_Finalize(rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
       if (finalrc.EQ.ESMF_SUCCESS) then
          print *, "PASS: ESMF_ClockEx.F90"

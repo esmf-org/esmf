@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.13 2004/02/13 20:20:13 svasquez Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.14 2004/06/05 00:17:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -20,12 +20,13 @@
 !
 ! !DESCRIPTION:
 !
-! This program shows an example of how to set-up, run, and examine a basic clock
-! with alarms
+! This program shows an example of how to create, initialize, run, and examine
+! a basic clock with alarms
 !-----------------------------------------------------------------------------
+
+      ! ESMF Framework module
       use ESMF_Mod
       implicit none
-
 
       ! instantiate a clock 
       type(ESMF_Clock) :: clock, clockCopy
@@ -51,8 +52,16 @@
       integer :: i, j, rc
 !EOC
 
+      ! result code
       integer :: finalrc
       finalrc = ESMF_SUCCESS
+
+!BOC
+      ! initialize ESMF framework
+      call ESMF_Initialize(defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
 !
@@ -63,18 +72,14 @@
                                               ESMF_CAL_GREGORIAN, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! initialize time interval to 1 day
       call ESMF_TimeIntervalSet(timeStep, d=1, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! initialize start time to 9/1/2003
@@ -82,9 +87,7 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! initialize stop time to 9/30/2003
@@ -92,9 +95,7 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       !
@@ -104,17 +105,13 @@
                                rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_ClockPrint(clock, "name", rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
 !
@@ -128,27 +125,21 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       name = "Example alarm 1"
       alarm(1) = ESMF_AlarmCreate(name, clock, ringTime=alarmTime, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "alarm(1) = "
       call ESMF_AlarmPrint(alarm(1), rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       !
@@ -159,17 +150,13 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_TimeIntervalSet(alarmInterval, d=7, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       alarm(2) = ESMF_AlarmCreate(clock=clock, ringTime=alarmTime, &
@@ -178,41 +165,35 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
 
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "alarm(2) = "
       call ESMF_AlarmPrint(alarm(2), rc=rc)
 
 !EOC
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       clockCopy = ESMF_ClockCreate(clock, rc)
 !EOC
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Original clock = "
       call ESMF_ClockPrint(clock, "name", rc=rc)
 !EOC
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "Clock copy = "
       call ESMF_ClockPrint(clockCopy, "name", rc=rc)
 !EOC
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       !
@@ -221,9 +202,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
       call ESMF_ClockGetAlarm(clock, "Alarm002", tempAlarm, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "alarm fetched from clock = "
@@ -231,17 +210,13 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
       call ESMF_AlarmPrint(tempAlarm, "name", rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_ClockGetAlarm(clock, "Example alarm 1", tempAlarm, rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "alarm fetched from clock = "
@@ -249,18 +224,14 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
       call ESMF_AlarmPrint(tempAlarm, "name", rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       call ESMF_ClockGetAlarmList(clock, ESMF_ALARMLIST_ALL, &
                                   alarmList, nAlarms, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       print *, "alarm list fetched from clock = "
@@ -270,9 +241,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         call ESMF_AlarmPrint(alarmList(i), "name", rc=rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       end do
@@ -294,35 +263,27 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
                                ringingAlarmCount=ringingAlarmCount, rc=rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
         call ESMF_ClockPrint(clock, "currTime string", rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
         ! get what the clock's next time would be after one timestep
         call ESMF_ClockGetNextTime(clock, nextTime, rc=rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
         print *, "clock next time after one timestep = "
         call ESMF_TimePrint(nextTime, "string", rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
         ! get what the clock's next time would be after a timestep equal to 10
@@ -330,9 +291,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         call ESMF_ClockGetNextTime(clock, nextTime, 10*timeStep, rc=rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
         print *, &
@@ -340,9 +299,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         call ESMF_TimePrint(nextTime, "string", rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
         if (ringingAlarmCount > 0) then
@@ -355,9 +312,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
           call ESMF_AlarmPrint(ringingAlarm(i), "name", rc=rc)
 !EOC
 
-          if (rc.NE.ESMF_SUCCESS) then
-              finalrc = ESMF_FAILURE
-          end if
+          if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
 
@@ -366,17 +321,13 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
             if (ringingAlarm(i) == alarm(j)) then
 !EOC
 
-            if (rc.NE.ESMF_SUCCESS) then
-                finalrc = ESMF_FAILURE
-            end if
+            if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
               call ESMF_AlarmGet(alarm(j), name=name, rc=rc)
 !EOC
 
-              if (rc.NE.ESMF_SUCCESS) then
-                  finalrc = ESMF_FAILURE
-              end if
+              if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
               print *, trim(name), ", Alarm #", j, &
@@ -386,18 +337,14 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
                 call ESMF_AlarmGet(alarm(2), ringTime=ringTime, rc=rc)
 !EOC
 
-                 if (rc.NE.ESMF_SUCCESS) then
-                     finalrc = ESMF_FAILURE
-                 end if
+                 if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
                 print *, "alarm(2)'s next ring time = "
                 call ESMF_TimePrint(ringTime, "string", rc)
 !EOC
 
-                if (rc.NE.ESMF_SUCCESS) then
-                    finalrc = ESMF_FAILURE
-                end if
+                if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC 
 
@@ -411,9 +358,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
           call ESMF_AlarmRingerOff(ringingAlarm(i), rc)
 !EOC
 
-          if (rc.NE.ESMF_SUCCESS) then
-              finalrc = ESMF_FAILURE
-           end if
+          if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC 
 
@@ -424,9 +369,8 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
                                     ringingAlarm, ringingAlarmCount, rc=rc)
 
 !EOC
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC 
         do i = 1, ringingAlarmCount
@@ -434,9 +378,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
           call ESMF_AlarmPrint(ringingAlarm(i), "name", rc=rc)
 !EOC
 
-          if (rc.NE.ESMF_SUCCESS) then
-              finalrc = ESMF_FAILURE
-          end if
+          if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC 
         end do
@@ -446,9 +388,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
                                     ringingAlarm, ringingAlarmCount, rc=rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC 
         do i = 1, ringingAlarmCount
@@ -456,9 +396,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
           call ESMF_AlarmPrint(ringingAlarm(i), "name", rc=rc)
 !EOC
 
-          if (rc.NE.ESMF_SUCCESS) then
-              finalrc = ESMF_FAILURE
-          end if
+          if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC 
         end do
@@ -476,9 +414,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
       do while (.not.ESMF_ClockIsStopTime(clock, rc))
 !EOC
 
-          if (rc.NE.ESMF_SUCCESS) then
-              finalrc = ESMF_FAILURE
-          end if
+          if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC 
         ! perform time step 
@@ -486,17 +422,13 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
                                rc=rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC 
         call ESMF_ClockPrint(clock, "currTime string", rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) then
-            finalrc = ESMF_FAILURE
-        end if
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC 
         ! check if alarms are ringing
@@ -505,18 +437,14 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
           if (ESMF_AlarmIsRinging(alarm(1), rc)) then
 !EOC
 
-            if (rc.NE.ESMF_SUCCESS) then
-                finalrc = ESMF_FAILURE
-             end if
+            if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC 
             print *, "Alarm(1) is ringing!"
             call ESMF_AlarmRingerOff(Alarm(1), rc)
 !EOC
 
-            if (rc.NE.ESMF_SUCCESS) then
-                finalrc = ESMF_FAILURE
-             end if
+            if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC 
           end if
@@ -524,9 +452,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
           if (ESMF_AlarmIsRinging(alarm(2), rc)) then
 !EOC
 
-            if (rc.NE.ESMF_SUCCESS) then
-                finalrc = ESMF_FAILURE
-            end if
+            if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC 
 
@@ -534,9 +460,8 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
             call ESMF_AlarmRingerOff(Alarm(2), rc)
 
 !EOC
-            if (rc.NE.ESMF_SUCCESS) then
-                finalrc = ESMF_FAILURE
-            end if
+
+            if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC 
           end if
@@ -549,33 +474,44 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
       call ESMF_AlarmDestroy(alarm(1), rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-           finalrc = ESMF_FAILURE
-       end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC 
       call ESMF_AlarmDestroy(alarm(2), rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-           finalrc = ESMF_FAILURE
-       end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC 
       call ESMF_ClockDestroy(clock, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) then
-           finalrc = ESMF_FAILURE
-       end if
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC 
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC 
+      call ESMF_ClockDestroy(clock, rc=rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+      ! finalize ESMF framework
+      call ESMF_Finalize(rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
       if (finalrc.EQ.ESMF_SUCCESS) then
          print *, "PASS: ESMF_AlarmEx.F90"
       else
          print *, "FAIL: ESMF_AlarmEx.F90"
       end if
-
-     call ESMF_CalendarDestroy(gregorianCalendar, rc)
 
 !BOC 
       end program ESMF_AlarmEx
