@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/02/03 17:08:24 nscollins Exp $ 
+# $Id: makefile,v 1.8 2003/02/05 03:51:17 nscollins Exp $ 
 
 all: alldocs
 
@@ -120,8 +120,8 @@ fsrc:
 	do_fprotex state ../src/ESMF_State.F90
 	do_fprotex xformex ../examples/ESMF_XformEx.F90
 	do_fprotex xform ../src/ESMF_Xform.F90
-	do_fprotex appex ../examples/ESMF_AppCompEx.F90
-	do_fprotex appex ../examples/ESMF_AppMainEx.F90
+	do_fprotex appcompex ../examples/ESMF_AppCompEx.F90
+	do_fprotex appmainex ../examples/ESMF_AppMainEx.F90
 	do_fprotex cplex ../examples/ESMF_CplEx.F90
 	do_fprotex gcompex ../examples/ESMF_GCompEx.F90
 
@@ -132,8 +132,8 @@ ccsrc:
 	do_ccprotex state ../interface/ESMC_State.C
 	do_ccprotex xformex ../examples/ESMC_XformEx.C
 	do_ccprotex xform ../interface/ESMC_Xform.C
-	do_ccprotex appex ../examples/ESMC_AppCompEx.C
-	do_ccprotex appex ../examples/ESMC_AppMainEx.C
+	do_ccprotex appcompex ../examples/ESMC_AppCompEx.C
+	do_ccprotex appmainex ../examples/ESMC_AppMainEx.C
 	do_ccprotex cplex ../examples/ESMC_CplEx.C
 	do_ccprotex gcompex ../examples/ESMC_GCompEx.C
 

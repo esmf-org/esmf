@@ -1,4 +1,4 @@
-% $Id: Component_desdoc.ctex,v 1.4 2003/02/03 17:08:21 nscollins Exp $
+% $Id: Component_desdoc.ctex,v 1.5 2003/02/05 03:51:17 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,6 +22,11 @@
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{Component Design Document}
 \newcommand{\myauthors}{Nancy Collins}
+% these are temporary patches until something more
+% permanent is done to the protex script.
+\newlength{\oldparskip}
+\newlength{\oldparindent}
+\newlength{\oldbaselineskip}
 #endif
 
 #ifdef STANDALONE
@@ -138,16 +143,20 @@
 
 \subsection{Application F90 Use and Examples}
 #ifdef STANDALONE
-\input{appex_fapi}
+\input{appmainex_fapi}
+\input{appcompex_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/appex_fapi}
+\input{comppath/appmainex_fapi}
+\input{comppath/appcompex_fapi}
 #endif
 
 \subsection{Application C++ Use and Examples}
 #ifdef STANDALONE
-\input{appex_ccapi}
+\input{appmainex_ccapi}
+\input{appcompex_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/appex_ccapi}
+\input{comppath/appmainex_ccapi}
+\input{comppath/appcompex_ccapi}
 #endif
 
 
