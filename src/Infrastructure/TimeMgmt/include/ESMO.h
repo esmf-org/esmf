@@ -1,4 +1,4 @@
-/* $Id: ESMO.h,v 1.1 2002/11/15 21:20:39 jwolfe Exp $ */
+/* $Id: ESMO.h,v 1.2 2003/10/17 19:45:03 nscollins Exp $ */
 
 /* General header for ESMF */
 
@@ -6,7 +6,7 @@
 #define ESMO_H
 
 
-#include "conf.h"
+#include "ESMC_Conf.h"
 
 #include "ESMO_App.h"
 #include "ESMO_Machine.h"

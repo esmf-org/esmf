@@ -1,6 +1,6 @@
-/* $Id: ESMO_Fortran.h,v 1.1 2002/11/15 21:24:48 jwolfe Exp $ */
+/* $Id: ESMO_Fortran.h,v 1.2 2003/10/17 19:45:03 nscollins Exp $ */
 
-#include "conf.h"
+#include "ESMC_Conf.h"
 
 /* Macro utilities for connecting fortran and C */
 
