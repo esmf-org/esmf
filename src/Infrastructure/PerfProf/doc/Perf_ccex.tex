@@ -1,4 +1,4 @@
-% $Id: Perf_ccex.tex,v 1.2 2003/03/24 18:20:55 ekluz Exp $
+% $Id: Perf_ccex.tex,v 1.3 2003/08/14 21:00:13 ekluz Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@
 \begin{verbatim}
    ESMC_Perf  perf;
 
-   perf = PerfCreate();
+   perf = ESMC_PerfCreate();
 
    for( time = 0; time <=10000000; time++ ) {
 #pragma omp parallel for
@@ -26,16 +26,16 @@
 #pragma omp critical
 
         {
-           perf.PerfStart( 'threaded_section');
+           perf.ESMC_PerfStart( 'threaded_section');
 .
 .
 .
-           perf.PerfEnd( 'threaded_section');
+           perf.ESMC_PerfEnd( 'threaded_section');
         }
      }
   }
-  perf.PerfPrint( );
-  perf.PerfDestroy( );
+  perf.ESMC_PerfPrint( );
+  perf.ESMC_PerfDestroy( );
 \end{verbatim}
 }
 \subsubsection{Example 2. Setting the run-time option to turn timing off}
@@ -43,7 +43,7 @@
 \begin{verbatim}
    ESMC_Perf  perf;
 
-   perf = PerfCreate( monitor=false);
+   perf = ESMC_PerfCreate( monitor=false);
 
    for( time = 0; time <=10000000; time++ ) {
 #pragma omp parallel for
@@ -52,16 +52,16 @@
 #pragma omp critical
 
         {
-           perf.PerfStart( 'threaded_section');
+           perf.ESMC_PerfStart( 'threaded_section');
 .
 .
 .
-           perf.PerfEnd( 'threaded_section');
+           perf.ESMC_PerfEnd( 'threaded_section');
         }
      }
   }
-  perf.PerfPrint( );
-  perf.PerfDestroy( );
+  perf.ESMC_PerfPrint( );
+  perf.ESMC_PerfDestroy( );
 \end{verbatim}
 }
 \subsubsection{Example 3. Turning hardware monitoring on by default, but off 
@@ -70,7 +70,7 @@ for some code segments}
 \begin{verbatim}
    ESMC_Perf  perf;
 
-   perf = PerfCreate( doHardware=true);
+   perf = ESMC_PerfCreate( doHardware=true);
 
    for( time = 0; time <=10000000; time++ ) {
 #pragma omp parallel for
@@ -79,34 +79,37 @@ for some code segments}
 #pragma omp critical
 
         {
-           perf.PerfStart( 'threaded_section');
+           perf.ESMC_PerfStart( 'threaded_section');
 .
 .
 .
-           perf.PerfEnd( 'threaded_section');
+           perf.ESMC_PerfEnd( 'threaded_section');
         }
      }
-     perf.PerfStart( 'non_threaded_section', doHW=false);
+     perf.ESMC_PerfStart( 'non_threaded_section', doHW=false);
 .
 .
 .
-     perf.PerfEnd( 'non_threaded_section');
+     perf.ESMC_PerfEnd( 'non_threaded_section');
   }
-  perf.PerfPrint( );
-  perf.PerfDestroy( );
+  perf.ESMC_PerfPrint( );
+  perf.ESMC_PerfDestroy( );
 \end{verbatim}
 }
 
-\subsubsection{Example 4. Turn on timing sychronization}
+\subsubsection{Example 4. Turn on timing sychronization and communication profiling}
 {\tt
 \begin{verbatim}
    ESMC_Perf   perf;
-   ESMC_Layout pe_list;
+   ESMC_Layout de_list;
 
 .
 .
 .
-   perf = PerfCreate( pe_list );
+// At each ESMF_PerfStart and ESMF_PerfEnd, a barrier will on the given de_list will be done
+// Also sizes and times for any MPI messages between the Start and End will be output.
+   msginfo = 1;
+   perf = ESMC_PerfCreate( de_list, msginfo );
 
    for( time = 0; time <=10000000; time++ ) {
 #pragma omp parallel for
@@ -115,15 +118,15 @@ for some code segments}
 #pragma omp critical
 
         {
-           perf.PerfStart( 'threaded_section');
+           perf.ESMC_PerfStart( 'threaded_section');
 .
 .
 .
-           perf.PerfEnd( 'threaded_section');
+           perf.ESMC_PerfEnd( 'threaded_section');
         }
      }
   }
-  perf.PerfPrint( );
-  perf.PerfDestroy( );
+  perf.ESMC_PerfPrint( );
+  perf.ESMC_PerfDestroy( );
 \end{verbatim}
 }
