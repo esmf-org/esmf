@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.29 2003/09/09 20:09:31 nscollins Exp $
+! $Id: ESMF_Alarm.F90,v 1.30 2003/09/11 00:01:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -167,7 +167,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.29 2003/09/09 20:09:31 nscollins Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.30 2003/09/11 00:01:06 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1221,7 +1221,8 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a validation check on a {\tt ESMF\_Alarm}'s properties.
+!     Perform a validation check on a {\tt ESMF\_Alarm}'s properties.  The
+!     options control the type of validation.
 !
 !     The arguments are:  
 !     \begin{description}
@@ -1256,7 +1257,8 @@
 
 ! !DESCRIPTION:
 !     To support testing/debugging, print out a {\tt ESMF\_Alarm}'s
-!     properties.
+!     properties.  The options control the type of information and level
+!     of detail.
 ! 
 !     The arguments are:
 !     \begin{description}
