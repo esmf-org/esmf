@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.63 2003/09/04 18:57:56 cdeluca Exp $
+// $Id: ESMC_Route.C,v 1.64 2003/09/04 19:54:47 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.63 2003/09/04 18:57:56 cdeluca Exp $";
+               "$Id: ESMC_Route.C,v 1.64 2003/09/04 19:54:47 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -242,6 +242,166 @@ static int maxroutes = 10;
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_RouteAddCache - If space, add a route to the cache table
+//
+// !INTERFACE:
+      int ESMC_Route::ESMC_RouteAddCache(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int rank,                    // in  - rank of data in both Fields
+      int my_DE_rcv,               // in  - my DE identifier in the DELayout 
+                                   //       where I'm the receiving Field
+      ESMC_AxisIndex *AI_rcv_exc,  // in  - array of axis indices for all DE's
+                                   //       in the DELayout for the receiving
+                                   //       Field - exclusive region
+      ESMC_AxisIndex *AI_rcv_tot,  // in  - array of axis indices for all DE's
+                                   //       in the DELayout for the receiving
+                                   //       Field - total region
+      int AI_rcv_count,            // in  - number of sets of AI's in the rcv
+                                   //       array (should be the same as the 
+                                   //       number of DE's in the rcv layout)
+      ESMC_DELayout *layout_rcv,   // in  - pointer to the rcv DELayout
+      int my_DE_snd,               // in  - my DE identifier in the DELayout 
+                                   //       where I'm the sending Field
+      ESMC_AxisIndex *AI_snd_exc,  // in  - array of axis indices for all DE's
+                                   //       in the DELayout for the sending
+                                   //       Field - exclusive region
+      ESMC_AxisIndex *AI_snd_tot,  // in  - array of axis indices for all DE's
+                                   //       in the DELayout for the sending
+                                   //       Field - total region
+      int AI_snd_count,            // in  - number of sets of AI's in the snd
+                                   //       array (should be the same as the
+                                   //       number of DE's in the snd layout)
+      ESMC_DELayout *layout_snd,   // in  - pointer to the snd DELayout 
+      ESMC_Logical *periodic) {    // in - if halo'ing, per/axis flag
+
+//
+// !DESCRIPTION:
+//     If space, add this route to the cache table.
+//
+//EOP
+// !REQUIREMENTS:  
+    int i, bytes;
+    ESMC_RouteCacheEntry *ep;
+
+    // add to cache table here.
+    if (routetable.rcep == NULL) {
+       routetable.rcep = (ESMC_RouteCacheEntry **) 
+                       malloc(sizeof(ESMC_RouteCacheEntry *) * maxroutes);
+       routetable.nalloc = maxroutes;
+
+    }
+
+    // if we decide to grow the table slowly...
+    //if (routetable.nroutes <= routetable.nalloc) {
+    //    realloc(routetable.rcep, (routetable.nalloc + 4) *
+    //                                    sizeof(ESMC_RouteCacheEntry *));
+    //    routetable.nalloc += 4;
+    //}
+
+    // TODO: this should turn into a loop up to maxroutes looking for
+    // an empty slot.
+    if (routetable.nroutes < maxroutes) {
+
+        ep = new ESMC_RouteCacheEntry;
+        routetable.rcep[routetable.nroutes] = ep;
+        routetable.nroutes++;
+ 
+        //DEBUG:
+        //printf("Cache: adding entry %d:\n", routetable.nroutes-1);
+        
+        // store this in the cache
+        ep->routeid = routeid;
+        ep->theroute = this; 
+        ep->entrystatus = 1;
+        ep->rank = rank; 
+        ep->snd_layout = layout_snd;
+        ep->snd_DE = my_DE_snd; 
+        ep->snd_AI_count = AI_snd_count; 
+        if (AI_snd_count > 0) {
+            ep->snd_AI_exc = new ESMC_AxisIndex[rank * AI_snd_count];
+            ep->snd_AI_tot = new ESMC_AxisIndex[rank * AI_snd_count];
+            bytes = sizeof(ESMC_AxisIndex) * rank * AI_snd_count;
+            memcpy(ep->snd_AI_exc, AI_snd_exc, bytes);
+            memcpy(ep->snd_AI_tot, AI_snd_tot, bytes);
+        }
+        ep->rcv_layout = layout_rcv;
+        ep->rcv_DE = my_DE_rcv; 
+        ep->rcv_AI_count = AI_rcv_count; 
+        if (AI_rcv_count > 0) {
+            ep->rcv_AI_exc = new ESMC_AxisIndex[rank * AI_rcv_count];
+            ep->rcv_AI_tot = new ESMC_AxisIndex[rank * AI_rcv_count];
+            bytes = sizeof(ESMC_AxisIndex) * rank * AI_rcv_count;
+            memcpy(ep->rcv_AI_exc, AI_rcv_exc, bytes);
+            memcpy(ep->rcv_AI_tot, AI_rcv_tot, bytes);
+        }
+        for (i=0; i<rank; i++) 
+            ep->periodic[i] = periodic ? periodic[i] : ESMF_TF_FALSE;
+
+        //DEBUG:
+        //printf("Info: this route added to Cache, entry %d\n", 
+        //                                       routetable.nroutes-1);
+    } else {
+        printf("Warning: this route not Cached - Cache table full\n");
+    }
+    
+    return ESMF_SUCCESS;
+
+ } // end ESMC_RouteAddCache
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_RouteDropCache - Drop a route from the cache table.
+//
+// !INTERFACE:
+      int ESMC_Route::ESMC_RouteDropCache(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !DESCRIPTION:
+//     Delete a route from the cache table.
+//
+//EOP
+
+    int i, j, entries;
+    ESMC_Logical tf;
+    ESMC_RouteCacheEntry *ep;
+
+    //DEBUG:
+    //printf("Info: searching cache table\n");
+
+    for (i=0; i<routetable.nroutes; i++) {
+
+        ep = routetable.rcep[i];
+    
+        // see if we find a match.  one should be enough but
+        // compare both just to be sure.
+        if (ep->routeid != routeid) continue;
+        if (ep->theroute != this) continue;
+
+        ep->entrystatus = 0;   // TODO: make this an enum
+        if (ep->snd_AI_exc) delete [] ep->snd_AI_exc;
+        if (ep->snd_AI_tot) delete [] ep->snd_AI_tot;
+        if (ep->rcv_AI_exc) delete [] ep->rcv_AI_exc;
+        if (ep->rcv_AI_tot) delete [] ep->rcv_AI_tot;
+
+        //DEBUG:
+        //printf("Info: this route deleted from Cache, entry %d\n", i);
+        return ESMF_SUCCESS;
+    } 
+
+    //DEBUG:
+    //printf("Warning: this route not found in cache\n");
+    return ESMF_FAILURE;
+
+ } // end ESMC_RouteDropCache
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_RouteGetCached - Retrieve a precomputed Route
 //
 // !INTERFACE:
@@ -286,16 +446,19 @@ static int maxroutes = 10;
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  
-    int i, j;
+
+    int i, j, entries;
     ESMC_Logical tf;
     ESMC_RouteCacheEntry *ep;
+
+    //DEBUG:
+    //printf("Info: searching cache table\n");
 
     for (i=0; i<routetable.nroutes; i++) {
 
         ep = routetable.rcep[i];
     
-        // see if we find a match.  
+        // see if we find a match.  try the simplest comparisons first.
         if (ep->entrystatus != 1) continue;    // make this a type, and flag
         if (rank != ep->rank) continue;
         if (layout_snd != ep->snd_layout) continue;
@@ -304,21 +467,32 @@ static int maxroutes = 10;
         if (my_DE_rcv != ep->rcv_DE) continue; 
         if (AI_snd_count != ep->snd_AI_count) continue; 
         if (AI_rcv_count != ep->rcv_AI_count) continue; 
-        for (j=0; j<rank; j++) {
-            tf = ESMC_AxisIndexEqual(AI_snd_exc, ep->snd_AI_exc); 
-            if (tf == ESMF_TF_FALSE) goto next;
-            tf = ESMC_AxisIndexEqual(AI_snd_tot, ep->snd_AI_tot); 
-            if (tf == ESMF_TF_FALSE) goto next;
-            tf = ESMC_AxisIndexEqual(AI_rcv_exc, ep->rcv_AI_exc); 
-            if (tf == ESMF_TF_FALSE) goto next;
-            tf = ESMC_AxisIndexEqual(AI_rcv_tot, ep->rcv_AI_tot); 
-            if (tf == ESMF_TF_FALSE) goto next;
+        for (j=0; j<rank; j++)
             if (periodic[j] != ep->periodic[j]) goto next;
+        if (ep->snd_AI_count > 0) {
+            entries = ep->snd_AI_count * ep->rank;            
+            for (j=0; j<entries; j++) {
+                tf = ESMC_AxisIndexEqual(AI_snd_exc+j, ep->snd_AI_exc+j); 
+                if (tf == ESMF_TF_FALSE) goto next;
+                tf = ESMC_AxisIndexEqual(AI_snd_tot+j, ep->snd_AI_tot+j); 
+                if (tf == ESMF_TF_FALSE) goto next;
+            }
+        }
+        if (ep->rcv_AI_count > 0) {
+            entries = ep->rcv_AI_count * ep->rank;            
+            for (j=0; j<entries; j++) {
+                tf = ESMC_AxisIndexEqual(AI_rcv_exc+j, ep->rcv_AI_exc+j); 
+                if (tf == ESMF_TF_FALSE) goto next;
+                tf = ESMC_AxisIndexEqual(AI_rcv_tot+j, ep->rcv_AI_tot+j); 
+                if (tf == ESMF_TF_FALSE) goto next;
+            }
         }
 
         *hascachedroute = ESMF_TF_TRUE;
         *route = routetable.rcep[i]->theroute;
 
+        //DEBUG: 
+        //printf("Cache search success: precomputed route found, entry %d\n", i);
         return ESMF_SUCCESS;
 
   next:  
@@ -330,6 +504,9 @@ static int maxroutes = 10;
     *hascachedroute = ESMF_TF_FALSE;
     *route = NULL;
 
+    //DEBUG: 
+    //printf("Cache search failure: precomputed route not found in %d entries\n",
+                                                          routetable.nroutes);
     return ESMF_SUCCESS;
 
  } // end ESMC_RouteGetCached
@@ -421,7 +598,7 @@ static int maxroutes = 10;
 // !REQUIREMENTS:  
     
     int rc = ESMF_FAILURE;
-    int i, j, k, l, m;
+    int i, j, l, m;
     int ixs, ixr;
     int ccount, xscount, xrcount, xmcount;
     int mydeid, theirdeid;
@@ -449,10 +626,10 @@ static int maxroutes = 10;
         // find out who the next id is 
         rc = ct->ESMC_CommTableGetPartner(i, &theirdeid, &needed);
         if (!needed) {
-        //    printf("RouteRun: comm partner %d not needed, looping\n", theirdeid);
+            //printf("RouteRun: comm partner %d not needed, looping\n", theirdeid);
 	    continue;
         //} else {
-        //   printf("RouteRun: comm partner %d needed %d\n", theirdeid, needed);
+            //printf("RouteRun: comm partner %d needed %d\n", theirdeid, needed);
         }
 
         // find total number of xpackets
@@ -609,23 +786,23 @@ static int maxroutes = 10;
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    ESMC_AxisIndex my_AI[ESMF_MAXDIM], my_AI_tot[ESMF_MAXDIM];
+    ESMC_AxisIndex my_AI_exc[ESMF_MAXDIM], my_AI_tot[ESMF_MAXDIM];
     ESMC_AxisIndex their_AI[ESMF_MAXDIM];
     ESMC_XPacket intersect_XP;
     ESMC_XPacket *my_XP = NULL;
     ESMC_XPacket *their_XP = NULL;
-    ESMC_RouteCacheEntry *ep;
     ESMC_DE *their_deid;
     ESMC_Logical boundary[ESMF_MAXGRIDDIM][2];
-    int nde[ESMF_MAXGRIDDIM], my_DE_pos[ESMF_MAXGRIDDIM], 
-                           their_DE_pos[ESMF_MAXGRIDDIM];
+    int nde[ESMF_MAXGRIDDIM], their_DE_pos[ESMF_MAXGRIDDIM];
     int my_global_start[ESMF_MAXDIM];
     int my_XPcount, their_XPcount;
-    int rc;   // TODO: really use this
+    int rc; 
     int i, j, k, start;
     int their_de, decount, dummy;
 
-    //
+
+    // Calculate the sending table.  If this DE is not part of the sending
+    // TODO: this assumes a 2D layout?  (certainly < 3D)
     layout->ESMC_DELayoutGetSize(&nde[0], &nde[1]);
 
     // Calculate the sending table.
@@ -634,29 +811,16 @@ static int maxroutes = 10;
     // TODO:  this is NOT going to work for data dims which are not
     //  equal the grid dims, e.g. a 2d grid with 4d data.
     for (k=0; k<rank; k++) {
-      my_AI[k] = AI_exc[my_DE + k*AI_count];
+      my_AI_exc[k] = AI_exc[my_DE + k*AI_count];
       my_AI_tot[k] = AI_tot[my_DE + k*AI_count];
       my_global_start[k] = global_start[my_DE + k*AI_count];
     }
 
     // calculate "my" (local DE's) XPacket in the sense of the global data
-    // nsc - here is where we will need to do this again for periodic
-    // boundary support if periodic is true along any axis and if this
-    // xpacket is along a corresponding minimum-side boundary.
-    layout->ESMC_DELayoutGetDEPosition(&my_DE_pos[0], &my_DE_pos[1]);
-    for (j=0; j<rank; j++) {
-      boundary[j][0] = ESMF_TF_FALSE;
-      boundary[j][1] = ESMF_TF_FALSE;
-      if (periodic[j] == ESMF_TF_TRUE) {
-        if (my_DE_pos[j] == 0) {
-          boundary[j][0] = ESMF_TF_TRUE;
-        }
-        if (my_DE_pos[j] == nde[j]-1) {
-          boundary[j][1] = ESMF_TF_TRUE;
-        }
-      }
-    }
-    rc = ESMC_XPacketFromAxisIndex(my_AI, rank, global_count, boundary, &my_XP,
+    // we only compute actual DE XPackets here; the periodic case is handled
+    // when computing "their" XPs.  the "boundary" arg below is NULL - that
+    // is where periodic information would be passed.
+    rc = ESMC_XPacketFromAxisIndex(my_AI_exc, rank, global_count, NULL, &my_XP,
                                    &my_XPcount);
 
     // loop over DE's from receiving layout to calculate send table
@@ -676,12 +840,10 @@ static int maxroutes = 10;
         boundary[j][0] = ESMF_TF_FALSE;
         boundary[j][1] = ESMF_TF_FALSE;
         if (periodic[j]==ESMF_TF_TRUE) {
-          if (their_DE_pos[j] == 0) {
+          if (their_DE_pos[j] == 0) 
             boundary[j][0] = ESMF_TF_TRUE;
-          }
-          if (their_DE_pos[j] == nde[j]-1) {
+          if (their_DE_pos[j] == nde[j]-1) 
             boundary[j][1] = ESMF_TF_TRUE;
-          }
         }
       }
       rc = ESMC_XPacketFromAxisIndex(their_AI, rank, global_count, boundary,
@@ -708,33 +870,19 @@ static int maxroutes = 10;
         sendRT->ESMC_RTableSetEntry(their_de, &intersect_XP);
         ct->ESMC_CommTableSetPartner(their_de);
       }
+  
+      // free XPs allocated by XPacketFromAxisIndex() routine above
+      delete [] their_XP;
     }
+
+
+    // free the old exclusive my_XP before computing the total my_XP
+    delete [] my_XP;
+
 
     // Calculate the receiving table.
  
-    // get "my" AI out of the AI_tot array
-    for (k=0; k<rank; k++) {
-      my_AI[k] = AI_tot[my_DE + k*AI_count];
-      my_global_start[k] = global_start[my_DE + k*AI_count];
-    }
-
-    // calculate "my" (local DE's) XPacket in the sense of the global data
-    // nsc - here is where we will need to do this again for periodic
-    // boundary support if periodic is true along any axis and if this
-    // xpacket is along a corresponding minimum-side boundary.
-    for (j=0; j<rank; j++) {
-      boundary[j][0] = ESMF_TF_FALSE;
-      boundary[j][1] = ESMF_TF_FALSE;
-      if (periodic[j] == ESMF_TF_TRUE) {
-        if (my_DE_pos[j] == 0) {
-          boundary[j][0] = ESMF_TF_TRUE;
-        }
-        if (my_DE_pos[j] == nde[j]-1) {
-          boundary[j][1] = ESMF_TF_TRUE;
-        }
-      }
-    }
-    rc = ESMC_XPacketFromAxisIndex(my_AI, rank, global_count, boundary, &my_XP,
+    rc = ESMC_XPacketFromAxisIndex(my_AI_tot, rank, global_count, NULL, &my_XP,
                                    &my_XPcount);
 
     // loop over DE's from layout to calculate receive table
@@ -753,12 +901,10 @@ static int maxroutes = 10;
         boundary[j][0] = ESMF_TF_FALSE;
         boundary[j][1] = ESMF_TF_FALSE;
         if (periodic[j] == ESMF_TF_TRUE) {
-          if (their_DE_pos[j] == 0) {
+          if (their_DE_pos[j] == 0) 
             boundary[j][0] = ESMF_TF_TRUE;
-          }
-          if (their_DE_pos[j] == nde[j]-1) {
+          if (their_DE_pos[j] == nde[j]-1) 
             boundary[j][1] = ESMF_TF_TRUE;
-          }
         }
       }
       rc = ESMC_XPacketFromAxisIndex(their_AI, rank, global_count, boundary, 
@@ -783,60 +929,22 @@ static int maxroutes = 10;
         recvRT->ESMC_RTableSetEntry(their_de, &intersect_XP);
         ct->ESMC_CommTableSetPartner(their_de);
       }
+
+      // free their_XP allocated in XPacketFromAxisIndex above.
+      delete [] their_XP;
     }
     //ESMC_RoutePrint("");
  
-    // free unneeded XPs here
-    delete my_XP;  
-    my_XP = NULL;
-    delete their_XP; 
-    their_XP = NULL;
+    // and delete the total my_XP
+    delete [] my_XP;  
 
-    // add to cache table here.
-    if (routetable.rcep == NULL) {
-       routetable.rcep = (ESMC_RouteCacheEntry **) 
-                       malloc(sizeof(ESMC_RouteCacheEntry *) * maxroutes);
-       routetable.nalloc = maxroutes;
 
-    }
-    // if we decide to grow the table slowly...
-    //if (routetable.nroutes <= routetable.nalloc) {
-    //    realloc(routetable.rcep, (routetable.nalloc + 4) *
-    //                                    sizeof(ESMC_RouteCacheEntry *));
-    //    routetable.nalloc += 4;
-    //}
+    // add this route to the cache table
+    ESMC_RouteAddCache(rank, my_DE, AI_exc, AI_tot, AI_count, layout, 
+                             my_DE, AI_exc, AI_tot, AI_count, layout, 
+                             periodic);
 
-    if (routetable.nroutes < maxroutes) {
-
-        ep = new ESMC_RouteCacheEntry;
-        routetable.rcep[routetable.nroutes] = ep;
-        routetable.nroutes++;
-        
-        // store this in the cache
-        ep->routeid = routeid;
-        ep->theroute = this; 
-        ep->entrystatus = 1;
-        ep->rank = rank; 
-        ep->snd_layout = layout;
-        ep->snd_DE = my_DE; 
-        ep->snd_AI_count = AI_count; 
-        for (i=0; i<rank; i++) {
-          ep->snd_AI_exc[i] = AI_exc[i]; 
-          ep->snd_AI_tot[i] = AI_tot[i];
-        }
-        ep->rcv_layout = layout;
-        ep->rcv_DE = my_DE; 
-        ep->rcv_AI_count = AI_count; 
-        for (i=0; i<rank; i++) {
-          ep->rcv_AI_exc[i] = AI_exc[i]; 
-          ep->rcv_AI_tot[i] = AI_tot[i];
-          ep->periodic[i] = periodic[i];
-        }
-    } else {
-       printf("Warning: this route not Cached - Cache table full\n");
-    }
-    
-    return ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_RoutePrecomputeHalo
 
@@ -902,22 +1010,22 @@ static int maxroutes = 10;
     ESMC_XPacket *my_XP = NULL;
     ESMC_XPacket *their_XP = NULL;
     ESMC_XPacket intersect_XP;
-    ESMC_RouteCacheEntry *ep;
-    ESMC_Logical boundary[ESMF_MAXGRIDDIM][2];
     int my_XPcount, their_XPcount;
     int my_global_start[ESMF_MAXDIM];
-    int i, j, k, rc;
+    int i, k, rc;
+    int didsomething;
     int their_de, their_de_parent, their_decount;
 
-    // Initialize
-    for (j=0; j<rank; j++) {
-      boundary[j][0] = ESMF_TF_FALSE;
-      boundary[j][1] = ESMF_TF_FALSE;
-    }
+    // set this here, because if neither send or recv are > 0 then we
+    // do nothing here.
+    rc = ESMF_SUCCESS;
+    didsomething = 0;
 
     // Calculate the sending table.  If this DE is not part of the sending
-    // layout (my_DE_snd = -1 ?  TODO), skip this part
+    // layout skip this loop.
     if (my_DE_snd != -1) {
+ 
+       didsomething++;
  
       // get "my" AI out of the AI_snd array
       // TODO:  this is NOT going to work for data dims which are not
@@ -931,7 +1039,7 @@ static int maxroutes = 10;
 
       // calculate "my" (local DE's) XPacket in the sense of the global data
       rc = ESMC_XPacketFromAxisIndex(my_AI_exc, rank, global_count_snd,
-                                     boundary, &my_XP, &my_XPcount);
+                                     NULL, &my_XP, &my_XPcount);
 
       // loop over DE's from receiving layout to calculate send table
       layout_rcv->ESMC_DELayoutGetNumDEs(&their_decount);
@@ -955,14 +1063,17 @@ static int maxroutes = 10;
  
           // calculate "their" XPacket in the sense of the global data
           rc = ESMC_XPacketFromAxisIndex(their_AI_exc, rank, global_count_rcv,
-                                         boundary, &their_XP, &their_XPcount);
+                                         NULL, &their_XP, &their_XPcount);
 
           // calculate the intersection
           intersect_XP.ESMC_XPacketIntersect(&my_XP[0], &their_XP[0]);
 
           // if there's no intersection, no need to add an entry here
-          if (intersect_XP.ESMC_XPacketEmpty())
+          if (intersect_XP.ESMC_XPacketEmpty()) {
+              // free XPs allocated by XPacketFromAxisIndex() routine above
+              delete [] their_XP;
               continue;
+          }
 
           // translate from global to local data space
           intersect_XP.ESMC_XPacketGlobalToLocal(&intersect_XP, my_AI_tot, 
@@ -971,13 +1082,20 @@ static int maxroutes = 10;
           // load the intersecting XPacket into the sending RTable
           sendRT->ESMC_RTableSetEntry(their_de_parent, &intersect_XP);
           ct->ESMC_CommTableSetPartner(their_de_parent);
+ 
+          // free XPs allocated by XPacketFromAxisIndex() routine above
+          delete [] their_XP;
         }
+
+        // free the src my_XP before computing the rcv my_XP
+        delete [] my_XP;
     }
 
-
     // Calculate the receiving table.  If this DE is not part of the receiving
-    // layout (my_DE_rcv = -1 ?  TODO), skip this part
+    // layout skip this loop completely.
     if (my_DE_rcv != -1) {
+ 
+       didsomething++;
  
       // get "my" AI out of the AI_rcv array
       for (k=0; k<rank; k++) {
@@ -989,7 +1107,7 @@ static int maxroutes = 10;
 
       // calculate "my" (local DE's) XPacket in the sense of the global data
       rc = ESMC_XPacketFromAxisIndex(my_AI_exc, rank, global_count_rcv,
-                                     boundary, &my_XP, &my_XPcount);
+                                     NULL, &my_XP, &my_XPcount);
 
       // loop over DE's from sending layout to calculate receive table
       for (i=0; i<their_decount; i++) {
@@ -1012,14 +1130,17 @@ static int maxroutes = 10;
  
           // calculate "their" XPacket in the sense of the global data
           rc = ESMC_XPacketFromAxisIndex(their_AI_exc, rank, global_count_snd,
-                                         boundary, &their_XP, &their_XPcount);
+                                         NULL, &their_XP, &their_XPcount);
 
           // calculate the intersection
           intersect_XP.ESMC_XPacketIntersect(&my_XP[0], &their_XP[0]);
 
           // if there's no intersection, no need to add an entry here
-          if (intersect_XP.ESMC_XPacketEmpty())
+          if (intersect_XP.ESMC_XPacketEmpty()) {
+              // free XPs allocated by XPacketFromAxisIndex() routine above
+              delete [] their_XP;
               continue;
+          }
 
           // translate from global to local
           intersect_XP.ESMC_XPacketGlobalToLocal(&intersect_XP, my_AI_tot, 
@@ -1029,61 +1150,23 @@ static int maxroutes = 10;
           recvRT->ESMC_RTableSetEntry(their_de_parent, &intersect_XP);
           ct->ESMC_CommTableSetPartner(their_de_parent);
         }
+
+        // free the rcv my_XP
+        delete [] my_XP;
     }
 
-    // free unneeded XPs here
-    delete my_XP;  
-    my_XP = NULL;
-    delete their_XP; 
-    their_XP = NULL;
+    // add this route to the cache table
+    if (didsomething)
+        ESMC_RouteAddCache(rank, 
+                   my_DE_rcv, AI_rcv_exc, AI_rcv_tot, AI_rcv_count, layout_rcv,
+                   my_DE_snd, AI_snd_exc, AI_snd_tot, AI_snd_count, layout_snd,
+                   NULL);
 
-    // add to cache table here.
-    if (routetable.rcep == NULL) {
-       routetable.rcep = (ESMC_RouteCacheEntry **) 
-                       malloc(sizeof(ESMC_RouteCacheEntry *) * maxroutes);
-       routetable.nalloc = maxroutes;
 
-    }
-    // if we decide to grow the table slowly...
-    //if (routetable.nroutes <= routetable.nalloc) {
-    //    realloc(routetable.rcep, (routetable.nalloc + 4) *
-    //                                    sizeof(ESMC_RouteCacheEntry *));
-    //    routetable.nalloc += 4;
-    //}
-
-    if (routetable.nroutes < maxroutes) {
-
-        ep = new ESMC_RouteCacheEntry;
-        routetable.rcep[routetable.nroutes] = ep;
-        routetable.nroutes++;
-        
-        // store this in the cache
-        ep->routeid = routeid;
-        ep->theroute = this; 
-        ep->entrystatus = 1;
-        ep->rank = rank; 
-        ep->snd_layout = layout_snd;
-        ep->snd_DE = my_DE_snd; 
-        ep->snd_AI_count = AI_snd_count; 
-        for (i=0; i<rank; i++) {
-          ep->snd_AI_exc[i] = AI_snd_exc[i]; 
-          ep->snd_AI_tot[i] = AI_snd_tot[i];
-        }
-        ep->rcv_layout = layout_rcv;
-        ep->rcv_DE = my_DE_rcv; 
-        ep->rcv_AI_count = AI_rcv_count; 
-        for (i=0; i<rank; i++) {
-          ep->rcv_AI_exc[i] = AI_rcv_exc[i]; 
-          ep->rcv_AI_tot[i] = AI_rcv_tot[i];
-          ep->periodic[i] = ESMF_TF_FALSE;
-        }
-    } else {
-       printf("Warning: this route not Cached - Cache table full\n");
-    }
-        
     //printf("end of RoutePrecomputeRedist:\n");
     //this->ESMC_RoutePrint("");
-    return ESMF_SUCCESS;
+
+    return rc;
 
  } // end ESMC_RoutePrecomputeRedist
 
@@ -1149,22 +1232,24 @@ static int maxroutes = 10;
     ESMC_XPacket *my_XP = NULL;
     ESMC_XPacket *their_XP = NULL;
     ESMC_XPacket intersect_XP;
-    ESMC_RouteCacheEntry *ep;
-    ESMC_Logical boundary[ESMF_MAXGRIDDIM][2];
     int my_global_start[ESMF_MAXDIM];
     int my_XPcount, their_XPcount;
-    int i, j, k, rc;
+    int i, k, rc;
+    int didsomething;
     int their_de, their_de_parent, their_decount;
 
-    // Initialize
-    for (j=0; j<rank; j++) {
-      boundary[j][0] = ESMF_TF_FALSE;
-      boundary[j][1] = ESMF_TF_FALSE;
-    }
+    // set this here, because if neither send or recv are > 0 then we
+    // do nothing here.
+    rc = ESMF_SUCCESS;
+    didsomething = 0;
 
     // Calculate the sending table.  If this DE is not part of the sending
-    // layout (my_DE_snd = -1 ?  TODO), skip this part
+
+    // Calculate the sending table.  If this DE is not part of the sending
+    // layout skip this code.
     if (my_DE_snd != -1) {
+ 
+       didsomething++;
  
       // get "my" AI out of the AI_snd array
       // TODO:  this is NOT going to work for data dims which are not
@@ -1178,7 +1263,7 @@ static int maxroutes = 10;
 
       // calculate "my" (local DE's) XPacket in the sense of the global data
       rc = ESMC_XPacketFromAxisIndex(my_AI_exc, rank, global_count_snd,
-                                     boundary, &my_XP, &my_XPcount);
+                                     NULL, &my_XP, &my_XPcount);
 
       // loop over DE's from receiving layout to calculate send table
       layout_rcv->ESMC_DELayoutGetNumDEs(&their_decount);
@@ -1202,14 +1287,17 @@ static int maxroutes = 10;
  
           // calculate "their" XPacket in the sense of the global data
           rc = ESMC_XPacketFromAxisIndex(their_AI_exc, rank, global_count_rcv,
-                                         boundary, &their_XP, &their_XPcount);
+                                         NULL, &their_XP, &their_XPcount);
 
           // calculate the intersection
           intersect_XP.ESMC_XPacketIntersect(&my_XP[0], &their_XP[0]);
 
           // if there's no intersection, no need to add an entry here
-          if (intersect_XP.ESMC_XPacketEmpty())
+          if (intersect_XP.ESMC_XPacketEmpty()) {
+              // free XPs allocated by XPacketFromAxisIndex() routine above
+              delete [] their_XP;
               continue;
+          }
 
           // translate from global to local data space
           intersect_XP.ESMC_XPacketGlobalToLocal(&intersect_XP, my_AI_tot, 
@@ -1219,12 +1307,17 @@ static int maxroutes = 10;
           sendRT->ESMC_RTableSetEntry(their_de_parent, &intersect_XP);
           ct->ESMC_CommTableSetPartner(their_de_parent);
         }
+
+        // free the src my_XP before computing the rcv my_XP
+        delete [] my_XP;
     }
 
 
     // Calculate the receiving table.  If this DE is not part of the receiving
-    // layout (my_DE_rcv = -1 ?  TODO), skip this part
+    // layout skip this code
     if (my_DE_rcv != -1) {
+ 
+       didsomething++;
  
       // get "my" AI out of the AI_rcv array
       for (k=0; k<rank; k++) {
@@ -1236,7 +1329,7 @@ static int maxroutes = 10;
 
       // calculate "my" (local DE's) XPacket in the sense of the global data
       rc = ESMC_XPacketFromAxisIndex(my_AI_exc, rank, global_count_rcv,
-                                     boundary, &my_XP, &my_XPcount);
+                                     NULL, &my_XP, &my_XPcount);
 
       // loop over DE's from sending layout to calculate receive table
       for (i=0; i<their_decount; i++) {
@@ -1259,14 +1352,17 @@ static int maxroutes = 10;
  
           // calculate "their" XPacket in the sense of the global data
           rc = ESMC_XPacketFromAxisIndex(their_AI_exc, rank, global_count_snd,
-                                         boundary, &their_XP, &their_XPcount);
+                                         NULL, &their_XP, &their_XPcount);
 
           // calculate the intersection
           intersect_XP.ESMC_XPacketIntersect(&my_XP[0], &their_XP[0]);
 
           // if there's no intersection, no need to add an entry here
-          if (intersect_XP.ESMC_XPacketEmpty())
+          if (intersect_XP.ESMC_XPacketEmpty()) {
+              // free XPs allocated by XPacketFromAxisIndex() routine above
+              delete [] their_XP;
               continue;
+          }
 
           // translate from global to local
           intersect_XP.ESMC_XPacketGlobalToLocal(&intersect_XP, my_AI_tot, 
@@ -1275,62 +1371,26 @@ static int maxroutes = 10;
           // load the intersecting XPacket into the receiving RTable
           recvRT->ESMC_RTableSetEntry(their_de_parent, &intersect_XP);
           ct->ESMC_CommTableSetPartner(their_de_parent);
+
+          // free XPs allocated by XPacketFromAxisIndex() routine above
+          delete [] their_XP;
         }
+
+        // free the rcv my_XP
+        delete [] my_XP;
     }
 
-    // free unneeded XPs here
-    delete my_XP;  
-    my_XP = NULL;
-    delete their_XP; 
-    their_XP = NULL;
-
-    // add to cache table here.
-    if (routetable.rcep == NULL) {
-       routetable.rcep = (ESMC_RouteCacheEntry **) 
-                       malloc(sizeof(ESMC_RouteCacheEntry *) * maxroutes);
-       routetable.nalloc = maxroutes;
-
-    }
-    // if we decide to grow the table slowly...
-    //if (routetable.nroutes <= routetable.nalloc) {
-    //    realloc(routetable.rcep, (routetable.nalloc + 4) *
-    //                                    sizeof(ESMC_RouteCacheEntry *));
-    //    routetable.nalloc += 4;
-    //}
-
-    if (routetable.nroutes < maxroutes) {
-
-        ep = new ESMC_RouteCacheEntry;
-        routetable.rcep[routetable.nroutes] = ep;
-        routetable.nroutes++;
-        
-        // store this in the cache
-        ep->routeid = routeid;
-        ep->theroute = this; 
-        ep->entrystatus = 1;
-        ep->rank = rank; 
-        ep->snd_layout = layout_snd;
-        ep->snd_DE = my_DE_snd; 
-        ep->snd_AI_count = AI_snd_count; 
-        for (i=0; i<rank; i++) {
-          ep->snd_AI_exc[i] = AI_snd_exc[i]; 
-          ep->snd_AI_tot[i] = AI_snd_tot[i];
-        }
-        ep->rcv_layout = layout_rcv;
-        ep->rcv_DE = my_DE_rcv; 
-        ep->rcv_AI_count = AI_rcv_count; 
-        for (i=0; i<rank; i++) {
-          ep->rcv_AI_exc[i] = AI_rcv_exc[i]; 
-          ep->rcv_AI_tot[i] = AI_rcv_tot[i];
-          ep->periodic[i] = ESMF_TF_FALSE;
-        }
-    } else {
-       printf("Warning: this route not Cached - Cache table full\n");
-    }
+    // add this route to the cache table
+    if (didsomething)
+        ESMC_RouteAddCache(rank, 
+                   my_DE_rcv, AI_rcv_exc, AI_rcv_tot, AI_rcv_count, layout_rcv,
+                   my_DE_snd, AI_snd_exc, AI_snd_tot, AI_snd_count, layout_snd,
+                   NULL);
         
     //printf("end of RoutePrecomputeRegrid:\n");
     //this->ESMC_RoutePrint("");
-    return ESMF_SUCCESS;
+
+    return rc;
 
  } // end ESMC_RoutePrecomputeRegrid
 
@@ -1367,38 +1427,35 @@ static int maxroutes = 10;
     ESMC_AxisIndex my_AI[ESMF_MAXDIM], their_AI[ESMF_MAXDIM];
     ESMC_XPacket *my_XP = NULL;
     ESMC_XPacket *their_XP = NULL;
-    ESMC_RouteCacheEntry *ep;
-    ESMC_Logical boundary[ESMF_MAXGRIDDIM][2];
     int my_XPcount, their_XPcount;
     int global_count[ESMF_MAXDIM];
-    int rc;   // TODO: really use this
+    int rc;  
     int j, k, theirOffset, offset, count;
     int their_de;
 
-    //
-    for (j=0; j<rank; j++) {
-      boundary[j][0] = ESMF_TF_FALSE;
-      boundary[j][1] = ESMF_TF_FALSE;
+    for (j=0; j<rank; j++)
       global_count[j] = 0;
-    }
 
     // Calculate the sending table.
     // loop over DE's from DomainList to send to
     for (k=0; k<sendDomainList->num_domains; k++) {
       their_de = sendDomainList->domains[k].DE;
       // get "my" AI
-      for (j=0; j<rank; j++) {
+      for (j=0; j<rank; j++) 
         my_AI[j] = sendDomainList->domains[k].ai_list[j];
-      }
+      
  
       // calculate "my" XPacket from the AxisIndices -- in this case the
       // AIs are in local space and so is the XPacket
-      rc = ESMC_XPacketFromAxisIndex(my_AI, rank, global_count, boundary,
+      rc = ESMC_XPacketFromAxisIndex(my_AI, rank, global_count, NULL,
                                      &my_XP, &my_XPcount);
       
       // load the XPacket into the sending RTable
       sendRT->ESMC_RTableSetEntry(their_de, my_XP);
       ct->ESMC_CommTableSetPartner(their_de);
+
+      // free each XP before allocating another in XPacketFromAxisIndex
+      delete [] my_XP;
     }
 
     // Calculate the receiving table.
@@ -1415,7 +1472,7 @@ static int maxroutes = 10;
  
       // calculate "their" XPacket from the AxisIndices -- in this case the
       // AIs are in local space and so is the XPacket
-      rc = ESMC_XPacketFromAxisIndex(their_AI, rank, global_count, boundary,
+      rc = ESMC_XPacketFromAxisIndex(their_AI, rank, global_count, NULL,
                                      &their_XP, &their_XPcount);
       
       // modify the XPacket so it gets stored immediately after the last one
@@ -1427,61 +1484,18 @@ static int maxroutes = 10;
       // load the XPacket into the sending RTable
       sendRT->ESMC_RTableSetEntry(their_de, their_XP);
       ct->ESMC_CommTableSetPartner(their_de);
+
+      // free each XP before allocating another in XPacketFromAxisIndex
+      delete [] their_XP;
     }
  
     //ESMC_RoutePrint("");
  
-    // free unneeded XPs here
-    delete my_XP;  
-    my_XP = NULL;
-    delete their_XP; 
-    their_XP = NULL;
+    // add this route to the cache table
+    ESMC_RouteAddCache(rank, my_DE, NULL, NULL, 0, layout,
+                             my_DE, NULL, NULL, 0, layout, NULL);
 
-    // add to cache table here.
-    if (routetable.rcep == NULL) {
-       routetable.rcep = (ESMC_RouteCacheEntry **) 
-                       malloc(sizeof(ESMC_RouteCacheEntry *) * maxroutes);
-       routetable.nalloc = maxroutes;
-
-    }
-    // if we decide to grow the table slowly...
-    //if (routetable.nroutes <= routetable.nalloc) {
-    //    realloc(routetable.rcep, (routetable.nalloc + 4) *
-    //                                    sizeof(ESMC_RouteCacheEntry *));
-    //    routetable.nalloc += 4;
-    //}
-
-    if (routetable.nroutes < maxroutes) {
-
-        ep = new ESMC_RouteCacheEntry;
-        routetable.rcep[routetable.nroutes] = ep;
-        routetable.nroutes++;
-        
-        // store this in the cache
-        ep->routeid = routeid;
-        ep->theroute = this; 
-        ep->entrystatus = 1;
-        ep->rank = rank; 
-        ep->snd_layout = layout;
-        ep->snd_DE = my_DE; 
-   //     ep->snd_AI_count = AI_count;
-   //     for (i=0; i<rank; i++) {
-   //       ep->snd_AI_exc[i] = AI_exc[i]; 
-   //       ep->snd_AI_tot[i] = AI_tot[i];
-   //     }
-        ep->rcv_layout = layout;
-        ep->rcv_DE = my_DE; 
-   //     ep->rcv_AI_count = AI_count; 
-   //     for (i=0; i<rank; i++) {
-   //       ep->rcv_AI_exc[i] = AI_exc[i]; 
-   //       ep->rcv_AI_tot[i] = AI_tot[i];
-   //       ep->periodic[i] = ESMF_TF_FALSE;
-   //     }
-    } else {
-       printf("Warning: this route not Cached - Cache table full\n");
-    }
-    
-    return ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_RoutePrecomputeDomainList
 
@@ -1548,7 +1562,7 @@ static int maxroutes = 10;
     printf(" Comm table:\n");
     rc = ct->ESMC_CommTablePrint(options);
 
-    return ESMF_SUCCESS;
+    return rc;
 
  } // end ESMC_RoutePrint
 
