@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.3 2003/09/23 16:31:09 jwolfe Exp $
+! $Id: user_model1.F90,v 1.4 2003/09/24 23:00:09 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -134,13 +134,13 @@
         ! Figure out our local processor id
         call ESMF_DELayoutGetDEID(layout, de_id, rc)
 
-        ! Set up a 2D integer array
+        ! Set up a 2D real array
         call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_REAL, &
                                 kind=ESMF_R8)
 
         ! Create the field and have it create the array internally
         humidity = ESMF_FieldCreate(grid1, arrayspec, relloc=ESMF_CELL_CENTER, &
-                                         name="humidity", rc=rc)
+                                    name="humidity", rc=rc)
 
         ! Get the allocated array back and get an F90 array pointer
         call ESMF_FieldGetData(humidity, array1, rc)
