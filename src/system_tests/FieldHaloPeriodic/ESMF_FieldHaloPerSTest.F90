@@ -1,7 +1,8 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.2 2003/09/24 22:39:15 nscollins Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.3 2003/09/25 16:26:09 nscollins Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
+!  Description on Sourceforge under System Test #82899
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

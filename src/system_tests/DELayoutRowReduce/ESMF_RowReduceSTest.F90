@@ -1,6 +1,7 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.1 2003/09/24 22:36:19 nscollins Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.2 2003/09/25 16:26:09 nscollins Exp $
 !
 ! System test DELayoutRowReduce
+!  Description on Sourceforge under System Test #69725
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
