@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.81 2005/01/08 00:17:23 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.82 2005/02/07 23:38:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.81 2005/01/08 00:17:23 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.82 2005/02/07 23:38:18 eschwab Exp $'
 
 !==============================================================================
 !
@@ -542,6 +542,10 @@
 !     Julian Date, No Leap, 360 Day and Custom calendars.  Not valid for
 !     Julian day or no calendar. \\
 !
+!     For {\tt timeString} and {\tt timeStringISOFrac}, YYYY format returns
+!     at least 4 digits; years <= 999 are padded on the left with zeroes and
+!     years >= 10000 return the number of digits required.
+!
 !     For timeString, convert {\tt ESMF\_Time}'s value into partial ISO 8601
 !     format YYYY-MM-DDThh:mm:ss[:n/d].  See ~\cite{ISO}.  See also method
 !     {\tt ESMF\_TimePrint()}.
@@ -751,7 +755,10 @@
 ! !DESCRIPTION:
 !     Prints out the contents of an {\tt ESMF\_Time} to {\tt stdout}, in
 !     support of testing and debugging.  The options control the type of
-!     information and level of detail.
+!     information and level of detail.  For options "string" and "string
+!     isofrac", YYYY format returns at least 4 digits; years <= 999 are
+!     padded on the left with zeroes and years >= 10000 return the number
+!     of digits required.
 !
 !     The arguments are:
 !     \begin{description}

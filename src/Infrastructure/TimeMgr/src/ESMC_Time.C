@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.78 2005/02/01 00:24:04 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.79 2005/02/07 23:38:19 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.78 2005/02/01 00:24:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.79 2005/02/07 23:38:19 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1253,7 +1253,7 @@
       return(rc);
 
     // format everything except seconds
-    sprintf(timeString, "%lld-%02d-%02dT%02d:%02d:\0", yy_i8, mm, dd, h, m);
+    sprintf(timeString, "%04lld-%02d-%02dT%02d:%02d:\0", yy_i8, mm, dd, h, m);
 
     // format seconds according to specified options
     bool isofrac = false;

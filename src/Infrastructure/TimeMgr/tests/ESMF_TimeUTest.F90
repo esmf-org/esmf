@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.15 2004/12/17 22:02:00 eschwab Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.16 2005/02/07 23:38:20 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.15 2004/12/17 22:02:00 eschwab Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.16 2005/02/07 23:38:20 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -98,16 +98,18 @@
 
       !NEX_UTest
       ! Test Setting Start Time 
+      write(name, *) "Set Time Initialization Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=29, h=12, m=17, s=58, &
                                    calendar=gregorianCalendar, rc=rc)
-      write(name, *) "Set Time Initialization Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
 
+      write(name, *) "Get Time Test 1"
+      write(failMsg, *) " Did not return 2004-01-29T12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, &
                         timeString=timeString, rc=rc)
       call ESMF_Test((YY==2004 .and. MM==1 .and. DD==29 .and. &
@@ -119,6 +121,39 @@
 
 
 #ifdef ESMF_EXHAUSTIVE
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Tests fix to support #1115836, bug #1118178, "ESMF_TimeGet returns
+      !   string with %lld not %04lld" reported by Paul Schopf/GMU
+      write(name, *) "Get String Time Test 2"
+      write(failMsg, *) " Did not return 0009-02-07T00:00:00 or ESMF_SUCCESS"
+      call ESMF_TimeSet(time1, yy=9, mm=2, dd=7, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeGet(time1, yy=YY, mm=MM, dd=DD, &
+                        timeString=timeString, rc=rc)
+      call ESMF_Test((YY==9 .and. MM==2 .and. DD==7 .and. &
+                      timeString=="0009-02-07T00:00:00" .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "time1 = ", timeString
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Tests fix to support #1115836, bug #1118178, "ESMF_TimeGet returns
+      !   string with %lld not %04lld" reported by Paul Schopf/GMU
+      write(name, *) "Get String Time Test 3"
+      write(failMsg, *) " Did not return 10000-02-07T00:00:00 or ESMF_SUCCESS"
+      call ESMF_TimeSet(time1, yy=10000, mm=2, dd=7, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeGet(time1, yy=YY, mm=MM, dd=DD, &
+                        timeString=timeString, rc=rc)
+      call ESMF_Test((YY==10000 .and. MM==2 .and. DD==7 .and. &
+                      timeString=="10000-02-07T00:00:00" .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "time1 = ", timeString
+
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Test Setting Stop Time 
