@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.12 2004/10/26 21:30:51 theurich Exp $
+// $Id: ESMC_VM.h,v 1.13 2004/12/17 18:20:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,20 +49,27 @@ class ESMF_VMPlan;
 class ESMC_VM : public ESMC_VMK {   // inherits from ESMC_VMK class
   // This is the ESMF derived virtual machine class.
   public:
-    // Get method that supports the F90 optional arguments interface
     int ESMC_VMGet(
+      // Get method that supports the F90 optional arguments interface
       int          *localPet,       // out - id of local PET
       int          *petCount,       // out - number of PETs
       int          *peCount,        // out - number of PEs
       MPI_Comm     *mpiCommunicator,// out - MPI Intracommunicator for VM
       ESMC_Logical *okOpenMpFlag);  // out - flag whether user-level OpenMP o.k.
-    // GetPETLocalInfo method that supports the F90 optional arguments interface
     int ESMC_VMGetPETLocalInfo(
+      // GetPETLocalInfo method that supports the F90 optional args interface
       int pet,            // in  - id of specified PET
       int *peCount,       // out - number of PEs for specified PET
       int *ssiId,         // out - ssiid for specified PET
       int *threadCount,   // out - number of treads in thread group with PET
       int *threadId);     // out - thread id for specified PET
+    int ESMC_VMGetPETMatchPET(
+      // match PET in current VM against PETs of another VM
+      int pet,                      // in  - id of specified PET
+      ESMC_VM &vmMatch,             // in  - vm to match against
+      int *petMatchCount,           // out - number of matching PETs in vmMatch
+      int *petMatchList,            // out - list of matching PETs in vmMatch
+      int len_petMatchList);        // in  - size of petMatchList
 };// end class ESMC_VM
 
 // external ESMC_VM methods:

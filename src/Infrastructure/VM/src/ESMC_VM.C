@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.18 2004/12/02 23:23:11 nscollins Exp $
+// $Id: ESMC_VM.C,v 1.19 2004/12/17 18:20:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.18 2004/12/02 23:23:11 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.19 2004/12/17 18:20:18 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -162,6 +162,58 @@ int ESMC_VM::ESMC_VMGetPETLocalInfo(
   if (threadId != ESMC_NULL_POINTER)
     *threadId = this->vmk_tid(pet);
   return ESMF_SUCCESS;            // TODO: Do some real error handling here...
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMGetPETMatchPET()"
+//BOP
+// !IROUTINE:  ESMC_VMGetPETMatchPET
+//
+// !INTERFACE:
+int ESMC_VM::ESMC_VMGetPETMatchPET(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  int pet,                      // in  - id of specified PET
+  ESMC_VM &vmMatch,             // in  - vm to match against
+  int *petMatchCount,           // out - number of matching PETs in vmMatch
+  int *petMatchList,            // out - list of matching PETs in vmMatch
+  int len_petMatchList          // in  - size of petMatchList
+  ){              
+//
+// !DESCRIPTION:
+//    Match pet in the current VM object against the PETs in the 
+//    provided vmMatch VM. Return number of matched PETs and a list of the
+//    matching pet id's that operate in the same virtual address space as
+//    the specified pet.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int npets = vmMatch.vmk_npets();  // maximum number of PETs in vmMatch
+  int *tempMatchList = new int[npets];
+  int tempMatchCount = 0;
+  int comparePID = pid[pet];        // this is pet's virtual address space id
+  int j=0;
+  for (int i=0; i<npets; i++)
+    if (vmMatch.vmk_pid(i) == comparePID){
+      tempMatchList[j] = i;
+      ++j;
+    }
+  // now j is equal to the number of PETs in vmMatch which operate in the 
+  // same virtual address space as pet in the current VM
+  if (petMatchCount != ESMC_NULL_POINTER)
+    *petMatchCount = j;
+  if (len_petMatchList >= j)
+    for (int i=0; i<j; i++)
+      petMatchList[i] = tempMatchList[i];
+  delete [] tempMatchList;
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
