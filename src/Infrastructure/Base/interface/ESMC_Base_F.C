@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.9 2004/02/09 21:02:53 nscollins Exp $
+// $Id: ESMC_Base_F.C,v 1.10 2004/02/09 21:21:39 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.9 2004/02/09 21:02:53 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.10 2004/02/09 21:21:39 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -154,7 +154,7 @@ extern "C" {
   int i, status;
   char *copts;
 
-  if (!*base) {
+  if (!base) {
     printf("uninitialized Base object\n");
     *rc = ESMF_SUCCESS;
     return;
@@ -199,7 +199,7 @@ extern "C" {
 
   int i, status;
 
-  if (!*base) {
+  if (!base) {
     *rc = ESMF_FAILURE;
     return;
   }
@@ -236,7 +236,7 @@ extern "C" {
 
   int i, status;
 
-  if (!*base) {
+  if (!base) {
     *rc = ESMF_FAILURE;
     return;
   }
@@ -273,7 +273,7 @@ extern "C" {
 
   int i, status;
 
-  if (!*base) {
+  if (!base) {
     *rc = ESMF_FAILURE;
     return;
   }
@@ -309,7 +309,7 @@ extern "C" {
 
   int i, status;
 
-  if (!*base) {
+  if (!base) {
     *rc = ESMF_FAILURE;
     return;
   }
@@ -358,7 +358,7 @@ extern "C" {
   int i, status;
   char *cname;
 
-  if (!*base) {
+  if (!base) {
     *rc = ESMF_FAILURE;
     return;
   }
@@ -415,7 +415,7 @@ extern "C" {
   int i, status;
   char *cname, *cvalue;
 
-  if (!*base) {
+  if (!base) {
     *rc = ESMF_FAILURE;
     return;
   }
@@ -486,7 +486,7 @@ extern "C" {
   ESMC_DataType attrDt;
   char *cname;
 
-  if (!*base) {
+  if (!base) {
     *rc = ESMF_FAILURE;
     return;
   }
@@ -564,7 +564,7 @@ extern "C" {
   char *cname, *cvalue;
   int slen;              // actual attribute string length
 
-  if (!*base) {
+  if (!base) {
     *rc = ESMF_FAILURE;
     return;
   }
@@ -651,7 +651,7 @@ extern "C" {
   int i, status, attrCount;
   char *cname;
 
-  if (!*base) {
+  if (!base) {
     *rc = ESMF_FAILURE;
     return;
   }
@@ -717,7 +717,7 @@ extern "C" {
   int i, status;
   char *cname;
 
-  if (!*base) {
+  if (!base) {
     *rc = ESMF_FAILURE;
     return;
   }
@@ -779,7 +779,7 @@ extern "C" {
 
   int i, status;
 
-  if (!*base) {
+  if (!base) {
     *rc = ESMF_FAILURE;
     return;
   }
