@@ -1036,11 +1036,17 @@ void vmachine::vmachine_exit(class vmplan &vmp, void *arg){
 void vmachine::vmachine_print(void){
   // print info about the vmachine object
   printf("--- vmachine_print start ---\n");
+  printf("this vm: %p\n", this);
   printf("npets = %d, mypet=%d\n", npets, mypet);
   printf("  pth_mutex =\t\t %p\n"
          "  pth_finish_count =\t %p\n"
          "  commarray =\t\t %p\n", 
     pth_mutex, pth_finish_count, commarray);
+  int size;
+  MPI_Group_size(mpi_g, &size);
+  printf("MPI_Group_size: %d\n", size);
+  MPI_Comm_size(mpi_c, &size);
+  printf("MPI_Comm_size: %d\n", size);
   for (int i=0; i<npets; i++){
     printf("  lpid[%d]=%d, pid[%d]=%d, tid[%d]=%d, ncpet[%d]=%d",
       i, lpid[i], i, pid[i], i, tid[i], i, ncpet[i]);
