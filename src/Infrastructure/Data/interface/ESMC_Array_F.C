@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.6 2002/12/10 18:13:03 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.7 2002/12/10 21:47:20 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,9 @@
  // TODO : find pointer size exactly for each system and put it into
  // build/*/conf.h for each arch.
 struct c_F90ptr {
-   char pad[88];
+                   // specific_machine_name/esmf_arch_setting
+   //char pad[88];   // halem/alpha
+   char pad[44];   // blackforest/rs6000_sp
 };
 
 // the interface subroutine names MUST be in lower case
@@ -76,10 +78,7 @@ extern "C" {
                                       NULL, NULL, status);
 
              *(unsigned long *)ptr = (unsigned long)lptr;
-             printf("ptr = 0x%08lx, lptr = 0x%08lx, *lptr = 0x%08lx\n", 
-                      (unsigned long)ptr, (unsigned long)lptr, *(unsigned long *)lptr);
 
-             printf("status = %d\n", *status);
      }
  
      void FTN(c_esmc_arraydestroy)(ESMC_Array *ptr, int *status) {
