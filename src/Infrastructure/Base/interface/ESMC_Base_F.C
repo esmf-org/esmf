@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.30 2004/11/30 23:43:55 nscollins Exp $
+// $Id: ESMC_Base_F.C,v 1.31 2004/12/02 17:14:58 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.30 2004/11/30 23:43:55 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.31 2004/12/02 17:14:58 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -245,10 +245,11 @@ extern "C" {
 
   int i, status;
 
+  *base = new ESMC_Base;
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.ESMC_LogWrite("Base object uninitialized", ESMC_LOG_INFO);
-    if (rc) *rc = ESMF_SUCCESS;
+    ESMC_LogDefault.ESMC_LogWrite("Base object error", ESMC_LOG_INFO);
+    if (rc) *rc = ESMF_FAILURE;
     return;
   }
 
