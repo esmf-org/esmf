@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_ErrReturnCodes.inc,v 1.1 2004/05/17 19:23:40 eschwab Exp $
+$Id: ESMF_ErrReturnCodes.inc,v 1.2 2004/05/17 19:58:24 eschwab Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,6 +14,17 @@ ESMF Error include file of constants for both FORTRAN or C++.
 Do not have C++ or F90 style comments in here because this file is processed
 by both C++ and F90 compilers.
 
+#endif
+
+#if 0
+Special macro for use in ESM[F,C]_LogMsgFoundError(), e.g.
+  ESMF_LogMsgFoundError(rcToCheck, ESMF_ERR_PASSTHRU. rcToReturn)
+#endif
+#define ESMF_ERR_PASSTHRU   "Internal subroutine call returned Error"
+
+#if 0
+Return codes are defined here; corresponding error messages are defined in
+ESMC_LogErrMsgs.C
 #endif
 
 #if 0
