@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest82899.F90,v 1.10 2003/08/07 15:10:41 nscollins Exp $
+! $Id: ESMF_SysTest82899.F90,v 1.11 2003/08/07 20:05:07 nscollins Exp $
 !
 ! System test code #82899
 !  Field Halo with periodic boundary conditions.
@@ -14,6 +14,20 @@
 !
 !\begin{verbatim}
 
+    module global_data
+
+      use ESMF_Mod
+
+      ! set to true to get more output
+      logical :: verbose = .false.
+   
+      ! which type of periodic boundaries
+      type(ESMF_Logical) :: periodic(2)
+
+      public :: verbose, periodic
+
+    end module
+
     program ESMF_SysTest82899
 
 #include <ESMF_Macros.inc>
@@ -21,6 +35,7 @@
     ! ESMF Framework module
     use ESMF_Mod
     use ESMF_TestMod
+    use global_data
     
     implicit none
     
@@ -38,8 +53,6 @@
     type(ESMF_State) :: import
     integer :: i, ndes, rc
 
-    ! set to true to get more output
-    logical :: verbose = .false.
         
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
@@ -191,6 +204,7 @@
 !
     subroutine setserv(comp, rc)
       use ESMF_Mod
+      use global_data
 
       type(ESMF_GridComp) :: comp
       integer :: rc
@@ -218,6 +232,7 @@
 !
     subroutine myinit(comp, importstate, exportstate, clock, rc)
       use ESMF_Mod
+      use global_data
 
       type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importstate, exportstate
@@ -239,9 +254,7 @@
       integer :: horz_stagger, vert_stagger
       integer :: horz_coord_system, vert_coord_system
       real :: x_min, x_max, y_min, y_max
-      type(ESMF_Logical) :: periodic(2)
       character(len=ESMF_MAXSTR) :: gname, fname
-      logical :: verbose = .false.
 
       if (verbose) print *, "Entering Initialization routine"
 
@@ -263,9 +276,9 @@
       horz_stagger = ESMF_GridStagger_A
       horz_coord_system = ESMF_CoordSystem_Cartesian
 
-      print *, "Grid is Periodic along the 2nd dimension"
-      periodic(1) = ESMF_TF_FALSE
-      periodic(2) = ESMF_TF_TRUE
+      print *, "Grid is Periodic along the 1st dimension"
+      periodic(1) = ESMF_TF_TRUE
+      periodic(2) = ESMF_TF_FALSE
 
       gname = "test grid 1"
 
@@ -345,6 +358,7 @@
 
     subroutine myrun(comp, importstate, exportstate, clock, rc)
       use ESMF_Mod
+      use global_data
 
       type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importstate, exportstate
@@ -353,7 +367,6 @@
 
       ! Local variables
       type(ESMF_Field) :: field1
-      logical :: verbose = .false.
 
       if (verbose) print *, "Entering Run routine"
 
@@ -393,6 +406,7 @@
 
     subroutine myfinal(comp, importstate, exportstate, clock, rc)
       use ESMF_Mod
+      use global_data
 
       type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importstate, exportstate
@@ -410,7 +424,6 @@
       type(ESMF_Field) :: field1
       type(ESMF_Grid) :: grid1
       type(ESMF_Array) :: array1
-      logical :: verbose = .false.
 
       if (verbose) print *, "Entering Finalize routine"
       ! this must match halo width in original program!!
@@ -453,79 +466,67 @@
       call ESMF_DELayoutGetDEPosition(layout, xpos, ypos, rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      mismatch = 0
 
-      ! check interior points
+      !!
+      ! construct the pattern for side, corners, and interior points
+      !!
+
+      ! interior points
       target = de_id
       pattern(2,2) = target
-      do j=1+halo_width,nj-halo_width
-        do i=1+halo_width,ni-halo_width
-          if (ldata(i,j) .ne. target) then
-             mismatch = mismatch + 1
-          endif
-        enddo
-      enddo
 
       ! now edges minus corners
 
       ! bottom middle
       if (ypos .eq. 0) then
-        target = (ny-1)*nx + xpos  ! used to be -1 before periodic was on.
+        if (periodic(2) .eq. ESMF_TF_TRUE) then
+          target = (ny-1)*nx + xpos 
+        else
+          target = -1
+        endif
       else
         target = de_id - nx 
       endif
       pattern(2, 1) = target
-      do j=1,halo_width
-        do i=1+halo_width,ni-halo_width
-          if (ldata(i,j) .ne. target) then
-             mismatch = mismatch + 1
-          endif
-        enddo
-      enddo
+
       ! top middle
       if (ypos .eq. ny-1) then
-        target = xpos  ! used to be -1 before periodic was on.
+        if (periodic(2) .eq. ESMF_TF_TRUE) then
+          target = xpos 
+        else
+          target = -1
+        endif
       else
         target = de_id + nx 
       endif
       pattern(2, 3) = target
-      do j=nj-halo_width+1,nj
-        do i=1+halo_width, ni-halo_width
-          if (ldata(i,j) .ne. target) then
-             mismatch = mismatch + 1
-          endif
-        enddo
-      enddo
+      
       ! left side middle
       if (xpos .eq. 0) then
-        target = -1
+        if (periodic(1) .eq. ESMF_TF_TRUE) then
+          target = de_id + (nx-1)
+        else
+          target = -1
+        endif
       else
         target = de_id - 1
       endif
       pattern(1, 2) = target
-      do j=1+halo_width,nj-halo_width
-        do i=1, halo_width
-          if (ldata(i,j) .ne. target) then
-             mismatch = mismatch + 1
-          endif
-        enddo
-      enddo
+      
       ! right side middle
       if (xpos .eq. nx-1) then
-        target = -1
+        if (periodic(1) .eq. ESMF_TF_TRUE) then
+          target = de_id - (nx-1)
+        else
+          target = -1
+        endif
       else
         target = de_id + 1
       endif
       pattern(3, 2) = target
-      do j=1+halo_width,nj-halo_width
-        do i=ni-halo_width+1,ni
-          if (ldata(i,j) .ne. target) then
-             mismatch = mismatch + 1
-          endif
-        enddo
-      enddo
 
       ! and finally corners
+
       ! lower left
       if ((xpos .eq. 0) .and. (ypos .eq. 0)) then
         target = -1
@@ -537,13 +538,7 @@
         target = de_id - nx - 1
       endif
       pattern(1, 1) = target
-      do j=1,halo_width
-        do i=1,halo_width
-          if (ldata(i,j) .ne. target) then
-             mismatch = mismatch + 1
-          endif
-        enddo
-      enddo
+      
       ! lower right
       if ((xpos .eq. nx-1) .and. (ypos .eq. 0)) then
         target = -1
@@ -555,13 +550,7 @@
         target = de_id - nx + 1
       endif
       pattern(3, 1) = target
-      do j=1,halo_width
-        do i=ni-halo_width+1, ni
-          if (ldata(i,j) .ne. target) then
-             mismatch = mismatch + 1
-          endif
-        enddo
-      enddo
+      
       ! upper left
       if ((xpos .eq. 0) .and. (ypos .eq. ny-1)) then
         target = -1
@@ -573,13 +562,7 @@
         target = de_id + nx - 1
       endif
       pattern(1, 3) = target
-      do j=nj-halo_width+1,nj
-        do i=1, halo_width
-          if (ldata(i,j) .ne. target) then
-             mismatch = mismatch + 1
-          endif
-        enddo
-      enddo
+      
       ! upper right
       if ((xpos .eq. nx-1) .and. (ypos .eq. ny-1)) then
         target = -1
@@ -591,6 +574,101 @@
         target = de_id + nx + 1
       endif
       pattern(3, 3) = target
+
+
+
+      !!
+      ! compare pattern to actual values and count mismatches
+      !!
+
+      mismatch = 0
+
+      ! check interior points
+      target = pattern(2,2)
+      do j=1+halo_width,nj-halo_width
+        do i=1+halo_width,ni-halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! now edges minus corners
+
+      ! bottom middle
+      target = pattern(2, 1)
+      do j=1,halo_width
+        do i=1+halo_width,ni-halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! top middle
+      target = pattern(2, 3)
+      do j=nj-halo_width+1,nj
+        do i=1+halo_width, ni-halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! left side middle
+      target = pattern(1, 2)
+      do j=1+halo_width,nj-halo_width
+        do i=1, halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! right side middle
+      target = pattern(3, 2)
+      do j=1+halo_width,nj-halo_width
+        do i=ni-halo_width+1,ni
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! and finally corners
+
+      ! lower left
+      target = pattern(1, 1)
+      do j=1,halo_width
+        do i=1,halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! lower right
+      target = pattern(3, 1)
+      do j=1,halo_width
+        do i=ni-halo_width+1, ni
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! upper left
+      target = pattern(1, 3) 
+      do j=nj-halo_width+1,nj
+        do i=1, halo_width
+          if (ldata(i,j) .ne. target) then
+             mismatch = mismatch + 1
+          endif
+        enddo
+      enddo
+
+      ! upper right
+      target = pattern(3, 3) 
       do j=nj-halo_width+1,nj
         do i=ni-halo_width+1,ni
           if (ldata(i,j) .ne. target) then
@@ -599,7 +677,9 @@
         enddo
       enddo
 
+      !!
       ! Print what the results should look like
+      !!
       print *, "------------------------------------------------------"
       print *, "pattern should look like:"
       print *, pattern(1, 3), pattern(2, 3), pattern(3, 3)
