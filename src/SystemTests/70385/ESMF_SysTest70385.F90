@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.1 2003/02/21 20:56:33 jwolfe Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.2 2003/02/21 22:03:36 jwolfe Exp $
 !
 ! System test code #70385
 
@@ -70,8 +70,8 @@
     layout1 = ESMF_LayoutCreate(2, 2, delist, ESMF_XFAST, rc)
 
     cname = "System Test #70385"
-    comp1 = ESMF_CompCreate(cname, layout1, ESMF_GRIDCOMP, &
-                                       ESMF_ATM, "/usr/local", rc=rc)
+!   comp1 = ESMF_CompCreate(cname, layout1, ESMF_GRIDCOMP, &
+!                                      ESMF_ATM, "/usr/local", rc=rc)
 
     print *, "Comp Create finished, name = ", trim(cname)
 
@@ -116,9 +116,9 @@
 
 !     Allocate arrays.
       call ESMF_GridGetDE(grid1, lcelltot_index=index, rc=rc)
-      print *, "allocating", ni, " cells on DE", de_id
       ni = index(1)%r - index(1)%l + 1
       nj = index(2)%r - index(2)%l + 1
+      print *, "allocating", ni, " by ",nj," cells on DE", de_id
       allocate(idata(ni,nj))
       allocate(ldata(ni,nj))
 
@@ -131,7 +131,7 @@
 
 !     Create Array based on an existing, allocated F90 pointer.
 !     Data is type Integer, 2D.
-      array1 = ESMF_ArrayCreate(idata, ESMF_NO_COPY, rc)
+      array1 = ESMF_ArrayCreate(ldata, ESMF_NO_COPY, rc)
       print *, "Array Create returned"
 
       call ESMF_ArrayPrint(array1, "foo", rc);
@@ -159,7 +159,7 @@
 !
 
       timestep = 1
-      call ESMF_CompRun(comp1, timestep, rc)
+!     call ESMF_CompRun(comp1, timestep, rc)
 
 !     Call Field method to halo
       call ESMF_FieldHalo(field1, rc)
