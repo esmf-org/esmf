@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.38 2003/08/28 14:33:23 pwjones Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.39 2003/08/28 17:12:39 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -182,7 +182,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.38 2003/08/28 14:33:23 pwjones Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.39 2003/08/28 17:12:39 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -350,16 +350,18 @@
 !EOP
 
       type(ESMF_PhysGridType), pointer :: physgrid   ! Pointer to new physgrid
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
 
 !     Initialize pointers
       nullify(physgrid)
       nullify(ESMF_PhysGridCreateNew%ptr)
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
-        rcpresent=.TRUE.
+        rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
 
@@ -446,16 +448,18 @@
 !EOP
 
       type(ESMF_PhysGridType), pointer :: physgrid   ! Pointer to new physgrid
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
 
 !     Initialize pointers
       nullify(physgrid)
       nullify(ESMF_PhysGridCreateInternal%ptr)
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
-        rcpresent=.TRUE.
+        rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
 
@@ -549,14 +553,16 @@
 !EOP
 
       type(ESMF_PhysGridType), pointer :: physgrid   ! Pointer to new physgrid
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
 
 !     Initialize pointers
       nullify(physgrid)
       nullify(ESMF_PhysGridCreateSpecd%ptr)
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -611,10 +617,16 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
 
-      if (present(rc)) rcpresent = .TRUE.
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
 
       call ESMF_PhysGridDestruct(physgrid%ptr, status)
 
@@ -656,11 +668,13 @@
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      integer :: status=ESMF_SUCCESS               ! Error status
-      logical :: rcpresent=.FALSE.                 ! Return code present
+      integer :: status                            ! Error status
+      logical :: rcpresent                         ! Return code present
       integer :: i
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -774,10 +788,12 @@
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -872,11 +888,13 @@
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
       integer :: i
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -932,11 +950,13 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
       integer :: i
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -1053,10 +1073,12 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -1096,7 +1118,7 @@
          global_max = physgrid%global_max
       endif
 
-      if(rcpresent) rc = status
+      if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridGet
 
@@ -1171,10 +1193,12 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -1214,76 +1238,9 @@
          physgrid%global_max = global_max
       endif
 
-      if(rcpresent) rc = status
+      if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridSet
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_PhysGridGetConfig - Get configuration information from a PhysGrid
-
-! !INTERFACE:
-      subroutine ESMF_PhysGridGetConfig(physgrid, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid
-      integer, intent(out) :: config   
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     Returns the set of resources the {\tt ESMF\_PhysGrid} object was configured with.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[physgrid] 
-!          Class to be queried.
-!     \item[config]
-!          Configuration information.         
-!     \item[[rc]] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-!
-!  code goes here
-!
-      end subroutine ESMF_PhysGridGetConfig
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_PhysGridSetConfig - Set configuration information for a PhysGrid
-
-! !INTERFACE:
-      subroutine ESMF_PhysGridSetConfig(physgrid, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid
-      integer, intent(in) :: config   
-      integer, intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!     Configures the {\tt ESMF\_PhysGrid} object with set of resources given.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[physgrid] 
-!          Class to be configured.
-!     \item[config]
-!          Configuration information.         
-!     \item[[rc]] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-!
-!  code goes here
-!
-      end subroutine ESMF_PhysGridSetConfig
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1332,10 +1289,12 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -1406,10 +1365,12 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -1487,17 +1448,19 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status=ESMF_SUCCESS              ! Error status
+      integer :: status                           ! Error status
       integer :: i                                ! local counter
       integer :: global_n1, global_n2             ! counters
       integer :: local_n1, local_n2               ! counters
       integer :: l1, l2
-      logical :: rcpresent=.FALSE.                ! Return code present
+      logical :: rcpresent                        ! Return code present
       real(selected_real_kind(6,45)), dimension(:,:,:), pointer :: temp
       type(ESMF_LocalArray) :: array_temp
       
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -1509,59 +1472,116 @@
         return
       endif
 
+      l1 = (global_nmax1 - global_nmin1) + 1
+      l2 = (global_nmax2 - global_nmin2) + 1
+      allocate(temp(2,l1,l2))    ! TODO: hardcoded for dim=2 for now
+
 !     Loop over number of coordinate location specifiers
       do i = 1,ncoord_locs
 
-!     For now, a case construct for the different coordinate locations
+        nullify(temp)
+
+!       For now, a case construct for the different coordinate locations
         select case (coord_loc(i))
+
         case (ESMF_CellLoc_Unknown)
           status = ESMF_FAILURE
+
         case (ESMF_CellLoc_Center_X)
-          l1 = global_nmax1 - global_nmin1 + 1
-          l2 = global_nmax2 - global_nmin2 + 1
-          allocate(temp(l1,l2,2))  ! TODO local sizing
           do global_n1 = global_nmin1,global_nmax1
-            local_n1 = global_n1 - global_nmin1 + 1
+            local_n1 = (global_n1 - global_nmin1) + 1
             do global_n2 = global_nmin2,global_nmax2
-              local_n2 = global_n2 - global_nmin2 + 1
-              temp(local_n1,local_n2,1) = &
-                           delta1*0.5*real(global_n1+global_n1-1)
+              local_n2 = (global_n2 - global_nmin2) + 1
+              temp(1,local_n1,local_n2) = delta1*0.5*real(global_n1+global_n1-1)
             enddo
           enddo
           array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
-          physgrid%center_coord = array_temp 
-!         nullify(temp)
-!         deallocate(temp)    ! TODO: figure out how to load one array
+          physgrid%center_coord = array_temp
+
         case (ESMF_CellLoc_Center_Y)
           do global_n2 = global_nmin2,global_nmax2
-            local_n2 = global_n2 - global_nmin2 + 1
+            local_n2 = (global_n2 - global_nmin2) + 1
             do global_n1 = global_nmin1,global_nmax1
-              local_n1 = global_n1 - global_nmin1 + 1
-              temp(local_n1,local_n2,2) = &
-                           delta2*0.5*real(global_n2+global_n2-1)
+              local_n1 = (global_n1 - global_nmin1) + 1
+              temp(2,local_n1,local_n2) = delta2*0.5*real(global_n2+global_n2-1)
             enddo
           enddo
           array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
-          physgrid%center_coord = array_temp 
-          nullify(temp)
-!         deallocate(temp)
+          physgrid%center_coord = array_temp
+
         case (ESMF_CellLoc_Corner_X)
-!          corner_coord1()=
-        case (ESMF_CellLoc_Corner_Y)
-!          corner_coord2()=
-        case (ESMF_CellLoc_Face_X)
-!          face_coord1()=
-        case (ESMF_CellLoc_Face_Y)
-!          face_coord2()=
+          do global_n1 = global_nmin1,global_nmax1
+            local_n1 = (global_n1 - global_nmin1) + 1
+            do global_n2 = global_nmin2,global_nmax2
+              local_n2 = (global_n2 - global_nmin2) + 1
+              temp(1,local_n1,local_n2) = delta1*real(global_n1)
+            enddo
+          enddo
+          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
+          physgrid%corner_coord = array_temp
+
+  !      case (ESMF_CellLoc_Corner_Y)
+  !        do global_n2 = global_nmin2,global_nmax2
+  !          local_n2 = (global_n2 - global_nmin2) + 1
+  !          do global_n1 = global_nmin1,global_nmax1
+  !            local_n1 = (global_n1 - global_nmin1) + 1
+  !            temp(2,local_n1,local_n2) = delta2*real(global_n2)
+  !          enddo
+  !        enddo
+  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
+  !        physgrid%corner_coord = array_temp
+
+  !      case (ESMF_CellLoc_NFace_X)
+  !        do global_n1 = global_nmin1,global_nmax1
+  !          local_n1 = (global_n1 - global_nmin1) + 1
+  !          do global_n2 = global_nmin2,global_nmax2
+  !            local_n2 = (global_n2 - global_nmin2) + 1
+  !            temp(1,local_n1,local_n2) = delta1*0.5*real(global_n1+global_n1-1)
+  !          enddo
+  !        enddo
+  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
+  !        physgrid%nface_coord = array_temp
+
+  !      case (ESMF_CellLoc_NFace_Y)
+  !        do global_n2 = global_nmin2,global_nmax2
+  !          local_n2 = (global_n2 - global_nmin2) + 1
+  !          do global_n1 = global_nmin1,global_nmax1
+  !            local_n1 = (global_n1 - global_nmin1) + 1
+  !            temp(2,local_n1,local_n2) = delta2*real(global_n2)
+  !          enddo
+  !        enddo
+  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
+  !        physgrid%nface_coord = array_temp
+
+  !      case (ESMF_CellLoc_EFace_X)
+  !        do global_n1 = global_nmin1,global_nmax1
+  !          local_n1 = (global_n1 - global_nmin1) + 1
+  !          do global_n2 = global_nmin2,global_nmax2
+  !            local_n2 = (global_n2 - global_nmin2) + 1
+  !            temp(1,local_n1,local_n2) = delta1*real(global_n1)
+  !          enddo
+  !        enddo
+  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
+  !        physgrid%eface_coord = array_temp
+
+  !      case (ESMF_CellLoc_EFace_Y)
+  !        do global_n2 = global_nmin2,global_nmax2
+  !          local_n2 = (global_n2 - global_nmin2) + 1
+  !          do global_n1 = global_nmin1,global_nmax1
+  !            local_n1 = (global_n1 - global_nmin1) + 1
+  !            temp(2,local_n1,local_n2) = delta2*0.5*real(global_n2+global_n2-1)
+  !          enddo
+  !        enddo
+  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
+  !        physgrid%eface_coord = array_temp
+
         end select
 
       enddo
 
+      deallocate(temp)    ! TODO: figure out how to load one array
+
 !     call ESMF_LocalArrayPrint(physgrid%center_coord1, "foo", rc)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_PhysGridSetCoordInternal: TODO"
-        return
-      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1610,10 +1630,12 @@
 ! !REQUIREMENTS: 
 
       integer :: i
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
 
 !     Initialize return code
+      status = ESMF_SUCCESS
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -1694,12 +1716,14 @@
 ! !REQUIREMENTS: 
 
       integer :: i, n
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
       type(ESMF_LocalArray), dimension(:), allocatable, target :: temp_metrics
                                              ! temporary array of metrics
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -1786,10 +1810,12 @@
 ! !REQUIREMENTS: 
 
       integer :: i
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
 
 !     Initialize return code
+      status = ESMF_SUCCESS
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -1869,12 +1895,14 @@
 ! !REQUIREMENTS: 
 
       integer :: i, n
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
       type(ESMF_LocalArray), dimension(:), allocatable, target :: temp_lmask
                                              ! temporary array of lmasks
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -1961,10 +1989,12 @@
 ! !REQUIREMENTS: 
 
       integer :: i
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
 
 !     Initialize return code
+      status = ESMF_SUCCESS
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -2044,12 +2074,14 @@
 ! !REQUIREMENTS: 
 
       integer :: i, n
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
       type(ESMF_LocalArray), dimension(:), allocatable, target :: temp_mmask
                                              ! temporary array of mmasks
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -2131,10 +2163,12 @@
 ! !REQUIREMENTS: 
 
       integer :: i
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -2145,7 +2179,7 @@
          region_names(i) = physgrid%region_id_names(i)
       end do
 
-      if(rcpresent) rc = status
+      if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridGetRegionID
 
@@ -2190,10 +2224,12 @@
 ! !REQUIREMENTS: 
 
       integer :: n
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
