@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.20 2004/06/14 17:57:39 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.21 2004/06/15 11:50:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.20 2004/06/14 17:57:39 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.21 2004/06/15 11:50:34 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -658,11 +658,11 @@
       !Commented out because it crashes
       ! Bug Report 972679 opened
       ! Test State Validation
-      !call ESMF_StateValidate(state1, rc=rc)
-      !write(failMsg, *) "Should not return ESMF_SUCCESS"
-      !write(name, *) "Validating a State Test"
-      !call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_StateValidate(state1, rc=rc)
+      write(failMsg, *) "Should not return ESMF_SUCCESS"
+      write(name, *) "Validating a State Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -684,12 +684,12 @@
       !Commented out because it crashes
       ! Bug Report 969163 opened
       ! Test Destruction of a destroyed State
-      !write(failMsg, *) ""
-      !write(name, *) "Destruction of a destroyed State Test"
-      !call  ESMF_StateDestroy(state1, rc)
-      !call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
+      write(failMsg, *) ""
+      write(name, *) "Destruction of a destroyed State Test"
+      call  ESMF_StateDestroy(state1, rc)
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "rc = ", rc
 
 #endif
 
