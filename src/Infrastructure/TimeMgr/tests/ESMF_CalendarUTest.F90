@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.29 2004/06/17 21:18:06 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.30 2004/08/09 19:51:00 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.29 2004/06/17 21:18:06 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.30 2004/08/09 19:51:00 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -807,7 +807,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting the Stop Time for the Julian Day Calencar
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Stop Time at upper limit of Julian Day Calendar Test"
