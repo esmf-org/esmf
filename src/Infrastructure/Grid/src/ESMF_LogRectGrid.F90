@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.86 2004/06/21 23:32:04 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.87 2004/06/23 16:25:50 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.86 2004/06/21 23:32:04 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.87 2004/06/23 16:25:50 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -393,7 +393,8 @@
 !     pointer to the new {\tt ESMF\_Grid}.  This routine creates an
 !     {\tt ESMF\_Grid} with the following parameters:
 !             logically rectangular;
-!             uniformly spaced;
+!             uniformly spaced coordinates (the distance between any 
+!                   two consecutive grid points is equal);
 !             horizontal spherical coordinate system.
 !     This routine generates {\tt ESMF\_Grid} coordinates from either of two
 !     optional sets of arguments:
@@ -642,7 +643,8 @@
 !     pointer to the new {\tt ESMF\_Grid}.  This routine creates an
 !     {\tt ESMF\_Grid} with the following parameters:
 !             logically rectangular;
-!             uniformly spaced;
+!             uniformly spaced coordinates (the distance between any 
+!                   two consecutive grid points is equal);
 !             horizontal cartesian coordinate system.
 !     This routine generates {\tt ESMF\_Grid} coordinates from either of two
 !     optional sets of arguments:
