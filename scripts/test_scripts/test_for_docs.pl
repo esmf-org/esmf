@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# $Id: test_for_docs.pl,v 1.2 2003/06/25 20:56:25 flanigan Exp $
+# $Id: test_for_docs.pl,v 1.3 2003/10/08 19:36:49 svasquez Exp $
 #
 # test_for_docs.pl
 # 
@@ -58,8 +58,6 @@ sub GetNewDocs($);
 		  "Component_refdoc",
 		  "Config_refdoc",
 		  "Config_reqdoc",
-		  "Data_refdoc",
-		  "Demo_usrdoc",
 		  "DistGrid_desdoc",
 		  "DistGrid_refdoc",
 		  "DistGrid_reqdoc",
