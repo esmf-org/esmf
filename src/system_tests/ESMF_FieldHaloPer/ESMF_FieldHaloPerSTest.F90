@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.19 2004/04/19 17:06:41 jwolfe Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.20 2004/04/19 20:31:30 jwolfe Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -710,15 +710,14 @@
       nx = ncount(1)
       ny = ncount(2)
       if (rc .ne. ESMF_SUCCESS) goto 40
-      !call ESMF_newDELayoutGetDEPosition(layout, xpos, ypos, rc)
       call ESMF_newDELayoutGetDE(layout, de_id, coord=pos, rc=rc)
       xpos = pos(1)
       ypos = pos(2)
       if (rc .ne. ESMF_SUCCESS) goto 40
      
       ! for the calculations below we need the first xpos=0, not 1
-      ! xpos = xpos - 1     TODO:  need to figure this out once and for all -- newDE
-      ! ypos = ypos - 1
+      xpos = xpos - 1
+      ypos = ypos - 1
 
 
       !!

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.22 2004/04/16 23:06:55 jwolfe Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.23 2004/04/19 20:30:52 jwolfe Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -453,12 +453,12 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
       nx = nDE(1)
       ny = nDE(2)
-      write(*,*) 'nx, ny = ',nx,ny
+      write(*,*) 'nx, ny = ', nx, ny
       call ESMF_newDELayoutGetDE(delayout, de_id, coord=myDE, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      xpos = myDE(1) + 1   ! TODO: fix in delayout code instead
-      ypos = myDE(2) + 1
-      write(*,*) 'xpos, ypos = ',xpos,ypos
+      xpos = myDE(1)
+      ypos = myDE(2)
+      write(*,*) 'xpos, ypos = ', xpos, ypos
    
       mismatch = 0
 
