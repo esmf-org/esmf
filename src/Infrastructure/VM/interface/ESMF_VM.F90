@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.2 2004/02/27 16:51:53 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.3 2004/02/27 21:02:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -122,7 +122,92 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.2 2004/02/27 16:51:53 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.3 2004/02/27 21:02:37 theurich Exp $'
+
+!==============================================================================
+
+!==============================================================================
+! 
+! INTERFACE BLOCKS
+!
+!==============================================================================
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_VMSend -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMSend
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMSendI4
+      module procedure ESMF_VMSendR4
+      module procedure ESMF_VMSendR8
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMSend} functions.   
+!EOP 
+      end interface
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_VMScatter -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMRecv
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMRecvI4
+      module procedure ESMF_VMRecvR4
+      module procedure ESMF_VMRecvR8
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMRecv} functions.   
+!EOP 
+      end interface
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_VMScatter -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMScatter
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMScatterI4
+      module procedure ESMF_VMScatterR4
+      module procedure ESMF_VMScatterR8
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMScatter} functions.   
+!EOP 
+      end interface
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_VMGather-- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMGather
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMGatherI4
+      module procedure ESMF_VMGatherR4
+      module procedure ESMF_VMGatherR8
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMGather} functions.   
+!EOP 
+      end interface
+
 
 !==============================================================================
       
@@ -516,20 +601,20 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMSend - VM wide send
+! !IROUTINE: ESMF_VMSendI4 - VM wide send
 
 ! !INTERFACE:
-  subroutine ESMF_VMSend(vm, message, len, dest, rc)
+  subroutine ESMF_VMSendI4(vm, message, len, dest, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM), intent(in)            :: vm
-    integer,       intent(in)            :: message(:)  
-    integer,       intent(in)            :: len
-    integer,       intent(in)            :: dest
-    integer,       intent(out), optional :: rc           
+    type(ESMF_VM),         intent(in)            :: vm
+    integer(ESMF_KIND_I4), intent(in)            :: message(:)  
+    integer,               intent(in)            :: len
+    integer,               intent(in)            :: dest
+    integer,               intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   VM wide send
+!   VM wide send for ESMF_KIND_I4
 !
 !   The arguments are:
 !   \begin{description}
@@ -560,7 +645,7 @@ module ESMF_VMMod
       rc = ESMF_FAILURE
     endif
 
-    size = len*4
+    size = len * 4 ! 4 bytes
     call c_ESMC_VMSend(vm, message, size, dest, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMSend error"
@@ -570,26 +655,146 @@ module ESMF_VMMod
     ! Set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_VMSend
+  end subroutine ESMF_VMSendI4
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMRecv - VM wide receive
+! !IROUTINE: ESMF_VMSendR4 - VM wide send
 
 ! !INTERFACE:
-  subroutine ESMF_VMRecv(vm, message, len, source, rc)
+  subroutine ESMF_VMSendR4(vm, message, len, dest, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM), intent(in)            :: vm
-    integer,       intent(in)            :: message(:)  
-    integer,       intent(in)            :: len
-    integer,       intent(in)            :: source
-    integer,       intent(out), optional :: rc           
+    type(ESMF_VM),      intent(in)            :: vm
+    real(ESMF_KIND_R4), intent(in)            :: message(:)  
+    integer,            intent(in)            :: len
+    integer,            intent(in)            :: dest
+    integer,            intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   VM wide receive
+!   VM wide send for ESMF_KIND_R4
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        VM object.
+!   \item[message] 
+!        Array holing message data.
+!   \item[len] 
+!        Number of elements in message
+!   \item[dest] 
+!        Destination PET
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: status                     ! local error status
+    logical :: rcpresent
+    integer :: size
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    size = len * 4 ! 4 bytes
+    call c_ESMC_VMSend(vm, message, size, dest, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_VMSend error"
+      return
+    endif
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_VMSendR4
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_VMSendR8 - VM wide send
+
+! !INTERFACE:
+  subroutine ESMF_VMSendR8(vm, message, len, dest, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),      intent(in)            :: vm
+    real(ESMF_KIND_R8), intent(in)            :: message(:)  
+    integer,            intent(in)            :: len
+    integer,            intent(in)            :: dest
+    integer,            intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!   VM wide send for ESMF_KIND_R8
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        VM object.
+!   \item[message] 
+!        Array holing message data.
+!   \item[len] 
+!        Number of elements in message
+!   \item[dest] 
+!        Destination PET
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: status                     ! local error status
+    logical :: rcpresent
+    integer :: size
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    size = len * 8 ! 8 bytes
+    call c_ESMC_VMSend(vm, message, size, dest, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_VMSend error"
+      return
+    endif
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_VMSendR8
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_VMRecvI4 - VM wide receive
+
+! !INTERFACE:
+  subroutine ESMF_VMRecvI4(vm, message, len, source, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),         intent(in)            :: vm
+    integer(ESMF_KIND_I4), intent(in)            :: message(:)  
+    integer,               intent(in)            :: len
+    integer,               intent(in)            :: source
+    integer,               intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!   VM wide receive for ESMF_KIND_I4
 !
 !   The arguments are:
 !   \begin{description}
@@ -620,7 +825,7 @@ module ESMF_VMMod
       rc = ESMF_FAILURE
     endif
 
-    size = len*4
+    size = len * 4 ! 4 bytes
     call c_ESMC_VMRecv(vm, message, size, source, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMSend error"
@@ -630,26 +835,147 @@ module ESMF_VMMod
     ! Set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_VMRecv
+  end subroutine ESMF_VMRecvI4
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMScatter - MPI-like VM wide Scatter
+! !IROUTINE: ESMF_VMRecvR4 - VM wide receive
 
 ! !INTERFACE:
-  subroutine ESMF_VMScatter(vm, input, output, len, root, rc)
+  subroutine ESMF_VMRecvR4(vm, message, len, source, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),      intent(in)            :: vm
+    real(ESMF_KIND_R4), intent(in)            :: message(:)  
+    integer,            intent(in)            :: len
+    integer,            intent(in)            :: source
+    integer,            intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!   VM wide receive for ESMF_KIND_R4
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        VM object
+!   \item[message] 
+!        Array holing message data
+!   \item[len] 
+!        Number of elements in message
+!   \item[source] 
+!        Source PET
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: status                     ! local error status
+    logical :: rcpresent
+    integer :: size
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    size = len * 4 ! 4 bytes
+    call c_ESMC_VMRecv(vm, message, size, source, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_VMSend error"
+      return
+    endif
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_VMRecvR4
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_VMRecvR8 - VM wide receive
+
+! !INTERFACE:
+  subroutine ESMF_VMRecvR8(vm, message, len, source, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),      intent(in)            :: vm
+    real(ESMF_KIND_R8), intent(in)            :: message(:)  
+    integer,            intent(in)            :: len
+    integer,            intent(in)            :: source
+    integer,            intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!   VM wide receive for ESMF_KIND_R8
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        VM object
+!   \item[message] 
+!        Array holing message data
+!   \item[len] 
+!        Number of elements in message
+!   \item[source] 
+!        Source PET
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: status                     ! local error status
+    logical :: rcpresent
+    integer :: size
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    size = len * 4 ! 4 bytes
+    call c_ESMC_VMRecv(vm, message, size, source, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_VMSend error"
+      return
+    endif
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_VMRecvR8
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_VMScatterI4 - MPI-like VM wide Scatter
+
+! !INTERFACE:
+  subroutine ESMF_VMScatterI4(vm, input, output, len, root, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM), intent(in)               :: vm
-    integer, intent(in)                     :: input(:), len, root
-    integer, intent(out)                    :: output(:)
+    integer(ESMF_KIND_I4), intent(in)      :: input(:)
+    integer(ESMF_KIND_I4), intent(out)     :: output(:)
+    integer, intent(in)                     :: len, root
     integer, intent(out), optional          :: rc
 !         
 !
 ! !DESCRIPTION:
-!   MPI-like VM wide Scatter
+!   MPI-like VM wide Scatter for ESMF_KIND_I4
 !
 !   The arguments are:
 !   \begin{description}
@@ -683,7 +1009,7 @@ module ESMF_VMMod
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    size = len*4
+    size = len * 4 ! 4 bytes
     call c_ESMC_VMScatter(vm, input, output, size, root, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMScatter error"
@@ -693,26 +1019,155 @@ module ESMF_VMMod
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_VMScatter
+  end subroutine ESMF_VMScatterI4
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMGather - MPI-like VM wide Gather
+! !IROUTINE: ESMF_VMScatterR4 - MPI-like VM wide Scatter
 
 ! !INTERFACE:
-  subroutine ESMF_VMGather(vm, input, output, len, root, rc)
+  subroutine ESMF_VMScatterR4(vm, input, output, len, root, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM), intent(in)               :: vm
-    integer, intent(in)                     :: input(:), len, root
-    integer, intent(out)                    :: output(:)
+    real(ESMF_KIND_R4), intent(in)          :: input(:)
+    real(ESMF_KIND_R4), intent(out)         :: output(:)
+    integer, intent(in)                     :: len, root
     integer, intent(out), optional          :: rc
 !         
 !
 ! !DESCRIPTION:
-!   MPI-like VM wide Gather
+!   MPI-like VM wide Scatter for ESMF_KIND_R4
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        VM object.
+!   \item[input] 
+!        Array holing input data
+!   \item[output] 
+!        Array holing output data
+!   \item[len] 
+!        Number of elements send to each PET
+!   \item[root] 
+!        Root PET id
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: status                 ! local error status
+    logical :: rcpresent
+    integer :: size
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Routine which interfaces to the C++ creation routine.
+    size = len * 4 ! 4 bytes
+    call c_ESMC_VMScatter(vm, input, output, size, root, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_VMScatter error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_VMScatterR4
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_VMScatterR8 - MPI-like VM wide Scatter
+
+! !INTERFACE:
+  subroutine ESMF_VMScatterR8(vm, input, output, len, root, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM), intent(in)               :: vm
+    real(ESMF_KIND_R8), intent(in)          :: input(:)
+    real(ESMF_KIND_R8), intent(out)         :: output(:)
+    integer, intent(in)                     :: len, root
+    integer, intent(out), optional          :: rc
+!         
+!
+! !DESCRIPTION:
+!   MPI-like VM wide Scatter for ESMF_KIND_R8
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        VM object.
+!   \item[input] 
+!        Array holing input data
+!   \item[output] 
+!        Array holing output data
+!   \item[len] 
+!        Number of elements send to each PET
+!   \item[root] 
+!        Root PET id
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: status                 ! local error status
+    logical :: rcpresent
+    integer :: size
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Routine which interfaces to the C++ creation routine.
+    size = len * 8 ! 8 bytes
+    call c_ESMC_VMScatter(vm, input, output, size, root, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_VMScatter error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_VMScatterR8
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_VMGatherI4 - MPI-like VM wide Gather
+
+! !INTERFACE:
+  subroutine ESMF_VMGatherI4(vm, input, output, len, root, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM), intent(in)               :: vm
+    integer(ESMF_KIND_I4), intent(in)       :: input(:)
+    integer(ESMF_KIND_I4), intent(out)      :: output(:)
+    integer, intent(in)                     :: len, root
+    integer, intent(out), optional          :: rc
+!         
+!
+! !DESCRIPTION:
+!   MPI-like VM wide Gather for ESMF_KIND_I4
 !
 !   The arguments are:
 !   \begin{description}
@@ -746,7 +1201,7 @@ module ESMF_VMMod
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    size = len*4
+    size = len * 4 ! 4 bytes
     call c_ESMC_VMGather(vm, input, output, size, root, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMGather error"
@@ -756,7 +1211,135 @@ module ESMF_VMMod
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_VMGather
+  end subroutine ESMF_VMGatherI4
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_VMGatherR4 - MPI-like VM wide Gather
+
+! !INTERFACE:
+  subroutine ESMF_VMGatherR4(vm, input, output, len, root, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM), intent(in)               :: vm
+    real(ESMF_KIND_R4), intent(in)          :: input(:)
+    real(ESMF_KIND_R4), intent(out)         :: output(:)
+    integer, intent(in)                     :: len, root
+    integer, intent(out), optional          :: rc
+!         
+!
+! !DESCRIPTION:
+!   MPI-like VM wide Gather for ESMF_KIND_R4
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        VM object.
+!   \item[input] 
+!        Array holing input data
+!   \item[output] 
+!        Array holing output data
+!   \item[len] 
+!        Number of elements received from each PET
+!   \item[root] 
+!        Root PET id
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: status                 ! local error status
+    logical :: rcpresent
+    integer :: size
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Routine which interfaces to the C++ creation routine.
+    size = len * 4 ! 4 bytes
+    call c_ESMC_VMGather(vm, input, output, size, root, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_VMGather error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_VMGatherR4
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_VMGatherR8 - MPI-like VM wide Gather
+
+! !INTERFACE:
+  subroutine ESMF_VMGatherR8(vm, input, output, len, root, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM), intent(in)               :: vm
+    real(ESMF_KIND_R8), intent(in)          :: input(:)
+    real(ESMF_KIND_R8), intent(out)         :: output(:)
+    integer, intent(in)                     :: len, root
+    integer, intent(out), optional          :: rc
+!         
+!
+! !DESCRIPTION:
+!   MPI-like VM wide Gather for ESMF_KIND_R8
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        VM object.
+!   \item[input] 
+!        Array holing input data
+!   \item[output] 
+!        Array holing output data
+!   \item[len] 
+!        Number of elements received from each PET
+!   \item[root] 
+!        Root PET id
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: status                 ! local error status
+    logical :: rcpresent
+    integer :: size
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Routine which interfaces to the C++ creation routine.
+    size = len * 8 ! 8 bytes
+    call c_ESMC_VMGather(vm, input, output, size, root, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_VMGather error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_VMGatherR8
 !------------------------------------------------------------------------------
 
 
