@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.30 2003/08/01 16:35:48 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.31 2003/08/28 16:36:36 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.30 2003/08/01 16:35:48 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.31 2003/08/28 16:36:36 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -653,10 +653,13 @@
 ! !REQUIREMENTS:
 
 !       Local variables.
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status        ! local error status
+        logical :: rcpresent     ! did user specify rc?
 
 !       initialize return code; assume failure until success is certain
+        rcpresent = .FALSE.
+        status = ESMF_FAILURE
+
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
