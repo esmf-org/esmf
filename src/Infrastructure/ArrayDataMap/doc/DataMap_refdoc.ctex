@@ -1,4 +1,4 @@
-% $Id: DataMap_refdoc.ctex,v 1.1 2004/05/03 16:12:41 nscollins Exp $
+% $Id: DataMap_refdoc.ctex,v 1.2 2004/05/11 12:14:21 nscollins Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -73,28 +73,28 @@
 #ifdef STANDALONE
 \input{DataMap_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DataMap/doc/DataMap_desc}
+\input{../Infrastructure/ArrayDataMap/doc/ArrayDataMap_desc}
 #endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{DataMap_usage}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DataMap/doc/DataMap_usage}
+\input{../Infrastructure/ArrayDataMap/doc/ArrayDataMap_usage}
 #endif
 
 %\subsubsection{Restrictions and Future Work}
 #ifdef STANDALONE
 %\input{DataMap_rest}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/DataMap/doc/DataMap_rest}
+%\input{../Infrastructure/ArrayDataMap/doc/ArrayDataMap_rest}
 #endif
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{../../DataMap/doc/ESMF_DataMap_fapi}
+\input{../../ArrayDataMap/doc/ESMF_ArrayDataMap_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DataMap/doc/ESMF_DataMap_fapi}
+\input{../Infrastructure/ArrayDataMap/doc/ESMF_ArrayDataMap_fapi}
 #endif
 
 %#ifdef STANDALONE
