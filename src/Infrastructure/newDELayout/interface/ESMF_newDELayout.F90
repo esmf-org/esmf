@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.10 2004/03/23 18:51:22 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.11 2004/03/24 16:38:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -113,7 +113,6 @@
       
       public ESMF_newDELayoutGet
       public ESMF_newDELayoutGetDE
-      public ESMF_newDELayoutMyDE
       
       public ESMF_newDELayoutPrint
       
@@ -130,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.10 2004/03/23 18:51:22 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.11 2004/03/24 16:38:28 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -198,7 +197,6 @@
       end interface
 
 !==============================================================================
-
 
 
 contains
@@ -510,59 +508,6 @@ contains
     if (rcpresent) rc = ESMF_SUCCESS
 
   end subroutine ESMF_newDELayoutGetDE
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_newDELayoutMyDE - Inquire whether this is one of PET's DEs
-
-! !INTERFACE:
-  function ESMF_newDELayoutMyDE(layout, DE, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_newDELayout), intent(in)      :: layout
-    integer, intent(in)                     :: DE
-    integer, intent(out), optional          :: rc
-!         
-! !RETURN VALUE:
-      type(ESMF_Logical) :: ESMF_newDELayoutMyDE
-!
-! !DESCRIPTION:
-!     Inquire whether this is one of PET's DEs
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-    type(ESMF_Logical) :: value
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutMyDE(layout, DE, value, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "ESMF_newDELayoutMyDE error"
-      return
-    endif
-
-    ! set return error status
-    ESMF_newDELayoutMyDE = value
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end function ESMF_newDELayoutMyDE
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
