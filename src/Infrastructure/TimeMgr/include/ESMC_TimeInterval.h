@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.33 2004/04/20 23:22:19 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.34 2004/04/21 21:39:40 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -69,6 +69,9 @@ class ESMC_TimeInterval;
  #include <ESMC_BaseTime.h>       // inherited BaseTime class
  #include <ESMC_Time.h>
 
+enum ESMC_ComparisonType {ESMC_EQ, ESMC_NE,
+                          ESMC_LT, ESMC_GT,
+                          ESMC_LE, ESMC_GE};
 // !PUBLIC TYPES:
  class ESMC_TimeInterval;
 
@@ -237,6 +240,11 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
   private:
     // return in string format (TMG 1.5.9)
     int ESMC_TimeIntervalGetString(char *timeString) const;
+
+    // common method for overloaded comparison operators
+    bool ESMC_TimeIntervalCompare(const ESMC_TimeInterval &,
+                                  const ESMC_TimeInterval &,
+                                  ESMC_ComparisonType) const;
 
     friend class ESMC_Calendar;
                                                         // (TMG 2.5.5)

@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.53 2004/04/20 23:22:16 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.54 2004/04/21 21:39:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.53 2004/04/20 23:22:16 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.54 2004/04/21 21:39:54 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1466,8 +1466,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(s == timeInterval.s);
-    // TODO: compare equal sN/sD fractions when sD differs
+    return(ESMC_TimeIntervalCompare(*this, timeInterval, ESMC_EQ));
 
 }  // end ESMC_TimeInterval::operator==
 
@@ -1493,8 +1492,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(s != timeInterval.s);
-    // TODO:  compare unequal fractions
+    return(ESMC_TimeIntervalCompare(*this, timeInterval, ESMC_NE));
 
 }  // end ESMC_TimeInterval::operator!=
 
@@ -1520,8 +1518,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(s < timeInterval.s);
-    // TODO:  compare fractions
+    return(ESMC_TimeIntervalCompare(*this, timeInterval, ESMC_LT));
 
 }  // end ESMC_TimeInterval::operator<
 
@@ -1547,8 +1544,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(s > timeInterval.s);
-    // TODO:  compare fractions
+    return(ESMC_TimeIntervalCompare(*this, timeInterval, ESMC_GT));
 
 }  // end ESMC_TimeInterval::operator>
 
@@ -1574,8 +1570,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(s <= timeInterval.s);
-    // TODO:  compare fractions
+    return(ESMC_TimeIntervalCompare(*this, timeInterval, ESMC_LE));
 
 }  // end ESMC_TimeInterval::operator<=
 
@@ -1601,10 +1596,230 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(s >= timeInterval.s);
-    // TODO:  compare fractions
+    return(ESMC_TimeIntervalCompare(*this, timeInterval, ESMC_GE));
 
 }  // end ESMC_TimeInterval::operator>=
+
+//-------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_TimeIntervalCompare - TimeInterval comparison common method
+//
+// !INTERFACE:
+      bool ESMC_TimeInterval::ESMC_TimeIntervalCompare(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval1,           // in - 1st to compare
+      const ESMC_TimeInterval &timeInterval2,           // in - 2nd to compare
+            ESMC_ComparisonType comparisonType) const { // in - operator type
+//
+// !DESCRIPTION:
+//      Captures common logic for comparing two time intervals
+//
+//EOPI
+// !REQUIREMENTS:  
+
+    // TODO: use function pointer table instead of switch to perform comparison
+    //       type?  or some other form of polymorphism ?
+
+    // calendars must be defined
+    if (timeInterval1.calendar == ESMC_NULL_POINTER ||
+        timeInterval2.calendar == ESMC_NULL_POINTER) {
+      // TODO: write LogErr message (timeInterval calendar undefined)
+      return(false);
+    }
+
+    // create local copies to manipulate and compare 
+    ESMC_TimeInterval ti1 = timeInterval1;
+    ESMC_TimeInterval ti2 = timeInterval2;
+
+    // Reduce both time interval's units to the smallest and least number
+    // of units possible
+    ti1.calendar->ESMC_CalendarIntervalMagnitude(ti1);
+    ti2.calendar->ESMC_CalendarIntervalMagnitude(ti2);
+
+    // if both absolute, simply compare baseTime seconds and return
+    if (ti1.yy == 0 && ti2.yy == 0 &&
+        ti1.mm == 0 && ti2.mm == 0 &&
+        ti1.d  == 0 && ti2.d  == 0) {
+      switch (comparisonType)
+      {
+        case ESMC_EQ:
+          return(ti1.ESMC_BaseTime::operator==(ti2));
+        case ESMC_NE:
+          return(ti1.ESMC_BaseTime::operator!=(ti2));
+        case ESMC_LT:
+          return(ti1.ESMC_BaseTime::operator<(ti2));
+        case ESMC_GT:
+          return(ti1.ESMC_BaseTime::operator>(ti2));
+        case ESMC_LE:
+          return(ti1.ESMC_BaseTime::operator<=(ti2));
+        case ESMC_GE:
+          return(ti1.ESMC_BaseTime::operator>=(ti2));
+      };
+    }
+
+    // calendars must be the same for relative comparison
+    // TODO: relax this restriction (e.g. 1 month Gregorian > 27 day 360-day)
+    if (ti1.calendar->calendarType != ti2.calendar->calendarType) {
+      // TODO: write LogErr message (timeInterval calendars not the same)
+      return(false);
+    }
+
+    // Perform relative comparisons based on calendar type
+    // TODO:  fractional seconds
+    switch (ti1.calendar->calendarType)  
+    {
+      case ESMC_CAL_GREGORIAN:
+      case ESMC_CAL_NOLEAP:
+        if (ti1.yy != 0 || ti2.yy != 0 ||
+            ti1.d  != 0 || ti2.d  != 0) {
+          // shouldn't be here - yy and d already reduced in Magnitude call
+          // above TODO: write LogErr message (internal error)
+          return(false);
+
+        // all relative case (yy (reduced to mm), mm, no seconds)
+        } else if (ti1.s == 0 && ti2.s == 0) { // TODO: fractions (sN == 0)
+          switch (comparisonType)
+          {
+            case ESMC_EQ:
+              return(ti1.mm == ti2.mm);
+            case ESMC_NE:
+              return(ti1.mm != ti2.mm);
+            case ESMC_LT:
+              return(ti1.mm < ti2.mm);
+            case ESMC_GT:
+              return(ti1.mm > ti2.mm);
+            case ESMC_LE:
+              return(ti1.mm <= ti2.mm);
+            case ESMC_GE:
+              return(ti1.mm >= ti2.mm);
+          };
+
+        // below here are mixed (relative, absolute) cases
+        } else if (((ti1.mm != 0 || ti1.s != 0) && ti2.mm == 0 && ti2.s == 0)
+                                                ||
+                   ((ti2.mm != 0 || ti2.s != 0) && ti1.mm == 0 && ti1.s == 0)) {
+          // ti1 non-zero and ti2 zero or vice versa
+          // TODO: sign analysis ?  can't do if mixed signs ?
+          switch (comparisonType)
+          {
+            case ESMC_EQ:
+              return(false);
+            case ESMC_NE:
+              return(true);
+            case ESMC_LT:
+              return(false);  // TODO:
+            case ESMC_GT:
+              return(false);  // TODO:
+            case ESMC_LE:
+              return(false);  // TODO:
+            case ESMC_GE:
+              return(false);  // TODO:
+          };
+
+        } else {
+          // TODO: write LogErr message (can't compare w/o time instant)
+          // TODO: can do if ti1.s and/or ti2.s < 28 days
+          return(false);
+        }
+        break;
+      case ESMC_CAL_360DAY:
+        // shouldn't be here - yy, mm, d already reduced in Magnitude call above
+        // TODO: write LogErr message (internal error)
+        return(false);
+        break;
+      case ESMC_CAL_JULIANDAY:
+        if (ti1.yy != 0 || ti2.yy != 0 ||
+            ti1.mm != 0 || ti2.mm != 0) {
+          // TODO: write LogErr message (years and months not defined!)
+          return(false);
+        }
+        if (ti1.d  != 0 || ti2.d  != 0) {
+          // shouldn't be here - days already reduced in Magnitude call above
+          // TODO: write LogErr message (internal error)
+          return(false);
+        }
+        break;
+      case ESMC_CAL_NOCALENDAR:
+        // can compare like units only
+        if ( (ti1.yy != 0 || ti2.yy != 0) &&
+              ti1.mm == 0 && ti2.mm == 0  &&
+              ti1.d  == 0 && ti2.d  == 0  &&
+              ti1.s  == 0 && ti2.s  == 0) {
+          // compare years only
+          switch (comparisonType)
+          {
+            case ESMC_EQ:
+              return(ti1.yy == ti2.yy);
+            case ESMC_NE:
+              return(ti1.yy != ti2.yy);
+            case ESMC_LT:
+              return(ti1.yy < ti2.yy);
+            case ESMC_GT:
+              return(ti1.yy > ti2.yy);
+            case ESMC_LE:
+              return(ti1.yy <= ti2.yy);
+            case ESMC_GE:
+              return(ti1.yy >= ti2.yy);
+           };
+        } else if ( ti1.yy == 0 && ti2.yy == 0  &&
+                   (ti1.mm != 0 || ti2.mm != 0) &&
+                    ti1.d  == 0 && ti2.d  == 0  &&
+                    ti1.s  == 0 && ti2.s  == 0) {
+          // compare months only
+          switch (comparisonType)
+          {
+            case ESMC_EQ:
+              return(ti1.mm == ti2.mm);
+            case ESMC_NE:
+              return(ti1.mm != ti2.mm);
+            case ESMC_LT:
+              return(ti1.mm < ti2.mm);
+            case ESMC_GT:
+              return(ti1.mm > ti2.mm);
+            case ESMC_LE:
+              return(ti1.mm <= ti2.mm);
+            case ESMC_GE:
+              return(ti1.mm >= ti2.mm);
+           };
+        } else if ( ti1.yy == 0 && ti2.yy == 0  &&
+                    ti1.mm == 0 && ti2.mm == 0  &&
+                   (ti1.d  != 0 || ti2.d  != 0) &&
+                    ti1.s  == 0 && ti2.s  == 0) {
+          // compare days only
+          switch (comparisonType)
+          {
+            case ESMC_EQ:
+              return(ti1.d == ti2.d);
+            case ESMC_NE:
+              return(ti1.d != ti2.d);
+            case ESMC_LT:
+              return(ti1.d < ti2.d);
+            case ESMC_GT:
+              return(ti1.d > ti2.d);
+            case ESMC_LE:
+              return(ti1.d <= ti2.d);
+            case ESMC_GE:
+              return(ti1.d >= ti2.d);
+           };
+        } else {
+          // TODO: write LogErr message (can't compare mixed units)
+          return(false);
+        }
+        break;
+      case ESMC_CAL_CUSTOM:
+        // TODO:
+        break;
+      default:
+        // TODO: write LogErr message (unknown calendar type)
+        return(false);
+        break;
+    };
+
+}  // end ESMC_TimeIntervalCompare
 
 //-------------------------------------------------------------------------
 //BOP
