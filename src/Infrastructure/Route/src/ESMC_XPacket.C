@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.45 2004/06/07 15:30:29 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.46 2004/06/08 13:14:14 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,6 +29,7 @@
 // for printf
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
  // associated class definition file
  #include <ESMC_XPacket.h>
 
@@ -36,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.45 2004/06/07 15:30:29 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.46 2004/06/08 13:14:14 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -180,6 +181,7 @@
 
     int rc = ESMF_FAILURE;
     int i;
+    char msgbuf[ESMF_MAXSTR];
 
     // check that the xpacket ranks are the same
     if (xpacket1->rank != xpacket2->rank) {
@@ -274,20 +276,12 @@
         }
       break;
       case 3:
-        {
-          printf("no code to handle xpacket rank %d yet\n", this->rank);
-        }
-      break;
       case 4:
-        {
-          printf("no code to handle xpacket rank %d yet\n", this->rank);
-        }
-      break;
       case 5:
-        {
-          printf("no code to handle xpacket rank %d yet\n", this->rank);
-        }
-      break;
+      default:
+        sprintf(msgbuf, "no code to handle xpacket rank %d yet\n", this->rank);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+        return (rc);
     } 
 
     // debug
@@ -332,6 +326,7 @@
     int i, j, nxp, nextxp;
     ESMC_XPacket *xps;
     int rc = ESMF_FAILURE;
+    char msgbuf[ESMF_MAXSTR];
 
     // switch based on array rank  TODO: is this necessary?
     switch (size_axisindex) {
@@ -494,10 +489,10 @@
       break;
 
       default:
-        {
-          printf("no code to handle %d AxisIndices yet\n", size_axisindex);
-        }
-      break;
+        sprintf(msgbuf, "no code to handle %d AxisIndices yet\n", size_axisindex);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+        return (rc);
+        break;
     } 
 
     rc = ESMF_SUCCESS;
@@ -533,14 +528,14 @@
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
     int rc = ESMF_FAILURE;
+    char msgbuf[ESMF_MAXSTR];
 
     // switch based on array rank  TODO: is this necessary?
     switch (rank) {
       case 1:
-        {
-          printf("no code to handle %d rank yet\n", rank);
-        }
-      break;
+        sprintf(msgbuf, "no code to handle %d rank yet\n", rank);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+        return (rc);
       case 2:
         {
           int my_stride = indexlist[0].max - indexlist[0].min + 1;
@@ -557,20 +552,12 @@
         }
       break;
       case 3:
-        {
-          printf("no code to handle %d rank yet\n", rank);
-        }
-      break;
       case 4:
-        {
-          printf("no code to handle %d rank yet\n", rank);
-        }
-      break;
       case 5:
-        {
-          printf("no code to handle %d rank yet\n", rank);
-        }
-      break;
+      default:
+        sprintf(msgbuf, "no code to handle %d rank yet\n", rank);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+        return (rc);
     } 
 
     rc = ESMF_SUCCESS;
@@ -602,16 +589,28 @@
 // !REQUIREMENTS:  
 
     int i;
+    char msgbuf[ESMF_MAXSTR];
+    char tempbuf[ESMF_MAXSTR];
 
-    printf("XPacket: rank=%d, offset=%d, contig_length=%d, ", rank, offset, contig_length);
+    sprintf(msgbuf, "XPacket: rank=%d, offset=%d, contig_length=%d, ", 
+                         rank, offset, contig_length);
  
-    printf("strides=(");
-    for (i=0; i<rank-1; i++) 
-      printf("%d,", stride[i]);
-    printf("%d), rep_count=(", stride[i]);
-    for (i=0; i<rank-1; i++) 
-      printf("%d,", rep_count[i]);
-    printf("%d)\n", rep_count[i]); 
+    sprintf(tempbuf,"strides=(");
+    strcpy(msgbuf, tempbuf);
+    for (i=0; i<rank-1; i++) {
+      sprintf(tempbuf,"%d,", stride[i]);
+      strcat(msgbuf, tempbuf);
+    }
+    sprintf(tempbuf,"%d), rep_count=(", stride[i]);
+    strcat(msgbuf, tempbuf);
+    for (i=0; i<rank-1; i++) {
+      sprintf(tempbuf,"%d,", rep_count[i]);
+      strcat(msgbuf, tempbuf);
+    }
+    sprintf(tempbuf,"%d)\n", rep_count[i]); 
+    strcat(msgbuf, tempbuf);
+    
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
 
     return ESMF_SUCCESS;
 

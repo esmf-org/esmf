@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.cpp,v 1.9 2004/06/08 09:27:18 nscollins Exp $
+! $Id: ESMF_LocalArray.cpp,v 1.10 2004/06/08 13:14:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -175,7 +175,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.cpp,v 1.9 2004/06/08 09:27:18 nscollins Exp $'
+      '$Id: ESMF_LocalArray.cpp,v 1.10 2004/06/08 13:14:06 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1885,14 +1885,19 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
         ! Basic sanity checks - slice dim is ok, sliced location exists, etc.
         if ((slicedim .lt. 1) .or. (slicedim .gt. rank)) then
-            print *, "ESMF_LocalArraySlice: slicedim value ", slicedim, &
-                                               " must be between 1 and ", rank
-            return
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Bad value for slicedim", &
+                                 ESMF_CONTEXT, rc)) return
+
+            ! "ESMF_LocalArraySlice: slicedim value ", slicedim, &
+            ! " must be between 1 and ", rank
         endif
         if ((sliceloc .lt. 1) .or. (sliceloc .gt. counts(rank))) then
-            print *, "ESMF_LocalArraySlice: sliceloc value ", sliceloc, &
-                                        " must be between 1 and ", counts(rank)
-            return
+           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Bad value for sliceloc", &
+                                 ESMF_CONTEXT, rc)) return
+            !"ESMF_LocalArraySlice: sliceloc value ", sliceloc, &
+            ! " must be between 1 and ", counts(rank)
         endif
 
         ! This slice will be rank < 1.  Remove the counts corresponding
@@ -2133,10 +2138,9 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
            !call c_ESMC_LocalArrayValidate(array, defaultopts, status) 
        endif
 
-       !if (status .ne. ESMF_SUCCESS) then
-       !  print *, "LocalArray validate error"
-       !  return
-       !endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
        ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS
@@ -2167,6 +2171,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
        character (len=6) :: defaultopts      ! default print options 
        integer :: status                     ! local error status
        logical :: rcpresent        
+       character(len=ESMF_MAXSTR) :: msgbuf
 
        ! Initialize return code; assume failure until success is certain
        status = ESMF_FAILURE
@@ -2177,8 +2182,10 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
        endif
 
        if (array%this .eq. ESMF_NULL_POINTER) then
-         print *, "LocalArray Print:"
-         print *, " Empty or Uninitialized Array"
+         print msgbuf, "LocalArray Print:"
+         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+         print msgbuf, " Empty or Uninitialized Array"
+         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
          if (present(rc)) rc = ESMF_SUCCESS
          return
        endif
@@ -2191,10 +2198,9 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
            call c_ESMC_LocalArrayPrint(array, defaultopts, status) 
        endif
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "LocalArray print error"
-         return
-       endif
+       if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
 !      set return values
        if (rcpresent) rc = ESMF_SUCCESS

@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.19 2004/06/07 15:30:28 nscollins Exp $
+// $Id: ESMC_RTable.C,v 1.20 2004/06/08 13:14:14 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_RTable.C,v 1.19 2004/06/07 15:30:28 nscollins Exp $";
+            "$Id: ESMC_RTable.C,v 1.20 2004/06/08 13:14:14 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -434,12 +434,15 @@
 
     int i, j,ixp;
     ESMC_XPacket *xptr;
+    char msgbuf[ESMF_MAXSTR];
 
-    printf(" entrycount=%d, my_deid=%d\n", entrycount, my_deid);
+    sprintf(msgbuf, " entrycount=%d, my_deid=%d\n", entrycount, my_deid);
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
    
     for(i=0; i<entrycount; i++) {
-        printf("%2d: deid=%2d, xpcount=%2d, xpaddr=0x%08lx\n",
+        sprintf(msgbuf, "%2d: deid=%2d, xpcount=%2d, xpaddr=0x%08lx\n",
                  i, entry[i].deid, entry[i].xpcount, (long int)(entry[i].xp)); 
+       ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
        for (j=0, xptr=&(entry[i].xp[0]); j<entry[i].xpcount; j++, xptr++)
           xptr->ESMC_XPacketPrint();
     }

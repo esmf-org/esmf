@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.10 2004/06/08 09:27:17 nscollins Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.11 2004/06/08 13:14:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.10 2004/06/08 09:27:17 nscollins Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.11 2004/06/08 13:14:49 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -263,11 +263,13 @@
 !EOP
 
         character (len = ESMF_MAXSTR) :: str
+        character (len = ESMF_MAXSTR) :: msgbuf
 
-        print *, "FieldDataMap print:"
+        print msgbuf, "FieldDataMap print:"
+        if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
         if (datamap%status .ne. ESMF_STATE_READY) then
-          print *, "Uninitialized or Invalid object"
-          if (present(rc)) rc = ESMF_FAILURE
+          print msgbuf, "Uninitialized or Invalid object"
+          if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
           return
         endif
 
@@ -275,12 +277,14 @@
         call ESMF_ArrayDataMapPrint(datamap%adm, options, rc)
 
         call ESMF_RelLocString(datamap%horzRelloc, str, rc)
-        print *, "  Horizontal Relative location = ", trim(str)
+        print msgbuf, "  Horizontal Relative location = ", trim(str)
+        if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
         call ESMF_RelLocString(datamap%vertRelloc, str, rc)
-        print *, "  Vertical Relative location = ", trim(str)
+        print msgbuf, "  Vertical Relative location = ", trim(str)
+        if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
         ! TODO: These are private now, they need a print routine.
         !call ESMF_InterleaveString(datamap%interleave%il_type, str, rc)
-        !print *, "  Interleave type = ", trim(str), &
+        !print msgbuf, "  Interleave type = ", trim(str), &
         !         ".  Interleave Start,end,stride = ",  &
         !         datamap%interleave%il_start, & 
         !         datamap%interleave%il_end, & 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.97 2004/06/07 15:30:28 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.98 2004/06/08 13:14:14 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.97 2004/06/07 15:30:28 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.98 2004/06/08 13:14:14 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1728,17 +1728,25 @@ static int maxroutes = 10;
 // !REQUIREMENTS:
 
     int rc;
+    char msgbuf[ESMF_MAXSTR];
 
-    printf("Route print:\n");
-    printf(" Routeid = %d\n", routeid);
-//    printf(" DELayout:\n");
+    sprintf(msgbuf,"Route print:\n");
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    sprintf(msgbuf," Routeid = %d\n", routeid);
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+//    sprintf(msgbuf," DELayout:\n");
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
 //    rc = layout->ESMC_DELayoutPrint(); // options);  // doesn't take opts yet
-    printf(" Send table:\n");
+    sprintf(msgbuf," Send table:\n");
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     rc = sendRT->ESMC_RTablePrint(options);
-    printf(" Recv table:\n");
+    sprintf(msgbuf," Recv table:\n");
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     rc = recvRT->ESMC_RTablePrint(options);
-    printf(" Recv items: %d\n", recvitems);
-    printf(" Comm table:\n");
+    sprintf(msgbuf," Recv items: %d\n", recvitems);
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    sprintf(msgbuf," Comm table:\n");
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     rc = ct->ESMC_CommTablePrint(options);
 
     return rc;
