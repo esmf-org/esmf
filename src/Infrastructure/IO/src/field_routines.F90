@@ -44,7 +44,7 @@ subroutine ext_ncd_RealFieldIO(IO,NCID,VarID,VStart,VCount,Data,Status)
   integer                     ,intent(in)    :: VarID
   integer ,dimension(NVarDims),intent(in)    :: VStart
   integer ,dimension(NVarDims),intent(in)    :: VCount
-  real                        ,intent(inout) :: Data
+  real, dimension(*)          ,intent(inout) :: Data
   integer                     ,intent(out)   :: Status
   integer                                    :: stat
 
@@ -61,7 +61,7 @@ subroutine ext_ncd_RealFieldIO(IO,NCID,VarID,VStart,VCount,Data,Status)
   return
 end subroutine ext_ncd_RealFieldIO
 
-subroutine ext_ncd_Real8FieldIO(IO,NCID,VarID,VStart,VCount,Data,Status)
+subroutine ext_ncd_DoubleFieldIO(IO,NCID,VarID,VStart,VCount,Data,Status)
   use wrf_data
   use ext_ncd_support_routines
   implicit none
@@ -87,7 +87,7 @@ subroutine ext_ncd_Real8FieldIO(IO,NCID,VarID,VStart,VCount,Data,Status)
     call wrf_debug ( WARN , msg)
   endif
   return
-end subroutine ext_ncd_Real8FieldIO
+end subroutine ext_ncd_DoubleFieldIO
 
 subroutine ext_ncd_IntFieldIO(IO,NCID,VarID,VStart,VCount,Data,Status)
   use wrf_data

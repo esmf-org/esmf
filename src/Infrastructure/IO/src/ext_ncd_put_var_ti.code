@@ -63,17 +63,17 @@
     return
   endif
   if(DH%FileStatus == WRF_FILE_NOT_OPENED) then
-    Status = WRF_ERR_WARN_FILE_NOT_OPENED
+    Status = WRF_WARN_FILE_NOT_OPENED  
     write(msg,*) &
 'Warning FILE NOT OPENED in ',__FILE__,' ',ROUTINE_TYPE,', line', __LINE__
     call wrf_debug ( WARN , msg)
   elseif(DH%FileStatus == WRF_FILE_OPENED_FOR_READ) then
-    Status = WRF_ERR_WARN_WRITE_RONLY_FILE
+    Status = WRF_WARN_WRITE_RONLY_FILE  
     write(msg,*) &
 'Warning WRITE READ ONLY FILE in ',__FILE__,' ',ROUTINE_TYPE,', line', __LINE__ 
     call wrf_debug ( WARN , msg)
   elseif(DH%FileStatus == WRF_FILE_OPENED_AND_COMMITTED) then
-    Status = WRF_ERR_WARN_MD_AFTER_OPEN
+    Status = WRF_WARN_MD_AFTER_OPEN  
     write(msg,*) &
 'Warning WRITE METADATA AFTER OPEN in ',__FILE__,' ',ROUTINE_TYPE,', line', __LINE__
     call wrf_debug ( WARN , msg)
@@ -83,7 +83,7 @@
       if(TRIM(DH%VarNames(NVar)) == TRIM(VarName)) then
         exit
       elseif(NVar == MaxVars) then
-        Status = WRF_ERR_WARN_VAR_NF
+        Status = WRF_WARN_VAR_NF 
         write(msg,*) &
 'Warning VARIABLE NOT FOUND in ',__FILE__,' ',ROUTINE_TYPE,', line', __LINE__ &
                         ,NVar,VarName
@@ -94,7 +94,7 @@
 #ifdef LOG
     allocate(Buffer(Count), STAT=stat)
     if(stat/= 0) then
-      Status = WRF_ERR_FATAL_ALLOCATION_ERROR
+      Status = WRF_ERR_FATAL_ALLOCATION_ERROR 
       write(msg,*) &
 'Fatal ALLOCATION ERROR in ',__FILE__,' ',ROUTINE_TYPE,', line', __LINE__
       call wrf_debug ( FATAL , msg)
@@ -127,7 +127,7 @@
 #ifdef LOG
     deallocate(Buffer, STAT=stat)
     if(stat/= 0) then
-      Status = WRF_ERR_FATAL_DEALLOCATION_ERR
+      Status = WRF_ERR_FATAL_DEALLOCATION_ERR 
       write(msg,*) &
 'Fatal DEALLOCATION ERROR in ',__FILE__,' ',ROUTINE_TYPE,', line', __LINE__
       call wrf_debug ( FATAL , msg)
@@ -135,7 +135,7 @@
     endif
 #endif
   else
-    Status = WRF_ERR_FATAL_BAD_FILE_STATUS
+    Status = WRF_ERR_FATAL_BAD_FILE_STATUS 
     write(msg,*) &
 'Fatal error BAD FILE STATUS in ',__FILE__,' ',ROUTINE_TYPE,', line', __LINE__ 
     call wrf_debug ( FATAL , msg)
