@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_st_results.pl,v 1.5 2005/02/08 23:35:39 svasquez Exp $
+# $Id: do_st_results.pl,v 1.6 2005/02/11 21:19:11 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 
@@ -204,6 +204,11 @@ getopts("d:b:", \%options);
                         # Get *Ex files
                         @st_x_files=grep (/STest/, @all_files);
 			@stdout_st_files = (); #Clear the file list.
+                        # Delete the .stdout from each file
+                        foreach ( @st_st_files) {
+                                s/\.stdout//; # Delete stdout
+                        }
+
                         # Find the system test executable files that are in the st_ex_files
                         foreach $file ( @st_st_files) {
                                         push @stdout_st_files, grep (/$file/, @st_x_files);
