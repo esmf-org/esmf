@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.11 2002/12/31 16:31:37 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.12 2002/12/31 17:08:34 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -181,7 +181,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.11 2002/12/31 16:31:37 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.12 2002/12/31 17:08:34 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -621,7 +621,7 @@
                                 covers_domain_dir2=.true., rc=status)
 
 !     Create layout with specified decomposition (assume 1 in 3rd direction)
-      call ESMF_LayoutCreate(nDE_i, nDE_j, 1, status)
+!     call ESMF_LayoutCreate(nDE_i, nDE_j, 1, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: Layout create"
         return
@@ -639,7 +639,7 @@
                                   status)
         
 !     Fill in DE derived type
-      call ESMF_DistGridSetDE(distgrid, status)
+!     call ESMF_DistGridSetDE(distgrid, status)    TODO
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: Set de"
         return
