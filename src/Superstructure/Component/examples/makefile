@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.5 2003/02/04 21:02:19 nscollins Exp $ 
+# $Id: makefile,v 1.6 2003/02/14 22:34:53 nscollins Exp $ 
 
-ALL: 
+ALL:  examples
 
 CFLAGS    =
 FFLAGS    =
