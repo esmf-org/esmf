@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.18 2004/02/05 18:42:24 jwolfe Exp $
+// $Id: ESMC_Array_F.C,v 1.19 2004/02/06 23:31:48 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -115,10 +115,7 @@ extern "C" {
              return;
          }
            
-         memset(name, ' ', nlen);
-         strncpy(name, (*ptr)->ESMC_BaseGetName(), 
-                                   MIN(nlen, strlen((*ptr)->ESMC_BaseGetName())));
-         *status = ESMF_SUCCESS;
+         *status = ESMC_CtoF90string((*ptr)->ESMC_BaseGetName(), name, nlen);
      }
 
      void FTN(c_esmc_arraydestroy)(ESMC_Array **ptr, int *status) {
