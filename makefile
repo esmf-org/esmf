@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.57 2005/02/03 16:45:09 jwolfe Exp $
+# $Id: makefile,v 1.58 2005/03/29 18:56:55 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -64,6 +64,7 @@ script_info:
 	  echo "ESMF_COMPILER_VERSION: ${ESMF_COMPILER_VERSION}" ; fi
 	-@if [ -n "${ESMF_C_COMPILER}" ] ; then \
 	  echo "ESMF_C_COMPILER: ${ESMF_C_COMPILER}" ; fi
+	-@echo "ESMF_PTHREADS: ${ESMF_PTHREADS}"
 #
 info:   script_info
 	-@echo "-----------------------------------------"
