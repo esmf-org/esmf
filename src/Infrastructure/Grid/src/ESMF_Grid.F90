@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.180 2004/06/22 22:55:42 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.180.2.1 2004/07/22 20:56:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -69,6 +69,9 @@
     public ESMF_GridDestroy
     public ESMF_GridDistribute
     public ESMF_GridGet
+    public ESMF_GridGetAttribute
+    public ESMF_GridGetAttributeCount
+    public ESMF_GridGetAttributeInfo
     public ESMF_GridGetCoord
     public ESMF_GridGetDELocalInfo
     !public ESMF_GridGetMask
@@ -77,6 +80,7 @@
     public ESMF_GridDELocalToGlobalIndex
     public ESMF_GridPrint
     public ESMF_GridSet
+    public ESMF_GridSetAttribute
     public ESMF_GridSetCoord
     public ESMF_GridSetMask
     public ESMF_GridSetMetric
@@ -100,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.180 2004/06/22 22:55:42 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.180.2.1 2004/07/22 20:56:31 nscollins Exp $'
 
 !==============================================================================
 !
@@ -122,6 +126,78 @@
 ! !DESCRIPTION:
 !     This interface provides a single entry point for {\tt ESMF\_Grid} create
 !     methods.
+
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridGetAttribute  - Get Grid attributes
+!
+! !INTERFACE:
+      interface ESMF_GridGetAttribute
+
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_GridGetInt4Attr
+        module procedure ESMF_GridGetInt4ListAttr
+        module procedure ESMF_GridGetInt8Attr
+        module procedure ESMF_GridGetInt8ListAttr
+        module procedure ESMF_GridGetReal4Attr
+        module procedure ESMF_GridGetReal4ListAttr
+        module procedure ESMF_GridGetReal8Attr
+        module procedure ESMF_GridGetReal8ListAttr
+        module procedure ESMF_GridGetLogicalAttr
+        module procedure ESMF_GridGetLogicalListAttr
+        module procedure ESMF_GridGetCharAttr
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that retrieve
+!     attributes from an {\tt ESMF\_Grid}.
+
+!EOPI
+      end interface
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridGetAttributeInfo - Get type, count from a Grid attribute
+!     
+! !INTERFACE:
+      interface ESMF_GridGetAttributeInfo
+
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_GridGetAttrInfoByName
+        module procedure ESMF_GridGetAttrInfoByNum
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that retrieve
+!     information about attributes from an {\tt ESMF\_Grid}.
+
+!EOPI
+      end interface
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridSetAttribute  - Set Grid attributes
+!
+! !INTERFACE:
+      interface ESMF_GridSetAttribute
+
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_GridSetInt4Attr
+        module procedure ESMF_GridSetInt4ListAttr
+        module procedure ESMF_GridSetInt8Attr
+        module procedure ESMF_GridSetInt8ListAttr
+        module procedure ESMF_GridSetReal4Attr
+        module procedure ESMF_GridSetReal4ListAttr
+        module procedure ESMF_GridSetReal8Attr
+        module procedure ESMF_GridSetReal8ListAttr
+        module procedure ESMF_GridSetLogicalAttr
+        module procedure ESMF_GridSetLogicalListAttr
+        module procedure ESMF_GridSetCharAttr
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that attach
+!     attributes to an {\tt ESMF\_Grid}.
 
 !EOPI
       end interface
@@ -1017,7 +1093,7 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! free field memory.
+      ! free grid memory.
       deallocate(grid%ptr, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocate Grid type", &
                                      ESMF_CONTEXT, rc)) return
@@ -1318,6 +1394,826 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGet
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetInt4Attr"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttribute  - Retrieve a 4-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridGetAttribute()
+      subroutine ESMF_GridGetInt4Attr(grid, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I4), intent(out) :: value
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Returns a 4-byte integer attribute from the {\tt grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The 4-byte integer value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I4, 1, &
+                                    value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetInt4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetInt4ListAttr"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttribute - Retrieve a 4-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridGetAttribute()
+      subroutine ESMF_GridGetInt4ListAttr(grid, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Returns a 4-byte integer list attribute from the {\tt grid}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the attribute.
+!     \item [valueList]
+!           The 4-byte integer values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      integer :: limit
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                 "count longer than valueList", &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I4, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetInt4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetInt8Attr"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttribute  - Retrieve an 8-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridGetAttribute()
+      subroutine ESMF_GridGetInt8Attr(grid, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I8), intent(out) :: value
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!      Returns an 8-byte integer attribute from the {\tt grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The 8-byte integer value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, 1, &
+                                    value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetInt8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetIntList8Attr"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttribute - Retrieve an 8-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridGetAttribute()
+      subroutine ESMF_GridGetInt8ListAttr(grid, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!      Returns an 8-byte integer list attribute from the {\tt grid}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the attribute.
+!     \item [valueList]
+!           The 8-byte integer values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      integer :: limit
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                 "count longer than valueList", &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetInt8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetReal4Attr"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttribute - Retrieve a 4-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridGetAttribute()
+      subroutine ESMF_GridGetReal4Attr(grid, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R4), intent(out) :: value
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Returns a 4-byte real attribute from the {\tt grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The 4-byte real value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R4, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetReal4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetReal4ListAttr"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttribute - Retrieve a 4-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridGetAttribute()
+      subroutine ESMF_GridGetReal4ListAttr(grid, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Returns a 4-byte real list attribute from an {\tt ESMF\_Grid}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the attribute.
+!     \item [valueList]
+!           The 4-byte real values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      integer :: limit
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                 "count longer than valueList", &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R4, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetReal4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetReal8Attr"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttribute - Retrieve an 8-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridGetAttribute()
+      subroutine ESMF_GridGetReal8Attr(grid, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R8), intent(out) :: value
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Returns an 8-byte real attribute from the {\tt grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The 8-byte real value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R8, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetReal8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetReal8ListAttr"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttribute - Retrieve an 8-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridGetAttribute()
+      subroutine ESMF_GridGetReal8ListAttr(grid, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!      Returns an 8-byte real list attribute from an {\tt ESMF\_Grid}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the attribute.
+!     \item [valueList]
+!           The real*8 values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      integer :: limit
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                 "count longer than valueList", &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R8, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetReal8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetLogicalAttr"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttribute - Retrieve a logical attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridGetAttribute()
+      subroutine ESMF_GridGetLogicalAttr(grid, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      type(ESMF_Logical), intent(out) :: value
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Returns a logical attribute from the {\tt grid}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The logical value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
+                                    value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetLogicalAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetLogicalListAttr"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttribute - Retrieve a logical list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridGetAttribute()
+      subroutine ESMF_GridGetLogicalListAttr(grid, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      type(ESMF_Logical), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Returns a logical list attribute from the {\tt grid}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the attribute.
+!     \item [valueList]
+!           The logical values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      integer :: limit
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                 "count longer than valueList", &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetLogicalListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetCharAttr"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttribute - Retrieve a character attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridGetAttribute()
+      subroutine ESMF_GridGetCharAttr(grid, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      character (len = *), intent(out) :: value
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Returns a character attribute from the {\tt grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The character value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeGetChar(grid%ptr%base, name, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetCharAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetAttributeCount"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttributeCount - Query the number of attributes
+!
+! !INTERFACE:
+      subroutine ESMF_GridGetAttributeCount(grid, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(out) :: count
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!      Returns the number of attributes associated with the given {\tt grid} in
+!      the argument {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [count]
+!           The number of attributes associated with this object.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeGetCount(grid%ptr%base, count, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetAttributeCount
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetAttrInfoByName"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttributeInfo - Query Grid attributes by name
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridGetAttributeInfo()
+      subroutine ESMF_GridGetAttrInfoByName(grid, name, datatype, &
+                                            datakind, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character(len=*), intent(in) :: name
+      type(ESMF_DataType), intent(out), optional :: datatype
+      type(ESMF_DataKind), intent(out), optional :: datakind
+      integer, intent(out), optional :: count
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Returns information associated with the named attribute, 
+!      including {\tt datatype}, {\tt datakind} (if applicable),
+!      and {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to query.
+!     \item [{[datatype]}]
+!           The data type of the attribute. One of the values
+!           {\tt ESMF\_DATA\_INTEGER}, {\tt ESMF\_DATA\_REAL},
+!           {\tt ESMF\_DATA\_LOGICAL}, or {\tt ESMF\_DATA\_CHARACTER}.
+!     \item [{[datakind]}]
+!           The datakind of the attribute, if attribute is type
+!           {\tt ESMF\_DATA\_INTEGER} or {\tt ESMF\_DATA\_REAL}.
+!           One of the values {\tt ESMF\_I4}, {\tt ESMF\_I8}, {\tt ESMF\_R4},
+!           or {\tt ESMF\_R8}.
+!           For all other types the value {\tt ESMF\_NOKIND} is returned.
+!     \item [count]
+!           The number of items in this attribute.  For character types,
+!           the length of the character string.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      type(ESMF_DataType) :: localDt
+      type(ESMF_DataKind) :: localDk
+      integer :: localCount
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeGetAttrInfoName(grid%ptr%base, name, &
+                                           localDt, localDk, localCount, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(datatype)) datatype = localDt
+      if (present(datakind)) datakind = localDk
+      if (present(count)) count = localCount
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetAttrInfoByName
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetAttrInfoByNum"
+
+!BOP
+! !IROUTINE: ESMF_GridGetAttributeInfo - Query Grid attributes by index number
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridGetAttributeInfo()
+      subroutine ESMF_GridGetAttrInfoByNum(grid, attributeIndex, name, &
+                                           datatype, datakind, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in) :: attributeIndex
+      character(len=*), intent(out), optional :: name
+      type(ESMF_DataType), intent(out), optional :: datatype
+      type(ESMF_DataKind), intent(out), optional :: datakind
+      integer, intent(out), optional :: count
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!      Returns information associated with the indexed attribute,
+!      including {\tt datatype}, {\tt datakind} (if applicable),
+!      and item {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [attributeIndex]
+!           The index number of the attribute to query.
+!     \item [name]
+!           Returns the name of the attribute.
+!     \item [{[datatype]}]
+!           The data type of the attribute. One of the values
+!           {\tt ESMF\_DATA\_INTEGER}, {\tt ESMF\_DATA\_REAL},
+!           {\tt ESMF\_DATA\_LOGICAL}, or {\tt ESMF\_DATA\_CHARACTER}.
+!     \item [{[datakind]}]
+!           The datakind of the attribute, if attribute is type
+!           {\tt ESMF\_DATA\_INTEGER} or {\tt ESMF\_DATA\_REAL}.
+!           One of the values {\tt ESMF\_I4}, {\tt ESMF\_I8}, {\tt ESMF\_R4},
+!           or {\tt ESMF\_R8}.
+!           For all other types the value {\tt ESMF\_NOKIND} is returned.
+!     \item [count]
+!           Returns the number of items in this attribute.  For character types,
+!           this is the length of the character string.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: localrc                          ! local error status
+      character(len=ESMF_MAXSTR) :: localName
+      type(ESMF_DataType) :: localDt
+      type(ESMF_DataKind) :: localDk
+      integer :: localCount
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeGetAttrInfoNum(grid%ptr%base, attributeIndex, &
+                                          localName, localDt, localDk, &
+                                          localCount, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(name)) name = localName
+      if (present(datatype)) datatype = localDt
+      if (present(datakind)) datakind = localDk
+      if (present(count)) count = localCount
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetAttrInfoByNum
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1806,8 +2702,8 @@
       subroutine ESMF_GridPrint(grid, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: options
+      type(ESMF_Grid),   intent(in) :: grid
+      character (len=*), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1817,7 +2713,7 @@
 !     \begin{description}
 !     \item[grid]
 !          {\tt ESMF\_Grid} to print.
-!     \item[options]
+!     \item[{[options]}]
 !          Print options are not yet supported.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1825,7 +2721,7 @@
 !
 !EOP
 
-      character(len=ESMF_MAXSTR) :: name, str
+      !character(len=ESMF_MAXSTR) :: name, str
       type(ESMF_GridClass), pointer :: gp
       integer :: i
       integer :: localrc                          ! local error status
@@ -1942,7 +2838,7 @@
 ! !REQUIREMENTS:
 !EOP
 
-      integer :: localrc                          ! local error status
+      !integer :: localrc                          ! local error status
       integer :: i                                ! loop index
       type(ESMF_GridClass), pointer :: gridp      ! Pointer to new grid
 
@@ -1983,6 +2879,639 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridSet
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetInt4Attr"
+
+!BOP
+! !IROUTINE: ESMF_GridSetAttribute - Set a 4-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridSetAttribute()
+      subroutine ESMF_GridSetInt4Attr(grid, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(inout) :: grid
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I4), intent(in) :: value
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Attaches a 4-byte integer attribute to the {\tt grid}.
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The 4-byte integer value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I4, 1, &
+                                    value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetInt4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetInt4ListAttr"
+
+!BOP
+! !IROUTINE: ESMF_GridSetAttribute - Set a 4-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridSetAttribute()
+      subroutine ESMF_GridSetInt4ListAttr(grid, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attaches a 4-byte integer list attribute to the {\tt grid}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is
+!     given by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [count]
+!           The number of integers in the {\tt valueList}.
+!     \item [valueList]
+!           The 4-byte integer values of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      integer :: limit
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+  
+      limit = size(valueList)
+      if (count > limit) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                 "count longer than valueList", &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I4, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetInt4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetInt8Attr"
+
+!BOP
+! !IROUTINE: ESMF_GridSetAttribute - Set an 8-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridSetAttribute()
+      subroutine ESMF_GridSetInt8Attr(grid, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(inout) :: grid
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I8), intent(in) :: value
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Attaches an 8-byte integer attribute to the {\tt grid}.
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The 8-byte integer value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, 1, &
+                                    value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetInt8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetInt8ListAttr"
+
+!BOP
+! !IROUTINE: ESMF_GridSetAttribute - Set an 8-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridSetAttribute()
+      subroutine ESMF_GridSetInt8ListAttr(grid, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attaches a 8-byte integer list attribute to the {\tt grid}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is
+!     given by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [count]
+!           The number of integers in the {\tt valueList}.
+!     \item [valueList]
+!           The 8-byte integer values of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      integer :: limit
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+  
+      limit = size(valueList)
+      if (count > limit) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                 "count longer than valueList", &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_INTEGER, ESMF_I8, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetInt8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetReal4Attr"
+
+!BOP
+! !IROUTINE: ESMF_GridSetAttribute - Set a 4-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridSetAttribute()
+      subroutine ESMF_GridSetReal4Attr(grid, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R4), intent(in) :: value
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Attaches a 4-byte real attribute to the {\tt grid}.
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The 4-byte real value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R4, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetReal4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetReal4ListAttr"
+
+!BOP
+! !IROUTINE: ESMF_GridSetAttribute - Set a 4-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridSetAttribute()
+      subroutine ESMF_GridSetReal4ListAttr(grid, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attaches a 4-byte real list attribute to the {\tt grid}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is
+!     given by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [count]
+!           The number of reals in the {\tt valueList}.
+!     \item [value]
+!           The 4-byte real values of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      integer :: limit
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                 "count longer than valueList", &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R4, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetReal4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetReal8Attr"
+
+!BOP
+! !IROUTINE: ESMF_GridSetAttribute - Set an 8-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridSetAttribute()
+      subroutine ESMF_GridSetReal8Attr(grid, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R8), intent(in) :: value
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Attaches an 8-byte real attribute to the {\tt grid}.
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The 8-byte real value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R8, 1, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetReal8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetReal8ListAttr"
+
+!BOP
+! !IROUTINE: ESMF_GridSetAttribute - Set an 8-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridSetAttribute()
+      subroutine ESMF_GridSetReal8ListAttr(grid, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attaches an 8-byte real list attribute to the {\tt grid}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is
+!     given by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [count]
+!           The number of reals in the {\tt valueList}.
+!     \item [value]
+!           The 8-byte real values of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      integer :: limit
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                 "count longer than valueList", &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_REAL, ESMF_R8, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetReal8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetLogicalAttr"
+
+!BOP
+! !IROUTINE: ESMF_GridSetAttribute - Set a logical attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridSetAttribute()
+      subroutine ESMF_GridSetLogicalAttr(grid, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      type(ESMF_Logical), intent(in) :: value
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attaches a logical attribute to the {\tt grid}.
+!     The attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The logical true/false value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
+                                    value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetLogicalAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetLogicalListAttr"
+
+!BOP
+! !IROUTINE: ESMF_GridSetAttribute - Set a logical list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridSetAttribute()
+      subroutine ESMF_GridSetLogicalListAttr(grid, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      type(ESMF_Logical), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attaches a logical list attribute to the {\tt grid}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of logical items in the {\tt valueList} is
+!     given by {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [count]
+!           The number of logicals in the {\tt valueList}.
+!     \item [value]
+!           The logical true/false values of the attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      integer :: limit
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      limit = size(valueList)
+      if (count > limit) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                 "count longer than valueList", &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      call c_ESMC_AttributeSetValue(grid%ptr%base, name, &
+                                    ESMF_DATA_LOGICAL, ESMF_NOKIND, count, &
+                                    valueList, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetLogicalListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetCharAttr"
+
+!BOP
+! !IROUTINE: ESMF_GridSetAttribute - Set a character attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_GridSetAttribute()
+      subroutine ESMF_GridSetCharAttr(grid, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len = *), intent(in) :: name
+      character (len = *), intent(in) :: value
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Attaches a character attribute to the {\tt grid}.
+!     The attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to add.
+!     \item [value]
+!           The character value of the attribute to add.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+      
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call c_ESMC_AttributeSetChar(grid%ptr%base, name, value, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetCharAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
