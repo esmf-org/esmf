@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand.F90,v 1.9 2003/10/09 22:05:18 nscollins Exp $
+! $Id: ESMF_ArrayExpand.F90,v 1.10 2003/12/02 21:59:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -215,7 +215,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand.F90,v 1.9 2003/10/09 22:05:18 nscollins Exp $'
+      '$Id: ESMF_ArrayExpand.F90,v 1.10 2003/12/02 21:59:52 nscollins Exp $'
 
 !==============================================================================
 !
@@ -12380,7 +12380,7 @@ end interface
  offsets = 0 
  
  wrap % I21Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -12536,7 +12536,7 @@ end interface
  offsets = 0 
  
  wrap % I41Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -12692,7 +12692,7 @@ end interface
  offsets = 0 
  
  wrap % I81Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -12848,7 +12848,7 @@ end interface
  offsets = 0 
  
  wrap % I22Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13004,7 +13004,7 @@ end interface
  offsets = 0 
  
  wrap % I42Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13160,7 +13160,7 @@ end interface
  offsets = 0 
  
  wrap % I82Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13316,7 +13316,7 @@ end interface
  offsets = 0 
  
  wrap % I23Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13472,7 +13472,7 @@ end interface
  offsets = 0 
  
  wrap % I43Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13628,7 +13628,7 @@ end interface
  offsets = 0 
  
  wrap % I83Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13784,7 +13784,7 @@ end interface
  offsets = 0 
  
  wrap % I24Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13940,7 +13940,7 @@ end interface
  offsets = 0 
  
  wrap % I44Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14096,7 +14096,7 @@ end interface
  offsets = 0 
  
  wrap % I84Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14252,7 +14252,7 @@ end interface
  offsets = 0 
  
  wrap % I25Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14408,7 +14408,7 @@ end interface
  offsets = 0 
  
  wrap % I45Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14564,7 +14564,7 @@ end interface
  offsets = 0 
  
  wrap % I85Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14720,7 +14720,7 @@ end interface
  offsets = 0 
  
  wrap % R41Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14876,7 +14876,7 @@ end interface
  offsets = 0 
  
  wrap % R81Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15032,7 +15032,7 @@ end interface
  offsets = 0 
  
  wrap % R42Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15188,7 +15188,7 @@ end interface
  offsets = 0 
  
  wrap % R82Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15344,7 +15344,7 @@ end interface
  offsets = 0 
  
  wrap % R43Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15500,7 +15500,7 @@ end interface
  offsets = 0 
  
  wrap % R83Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15656,7 +15656,7 @@ end interface
  offsets = 0 
  
  wrap % R44Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15812,7 +15812,7 @@ end interface
  offsets = 0 
  
  wrap % R84Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15968,7 +15968,7 @@ end interface
  offsets = 0 
  
  wrap % R45Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -16124,7 +16124,7 @@ end interface
  offsets = 0 
  
  wrap % R85Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, newp, counts, & 
  lbounds, ubounds, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
