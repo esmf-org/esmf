@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.26 2004/02/18 01:44:51 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.27 2004/02/25 03:04:46 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -18,6 +18,7 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 #include <ESMC.h>
+#include <ESMC_F90Interface.h>
 #include <ESMC_TimeInterval.h>
 //------------------------------------------------------------------------------
 //BOP
@@ -49,55 +50,30 @@ extern "C" {
                                  ESMF_KIND_R8 *ns_r8,
                                  ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
                                  int *status) {
-
           int rc = (ptr)->ESMC_TimeIntervalSet(
-                    ((void*) yy    == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : yy),
-                    ((void*) yy_i8 == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : yy_i8),
-                    ((void*) mm    == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : mm),
-                    ((void*) mm_i8 == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : mm_i8),
-                    ((void*) d     == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : d),
-                    ((void*) d_i8  == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : d_i8),
-                    ((void*) h     == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : h),
-                    ((void*) m     == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : m),
-                    ((void*) s     == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : s),
-                    ((void*) s_i8  == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : s_i8),
-                    ((void*) ms    == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : ms),
-                    ((void*) us    == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : us),
-                    ((void*) ns    == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : ns),
-                    ((void*) d_r8  == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : d_r8),
-                    ((void*) h_r8  == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : h_r8),
-                    ((void*) m_r8  == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : m_r8),
-                    ((void*) s_r8  == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : s_r8),
-                    ((void*) ms_r8 == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : ms_r8),
-                    ((void*) us_r8 == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : us_r8),
-                    ((void*) ns_r8 == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : ns_r8),
-                    ((void*) sN    == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : sN),
-                    ((void*) sD    == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : sD) );
-
-          if (status != ESMC_NULL_POINTER &&
-              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
+                       ESMC_NOT_PRESENT_FILTER(yy),
+                       ESMC_NOT_PRESENT_FILTER(yy_i8),
+                       ESMC_NOT_PRESENT_FILTER(mm),
+                       ESMC_NOT_PRESENT_FILTER(mm_i8),
+                       ESMC_NOT_PRESENT_FILTER(d),
+                       ESMC_NOT_PRESENT_FILTER(d_i8),
+                       ESMC_NOT_PRESENT_FILTER(h),
+                       ESMC_NOT_PRESENT_FILTER(m),
+                       ESMC_NOT_PRESENT_FILTER(s),
+                       ESMC_NOT_PRESENT_FILTER(s_i8),
+                       ESMC_NOT_PRESENT_FILTER(ms),
+                       ESMC_NOT_PRESENT_FILTER(us),
+                       ESMC_NOT_PRESENT_FILTER(ns),
+                       ESMC_NOT_PRESENT_FILTER(d_r8),
+                       ESMC_NOT_PRESENT_FILTER(h_r8),
+                       ESMC_NOT_PRESENT_FILTER(m_r8),
+                       ESMC_NOT_PRESENT_FILTER(s_r8),
+                       ESMC_NOT_PRESENT_FILTER(ms_r8),
+                       ESMC_NOT_PRESENT_FILTER(us_r8),
+                       ESMC_NOT_PRESENT_FILTER(ns_r8),
+                       ESMC_NOT_PRESENT_FILTER(sN),
+                       ESMC_NOT_PRESENT_FILTER(sD) );
+          if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN(c_esmc_timeintervalget)(ESMC_TimeInterval *ptr,
@@ -114,58 +90,31 @@ extern "C" {
                                  ESMF_KIND_R8 *ns_r8,
                                  ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
                                  char *timeString, int *status) {
-
           int rc = (ptr)->ESMC_TimeIntervalGet(
-                    ((void*) yy    == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : yy),
-                    ((void*) yy_i8 == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : yy_i8),
-                    ((void*) mm    == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : mm),
-                    ((void*) mm_i8 == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : mm_i8),
-                    ((void*) d     == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : d),
-                    ((void*) d_i8  == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : d_i8),
-                    ((void*) h     == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : h),
-                    ((void*) m     == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : m),
-                    ((void*) s     == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : s),
-                    ((void*) s_i8  == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : s_i8),
-                    ((void*) ms    == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : ms),
-                    ((void*) us    == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : us),
-                    ((void*) ns    == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : ns),
-                    ((void*) d_r8  == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : d_r8),
-                    ((void*) h_r8  == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : h_r8),
-                    ((void*) m_r8  == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : m_r8),
-                    ((void*) s_r8  == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : s_r8),
-                    ((void*) ms_r8 == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : ms_r8),
-                    ((void*) us_r8 == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : us_r8),
-                    ((void*) ns_r8 == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : ns_r8),
-                    ((void*) sN    == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : sN),
-                    ((void*) sD    == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : sD),
-                    ((void*) timeString == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : timeString) );
-
-          if (status != ESMC_NULL_POINTER &&
-              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
-
+                       ESMC_NOT_PRESENT_FILTER(yy),
+                       ESMC_NOT_PRESENT_FILTER(yy_i8),
+                       ESMC_NOT_PRESENT_FILTER(mm),
+                       ESMC_NOT_PRESENT_FILTER(mm_i8),
+                       ESMC_NOT_PRESENT_FILTER(d),
+                       ESMC_NOT_PRESENT_FILTER(d_i8),
+                       ESMC_NOT_PRESENT_FILTER(h),
+                       ESMC_NOT_PRESENT_FILTER(m),
+                       ESMC_NOT_PRESENT_FILTER(s),
+                       ESMC_NOT_PRESENT_FILTER(s_i8),
+                       ESMC_NOT_PRESENT_FILTER(ms),
+                       ESMC_NOT_PRESENT_FILTER(us),
+                       ESMC_NOT_PRESENT_FILTER(ns),
+                       ESMC_NOT_PRESENT_FILTER(d_r8),
+                       ESMC_NOT_PRESENT_FILTER(h_r8),
+                       ESMC_NOT_PRESENT_FILTER(m_r8),
+                       ESMC_NOT_PRESENT_FILTER(s_r8),
+                       ESMC_NOT_PRESENT_FILTER(ms_r8),
+                       ESMC_NOT_PRESENT_FILTER(us_r8),
+                       ESMC_NOT_PRESENT_FILTER(ns_r8),
+                       ESMC_NOT_PRESENT_FILTER(sN),
+                       ESMC_NOT_PRESENT_FILTER(sD),
+                       ESMC_NOT_PRESENT_FILTER(timeString) );
+          if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN(c_esmc_timeintervalabsvalue)(ESMC_TimeInterval *ptr,
@@ -251,39 +200,36 @@ extern "C" {
                                                 ESMC_IOSpec *iospec,
                                                 int *status) {
           int rc = (ptr)->ESMC_TimeIntervalReadRestart(
-                 *nameLen,  // always present internal argument.
-                 name,      // required.
-                 ((void*)iospec == (void*)ESMC_BAD_POINTER ?      
-                                                  ESMC_NULL_POINTER : iospec) );
-          if (status != ESMC_NULL_POINTER &&
-              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
+                                        *nameLen,  // always present
+                                                   //   internal argument.
+                                         name,     // required.
+                 ESMC_NOT_PRESENT_FILTER(iospec) );
+
+          if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN(c_esmc_timeintervalwriterestart)(ESMC_TimeInterval *ptr,
                                                  ESMC_IOSpec *iospec,
                                                  int *status) {
           int rc = (ptr)->ESMC_TimeIntervalWriteRestart(
-              ((void*)iospec == (void*)ESMC_BAD_POINTER ?
-                                                  ESMC_NULL_POINTER : iospec) );
-          if (status != ESMC_NULL_POINTER &&
-              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;  
+                                ESMC_NOT_PRESENT_FILTER(iospec) );
+
+          if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN(c_esmc_timeintervalvalidate)(ESMC_TimeInterval *ptr,
                                              const char *options, int *status) {
           int rc = (ptr)->ESMC_TimeIntervalValidate(
-                     ((void*) options == (void*)ESMC_BAD_POINTER ?
-                                                ESMC_NULL_POINTER : options) );
-          if (status != ESMC_NULL_POINTER &&
-              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
+                            ESMC_NOT_PRESENT_FILTER(options) );
+
+          if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN(c_esmc_timeintervalprint)(ESMC_TimeInterval *ptr,
                                           const char *options, int *status) {
           int rc = (ptr)->ESMC_TimeIntervalPrint(
-                     ((void*) options == (void*)ESMC_BAD_POINTER ?
-                                                ESMC_NULL_POINTER : options) );
-          if (status != ESMC_NULL_POINTER &&
-              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
+                         ESMC_NOT_PRESENT_FILTER(options) );
+
+          if (ESMC_PRESENT(status)) *status = rc;
        }
 };

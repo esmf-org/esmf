@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction_F.C,v 1.13 2004/02/18 01:44:51 eschwab Exp $
+// $Id: ESMC_Fraction_F.C,v 1.14 2004/02/25 03:04:46 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -18,6 +18,7 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 #include <ESMC.h>
+#include <ESMC_F90Interface.h>
 #include <ESMC_Fraction.h>
 //------------------------------------------------------------------------------
 //BOP
@@ -40,26 +41,22 @@ static int fred;
 extern "C" {
 
 #if 0
-       // keep this for shallow classes, get rid of create/destroy above
        void FTN(c_esmc_fractionset)(ESMC_Fraction *ptr, int *arg1, int *arg2,
                                                   int *arg3, int *status) {
           int rc = (ptr)->ESMC_FractionSet(*arg1, *arg2, *arg3);
-          if (status != ESMC_NULL_POINTER &&
-              (int)status != ESMC_BAD_POINTER) *status = rc;
+          if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN(c_esmc_fractionget)(ESMC_Fraction *ptr, 
                                          <value> *value, int *status} {
           int rc = (ptr)->ESMC_FractionGet(&value);
-          if (status != ESMC_NULL_POINTER &&
-              (int)status != ESMC_BAD_POINTER) *status = rc;
+          if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN(c_esmc_fractionset)(ESMC_Fraction *ptr, 
                                          <value> *value, int *status} {
           int rc = (ptr)->ESMC_FractionSet(value);
-          if (status != ESMC_NULL_POINTER &&
-              (int)status != ESMC_BAD_POINTER) *status = rc;
+          if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN(c_esmc_fractionreadrestart)(ESMC_Fraction *ptr, int *nameLen,
@@ -67,39 +64,35 @@ extern "C" {
                                             ESMC_IOSpec *iospec,
                                             int *status) {
           int rc = (ptr)->ESMC_FractionReadRestart(
-                 *nameLen,  // always present internal argument.
-                 name,      // required.
-                 ((void*)iospec == (void*)ESMC_BAD_POINTER ?      
-                                                  ESMC_NULL_POINTER : iospec) );
-          if (status != ESMC_NULL_POINTER &&
-              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
+                                                   *nameLen,  // always present
+                                                              //   internal
+                                                              //   argument.
+                                                    name,     // required.
+                            ESMC_NOT_PRESENT_FILTER(iospec) );
+          if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN(c_esmc_fractionwriterestart)(ESMC_Fraction *ptr,
                                              ESMC_IOSpec *iospec,
                                              int *status) {
           int rc = (ptr)->ESMC_FractionWriteRestart(
-              ((void*)iospec == (void*)ESMC_BAD_POINTER ?
-                                                  ESMC_NULL_POINTER : iospec) );
-          if (status != ESMC_NULL_POINTER &&
-              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;  
+                            ESMC_NOT_PRESENT_FILTER(iospec) );
+          if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN(c_esmc_fractionvalidate)(ESMC_Fraction *ptr,
                                          const char *options,
                                          int *status) {
           int rc = (ptr)->ESMC_Fraction::ESMC_Validate(
-            ((int) options == ESMC_BAD_POINTER ? ESMC_NULL_POINTER : options) );
-          if (status != ESMC_NULL_POINTER &&
-              (int)status != ESMC_BAD_POINTER) *status = rc;
+                               ESMC_NOT_PRESENT_FILTER(options) );
+          if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN(c_esmc_fractionprint)(ESMC_Fraction *ptr, const char *options,
                                       int *status) {
           int rc = (ptr)->ESMC_Fraction::ESMC_Print(
-            ((int) options == ESMC_BAD_POINTER ? ESMC_NULL_POINTER : options) );
-          if (status != ESMC_NULL_POINTER &&
-              (int)status != ESMC_BAD_POINTER) *status = rc;
+                            ESMC_NOT_PRESENT_FILTER(options) );
+          if (ESMC_PRESENT(status)) *status = rc;
        }
 #endif
 };
