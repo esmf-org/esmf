@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.5 2004/03/24 17:57:06 nscollins Exp $
+#  $Id: build_rules.mk,v 1.6 2004/04/30 21:00:56 nscollins Exp $
 #
 #  Linus.absoft.default.mk
 #
@@ -120,10 +120,10 @@ CXX_FLINKER	   = ${CXX_CC}
 CXX_CCV		   = ${CXX_CC} --version
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 C_F90CXXLD         = ${CXX_FC}
-C_F90CXXLIBS       = ${MPI_LIB} -lf90math -lfio -lf77math -lstdc++
+C_F90CXXLIBS       = ${MPI_LIB} -lf90math -lfio -lf77math -lrt -lstdc++
 C_CXXF90LD         = ${CXX_CC} 
 F90LIBBASE         = /soft/com/packages/absoft-8.0/opt/absoft/lib
-C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -L${F90LIBBASE} -lf90math -lfio -lf77math
+C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -L${F90LIBBASE} -lf90math -lrt -lfio -lf77math
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
