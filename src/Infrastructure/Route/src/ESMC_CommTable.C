@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.20 2003/07/02 16:49:56 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.21 2004/04/09 22:02:20 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.20 2003/07/02 16:49:56 nscollins Exp $";
+            "$Id: ESMC_CommTable.C,v 1.21 2004/04/09 22:02:20 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -45,7 +45,7 @@
 //
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_CommTableCreate - Create a new CommTable
 //
 // !INTERFACE:
@@ -67,7 +67,7 @@
 //      Note: this is a class helper function, not a class method
 //      (see declaration in ESMC_CommTable.h)
 //
-//EOP
+//EOPI
 // !REQUIREMENTS: 
 
     ESMC_CommTable *newc = new ESMC_CommTable;
@@ -79,7 +79,7 @@
  } // end ESMC_CommTableCreate
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_CommTableDestroy - free a CommTable created with Create
 //
 // !INTERFACE:
@@ -98,7 +98,7 @@
 //      Note: this is a class helper function, not a class method
 //      (see declaration in ESMC_CommTable.h)
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  
 
     return ESMF_FAILURE;
@@ -106,7 +106,7 @@
  } // end ESMC_CommTableDestroy
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_CommTableConstruct - fill in an already allocated CommTable
 //
 // !INTERFACE:
@@ -127,7 +127,7 @@
 //      ESMF use only; end-users use ESMC_CommTableCreate, which calls
 //      ESMC_CommTableConstruct.  Define for deep classes only.
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  
     int i, *ip, rc;
 
@@ -218,7 +218,7 @@
  } // end ESMC_CommTableConstruct
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_CommTableDestruct - release resources associated w/a CommTable
 //
 // !INTERFACE:
@@ -237,7 +237,7 @@
 //      use only; end-users use ESMC_CommTableDestroy, which calls
 //      ESMC_CommTableDestruct.  Define for deep classes only.
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  
 
     delete [] commpartner;
@@ -249,7 +249,7 @@
 
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_CommTableGetCount - get partner list count
 //
 // !INTERFACE:
@@ -264,7 +264,7 @@
 // !DESCRIPTION:
 //     Returns the value of CommTable member count.
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  
 
     *count = commcount;
@@ -274,7 +274,7 @@
  } // end ESMC_CommTableGetCount
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_CommTableGetPartner - get partner list count
 //
 // !INTERFACE:
@@ -292,7 +292,7 @@
 //     Returns the nth communication partner, and flag saying if
 //     communication is needed.
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  
 
     if (entry < 0 || entry >= commcount) {
@@ -309,7 +309,7 @@
  } // end ESMC_CommTableGetCount
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_CommTableSetPartner - set processor id to communicate with
 //
 // !INTERFACE:
@@ -324,7 +324,7 @@
 // !DESCRIPTION:
 //     Sets the CommTable member <Value> with the given value.
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  
  
       int i;
@@ -349,7 +349,7 @@
  } // end ESMC_CommTableSetPartner
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_CommTableValidate - internal consistency check for a CommTable
 //
 // !INTERFACE:
@@ -365,7 +365,7 @@
 //      Validates that a CommTable is internally consistent.
 //      Returns error code if problems are found.  ESMC_Base class method.
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 //
 
@@ -375,7 +375,7 @@
 
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_CommTablePrint - print contents of a CommTable
 //
 // !INTERFACE:
@@ -391,7 +391,7 @@
 //      Print information about a CommTable.  The options control the
 //      type of information and level of detail.  ESMC_Base class method.
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
     int i;
@@ -482,7 +482,7 @@ fill(int max, int size, int xpos, int ypos, int base, int *results)
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_CommTable - native C++ constructor
 //
 // !INTERFACE:
@@ -496,7 +496,7 @@ fill(int max, int size, int xpos, int ypos, int base, int *results)
 //
 // !DESCRIPTION:
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:
 
     decount = 0;
@@ -507,7 +507,7 @@ fill(int max, int size, int xpos, int ypos, int base, int *results)
  } // end ESMC_CommTable
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ~ESMC_CommTable - native C++ destructor
 //
 // !INTERFACE:
@@ -522,7 +522,7 @@ fill(int max, int size, int xpos, int ypos, int base, int *results)
 // !DESCRIPTION:
 //      Calls standard ESMF deep or shallow methods for destruction
 //
-//EOP
+//EOPI
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
 //
