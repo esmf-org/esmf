@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/04/29 16:07:48 svasquez Exp $
+# $Id: makefile,v 1.4 2003/04/29 16:19:51 svasquez Exp $
 
 ALL:  tests
 
@@ -17,28 +17,28 @@ LOCDIR	  =  src/Infrastructure/ConfigAttr/tests
 TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_ConfigUTest
 #	        $(ESMC_TESTDIR)/ESMC_ConfigUTest 
 
-TESTS_RUN     = RUN_ESMF_ConfigUTest \
+TESTS_RUN     = RUN_ESMF_ConfigUTest
 #		RUN_ESMC_ConfigUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_ConfigUTestUNI \
+TESTS_RUN_UNI = RUN_ESMF_ConfigUTestUNI
 #		RUN_ESMC_ConfigUTestUNI 
 
-TESTS_RM      = ESMF_ConfigUTest.rm \
+TESTS_RM      = ESMF_ConfigUTest.rm
 #                ESMC_ConfigUTest.rm
 
 
 
 
-#TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_ConfigUTest \
+#TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_ConfigUTest 
 #	        $(ESMC_TESTDIR)/ESMC_ConfigUTest 
 
-#TESTS_RUN     = RUN_ESMF_ConfigUTest \
+#TESTS_RUN     = RUN_ESMF_ConfigUTest
 #		RUN_ESMC_ConfigUTest 
 
-#TESTS_RUN_UNI = RUN_ESMF_ConfigUTestUNI \
+#TESTS_RUN_UNI = RUN_ESMF_ConfigUTestUNI
 #		RUN_ESMC_ConfigUTestUNI 
 
-#TESTS_RM      = ESMF_ConfigUTest.rm \
+#TESTS_RM      = ESMF_ConfigUTest.rm
 #                ESMC_ConfigUTest.rm
 
 
