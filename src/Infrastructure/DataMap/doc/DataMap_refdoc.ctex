@@ -1,4 +1,4 @@
-% $Id: DataMap_refdoc.ctex,v 1.5 2003/10/22 23:28:23 cdeluca Exp $
+% $Id: DataMap_refdoc.ctex,v 1.6 2004/03/22 19:02:30 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -83,7 +83,7 @@
 \input{../Infrastructure/DataMap/doc/DataMap_usage}
 #endif
 
-%\subsubsection{Restrictions}
+%\subsubsection{Restrictions and Future Work}
 #ifdef STANDALONE
 %\input{DataMap_rest}
 #elif defined(CONSTITUENT)

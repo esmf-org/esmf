@@ -58,7 +58,7 @@
 %\input{../Infrastructure/TimeMgr/doc/TimeMgr_param}
 %#endif
 
-%\subsection{Implementation Notes}
+%\subsection{Design and Implementation Notes}
 #ifdef STANDALONE
 \input{TimeMgr_implnotes}
 #elif defined(CONSTITUENT)
@@ -96,14 +96,14 @@
 \input{../Infrastructure/TimeMgr/doc/ESMF_CalendarEx_fapi}
 #endif
 
-%\subsubsection{Restrictions}
+%\subsubsection{Restrictions and Future Work}
 %#ifdef STANDALONE
 %\input{Calendar_rest}
 %#elif defined(CONSTITUENT)
 %\input{../Infrastructure/TimeMgr/doc/Calendar_rest}
 %#endif
 
-%\subsection{Implementation Notes}
+%\subsection{Design and Implementation Notes}
 %#ifdef STANDALONE
 %\input{Calendar_implnotes}
 %#elif defined(CONSTITUENT)
@@ -139,7 +139,7 @@
 \input{../Infrastructure/TimeMgr/doc/ESMF_TimeEx_fapi}
 #endif
 
-\subsection{Restrictions}
+\subsection{Restrictions and Future Work}
 #ifdef STANDALONE
 \input{Time_rest}
 #elif defined(CONSTITUENT)
@@ -175,7 +175,7 @@
 \input{../Infrastructure/TimeMgr/doc/ESMF_TimeIntervalEx_fapi}
 #endif
 
-\subsection{Restrictions}
+\subsection{Restrictions and Future Work}
 #ifdef STANDALONE
 \input{TimeInterval_rest}
 #elif defined(CONSTITUENT)
@@ -224,7 +224,7 @@
 \input{../Infrastructure/TimeMgr/doc/ESMF_ClockAdvEx_fapi}
 #endif
 
-\subsection{Restrictions}
+\subsection{Restrictions and Future Work}
 #ifdef STANDALONE
 %\input{Clock_rest}
 #elif defined(CONSTITUENT)
@@ -261,14 +261,14 @@
 \input{../Infrastructure/TimeMgr/doc/ESMF_AlarmEx_fapi}
 #endif
 
-%\subsection{Restrictions}
+%\subsection{Restrictions and Future Work}
 %#ifdef STANDALONE
 %\input{Alarm_rest}
 %#elif defined(CONSTITUENT)
 %\input{../Infrastructure/TimeMgr/doc/Alarm_rest}
 %#endif
 
-%\subsection{Implementation Notes}
+%\subsection{Design and Implementation Notes}
 #ifdef STANDALONE
 \input{Alarm_implnotes}
 #elif defined(CONSTITUENT)

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.2 2004/03/18 05:24:22 cdeluca Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.3 2004/03/22 19:02:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArraySpec.F90,v 1.2 2004/03/18 05:24:22 cdeluca Exp $'
+      '$Id: ESMF_ArraySpec.F90,v 1.3 2004/03/22 19:02:30 cdeluca Exp $'
 
 
 !==============================================================================
@@ -87,8 +87,70 @@
 
 !==============================================================================
 
+!BOP
+! !IROUTINE: ESMF_ArraySpecGet - Get values from an ArraySpec
+!
+! !INTERFACE:
+      subroutine ESMF_ArraySpecGet(arrayspec, rank, type, kind, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_ArraySpec), intent(in) :: arrayspec
+      integer, intent(out), optional :: rank
+      type(ESMF_DataType), intent(out), optional :: type
+      type(ESMF_DataKind), intent(out), optional :: kind
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Return information about the contents of a {\tt ESMF\_ArraySpec} type.
+!
+! The arguments are:
+! \begin{description}
+! \item[arrayspec]
+! An {\tt ESMF\_ArraySpec} object.
+! \item[rank]
+! {\tt ESMF\_Array} rank (dimensionality, 1D, 2D, etc). Maximum
+! allowed is 7D.
+! \item[type]
+! {\tt ESMF\_Array} type. Valid types include {\tt ESMF\_DATA\_INTEGER},
+! {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL},
+! {\tt ESMF\_DATA\_CHARACTER}.
+! \item[kind]
+! {\tt ESMF\_Array} kind. Valid kinds include {\tt ESMF\_KIND\_I4},
+! {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
+! {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
+! \item[[rc]]
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+
+        ! Local vars
+        integer :: i
+        integer :: status ! local error status
+        logical :: rcpresent ! did user specify rc?
+
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Get arrayspec contents
+
+        if(present(rank)) rank = arrayspec%rank
+        if(present(type)) type = arrayspec%type
+        if(present(kind)) kind = arrayspec%kind
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ArraySpecGet
+
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArraySpecSet - Set values for an ArraySpec
+!
 ! !INTERFACE:
      subroutine ESMF_ArraySpecSet(arrayspec, rank, type, kind, rc)
 !
@@ -158,65 +220,5 @@
 
         end subroutine ESMF_ArraySpecSet
 
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArraySpecGet(arrayspec, rank, type, kind, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_ArraySpec), intent(in) :: arrayspec
-      integer, intent(out), optional :: rank
-      type(ESMF_DataType), intent(out), optional :: type
-      type(ESMF_DataKind), intent(out), optional :: kind
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Return information about the contents of a {\tt ESMF\_ArraySpec} type.
-!
-! The arguments are:
-! \begin{description}
-! \item[arrayspec]
-! An {\tt ESMF\_ArraySpec} object.
-! \item[rank]
-! {\tt ESMF\_Array} rank (dimensionality, 1D, 2D, etc). Maximum
-! allowed is 7D.
-! \item[type]
-! {\tt ESMF\_Array} type. Valid types include {\tt ESMF\_DATA\_INTEGER},
-! {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL},
-! {\tt ESMF\_DATA\_CHARACTER}.
-! \item[kind]
-! {\tt ESMF\_Array} kind. Valid kinds include {\tt ESMF\_KIND\_I4},
-! {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
-! {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
-! \item[[rc]]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-
-        ! Local vars
-        integer :: i
-        integer :: status ! local error status
-        logical :: rcpresent ! did user specify rc?
-
-        ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Get arrayspec contents
-
-        if(present(rank)) rank = arrayspec%rank
-        if(present(type)) type = arrayspec%type
-        if(present(kind)) kind = arrayspec%kind
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArraySpecGet
 
         end module ESMF_ArraySpecMod
