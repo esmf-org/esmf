@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: conf.h,v 1.1 2001/11/13 18:35:48 dneckels Exp $"
+"$Id: conf.h,v 1.2 2002/10/29 21:48:01 nscollins Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -47,5 +47,7 @@
 
 #define ESMC_NEED_KILL_FOR_DEBUGGER
 #define ESMC_USE_PID_FOR_DEBUGGER
+
+#define ESMF_IS_64BIT_MACHINE 1
 
 #endif

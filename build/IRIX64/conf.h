@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: conf.h,v 1.2 2001/12/21 21:03:36 dneckels Exp $"
+"$Id: conf.h,v 1.3 2002/10/29 21:48:01 nscollins Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -60,5 +60,7 @@
 
 #define ESMC_USE_KBYTES_FOR_SIZE
 #define ESMC_USE_P_FOR_DEBUGGER
+
+#define ESMF_IS_64BIT_MACHINE 1
 
 #endif
