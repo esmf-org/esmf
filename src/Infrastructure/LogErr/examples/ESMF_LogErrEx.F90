@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.25 2005/02/03 21:43:26 jwolfe Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.26 2005/03/11 22:22:43 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,6 +64,7 @@
     ! LogMsgSetError
     call ESMF_LogMsgSetError(ESMF_FAILURE,"Convergence failure",rcToReturn=rc2)
     ! LogMsgFoundError
+    call ESMF_TimeSet(time, calendarType=ESMF_CAL_NOCALENDAR)
     call ESMF_TimeSyncToRealTime(time, rcToTest)
     if (ESMF_LogMsgFoundError(rcToTest, "getting wall clock time", &
                               rcToReturn=rc2)) then
