@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.15 2003/01/09 22:51:25 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.16 2003/01/10 16:55:09 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -194,7 +194,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.15 2003/01/09 22:51:25 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.16 2003/01/10 16:55:09 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -650,7 +650,7 @@
 !     Create layout with specified decomposition
       allocate(PEList(nDE_i*nDE_j))
       do i = 1,nDE_i*nDE_j
-        PEList(i) = i
+        PEList(i) = i - 1  ! TODO:  short-term fix to go to C++
       enddo
       distgrid%layout = ESMF_LayoutCreate(nDE_i, nDE_j, PEList, &
                                           ESMF_XFAST, status)
@@ -1250,6 +1250,9 @@
         return
       endif
       DE_id = DE_id + 1    ! TODO:  have to add one to go from C
+      DEx = DEx + 1
+      DEy = DEy + 1
+      write(*,*) 'DE_id, DEx, DEy = ', DE_id, DEx, DEy
 !     TODO:  identify neighbors
 
       distgrid%MyDE%MyDE = DE_id

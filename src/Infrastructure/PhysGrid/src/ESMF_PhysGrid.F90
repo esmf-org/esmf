@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.14 2003/01/08 21:25:20 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.15 2003/01/10 16:55:33 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -182,7 +182,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.14 2003/01/08 21:25:20 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.15 2003/01/10 16:55:33 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1142,6 +1142,7 @@
       integer :: i                                ! local counter
       integer :: global_n1, global_n2             ! counters
       integer :: local_n1, local_n2               ! counters
+      integer :: l1, l2
       logical :: rcpresent=.FALSE.                ! Return code present
       real(selected_real_kind(6,45)), dimension(:,:), pointer :: temp
 
@@ -1165,7 +1166,9 @@
         case (ESMF_CellLoc_Unknown)
           status = ESMF_FAILURE
         case (ESMF_CellLoc_Center_X)
-          allocate(temp(global_nmax1,global_nmax2))  ! TODO local sizing
+          l1 = global_nmax1 - global_nmin1 + 1
+          l2 = global_nmax2 - global_nmin2 + 1
+          allocate(temp(l1,l2))  ! TODO local sizing
           do global_n1 = global_nmin1,global_nmax1
             local_n1 = global_n1 - global_nmin1 + 1
             do global_n2 = global_nmin2,global_nmax2
@@ -1179,7 +1182,9 @@
 !         deallocate(temp)
           call ESMF_ArrayPrint(physgrid%center_coord1, "foo", rc)
         case (ESMF_CellLoc_Center_Y)
-          allocate(temp(global_nmax1,global_nmax2))  ! TODO local sizing
+          l1 = global_nmax1 - global_nmin1 + 1
+          l2 = global_nmax2 - global_nmin2 + 1
+          allocate(temp(l1,l2))  ! TODO local sizing
           do global_n2 = global_nmin2,global_nmax2
             local_n2 = global_n2 - global_nmin2 + 1
             do global_n1 = global_nmin1,global_nmax1
