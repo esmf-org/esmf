@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.26 2003/08/29 05:33:37 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.27 2003/09/03 20:47:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.26 2003/08/29 05:33:37 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.27 2003/09/03 20:47:23 cdeluca Exp $'
 
 !==============================================================================
 
@@ -113,7 +113,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockSetup - Initialize a clock
+! !IROUTINE: ESMF_ClockSetup - Setup a Clock
 
 ! !INTERFACE:
       subroutine ESMF_ClockSetup(clock, timeStep, startTime, stopTime, &
@@ -128,7 +128,7 @@
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Initialize an {\tt ESMF\_Clock}.
+!     Sets the initial values in an {\tt ESMF\_Clock}.    
 !     
 !     The arguments are:
 !     \begin{description}
@@ -158,7 +158,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockSet - Set a clock's properties
+! !IROUTINE: ESMF_ClockSet - Set one or more properties of a Clock
 
 ! !INTERFACE:
       subroutine ESMF_ClockSet(clock, timeStep, startTime, stopTime, &
@@ -175,7 +175,7 @@
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Initialize an {\tt ESMF\_Clock}.
+!     Sets one or more of the properties of an {\tt ESMF\_Clock}.
 !     
 !     The arguments are:
 !     \begin{description}
@@ -209,7 +209,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockGet - Get a clock's properties
+! !IROUTINE: ESMF_ClockGet - Get a Clock's properties
 
 ! !INTERFACE:
       subroutine ESMF_ClockGet(clock, timeStep, startTime, stopTime, &
@@ -231,7 +231,7 @@
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Get properties of a {\tt ESMF\_Clock}.
+!     Gets the properties of a {\tt ESMF\_Clock}.
 !     
 !     The arguments are:
 !     \begin{description}
@@ -275,7 +275,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockAddAlarm - Add an alarm to a clock's alarm list
+! !IROUTINE: ESMF_ClockAddAlarm - Add an Alarm to a Clock's Alarm list
 
 ! !INTERFACE:
       subroutine ESMF_ClockAddAlarm(clock, alarm, rc)
@@ -286,7 +286,7 @@
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Add an {\tt ESMF\_Alarm} to an {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list.
+!     Adds an {\tt alarm} to the {\tt clock}'s {\tt ESMF\_Alarm} list.
 !
 !     The arguments are:
 !     \begin{description}
@@ -310,7 +310,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockGetAlarm - Get an alarm in a clock's alarm list
+! !IROUTINE: ESMF_ClockGetAlarm - Get an Alarm in a Clock's Alarm list
 
 ! !INTERFACE:
       subroutine ESMF_ClockGetAlarm(clock, i, alarm, rc)
@@ -322,7 +322,7 @@
       integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get the "i" th {\tt ESMF\_Alarm} in an {\tt ESMF\_Clock}'s
+!     Gets the "i" th {\tt alarm} in the {\tt clock}'s
 !     {\tt ESMF\_Alarm} list.
 !   
 !     The arguments are:
@@ -348,7 +348,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockGetRingingAlarm - Get a ringing alarm in a clock's alarm list
+! !IROUTINE: ESMF_ClockGetRingingAlarm - Get a ringing Alarm in a Clock's Alarm list
 
 ! !INTERFACE:
       subroutine ESMF_ClockGetRingingAlarm(clock, i, alarm, rc)
@@ -360,7 +360,7 @@
       integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get the "i" th ringing {\tt ESMF\_Alarm} in an {\tt ESMF\_Clock}'s
+!     Gets the "i" th ringing {\tt alarm} in the {\tt clock}'s
 !     {\tt ESMF\_Alarm} list.
 !   
 !     The arguments are:
@@ -386,7 +386,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockAdvance - Advance a clock's current time by one time step
+! !IROUTINE: ESMF_ClockAdvance - Advance a Clock's current time by one time step
 
 ! !INTERFACE:
       subroutine ESMF_ClockAdvance(clock, timeStep, numRingingAlarms, rc)
@@ -398,7 +398,8 @@
       integer,                 intent(out), optional :: rc
 !   
 ! !DESCRIPTION:
-!     Advance an {\tt ESMF\_Clock}'s current time by one time step.
+!     Advances the {\tt clock}'s current time by one time step.  This
+!     method optionally returns the number of ringing {\tt ESMF_Alarm}s.
 !  
 !     The arguments are:
 !     \begin{description}
@@ -424,7 +425,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockIsStopTime - Has the clock reached its stop time ?
+! !IROUTINE: ESMF_ClockIsStopTime - Has the Clock reached its stop time?
 
 ! !INTERFACE:
       function ESMF_ClockIsStopTime(clock, rc)
@@ -437,8 +438,8 @@
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Return true if {\tt ESMF\_Clock} has reached its stop time, false 
-!     otherwise.
+!     Returns true if the {\tt clock} has reached its stop time, and
+!     false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -458,7 +459,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockSyncToRealTime - Set clock's current time to wall clock time
+! !IROUTINE: ESMF_ClockSyncToRealTime - Set Clock's current time to wall clock time
 
 ! !INTERFACE:
       subroutine ESMF_ClockSyncToRealTime(clock, rc)
@@ -468,7 +469,7 @@
       integer,          intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Set an {\tt ESMF\_Clock}'s current time to wall clock time.
+!     Sets a {\tt clock}'s current time to the wall clock time.
 !   
 !     The arguments are:
 !     \begin{description}
@@ -494,7 +495,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockReadRestart - Restores a clock
+! !IROUTINE: ESMF_ClockReadRestart - Restore the contents of a Clock
 
 ! !INTERFACE:
       subroutine ESMF_ClockReadRestart(clock, timeStep, startTime, stopTime, &
@@ -515,7 +516,7 @@
       integer,                 intent(out), optional      :: rc
     
 ! !DESCRIPTION:
-!     Restore an {\tt ESMF\_Clock}.
+!     Restores the contents of an {\tt ESMF\_Clock} for restart.
 !     
 !     The arguments are:
 !     \begin{description}
@@ -556,7 +557,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockWriteRestart - Saves a clock
+! !IROUTINE: ESMF_ClockWriteRestart - Save the contents of a Clock 
 
 ! !INTERFACE:
       subroutine ESMF_ClockWriteRestart(clock, timeStep, startTime, stopTime, &
@@ -577,7 +578,7 @@
       integer,                 intent(out), optional       :: rc
 
 ! !DESCRIPTION:
-!     Save an {\tt ESMF\_Clock}.
+!     Saves the contents of an {\tt ESMF\_Clock} for restart.
 !     
 !     The arguments are:
 !     \begin{description}
@@ -629,7 +630,7 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a validation check on an {\tt ESMF\_Clock}'s properties.
+!     Check whether a {\tt clock} is valid.
 !
 !     The arguments are:  
 !     \begin{description}
@@ -652,7 +653,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_ClockPrint - Print out a Clock's properties
+! !IROUTINE:  ESMF_ClockPrint - Print the contents of a Clock
 
 ! !INTERFACE:
       subroutine ESMF_ClockPrint(clock, options, rc)
@@ -663,8 +664,8 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     To support testing/debugging, print out an {\tt ESMF\_Clock}'s
-!     properties.
+!     To support testing and debugging, this method prints out 
+!     the contents of an {\tt ESMF\_Clock}.
 ! 
 !     The arguments are:
 !     \begin{description}
