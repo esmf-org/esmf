@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.10 2003/08/30 00:05:41 eschwab Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.11 2003/08/30 00:13:35 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarEx.F90,v 1.10 2003/08/30 00:05:41 eschwab Exp $'
+      '$Id: ESMF_CalendarEx.F90,v 1.11 2003/08/30 00:13:35 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -109,7 +109,7 @@
       Dl = Dl + 67300   !     are 32-bit
       call ESMF_TimeSet(checkTime, d_i8=Dl, calendar=julianCalendar, rc=rc)
       call ESMF_TimePrint(checkTime, rc=rc)
-      call ESMF_TimeSetCalendar(checkTime, gregorianCalendar, rc)
+      call ESMF_TimeSet(checkTime, calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeGet(checkTime, yr_i8=YRl, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
       print *, "Check Time4 Gregorian = ", &
                YRl, "/", MM, "/", DD, " ", H, ":", M, ":", S
@@ -120,7 +120,7 @@
       Dl = Dl + 67301   !     are 32-bit
       call ESMF_TimeSet(checkTime, d_i8=Dl, calendar=julianCalendar, rc=rc)
       call ESMF_TimePrint(checkTime, rc=rc)
-      call ESMF_TimeSetCalendar(checkTime, gregorianCalendar, rc)
+      call ESMF_TimeSet(checkTime, calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeGet(checkTime, yr_i8=YRl, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
       print *, "Check Time5 Gregorian = ", &
                YRl, "/", MM, "/", DD, " ", H, ":", M, ":", S
