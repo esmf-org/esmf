@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2003/04/02 21:05:13 flanigan Exp $ 
+# $Id: makefile,v 1.17 2003/04/08 23:09:25 nscollins Exp $ 
 
 ALL: system_tests
 
@@ -42,7 +42,7 @@ $(ESMC_TESTDIR)/ESMF_SysTest63029: ESMF_SysTest63029.o  user_model.o chkopts
 
 RUN_ESMF_SysTest63029:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest63029.tmps
-	${MPIRUN} -np 2 $(ESMC_TESTDIR)/ESMF_SysTest63029 > $(ESMC_TESTDIR)/ESMF_SysTest63029.stdout
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_SysTest63029 > $(ESMC_TESTDIR)/ESMF_SysTest63029.stdout
 
 RUN_ESMF_SysTest63029UNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest63029.tmps
