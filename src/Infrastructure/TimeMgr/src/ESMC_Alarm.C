@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.42 2004/05/19 00:50:38 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.43 2004/05/19 21:24:40 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,6 +23,7 @@
  #include <iostream.h>
  #include <string.h>
  #include <ctype.h>
+
  #include <ESMC_LogErr.h>
  #include <ESMF_LogMacros.inc>
  #include <ESMC_Clock.h>
@@ -33,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.42 2004/05/19 00:50:38 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.43 2004/05/19 21:24:40 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
