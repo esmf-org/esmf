@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.14 2003/04/28 20:09:13 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.15 2003/04/29 14:14:35 nscollins Exp $
 !
 ! System test code #70385
 
@@ -98,10 +98,9 @@
 !     Destroy section
 ! 
 
-    call ESMF_GridCompDestroy(comp1, rc)
-    call ESMF_StateDestroy(import, rc)
     call ESMF_DELayoutDestroy(layout1, rc)
     call ESMF_GridCompDestroy(comp1, rc)
+    call ESMF_StateDestroy(import, rc)
     call ESMF_AppCompDestroy(app, rc)
     print *, "All Destroy routines done"
 
