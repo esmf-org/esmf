@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.80 2004/02/10 23:42:07 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.81 2004/02/19 00:14:25 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -283,12 +283,13 @@
       public ESMF_Domain, ESMF_DomainList
       public ESMF_AxisIndex
 
-! !PUBLIC MEMBER FUNCTIONS:
 !
 ! !DESCRIPTION:
 !     The following routines apply to any type in the system.  
 !     The attribute routines can be inherited as-is.  The other
 !     routines need to be specialized by the higher level objects.
+!
+! !PUBLIC MEMBER FUNCTIONS:
 !
 !   Base class methods
        public ESMF_BaseCreate
@@ -381,7 +382,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.80 2004/02/10 23:42:07 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.81 2004/02/19 00:14:25 svasquez Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -692,7 +693,7 @@ end function
 !     \item [{[name]}]
 !           Object name.  An error will be returned if a duplicate name 
 !           is specified.  If a name is not given a unique name will be
-!           generated and can be queried by the {\tt ESMF_GetName} routine.
+!           generated and can be queried by the {\tt ESMF\_GetName} routine.
 !     \item [{[namespace]}]
 !           Object namespace (e.g. "Application", "Component", "Grid", etc).
 !           If given, the name will be checked that it is unique within
@@ -875,7 +876,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMF_AttributeGetNameList - get an ESMF object's attribute name list
+! !IROUTINE:  ESMF_AttributeGetNameList - get an ESMF object's attribute name list
 !
 ! !INTERFACE:
       subroutine ESMF_AttributeGetNameList(anytype, count, namelist, rc)
@@ -1036,7 +1037,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMF_AttributeCopyAll - copy attributes between two objects
+! !IROUTINE:  ESMF_AttributeCopyAll - copy attributes between two objects
 
 !
 ! !INTERFACE:
@@ -1066,7 +1067,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMF_BasePrint - call into C++ code to print base object
+! !IROUTINE:  ESMF_BasePrint - call into C++ code to print base object
 
 !
 ! !INTERFACE:
@@ -1108,7 +1109,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMF_DomainListCreate - create domain list
+! !IROUTINE:  ESMF_DomainListCreate - create domain list
 
 !
 ! !INTERFACE:
@@ -1143,7 +1144,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMF_DomainListDestroy - destroy domain list
+! !IROUTINE:  ESMF_DomainListDestroy - destroy domain list
 
 !
 ! !INTERFACE:
@@ -1165,7 +1166,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMF_DomainListPrint - print domain list
+! !IROUTINE:  ESMF_DomainListPrint - print domain list
 
 !
 ! !INTERFACE:
@@ -1201,7 +1202,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMF_DomainListAdd2d - Add a 2d domainlist
+! !IROUTINE:  ESMF_DomainListAdd2d - Add a 2d domainlist
 
 !
 ! !INTERFACE:
@@ -1236,7 +1237,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMF_DomainListAdd3d - Add a 3d domainlist
+! !IROUTINE:  ESMF_DomainListAdd3d - Add a 3d domainlist
 
 !
 ! !INTERFACE:
@@ -1276,7 +1277,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMF_DomainListAddObj - Add a domain object 
+! !IROUTINE:  ESMF_DomainListAddObj - Add a domain object 
 
 !
 ! !INTERFACE:
@@ -1332,7 +1333,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMF_AxisIndexSet - initialize an AxisIndex object
+! !IROUTINE:  ESMF_AxisIndexSet - initialize an AxisIndex object
 
 !
 ! !INTERFACE:
@@ -1361,7 +1362,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMF_AxisIndexGet - get contents of an AxisIndex object
+! !IROUTINE:  ESMF_AxisIndexGet - get contents of an AxisIndex object
 !
 ! !INTERFACE:
       subroutine ESMF_AxisIndexGet(ai, min, max, stride, rc)
@@ -1390,7 +1391,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMF_SetPointer - set an opaque value
+! !IROUTINE:  ESMF_SetPointer - set an opaque value
 
 !
 ! !INTERFACE:
@@ -1416,7 +1417,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMF_SetNullPointer - set an opaque value
+! !IROUTINE:  ESMF_SetNullPointer - set an opaque value
 
 !
 ! !INTERFACE:
