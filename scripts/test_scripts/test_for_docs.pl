@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# $Id: test_for_docs.pl,v 1.1 2003/06/25 20:34:04 flanigan Exp $
+# $Id: test_for_docs.pl,v 1.2 2003/06/25 20:56:25 flanigan Exp $
 #
 # test_for_docs.pl
 # 
@@ -166,25 +166,28 @@ if ($options{e}) {
     $esmf_docs_fail = 0;
 
     # Check for existence of impl_rep dir.
-    -d $options{e} || die "FAIL ESMF dir does not exist: $options{i} \n";
-
-    # Check for existence of impl_rep/doc dir.
-    $doc_dir = "$options{e}/doc";
-    -d $doc_dir || die "FAIL ESMF doc dir does not exist: $doc_dir \n";
-
-    # Check for all docs listed in the impl_rep_docs array.
-    foreach $doc (@esmf_docs){
-	@esmf_result = GetDocStatus("$doc_dir","ESMF",$doc);
-	push @esmf_result_list, $esmf_result[0];
-	$esmf_docs_num++;
-	if($esmf_result[1]){
-	    $esmf_docs_pass++ ;
+    if (! -d $options{e}){
+	print "Error: ESMF dir does not exist: $options{i} \n";
+    }else{
+	# Check for existence of impl_rep/doc dir.
+	$doc_dir = "$options{e}/doc";
+	if (! -d $doc_dir) { 
+	    print "Error: ESMF doc dir does not exist: $doc_dir \n";
 	}else{
-	    $esmf_docs_fail++ ;
+	    # Check for all docs listed in the impl_rep_docs array.
+	    foreach $doc (@esmf_docs){
+		@esmf_result = GetDocStatus("$doc_dir","ESMF",$doc);
+		push @esmf_result_list, $esmf_result[0];
+		$esmf_docs_num++;
+		if($esmf_result[1]){
+		    $esmf_docs_pass++ ;
+		}else{
+		    $esmf_docs_fail++ ;
+		}
+	    }
 	}
     }
 }
-
 
 #
 #  Test for impl_rep docs
@@ -196,21 +199,26 @@ if ($options{i}) {
     $impl_rep_docs_fail = 0;
     
     # Check for existence of impl_rep dir.
-    -d $options{i} || die "FAIL impl_rep dir does not exist: $options{i} \n";
-
-    # Check for existence of impl_rep/doc dir.
-    $doc_dir = "$options{i}/doc";
-    -d $doc_dir || die "FAIL impl_rep doc dir does not exist: $doc_dir \n";
-
-    # Check for all docs listed in the impl_rep_docs array.
-    foreach $doc (@impl_rep_docs){
-	@impl_rep_result = GetDocStatus("$doc_dir","impl_rep",$doc);
-	push @impl_rep_result_list, $impl_rep_result[0];
-	$impl_rep_docs_num++;
-	if($impl_rep_result[1]){
-	    $impl_rep_docs_pass++ ;
+    if (! -d $options{i}) {
+	print "Error: impl_rep dir does not exist: $options{i} \n";
+    }else{
+	# Check for existence of impl_rep/doc dir.
+	$doc_dir = "$options{i}/doc";
+	if(! -d $doc_dir ) {
+	    print "Error: impl_rep doc dir does not exist: $doc_dir \n";
 	}else{
-	    $impl_rep_docs_fail++ ;
+
+	    # Check for all docs listed in the impl_rep_docs array.
+	    foreach $doc (@impl_rep_docs){
+		@impl_rep_result = GetDocStatus("$doc_dir","impl_rep",$doc);
+		push @impl_rep_result_list, $impl_rep_result[0];
+		$impl_rep_docs_num++;
+		if($impl_rep_result[1]){
+		    $impl_rep_docs_pass++ ;
+		}else{
+		    $impl_rep_docs_fail++ ;
+		}
+	    }
 	}
     }
 }
