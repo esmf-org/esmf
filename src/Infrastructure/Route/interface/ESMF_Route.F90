@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.65 2005/03/01 00:06:28 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.66 2005/03/14 17:33:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -116,18 +116,39 @@
       public ESMF_RouteValidate
       public ESMF_RoutePrint
  
-!
+! Overloaded = operator function
+      public operator(+)
+
+
 !
 !EOPI
 
 !------------------------------------------------------------------------------
+interface operator(+)
+  module procedure radd
+end interface
+
+!------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.65 2005/03/01 00:06:28 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.66 2005/03/14 17:33:44 nscollins Exp $'
 
 !==============================================================================
 !
       contains
+
+!==============================================================================
+!
+! Overloaded operators
+!
+!------------------------------------------------------------------------------
+function radd(first, second)
+  type(ESMF_RouteOptions) :: radd
+  type(ESMF_RouteOptions), intent(in) :: first, second
+
+  radd.option = first.option + second.option
+
+end function radd
 
 !==============================================================================
 !
