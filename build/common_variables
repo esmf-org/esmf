@@ -1,4 +1,4 @@
-# $Id: common_variables,v 1.26 2003/04/09 23:48:41 flanigan Exp $ 
+# $Id: common_variables,v 1.27 2003/04/24 17:07:09 flanigan Exp $ 
 #
 # LIBNAME       - library name
 # SOURCE        - source files
@@ -94,7 +94,6 @@ ifeq ($(ESMF_EXHAUSTIVE),ON)
 FCPPFLAGS += -DESMF_EXHAUSTIVE 
 CCPPFLAGS += -DESMF_EXHAUSTIVE 
 endif
-
 
 
 #

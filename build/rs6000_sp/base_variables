@@ -1,9 +1,10 @@
-# $Id: base_variables,v 1.19 2003/04/23 14:11:50 nscollins Exp $ 
+# $Id: base_variables,v 1.20 2003/04/24 17:07:19 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
 AR			= ar
 AR_FLAGS		= cr
+AR_EXTRACT              = -x
 RM			= rm -f
 OMAKE			= ${MAKE}
 RANLIB			= ranlib
@@ -108,11 +109,17 @@ OCOMP_FOPTFLAGS		= -O3
 #
 PARCH			= rs6000
 
-SL_SUFFIX   = so
-SL_LIBOPTS  = -G 
-SL_LINKOPTS = -lC -blazy
-SL_F_LINKER = $(F90CXXLD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
-SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
+# SL_SUFFIX   = so
+# SL_LIBOPTS  = -G 
+# SL_LINKOPTS = -lC -blazy
+# SL_F_LINKER = $(F90CXXLD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
+# SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
+
+SL_SUFFIX   = 
+SL_LIBOPTS  = 
+SL_LINKOPTS = 
+SL_F_LINKER = $(F90CXXLD)
+SL_C_LINKER = $(CXXF90LD)
 
 include $(ESMF_BUILD_DIR)/common_variables
 

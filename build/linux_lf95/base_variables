@@ -1,9 +1,10 @@
-# $Id: base_variables,v 1.12 2003/04/11 20:54:31 flanigan Exp $ 
+# $Id: base_variables,v 1.13 2003/04/24 17:07:12 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
 AR		   = ar
 AR_FLAGS	   = cr
+AR_EXTRACT         = -x
 RM		   = rm -f
 OMAKE		   = ${MAKE}
 RANLIB		   = ranlib

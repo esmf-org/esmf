@@ -1,4 +1,4 @@
-# $Id: base,v 1.7 2003/04/21 22:17:35 flanigan Exp $ 
+# $Id: base,v 1.8 2003/04/24 17:07:18 flanigan Exp $ 
 #
 include $(ESMF_BUILD_DIR)/$(ESMF_ARCH)/base_variables
 include $(ESMF_BUILD_DIR)/common
@@ -57,5 +57,5 @@ include $(ESMF_BUILD_DIR)/common
 #
 # Set shared dependent on build_shared to build .so lib.
 #
-shared: build_shared
+shared: 
 
