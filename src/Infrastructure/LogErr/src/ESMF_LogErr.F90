@@ -179,21 +179,7 @@ end subroutine ESMF_LogClose
    	enddo 
 	if (aLog%FileIsOpen .eq. ESMF_FALSE) return
 	aLog%unitNumber = i  
-	if (present(rc)) rc=ESMF_SUCCESS
-	!call DATE_AND_TIME(d,t)
-
-	!OPEN(UNIT=aLog%unitnumber,File=aLog%nameLogErrFile,POSITION="APPEND", &
-	!ACTION="WRITE",STATUS="UNKNOWN",IOSTAT=STATUS)
-	!if (status .eq. 0) then
-    		!aLog%FileIsOpen=ESMF_TRUE
-		!WRITE(aLog%stdOutUnitNumber,100) d,t,"INFO     Log Open"
-		!100 FORMAT(a8,2x,a10,2x,a)
-		!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  INFO       Log Open"	
-		!rc=0
-   	!else
-    		!aLog%FileIsOpen=ESMF_FALSE
-   	!end if  
-	
+	if (present(rc)) rc=ESMF_SUCCESS	
 end subroutine ESMF_LogOpen	
 
 !--------------------------------------------------------------------------
@@ -201,15 +187,15 @@ end subroutine ESMF_LogOpen
 ! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
 
 ! !INTERFACE: 
-	subroutine ESMF_LogWrite(aLog, string,logtype,module, method, rc)
+	subroutine ESMF_LogWrite(msg,logtype,module,method,rc,aLog)
 !
 ! !ARGUMENTS:
-	type(ESMF_Log), intent(in) 		:: aLog
-	character(len=*), intent(in)		:: string
-	integer, intent(in)			:: logtype
+	character(len=*), intent(in)			:: msg
+	integer, intent(in)						:: logtype
 	character(len=*), intent(in), optional  :: module
 	character(len=*), intent(in), optional	:: method
-	integer, intent(out),optional		:: rc
+	integer, intent(out),optional			:: rc
+	type(ESMF_Log), intent(in) , optional	:: aLog
 
 ! !DESCRIPTION:
 !      This routine writes to the file(s) associated with {\tt aLog}.
@@ -219,7 +205,7 @@ end subroutine ESMF_LogOpen
 ! 
 !      \item [aLog]
 !            Log object.
-!      \item [string]
+!      \item [msg]
 !            User-provided context string.
 !      \item [logtype]
 !            The type of message (info(0), warning(1), error(2)).
@@ -245,51 +231,99 @@ end subroutine ESMF_LogOpen
 	
 	if (present(rc)) rc=ESMF_FAILURE
 	if (present(method)) tmethod=adjustl(method)
-	if (present(module)) tmodule=adjustl(module)	  
-	if (aLog%FileIsOpen .eq. ESMF_TRUE) then
-		call DATE_AND_TIME(d,t)	
-		select case (logtype)
-			case (0)
-				lt="INFO"
-			case (1)
-				lt="WARNING"
-			case default
-				lt="ERROR"
-		end select				
-		f=adjustl(__FILE__)
-		ok=0
-		do i=1, 100000
-			OPEN(UNIT=aLog%unitnumber,File=aLog%nameLogErrFile,POSITION="APPEND", &
-			ACTION="WRITE",STATUS="UNKNOWN",IOSTAT=status)
-			if (status.eq.0) then
-				if ((present(module)).and.(present(method))) then
-		  			WRITE(aLog%unitnumber,100) d,t,lt,f,__LINE__,tmodule,tmethod,string
-                        		100 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a,a)
-					if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-					lt,"    ",f,__LINE__,"  ",tmodule,tmethod,string		
-				else if ((present(module)).and. .not.(present(method))) then
-		  			WRITE(aLog%unitnumber,101) d,t,lt,f,__LINE__,tmodule,string
-					101 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a)
-					if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-					lt,"    ",f,__LINE__,"  ",tmodule,string
-				else if (.not.(present(module)).and.(present(method))) then
-		  			WRITE(aLog%unitnumber,102) d,t,lt,f,__LINE__,tmodule,string
-					102 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a)
-					if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-					lt,"    ",f,__LINE__,"  ",tmodule,string	
-				else
-					WRITE(aLog%unitnumber,103) d,t,lt,f,__LINE__,string
-					103 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a)
-					if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-					lt,"    ",f,__LINE__,"  ",string
+	if (present(module)) tmodule=adjustl(module)
+	if (present(aLog)) then	  
+		if (aLog%FileIsOpen .eq. ESMF_TRUE) then
+			call DATE_AND_TIME(d,t)	
+			select case (logtype)
+				case (0)
+					lt="INFO"
+				case (1)
+					lt="WARNING"
+				case default
+					lt="ERROR"
+			end select				
+			f=adjustl(__FILE__)
+			ok=0
+			do i=1, 100000
+				OPEN(UNIT=aLog%unitnumber,File=aLog%nameLogErrFile,POSITION="APPEND", &
+				ACTION="WRITE",STATUS="UNKNOWN",IOSTAT=status)
+				if (status.eq.0) then
+					if ((present(module)).and.(present(method))) then
+		  				WRITE(aLog%unitnumber,100) d,t,lt,f,__LINE__,tmodule,tmethod,msg
+                    	100 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a,a)
+						if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+						lt,"    ",f,__LINE__,"  ",tmodule,tmethod,msg		
+					else if ((present(module)).and. .not.(present(method))) then
+		  				WRITE(aLog%unitnumber,101) d,t,lt,f,__LINE__,tmodule,msg
+						101 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a)
+						if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+						lt,"    ",f,__LINE__,"  ",tmodule,msg
+					else if (.not.(present(module)).and.(present(method))) then
+		  				WRITE(aLog%unitnumber,102) d,t,lt,f,__LINE__,tmodule,msg
+						102 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a)
+						if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+						lt,"    ",f,__LINE__,"  ",tmodule,msg
+					else
+						WRITE(aLog%unitnumber,103) d,t,lt,f,__LINE__,msg
+						103 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a)
+						if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+						lt,"    ",f,__LINE__,"  ",msg
+					endif	
+					CLOSE(UNIT=aLog%stdOutUnitNumber)
+					if (present(rc)) rc=ESMF_SUCCESS
+					ok=1
 				endif	
-				CLOSE(UNIT=aLog%stdOutUnitNumber)
-				if (present(rc)) rc=ESMF_SUCCESS
-				ok=1
-			endif	
-			if (ok.eq.1) exit
-		enddo
-	endif
+				if (ok.eq.1) exit
+			enddo
+		endif
+
+	else
+		if (gLog%FileIsOpen .eq. ESMF_TRUE) then
+			call DATE_AND_TIME(d,t)	
+			select case (logtype)
+				case (0)
+					lt="INFO"
+				case (1)
+					lt="WARNING"
+				case default
+					lt="ERROR"
+			end select				
+			f=adjustl(__FILE__)
+			ok=0
+			do i=1, 100000
+				OPEN(UNIT=gLog%unitnumber,File=gLog%nameLogErrFile,POSITION="APPEND", &
+				ACTION="WRITE",STATUS="UNKNOWN",IOSTAT=status)
+				if (status.eq.0) then
+					if ((present(module)).and.(present(method))) then
+		  				WRITE(gLog%unitnumber,100) d,t,lt,f,__LINE__,tmodule,tmethod,msg
+                    	104 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a,a)
+						if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+						lt,"    ",f,__LINE__,"  ",tmodule,tmethod,msg		
+					else if ((present(module)).and. .not.(present(method))) then
+		  				WRITE(gLog%unitnumber,101) d,t,lt,f,__LINE__,tmodule,msg
+						105 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a)
+						if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+						lt,"    ",f,__LINE__,"  ",tmodule,msg
+					else if (.not.(present(module)).and.(present(method))) then
+		  				WRITE(gLog%unitnumber,102) d,t,lt,f,__LINE__,tmodule,msg
+						106 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a)
+						if (gLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+						lt,"    ",f,__LINE__,"  ",tmodule,msg	
+					else
+						WRITE(gLog%unitnumber,103) d,t,lt,f,__LINE__,msg
+						107 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a)
+						if (gLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+						lt,"    ",f,__LINE__,"  ",msg
+					endif	
+					CLOSE(UNIT=gLog%stdOutUnitNumber)
+					if (present(rc)) rc=ESMF_SUCCESS
+					ok=1
+				endif	
+				if (ok.eq.1) exit
+			enddo
+		endif
+	endif	
 	       
 end subroutine ESMF_LogWrite
 
@@ -298,18 +332,18 @@ end subroutine ESMF_LogWrite
 ! !IROUTINE: ESMF_LogFoundError - Returns logical associated with finding an error
 
 ! !INTERFACE: 
-	function ESMF_LogFoundError(aLog,rc,string,logtype,module,method)
+	function ESMF_LogFoundError(rc,msg,logtype,module,method,aLog)
 !
 ! !RETURN VALUE:
 	logical								::ESMF_LogFoundError
 ! !ARGUMENTS:
 !	
-	type(ESMF_Log), intent(in) 					:: aLog
 	integer, intent(in)						:: rc
-	character(len=*), intent(in),optional				:: string
+	character(len=*), intent(in),optional				:: msg
 	integer, intent(in),optional					:: logtype
 	character(len=*), intent(in), optional  			:: module
 	character(len=*), intent(in), optional				:: method
+	type(ESMF_Log), intent(in), optional				:: aLog
 	
 
 ! !DESCRIPTION:
@@ -338,7 +372,11 @@ end subroutine ESMF_LogWrite
 	
 	ESMF_LogFoundError=ESMF_FALSE
 	if (rc .NE. ESMF_SUCCESS) then
-		call ESMF_LogWrite(aLog,string,logtype,module,method,trc)
+		if (present(aLog)) then
+			call ESMF_LogWrite(msg,logtype,module,method,trc,aLog)
+		else 
+			call ESMF_LogWrite(msg,logtype,module,method,trc)
+		endif
 		ESMF_LogFoundError=ESMF_TRUE
 	endif	
        
