@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.9 2004/03/11 16:17:48 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.10 2004/03/17 23:31:42 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.9 2004/03/11 16:17:48 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.10 2004/03/17 23:31:42 svasquez Exp $'
 
 !==============================================================================
 !
@@ -136,6 +136,7 @@
 !     decomposed over N {\tt ESMF\_DE}s, this routine returns a copy of the
 !     entire collected data {\tt ESMF\_Array} on each of the N {\tt ESMF\_DE}s.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [bundle] 
 !           {\tt ESMF\_Bundle} containing data to be gathered.
@@ -206,6 +207,7 @@
 !     {\tt ESMF\_DE} number.  On all other {\tt ESMF\_DE}s, there is no return
 !     {\tt ESMF\_Array}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [bundle] 
 !           {\tt ESMF\_Bundle} containing data to be gathered.
@@ -341,6 +343,7 @@
 ! !DESCRIPTION:
 !     Perform a Reduction operation over the data in a {\tt ESMF\_Bundle}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [bundle] 
 !           Bundle containing data to be reduced.
@@ -408,6 +411,7 @@
 !     takes a single array on the specified {\tt ESMF\_DE} and returns a decomposed copy
 !     on each of the N {\tt ESMF\_DE}s, as the {\tt ESMF\_Array} associated with the given empty {\tt ESMF\_Bundle}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [array] 
 !           Input {\tt ESMF\_Array} containing the collected data.
@@ -521,6 +525,7 @@
 !     in an {\tt ESMF\_Bundle}.  This routine updates the data 
 !     inside the {\tt ESMF\_Bundle} in place.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [bundle] 
 !           {\tt ESMF\_Bundle} containing data to be halo'd.
@@ -582,6 +587,7 @@
 !     Release all stored information about the Halo associated
 !     with this {\tt ESMF\_RouteHandle}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} associated with this Bundle Halo.
@@ -616,6 +622,7 @@
 !     in an {\tt ESMF\_Bundle}.  This routine updates the data 
 !     inside the {\tt ESMF\_Bundle} in place.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [bundle] 
 !           {\tt ESMF\_Bundle} containing data to be halo'd.
@@ -707,6 +714,7 @@
 !     Unlike {\tt ESMF\_Regrid} this routine does not do interpolation,
 !     only data movement.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [srcbundle] 
 !           {\tt ESMF\_Bundle} containing source data.
@@ -775,6 +783,7 @@
 !     Release all stored information about the Redist associated
 !     with this {\tt ESMF\_RouteHandle}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} associated with this Bundle Redist.
@@ -816,6 +825,7 @@
 !     Unlike {\tt ESMF\_Regrid} this routine does not do interpolation,
 !     only data movement.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [srcBundle]
 !           {\tt ESMF\_Bundle} containing source data.
@@ -918,6 +928,7 @@
 !     control the transformation of data.  The array data in the 
 !     destination bundle is overwritten by this call.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [srcbundle] 
 !           {\tt ESMF\_Bundle} containing source data.
@@ -978,6 +989,7 @@
 !     Release all stored information about the Regridding associated
 !     with this {\tt ESMF\_RouteHandle}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} associated with this Bundle Regridding.
@@ -1015,6 +1027,7 @@
 !     control the transformation of data.  The array data in the 
 !     destination bundle is overwritten by this call.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [srcbundle] 
 !           {\tt ESMF\_Bundle} containing source data.
