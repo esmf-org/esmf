@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.86 2003/12/08 18:52:08 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.87 2003/12/08 23:11:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -236,7 +236,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.86 2003/12/08 18:52:08 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.87 2003/12/08 23:11:35 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1044,6 +1044,7 @@
       type(ESMF_Array) :: array                   ! New array
       type(ESMF_AxisIndex), dimension(ESMF_MAXDIM) :: index
       integer, dimension(ESMF_MAXDIM) :: counts
+      type(ESMF_Relloc) :: localRelloc
       integer :: hwidth
       integer :: i, rank, gridRank
 
@@ -1089,7 +1090,10 @@
       if (present(datamap)) then
         ftype%mapping = datamap
       else
-        call ESMF_GridGetPhysGrid(grid, numDims=gridRank, rc=status)
+        localRelloc = ESMF_CELL_CENTER
+        if (present(relloc)) localRelloc = relloc
+        call ESMF_GridGetPhysGrid(grid, relloc=localRelloc, numDims=gridRank, &
+                                rc=status)
         if (gridRank .eq. 1) then
           ftype%mapping = ESMF_DataMapCreate(ESMF_IO_I, relloc, gridRank, status)
         else if (gridRank .eq. 2) then
@@ -1244,6 +1248,7 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       integer :: gridRank
+      type(ESMF_Relloc) :: localRelloc
 
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -1270,7 +1275,10 @@
       ftype%grid = grid
       ftype%gridstatus = ESMF_STATE_READY
 
-      call ESMF_GridGetPhysGrid(grid, numDims=gridRank, rc=status)
+      localRelloc = ESMF_CELL_CENTER
+      if (present(relloc)) localRelloc = relloc
+      call ESMF_GridGetPhysGrid(grid, relloc=localRelloc, numDims=gridRank, &
+                                rc=status)
       if (present(datamap)) then
         ftype%mapping = datamap   ! copy, datamap can be deleted by user afterwards
       else
@@ -1278,7 +1286,7 @@
           ftype%mapping = ESMF_DataMapCreate(ESMF_IO_I, relloc, status)
         else if (gridRank .eq. 2) then
           ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJ, relloc, status)
-        else if (gridRank .eq. 2) then
+        else if (gridRank .eq. 3) then
           ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJK, relloc, status)
         endif
       endif
@@ -1356,6 +1364,7 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       integer :: gridRank
+      type(ESMF_Relloc) :: localRelloc
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -1381,7 +1390,10 @@
       ftype%grid = grid
       ftype%gridstatus = ESMF_STATE_READY
 
-      call ESMF_GridGetPhysGrid(grid, numDims=gridRank, rc=status)
+      localRelloc = ESMF_CELL_CENTER
+      if (present(relloc)) localRelloc = relloc
+      call ESMF_GridGetPhysGrid(grid, relloc=localRelloc, numDims=gridRank, &
+                                rc=status)
       if (present(datamap)) then
         ftype%mapping = datamap   ! copy, datamap can be deleted by user afterwards
       else
@@ -1389,7 +1401,7 @@
           ftype%mapping = ESMF_DataMapCreate(ESMF_IO_I, relloc, status)
         else if (gridRank .eq. 2) then
           ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJ, relloc, status)
-        else if (gridRank .eq. 2) then
+        else if (gridRank .eq. 3) then
           ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJK, relloc, status)
         endif
       endif
@@ -2256,11 +2268,12 @@
       type(ESMF_FieldType), pointer :: ftypep     ! field type info
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_DELayout) :: layout               ! layout
-      integer :: i, gridrank, datarank, thisdim, thislength
+      integer :: i, gridrank, datarank, thisdim, thislength, ndes
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
                                          global_dimlengths
       integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
       integer, dimension(ESMF_MAXGRIDDIM) :: local_cell_max_dim, local_maxlengths
+      integer, dimension(:, :), pointer :: local_axis_counts
       integer, dimension(:), pointer :: decompids
    
       ! Initialize return code   
@@ -2283,14 +2296,15 @@
       endif 
       call ESMF_GridGetDELayout(ftypep%grid, layout, status)
       call ESMF_DELayoutGetNumDEs(layout, ndes, status)
+      allocate(local_axis_counts(ndes, ESMF_MAXGRIDDIM), stat=status)
       call ESMF_GridGet(ftypep%grid, global_cell_dim=global_cell_dim, &
                         local_cell_max_dim=local_cell_max_dim, &
-                        local_axis_length= local_axis_length, &
+                        local_axis_length=local_axis_counts, &
                         rc=status)
 !     call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO: add decomps
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldAllGather: GridGet returned failure"
-        return
+        goto 20
       endif 
       decomps(1) = 1    ! TODO: remove this once the grid call is created
       decomps(2) = 2
@@ -2300,7 +2314,7 @@
                          counts=dimlengths, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldAllGather: ArrayGet returned failure"
-        return
+        goto 20
       endif 
 
       allocate(decompids(datarank), stat=status)
@@ -2330,7 +2344,7 @@
                                   rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldAllGather: ArraySetAxisIndex returned failure"
-        return
+        goto 20
       endif 
 
       ! Call Array method to perform actual work
@@ -2341,11 +2355,14 @@
                                ftypep%mapping, array, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldAllGather: Array AllGather returned failure"
-        return
+        goto 20
       endif 
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
+
+20  continue  ! error exit
+      deallocate(local_axis_counts, stat=status)
 
       end subroutine ESMF_FieldAllGather
 
