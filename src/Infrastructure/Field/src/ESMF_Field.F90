@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.83 2003/10/25 12:03:29 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.84 2003/12/04 21:04:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -223,9 +223,11 @@
    public ESMF_FieldPrint              ! Print contents of a Field
    public ESMF_FieldBoxIntersect       ! Intersect bounding boxes
 
+   public ESMF_FieldWrite              ! Write data and grid from a Field
+
 !  !subroutine ESMF_FieldWriteRestart(field, iospec, rc)
 !  !function ESMF_FieldReadRestart(name, iospec, rc)
-!  !subroutine ESMF_FieldWrite(field, subset, iospec, rc)
+   !subroutine ESMF_FieldWrite(field, subset, iospec, rc)
 !  !function ESMF_FieldRead(fname, gname, dnames, iospec, rc)
 !
 !
@@ -234,7 +236,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.83 2003/10/25 12:03:29 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.84 2003/12/04 21:04:19 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3874,7 +3876,7 @@
                                  iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field 
+      type(ESMF_Field), intent(inout) :: field 
 !     type(ESMF_Subset), intent(in), optional :: subset
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc  
@@ -3886,15 +3888,50 @@
 !
 !
 !EOP
-! !REQUIREMENTS: FLD3.1, FLD3.2, FLD3.3, FLD3.4, FLD3.5
+
+        ! Local variables
+        integer :: status, de_id
+        logical :: rcpresent
+        type(ESMF_Array) :: outarray
+        type(ESMF_Grid) :: grid
+        type(ESMF_DELayout) :: layout
+        character(len=ESMF_MAXSTR) :: filename
 
 
-!
-! TODO: code goes here
-!
+        ! TODO: revised code goes here
+
+
         ! call ESMF_Log(?, 'entry into ESMF_FieldWrite');
-     
-        
+
+        ! Set initial values
+        status = ESMF_FAILURE 
+        rcpresent = .FALSE.
+
+        ! Initialize return code
+        if(present(rc)) then
+            rcpresent=.TRUE.
+            rc = ESMF_FAILURE      
+        endif
+           
+        ! Get filename out of IOSpec, if specified.  Otherwise use the
+        ! name of the Field.
+        if (present(IOSpec)) then
+            !call ESMF_IOSpecGet(IOSpec, filename=filename, rc=status)
+        else
+            call ESMF_FieldGet(field, name=filename, rc=status)
+        endif
+
+        ! Collect results on DE 0 and output to a file
+        call ESMF_FieldGet(field, grid=grid, rc=status)
+        call ESMF_GridGetDELayout(grid, layout, rc=status)
+        call ESMF_DELayoutGetDEID(layout, de_id, status)
+
+        ! Output to file
+        call ESMF_FieldAllGather(field, outarray, rc=status)
+        if (de_id .eq. 0) then       
+            call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
+        endif
+        call ESMF_ArrayDestroy(outarray, status)
 
         end subroutine ESMF_FieldWrite
 
