@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.22 2003/02/03 05:53:45 eschwab Exp $
+! $Id: ESMF_Base.F90,v 1.23 2003/02/06 18:54:02 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -134,6 +134,24 @@
           type (ESMF_DataValue) :: attr_value
       end type
 
+      type ESMF_AxisIndex
+      sequence
+!     private
+          integer :: l
+          integer :: r
+          integer :: max
+          integer :: decomp
+      end type
+
+      type ESMF_MemIndex
+      sequence
+!     private
+          integer :: l
+          integer :: r
+          integer :: str
+          integer :: num
+      end type
+
       type ESMF_BasePointer
       sequence
       private
@@ -167,8 +185,9 @@
 
       public ESMF_NULL_POINTER, ESMF_BAD_POINTER
 
-      public ESMF_Status, ESMF_DataType, ESMF_DataKind, ESMF_DataValue 
-      public ESMF_Attribute, ESMF_BasePointer, ESMF_Base, ESMF_Pointer
+      public ESMF_Status, ESMF_Pointer, ESMF_DataType, ESMF_DataKind
+      public ESMF_DataValue, ESMF_Attribute, ESMF_AxisIndex, ESMF_MemIndex
+      public ESMF_BasePointer, ESMF_Base
 
 ! !PUBLIC MEMBER FUNCTIONS:
 !
@@ -235,7 +254,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.22 2003/02/03 05:53:45 eschwab Exp $'
+               '$Id: ESMF_Base.F90,v 1.23 2003/02/06 18:54:02 jwolfe Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
