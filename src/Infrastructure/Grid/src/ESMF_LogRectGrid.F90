@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.115 2004/12/04 00:23:39 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.116 2004/12/04 20:05:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -108,6 +108,8 @@
     public ESMF_LRGridBoxIntersectRecv
     public ESMF_LRGridBoxIntersectSend
     public ESMF_LRGridDestruct
+    public ESMF_LRGridSerialize
+    public ESMF_LRGridDeserialize
     !public ESMF_LRGridSearch
 
 !------------------------------------------------------------------------------
@@ -119,7 +121,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.115 2004/12/04 00:23:39 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.116 2004/12/04 20:05:16 nscollins Exp $'
 
 !==============================================================================
 !
