@@ -1,4 +1,4 @@
-% $Id: DELayout_refdoc.ctex,v 1.1 2004/04/28 23:10:54 cdeluca Exp $ 
+% $Id: DELayout_refdoc.ctex,v 1.2 2004/04/29 17:55:25 cdeluca Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -41,40 +41,57 @@
 \newpage
 #endif
 
-
-
-%============================================================================
-% Overview
-%============================================================================
-
-\section{Overview}
-#ifdef STANDALONE
-\input{DELayout_desc}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/DELayout/doc/DELayout_desc}
-#endif
-\newpage
-
-
 %============================================================================
 % DELayout Class
 %============================================================================
 
 \section{DELayout Class}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{DELayout_desc}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/DELayout/doc/DELayout_desc}
+#endif
+
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{DELayout_usage}
+%\input{ESMF_DELayoutCreateEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/DELayout/doc/DELayout_usage}
+%\input{../Infrastructure/DELayout/doc/ESMF_DELayoutCreateEx_fapi}
 #endif
-\newpage
+
+%\subsection{Restrictions and Future Work}
+%#ifdef STANDALONE
+%\input{DELayout_rest}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/DELayout/doc/DELayout_rest}
+%#endif
+
+%\subsection{Design and Implementation Notes}
+%#ifdef STANDALONE
+%\input{DELayout_implnotes}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/DELayout/doc/DELayout_implnotes}
+%#endif
+
 \subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_DELayout_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/DELayout/doc/ESMF_DELayout_fapi}
 #endif
-\newpage
 
+%#ifdef STANDALONE
+%\section{Bibliography}
+%\bibliography{comp} 
+%\bibliographystyle{plain}
+%\addcontentsline{toc}{section}{Bibliography}
+%#endif
+
+#ifdef STANDALONE
 \end{document}
 #endif
+
