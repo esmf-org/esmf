@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.75 2003/10/13 22:31:31 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.76 2003/10/14 03:55:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -170,7 +170,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.75 2003/10/13 22:31:31 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.76 2003/10/14 03:55:39 nscollins Exp $'
 
 !==============================================================================
 !
@@ -691,7 +691,7 @@
       integer :: i, nDE, bnd
       integer, dimension(ESMF_MAXGRIDDIM) :: global_cell_dim, nDEs
 
-!     Initialize return code
+      ! Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -706,7 +706,7 @@
 !       return
 !     endif
  
-!     Initialize the derived type contents
+      ! Initialize the derived type contents
       call ESMF_DistGridConstructNew(dgtype, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: DistGrid construct"
@@ -769,7 +769,7 @@
         return
       endif
 
-!     set the distgrid layout to the specified layout
+      ! Set the distgrid layout to the specified layout
       call ESMF_DELayoutGetSize(layout, nDEs(1), nDEs(2), status)
       nDE = nDEs(1) * nDEs(2)
       if((status .NE. ESMF_SUCCESS) .or. (nDE .le. 0)) then
@@ -778,7 +778,7 @@
       endif
       dgtype%layout = layout
 
-!     Allocate resources based on number of DE's
+      ! Allocate resources based on number of DE's
       allocate(dgtype%global_total%local_cell_count(nDE), stat=status)
       if(status .NE. 0) then
         print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
@@ -820,20 +820,20 @@
         return
       endif
 
-!     Parse problem size, first with and then without boundary cells
+      ! Parse problem size, first with and then without boundary cells
       call ESMF_DistGridSetCounts(dgtype, nDEs, countsPerDE1, countsPerDE2, &
                                   periodic, total=.FALSE., rc=status)
       call ESMF_DistGridSetCounts(dgtype, nDEs, countsPerDE1, countsPerDE2, &
                                   periodic, total=.TRUE., rc=status)
         
-!     Fill in DE derived type
+      ! Fill in DE derived type
       call ESMF_DistGridSetDE(dgtype, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: Set de"
         return
       endif
 
-!     Calculate other distgrid values from DE information
+      ! Calculate other distgrid values from DE information
 !     dgtype%local_cell_max = GlobalCommMax()
 !     do i = 1,ESMF_MAXGRIDDIM
 !       dgtype%local_cell_max_dim(i) = GlobalCommMax()
@@ -879,7 +879,7 @@
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
 
-!     Initialize return code
+      ! Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -905,8 +905,9 @@
 ! !IROUTINE: ESMF_DistGridGet - Get information from a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGet(dgtype, covers_domain, global_cell_count, &
-                                  global_cell_dim, global_start, &
+      subroutine ESMF_DistGridGet(dgtype, covers_domain, &
+                                  global_cell_count, global_cell_dim, &
+                                  global_start, &
                                   local_cell_max, local_cell_max_dim, total, rc)
 !
 ! !ARGUMENTS:
@@ -942,8 +943,8 @@
 !          Array of the maximum number of cells in each dimension on
 !          any {\tt ESMF\_DE}.
 !     \item[{[total]}] 
-!          Logical; if TRUE return these values including boundary cells.  Default is
-!          FALSE, returning only computational cells.
+!          Logical; if TRUE return these values including boundary cells.  
+!          Default is FALSE, returning only computational cells.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -966,10 +967,9 @@
 
       ! If total is true, get info for the total cells including
       ! boundary areas; otherwise get only computational areas.
-      if (present(total) .and. total) then
-        glob => dgtype%global_total
-      else
-        glob => dgtype%global_comp
+      glob => dgtype%global_comp
+      if (present(total)) then
+        if (total) glob => dgtype%global_total
       endif
 
       ! If present, get information from distgrid derived type
@@ -1008,7 +1008,7 @@
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
-!
+ 
       end subroutine ESMF_DistGridGet
 
 !------------------------------------------------------------------------------
@@ -1016,9 +1016,9 @@
 ! !IROUTINE: ESMF_DistGridSet - Set information about a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridSet(dgtype, covers_domain, global_cell_count, &
-                                  global_cell_dim, local_cell_max, &
-                                  local_cell_max_dim, total, rc)
+      subroutine ESMF_DistGridSet(dgtype, covers_domain, &
+                                  global_cell_count, global_cell_dim, &
+                                  local_cell_max, local_cell_max_dim, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), target :: dgtype
@@ -1037,23 +1037,23 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[dgtype] 
-!          Class to be set.
+!        Class to be set.
 !     \item[{[covers\_domain]}]
-!          Logical identifier if distgrid covers the entire physical domain.
+!        Logical identifier if distgrid covers the entire physical domain.
 !     \item[{[global\_cell\_count]}]
-!          Global total number of cells.
+!        Global total number of cells.
 !     \item[{[global\_cell\_dim]}]
-!          Array of the global number of cells in each dimension.
+!        Array of the global number of cells in each dimension.
 !     \item[{[local\_cell\_max]}]
-!          Maximum number of cells on any {\tt ESMF\_DE}.
+!        Maximum number of cells on any {\tt ESMF\_DE}.
 !     \item[{[local\_cell\_max\_dim]}]
-!          Array of the maximum number of cells in each dimension on
-!          any {\tt ESMF\_DE}.
+!        Array of the maximum number of cells in each dimension on
+!        any {\tt ESMF\_DE}.
 !     \item[{[total]}]
-!          Logical; if TRUE, sets counts for total cells including boundary cells.
-!          Default is FALSE, sets only computational cells.
+!        Logical; if TRUE, sets counts for total cells including boundary cells.
+!        Default is FALSE, sets only computational cells.
 !     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
@@ -1064,7 +1064,7 @@
       type(ESMF_DistGridGlobal), pointer :: glob
       integer :: i
 
-!     Initialize return code
+      ! Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -1074,21 +1074,19 @@
 
       ! If total is true, set info for the total cells including
       ! boundary areas; otherwise set only computational areas.
-      if (present(total) .and. total) then
-        glob => dgtype%global_total
-      else
-        glob => dgtype%global_comp
+      glob => dgtype%global_comp
+      if (present(total)) then
+        if (total) glob => dgtype%global_total
       endif
 
-!     if present, set information filling in distgrid derived type
+      ! if present, set information filling in distgrid derived type
       if(present(covers_domain)) dgtype%covers_domain = covers_domain
 
-      if(present(global_cell_count)) &
-                 glob%global_cell_count = global_cell_count
+      if(present(global_cell_count)) glob%global_cell_count = global_cell_count
 
       if(present(global_cell_dim)) then
-                 ! TODO: add check that global_cell_dim is large enough
-                 !       or use the size of the array for the loop limit
+        ! TODO: add check that global_cell_dim is large enough
+        !       or use the size of the array for the loop limit
         do i = 1,ESMF_MAXGRIDDIM
           glob%global_cell_dim(i) = global_cell_dim(i)
         enddo
@@ -1097,8 +1095,8 @@
       if(present(local_cell_max)) glob%local_cell_max = local_cell_max
 
       if(present(local_cell_max_dim)) then
-                 ! TODO: add check that local_cell_max_dim is large enough
-                 !       or use the size of the array for the loop limit
+        ! TODO: add check that local_cell_max_dim is large enough
+        !       or use the size of the array for the loop limit
         do i = 1,ESMF_MAXGRIDDIM
           glob%local_cell_max_dim(i) = local_cell_max_dim(i)
         enddo
@@ -1305,10 +1303,9 @@
 
       ! If total is true, set info for the total cells including
       ! boundary areas; otherwise set only computational areas.
-      if (present(total) .and. total) then
-        glob => dgtype%global_total
-      else
-        glob => dgtype%global_comp
+      glob => dgtype%global_comp
+      if (present(total)) then
+        if (total) glob => dgtype%global_total
       endif
 
 !     Retrieve extent counts for each axis from the de identifier
@@ -1396,12 +1393,13 @@
 
       ! If total is true, set info for the total cells including
       ! boundary areas; otherwise set only computational areas.
-      if (present(total) .and. total) then
-        glob => dgtype%global_total
-        bnd = dgtype%grid_boundary_width * 2
-      else
-        glob => dgtype%global_comp
-        bnd = 0
+      glob => dgtype%global_comp
+      bnd = 0
+      if (present(total)) then
+        if (total) then
+          glob => dgtype%global_total
+          bnd = dgtype%grid_boundary_width * 2
+        endif
       endif
 
       ! Calculate number of local counts on each DE, respecting the setting
@@ -1546,10 +1544,9 @@
 
       ! If total is true, return info for the total cells including
       ! boundary areas; otherwise return computational areas.
-      if (present(total) .and. total) then
-        me => dgtype%MyDE_total
-      else
-        me => dgtype%MyDE_comp
+      me => dgtype%MyDE_comp
+      if (present(total)) then
+        if (total) me => dgtype%MyDE_total
       endif
 
       ! If present, get information from distgrid derived type
@@ -1697,10 +1694,9 @@
 
       ! If total is true, return info for the AIs including
       ! boundary areas; otherwise return computational AIs.
-      if (present(total) .and. total) then
-        glob => dgtype%global_total
-      else
-        glob => dgtype%global_comp
+      glob => dgtype%global_comp
+      if (present(total)) then
+        if (total) glob => dgtype%global_total
       endif
 
       ! Get information from distgrid derived type
@@ -1758,10 +1754,9 @@
 
       ! If total is true, return info for the total cells including
       ! boundary areas; otherwise return computational areas.
-      if (present(total) .and. total) then
-        glob => dgtype%global_total
-      else
-        glob => dgtype%global_comp
+      glob => dgtype%global_comp
+      if (present(total)) then
+        if (total) glob => dgtype%global_total
       endif
 
       ! Get information from distgrid derived type
@@ -1903,12 +1898,13 @@
 
       ! If total is true, return info for the total cells including
       ! boundary areas; otherwise return computational areas.
-      if (present(total) .and. total) then
-        me => dgtype%MyDE_total
-        glob => dgtype%global_total
-      else
-        me => dgtype%MyDE_comp
-        glob => dgtype%global_comp
+      me => dgtype%MyDE_comp
+      glob => dgtype%global_comp
+      if (present(total)) then
+        if (total) then
+          me => dgtype%MyDE_total
+          glob => dgtype%global_total
+        endif
       endif
 
       !memory translation here
@@ -2106,12 +2102,13 @@
 
       ! If total is true, return info for the total cells including
       ! boundary areas; otherwise return computational areas.
-      if (present(total) .and. total) then
-        me => dgtype%MyDE_total
-        glob => dgtype%global_total
-      else
-        me => dgtype%MyDE_comp
-        glob => dgtype%global_comp
+      me => dgtype%MyDE_comp
+      glob => dgtype%global_comp
+      if (present(total)) then
+        if (total) then
+          me => dgtype%MyDE_total
+          glob => dgtype%global_total
+        endif
       endif
 
 !     1-D memory translation here
