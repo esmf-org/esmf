@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.16 2004/02/25 23:08:19 svasquez Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.17 2004/03/01 18:46:44 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.16 2004/02/25 23:08:19 svasquez Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.17 2004/03/01 18:46:44 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -270,19 +270,22 @@
 ! !IROUTINE: ESMF_ArrayRedistStore - Release the information stored about this Halo operation
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayRedistStore(srcarray, srcgrid, srcdatamap, &
-                                       dstgrid, dstdatamap, parentlayout, &
-                                       routehandle, blocking, rc)
+      subroutine ESMF_ArrayRedistStore(srcArray, srcGrid, srcDataMap, &
+                                       dstArray, dstGrid, dstDataMap, &
+                                       parentLayout, routehandle, blocking, &
+                                       total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: srcarray
-      type(ESMF_Grid), intent(in) :: srcgrid
-      type(ESMF_DataMap), intent(in) :: srcdatamap
-      type(ESMF_Grid), intent(in) :: dstgrid
-      type(ESMF_DataMap), intent(in) :: dstdatamap
-      type(ESMF_DELayout) :: parentlayout
+      type(ESMF_Array), intent(in) :: srcArray
+      type(ESMF_Grid), intent(in) :: srcGrid
+      type(ESMF_DataMap), intent(in) :: srcDataMap
+      type(ESMF_Array), intent(in) :: dstArray
+      type(ESMF_Grid), intent(in) :: dstGrid
+      type(ESMF_DataMap), intent(in) :: dstDataMap
+      type(ESMF_DELayout) :: parentLayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_Async), intent(inout), optional :: blocking
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -300,8 +303,160 @@
 !
 !
 !EOP
+! !REQUIREMENTS:
+      integer :: status         ! local error status
+      logical :: rcpresent      ! did user specify rc?
+      type(ESMF_DELayout) :: dstLayout, srcLayout
+      type(ESMF_Logical), dimension(:), allocatable :: periodic
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: dstAI, srcAI, &
+                                                       dstLocalAI, srcLocalAI
+      type(ESMF_Route) :: route
+      integer, dimension(:), allocatable :: dstCellCountPerDim, decompids, &
+                                            srcCellCountPerDim
+      integer, dimension(ESMF_MAXDIM) :: dstDimOrder, srcDimOrder, dimlengths
+      integer, dimension(:,:), allocatable :: dstStartPerDEPerDim, &
+                                              srcStartPerDEPerDim
+      integer :: nDEs, dstMyDE, srcMyDE
+      integer :: gridrank, datarank
+      integer :: i, numDims
+      logical :: hascachedroute, &  ! can we reuse an existing route?
+                 totalUse
 
-      ! TODO: add code here
+      ! initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! set optional arguments if not present
+      totalUse = .false.
+      if (present(total)) then
+        totalUse = total
+      endif
+ 
+      ! Extract layout information from the Grids
+      call ESMF_GridGetDELayout(dstGrid, dstLayout, status)
+      call ESMF_GridGetDELayout(srcGrid, srcLayout, status)
+      call ESMF_GridGet(srcGrid, numDims=gridrank, rc=status)
+
+      ! Our DE number in the layout and the total number of DEs
+      call ESMF_DELayoutGetDEid(dstLayout, dstMyDE, status)
+      call ESMF_DELayoutGetDEid(srcLayout, srcMyDE, status)
+      call ESMF_DElayoutGetNumDEs(srcLayout, nDEs, rc=status)
+
+      ! Allocate temporary arrays
+      allocate(           periodic(      gridrank), stat=status)
+      allocate(          decompids(      gridrank), stat=status)
+      allocate( dstCellCountPerDim(      gridrank), stat=status)
+      allocate(dstStartPerDEPerDim(nDEs, gridrank), stat=status)
+      allocate( srcCellCountPerDim(      gridrank), stat=status)
+      allocate(srcStartPerDEPerDim(nDEs, gridrank), stat=status)
+      allocate(              dstAI(nDEs, gridrank), stat=status)
+      allocate(              srcAI(nDEs, gridrank), stat=status)
+      allocate(         dstLocalAI(nDEs, gridrank), stat=status)
+      allocate(         srcLocalAI(nDEs, gridrank), stat=status)
+     
+      ! Extract more information from the Grids
+      ! TODO: get decompids?
+      call ESMF_GridGet(dstGrid, globalCellCountPerDim=dstCellCountPerDim, &
+                        globalStartPerDEPerDim=dstStartPerDEPerDim, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+         print *, "ERROR in ArrayRedist: GridGet returned failure"
+         return
+      endif
+      call ESMF_GridGet(srcGrid, globalCellCountPerDim=srcCellCountPerDim, &
+                        globalStartPerDEPerDim=srcStartPerDEPerDim, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+         print *, "ERROR in ArrayRedist: GridGet returned failure"
+         return
+      endif
+
+      ! Query the datamap and set info for grid so it knows how to
+      ! match up the array indicies and the grid indicies.
+      call ESMF_DataMapGet(dstDataMap, dimlist=dstDimOrder, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ArrayRedist: DataMapGet returned failure"
+        return
+      endif
+      call ESMF_DataMapGet(srcDataMap, dimlist=srcDimOrder, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ArrayRedist: DataMapGet returned failure"
+        return
+      endif
+
+      ! And get the Array sizes
+      call ESMF_ArrayGet(srcArray, rank=datarank, counts=dimlengths, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+         print *, "ERROR in ArrayRedist: ArrayGet returned failure"
+         return
+      endif
+
+      ! TODO: apply dimorder and decompids to get mapping of array to data
+
+      ! set up things we need to find a cached route or precompute one
+      if (totalUse) then
+        call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+                                         totalindex=dstLocalAI, rc=status)
+        call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+                                         totalindex=srcLocalAI, rc=status)
+      else
+        call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+                                         compindex=dstLocalAI, rc=status)
+        call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+                                         compindex=srcLocalAI, rc=status)
+      endif
+
+      ! translate AI's into global numbering
+      call ESMF_GridLocalToGlobalIndex(dstGrid, localAI2D=dstLocalAI, &
+                                       globalAI2D=dstAI, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+         print *, "ERROR in ArrayRedist: GridLocalToGlobalIndex returned failure"
+         return
+      endif
+      call ESMF_GridLocalToGlobalIndex(srcGrid, localAI2D=srcLocalAI, &
+                                       globalAI2D=srcAI, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+         print *, "ERROR in ArrayRedist: GridLocalToGlobalIndex returned failure"
+         return
+      endif
+
+      ! Does this same route already exist?  If so, then we can drop
+      ! down immediately to RouteRun.
+      call ESMF_RouteGetCached(datarank, dstMyDE, dstAI, dstAI, nDEs, dstLayout, &
+                                         srcMyDE, srcAI, srcAI, nDEs, srcLayout, &
+                               periodic, hascachedroute, route, status)
+
+      if (.not. hascachedroute) then
+          ! Create the route object.
+          route = ESMF_RouteCreate(parentLayout, rc)
+
+          call ESMF_RoutePrecomputeRedist(route, datarank, dstMyDE, dstAI, &
+                                          dstStartPerDEPerDim, &
+                                          dstCellCountPerDim, dstLayout, &
+                                          srcMyDE, srcAI, &
+                                          srcStartPerDEPerDim, &
+                                          srcCellCountPerDim, srcLayout, status)
+      endif
+
+      ! and set route into routehandle object
+      call ESMF_RouteHandleSet(routehandle, route1=route, rc=status)
+
+      ! get rid of temporary arrays
+      if (allocated(           periodic)) deallocate(periodic)
+      if (allocated(          decompids)) deallocate(decompids)
+      if (allocated( dstCellCountPerDim)) deallocate(dstCellCountPerDim)
+      if (allocated( srcCellCountPerDim)) deallocate(srcCellCountPerDim)
+      if (allocated(dstStartPerDEPerDim)) deallocate(dstStartPerDEPerDim)
+      if (allocated(srcStartPerDEPerDim)) deallocate(srcStartPerDEPerDim)
+      if (associated(             dstAI)) deallocate(dstAI)
+      if (associated(             srcAI)) deallocate(srcAI)
+      if (associated(        dstLocalAI)) deallocate(dstLocalAI)
+      if (associated(        srcLocalAI)) deallocate(srcLocalAI)
+
+! set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayRedistStore
 
@@ -310,47 +465,27 @@
 ! !IROUTINE: ESMF_ArrayRedistNew - redistribute an Array
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayRedistNew(srcarray, dstarray, srcgrid, srcdatamap, &
-                                  dstgrid, dstdatamap, parentlayout, async, rc) 
+      subroutine ESMF_ArrayRedistNew(srcArray, dstArray, routehandle, &
+                                     blocking, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: srcarray
-      type(ESMF_Array), intent(inout) :: dstarray
-      type(ESMF_Grid), intent(in) :: srcgrid
-      type(ESMF_DataMap), intent(in) :: srcdatamap
-      type(ESMF_Grid), intent(in) :: dstgrid
-      type(ESMF_DataMap), intent(in) :: dstdatamap
-      type(ESMF_DELayout) :: parentlayout
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_Array), intent(in) :: srcArray
+      type(ESMF_Array), intent(inout) :: dstArray
+      type(ESMF_RouteHandle), intent(in) :: routehandle
+      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Used to redistribute an Array.
 !
 !     \begin{description}
-!     \item [srcarray]
+!     \item [srcArray]
 !           {\tt ESMF\_Array} containing source data.
-!     \item [dstarray]
+!     \item [dstArray]
 !           {\tt ESMF\_Array} containing results.
-!     \item [srcgrid]
-!           {\tt ESMF\_Grid} which corresponds to how the data in the
-!           source array has been decomposed.  
-!     \item [srcdatamap]
-!           {\tt ESMF\_DataMap} which describes how the array maps to
-!           the specified source grid.
-!     \item [dstgrid]
-!           {\tt ESMF\_Grid} which corresponds to how the data in the
-!           destination array should be decomposed.  
-!     \item [dstdatamap]
-!           {\tt ESMF\_DataMap} which describes how the array should map to
-!           the specified destination grid.
-!     \item [parentlayout]
-!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Field}s,
-!           most commonly the layout
-!           of the Coupler if the regridding is inter-component, but could
-!           also be the individual layout for a component if the
-!           regridding is intra-component.
-!     \item [{[async]}]
+!     \item [routehandle]
+!           {\tt ESMF\_RouteHandle} has been precomputed.
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
@@ -360,39 +495,37 @@
 !
 !     \end{description}
 !
-
-!
 !
 !EOP
 ! !REQUIREMENTS:
-        integer :: status         ! local error status
-        logical :: rcpresent      ! did user specify rc?
-        integer :: size_rank_trans
-        integer :: size_decomp
+      integer :: status         ! local error status
+      logical :: rcpresent      ! did user specify rc?
+      type(ESMF_LocalArray) :: dstLocalArray, srcLocalArray
+      type(ESMF_Route) :: route
 
-! TODO: add code here
-! TODO: query grids and datamaps to get what is needed for redist
+      ! initialize return code; assume failure until success certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
 
-        ! assume failure until success certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+      call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
 
-        ! query things implemented in F90 and pass them to the C++ side,
-        !  assume we can directly reference members in the class.
-        !call c_ESMC_ArrayRedist()
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "c_ESMC_ArrayRedist returned error"
-          return
-        endif
+      ! Execute the communications call.
+      dstLocalArray = dstArray
+      srcLocalArray = srcArray
+      call ESMF_RouteRun(route, srcLocalArray, dstLocalArray, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ArrayRedist: RouteRun returned failure"
+        return
+      endif
 
 ! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+      if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayRedistNew
+      end subroutine ESMF_ArrayRedistNew
 
 !------------------------------------------------------------------------------
 !BOP
