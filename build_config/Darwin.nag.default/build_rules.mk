@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.12 2004/10/28 22:11:27 nscollins Exp $
+#  $Id: build_rules.mk,v 1.13 2005/03/03 22:32:54 theurich Exp $
 #
 #  Darwin.nag.default.mk
 #
@@ -55,7 +55,7 @@ endif
 ifeq ($(ESMF_COMM),lam)
 # with lam-mpi installed in /usr/local:
 MPI_HOME       = 
-MPI_LIB        = -lmpi -llam 
+MPI_LIB        = -lmpi -llam -llamf77mpi
 MPI_INCLUDE    = 
 MPIRUN         =  mpirun
 endif
