@@ -1,38 +1,54 @@
-% $Id: comp_req.tex,v 1.1 2001/12/13 20:03:39 cdeluca Exp $
+% $Id: comp_req.tex,v 1.2 2002/02/22 21:43:46 cdeluca Exp $
 
-\section{Requirements}
+%===============================================================================
+% Requirements may be itemized under a main topic:
+%===============================================================================
+%===============================================================================
+\req{<Requirement>}
+%-------------------------------------------------------------------------------
 
-\subsection{Scientific Requirements}
+<Description>
 
-% For simple components, an itemized list of requirements
-% may suffice.  A more complex requirements list may look like
-% the following.
+\sreq{<Subrequirement>}
 
-\subsubsection{<Requirement1>}
-<Description of requirement1.>
+<Description>
 
-% For requirements that contain subrequirements
-\subsubsection{<Requirement2>}
-\begin{itemize}
-\item {\bf Sub-requirement1} 
-<Description of sub-requirement1.>
-\item {\bf Sub-requirement2} 
-<Description of sub-requirement2.>
-\end{itemize}
+\begin{reqlist}
+{\bf Priority:} <Priority 1-3> \\
+{\bf Source:} <JMC Code (required, desired)> \\
+{\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
+{\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
+{\bf Notes:} <Background, comments on design, implementation, etc.> 
+\end{reqlist}
 
-\subsection{Computational Requirements}
+%===============================================================================
+% Or requirements may be itemized under a subtopic:
+%===============================================================================
+%===============================================================================
+\req{<Requirement>}
+%-------------------------------------------------------------------------------
 
-\subsubsection{<Requirement3>}
-<Description of requirement3.>
+<Description>
 
-% For requirements that contain subrequirements
-\subsubsection{<Requirement4>}
-\begin{itemize}
-\item {\bf Sub-requirement3} 
-<Description of sub-requirement3.>
-\item {\bf Sub-requirement4} 
-<Description of sub-requirement4.>
-\end{itemize}
+\sreq{<Subrequirement>}
+
+<Description>
+
+\ssreq{Subsubrequirement} 
+
+<Description>
+
+\begin{reqlist}
+{\bf Priority:} <Priority 1-3> \\
+{\bf Source:} <JMC Code (required, desired)> \\
+{\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
+{\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
+{\bf Notes:} <Background, comments on design, implementation, etc.> 
+\end{reqlist}
+
+
+
+
 
 
 

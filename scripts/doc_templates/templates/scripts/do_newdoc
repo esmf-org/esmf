@@ -50,8 +50,9 @@ endif
   case req:
       if(!(-r $newdir/README_REQ)) cp $DOCT_DIR/README_REQ $newdir
       if(!(-r $newdir/$1_reqdoc.tex)) cp $DOCT_DIR/comp_reqdoc.tex $newdir/$1_reqdoc.tex
-      if(!(-r $newdir/$1_syn.tex)) cp $DOCT_DIR/comp_syn.tex $newdir/$1_syn.tex
-      if(!(-r $newdir/$1_alg.tex)) cp $DOCT_DIR/comp_alg.tex $newdir/$1_alg.tex
+      if(!(-r $newdir/$1_background.tex)) cp $DOCT_DIR/comp_background.tex $newdir/$1_background.tex
+      if(!(-r $newdir/$1_abbr.tex)) cp $DOCT_DIR/comp_abbr.tex $newdir/$1_abbr.tex
+      if(!(-r $newdir/$1_terms.tex)) cp $DOCT_DIR/comp_terms.tex $newdir/$1_terms.tex
       if(!(-r $newdir/$1_req.tex)) cp $DOCT_DIR/comp_req.tex $newdir/$1_req.tex
       if(!(-r $newdir/$1_glos.tex)) cp $DOCT_DIR/comp_glos.tex $newdir/$1_glos.tex
       if(!(-r $newdir/$1.bib)) cp $DOCT_DIR/comp.bib $newdir/$1.bib

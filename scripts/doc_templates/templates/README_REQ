@@ -1,4 +1,4 @@
-% $Id: README_REQ,v 1.1 2001/12/13 20:03:39 cdeluca Exp $
+% $Id: README_REQ,v 1.2 2002/02/22 21:43:46 cdeluca Exp $
 
 ================================================================================
                                  README_REQ
@@ -11,21 +11,22 @@ A requirements document has the parts shown in the table below.  Brackets []
 indicate that a part is optional.  
 
 --------------------------------------------------------------------------------
-Part		Template File      Description
+Part		Template File      	Description
 --------------------------------------------------------------------------------
-document	<comp>_reqdoc.tex  Document shell, includes review status
+document	<comp>_reqdoc.tex  	Document shell, includes review status
 
-synopsis        <comp>_syn.tex	   Brief description of the software 
-                                   function 
+synopsis        <comp>_background.tex	Brief description of the software 
+                                   	function 
 
-[algorithms]    <comp>_alg.tex	   Description of the continuous and discrete 
-                                   scientific algorithms used in the software
+[terms]    	<comp>_terms.tex	Terminology associated with the software
 
-requirements	<comp>_req.tex	   Scientific and computational requirements
+abbreviations	<comp>_abbr.tex	   	Abbreviations
 
-[glossary]      <comp>_glos.tex	   Definitions, acronyms, abbreviations
+requirements	<comp>_req.tex	   	Itemized software requirements
 
-[references]    <comp>.bib         References
+[glossary]      <comp>_glos.tex	   	Definitions, acronyms, abbreviations
+
+[references]    <comp>.bib         	References
 
 --------------------------------------------------------------------------------
 

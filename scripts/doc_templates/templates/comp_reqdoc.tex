@@ -1,75 +1,128 @@
-% $Id: comp_reqdoc.tex,v 1.1 2001/12/13 20:03:39 cdeluca Exp $
+% $Id: comp_reqdoc.tex,v 1.2 2002/02/22 21:43:46 cdeluca Exp $
 
-\documentclass[]{article}
-
-\usepackage{epsf}
+\documentclass[english]{article}
+\usepackage{babel}
+\usepackage{supertabular}
 \usepackage{html}
 \usepackage[T1]{fontenc}
 
-\textwidth 6.5in
-\textheight 8.5in
-\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\docmttype}{Requirements}
+\newcommand{\reqtitle}[1]{\shortname#1}
+\newcommand{\req}[1]{\section{\hspace{.3in}#1}}
+\newcommand{\sreq}[1]{\subsection{\hspace{.3in}#1}}
+\newcommand{\ssreq}[1]{\subsubsection{\hspace{.3in}#1}}
+\newcommand{\mytitle}{\longname \docmttype ~~- Draft <Num>}
+\newenvironment
+{reqlist}
+{\begin{list} {} {} \rm \item[]}
+{\end{list}}
+
+%===============================================================================
+% User-defined commands
+%-------------------------------------------------------------------------------
+\newcommand{\longname}{<Class Name> }
+\newcommand{\funcname}{<ClassNm> }
+\newcommand{\shortname}{<CN>}
+\newcommand{\myauthors}{<Authors>}
+%===============================================================================
 
 \begin{document}
 
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
 
-\begin{titlepage}
+% Title page
+\input{../../../../scripts/doc_templates/templates/title_alldoc}
 
-\begin{center}
-{\Large Earth System Modeling Framework } \\
-\vspace{.25in}
-{\Large {\bf <Module, Library, Component or Model Name> Requirements}} \\
-\vspace{.25in}
-{\large {\it Authors}}
-\vspace{.5in}
-\end{center}
-
-\begin{latexonly}
-\vspace{5.5in}
-\begin{tabular}{p{5in}p{.9in}}
-\hrulefill \\
-\noindent {\bf NASA High Performance Computing and Communications Program} \\
-\noindent Earth and Space Sciences Project \\
-\noindent CAN 00-OES-01 \\
-\noindent http://www.esmf.ucar.edu \\
-\end{tabular}
-\end{latexonly}
-
-\end{titlepage}
-
+\newpage
 \tableofcontents
 
 \newpage
-%\section{Synopsis}
-\input{comp_syn}
+\begin{htmlonly}
+\addcontentsline{toc}{part}{\longname Overview}
+\end{htmlonly}
+\part{\longname Overview}
 
-%\section{Algorithmic Description}
-\input{comp_alg}
+%===============================================================================
+\section{Target Codes and Review Team}
+%-------------------------------------------------------------------------------
 
-%\section{Requirements}
-\input{comp_req}
+\begin{tabular}{l l}
 
-\section{Review Status}
+{\bf Sign-Off Date:}          & <Date> \\ \\
 
-\noindent {\bf Requirements Review} \\
+{\bf Target Codes}            & {\bf Reviewers} \\
+GFDL-SPEC, BGRID, MOM4        & Balaji \\ 
+HIM                           & Hallberg \\
+CAM-EUL, CLM                  & Eaton \\
+CAM-FV, PSAS                  & da Silva\\
+POP, CICE                     & Jones \\
+WRF                           & Michalakes \\
+MIT-REG, MIT-CPL, ADJ         & Hill \\
+NSIPP-ATM, NSIPP-OCN          & Suarez \\
+NCEP-ATM, SSI                 & Iredell \\ \\
 
-\begin{tabular}{r p{1.3in} p{2in}}
-{\bf Review Date:} & <Date> \\ \\
-{\bf Reviewers:}   & <Reviewer>          & <Institution> \\
-                   & <Reviewer>          & <Institution> \\
-                   & <Reviewer>          & <Institution>
+{\bf Other Reviewers:}        & DeLuca, Neckels
+
 \end{tabular}
 
-%\section{Glossary}
-\input{comp_glos}
+%===============================================================================
 
-%\section{Bibliography}
+\section{Introduction}
+%\input{../../../../scripts/doc_templates/templates/intro_reqdoc}
+
+%\section{\longname Background}
+\input{comp_background}
+
+\section{\longname Terms}
+\input{comp_terms}
+
+\section{Document Organization and Conventions}
+%\input{../../../../scripts/doc_templates/templates/conv_reqdoc}
+
+\subsection{Requirement Attributes}
+%\input{../../../../scripts/doc_templates/templates/attr_reqdoc}
+
+\section{\longname Abbreviations}
+\input{comp_abbr}
+
+\newpage
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+\begin{htmlonly}
+\addcontentsline{toc}{part}{\longname Requirements}
+\end{htmlonly}
+\part{\longname Requirements}
+
+\input{comp_req}
+
+\section*{Glossary}
+\input{comp_glos}
+\addcontentsline{toc}{section}{Glossary}
+
+%\section{References}
 \bibliography{comp} 
 \bibliographystyle{plain}
-\addcontentsline{toc}{section}{Bibliography}
+\addcontentsline{toc}{section}{References}
 
 \end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
