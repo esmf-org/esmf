@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.7 2003/07/28 19:45:01 svasquez Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.8 2003/07/29 23:28:16 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.7 2003/07/28 19:45:01 svasquez Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.8 2003/07/29 23:28:16 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -152,7 +152,7 @@
                                 gregCal=gregorianCalendar, &
                                 julCal=julianCalendar, rc=rc)
       end do
-
+      !NEX_UTest
       write(failMsg, *) "Low range endpoint not -4800/2/29 or rc=ESMF_FAILURE"
       write(name, *) "Gregorian/Fliegel Low Range Test"
       call ESMF_Test((YRl.eq.-4800 .and. MM.eq.2 .and. DD.eq.29 &
@@ -168,9 +168,11 @@
       !------------------------------------------------------------------!
 
 #ifdef ESMF_EXHAUSTIVE
+      !EX_UTest
       first_test = HIGH_LO
       last_test  = HIGH_HI
 #else
+      !NEX_UTest
       first_test = HIGH_HI
       last_test  = HIGH_HI
 #endif
@@ -208,6 +210,7 @@
           Dl = Dl + 67300   !    are 32-bit
 
 #ifdef ESMF_EXHAUSTIVE
+	  !EX_UTest
           ! start back a few 10,000 years, then come forward
           Dl = Dl - 10000000
 
@@ -218,6 +221,7 @@
           MM = 10
           DD = 3
 #else
+          !NEX_UTest
           ! start back 1000 days, then come forward
           Dl = Dl - 1000
 
