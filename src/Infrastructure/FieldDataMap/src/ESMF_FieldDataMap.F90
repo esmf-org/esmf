@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.16 2004/06/09 21:53:25 cdeluca Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.17 2004/06/09 23:16:06 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.16 2004/06/09 21:53:25 cdeluca Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.17 2004/06/09 23:16:06 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -266,11 +266,13 @@
         character (len = ESMF_MAXSTR) :: str
         character (len = ESMF_MAXSTR) :: msgbuf
 
-        write (msgbuf, *)  "FieldDataMap print:"
-        if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw  write (msgbuf, *)  "FieldDataMap print:"
+      !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+        write (*, *)  "FieldDataMap print:"
         if (fielddatamap%status .ne. ESMF_STATE_READY) then
-          write (msgbuf, *)  "Uninitialized or Invalid object"
-          if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw    write (msgbuf, *)  "Uninitialized or Invalid object"
+      !jw    if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+          write (*, *)  "Uninitialized or Invalid object"
           return
         endif
 
@@ -278,11 +280,13 @@
         call ESMF_ArrayDataMapPrint(fielddatamap%adm, options, rc)
 
         call ESMF_RelLocString(fielddatamap%horzRelloc, str, rc)
-        write (msgbuf, *)  "  Horizontal Relative location = ", trim(str)
-        if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw  write (msgbuf, *)  "  Horizontal Relative location = ", trim(str)
+      !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+        write (*, *)  "  Horizontal Relative location = ", trim(str)
         call ESMF_RelLocString(fielddatamap%vertRelloc, str, rc)
-        write (msgbuf, *)  "  Vertical Relative location = ", trim(str)
-        if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw  write (msgbuf, *)  "  Vertical Relative location = ", trim(str)
+      !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+        write (*, *)  "  Vertical Relative location = ", trim(str)
         ! TODO: These are private now, they need a print routine.
         !call ESMF_InterleaveString(fielddatamap%interleave%il_type, str, rc)
         !write (msgbuf, *)  "  Interleave type = ", trim(str), &

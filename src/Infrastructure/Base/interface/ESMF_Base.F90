@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.109 2004/06/08 13:40:24 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.110 2004/06/09 23:13:52 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -153,7 +153,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.109 2004/06/08 13:40:24 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.110 2004/06/09 23:13:52 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -967,22 +967,27 @@
       integer :: min, max, stride
       character(len=ESMF_MAXSTR) :: msgbuf
 
-      write (msgbuf, *)  "DomainListPrint"
-      if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
-      write (msgbuf, *)  "Number stored domains:", domainlist%num_domains
-      if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
-      write (msgbuf, *)  "Total points:", domainlist%total_points
-      if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+    !jw  write (msgbuf, *)  "DomainListPrint"
+    !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      write (*, *)  "DomainListPrint"
+    !jw  write (msgbuf, *)  "Number stored domains:", domainlist%num_domains
+    !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      write (*, *)  "Number stored domains:", domainlist%num_domains
+    !jw  write (msgbuf, *)  "Total points:", domainlist%total_points
+    !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      write (*, *)  "Total points:", domainlist%total_points
 
 ! Now loop through domains and print them out
 
       do i=1, domainlist%num_domains
-         write (msgbuf, *)  '***Domain.  Rank:', domainlist%domains(i)%rank
-         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+    !jw     write (msgbuf, *)  '***Domain.  Rank:', domainlist%domains(i)%rank
+    !jw     if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+         write (*, *)  '***Domain.  Rank:', domainlist%domains(i)%rank
          do j=1, domainlist%domains(i)%rank
 	    call ESMF_AxisIndexGet(domainlist%domains(i)%ai(j), min, max, stride)
-	    write (msgbuf, *)  '   axis:min,max,stride3:', min, max, stride
-            if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+    !jw        write (msgbuf, *)  '   axis:min,max,stride3:', min, max, stride
+    !jw        if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+	    write (*, *)  '   axis:min,max,stride3:', min, max, stride
          enddo
       enddo
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.13 2004/06/08 22:37:18 cdeluca Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.14 2004/06/09 23:14:21 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -209,7 +209,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.13 2004/06/08 22:37:18 cdeluca Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.14 2004/06/09 23:14:21 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -432,29 +432,35 @@ end function
         integer :: i, j
         character(len=ESMF_MAXSTR) :: msgbuf
 
-        write(msgbuf,*)  "ArrayDataMap print:"
-        if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw  write(msgbuf,*)  "ArrayDataMap print:"
+      !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+        write(*,*)  "ArrayDataMap print:"
         if (datamap%status .ne. ESMF_STATE_READY) then
-          write(msgbuf,*)  "Uninitialized or Invalid object"
-          if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw    write(msgbuf,*)  "Uninitialized or Invalid object"
+      !jw    if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+          write(*,*)  "Uninitialized or Invalid object"
           if (present(rc)) rc = ESMF_SUCCESS
           return
         endif
 
         ! individual data item information
-        write(msgbuf,*)  " Data rank = ", datamap%dataRank
-        if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
-        write(msgbuf,*)  " Data Index Order and Lengths for non-Grid Indices:"
-        if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw  write(msgbuf,*)  " Data rank = ", datamap%dataRank
+      !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+        write(*,*)  " Data rank = ", datamap%dataRank
+      !jw  write(msgbuf,*)  " Data Index Order and Lengths for non-Grid Indices:"
+      !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+        write(*,*)  " Data Index Order and Lengths for non-Grid Indices:"
         j = 1
         do i=1, ESMF_MAXDIM
             if (datamap%dataDimOrder(i) .eq. 0) then
-               write(msgbuf,*)  i, "Non-Grid index, length = ", datamap%dataNonGridCounts(j)
-               if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw         write(msgbuf,*)  i, "Non-Grid index, length = ", datamap%dataNonGridCounts(j)
+      !jw         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+               write(*,*)  i, "Non-Grid index, length = ", datamap%dataNonGridCounts(j)
                j = j + 1
             else
-               write(msgbuf,*)  i, "Grid index ", datamap%dataDimOrder(i)
-               if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw         write(msgbuf,*)  i, "Grid index ", datamap%dataDimOrder(i)
+      !jw         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+               write(*,*)  i, "Grid index ", datamap%dataDimOrder(i)
             endif
         enddo
 

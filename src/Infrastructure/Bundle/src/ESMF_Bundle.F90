@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.48 2004/06/09 21:53:25 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.49 2004/06/09 23:14:52 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -2559,16 +2559,19 @@ end function
       integer :: i
       integer :: status
 
-      write (msgbuf, *)  "Bundle print:"
-      if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+    !jw  write (msgbuf, *)  "Bundle print:"
+    !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      write (*, *)  "Bundle print:"
 
       btype => bundle%btypep
       call c_ESMC_GetName(btype%base, bname, status)
-      write (msgbuf, *)  "  Bundle name = ", trim(bname)
-      if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+    !jw  write (msgbuf, *)  "  Bundle name = ", trim(bname)
+    !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      write (*, *)  "  Bundle name = ", trim(bname)
     
-      write (msgbuf, *)  "  Field count = ", btype%field_count
-      if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+    !jw  write (msgbuf, *)  "  Field count = ", btype%field_count
+    !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      write (*, *)  "  Field count = ", btype%field_count
     
       do i = 1, btype%field_count
   
@@ -2577,8 +2580,9 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-       write (msgbuf, *)  "    Field", i, "name = ", trim(fname)
-       if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+     !jw  write (msgbuf, *)  "    Field", i, "name = ", trim(fname)
+     !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+       write (*, *)  "    Field", i, "name = ", trim(fname)
       enddo
 
       ! TODO: add more code here for printing more info
