@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2004/02/13 18:36:39 eschwab Exp $
+# $Id: makefile,v 1.22 2004/06/11 17:27:04 eschwab Exp $
 
 ALL:  build_examples
 #
@@ -61,8 +61,6 @@ EXAMPLES_BUILD   =  $(ESMF_EXDIR)/ESMF_TimeEx \
                     $(ESMF_EXDIR)/ESMF_CalendarEx \
                     $(ESMF_EXDIR)/ESMF_ClockEx \
 		    $(ESMF_EXDIR)/ESMC_ClockEx \
-                    $(ESMF_EXDIR)/ESMF_ClockAdvEx \
-                    $(ESMF_EXDIR)/ESMF_ClockAdv2Ex \
                     $(ESMF_EXDIR)/ESMF_AlarmEx
 
 #
@@ -79,8 +77,6 @@ EXAMPLES_RUN     =  run_ESMF_TimeEx \
                     run_ESMF_CalendarEx \
                     run_ESMF_ClockEx \
 		    run_ESMC_ClockEx \
-                    run_ESMF_ClockAdvEx \
-                    run_ESMF_ClockAdv2Ex \
                     run_ESMF_AlarmEx
 
 EXAMPLES_RUN_UNI =  run_ESMF_TimeEx_uni \
@@ -88,8 +84,6 @@ EXAMPLES_RUN_UNI =  run_ESMF_TimeEx_uni \
                     run_ESMF_CalendarEx_uni \
                     run_ESMF_ClockEx_uni \
 		    run_ESMC_ClockEx_uni \
-                    run_ESMF_ClockAdvEx_uni \
-                    run_ESMF_ClockAdv2Ex_uni \
                     run_ESMF_AlarmEx_uni
 
 include ${ESMF_DIR}/makefile
@@ -147,24 +141,6 @@ run_ESMC_ClockEx_uni:
 
 run_ESMC_ClockEx:
 	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_ClockEx > $(ESMF_EXDIR)/ESMC_ClockEx.stdout
-
-#
-# ESMF_ClockAdvEx
-#
-run_ESMF_ClockAdvEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ClockAdvEx > $(ESMF_EXDIR)/ESMF_ClockAdvEx.stdout
-
-run_ESMF_ClockAdvEx:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ClockAdvEx > $(ESMF_EXDIR)/ESMF_ClockAdvEx.stdout
-
-#
-# ESMF_ClockAdv2Ex
-#
-run_ESMF_ClockAdv2Ex_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ClockAdv2Ex > $(ESMF_EXDIR)/ESMF_ClockAdv2Ex.stdout
-
-run_ESMF_ClockAdv2Ex:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ClockAdv2Ex > $(ESMF_EXDIR)/ESMF_ClockAdv2Ex.stdout
 
 # ESMF_AlarmEx
 #
