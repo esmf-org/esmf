@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.8 2004/01/29 04:44:34 eschwab Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.9 2004/01/30 20:00:19 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
       ! instantiate Alarm lists (of pointers)
       integer, parameter :: NUMALARMS = 2
       type(ESMF_Alarm) :: alarm(NUMALARMS)
-      integer :: numRingingAlarms  ! at any time step (0 to NUMALARMS)
+      integer :: ringingAlarmCount  ! at any time step (0 to NUMALARMS)
       type(ESMF_Alarm) :: ringingAlarm(NUMALARMS)
       type(ESMF_Alarm) :: tempAlarm
       type(ESMF_Alarm) :: alarmList(NUMALARMS)
@@ -307,9 +307,9 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         ! perform time step and get a list of any ringing alarms
         !call ESMF_ClockAdvance(clock, rc=rc)
         !call ESMF_ClockGetAlarmList(clock, ESMF_ALARMLIST_RINGING, &
-        !                            ringingAlarm, numRingingAlarms, rc=rc)
+        !                            ringingAlarm, ringingAlarmCount, rc=rc)
         call ESMF_ClockAdvance(clock, ringingAlarmList=ringingAlarm, &
-                               numRingingAlarms=numRingingAlarms, rc=rc)
+                               ringingAlarmCount=ringingAlarmCount, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -375,12 +375,12 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
 
 !BOP
 !\begin{verbatim}
-        if (numRingingAlarms > 0) then
-          print *, "number of ringing alarms = ", numRingingAlarms
+        if (ringingAlarmCount > 0) then
+          print *, "number of ringing alarms = ", ringingAlarmCount
         endif
 
         ! Process any ringing alarms in list returned by clock
-        do i = 1, numRingingAlarms
+        do i = 1, ringingAlarmCount
 
           call ESMF_AlarmPrint(ringingAlarm(i), "name", rc=rc)
 !\end{verbatim}
@@ -463,7 +463,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
 
         ! get previously ringing alarms
         call ESMF_ClockGetAlarmList(clock, ESMF_ALARMLIST_PREVRINGING, &
-                                    ringingAlarm, numRingingAlarms, rc=rc)
+                                    ringingAlarm, ringingAlarmCount, rc=rc)
 
 !\end{verbatim}
 !EOP
@@ -473,7 +473,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
 
 !BOP 
 !\begin{verbatim}
-        do i = 1, numRingingAlarms
+        do i = 1, ringingAlarmCount
           print *, "Previously ringing alarm = "
           call ESMF_AlarmPrint(ringingAlarm(i), "name", rc=rc)
 !\end{verbatim}
@@ -489,7 +489,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
 
         ! get next ringing alarms
         call ESMF_ClockGetAlarmList(clock, ESMF_ALARMLIST_NEXTRINGING, &
-                                    ringingAlarm, numRingingAlarms, rc=rc)
+                                    ringingAlarm, ringingAlarmCount, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -499,7 +499,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
 
 !BOP 
 !\begin{verbatim}
-        do i = 1, numRingingAlarms
+        do i = 1, ringingAlarmCount
           print *, "Next ringing alarm = "
           call ESMF_AlarmPrint(ringingAlarm(i), "name", rc=rc)
 !\end{verbatim}
@@ -534,7 +534,8 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
 !BOP 
 !\begin{verbatim}
         ! perform time step 
-        call ESMF_ClockAdvance(clock, numRingingAlarms=numRingingAlarms, rc=rc)
+        call ESMF_ClockAdvance(clock, ringingAlarmCount=ringingAlarmCount, &
+                               rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -555,8 +556,8 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
 !BOP 
 !\begin{verbatim}
         ! check if alarms are ringing
-        if (numRingingAlarms > 0) then
-          print *, "number of ringing alarms = ", numRingingAlarms
+        if (ringingAlarmCount > 0) then
+          print *, "number of ringing alarms = ", ringingAlarmCount
           if (ESMF_AlarmIsRinging(alarm(1), rc)) then
 !\end{verbatim}
 !EOP
