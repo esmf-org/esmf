@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.68 2004/04/23 17:00:37 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.69 2004/04/23 17:19:28 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,9 +55,10 @@
       use ESMF_FieldMod        ! ESMF field  class
       use ESMF_BundleMod       ! ESMF bundle class
       use ESMF_RegridTypesMod  ! ESMF regrid data types and utilities
-      use ESMF_RegridBilinearMod  ! ESMF rg methods related to bilinear regrid
+      use ESMF_RegridBilinearMod ! ESMF rg methods related to bilinear regrid
       use ESMF_RegridNearNbrMod  ! ESMF rg methods related to nearest-nbr regrid
-      use ESMF_RegridConservMod ! ESMF rg methods related to conservative regrid
+      use ESMF_RegridConservMod  ! ESMF rg methods related to conservative regrid
+      use ESMF_RegridLinearMod   ! ESMF rg methods related to linear regrid
 
       implicit none
 
@@ -104,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.68 2004/04/23 17:00:37 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.69 2004/04/23 17:19:28 jwolfe Exp $'
 
 !==============================================================================
 
