@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.9 2004/03/03 18:20:34 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.10 2004/03/04 18:14:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -134,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.9 2004/03/03 18:20:34 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.10 2004/03/04 18:14:18 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1914,7 +1914,7 @@
       endif
 
       ! Routine which interfaces to the C++ routine.
-      call c_ESMC_DELayoutBarrier(layout, rc)
+      call c_ESMC_DELayoutBarrier(layout, status)
       if (status .ne. ESMF_SUCCESS) then
         print *, "ESMF_DELayoutBarrier error"
         return
