@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.9 2004/03/22 21:57:31 cdeluca Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.10 2004/04/09 14:39:40 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.9 2004/03/22 21:57:31 cdeluca Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.10 2004/04/09 14:39:40 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -232,7 +232,7 @@
 !==============================================================================
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       interface operator (==)
 
@@ -245,11 +245,11 @@
 !     ESMF grid coordinate data types.  It is provided for easy
 !     comparisons of coordinate systems or kinds with defined values.
 !
-!EOP
+!EOPI
       end interface
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       interface operator (/=)
 
@@ -262,7 +262,7 @@
 !     ESMF grid coordinate data types.  It is provided for easy
 !     comparisons of coordinate systems or kinds with defined values.
 !
-!EOP
+!EOPI
       end interface
 !
 !------------------------------------------------------------------------------
@@ -275,7 +275,7 @@
 ! This section includes the PhysCoord Create and Destroy methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysCoordCreate - One stop interface for creating new coord
 
 ! !INTERFACE:
@@ -350,7 +350,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       type(ESMF_PhysCoordType), pointer :: physCoord ! Pointer to new PhysCoord
       integer :: status                              ! Error status
@@ -434,7 +434,7 @@
       end function ESMF_PhysCoordCreate
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysCoordDestroy - Deallocates a PhysCoord
 
 ! !INTERFACE:
@@ -460,7 +460,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
@@ -493,7 +493,7 @@
 ! This section includes the PhysCoord Get and Set methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysCoordSet - Sets attributes of a physical coordinate
 
 ! !INTERFACE:
@@ -567,7 +567,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
@@ -632,7 +632,7 @@
       end subroutine ESMF_PhysCoordSet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysCoordGet - Retrieves attributes of physical coordinate
 
 ! !INTERFACE:
@@ -675,7 +675,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
@@ -719,7 +719,7 @@
       end subroutine ESMF_PhysCoordGet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysCoordGetExtents - Retrieves extents of a PhysCoord.
 
 ! !INTERFACE:
@@ -756,7 +756,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
@@ -786,7 +786,7 @@
       end subroutine ESMF_PhysCoordGetExtents
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysCoordIsAligned - Checks alignment of physical,logical coordinate.
 
 ! !INTERFACE:
@@ -815,7 +815,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
@@ -843,7 +843,7 @@
       end function ESMF_PhysCoordIsAligned
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysCoordIsEqualSpaced - Checks for equally-spaced coordinates
 
 ! !INTERFACE:
@@ -872,7 +872,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
@@ -900,7 +900,7 @@
       end function ESMF_PhysCoordIsEqualSpaced
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysCoordIsCyclic - Checks alignment of physical,logical coordinate.
 
 ! !INTERFACE:
@@ -928,7 +928,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
@@ -956,7 +956,7 @@
       end function ESMF_PhysCoordIsCyclic
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysCoordPointInRange - Checks whether coordinate contains point
 !
 ! !INTERFACE:
@@ -991,7 +991,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       integer :: status                              ! Error status
@@ -1066,7 +1066,7 @@
       end function ESMF_PhysCoordPointInRange
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysCoordPrint - Print the contents of a PhysCoord
 
 ! !INTERFACE:
@@ -1091,7 +1091,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
       integer :: status
       character (len=ESMF_MAXSTR) :: char_tmp
@@ -1142,7 +1142,7 @@
       end subroutine ESMF_PhysCoordPrint
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CoordSystemEqual - determines equality of coord systems
 !
 ! !INTERFACE:
@@ -1167,7 +1167,7 @@
 !          Two coordinate systems to compare for equality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_CoordSystemEqual = (CoordSystem1%coordSystem == &
@@ -1176,7 +1176,7 @@
       end function ESMF_CoordSystemEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CoordSystemNotEqual - non-equality of coord systems
 !
 ! !INTERFACE:
@@ -1201,7 +1201,7 @@
 !          Two kinds of coordinate systems to compare for inequality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_CoordSystemNotEqual = (CoordSystem1%coordSystem /= &
@@ -1210,7 +1210,7 @@
       end function ESMF_CoordSystemNotEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CoordTypeEqual - determines equality of coord kinds
 !
 ! !INTERFACE:
@@ -1235,7 +1235,7 @@
 !          Two coordinate kinds to compare for equality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_CoordTypeEqual = (CoordType1%kind == CoordType2%kind)
@@ -1243,7 +1243,7 @@
       end function ESMF_CoordTypeEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CoordTypeNotEqual - non-equality of coord kinds
 !
 ! !INTERFACE:
@@ -1268,7 +1268,7 @@
 !          Two coordinate kinds to compare for inequality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_CoordTypeNotEqual = (CoordType1%kind /= CoordType2%kind)
