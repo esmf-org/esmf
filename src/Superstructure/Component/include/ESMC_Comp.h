@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.13 2004/03/18 21:49:29 cdeluca Exp $
+// $Id: ESMC_Comp.h,v 1.14 2004/04/09 20:19:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -61,6 +61,7 @@ extern const char *ESMC_SetReadRestart;
 #include "ESMC.h"
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
 #include "ESMC_DELayout.h"
+#include "ESMC_Calendar.h"
 #include "ESMC_State.h"
 #include "ESMC_FTable.h"  // function & data pointer table 
 
@@ -136,8 +137,9 @@ extern const char *ESMC_SetReadRestart;
                                       char *filepath, int *rc);
  int ESMC_CompDestroy(ESMC_Comp *comp);
 
- int ESMC_Initialize(void);
- int ESMC_Initialize(int argc, char **argv);
+ int ESMC_Initialize(ESMC_CalendarType defaultCalendar=ESMC_CAL_NOCALENDAR);
+ int ESMC_Initialize(int argc, char **argv,
+                     ESMC_CalendarType defaultCalendar=ESMC_CAL_NOCALENDAR);
  int ESMC_Finalize(void);
 
 // prototypes for fortran interface routines
@@ -148,7 +150,9 @@ extern "C" {
    void FTN(f_esmf_comprun)(ESMC_Comp *compp, char *name, int *rc, int nlen);
    void FTN(f_esmf_compfinalize)(ESMC_Comp *compp, char *name, int *rc, int nlen);
 
-   void FTN(f_esmf_frameworkinitialize)(int *language, int *rc);
+   void FTN(f_esmf_frameworkinitialize)(int *language, 
+                                        ESMC_CalendarType *defaultCalendar,
+                                        int *rc);
    void FTN(f_esmf_frameworkfinalize)(int *rc);
 };
 

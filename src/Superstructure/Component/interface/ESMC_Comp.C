@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.18 2004/03/18 21:49:29 cdeluca Exp $
+// $Id: ESMC_Comp.C,v 1.19 2004/04/09 20:19:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.18 2004/03/18 21:49:29 cdeluca Exp $";
+           "$Id: ESMC_Comp.C,v 1.19 2004/04/09 20:19:53 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -394,7 +394,8 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //    int error return code
 //
 // !ARGUMENTS:
-      void) {
+      ESMC_CalendarType defaultCalendar) { // in - optional time manager
+                                           //      default calendar type
 //
 // !DESCRIPTION:
 //
@@ -406,7 +407,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
     globalargc = 0;
     globalargv = NULL;
 
-    FTN(f_esmf_frameworkinitialize)((int*)&l, &rc);
+    FTN(f_esmf_frameworkinitialize)((int*)&l, &defaultCalendar, &rc);
 
     return rc;
 
@@ -423,7 +424,9 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //    int error return code
 //
 // !ARGUMENTS:
-      int argc, char **argv) {     // in - the arguments to the program
+      int argc, char **argv,       // in - the arguments to the program
+      ESMC_CalendarType defaultCalendar) {  // in - optional time manager
+                                            //      default calendar type
 //
 // !DESCRIPTION:
 //
@@ -436,7 +439,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
     globalargc = argc;
     globalargv = argv;
 
-    FTN(f_esmf_frameworkinitialize)((int*)&l, &rc);
+    FTN(f_esmf_frameworkinitialize)((int*)&l, &defaultCalendar, &rc);
 
     return rc;
 

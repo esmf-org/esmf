@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.80 2004/03/26 15:27:00 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.81 2004/04/09 20:19:53 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,6 +42,7 @@
       use ESMF_MachineMod
       use ESMF_ConfigMod
       use ESMF_DELayoutMod
+      use ESMF_CalendarMod
       use ESMF_ClockMod
       use ESMF_GridTypesMod
       use ESMF_StateMod
@@ -200,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.80 2004/03/26 15:27:00 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.81 2004/04/09 20:19:53 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -338,7 +339,7 @@ end function
         ! Has the Full ESMF Framework initialization been run?
         ! This only happens once per process at the start.
         if (frameworknotinit) then
-          call ESMF_Initialize(status)
+          call ESMF_Initialize(rc=status)
           if (status .ne. ESMF_SUCCESS) then
             if (present(rc)) rc = ESMF_FAILURE
             return
@@ -1471,10 +1472,11 @@ end function
 ! !IROUTINE:  ESMF_Initialize - Initialize the ESMF Framework.
 !
 ! !INTERFACE:
-      subroutine ESMF_Initialize(rc)
+      subroutine ESMF_Initialize(defaultCalendar, rc)
 !
 ! !ARGUMENTS:
-      integer, intent(out), optional :: rc     
+      type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar     
+      integer,                 intent(out), optional :: rc     
 
 !
 ! !DESCRIPTION:
@@ -1482,6 +1484,9 @@ end function
 !
 !     The argument is:
 !     \begin{description}
+!     \item [{[defaultCalendar]}]
+!           Sets the default calendar to be used by ESMF Time Manager.
+!           If not specified, defaults to {\tt ESMF\_CAL\_NOCALENDAR}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -1489,7 +1494,7 @@ end function
 !
 !EOP
 
-      call ESMF_FrameworkInternalInit(ESMF_MAIN_F90, rc)
+      call ESMF_FrameworkInternalInit(ESMF_MAIN_F90, defaultCalendar, rc)
 
       end subroutine ESMF_Initialize
 
@@ -1498,11 +1503,12 @@ end function
 ! !IROUTINE:  ESMF_FrameworkInternalInit - internal routine called by both F90 and C++
 !
 ! !INTERFACE:
-      subroutine ESMF_FrameworkInternalInit(lang, rc)
+      subroutine ESMF_FrameworkInternalInit(lang, defaultCalendar, rc)
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: lang     
-      integer, intent(out), optional :: rc     
+      integer,                 intent(in)            :: lang     
+      type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar     
+      integer,                 intent(out), optional :: rc     
 
 !
 ! !DESCRIPTION:
@@ -1513,6 +1519,9 @@ end function
 !     \item [lang]
 !           Flag to say whether main program is F90 or C++.  Affects things
 !           related to initialization, such as starting MPI.
+!     \item [{[defaultCalendar]}]
+!           Sets the default calendar to be used by ESMF Time Manager.
+!           If not specified, defaults to {\tt ESMF\_CAL\_NOCALENDAR}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1532,6 +1541,13 @@ end function
 
       if (already_init) then
           if (rcpresent) rc = ESMF_SUCCESS
+          return
+      endif
+
+      ! Initialize the default time manager calendar
+      call ESMF_CalendarInitialize(defaultCalendar, status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error initializing the default time manager calendar"
           return
       endif
 
@@ -1593,9 +1609,7 @@ end function
 !EOP
 
       logical :: rcpresent                        ! Return code present   
-#ifdef ESMF_ENABLE_VM
       integer :: status
-#endif
       logical, save :: already_final = .false.    ! Static, maintains state.
 
       ! Initialize return code
@@ -1621,6 +1635,13 @@ end function
 
       ! Where MPI is shut down, files closed, etc.
       call ESMF_MachineFinalize()
+
+      ! Delete any internal built-in time manager calendars
+      call ESMF_CalendarFinalize(status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error finalizing the time manager calendars"
+          return
+      endif
 
       already_final = .true.
 
