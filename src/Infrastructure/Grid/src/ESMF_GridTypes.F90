@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.11 2004/01/29 19:05:52 nscollins Exp $
+! $Id: ESMF_GridTypes.F90,v 1.12 2004/02/03 21:23:09 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -412,7 +412,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.11 2004/01/29 19:05:52 nscollins Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.12 2004/02/03 21:23:09 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -978,7 +978,7 @@
       grid%numDistGrids = grid%numDistGrids + 1
 
 !     Add the DistGrid
-      grid%distgrids(grid%numDistGridsAlloc) = distgrid
+      grid%distgrids(grid%numDistGrids) = distgrid
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1143,7 +1143,7 @@
       grid%numPhysGrids = grid%numPhysGrids + 1
 
 !     Add the PhysGrid
-      grid%physgrids(grid%numPhysGridsAlloc) = physgrid
+      grid%physgrids(grid%numPhysGrids) = physgrid
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
