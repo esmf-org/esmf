@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.17 2004/04/09 20:13:58 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.18 2004/04/15 17:58:20 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.17 2004/04/09 20:13:58 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.18 2004/04/15 17:58:20 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,7 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
 
-      logical :: bool
+      logical :: bool, calendarsEqual, calendarsNotEqual
       ! instantiate a clock 
       type(ESMF_Clock) :: clock, clock1, clock_gregorian, clock_julian, &
                           clock_no_leap, clock_360day
@@ -66,8 +66,8 @@
       integer :: timevals(8)
 
       ! instantiate a calendar
-      type(ESMF_Calendar) :: gregorianCalendar, julianDayCalendar, &
-                             no_leapCalendar, esmf_360dayCalendar
+      type(ESMF_Calendar) :: gregorianCalendar, gregorianCalendar1, gregorianCalendar2, &
+				julianDayCalendar,  no_leapCalendar, esmf_360dayCalendar
       type(ESMF_Calendar) :: customCalendar
       type(ESMF_CalendarType) :: cal_type
       integer, dimension(MONTHS_PER_YEAR) :: &
@@ -149,6 +149,47 @@
 
       ! ----------------------------------------------------------------------------
 
+      !NEX_UTest
+      ! Make a copy of Gregorian type calendar
+      write(name, *) "Make copy of  Gregorian Type Calendar Test"
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      gregorianCalendar1 = ESMF_CalendarCreate(gregorianCalendar, rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing for calendar equality
+      ! calendarsEqual = ESMF_CalendarOperator(==)(calendar1,calendar2)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Calendar Equal Test" 
+      calendarsEqual = (gregorianCalendar == gregorianCalendar1)
+      call ESMF_Test((calendarsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+      
+                          
+      !NEX_UTest
+      ! initialize another calendar to be Gregorian type
+      write(name, *) "Initialize Gregorian Type Calendar Test"
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      gregorianCalendar2 = ESMF_CalendarCreate("Gregorian", &
+                                              ESMF_CAL_GREGORIAN, rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing for calendar equality
+      ! calendarsEqual = ESMF_CalendarOperator(==)(calendar1,calendar2)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Calendar Equal Test" 
+      calendarsEqual = (gregorianCalendar2 == gregorianCalendar1)
+      call ESMF_Test((calendarsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
 
       !NEX_UTest
       ! initialize secand calendar to be Julian Day type
@@ -171,7 +212,36 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing for calendar inequality
+      ! calendarsEqual = ESMF_CalendarOperator(==)(calendar1,calendar2)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Calendar Equal Test" 
+      calendarsEqual = (julianDayCalendar == gregorianCalendar1)
+      call ESMF_Test((.not.calendarsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing for calendar inequality
+      ! calendarsNotEqual = ESMF_CalendarOperator(/=)(calendar1,calendar2)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Calendar Equal Test" 
+      calendarsNotEqual = (julianDayCalendar /= gregorianCalendar1)
+      call ESMF_Test((calendarsNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing for calendar equality
+      ! calendarsNotEqual = ESMF_CalendarOperator(/=)(calendar1,calendar2)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Calendar Equal Test" 
+      calendarsNotEqual = (gregorianCalendar2 /= gregorianCalendar1)
+      call ESMF_Test((.not.calendarsNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Validate Julian Day Calendar
       ! Test that validate subroutine returns ESMF_SUCESS
