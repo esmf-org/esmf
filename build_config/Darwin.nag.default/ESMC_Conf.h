@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.4 2004/10/28 21:40:46 nscollins Exp $"
+"$Id: ESMC_Conf.h,v 1.5 2004/11/01 20:58:03 nscollins Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -59,13 +59,6 @@ Licensed under the GPL.
 
 #define ESMC_PRESENT(arg) ( (arg) != 0 )
 
-#if 0
-currently in the ESMF_Config.F90 file, if EOL is defined
-as achar(10) (newline), the file will not parse.  when
-whatever this bug is turns out to be is fixed, this next
-define can be removed.
-#endif
-#define ESMF_HAS_ACHAR_BUG 1
 
 #if S32
 #define ESMF_IS_32BIT_MACHINE 1
