@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.14 2004/12/10 22:39:54 eschwab Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.15 2004/12/17 22:02:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.14 2004/12/10 22:39:54 eschwab Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.15 2004/12/17 22:02:00 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -382,6 +382,74 @@
       write(name, *) "Set End Time Initialization Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      ! The following 5 tests are from Shep Smithline/Giang/GFDL on 
+      !   support #1087160
+
+      !EX_UTest
+      ! Test Setting Stop Time, relying on defaults 1
+      write(failMsg, *) " Did not return 2/3/2004 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, yy=2004, mm=2, dd=3, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, yy=YY, mm=MM, dd=DD)
+      write(name, *) "Set Time Initialization Test w/Defaults 1"
+      call ESMF_Test((YY.eq.2004.and.mm.eq.2.and.dd.eq.3.and. &
+                      rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Setting Stop Time, relying on defaults 2
+      write(failMsg, *) " Did not return 1/4/3 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, yy=3, dd=4, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, yy=YY, mm=MM, dd=DD)
+      write(name, *) "Set Time Initialization Test w/Defaults 2"
+      call ESMF_Test((YY.eq.3.and.mm.eq.1.and.dd.eq.4.and. &
+                      rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Setting Stop Time, relying on defaults 3
+      write(failMsg, *) " Did not return 2/3/0 ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, mm=2, dd=5, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, yy=YY, mm=MM, dd=DD)
+      write(name, *) "Set Time Initialization Test w/Defaults 3"
+      call ESMF_Test((YY.eq.0.and.mm.eq.2.and.dd.eq.5.and. &
+                      rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Setting Stop Time, relying on defaults 4
+      write(failMsg, *) " Did not return 1/6/0 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, dd=6, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, yy=YY, mm=MM, dd=DD)
+      write(name, *) "Set Time Initialization Test w/Defaults 4"
+      call ESMF_Test((YY.eq.0.and.mm.eq.1.and.dd.eq.6.and. &
+                      rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Setting Stop Time, relying on defaults 5
+      write(failMsg, *) " Did not return 1/1/0 and ESMF_SUCCESS"
+      call ESMF_CalendarSetDefault(ESMF_CAL_NOLEAP)
+      call ESMF_TimeSet(stopTime, rc=rc)
+      call ESMF_TimeGet(stopTime, yy=YY, mm=MM, dd=DD)
+      write(name, *) "Set Time Initialization Test w/Defaults 5"
+      call ESMF_Test((YY.eq.0.and.mm.eq.1.and.dd.eq.1.and. &
+                      rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_CalendarSetDefault(ESMF_CAL_NOCALENDAR)
 
   ! ----------------------------------------------------------------------------
       
