@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.9 2003/07/01 17:03:55 nscollins Exp $
+! $Id: ESMF_IO.F90,v 1.10 2003/07/22 21:23:21 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IO module
@@ -40,55 +40,83 @@
 ! !PUBLIC TYPES:
       private
     
-      integer, parameter :: UNKNOWN=0, NETCDF=1
-
-      type ESMF_IOType
+      ! File format
+      type ESMF_IOFileFormat
       sequence
       private
-         integer :: iotype
+         integer :: iofileformat
       end type
 
+      ! Predefined file formats
+      type(ESMF_IOFileFormat), parameter :: &
+                          ESMF_IO_FILEFORMAT_UNSPECIFIED=ESMF_IOFileFormat(0), &
+                          ESMF_IO_FILEFORMAT_NETCDF=ESMF_IOFileFormat(1), &
+                          ESMF_IO_FILEFORMAT_HDF=ESMF_IOFileFormat(2)
+
+      ! What type of I/O - Read only, write only, R/W, append with truncation
+      type ESMF_IORWType
+      sequence
+      private
+         integer :: iorwtype
+      end type
+
+      type(ESMF_IORWType), parameter :: &
+                             ESMF_IO_RWTYPE_UNSPECIFIED = ESMF_IORWType(0), &
+                             ESMF_IO_RWTYPE_READONLY = ESMF_IORWType(1), &
+                             ESMF_IO_RWTYPE_WRITEONLY = ESMF_IORWType(2), &
+                             ESMF_IO_RWTYPE_READWRITE = ESMF_IORWType(3), &
+                             ESMF_IO_RWTYPE_APPEND = ESMF_IORWType(4), &
+                             ESMF_IO_RWTYPE_TRUNCATE = ESMF_IORWType(5)
+
+      ! The combined values a user can specify.
       type ESMF_IOSpec
       sequence
       private
           type (ESMF_Status) :: iostatus
-          type (ESMF_IOType) :: iotype
-          integer :: current_status
-          ! should be a derived type or enum
-          logical :: async_io
+          type (ESMF_IOFileFormat) :: iofileformat
+          type (ESMF_IORWType) :: iorwtype
+          logical :: async_io       ! TODO: should be a derived type or enum
       end type
 
+      ! This type captures information about what's currently being
+      ! written out and is computed and updated internally - nothing in
+      ! here is specified by the user.
+      type ESMF_IOState
+      sequence
+      private
+          integer :: nestlevel
+          integer :: filestate   ! should be enum or status
+          integer :: funit
+          logical :: isopen
+          logical :: define_mode
+          logical :: singlefile
+          logical :: parallel
+          logical :: using_mpiio
+      end type
+          
    
 ! !DESCRIPTION:
 !     The following routines apply to general I/O characteristics.
 
 ! !PUBLIC MEMBER TYPES:
-      public ESMF_IOSpec
+      public ESMF_IOSpec, ESMF_IOState
+      public ESMF_IOFileFormat, ESMF_IO_FILEFORMAT_UNSPECIFIED
+      public     ESMF_IO_FILEFORMAT_NETCDF, ESMF_IO_FILEFORMAT_HDF
+      public ESMF_IORWType, ESMF_IO_RWTYPE_UNSPECIFIED
+      public     ESMF_IO_RWTYPE_READONLY, ESMF_IO_RWTYPE_WRITEONLY
+      public     ESMF_IO_RWTYPE_READWRITE, ESMF_IO_RWTYPE_APPEND
+      public     ESMF_IO_RWTYPE_TRUNCATE
+
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
 !     Temporary for putting system dependent I/O code in a single place.
       public ESMF_IOFlush
 !
-!     function ESMF_IOSpecCreate() (interface only)
-!     function ESMF_IOSpecCreateNew()
-!     function ESMF_IOSpecCreateCopy()
-! or
-!     function ESMF_IOSpecInit()
-!
-!     subroutine ESMF_IOSpecConstruct()
-!     subroutine ESMF_IOSpecDestruct()
-!
-!     subroutine ESMF_IOSpecSet()
-!     subroutine ESMF_IOSpecGet()
+!     ! shallow class, only needs Get and Set
+      public ESMF_IOSpecSet
+      public ESMF_IOSpecGet
 ! 
-!     subroutine ESMF_IOSpecSetName()  
-!     subroutine ESMF_IOSpecGetName()
-!     subroutine ESMF_IOSpecSetDestName()
-!     subroutine ESMF_IOSpecGetDestName()
-!     subroutine ESMF_IOSpecSetSrcName()
-!     subroutine ESMF_IOSpecGetSrcName()
-!
 !     subroutine ESMF_IOSpecSetType()  
 !     subroutine ESMF_IOSpecGetType()
 !     subroutine ESMF_IOSpecSetDestType()
@@ -110,14 +138,6 @@
 !
 
 !EOP
-
-!BOP
-!  !INTERFACE:
-      interface ESMF_IOSpecCreate
-!
-      end interface
-
-! add interface block for Create here
 
 !-------------------------------------------------------------------------
 
@@ -168,31 +188,92 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !BOP
-!
+! !IROUTINE: ESMF_IOSpecSet - set values in an IOSpec
 !
 ! !INTERFACE:
-      function ESMF_IOSpecCreateNew(rc)
+      subroutine ESMF_IOSpecSet(iospec, iofileformat, iorwtype, async_io, rc)
 !
-! !RETURN VALUE:
-      type (ESMF_IOSpec), pointer :: ESMF_IOSpecCreateNew
 !
 ! !PARAMETERS:
-      integer, intent(out), optional :: rc               ! return code
+      type (ESMF_IOSpec), intent(inout) :: iospec
+      type (ESMF_IOFileFormat), intent(in), optional :: iofileformat
+      type (ESMF_IORWType), intent(in), optional :: iorwtype
+      logical, intent(in), optional :: async_io
+      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
+!   (insert documentation here.)
 
 !
 ! !REQUIREMENTS: 
 
 !EOP
-      type (ESMF_IOSpec), pointer :: ios
 
-      ALLOCATE(ios)
+      if (present(iorwtype)) then
+          iospec%iorwtype = iorwtype
+      else
+          iospec%iorwtype = ESMF_IO_RWTYPE_UNSPECIFIED
+      endif
 
-      ESMF_IOSpecCreateNew => ios
+      if (present(iofileformat)) then
+          iospec%iofileformat = iofileformat
+      else
+          iospec%iofileformat = ESMF_IO_FILEFORMAT_UNSPECIFIED
+      endif
 
-      end function ESMF_IOSpecCreateNew
+      if (present(async_io)) then
+          iospec%async_io = async_io
+      else
+          iospec%async_io = .false.
+      endif
+
+      iospec%iostatus = ESMF_STATE_READY
+      
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_IOSpecSet
+
+
+!-------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_IOSpecGet - set values in an IOSpec
+!
+! !INTERFACE:
+      subroutine ESMF_IOSpecGet(iospec, iofileformat, iorwtype, async_io, rc)
+!
+!
+! !PARAMETERS:
+      type (ESMF_IOSpec), intent(inout) :: iospec
+      type (ESMF_IOFileFormat), intent(out), optional :: iofileformat
+      type (ESMF_IORWType), intent(out), optional :: iorwtype
+      logical, intent(out), optional :: async_io
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!   (insert documentation here.)
+
+!
+! !REQUIREMENTS: 
+
+!EOP
+
+      if (present(iorwtype)) then
+          iorwtype = iospec%iorwtype
+      endif
+
+      if (present(iofileformat)) then
+          iofileformat = iospec%iofileformat
+      endif
+
+      if (present(async_io)) then
+          async_io = iospec%async_io
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_IOSpecGet
 
 
 !-------------------------------------------------------------------------
