@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.14 2004/02/13 20:30:11 svasquez Exp $
+! $Id: ESMF_CplComp.F90,v 1.15 2004/03/01 19:27:07 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,14 +98,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.14 2004/02/13 20:30:11 svasquez Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.15 2004/03/01 19:27:07 cdeluca Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CplCompCreate - Create a Coupler Component
 !
 ! !INTERFACE:
@@ -122,7 +122,7 @@
 !     config file which needs to be opened.
 !
 
-!EOP
+!EOPI
       end interface
 
 !------------------------------------------------------------------------------
@@ -146,18 +146,16 @@
 
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!
-! This section includes Component Create/Destroy, Construct/Destruct methods.
-!
-!------------------------------------------------------------------------------
+
 !BOP
-! !IROUTINE: ESMF_CplCompCreateNew -- Create a new Component.
+! !IROUTINE: ESMF_CplCompCreate - Create a new Component
 
 ! !INTERFACE:
-      function ESMF_CplCompCreateNew(name, layout, config, clock, rc)
+      ! Private name; call using ESMF_CplCompCreate()      
+      function ESMF_CplCompCreate(name, layout, config, clock, rc)
 !
 ! !RETURN VALUE:
+      ! Private name; call using ESMF_CplCompCreate()      
       type(ESMF_CplComp) :: ESMF_CplCompCreateNew
 !
 ! !ARGUMENTS:
@@ -236,9 +234,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompCreateConf -- Create a new Component.
+! !IROUTINE: ESMF_CplCompCreate - Create a new Component from a Config file
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_CplCompCreate()      
       function ESMF_CplCompCreateConf(name, layout, config, configfile, &
                                       clock, rc)
 !
@@ -324,67 +323,79 @@
 
         end function ESMF_CplCompCreateConf
     
-
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompInitialize -- Call the Component's init routine
+! !IROUTINE: ESMF_CplCompDestroy - Release resources for a Component
 
 ! !INTERFACE:
-      recursive subroutine ESMF_CplCompInitialize(component, importstate, &
-                                                  exportstate, clock, phase, rc)
-!
+      subroutine ESMF_CplCompDestroy(component, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_CplComp) :: component
-      type (ESMF_State), intent(inout), optional :: importstate
-      type (ESMF_State), intent(inout), optional :: exportstate
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      integer, intent(out), optional :: rc 
+      type(ESMF_CplComp) :: component
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!  Call the associated user initialization code for a component.
+!     Releases all resources associated with this {\tt Component}.
 !
-!    
-!  The arguments are: 
-!  \begin{description} 
-!  
-!   \item[component]
-!    Component to call Initialization routine for.
+!     The arguments are:
+!     \begin{description}
 !
-!   \item[{[importstate]}]  
-!       ESMF\_State containing source data for coupling.
+!     \item[component]
+!       Destroy contents of this {\tt Component}.
 !
-!   \item[{[exportstate]}]  
-!       ESMF\_State containing destination data for coupling.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase init, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompInitialize(component%compp, importstate=importstate, &
-                                 exportstate=exportstate, clock=clock,     &
-                                 phase=phase, rc=rc)
+        ! local vars
+        integer :: status                       ! local error status
+        logical :: rcpresent                    ! did user specify rc?
 
-        end subroutine ESMF_CplCompInitialize
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
 
+        ! Check to see if already destroyed
+        if (.not.associated(component%compp)) then  
+          print *, "Component already destroyed"
+          return
+        endif
+
+        ! call Destruct to release resources
+        call ESMF_CompDestruct(component%compp, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Component contents destruction error"
+          return
+        endif
+
+        ! Deallocate the component struct itself
+        deallocate(component%compp, stat=status)
+        if (status .ne. 0) then
+          print *, "Component contents destruction error"
+          return
+        endif
+        nullify(component%compp)
+ 
+        ! Set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_CplCompDestroy
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompRun -- Call Component Run routine with 2 States
+! !IROUTINE: ESMF_CplCompFinalize - Call the Component's finalize routine
 
 ! !INTERFACE:
-    recursive subroutine ESMF_CplCompRun(component, importstate, exportstate, &
-                                                                  clock, phase, rc)
+    recursive subroutine ESMF_CplCompFinalize(component, importstate, &
+                                              exportstate, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
@@ -396,14 +407,14 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user run code for a component.
+!  Call the associated user finalize code for a component.
 !
 !    
 !  The arguments are: 
 !  \begin{description} 
 !  
 !   \item[component]
-!    Component to call Run routine for.
+!    Component to call Finalize routine for.
 !
 !   \item[{[importstate]}]
 !       ESMF\_State containing import data for coupling.
@@ -413,7 +424,7 @@
 !
 !   \item[{[clock]}]  External clock for passing in time information.
 !
-!   \item[{[phase]}]  If multiple-phase run, which phase number this is.
+!   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
 !      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !
 !   \item[{[rc]}]
@@ -424,15 +435,15 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompRun(component%compp, importstate=importstate,  &
+        call ESMF_CompFinalize(component%compp, importstate=importstate, &
                       exportstate=exportstate, clock=clock, phase=phase, rc=rc)
 
-        end subroutine ESMF_CplCompRun
+        end subroutine ESMF_CplCompFinalize
 
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompGet -- Query a component for various information
+! !IROUTINE: ESMF_CplCompGet - Query a Component for information
 !
 ! !INTERFACE:
       subroutine ESMF_CplCompGet(component, name, layout, clock, &
@@ -491,7 +502,150 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompSet -- Sets or resets information about the component.
+! !IROUTINE: ESMF_CplCompInitialize - Call the Component's initialize routine
+
+! !INTERFACE:
+      recursive subroutine ESMF_CplCompInitialize(component, importstate, &
+                                                  exportstate, clock, phase, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_CplComp) :: component
+      type (ESMF_State), intent(inout), optional :: importstate
+      type (ESMF_State), intent(inout), optional :: exportstate
+      type (ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: phase
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user initialization code for a component.
+!
+!    
+!  The arguments are: 
+!  \begin{description} 
+!  
+!   \item[component]
+!    Component to call Initialization routine for.
+!
+!   \item[{[importstate]}]  
+!       ESMF\_State containing source data for coupling.
+!
+!   \item[{[exportstate]}]  
+!       ESMF\_State containing destination data for coupling.
+!
+!   \item[{[clock]}]  External clock for passing in time information.
+!
+!   \item[{[phase]}]  If multiple-phase init, which phase number this is.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompInitialize(component%compp, importstate=importstate, &
+                                 exportstate=exportstate, clock=clock,     &
+                                 phase=phase, rc=rc)
+
+        end subroutine ESMF_CplCompInitialize
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_CplCompPrint - Print the contents of a Component
+!
+! !INTERFACE:
+      subroutine ESMF_CplCompPrint(component, options, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp) :: component
+      character (len = *), intent(in), optional :: options
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Routine to print information about a component.
+!
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[component]
+!    Component to print.
+!
+!   \item[{[options]}]
+!    Options on print.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+       print *, "Coupler Component:"
+       call ESMF_CompPrint(component%compp, options, rc)
+
+       end subroutine ESMF_CplCompPrint
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CplCompRun - Call Component run routine with two States
+
+! !INTERFACE:
+    recursive subroutine ESMF_CplCompRun(component, importstate, exportstate, &
+                                                                  clock, phase, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_CplComp) :: component
+      type (ESMF_State), intent(inout), optional :: importstate
+      type (ESMF_State), intent(inout), optional :: exportstate
+      type (ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: phase
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user run code for a component.
+!
+!    
+!  The arguments are: 
+!  \begin{description} 
+!  
+!   \item[component]
+!    Component to call Run routine for.
+!
+!   \item[{[importstate]}]
+!       ESMF\_State containing import data for coupling.
+!
+!   \item[{[exportstate]}]
+!       ESMF\_State containing export data for coupling.
+!
+!   \item[{[clock]}]  External clock for passing in time information.
+!
+!   \item[{[phase]}]  If multiple-phase run, which phase number this is.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompRun(component%compp, importstate=importstate,  &
+                      exportstate=exportstate, clock=clock, phase=phase, rc=rc)
+
+        end subroutine ESMF_CplCompRun
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CplCompSet - Set or reset information about the Component
 !
 ! !INTERFACE:
       subroutine ESMF_CplCompSet(component, name, layout, clock, &
@@ -551,7 +705,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompValidate -- Ensure the Component internal data is valid.
+! !IROUTINE: ESMF_CplCompValidate -- Ensure the Component is internally consistent
 !
 ! !INTERFACE:
       subroutine ESMF_CplCompValidate(component, options, rc)
@@ -585,96 +739,6 @@
        call ESMF_CompValidate(component%compp, options, rc)
  
        end subroutine ESMF_CplCompValidate
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_CplCompPrint -- Print the contents of a Component
-!
-! !INTERFACE:
-      subroutine ESMF_CplCompPrint(component, options, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_CplComp) :: component
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      Routine to print information about a component.
-!
-!  The arguments are:
-!  \begin{description}
-!
-!   \item[component]
-!    Component to print.
-!
-!   \item[{[options]}]
-!    Options on print.
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-       print *, "Coupler Component:"
-       call ESMF_CompPrint(component%compp, options, rc)
-
-       end subroutine ESMF_CplCompPrint
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CplCompFinalize -- Call the Component's finalize routine
-
-! !INTERFACE:
-    recursive subroutine ESMF_CplCompFinalize(component, importstate, &
-                                              exportstate, clock, phase, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_CplComp) :: component
-      type (ESMF_State), intent(inout), optional :: importstate
-      type (ESMF_State), intent(inout), optional :: exportstate
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user finalize code for a component.
-!
-!    
-!  The arguments are: 
-!  \begin{description} 
-!  
-!   \item[component]
-!    Component to call Finalize routine for.
-!
-!   \item[{[importstate]}]
-!       ESMF\_State containing import data for coupling.
-!
-!   \item[{[exportstate]}]
-!       ESMF\_State containing export data for coupling.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompFinalize(component%compp, importstate=importstate, &
-                      exportstate=exportstate, clock=clock, phase=phase, rc=rc)
-
-        end subroutine ESMF_CplCompFinalize
-
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -767,72 +831,6 @@
         end subroutine ESMF_CplCompReadRestart
 
 
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CplCompDestroy -- Release resources for a Component
-
-! !INTERFACE:
-      subroutine ESMF_CplCompDestroy(component, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_CplComp) :: component
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Releases all resources associated with this {\tt Component}.
-!
-!     The arguments are:
-!     \begin{description}
-!
-!     \item[component]
-!       Destroy contents of this {\tt Component}.
-!
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        ! local vars
-        integer :: status                       ! local error status
-        logical :: rcpresent                    ! did user specify rc?
-
-        ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Check to see if already destroyed
-        if (.not.associated(component%compp)) then  
-          print *, "Component already destroyed"
-          return
-        endif
-
-        ! call Destruct to release resources
-        call ESMF_CompDestruct(component%compp, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Component contents destruction error"
-          return
-        endif
-
-        ! Deallocate the component struct itself
-        deallocate(component%compp, stat=status)
-        if (status .ne. 0) then
-          print *, "Component contents destruction error"
-          return
-        endif
-        nullify(component%compp)
- 
-        ! Set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_CplCompDestroy
 
 end module ESMF_CplCompMod
 
