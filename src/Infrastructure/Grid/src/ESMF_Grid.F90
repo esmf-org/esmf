@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.139 2004/02/18 20:37:05 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.140 2004/02/19 21:27:33 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.139 2004/02/18 20:37:05 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.140 2004/02/19 21:27:33 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1502,7 +1502,8 @@
                                              relloc, global1D, local1D, &
                                              global2D, local2D, &
                                              globalAI1D, localAI1D, &
-                                             globalAI2D, localAI2D, rc)
+                                             globalAI2D, localAI2D, &
+                                             dimOrder, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -1517,6 +1518,7 @@
       type(ESMF_AxisIndex), dimension(:), optional, intent(out) ::  localAI1D
       type(ESMF_AxisIndex), dimension(:,:), optional, intent(in) :: globalAI2D
       type(ESMF_AxisIndex), dimension(:,:), optional, intent(out) ::  localAI2D
+      integer, dimension(:), optional, intent(in) :: dimOrder
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1583,7 +1585,8 @@
                                            relloc, global1D, local1D, &
                                            global2D, local2D, &
                                            globalAI1D, localAI1D, &
-                                           globalAI2D, localAI2D, status)
+                                           globalAI2D, localAI2D, &
+                                           dimOrder, status)
 
       !-------------
       ! ESMF_GridStructure_LogRectBlock
