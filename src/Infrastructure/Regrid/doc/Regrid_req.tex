@@ -1,4 +1,4 @@
-% $Id: Regrid_req.tex,v 1.7 2002/04/08 16:27:59 pwjones Exp $
+% $Id: Regrid_req.tex,v 1.8 2002/05/03 18:17:22 pwjones Exp $
 
 %===============================================================================
 % Requirements may be itemized under a main topic:
@@ -15,7 +15,7 @@ Requirements document).
 %-------------------------------------------------------------------------------
 \sreq{Creation}
 
-Applications must be able to create a regridding and initialize
+Components must be able to create a regridding and initialize
 various time-independent regridding quantities.
 
 \begin{reqlist}
@@ -31,7 +31,7 @@ various time-independent regridding quantities.
 %-------------------------------------------------------------------------------
 \sreq{Destruction}
 
-Applications must be able to destroy regriddings to free up memory.
+Components must be able to destroy regriddings to free up memory.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -44,14 +44,14 @@ Applications must be able to destroy regriddings to free up memory.
 %-------------------------------------------------------------------------------
 \sreq{Query}
 
-Applications must be able to query various properties of a regridding.
+Components must be able to query various properties of a regridding.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:}  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
-{\bf Notes:} Ideally, applications should not need to access internal
+{\bf Notes:} Ideally, components should not need to access internal
              regridding fields.  But it might be useful to access some
              aspects for error checking, optimization of data layout or
              renormalization.  Exact query functions will be determined
@@ -61,8 +61,9 @@ Applications must be able to query various properties of a regridding.
 %-------------------------------------------------------------------------------
 \sreq{Change}
 
-Applications should be able to change individual properties of a
-regridding.
+Components should be able to change individual properties of a
+regridding.  Examples might include adjusting regridding weights to 
+renormalize or to adapt to dynamic area fractions (like ice fraction).
 
 \begin{reqlist}
 {\bf Priority:} 3 \\
@@ -77,10 +78,10 @@ regridding.
 %-------------------------------------------------------------------------------
 \sreq{Reading}
 
-Applications may be able to read regridding information from a file.
+Components may be able to read regridding information from a file.
 
 \begin{reqlist}
-{\bf Priority:} 2 \\
+{\bf Priority:} 1 \\
 {\bf Source:} POP, CICE, CAM desired \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
@@ -91,10 +92,10 @@ Applications may be able to read regridding information from a file.
 %-------------------------------------------------------------------------------
 \sreq{Writing}
 
-Applications may be able to write regridding information to a file.
+Components may be able to write regridding information to a file.
 
 \begin{reqlist}
-{\bf Priority:} 2 \\
+{\bf Priority:} 1 \\
 {\bf Source:} POP, CICE, CAM desired \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
@@ -133,6 +134,21 @@ a single call must be supported.
              be required to achieve functionality.
 \end{reqlist}
 
+\ssreq{Interface requires only data arrays}
+
+An interface requiring only data arrays shall be
+provided.  Such an interface would not require the overhead
+of a full field structure and is supplied for efficiency.
+
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} POP, CICE, CAM desired \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test \\
+{\bf Notes:} Field info may still be used for creation of the
+             regrid object.
+\end{reqlist}
+
 \ssreq{Consistency of field bundles}
 
 The regridding function must check if the input field bundle and output field
@@ -152,7 +168,7 @@ fields and grids on which the fields are placed.
 \sreq{Multiple methods per grid pair}
 
 It shall be possible to create more than one regridding for a given grid
-pair.  In such a case, each regridding will be separate and distinct.
+pair.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -160,29 +176,33 @@ pair.  In such a case, each regridding will be separate and distinct.
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Both non-conservative and conservative methods will be needed
-             between the same two grids, but they should not be combined in the
-             same regridding structure/instantiation.
+             between the same two grids.
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
 \sreq{Consistency of coordinates}
 
 Regridding will assume source and destination grids will be
-in compatible coordinate systems.  That is, no knowledge of units or
-physics must be necessary to perform regridding.
-This also applies to vertical grid systems.
+in compatible coordinate systems.  No knowledge of
+the projection used or the physics of the coordinate are
+required for performing a regridding.  For example, if a 
+horizontal grid is in Caresian coordinates, the second grid 
+must also be in Cartesian coordinates with the same origin.
+Similarly, if the coordinates of one grid are in spherical 
+coordinates, the second grid must also use spherical 
+coordinates.  The restriction
+also applies to vertical coordinates where the regridding
+will not be expected to know how to transform between
+two different coordinate choices (eg pressure to isentropic).
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} Required by all. \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection  \\
-{\bf Notes:} A horizontal grid pair must be either both in x-y units (m)
-             with the same origin or both in lat-lon (deg) units unless
-             we decide to include arbitrary projection information as part
-             of a PhysGrid structure.
-             Also, vertical regridding between all possible vertical grid
-             systems is problematic.
+{\bf Notes:} Exceptions to this are permitted if the user
+             supplies the regridding routine (see later
+             requirement on user-supplied regridding).
 \end{reqlist}
 
 \ssreq{Consistency of coordinates check}
@@ -202,11 +222,11 @@ with each other.
 %-------------------------------------------------------------------------------
 \sreq{Interpolation adjoints}
 
-Adjoints shall be supplied for all methods when possible.  This is generally
-possible for regriddings that are independent of the field being regridded
-(see following requirement) and that can be cast as a linear operator (eg
-matrix multiplication).  Methods where adjoints are absolutely required
-have been so noted within their own respective decriptions.
+Adjoints shall be supplied for regridding methods when possible.  This is 
+generally possible for regriddings that are independent of the field being 
+regridded (see following requirement) and that can be cast as a linear 
+operator (eg matrix multiplication).  Methods where adjoints are absolutely 
+required have been so noted within their own respective decriptions.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
@@ -219,8 +239,9 @@ have been so noted within their own respective decriptions.
 %-------------------------------------------------------------------------------
 \sreq{Masked regridding}
 
-For all regridding methods, it shall be possible to restrict the
-regridding to parts of a grid through the use of a mask.
+It shall be possible to restrict the regridding to parts of a grid through 
+the use of a mask.  Note that use of a mask is inappropriate for some methods 
+(eg spectral transforms) and will not be supported for those methods.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -250,8 +271,7 @@ be determined (eg source grid is ``master'').
 %-------------------------------------------------------------------------------
 \sreq{Independence of field}
 
-At least one regridding method must be completely independent of
-field information.  Whenever possible, regridding should be formulated to be
+Whenever possible, regridding should be formulated to be
 independent of the field being regridded.  This requirement exists to
 aid the creation of an adjoint, to enable pre-computation of regridding
 weights and to enable re-use of regridding information for multiple
@@ -269,14 +289,12 @@ fields.
 \sreq{Dependence of field}
 
 For regridding schemes which might require field information,
-the required field information must be passed as arguments.
+the required field information can be passed as arguments.
 Some higher-order regridding schemes require information on the
-gradient or other moments of a field.  Other potential schemes
-interpolate in the upwind direction, requiring knowledge of a
-velocity field.  In such cases, this supplemental field
-information must be computed by the application and passed to
-the regridding function so that the regridding does not
-require detailed knowledge of operators or topology on every
+gradient or other moments of a field.  In such cases, this 
+supplemental field information must be computed by the component 
+and passed to the regridding function so that the regridding does 
+not require detailed knowledge of operators or grid topology on every
 supported grid or field.
 
 \begin{reqlist}
@@ -284,9 +302,8 @@ supported grid or field.
 {\bf Source:} Required by all. \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection  \\
-{\bf Notes:} If a way of passing user-defined functions
-             were available, this requirement could be relaxed or even
-             eliminated.
+{\bf Notes:} This requirement could also be satisfied by a later requirement
+             for user-supplied regridding routines.
 \end{reqlist}
 
 %===============================================================================
@@ -298,9 +315,9 @@ This section contains requirements on regridding algorithms themselves.
 %-------------------------------------------------------------------------------
 \sreq{Conservation}
 
-At least one regridding method between two gridded fields must be
+Regridding methods must be supplied which are
 \htmlref{conservative}{glos:conservation}.  Where possible,
-higher-order conservative methods should be supplied.  This requirement
+higher-order conservative methods should also be supplied.  This requirement
 applies only to ESMF grids which have an area (2-d), volume (3-d) or
 linear region (1-d) associated with them such that conservation is well
 defined.
@@ -312,9 +329,9 @@ defined.
 {\bf Verification:} Unit test \\
 {\bf Notes:} Methods exist for both first and second-order
              conservative schemes in 1-d and 2-d \cite{Jones1999}.
-             A Monte Carlo method could be used for first-order conservative
-             regridding of 3-d fields; 3-d extensions to the 2-d methods above
-             exist for some special cases but are non-trivial.
+             Conservative methods for 3-d field (eg Monte Carlo
+             or 3-d extensions to the above methods) are more difficult
+             and may have a lower priority.
              High-order conservative schemes are more expensive and
              no schemes higher than second-order have been implemented.
 
@@ -338,10 +355,10 @@ A method for verifying conservation must be supplied.
 %-------------------------------------------------------------------------------
 \sreq{Monotonicity}
 
-At least one regridding method must be \htmlref{monotone}{glos:monotone}.
+\htmlref{Monotone}{glos:monotone} regridding methods must be supplied.
 
 \begin{reqlist}
-{\bf Priority:} 2-3? \\
+{\bf Priority:} 2 \\
 {\bf Source:}  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
@@ -349,14 +366,16 @@ At least one regridding method must be \htmlref{monotone}{glos:monotone}.
              conservative schemes are generally monotone by
              construction, so this could be satisfied by the
              conservation requirement for gridded data.
+             1-d monotone schemes are required for some hybrid
+             and Lagrangian vertical coordinate schemes.
 \end{reqlist}
 
 
 %-------------------------------------------------------------------------------
 \sreq{Higher-order schemes}
 
-At least one regridding method must be higher than first
-\htmlref{order}{glos:order}.  This is required for preventing
+Regridding methods which are higher than first \htmlref{order}{glos:order}
+must be supplied.  This is required for preventing
 ``patchwork'' patterns when regridding from coarse to fine
 grids and for preventing discontinuities in gradients of
 regridded fields.
@@ -369,13 +388,14 @@ regridded fields.
 {\bf Notes:} This will require either internal approximations to
              gradients (eg bilinear, bicubic, trilinear) or will require the
              user to pass gradient information (eg second-order conservative
-             methods).  See requirements on field dependence.
+             methods).  See requirements on field dependence.  Also, this
+             requirement can be in conflict with monotonicity requirements.
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
 \sreq{Vector fields in physical space}
 
-At least one regridding method must be available for regridding a horizontal
+Regridding methods must be available for regridding a horizontal
 vector field with components aligned with physical directions
 (eg zonal-meridional or x-y), where the physical direction may be
 inferred by the grid type or specified by user.
@@ -385,33 +405,34 @@ inferred by the grid type or specified by user.
 {\bf Source:}  POP, CICE, CAM required. \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Notes:} In spherical coordinates, meridional velocity components
+             may be improperly handled except in simple latitude-longitude
+             grid combinations.
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
 \sreq{Vector fields in logical space}
 
-At least one regridding method must be available for regridding a horizontal
+Regridding methods must be available for regridding a horizontal
 vector field with components aligned along grid logical directions.
 Logical directions here refer to directions parallel and perpendicular
-to cell sides.
+to cell sides.  Such a method would correctly handle flow through 
+coordinate singularities such as the poles in spherical coordinates.
 
 \begin{reqlist}
-{\bf Priority:} 2-3 \\
+{\bf Priority:} 2 \\
 {\bf Source:}  POP, CICE (CCSM) desired. \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Currently working on whether it is even possible to do this
-             in all cases, but willing to make the attempt.  If not possible,
-             physical space requirement is adequate with requirement that
-             component models perform appropriate rotations of vectors to
-             logical directions from physical directions.
+             in all cases, but willing to make the attempt.  Conversion to
+             3-d Cartesian components during the remapping is one option.
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
 \sreq{Regridding based on index space}
 
-At least one regridding method must be available for regridding based
+Methods must be available for regridding based
 only on logical indices of grid points and thus only on DistGrid information.  
 Such a function is useful for nested grid and multi-grid applications where 
 no physical grid information is required for creating the regridding.
@@ -426,17 +447,23 @@ no physical grid information is required for creating the regridding.
 
 \ssreq{Index space changes}
 
-An efficient method must be supplied for rapidly changing the
+A method must be supplied for rapidly changing the
 regridding in cases where indices of one grid shift in relation 
 to the other grid (eg as a nested grid moves in relation to its 
-parent).
+parent).  The regridding in this case would be utilizing the
+same stencil and weights; only the addresses of the grid points
+would shift.  Because of the simple nature of this operation,
+this requirement provides an efficient short-cut, avoiding
+re-creating a regridding using calls to create or destroy methods.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:}  WRF required \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Notes:} A requirement for this exists in DistGrid, so
+             Regrid would utilize the DistGrid functionality to 
+             accomplish this.
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
@@ -456,6 +483,37 @@ reduced grids, spectral elements, etc.).
 {\bf Notes:} 
 \end{reqlist}
 
+\ssreq{Return types for Fourier modes}
+
+Results of Fourier transforms can be returned as either
+complex numbers or as real numbers in a specified order.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test \\
+{\bf Notes:} 
+\end{reqlist}
+
+\ssreq{Parallel implementations}
+
+Distributed FFT algorithms will be supported for a limited
+number of specific configurations.  Note that a transpose
+algorithm (in which a local serial transform is combined
+with data transposes to redistribute data) will always
+be supported for the general case.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test \\
+{\bf Notes:} Distributed algorithms make assumptions about
+             the placement of both input and output data and
+             support for all possibilities may be prohibitive.
+\end{reqlist}
+
 %-------------------------------------------------------------------------------
 \sreq{Legendre transforms}
 
@@ -470,6 +528,38 @@ data must be located at appropriate quadrature points).
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:}
+\end{reqlist}
+
+\ssreq{Data types for Fourier modes}
+
+Legendre transforms must support Fourier modes stored as either
+complex numbers or as real numbers in a specified order.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test \\
+{\bf Notes:}  Companion to the Fourier requirement above.
+\end{reqlist}
+
+\ssreq{Parallel implementations}
+
+Distributed Legendre algorithms will be supported for a limited
+number of specific configurations.  Note that a transpose
+algorithm (in which a local serial transform is combined
+with data transposes to redistribute data) will always
+be supported for the general case.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test \\
+{\bf Notes:} Similar to the Fourier requirement,
+             distributed algorithms make assumptions about
+             the placement of both input and output data and
+             support for all possibilities may be prohibitive.
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
@@ -511,8 +601,8 @@ Methods for regridding FROM ungridded data TO gridded data may be
 supplied (eg nearest-neighbor distance-weighted schemes).
 
 \begin{reqlist}
-{\bf Priority:} 3 \\
-{\bf Source:}  \\
+{\bf Priority:} 1 \\
+{\bf Source:} MIT  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Generally, operations like this will be covered by
@@ -528,7 +618,7 @@ routines.  This is especially useful for regriddings that are
 strongly dependent on model fields.
 
 \begin{reqlist}
-{\bf Priority:} 3 \\
+{\bf Priority:} 2 \\
 {\bf Source:}  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\

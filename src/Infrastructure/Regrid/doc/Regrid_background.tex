@@ -1,37 +1,47 @@
-% $Id: Regrid_background.tex,v 1.4 2002/04/08 16:27:59 pwjones Exp $
+% $Id: Regrid_background.tex,v 1.5 2002/05/03 18:17:22 pwjones Exp $
 
 Many applications in Earth system modeling require
-communicating fields between different grids.  Such
-cases occur when coupling two models that utilize
+transforming fields between different grids.  Such
+cases occur when coupling two components that utilize
 different grids (eg coupling atmosphere and ocean
-components of a climate model) or when a single model
-utilizes more than one grid (eg nested grids or multi-grid).
-Fields must then be interpolated or remapped
+components of a climate model) or when a single component
+utilizes more than one grid (eg nested grids, multi-grid
+or spectral transforms).
+Fields must then be interpolated, averaged or remapped
 from one grid to another.  We will refer to this process
-as {\em regridding}. Many different methods
+as {\em regridding}. 
+
+Many different methods
 for performing regriddings are required.
 Regridding heat or water fluxes between models requires
 fluxes to be regridded in a way that conserves
-the total energy or water flux in the model.  In other
+the total energy or water in the model.  In other
 cases, it is more important that higher-order
 regridding methods be used to prevent discontinuities
 in the interpolated fields or their gradients.
 
 In addition to moving fields between grids,
-models require moving ungridded data (eg observations)
-to and from model grids.  Transforming fields
+components require moving ungridded data (eg observations)
+to and from component grids.  Transforming fields
 from physical space to spectral space is also
 a frequent operation.
 
 The ESMF Regridding facility (Regrid) will
 supply necessary functions and data structures for
-{\em quality} implementations of {\em bespoken} regridding
-operations.  Appropriate functions for all supported
-ESMF grids will be supplied.
+implementing regridding operations.  Appropriate 
+functions will be supplied for all supported ESMF grids,
+including grids in spherical, Cartesian and cylindrical
+coordinates and non-gridded lists of points
+in those coordinates (see PhysGrid requirements for
+complete list of supported grids).  A variety of methods will
+be supplied, including conservative, spectral transform,
+linear and higher-order methods.  The   
+remainder of this document outlines specific requirements
+for all of the supported options.
 
 \subsection{Location}
 
-The regridding and interpolation is part of the ESMF
+Regridding and interpolation is part of the ESMF
 Infrastructure.  It will use information from Physical
 Grids (PhysGrid) or Distributed Grids (DistGrid) to compute
 regridding information and use DistGrid
@@ -41,7 +51,8 @@ within component models when necessary.
 
 \subsection{Scope}
 
-ESMF Regrid is meant to be used for mapping data
-between ESMF grids.  It is not meant to be a data
-assimilation system.
+ESMF Regrid is meant to be used for interpolating or
+remapping data between supported ESMF grids.  Support
+for moving fields between points on staggered grids
+will be included in PhysGrid.
 
