@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.1 2002/10/08 19:16:48 nscollins Exp $
+! $Id: ESMF_IO.F90,v 1.2 2002/10/16 20:37:50 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IO module
@@ -50,9 +50,9 @@
       type ESMF_IOSpec
       sequence
       private
-          type (ESMF_State) :: iostate
+          type (ESMF_Status) :: iostatus
           type (ESMF_IOType) :: iotype
-          integer :: current_state
+          integer :: current_status
           type (ESMF_Flag) :: async_io
       end type
 
