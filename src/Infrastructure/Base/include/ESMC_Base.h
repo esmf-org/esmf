@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.19 2003/07/09 20:02:23 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.20 2003/08/22 21:49:19 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -128,13 +128,19 @@ struct ESMC_AxisIndex {
     int  stride;
 };
 
-// collection of AxisIndicies per axis, to describe an n-dim cube
+// collection of AxisIndices per axis, to describe an n-dim cube
 struct ESMC_Domain {
-    ESMC_Logical f90indexorder;
-    int  rank;
+    int DE;
+    int rank;
     struct ESMC_AxisIndex ai_list[ESMF_MAXDIM];
 };
 
+// collection of AxisIndices per axis, to describe an n-dim cube
+struct ESMC_DomainList {
+    int num_domains;
+    int current_size;
+    struct ESMC_Domain domains[ESMF_MAXDIM];  // not right, just temp
+};
 
 // !PRIVATE TYPES:
 
