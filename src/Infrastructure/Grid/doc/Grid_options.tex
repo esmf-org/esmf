@@ -1,4 +1,4 @@
-% $Id: Grid_options.tex,v 1.6 2004/04/22 17:43:40 jwolfe Exp $
+% $Id: Grid_options.tex,v 1.7 2004/05/24 22:57:50 jwolfe Exp $
 
 \subsubsection{ESMF\_GridStructure}
 
@@ -7,17 +7,17 @@ General Grid structures supported by ESMF.
 
 Valid values are:
 \begin{description}
-   \item [ESMF\_GRIDSTRUCTURE\_LOGRECT]
+   \item [ESMF\_GRID\_STRUCTURE\_LOGRECT]
          Logically rectangular grid.  This infers a single block grid.
 
-%  \item [ESMF\_GRIDSTRUCTURE\_LOGRECTBLOCK]
+%  \item [ESMF\_GRID\_STRUCTURE\_LOGRECTBLK]
 %        Logically rectangular blocked grid.
-%  \item [ESMF\_GRIDSTRUCTURE\_UNSTRUCT]
+%  \item [ESMF\_GRID\_STRUCTURE\_UNSTRUCT]
 %        Unstructured grid.
-   \item [ESMF\_GRIDSTRUCTURE\_USER]
+   \item [ESMF\_GRID\_STRUCTURE\_USER]
          User-defined grid.
 
-   \item [ESMF\_GRIDSTRUCTURE\_UNKNOWN]
+   \item [ESMF\_GRID\_STRUCTURE\_UNKNOWN]
          Unknown or undefined grid.
 \end{description}
 
@@ -25,64 +25,68 @@ Valid values are:
 \subsubsection{ESMF\_GridType}
 
 {\sf DESCRIPTION:\\}
-Grid types supported by ESMF.
+Grid types supported by ESMF.  In general, we expect each GridType to have
+its own explicit Create function.
 
 Valid values are:
 \begin{description}
-   \item [ESMF\_GRIDTYPE\_LATLON]
-         latitude/longitude grid
+   \item [ESMF\_GRID\_TYPE\_LATLON]
+         Latitude/longitude grid
 
-%  \item [ESMF\_GRIDTYPE\_LATLONGAUSS]
+   \item [ESMF\_GRID\_TYPE\_LATLON\_UNI]
+         Uniform latitude/longitude grid
+
+%  \item [ESMF\_GRID\_TYPE\_LATLON\_GAUSS]
 %        Latitude/Longitude grid with gaussian-spaced latitudes
-%  \item [ESMF\_GRIDTYPE\_LATLONMERCATOR]
+%  \item [ESMF\_GRID\_TYPE\_LATLON\_MERC]
 %        Latitude/Longitude grid with Mercator-spaced latitudes
-%  \item [ESMF\_GRIDTYPE\_REDUCED]
+%  \item [ESMF\_GRID\_TYPE\_REDUCED]
 %        Latitude/Longitude grid where the number of longitudinal points is a
 %        function of the latitude
-%  \item [ESMF\_GRIDTYPE\_DIPOLE]
+%  \item [ESMF\_GRID\_TYPE\_DIPOLE]
 %        Displaced-pole dipole grid
-%  \item [ESMF\_GRIDTYPE\_TRIPOLE]
+%  \item [ESMF\_GRID\_TYPE\_TRIPOLE]
 %        Tripolar grids
-   \item [ESMF\_GRIDTYPE\_XY]
-         XY cartesian grid with equal spacing
-
-   \item [ESMF\_GRIDTYPE\_XYVAR]
+   \item [ESMF\_GRID\_TYPE\_XY]
          XY cartesian grid with variable or unequal spacing
 
-%  \item [ESMF\_GRIDTYPE\_DATASTREAM]
+   \item [ESMF\_GRID\_TYPE\_XY\_UNI]
+         XY cartesian grid with equal spacing
+
+%  \item [ESMF\_GRID\_TYPE\_DATASTREAM]
 %        Data stream - set of locations
-%  \item [ESMF\_GRIDTYPE\_PHYSFOURIER]
+%  \item [ESMF\_GRID\_TYPE\_PHYSFOURIER]
 %        Mixed Fourier Space/Physcal Space grid
-%  \item [ESMF\_GRIDTYPE\_SPHERICALSPECTRAL]
-%        spectral space for spherical harmonics
-%  \item [ESMF\_GRIDTYPE\_CARTSPECTRAL]
-%        spectral space for cartesian coordinates
-%  \item [ESMF\_GRIDTYPE\_GEODESIC]
+%  \item [ESMF\_GRID\_TYPE\_SPHER\_SPECT]
+%        Spectral space for spherical harmonics
+%  \item [ESMF\_GRID\_TYPE\_CART\_SPECT]
+%        Spectral space for cartesian coordinates
+%  \item [ESMF\_GRID\_TYPE\_GEODESIC]
 %        Spherical geodesic grid
-%  \item [ESMF\_GRIDTYPE\_CUBEDSPHERE]
+%  \item [ESMF\_GRID\_TYPE\_CUBEDSPHERE]
 %        Cubed sphere grid
-%  \item [ESMF\_GRIDTYPE\_EXCHANGE]
+%  \item [ESMF\_GRID\_TYPE\_EXCHANGE]
 %        Intersection of two grids, which is itself a grid
-   \item [ESMF\_GRIDTYPE\_UNKNOWN]
+   \item [ESMF\_GRID\_TYPE\_UNKNOWN]
          Unknown or undefined grid.
 
 \end{description}
 
-\subsubsection{ESMF\_GridStagger}
+\subsubsection{ESMF\_GridHorzStagger}
 
 {\sf DESCRIPTION:\\}
-Grid staggerings supported by ESMF.
+Horizontal Grid staggerings supported by ESMF.
 
 Valid values are:
 \begin{description}
-   \item [ESMF\_GRIDSTAGGER\_A]
+   \item [ESMF\_GRID\_HORZ\_STAGGER\_A]
          Arakawa A staggering where all fields, including velocities, are
          located at cell centers.  This staggering is only valid as a horzStagger.
          A grid created with this staggering will only accept ESMF\_Fields with
          the following horzRellocs (horizontal relative locations):
              ESMF\_CELL\_CENTER
 
-   \item [ESMF\_GRIDSTAGGER\_B\_NE]
+   \item [ESMF\_GRID\_HORZ\_STAGGER\_B\_NE]
          Arakawa B staggering where both the U and V velocities are located at
          each cell's NorthEast corner.  This staggering is only valid as a
          horzStagger.  A grid created with this staggering will only accept
@@ -90,7 +94,7 @@ Valid values are:
              ESMF\_CELL\_CENTER
              ESMF\_CELL\_NECORNER
 
-   \item [ESMF\_GRIDSTAGGER\_B\_SW]
+   \item [ESMF\_GRID\_HORZ\_STAGGER\_B\_SW]
          Arakawa B staggering where both the U and V velocities are located at
          each cell's SouthWest corner.  This staggering is only valid as a 
          horzStagger.  A grid created with this staggering will only accept
@@ -98,7 +102,7 @@ Valid values are:
              ESMF\_CELL\_CENTER
              ESMF\_CELL\_SWCORNER
 
-   \item [ESMF\_GRIDSTAGGER\_B\_SE]
+   \item [ESMF\_GRID\_HORZ\_STAGGER\_B\_SE]
          Arakawa B staggering where both the U and V velocities are located at
          each cell's SouthEast corner.  This staggering is only valid as a 
          horzStagger.  A grid created with this staggering will only accept
@@ -106,7 +110,7 @@ Valid values are:
              ESMF\_CELL\_CENTER
              ESMF\_CELL\_SECORNER
 
-   \item [ESMF\_GRIDSTAGGER\_B\_NW]
+   \item [ESMF\_GRID\_HORZ\_STAGGER\_B\_NW]
          Arakawa B staggering where both the U and V velocities are located at
          each cell's NorthWest corner.  This staggering is only valid as a 
          horzStagger.  A grid created with this staggering will only accept
@@ -114,7 +118,7 @@ Valid values are:
              ESMF\_CELL\_CENTER
              ESMF\_CELL\_NWCORNER
 
-   \item [ESMF\_GRIDSTAGGER\_C\_NE]
+   \item [ESMF\_GRID\_HORZ\_STAGGER\_C\_NE]
          Arakawa C staggering where the U velocity is located at the East face
          and the V velocity is located at the North face.  This staggering is
          only valid as a horzStagger.  A grid created with this staggering will
@@ -124,7 +128,7 @@ Valid values are:
              ESMF\_CELL\_NFACE
              ESMF\_CELL\_EFACE
 
-   \item [ESMF\_GRIDSTAGGER\_C\_SW]
+   \item [ESMF\_GRID\_HORZ\_STAGGER\_C\_SW]
          Arakawa C staggering where the U velocity is located at the West face
          and the V velocity is located at the South face.  This staggering is
          only valid as a horzStagger.  A grid created with this staggering will
@@ -134,7 +138,7 @@ Valid values are:
              ESMF\_CELL\_SFACE
              ESMF\_CELL\_WFACE
 
-   \item [ESMF\_GRIDSTAGGER\_C\_SE]
+   \item [ESMF\_GRID\_HORZ\_STAGGER\_C\_SE]
          Arakawa C staggering where the U velocity is located at the East face
          and the V velocity is located at the South face.  This staggering is
          only valid as a horzStagger.  A grid created with this staggering will
@@ -144,7 +148,7 @@ Valid values are:
              ESMF\_CELL\_SFACE
              ESMF\_CELL\_EFACE
 
-   \item [ESMF\_GRIDSTAGGER\_C\_NW]
+   \item [ESMF\_GRID\_HORZ\_STAGGER\_C\_NW]
          Arakawa C staggering where the U velocity is located at the West face
          and the V velocity is located at the North face.  This staggering is
          only valid as a horzStagger.  A grid created with this staggering will
@@ -154,7 +158,7 @@ Valid values are:
              ESMF\_CELL\_NFACE
              ESMF\_CELL\_WFACE
 
-   \item [ESMF\_GRIDSTAGGER\_D\_NE]
+   \item [ESMF\_GRID\_HORZ\_STAGGER\_D\_NE]
          Arakawa D staggering where the U velocity is located at the North face
          and the V velocity is located at the East face.  This staggering is
          only valid as a horzStagger.  A grid created with this staggering will 
@@ -164,7 +168,7 @@ Valid values are:
              ESMF\_CELL\_NFACE
              ESMF\_CELL\_EFACE
 
-   \item [ESMF\_GRIDSTAGGER\_D\_SW]
+   \item [ESMF\_GRID\_HORZ\_STAGGER\_D\_SW]
          Arakawa D staggering where the U velocity is located at the South face
          and the V velocity is located at the West face.  This staggering is
          only valid as a horzStagger.  A grid created with this staggering will
@@ -174,7 +178,7 @@ Valid values are:
              ESMF\_CELL\_SFACE
              ESMF\_CELL\_WFACE
 
-   \item [ESMF\_GRIDSTAGGER\_D\_SE]
+   \item [ESMF\_GRID\_HORZ\_STAGGER\_D\_SE]
          Arakawa D staggering where the U velocity is located at the South face
          and the V velocity is located at the East face.  This staggering is
          only valid as a horzStagger.  A grid created with this staggering will
@@ -184,7 +188,7 @@ Valid values are:
              ESMF\_CELL\_SFACE
              ESMF\_CELL\_EFACE
 
-   \item [ESMF\_GRIDSTAGGER\_D\_NW]
+   \item [ESMF\_GRID\_HORZ\_STAGGER\_D\_NW]
          Arakawa D staggering where the U velocity is located at the North face
          and the V velocity is located at the West face.  This staggering is
          only valid as a horzStagger.  A grid created with this staggering will
@@ -194,34 +198,47 @@ Valid values are:
              ESMF\_CELL\_NFACE
              ESMF\_CELL\_WFACE
 
-%  \item [ESMF\_GRIDSTAGGER\_E]
+%  \item [ESMF\_GRID\_HORZ\_STAGGER\_E]
 %        Arakawa E.
-%  \item [ESMF\_GRIDSTAGGER\_Z]
+%  \item [ESMF\_GRID\_HORZ\_STAGGER\_Z]
 %        C grid equivalent for geodesic grid.
-   \item [ESMF\_GRIDSTAGGER\_VERTCENTER] 
-         Vertical velocity or pressure gradient is located at vertical midpoints.
-         This staggering is only valid as a vertStagger.  A grid created with
-         this staggering will only accept ESMF\_Fields with the following
-         vertRellocs (vertical relative locations):
-             ESMF\_CELL\_CELL
 
-   \item [ESMF\_GRIDSTAGGER\_VERTTOP]
-         Vertical velocity or pressure gradient is located at the top vertical 
-         face of the cell.  This staggering is only valid as a vertStagger.
+   \item [ESMF\_GRID\_HORZ\_STAGGER\_UNKNOWN]
+         Unknown or undefined staggering.
+
+\end{description}
+
+\subsubsection{ESMF\_GridVertStagger}
+
+{\sf DESCRIPTION:\\}
+Vertical Grid staggerings supported by ESMF.
+
+Valid values are:
+\begin{description}
+
+   \item [ESMF\_GRID\_VERT\_STAGGER\_CENTER] 
+         Vertical velocity or pressure gradient is located at vertical midpoints.
          A grid created with this staggering will only accept ESMF\_Fields with
          the following vertRellocs (vertical relative locations):
+             ESMF\_CELL\_CELL
+
+   \item [ESMF\_GRID\_VERT\_STAGGER\_TOP]
+         Vertical velocity or pressure gradient is located at the top vertical 
+         face of the cell.  A grid created with this staggering will only accept
+         ESMF\_Fields with the following vertRellocs (vertical relative
+         locations):
              ESMF\_CELL\_CELL
              ESMF\_CELL\_TOPFACE
 
-   \item [ESMF\_GRIDSTAGGER\_VERTBOTTOM]
+   \item [ESMF\_GRID\_VERT\_STAGGER\_BOTTOM]
          Vertical velocity or pressure gradient is located at the bottom vertical 
-         face of the cell.  This staggering is only valid as a vertStagger.
-         A grid created with this staggering will only accept ESMF\_Fields with
-         the following vertRellocs (vertical relative locations):
+         face of the cell.  A grid created with this staggering will only accept
+         ESMF\_Fields with the following vertRellocs (vertical relative
+         locations):
              ESMF\_CELL\_CELL
              ESMF\_CELL\_BOTFACE
 
-   \item [ESMF\_GRIDSTAGGER\_Unknown]
+   \item [ESMF\_GRID\_VERT\_STAGGER\_UNKNOWN]
          Unknown or undefined staggering.
 
 \end{description}
@@ -234,26 +251,26 @@ example KIJ.  This parameter describes ordering options supported by ESMF.
 
 Valid values are:
 \begin{description}
-   \item [ESMF\_COORDORDER\_XYZ]
+   \item [ESMF\_COORD\_ORDER\_XYZ]
          The coordinates are ordered XYZ.  This is equivalent to IJK ordering.
          For a 2D grid, this defaults to IJ mapping.
 
-   \item [ESMF\_COORDORDER\_XZY]
+   \item [ESMF\_COORD\_ORDER\_XZY]
          The coordinates are ordered XZY.  For a 2D grid, this defaults to IJ mapping to XY.
 
-   \item [ESMF\_COORDORDER\_YXZ]
+   \item [ESMF\_COORD\_ORDER\_YXZ]
          IJK maps to YXZ.  For a 2D grid, this defaults to IJ mapping to YX.
 
-   \item [ESMF\_COORDORDER\_YZX]
+   \item [ESMF\_COORD\_ORDER\_YZX]
          IJK maps to YZX.  For a 2D grid, this defaults to
 
-   \item [ESMF\_COORDORDER\_ZXY]
+   \item [ESMF\_COORD\_ORDER\_ZXY]
          IJK maps to ZXY.
 
-   \item [ESMF\_COORDORDER\_ZYX]
+   \item [ESMF\_COORD\_ORDER\_ZYX]
          IJK maps to ZYX.
 
-   \item [ESMF\_COORDORDER\_Unknown]
+   \item [ESMF\_COORD\_ORDER\_UNKNOWN]
          Unknown or undefined coordinate ordering.
 \end{description}
 
@@ -265,13 +282,13 @@ parameter describes indexing options supported by ESMF.
 
 Valid values are:
 \begin{description}
-   \item [ESMF\_COORDINDEX\_LOCAL]
+   \item [ESMF\_COORD\_INDEX\_LOCAL]
          The coordinates are indexed locally.  
 
-   \item [ESMF\_COORDINDEX\_GLOBAL]
+   \item [ESMF\_COORD\_INDEX\_GLOBAL]
          The coordinates are indexed globally.
 
-   \item [ESMF\_COORDINDEX\_Unknown]
+   \item [ESMF\_COORD\_INDEX\_UNKNOWN]
          Unknown or undefined coordinate indexing.
 \end{description}
 
@@ -282,43 +299,43 @@ Supported coordinate systems.
 
 Valid values are:
 \begin{description}
-   \item [ESMF\_COORDSYSTEM\_USER]
+   \item [ESMF\_COORD\_SYSTEM\_USER]
          User-defined coordinate system.
 
-   \item [ESMF\_COORDSYSTEM\_SPHERICAL]
+   \item [ESMF\_COORD\_SYSTEM\_SPHERICAL]
          Spherical coordinates (longitude, latitude).
 
-   \item [ESMF\_COORDSYSTEM\_CARTESIAN]
+   \item [ESMF\_COORD\_SYSTEM\_CARTESIAN]
          Cartesian coordinates (x,y).
 
-   \item [ESMF\_COORDSYSTEM\_CYLINDRICAL] 
+   \item [ESMF\_COORD\_SYSTEM\_CYLINDRICAL] 
          Cylindrical coordinates.
 
-%  \item [ESMF\_COORDSYSTEM\_LATFOURIER]
+%  \item [ESMF\_COORD\_SYSTEM\_LATFOURIER]
 %        Mixed latitude/Fourier spectral space.
-%  \item [ESMF\_COORDSYSTEM\_SPECTRAL]
+%  \item [ESMF\_COORD\_SYSTEM\_SPECTRAL]
 %        Wavenumber space.
-   \item [ESMF\_COORDSYSTEM\_DEPTH]
+   \item [ESMF\_COORD\_SYSTEM\_DEPTH]
          Vertical z coordinate depth (0 at top surface).
 
-   \item [ESMF\_COORDSYSTEM\_HEIGHT]
+   \item [ESMF\_COORD\_SYSTEM\_HEIGHT]
          Vertical z coordinate height (0 at bottom).
 
-%  \item [ESMF\_COORDSYSTEM\_PRESSURE]
+%  \item [ESMF\_COORD\_SYSTEM\_PRESSURE]
 %        Vertical pressure coordinate.
-%  \item [ESMF\_COORDSYSTEM\_SIGMA] 
+%  \item [ESMF\_COORD\_SYSTEM\_SIGMA] 
 %        Vertical sigma coordinate.
-%  \item [ESMF\_COORDSYSTEM\_THETA]
+%  \item [ESMF\_COORD\_SYSTEM\_THETA]
 %        Vertical theta coordinate.
-%  \item [ESMF\_COORDSYSTEM\_ETA]
+%  \item [ESMF\_COORD\_SYSTEM\_ETA]
 %        Vertical eta coordinate.
-%  \item [ESMF\_COORDSYSTEM\_ISOPYCNAL]
+%  \item [ESMF\_COORD\_SYSTEM\_ISOPYCNAL]
 %        Vertical density coordinate.
-%  \item [ESMF\_COORDSYSTEM\_HYBRID]
+%  \item [ESMF\_COORD\_SYSTEM\_HYBRID]
 %        Hybrid vertical coordinates.
-%  \item [ESMF\_COORDSYSTEM\_LAGRANGIAN] 
+%  \item [ESMF\_COORD\_SYSTEM\_LAGRANGIAN] 
 %        Lagrangian coordinates.
-   \item [ESMF\_COORDSYSTEM\_UNKNOWN]
+   \item [ESMF\_COORD\_SYSTEM\_UNKNOWN]
          Unknown or undefined coordinate system.
 \end{description}
 
@@ -329,12 +346,27 @@ Supported types of grid masks.
 
 Valid values are:
 \begin{description}
-   \item [ESMF\_GRIDMASKTYPE\_LOGICAL]
+   \item [ESMF\_GRID\_MASKTYPE\_LOGICAL]
          Logical mask.
-   \item [ESMF\_GRIDMASKTYPE\_MULT]
+   \item [ESMF\_GRID\_MASKTYPE\_MULT]
          Multiplicative mask.
-   \item [ESMF\_GRIDMASKTYPE\_REGIONID]
+   \item [ESMF\_GRID\_MASKTYPE\_REGION\_ID]
          Integer assigning unique ID to each point.
-   \item [ESMF\_GRIDMASKTYPE\_UNKNOWN]
+   \item [ESMF\_GRID\_MASKTYPE\_UNKNOWN]
          Unknown or undefined mask type.
+\end{description}
+
+
+{\sf DESCRIPTION:\\}
+Supported types of grid regions.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_REGION\_TYPE\_POLYGON]
+         Polygonal regions defined by vertex coordinates.
+   \item [ESMF\_REGION\_TYPE\_ELLIPSE]
+         Elliptical regions centered on grid point, defined by two 
+         additional parameters.
+   \item [ESMF\_REGION\_TYPE\_UNKNOWN]
+         Unknown or undefined region type.
 \end{description}
