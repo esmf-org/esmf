@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.3 2002/12/13 16:27:14 nscollins Exp $ 
+# $Id: base_variables,v 1.4 2002/12/16 22:43:37 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -13,7 +13,7 @@ SH_LD		   = cc
 # ######################### C and Fortran compiler ########################
 #
 C_CC		   = cc
-C_FC		   = f95 
+C_FC		   = f95 -YEXT_NAMES=LCS -s
 C_FC_MOD           = -p
 C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
@@ -39,7 +39,7 @@ F_FIXNOCPP      = -ffixed
 # ########################## C++ compiler ##################################
 #
 CXX_CC		   = g++ -fPIC
-CXX_FC		   = f95
+CXX_FC		   = f95 -YEXT_NAMES=LCS -s 
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CLINKER	   = g++
