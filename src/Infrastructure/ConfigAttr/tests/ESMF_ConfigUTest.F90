@@ -32,8 +32,7 @@
 
     program ESMF_Config_Test
 
-      use  ESMF_DELayoutMod
-      use ESMF_ConfigMod   
+      use ESMF_Mod
 
       type(ESMF_DELayout) :: layout  
       type (ESMF_Config) cf 
@@ -66,6 +65,7 @@
       counter_success = 0
  
 
+      call ESMF_FrameworkInitialize()
 
 ! Initialization:
 !----------------
@@ -114,6 +114,7 @@
       endif
 
 
+      call ESMF_FrameworkFinalize()
 
 
 
