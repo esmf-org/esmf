@@ -74,7 +74,7 @@ The ESMF shall operate on the following platforms:
   {\bf Priority:} 3.
 \end{reqlist}
 
-\sreq{Performance}
+\sreq{Performance} \label{perf}
 The framework shall not increase the execution time of an existing code 
 written without the framework by more than 10\% on scalar 
 architectures within their scalable range.
@@ -121,7 +121,8 @@ ESMF shall provide varied levels of bit-reproducibility:
 
 An execution mode will be provided which allows an ESMF-based model to
 return bitwise identical results from the same executable at different
-processor counts, or different parallelism options.
+processor counts, or different parallelism options. This execution
+mode is not subject to the performance requirement of Section~\ref{perf}.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -132,15 +133,12 @@ processor counts, or different parallelism options.
 
 \ssreq{Bit-reproducibility on identical configurations}
 
-The \emph{default} execution mode will allow an
-ESMF-based model to return bitwise identical results from the same
-executable at the same processor count, with the same parallelism
-options.
+The \emph{default} execution mode will allow an ESMF-based model to
+return bitwise identical results from the same executable at the same
+processor count, with the same parallelism options. This mode
+\emph{is} subject to the performance requirement of
+Section~\ref{perf}.
 
-ESMF must provide an optional execution mode where the same
-executable, run on a different number of processors under the same
-parallelization mode, produces bitwise-reproducible results. This mode
-is not subject to the performance requirements above.
 \begin{reqlist}
 {\bf Priority:} 1.\\
 {\bf Source:} all codes. \\
@@ -167,10 +165,11 @@ results.
 The ESMF shall be instrumented for error handling consistly across the
 framework.  The user shall receive ample information on errors.
 \begin{reqlist}
-{\bf Priority:} 1. \\
-{\bf Source:} Required by all codes. \\
-{\bf Status:} Proposed. \\
-{\bf Verification:} Interface inspection, code inspection, unit test, system test.
+  {\bf Priority:} 1. \\
+  {\bf Source:} Required by all codes. \\
+  {\bf Status:} Proposed. \\
+  {\bf Verification:} Interface inspection, code inspection, unit
+  test, system test.
 \end{reqlist}
 
 \sreq{Modularity}
