@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  $Id: protex,v 1.13 2003/05/07 04:34:28 cdeluca Exp $
+#  $Id: protex,v 1.14 2004/02/12 17:51:32 svasquez Exp $
 #
 #BOP
 #
@@ -633,7 +633,7 @@ KEY:       foreach $key ( @keys ) {
               $prologue = 0;
               $source = 1;
               ### printf "\\subsubsection*{CONTENTS:}\n\n", $Fld[3];
-              printf "{\\sf CONTENTS:}";
+              ###printf "{\\sf CONTENTS:}";
               printf "\n \\begin{verbatim}\n";
               $verb = 1;
               next LINE;
