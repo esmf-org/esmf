@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.47 2003/09/24 22:10:44 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.48 2003/10/03 19:47:37 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.47 2003/09/24 22:10:44 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.48 2003/10/03 19:47:37 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -276,7 +276,6 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
       ! Verify the year is set correctly
       !write(name, *) "Get Start Time Year Test"
       !call ESMF_TimeGet(startTime, yr_i8=YR, rc=rc)
@@ -296,7 +295,6 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
       ! Verify the day is set correctly
       !write(name, *) "Get StartTime Day Test"
       !call ESMF_TimeGet(startTime, d_i8=DD, rc=rc)
@@ -306,7 +304,6 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
       ! Verify the calendar is set correctly
       !write(name, *) "Get Calendar Type Test"
       !call ESMF_CalendarGet(gregorianCalendar, type=cal_type, rc=rc)
@@ -418,6 +415,7 @@
 #ifdef ESMF_EXHAUSTIVE
 
       ! Initialize clock with uninitialized Start Time.
+      !EX_UTest
        write(name, *) "Clock Initialization Test with uninitialized startTime"
        write(failMsg, *) " Returned ESMF_SUCCESS"
        call ESMF_ClockSetup(clock, timeStep, startTime2, stopTime, rc=rc)
@@ -910,6 +908,7 @@
 
       ! ----------------------------------------------------------------------------
 
+      !EX_UTest
       write(failMsg, *) "Seconds should = 234000."
       write(name, *) "Get Time Step in seconds Test" 
       call ESMF_TimeIntervalGet(timeStep, s=secs, rc=rc)
