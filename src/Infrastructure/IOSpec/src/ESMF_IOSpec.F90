@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpec.F90,v 1.1 2004/03/18 05:24:23 cdeluca Exp $
+! $Id: ESMF_IOSpec.F90,v 1.2 2004/03/18 16:24:25 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IOSpec module
@@ -22,13 +22,13 @@
 
 ! module definition
 
-      module ESMF_IOMod
+      module ESMF_IOSpecMod
 
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !BOPI
-! !MODULE: ESMF_IOmod
+! !MODULE: ESMF_IOSpecMod
 !
 ! !USES:
       use ESMF_BaseMod
@@ -316,7 +316,7 @@
 
 
 
-      end module ESMF_IOMod
+      end module ESMF_IOSpecMod
 
 
 

@@ -1,0 +1,39 @@
+// $Id: ESMC_IOSpec.C,v 1.1 2004/03/18 16:24:50 nscollins Exp $
+// Earth System Modeling Framework
+// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// NASA Goddard Space Flight Center.
+// Licensed under the GPL.
+
+// ESMC IOSpec method implementation (body) file
+
+//-----------------------------------------------------------------------------
+//
+// !DESCRIPTION:
+//
+// The code in this file implements the C++ IOSpec methods.
+// This is a shallow class, and any changes to either the Fortran or C++
+// should be mirrored in the other language.
+//
+//-----------------------------------------------------------------------------
+//
+
+// for printf
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+// associated class definition file
+#include "ESMC_Base.h"
+#include "ESMC_IOSpec.h"
+
+// in this case, no body for file, all in class
+//-----------------------------------------------------------------------------
+ // leave the following line as-is; it will insert the cvs ident string
+ // into the object file for tracking purposes.
+ static const char *const version = 
+            "$Id: ESMC_IOSpec.C,v 1.1 2004/03/18 16:24:50 nscollins Exp $";
+//-----------------------------------------------------------------------------
+
+//

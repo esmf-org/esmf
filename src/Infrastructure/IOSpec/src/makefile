@@ -1,20 +1,20 @@
-# $Id: makefile,v 1.1 2004/03/17 04:56:31 cdeluca Exp $
+# $Id: makefile,v 1.2 2004/03/18 16:24:26 nscollins Exp $
 
 ALL: build_here
 
 CFLAGS    =
 FFLAGS    =
 SOURCEC   = 
-SOURCEF   =
-STOREH    = ESMC_IO.h
+SOURCEF   = ESMF_IOSpec.F90
+STOREH    = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-MANSEC    = IOobj
+MANSEC    = IOSpecobj
 LIBBASE   = libesmf
 DIRS      =
-LOCDIR    = src/Infrastructure/IO/src
+LOCDIR    = src/Infrastructure/IOSpec/src
 
 include $(ESMF_DIR)/makefile
 
