@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_F1Ex.F90,v 1.4 2003/12/02 17:28:13 svasquez Exp $
+! $Id: ESMF_DELayout_F1Ex.F90,v 1.5 2003/12/18 20:29:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -21,6 +21,11 @@
 ! bsub -P "hp606" -q general -n 4 prun -n 2 -N 1 ./ESMF_DELayout_FEx
 ! to run 2 DEs (MPI processes) on one node
 !-----------------------------------------------------------------------------
+!BOP
+
+See the following code fragments for examples of how to create DELayouts and use them in the communications routines.
+Also see the Programming Model section of this document.  
+!\begin{verbatim}
 
 program ESMF_DELayout_F1Ex
 
@@ -34,11 +39,17 @@ program ESMF_DELayout_F1Ex
 
   type(ESMF_DELayout) :: layout
   integer, dimension(2) :: delist
-  integer :: nx, ny, x, y, id, rc, finalrc
+  integer :: nx, ny, x, y, id, rc
   integer, dimension(20) :: array1, array2
   integer :: i, result, len
+!\end{verbatim}
+!EOP
+
+  integer :: finalrc
   finalrc = ESMF_SUCCESS
 
+!BOP
+!\begin{verbatim}
   ! initialize framework
   call ESMF_Initialize(rc)
 
@@ -53,30 +64,44 @@ program ESMF_DELayout_F1Ex
 
   ! verify size of layout
   call ESMF_DELayoutGetSize(layout, nx, ny, rc)
+!\end{verbatim}
+!EOP
 
   if (rc.NE.ESMF_SUCCESS) then
       finalrc = ESMF_FAILURE
   end if
 
+!BOP
+!\begin{verbatim}
+  ! initialize framework
   print *, "ESMF_DELayoutGetSize(nx, ny) = ", nx, ny
 
   ! get our DE's position within the layout
   call ESMF_DELayoutGetDEPosition(layout, x, y, rc)
+!\end{verbatim}
+!EOP
 
   if (rc.NE.ESMF_SUCCESS) then
       finalrc = ESMF_FAILURE
   end if
 
+!BOP
+!\begin{verbatim}
   print *, "ESMF_DELayoutGetDEPosition(x, y) = ", x, y
 
   ! get our DE id
   call ESMF_DELayoutGetDEid(layout, id, rc)
 
+  print *, "ESMF_DELayoutGetDEid(id) = ", id
+!\end{verbatim}
+!EOP
+
   if (rc.NE.ESMF_SUCCESS) then
       finalrc = ESMF_FAILURE
   end if
 
-  print *, "ESMF_DELayoutGetDEid(id) = ", id
+!BOP
+!\begin{verbatim}
 
   ! populate DE 0 array with first half of row 5
   do i=1,len
@@ -96,35 +121,52 @@ program ESMF_DELayout_F1Ex
   ! perform allreduce with our DE's array
   if (id .eq. 0) then
     call ESMF_DELayoutAllReduce(layout, array1, result, len, ESMF_SUM, rc)
+!\end{verbatim}
+!EOP
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
 
+!BOP
+!\begin{verbatim}
   else
     call ESMF_DELayoutAllReduce(layout, array2, result, len, ESMF_SUM, rc)
+!\end{verbatim}
+!EOP
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
 
+!BOP
+!\begin{verbatim}
   endif
 
   ! ... and the answer is ...
   print *, "ESMF_DELayoutAllReduce(sum) = ", result
+!\end{verbatim}
+!EOP
 
   if (result.NE.11620) then
      finalrc = ESMF_FAILURE
   end if
 
+!BOP
+!\begin{verbatim}
   call ESMF_DELayoutDestroy(layout, rc)
+!\end{verbatim}
+!EOP
 
   if (rc.NE.ESMF_SUCCESS) then
       finalrc = ESMF_FAILURE
   end if
 
-
+!BOP
+!\begin{verbatim}
   call ESMF_Finalize(rc)
+!\end{verbatim}
+!EOP
 
   if (rc.NE.ESMF_SUCCESS) then
       finalrc = ESMF_FAILURE
@@ -136,6 +178,8 @@ program ESMF_DELayout_F1Ex
      print *, "FAIL: ESMF_DELayout_F1Ex.F90"
   end if
 
-
-
+!BOP
+!\begin{verbatim}
 end program ESMF_DELayout_F1Ex
+!\end{verbatim}
+!EOP
