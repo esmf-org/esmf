@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.31 2005/01/28 22:47:11 theurich Exp $
+// $Id: ESMC_VM.C,v 1.32 2005/02/01 00:38:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.31 2005/01/28 22:47:11 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.32 2005/02/01 00:38:59 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -446,6 +446,36 @@ void ESMC_VMAbort(
   GlobalVM->vmk_abort();
   matchArray_count = 0;
   *rc = ESMF_SUCCESS;             // TODO: Do some real error handling here...
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_VMGetArgs - Get command line arguments
+//
+// !INTERFACE:
+void ESMC_VMGetArgs(
+//
+// !RETURN VALUE:
+//    Get command line arguments
+//
+// !ARGUMENTS:
+//
+  int *argc,      // count of command line arguments
+  char ***argv,   // command line argument strings
+  int *rc){       // return code
+//
+// !DESCRIPTION:
+//   Get the command line arguments
+//
+//EOP
+//-----------------------------------------------------------------------------
+  *rc = ESMF_FAILURE; // assume failure
+  *argc = GlobalVM->argc;
+  *argv = GlobalVM->argv;
+  // success
+  *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 

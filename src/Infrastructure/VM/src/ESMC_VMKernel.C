@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.23 2005/01/28 22:47:12 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.24 2005/02/01 00:38:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,6 +76,8 @@ MPI_Comm ESMC_VMK::default_mpi_c;
 int ESMC_VMK::ncores;
 int *ESMC_VMK::cpuid;
 int *ESMC_VMK::ssiid;
+int ESMC_VMK::argc;
+char **ESMC_VMK::argv;
 
 
 // -----------------------------------------------------------------------------
@@ -138,22 +140,24 @@ int vmkt_join(vmkt_t *vmkt){
 // vmkt encapsulation: end
 // -----------------------------------------------------------------------------
 
-static int MPI_InitWrapper(void){
-  // This wrapper is used for MPICH in order to provide argc and argv
-  int pid = getpid();
+
+void ESMC_VMK::vmk_obtain_args(void){
+  // use sus3 shell features to obtain command line args for this process
+  int mypid = getpid();
   char command[160], fname[80], args[8000];
-  sprintf(command, "env COLUMNS=8000 ps -p %d -o args= > .args.%d", pid, pid);
+  sprintf(command, "env COLUMNS=8000 ps -p %d -o args= > .args.%d", mypid,
+    mypid);
   system(command);
-  sprintf(fname, ".args.%d", pid);
+  sprintf(fname, ".args.%d", mypid);
   FILE *fp=fopen(fname, "r");
   fscanf(fp, "%[^\n]", args);
   fclose(fp);
-  sprintf(command, "rm -f .args.%d", pid);
+  sprintf(command, "rm -f .args.%d", mypid);
   system(command);
   // now the string 'args' holds the complete command line with arguments
   // next prepare the argc and argv variables
-  int argc=0;
-  char **argv = new char*[100];
+  argc=0;
+  argv = new char*[100];
   for (int k=0; k<100; k++)
     argv[k] = new char[160];
   int i=0;
@@ -173,19 +177,9 @@ static int MPI_InitWrapper(void){
   argv[argc][j] = '\0';
   ++argc;
   // now argc and argv are valid
-  //printf("argc=%d\n", argc);
-  //for (i=0; i<argc; i++)
-  //  printf("%s\n", argv[i]);
-
-  // prepare heap copies of argc and argv in case the MPI library uses these
-  // pointers after the MPI_Init call has returned.
-  int *p_argc = new int;
-  *p_argc = argc;
-  char ***p_argv = new char**;
-  *p_argv = argv;
-  // now argc and argv can be used
-  MPI_Init(p_argc, p_argv);
-  return 0;
+//  printf("argc=%d\n", argc);
+//  for (i=0; i<argc; i++)
+//    printf("%s\n", argv[i]);
 }
 
 
@@ -200,6 +194,8 @@ void ESMC_VMK::vmk_init(void){
   sigemptyset(&sigs_to_block);
   sigaddset(&sigs_to_block, VM_SIG1);
   sigprocmask(SIG_BLOCK, &sigs_to_block, NULL); // block VM_SIG1
+  // obtain command line arguments and store in the VM class
+  vmk_obtain_args();
   // next check is whether MPI has been initialized yet
   // actually we need to indicate an error if MPI has been initialized before
   // because signal blocking might not reach all of the threads again...
@@ -207,7 +203,7 @@ void ESMC_VMK::vmk_init(void){
   MPI_Initialized(&initialized);
   if (!initialized){
 #ifdef ESMF_MPICH   
-    MPI_InitWrapper();
+    MPI_Init(&argc, &argv); // MPICH1.2 is not standard compliant and needs args
 #else
     MPI_Init(NULL, NULL);
 #endif
