@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.140 2004/02/19 21:27:33 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.141 2004/03/02 00:02:49 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.140 2004/02/19 21:27:33 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.141 2004/03/02 00:02:49 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -966,14 +966,14 @@
         rc = ESMF_FAILURE
       endif
 
-!     Call GridGetDE routines based on GridStructure
+!     Call GridDistribute routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
 
       !-------------
       ! ESMF_GridStructure_Unknown
       case(0)
-        print *, "ERROR in ESMF_GridDistributeGetDE: ", &
+        print *, "ERROR in ESMF_GridDistribute: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
@@ -1281,32 +1281,64 @@
 ! !IROUTINE: ESMF_GridGetDE - Get DE information for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetDE(grid, distGridId, physGridId, relloc, &
-                                MyDE, localCellCount, localCellCountPerDim, &
+      subroutine ESMF_GridGetDE(grid, horzDistGridId, vertDistGridId, &
+                                horzPhysGridId, vertPhysGridId, &
+                                horzRelLoc, vertRelLoc, &
+                                myDE, localCellCount, localCellCountPerDim, &
                                 globalStartPerDim, globalAIPerDim, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      integer, intent(in), optional :: distGridId
-      integer, intent(in), optional :: physGridId
-      type(ESMF_RelLoc), intent(in), optional :: relloc
-      integer, intent(inout), optional :: MyDE
+      integer, intent(in), optional :: horzDistGridId
+      integer, intent(in), optional :: vertDistGridId
+      integer, intent(in), optional :: horzPhysGridId
+      integer, intent(in), optional :: vertPhysGridId
+      type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      integer, intent(inout), optional :: myDE
       integer, intent(inout), optional :: localCellCount
       integer, dimension(:), intent(inout), optional :: localCellCountPerDim
       integer, dimension(:), intent(inout), optional :: globalStartPerDim
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM), intent(inout), &
+      type(ESMF_AxisIndex), dimension(:), intent(inout), &
                         optional :: globalAIPerDim
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
+!     Get a {\tt ESMF\_DistGrid} attribute with the given value.  Since a single
+!     {\tt ESMF\_Grid} can have many {\tt ESMF\_DistGrids}, the correct
+!     {\tt ESMF\_DistGrid} must be identified by this calling routine.  For a 3D
+!     {\tt ESMF\_Grid}, the user must supply identifiers for both the horizontal
+!     and vertical grids if querying for an array of values, like 
+!     localCellCountPerDim.  The {\tt ESMF\_DistGrid(s)} can be identified
+!     using one of three input variables:
+!        (1) horzDistGridId and/or vertDistGridId;
+!        (2) horzPhysGridId and/or vertPhysGridId;
+!        (3) horzRelLoc and/or vertRelLoc.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[{[MyDE]}]
+!     \item[{[horzDistGridId]}]
+!          Integer identifier for {\tt ESMF\_DistGrid} corresponding to the
+!          horizontal grid.
+!     \item[{[vertDistGridId]}]
+!          Integer identifier for {\tt ESMF\_DistGrid} corresponding to the
+!          vertical grid.
+!     \item[{[horzPhysGridId]}]
+!          Integer identifier for {\tt ESMF\_PhysGrid} corresponding to the
+!          horizontal grid.
+!     \item[{[vertPhysGridId]}]
+!          Integer identifier for {\tt ESMF\_PhysGrid} corresponding to the
+!          vertical grid.
+!     \item[{[horzRelLoc]}]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
+!          grid.          
+!     \item[{[vertRelLoc]}]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
+!          grid.          
+!     \item[{[myDE]}]
 !          Identifier for this {\tt ESMF\_DE}.
 !     \item[{[localCellCount]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells.
@@ -1351,8 +1383,10 @@
       !-------------
       ! ESMF_GridStructure_LogRect
       case(1)
-        call ESMF_LRGridGetDE(grid, distGridId, physGridId, relloc, MyDE, &
-                              localCellCount, localCellCountPerDim, &
+        call ESMF_LRGridGetDE(grid, horzDistGridId, vertDistGridId, &
+                              horzPhysGridId, vertPhysGridId, &
+                              horzRelLoc, vertRelLoc, &
+                              myDE, localCellCount, localCellCountPerDim, &
                               globalStartPerDim, globalAIPerDim, total, status)
 
       !-------------
