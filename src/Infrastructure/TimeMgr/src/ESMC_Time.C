@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.73 2004/12/01 00:10:16 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.74 2004/12/03 00:59:17 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.73 2004/12/01 00:10:16 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.74 2004/12/03 00:59:17 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1076,7 +1076,7 @@
       // default
       ESMC_BaseTime::ESMC_BaseTimePrint(options);
       if (this->calendar != ESMC_NULL_POINTER) {
-        this->calendar->ESMC_CalendarPrint(options);
+        this->calendar->ESMC_CalendarPrint(options, this);
       }
       cout << "timeZone = " << timeZone << endl;
     }
