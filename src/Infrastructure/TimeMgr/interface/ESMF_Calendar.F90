@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.55 2004/03/10 20:38:00 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.56 2004/03/10 21:52:17 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -120,7 +120,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.55 2004/03/10 20:38:00 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.56 2004/03/10 21:52:17 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -911,7 +911,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarReadRestart - Restore the contents of a Calendar
+! !IROUTINE:  ESMF_CalendarReadRestart - Restore the contents of a Calendar (not implemented)
 
 ! !INTERFACE:
       function ESMF_CalendarReadRestart(name, iospec, rc)
@@ -926,7 +926,7 @@
 
 ! !DESCRIPTION:
 !     Restores an {\tt ESMF\_Calendar} object from the last call to
-!     {\tt ESMF\_CalendarWriteRestart()}.
+!     {\tt ESMF\_CalendarWriteRestart()}.  (Not implemented yet).
 !
 !     The arguments are:
 !     \begin{description}
@@ -954,7 +954,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarWriteRestart - Save the contents of a Calendar
+! !IROUTINE:  ESMF_CalendarWriteRestart - Save the contents of a Calendar (not implemented)
 
 ! !INTERFACE:
       subroutine ESMF_CalendarWriteRestart(calendar, iospec, rc)
@@ -966,7 +966,7 @@
 
 ! !DESCRIPTION:  
 !     Saves an {\tt ESMF\_Calendar} object.  Default options are to select the
-!     fastest way to save to disk.
+!     fastest way to save to disk.  (Not implemented yet).
 !
 !     The arguments are:
 !     \begin{description}
