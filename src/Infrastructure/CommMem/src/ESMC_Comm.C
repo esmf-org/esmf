@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.8 2003/02/13 23:06:48 eschwab Exp $
+// $Id: ESMC_Comm.C,v 1.9 2003/02/18 15:04:33 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.8 2003/02/13 23:06:48 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.9 2003/02/18 15:04:33 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -675,7 +675,7 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-cout << "entered ESMC_CommAllGatherV(), tidx = " << DE->tID << endl;
+//cout << "entered ESMC_CommAllGatherV(), tidx = " << DE->tID << endl;
 
     MPI_Allgatherv(sbuf, slen, ESMC_TypeToMPI[type],
                    rbuf, rlen, rdispls, ESMC_TypeToMPI[type],
@@ -730,13 +730,13 @@ cout << "main wokeup with threadCount = " << *threadCount << endl;
 
   } // end if ESMC_PROCESS
 
-cout << "ESMC_CommAllGatherV(), final barrier, tidx = " << DE->tID << endl;
+//cout << "ESMC_CommAllGatherV(), final barrier, tidx = " << DE->tID << endl;
 
   // wait for all threads to finish copying their data
   ESMC_CommBarrier();
 #endif
 
-cout << "leaving ESMC_CommAllGatherV(), tidx = " << DE->tID << endl;
+//cout << "leaving ESMC_CommAllGatherV(), tidx = " << DE->tID << endl;
   return(ESMF_SUCCESS);
 
  } // end ESMC_CommAllGatherV
@@ -809,12 +809,12 @@ cout << "main wokeup with threadCount = " << *threadCount << endl;
                   MPI_COMM_WORLD);
   }
 
-cout << "ESMC_CommAllGather(), final barrier, tidx = " << DE->tID << endl;
+//cout << "ESMC_CommAllGather(), final barrier, tidx = " << DE->tID << endl;
 
   // wait for all threads to finish copying their data
   ESMC_CommBarrier();
 
-cout << "leaving ESMC_CommAllGather(), tidx = " << DE->tID << endl;
+//cout << "leaving ESMC_CommAllGather(), tidx = " << DE->tID << endl;
   return(ESMF_SUCCESS);
 
  } // end ESMC_CommAllGather
@@ -926,7 +926,7 @@ cout << "main wokeup with threadCount = " << *threadCount << endl;
     pthread_mutex_unlock(&barrierMutex);
 
     // then reduce data with other nodes
-cout << "calling MPI_Allreduce" << endl;
+//cout << "calling MPI_Allreduce" << endl;
     memset(rbuf, 0, num*sizeof(int)); // clear gbuf
     MPI_Allreduce(lbuf, rbuf, num, ESMC_TypeToMPI[type],
                   ESMC_OpToMPI[op], MPI_COMM_WORLD);

@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.C,v 1.11 2003/02/15 00:09:34 jwolfe Exp $
+// $Id: ESMC_Layout.C,v 1.12 2003/02/18 15:04:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Layout.C,v 1.11 2003/02/15 00:09:34 jwolfe Exp $";
+ static const char *const version = "$Id: ESMC_Layout.C,v 1.12 2003/02/18 15:04:34 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1088,7 +1088,7 @@ cout << "~ESMC_Layout() invoked\n";
     }
   }
 
-  cout << "ESMC_LayoutAllReduce localResult = " << localResult << endl;
+  // cout << "ESMC_LayoutAllReduce localResult = " << localResult << endl;
 
   // perform reduction operation across all DEs in the layout
   int rc;
