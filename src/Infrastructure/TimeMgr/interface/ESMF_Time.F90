@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.37 2003/07/25 16:46:44 cdeluca Exp $
+! $Id: ESMF_Time.F90,v 1.38 2003/08/08 00:25:49 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -135,7 +135,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.37 2003/07/25 16:46:44 cdeluca Exp $'
+      '$Id: ESMF_Time.F90,v 1.38 2003/08/08 00:25:49 eschwab Exp $'
 
 !==============================================================================
 !
@@ -483,7 +483,7 @@
                                     sN, sD, calendar, timeZone, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(out) :: time
+      type(ESMF_Time), intent(inout) :: time
       integer(ESMF_IKIND_I4), intent(in), optional :: yr_i4
       integer(ESMF_IKIND_I8), intent(in), optional :: yr_i8
       integer(ESMF_IKIND_I4), intent(in), optional :: mm_i4
@@ -663,7 +663,7 @@
       subroutine ESMF_TimeSetCalendarPtr(time, calendar, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(out) :: time
+      type(ESMF_Time), intent(inout) :: time
       type(ESMF_Calendar), intent(in) :: calendar
       integer, intent(out), optional :: rc
 
@@ -696,7 +696,7 @@
       subroutine ESMF_TimeSetCalendarPtrPtr(time, calendar, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(out) :: time
+      type(ESMF_Time), intent(inout) :: time
       type(ESMF_Pointer), intent(in) :: calendar
       integer, intent(out), optional :: rc
 
@@ -800,7 +800,7 @@
       subroutine ESMF_TimeSetTimezone(time, timeZone, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(out) :: time
+      type(ESMF_Time), intent(inout) :: time
       integer, intent(in) :: timeZone
       integer, intent(out), optional :: rc
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.24 2003/08/07 16:52:10 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.25 2003/08/08 00:25:49 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -116,7 +116,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.24 2003/08/07 16:52:10 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.25 2003/08/08 00:25:49 eschwab Exp $'
 
 !==============================================================================
 !
@@ -157,7 +157,7 @@
                                stopTime, enabled, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Alarm), intent(inout) :: alarm
       type(ESMF_Time), intent(in), optional :: ringTime
       type(ESMF_TimeInterval), intent(in), optional :: ringInterval
       type(ESMF_Time), intent(in), optional :: stopTime
@@ -231,7 +231,7 @@
       subroutine ESMF_AlarmSetRingInterval(alarm, ringInterval, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Alarm), intent(inout) :: alarm
       type(ESMF_TimeInterval), intent(in) :: ringInterval
       integer, intent(out), optional :: rc
 
@@ -298,7 +298,7 @@
                                            numTimeSteps, timeStep, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Alarm), intent(inout) :: alarm
       type(ESMF_TimeInterval), intent(in), optional :: ringDuration
       integer, intent(in), optional :: numTimeSteps
       type(ESMF_TimeInterval), intent(in), optional :: timeStep
@@ -373,7 +373,7 @@
       subroutine ESMF_AlarmSetRingTime(alarm, ringTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Alarm), intent(inout) :: alarm
       type(ESMF_Time), intent(in) :: ringTime
       integer, intent(out), optional :: rc
 
@@ -439,7 +439,7 @@
       subroutine ESMF_AlarmSetPrevRingTime(alarm, prevRingTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Alarm), intent(inout) :: alarm
       type(ESMF_Time), intent(in) :: prevRingTime
       integer, intent(out), optional :: rc
    
@@ -505,7 +505,7 @@
       subroutine ESMF_AlarmSetStopTime(alarm, stopTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Alarm), intent(inout) :: alarm
       type(ESMF_Time), intent(in) :: stopTime
       integer, intent(out), optional :: rc
 
@@ -571,7 +571,7 @@
       subroutine ESMF_AlarmSetRefTime(alarm, refTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Alarm), intent(inout) :: alarm
       type(ESMF_Time), intent(in) :: refTime
       integer, intent(out), optional :: rc
 
@@ -604,7 +604,7 @@
       subroutine ESMF_AlarmEnable(alarm, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Alarm), intent(inout) :: alarm
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -633,7 +633,7 @@
       subroutine ESMF_AlarmDisable(alarm, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Alarm), intent(inout) :: alarm
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -663,7 +663,7 @@
       subroutine ESMF_AlarmTurnOn(alarm, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Alarm), intent(inout) :: alarm
       integer, intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -693,7 +693,7 @@
       subroutine ESMF_AlarmTurnOff(alarm, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Alarm), intent(inout) :: alarm
       integer, intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -723,7 +723,7 @@
       subroutine ESMF_AlarmSticky(alarm, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Alarm), intent(inout) :: alarm
       integer, intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -755,7 +755,7 @@
       subroutine ESMF_AlarmNotSticky(alarm, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Alarm), intent(inout) :: alarm
       integer, intent(out), optional :: rc
     
 ! !DESCRIPTION:
