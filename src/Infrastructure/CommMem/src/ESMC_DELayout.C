@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.5 2003/03/13 22:56:13 cdeluca Exp $
+// $Id: ESMC_DELayout.C,v 1.6 2003/03/14 17:16:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.5 2003/03/13 22:56:13 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.6 2003/03/14 17:16:04 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -334,6 +334,7 @@
   // TODO: currently, this works only in the default case of all MPI DEs: no
   //  threads
   //
+  int i;
 
   // Initialize comm, PE, DE, Machine
   ESMC_DELayoutInit();
@@ -380,7 +381,7 @@
   int rc;
   peList = ESMC_PEListCreate(nDEs, &rc); // assume #PEs = nDEs
                                          //   for now
-  for(int i=0; i<nDEs; i++) {
+  for(i=0; i<nDEs; i++) {
     // populate PE list with gathered ids
     peList->ESMC_PEListInit(i, gbuf[i*3], gbuf[i*3+1], gbuf[i*3+2]);
   }
@@ -401,7 +402,7 @@
     layout = new ESMC_DE**[nDEs];
 
     // then allocate ny=1, nz=1 DEs
-    for (int i=0; i<nDEs; i++) {
+    for (i=0; i<nDEs; i++) {
       layout[i] = new ESMC_DE*[1];
       layout[i][0] = new ESMC_DE[1];
     }
@@ -418,7 +419,7 @@
   nzDELayout = 1;
 
   ESMC_PE *pe;
-  for (int i=0; i<nDEs; i++) {
+  for (i=0; i<nDEs; i++) {
     // retrieve next PE from our list
     peList->ESMC_PEListGetPE(i, &pe);
 
