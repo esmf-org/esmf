@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.44 2004/11/18 20:45:40 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.45 2004/12/02 23:26:04 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.44 2004/11/18 20:45:40 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.45 2004/12/02 23:26:04 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -3495,8 +3495,11 @@ extern "C" {
 //   default initialization 
 //
 //EOPI
-
-  ID = ++globalCount;
+  int vmid, rc;
+  
+  // get the MPI communicator number, and fold that into the object ID
+  FTN(c_esmc_compgetvmid)(&vmid, &rc);
+  ID = ++globalCount | (vmid << 24);
   refCount = 1;
   strcpy(className, "global");
   sprintf(baseName, "%s%3d", "unnamed", ID);
@@ -3530,8 +3533,11 @@ extern "C" {
 //   of attributes to make space for.
 //
 //EOPI
-
-  ID = ++globalCount;
+  int vmid, rc;
+  
+  // get the MPI communicator number, and fold that into the object ID
+  FTN(c_esmc_compgetvmid)(&vmid, &rc);
+  ID = ++globalCount | (vmid << 24);
   refCount = 1;
   strcpy(className, superclass ? superclass : "global");
   if (name && (name[0]!='\0')) 
