@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74559.F90,v 1.4 2003/04/28 23:38:39 nscollins Exp $
+! $Id: ESMF_SysTest74559.F90,v 1.5 2003/04/28 23:41:46 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !
@@ -36,7 +36,7 @@
     type(ESMF_State) :: HIimp, HIexp, FSimp, FSexp
     type(ESMF_State) :: cplstateF2H, cplstateH2F, cplbothlists
     type(ESMF_AppComp) :: app
-    type(ESMF_GridComp) :: compHI, compFS
+    type(ESMF_GridComp) :: HIcomp, FScomp
     type(ESMF_CplComp) :: cpl
 
     ! instantiate a clock, a calendar, and timesteps
@@ -91,8 +91,8 @@
     cnameHI = "Injector model"
     delist = (/ (i, i=0, ndes-1) /)
     layoutHI = ESMF_DELayoutCreate(delist, 2, (/ mid, 2 /), (/ 0, 0 /), rc)
-    HIcomp = ESMF_GridCompCreate(cnameHS, layout=layoutHI, rc=rc)
-    print *, "Created component ", trim(cnameHS), "rc =", rc
+    HIcomp = ESMF_GridCompCreate(cnameHI, layout=layoutHI, rc=rc)
+    print *, "Created component ", trim(cnameHI), "rc =", rc
     call ESMF_DELayoutPrint(layoutHI, rc=rc)
 
     cnameFS = "Flow Solver model"
@@ -174,13 +174,13 @@
 
       cplstateH2F = ESMF_StateCreate("Coupler States Injector to FlowSolver", &
                                                       ESMF_STATELIST, cplname)
-      call ESMF_StateAddData(cplstate, HIexp, rc=rc)
-      call ESMF_StateAddData(cplstate, FSimp, rc=rc)
+      call ESMF_StateAddData(cplstateH2F, HIexp, rc=rc)
+      call ESMF_StateAddData(cplstateH2F, FSimp, rc=rc)
  
       cplstateF2H = ESMF_StateCreate("Coupler States FlowSolver to Injector", &
                                                       ESMF_STATELIST, cplname)
-      call ESMF_StateAddData(cplstate, FSexp, rc=rc)
-      call ESMF_StateAddData(cplstate, HIimp, rc=rc)
+      call ESMF_StateAddData(cplstateF2H, FSexp, rc=rc)
+      call ESMF_StateAddData(cplstateF2H, HIimp, rc=rc)
  
       cplbothlists = ESMF_StateCreate("All Coupler states", ESMF_STATELIST, cplname)
 
@@ -227,7 +227,7 @@
       call ESMF_GridCompFinalize(FScomp, FSimp, FSimp, clock, rc=rc)
       print *, "Flow Model Finalize finished, rc =", rc
 
-      call ESMF_CplCompFinalize(cpl, cplstate, clock, rc=rc)
+      call ESMF_CplCompFinalize(cpl, cplstateH2F, clock, rc=rc)
       print *, "Coupler Finalize finished, rc =", rc
 
 
