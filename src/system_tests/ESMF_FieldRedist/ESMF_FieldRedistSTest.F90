@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.7 2004/03/16 23:28:17 cdeluca Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.8 2004/03/18 18:40:17 nscollins Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -167,7 +167,7 @@
     call ESMF_ArrayGet(coordArray(1), counts=localCounts, rc=status)
 
     ! Get pointers to the data and set it up
-    call ESMF_FieldGetData(field1, array1, rc)
+    call ESMF_FieldGetArray(field1, array1, rc)
     call ESMF_ArrayGetData(array1, srcdata, ESMF_DATA_REF, rc)
 
     ! set data array to a function of coordinates (just in the computational part
@@ -197,7 +197,7 @@
 
     !! Call transpose method here, output ends up in field2
     call ESMF_FieldRedist(field1, field2, rh12, rc=status)
-    call ESMF_FieldGetData(field2, array2, rc)
+    call ESMF_FieldGetArray(field2, array2, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after Transpose:"
@@ -207,7 +207,7 @@
     !! Transpose back so we can compare contents
     !! Call transpose method again here, output ends up in field3
     call ESMF_FieldRedist(field2, field3, rh23, rc=status)
-    call ESMF_FieldGetData(field3, array3, rc)
+    call ESMF_FieldGetArray(field3, array3, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after second Transpose, should match original:"

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.9 2004/03/16 23:28:17 cdeluca Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.10 2004/03/18 18:40:17 nscollins Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -448,7 +448,7 @@
       do k=1, 4
 
           ! Get pointer to the actual data
-          call ESMF_FieldGetData(field(k), array1, rc=rc)
+          call ESMF_FieldGetArray(field(k), array1, rc=rc)
           call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
     
           ! Set initial data values over whole array to -1
@@ -668,7 +668,7 @@
       if (verbose) print *, "Entering halo verification routine"
 
       ! Get a pointer to the data Array in the Field
-      call ESMF_FieldGetData(thisfield, array1, rc=rc)
+      call ESMF_FieldGetArray(thisfield, array1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 40
       if (verbose) print *, "array back from field"
 

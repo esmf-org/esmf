@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.12 2004/03/16 23:28:17 cdeluca Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.13 2004/03/18 18:40:17 nscollins Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -304,7 +304,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get pointer to the actual data
-      call ESMF_FieldGetData(field1, array1, rc=rc)
+      call ESMF_FieldGetArray(field1, array1, rc=rc)
       call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
 
       ! Set initial data values over whole array to -1
@@ -436,7 +436,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get a pointer to the data Array in the Field
-      call ESMF_FieldGetData(field1, array1, rc=rc)
+      call ESMF_FieldGetArray(field1, array1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       print *, "data back from field"
 

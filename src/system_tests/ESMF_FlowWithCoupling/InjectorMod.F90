@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.6 2004/03/10 20:45:16 jwolfe Exp $
+! $Id: InjectorMod.F90,v 1.7 2004/03/18 18:40:24 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -284,16 +284,16 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       
         ! Get the Field and Bundle data from the State, and a pointer to
         !  the existing data (not a copy).
-        call ESMF_FieldGetData(local_sie, array_sie, rc=rc) 
+        call ESMF_FieldGetArray(local_sie, array_sie, rc=rc) 
         call ESMF_ArrayGetData(array_sie, data_sie, ESMF_DATA_REF, rc)
             
-        call ESMF_FieldGetData(local_v, array_v, rc=rc) 
+        call ESMF_FieldGetArray(local_v, array_v, rc=rc) 
         call ESMF_ArrayGetData(array_v, data_v, ESMF_DATA_REF, rc)
       
-        call ESMF_FieldGetData(local_rho, array_rho, rc=rc) 
+        call ESMF_FieldGetArray(local_rho, array_rho, rc=rc) 
         call ESMF_ArrayGetData(array_rho, data_rho, ESMF_DATA_REF, rc)
       
-        call ESMF_FieldGetData(local_flag, array_flag, rc=rc) 
+        call ESMF_FieldGetArray(local_flag, array_flag, rc=rc) 
         call ESMF_ArrayGetData(array_flag, data_flag, ESMF_DATA_REF, rc)
           
         !! DEBUG.

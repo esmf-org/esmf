@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.11 2004/03/16 23:28:17 cdeluca Exp $
+! $Id: user_model2.F90,v 1.12 2004/03/18 18:40:23 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -148,7 +148,7 @@
                                   haloWidth=0, name="humidity", rc=rc)
 
       ! Get the allocated array back and get an F90 array pointer
-      call ESMF_FieldGetData(humidity, array1, rc)
+      call ESMF_FieldGetArray(humidity, array1, rc)
       call ESMF_ArrayGetData(array1, idata, rc=rc)
 
       call ESMF_StateAddData(importstate, humidity, rc)
@@ -184,7 +184,7 @@
   !    call ESMF_FieldPrint(humidity, "", rc=status)
     
       ! This is where the model specific computation goes.
-      call ESMF_FieldGetData(humidity, array1, rc=status)
+      call ESMF_FieldGetArray(humidity, array1, rc=status)
       print *, "Imported Array in user model 2:"
   !    call ESMF_ArrayPrint(array1, "", rc)
 
@@ -287,7 +287,7 @@
       call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
 
       ! update field values here
-      call ESMF_FieldGetData(humidity, array, rc=rc)
+      call ESMF_FieldGetArray(humidity, array, rc=rc)
       ! Get a pointer to the start of the data
       call ESMF_ArrayGetData(array, data, ESMF_DATA_REF, rc)
       print *, "rc from array get data = ", rc

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.14 2004/03/18 16:37:34 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.15 2004/03/18 18:40:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.14 2004/03/18 16:37:34 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.15 2004/03/18 18:40:17 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1019,7 +1019,7 @@
       if (hassrcdata) then
           ! don't ask for our de number if this de isn't part of the layout
           call ESMF_DELayoutGetDEid(srclayout, my_src_DE, status)
-          call ESMF_FieldGetData(srcfield, src_array, rc=status)
+          call ESMF_FieldGetArray(srcfield, src_array, rc=status)
           call ESMF_FieldGetDataMap(srcfield, src_datamap, rc=status)
       endif
 
@@ -1032,7 +1032,7 @@
       if (hasdstdata) then
           ! don't ask for our de number if this de isn't part of the layout
           call ESMF_DELayoutGetDEid(dstlayout, my_dst_DE, status)
-          call ESMF_FieldGetData(dstfield, dst_array, rc=status)
+          call ESMF_FieldGetArray(dstfield, dst_array, rc=status)
           call ESMF_FieldGetDataMap(dstfield, dst_datamap, rc=status)
       endif
 
@@ -1211,7 +1211,7 @@
       if (hassrcdata) then
           ! don't ask for our de number if this de isn't part of the layout
           call ESMF_DELayoutGetDEid(srclayout, my_src_DE, status)
-          call ESMF_FieldGetData(srcfield, src_array, rc=status)
+          call ESMF_FieldGetArray(srcfield, src_array, rc=status)
           call ESMF_FieldGetDataMap(srcfield, src_datamap, rc=status)
       endif
 
@@ -1224,7 +1224,7 @@
       if (hasdstdata) then
           ! don't ask for our de number if this de isn't part of the layout
           call ESMF_DELayoutGetDEid(dstlayout, my_dst_DE, status)
-          call ESMF_FieldGetData(dstfield, dst_array, rc=status)
+          call ESMF_FieldGetArray(dstfield, dst_array, rc=status)
           call ESMF_FieldGetDataMap(dstfield, dst_datamap, rc=status)
       endif
 

@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.3 2004/01/29 04:51:37 eschwab Exp $
+! $Id: InjectorMod.F90,v 1.4 2004/03/18 18:40:17 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -418,16 +418,16 @@ end subroutine injector_init1
       
         ! Get the Field and Bundle data from the State, and a pointer to
         !  the existing data (not a copy).
-        call ESMF_FieldGetData(local_sie, array_sie, rc=rc) 
+        call ESMF_FieldGetArray(local_sie, array_sie, rc=rc) 
         call ESMF_ArrayGetData(array_sie, data_sie, ESMF_DATA_REF, rc)
             
-        call ESMF_FieldGetData(local_v, array_v, rc=rc) 
+        call ESMF_FieldGetArray(local_v, array_v, rc=rc) 
         call ESMF_ArrayGetData(array_v, data_v, ESMF_DATA_REF, rc)
       
-        call ESMF_FieldGetData(local_rho, array_rho, rc=rc) 
+        call ESMF_FieldGetArray(local_rho, array_rho, rc=rc) 
         call ESMF_ArrayGetData(array_rho, data_rho, ESMF_DATA_REF, rc)
       
-        call ESMF_FieldGetData(local_flag, array_flag, rc=rc) 
+        call ESMF_FieldGetArray(local_flag, array_flag, rc=rc) 
         call ESMF_ArrayGetData(array_flag, data_flag, ESMF_DATA_REF, rc)
           
         ! Update values.  Flag = 10 means override values with our own.

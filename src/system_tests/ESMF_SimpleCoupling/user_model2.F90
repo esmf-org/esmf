@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.6 2004/03/16 23:28:18 cdeluca Exp $
+! $Id: user_model2.F90,v 1.7 2004/03/18 18:40:24 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -137,7 +137,7 @@
                                          name="humidity", rc=rc)
 
         ! Get the allocated array back and get an F90 array pointer
-        call ESMF_FieldGetData(humidity, array1, rc)
+        call ESMF_FieldGetArray(humidity, array1, rc)
         call ESMF_ArrayGetData(array1, idata, rc=rc)
 
         ! Set initial data values over exclusive domain to the de identifier
@@ -177,7 +177,7 @@
     
 
         ! This is where the model specific computation goes.
-        call ESMF_FieldGetData(humidity, array1, rc=status)
+        call ESMF_FieldGetArray(humidity, array1, rc=status)
         print *, "Imported Array in user model 2:"
         call ESMF_ArrayPrint(array1, "", rc)
 

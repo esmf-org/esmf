@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.13 2004/03/08 16:03:26 nscollins Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.14 2004/03/18 18:40:24 nscollins Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -179,7 +179,7 @@
     row_to_reduce = 5
 
     ! Get a pointer to the data Array in the Field
-    call ESMF_FieldGetData(field1, array2, rc=rc)
+    call ESMF_FieldGetArray(field1, array2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_ArrayValidate(array2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
