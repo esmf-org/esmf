@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr_F.C,v 1.9 2004/05/19 18:16:23 cpboulder Exp $
+// $Id: ESMC_LogErr_F.C,v 1.10 2004/05/25 16:55:50 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.9 2004/05/19 18:16:23 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.10 2004/05/25 16:55:50 cpboulder Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -46,6 +46,59 @@ extern "C" {
 //-----------------------------------------------------------------------------
 //  LogErr Methods
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_LogFinalize - Finalize global Error Log
+//
+// !INTERFACE:
+      void FTN(c_esmc_logfinalize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      int *rc){                 // out - return code
+// 
+// !DESCRIPTION:
+//     Finalize C++ version of LogErr.
+//
+//EOP
+// !REQUIREMENTS: 
+
+  *rc = ESMF_SUCCESS;
+  return;
+
+}  // end c_ESMC_Logfinalize
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_LogGetErrMessage - initialize global Error Log
+//
+// !INTERFACE:
+      void FTN(c_esmc_loggeterrormsg)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+                
+      int *rc,        		// in - return code          
+      char *msg,		// out - message associted with code
+      int *msglen){ 		// out - strlen(msg)
+// 
+// !DESCRIPTION:
+//     Initialize C++ version of LogErr.
+//
+//EOP
+// !REQUIREMENTS: 
+
+  // copy and convert F90 strings to null terminated ones
+  strcpy(msg,ESMC_LogGetErrMsg(*rc));
+  *msglen=strlen(msg);
+  return;
+
+}  // end c_ESMC_LogGetErrMessage
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -86,29 +139,6 @@ extern "C" {
 
 }  // end c_ESMC_Loginitialize
 
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_LogFinalize - Finalize global Error Log
-//
-// !INTERFACE:
-      void FTN(c_esmc_logfinalize)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      int *rc){                 // out - return code
-// 
-// !DESCRIPTION:
-//     Finalize C++ version of LogErr.
-//
-//EOP
-// !REQUIREMENTS: 
-
-  *rc = ESMF_SUCCESS;
-  return;
-
-}  // end c_ESMC_Logfinalize
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -124,13 +154,13 @@ extern "C" {
 //  none
 //
 // !ARGUMENTS:
-    int *y,
-    int *mn,
-    int *d,
-    int *h,
-    int *m,
-    int *s,
-    int *ms
+    int *y,    			// out - year
+    int *mn,			// out - month
+    int *d,			// out - day
+    int *h,			// out - hour
+    int *m,			// out - minute
+    int *s,			// out - second
+    int *ms			// out - microsecond
       
     )
 // !DESCRIPTION:
@@ -152,34 +182,6 @@ extern "C" {
     return;
 }  // end c_ESMC_Timestamp
 
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_LogGetErrMessage - initialize global Error Log
-//
-// !INTERFACE:
-      void FTN(c_esmc_loggeterrormsg)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-                
-      int *rc,                  
-      char *msg,
-      int *msglen){ 
-// 
-// !DESCRIPTION:
-//     Initialize C++ version of LogErr.
-//
-//EOP
-// !REQUIREMENTS: 
-
-  // copy and convert F90 strings to null terminated ones
-  strcpy(msg,ESMC_LogGetErrMsg(*rc));
-  *msglen=strlen(msg);
-  return;
-
-}  // end c_ESMC_Loginitialize
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
