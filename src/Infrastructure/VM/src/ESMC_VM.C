@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.23 2005/01/06 01:10:46 theurich Exp $
+// $Id: ESMC_VM.C,v 1.24 2005/01/12 23:23:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.23 2005/01/06 01:10:46 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.24 2005/01/12 23:23:54 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -109,6 +109,7 @@ void *ESMC_VM::ESMC_VMStartup(
   
   // now take care of book keeping for ESMF...
   int i, pid, m, n;
+  int localrc;
   int matchArray_count_old = matchArray_count;
   // enter information for all threads of this new VM into the matchArray
   // TODO: make this thread-safe for when we allow ESMF-threading!
@@ -116,9 +117,7 @@ void *ESMC_VM::ESMC_VMStartup(
     matchArray_tid[matchArray_count]  = vmp->myvms[j]->vmk_mypthid(); // pthid
     matchArray_vm[matchArray_count]   = vmp->myvms[j];
 
-    matchArray_vmID[matchArray_count].vmKey = new char[vmKeyWidth];
-    for (i=0; i<vmKeyWidth; i++)
-      matchArray_vmID[matchArray_count].vmKey[i] = 0x00;  // zero out all bits
+    matchArray_vmID[matchArray_count] = ESMC_VMIdCreate(&localrc);  // new VMId
     for (i=0; i<vmp->myvms[j]->vmk_npets(); i++){
       // loop through all the pets in the VM
       pid = vmp->myvms[j]->vmk_pid(i);
@@ -407,7 +406,8 @@ ESMC_VM *ESMC_VMInitialize(
     vmKeyOff = 8 - vmKeyOff;    // number of extra bits in last char
   }
 //printf("gjt in ESMC_VMInitialize, vmKeyWidth = %d\n", vmKeyWidth);
-  matchArray_vmID[matchArray_count].vmKey = new char[vmKeyWidth];
+  int localrc;
+  matchArray_vmID[matchArray_count] = ESMC_VMIdCreate(&localrc);
   for (int i=0; i<vmKeyWidth; i++)
     matchArray_vmID[matchArray_count].vmKey[i] = 0xff;  // globalVM in all VASs
   matchArray_vmID[matchArray_count].vmKey[vmKeyWidth-1] =
@@ -480,3 +480,23 @@ void ESMC_VMIdPrint(ESMC_VMId *vmID){
 }
 
 
+ESMC_VMId ESMC_VMIdCreate(int *rc){
+  // allocates memory for vmKey member
+  ESMC_VMId vmID;    // temporary stack variable
+  vmID.vmKey = new char[vmKeyWidth];
+  for (int i=0; i<vmKeyWidth; i++)
+    vmID.vmKey[i] = 0x00;  // zero out all bits
+  vmID.localID = 0;   // reset
+  *rc = ESMF_SUCCESS;
+  return vmID;
+}
+
+
+void ESMC_VMIdDestroy(ESMC_VMId *vmID, int *rc){
+  // frees memory for vmKey member
+  if (vmID->vmKey){
+    delete [] vmID->vmKey;
+    vmID->vmKey = NULL;
+  }
+  *rc = ESMF_SUCCESS;
+}

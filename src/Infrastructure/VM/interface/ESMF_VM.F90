@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.52 2005/01/12 20:05:29 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.53 2005/01/12 23:23:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -159,6 +159,8 @@ module ESMF_VMMod
   public ESMF_VMPlanMaxPEs
   public ESMF_VMPlanMaxThreads
   public ESMF_VMPlanMinThreads
+  public ESMF_VMIdCreate
+  public ESMF_VMIdDestroy
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -166,7 +168,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.52 2005/01/12 20:05:29 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.53 2005/01/12 23:23:44 theurich Exp $'
 
 !==============================================================================
 
@@ -4177,6 +4179,91 @@ module ESMF_VMMod
   end subroutine ESMF_VMPlanMinThreads
 !------------------------------------------------------------------------------
 
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMIdCreate()"
+!BOPI
+! !IROUTINE: ESMF_VMIdCreate - Create an ESMF_VMId object
+
+! !INTERFACE:
+  subroutine ESMF_VMIdCreate(vmId, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMId),   intent(inout)         :: vmId
+    integer,           intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!   Create an  ESMF_VMId object. This allocates memory on the C side
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmId] 
+!        ESMF_VMId object
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface
+    call c_ESMC_VMIdCreate(vmId, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMIdCreate
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMIdDestroy()"
+!BOPI
+! !IROUTINE: ESMF_VMIdDestroy - Destroy an ESMF_VMId object
+
+! !INTERFACE:
+  subroutine ESMF_VMIdDestroy(vmId, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMId),   intent(inout)         :: vmId
+    integer,           intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!   Destroy an ESMF_VMId object. This frees memory on the C side
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmId] 
+!        ESMF_VMId object
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface
+    call c_ESMC_VMIdDestroy(vmId, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMIdDestroy
+!------------------------------------------------------------------------------
 
 end module ESMF_VMMod
 

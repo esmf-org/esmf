@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.28 2005/01/12 07:37:13 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.29 2005/01/12 23:23:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -454,5 +454,30 @@ extern "C" {
     (*ptr)->vmkplan_myvms((*ptr)->myvmachs); // use pointer array inside
     *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
   }
+  
+  
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // ESMC_VMId interfaces
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+    void FTN(c_esmc_vmidcreate)(ESMC_VMId **vmid, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmidcreate()"
+    int localrc;
+    *vmid = new ESMC_VMId;              // allocate memory off the heap
+    **vmid = ESMC_VMIdCreate(&localrc); // allocate memory for internal members
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+  }
+
+    void FTN(c_esmc_vmiddestroy)(ESMC_VMId **vmid, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmiddestroy()"
+    int localrc;
+    ESMC_VMIdDestroy(*vmid, &localrc);  // free memory for internal members
+    delete *vmid;                       // free memory for this VMId
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+  }
+
   
 };

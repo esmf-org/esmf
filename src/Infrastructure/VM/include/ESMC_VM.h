@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.16 2005/01/06 01:10:46 theurich Exp $
+// $Id: ESMC_VM.h,v 1.17 2005/01/12 23:23:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,7 +49,9 @@ typedef struct{
 }ESMC_VMId;
 
 void ESMC_VMIdPrint(ESMC_VMId *vmID);
-
+ESMC_VMId ESMC_VMIdCreate(int *rc);      // allocates memory for vmKey member
+void ESMC_VMIdDestroy(ESMC_VMId *vmID, int *rc); // frees memory for vmKey memb
+    
 
 class ESMC_VM;
 class ESMF_VMPlan;

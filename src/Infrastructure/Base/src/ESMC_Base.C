@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.55 2005/01/12 20:05:29 theurich Exp $
+// $Id: ESMC_Base.C,v 1.56 2005/01/12 23:23:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.55 2005/01/12 20:05:29 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.56 2005/01/12 23:23:43 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -3641,7 +3641,7 @@ extern "C" {
   int rc;
   
   vmID = ESMC_VMGetCurrentID(&rc);  // get the vmID of the current VM context
-//  ESMC_VMIdPrint(vmID);
+  ESMC_VMIdPrint(vmID);
   ID = ++globalCount;
   refCount = 1;
   strcpy(className, "global");
@@ -3679,7 +3679,7 @@ extern "C" {
   int rc;
   
   vmID = ESMC_VMGetCurrentID(&rc);  // get the vmID of the current VM context
-//  ESMC_VMIdPrint(vmID);
+  ESMC_VMIdPrint(vmID);
   ID = ++globalCount;
   refCount = 1;
   strcpy(className, superclass ? superclass : "global");
