@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.15 2004/04/13 17:30:46 nscollins Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.16 2004/04/19 22:32:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.15 2004/04/13 17:30:46 nscollins Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.16 2004/04/19 22:32:08 nscollins Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -70,8 +70,8 @@
        use ESMF_newDELayoutMod
        use ESMF_ClockMod
        use ESMF_GridTypesMod
-       use ESMF_GridCompMod
        use ESMF_CompMod
+       use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: gcomp
        character(len=*) :: name
@@ -90,7 +90,7 @@
 
    subroutine f_esmf_gridcompdestroy(comp, rc)
        !use ESMF_BaseMod    ! ESMF base class
-       !use ESMF_CompMod
+       use ESMF_CompMod
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp
@@ -105,6 +105,7 @@
        !use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
+       use ESMF_CompMod
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
@@ -123,6 +124,7 @@
        !use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
+       use ESMF_CompMod
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
@@ -141,6 +143,7 @@
        !use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
+       use ESMF_CompMod
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
@@ -157,6 +160,7 @@
  
    subroutine f_esmf_gridcompset(comp, rc)
        !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
@@ -168,6 +172,7 @@
  
    subroutine f_esmf_gridcompget(comp, rc)
        !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
@@ -179,6 +184,7 @@
 
    subroutine f_esmf_gridcompvalidate(comp, options, rc)
        !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
@@ -191,6 +197,7 @@
 
    subroutine f_esmf_gridcompprint(comp, options, rc)
        !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
@@ -225,7 +232,7 @@
 
    subroutine f_esmf_cplcompdestroy(comp, rc)
        !use ESMF_BaseMod    ! ESMF base class
-       !use ESMF_CompMod
+       use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp
@@ -240,6 +247,7 @@
        !use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
+       use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
@@ -258,6 +266,7 @@
        !use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
+       use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
@@ -276,6 +285,7 @@
        !use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
+       use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
@@ -292,6 +302,7 @@
  
    subroutine f_esmf_cplcompset(comp, rc)
        !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
@@ -303,6 +314,7 @@
  
    subroutine f_esmf_cplcompget(comp, rc)
        !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
@@ -314,6 +326,7 @@
 
    subroutine f_esmf_cplcompvalidate(comp, options, rc)
        !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
@@ -326,6 +339,7 @@
 
    subroutine f_esmf_cplcompprint(comp, options, rc)
        !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
