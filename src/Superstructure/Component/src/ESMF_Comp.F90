@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.89 2004/04/20 19:03:26 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.90 2004/04/23 13:37:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -110,6 +110,7 @@
          type(ESMF_CompType) :: ctype             ! component type
          type(ESMF_Config) :: config              ! configuration object
          type(ESMF_newDELayout) :: delayout          ! component delayout
+         type(ESMF_VM) :: vm          ! component VM
          type(ESMF_Clock) :: clock                ! private component clock
          logical :: multiphaseinit                ! multiple init, run, final
          integer :: initphasecount                ! max inits, for error check
@@ -140,7 +141,6 @@
 #else
          type(ESMF_CompClass), pointer :: compp
 #endif
-         type(ESMF_VM) :: vm
       end type
 
 !------------------------------------------------------------------------------
@@ -156,7 +156,6 @@
 #else
          type(ESMF_CompClass), pointer :: compp
 #endif
-         type(ESMF_VM) :: vm
       end type
 
 
@@ -173,7 +172,6 @@
 #else
          type(ESMF_CompClass), pointer :: compp
 #endif
-         type(ESMF_VM) :: vm
       end type
 
 
@@ -219,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.89 2004/04/20 19:03:26 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.90 2004/04/23 13:37:51 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1206,19 +1204,21 @@ end function
 ! !IROUTINE: ESMF_CompGet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompGet(compp, name, delayout, gridcomptype, grid, &
-                                        clock, dirPath, configFile, config, rc)
+      subroutine ESMF_CompGet(compp, name, delayout, vm, gridcomptype, &
+        grid, clock, dirPath, configFile, config, ctype, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
       character(len=*), intent(out), optional :: name
       type(ESMF_newDELayout), intent(out), optional :: delayout
+      type(ESMF_VM), intent(out), optional :: vm
       type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
       type(ESMF_Grid), intent(out), optional :: grid
       type(ESMF_Clock), intent(out), optional :: clock
       character(len=*), intent(out), optional :: dirPath
       character(len=*), intent(out), optional :: configFile
       type(ESMF_Config), intent(out), optional :: config
+      type(ESMF_CompType), intent(out), optional :: ctype
       integer, intent(out), optional :: rc             
 
 !
@@ -1247,8 +1247,16 @@ end function
           call ESMF_GetName(compp%base, name, status)
         endif
 
+        if (present(ctype)) then
+          ctype = compp%ctype
+        endif
+
         if (present(delayout)) then
           delayout = compp%delayout
+        endif
+
+        if (present(vm)) then
+          vm = compp%vm
         endif
 
         if (present(gridcomptype)) then
@@ -1287,13 +1295,14 @@ end function
 ! !IROUTINE: ESMF_CompSet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompSet(compp, name, delayout, gridcomptype, grid, &
+      subroutine ESMF_CompSet(compp, name, delayout, vm, gridcomptype, grid, &
                                         clock, dirPath, configFile, config, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
       character(len=*), intent(in), optional :: name
       type(ESMF_newDELayout), intent(in), optional :: delayout
+      type(ESMF_VM), intent(in), optional :: vm
       type(ESMF_GridCompType), intent(in), optional :: gridcomptype 
       type(ESMF_Grid), intent(in), optional :: grid
       type(ESMF_Clock), intent(in), optional :: clock
@@ -1330,6 +1339,10 @@ end function
 
         if (present(delayout)) then
           compp%delayout = delayout
+        endif
+
+        if (present(vm)) then
+          compp%vm = vm
         endif
 
         if (present(gridcomptype)) then
@@ -1786,107 +1799,3 @@ end function
 !------------------------------------------------------------------------------
 
 end module ESMF_CompMod
-
-
-
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_CompThreadCopy - Create a thread private copy 
-
-! !INTERFACE:
-  subroutine ESMF_CompThreadCopy(ccompcp, ccomp, vm, rc)
-    use ESMF_CompMod
-    use ESMF_VMMod
-!
-! !ARGUMENTS:
-    type(ESMF_CWrap), pointer       :: ccompcp
-    type(ESMF_CWrap)                :: ccomp
-    type(ESMF_VM)                   :: vm
-    integer, intent(out), optional  :: rc           
-!
-! !DESCRIPTION:
-!     Create a thread private copy of component objects
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[ccomp] 
-!          component object
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-
-    integer :: status                     ! local error status
-    logical :: rcpresent
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-
-    ! make copy
-    print *, 'Hello out of ESMF_CompThreadCopy'
-    allocate(ccompcp)
-    ccompcp = ccomp
-    ccompcp%vm = vm
-
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_CompThreadCopy
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_CompThreadCopyFree - Free a thread private copy 
-
-! !INTERFACE:
-  subroutine ESMF_CompThreadCopyFree(ccompcp, rc)
-    use ESMF_CompMod
-!
-! !ARGUMENTS:
-    type(ESMF_CWrap), pointer       :: ccompcp
-    integer, intent(out), optional  :: rc           
-!
-! !DESCRIPTION:
-!    Free a thread private copy 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[ccomp] 
-!          component object
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-
-    integer :: status                     ! local error status
-    logical :: rcpresent
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-
-    ! make copy
-    deallocate(ccompcp)
-
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_CompThreadCopyFree
-!------------------------------------------------------------------------------
