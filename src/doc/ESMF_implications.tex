@@ -4,13 +4,14 @@
 \subsection{ESMF Compliance}
 
 We define ESMF compliance for software components, including
-both coupler and gridded components.  In order to achieve compliance, 
+both {\tt Coupler} and {\tt Gridded Component}s.  In order to 
+achieve compliance, 
 components must provide a minimal set of standard ESMF-defined 
 interfaces.  The implementation of these interfaces must enable the  
 components to be instantiated in parallel configurations
 and destroyed; to be initialized, finalized, and run; to be queried for 
 distribution, state, run status and other pertinent information;
-and, for gridded components, to interoperate with other components such
+and, for {\tt Gridded Component}s, to interoperate with other components such
 that they do not need to maintain information about the coupling context.
 
 \subsection{Implications of Architecture for Framework Adoption}
@@ -22,21 +23,23 @@ explored all the implications of the architectural definition, this list is
 necessarily tentative, incomplete, and non-specific.}
 
 \begin{itemize}
-\item Since gridded components will run on the same 
-DEs as the application component, often in conjunction with a coupler, 
+\item Since {\tt Gridded Component}s will run on the same 
+{\tt DE}s as the {\tt Application Component}, often in conjunction 
+with a {\tt Coupler}, 
 it is necessary to subroutinize
 them and provide standard methods such as {\tt ESMF\_CompInit}, 
-{\tt ESMF\_CompRun}, and {\tt ESMF\_CompFinalize}.  For gridded components
+{\tt ESMF\_CompRun}, and {\tt ESMF\_CompFinalize}.  For {\tt Gridded 
+Component}s
 with a time iteration loop, we expect the {\tt ESMF\_CompRun} command to 
-takes a time interval or number of timesteps as one of its arguments.
-\item Gridded components must define ESMF import and export state 
+take a time interval or number of timesteps as one of its arguments.
+\item {\tt Gridded Component}s must define ESMF import and export {\tt State} 
 structures.
-\item Coupler components must define and return any transforms or 
-sends that gridded components involved in a coupling interaction may 
-perform.
-\item Components will need to implement standard query methods to return
-their distribution, grid, state, run status, and other information in
-a standard format.
+\item {\tt Coupler Component}s must define and return in a specified 
+format any transforms that {\tt Gridded Component}s involved 
+in a coupling interaction will execute.
+\item Components must implement standard query methods to return
+their {\tt Layout}, {\tt Grid(s)}, {\tt States}, run status, and other 
+information in a standard format.
 \end{itemize}
 
 Components {\it will not} need to recast their internal data structures.

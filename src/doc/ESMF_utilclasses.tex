@@ -5,7 +5,7 @@
 
 The previous Infrastructure section described the data handling 
 objects in the ESMF library. This section describes the lowest level
-objects in the Infrastructure layer, the Utility classes.
+objects in the infrastructure layer, the utility classes.
 
 \subsection{Design Goals and Considerations}
 
@@ -13,13 +13,12 @@ The goal of the utility layer is to present a uniform interface
 for common system functions.  Each hardware architecture and
 software system has different system libraries and methods
 for accomplishing what are logically the same tasks.  Routines
-in this layer
-must insulate user code from these variations so that it is
+in this layer must insulate user code from these variations so that it is
 portable from system to system.
 
 \subsection{Overview}
 
-The Utility classes have very little in common;
+The utility classes have very little in common;
 some are lightweight classes which maintain no internal state; 
 others have state and exist for the lifetime of the application.  
 Some run within a single process; others exist per processor and 
@@ -31,13 +30,13 @@ Another advantage of collecting these functions
 into a base-level utility set is to help avoid circular referencing.
 In most cases they occupy the lowest level of the object hierarchy.
 
-Methods provided by Utility classes are available for use by  
+Methods provided by utility classes are available for use by  
 all other classes in the ESMF library.  
 Some of these methods will be called directly by user-supplied
 code; others are intended to provide support for internal ESMF 
 library code.
 
-The Layout object is used by any part of the library which needs
+The {\tt Layout} class is used by any part of the library which needs
 to decompose a task/problem/dataset into subsets.
 The decomposition must allow for mapping certain subsets onto the
 underlying machine model in a preferential way; e.g. keeping
@@ -47,11 +46,9 @@ It is required to interact with both the Processing Element lists
 and the Machine Model in order to accomplish this preferential
 decomposition.
 
-The abstraction of a Processing Element provides a layer between
+The abstraction of a Processing Element andlist is a simple  between
 the underlying hardware processor ID and the application's view
-of how to address individual processors.  It also maintains
-grouping information to indicate collections of processors which
-share some characteristic or resource.
+of how to address individual processors.  
 
 The Machine Model encapsulates all information about the
 hardware configuration, memory structure, and available
@@ -60,16 +57,15 @@ information to other parts of the library which can
 make decisions about partitioning or selection of algorithms
 based on the amount and types of resources available.
 
-The Basic Communications routines provide a uniform interface to
+The {\tt Basic Communication} routines provide a uniform interface to
 the variety of interprocess communication mechanisms available
 on different hardware platforms.  
 The basic functions include methods to send
 and receive data, such as scatter, gather, send, receive,
 reduction methods such as sum, global min/max, and methods
-to synchronize such as barrier.  << does this need more
-detail, or is this level ok for this point in the document??  nsc. >>
+to synchronize such as barrier. 
 
-The Time Manager provides all general purpose time methods, both
+The {\tt Time Manager} provides all general purpose time methods, both
 for computing time instants (dates and times) and time intervals
 (the difference between 2 time instants).   It also supports 
 setting and handling alarm events, either one-shot or repeating.
@@ -77,28 +73,28 @@ Supported calendars include Gregorian, Julian, no-leap, 360-day,
 generic, and no-calendar.
 Time intervals can range from the very brief -- any rational fraction
 of a second -- to geologic time scales.
-The Time Manager also allows the user to control the format of
+The {\tt Time Manager} also allows the user to control the format of
 time instants and intervals as they are returned.
 
 Many parts of the library are required to maintain unique name
-spaces for their objects.  The Name Registry supplies methods
+spaces for their objects.  The {\tt Registry} supplies methods
 for defining name spaces and adding and querying names in those
-spaces.  In general there is will be one Registry object per
-process, but if the namespace spans processes then Registry objects
-will have to do global communication in order to verify names
+spaces.  In general there is will be one {\tt Registry} object per
+process, but if the namespace spans processes then {\tt Registry} 
+objects will have to do global communication in order to verify names
 are unique within the entire application.
 
-The Error Handler provides both uniform handling of errors and
+The {\tt Error Handler} provides both uniform handling of errors and
 a way for user code to select how errors will be handled.
 An integer error code can be returned from the library to the
 calling code, or the library can print an error message and exit.
 
-The Log Utility manages the complexity of serializing diagnostic
+The {\tt Log} manages the complexity of serializing diagnostic
 messages produced by a multiprocess application.  It provides
 methods for uniformly formatting the messages to facilitate
 post-processing by filters and automated tools.
 
-The Diagnostic routines provide assistance with both performance
+The {\tt Diagnostic} routines provide assistance with both performance
 profiling and code debugging.  Timing routines support measurement
 of both serial and parallel time intervals around certain sections
 of code.  Debugging routines allow dynamic control over the level
@@ -129,10 +125,10 @@ extent compatible with user-defined threads.  The user will have
 the option to enable ESMF threading or not.  In the latter case, the
 DE again degenerates to a process.
 
-DEs are organized into topologies, such as a 2-D grid, by the Layout 
+DEs are organized into topologies, such as a 2D grid, by the Layout 
 class.  A user can define their own Layout, or a Layout can be 
-constructed automatically in the process of creating a distributed 
-grid.  
+constructed automatically in the process of creating a Distributed 
+Grid.  
 
 The Layout for both homogeneous and heterogeneous programming
 strategies can be described compactly and precisely by a Layout 
@@ -161,9 +157,9 @@ together with their Ltuple description.
 \scalebox{0.7}{\includegraphics{Layout.eps}}
 \end{figure}
 
-When a Grid object is defined on a Layout, we require that the dimensions 
-of the Grid align with the dimensions of a Layout.  The superimposition
-of a Grid on a Layout is shown in Figure~\ref{fig:gridlayout}.
+When a {\tt Grid} object is defined on a {\tt Layout}, we require that the dimensions 
+of the {\tt Grid} align with the dimensions of the {\tt Layout}.  The superimposition
+of a {\tt Grid} on a {\tt Layout} is shown in Figure~\ref{fig:gridlayout}.
 
 \begin{figure}
 \label{fig:gridlayout}
@@ -171,11 +167,7 @@ of a Grid on a Layout is shown in Figure~\ref{fig:gridlayout}.
 \end{figure}
 
 The user can request system resources either through a simple processor
-ID list, or by defining a Layout.
-
-More information on the ESMF machine model and programming model
-is available in Section~\ref{sec:machine} and in the {\it ESMF
-Implementation Report}.
+ID list, or by defining a {\tt Layout}.
 
 \subsection{Class Details}
 
@@ -304,29 +296,20 @@ formatting information, for selecting a single unified log vs.\  a log
 file per processor.
 \end{description}
 
-\subsubsection{Diagnostics (ESMF\_Diagnostics)}
+\subsubsection{Diagnostics (ESMF\_Diag)}
 \label{sec:diagnostics} 
 \begin{description}
 \item [Description] Diagnostics are collections of routines for
 gathering information about how the simulation is behaving.  
 These include both routines for finding program bugs
 as well as understanding execution bottlenecks.
-\item [Function] The Diagnostic class consists of two subclasses,
+The Diagnostic class consists of two subclasses,
 a Debug class for supporting methods for specifying
 diagnostic information, and enabling and disabling the production of
 that information.  The Performance class provides methods
 for enabling and disabling timing routines in sections of
 code, in both serial and parallel execution modes.
-\end{description}
 
-
-
-% \subsubsection{Foo (ESMF\_Foo)}
-% \label{sec:Foo} 
-% \begin{description}
-% \item [Description] A Foo is ...
-% \item [Function] The Foo class ...
-% \end{description}
 
 
 
