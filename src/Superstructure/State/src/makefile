@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2004/11/02 00:01:31 nscollins Exp $
+# $Id: makefile,v 1.9 2004/11/15 18:33:38 nscollins Exp $
 
 # Leave alone.
 ALL: build_here 
@@ -43,5 +43,5 @@ ESMF_StateGet.o: ESMF_StateGet.cpp ESMF_StateMacros.h ESMF_State.o
 
 ESMF_State.o: ESMF_StateTypes.o
 
-ESMF_StateReconcile.o: ESMF_StateTypes.o
+ESMF_StateReconcile.o: ESMF_StateTypes.o ESMF_State.o
 
