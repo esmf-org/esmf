@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.21 2004/06/15 11:50:34 nscollins Exp $
+! $Id: ESMF_StateUTest.F90,v 1.22 2004/06/15 12:16:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.21 2004/06/15 11:50:34 nscollins Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.22 2004/06/15 12:16:42 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -348,12 +348,12 @@
       !Commented out because it crashes
       ! Bug report 969635 opened.
       ! Test State for non-existant Field being needed
-      !IsNeeded = ESMF_StateIsNeeded(state1, "Humidty", rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Query if non existant Field is needed in a State Test"
-      !call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
-      !print *, "IsNeeded = ", IsNeeded
+      IsNeeded = ESMF_StateIsNeeded(state1, "Humidty", rc)
+      write(failMsg, *) ""
+      write(name, *) "Query if non existant Field is needed in a State Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "IsNeeded = ", IsNeeded
       !------------------------------------------------------------------------
 
 
@@ -509,7 +509,7 @@
       !call ESMF_StateAddBundle(state1, bundle5, rc=rc)
       !write(name, *) "Adding an uninitialized  Bundle to a State Test"
       !call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      !                name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       ! Test adding an uninitialized Field to a State
@@ -518,17 +518,17 @@
       !call ESMF_StateAddField(state1, field4, rc)
       !write(name, *) "Adding an uninitialized  Field to a State Test"
       !call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-                       !name, failMsg, result, ESMF_SRCLINE)
+      !                 name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
       ! Test adding an uninitialized Array to a State
-      call ESMF_StateAddArray(state1, array3, rc)
-      write(name, *) "Adding an uninitialized Array to a State Test"
-      print *, "rc = ", rc
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-                        name, failMsg, result, ESMF_SRCLINE)
-      print *, "rc = ", rc
+      !call ESMF_StateAddArray(state1, array3, rc)
+      !write(name, *) "Adding an uninitialized Array to a State Test"
+      !print *, "rc = ", rc
+      !call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+      !                  name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
 
       !------------------------------------------------------------------------
 
