@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.24 2003/04/30 18:19:44 flanigan Exp $ 
+# $Id: base_variables,v 1.25 2003/05/01 15:03:40 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -115,7 +115,7 @@ PARCH			= rs6000
 
 SL_SUFFIX   = so
 SL_LIBOPTS  = -G $(C_F90CXXLIBS)
-SL_LINKOPTS = -lC -blazy
+SL_LINKOPTS = -lC -brtl
 SL_F_LINKER = $(F90CXXLD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
 SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
 
