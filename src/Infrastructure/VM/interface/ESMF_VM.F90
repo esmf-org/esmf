@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.38 2004/11/09 19:01:46 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.39 2004/11/11 05:00:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -149,7 +149,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.38 2004/11/09 19:01:46 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.39 2004/11/11 05:00:05 theurich Exp $'
 
 !==============================================================================
 
@@ -3175,8 +3175,11 @@ module ESMF_VMMod
     call c_ESMC_VMInitialize(GlobalVM, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    !  ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Cannot use LogErr here because LogErr initializes _after_ VM
+    if (present(rc)) rc = localrc
 
   end subroutine ESMF_VMInitialize
 !------------------------------------------------------------------------------
@@ -3215,8 +3218,11 @@ module ESMF_VMMod
     call c_ESMC_VMFinalize(localrc)
     
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    !  ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Cannot use LogErr here because LogErr finalizes _before_ VM
+    if (present(rc)) rc = localrc
 
   end subroutine ESMF_VMFinalize
 !------------------------------------------------------------------------------
