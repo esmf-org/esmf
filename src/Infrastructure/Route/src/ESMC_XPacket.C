@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.15 2003/03/21 20:22:25 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.16 2003/03/21 21:02:00 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.15 2003/03/21 20:22:25 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.16 2003/03/21 21:02:00 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -221,9 +221,11 @@
         {
           // implementation of efficient intersection calculation from
           // thesis by Ramaswamy
-          int intersect1 = (xpacket2->left-xpacket1->right) / xpacket1->strides[0];
+          int intersect1 = (xpacket2->left-xpacket1->right+xpacket1->strides[0]-1)
+                         /  xpacket1->strides[0];  // rounding to nearest integer
           if (intersect1 < 0) intersect1 = 0;
-          int intersect2 = (xpacket1->left-xpacket2->right) / xpacket2->strides[0];
+          int intersect2 = (xpacket1->left-xpacket2->right+xpacket2->strides[0]-1)
+                         /  xpacket2->strides[0];  // rounding to nearest integer
           if (intersect2 < 0) intersect2 = 0;
           int i1=intersect1;
           int L1_left  = xpacket1->left  + i1*xpacket1->strides[0];
