@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.1 2003/07/15 18:14:35 jwolfe Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.2 2003/07/17 20:45:36 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -226,13 +226,13 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_LocalArrayCreateByMTArr##mtypekind##mrank##D - make an ESMF array from an unallocated F90 array @\
+! !IROUTINE: ESMF_LocalArrCreateByMTArr##mtypekind##mrank##D - make an ESMF array from an unallocated F90 array @\
  @\
 ! !INTERFACE: @\
-      function ESMF_LocalArrayCreateByMTArr##mtypekind##mrank##D(f90arr, counts, rc) @\
+      function ESMF_LocalArrCreateByMTArr##mtypekind##mrank##D(f90arr, counts, rc) @\
 ! @\
 ! !RETURN VALUE: @\
-      type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArr##mtypekind##mrank##D @\
+      type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArr##mtypekind##mrank##D @\
 ! @\
 ! !ARGUMENTS: @\
       mname (ESMF_IKIND_##mtypekind), dimension(mdim), target :: f90arr @\
@@ -301,10 +301,10 @@
         @\
  @\
 !       ! return value set by c_ESMC func above @\
-        ESMF_LocalArrayCreateByMTArr##mtypekind##mrank##D = array @\
+        ESMF_LocalArrCreateByMTArr##mtypekind##mrank##D = array @\
         if (rcpresent) rc = status @\
  @\
-        end function ESMF_LocalArrayCreateByMTArr##mtypekind##mrank##D   @\
+        end function ESMF_LocalArrCreateByMTArr##mtypekind##mrank##D   @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
@@ -319,13 +319,13 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_LocalArrayCreateByFlArr##mtypekind##mrank##D - make an ESMF array from an Allocated F90 array @\
+! !IROUTINE: ESMF_LocalArrCreateByFlArr##mtypekind##mrank##D - make an ESMF array from an Allocated F90 array @\
  @\
 ! !INTERFACE: @\
-      function ESMF_LocalArrayCreateByFlArr##mtypekind##mrank##D(f90arr, docopy, rc) @\
+      function ESMF_LocalArrCreateByFlArr##mtypekind##mrank##D(f90arr, docopy, rc) @\
 ! @\
 ! !RETURN VALUE: @\
-      type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArr##mtypekind##mrank##D @\
+      type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArr##mtypekind##mrank##D @\
 ! @\
 ! !ARGUMENTS: @\
       mname (ESMF_IKIND_##mtypekind), dimension(mdim), target :: f90arr @\
@@ -412,10 +412,10 @@
         @\
  @\
 !       ! return value set by c_ESMC func above @\
-        ESMF_LocalArrayCreateByFlArr##mtypekind##mrank##D = array @\
+        ESMF_LocalArrCreateByFlArr##mtypekind##mrank##D = array @\
         if (rcpresent) rc = status @\
  @\
-        end function ESMF_LocalArrayCreateByFlArr##mtypekind##mrank##D   @\
+        end function ESMF_LocalArrCreateByFlArr##mtypekind##mrank##D   @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
@@ -430,13 +430,13 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtr##mtypekind##mrank##D - make an ESMF array from an unallocated F90 pointer @\
+! !IROUTINE: ESMF_LocalArrCreateByMTPtr##mtypekind##mrank##D - make an ESMF array from an unallocated F90 pointer @\
  @\
 ! !INTERFACE: @\
-      function ESMF_LocalArrayCreateByMTPtr##mtypekind##mrank##D(f90ptr, counts, rc) @\
+      function ESMF_LocalArrCreateByMTPtr##mtypekind##mrank##D(f90ptr, counts, rc) @\
 ! @\
 ! !RETURN VALUE: @\
-      type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtr##mtypekind##mrank##D @\
+      type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtr##mtypekind##mrank##D @\
 ! @\
 ! !ARGUMENTS: @\
       mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: f90ptr @\
@@ -501,10 +501,10 @@
         @\
  @\
 !       ! return value set by c_ESMC func above @\
-        ESMF_LocalArrayCreateByMTPtr##mtypekind##mrank##D = array @\
+        ESMF_LocalArrCreateByMTPtr##mtypekind##mrank##D = array @\
         if (rcpresent) rc = status @\
  @\
-        end function ESMF_LocalArrayCreateByMTPtr##mtypekind##mrank##D   @\
+        end function ESMF_LocalArrCreateByMTPtr##mtypekind##mrank##D   @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
@@ -519,13 +519,13 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtr##mtypekind##mrank##D - make an ESMF array from an Allocated F90 pointer @\
+! !IROUTINE: ESMF_LocalArrCreateByFlPtr##mtypekind##mrank##D - make an ESMF array from an Allocated F90 pointer @\
  @\
 ! !INTERFACE: @\
-      function ESMF_LocalArrayCreateByFlPtr##mtypekind##mrank##D(f90ptr, docopy, rc) @\
+      function ESMF_LocalArrCreateByFlPtr##mtypekind##mrank##D(f90ptr, docopy, rc) @\
 ! @\
 ! !RETURN VALUE: @\
-      type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtr##mtypekind##mrank##D @\
+      type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtr##mtypekind##mrank##D @\
 ! @\
 ! !ARGUMENTS: @\
       mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: f90ptr @\
@@ -608,10 +608,10 @@
         @\
  @\
 !       ! return value set by c_ESMC func above @\
-        ESMF_LocalArrayCreateByFlPtr##mtypekind##mrank##D = array @\
+        ESMF_LocalArrCreateByFlPtr##mtypekind##mrank##D = array @\
         if (rcpresent) rc = status @\
  @\
-        end function ESMF_LocalArrayCreateByFlPtr##mtypekind##mrank##D   @\
+        end function ESMF_LocalArrCreateByFlPtr##mtypekind##mrank##D   @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\

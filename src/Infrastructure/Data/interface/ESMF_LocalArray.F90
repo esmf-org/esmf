@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.F90,v 1.6 2003/07/17 20:02:47 nscollins Exp $
+! $Id: ESMF_LocalArray.F90,v 1.7 2003/07/17 20:45:36 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -42,7 +42,6 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOMod
-      use ESMF_DELayoutMod
       implicit none
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
@@ -98,7 +97,7 @@
       type ESMF_ArraySpec
       sequence
       !!private
-        integer :: rank             ! number of dimensions
+        integer :: rank ! number of dimensions
         type(ESMF_DataType) :: type ! real/float, integer, etc enum
         type(ESMF_DataKind) :: kind ! fortran "kind" enum/integer
       end type
@@ -287,7 +286,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.F90,v 1.6 2003/07/17 20:02:47 nscollins Exp $'
+      '$Id: ESMF_LocalArray.F90,v 1.7 2003/07/17 20:45:36 nscollins Exp $'
 !==============================================================================
 !
 ! INTERFACE BLOCKS
@@ -304,69 +303,69 @@
         ! Plus interfaces for each T/K/R
 !EOP
 ! ! < interfaces for each T/K/R >
-! --LocalArray--InterfaceMacro(LocalArrayCreateByMTArr)
+! --LocalArray--InterfaceMacro(LocalArrCreateByMTArr)
 !
 ! ! < interfaces for each T/K/R >
-! --LocalArray--InterfaceMacro(LocalArrayCreateByFullArr)
+! --LocalArray--InterfaceMacro(LocalArrCreateByFullArr)
        ! < interfaces for each T/K/R >
 !------------------------------------------------------------------------------ 
 ! <This section created by macro - do not edit directly> 
- module procedure ESMF_LocalArrayCreateByMTPtrI21D 
- module procedure ESMF_LocalArrayCreateByMTPtrI41D 
- module procedure ESMF_LocalArrayCreateByMTPtrI81D 
- module procedure ESMF_LocalArrayCreateByMTPtrI22D 
- module procedure ESMF_LocalArrayCreateByMTPtrI42D 
- module procedure ESMF_LocalArrayCreateByMTPtrI82D 
- module procedure ESMF_LocalArrayCreateByMTPtrI23D 
- module procedure ESMF_LocalArrayCreateByMTPtrI43D 
- module procedure ESMF_LocalArrayCreateByMTPtrI83D 
- module procedure ESMF_LocalArrayCreateByMTPtrI24D 
- module procedure ESMF_LocalArrayCreateByMTPtrI44D 
- module procedure ESMF_LocalArrayCreateByMTPtrI84D 
- module procedure ESMF_LocalArrayCreateByMTPtrI25D 
- module procedure ESMF_LocalArrayCreateByMTPtrI45D 
- module procedure ESMF_LocalArrayCreateByMTPtrI85D 
- module procedure ESMF_LocalArrayCreateByMTPtrR41D 
- module procedure ESMF_LocalArrayCreateByMTPtrR81D 
- module procedure ESMF_LocalArrayCreateByMTPtrR42D 
- module procedure ESMF_LocalArrayCreateByMTPtrR82D 
- module procedure ESMF_LocalArrayCreateByMTPtrR43D 
- module procedure ESMF_LocalArrayCreateByMTPtrR83D 
- module procedure ESMF_LocalArrayCreateByMTPtrR44D 
- module procedure ESMF_LocalArrayCreateByMTPtrR84D 
- module procedure ESMF_LocalArrayCreateByMTPtrR45D 
- module procedure ESMF_LocalArrayCreateByMTPtrR85D 
+ module procedure ESMF_LocalArrCreateByMTPtrI21D 
+ module procedure ESMF_LocalArrCreateByMTPtrI41D 
+ module procedure ESMF_LocalArrCreateByMTPtrI81D 
+ module procedure ESMF_LocalArrCreateByMTPtrI22D 
+ module procedure ESMF_LocalArrCreateByMTPtrI42D 
+ module procedure ESMF_LocalArrCreateByMTPtrI82D 
+ module procedure ESMF_LocalArrCreateByMTPtrI23D 
+ module procedure ESMF_LocalArrCreateByMTPtrI43D 
+ module procedure ESMF_LocalArrCreateByMTPtrI83D 
+ module procedure ESMF_LocalArrCreateByMTPtrI24D 
+ module procedure ESMF_LocalArrCreateByMTPtrI44D 
+ module procedure ESMF_LocalArrCreateByMTPtrI84D 
+ module procedure ESMF_LocalArrCreateByMTPtrI25D 
+ module procedure ESMF_LocalArrCreateByMTPtrI45D 
+ module procedure ESMF_LocalArrCreateByMTPtrI85D 
+ module procedure ESMF_LocalArrCreateByMTPtrR41D 
+ module procedure ESMF_LocalArrCreateByMTPtrR81D 
+ module procedure ESMF_LocalArrCreateByMTPtrR42D 
+ module procedure ESMF_LocalArrCreateByMTPtrR82D 
+ module procedure ESMF_LocalArrCreateByMTPtrR43D 
+ module procedure ESMF_LocalArrCreateByMTPtrR83D 
+ module procedure ESMF_LocalArrCreateByMTPtrR44D 
+ module procedure ESMF_LocalArrCreateByMTPtrR84D 
+ module procedure ESMF_LocalArrCreateByMTPtrR45D 
+ module procedure ESMF_LocalArrCreateByMTPtrR85D 
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
        ! < interfaces for each T/K/R >
 !------------------------------------------------------------------------------ 
 ! <This section created by macro - do not edit directly> 
- module procedure ESMF_LocalArrayCreateByFlPtrI21D 
- module procedure ESMF_LocalArrayCreateByFlPtrI41D 
- module procedure ESMF_LocalArrayCreateByFlPtrI81D 
- module procedure ESMF_LocalArrayCreateByFlPtrI22D 
- module procedure ESMF_LocalArrayCreateByFlPtrI42D 
- module procedure ESMF_LocalArrayCreateByFlPtrI82D 
- module procedure ESMF_LocalArrayCreateByFlPtrI23D 
- module procedure ESMF_LocalArrayCreateByFlPtrI43D 
- module procedure ESMF_LocalArrayCreateByFlPtrI83D 
- module procedure ESMF_LocalArrayCreateByFlPtrI24D 
- module procedure ESMF_LocalArrayCreateByFlPtrI44D 
- module procedure ESMF_LocalArrayCreateByFlPtrI84D 
- module procedure ESMF_LocalArrayCreateByFlPtrI25D 
- module procedure ESMF_LocalArrayCreateByFlPtrI45D 
- module procedure ESMF_LocalArrayCreateByFlPtrI85D 
- module procedure ESMF_LocalArrayCreateByFlPtrR41D 
- module procedure ESMF_LocalArrayCreateByFlPtrR81D 
- module procedure ESMF_LocalArrayCreateByFlPtrR42D 
- module procedure ESMF_LocalArrayCreateByFlPtrR82D 
- module procedure ESMF_LocalArrayCreateByFlPtrR43D 
- module procedure ESMF_LocalArrayCreateByFlPtrR83D 
- module procedure ESMF_LocalArrayCreateByFlPtrR44D 
- module procedure ESMF_LocalArrayCreateByFlPtrR84D 
- module procedure ESMF_LocalArrayCreateByFlPtrR45D 
- module procedure ESMF_LocalArrayCreateByFlPtrR85D 
+ module procedure ESMF_LocalArrCreateByFlPtrI21D 
+ module procedure ESMF_LocalArrCreateByFlPtrI41D 
+ module procedure ESMF_LocalArrCreateByFlPtrI81D 
+ module procedure ESMF_LocalArrCreateByFlPtrI22D 
+ module procedure ESMF_LocalArrCreateByFlPtrI42D 
+ module procedure ESMF_LocalArrCreateByFlPtrI82D 
+ module procedure ESMF_LocalArrCreateByFlPtrI23D 
+ module procedure ESMF_LocalArrCreateByFlPtrI43D 
+ module procedure ESMF_LocalArrCreateByFlPtrI83D 
+ module procedure ESMF_LocalArrCreateByFlPtrI24D 
+ module procedure ESMF_LocalArrCreateByFlPtrI44D 
+ module procedure ESMF_LocalArrCreateByFlPtrI84D 
+ module procedure ESMF_LocalArrCreateByFlPtrI25D 
+ module procedure ESMF_LocalArrCreateByFlPtrI45D 
+ module procedure ESMF_LocalArrCreateByFlPtrI85D 
+ module procedure ESMF_LocalArrCreateByFlPtrR41D 
+ module procedure ESMF_LocalArrCreateByFlPtrR81D 
+ module procedure ESMF_LocalArrCreateByFlPtrR42D 
+ module procedure ESMF_LocalArrCreateByFlPtrR82D 
+ module procedure ESMF_LocalArrCreateByFlPtrR43D 
+ module procedure ESMF_LocalArrCreateByFlPtrR83D 
+ module procedure ESMF_LocalArrCreateByFlPtrR44D 
+ module procedure ESMF_LocalArrCreateByFlPtrR84D 
+ module procedure ESMF_LocalArrCreateByFlPtrR45D 
+ module procedure ESMF_LocalArrCreateByFlPtrR85D 
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
@@ -750,13 +749,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrI21D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrI21D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrI21D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI21D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrI21D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI21D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:), target :: f90arr 
@@ -825,10 +824,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrI21D = array 
+ ESMF_LocalArrCreateByMTArrI21D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrI21D 
+ end function ESMF_LocalArrCreateByMTArrI21D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -836,13 +835,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrI41D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrI41D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrI41D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI41D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrI41D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI41D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:), target :: f90arr 
@@ -911,10 +910,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrI41D = array 
+ ESMF_LocalArrCreateByMTArrI41D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrI41D 
+ end function ESMF_LocalArrCreateByMTArrI41D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -922,13 +921,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrI81D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrI81D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrI81D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI81D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrI81D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI81D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:), target :: f90arr 
@@ -997,10 +996,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrI81D = array 
+ ESMF_LocalArrCreateByMTArrI81D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrI81D 
+ end function ESMF_LocalArrCreateByMTArrI81D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1008,13 +1007,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrI22D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrI22D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrI22D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI22D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrI22D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI22D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:), target :: f90arr 
@@ -1083,10 +1082,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrI22D = array 
+ ESMF_LocalArrCreateByMTArrI22D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrI22D 
+ end function ESMF_LocalArrCreateByMTArrI22D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1094,13 +1093,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrI42D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrI42D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrI42D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI42D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrI42D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI42D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:), target :: f90arr 
@@ -1169,10 +1168,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrI42D = array 
+ ESMF_LocalArrCreateByMTArrI42D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrI42D 
+ end function ESMF_LocalArrCreateByMTArrI42D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1180,13 +1179,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrI82D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrI82D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrI82D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI82D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrI82D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI82D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:), target :: f90arr 
@@ -1255,10 +1254,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrI82D = array 
+ ESMF_LocalArrCreateByMTArrI82D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrI82D 
+ end function ESMF_LocalArrCreateByMTArrI82D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1266,13 +1265,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrI23D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrI23D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrI23D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI23D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrI23D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI23D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:), target :: f90arr 
@@ -1341,10 +1340,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrI23D = array 
+ ESMF_LocalArrCreateByMTArrI23D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrI23D 
+ end function ESMF_LocalArrCreateByMTArrI23D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1352,13 +1351,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrI43D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrI43D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrI43D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI43D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrI43D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI43D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:), target :: f90arr 
@@ -1427,10 +1426,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrI43D = array 
+ ESMF_LocalArrCreateByMTArrI43D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrI43D 
+ end function ESMF_LocalArrCreateByMTArrI43D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1438,13 +1437,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrI83D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrI83D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrI83D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI83D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrI83D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI83D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:), target :: f90arr 
@@ -1513,10 +1512,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrI83D = array 
+ ESMF_LocalArrCreateByMTArrI83D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrI83D 
+ end function ESMF_LocalArrCreateByMTArrI83D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1524,13 +1523,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrI24D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrI24D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrI24D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI24D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrI24D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI24D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:,:), target :: f90arr 
@@ -1599,10 +1598,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrI24D = array 
+ ESMF_LocalArrCreateByMTArrI24D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrI24D 
+ end function ESMF_LocalArrCreateByMTArrI24D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1610,13 +1609,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrI44D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrI44D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrI44D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI44D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrI44D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI44D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:,:), target :: f90arr 
@@ -1685,10 +1684,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrI44D = array 
+ ESMF_LocalArrCreateByMTArrI44D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrI44D 
+ end function ESMF_LocalArrCreateByMTArrI44D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1696,13 +1695,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrI84D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrI84D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrI84D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI84D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrI84D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI84D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:,:), target :: f90arr 
@@ -1771,10 +1770,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrI84D = array 
+ ESMF_LocalArrCreateByMTArrI84D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrI84D 
+ end function ESMF_LocalArrCreateByMTArrI84D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1782,13 +1781,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrI25D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrI25D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrI25D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI25D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrI25D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI25D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:,:,:), target :: f90arr 
@@ -1857,10 +1856,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrI25D = array 
+ ESMF_LocalArrCreateByMTArrI25D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrI25D 
+ end function ESMF_LocalArrCreateByMTArrI25D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1868,13 +1867,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrI45D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrI45D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrI45D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI45D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrI45D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI45D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:,:,:), target :: f90arr 
@@ -1943,10 +1942,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrI45D = array 
+ ESMF_LocalArrCreateByMTArrI45D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrI45D 
+ end function ESMF_LocalArrCreateByMTArrI45D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1954,13 +1953,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrI85D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrI85D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrI85D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrI85D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrI85D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrI85D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:,:,:), target :: f90arr 
@@ -2029,10 +2028,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrI85D = array 
+ ESMF_LocalArrCreateByMTArrI85D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrI85D 
+ end function ESMF_LocalArrCreateByMTArrI85D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -2040,13 +2039,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrR41D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrR41D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrR41D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR41D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrR41D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR41D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:), target :: f90arr 
@@ -2115,10 +2114,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrR41D = array 
+ ESMF_LocalArrCreateByMTArrR41D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrR41D 
+ end function ESMF_LocalArrCreateByMTArrR41D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -2126,13 +2125,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrR81D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrR81D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrR81D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR81D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrR81D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR81D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:), target :: f90arr 
@@ -2201,10 +2200,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrR81D = array 
+ ESMF_LocalArrCreateByMTArrR81D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrR81D 
+ end function ESMF_LocalArrCreateByMTArrR81D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -2212,13 +2211,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrR42D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrR42D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrR42D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR42D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrR42D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR42D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:), target :: f90arr 
@@ -2287,10 +2286,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrR42D = array 
+ ESMF_LocalArrCreateByMTArrR42D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrR42D 
+ end function ESMF_LocalArrCreateByMTArrR42D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -2298,13 +2297,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrR82D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrR82D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrR82D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR82D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrR82D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR82D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:), target :: f90arr 
@@ -2373,10 +2372,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrR82D = array 
+ ESMF_LocalArrCreateByMTArrR82D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrR82D 
+ end function ESMF_LocalArrCreateByMTArrR82D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -2384,13 +2383,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrR43D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrR43D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrR43D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR43D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrR43D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR43D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:), target :: f90arr 
@@ -2459,10 +2458,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrR43D = array 
+ ESMF_LocalArrCreateByMTArrR43D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrR43D 
+ end function ESMF_LocalArrCreateByMTArrR43D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -2470,13 +2469,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrR83D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrR83D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrR83D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR83D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrR83D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR83D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:), target :: f90arr 
@@ -2545,10 +2544,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrR83D = array 
+ ESMF_LocalArrCreateByMTArrR83D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrR83D 
+ end function ESMF_LocalArrCreateByMTArrR83D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -2556,13 +2555,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrR44D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrR44D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrR44D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR44D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrR44D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR44D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:,:), target :: f90arr 
@@ -2631,10 +2630,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrR44D = array 
+ ESMF_LocalArrCreateByMTArrR44D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrR44D 
+ end function ESMF_LocalArrCreateByMTArrR44D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -2642,13 +2641,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrR84D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrR84D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrR84D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR84D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrR84D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR84D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:,:), target :: f90arr 
@@ -2717,10 +2716,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrR84D = array 
+ ESMF_LocalArrCreateByMTArrR84D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrR84D 
+ end function ESMF_LocalArrCreateByMTArrR84D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -2728,13 +2727,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrR45D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrR45D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrR45D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR45D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrR45D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR45D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:,:,:), target :: f90arr 
@@ -2803,10 +2802,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrR45D = array 
+ ESMF_LocalArrCreateByMTArrR45D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrR45D 
+ end function ESMF_LocalArrCreateByMTArrR45D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -2814,13 +2813,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTArrR85D - make an ESMF array from an unallocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByMTArrR85D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTArrR85D(f90arr, counts, rc) 
+ function ESMF_LocalArrCreateByMTArrR85D(f90arr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTArrR85D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArrR85D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:,:,:), target :: f90arr 
@@ -2889,10 +2888,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTArrR85D = array 
+ ESMF_LocalArrCreateByMTArrR85D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTArrR85D 
+ end function ESMF_LocalArrCreateByMTArrR85D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -2903,13 +2902,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrI21D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrI21D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrI21D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrI21D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrI21D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrI21D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:), target :: f90arr 
@@ -2996,10 +2995,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrI21D = array 
+ ESMF_LocalArrCreateByFlArrI21D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrI21D 
+ end function ESMF_LocalArrCreateByFlArrI21D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -3007,13 +3006,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrI41D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrI41D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrI41D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrI41D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrI41D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrI41D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:), target :: f90arr 
@@ -3100,10 +3099,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrI41D = array 
+ ESMF_LocalArrCreateByFlArrI41D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrI41D 
+ end function ESMF_LocalArrCreateByFlArrI41D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -3111,13 +3110,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrI81D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrI81D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrI81D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrI81D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrI81D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrI81D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:), target :: f90arr 
@@ -3204,10 +3203,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrI81D = array 
+ ESMF_LocalArrCreateByFlArrI81D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrI81D 
+ end function ESMF_LocalArrCreateByFlArrI81D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -3215,13 +3214,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrI22D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrI22D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrI22D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrI22D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrI22D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrI22D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:), target :: f90arr 
@@ -3308,10 +3307,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrI22D = array 
+ ESMF_LocalArrCreateByFlArrI22D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrI22D 
+ end function ESMF_LocalArrCreateByFlArrI22D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -3319,13 +3318,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrI42D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrI42D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrI42D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrI42D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrI42D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrI42D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:), target :: f90arr 
@@ -3412,10 +3411,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrI42D = array 
+ ESMF_LocalArrCreateByFlArrI42D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrI42D 
+ end function ESMF_LocalArrCreateByFlArrI42D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -3423,13 +3422,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrI82D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrI82D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrI82D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrI82D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrI82D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrI82D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:), target :: f90arr 
@@ -3516,10 +3515,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrI82D = array 
+ ESMF_LocalArrCreateByFlArrI82D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrI82D 
+ end function ESMF_LocalArrCreateByFlArrI82D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -3527,13 +3526,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrI23D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrI23D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrI23D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrI23D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrI23D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrI23D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:), target :: f90arr 
@@ -3620,10 +3619,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrI23D = array 
+ ESMF_LocalArrCreateByFlArrI23D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrI23D 
+ end function ESMF_LocalArrCreateByFlArrI23D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -3631,13 +3630,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrI43D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrI43D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrI43D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrI43D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrI43D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrI43D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:), target :: f90arr 
@@ -3724,10 +3723,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrI43D = array 
+ ESMF_LocalArrCreateByFlArrI43D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrI43D 
+ end function ESMF_LocalArrCreateByFlArrI43D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -3735,13 +3734,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrI83D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrI83D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrI83D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrI83D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrI83D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrI83D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:), target :: f90arr 
@@ -3828,10 +3827,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrI83D = array 
+ ESMF_LocalArrCreateByFlArrI83D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrI83D 
+ end function ESMF_LocalArrCreateByFlArrI83D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -3839,13 +3838,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrI24D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrI24D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrI24D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrI24D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrI24D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrI24D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:,:), target :: f90arr 
@@ -3932,10 +3931,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrI24D = array 
+ ESMF_LocalArrCreateByFlArrI24D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrI24D 
+ end function ESMF_LocalArrCreateByFlArrI24D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -3943,13 +3942,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrI44D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrI44D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrI44D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrI44D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrI44D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrI44D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:,:), target :: f90arr 
@@ -4036,10 +4035,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrI44D = array 
+ ESMF_LocalArrCreateByFlArrI44D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrI44D 
+ end function ESMF_LocalArrCreateByFlArrI44D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -4047,13 +4046,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrI84D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrI84D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrI84D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrI84D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrI84D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrI84D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:,:), target :: f90arr 
@@ -4140,10 +4139,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrI84D = array 
+ ESMF_LocalArrCreateByFlArrI84D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrI84D 
+ end function ESMF_LocalArrCreateByFlArrI84D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -4151,13 +4150,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrI25D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrI25D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrI25D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrI25D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrI25D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrI25D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:,:,:), target :: f90arr 
@@ -4244,10 +4243,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrI25D = array 
+ ESMF_LocalArrCreateByFlArrI25D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrI25D 
+ end function ESMF_LocalArrCreateByFlArrI25D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -4255,13 +4254,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrI45D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrI45D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrI45D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrI45D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrI45D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrI45D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:,:,:), target :: f90arr 
@@ -4348,10 +4347,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrI45D = array 
+ ESMF_LocalArrCreateByFlArrI45D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrI45D 
+ end function ESMF_LocalArrCreateByFlArrI45D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -4359,13 +4358,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrI85D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrI85D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrI85D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrI85D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrI85D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrI85D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:,:,:), target :: f90arr 
@@ -4452,10 +4451,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrI85D = array 
+ ESMF_LocalArrCreateByFlArrI85D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrI85D 
+ end function ESMF_LocalArrCreateByFlArrI85D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -4463,13 +4462,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrR41D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrR41D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrR41D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrR41D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrR41D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrR41D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:), target :: f90arr 
@@ -4556,10 +4555,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrR41D = array 
+ ESMF_LocalArrCreateByFlArrR41D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrR41D 
+ end function ESMF_LocalArrCreateByFlArrR41D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -4567,13 +4566,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrR81D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrR81D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrR81D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrR81D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrR81D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrR81D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:), target :: f90arr 
@@ -4660,10 +4659,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrR81D = array 
+ ESMF_LocalArrCreateByFlArrR81D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrR81D 
+ end function ESMF_LocalArrCreateByFlArrR81D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -4671,13 +4670,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrR42D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrR42D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrR42D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrR42D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrR42D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrR42D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:), target :: f90arr 
@@ -4764,10 +4763,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrR42D = array 
+ ESMF_LocalArrCreateByFlArrR42D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrR42D 
+ end function ESMF_LocalArrCreateByFlArrR42D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -4775,13 +4774,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrR82D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrR82D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrR82D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrR82D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrR82D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrR82D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:), target :: f90arr 
@@ -4868,10 +4867,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrR82D = array 
+ ESMF_LocalArrCreateByFlArrR82D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrR82D 
+ end function ESMF_LocalArrCreateByFlArrR82D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -4879,13 +4878,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrR43D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrR43D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrR43D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrR43D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrR43D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrR43D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:), target :: f90arr 
@@ -4972,10 +4971,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrR43D = array 
+ ESMF_LocalArrCreateByFlArrR43D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrR43D 
+ end function ESMF_LocalArrCreateByFlArrR43D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -4983,13 +4982,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrR83D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrR83D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrR83D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrR83D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrR83D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrR83D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:), target :: f90arr 
@@ -5076,10 +5075,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrR83D = array 
+ ESMF_LocalArrCreateByFlArrR83D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrR83D 
+ end function ESMF_LocalArrCreateByFlArrR83D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -5087,13 +5086,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrR44D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrR44D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrR44D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrR44D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrR44D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrR44D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:,:), target :: f90arr 
@@ -5180,10 +5179,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrR44D = array 
+ ESMF_LocalArrCreateByFlArrR44D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrR44D 
+ end function ESMF_LocalArrCreateByFlArrR44D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -5191,13 +5190,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrR84D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrR84D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrR84D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrR84D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrR84D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrR84D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:,:), target :: f90arr 
@@ -5284,10 +5283,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrR84D = array 
+ ESMF_LocalArrCreateByFlArrR84D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrR84D 
+ end function ESMF_LocalArrCreateByFlArrR84D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -5295,13 +5294,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrR45D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrR45D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrR45D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrR45D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrR45D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrR45D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:,:,:), target :: f90arr 
@@ -5388,10 +5387,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrR45D = array 
+ ESMF_LocalArrCreateByFlArrR45D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrR45D 
+ end function ESMF_LocalArrCreateByFlArrR45D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -5399,13 +5398,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlArrR85D - make an ESMF array from an Allocated F90 array 
+! !IROUTINE: ESMF_LocalArrCreateByFlArrR85D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlArrR85D(f90arr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlArrR85D(f90arr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlArrR85D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArrR85D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:,:,:), target :: f90arr 
@@ -5492,10 +5491,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlArrR85D = array 
+ ESMF_LocalArrCreateByFlArrR85D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlArrR85D 
+ end function ESMF_LocalArrCreateByFlArrR85D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -5506,13 +5505,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrI21D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrI21D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrI21D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI21D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrI21D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI21D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:), pointer :: f90ptr 
@@ -5577,10 +5576,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrI21D = array 
+ ESMF_LocalArrCreateByMTPtrI21D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrI21D 
+ end function ESMF_LocalArrCreateByMTPtrI21D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -5588,13 +5587,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrI41D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrI41D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrI41D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI41D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrI41D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI41D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:), pointer :: f90ptr 
@@ -5659,10 +5658,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrI41D = array 
+ ESMF_LocalArrCreateByMTPtrI41D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrI41D 
+ end function ESMF_LocalArrCreateByMTPtrI41D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -5670,13 +5669,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrI81D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrI81D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrI81D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI81D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrI81D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI81D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:), pointer :: f90ptr 
@@ -5741,10 +5740,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrI81D = array 
+ ESMF_LocalArrCreateByMTPtrI81D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrI81D 
+ end function ESMF_LocalArrCreateByMTPtrI81D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -5752,13 +5751,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrI22D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrI22D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrI22D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI22D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrI22D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI22D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:), pointer :: f90ptr 
@@ -5823,10 +5822,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrI22D = array 
+ ESMF_LocalArrCreateByMTPtrI22D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrI22D 
+ end function ESMF_LocalArrCreateByMTPtrI22D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -5834,13 +5833,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrI42D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrI42D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrI42D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI42D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrI42D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI42D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:), pointer :: f90ptr 
@@ -5905,10 +5904,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrI42D = array 
+ ESMF_LocalArrCreateByMTPtrI42D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrI42D 
+ end function ESMF_LocalArrCreateByMTPtrI42D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -5916,13 +5915,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrI82D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrI82D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrI82D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI82D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrI82D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI82D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:), pointer :: f90ptr 
@@ -5987,10 +5986,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrI82D = array 
+ ESMF_LocalArrCreateByMTPtrI82D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrI82D 
+ end function ESMF_LocalArrCreateByMTPtrI82D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -5998,13 +5997,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrI23D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrI23D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrI23D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI23D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrI23D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI23D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:), pointer :: f90ptr 
@@ -6069,10 +6068,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrI23D = array 
+ ESMF_LocalArrCreateByMTPtrI23D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrI23D 
+ end function ESMF_LocalArrCreateByMTPtrI23D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -6080,13 +6079,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrI43D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrI43D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrI43D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI43D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrI43D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI43D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:), pointer :: f90ptr 
@@ -6151,10 +6150,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrI43D = array 
+ ESMF_LocalArrCreateByMTPtrI43D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrI43D 
+ end function ESMF_LocalArrCreateByMTPtrI43D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -6162,13 +6161,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrI83D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrI83D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrI83D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI83D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrI83D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI83D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:), pointer :: f90ptr 
@@ -6233,10 +6232,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrI83D = array 
+ ESMF_LocalArrCreateByMTPtrI83D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrI83D 
+ end function ESMF_LocalArrCreateByMTPtrI83D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -6244,13 +6243,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrI24D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrI24D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrI24D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI24D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrI24D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI24D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:,:), pointer :: f90ptr 
@@ -6315,10 +6314,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrI24D = array 
+ ESMF_LocalArrCreateByMTPtrI24D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrI24D 
+ end function ESMF_LocalArrCreateByMTPtrI24D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -6326,13 +6325,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrI44D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrI44D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrI44D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI44D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrI44D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI44D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:,:), pointer :: f90ptr 
@@ -6397,10 +6396,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrI44D = array 
+ ESMF_LocalArrCreateByMTPtrI44D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrI44D 
+ end function ESMF_LocalArrCreateByMTPtrI44D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -6408,13 +6407,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrI84D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrI84D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrI84D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI84D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrI84D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI84D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:,:), pointer :: f90ptr 
@@ -6479,10 +6478,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrI84D = array 
+ ESMF_LocalArrCreateByMTPtrI84D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrI84D 
+ end function ESMF_LocalArrCreateByMTPtrI84D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -6490,13 +6489,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrI25D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrI25D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrI25D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI25D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrI25D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI25D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:,:,:), pointer :: f90ptr 
@@ -6561,10 +6560,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrI25D = array 
+ ESMF_LocalArrCreateByMTPtrI25D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrI25D 
+ end function ESMF_LocalArrCreateByMTPtrI25D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -6572,13 +6571,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrI45D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrI45D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrI45D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI45D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrI45D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI45D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:,:,:), pointer :: f90ptr 
@@ -6643,10 +6642,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrI45D = array 
+ ESMF_LocalArrCreateByMTPtrI45D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrI45D 
+ end function ESMF_LocalArrCreateByMTPtrI45D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -6654,13 +6653,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrI85D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrI85D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrI85D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrI85D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrI85D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrI85D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:,:,:), pointer :: f90ptr 
@@ -6725,10 +6724,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrI85D = array 
+ ESMF_LocalArrCreateByMTPtrI85D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrI85D 
+ end function ESMF_LocalArrCreateByMTPtrI85D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -6736,13 +6735,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrR41D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrR41D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrR41D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR41D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrR41D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR41D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:), pointer :: f90ptr 
@@ -6807,10 +6806,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrR41D = array 
+ ESMF_LocalArrCreateByMTPtrR41D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrR41D 
+ end function ESMF_LocalArrCreateByMTPtrR41D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -6818,13 +6817,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrR81D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrR81D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrR81D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR81D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrR81D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR81D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:), pointer :: f90ptr 
@@ -6889,10 +6888,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrR81D = array 
+ ESMF_LocalArrCreateByMTPtrR81D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrR81D 
+ end function ESMF_LocalArrCreateByMTPtrR81D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -6900,13 +6899,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrR42D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrR42D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrR42D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR42D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrR42D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR42D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:), pointer :: f90ptr 
@@ -6971,10 +6970,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrR42D = array 
+ ESMF_LocalArrCreateByMTPtrR42D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrR42D 
+ end function ESMF_LocalArrCreateByMTPtrR42D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -6982,13 +6981,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrR82D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrR82D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrR82D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR82D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrR82D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR82D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:), pointer :: f90ptr 
@@ -7053,10 +7052,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrR82D = array 
+ ESMF_LocalArrCreateByMTPtrR82D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrR82D 
+ end function ESMF_LocalArrCreateByMTPtrR82D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -7064,13 +7063,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrR43D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrR43D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrR43D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR43D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrR43D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR43D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:), pointer :: f90ptr 
@@ -7135,10 +7134,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrR43D = array 
+ ESMF_LocalArrCreateByMTPtrR43D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrR43D 
+ end function ESMF_LocalArrCreateByMTPtrR43D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -7146,13 +7145,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrR83D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrR83D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrR83D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR83D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrR83D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR83D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:), pointer :: f90ptr 
@@ -7217,10 +7216,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrR83D = array 
+ ESMF_LocalArrCreateByMTPtrR83D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrR83D 
+ end function ESMF_LocalArrCreateByMTPtrR83D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -7228,13 +7227,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrR44D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrR44D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrR44D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR44D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrR44D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR44D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:,:), pointer :: f90ptr 
@@ -7299,10 +7298,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrR44D = array 
+ ESMF_LocalArrCreateByMTPtrR44D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrR44D 
+ end function ESMF_LocalArrCreateByMTPtrR44D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -7310,13 +7309,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrR84D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrR84D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrR84D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR84D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrR84D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR84D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:,:), pointer :: f90ptr 
@@ -7381,10 +7380,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrR84D = array 
+ ESMF_LocalArrCreateByMTPtrR84D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrR84D 
+ end function ESMF_LocalArrCreateByMTPtrR84D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -7392,13 +7391,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrR45D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrR45D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrR45D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR45D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrR45D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR45D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:,:,:), pointer :: f90ptr 
@@ -7463,10 +7462,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrR45D = array 
+ ESMF_LocalArrCreateByMTPtrR45D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrR45D 
+ end function ESMF_LocalArrCreateByMTPtrR45D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -7474,13 +7473,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByMTPtrR85D - make an ESMF array from an unallocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByMTPtrR85D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByMTPtrR85D(f90ptr, counts, rc) 
+ function ESMF_LocalArrCreateByMTPtrR85D(f90ptr, counts, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByMTPtrR85D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtrR85D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:,:,:), pointer :: f90ptr 
@@ -7545,10 +7544,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByMTPtrR85D = array 
+ ESMF_LocalArrCreateByMTPtrR85D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByMTPtrR85D 
+ end function ESMF_LocalArrCreateByMTPtrR85D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -7559,13 +7558,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrI21D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrI21D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrI21D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrI21D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrI21D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrI21D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:), pointer :: f90ptr 
@@ -7648,10 +7647,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrI21D = array 
+ ESMF_LocalArrCreateByFlPtrI21D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrI21D 
+ end function ESMF_LocalArrCreateByFlPtrI21D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -7659,13 +7658,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrI41D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrI41D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrI41D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrI41D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrI41D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrI41D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:), pointer :: f90ptr 
@@ -7748,10 +7747,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrI41D = array 
+ ESMF_LocalArrCreateByFlPtrI41D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrI41D 
+ end function ESMF_LocalArrCreateByFlPtrI41D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -7759,13 +7758,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrI81D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrI81D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrI81D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrI81D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrI81D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrI81D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:), pointer :: f90ptr 
@@ -7848,10 +7847,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrI81D = array 
+ ESMF_LocalArrCreateByFlPtrI81D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrI81D 
+ end function ESMF_LocalArrCreateByFlPtrI81D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -7859,13 +7858,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrI22D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrI22D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrI22D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrI22D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrI22D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrI22D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:), pointer :: f90ptr 
@@ -7948,10 +7947,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrI22D = array 
+ ESMF_LocalArrCreateByFlPtrI22D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrI22D 
+ end function ESMF_LocalArrCreateByFlPtrI22D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -7959,13 +7958,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrI42D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrI42D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrI42D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrI42D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrI42D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrI42D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:), pointer :: f90ptr 
@@ -8048,10 +8047,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrI42D = array 
+ ESMF_LocalArrCreateByFlPtrI42D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrI42D 
+ end function ESMF_LocalArrCreateByFlPtrI42D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -8059,13 +8058,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrI82D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrI82D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrI82D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrI82D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrI82D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrI82D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:), pointer :: f90ptr 
@@ -8148,10 +8147,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrI82D = array 
+ ESMF_LocalArrCreateByFlPtrI82D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrI82D 
+ end function ESMF_LocalArrCreateByFlPtrI82D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -8159,13 +8158,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrI23D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrI23D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrI23D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrI23D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrI23D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrI23D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:), pointer :: f90ptr 
@@ -8248,10 +8247,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrI23D = array 
+ ESMF_LocalArrCreateByFlPtrI23D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrI23D 
+ end function ESMF_LocalArrCreateByFlPtrI23D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -8259,13 +8258,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrI43D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrI43D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrI43D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrI43D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrI43D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrI43D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:), pointer :: f90ptr 
@@ -8348,10 +8347,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrI43D = array 
+ ESMF_LocalArrCreateByFlPtrI43D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrI43D 
+ end function ESMF_LocalArrCreateByFlPtrI43D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -8359,13 +8358,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrI83D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrI83D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrI83D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrI83D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrI83D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrI83D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:), pointer :: f90ptr 
@@ -8448,10 +8447,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrI83D = array 
+ ESMF_LocalArrCreateByFlPtrI83D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrI83D 
+ end function ESMF_LocalArrCreateByFlPtrI83D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -8459,13 +8458,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrI24D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrI24D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrI24D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrI24D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrI24D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrI24D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:,:), pointer :: f90ptr 
@@ -8548,10 +8547,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrI24D = array 
+ ESMF_LocalArrCreateByFlPtrI24D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrI24D 
+ end function ESMF_LocalArrCreateByFlPtrI24D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -8559,13 +8558,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrI44D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrI44D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrI44D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrI44D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrI44D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrI44D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:,:), pointer :: f90ptr 
@@ -8648,10 +8647,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrI44D = array 
+ ESMF_LocalArrCreateByFlPtrI44D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrI44D 
+ end function ESMF_LocalArrCreateByFlPtrI44D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -8659,13 +8658,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrI84D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrI84D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrI84D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrI84D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrI84D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrI84D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:,:), pointer :: f90ptr 
@@ -8748,10 +8747,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrI84D = array 
+ ESMF_LocalArrCreateByFlPtrI84D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrI84D 
+ end function ESMF_LocalArrCreateByFlPtrI84D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -8759,13 +8758,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrI25D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrI25D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrI25D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrI25D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrI25D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrI25D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:,:,:), pointer :: f90ptr 
@@ -8848,10 +8847,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrI25D = array 
+ ESMF_LocalArrCreateByFlPtrI25D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrI25D 
+ end function ESMF_LocalArrCreateByFlPtrI25D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -8859,13 +8858,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrI45D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrI45D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrI45D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrI45D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrI45D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrI45D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:,:,:), pointer :: f90ptr 
@@ -8948,10 +8947,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrI45D = array 
+ ESMF_LocalArrCreateByFlPtrI45D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrI45D 
+ end function ESMF_LocalArrCreateByFlPtrI45D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -8959,13 +8958,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrI85D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrI85D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrI85D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrI85D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrI85D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrI85D 
 ! 
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:,:,:), pointer :: f90ptr 
@@ -9048,10 +9047,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrI85D = array 
+ ESMF_LocalArrCreateByFlPtrI85D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrI85D 
+ end function ESMF_LocalArrCreateByFlPtrI85D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -9059,13 +9058,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrR41D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrR41D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrR41D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrR41D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrR41D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrR41D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:), pointer :: f90ptr 
@@ -9148,10 +9147,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrR41D = array 
+ ESMF_LocalArrCreateByFlPtrR41D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrR41D 
+ end function ESMF_LocalArrCreateByFlPtrR41D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -9159,13 +9158,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrR81D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrR81D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrR81D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrR81D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrR81D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrR81D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:), pointer :: f90ptr 
@@ -9248,10 +9247,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrR81D = array 
+ ESMF_LocalArrCreateByFlPtrR81D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrR81D 
+ end function ESMF_LocalArrCreateByFlPtrR81D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -9259,13 +9258,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrR42D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrR42D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrR42D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrR42D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrR42D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrR42D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:), pointer :: f90ptr 
@@ -9348,10 +9347,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrR42D = array 
+ ESMF_LocalArrCreateByFlPtrR42D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrR42D 
+ end function ESMF_LocalArrCreateByFlPtrR42D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -9359,13 +9358,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrR82D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrR82D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrR82D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrR82D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrR82D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrR82D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:), pointer :: f90ptr 
@@ -9448,10 +9447,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrR82D = array 
+ ESMF_LocalArrCreateByFlPtrR82D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrR82D 
+ end function ESMF_LocalArrCreateByFlPtrR82D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -9459,13 +9458,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrR43D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrR43D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrR43D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrR43D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrR43D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrR43D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:), pointer :: f90ptr 
@@ -9548,10 +9547,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrR43D = array 
+ ESMF_LocalArrCreateByFlPtrR43D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrR43D 
+ end function ESMF_LocalArrCreateByFlPtrR43D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -9559,13 +9558,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrR83D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrR83D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrR83D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrR83D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrR83D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrR83D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:), pointer :: f90ptr 
@@ -9648,10 +9647,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrR83D = array 
+ ESMF_LocalArrCreateByFlPtrR83D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrR83D 
+ end function ESMF_LocalArrCreateByFlPtrR83D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -9659,13 +9658,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrR44D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrR44D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrR44D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrR44D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrR44D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrR44D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:,:), pointer :: f90ptr 
@@ -9748,10 +9747,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrR44D = array 
+ ESMF_LocalArrCreateByFlPtrR44D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrR44D 
+ end function ESMF_LocalArrCreateByFlPtrR44D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -9759,13 +9758,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrR84D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrR84D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrR84D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrR84D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrR84D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrR84D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:,:), pointer :: f90ptr 
@@ -9848,10 +9847,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrR84D = array 
+ ESMF_LocalArrCreateByFlPtrR84D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrR84D 
+ end function ESMF_LocalArrCreateByFlPtrR84D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -9859,13 +9858,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrR45D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrR45D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrR45D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrR45D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrR45D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrR45D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:,:,:), pointer :: f90ptr 
@@ -9948,10 +9947,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrR45D = array 
+ ESMF_LocalArrCreateByFlPtrR45D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrR45D 
+ end function ESMF_LocalArrCreateByFlPtrR45D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -9959,13 +9958,13 @@ end function
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_LocalArrayCreateByFlPtrR85D - make an ESMF array from an Allocated F90 pointer 
+! !IROUTINE: ESMF_LocalArrCreateByFlPtrR85D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_LocalArrayCreateByFlPtrR85D(f90ptr, docopy, rc) 
+ function ESMF_LocalArrCreateByFlPtrR85D(f90ptr, docopy, rc) 
 ! 
 ! !RETURN VALUE: 
- type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByFlPtrR85D 
+ type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtrR85D 
 ! 
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:,:,:), pointer :: f90ptr 
@@ -10048,10 +10047,10 @@ end function
  
  
 ! ! return value set by c_ESMC func above 
- ESMF_LocalArrayCreateByFlPtrR85D = array 
+ ESMF_LocalArrCreateByFlPtrR85D = array 
  if (rcpresent) rc = status 
  
- end function ESMF_LocalArrayCreateByFlPtrR85D 
+ end function ESMF_LocalArrCreateByFlPtrR85D 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 

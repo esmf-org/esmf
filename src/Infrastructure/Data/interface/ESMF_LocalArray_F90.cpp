@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.6 2003/07/17 20:02:47 nscollins Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.7 2003/07/17 20:45:36 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,6 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOMod
-      use ESMF_DELayoutMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -178,7 +177,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.6 2003/07/17 20:02:47 nscollins Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.7 2003/07/17 20:45:36 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -203,16 +202,16 @@ ArrayAllTypeMacro()
         
 
 !       ! < interfaces for each T/K/R >
-! --LocalArray--InterfaceMacro(LocalArrayCreateByMTArr)
+! --LocalArray--InterfaceMacro(LocalArrCreateByMTArr)
 !
 !       ! < interfaces for each T/K/R >
-! --LocalArray--InterfaceMacro(LocalArrayCreateByFullArr)
+! --LocalArray--InterfaceMacro(LocalArrCreateByFullArr)
 
        ! < interfaces for each T/K/R >
-LocalArrayInterfaceMacro(LocalArrayCreateByMTPtr)
+LocalArrayInterfaceMacro(LocalArrCreateByMTPtr)
 
        ! < interfaces for each T/K/R >
-LocalArrayInterfaceMacro(LocalArrayCreateByFlPtr)
+LocalArrayInterfaceMacro(LocalArrCreateByFlPtr)
 
 
 !BOP
