@@ -1,4 +1,4 @@
-% $Id: AppDriver_desc.tex,v 1.12 2004/06/15 23:23:54 cdeluca Exp $
+% $Id: AppDriver_desc.tex,v 1.13 2004/12/28 18:52:15 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,8 +45,9 @@ Components so that data deadlock does not occur.  This strategy
 has the advantage of allowing coupling to other Gridded Components 
 at any time during the computational process, including not 
 having to return to the calling level of code before making 
-data available.  ESMF does not fully support the concurrent mode
-of execution at this time.
+data available.  ESMF supports the concurrent mode of execution
+but does not support asynchronous data transfer from within an 
+executing Component at this time.
 
 \item[Pairwise vs. Hub and Spoke]
 
