@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.2 2005/02/28 16:31:56 nscollins Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.3 2005/03/02 20:10:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.2 2005/02/28 16:31:56 nscollins Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.3 2005/03/02 20:10:31 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -42,7 +42,7 @@
     !type(ESMF_Field) :: field1, field2
     type(ESMF_Bundle) :: bundle1, bundle2, qbundle
     type(ESMF_State) :: state1, state2, state3, state4, state5
-    logical :: IsNeeded
+    logical :: isNeeded
 
     ! individual test failure messages
     character(ESMF_MAXSTR) :: failMsg
@@ -226,8 +226,9 @@
       isNeeded =  ESMF_StateIsNeeded(state3, sname, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Querying if an item is needed"
-      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .or. (isNeeded .eq. .FALSE.)), &
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .or. (.not. isNeeded)), &
                       name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
       !EX_UTest      
       ! Creating a Bundle to add to a State
