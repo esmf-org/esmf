@@ -1,4 +1,4 @@
-! $Id: ArraysGlobalMod.F90,v 1.4 2003/04/24 16:43:17 nscollins Exp $
+! $Id: ArraysGlobalMod.F90,v 1.5 2003/06/20 15:24:23 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -34,8 +34,8 @@
     public :: field_sie, field_u, field_v, field_rho, field_rhoi, field_rhou, &
               field_rhov, field_p, field_q, field_flag
 
-    type(ESMF_Field) :: field_sie, field_u, field_v, field_rho, field_rhoi, &
-                        field_rhou, field_rhov, field_p, field_q, field_flag
+    type(ESMF_Field), save :: field_sie, field_u, field_v, field_rho, field_rhoi, &
+                              field_rhou, field_rhov, field_p, field_q, field_flag
 !
 ! scalars here
 !

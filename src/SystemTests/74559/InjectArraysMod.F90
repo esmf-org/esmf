@@ -1,4 +1,4 @@
-! $Id: InjectArraysMod.F90,v 1.1 2003/05/02 19:26:02 nscollins Exp $
+! $Id: InjectArraysMod.F90,v 1.2 2003/06/20 15:24:48 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -29,7 +29,8 @@
       public :: nbc
       public :: iobs_min, iobs_max, jobs_min, jobs_max
 
-      real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag
+      real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: sie, u, v, rho, rhoi, &
+                                                           rhou, rhov, p, q, flag
       integer, dimension(4) :: nbc
       integer, dimension(50) :: iobs_min, iobs_max, jobs_min, jobs_max
 !
@@ -38,8 +39,8 @@
       public :: field_sie, field_u, field_v, field_rho, field_rhoi, field_rhou, &
                 field_rhov, field_p, field_q, field_flag
 
-      type(ESMF_Field) :: field_sie, field_u, field_v, field_rho, field_rhoi, &
-                          field_rhou, field_rhov, field_p, field_q, field_flag
+      type(ESMF_Field), save :: field_sie, field_u, field_v, field_rho, field_rhoi, &
+                                field_rhou, field_rhov, field_p, field_q, field_flag
 !
 ! scalars here
 !
