@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.3 2004/10/28 22:21:22 nscollins Exp $
+# $Id: build_rules.mk,v 1.4 2005/02/15 15:45:43 nscollins Exp $
 # 
 # Unicos.default.default.mk
 #
@@ -68,22 +68,23 @@ LD		   = ftn
 #
 # C and Fortran compiler
 #
-C_CC		   = CC -h new_for_init -h ssp
-C_FC		   = ftn -h ssp
+C_CC		   = CC -h new_for_init -h ssp 
+C_FC		   = ftn -h ssp -dy
 C_CLINKER	   = cc -h ssp
-C_FLINKER	   = ftn -h ssp
+C_FLINKER	   = $(C_FC)
 #
 # C++ compiler
 #
-CXX_CC		   = CC -h new_for_init -h ssp
-CXX_FC		   = ftn -h ssp
-CXX_CLINKER	   = CC -h ssp
-CXX_FLINKER	   = CC -h ssp
-C_CXXF90LD         = CC -h ssp
-C_F90CXXLD         = CC -h ssp
+CXX_CC		   = CC -h new_for_init -h ssp 
+CXX_FC		   = $(C_FC)
+CXX_CLINKER	   = CC -h ssp 
+CXX_FLINKER	   = $(CXX_CLINKER)
+
+C_CXXF90LD         = $(CXX_CLINKER)
+C_F90CXXLD         = $(CXX_CLINKER)
 C_CXXF90LIBS       =
 C_F90CXXLIBS       =
-C_CXXSO		   = CC -h ssp
+C_CXXSO		   = $(CXX_CLINKER)
 
 
 AR		   = ar
@@ -95,32 +96,33 @@ OMAKE		   = ${MAKE}
 SHELL		   = /bin/sh
 SED		   = /bin/sed
 #
-# C and Fortran compiler 
+# C, C++, and Fortran compiler 
 #
 C_FC_MOD           = -em -J
 C_CLINKER_SLFLAG   =
 C_FLINKER_SLFLAG   =
-C_CCV		   = cc -V -h ssp
-C_FCV              = ftn -V -h ssp
+
+C_CCV		   = cc -V
+C_FCV              = ftn -V
+CXX_CCV		   = CC -V
 C_SYS_LIB	   =
+#
+F_FREECPP       = -f free -N 255 -F -M1549
+F_FIXCPP        = -f fixed -N 132 -F -M1549
+F_FREENOCPP     = -f free -N 255
+F_FIXNOCPP      = -f fixed -N 132
+#
+CXX_CLINKER_SLFLAG =
+CXX_FLINKER_SLFLAG =
+CXX_SYS_LIB	   =
+
+###############################################################################
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS	   = -g 
 G_FOPTFLAGS	   = -g 
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS	   =
 O_FOPTFLAGS	   =
-# ########################## Fortran compiler ##############################
-#
-F_FREECPP       = -f free -N 255 -F -M1549
-F_FIXCPP        = -f fixed -N 132 -F -M1549
-F_FREENOCPP     = -f free -N 255
-F_FIXNOCPP      = -f fixed -N 132
-# ########################## C++ compiler ##################################
-#
-CXX_CLINKER_SLFLAG =
-CXX_FLINKER_SLFLAG =
-CXX_CCV		   = CC -V
-CXX_SYS_LIB	   =
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g
 GCXX_FOPTFLAGS	   = -g
@@ -133,7 +135,7 @@ GCOMP_FOPTFLAGS	   = -g
 # --------------------------- BOPT - O_complex options -------------------------
 OCOMP_COPTFLAGS	   =
 OCOMP_FOPTFLAGS	   =
-##################################################################################
+###############################################################################
 
 PARCH		   = Unicos
 
