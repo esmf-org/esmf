@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2004/02/13 15:38:09 nscollins Exp $
+# $Id: makefile,v 1.21 2004/02/18 22:14:31 nscollins Exp $
 
 # Leave alone.
 ALL: build_here 
@@ -17,7 +17,7 @@ SOURCEF	  =  ESMF_Comp_C.F90
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # List .h files to be copied to higher level common include directory
-STOREH	  = 
+STOREH	  =  ESMC_Comp.h
 
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
