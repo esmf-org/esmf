@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.95 2004/04/15 17:32:21 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.96 2004/04/23 21:26:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -386,11 +386,6 @@
       public ESMF_SetNullPointer
       public ESMF_GetPointer
 
-!  Print methods for calling by higher level print functions
-!  (they have little formatting other than the actual values)
-      public ESMF_StatusString, ESMF_DataTypeString
-      public ESMF_DataKindString, ESMF_LogicalString
-
 !  Overloaded = operator functions
       public operator(.eq.), operator(.ne.), assignment(=)
 !
@@ -423,7 +418,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.95 2004/04/15 17:32:21 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.96 2004/04/23 21:26:14 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -1793,169 +1788,6 @@ end function
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GetPointer
-
-!------------------------------------------------------------------------- 
-! misc print routines
-!------------------------------------------------------------------------- 
-!BOPI 
-!  !IROUTINE:  ESMF_StatusString - Return status as a string
-!  
-! !INTERFACE: 
-      subroutine ESMF_StatusString(status, string, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Status), intent(in) :: status
-      character(len=*), intent(out) :: string
-      integer, intent(out), optional :: rc  
-
-!
-! !DESCRIPTION:
-!   Return a status variable as a string.
-!
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[status]
-!       The ESMF\_Status of a string.
-!     \item[string]
-!       The status string.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-! !REQUIREMENTS:
-
-      if (status .eq. ESMF_STATE_UNINIT) string = "Uninitialized"
-      if (status .eq. ESMF_STATE_READY) string = "Ready"
-      if (status .eq. ESMF_STATE_UNALLOCATED) string = "Unallocated"
-      if (status .eq. ESMF_STATE_ALLOCATED) string = "Allocated"
-      if (status .eq. ESMF_STATE_BUSY) string = "Busy"
-      if (status .eq. ESMF_STATE_INVALID) string = "Invalid"
- 
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StatusString
-
-!------------------------------------------------------------------------- 
-!BOPI 
-!  !IROUTINE:  ESMF_DataTypeString - Return DataType as a string
-!  
-! !INTERFACE: 
-      subroutine ESMF_DataTypeString(datatype, string, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_DataType), intent(in) :: datatype
-      character(len=*), intent(out) :: string
-      integer, intent(out), optional :: rc  
-
-!
-! !DESCRIPTION:
-!   Return a datatype variable as a string.
-!
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[datatype]
-!       The ESMF\_DataType of a string.
-!     \item[string]
-!       The status string.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS:
-
-      if (datatype .eq. ESMF_DATA_INTEGER) string = "Integer"
-      if (datatype .eq. ESMF_DATA_REAL) string = "Real"
-      if (datatype .eq. ESMF_DATA_LOGICAL) string = "Logical"
-      if (datatype .eq. ESMF_DATA_CHARACTER) string = "Character"
- 
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_DataTypeString
-
-!------------------------------------------------------------------------- 
-!BOPI 
-!  !IROUTINE:  ESMF_DataKindString - Return DataKind as a string
-!  
-! !INTERFACE: 
-      subroutine ESMF_DataKindString(datakind, string, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_DataKind), intent(in) :: datakind
-      character(len=*), intent(out) :: string
-      integer, intent(out), optional :: rc  
-
-!
-! !DESCRIPTION:
-!   Return a datakind variable as a string.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[datakind]
-!       The ESMF\_DataKind of a string.
-!     \item[string]
-!       The status string.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-! !REQUIREMENTS:
-
-      if (datakind .eq. ESMF_I1)  string = "Integer*1"
-      if (datakind .eq. ESMF_I2)  string = "Integer*2"
-      if (datakind .eq. ESMF_I4)  string = "Integer*4"
-      if (datakind .eq. ESMF_I8)  string = "Integer*8"
-      if (datakind .eq. ESMF_R4)  string = "Real*4"
-      if (datakind .eq. ESMF_R8)  string = "Real*8"
-      if (datakind .eq. ESMF_C8)  string = "Complex*8"
-      if (datakind .eq. ESMF_C16) string = "Complex*16"
- 
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_DataKindString
-
-!------------------------------------------------------------------------- 
-!BOPI 
-!  !IROUTINE:  ESMF_LogicalString - Return Logical as a string
-!  
-! !INTERFACE: 
-      subroutine ESMF_LogicalString(tf, string, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Logical), intent(in) :: tf
-      character(len=*), intent(out) :: string
-      integer, intent(out), optional :: rc  
-
-!
-! !DESCRIPTION:
-!   Return a tf variable as a string.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[tf]
-!       The ESMF\_Logical of a string.
-!     \item[string]
-!       The status string.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-! !REQUIREMENTS:
-
-      if (tf .eq. ESMF_TRUE)  string = "True"
-      if (tf .eq. ESMF_FALSE) string = "False"
- 
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_LogicalString
 
 !-------------------------------------------------------------------------
 !
