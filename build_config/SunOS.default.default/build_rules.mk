@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.8 2004/05/15 00:25:54 slswift Exp $
+# $Id: build_rules.mk,v 1.9 2004/05/18 11:31:02 nscollins Exp $
 #
 # SunOS.default.default.mk
 #
@@ -26,12 +26,21 @@ endif
 # for information on retrieving them.
 #
 #
+ifeq ($(ESMF_NO_IOCODE),true)
+BLAS_LIB         =
+LAPACK_LIB       =
+NETCDF_LIB       =
+NETCDF_INCLUDE   =
+HDF_LIB          =
+HDF_INCLUDE      =
+else
 BLAS_LIB         = -L/usr/local/lib -latlas
 LAPACK_LIB       = -L/usr/local/lib -llapack
 NETCDF_LIB       = -L/usr/local/lib -lnetcdf
 NETCDF_INCLUDE   = -I/usr/local/include
 HDF_LIB          = -L/usr/local/lib/ -lmfhdf -ldf -ljpeg -lz
 HDF_INCLUDE      = -I/usr/local/include
+endif
 
 # Location of MPI (Message Passing Interface) software
 

@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.7 2004/05/15 00:25:52 slswift Exp $
+# $Id: build_rules.mk,v 1.8 2004/05/18 11:31:00 nscollins Exp $
 # 
 # IRIX64.default.default.mk
 #
@@ -25,6 +25,14 @@ endif
 # BLAS usually comes with SGI. Do NOT use the parallel (library names with 
 # mp in them) version of the SGI BLAS.
 #
+ifeq ($(ESMF_NO_IOCODE),true)
+BLAS_LIB         =
+LAPACK_LIB       =
+NETCDF_LIB       =
+NETCDF_INCLUDE   =
+HDF_LIB          =
+HDF_INCLUDE      =
+else
 BLAS_LIB       = -latlas ${FC_LIB}
 LAPACK_LIB     = -llapacko
 ifeq ($(ESMF_PREC),32)
@@ -41,6 +49,9 @@ HDF_LIB          = -L /usr/local/lib -lmfhdf -ldf -ljpeg -lz
 HDF_INCLUDE      = -I /usr/local/include
 endif
 # end 64 bit section
+endif
+# end of io bypass section
+
 #
 # Location of MPI (Message Passing Interface) software  
 #

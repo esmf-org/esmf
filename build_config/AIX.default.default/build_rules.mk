@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.14 2004/05/15 00:25:51 slswift Exp $
+#  $Id: build_rules.mk,v 1.15 2004/05/18 11:31:00 nscollins Exp $
 #
 #  AIX.default.default.mk
 #
@@ -25,6 +25,16 @@ endif
 #  If you list -lessl or -lesslp2 below you must have -DESMC_HAVE_ESSL listed in the 
 # PCONF line at the bottom of this file.
 #
+
+ifeq ($(ESMF_NO_IOCODE),true)
+BLAS_LIB         =
+LAPACK_LIB       =
+NETCDF_LIB       =
+NETCDF_INCLUDE   =
+HDF_LIB          =
+HDF_INCLUDE      =
+else
+
 BLAS_LIB         = -lblas ${FC_LIB}
 
 ifeq ($(ESMF_PREC),32)
@@ -45,6 +55,8 @@ HDF_INCLUDE	 = -I/usr/local/include/hdf
 HDF_LIB		 = -L/usr/local/lib64/r4i4 -lmfhdf
 endif
 # end 64 bit section
+endif
+#end of io bypass section
 
 #
 # Location of MPI (Message Passing Interface) software

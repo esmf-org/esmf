@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.6 2004/05/15 00:25:51 slswift Exp $
+#  $Id: build_rules.mk,v 1.7 2004/05/18 11:31:00 nscollins Exp $
 #
 #  Darwin.nag.default.mk
 #
@@ -30,12 +30,21 @@ endif
 # for information on retrieving them.
 #
 #
+ifeq ($(ESMF_NO_IOCODE),true)
+BLAS_LIB         =
+LAPACK_LIB       =
+NETCDF_LIB       =
+NETCDF_INCLUDE   =
+HDF_LIB          =
+HDF_INCLUDE      =
+else
 BLAS_LIB         = -L/sw/lib -latlas
 LAPACK_LIB       = -L/sw/lib -llapack
 NETCDF_LIB       = -L/sw/lib -lnetcdf
 NETCDF_INCLUDE   = -I/sw/include
 HDF_LIB          = -L/sw/lib/ -lmfhdf -ldf -ljpeg -lz
 HDF_INCLUDE      = -I/sw/include
+endif
 
 # Location of MPI (Message Passing Interface) software
 
