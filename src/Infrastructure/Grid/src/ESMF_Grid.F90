@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.88 2003/09/02 17:39:18 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.89 2003/09/02 21:24:39 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.88 2003/09/02 17:39:18 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.89 2003/09/02 21:24:39 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1762,25 +1762,25 @@
 !     Increment the number of physgrids in the grid and allocate memory
       grid%num_physgrids = grid%num_physgrids + 1
       if(grid%num_physgrids .eq. 1) then
-        allocate(grid%physgrids(1), stat=status)
+        allocate(grid%physgrids(3), stat=status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridAddPhysGrid: physgrids allocate"
           return
         endif
-        allocate(temp_pgrids(grid%num_physgrids), stat=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridAddPhysGrid: temp_pgrids allocate"
-          return
-        endif
-      else
-        allocate(temp_pgrids(grid%num_physgrids), stat=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridAddPhysGrid: temp_pgrids allocate"
-          return
-        endif
-        do i = 1, grid%num_physgrids - 1
-          temp_pgrids(i) = grid%physgrids(i)
-        enddo
+!        allocate(temp_pgrids(grid%num_physgrids), stat=status)
+!        if(status .NE. ESMF_SUCCESS) then
+!          print *, "ERROR in ESMF_GridAddPhysGrid: temp_pgrids allocate"
+!          return
+!        endif
+!      else
+!        allocate(temp_pgrids(grid%num_physgrids), stat=status)
+!        if(status .NE. ESMF_SUCCESS) then
+!          print *, "ERROR in ESMF_GridAddPhysGrid: temp_pgrids allocate"
+!          return
+!        endif
+!        do i = 1, grid%num_physgrids - 1
+!          temp_pgrids(i) = grid%physgrids(i)
+!        enddo
  !       deallocate(grid%physgrids, stat=status)
  !       if(status .NE. ESMF_SUCCESS) then
  !         print *, "ERROR in ESMF_GridAddPhysGrid: physgrids deallocate"
@@ -1815,7 +1815,8 @@
       global_min_coord(2)=y_min
       global_max_coord(2)=y_max
       global_nmax(2)=counts(2)
-      temp_pgrids(physgrid_id)=ESMF_PhysGridCreate(dim_num=2, &
+ !     temp_pgrids(physgrid_id)=ESMF_PhysGridCreate(dim_num=2, &
+      grid%physgrids(physgrid_id)=ESMF_PhysGridCreate(dim_num=2, &
                                       relloc=relloc, &
                                       local_min=local_min_coord, &
                                       local_max=local_max_coord, &
@@ -1824,7 +1825,7 @@
                                       global_max=global_max_coord, &
                                       global_nmax=global_nmax, &
                                       name=physgrid_name, rc=status)
-      grid%physgrids => temp_pgrids
+ !     grid%physgrids => temp_pgrids
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1910,25 +1911,25 @@
 !     Increment the number of physgrids in the grid and allocate memory
       grid%num_physgrids = grid%num_physgrids + 1
       if(grid%num_physgrids .eq. 1) then
-        allocate(grid%physgrids(1), stat=status)
+        allocate(grid%physgrids(3), stat=status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridAddPhysGridSpecd: physgrids allocate"
           return
         endif
-        allocate(temp_pgrids(grid%num_physgrids), stat=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridAddPhysGridSpecd: temp_pgrids allocate"
-          return
-        endif
-      else
-        allocate(temp_pgrids(grid%num_physgrids), stat=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridAddPhysGridSpecd: temp_pgrids allocate"
-          return
-        endif
-        do i = 1, grid%num_physgrids - 1
-          temp_pgrids(i) = grid%physgrids(i)
-        enddo
+!        allocate(temp_pgrids(grid%num_physgrids), stat=status)
+!        if(status .NE. ESMF_SUCCESS) then
+!          print *, "ERROR in ESMF_GridAddPhysGridSpecd: temp_pgrids allocate"
+!          return
+!        endif
+!      else
+!        allocate(temp_pgrids(grid%num_physgrids), stat=status)
+!        if(status .NE. ESMF_SUCCESS) then
+!          print *, "ERROR in ESMF_GridAddPhysGridSpecd: temp_pgrids allocate"
+!          return
+!        endif
+!        do i = 1, grid%num_physgrids - 1
+!          temp_pgrids(i) = grid%physgrids(i)
+!        enddo
  !       deallocate(grid%physgrids, stat=status)
  !       if(status .NE. ESMF_SUCCESS) then
  !         print *, "ERROR in ESMF_GridAddPhysGridSpecd: physgrids deallocate"
@@ -1999,7 +2000,8 @@
         local_max(2) = local_max(2) + delta2(i+local_start(2))
       enddo
 
-      temp_pgrids(physgrid_id) = ESMF_PhysGridCreate(dim_num=2, &
+!      temp_pgrids(physgrid_id) = ESMF_PhysGridCreate(dim_num=2, &
+      grid%physgrids(physgrid_id) = ESMF_PhysGridCreate(dim_num=2, &
                                    relloc=relloc, &
                                    delta1=delta1_local, &
                                    delta2=delta2_local, &
@@ -2012,7 +2014,7 @@
                                    dim_units=dim_units, &
                                    name=physgrid_name, &
                                    rc=status)
-      grid%physgrids => temp_pgrids
+!      grid%physgrids => temp_pgrids
 
       if(rcpresent) rc = ESMF_SUCCESS
 
