@@ -218,7 +218,7 @@
 
       call ESMF_GridCompDestroy(compGridded, rc)
 
-      call ESMF_DELayoutDestroy(defaultlayout, rc)
+      call ESMF_DELayoutDestroy(defaultLayout, rc)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ParentGridComponentTemplate.F90,v 1.3 2003/11/06 23:56:46 nscollins Exp $
+! $Id: ParentGridComponentTemplate.F90,v 1.4 2003/11/11 18:22:22 nscollins Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -65,8 +65,8 @@
       type(ESMF_DELayout) :: parentlayout
       type(ESMF_Grid) :: parentgrid
 
-      ! call ESMF_LogErrMsg("Parent Gridded Component initialize routine called")
-      print *, "Parent Gridded Component initialize routine called"
+      ! call ESMF_LogErrMsg("Parent Gridded Component Initialize routine called")
+      print *, "Parent Gridded Component Initialize routine called"
 
       ! Get the layout and grid associated with this component
       call ESMF_GridCompGet(gcomp, layout=parentlayout, grid=parentgrid, rc=rc)
@@ -105,12 +105,12 @@
 
       ! Now give each of the subcomponents a chance to initialize themselves.
       call ESMF_GridCompInitialize(comp1Grid, G1imp, G1exp, parentclock, rc=rc)
-      call ESMF_GridCompInitialize(comp1Grid, G2imp, G2exp, parentclock, rc=rc)
+      call ESMF_GridCompInitialize(comp2Grid, G2imp, G2exp, parentclock, rc=rc)
 
       call ESMF_CplCompInitialize(compCoupler, G1exp, G2imp, parentclock, rc=rc)
 
-      ! call ESMF_LogErrMsg("Parent Component Init finished")
-      print *, "Parent Component Init finished"
+      ! call ESMF_LogErrMsg("Parent Component Initialize finished")
+      print *, "Parent Component Initialize finished"
 
     end subroutine my_init
 
@@ -122,8 +122,17 @@
       type(ESMF_Clock) :: parentclock
       integer :: rc
      
-      ! call ESMF_ErrLogErrMsg("Parent Gridded Component run routine called")
-      print *, "Parent Gridded Component run routine called"
+      ! call ESMF_ErrLogErrMsg("Parent Gridded Component Run routine called")
+      print *, "Parent Gridded Component Run routine called"
+
+      ! Now run the subcomponents
+      call ESMF_GridCompRun(comp1Grid, G1imp, G1exp, parentclock, rc=rc)
+      call ESMF_CplCompRun(compCoupler, G1exp, G2imp, parentclock, rc=rc)
+      call ESMF_GridCompRun(comp2Grid, G2imp, G2exp, parentclock, rc=rc)
+
+
+      ! call ESMF_LogErrMsg("Parent Component Run finished")
+      print *, "Parent Component Run finished"
 
     end subroutine my_run
 
@@ -135,8 +144,22 @@
       type(ESMF_Clock) :: parentclock
       integer :: rc
      
-      ! call ESMF_ErrLogErrMsg("Parent Gridded Component finalize routine called")
-      print *, "Parent Gridded Component finalize routine called"
+      ! call ESMF_ErrLogErrMsg("Parent Gridded Component Finalize routine called")
+      print *, "Parent Gridded Component Finalize routine called"
+
+      ! Give each of the subcomponents a chance to finalize themselves.
+      call ESMF_GridCompFinalize(comp1Grid, G1imp, G1exp, parentclock, rc=rc)
+      call ESMF_GridCompFinalize(comp2Grid, G2imp, G2exp, parentclock, rc=rc)
+
+      call ESMF_CplCompFinalize(compCoupler, G1exp, G2imp, parentclock, rc=rc)
+
+      ! Now remove the Components to free up their resources
+      call ESMF_GridCompDestroy(comp1Grid, rc)
+      call ESMF_GridCompDestroy(comp2Grid, rc)
+      call ESMF_CplCompDestroy(compCoupler, rc)
+
+      ! call ESMF_ErrLogErrMsg("Parent Gridded Component Finalize routine finished")
+      print *, "Parent Gridded Component Finalize routine finished"
 
     end subroutine my_final
 
