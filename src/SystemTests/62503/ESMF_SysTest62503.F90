@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62503.F90,v 1.3 2003/04/04 21:10:28 nscollins Exp $
+! $Id: ESMF_SysTest62503.F90,v 1.4 2003/04/07 14:54:57 nscollins Exp $
 !
 ! System test code #62503
 
@@ -19,14 +19,14 @@
     ! ESMF Framework module
     use ESMF_Mod
 
-    use user_model1, only userm1_register
-    use user_model2, only userm2_register
-    use user_coupler, only usercpl_register
+    use user_model1, only : userm1_register
+    use user_model2, only : userm2_register
+    use user_coupler, only : usercpl_register
 
     implicit none
     
     ! Local variables
-    integer :: de_id, rc, delist(4)
+    integer :: i, de_id, ndes, mid, rc, delist(4)
     character(len=ESMF_MAXSTR) :: aname, cname1, cname2, cplname
     type(ESMF_DELayout) :: layout1, layout2, layout3
     type(ESMF_State) :: c1exp, c2imp, cplstate(2)
@@ -62,18 +62,20 @@
 
     ! Query application for layout.
     call ESMF_AppCompGet(app, layout=layout1, rc=rc)
+    call ESMF_DELayoutGetNumDEs(layout1, ndes, rc=rc)
+    mid = ndes / 2
 
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-    delist = (/ 0, 1, 2, 3 /)
-    layout2 = ESMF_DELayoutCreate(2, 2, delist, ESMF_XFAST, rc)
+    delist = (/ (i, i=0, mid-1) /)
+    layout2 = ESMF_DELayoutCreate(delist, 2, (/ 2, ndes/4 /), (/ 0, 0 /), rc)
     comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=rc)
     print *, "Created component ", trim(cname1), "rc =", rc
 
     cname2 = "user model 2"
-    delist = (/ 4, 5, 6, 7 /)
-    layout3 = ESMF_DELayoutCreate(2, 2, delist, ESMF_XFAST, rc)
+    delist = (/ (i, i=mid, ndes-1) /)
+    layout3 = ESMF_DELayoutCreate(delist, 2, (/ 2, ndes/4 /), (/ 0, 0 /), rc)
     comp2 = ESMF_GridCompCreate(cname2, layout=layout3, rc=rc)
     print *, "Created component ", trim(cname2), "rc =", rc
 
