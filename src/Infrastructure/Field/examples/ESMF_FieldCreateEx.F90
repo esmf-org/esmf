@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.6 2003/12/01 17:23:10 svasquez Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.7 2003/12/01 21:24:04 svasquez Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -209,9 +209,9 @@
 !-------------------------------------------------------------------------
 
     if (finalrc.EQ.ESMF_SUCCESS) then
-	print *, "ESMF_FieldCreateEx.F90 examples completed successfully"
+	print *, "PASS: ESMF_FieldCreateEx.F90"
     else
-	print *, "ESMF_FieldCreateEx.F90 examples failed"
+	print *, "FAIL: ESMF_FieldCreateEx.F90"
     end if
 
 
