@@ -182,11 +182,13 @@ typedef struct _pthread_descr_struct *_pthread_descr;
 #endif
 
 #ifndef _AIX
+#ifndef __osf__
 /* Attributes for threads.  */
 typedef struct __pthread_attr_s
 {
 
 } pthread_attr_t;
+#endif
 #endif
 
 /* Conditions (not abstract because of PTHREAD_COND_INITIALIZER */
@@ -197,6 +199,7 @@ __extension__ typedef long long __pthread_cond_align_t;
 typedef long __pthread_cond_align_t;
 #endif
 #ifndef _AIX
+#ifndef __osf__
 typedef struct
 {
 
@@ -207,12 +210,12 @@ typedef struct
 {
   int __dummy;
 } pthread_condattr_t;
-
+#endif
 
 /* Keys for thread-specific data */
 typedef unsigned int pthread_key_t;
 
-
+#ifndef __osf__
 /* Mutexes (not abstract because of PTHREAD_MUTEX_INITIALIZER).  */
 /* (The layout is unnatural to maintain binary compatibility
     with earlier releases of LinuxThreads.) */
@@ -235,7 +238,7 @@ typedef struct
 
 /* Once-only execution */
 typedef int pthread_once_t;
-
+#endif
 
 #ifdef __USE_UNIX98
 /* Read-write locks.  */
@@ -278,14 +281,20 @@ typedef struct {
 
 #endif
 
-
+#ifndef __osf__
 /* Thread identifiers */
 typedef unsigned long int pthread_t;
+#endif
 #endif
 #endif	/* bits/pthreadtypes.h */
 
 #ifdef _AIX
 #define __const const
+#endif
+
+#ifdef __osf__
+#define __const const
+#define __restrict 
 #endif
 
 /* Function for handling threads.  */
@@ -305,7 +314,11 @@ extern pthread_t pthread_self (void) ;
 extern int pthread_equal (pthread_t __thread1, pthread_t __thread2) ;
 
 /* Terminate calling thread.  */
+#ifndef __osf__
 extern void pthread_exit (void *__retval) __attribute__ ((__noreturn__));
+#else
+extern void pthread_exit (void *__retval);
+#endif
 
 /* Make calling thread wait for termination of the thread TH.  The
    exit status of the thread is stored in *THREAD_RETURN, if THREAD_RETURN
