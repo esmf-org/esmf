@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.1 2004/02/17 15:57:39 nscollins Exp $
+! $Id: user_model2.F90,v 1.2 2004/02/19 21:34:31 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -92,7 +92,7 @@
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: idata
       real(ESMF_KIND_R8) :: min(2)
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
-      integer :: countsPerDE1(3), countsPerDE2(2)
+      integer :: countsPerDE1(3), countsPerDE2(2), order(3), counts(3)
       integer :: de_id
       type(ESMF_GridKind) :: horz_gridkind
       type(ESMF_GridStagger) :: horz_stagger
@@ -107,6 +107,7 @@
       ! Add a "humidity" field to the import state.
       countsPerDE1 = (/ 10, 18, 12 /)
       countsPerDE2 = (/ 22, 28 /)
+      counts       = (/  4, 40, 50 /)
       min(1) = 0.0
       delta1 = (/ 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.3, 1.4, &
                   1.4, 1.5, 1.6, 1.6, 1.6, 1.8, 1.8, 1.7, 1.7, 1.6, &
@@ -124,8 +125,8 @@
       horz_coord_system = ESMF_CoordSystem_Cartesian
 
       grid1 = ESMF_GridCreateLogRect(2, counts=(/ 40, 50 /), &
-                              countsPerDEDim1=countsPerDE1, &
-                              countsPerDEDim2=countsPerDE2, &
+                              countsPerDEDecomp1=countsPerDE1, &
+                              countsPerDEDecomp2=countsPerDE2, &
                               minGlobalCoordPerDim=min, &
                               delta1=delta1, delta2=delta2, &
                               layout=layout, &
@@ -145,7 +146,10 @@
       array1 = ESMF_ArrayCreate(arrayspec, counts=(/ 4, 40, 50 /), rc=rc)
 
       ! Create a datamap
-      datamap = ESMF_DataMapCreate(ESMF_IO_IJ, rc=rc)
+      order(1) = 0
+      order(2) = 1
+      order(3) = 2
+      datamap = ESMF_DataMapCreate(order, counts=counts(1:1), rc=rc)
 
       ! Create the field 
       humidity = ESMF_FieldCreate(grid1, array=array1, datamap=datamap, &
