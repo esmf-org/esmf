@@ -155,7 +155,12 @@ A user may also explicitly control the {Layout} by specifying which
 communication mechanisms are preferred for a particular dimension.
 The {\tt Layout} may interact with both the {\tt PE List}s
 and the {\tt Machine Model} in order to accomplish a preferential
-decomposition.
+decomposition. The layout class will support methods that enable a user or
+developer to specify various distributions and fast or slow 
+communication axes, e.g. two\_dimensional\_block\_distribute,
+cyclic\_distribute, block\_cyclic\_distribute, random\_balanced\_distribute 
+etc...
+
 
 \subsubsection{Basic Communications (ESMF\_Comm)}
 \label{sec:basiccomm} 
