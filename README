@@ -1,4 +1,4 @@
- $Id: README,v 1.31 2003/09/02 16:15:15 flanigan Exp $
+ $Id: README,v 1.32 2003/09/02 17:11:09 cdeluca Exp $
 ================================================================================
                                    README
 
@@ -28,7 +28,7 @@ Follow the directions on that webpage to access the ESMF CVS repository.
 
 QuickStart information for the impatient.
 
- - set environment variables ESMF_DIR (see below).
+ - set environment variable (see below).
  - Type 'gmake' (the GNU make program) to build the ESMF library.
  - Type 'gmake tests' to make and run the unit tests
     (or 'gmake tests_uni' for non-mpi machines).
@@ -84,7 +84,7 @@ The following environment variables need to be set only if the
 default values are not acceptable.  For supported platforms,
 the default values should be all that is needed.
 
-ESMF_ARCH      Value of uname -s.  This will be AIX for IBM RS6000's.
+ESMF_ARCH      Normally value of uname -s.
 
 ESMF_SITE      Build configure site name or the value default.
                If not set, then the value of default is assumed.
@@ -96,7 +96,7 @@ ESMF_BOPT      Build option value of g (for debug) or O (for Optimize).
                Default value will be O.
 
 The README file in the directory build_config documents these
-variables in more detail.
+variables in more detail, as does the ESMF User's Guide.
 
 Environment variables must be set in the user's shell and not inside
 an ESMF makefile or build system file.  They can also be set on the
