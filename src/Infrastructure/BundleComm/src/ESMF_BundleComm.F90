@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.35 2004/09/23 21:45:40 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.36 2004/10/05 22:45:29 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.35 2004/09/23 21:45:40 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.36 2004/10/05 22:45:29 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -850,10 +850,11 @@
       endif
 
       do i = 1, stypep%field_count
+          ! TODO: add hasSrcData and hasDstData logic
           call ESMF_ArrayRegrid(stypep%flist(i)%ftypep%localfield%localdata, &
+                                stypep%flist(i)%ftypep%mapping, .true., &
                                 dtypep%flist(i)%ftypep%localfield%localdata, &
-                                stypep%flist(i)%ftypep%mapping, &
-                                dtypep%flist(i)%ftypep%mapping, &
+                                dtypep%flist(i)%ftypep%mapping, .true., &
 	                        routehandle, srcmask, dstmask, &
                                 blocking, commhandle, status)
           if (ESMF_LogMsgFoundError(status, &
