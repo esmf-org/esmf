@@ -1,4 +1,4 @@
-! $Id: ESMF_Component.F90,v 1.3 2003/01/09 19:51:14 nscollins Exp $
+! $Id: ESMF_Component.F90,v 1.4 2003/01/09 22:02:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -117,7 +117,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Component.F90,v 1.3 2003/01/09 19:51:14 nscollins Exp $'
+      '$Id: ESMF_Component.F90,v 1.4 2003/01/09 22:02:31 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -516,7 +516,7 @@ end interface
 !       Routine which interfaces to the C++ creation routine.
         call c_ESMC_ComponentFinalize(component, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Component initialization error"
+          print *, "Component finalization error"
           return
         endif
 
