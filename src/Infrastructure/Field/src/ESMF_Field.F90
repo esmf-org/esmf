@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.87 2003/12/08 23:11:35 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.88 2003/12/09 20:39:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -236,7 +236,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.87 2003/12/08 23:11:35 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.88 2003/12/09 20:39:38 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1087,25 +1087,7 @@
         return
       endif 
 
-      if (present(datamap)) then
-        ftype%mapping = datamap
-      else
-        localRelloc = ESMF_CELL_CENTER
-        if (present(relloc)) localRelloc = relloc
-        call ESMF_GridGetPhysGrid(grid, relloc=localRelloc, numDims=gridRank, &
-                                rc=status)
-        if (gridRank .eq. 1) then
-          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_I, relloc, gridRank, status)
-        else if (gridRank .eq. 2) then
-          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJ, relloc, gridRank, status)
-        else if (gridRank .eq. 3) then
-          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJK, relloc, gridRank, status)
-        endif
-        if(status .NE. ESMF_SUCCESS) then 
-          print *, "ERROR in ESMF_FieldConstructNew: datamap create"
-          return
-        endif 
-      endif
+      if (present(datamap)) ftype%mapping = datamap
       
       ftype%localfield%localdata = array
       ftype%datastatus = ESMF_STATE_READY
@@ -1283,11 +1265,11 @@
         ftype%mapping = datamap   ! copy, datamap can be deleted by user afterwards
       else
         if (gridRank .eq. 1) then
-          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_I, relloc, status)
+          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_I, relloc, gridRank, status)
         else if (gridRank .eq. 2) then
-          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJ, relloc, status)
+          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJ, relloc, gridRank, status)
         else if (gridRank .eq. 3) then
-          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJK, relloc, status)
+          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJK, relloc, gridRank, status)
         endif
       endif
 
@@ -1398,11 +1380,11 @@
         ftype%mapping = datamap   ! copy, datamap can be deleted by user afterwards
       else
         if (gridRank .eq. 1) then
-          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_I, relloc, status)
+          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_I, relloc, gridRank, status)
         else if (gridRank .eq. 2) then
-          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJ, relloc, status)
+          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJ, relloc, gridRank, status)
         else if (gridRank .eq. 3) then
-          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJK, relloc, status)
+          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJK, relloc, gridRank, status)
         endif
       endif
 
