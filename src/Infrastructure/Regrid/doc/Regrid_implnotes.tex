@@ -1,0 +1,59 @@
+
+
+%\subsection{Design and Implementation Notes}
+
+Regrid has been designed to be as efficient as possible during its
+Run routine.  Although the initial calculation during the Store routines
+can be computationally intensive, the {\tt ESMF\_RouteHandle} object
+it creates is designed to be reused by similar Fields on the same Grids.
+And, as long as the Grids are static, RegridStore can be called once
+and reused throughout a simulation.  It leverages internal structures
+and methods used throughout ESMF for communication so that algorithmic
+and programming improvements can be focused on a single location.
+
+Because many methods are supported for regridding, the main Store function
+branches to a specific creation function based on the regrid method requested
+(e.g. bilinear, conservative, spectral).  Each of these regrid methods are in
+a separate module to prevent the main Regrid module from becoming too
+large.  The user is unaware of this hierarchy as the top-level module provides
+a unified API.
+
+The RouteHandle object created by the RegridStore function contains a set of
+``links'' which identify how a Field at a point on the destination Grid is
+related to a Field at a point on the source Grid.  As such, a ``link''
+consists of a source address, a destination address and a weight.  The addresses
+are stored as indices to allow reuse by different Fields on the same Grids.
+Because the Grids are generally distributed very differently, the Regrid object
+also contains communication information for any data motion required for the
+regridding.
+
+\subsubsection{Parallel Implementation}
+
+On parallel processing platforms, only a piece of each Grid is represented 
+locally on a particular DE.  In order to calculate a regrid, the portions of
+the decomposed source Grid that overlaps the local destination Grid must be
+gathered to its DE.  During the RegridStore routine, ESMF determines the
+list of the source DE's and Grid extents that must be collected to cover the
+destination Grid and stores them in an {\tt ESMF\_DomainList}.  Currently
+ESMF gathers all the data from each DE whose source Grid intersects
+the local destination Grid, but there has been some work in identifying and
+collecting subsets of distributed data instead.  The communication pattern
+to gather the corresponding data is stored in an {\tt ESMF\_Route} for use
+during the run routine.  Each DE then stores the Route and list of links
+unique to its destination Grid.
+
+During the run routine, the source data is first gathered using the
+precomputed Route and stored as a 1-D vector.  The main calculation is then 
+a loop over the number of links that effectively sums the product of the
+source data and the interpolation weights and loads the result into the
+corresponding destination Array address.
+
+\subsubsection{Regrid Objects}
+The {\tt ESMF\_Regrid} object itself is relatively small, containing mostly
+just pointers to the source and destination Field information and settings
+for regrid options.  Regrid methods also create an {\tt ESMF\_TransformValues}
+object, which holds information about the ``links'', including the number of
+them and Arrays of source addresses, destination addresses, and interpolation
+weights.  Both the Regrid and TransformValues objects are private and 
+contained by the RouteHandle object.
+
