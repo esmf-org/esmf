@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.33 2005/01/13 22:26:46 theurich Exp $
+// $Id: ESMC_Base_F.C,v 1.34 2005/01/13 22:34:30 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.33 2005/01/13 22:26:46 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.34 2005/01/13 22:34:30 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -629,6 +629,42 @@ extern "C" {
   return;
 
 }  // end c_ESMC_GetVMId
+
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  c_ESMC_SetVMId - set the object's VMId 
+//
+// !INTERFACE:
+      void FTN(c_esmc_setvmid)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in - base object
+      ESMC_VMId **vmid,         // in - Fortran, ESMF_VMId
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     return the object's VMId to a Fortran caller.
+//
+//EOPI
+
+  int i, status;
+
+  if (!base) {
+    printf("in c_ESMC_SetVMId, base is bad, returning failure\n");
+    if (rc) *rc = ESMF_FAILURE;
+    return;
+  }
+
+  status = (*base)->ESMC_BaseSetVMId(*vmid);
+  if (rc) *rc = status;
+
+  return;
+
+}  // end c_ESMC_SetVMId
 
 
 
