@@ -24,11 +24,6 @@ configuration in which model components execute concurrently.
 
 \subsection{Classes and Scoping}
 
-An ESMF coupled application involves an application component 
-containing two or more gridded components that require an 
-inter-component data exchange, and one or more coupling 
-components.
-
 There are restrictions on how objects within an application may be scoped
 on a parallel platform.  The application component must be instantiated on 
 any decomposition elements or DEs (see Section~\ref{sec:progmodel}) on 
@@ -38,6 +33,12 @@ application contains a single executable or multiple
 executables.  There is only one application component defined for any
 application; it initially allocates resources and tracks application-wide 
 information.  
+
+An ESMF coupled application typically involves an application component 
+containing two or more gridded components that require an 
+inter-component data exchange, and one or more coupling 
+components.  However, any parent component that contains the appropriate 
+subcomponents can manage their execution and coupling.
 
 A coupler component must be instantiated on any DEs on which components
 it will couple are defined.  This is consistent with an architectural
@@ -53,7 +54,7 @@ specifically to handle that function.
 A gridded component may exist across all DEs in the application.  When 
 a set of gridded  components and a coupler all execute in sequence on 
 the same set of DEs and are contained within an application running 
-as a single executable we have an SPMD, sequential execution model.  
+as a single executable we have a SPMD, sequential execution model.  
 
 Within an application, a gridded component may also reside on 
 a subset of DEs.  These DEs may wholly coincide with, be wholly 
@@ -72,7 +73,7 @@ components instantiated on a separate set of DEs and running as
 another executable, and a coupler and application component 
 instantiated across all DEs.
 
-\subsection{Flow of Control and Data}
+\subsection{Flow of Control}
 
 Gridded components have few responsibilities with respect to coupling
 to other components.  They do not need to keep track of the data needed
@@ -88,22 +89,33 @@ providing an import state, gridded components are required to check that
 initial or imported data is valid and complete.
 
 The coupler component produces a specification of the sequence of 
-transforms that are 
-necessary to effect communication between components, both scientific and 
-computational.  This specification includes the transforms to be
+transforms that are necessary to effect communication between components, 
+both scientific and computational.  This specification includes the 
+transforms to be
 called, on which DEs they should take place, any sequencing restrictions 
 on the transforms, and what data is to be acted on.  For example, the
 coupler may specify that transformations occur on either the data sending 
 or receiving end (or both), that data be sent directly between components,
 or that data be sent to the coupler for intermediate processing before 
-it is sent to its destination.  The coupler is not responsible for 
-transferring data between components or for managing synchronization; 
-these tasks are handled by the application.  
+it is sent to its destination.  The coupler is responsible for managing
+the transfer of data between components.    
 
-The application component manages the sequencing and synchronization of
-components, and applies the transforms specified by the coupler.  The 
-configurations that it can support are subject to the restrictions
-determined by the coupler.
+The application or parent component initiating the coupling manages 
+its sequencing.  It is responsible for instantiating the gridded components
+that are exchanging data as well as the coupler, for determining whether the 
+desired sequencing can be supported, and making the calls to the {\tt run} 
+methods of the components and coupler that effect the coupled exchange. 
+
+\subsection{Flow of Data}
+
+The design choices we have made enable the user to configure an ESMF
+coupler so that data is sent directly from one component to another, 
+without requiring that it first be sent to a coupler (or even necessarily
+copied).  This is likely to be the most efficient way of performing 
+inter-component coupling when the components are instantiated on different
+DE sets.  However, if desired, an application can also be configured so that
+data from a source component is sent to a distinct set of coupler 
+DEs for processing before being sent to its destination.
 
 \subsection{Examples}
 
