@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.13 2003/11/06 23:08:14 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.14 2004/01/07 22:39:42 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -124,7 +124,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.13 2003/11/06 23:08:14 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.14 2004/01/07 22:39:42 jwolfe Exp $'
 
 !==============================================================================
 
@@ -260,14 +260,14 @@
 ! !IROUTINE: ESMF_TransformValuesGet - Get values from a TransformValues
 
 ! !INTERFACE:
-      subroutine ESMF_TransformValuesGet(tv, numlist, srcindex, dstindex, &
+      subroutine ESMF_TransformValuesGet(tv, numList, srcIndex, dstIndex, &
                                          weights, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_TransformValues), intent(in) :: tv
-      integer, intent(out), optional :: numlist
-      type(ESMF_LocalArray), intent(out), optional :: srcindex
-      type(ESMF_LocalArray), intent(out), optional :: dstindex
+      integer, intent(out), optional :: numList
+      type(ESMF_LocalArray), intent(out), optional :: srcIndex
+      type(ESMF_LocalArray), intent(out), optional :: dstIndex
       type(ESMF_LocalArray), intent(out), optional :: weights
       integer, intent(out), optional :: rc             
 
@@ -279,11 +279,11 @@
 !     \begin{description}
 !     \item[tv] 
 !          Class to be queried.
-!     \item[{[numlist]}]
+!     \item[{[numList]}]
 !          Value to be retrieved.         
-!     \item[{[srcindex]}]
+!     \item[{[srcIndex]}]
 !          Value to be retrieved.         
-!     \item[{[dstindex]}]
+!     \item[{[dstIndex]}]
 !          Value to be retrieved.         
 !     \item[{[weights]}]
 !          Value to be retrieved.         
@@ -320,16 +320,16 @@
           return  
         endif
 
-        if (present(numlist)) then
-            numlist = curnumlist    
+        if (present(numList)) then
+            numList = curnumlist    
         endif
 
-        if (present(srcindex)) then
-            srcindex = cursrc    
+        if (present(srcIndex)) then
+            srcIndex = cursrc    
         endif
 
-        if (present(dstindex)) then
-            dstindex = curdst    
+        if (present(dstIndex)) then
+            dstIndex = curdst    
         endif
 
         if (present(weights)) then
@@ -345,14 +345,14 @@
 ! !IROUTINE: ESMF_TransformValuesGetF90Ptrs - Get f90 ptrs from TransformValues
 
 ! !INTERFACE:
-      subroutine ESMF_TransformValuesGetF90Ptrs(tv, numlist, srcindex, &
-                                                dstindex, weights, rc)
+      subroutine ESMF_TransformValuesGetF90Ptrs(tv, numList, srcIndex, &
+                                                dstIndex, weights, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_TransformValues), intent(in) :: tv
-      integer, intent(out), optional :: numlist
-      real(ESMF_KIND_I4), dimension(:), pointer, optional :: srcindex
-      real(ESMF_KIND_I4), dimension(:), pointer, optional :: dstindex
+      integer, intent(out), optional :: numList
+      real(ESMF_KIND_I4), dimension(:), pointer, optional :: srcIndex
+      real(ESMF_KIND_I4), dimension(:), pointer, optional :: dstIndex
       real(ESMF_KIND_R8), dimension(:), pointer, optional :: weights
       integer, intent(out), optional :: rc             
 
@@ -364,11 +364,11 @@
 !     \begin{description}
 !     \item[tv] 
 !          Class to be queried.
-!     \item[{[numlist]}]
+!     \item[{[numList]}]
 !          Value to be retrieved.         
-!     \item[{[srcindex]}]
+!     \item[{[srcIndex]}]
 !          Value to be retrieved.         
-!     \item[{[dstindex]}]
+!     \item[{[dstIndex]}]
 !          Value to be retrieved.         
 !     \item[{[weights]}]
 !          Value to be retrieved.         
@@ -405,16 +405,16 @@
           return  
         endif
 
-        if (present(numlist)) then
-            numlist = curnumlist    
+        if (present(numList)) then
+            numList = curnumlist    
         endif
 
-        if (present(srcindex)) then
-            srcindex => srcwrap%i4ptr
+        if (present(srcIndex)) then
+            srcIndex => srcwrap%i4ptr
         endif
 
-        if (present(dstindex)) then
-            dstindex => dstwrap%i4ptr
+        if (present(dstIndex)) then
+            dstIndex => dstwrap%i4ptr
         endif
 
         if (present(weights)) then
@@ -430,14 +430,14 @@
 ! !IROUTINE: ESMF_TransformValuesSet - Set values in a TransformValues
 
 ! !INTERFACE:
-      subroutine ESMF_TransformValuesSet(tv, numlist, srcindex, dstindex, &
+      subroutine ESMF_TransformValuesSet(tv, numList, srcIndex, dstIndex, &
                                          weights, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_TransformValues), intent(in) :: tv
-      integer, intent(in), optional :: numlist
-      type(ESMF_LocalArray), intent(in), optional :: srcindex
-      type(ESMF_LocalArray), intent(in), optional :: dstindex
+      integer, intent(in), optional :: numList
+      type(ESMF_LocalArray), intent(in), optional :: srcIndex
+      type(ESMF_LocalArray), intent(in), optional :: dstIndex
       type(ESMF_LocalArray), intent(in), optional :: weights
       integer, intent(out), optional :: rc             
 
@@ -449,11 +449,11 @@
 !     \begin{description}
 !     \item[tv] 
 !          Class to be changed.
-!     \item[{[numlist]}]
+!     \item[{[numList]}]
 !          Value to be set.         
-!     \item[{[srcindex]}]
+!     \item[{[srcIndex]}]
 !          Value to be set.         
-!     \item[{[dstindex]}]
+!     \item[{[dstIndex]}]
 !          Value to be set.         
 !     \item[{[weights]}]
 !          Value to be set.         
@@ -488,19 +488,19 @@
                                        curdst, curweights, status)
         changed = .false.
 
-        if (present(numlist)) then
+        if (present(numList)) then
           changed = .true.
-          curnumlist = numlist    
+          curnumlist = numList    
         endif
 
-        if (present(srcindex)) then
+        if (present(srcIndex)) then
           changed = .true.
-          cursrc = srcindex    
+          cursrc = srcIndex    
         endif
 
-        if (present(dstindex)) then
+        if (present(dstIndex)) then
           changed = .true.
-          curdst = dstindex    
+          curdst = dstIndex    
         endif
 
         if (present(weights)) then
