@@ -1,4 +1,4 @@
-% $Id: LogErr_fex.tex,v 1.3 2003/09/04 22:24:21 cdeluca Exp $
+% $Id: LogErr_fex.tex,v 1.4 2003/10/15 21:10:19 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,85 +8,96 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the GPL.
 
-%\subsection{F90 Use and Examples}
+%\subsection{Use and Examples}
 
-%<Detailed examples of F90 usage of the class.>
-
+There are four options that can be set with {\tt ESMF\_LogSet}, each of which 
+can be set to {\tt ESMF\_TRUE} or {\tt ESMF\_FALSE}.
+\begin{enumerate}
+\item {\tt verbose} - Whether error messages should be written (default: {\tt ESMF\_TRUE}).
+\item {\tt flush} - Whether output should be flushed (default:  {\tt ESMF\_FALSE}).
+\item {\tt haltOnErr} - Whether to halt on an error (default:  {\tt ESMF\_TRUE}).
+\item {\tt haltOnWarn} - Whether to halt on a warning (default:  {\tt ESMF\_FALSE}).
+\end {enumerate}
 
 \subsubsection{Example 1. Simple Example.}
 
-In this example we use the default ESMF\_Log\_World object and illustrate
-the ESMF\_LogGetUnit()to write to
-the log file aLog.txt.
+In this example we use the default {\tt ESMF\_Log\_World} object and 
+illustrate the {\tt ESMF\_LogGetUnit} to write to the log file 
+{\tt aLog.txt}.
 
 {\tt
 \begin{verbatim}
 program test_log
+
   use ESMF_Mod
   implicit none
-#include "ESMC_LogErr.inc"
+
   call ESMF_LogOpenFile(ESMF_Log_World,ESMF_SINGLE_LOG_FILE,"aLog.txt")
-  write(ESMF_LogGetUnit(ESMF_Log_World),*)"This is a test."
+  write(ESMF_LogGetUnit(ESMF_Log_World),*) "This is a test."
   call ESMF_LogCloseFile(ESMF_Log_World)
+
 end program
 \end{verbatim}
 \tt}
 
 \subsubsection{Example 2. Simple Error Handling.}
 
-Here we illustrate simple error handling.  We define an error handler - anErr -
-and error output goes to the
-file anErr.txt.  There are four options that can be set with ESMF\_LogSet()
-and we set them all here: verbose (whether an
-error message should be written for anErr), flush (whether output should be 
-flushed), haltOnErr and haltOnWarn (whether the code should halt on
-an error or warning).  While the values set here are the default
-values, so they need not be set with ESMF\_Set(), the example illustrates how
-to ESMF\_SET().
+Here we illustrate simple error handling.  We define an error handler, 
+{\tt anErr}, and set its options.  Error output goes to the file 
+{\tt anErr.txt}.  A standard error message is written to the Log.  
 
 {\tt
 \begin{verbatim}
-#include "ESMC_LogErr.inc" 
+
 type(ESMF_Log) :: anErr
 integer returnCode 
 call ESMF_LogSet(anErr, verbose=ESMF_TRUE, flush=ESMF_FALSE,   &
                  haltOnErr=ESMF_TRUE, haltOnWarn=ESMF_FALSE)
-call ESMF_LogOpenFile(anErr,ESMF_SINGLE_LOG_FILE,"anErr.txt")
+call ESMF_LogOpenFile(anErr, ESMF_SINGLE_LOG_FILE, "anErr.txt")Xo
 returnCode=foo()
 if (returnCode == ESMF_FATAL) call ESMF_LogErr(anErr, returnCode) 
 call ESMF_LogCloseFile(anErr)
 \end{verbatim}
 \tt}
 
-\subsubsection{Example 3. More error handling.}
+\subsubsection{Example 3. More Complex Error Handling.}
 
 In this example, we illustrate more complex error handling.  We use
-ESMF\_LogGet() to get the value of verbose and if it's set to ESMF\_TF\_TRUE
-then turn off verbose midway through the code.  This allows you to put in lots
-of debugging code, and then if you want to turn them off, you can just call
-an ESMF\_LogSet() rather than commenting out all the error handling calls.
-We also illustrate the use 
-of ESMF\_LogErrMsg() which writes an additional message to the err file.
+{\tt ESMF\_LogGet} to get the value of {\tt verbose}, and if it's set to 
+{\tt ESMF\_TRUE} then we turn off verbose midway through the code.  This allows 
+you to put in lots of debugging code, and if you want to turn the debugging
+messages off, you can call {\tt ESMF\_LogSet} rather than commenting out all 
+the error handling calls.  We also illustrate the use of {\tt ESMF\_LogErrMsg},
+which writes an additional message to the Log file.
 
 {\tt
 \begin{verbatim}
-#include "ESMC_LogErr.inc" 
+
 type(ESMF_Log) :: anErr
 type(ESMF_Logical) :: myVerbosity
 character(len=32) :: myMsg
 integer returnCode 
+
 call ESMF_LogSet(anErr, verbose=ESMF_TRUE, flush=ESMF_FALSE,   &
                  haltOnErr=ESMF_TRUE, haltOnWarn=ESMF_FALSE)
 call ESMF_LogOpenFile(anErr,ESMF_SINGLE_LOG_FILE,"anErr.txt")
+
 returnCode=foo()
+
 myMsg="This will be written out."
+
 if (returnCode == ESMF_FATAL) call ESMF_LogErrMsg(anErr, returnCode,myMsg) 
+
 ESMF_LogGet(anErr,verbose=myVerbosity)
+
 if (myVerbosity==ESMF_TRUE) call ESMF_LogSet(verbose=ESMF_FALSE)
+
 myMsg="This will not be written out."
 returnCode=foo()
+
 if (returnCode == ESMF_FATAL) call ESMF_LogErrMsg(anErr, returnCode,myMsg)
 call ESMF_LogCloseFile(anErr)
+
 \end{verbatim}
 \tt}
 

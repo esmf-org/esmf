@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.105 2003/10/14 23:20:38 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.106 2003/10/15 21:10:18 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -231,7 +231,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.105 2003/10/14 23:20:38 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.106 2003/10/15 21:10:18 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -3864,7 +3864,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This version of get retrieves an ESMF_Array of cell types for an
+!     This version of get retrieves an {\tt ESMF\_Array} of cell types for an
 !     {\tt ESMF\_Grid} from a corresponding {\tt ESMF\_PhysGrid}.
 !     This mask is intended for internal use to indicate which cells are in
 !     the computational regime (cellType=0), a ghost region (cellType=1), or a

@@ -1,4 +1,4 @@
-% $Id: LogErr_desc.tex,v 1.2 2003/08/07 17:54:18 shep_smith Exp $
+% $Id: LogErr_desc.tex,v 1.3 2003/10/15 21:10:19 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -11,7 +11,8 @@
 %\subsection{Description}
 
 The Log class consists of a variety of methods for writing error, warning, and
-miscellaneous log data to files or to standard out. 
-The user may set
-the code to make the output verbose or not,  to halt on encountering errors or warnings, and to flush output buffers
-after every write.
+other log data to files or to standard out.  You may set options to make 
+the output verbose or not, to halt on encountering errors or 
+warnings, and to flush output buffers after every write.  Logs may be given
+user-specified names, or, if desired, a default {\tt ESMF\_Log\_World} can 
+be used.  

@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_ErrConstants.inc,v 1.3 2003/03/28 23:06:37 nscollins Exp $
+$Id: ESMF_ErrConstants.inc,v 1.4 2003/10/15 21:10:19 cdeluca Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,18 +33,6 @@ by both C++ and F90 compilers.
 !EOP
 #endif
 #define ESMF_WARNING              3
-#if 0
-!BOP
- ESMF\_SINGLE\_ERR\_FILE : Send errors to single file for all PEs
-!EOP
-#endif
-#define ESMF_SINGLE_ERR_FILE      4
-#if 0
-!BOP
- ESMF\_MULT\_ERR\_FILE : All PEs write to separate files.
-!EOP
-#endif
-#define ESMF_MULT_ERR_FILE        5
 #if 0
 !BOP
  ESMF\_ERR\_RETURN : Return on error

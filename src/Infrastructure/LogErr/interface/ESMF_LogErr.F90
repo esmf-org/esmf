@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.25 2003/10/15 17:37:56 jwolfe Exp $
+! $Id: ESMF_LogErr.F90,v 1.26 2003/10/15 21:10:20 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -20,7 +20,7 @@ module ESMF_LogErrMod
    use ESMF_BaseMod
    use ESMF_IOMod
 
-!BOP
+!BOPI
 !============================================================================
 ! !MODULE: Fortran Interface to Log class. 
 !
@@ -31,7 +31,7 @@ module ESMF_LogErrMod
 ! This file contains the interface code written in Fortran.  It also contains
 ! some utility functions used by the {\tt ESMF\_Log} class.
 !
-!EOP
+!EOPI
    implicit none
    private
 
@@ -120,7 +120,7 @@ contains
 
 !------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogCloseFile - closes a file from Fortran code
+! !IROUTINE: ESMF_LogCloseFile - Close a Log file 
 !
 ! !INTERFACE: 
      subroutine ESMF_LogCloseFile(aLog)
@@ -129,8 +129,7 @@ contains
   type(ESMF_Log), intent(in) :: aLog
 !
 ! !DESCRIPTION:
-! Calls c\_esmf\_logclosefile() (defined in ESMC\_LogInterface.C), the wraper for the method {\tt ESMC\_LogCloseFileForWrite} which closes aLog's 
-! log file.
+! Closes the file(s) associated with the Log {\tt aLog}.
 !
 ! The arguments are
 ! \begin{description}
@@ -149,7 +148,7 @@ end subroutine ESMF_LogCloseFile
 !--------------------------------------------------------------------------
 !BOP
 !
-! !IROUTINE: ESMF_LogOpenFile - opens a log file
+! !IROUTINE: ESMF_LogOpenFile - Open a Log file
 ! !INTERFACE: 
 subroutine ESMF_LogOpenFile(aLog, numFile, name)
 !
@@ -162,9 +161,7 @@ subroutine ESMF_LogOpenFile(aLog, numFile, name)
   character(len=*) :: name
 
 ! !DESCRIPTION:
-! This routine finds the first space in the array name and inserts a
-! a null character. It then calls {\tt ESMC\_LogOpenFileForWrite} 
-! an {\tt ESMC\_Log} method for opening files.
+! This routine opens the file(s) associated with {\tt alLog}.
 !
 ! The arguments are:
 ! \begin{description}
@@ -192,7 +189,7 @@ end subroutine
 
 !----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogSet - initialize an error object.
+! !IROUTINE: ESMF_LogSet - Initialize or set options for a Log.
 !
 ! !INTERFACE:
 subroutine ESMF_LogSet(aLog, verbose, flush, haltOnErr, haltOnWarn)
@@ -207,10 +204,10 @@ subroutine ESMF_LogSet(aLog, verbose, flush, haltOnErr, haltOnWarn)
 !
 ! !DESCRIPTION:
 !
-!   With the exception of the {\tt ESMF\_Log} object, all the arguments
-!   are optional.
-!   See the Examples section of the document for a discussion of how to use
-!   the routine.
+!   This routines sets the options for a Log.  With the exception of 
+!   the {\tt ESMF\_Log} object, all the arguments
+!   are optional.  See the Log Examples section for a 
+!   discussion of how to use this routine.
 !
 !   The arguments are:
 !   \begin{description}
@@ -266,7 +263,7 @@ end subroutine ESMF_LogSet
 
 !----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogGet - gets attributes of log object 
+! !IROUTINE: ESMF_LogGet - Get attributes of a Log 
 !
 ! !INTERFACE:
 subroutine ESMF_LogGet(aLog, verbose, flush, haltOnErr, haltOnWarn)
@@ -281,10 +278,10 @@ subroutine ESMF_LogGet(aLog, verbose, flush, haltOnErr, haltOnWarn)
 !
 ! !DESCRIPTION:
 !
-!   With the exception of the {\tt ESMF\_Log} object, all the arguments
-!   are optional.
-!   See the Examples section of the document for a discussion of how to use the
-!   routine.
+!   Gets the attributes of a Log.  With the exception of the 
+!   {\tt ESMF\_Log} object, all the arguments
+!   are optional. See the Log Examples section for a 
+!   discussion of how to use the routine.
 !  
 !   The arguments are:
 !   \begin{description}
@@ -317,11 +314,11 @@ end subroutine ESMF_LogGet
 !---------------------------------------------------------------------------------
 !BOP
 !
-! !IROUTINE: ESMF_LogWarnMsg  - writes a warning message to the log file
+! !IROUTINE: ESMF_LogWarnMsg  - Write a warning to a Log with a user message
 !
 ! !INTERFACE:
 !
-subroutine ESMF_LogWarnMsg_(aLog, errCode, line,file,dir,msg)
+subroutine ESMF_LogWarnMsg_(aLog, errCode, line, file, dir, msg)
 
 ! !ARGUMENTS:
     type(ESMF_Log) :: aLog
@@ -340,18 +337,14 @@ subroutine ESMF_LogWarnMsg_(aLog, errCode, line,file,dir,msg)
                                         
 
 ! !DESCRIPTION:
-!    This routine calls c\_esmf\_logerrmsg in ESMC\_LogErrInterface.C
-!    to write a warning message to the log file.  This warning
-!    message consists of the erroCode, a description of the warning, the 
-!    line number, file, and directory of the error, and a message. A 
-!    preprocessor macro adds the predefined preprocessor symbolic
-!    constants \_\_LINE\_\_, \_\_FILE\_\_, and \_\_DIR\_\_ when
-!    {\tt ESMF\_LogWarnMsg} is called user code.  Note,
-!    the value of \_\_DIR\_\_ 
-!    must be suppliled by the user (usually done in
-!    the makefile.).  By default, execution continues after encountering
-!    a warning, but by calling the routine ESMF\_LogWarnHalt(), the user
-!    can halt on warnings.
+!    This routine writes a warning message to the Log file(s).  This warning
+!    message consists of the {\tt errCode}, a description of the warning, the 
+!    line number, file, and directory of the error, and a user-specified 
+!    message. A preprocessor macro adds the predefined preprocessor symbolic
+!    constants {\tt \_\_LINE\_\_}, {\tt \_\_FILE\_\_}, and {\tt \_\_DIR\_\_}
+!    when {\tt ESMF\_LogWarnMsg} is called user code.  Note,
+!    the value of {\tt \_\_DIR\_\_} must be suppliled by the user 
+!    (usually done in the makefile).  
 !
 !    The arguments are
 !    \begin{description}
@@ -392,7 +385,7 @@ subroutine ESMF_LogWarnMsg_(aLog, errCode, line,file,dir,msg)
 
 !-----------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogWarn - writes a warning message to log file
+! !IROUTINE: ESMF_LogWarn - Write a standard warning to a Log 
 
 ! !INTERFACE:
   subroutine ESMF_LogWarn_(aLog, errCode,line,file,dir)
@@ -413,8 +406,8 @@ subroutine ESMF_LogWarnMsg_(aLog, errCode, line,file,dir,msg)
 
 !
 ! !DESCRIPTION:
-!   This routine is identical to {\tt ESMF\_LogWarnMsg}, except a msg is
-!   not written to the log file.
+!   This routine is identical to {\tt ESMF\_LogWarnMsg}, except a message is
+!   not written to the Log.
 !
 !   The arguments are:
 !   \begin{description}
@@ -448,7 +441,7 @@ subroutine ESMF_LogWarnMsg_(aLog, errCode, line,file,dir,msg)
 
 !-----------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogErr - writes a error message to log file
+! !IROUTINE: ESMF_LogErrMsg - Write an error to a Log with a user message
 
 ! !INTERFACE:
  subroutine ESMF_LogErrMsg_(aLog, errCode,line,file,dir,msg)
@@ -470,8 +463,14 @@ subroutine ESMF_LogWarnMsg_(aLog, errCode, line,file,dir,msg)
                                           
 
 ! !DESCRIPTION:
-!   This routine is identical to {\tt ESMF\_LogErrMsg}, except a msg is
-!   not written to the log file.
+!    This routine writes an error message to the Log file(s).  This 
+!    message consists of the {\tt errCode}, a description of the error, the 
+!    line number, file, and directory of the error, and a user-specified 
+!    message. A preprocessor macro adds the predefined preprocessor symbolic
+!    constants {\tt \_\_LINE\_\_}, {\tt \_\_FILE\_\_}, and {\tt \_\_DIR\_\_}
+!    when {\tt ESMF\_LogWarnMsg} is called user code.  Note,
+!    the value of {\tt \_\_DIR\_\_} must be suppliled by the user 
+!    (usually done in the makefile).  
 !
 !   The arguments are:
 !   \begin{description}
@@ -504,7 +503,7 @@ subroutine ESMF_LogWarnMsg_(aLog, errCode, line,file,dir,msg)
  end subroutine ESMF_LogErrMsg_
 !-----------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogErr - writes a error message to log file
+! !IROUTINE: ESMF_LogErr - Write an error message to a Log
 
 ! !INTERFACE:
  subroutine  ESMF_LogErr_(aLog, errCode,line,file,dir)
@@ -556,7 +555,7 @@ subroutine ESMF_LogWarnMsg_(aLog, errCode, line,file,dir,msg)
  end subroutine ESMF_LogErr_
 
 !----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LogOpenFortran
 !
 ! !INTERFACE:
@@ -595,7 +594,7 @@ subroutine ESMF_LogOpenFortran(isOpen, unitNumber, nameLogFile)
 !
 ! \end{description}
 !
-!EOP
+!EOPI
 
    integer :: status, i
 
@@ -628,7 +627,7 @@ subroutine ESMF_LogOpenFortran(isOpen, unitNumber, nameLogFile)
 
 
 !----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LogCloseFortran
 !
 ! !INTERFACE:
@@ -649,7 +648,7 @@ subroutine ESMF_LogOpenFortran(isOpen, unitNumber, nameLogFile)
 ! standard Fortran unit number for I/O
 !
 ! \end{description}
-!EOP
+!EOPI
   
     close(unitNumber)
 
@@ -658,7 +657,7 @@ end subroutine ESMF_LogCloseFortran
 
 !----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogPrintNewLine - prints a newline character
+! !IROUTINE: ESMF_LogPrintNewLine - Print a newline character
 !
 ! !INTERFACE:
   subroutine ESMF_LogPrintNewLine(unitNumber,flushSet)
@@ -691,8 +690,8 @@ end subroutine ESMF_LogCloseFortran
 
 
 !----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_LogPrintString - prints a string
+!BOPI
+! !IROUTINE: ESMF_LogPrintString - Print a string.
 !
 ! !INTERFACE:
  subroutine ESMF_LogPrintString(unitNumber,stringToPrint,flushSet)
@@ -703,7 +702,7 @@ end subroutine ESMF_LogCloseFortran
   character(len=*), intent(in)::stringToPrint
 
 ! !DESCRIPTION:
-! This routine, is used by ESMC\_LogPrint() and
+! This routine is used by ESMC\_LogPrint() and
 ! ESMC\_LogPrintHeader() in the Log class to print a string.
 ! Ordinarily, these Log routines would
 ! have just used fprintf.  However, because we need to allow one
@@ -726,7 +725,7 @@ end subroutine ESMF_LogCloseFortran
 ! If set to ESMF\_TRUE, out flushed.
 !
 ! \end{description}
-!EOP
+!EOPI
 
   integer :: i,istat
 
