@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.10 2004/10/13 17:10:24 nscollins Exp $
+#  $Id: build_rules.mk,v 1.11 2004/10/28 16:42:40 nscollins Exp $
 #
 #  Darwin.nag.default.mk
 #
@@ -112,7 +112,7 @@ SH_LD		   = cc
 C_CC		   = cc
 C_FC		   = f95 
 CXX_CC		   = g++ -fPIC
-CXX_FC		   = f95 -YEXT_NAMES=LCS -s 
+CXX_FC		   = f95 
 
 C_FC_MOD           = -I
 C_CLINKER_SLFLAG   = -Wl,-rpath,
@@ -132,7 +132,7 @@ O_FOPTFLAGS	   = -O
 #
 # Fortran compiler 
 #
-FFLAGS          = -w=x77 -kind=byte -dusty -mismatch_all -gline
+FFLAGS          = -kind=byte -w=x77 -mismatch_all -gline
 F_FREECPP       = -free -fpp
 F_FIXCPP        = -fixed -fpp
 F_FREENOCPP     = -free
@@ -143,14 +143,14 @@ F_FIXNOCPP      = -fixed
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CLINKER	   = ${CXX_CC}
-CXX_FLINKER	   = ${CXX_CC}
+CXX_FLINKER	   = ${CXX_FC}
 CXX_CCV		   = ${CXX_CC} --version
 LOCAL_INCLUDE      =
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
-C_F90CXXLD         = ${CXX_CC}
-C_F90CXXLIBS       = ${MPI_LIB} -L/usr/local/lib/NAGware -lstdc++ -lf90math -lfio -lf77math
-C_CXXF90LD         = ${CXX_CC}
-C_CXXF90LIBS       = ${MPI_LIB} -L/usr/local/lib/NAGware -lstdc++ -lf90math -lfio -lf77math
+C_F90CXXLD         = ${CXX_FC}
+C_F90CXXLIBS       = ${MPI_LIB} -L/usr/local/lib/NAGware -lf96 -lstdc++
+C_CXXF90LD         = ${CXX_FC}
+C_CXXF90LIBS       = ${MPI_LIB} -L/usr/local/lib/NAGware -lf96 -lstdc++
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
