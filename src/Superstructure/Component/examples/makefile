@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/04/15 20:09:31 svasquez Exp $ 
+# $Id: makefile,v 1.11 2003/09/18 17:12:13 flanigan Exp $ 
 
 ALL:  examples
 
@@ -14,256 +14,138 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Superstructure/Component/examples
 
-TESTEXAMPLES_1  = \
-	ESMC_AppMainEx RUN_ESMC_AppMainEx ESMC_AppMainEx.rm \
-	ESMC_CplEx RUN_ESMC_CplEx ESMC_CplEx.rm \
-	ESMC_GCompEx RUN_ESMC_GCompEx ESMC_GCompEx.rm \
-	ESMC_StateEx RUN_ESMC_StateEx ESMC_StateEx.rm \
-	ESMC_XformEx RUN_ESMC_XformEx ESMC_XformEx.rm 
 
-TESTEXAMPLES_3  = \
-	ESMF_AppMainEx RUN_ESMF_AppMainEx ESMF_AppMainEx.rm \
-	ESMF_CplEx RUN_ESMF_CplEx ESMF_CplEx.rm \
-	ESMF_GCompEx RUN_ESMF_GCompEx ESMF_GCompEx.rm \
-	ESMF_StateEx RUN_ESMF_StateEx ESMF_StateEx.rm \
-	ESMF_XformEx RUN_ESMF_XformEx ESMF_XformEx.rm 
-
-TESTEXAMPLES_4  = \
-	ESMC_AppMainEx RUN_ESMC_AppMainExUNI ESMC_AppMainEx.rm \
-	ESMC_CplEx RUN_ESMC_CplExUNI ESMC_CplEx.rm \
-	ESMC_GCompEx RUN_ESMC_GCompExUNI ESMC_GCompEx.rm \
-	ESMC_StateEx RUN_ESMC_StateExUNI ESMC_StateEx.rm \
-	ESMC_XformEx RUN_ESMC_XformExUNI ESMC_XformEx.rm 
-
-TESTEXAMPLES_9  = \
-	ESMF_AppMainEx RUN_ESMF_AppMainEx ESMF_AppMainEx.rm \
-	ESMF_CplEx RUN_ESMF_CplEx ESMF_CplEx.rm \
-	ESMF_GCompEx RUN_ESMF_GCompEx ESMF_GCompEx.rm \
-	ESMF_StateEx RUN_ESMF_StateEx ESMF_StateEx.rm \
-	ESMF_XformEx RUN_ESMF_XformEx ESMF_XformEx.rm 
+EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_AppMainEx \
+                 $(ESMF_EXDIR)/ESMC_CplEx \
+                 $(ESMF_EXDIR)/ESMC_GCompEx \
+                 $(ESMF_EXDIR)/ESMC_StateEx \
+                 $(ESMF_EXDIR)/ESMC_XformEx \
+                 $(ESMF_EXDIR)/ESMF_AppMainEx \
+                 $(ESMF_EXDIR)/ESMF_CplEx \
+                 $(ESMF_EXDIR)/ESMF_GCompEx \
+                 $(ESMF_EXDIR)/ESMF_StateEx \
+                 $(ESMF_EXDIR)/ESMF_XformEx 
 
 
-EXAMPLESF  = ESMF_AppMainEx.F90 ESMF_CplEx.F90 ESMF_GCompEx.F90 \
-             ESMF_StateEx.F90 ESMF_XformEx.F90
+EXAMPLES_RUN   = run_ESMC_AppMainEx \
+                 run_ESMC_CplEx \
+                 run_ESMC_GCompEx \
+                 run_ESMC_StateEx \
+                 run_ESMC_XformEx \
+                 run_ESMF_AppMainEx \
+                 run_ESMF_CplEx \
+                 run_ESMF_GCompEx \
+                 run_ESMF_StateEx \
+                 run_ESMF_XformEx   
 
-EXAMPLESC  = ESMC_AppMainEx.C ESMC_CplEx.C ESMC_GCompEx.C \
-             ESMC_StateEx.C ESMC_XformEx.C
 
-
-
-examples:  ESMF_AppMainEx ESMF_CplEx ESMF_GCompEx ESMF_StateEx ESMF_XformEx \
-           ESMC_AppMainEx ESMC_CplEx ESMC_GCompEx ESMC_StateEx ESMC_XformEx
-
+EXAPMLES_RUN_UNI = run_ESMC_AppMainEx_uni \
+                   run_ESMC_CplEx_uni \
+                   run_ESMC_GCompEx_uni \
+                   run_ESMC_StateEx_uni \
+                   run_ESMC_XformEx_uni \
+                   run_ESMF_AppMainEx_uni \
+                   run_ESMF_CplEx_uni \
+                   run_ESMF_GCompEx_uni \
+                   run_ESMF_StateEx_uni \
+                   run_ESMF_XformEx_uni   
 
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-
-#------------------------
-# Fortran examples
-#------------------------
-
-#------------------------
-ESMF_AppMainCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
-
-ESMF_AppMainEx: ESMF_AppMainEx.o  
-	-${F90CXXLD} -g -o ESMF_AppMainEx ESMF_AppMainEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
-	${RM} ESMF_AppMainEx.o
-
-RUN_ESMF_AppMainEx:
-	-@rm -f testlog stdlog.* logfile.* ESMF_AppMainEx.tmps
-	-${MPIRUN} -np 4 ESMF_AppMainEx > ESMF_AppMainEx.stdout
-
-RUN_ESMF_AppMainExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_AppMainEx.tmps
-	-${MPIRUN} -np 1 ESMF_AppMainEx > ESMF_AppMainEx.stdout
-
-ESMF_AppMainEx.rm:
-	echo "ESMF_AppMainEx.rm target called here."
+CLEANDIRS   = coredir.*
+CLEANFILES  = *.o *.mod *.txt *.stdout NULL core $(EXAMPLES_BUILD)
+CLOBBERDIRS =
 
 
-#------------------------
-ESMF_CplCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
+#
+# ESMC_AppMainEx
+#
+run_ESMC_AppMainEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_AppMainEx > $(ESMF_EXDIR)/ESMC_AppMainEx.stdout
 
-ESMF_CplEx: ESMF_CplEx.o  
-	-${F90CXXLD} -g -o ESMF_CplEx ESMF_CplEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
-	${RM} ESMF_CplEx.o
+run_ESMC_AppMainEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_AppMainEx > $(ESMF_EXDIR)/ESMC_AppMainEx.stdout
 
-RUN_ESMF_CplEx:
-	-@rm -f testlog stdlog.* logfile.* ESMF_CplEx.tmps
-	-${MPIRUN} -np 4 ESMF_CplEx > ESMF_CplEx.stdout
+#
+# ESMC_CplEx
+#
+run_ESMC_CplEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_CplEx > $(ESMF_EXDIR)/ESMC_CplEx.stdout
 
-RUN_ESMF_CplExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_CplEx.tmps
-	-${MPIRUN} -np 1 ESMF_CplEx > ESMF_CplEx.stdout
+run_ESMC_CplEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_CplEx > $(ESMF_EXDIR)/ESMC_CplEx.stdout
 
-ESMF_CplEx.rm:
-	echo "ESMF_CplEx.rm target called here."
+#
+# ESMC_GCompEx
+#
+run_ESMC_GCompEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_GCompEx > $(ESMF_EXDIR)/ESMC_GCompEx.stdout
 
+run_ESMC_GCompEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_GCompEx > $(ESMF_EXDIR)/ESMC_GCompEx.stdout
 
-#------------------------
-ESMF_GCompCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
+#
+# ESMC_StateEx
+#
+run_ESMC_StateEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_StateEx > $(ESMF_EXDIR)/ESMC_StateEx.stdout
 
-ESMF_GCompEx: ESMF_GCompEx.o  
-	-${F90CXXLD} -g -o ESMF_GCompEx ESMF_GCompEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
-	${RM} ESMF_GCompEx.o
+run_ESMC_StateEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_StateEx > $(ESMF_EXDIR)/ESMC_StateEx.stdout
 
-RUN_ESMF_GCompEx:
-	-@rm -f testlog stdlog.* logfile.* ESMF_GCompEx.tmps
-	-${MPIRUN} -np 4 ESMF_GCompEx > ESMF_GCompEx.stdout
+#
+# ESMC_XformEx
+#
+run_ESMC_XformEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_XformEx > $(ESMF_EXDIR)/ESMC_XformEx.stdout
 
-RUN_ESMF_GCompExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_GCompEx.tmps
-	-${MPIRUN} -np 1 ESMF_GCompEx > ESMF_GCompEx.stdout
-
-ESMF_GCompEx.rm:
-	echo "ESMF_GCompEx.rm target called here."
-
-
-#------------------------
-ESMF_StateCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
-
-ESMF_StateEx: ESMF_StateEx.o  
-	-${F90CXXLD} -g -o ESMF_StateEx ESMF_StateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
-	${RM} ESMF_StateEx.o
-
-RUN_ESMF_StateEx:
-	-@rm -f testlog stdlog.* logfile.* ESMF_StateEx.tmps
-	-${MPIRUN} -np 4 ESMF_StateEx > ESMF_StateEx.stdout
-
-RUN_ESMF_StateExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_StateEx.tmps
-	-${MPIRUN} -np 1 ESMF_StateEx > ESMF_StateEx.stdout
-
-ESMF_StateEx.rm:
-	echo "ESMF_StateEx.rm target called here."
+run_ESMC_XformEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_XformEx > $(ESMF_EXDIR)/ESMC_XformEx.stdout
 
 
-#------------------------
-ESMF_XformCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
+#
+# EMSF_AppMainEx
+#
+run_EMSF_AppMainEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/EMSF_AppMainEx > $(ESMF_EXDIR)/EMSF_AppMainEx.stdout
 
-ESMF_XformEx: ESMF_XformEx.o  
-	-${F90CXXLD} -g -o ESMF_XformEx ESMF_XformEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
-	${RM} ESMF_XformEx.o
+run_EMSF_AppMainEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/EMSF_AppMainEx > $(ESMF_EXDIR)/EMSF_AppMainEx.stdout
 
-RUN_ESMF_XformEx:
-	-@rm -f testlog stdlog.* logfile.* ESMF_XformEx.tmps
-	-${MPIRUN} -np 4 ESMF_XformEx > ESMF_XformEx.stdout
+#
+# EMSF_CplEx
+#
+run_EMSF_CplEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/EMSF_CplEx > $(ESMF_EXDIR)/EMSF_CplEx.stdout
 
-RUN_ESMF_XformExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_XformEx.tmps
-	-${MPIRUN} -np 1 ESMF_XformEx > ESMF_XformEx.stdout
+run_EMSF_CplEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/EMSF_CplEx > $(ESMF_EXDIR)/EMSF_CplEx.stdout
 
-ESMF_XformEx.rm:
-	echo "ESMF_XformEx.rm target called here."
+#
+# EMSF_GCompEx
+#
+run_EMSF_GCompEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/EMSF_GCompEx > $(ESMF_EXDIR)/EMSF_GCompEx.stdout
 
+run_EMSF_GCompEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/EMSF_GCompEx > $(ESMF_EXDIR)/EMSF_GCompEx.stdout
 
-#------------------------
-# C++ examples
-#------------------------
+#
+# EMSF_StateEx
+#
+run_EMSF_StateEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/EMSF_StateEx > $(ESMF_EXDIR)/EMSF_StateEx.stdout
 
-#------------------------
-ESMC_AppMainCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
+run_EMSF_StateEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/EMSF_StateEx > $(ESMF_EXDIR)/EMSF_StateEx.stdout
 
-ESMC_AppMainEx: ESMC_AppMainEx.o  
-	-${F90CXXLD} -g -o ESMC_AppMainEx ESMC_AppMainEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
-	${RM} ESMC_AppMainEx.o
+#
+# EMSF_XformEx
+#
+run_EMSF_XformEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/EMSF_XformEx > $(ESMF_EXDIR)/EMSF_XformEx.stdout
 
-RUN_ESMC_AppMainEx:
-	-@rm -f testlog stdlog.* logfile.* ESMC_AppMainEx.tmps
-	-${MPIRUN} -np 4 ESMC_AppMainEx > ESMC_AppMainEx.stdout
-
-RUN_ESMC_AppMainExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMC_AppMainEx.tmps
-	-${MPIRUN} -np 1 ESMC_AppMainEx > ESMC_AppMainEx.stdout
-
-ESMC_AppMainEx.rm:
-	echo "ESMC_AppMainEx.rm target called here."
-
-
-#------------------------
-ESMC_CplCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
-
-ESMC_CplEx: ESMC_CplEx.o  
-	-${F90CXXLD} -g -o ESMC_CplEx ESMC_CplEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
-	${RM} ESMC_CplEx.o
-
-RUN_ESMC_CplEx:
-	-@rm -f testlog stdlog.* logfile.* ESMC_CplEx.tmps
-	-${MPIRUN} -np 4 ESMC_CplEx > ESMC_CplEx.stdout
-
-RUN_ESMC_CplExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMC_CplEx.tmps
-	-${MPIRUN} -np 1 ESMC_CplEx > ESMC_CplEx.stdout
-
-ESMC_CplEx.rm:
-	echo "ESMC_CplEx.rm target called here."
-
-
-#------------------------
-ESMC_GCompCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
-
-ESMC_GCompEx: ESMC_GCompEx.o  
-	-${F90CXXLD} -g -o ESMC_GCompEx ESMC_GCompEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
-	${RM} ESMC_GCompEx.o
-
-RUN_ESMC_GCompEx:
-	-@rm -f testlog stdlog.* logfile.* ESMC_GCompEx.tmps
-	-${MPIRUN} -np 4 ESMC_GCompEx > ESMC_GCompEx.stdout
-
-RUN_ESMC_GCompExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMC_GCompEx.tmps
-	-${MPIRUN} -np 1 ESMC_GCompEx > ESMC_GCompEx.stdout
-
-ESMC_GCompEx.rm:
-	echo "ESMC_GCompEx.rm target called here."
-
-
-#------------------------
-ESMC_StateCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
-
-ESMC_StateEx: ESMC_StateEx.o  
-	-${F90CXXLD} -g -o ESMC_StateEx ESMC_StateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
-	${RM} ESMC_StateEx.o
-
-RUN_ESMC_StateEx:
-	-@rm -f testlog stdlog.* logfile.* ESMC_StateEx.tmps
-	-${MPIRUN} -np 4 ESMC_StateEx > ESMC_StateEx.stdout
-
-RUN_ESMC_StateExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMC_StateEx.tmps
-	-${MPIRUN} -np 1 ESMC_StateEx > ESMC_StateEx.stdout
-
-ESMC_StateEx.rm:
-	echo "ESMC_StateEx.rm target called here."
-
-
-#------------------------
-ESMC_XformCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
-
-ESMC_XformEx: ESMC_XformEx.o  
-	-${F90CXXLD} -g -o ESMC_XformEx ESMC_XformEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
-	${RM} ESMC_XformEx.o
-
-RUN_ESMC_XformEx:
-	-@rm -f testlog stdlog.* logfile.* ESMC_XformEx.tmps
-	-${MPIRUN} -np 4 ESMC_XformEx > ESMC_XformEx.stdout
-
-RUN_ESMC_XformExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMC_XformEx.tmps
-	-${MPIRUN} -np 1 ESMC_XformEx > ESMC_XformEx.stdout
-
-ESMC_XformEx.rm:
-	echo "ESMC_XformEx.rm target called here."
-
+run_EMSF_XformEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/EMSF_XformEx > $(ESMF_EXDIR)/EMSF_XformEx.stdout
