@@ -87,8 +87,9 @@ The ESMF shall operate on the following platforms:
 \end{reqlist}
 
 \sreq{Performance} \label{perf}
-The framework shall not increase the execution time of an existing code 
-written without the framework by more than 10\% on scalar 
+Fully compliant adoption of the framework shall not increase the execution time 
+of the milestone G codes, which are maintained and developed outside the 
+framework throughout the project, by more than 10\% on scalar 
 architectures within their scalable range.
 \begin{reqlist}
 {\bf Priority:} 1. \\
@@ -122,12 +123,19 @@ precision.
 
 \sreq{Runtime configurability} The ESMF shall allow the user to set
 certain application parameters at runtime.
+\begin{reqlist}
+{\bf Notes:} There are many runtime configurable parameters that 
+need to be set for codes operating as framework components.
+The sub-requiremente listed here \ref{req:gr:Configurable_decomposition} - 
+\ref{req:gr:Configurable_paths_and_directories} are some, but not all of these.
+\end{reqlist}
 
 \ssreq{Configurable decomposition} ESMF shall allow domain
 decomposition and assignment of domains to processors, nodes, and/or
 threads to be configurable at runtime.  The choice of parallelization
 mechanism (message passing/multithreading/combination) must be
 configurable at runtime.
+\label{req:gr:Configurable_decomposition}
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} CAM-EUL. \\
@@ -137,6 +145,17 @@ configurable at runtime.
 
 \ssreq{Configurable resolution}
 ESMF shall allow model resolution to be configurable at runtime.
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} all codes. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} System test.
+\end{reqlist}
+
+\ssreq{Configurable paths and directories}
+ESMF shall allow input and output paths and directories to be specified
+at runtime.
+\label{req:gr:Configurable_paths_and_directories}
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} all codes. \\
@@ -199,13 +218,18 @@ results.
 
 \sreq{Error handling}
 The ESMF shall be instrumented for error handling consistly across the
-framework.  The user shall receive ample information on errors.
+framework.  The user shall receive ample information on errors including
+comprehensive error logging.
+\label{req:gr:error_handling}
 \begin{reqlist}
   {\bf Priority:} 1. \\
   {\bf Source:} Required by all codes. \\
   {\bf Status:} Approved-1. \\
   {\bf Verification:} Interface inspection, code inspection, unit
   test, system test.
+  {\bf Notes} Components will be required to use ESMF error
+handling utilities for fatal erros to be classified as 
+{\it well-behaved} ESMF components.
 \end{reqlist}
 
 \sreq{Modularity}
@@ -213,18 +237,22 @@ Layers of the framework will be designed to adapt to restructuring of
 other parts of the framework and user-supplied components.  For
 example, the coupling layers should be able to adapt to different
 implementations and data structures of component models.
+A modular design and implementation approach must be used that ensures
+parts of the framework are independent of one another and can be 
+developed concurrently.
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} Required for interoperability Milestones I and J. \\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Interoperability experiments.
+{\bf Verification:} Interoperability experiments and incremental
+adoption by deployment teams.
 \end{reqlist}
 
 \sreq{Ease of adoption}
 It must be straightforward to integrate ESMF into an application 
-that is reasonably modular.  We adopt as a goal that such applications should
-need to modify no more than 2\% of their source code to utilize the coupling
-features of ESMF.
+that is reasonably modular. Adapting an existing modular application
+to use the frameworks coupling services shall require no more
+than 2\% modification of the applications source code.
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} GFDL, NSIPP. \\
