@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.8 2003/04/02 17:24:56 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.9 2003/04/05 01:55:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.8 2003/04/02 17:24:56 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.9 2003/04/05 01:55:33 eschwab Exp $'
 
 !==============================================================================
 !
@@ -268,11 +268,14 @@
 ! !IROUTINE: ESMF_TimeIntervalGet - Get value in user-specified units
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalGet(timeinterval, D, H, M, S, MS, US, NS, &
-                                      d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
+      subroutine ESMF_TimeIntervalGet(timeinterval, YY, MO, D, H, M, S, MS, &
+                                      US, NS, d_, h_, m_, s_, ms_, us_, ns_, &
+                                      Sn, Sd, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      integer, intent(out), optional :: YY
+      integer, intent(out), optional :: MO
       integer, intent(out), optional :: D
       integer, intent(out), optional :: H
       integer, intent(out), optional :: M
@@ -299,6 +302,10 @@
 !     \begin{description}
 !     \item[timeinterval]
 !          The object instance to query
+!     \item[{[YY]}]
+!          Integer years
+!     \item[{[MO]}]
+!          Integer months
 !     \item[{[D]}]
 !          Integer days
 !     \item[{[H]}]
@@ -340,8 +347,9 @@
 !EOP
 
       ! use optional args for any subset
-!      call c_ESMC_TimeIntervalGet(timeinterval, D, H, M, S, MS, US, NS, &
-!                                  d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
+      call c_ESMC_TimeIntervalGet(timeinterval, YY, MO, D, H, M, S, MS, US, &
+                                  NS, d_, h_, m_, s_, ms_, us_, ns_, &
+                                  Sn, Sd, rc)
     
       end subroutine ESMF_TimeIntervalGet
 
@@ -350,11 +358,14 @@
 ! !IROUTINE: ESMF_TimeIntervalSet - Set value in user-specified units
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalSet(timeinterval, D, H, M, S, MS, US, NS, &
-                                      d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
+      subroutine ESMF_TimeIntervalSet(timeinterval, YY, MO, D, H, M, S, MS, &
+                                      US, NS, d_, h_, m_, s_, ms_, us_, ns_, &
+                                      Sn, Sd, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      integer, intent(in), optional :: YY
+      integer, intent(in), optional :: MO
       integer, intent(in), optional :: D
       integer, intent(in), optional :: H
       integer, intent(in), optional :: M
@@ -381,6 +392,10 @@
 !     \begin{description}
 !     \item[timeinterval]
 !          The object instance to query
+!     \item[{[YY]}]
+!          Integer years
+!     \item[{[MO]}]
+!          Integer months
 !     \item[{D]}]
 !          Integer days
 !     \item[{H]}]
@@ -422,8 +437,9 @@
 !EOP
     
       ! use optional args for any subset
-!       call c_ESMC_TimeIntervalSet(timeinterval, D, H, M, S, MS, US, NS, &
-!                                   d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
+       call c_ESMC_TimeIntervalSet(timeinterval, YY, MO, D, H, M, S, MS, US, &
+                                   NS, d_, h_, m_, s_, ms_, us_, ns_, &
+                                   Sn, Sd, rc)
     
       end subroutine ESMF_TimeIntervalSet
 
