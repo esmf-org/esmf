@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.11 2004/03/09 21:52:05 svasquez Exp $
+! $Id: ESMF_DELayout.F90,v 1.12 2004/03/15 22:36:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -134,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.11 2004/03/09 21:52:05 svasquez Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.12 2004/03/15 22:36:41 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -231,7 +231,7 @@
 !
 !  The return value is a new DELayout.
 !    
-!  The arguments are:
+!  The argument is:
 !  \begin{description}
 !   \item[[rc]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -280,13 +280,13 @@
       type(ESMF_DELayout) :: ESMF_DELayoutCreateFromParent
 !
 ! !ARGUMENTS:
-      type(ESMF_DELayout), intent(inout) :: parent  ! to allocate DEs from
-      integer, intent(in) :: ndim                   ! number of dimensions
-      integer, intent(in) :: lengths(:)             ! number of des in each dim
-      integer, intent(in) :: commtypes(:)           ! comm types in each dim
-      integer, intent(in), optional :: parent_offsets(:) ! offsets from parent 
-      integer, intent(in), optional :: de_indices(:)  ! parent de indices 
-      integer, intent(out), optional :: rc          ! return code
+      type(ESMF_DELayout), intent(inout) :: parent  
+      integer, intent(in) :: ndim                  
+      integer, intent(in) :: lengths(:)           
+      integer, intent(in) :: commtypes(:)        
+      integer, intent(in), optional :: parent_offsets(:) 
+      integer, intent(in), optional :: de_indices(:)  
+      integer, intent(out), optional :: rc          
 !
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_DELayout} using a parent {\tt ESMF\_DELayout}'s {\tt ESMF\_DE}s.  
@@ -373,11 +373,11 @@
       type(ESMF_DELayout) :: ESMF_DELayoutCreateFromDEList
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: delist(:)            ! list of processing elements
-      integer, intent(in) :: ndim                 ! number of dimensions
-      integer, intent(in) :: lengths(:)           ! number of des in each dim
-      integer, intent(in) :: commtypes(:)         ! comm types in each dim
-      integer, intent(out), optional :: rc        ! return code
+      integer, intent(in) :: delist(:)            
+      integer, intent(in) :: ndim                
+      integer, intent(in) :: lengths(:)         
+      integer, intent(in) :: commtypes(:)      
+      integer, intent(out), optional :: rc    
 !
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_DELayout} from a list of {\tt ESMF\_DE} indices.  
@@ -451,7 +451,7 @@
 ! !DESCRIPTION:
 !  Create a new empty {\tt ESMF\_DELayout} object.
 !
-!  The arguments are:
+!  The argument is:
 !  \begin{description}
 !   \item[[rc]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -540,8 +540,8 @@
       end subroutine ESMF_DELayoutDestroy
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutSetData - < desc here >
+!BOPI
+! !IROUTINE: ESMF_DELayoutSetData - Add data to an empty array.
 !
 ! !INTERFACE:
       subroutine ESMF_DELayoutSetData(layout, rc)
@@ -554,9 +554,18 @@
 !      Used only with the version of DELayoutCreate which creates an empty
 !      DELayout and allows the Data to be specified later.
 !
-!EOP
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        A {\tt ESMF\_DELayout}.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
 !
 ! TODO: code goes here
+!	Changed BOP/EOP to BOPI/EOPI until code is added.
 !
 !     Local variables.
       integer :: status                ! Error status
@@ -581,7 +590,7 @@
 ! Query for information from the layout.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DELayoutGet - <desc here>
 !
 ! !INTERFACE:
@@ -597,9 +606,10 @@
 !      only wants a single value, specify the argument by name.
 !      All the arguments after the layout input are optional to facilitate this
 !
-!EOP
+!EOPI 
 !
 ! TODO: code goes here
+!	Changed BOP/EOP to BOPI/EOPI until code is added.
 !
 !     Local variables.
       integer :: status                ! Error status
@@ -632,6 +642,16 @@
 !
 ! !DESCRIPTION:
 !      Returns the number of processors in the DELayout's processor list
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        A {\tt ESMF\_DELayout}.
+!     \item[nDEs]
+!        Number of DEs in layout.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
@@ -678,6 +698,18 @@
 !      only wants a single value, specify the argument by name.
 !      All the arguments after the layout input are optional to facilitate this.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        A {\tt ESMF\_DELayout}.
+!     \item[nx]
+!        Number of DEs in x direction.
+!     \item[ny]
+!        Number of DEs in y direction.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !EOP
 
 !     Local variables
@@ -718,6 +750,18 @@
 ! !DESCRIPTION:
 !      Returns information about the {\tt ESMF\_DELayout}.  For queries where the caller
 !      only wants a single value, specify the argument by name.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        A {\tt ESMF\_DELayout}.
+!     \item[x]
+!        x position of the DE in layout.
+!     \item[y]
+!        y position of the DE in layout.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 
@@ -766,6 +810,20 @@
 ! !DESCRIPTION:
 !      Returns information about the {\tt ESMF\_DELayout}. 
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        A {\tt ESMF\_DELayout}.
+!     \item[x]
+!        x position of the DE in layout.
+!     \item[y]
+!        y position of the DE in layout.
+!     \item[id]
+!        id of the DE at x,y.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !EOP
 
 !     Local variables.
@@ -811,6 +869,16 @@
 !
 ! !DESCRIPTION:
 !     Returns DE index id where the current execution is running.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        A {\tt ESMF\_DELayout}.
+!     \item[id]
+!        id of current execution DE.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
@@ -858,6 +926,20 @@
 !     DE index id in that layout.  Also takes the parent layout, and returns
 !     the corresponding parent DE index id for the same PE.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[child]
+!        The child {\tt ESMF\_DELayout}.
+!     \item[childid]
+!        The id of the child.
+!     \item[parent]
+!        The parent {\tt ESMF\_DELayout}.
+!     \item[parentid]
+!        The id of the parent.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !EOP
 ! !REQUIREMENTS:
 
@@ -903,6 +985,20 @@
 !     Takes a layout which was created as a child of a parent layout, and an
 !     DE index id in that layout.  Also takes the parent layout, and returns
 !     the corresponding parent DE index id for the same PE.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[parent]
+!        The parent {\tt ESMF\_DELayout}.
+!     \item[parentid]
+!        The id of the parent.
+!     \item[child]
+!        The child {\tt ESMF\_DELayout}.
+!     \item[childid]
+!        The id of the child.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
@@ -950,6 +1046,20 @@
 !     which is either this layout's parent or child, and returns the logical
 !     value to say whether this DE is contained in the other layout.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The first {\tt ESMF\_DELayout}.
+!     \item[deid]
+!        The DE id index of the first {\tt ESMF\_DELayout}.
+!     \item[other]
+!        The second {\tt ESMF\_DELayout} which must be parent or child of the first {\tt ESMF\_DELayout}.
+!     \item[exists]
+!        The logical value whether the DE is contained in the second {\tt ESMF\_DELayout}.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !EOP
 ! !REQUIREMENTS:
 
@@ -994,6 +1104,20 @@
 !
 ! !DESCRIPTION:
 !    Set local/global information
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.
+!     \item[global_counts]
+!	Total (global) number of elements per axis (array).
+!     \item[decompids]
+!	Decomposition identifier for each axis (aaray).
+!     \item[AIPtr]
+!	Pointer to array of AxisIndex structures.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !
 !EOP
@@ -1053,6 +1177,21 @@
 ! !DESCRIPTION:
 !    Parse an element count over the DEs along one axis of a layout
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.
+!     \item[axis]
+!       The axis to parse.
+!     \item[count]
+!       Total number of elements
+!     \item[countsPerDE]                     
+!       Array of number of elements per DE for the axis.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
 !EOP
 ! !REQUIREMENTS:
 
@@ -1103,6 +1242,29 @@
 !
 ! !DESCRIPTION:
 !     Performs an MPI-like Array Gather to a single processor for an int array.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.
+!     \item[DistArray]
+!       The distributed array.
+!     \item[global_dimlengths]
+!       The global dimension length.
+!     \item[localDimCounts]
+!       THe local dimension counts.
+!     \item[decompids]
+!       Decomposition identifier for each axis for the array.
+!     \item[AIPtr]
+!       Pointer to array of AxisIndex structures for exclusive data.
+!     \item[AIPtr2]
+!       Pointer to array of AxisIndex structures for total data.
+!     \item[GlobalArray]
+!       The returned Global Array.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:
@@ -1180,6 +1342,29 @@
 !
 ! !DESCRIPTION:
 !     Performs an MPI-like Array Gather to a single processor for a real array.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.
+!     \item[DistArray]
+!       The distributed array.
+!     \item[global_dimlengths]
+!       The global dimension length.
+!     \item[localDimCounts]
+!       The local dimension counts.
+!     \item[decompids]
+!       Decomposition identifier for each axis for the array.
+!     \item[AIPtr]
+!       Pointer to array of AxisIndex structures for exclusive data.
+!     \item[AIPtr2]
+!       Pointer to array of AxisIndex structures for total data.
+!     \item[GlobalArray]
+!       The returned Global Array.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !
 !
 !EOP
@@ -1259,6 +1444,28 @@
 ! !DESCRIPTION:
 !     Performs an MPI-like Array Gather to a single processor for a real*8 array.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.          
+!     \item[DistArray]
+!       The distributed array.
+!     \item[global_dimlengths]
+!       The global dimension length.
+!     \item[localDimCounts]
+!       The local dimension counts.
+!     \item[decompids]
+!       Decomposition identifier for each axis for the array.
+!     \item[AIPtr]
+!       Pointer to array of AxisIndex structures for exclusive data.
+!     \item[AIPtr2]
+!       Pointer to array of AxisIndex structures for total data.
+!     \item[GlobalArray]
+!       The returned Global Array.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:
@@ -1336,6 +1543,16 @@
 !      same I/O interface as Read/Write, but the default options are to
 !      select the fastest way to save data to disk.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.          
+!     \item[iospec]
+!       The file specifications.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !EOP
 !
 !     Local variables.
@@ -1368,13 +1585,23 @@
 !
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: name              ! layout name to restore
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
+      character (len = *), intent(in) :: name 
+      type(ESMF_IOSpec), intent(in), optional :: iospec    
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
 !      all data associated with a DELayout from the last call to Checkpoint.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[name]
+!        The name of the {\tt ESMF\_DELayout} to restore.
+!     \item[iospec]
+!       The file specifications,
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
@@ -1422,6 +1649,16 @@
 !     (see Checkpoint/Restore for quick data dumps.)  Details of I/O 
 !     options specified in the IOSpec derived type. 
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout} to store.
+!     \item[iospec]
+!       The file specifications,
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !
 !EOP
 
@@ -1461,6 +1698,16 @@
 !
 ! !DESCRIPTION:
 !     Used to read data from persistent storage in a variety of formats.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[name]
+!        The name of the {\tt ESMF\_DELayout} to read.
+!     \item[iospec]
+!       The file specifications.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !
 !EOP
@@ -1504,6 +1751,16 @@
 !
 ! !DESCRIPTION:
 !     Print contents of a {\tt ESMF\_DELayout}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[name]
+!        The {\tt ESMF\_DELayout} to print.
+!     \item[options]
+!       The print options.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 
@@ -1553,6 +1810,16 @@
 !
 ! !DESCRIPTION:
 !     Validate contents of a {\tt ESMF\_DELayout}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[name]
+!        The {\tt ESMF\_DELayout} to validate.
+!     \item[options]
+!       The validation options.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 
@@ -1607,6 +1874,23 @@
 ! !DESCRIPTION:
 !     Perform an MPI-like scatter from one DE to all DEs in a layout
 !
+!     The arguments are:
+!     \begin{description}                   
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.
+!     \item[snd]
+!       The send data array.
+!     \item[rcvArray]
+!       The received data length.
+!     \item[len]
+!       The data array chunk size.
+!     \item[srcDEid]
+!       The source DE performing the scatter.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
 !EOP
 
 !     Local variables.
@@ -1652,6 +1936,22 @@
 !
 ! !DESCRIPTION:
 !     Perform an MPI-like scatter from one DE to all DEs in a layout
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.
+!     \item[snd]
+!       The send data array.
+!     \item[rcvArray]
+!       The received data length.
+!     \item[len]
+!       The data array chunk size.
+!     \item[srcDEid]
+!       The source DE performing the scatter.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 
@@ -1699,6 +1999,22 @@
 ! !DESCRIPTION:
 !     Perform an MPI-like scatter from one DE to all DEs in a layout
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.
+!     \item[snd]
+!       The send data array.
+!     \item[rcvArray]
+!       The received data length.
+!     \item[len]
+!       The data array chunk size.
+!     \item[srcDEid]
+!       The source DE performing the scatter.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !EOP
 
 !     Local variables.
@@ -1744,6 +2060,22 @@
 !
 ! !DESCRIPTION:
 !     Perform an MPI-like scatter from one DE to all DEs in a layout
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.
+!     \item[snd]
+!       The send data array.
+!     \item[rcvArray]
+!       The received data length.
+!     \item[len]
+!       The data array chunk size.
+!     \item[srcDEid]
+!       The source DE performing the scatter.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 
@@ -1791,6 +2123,22 @@
 ! !DESCRIPTION:
 !     Performs an MPI-like Allreduce for an integer array
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.
+!     \item[dataArray]
+!       The integer data array.
+!     \item[ArrayLen]
+!       The length of the data array
+!     \item[op]
+!       The reduction operation (sum, min, max ...)
+!     \item[result]
+!       The resulting single integer value.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !EOP
 
 !     Local variables.
@@ -1837,6 +2185,26 @@
 ! !DESCRIPTION:
 !     Performs an MPI-like send-receive for a real array.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.
+!     \item[sArray]
+!       The send array.
+!     \item[rarray]
+!       The receive array.
+!     \item[snum]
+!       The send array length.
+!     \item[rnum]
+!       The receive array length.
+!     \item[sde_index]
+!       The send DE index.
+!     \item[rde_index]
+!       The receive DE index.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !EOP
 
 !     Local variables.
@@ -1877,6 +2245,15 @@
 !
 ! !DESCRIPTION:
 !     Synchronizes a set of processes in an {\tt ESMF\_DELayout}.
+!
+!     The arguments are:            
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !
 !EOP
 
@@ -1921,6 +2298,21 @@
 ! !DESCRIPTION:
 !     Broadcasts data from a root {\tt ESMF\_DE} to all other {\tt ESMF\_DE}s in
 !     the {\tt ESMF\_DELayout}.
+!
+!     The arguments are:            
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.
+!     \item[array]
+!       The buffer array.
+!     \item[num]
+!       The length of the buffer array.
+!     \item[rootde_index]
+!       The index of the source DE.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !
 !EOP
 
@@ -1968,6 +2360,24 @@
 !
 ! !DESCRIPTION:
 !     Perform an MPI-like Allgatherv for real*8 arrays across a layout.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.
+!     \item[sndArray]
+!       The send array.
+!     \item[sndLen]
+!       The length of the send array.
+!     \item[rcvArray]
+!       The receive array.
+!     \item[rcvLen]
+!       The length of the receive array.
+!     \item[rcvDispls]
+!       The array of receive arrat displacements.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 
@@ -2017,6 +2427,24 @@
 ! !DESCRIPTION:
 !     Perform an MPI-like Allgatherv for real*4 arrays across a layout.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.
+!     \item[sndArray]
+!       The send array.
+!     \item[sndLen]
+!       The length of the send array.
+!     \item[rcvArray]
+!       The receive array.
+!     \item[rcvLen]
+!       The length of the receive array.
+!     \item[rcvDispls]
+!       The array of receive arrat displacements.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !EOP
 
 !     Local variables.
@@ -2065,6 +2493,24 @@
 ! !DESCRIPTION:
 !     Perform an MPI-like Allgatherv for integer*4 arrays across a layout
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.
+!     \item[sndArray]
+!       The send array.
+!     \item[sndLen]
+!       The length of the send array.
+!     \item[rcvArray]
+!       The receive array.
+!     \item[rcvLen]
+!       The length of the receive array.
+!     \item[rcvDispls]
+!       The array of receive arrat displacements.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !EOP
 
 !     Local variables.
@@ -2112,6 +2558,24 @@
 !
 ! !DESCRIPTION:
 !     Perform an MPI-like Allgatherv for local arrays across a layout
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[layout]
+!        The {\tt ESMF\_DELayout}.
+!     \item[sndArray]
+!       The send array.
+!     \item[sndLen]
+!       The length of the send array.
+!     \item[rcvArray]
+!       The receive array.
+!     \item[rcvLen]
+!       The length of the receive array.
+!     \item[rcvDispls]
+!       The array of receive arrat displacements.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 
