@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.17 2003/03/21 23:02:06 jwolfe Exp $
+// $Id: ESMC_XPacket.h,v 1.18 2003/07/09 17:43:14 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -58,20 +58,21 @@
      // one of these per memory transfer
 
      int rank;
-     int left;
-     int right;
-     int strides[ESMF_MAXDIM];
-     int num[ESMF_MAXDIM];
+     int offset;
+     int contig_length;
+     int stride[ESMF_MAXDIM];
+     int rep_count[ESMF_MAXDIM];
      
 // !PUBLIC MEMBER FUNCTIONS:
 //
 
   public:
-    int ESMC_XPacketInit(int rank, int left, int right, int *strides, int *num);
+    int ESMC_XPacketInit(int rank, int offset, int contig_length, int *stride,
+                         int *rep_count);
 
  // accessor methods for class members
-    int ESMC_XPacketGet(int *nrank, int *nleft, int *nright, 
-                                                int *nstrides, int *nnum);
+    int ESMC_XPacketGet(int *nrank, int *noffset, int *ncontig_length, 
+                        int *nstride, int *nrep_count);
     //int ESMC_XPacketSet(<value type>  value);
 
  // miscellaneous fun stuff
