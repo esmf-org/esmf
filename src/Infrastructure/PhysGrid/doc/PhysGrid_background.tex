@@ -1,19 +1,32 @@
-% $Id: PhysGrid_background.tex,v 1.2 2002/03/07 02:49:02 cnh Exp $
+% $Id: PhysGrid_background.tex,v 1.3 2002/04/02 01:18:23 rhallberg Exp $
 
 \section{Background}
 
-  The ESMF Physical Grid facility (PhysGrid) describes the physical location of
-data and of all the points on a grid. In addition, PhysGrid provides an
-extensive range of metric terms (e.g. grid spacings and areas) associated with
-a grid.  Grid masks are generated through PhysGrid.
+
+  Earth system models use a variety of different discrete grids to represent
+continuous physical space. The ESMF Physical Grid (PhysGrid) element is 
+responsible for maintaining information about physical coordinate based 
+discretizations of simulation domains. Components may include and use 
+additional grid information internally, however, the only physical grid 
+information that framework operates on will come through PhysGrids. 
+
+  The information that the framework needs to represent in PhysGrid is  quite
+extensive. Coupled components need to be able to provide PhysGrid  information
+that is sufficiently detailed for regridding operators (see Regrid) which
+transfer field data between the components.  The primary ESMF codes employ
+finite-difference and finite-volume grids, spectral grids, unstructured
+land-surface grids and ungridded observational networks.  This requires
+PhysGrid to support an extensive range of metric terms (e.g. grid spacings,
+areas and volumes) and grid masks.  The ungridded observational networks are
+supported through the PhysGrid Location Stream facilities.
 
 \subsection{Location}
 
   PhysGrid is a part of the "Fields and Grids" portion of the infrastructure.
 PhysGrid interacts closely with the index spaces in the Distributed Grid
 facility (DistGrid); the creation of a DistGrid precedes the creation of a
-PhysGrid.  Most Fields exist at locations described via PhysGrid.  Regrid uses
-PhysGrid information.
+PhysGrid.  Most Fields exist at locations described via PhysGrid.  Regrid
+typically uses PhysGrid information.
 
 \subsection{Scope}
 
