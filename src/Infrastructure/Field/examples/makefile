@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.7 2003/09/17 22:10:44 cdeluca Exp $ 
+# $Id: makefile,v 1.8 2003/09/18 16:29:59 flanigan Exp $ 
 
-ALL: 
+ALL:  examples
 
 CFLAGS    =
 FFLAGS    =
@@ -14,16 +14,15 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Field/examples
 
-TESTEXAMPLES_3  = \
-	ESMF_FieldCreateEx RUN_ESMF_FieldCreateEx ESMF_FieldCreateEx.rm \
-	ESMC_FieldCreateEx RUN_ESMC_FieldCreateEx ESMC_FieldCreateEx.rm 
+EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_FieldCreateEx \
+                 $(ESMF_EXDIR)/ESMF_FieldCreateEx
 
-TESTEXAMPLES_9  = \
-	ESMF_FieldCreateEx RUN_ESMF_FieldCreateExUNI ESMF_FieldCreateEx.rm \
-	ESMC_FieldCreateEx RUN_ESMC_FieldCreateExUNI ESMC_FieldCreateEx.rm 
+EXAMPLES_RUN = run_ESMC_FieldCreateEx \
+               run_ESMF_FieldCreateEx 
 
-EXAMPLESF       = ESMF_FieldCreateEx.F90 
-EXAMPLESC       = ESMC_FieldCreateEx.C
+EXAPMLES_RUN_UNI = run_ESMC_FieldCreateEx_uni \
+                   run_ESMF_FieldCreateEx_uni
+
 
 include $(ESMF_DIR)/makefile
 
@@ -33,40 +32,24 @@ CLEANDIRS   =
 CLEANFILES  = *.o *.mod ESMF_FieldCreateEx ESMC_FieldCreateEx
 CLOBBERDIRS =
 
+#
+# ESMC_FieldCreateEx
+#
+run_ESMC_FieldCreateEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_FieldCreateEx > $(ESMF_EXDIR)/ESMC_FieldCreateEx.stdout
 
-examples: ESMF_FieldCreateEx ESMC_FieldCreateEx
+run_ESMC_FieldCreateEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_FieldCreateEx > $(ESMF_EXDIR)/ESMC_FieldCreateEx_uni.stdout
 
-ESMF_FieldCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
+#
+# ESMF_FieldCreateEx
+#
+run_ESMF_FieldCreateEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_FieldCreateEx > $(ESMF_EXDIR)/ESMF_FieldCreateEx.stdout
 
-ESMF_FieldCreateEx: ESMF_FieldCreateEx.o  chkopts
-	-${F90CXXLD} -o ESMF_FieldCreateEx ESMF_FieldCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_FieldCreateEx.o
-
-RUN_ESMF_FieldCreateEx:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldCreateEx.tmps
-	-${MPIRUN} -np 4 ESMF_FieldCreateEx > ESMF_FieldCreateEx.stdout
-
-RUN_ESMF_FieldCreateExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldCreateEx.tmps
-	-${MPIRUN} -np 1 ESMF_FieldCreateEx > ESMF_FieldCreateEx.stdout
-
-ESMF_FieldCreateEx.rm:
-	echo "ESMF_FieldCreateEx.rm target called here."
+run_ESMF_FieldCreateEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_FieldCreateEx > $(ESMF_EXDIR)/ESMF_FieldCreateEx_uni.stdout
 
 
-ESMC_FieldCreateEx: ESMC_FieldCreateEx.o  chkopts
-	-${CXXF90LD} -o ESMC_FieldCreateEx ESMC_FieldCreateEx.o ${ESMC_TIME_LIB} -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMC_FieldCreateEx.o
 
-RUN_ESMC_FieldCreateEx:
-	-@rm -f testlog stdlog.* logfile.* ESMC_FieldCreateEx.tmps
-	-${MPIRUN} -np 4 ESMC_FieldCreateEx > ESMC_FieldCreateEx.stdout
-
-RUN_ESMC_FieldCreateExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMC_FieldCreateEx.tmps
-	-${MPIRUN} -np 1 ESMC_FieldCreateEx > ESMC_FieldCreateEx.stdout
-
-ESMC_FieldCreateEx.rm:
-	echo "ESMC_FieldCreateEx.rm target called here."
 
