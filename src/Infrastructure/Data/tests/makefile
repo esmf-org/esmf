@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/01/16 22:29:26 nscollins Exp $ 
+# $Id: makefile,v 1.4 2003/02/10 16:45:34 nscollins Exp $ 
 
 ALL: 
 
@@ -15,45 +15,54 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/Data/tests
 
-tests:    ESMF_ArrayTest
 
 TESTEXAMPLES_3  = \
-	ESMF_ArrayTest RUN_ESMF_ArrayTest ESMF_ArrayTest.rm
+	ESMF_ArrayTest RUN_ESMF_ArrayTest ESMF_ArrayTest.rm \
+	ESMF_ArrayBasic RUN_ESMF_ArrayBasic ESMF_ArrayBasic.rm
 
 TESTEXAMPLES_9  = \
-	ESMF_ArrayTest RUN_ESMF_ArrayTestUNI ESMF_ArrayTest.rm
+	ESMF_ArrayTest RUN_ESMF_ArrayTestUNI ESMF_ArrayTest.rm \
+	ESMF_ArrayBasic RUN_ESMF_ArrayBasicUNI ESMF_ArrayBasic.rm
 
-EXAMPLESF       = ESMF_ArrayTest.F90
+TESTSF       = ESMF_ArrayTest.F90 ESMF_ArrayBasic.F90
 
-test:	ESMF_ArrayTest
+test tests: chkdir_tests ESMF_ArrayTest ESMF_ArrayBasic
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
-ESMF_ArrayCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
 
-ESMF_ArrayTest: ESMF_ArrayTest.o  chkopts
+##
+
+ESMF_ArrayTest: ESMF_ArrayTest.o  
 	${F90CXXLD} -g -o ESMF_ArrayTest ESMF_ArrayTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
 	${RM} ESMF_ArrayTest.o
 
 RUN_ESMF_ArrayTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayTest.tmps
 	${MPIRUN} -np 4 ESMF_ArrayTest > ESMF_ArrayTest.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_ArrayTest.tmp
-	#@if (diff ESMF_ArrayTest.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_ArrayTest.out) then \
-	#echo "PASS ArrayTest test" > ${ESMC_TESTDIR}/ESMF_ArrayTest.log; else \
-	#echo "FAIL ArrayTest test" > ${ESMC_TESTDIR}/ESMF_ArrayTest.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_ArrayTest.tmp optlog
 
 RUN_ESMF_ArrayTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayTest.tmps
 	${MPIRUN} -np 1 ESMF_ArrayTest > ESMF_ArrayTest.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_ArrayTest.tmp
-	#@if (diff ESMF_ArrayTest.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_ArrayTest.outuni) then \
-	#echo "PASS ArrayTest test" > ${ESMC_TESTDIR}/ESMF_ArrayTest.log; else \
-	#echo "FAIL ArrayTest test" > ${ESMC_TESTDIR}/ESMF_ArrayTest.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_ArrayTest.tmp optlog
 
 ESMF_ArrayTest.rm:
-	echo "ESMF_ArrayTest.rm target called here."
+	-@echo "ESMF_ArrayTest.rm target called here."
+##
+
+##
+ESMF_ArrayBasic: ESMF_ArrayBasic.o  
+	${F90CXXLD} -g -o ESMF_ArrayBasic ESMF_ArrayBasic.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
+	${RM} ESMF_ArrayBasic.o
+
+RUN_ESMF_ArrayBasic:
+	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayBasic.tmps
+	${MPIRUN} -np 4 ESMF_ArrayBasic > ESMF_ArrayBasic.stdout
+
+RUN_ESMF_ArrayBasicUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayBasic.tmps
+	${MPIRUN} -np 1 ESMF_ArrayBasic > ESMF_ArrayBasic.stdout
+
+ESMF_ArrayBasic.rm:
+	-@echo "ESMF_ArrayBasic.rm target called here."
+##
 

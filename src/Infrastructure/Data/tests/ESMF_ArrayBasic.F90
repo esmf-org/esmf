@@ -40,7 +40,8 @@
     !intptr = reshape( (/ (i, i = 1, items) /), (/ nx, ny /) )
  
     print *, "initial data is", intptr
-    array1 = ESMF_ArrayCreate(intptr, rc)
+    array1 = ESMF_ArrayCreate(intptr, rc=rc)
+    !array1 = ESMF_ArrayCreate(intptr, docopy, rc)
     print *, "array 1 create returned"
  
     call ESMF_ArrayPrint(array1, "opts", rc)
