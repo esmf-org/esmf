@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.29 2003/06/06 14:17:30 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.30 2003/07/07 20:37:02 rstaufer Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt PhysGrid} class and is responsible
+! The code in this file implements the {\tt ESMF\_PhysGrid} class and is responsible
 ! for computing or initializing physical properties of grids.   Such
 ! properties include coordinate information necessary for describing grids,
 ! metric information for grid distances, grid masks and assignment of
@@ -178,7 +178,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.29 2003/06/06 14:17:30 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.30 2003/07/07 20:37:02 rstaufer Exp $'
 
 !==============================================================================
 !
@@ -201,7 +201,7 @@
 !        module procedure ESMF_PhysGridCreateExchange
 
 ! !DESCRIPTION:
-!     This interface provides a single entry point for PhysGrid create
+!     This interface provides a single entry point for {\tt ESMF\_PhysGrid} create
 !     methods.
 !
 !EOP
@@ -254,7 +254,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that construct
-!     a complete {\tt PhysGrid}.
+!     a complete {\tt ESMF\_PhysGrid}.
 !
 !EOP
       end interface 
@@ -329,13 +329,13 @@
       integer, intent(out), optional :: rc               
 
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt PhysGrid} object and constructs its
-!     internals.  Returns a pointer to a new {\tt PhysGrid}.
+!     Allocates memory for a new {\tt ESMF\_PhysGrid} object and constructs its
+!     internals.  Returns a pointer to a new {\tt ESMF\_PhysGrid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[[name]]
-!          {\tt PhysGrid} name.
+!          {\tt ESMF\_PhysGrid} name.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -410,9 +410,9 @@
       integer, intent(out), optional :: rc  ! return code               
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt PhysGrid} object, constructs its
-!     internals, and internally generates the {\tt PhysGrid}.  Returns a
-!     pointer to the new {\tt PhysGrid}.
+!     Allocates memory for a new {\tt ESMF\_PhysGrid} object, constructs its
+!     internals, and internally generates the {\tt ESMF\_PhysGrid}.  Returns a
+!     pointer to the new {\tt ESMF\_PhysGrid}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -431,7 +431,7 @@
 !     \item[global\_nmax]
 !          Number of global grid increments in each coordinate direction.
 !     \item[[name]]
-!          {\tt PhysGrid} name.
+!          {\tt ESMF\_PhysGrid} name.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -496,13 +496,13 @@
       integer, intent(out), optional :: rc        
 !
 ! !DESCRIPTION:
-!     Destroys a {\tt PhysGrid} object previously allocated
-!     via an {\tt ESMF\_PhysGridCreate routine}.
+!     Destroys a {\tt ESMF\_PhysGrid} object previously allocated
+!     via an {\tt ESMF\_PhysGridCreate} routine.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid] 
-!          The Phys Grid object to be destroyed.
+!          The {\tt ESMF\_PhysGrid} object to be destroyed.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -536,8 +536,8 @@
 !
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
-!     allocated {\tt PhysGrid} object.  May perform additional allocations
-!     as needed.  Must call the corresponding ESMF\_PhysGridDestruct
+!     allocated {\tt ESMF\_PhysGrid} object.  May perform additional allocations
+!     as needed.  Must call the corresponding {\tt ESMF\_PhysGridDestruct}
 !     routine to free the additional memory.  Intended for internal
 !     ESMF use only; end-users use {\tt ESMF\_PhysGridCreate}, which calls
 !     {\tt ESMF\_PhysGridConstruct}. 
@@ -545,9 +545,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid] 
-!          Pointer to a {\tt PhysGrid}.
+!          Pointer to a {\tt ESMF\_PhysGrid}.
 !     \item[[name]] 
-!          {\tt PhysGrid} name.
+!          {\tt ESMF\_PhysGrid} name.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -642,8 +642,8 @@
 !
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
-!     allocated {\tt PhysGrid} object.  May perform additional allocations
-!     as needed.  Must call the corresponding ESMF\_PhysGridDestruct
+!     allocated {\tt ESMF\_PhysGrid} object.  May perform additional allocations
+!     as needed.  Must call the corresponding {\tt ESMF\_PhysGridDestruct}
 !     routine to free the additional memory.  Intended for internal
 !     ESMF use only; end-users use {\tt ESMF\_PhysGridCreate}, which calls
 !     {\tt ESMF\_PhysGridConstruct}. 
@@ -665,7 +665,7 @@
 !     \item[global\_nmax]
 !          Number of global grid increments in each coordinate direction.
 !     \item[[name]]
-!          {\tt PhysGrid} name.
+!          {\tt ESMF\_PhysGrid} name.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -722,8 +722,8 @@
 !
 ! !DESCRIPTION:
 !     ESMF routine which deallocates any space allocated by
-!    {\tt  ESMF\_PhysGridConstruct}, does any additional cleanup before the
-!     original PhysGrid object is freed.  Intended for internal ESMF
+!    {\tt ESMF\_PhysGridConstruct}, does any additional cleanup before the
+!     original {\tt ESMF\_PhysGrid} object is freed.  Intended for internal ESMF
 !     use only; end-users use {\tt ESMF\_PhysGridDestroy}, which calls
 !     {\tt ESMF\_PhysGridDestruct}.  
 !
@@ -823,15 +823,15 @@
       integer, intent(out), optional :: rc ! return code              
 !
 ! !DESCRIPTION:
-!     This version gets a variety of information about a physgrid, depending
+!     This version gets a variety of information about a {\tt ESMF\_PhysGrid}, depending
 !     on a list of optional arguments.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid] 
-!          Pointer to a {\tt PhysGrid}.
+!          Pointer to a {\tt ESMF\_PhysGrid}.
 !     \item[[name]]
-!          {\tt PhysGrid} name.
+!          {\tt ESMF\_PhysGrid} name.
 !     \item[[dim\_num]] 
 !          Number of physical dimensions for this grid.
 !     \item[[dim\_names]] 
@@ -941,15 +941,15 @@
       integer, intent(out), optional :: rc ! return code              
 !
 ! !DESCRIPTION:
-!     This version sets a variety of information about a physgrid, depending
+!     This version sets a variety of information about a {\tt ESMF\_PhysGrid}, depending
 !     on a list of optional arguments.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid] 
-!          Pointer to a {\tt PhysGrid}.
+!          Pointer to a {\tt ESMF\_PhysGrid}.
 !     \item[[name]]
-!          {\tt PhysGrid} name.
+!          {\tt ESMF\_PhysGrid} name.
 !     \item[[dim\_num]] 
 !          Number of physical dimensions for this grid.
 !     \item[[dim\_names]] 
@@ -1035,7 +1035,7 @@
       integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
-!     Returns the set of resources the PhysGrid object was configured with.
+!     Returns the set of resources the {\tt ESMF\_PhysGrid} object was configured with.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1069,7 +1069,7 @@
 
 !
 ! !DESCRIPTION:
-!     Configures the PhysGrid object with set of resources given.
+!     Configures the {\tt ESMF\_PhysGrid} object with set of resources given.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1110,12 +1110,12 @@
 
 !
 ! !DESCRIPTION:
-!     Extracts coordinate information from a PhysGrid structure.
+!     Extracts coordinate information from a {\tt ESMF\_PhysGrid} structure.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid]
-!          PhysGrid for which coordinates are to be defined.
+!          {\tt ESMF\_PhysGrid} for which coordinates are to be defined.
 !     \item[[center\_coord]]
 !          Coordinates of each cell center.  The dimension index should
 !          be defined first (e.g. x = coord(1,i,j), y=coord(2,i,j)).
@@ -1183,13 +1183,13 @@
 
 !
 ! !DESCRIPTION:
-!     Assigns a PhysGrid's coordinates from user-defined coordinates
+!     Assigns a {\tt ESMF\_PhysGrid}'s coordinates from user-defined coordinates
 !     sent in an input array.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid]
-!          PhysGrid for which coordinates are to be defined.
+!          {\tt ESMF\_PhysGrid} for which coordinates are to be defined.
 !     \item[[center\_coord]]
 !          Coordinates of each cell center.  The dimension index should
 !          be defined first (e.g. x = coord(1,i,j), y=coord(2,i,j)).
@@ -1260,7 +1260,7 @@
 
 !
 ! !DESCRIPTION:
-!     Compute a PhysGrid's coordinates from a given gridtype and set of
+!     Compute a {\tt ESMF\_PhysGrid}'s coordinates from a given gridtype and set of
 !     physical parameters.
 !
 !     The arguments are:
@@ -1392,12 +1392,12 @@
 
 !
 ! !DESCRIPTION:
-!     Extracts metric information from a PhysGrid structure.
+!     Extracts metric information from a {\tt ESMF\_PhysGrid} structure.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid]
-!          PhysGrid containing metrics.
+!          {\tt ESMF\_PhysGrid} containing metrics.
 !     \item[metric\_array]
 !          Pointer to array in which metric is stored.
 !     \item[[name]]
@@ -1476,13 +1476,13 @@
 
 !
 ! !DESCRIPTION:
-!     Assigns a metric to a PhysGrid using user-defined data 
+!     Assigns a metric to a {\tt ESMF\_PhysGrid} using user-defined data 
 !     sent in an input array.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid]
-!          PhysGrid for which coordinates are to be defined.
+!          {\tt ESMF\_PhysGrid} for which coordinates are to be defined.
 !     \item[metric\_array]
 !          Array containing metric values at for each grid cell.
 !     \item[name]
@@ -1568,12 +1568,12 @@
 
 !
 ! !DESCRIPTION:
-!     Extracts logical mask information from a PhysGrid structure.
+!     Extracts logical mask information from a {\tt ESMF\_PhysGrid} structure.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid]
-!          PhysGrid containing metrics.
+!          {\tt ESMF\_PhysGrid} containing metrics.
 !     \item[lmask\_array]
 !          Pointer to the requested logical mask.
 !     \item[[name]]
@@ -1651,13 +1651,13 @@
 
 !
 ! !DESCRIPTION:
-!     Assigns a logical mask to a PhysGrid using user-defined data 
+!     Assigns a logical mask to a {\tt ESMF\_PhysGrid} using user-defined data 
 !     sent in an input array.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid]
-!          PhysGrid for which mask is to be added.
+!          {\tt ESMF\_PhysGrid} for which mask is to be added.
 !     \item[lmask\_array]
 !          Array containing logical mask values at for each grid cell.
 !     \item[name]
@@ -1743,12 +1743,12 @@
 
 !
 ! !DESCRIPTION:
-!     Extracts multiplicative mask information from a PhysGrid structure.
+!     Extracts multiplicative mask information from a {\tt ESMF\_PhysGrid} structure.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid]
-!          PhysGrid containing requested mask.
+!          {\tt ESMF\_PhysGrid} containing requested mask.
 !     \item[mmask\_array]
 !          Pointer to the requested multiplicative mask.
 !     \item[[name]]
@@ -1826,13 +1826,13 @@
 
 !
 ! !DESCRIPTION:
-!     Assigns a multiplicative mask to a PhysGrid using user-defined data 
+!     Assigns a multiplicative mask to a {\tt ESMF\_PhysGrid} using user-defined data 
 !     sent in an input array.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid]
-!          PhysGrid for which mask is to be added.
+!          {\tt ESMF\_PhysGrid} for which mask is to be added.
 !     \item[lmask\_array]
 !          Array containing multiplicative mask values at for each grid cell.
 !     \item[name]
@@ -1917,12 +1917,12 @@
 
 !
 ! !DESCRIPTION:
-!     Extracts region id information from a PhysGrid structure.
+!     Extracts region id information from a {\tt ESMF\_PhysGrid} structure.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid]
-!          PhysGrid containing requested region id.
+!          {\tt ESMF\_PhysGrid} containing requested region id.
 !     \item[region\_array]
 !          Pointer to the array assigning a region ID to each grid point.
 !     \item[region\_names]
@@ -1975,13 +1975,13 @@
 
 !
 ! !DESCRIPTION:
-!     Assigns region ids to a PhysGrid using user-defined data 
+!     Assigns region ids to a {\tt ESMF\_PhysGrid} using user-defined data 
 !     sent in an input array.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[physgrid]
-!          PhysGrid for which region ids are to be defined.
+!          {\tt ESMF\_PhysGrid} for which region ids are to be defined.
 !     \item[region\_array]
 !          Array containing region id for each grid cell.
 !     \item[region\_names]
@@ -2030,7 +2030,7 @@
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
-!     Validates that a PhysGrid is internally consistent.
+!     Validates that a {\tt ESMF\_PhysGrid} is internally consistent.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2063,7 +2063,7 @@
       integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!      Print information about a PhysGrid.  
+!      Print information about a {\tt ESMF\_PhysGrid}.  
 !
 !     The arguments are:
 !     \begin{description}
@@ -2127,11 +2127,11 @@
 !!     \item[x,y]
 !!          Coordinates of search point.
 !!     \item[DEid]
-!!          id of DE that owns search point.
+!!          id of {\tt ESMF\_DE} that owns search point.
 !!     \item[phys\_grid]
-!!          ESMF PhysGrid to search for location.
+!!          {\tt ESMF\_PhysGrid} to search for location.
 !!     \item[[dis\_grid]
-!!          ESMF DistGrid describing distribution of PhysGrid above.
+!!          {\tt ESMF\_DistGrid} describing distribution of {\tt ESMF\_PhysGrid} above.
 !!     \item[[rc]]
 !!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !!     \end{description}
@@ -2290,11 +2290,11 @@
 !!     \item[x,y]
 !!          Coordinates of search point.
 !!     \item[DEid]
-!!          id of DE that owns search point.
+!!          id of {\tt ESMF\_DE} that owns search point.
 !!     \item[phys\_grid]
-!!          ESMF PhysGrid to search for location.
+!!          {\tt ESMF\_PhysGrid} to search for location.
 !!     \item[[dis\_grid]
-!!          ESMF DistGrid describing distribution of PhysGrid above.
+!!          {\tt ESMF\_DistGrid} describing distribution of {\tt ESMF\_PhysGrid} above.
 !!     \item[[rc]]
 !!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !!     \end{description}
@@ -2435,11 +2435,11 @@
 !!     \item[x,y]
 !!          Coordinates of search point.
 !!     \item[DEid]
-!!          id of DE that owns search point.
+!!          id of {\tt ESMF\_DE} that owns search point.
 !!     \item[phys\_grid]
-!!          ESMF PhysGrid to search for location.
+!!          {\tt ESMF\_PhysGrid} to search for location.
 !!     \item[[dis\_grid]
-!!          ESMF DistGrid describing distribution of PhysGrid above.
+!!          {\tt ESMF\_DistGrid} describing distribution of {\tt ESMF\_PhysGrid} above.
 !!     \item[[rc]]
 !!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !!     \end{description}
