@@ -93,11 +93,10 @@ explored all the implications of the architectural definition, this list is
 necessarily tentative, incomplete, and non-specific.}
 
 \begin{itemize}
-\item Since {\tt Gridded Component}s will run on the same 
-{\tt DE}s as the {\tt Application Component}, often in conjunction 
-with a {\tt Coupler}, 
+\item Since {\tt Gridded Component}s and {\tt Coupler Component}s
+must be composable with other Components to build an application,
 it is necessary to subroutinize
-them and provide standard methods such as {\tt ESMF\_CompInit}, 
+them and provide standard methods such as {\tt ESMF\_CompInitialize}, 
 {\tt ESMF\_CompRun}, and {\tt ESMF\_CompFinalize}.  For {\tt Gridded 
 Component}s
 with a time iteration loop, we expect the {\tt ESMF\_CompRun} command to 
@@ -115,8 +114,9 @@ information in a standard format.
 Components {\it will not} need to recast their internal data structures.
 They {\it will not} be required to insert return points at each timestep.
 Thus the amount of internal reorganization of codes required should be 
-kept to a minimum.  We hope, however, to provide high-performance infrastructure,
-both data structures and utilities, that can be leveraged by groups who see
+kept to a minimum.  We hope, however, to provide high-performance 
+infrastructure, both data structures and utilities, that can be 
+leveraged by groups who see
 the ESMF effort as an opportunity to restructure their codes.
 
 
