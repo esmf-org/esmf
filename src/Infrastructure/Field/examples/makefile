@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2004/06/18 09:17:34 nscollins Exp $ 
+# $Id: makefile,v 1.15 2004/07/27 22:54:55 jwolfe Exp $ 
 
 ALL:  build_examples
 
@@ -60,6 +60,7 @@ LOCDIR	  = src/Infrastructure/Field/examples
 
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_FieldCreateEx \
                  $(ESMF_EXDIR)/ESMF_FieldCreateEx \
+                 $(ESMF_EXDIR)/ESMF_FieldGlobalEx \
                  $(ESMF_EXDIR)/ESMF_FieldWriteEx
 
 #
@@ -70,6 +71,7 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_FieldCreateEx \
 
 EXAMPLES_RUN = run_ESMC_FieldCreateEx \
                run_ESMF_FieldCreateEx \
+               run_ESMF_FieldGlobalEx \
                run_ESMF_FieldWriteEx 
 
 EXAMPLES_RUN_UNI = run_ESMC_FieldCreateEx_uni \
@@ -103,6 +105,12 @@ run_ESMF_FieldCreateEx:
 
 run_ESMF_FieldCreateEx_uni:
 	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_FieldCreateEx > $(ESMF_EXDIR)/ESMF_FieldCreateEx_uni.stdout
+
+#
+# ESMF_FieldGlobalEx
+#
+run_ESMF_FieldGlobalEx:
+	-${MPIRUN} -np 6 $(ESMF_EXDIR)/ESMF_FieldGlobalEx > $(ESMF_EXDIR)/ESMF_FieldGlobalEx.stdout
 
 #
 # ESMF_FieldWriteEx
