@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.93 2004/02/13 23:11:04 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.94 2004/02/19 20:54:03 nscollins Exp $'
 
 !==============================================================================
 !
@@ -596,10 +596,10 @@
         rc = ESMF_FAILURE
       endif
 
-!     Set the DistGrid name if present, otherwise construct a default one
-      call ESMF_SetName(dgtype%base, name, "DistGrid", status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridConstructNew: Setname"
+      ! Construct a default name if one is not given
+      call ESMF_BaseCreate(dgtype%base, "DistGrid", name, 0, status)
+      if(status .ne. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridConstructNew: BaseCreate"
         return
       endif
 
@@ -741,7 +741,7 @@
 !       return
 !     endif
  
-      ! Initialize the derived type contents
+      ! Initialize the derived type contents, including setting name
       call ESMF_DistGridConstructNew(dgtype, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: DistGrid construct"
@@ -772,13 +772,6 @@
         do i = 1,numDims
           dgtype%coversDomain(i) = coversDomain(i)
         enddo
-      endif
-      if (present(name)) then
-        call ESMF_SetName(dgtype%base, name, "DistGrid", status)
-        if (status /= ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_DistGridSet: set name"
-          return
-        endif
       endif
 
       ! Calculate values for computational cells

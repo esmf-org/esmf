@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.7 2004/02/10 16:31:26 jwolfe Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.8 2004/02/19 20:54:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.7 2004/02/10 16:31:26 jwolfe Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.8 2004/02/19 20:54:37 nscollins Exp $'
 
 !==============================================================================
 !
@@ -378,12 +378,10 @@
 
       physCoord%kind = coordKind
 
-      if (present(name)) then
-         call ESMF_SetName(physCoord%base, name, "PhysCoord", status)
-         if(status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_PhysCoordCreate: set name"
-            return
-         endif
+      call ESMF_BaseCreate(physCoord%base, "PhysCoord", name, 0, status)
+      if(status /= ESMF_SUCCESS) then
+         print *, "ERROR in ESMF_PhysCoordCreate: BaseCreate"
+         return
       endif
 
       if (present(units)) then
