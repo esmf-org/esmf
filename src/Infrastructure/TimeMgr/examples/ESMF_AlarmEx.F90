@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.5 2004/01/06 17:11:30 svasquez Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.6 2004/01/07 21:02:31 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
       program ESMF_AlarmEx
 
 !------------------------------------------------------------------------------
-!
+!EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOP
 !\begin{verbatim}
