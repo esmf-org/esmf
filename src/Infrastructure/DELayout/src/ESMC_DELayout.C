@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.24 2004/11/05 00:10:58 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.25 2004/11/17 23:52:27 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.24 2004/11/05 00:10:58 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.25 2004/11/17 23:52:27 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -235,7 +235,14 @@ int ESMC_DELayout::ESMC_DELayoutConstruct1D(ESMC_VM &vm, int nDEs,
         des[i].connect_w[1] = ESMF_CWGHT_NORMAL;
       }        
     }
+  } else  {
+     des[0].nconnect = 1;
+     des[0].connect_de = new int[1];
+     des[0].connect_w  = new int[1];
+     des[0].connect_de[0] = 0;
+     des[0].connect_w[0] = ESMF_CWGHT_NORMAL;
   }
+	
   // Setup the dimensionality and coordinates of this layout. This information
   // is only kept for external use!
   ndim = 1; // this is a 1D logical rectangular routine
