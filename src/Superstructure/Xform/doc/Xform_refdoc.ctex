@@ -1,4 +1,4 @@
-% $Id: Xform_refdoc.ctex,v 1.1 2003/10/22 21:00:53 cdeluca Exp $
+% $Id: Xform_refdoc.ctex,v 1.2 2003/10/22 21:02:37 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -53,35 +53,35 @@
 %#ifdef STANDALONE
 %\input{xform_desc}
 %#elif defined(CONSTITUENT)
-%\input{../Superstraucture/Xform/doc/xform_desc}
+%\input{../Superstructure/Xform/doc/xform_desc}
 %#endif
 
 %\subsection{Usage}
 %#ifdef STANDALONE
 %\input{xform_usage}
 %#elif defined(CONSTITUENT)
-%\input{../Superstraucture/Xform/doc/xform_usage}
+%\input{../Superstructure/Xform/doc/xform_usage}
 %#endif
 
 %\subsubsection{Restrictions}
 %#ifdef STANDALONE
 %\input{xform_rest}
 %#elif defined(CONSTITUENT)
-%\input{../Superstraucture/Xform/doc/xform_rest}
+%\input{../Superstructure/Xform/doc/xform_rest}
 %#endif
 
 %\subsection{Use and Examples}
 %#ifdef STANDALONE
 %\input{ESMF_XformEx_fapi}
 %#elif defined(CONSTITUENT)
-%\input{../Superstraucture/Xform/doc/ESMF_XformEx_fapi}
+%\input{../Superstructure/Xform/doc/ESMF_XformEx_fapi}
 %#endif
 
 %\subsection{Class API}
 %#ifdef STANDALONE
 %\input{ESMF_Xform_fapi}
 %#elif defined(CONSTITUENT)
-%\input{../Superstraucture/Xform/doc/ESMF_Xform_fapi}
+%\input{../Superstructure/Xform/doc/ESMF_Xform_fapi}
 %#endif
 
 
