@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.10 2003/11/07 21:55:34 nscollins Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.11 2004/01/06 17:50:11 svasquez Exp $
 !
 ! Example code for a main Application program. 
 
@@ -137,7 +137,7 @@
     states(1) = ESMF_StateCreate(cname1, ESMF_STATEEXPORT, rc=rc)
     states(2) = ESMF_StateCreate(cname2, ESMF_STATEIMPORT, rc=rc)
     bothstates = ESMF_StateCreate(cname, rc=rc)
-    call ESMF_StateAdd(bothstates, states, rc)
+    call ESMF_StateAddData(bothstates, 2, states, rc)
 
     ! See the TimeMgr document for the details on the actual code needed
     !  to set up a clock.
