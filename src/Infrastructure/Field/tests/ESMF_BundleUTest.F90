@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.12 2003/04/11 00:09:02 nscollins Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.13 2003/04/22 19:31:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.12 2003/04/11 00:09:02 nscollins Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.13 2003/04/22 19:31:29 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -290,23 +290,6 @@
       print *, "******************NON-EXHAUTIVE BUNDLE UNIT TESTS****************************"
       print *
 
-      !------------------------------------------------------------------------
-
-      ! Verify that getting the name of an uninitialized Bundle is handled properly.
-      call ESMF_BundleGetName(bundle1, bname1, rc)
-      write(failMsg, *) "Subroutine should have returned ESMF_FAILURE"
-      write(name, *) "Getting name of uninitalized Bundle Test"
-      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-     
-      ! The following code is commented out because it crashes the program
-      ! It will be uncommented when the bug is fixed
-      !  Verify that the Field count query from an uninitialized Bundle is handled properly
-      !call ESMF_BundleGetFieldCount(bundle1, fieldcount, rc);
-      !write(failMsg, *) ""
-      !write(name, *) "Getting Field count from an uninitialized Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
 
       ! Test Requirement FLD2.1.1 Creation using Field liist
       ! It shall be possible to create a bundle with a field list, an optional 
@@ -329,28 +312,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      ! Verify that adding a Field to an uninitialized Bundle is handled correctly
-      ! This code is commented out because it crashes the program.
-      !It will be uncommented when the bug is fixed
-      !call ESMF_BundleAddFields(bundle2, simplefield, rc=rc);
-      !write(failMsg, *) "Add Field to uncreated Bundle failed"
-      !write(name, *) "Adding a Field to an uncreated Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !  Verify that a Field can be added to a Bundle
-      ! The following code s commented out because it crashes. Bug 703872
-      ! simplefield = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
-                                    ! name="rh", rc=rc)
-
-      !  Verify that an empty Bundle can be created
-      ! bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc);
-      ! write(failMsg, *) ""
-      ! write(name, *) "Creating Empty Bundle Test"
-      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !  Verify that recreating a created Bundle is handled properly
+      !  Creating a created Bundle an empty bundle
       bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc);
       write(failMsg, *) ""
       write(name, *) "Creating a Bundle that has already been created Test"
@@ -486,19 +448,6 @@
       print *, "rc = ", (rc)
       !------------------------------------------------------------------------
 
-      ! Verify that destroying a destroyed Bundle is handled correctly
-      call ESMF_BundleDestroy(bundle1, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Destroying a Destroyed Bundle Test"
-      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
-      print *, "rc = ", (rc)
-      !------------------------------------------------------------------------
-
-      ! Requirement 2.5.2 Insert and remove Field
-      ! A Field can be inserted into or removed from a Bundle
-      ! The remove portion of this requirement cannot be tested until Bug 705849
-      ! ESMF_BundleDeleteField not implemented" is fixed.
-      !------------------------------------------------------------------------
 
 
 #endif

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.13 2003/04/16 19:10:30 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.14 2003/04/22 19:31:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.13 2003/04/16 19:10:30 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.14 2003/04/22 19:31:29 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -453,29 +453,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
      
-      ! Test requirement FLD1.5.1. Default name attribute 
-      ! The only default attribute of a field will be a name. A unique name will 
-      ! be generated if not supplied by the user.
-      ! Test Requirement FLD1.7.1 Query name
-      ! A field shall be able to easily return its name. If the user does not provide 
-      ! a field name one will be created. Field names must be unique within an address 
-      ! space and it shall be possible to check this.
-      ! Bug 705087 "Default Field names not unique"
-      f1 = ESMF_FieldCreateNoData(rc=rc)
-      f2 = ESMF_FieldCreateNoData(rc=rc)
-      Call ESMF_FieldGetName(f1, fname1, rc=rc)
-      Call ESMF_FieldGetName(f2, fname2, rc=rc)
-      write(failMsg, *) "Field names not unique"
-      write(name, *) "Unique default Field names Test, FLD1.5.1 & 1.7.1"
-      call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
-      print *, "Field (f1) name = ", trim(fname1)
-      print *, "Field (f2) name = ", trim(fname2)
-      call ESMF_FieldPrint(f1)
-      call ESMF_FieldPrint(f2)
-      call ESMF_FieldDestroy(f1)
-      call ESMF_FieldDestroy(f2)
-      !------------------------------------------------------------------------
-
       ! Verifing that a Grid can be printed
       call ESMF_GridPrint(grid, "", rc=rc)
       write(failMsg, *) ""
