@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ut_results.pl,v 1.9 2005/02/09 16:54:10 svasquez Exp $
+# $Id: do_ut_results.pl,v 1.10 2005/02/09 17:20:02 svasquez Exp $
 # This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
 
@@ -36,7 +36,10 @@ getopts("d:b:", \%options);
 	# Open the test config file 
 	$ok=open(F,"$TEST_DIR/tests.config");
 	if (!(defined $ok)) {
-		print "\n\nERROR:Unable to open $TEST_DIR/tests.config file.\n\n";
+		print "\n\nERROR:Unable to open $TEST_DIR/tests.config file.\n";
+		print "Either the 'gmake ESMF_BOPT=$ESMF_BOPT build_tests' has not been run ";
+		print "or the 'gmake ESMF_BOPT=$ESMF_BOPT' did not build successfully. \n\n";
+
 		exit 0;
 	}
 	# Get flags from tests_config file.
