@@ -1,4 +1,4 @@
-! $Id: ESMF_XPacket.F90,v 1.3 2003/03/11 23:15:57 nscollins Exp $
+! $Id: ESMF_XPacket.F90,v 1.4 2003/03/17 20:57:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_XPacket.F90,v 1.3 2003/03/11 23:15:57 nscollins Exp $'
+      '$Id: ESMF_XPacket.F90,v 1.4 2003/03/17 20:57:38 nscollins Exp $'
 
 !==============================================================================
 
@@ -98,8 +98,8 @@
       integer, intent(in) :: rank
       integer, intent(in) :: left
       integer, intent(in) :: right
-      integer, intent(in) :: stride(ESMF_MAXDIM)
-      integer, intent(in) :: num(ESMF_MAXDIM)
+      integer, intent(in) :: stride(:)
+      integer, intent(in) :: num(:)
       integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -274,7 +274,7 @@
         endif
 
         ! Call C++  code
-        call c_ESMC_XPacketSet(xpacket, value1, value2, status)
+        !call c_ESMC_XPacketSet(xpacket, value1, value2, status)
         status = ESMF_FAILURE
         if (status .ne. ESMF_SUCCESS) then  
           print *, "XPacket Set error"

@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteTest.F90,v 1.2 2003/03/17 17:53:30 nscollins Exp $
+! $Id: ESMF_RouteTest.F90,v 1.3 2003/03/17 20:57:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,16 +30,15 @@
 ! !USES:
       use ESMF_TestMod     ! test methods
       use ESMF_RouteMod  ! the class to test
+      use ESMF_XPacketMod
       use ESMF_DELayoutMod
       use ESMF_ArrayMod
-      use ESMF_GridMod
-      use ESMF_FieldMod
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RouteTest.F90,v 1.2 2003/03/17 17:53:30 nscollins Exp $'
+      '$Id: ESMF_RouteTest.F90,v 1.3 2003/03/17 20:57:45 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,7 +51,7 @@
       character(ESMF_MAXSTR) :: name
 
       ! individual test failure message
-      character(ESMF_MAXSTR) :: failMsg
+      character(ESMF_MAXSTR*2) :: failMsg
       character(ESMF_MAXSTR) :: validate_options = "full"
       character(ESMF_MAXSTR) :: print_options = "all"
 
@@ -60,20 +59,29 @@
       type(ESMF_Route) :: route
  
       ! local args needed to create/construct objects
-      type(ESMF_Field) :: srcfield, dstfield
-      type(ESMF_Grid) :: srcgrid, dstgrid
-      type(ESMF_Array) :: srcarray, dstarray
       type(ESMF_DELayout) :: mylayout
+      type(ESMF_XPacket) :: sendxp, recvxp
+      integer :: i, mydeid, deidcount, otherdeid
+      type(ESMF_Array) :: srcarr, dstarr
+      integer, dimension(:,:), pointer :: srcptr, dstptr
 
 
-      ! all variable declarations above here -
-      ! beginning of executable code below here
+      ! -------- all variable declarations above here ----------
+!------------------------------------------------------------------------------
+      ! -------- beginning of executable code below here -------
 
       ! make a layout for what's needed below
       mylayout = ESMF_DELayoutCreate(rc=rc)
 
-      ! test the actual user entry point
-      ! call ESMF_FieldRoute(srcfield, dstfield, mylayout)
+      call ESMF_DELayoutGetDEid(mylayout, mydeid, rc=rc)
+      call ESMF_DELayoutGetNumDEs(mylayout, deidcount, rc=rc)
+
+      allocate(srcptr(10,20))
+      srcptr = reshape( (/ (i, i=1,200) /), (/ 10, 20 /))
+      allocate(dstptr(10,20))
+      dstptr = reshape( (/ (i, i=201,400) /), (/ 10, 20 /))
+      srcarr = ESMF_ArrayCreate(srcptr, ESMF_NO_COPY, rc)
+      dstarr = ESMF_ArrayCreate(dstptr, ESMF_NO_COPY, rc)
 
       ! test dynamic allocation of ESMF_Route
       route = ESMF_RouteCreate(mylayout, rc)
@@ -90,14 +98,54 @@
       ! test validate method via option string
       call ESMF_RouteValidate(route, validate_options, rc)
       write(name, *) "ESMF_RouteValidate"
-      write(failMsg, *) "rc =", rc, ", validate_options =", validate_options
+      write(failMsg, *) "rc =", rc, ", validate_options =", &
+                                   trim(validate_options)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! test print method via option string
       call ESMF_RoutePrint(route, print_options, rc)
       write(name, *) "ESMF_RoutePrint"
-      write(failMsg, *) "rc =", rc, ", print_options =", print_options
+      write(failMsg, *) "rc =", rc, ", print_options =", &
+                                  trim(print_options)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! add a send route
+      call ESMF_XPacketInit(sendxp, 2, 0, 10, (/ 1, 10 /), (/ 3, 4 /) )
+      otherdeid = MODULO(mydeid+1, deidcount)
+      call ESMF_RouteSetSend(route, otherdeid, sendxp, rc);
+      write(name, *) "ESMF_RouteSetSend"
+      write(failMsg, *) "rc =", rc, ", args =", otherdeid
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! test print method via option string
+      call ESMF_RoutePrint(route, print_options, rc)
+      write(name, *) "ESMF_RoutePrint"
+      write(failMsg, *) "rc =", rc, ", print_options =", &
+                                  trim(print_options)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! add a recv route
+      call ESMF_XPacketInit(recvxp, 2, 0, 10, (/ 1, 10 /), (/ 3, 4 /) )
+      otherdeid = MODULO(mydeid-1, deidcount)
+      call ESMF_RouteSetRecv(route, otherdeid, recvxp, rc);
+      write(name, *) "ESMF_RouteSetRecv"
+      write(failMsg, *) "rc =", rc, ", args =", otherdeid
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! test print method via option string
+      call ESMF_RoutePrint(route, print_options, rc)
+      write(name, *) "ESMF_RoutePrint"
+      write(failMsg, *) "rc =", rc, ", print_options =", &
+                                  trim(print_options)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! execute the existing route
+      call ESMF_RouteRun(route, srcarr, dstarr, rc)
+      write(name, *) "ESMF_RouteRun"
+      write(failMsg, *) "rc =", rc
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 
       ! test internal dynamic deallocation within statically allocated 
       !   ESMF_Route
@@ -114,5 +162,8 @@
 
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
+      write(*,*) "===================================="
+      write(*,*) "========= end of test =============="
+      write(*,*) "===================================="
   
       end program ESMF_RouteTest

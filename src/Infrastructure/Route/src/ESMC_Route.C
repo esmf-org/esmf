@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.16 2003/03/15 00:14:05 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.17 2003/03/17 20:57:44 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.16 2003/03/15 00:14:05 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.17 2003/03/17 20:57:44 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -279,8 +279,8 @@
       ESMC_XPacket *xp) {  // in - exchange packet
 //
 // !DESCRIPTION:
-//     Adds an exchange packet, base address, and destination de to the
-//     route table.
+//     Adds an exchange packet and destination de to the
+//     route table, and marks this de as needed in the comm table.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -288,7 +288,10 @@
     int rc;
 
     rc = sendRT->ESMC_RTableSetEntry(dest_de, xp);
+    if (rc != ESMF_SUCCESS)
+        return rc;
 
+    rc = ct->ESMC_CommTableSetPartner(dest_de);
     return rc;
 
  } // end ESMC_RouteSetSend
@@ -308,8 +311,8 @@
       ESMC_XPacket *xp) {  // in - exchange packet
 //
 // !DESCRIPTION:
-//     Adds an exchange packet, base address, and destination de to the
-//     route table.
+//     Adds an exchange packet and source DE to the route table,
+//     and marks this de as needed in the comm table.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -317,6 +320,10 @@
     int rc;
 
     rc = recvRT->ESMC_RTableSetEntry(source_de, xp);
+    if (rc != ESMF_SUCCESS)
+        return rc;
+
+    rc = ct->ESMC_CommTableSetPartner(source_de);
 
     return rc;
 
@@ -594,11 +601,15 @@
     int rc;
 
     printf("Route print:\n");
-    printf(" id = %d\n", routeid);
-    printf("  send table\n");
+    printf(" Routeid = %d\n", routeid);
+    printf(" DELayout:\n");
+    rc = layout->ESMC_DELayoutPrint(); // options);  // doesn't take opts yet
+    printf(" Send table:\n");
     rc = sendRT->ESMC_RTablePrint(options);
-    printf("  recv table\n");
+    printf(" Recv table:\n");
     rc = recvRT->ESMC_RTablePrint(options);
+    printf(" Comm table:\n");
+    rc = ct->ESMC_CommTablePrint(options);
 
     return ESMF_SUCCESS;
 

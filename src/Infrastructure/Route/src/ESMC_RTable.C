@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.10 2003/03/14 22:55:36 nscollins Exp $
+// $Id: ESMC_RTable.C,v 1.11 2003/03/17 20:57:42 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RTable.C,v 1.10 2003/03/14 22:55:36 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_RTable.C,v 1.11 2003/03/17 20:57:42 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -136,6 +136,7 @@
 
     entrycount = decount;
     my_deid = myde;
+    entry = new struct rtableentry[decount];
 
     // TODO: this is a fully instantiated table, one slot per possible
     // destination processor.  if this table size gets too large, it can
@@ -348,7 +349,16 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-    return ESMF_FAILURE;
+    int i;
+
+    printf(" entrycount=%d, my_deid=%d\n", entrycount, my_deid);
+   
+    for(i=0; i<entrycount; i++) {
+        printf("%2d: deid=%2d, xpcount=%2d, xpaddr=0x%08lx\n",
+                 i, entry[i].deid, entry[i].xpcount, (long int)(entry[i].xp)); 
+    }
+  
+    return ESMF_SUCCESS;
 
  } // end ESMC_RTablePrint
 
