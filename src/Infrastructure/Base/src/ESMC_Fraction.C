@@ -1,0 +1,1063 @@
+// $Id: ESMC_Fraction.C,v 1.1 2004/10/27 18:40:24 eschwab Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2003, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+// NASA Goddard Space Flight Center.
+// Licensed under the GPL.
+//
+// ESMC Fraction method code (body) file
+//
+//-------------------------------------------------------------------------
+//
+// !DESCRIPTION:
+//
+// The code in this file implements the C++ {\tt ESMC\_Fraction} methods
+// declared in the companion file {\tt ESMC_Fraction.h}
+//
+//-------------------------------------------------------------------------
+//
+ #define ESMC_FILENAME "ESMC_Fraction.C"
+
+ // higher level, 3rd party or system includes
+ #include <iostream.h>
+
+ #include <ESMC_LogErr.h>
+ #include <ESMF_LogMacros.inc>
+
+ // associated class definition file
+ #include <ESMC_Fraction.h>
+
+//-------------------------------------------------------------------------
+ // leave the following line as-is; it will insert the cvs ident string
+ // into the object file for tracking purposes.
+ static const char *const version = "$Id: ESMC_Fraction.C,v 1.1 2004/10/27 18:40:24 eschwab Exp $";
+//-------------------------------------------------------------------------
+
+//
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+//
+// This section includes all the ESMC_Fraction routines
+//
+//
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FractionSetw - Set fraction's whole number
+//
+// !INTERFACE:
+      int ESMC_Fraction::ESMC_FractionSetw(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMF_KIND_I8 w) {   // input - the whole number value to set
+//
+// !DESCRIPTION:
+//     Sets the fraction's whole number value.
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_FractionSetw()"
+
+   this->w = w;
+
+   // ensure normal form
+   return(ESMC_FractionNormalize());
+
+ }  // end ESMC_FractionSetw
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FractionSetn - Set fraction's numerator
+//
+// !INTERFACE:
+      int ESMC_Fraction::ESMC_FractionSetn(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMF_KIND_I4 n) {   // input - the numerator value to set
+//
+// !DESCRIPTION:
+//     Sets the fraction's numerator value.
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_FractionSetn()"
+
+   this->n = n;
+
+   // ensure normal form
+   return(ESMC_FractionNormalize());
+
+ }  // end ESMC_FractionSetn
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FractionSetd - Set fraction's denominator
+//
+// !INTERFACE:
+      int ESMC_Fraction::ESMC_FractionSetd(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMF_KIND_I4 d) {   // input - the denominator value to set
+//
+// !DESCRIPTION:
+//     Sets the fraction's denominator value.
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_FractionSetd()"
+
+   this->d = d;
+
+   // ensure normal form
+   return(ESMC_FractionNormalize());
+
+ }  // end ESMC_FractionSetd
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FractionGetw - Get fraction's whole number
+//
+// !INTERFACE:
+      ESMF_KIND_I8 ESMC_Fraction::ESMC_FractionGetw(void) const {
+//
+// !RETURN VALUE:
+//    The fraction's whole number value
+//
+// !ARGUMENTS:
+//    none.
+//
+// !DESCRIPTION:
+//     Gets the fraction's whole number value.
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_FractionGetw()"
+
+   return(w);
+
+ }  // end ESMC_FractionGetw
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FractionGetn - Get fraction's numerator
+//
+// !INTERFACE:
+      ESMF_KIND_I4 ESMC_Fraction::ESMC_FractionGetn(void) const {
+//
+// !RETURN VALUE:
+//    The fraction's numerator value.
+//
+// !ARGUMENTS:
+//    none.
+//
+// !DESCRIPTION:
+//     Gets the fraction's numerator value.
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_FractionGetn()"
+
+   return(n);
+
+ }  // end ESMC_FractionGetn
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FractionGetd - Get fraction's denominator
+//
+// !INTERFACE:
+      ESMF_KIND_I4 ESMC_Fraction::ESMC_FractionGetd(void) const {
+//
+// !RETURN VALUE:
+//    The fraction's denominator value.
+//
+// !ARGUMENTS:
+//    none.
+//
+// !DESCRIPTION:
+//     Gets the fraction's denominator value.
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_FractionGetd()"
+
+   return(d);
+
+ }  // end ESMC_FractionGetd
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FractionSet - Set fraction value
+//
+// !INTERFACE:
+      int ESMC_Fraction::ESMC_FractionSet(
+//
+// !RETURN VALUE:
+//    none.
+//
+// !ARGUMENTS:
+      ESMF_KIND_I8 *w,
+      ESMF_KIND_I4 *n,
+      ESMF_KIND_I4 *d) {
+//
+// !DESCRIPTION:
+//     Sets the fraction's value.  Supports F90 optional args interface
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_FractionSet(*w,*n,*d)"
+
+   if (w != ESMC_NULL_POINTER) this->w = *w;
+   if (n != ESMC_NULL_POINTER) this->n = *n;
+   if (d != ESMC_NULL_POINTER) this->d = *d;
+
+   // ensure normal form
+   return(ESMC_FractionNormalize());
+
+ }  // end ESMC_FractionSet
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FractionSet - Set fraction value
+//
+// !INTERFACE:
+      int ESMC_Fraction::ESMC_FractionSet(
+//
+// !RETURN VALUE:
+//    none.
+//
+// !ARGUMENTS:
+      ESMF_KIND_I8 w,
+      ESMF_KIND_I4 n,
+      ESMF_KIND_I4 d) {
+//
+// !DESCRIPTION:
+//     Sets the fraction's value.
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_FractionSet(w,n,d)"
+
+   this->w = w;
+   this->n = n;
+   this->d = d;
+
+   // ensure normal form
+   return(ESMC_FractionNormalize());
+
+ }  // end ESMC_FractionSet
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FractionGet - Get fraction value
+//
+// !INTERFACE:
+      int ESMC_Fraction::ESMC_FractionGet(
+//
+// !RETURN VALUE:
+//    none.
+//
+// !ARGUMENTS:
+      ESMF_KIND_I8 *w,
+      ESMF_KIND_I4 *n,
+      ESMF_KIND_I4 *d) const {
+//
+// !DESCRIPTION:
+//     Gets the fraction's value.
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_FractionGet()"
+
+   if (w != ESMC_NULL_POINTER) *w = this->w;
+   if (n != ESMC_NULL_POINTER) *n = this->n;
+   if (d != ESMC_NULL_POINTER) *d = this->d;
+
+   return(ESMF_SUCCESS);
+
+ }  // end ESMC_FractionGet
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FractionNormalize - Ensure proper fraction (< 1) and sign
+//
+// !INTERFACE:
+      int ESMC_Fraction::ESMC_FractionNormalize(void) {
+//
+// !RETURN VALUE:
+//    none.
+//
+// !ARGUMENTS:
+//    none.
+//
+// !DESCRIPTION:
+//     If fraction >= 1, add to whole part, and adjust fraction to remainder.
+//     Does not reduce; maintains same denominator, eg. 1000 (milli),
+//     1,000,000 (micro), 1,000,000,000 (nano).
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_FractionNormalize()"
+
+    // check for divide-by-zero
+    if (d == 0) {
+      ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+      return(ESMF_FAILURE);
+    }
+
+    // normalize to proper fraction (labs(n/d) < 1)
+    ESMF_KIND_I4 whole;
+    if (labs((whole = n/d)) >= 1) {
+      w += whole;
+      n %= d;
+    }
+
+    // ensure whole and fraction parts are same sign
+    
+    // if whole is positive and fraction is negative
+    if (w > 0 && (n < 0 && d > 0 || d < 0 && n > 0)) {
+      w--;     // subtract one from whole number
+      n += d;  //   and add it to the fraction part
+
+    // else if whole is negative and fraction is positive
+    } else if (w < 0 && (n > 0 && d > 0) || (d < 0 && n < 0)) {
+      w++;     // add one to whole number
+      n -= d;  //   and subtract it from the fraction part
+    }
+
+    // normalize fraction sign 
+    if (d < 0) {
+      d *= -1; n *= -1;  // change signs
+    }
+
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_FractionNormalize
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FractionReduce - Reduce to smallest denominator
+//
+// !INTERFACE:
+      int ESMC_Fraction::ESMC_FractionReduce(void) {
+//
+// !RETURN VALUE:
+//    none.
+//
+// !ARGUMENTS:
+//    none.
+//
+// !DESCRIPTION:
+//     Divide numerator and denominator by their GCD.
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_FractionReduce()"
+
+// TODO: could enhance by adding optional input argument denom to be
+//       desired denominator (eg. powers of 10:  1000 (milli),
+//                            100,000,000 (micro) etc.)
+
+    ESMF_KIND_I4 gcd = ESMC_FractionGCD(n,d);
+
+    // this should never happen since GCD never returns zero!
+    if (gcd == 0) {
+      ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+      return(ESMF_FAILURE);
+    }
+
+    n /= gcd;
+    d /= gcd;
+
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_FractionReduce
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FractionConvert - Convert to given denominator
+//
+// !INTERFACE:
+      int ESMC_Fraction::ESMC_FractionConvert(
+//
+// !RETURN VALUE:
+//    none.
+//
+// !ARGUMENTS:
+      ESMF_KIND_I4 denominator) {  // input
+//
+// !DESCRIPTION:
+//     Convert fraction in terms of given denominator
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_FractionConvert()"
+
+    if (d == 0) {
+      ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+      return(ESMF_FAILURE);
+    }
+
+    n = ((ESMF_KIND_I8) n * (ESMF_KIND_I8) denominator) / (ESMF_KIND_I8) d;
+    d = denominator;
+
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_FractionConvert
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FractionGCD - determine the Greatest Common Divisor
+//
+// !INTERFACE:
+      ESMF_KIND_I4 ESMC_FractionGCD(
+//
+// !RETURN VALUE:
+//    The GCD of a and b.
+//
+// !ARGUMENTS:
+      ESMF_KIND_I4 a,    // in - the first number 
+      ESMF_KIND_I4 b) {  // in - the second number
+//
+// !DESCRIPTION:
+//     Uses Euclid's algorithm to determine the Greatest Common Divisor of 
+//     a and b.
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_FractionGCD()"
+
+    ESMF_KIND_I4 abs_a = labs(a);
+    ESMF_KIND_I4 abs_b = labs(b);
+    ESMF_KIND_I4 large = MAX(abs_a, abs_b);
+    ESMF_KIND_I4 small = MIN(abs_a, abs_b);
+    ESMF_KIND_I4 remainder;
+
+    // deal with a zero input
+    if      (small == 0 && large != 0) return(large);
+    else if (small != 0 && large == 0) return(small);
+    else if (small == 0 && large == 0) return(1);
+
+    // initial remainder
+    remainder = large % small;
+
+    // divide smaller number by previous remainder until remainder goes to 0
+    while(remainder != 0) {
+      large = small;
+      small = remainder;
+      remainder = large % small; 
+    }
+
+    // the GCD is the last non-zero remainder or the passed-in smallest number
+    return(small);
+
+ }  // end ESMC_FractionGCD
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FractionLCM - determine the Least Common Multiple
+//
+// !INTERFACE:
+      ESMF_KIND_I4 ESMC_FractionLCM(
+//
+// !RETURN VALUE:
+//    the LCM of a and b
+//
+// !ARGUMENTS:
+      ESMF_KIND_I4 a,    // in - the first number 
+      ESMF_KIND_I4 b) {  // in - the second number
+//
+// !DESCRIPTION:
+//      Uses GCD determine the Least Common Multiple of a and b.
+//      LCM = (a * b) / GCD(a,b)
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_FractionLCM()"
+
+    ESMF_KIND_I4 gcd = ESMC_FractionGCD(a,b);
+
+    // this should never happen since GCD never returns zero!
+    if (gcd == 0) {
+      ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+      return(0);
+    }
+
+    return(labs((a/gcd) * b));   // avoid (a * b) directly to prevent
+                                 //   overflow when a and b are large;
+                                 //   return absolute value
+
+ }  // end ESMC_FractionLCM
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(==) - Fraction equality comparison
+//
+// !INTERFACE:
+      bool ESMC_Fraction::operator==(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &fraction) const {   // in - ESMC_Fraction to compare
+//
+// !DESCRIPTION:
+//      Compare for equality the current object's (this) {\tt ESMC\_Fraction}
+//      with given {\tt ESMC\_Fraction}, return result
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::operator==()"
+
+    // make local copies; don't change the originals.
+    ESMC_Fraction f1 = *this;
+    ESMC_Fraction f2 = fraction;
+
+    // ensure proper fractions
+    f1.ESMC_FractionNormalize();
+    f2.ESMC_FractionNormalize();
+
+    // put both fractions on the same denominator, then compare
+    ESMF_KIND_I4 lcm = ESMC_FractionLCM(f1.d, f2.d);
+    return(f1.w == f2.w && f1.n*(lcm/f1.d) == f2.n*(lcm/f2.d));
+
+}  // end ESMC_Fraction::operator==
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(!=) - Fraction inequality comparison
+//
+// !INTERFACE:
+      bool ESMC_Fraction::operator!=(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &fraction) const {   // in - ESMC_Fraction to compare
+//
+// !DESCRIPTION:
+//      Compare for inequality the current object's (this)
+//      {\tt ESMC\_Fraction} with given {\tt ESMC\_Fraction}, return result
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::operator!=()"
+
+    // make local copies; don't change the originals.
+    ESMC_Fraction f1 = *this;
+    ESMC_Fraction f2 = fraction;
+
+    // put both fractions on the same denominator, then compare
+    f1.ESMC_FractionNormalize();
+    f2.ESMC_FractionNormalize();
+
+    // put both fractions on the same denominator, then compare
+    ESMF_KIND_I4 lcm = ESMC_FractionLCM(f1.d, f2.d);
+    return(f1.w != f2.w || f1.n*(lcm/f1.d) != f2.n*(lcm/f2.d));
+
+}  // end ESMC_Fraction::operator!=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(<) - Fraction less than comparison
+//
+// !INTERFACE:
+      bool ESMC_Fraction::operator<(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &fraction) const {   // in - ESMC_Fraction to compare
+//
+// !DESCRIPTION:
+//      Compare for less than the current object's (this)
+//      {\tt ESMC\_Fraction} with given {\tt ESMC\_Fraction}, return result
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::operator<()"
+
+    // make local copies; don't change the originals.
+    ESMC_Fraction f1 = *this;
+    ESMC_Fraction f2 = fraction;
+
+    // ensure proper fractions
+    f1.ESMC_FractionNormalize();
+    f2.ESMC_FractionNormalize();
+
+    // ignore fractional part if whole parts are different
+    if (f1.w != f2.w) return(f1.w < f2.w);
+    else { // must look at fractional part
+      // put both fractions on the same denominator, then compare
+      ESMF_KIND_I4 lcm = ESMC_FractionLCM(f1.d, f2.d);
+      return(f1.n*(lcm/f1.d) < f2.n*(lcm/f2.d));
+    }
+
+}  // end ESMC_Fraction::operator<
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(>) - Fraction greater than comparison
+//
+// !INTERFACE:
+      bool ESMC_Fraction::operator>(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &fraction) const {   // in - ESMC_Fraction to compare
+//
+// !DESCRIPTION:
+//      Compare for greater than the current object's (this)
+//      {\tt ESMC\_Fraction} with given {\tt ESMC\_Fraction}, return result
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::operator>()"
+
+    // make local copies; don't change the originals.
+    ESMC_Fraction f1 = *this;
+    ESMC_Fraction f2 = fraction;
+
+    // ensure proper fractions
+    f1.ESMC_FractionNormalize();
+    f2.ESMC_FractionNormalize();
+
+    // ignore fractional part if whole parts are different
+    if (f1.w != f2.w) return(f1.w > f2.w);
+    else { // must look at fractional part
+      // put both fractions on the same denominator, then compare
+      ESMF_KIND_I4 lcm = ESMC_FractionLCM(f1.d, f2.d);
+      return(f1.n*(lcm/f1.d) > f2.n*(lcm/f2.d));
+    }
+
+}  // end ESMC_Fraction::operator>
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(<=) - Fraction less or equal than comparison
+//
+// !INTERFACE:
+      bool ESMC_Fraction::operator<=(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &fraction) const {   // in - ESMC_Fraction to compare
+//
+// !DESCRIPTION:
+//      Compare for less than or equal the current object's (this)
+//      {\tt ESMC\_Fraction} with given {\tt ESMC\_Fraction}, return result
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::operator<=()"
+
+    // just reuse < and == operators defined above!
+    return(*this < fraction || *this == fraction);
+
+}  // end ESMC_Fraction::operator<=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(>=) - Fraction greater than or equal comparison
+//
+// !INTERFACE:
+      bool ESMC_Fraction::operator>=(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &fraction) const {   // in - ESMC_Fraction to compare
+//
+// !DESCRIPTION:
+//      Compare for greater than or equal the current object's (this)
+//      {\tt ESMC\_Fraction} with given {\tt ESMC\_Fraction}, return result
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::operator>=()"
+
+    // just reuse > and == operators defined above!
+    return(*this > fraction || *this == fraction);
+
+}  // end ESMC_Fraction::operator>=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(+) - increment Fraction
+//
+// !INTERFACE:
+      ESMC_Fraction ESMC_Fraction::operator+(
+//
+// !RETURN VALUE:
+//    ESMC_Fraction result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &fraction) const {   // in - ESMC_Fraction increment
+//
+// !DESCRIPTION:
+//      Increment current object's (this) {\tt ESMC\_Fraction} with given
+//      {\tt ESMC\_Fraction}, return result
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::operator+()"
+
+    ESMC_Fraction sum;
+
+    // fractional part addition
+    sum.d = ESMC_FractionLCM(d, fraction.d);
+    sum.n = n*(sum.d/d) + fraction.n*(sum.d/fraction.d);
+
+    // whole part addition
+    sum.w = w + fraction.w;
+
+    // normalize, but don't reduce; maintains denominators where possible.
+    //   eg. 1000 (milli), 1,000,000 (micro), 1,000,000,000 (nano).
+    sum.ESMC_FractionNormalize();
+
+    return(sum);
+
+}  // end ESMC_Fraction::operator+
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(-) - decrement Fraction
+//
+// !INTERFACE:
+      ESMC_Fraction ESMC_Fraction::operator-(
+//
+// !RETURN VALUE:
+//    ESMC_Fraction result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &fraction) const {   // in - ESMC_Fraction decrement
+//
+// !DESCRIPTION:
+//      Decrement current object's (this) {\tt ESMC\_Fraction} with given
+//      {\tt ESMC\_Fraction}, return result
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::operator-()"
+
+    ESMC_Fraction diff;
+
+    // fractional part subtraction
+    diff.d = ESMC_FractionLCM(d, fraction.d);
+    diff.n = n*(diff.d/d) - fraction.n*(diff.d/fraction.d);
+
+    // whole part subtraction 
+    diff.w = w - fraction.w;
+
+    // normalize, but don't reduce; maintains denominators where possible.
+    //   eg. 1000 (milli), 1,000,000 (micro), 1,000,000,000 (nano).
+    diff.ESMC_FractionNormalize();
+
+    return(diff);
+
+}  // end ESMC_Fraction::operator-
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(+=) - increment Fraction
+//
+// !INTERFACE:
+      ESMC_Fraction& ESMC_Fraction::operator+=(
+//
+// !RETURN VALUE:
+//    ESMC_Fraction& result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &fraction) {   // in - ESMC_Fraction increment
+//
+// !DESCRIPTION:
+//      Increment current object's (this) {\tt ESMC\_Fraction} with given
+//      {\tt ESMC\_Fraction}
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::operator+=()"
+
+    // just reuse (+) operator defined above!
+    *this = *this + fraction;
+
+    return(*this);
+
+}  // end ESMC_Fraction::operator+=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(-=) - decrement Fraction
+//
+// !INTERFACE:
+      ESMC_Fraction& ESMC_Fraction::operator-=(
+//
+// !RETURN VALUE:
+//    ESMC_Fraction& result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &fraction) {   // in - ESMC_Fraction decrement
+//
+// !DESCRIPTION:
+//      Decrement current object's (this) {\tt ESMC\_Fraction} with given
+//      {\tt ESMC\_Fraction}
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::operator-=()"
+
+    // just reuse (-) operator defined above!
+    *this = *this - fraction;
+
+    return(*this);
+
+}  // end ESMC_Fraction::operator-=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FractionValidate - validate Fraction state
+//
+// !INTERFACE:
+      int ESMC_Fraction::ESMC_FractionValidate(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *options) const {     // in - options
+//
+// !DESCRIPTION:
+//      validate {\tt ESMC\_Fraction} state
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_FractionValidate()"
+
+    // must have non-zero denominator
+    if (d == 0) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "must have non-zero denominator."); 
+      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+      return(ESMF_FAILURE);
+    }
+
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_FractionValidate
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FractionPrint - print Fraction state
+//
+// !INTERFACE:
+      int ESMC_Fraction::ESMC_FractionPrint(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *options) const {    // in - print options
+//
+// !DESCRIPTION:
+//      print {\tt ESMC\_Fraction} state for testing/debugging
+//
+//EOP
+// !REQUIREMENTS:  
+
+    cout << "Fraction -------------------------------" << endl;
+    cout << "w = " << w << endl;
+    cout << "n = " << n << endl;
+    cout << "d = " << d << endl;
+    cout << "end Fraction ---------------------------" << endl << endl;
+
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_FractionPrint
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction - native default C++ constructor
+//
+// !INTERFACE:
+      ESMC_Fraction::ESMC_Fraction(void) {
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      Initializes a {\tt ESMC\_Fraction} with defaults
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::ESMC_Fraction(void) constructor"
+
+   w = 0;
+   n = 0;
+   d = 1;  // to prevent divide-by-zero
+
+ }  // end ESMC_Fraction
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction - native C++ constructor
+//
+// !INTERFACE:
+      ESMC_Fraction::ESMC_Fraction(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+      ESMF_KIND_I8 w,   // Integer (whole) seconds (signed)
+      ESMF_KIND_I4 n,   // Integer fraction (exact) n/d; numerator (signed)
+      ESMF_KIND_I4 d) { // Integer fraction (exact) n/d; denominator
+
+// !DESCRIPTION:
+//      Initializes a {\tt ESMC\_Fraction} with given values
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::ESMC_Fraction(w,n,d) constructor"
+
+   this->w = w;
+   this->n = n;
+   this->d = d;
+
+   // ensure normal form
+   ESMC_FractionNormalize();
+   // TODO:  throw exception if ESMC_FractionNormalize() returns ESMF_FAILURE
+
+ }  // end ESMC_Fraction
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction - native C++ constructor
+//
+// !INTERFACE:
+      ESMC_Fraction::ESMC_Fraction(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+      int w,   // Integer (whole) seconds (signed)
+      int n,   // Integer fraction (exact) n/d; numerator (signed)
+      int d) { // Integer fraction (exact) n/d; denominator
+
+// !DESCRIPTION:
+//      Initializes a {\tt ESMC\_Fraction} with given values
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::ESMC_Fraction(w,n,d) constructor"
+
+   this->w = w;
+   this->n = n;
+   this->d = d;
+
+   // ensure normal form
+   ESMC_FractionNormalize();
+   // TODO:  throw exception if ESMC_FractionNormalize() returns ESMF_FAILURE
+
+ }  // end ESMC_Fraction
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ~ESMC_Fraction - native default C++ destructor
+//
+// !INTERFACE:
+      ESMC_Fraction::~ESMC_Fraction(void) {
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      Default {\tt ESMC\_Fraction} destructor
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::~ESMC_Fraction(void) destructor"
+
+ }  // end ~ESMC_Fraction
