@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.17 2004/06/12 17:17:57 cdeluca Exp $
+! $Id: ESMF_StateUTest.F90,v 1.18 2004/06/14 13:52:15 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.17 2004/06/12 17:17:57 cdeluca Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.18 2004/06/14 13:52:15 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -199,28 +199,28 @@
       !Commented out because it crashes
       ! Bug 959618 has been opened.
       !Test adding an Array to a State
-      !call ESMF_StateAddArray(state1, array1, rc)
-      !write(name, *) "Adding an Array to a State Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_StateAddArray(state1, array1, rc)
+      write(name, *) "Adding an Array to a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !Cannot run this test until the previous test is fixed
       ! Test getting an Array from a State
-      !call ESMF_StateGetArray(state1, arrayname=aname, array=array3, rc=rc)
-      !write(failMsg, *) "DId not return ESMF_SUCCESS"
-      !write(name, *) "Getting an Array from a State Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_StateGetArray(state1, arrayname=aname, array=array3, rc=rc)
+      write(failMsg, *) "DId not return ESMF_SUCCESS"
+      write(name, *) "Getting an Array from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       ! Test printing of State
       ! Commented out because it crashes:
       ! Bug report 969851 opened.
-      !call  ESMF_StatePrint(state1, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Printing of a State Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      call  ESMF_StatePrint(state1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing of a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -235,11 +235,11 @@
       ! Commented out because it crashes:
       ! Bug report 969851 opened.
       ! Test printing of State
-      !call  ESMF_StatePrint(state1, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Printing of a State Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      call  ESMF_StatePrint(state1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing of a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -353,12 +353,12 @@
       !Commented out because it crashes
       ! Bug report 969077 opened.
       ! Test State for non-existant Field being needed
-      !IsNeeded = ESMF_StateIsNeeded(state1, "Humidty", rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Query if non existant Field is needed in a State Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), &
-                      !name, failMsg, result, ESMF_SRCLINE)
-      !print *, "IsNeeded = ", IsNeeded
+      IsNeeded = ESMF_StateIsNeeded(state1, "Humidty", rc)
+      write(failMsg, *) ""
+      write(name, *) "Query if non existant Field is needed in a State Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "IsNeeded = ", IsNeeded
       !------------------------------------------------------------------------
 
 
@@ -380,12 +380,12 @@
       !Commented out because it crashes
       ! Bug report 959618 resolution should allow this test to run
       ! Test State for Array being needed
-      !IsNeeded = ESMF_StateIsNeeded(state1, aname, rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Query if Array is needed in a State Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(IsNeeded), &
-                      !name, failMsg, result, ESMF_SRCLINE)
-      !print *, "IsNeeded = ", IsNeeded
+      IsNeeded = ESMF_StateIsNeeded(state1, aname, rc)
+      write(failMsg, *) ""
+      write(name, *) "Query if Array is needed in a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(IsNeeded), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "IsNeeded = ", IsNeeded
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -408,28 +408,28 @@
       !Commented out because it crashes
       ! Bug report 959618 resolution should allow this test to run
       ! Test setting Array as not needed in a State
-      !call ESMF_StateSetNeeded(state1, aname, ESMF_NOTNEEDED, rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Set Array as not needed in a State Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_StateSetNeeded(state1, aname, ESMF_NOTNEEDED, rc)
+      write(failMsg, *) ""
+      write(name, *) "Set Array as not needed in a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !Commented out because it crashes
       ! Bug report 959618 resolution should allow this test to run
-      !IsNeeded = ESMF_StateIsNeeded(state1, aname, rc)
-      !write(name, *) "Test if Array is not needed in a State Test"
-      !call ESMF_Test((.not.IsNeeded), &
-                      !name, failMsg, result, ESMF_SRCLINE)
-      !print *, "IsNeeded = ", IsNeeded
+      IsNeeded = ESMF_StateIsNeeded(state1, aname, rc)
+      write(name, *) "Test if Array is not needed in a State Test"
+      call ESMF_Test((.not.IsNeeded), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "IsNeeded = ", IsNeeded
       !------------------------------------------------------------------------
 
       !Commented out because it crashes
       ! Bug report 959618 resolution should allow this test to run
       ! Test getting Array from State
-      !call  ESMF_StateGetArray(state1, aname, array3, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Getting Arrray from a State Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      call  ESMF_StateGetArray(state1, aname, array3, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting Arrray from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -494,48 +494,49 @@
       !Commented out because it crashes
       ! Bug report 959618 resolution should allow this test to run
       ! Test setting Array as needed in a State
-      !call ESMF_StateSetNeeded(state1, aname, ESMF_NEEDED, rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Set Array as needed in a State Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_StateSetNeeded(state1, aname, ESMF_NEEDED, rc)
+      write(failMsg, *) ""
+      write(name, *) "Set Array as needed in a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !Commented out because it crashes
       ! Bug report 959618 resolution should allow this test to run
-      !IsNeeded = ESMF_StateIsNeeded(state1, aname, rc)
-      !write(name, *) "Test if Array is needed in a State Test"
-      !call ESMF_Test((IsNeeded), &
-                      !name, failMsg, result, ESMF_SRCLINE)
-      !print *, "IsNeeded = ", IsNeeded
+      IsNeeded = ESMF_StateIsNeeded(state1, aname, rc)
+      write(name, *) "Test if Array is needed in a State Test"
+      call ESMF_Test((IsNeeded), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "IsNeeded = ", IsNeeded
       !------------------------------------------------------------------------
 
       !Commented out because it crashes
       ! Bug report 969116 has been opened
       ! Test adding an uninitialized Bundle to a State
-      !call ESMF_StateAddData(state1, bundle5, rc)
-      !write(name, *) "Adding an uninitialized  Bundle to a State Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_StateAddBundle(state1, bundle5, rc=rc)
+      write(name, *) "Adding an uninitialized  Bundle to a State Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       ! Test adding an uninitialized Field to a State
       ! This code crashes, it will be commented out until
       ! bug 709032 is fixed.
-      !call ESMF_StateAddField(state1, field4, rc)
-      !write(name, *) "Adding an uninitialized  Field to a State Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), &
-                       !name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_StateAddField(state1, field4, rc)
+      write(name, *) "Adding an uninitialized  Field to a State Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !Commented out because it crashes
       ! Waiting resolution of Bug report 959635 
       ! Test adding an uninitialized Array to a State
-      !call ESMF_StateAddArray(state1, array3, rc)
-      !write(name, *) "Adding an uninitialized Array to a State Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), &
-                        !name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
+      call ESMF_StateAddArray(state1, array3, rc)
+      write(name, *) "Adding an uninitialized Array to a State Test"
+    print *, "rc = ", rc
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                        name, failMsg, result, ESMF_SRCLINE)
+      print *, "rc = ", rc
 
       !------------------------------------------------------------------------
 
@@ -546,14 +547,14 @@
       x = 1
       bundle2(1) = ESMF_BundleCreate(name=bundlename, rc=rc)
       state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
-                                bundles=bundle2, itemcount=x, rc=rc)
+                                bundleList=bundle2, itemcount=x, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an export State with a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       ! Commented out because it crashes:
       ! Bug report 969851 opened.
-      !call  ESMF_StatePrint(state2, rc=rc)
+      call  ESMF_StatePrint(state2, rc=rc)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -565,7 +566,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       ! Commented out because it crashes:
       ! Bug report 969851 opened.
-      !call  ESMF_StatePrint(state2, rc=rc)
+      call  ESMF_StatePrint(state2, rc=rc)
 
       !------------------------------------------------------------------------
 
@@ -578,7 +579,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       ! Commented out because it crashes:
       ! Bug report 969851 opened.
-      !call  ESMF_StatePrint(state2, rc=rc)
+      call  ESMF_StatePrint(state2, rc=rc)
 
       !------------------------------------------------------------------------
 
@@ -596,126 +597,127 @@
       ! Bug report 959618 resolution should allow this test to run
       !
       ! Test Creation of an export State with the wrong number of Fields
-      !statename = "Export State"
-      !x = 1
-      !fieldname = "Precipitation"
-      !field3(1) = ESMF_FieldCreateNoData(fieldname, rc=rc)
-      !state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
-                                !fields=field3, itemcount=x, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Creating an export State with a bad Field list"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      statename = "Export State"
+      x = 4
+      fieldname = "Precipitation"
+      field3(1) = ESMF_FieldCreateNoData(fieldname, rc=rc)
+      state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
+                                fieldList=field3, itemcount=x, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an export State with a bad Field list"
+   print *, "itemcount mismatch, rc = ", rc
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                     name, failMsg, result, ESMF_SRCLINE)
       ! Commented out because it crashes:
       ! Bug report 969851 opened.
-      !call  ESMF_StatePrint(state2, rc=rc)
+      call  ESMF_StatePrint(state2, rc=rc)
       !------------------------------------------------------------------------
 
 
       ! Commented out because it crashes
       ! Bug Report 969140 openned
       ! Test Creation of an export State with a Field
-      !statename = "Export State"
-      !x = 1
-      !fieldname = "Precipitation"
-      !field3(1) = ESMF_FieldCreateNoData(fieldname, rc=rc)
-      !state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
-                                !fields=field3(1:1), itemcount=x, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Creating an export State with a Field Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      statename = "Export State"
+      x = 1
+      fieldname = "Precipitation"
+      field3(1) = ESMF_FieldCreateNoData(fieldname, rc=rc)
+      state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
+                                fieldList=field3(1:1), itemcount=x, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an export State with a Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
       ! Commented out because it crashes:
       ! Bug report 969851 opened.
-      !call  ESMF_StatePrint(state2, rc=rc)
+      call  ESMF_StatePrint(state2, rc=rc)
       !------------------------------------------------------------------------
 
       !Commented out because it crashes
       ! Bug report 969149 opened.
       ! Test Creation of an export State with an array
-      !statename = "Export State"
-      !x  = 1
-      !allocate(f90ptr1(10,20))
-      !array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
-      !state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
-                                !arrays=array2(1:1), itemcount=x, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Creating an export State with a Array Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                        !name, failMsg, result, ESMF_SRCLINE)
+      statename = "Export State"
+      x  = 1
+      allocate(f90ptr1(10,20))
+      array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
+      state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
+                                arrayList=array2(1:1), itemcount=x, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an export State with a Array Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                        name, failMsg, result, ESMF_SRCLINE)
       ! Commented out because it crashes:
       ! Bug report 969851 opened.
-      !call  ESMF_StatePrint(state2, rc=rc)
+      call  ESMF_StatePrint(state2, rc=rc)
       !------------------------------------------------------------------------
 
       !Commented out because it crashes
       ! Bug report 969149 opened.
       ! Test Creation of an export State with an array
-      !statename = "Export State"
-      !x  = 2
-      !allocate(f90ptr1(10,20))
-      !array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
-      !array2(2) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
-      !state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
-                                !arrays=array2, itemcount=x, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Creating an export State with a Array list Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                        !name, failMsg, result, ESMF_SRCLINE)
+      statename = "Export State"
+      x  = 2
+      allocate(f90ptr1(10,20))
+      array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
+      array2(2) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
+      state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
+                                arrayList=array2, itemcount=x, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an export State with a Array list Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                        name, failMsg, result, ESMF_SRCLINE)
       ! Commented out because it crashes:
       ! Bug report 969851 opened.
-      !call  ESMF_StatePrint(state2, rc=rc)
+      call  ESMF_StatePrint(state2, rc=rc)
       !------------------------------------------------------------------------
 
       ! Commented out because it crashes:
       ! Bug report 969851 opened.
-      !call  ESMF_StatePrint(state1, rc=rc)
+      call  ESMF_StatePrint(state1, rc=rc)
 
       !Commented out because it crashes
       ! Test Destruction of State
-      !call  ESMF_StateDestroy(state1, rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Destruction of a State Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      call  ESMF_StateDestroy(state1, rc)
+      write(failMsg, *) ""
+      write(name, *) "Destruction of a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !Commented out because it crashes
       ! Test State Validation
-      !call ESMF_StateValidate(state1, rc=rc)
-      !write(failMsg, *) "Should not return ESMF_SUCCESS"
-      !write(name, *) "Validating a State Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_StateValidate(state1, rc=rc)
+      write(failMsg, *) "Should not return ESMF_SUCCESS"
+      write(name, *) "Validating a State Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !Commented out because it crashes
       ! Test Creation of an export State with an array list
-      !statename = "Export State"
-      !x  = 2
-      !allocate(f90ptr1(10,20))
-      !array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
-      !array2(2) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
-      !state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
-                                !arrays=array2, itemcount=x, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Creating an export State with a Array list Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                        !name, failMsg, result, ESMF_SRCLINE)
+      statename = "Export State"
+      x  = 2
+      allocate(f90ptr1(10,20))
+      array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
+      array2(2) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
+      state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
+                                arrayList=array2, itemcount=x, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an export State with a Array list Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                        name, failMsg, result, ESMF_SRCLINE)
       ! Commented out because it crashes:
       ! Bug report 969851 opened.
-      !call  ESMF_StatePrint(state2, rc=rc)
+      call  ESMF_StatePrint(state2, rc=rc)
       !------------------------------------------------------------------------
 
       !Commented out because it crashes
       ! Bug Report 969163 opened
       ! Test Destruction of a destroyed State
-      !write(failMsg, *) ""
-      !write(name, *) "Destruction of a destroyed State Test"
-      !call  ESMF_StateDestroy(state1, rc)
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), &
-                      !name, failMsg, result, ESMF_SRCLINE)
-      !print *, "rc = ", rc
+      write(failMsg, *) ""
+      write(name, *) "Destruction of a destroyed State Test"
+      call  ESMF_StateDestroy(state1, rc)
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "rc = ", rc
 
 #endif
 
