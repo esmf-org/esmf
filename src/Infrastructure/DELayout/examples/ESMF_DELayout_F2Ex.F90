@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_F2Ex.F90,v 1.3 2003/12/02 17:14:15 svasquez Exp $
+! $Id: ESMF_DELayout_F2Ex.F90,v 1.4 2003/12/02 17:26:01 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -334,9 +334,9 @@ program ESMF_DELayout_FEx2
   end if
 
   if (finalrc.EQ.ESMF_SUCCESS) then
-     print *, "PASS: ESMF_BundleCreateEx.F90"
+     print *, "PASS: ESMF_DELayout_FEx2.F90"
   else
-     print *, "FAIL: ESMF_BundleCreateEx.F90"
+     print *, "FAIL: ESMF_DELayout_FEx2.F90"
   end if
 
 
