@@ -1,4 +1,4 @@
-% $Id: TimeMgr_param.tex,v 1.1 2002/08/18 22:43:36 eschwab Exp $
+% $Id: TimeMgr_param.tex,v 1.2 2002/09/20 18:24:06 eschwab Exp $
 
 Platform-independent specification of 64-bit and 32-bit integers are done via
 compile-time constants in F90 and C++ as follows:
@@ -13,7 +13,7 @@ F90:
 
 C++:
 \begin{verbatim}
-#ifdef LIUNX
+#ifdef LINUX
 #define int64  long long	! at least 64 bits
 #define int32  long
 #elif defined(IRIX64)
