@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: base_variables,v 1.2 2001/11/15 23:11:29 dneckels Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -9,19 +9,19 @@ OMAKE		   = ${MAKE}
 RANLIB		   = /usr/ccs/bin/ranlib
 SHELL		   = /bin/sh
 SED		   = /bin/sed
-SH_LD		   = /opt/SUNWhpc/bin/mpCC 
+SH_LD		   = /opt/SUNWspro/bin/CC 
 # ######################### C and Fortran compiler ########################
 #
-C_CC		   = /opt/SUNWhpc/bin/mpcc -KPIC -dalign -xtarget=native
-C_FC		   = /opt/SUNWhpc/bin/mpf90 -openmp -xpp=cpp -dalign
+C_CC		   = /opt/SUNWspro/bin/cc -KPIC -dalign -xtarget=native
+C_FC		   = /opt/SUNWspro/bin/f90 -openmp -xpp=cpp -dalign
 C_FC_MOD           = -M
 C_CLINKER_SLFLAG   = -R
 C_FLINKER_SLFLAG   = -R
 # Must use f90 to link C to get omp libs
-C_CLINKER	   = /opt/SUNWhpc/bin/mpf90 -openmp -dalign
-C_FLINKER	   = /opt/SUNWhpc/bin/mpf90 -openmp -dalign
+C_CLINKER	   = /opt/SUNWspro/bin/f90 -openmp -dalign
+C_FLINKER	   = /opt/SUNWspro/bin/f90 -openmp -dalign
 C_CCV		   = ${C_CC} --version
-C_FCV              = /opt/SUNWhpc/bin/mpf90 -openmp -dalign
+C_FCV              = /opt/SUNWspro/bin/f90 -openmp -dalign
 C_SYS_LIB	   = -L/opt/SUNWspro/SC5.0/lib -lF77 -lM77 -lfsu -lsunmath -lnsl -lsocket -lgen -ldl -lm
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS	   = -g -xs
@@ -31,12 +31,12 @@ O_COPTFLAGS	   = -fast -xO4 -fsimple=2 -xtarget=native
 O_FOPTFLAGS	   = -fast
 # ########################## C++ compiler ##################################
 #
-CXX_CC		   = /opt/SUNWhpc/bin/mpCC 
-CXX_FC		   = /opt/SUNWhpc/bin/mpf90 -openmp
+CXX_CC		   = /opt/SUNWspro/bin/CC 
+CXX_FC		   = /opt/SUNWspro/bin/f90 -openmp
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
-CXX_CLINKER	   = /opt/SUNWhpc/bin/mpCC 
-CXX_FLINKER	   = /opt/SUNWhpc/bin/mpCC 
+CXX_CLINKER	   = /opt/SUNWspro/bin/CC 
+CXX_FLINKER	   = /opt/SUNWspro/bin/CC 
 CXX_CCV		   = ${CXX_CC} --version
 #CXX_SYS_LIB	   = -ldl -lc -lf2c -lm
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm

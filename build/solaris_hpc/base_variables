@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.1 2001/11/15 23:10:20 dneckels Exp $ 
+# $Id: base_variables,v 1.2 2001/11/15 23:11:29 dneckels Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -73,6 +73,6 @@ OCOMP_ALICEFLAGS   = -DESMC_DEBUG  -DESMC_USE_LOG -DESMC_USE_BOPT_O \
 #
 ##################################################################################
 
-PARCH		   = solaris
+PARCH		   = solaris_hpc
 
 include ${ESMF_DIR}/build/common_variables
