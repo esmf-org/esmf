@@ -1,10 +1,11 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.15 2004/06/11 02:13:00 cdeluca Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.16 2005/02/01 23:22:50 svasquez Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
 
 !-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!SYSTEM_TEST        String used by test script to count system tests.
+!=========================================================================
 
 !BOP
 !

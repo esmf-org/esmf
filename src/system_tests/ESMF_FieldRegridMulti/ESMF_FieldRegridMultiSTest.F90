@@ -1,10 +1,11 @@
-! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.13 2004/06/11 02:13:00 cdeluca Exp $
+! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.14 2005/02/01 23:17:06 svasquez Exp $
 !
 ! System test code FieldRegridMulti
 !  Description on Sourceforge under System Test #xxxxx
 
 !-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!SYSTEM_TEST        String used by test script to count system tests.
+!=========================================================================
 
 !BOP
 !

@@ -1,9 +1,10 @@
-! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.3 2004/06/11 02:13:00 cdeluca Exp $
+! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.4 2005/02/01 23:15:30 svasquez Exp $
 !
 ! System test code FieldRegridConserv
 
 !-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!SYSTEM_TEST        String used by test script to count system tests.
+!=========================================================================
 
 !BOP
 !

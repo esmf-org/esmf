@@ -1,10 +1,11 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.26 2004/05/27 22:48:17 jwolfe Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.27 2005/02/01 23:12:31 svasquez Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
 
 !-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!SYSTEM_TEST        String used by test script to count system tests.
+!=========================================================================
 
 !BOP
 !

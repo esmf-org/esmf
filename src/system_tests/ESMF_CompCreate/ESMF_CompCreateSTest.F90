@@ -1,10 +1,11 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.13 2004/07/27 16:25:05 nscollins Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.14 2005/02/01 23:03:24 svasquez Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
 
 !-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!SYSTEM_TEST        String used by test script to count system tests.
+!=========================================================================
 
 !BOP
 !

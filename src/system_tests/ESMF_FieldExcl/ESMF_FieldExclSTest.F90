@@ -1,10 +1,12 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.15 2004/12/30 21:34:01 nscollins Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.16 2005/02/01 23:07:07 svasquez Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
 
 !-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!SYSTEM_TEST        String used by test script to count system tests.
+!=========================================================================
+
 
 !BOP
 !

@@ -1,11 +1,12 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.30 2004/06/21 19:38:35 theurich Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.31 2005/02/01 23:10:16 svasquez Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
 !  Description on Sourceforge under System Test #82899
 
 !-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!SYSTEM_TEST        String used by test script to count system tests.
+!=========================================================================
 
 !BOP
 !
