@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.53 2003/08/05 17:47:42 dneckels Exp $
+! $Id: ESMF_Field.F90,v 1.54 2003/08/05 20:41:41 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -181,7 +181,6 @@
    public ESMF_FieldGetData            ! Return a data pointer
    public ESMF_FieldGetGlobalDataInfo  ! Return global data info
    public ESMF_FieldGetLocalDataInfo   ! Return local data info
-   public ESMF_FieldGetRelLoc          ! Return relative location
  
    public ESMF_FieldGetDataMap         ! Return a pointer to DataMap object
 
@@ -214,7 +213,6 @@
 
    public ESMF_FieldValidate           ! Check internal consistency
    public ESMF_FieldPrint              ! Print contents of a Field
-   public ESMF_FieldBoxIntersect       ! Intersect bounding boxes
 
 !  !subroutine ESMF_FieldWriteRestart(field, iospec, rc)
 !  !function ESMF_FieldReadRestart(name, iospec, rc)
@@ -227,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.53 2003/08/05 17:47:42 dneckels Exp $'
+      '$Id: ESMF_Field.F90,v 1.54 2003/08/05 20:41:41 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2493,6 +2491,7 @@
       integer, dimension(ESMF_MAXGRIDDIM) :: global_stride
       integer, dimension(:,:), allocatable :: global_start
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
+      type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
       integer :: AI_count
 
    
@@ -2535,7 +2534,8 @@
       allocate(src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
       allocate(dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
       call ESMF_GridGet(ftypep%grid, global_cell_dim=global_stride, &
-                        global_start=global_start, rc=status)
+                        global_start=global_start, &
+                        periodic=periodic, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
          print *, "ERROR in FieldHalo: GridGet returned failure"
          return
@@ -2550,17 +2550,16 @@
       ! down immediately to RouteRun.
       call ESMF_RouteGetCached(datarank, my_DE, dst_AI, dst_AI, &
                                AI_count, layout, my_DE, src_AI, src_AI, &
-                               AI_count, layout, hascachedroute, route, &
-                               rc=status)
+                               AI_count, layout, periodic, &
+                               hascachedroute, route, status)
 
       if (.not. hascachedroute) then
           ! Create the route object.
           route = ESMF_RouteCreate(layout, rc) 
 
-          call ESMF_RoutePrecomputeHalo(route, datarank, &
-                                        my_DE, src_AI, dst_AI, &
+          call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, src_AI, dst_AI, &
                                         AI_count, global_start, global_stride, &
-                                        layout, rc=status)
+                                        layout, periodic, status)
 
       endif
 
@@ -2756,6 +2755,7 @@
       integer, dimension(:,:), allocatable :: src_global_start
       integer, dimension(ESMF_MAXGRIDDIM) :: dst_global_stride
       integer, dimension(:,:), allocatable :: dst_global_start
+      type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
       integer :: AI_snd_count, AI_rcv_count
 
    
@@ -2883,13 +2883,18 @@
           AI_rcv_count = 0
       endif
           
+      ! periodic only matters for halo operations
+      do i=1, ESMF_MAXGRIDDIM
+        periodic(i) = ESMF_TF_FALSE
+      enddo
+
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
       call ESMF_RouteGetCached(datarank, &
                                my_dst_DE, dst_AI_exc, dst_AI_tot, &
                                AI_rcv_count, dstlayout, &
                                my_src_DE, src_AI_exc, src_AI_tot, &
-                               AI_snd_count, srclayout, &
+                               AI_snd_count, srclayout, periodic, &
                                hascachedroute, route, rc=status)
 
       if (.not. hascachedroute) then
@@ -2903,7 +2908,8 @@
                                     dst_global_stride, dstlayout,  &
                                     my_src_DE, src_AI_exc, src_AI_tot, &
                                     AI_snd_count, src_global_start, &
-                                    src_global_stride, srclayout, rc=status)
+                                    src_global_stride, srclayout, &
+                                    rc=status)
 
       endif
 
@@ -3345,74 +3351,6 @@
 
 
         end function ESMF_FieldRead
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldGetRelLoc - Return Relative location
-!
-! !INTERFACE:
-      subroutine ESMF_FieldGetRelLoc(field, relloc, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field             ! field to cover
-      type(ESMF_RelLoc), intent(out) :: relloc          ! RelLoc to return
-      integer, intent(out), optional :: rc              ! return code
-!
-! !DESCRIPTION:
-!     Finds and returns the relative location of the field. Use
-!     DataMap access routines to get relloc.
-!
-! !REQUIREMENTS: 
-!EOP
-
-      call ESMF_DataMapGet(field%ftypep%mapping, relloc=relloc, rc=rc)
-
-      end subroutine ESMF_FieldGetRelLoc
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldBoxIntersect - Intersect bounding boxes
-!
-! !INTERFACE:
-      subroutine ESMF_FieldBoxIntersect(src_field, clip_field, src_DE, &
-                                 de_list, domainlist, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: src_field         ! field to cover
-      type(ESMF_Field), intent(in) :: clip_field        ! field to find a cover in
-      integer, intent(in), optional  :: src_DE          ! The DE to 'cover'
-      integer, intent(out), optional :: de_list         ! DE's that cover
-      type(ESMF_DomainList), optional :: domainlist     ! domain list hint
-      integer, intent(out), optional :: rc              ! return code
-!
-! !DESCRIPTION:
-!      Clips the src_field physgrid box against the clip_field, i.e. returns
-!      a description of the area in clip_field which is necessary to cover the
-!      desired area in src_field.  This procedure is mostly an entry point;
-!      most of the work is done in the {\tt ESMF\_Grid} class.
-!
-! !REQUIREMENTS: 
-!EOP
-        type(ESMF_Grid) :: src_grid, clip_grid
-        type(ESMF_RelLoc) :: src_relloc, clip_relloc
-
-        call ESMF_FieldGetGrid(src_field, src_grid, rc)
-        call ESMF_FieldGetGrid(clip_field, clip_grid, rc)
-
-        ! Retrieve the relative locations
-        call ESMF_FieldGetRelloc(src_field, src_relloc, rc)
-        call ESMF_FieldGetRelloc(clip_field, clip_relloc, rc)
-
-        ! Here is the main reason for this function in field.  To avoid
-        ! burdening the user with getting each grid and each RelLoc flag
-        print *, 'in fieldboxintersect, calling gridboxintersect'
-        !call ESMF_GridBoxIntersect(src_grid, clip_grid, &
-                         !src_relloc, clip_relloc, &
-                         !src_DE, de_list, &
-                         !domainlist, rc)
-
-
-        end subroutine ESMF_FieldBoxIntersect
 
 
         end module ESMF_FieldMod
