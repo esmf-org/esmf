@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.C,v 1.16 2003/02/26 20:15:10 jwolfe Exp $
+// $Id: ESMC_Layout.C,v 1.17 2003/02/26 22:16:02 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Layout.C,v 1.16 2003/02/26 20:15:10 jwolfe Exp $";
+ static const char *const version = "$Id: ESMC_Layout.C,v 1.17 2003/02/26 22:16:02 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -969,10 +969,10 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
               recvcounts[k] = rsize[rankx]; // TODO: fix so variable
               displs[k] = kx*rsize[rankx] + ky*rskip[ranky]*rsize[ranky];
             }
+          }
           // call layout gather routine
           comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
                                    displs, ESMC_INT);
-          }
         }
         delete [] recvcounts;
         delete [] displs;
