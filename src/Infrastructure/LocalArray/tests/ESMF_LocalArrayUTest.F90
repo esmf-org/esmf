@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.11 2004/05/21 17:04:01 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.12 2004/05/26 16:38:32 jwolfe Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -741,9 +741,9 @@
 
 !-------------------------------------------------------------------------------
 
-    call ESMF_Finalize()
-
 #endif
+
+    call ESMF_Finalize()
 
     end program ESMF_LocalArrayTest
     
