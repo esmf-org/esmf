@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.26 2003/09/04 18:57:56 cdeluca Exp $
+// $Id: ESMC_Time.h,v 1.27 2003/09/10 03:32:49 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -141,6 +141,11 @@
     // copy or assign from ESMC_BaseTime expressions
     // TODO:  should be implicit ?
     ESMC_Time& operator=(const ESMC_BaseTime &);  
+
+    // TODO: ? override BaseTime arithmetic operators with same operators
+    //         which use the BaseTime operators and then specialize
+    //         with logic to validate (range check) the new value against
+    //         the associated calendar.
 
     // required methods inherited and overridden from the ESMC_Base class
 
