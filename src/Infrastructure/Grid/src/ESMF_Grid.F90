@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.114 2003/10/23 17:55:02 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.115 2003/10/28 18:22:29 atrayanov Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -231,7 +231,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.114 2003/10/23 17:55:02 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.115 2003/10/28 18:22:29 atrayanov Exp $'
 
 !==============================================================================
 !
@@ -1843,8 +1843,8 @@
         endif
 
         localStart(i) = grid%distgrid%ptr%MyDE_comp%ai_global(i)%min - 1
-        localMinCoord(i) = delta(i) * real(localStart(i))
-        localMaxCoord(i) = delta(i) &
+        localMinCoord(i) = min(i) + delta(i) * real(localStart(i))
+        localMaxCoord(i) = min(i) + delta(i) &
                          * real(grid%distgrid%ptr%MyDE_comp%ai_global(i)%max)
         localCounts(i)   = grid%distgrid%ptr%MyDE_comp%ai_global(i)%max &
                          - grid%distgrid%ptr%MyDE_comp%ai_global(i)%min + 1
