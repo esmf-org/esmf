@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.21 2003/01/28 16:59:41 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.22 2003/02/03 05:53:45 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -88,20 +88,20 @@
       end type
 
       type(ESMF_DataKind), parameter :: &
-                   ESMF_KIND_I1 = ESMF_DataKind(1), &
-                   ESMF_KIND_I2 = ESMF_DataKind(selected_int_kind(2)), &
-                   ESMF_KIND_I4 = ESMF_DataKind(selected_int_kind(5)), &
-                   ESMF_KIND_I8 = ESMF_DataKind(selected_int_kind(10)), &
+                   ESMF_KIND_I1 = ESMF_DataKind(selected_int_kind(2)), &
+                   ESMF_KIND_I2 = ESMF_DataKind(selected_int_kind(4)), &
+                   ESMF_KIND_I4 = ESMF_DataKind(selected_int_kind(9)), &
+                   ESMF_KIND_I8 = ESMF_DataKind(selected_int_kind(18)), &
                    ESMF_KIND_R4 = ESMF_DataKind(selected_real_kind(3,25)), &
                    ESMF_KIND_R8 = ESMF_DataKind(selected_real_kind(6,45)), &
                    ESMF_KIND_C8 = ESMF_DataKind(selected_real_kind(3,25)), &
                    ESMF_KIND_C16 = ESMF_DataKind(selected_real_kind(6,45))
 
       integer, parameter :: &
-                   ESMF_IKIND_I1 = 1, &
-                   ESMF_IKIND_I2 = selected_int_kind(2), &
-                   ESMF_IKIND_I4 = selected_int_kind(5), &
-                   ESMF_IKIND_I8 = selected_int_kind(10), &
+                   ESMF_IKIND_I1 = selected_int_kind(2), &
+                   ESMF_IKIND_I2 = selected_int_kind(4), &
+                   ESMF_IKIND_I4 = selected_int_kind(9), &
+                   ESMF_IKIND_I8 = selected_int_kind(18), &
                    ESMF_IKIND_R4 = selected_real_kind(3,25), &
                    ESMF_IKIND_R8 = selected_real_kind(6,45), &
                    ESMF_IKIND_C8 = selected_real_kind(3,25), &
@@ -114,7 +114,7 @@
       private
           type(ESMF_DataType) :: dt
           integer :: rank
-          ! how do you do values of all types here ?
+          ! how do you do values of all types here ? TODO
           ! in C++ i'd do a union w/ overloaded access funcs
           integer :: vi
           !integer, dimension (:), pointer :: vip
@@ -235,7 +235,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.21 2003/01/28 16:59:41 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.22 2003/02/03 05:53:45 eschwab Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
