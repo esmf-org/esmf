@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.26 2004/02/04 23:24:00 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.27 2004/02/11 06:51:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -164,14 +164,14 @@ extern "C" {
 
                        tempNameLen,  // always present internal argument.
 
-              ((void*) tempName       == (void*)ESMC_BAD_POINTER ?
-                                          ESMC_NULL_POINTER : tempName),
+                       tempName,     // always present internal argument.
+
               ((void*) calendarType   == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : calendarType),
               ((void*) daysPerMonth   == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : daysPerMonth),
 
-                       sizeofDaysPerMonth,  // always present internal argument
+                      *sizeofDaysPerMonth,  // always present internal argument
 
               ((void*) monthsPerYear  == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : monthsPerYear),
