@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2004/12/14 22:09:48 nscollins Exp $ 
+# $Id: makefile,v 1.8 2005/01/04 20:33:28 theurich Exp $ 
 
 ALL:  build_examples
 
@@ -73,7 +73,7 @@ EXAMPLES_RUN   = run_ESMF_StateEx \
                  
 
 EXAMPLES_RUN_UNI = run_ESMF_StateEx_uni \
-                   run_ESMC_StateReconcileEx_uni 
+                   run_ESMF_StateReconcileEx_uni 
 #                   run_ESMC_StateEx_uni 
                    
 include $(ESMF_DIR)/makefile
