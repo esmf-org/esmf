@@ -1,17 +1,127 @@
-% $Id: IO_background.tex,v 1.1 2002/03/05 20:33:03 cnh Exp $
+% $Id: IO_background.tex,v 1.2 2002/04/22 21:34:14 lzaslavsky Exp $
 
 \section{Background}
 
-<Desciption of this class, module or utility set.>
+Applications in Earth system modeling require efficient and robust
+tools for input and output of gridded data and observational data streams.
+
+Interfaces and methods provided by ESMF should allow reading and
+writing of data in several standard formats as well as support
+efficient internal data representations. ESMF IO is supposed to
+provide a unified interface to input data from a file with automatic 
+detection of file-type in runtime, and to output data in a requested format.
+
+\subsection{Gridded Data Formats}
+
+Several standard formats are currently used in earth science modeling
+for input/output of gridded data, including multiple versions of
+NetCDF, HDF, GRIB, as well as internal binary format accompanied by
+metadata:
+
+
+\begin{itemize}
+\item[\bf NetCDF] Network Common Data Form (netCDF) is an interface for 
+array-oriented data access. The netCDF library provides an
+implementation of the interface. It also defines a 
+machine-independent format for representing scientific data. Together,
+the interface, library, and format support the creation, access, and
+sharing of scientific data. The netCDF software was developed at the
+Unidata Program Center in Boulder, Colorado. See \cite{NetCDF3_UsersGuide_C}.
+
+\item[\bf HDF] The Hierarchical Data Format (HDF) project provides
+interface,  software and file formats for scientific data management. 
+The HDF software includes I/O libraries and tools for analyzing,
+visualizing, and converting scientific data. There are two different
+HDF formats, HDF (4.x and previous releases) and HDF5. These formats
+are completely different and {\it not} compatible. HDF is developed
+and supported at the National Center for Supercomputing Applications,
+University of Illinois at Urbana-Champaign. See
+\cite{HDF4_tutorials}, \cite{HDF5_tutorial}.
+
+\item[\bf GRIB] GRid in Binary (GRIB) format is a gridded data
+standard from the World Meteorological Organization. NCEP uses GRIB
+for all the files produced by its analyses. Unfortunately, not all
+GRIBs are the same and the ECMWF and EMC use slightly different
+formats, though they both claim to use GRIB. See \cite{GRIB_1}.
+
+
+\item[\bf Binary]
+The most important way for a machine to represent data is to use a
+native binary data representation. There are  two choices of ordering of 
+bytes (so-called, {\it Big Endian} and {\it Little Endian}), and a lot of
+ambiguity in representing floating point data. The latter, however, is
+specified, if IEEE Floating Point Standard 754 is satisfied 
+(\cite{IEEE-Floating-Point}, \cite{Kahan-IEEE-754}). It is
+desirable to be able to use efficient native representation,
+accompanied by XML metadata file \cite{XML-W3C}. 
+\end{itemize}
+
+\subsection{CF conventions} 
+
+The conventions for climate and forecast metadata, ``CF conventions'',
+\cite{NetCDF_CF_v1_beta3} promote processing and sharing of files
+created with netCDF API. Metadata created according to CF convensions
+provide definitive description of what the data represent, and spacial
+and temporal properties of data.
+
+We expect that the ESMF gridded data will satisfy CF conventions, or
+that an extenstion to CF conventions will be accepted by participants.
+
+Thus, ESMF IO interfaces and software for gridded data will cover only
+IO of data covered by the convention.
+
+\subsection{Observational Data}
+
+Observational data are usually transmitted and saved in BUFR format 
+\cite{WMO-BUFR-CREX}. 
+
+\begin{itemize}
+\item[\bf BUFR] Binary Universal Form of Represantation
+of the meteorological data (BUFR) is a self-descriptive format. The
+form and content of data contained in a BUFR message are described
+within BUFR message itself. In addition, BUFR provides condensation,
+or packing of data. 
+
+The BUFR is a table-driven code since the Data Description Section
+contains a sequence of data descriptors referring to a set of predefined and 
+internationally agreed tables. Thus, instead of writing all detailed
+definitions within a message, one will just write a number identifying
+a parameter with its descriptions \cite{WMO-BUFR-CREX}.
+\end{itemize}
+
+\subsection{IO optimization}
+
+The future development of ESMF IO facility will require further
+optimization with an expected increase in IO amount over the next few
+years. Increase in amount of satellitte data will result in the
+increase of time spent to input observational data. On the other hand,
+a customer's desire to download simulation results more frequently leads
+to significant increase in the amount of gridded data IO.
+
+
 
 \subsection{Location}
 
-<Describe whether this software is in the infrastructure or superstructure,
-and other software modules that it interacts with.>
+Input/Output (IO) is part of the ESMF Infrastructure.  It will provide
+efficient utilities to input/output gridded data and observation data
+to and from the disk. A standard API will allow manipulate with multiple
+standard formats.
 
 \subsection{Scope}
 
-<Discussion of scope and restrictions.>
+ESMF IO is meant to be used for standard API and underlying
+implementation, providing input and outut of gridded data and
+observational data streams to and from the disk in multiple standard
+formats.
+
+
+
+
+
+
+
+
+
 
 
 
