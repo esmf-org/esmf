@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.195 2004/12/03 20:47:45 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.196 2004/12/07 17:18:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -285,7 +285,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.195 2004/12/03 20:47:45 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.196 2004/12/07 17:18:50 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3070,6 +3070,7 @@
       integer :: maplist(ESMF_MAXDIM)          ! mapping between them
       integer :: otheraxes(ESMF_MAXDIM)        ! counts for non-grid dims
       integer :: gridrank, maprank, arrayrank, halo
+      integer :: gridcellcount, arraycellcount
       logical :: hasgrid, hasarray, hasmap     ! decide what we can validate
       integer :: i, j
     
@@ -3134,6 +3135,12 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           hasgrid = .TRUE.
+
+          ! compute total number of grid items for later
+          gridcellcount = 1
+          do i = 1, gridrank
+              gridcellcount = gridcellcount * gridcounts(i)
+          enddo
       endif
 
       ! make sure there is data before asking it questions.
@@ -3146,6 +3153,12 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           hasarray = .TRUE.
+
+          ! compute total number of array items for later
+          arraycellcount = 1
+          do i = 1, arrayrank
+              arraycellcount = arraycellcount * arraycounts(i)
+          enddo
       endif
 
       ! and now see if it is at all consistent.
@@ -3158,9 +3171,16 @@
           endif
       endif
 
+      ! if array and datamap and grid, check exact counts now
       if (hasarray .and. hasmap .and. hasgrid) then
-          j = 1
-          do i = 1, arrayrank
+
+          ! if the array and grid cell counts are 0, there is no local
+          ! data on the PET and we should look no further.
+          if ((arraycellcount .eq. 0) .and. (gridcellcount .eq. 0)) then
+             continue ! ok, no data on this local PET.  
+          else
+            j = 1
+            do i = 1, arrayrank
               if (maplist(i) .eq. 0) then
                   ! maplist is 0 if the axes does not correspond to the grid.
                   ! in that case, it must correspond to the counts in the map.
@@ -3201,7 +3221,8 @@
                   endif
     
               endif
-          enddo
+            enddo
+          endif
       endif
 
       
@@ -5254,10 +5275,6 @@
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
-        ! TODO: REMOVE THIS ONCE GRID DESERIAL IS WORKING!!
-        ! for now mark it as not present because validate is getting
-        ! confused deep in the grid code at the moment.
-        fp%gridstatus = ESMF_STATUS_UNINIT
       endif
 
       if (fp%datamapstatus .eq. ESMF_STATUS_READY) then
