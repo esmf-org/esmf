@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.2 2003/09/23 17:26:44 jwolfe Exp $
+// $Id: ESMC_GridComp.h,v 1.3 2003/10/01 22:17:42 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -72,7 +72,7 @@
 // !PUBLIC MEMBER FUNCTIONS:
 //
   public:
-  int ESMC_GridCompSetServices(void *);
+  int ESMC_GridCompSetServices(void (*)(ESMC_Comp *, int *));
 
   int ESMC_GridCompInitialize(ESMC_State *importstate, ESMC_State *exportstate, 
                               ESMC_Clock *clock, int phase);

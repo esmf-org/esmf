@@ -1,4 +1,4 @@
-! $Id: ESMF_UserGComp.F90,v 1.3 2003/04/04 15:38:36 nscollins Exp $
+! $Id: ESMF_UserGComp.F90,v 1.4 2003/10/01 22:17:43 nscollins Exp $
 !
 ! Test code which supplies a user-written component.
 
@@ -61,6 +61,7 @@
       type(ESMF_Clock) :: externalclock
       integer :: rc
      
+      print *, "User initialize routine called"
 
     end subroutine my_init
 
@@ -72,6 +73,7 @@
       type(ESMF_Clock) :: externalclock
       integer :: rc
      
+      print *, "User run routine called"
 
     end subroutine my_run
 
@@ -83,11 +85,11 @@
       type(ESMF_Clock) :: externalclock
       integer :: rc
      
+      print *, "User finalize routine called"
 
     end subroutine my_final
 
-
     end module UserGridCompMod
-    
+
 !\end{verbatim}
     

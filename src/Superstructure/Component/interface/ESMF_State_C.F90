@@ -1,4 +1,4 @@
-!  $Id: ESMF_State_C.F90,v 1.1 2003/02/20 16:00:29 nscollins Exp $
+!  $Id: ESMF_State_C.F90,v 1.2 2003/10/01 22:17:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.1 2003/02/20 16:00:29 nscollins Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.2 2003/10/01 22:17:43 nscollins Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -39,27 +39,26 @@
 ! 
 !EOP
 !------------------------------------------------------------------------------
-   function f_esmf_statecreate(name, rc)
+   subroutine f_esmf_statecreate(state, name, rc)
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
 
+       type(ESMF_State) :: state
        character(*) :: name
        integer :: rc              
 
-       !f_esmf_statecreate = ESMF_StateCreate(name, rc)
-       f_esmf_statecreate = 0
+       state = ESMF_StateCreate(statename=name, rc=rc)
     
-   end function f_esmf_statecreate
+   end subroutine f_esmf_statecreate
 
-   subroutine f_esmf_statedestroy(statep, name, func, rc)
+   subroutine f_esmf_statedestroy(state, rc)
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
 
-       character(*) :: name
-       integer :: func
+       type(ESMF_State) :: state
        integer :: rc              
 
-       !call ESMF_StateDestroy(statep, rc)
+       call ESMF_StateDestroy(state, rc)
     
    end subroutine f_esmf_statedestroy
 

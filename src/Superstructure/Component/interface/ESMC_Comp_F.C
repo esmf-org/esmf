@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.13 2003/09/23 15:18:31 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.14 2003/10/01 22:17:43 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -72,7 +72,7 @@ static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
     *status = (**ptr)->ESMC_FTableSetDataPtr(name, *datap, dtype);
 }
 
-static void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
+extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
      int rc, funcrc;
      int *tablerc = new int;
      void *f90comp = ptr;

@@ -1,4 +1,4 @@
-// $Id: ESMC_State.C,v 1.7 2003/03/11 03:01:09 cdeluca Exp $
+// $Id: ESMC_State.C,v 1.8 2003/10/01 22:17:43 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.7 2003/03/11 03:01:09 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.8 2003/10/01 22:17:43 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -61,31 +61,21 @@
 //     pointer to newly allocated ESMC_State
 //
 // !ARGUMENTS:
+      char *name,          // in - state name
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
-//      Create a new State from ... Allocates memory for a new State
-//      object and uses the internal routine ESMC\_StateConstruct to
-//      initialize it.  Define for deep classes only, for shallow classes only
-//      define and use ESMC\_StateInit.
-//      There can be multiple overloaded methods with the same name, but
-//      different argument lists.
+//      Create a new State.
 //
 //      Note: this is a class helper function, not a class method
 //      (see declaration in ESMC\_State.h)
 //
 //EOP
-// !REQUIREMENTS:  AAAn.n.n
+    ESMC_State *state;
 
-//
-//  code goes here
-//
-    // TODO: this is remnants of the original template code which
-    // was going to do the implementation in C++.  this needs to be
-    // turned into a call to the f_esmf_XXX interface code.
-    // Same goes for the rest of the functions in this file.
+    FTN(f_esmf_statecreate)(state, name, rc);
 
-    return new ESMC_State;
+    return state;
 
  } // end ESMC_StateCreate
 
@@ -112,10 +102,11 @@
 //EOP
 // !REQUIREMENTS:  
 
-//
-//  code goes here
-//
-    return ESMF_FAILURE;
+    int rc;
+   
+    FTN(f_esmf_statedestroy)(state, &rc);
+
+    return rc;
 
  } // end ESMC_StateDestroy
 
