@@ -1,4 +1,4 @@
-! $Id: ESMF_UserMain.F90,v 1.9 2004/01/29 04:51:37 eschwab Exp $
+! $Id: ESMF_UserMain.F90,v 1.10 2004/02/06 23:30:28 nscollins Exp $
 !
 ! Test code which creates a new Application Component. 
 !   Expects to be compiled with ESMF_UserCComp.F90 and ESMF_UserGComp.F90
@@ -42,7 +42,7 @@
     type(ESMF_DELayout) :: tlayout
 
     type(ESMF_Grid) :: grid1, grid2
-    type(ESMF_State) :: atmimport, ocnexport, cplstates
+    type(ESMF_State) :: atmimport, ocnexport
 
     character(ESMF_MAXSTR) :: tname, gname1, gname2, cname
     character(1024) :: configfile
@@ -129,22 +129,19 @@
 
     atmimport = ESMF_StateCreate("atmosphere import", ESMF_IMPORTSTATE, rc=rc)
     ocnexport = ESMF_StateCreate("ocean export", ESMF_EXPORTSTATE, rc=rc)
-    cplstates = ESMF_StateCreate("coupler states", ESMF_STATELIST, rc=rc)
-    call ESMF_StateAddData(cplstates, ocnexport, rc)
-    call ESMF_StateAddData(cplstates, atmimport, rc)
  
     !-------------------------------------------------------------------------
     !  Initialize each component
     !
     !   Full Init argument list is:
     !   call ESMF_GridCompInitialize(comp, import, export, clock, phase, rc)
-    !   call ESMF_CplCompInitialize(comp, statelist, clock, phase, rc)
+    !   call ESMF_CplCompInitialize(comp, import, export, clock, phase, rc)
 
 
     call ESMF_GridCompInitialize(oceangridcomp, exportstate=ocnexport, &
                                                     clock=tclock, rc=rc)
     call ESMF_GridCompInitialize(atmgridcomp, atmimport, clock=tclock, rc=rc)
-    call ESMF_CplCompInitialize(cplcomp, cplstates, tclock, rc=rc)
+    call ESMF_CplCompInitialize(cplcomp, ocnexport, atmimport, tclock, rc=rc)
     print *, "Initialization complete"
 
 
@@ -153,14 +150,14 @@
     !
     !   Full Run argument list is:
     !   call ESMF_GridCompRun(comp, import, export, clock, phase, rc)
-    !   call ESMF_CplCompRun(comp, statelist, clock, phase, rc)
+    !   call ESMF_CplCompRun(comp, import, export, clock, phase, rc)
 
     do
    
         call ESMF_GridCompRun(oceangridcomp, exportstate=ocnexport, 
                                                          clock=tclock, rc=rc)
 
-        call ESMF_CplCompRun(cplcomp, cplstates, tclock, rc=rc)
+        call ESMF_CplCompRun(cplcomp, ocnexport, atmimport, tclock, rc=rc)
 
         call ESMF_GridCompRun(atmgridcomp, atmimport, clock=tclock, rc=rc)
 
@@ -178,12 +175,12 @@
     !
     !   Full Final argument list is:
     !   call ESMF_GridCompFinalize(comp, import, export, clock, phase, rc)
-    !   call ESMF_CplCompFinalize(comp, statelist, clock, phase, rc)
+    !   call ESMF_CplCompFinalize(comp, import, export, clock, phase, rc)
 
 
-    call ESMF_GridCompFinalize(component=oceangridcomp, exportstate=ocnexport, &
+    call ESMF_GridCompFinalize(oceangridcomp, exportstate=ocnexport, &
                                                     clock=tclock, rc=rc)
-    call ESMF_CplCompFinalize(cplcomp, statelist=cplstates, clock=tclock, &
+    call ESMF_CplCompFinalize(cplcomp, ocnexport, atmimport, clock=tclock, &
                                                                    rc=rc)
     call ESMF_GridCompFinalize(component=atmgridcomp, importstate=atmimport, &
                                                     clock=tclock, rc=rc)

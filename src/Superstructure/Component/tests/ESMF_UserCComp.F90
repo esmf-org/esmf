@@ -1,4 +1,4 @@
-! $Id: ESMF_UserCComp.F90,v 1.4 2003/04/14 14:51:42 nscollins Exp $
+! $Id: ESMF_UserCComp.F90,v 1.5 2004/02/06 23:30:28 nscollins Exp $
 !
 ! Test code which supplies a user-written coupler component.
 
@@ -54,38 +54,46 @@
     end subroutine User_SetServices
 
 
-    subroutine my_init(ccomp, statelist, externalclock, rc)
+    subroutine my_init(ccomp, import, export, externalclock, rc)
       type(ESMF_CplComp) :: ccomp
-      !type(ESMF_State) :: statelist(*)
-      type(ESMF_State) :: statelist
+      type(ESMF_State) :: import, export
       type(ESMF_Clock) :: externalclock
       integer :: rc
      
-      type(ESMF_State) :: state1, state2
-      call ESMF_StateGetData(statelist,  "statename1", state1, rc)
-      call ESMF_StateGetData(statelist,  "statename2", state2, rc)
+      type(ESMF_Field) :: field1, field2
+
+      call ESMF_StateGetField(import, "fieldname1", field1, rc=rc)
+      call ESMF_StateGetField(export, "fieldname2", field2, rc=rc)
 
     end subroutine my_init
 
 
-    subroutine my_run(ccomp, statelist, externalclock, rc)
+    subroutine my_run(ccomp, import, export, externalclock, rc)
       type(ESMF_CplComp) :: ccomp
-      !type(ESMF_State) :: statelist(*)
-      type(ESMF_State) :: statelist
+      type(ESMF_State) :: import, export
       type(ESMF_Clock) :: externalclock
       integer :: rc
      
+      type(ESMF_Field) :: field1, field2
+
+      call ESMF_StateGetField(import, "fieldname1", field1, rc=rc)
+      call ESMF_StateGetField(export, "fieldname2", field2, rc=rc)
+
 
     end subroutine my_run
 
 
-    subroutine my_final(ccomp, statelist, externalclock, rc)
+    subroutine my_final(ccomp, import, export, externalclock, rc)
       type(ESMF_CplComp) :: ccomp
-      !type(ESMF_State) :: statelist(*)
-      type(ESMF_State) :: statelist
+      type(ESMF_State) :: import, export
       type(ESMF_Clock) :: externalclock
       integer :: rc
      
+      type(ESMF_Field) :: field1, field2
+
+      call ESMF_StateGetField(import, "fieldname1", field1, rc=rc)
+      call ESMF_StateGetField(export, "fieldname2", field2, rc=rc)
+
 
     end subroutine my_final
 
