@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.26 2004/06/20 05:34:58 nscollins Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.27 2004/06/21 22:04:20 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.26 2004/06/20 05:34:58 nscollins Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.27 2004/06/21 22:04:20 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -276,7 +276,6 @@
       !------------------------------------------------------------------------
 
 
-      !EX_UTest
       ! Create an empty Bundle and then add multiple fields to it.
       bundle3 = ESMF_BundleCreate(name="southern hemisphere", rc=rc)
       !bundle3 = ESMF_BundleCreate(name="northern hemisphere", rc=rc)
