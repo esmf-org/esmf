@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.20 2003/07/17 20:02:47 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.21 2003/07/30 21:50:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.20 2003/07/17 20:02:47 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.21 2003/07/30 21:50:52 nscollins Exp $'
 
 !==============================================================================
 !
@@ -603,8 +603,10 @@
 
 ! !INTERFACE:
       subroutine ESMF_RoutePrecompute(route, rank, &
-               my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, layout_dst, &
-               my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, layout_src, rc)
+               my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
+               dst_global_start, dst_global_stride, layout_dst, &
+               my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
+               src_global_start, src_global_stride, layout_src, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
@@ -613,11 +615,15 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_tot
       integer, intent(in) :: AI_dst_count
+      integer, dimension(:,:), intent(in) :: dst_global_start
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dst_global_stride
       type(ESMF_DELayout), intent(in) :: layout_dst
       integer, intent(in) :: my_DE_src
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_tot
       integer, intent(in) :: AI_src_count
+      integer, dimension(:,:), intent(in) :: src_global_start
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: src_global_stride
       type(ESMF_DELayout), intent(in) :: layout_src
       integer, intent(out), optional :: rc
 
@@ -670,8 +676,10 @@
 
         ! Call C++  code
         call c_ESMC_RoutePrecompute(route, rank, &
-           my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, layout_dst, &
-           my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, layout_src, status)
+           my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
+           dst_global_start, dst_global_stride, layout_dst, &
+           my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
+           src_global_start, src_global_stride, layout_src, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route Precompute error"
           ! don't return before adding 1 back to AIs
