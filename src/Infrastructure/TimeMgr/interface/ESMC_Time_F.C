@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.22 2004/01/16 00:31:23 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.23 2004/01/21 00:51:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -96,8 +96,8 @@ extern "C" {
                                                ESMC_NULL_POINTER : sN),
                     ((void*)sD       == (void*)ESMC_BAD_POINTER ?
                                                ESMC_NULL_POINTER : sD),
-                    ((void*)calendar == (void*)ESMC_BAD_POINTER ?
-                                               ESMC_NULL_POINTER : calendar),
+                    calendar,    // required
+                            
                     ((void*)timeZone == (void*)ESMC_BAD_POINTER ?
                                                ESMC_NULL_POINTER : timeZone) );
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.57 2004/01/16 00:36:52 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.58 2004/01/21 00:51:09 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -123,7 +123,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.57 2004/01/16 00:36:52 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.58 2004/01/21 00:51:09 eschwab Exp $'
 
 !==============================================================================
 !
@@ -519,7 +519,7 @@
       real(ESMF_KIND_R8),    intent(in),  optional :: ns_r8
       integer(ESMF_KIND_I4), intent(in),  optional :: sN
       integer(ESMF_KIND_I4), intent(in),  optional :: sD
-      type(ESMF_Calendar),   intent(in),  optional :: calendar
+      type(ESMF_Calendar),   intent(in)            :: calendar
       integer,               intent(in),  optional :: timeZone
       integer,               intent(out), optional :: rc
 
@@ -614,8 +614,8 @@
 !     \item[{[sD]}]
 !          Integer denominator portion of fractional seconds (sN/sD).
 !          Default = 1
-!     \item[{[calendar]}]
-!          Associated {\tt Calendar}.  Default = ESMF\_CAL\_NOCALENDAR.
+!     \item[calendar]
+!          Associated {\tt Calendar}.  Required.
 !     \item[{[timeZone]}]
 !          Associated timezone (hours offset from UTC, e.g. EST = -5).
 !          Default = 0 (UTC)
