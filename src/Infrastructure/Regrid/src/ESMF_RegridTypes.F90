@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.49 2004/05/25 20:11:44 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.50 2004/05/25 21:13:38 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -150,7 +150,7 @@
                                      ! gather data
     public ESMF_RegridGet            ! returns a regrid attribute
     public ESMF_RegridSet            ! sets    a regrid attribute
-    public ESMF_RegridCreate         ! creates an empty regrid structure
+    public ESMF_RegridCreateEmpty    ! creates an empty regrid structure
     public ESMF_RegridConstructEmpty ! constructs an empty regrid structure
     public ESMF_RegridDestruct       ! deallocate memory associated with a regrid
 
@@ -159,7 +159,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.49 2004/05/25 20:11:44 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.50 2004/05/25 21:13:38 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -778,15 +778,15 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RegridCreate"
+#define ESMF_METHOD "ESMF_RegridCreateEmpty"
 !BOPI
-! !IROUTINE: ESMF_RegridCreate - Create empty regrid structure
+! !IROUTINE: ESMF_RegridCreateEmpty - Create empty regrid structure
 
 ! !INTERFACE:
-      function ESMF_RegridCreate(rc)
+      function ESMF_RegridCreateEmpty(rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Regrid) :: ESMF_RegridCreate
+      type(ESMF_Regrid) :: ESMF_RegridCreateEmpty
 !
 ! !ARGUMENTS:
       integer, intent(out), optional :: rc
@@ -815,28 +815,28 @@
 
 !     Initialize pointers
       nullify(rgtype)
-      nullify(ESMF_RegridCreate%ptr)
+      nullify(ESMF_RegridCreateEmpty%ptr)
 
       allocate(rgtype, stat=localrc)        ! TODO
 !     If error write message and return.
       if(localrc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_RegridCreate: Allocate"
+        print *, "ERROR in ESMF_RegridCreateEmpty: Allocate"
         return
       endif
 
 !     Call construction method to allocate and initialize regrid internals.
       call ESMF_RegridConstructEmpty(rgtype, localrc)
       if(localrc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_RegridCreate: Regrid construct"
+        print *, "ERROR in ESMF_RegridCreateEmpty: Regrid construct"
         return
       endif
 
 !     Set return values.
-      ESMF_RegridCreate%ptr => rgtype
+      ESMF_RegridCreateEmpty%ptr => rgtype
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_RegridCreate
+      end function ESMF_RegridCreateEmpty
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
