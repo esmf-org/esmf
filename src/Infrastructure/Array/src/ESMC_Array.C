@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.28 2004/04/14 20:24:34 jwolfe Exp $";
+            "$Id: ESMC_Array.C,v 1.29 2004/04/22 22:26:29 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -367,6 +367,7 @@
             ESMC_AxisIndexSet(ai_total+i, 0, counts[i]-1, total_stride);
             ESMC_AxisIndexSet(ai_comp+i, 0, counts[i]-1, total_stride);
             ESMC_AxisIndexSet(ai_excl+i, 0, counts[i]-1, total_stride);
+            hwidth[0][0] = 0;
         } else {
             total_stride *= counts[i];
             comp_stride *= counts[i] - 2*halo_width;
@@ -376,6 +377,7 @@
                               comp_stride);
             ESMC_AxisIndexSet(ai_excl+i, halo_width*2, 
                               counts[i]-2*halo_width-1, excl_stride);
+            hwidth[0][0] = halo_width;
         }
     }
     for (i=rank; i<ESMF_MAXDIM; i++) {

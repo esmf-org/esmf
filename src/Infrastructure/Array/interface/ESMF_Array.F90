@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.7 2004/03/24 14:54:31 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.8 2004/04/22 22:26:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -121,7 +121,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.7 2004/03/24 14:54:31 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.8 2004/04/22 22:26:27 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -153,7 +153,8 @@ end subroutine
 !
 ! !INTERFACE:
       subroutine ESMF_ArrayGet(array, rank, type, kind, counts, &
-                               lbounds, ubounds, strides, base, name, rc)
+                               lbounds, ubounds, strides, haloWidth, &
+                               base, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
@@ -164,6 +165,7 @@ end subroutine
       integer, dimension(:), intent(out), optional :: lbounds
       integer, dimension(:), intent(out), optional :: ubounds
       integer, dimension(:), intent(out), optional :: strides
+      integer, intent(out), optional :: haloWidth
       type(ESMF_Pointer), intent(out), optional :: base
       character(len=ESMF_MAXSTR), intent(out), optional :: name
       integer, intent(out), optional :: rc             
@@ -178,25 +180,32 @@ end subroutine
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           A {\tt ESMF\_Array} object.
+!           An {\tt ESMF\_Array} object.
 !     \item [{[rank]}]
-!           The number of dimensions of the array.
+!           The number of dimensions in the array.
 !     \item [{[type]}]
 !	    Real or integer.
 !     \item [{[kind]}]
-!           Item size in bytes.
+!           {\tt ESMF\_DataKind} variable which indicates 
+!           the item size in bytes.
 !     \item [{[counts]}]
 !           The number of items in each dimension of the array.
 !     \item [{[lbounds]}]
-!           The lower index value.
+!           The lower index value of each dimension of the array.
 !     \item [{[ubounds]}]
-!           The upper index value.
+!           The upper index value of each dimension of the array.
 !     \item [{[strides]}]
-!           None contiguous index values.
+!           If nonzero, the spacing between index values per dimension
+!           of the array.
+!     \item [{[haloWidth]}]
+!           Width of halo region.
+!     \item [{[base]}]
+!           Base memory address of the data region of the array.
+!     \item [{[name]}]
+!           Array name.  If not specified, a unique name will be generated.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!
 !
 !EOP
 ! !REQUIREMENTS:
@@ -251,6 +260,11 @@ end subroutine
          if (status .ne. ESMF_SUCCESS) return
       endif
    
+      if (present(haloWidth)) then
+         call c_ESMC_ArrayGetHWidth(array, haloWidth, status)
+         if (status .ne. ESMF_SUCCESS) return
+      endif
+   
       if (present(base)) then
          call c_ESMC_ArrayGetBaseAddr(array, base, status)
          if (status .ne. ESMF_SUCCESS) return
@@ -271,7 +285,7 @@ end subroutine
       end subroutine ESMF_ArrayGet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayGetAxisIndex
 !
 ! !INTERFACE:
@@ -292,7 +306,7 @@ end subroutine
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           A {\tt ESMF\_Array} object.
+!           An {\tt ESMF\_Array} object.
 !     \item [totalindex]
 !           An array of index spaces for the total array size.
 !     \item [{[compindex]}]
@@ -304,7 +318,7 @@ end subroutine
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
         integer :: status, i
@@ -367,7 +381,7 @@ end subroutine
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           A {\tt ESMF\_Array} object.
+!           An {\tt ESMF\_Array} object.
 !     \item [{[options]}]
 !           The print options
 !     \item [{[rc]}]
@@ -436,7 +450,7 @@ end subroutine
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           A {\tt ESMF\_Array} object.
+!           An {\tt ESMF\_Array} object.
 !     \item [{[iospece]}]
 !           The file specification.
 !     \item [{[rc]}]
@@ -489,7 +503,7 @@ end subroutine
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           A {\tt ESMF\_Array} object.
+!           An {\tt ESMF\_Array} object.
 !     \item [{[iospece]}]
 !           The file specification.
 !     \item [{[rc]}]
@@ -556,7 +570,7 @@ end subroutine
         end subroutine ESMF_ArrayReorder
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArraySetAxisIndex
 !
 ! !INTERFACE:
@@ -577,7 +591,7 @@ end subroutine
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           A {\tt ESMF\_Array} object.
+!           An {\tt ESMF\_Array} object.
 !     \item [totalindex]
 !	    An array of index spaces for the total array size.
 !     \item [{[compindex]}]
@@ -589,7 +603,7 @@ end subroutine
 !     \end{description}
 !       
 !
-!EOP
+!EOPI
 
         integer :: status
         integer :: i
@@ -658,12 +672,13 @@ end subroutine
 
 !
 ! !DESCRIPTION:
-!      Sets the name of the array.  
+!     Sets the name of the array.  (Unlike other objects, there are
+!     very few items which can be set once an array is created.)
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           A {\tt ESMF\_Array} object.
+!           An {\tt ESMF\_Array} object.
 !     \item [{[name]}]
 !           The array name.
 !     \item [{[rc]}]
@@ -717,7 +732,7 @@ end subroutine
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           A {\tt ESMF\_Array} object.
+!           An {\tt ESMF\_Array} object.
 !     \item [{[options]}]
 !           The validation options.
 !     \item [{[rc]}]
@@ -789,8 +804,8 @@ end subroutine
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           A {\tt ESMF\_Array} object.
-!     \item [{[iospece]}]
+!           An {\tt ESMF\_Array} object.
+!     \item [{[iospec]}]
 !           The file specification.
 !     \item [{[filename]}]
 !           The file name.
@@ -857,7 +872,7 @@ end subroutine
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           A {\tt ESMF\_Array} object.
+!           An {\tt ESMF\_Array} object.
 !     \item [{[iospece]}]
 !           The file specification.
 !     \item [{[rc]}]

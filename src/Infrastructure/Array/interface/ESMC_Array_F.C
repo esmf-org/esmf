@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.22 2004/04/14 20:24:58 jwolfe Exp $
+// $Id: ESMC_Array_F.C,v 1.23 2004/04/22 22:26:27 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -113,6 +113,16 @@ extern "C" {
           }
 
          *status = (*ptr)->ESMC_ArrayGetUbounds(*rank, ubounds);
+     }
+
+     void FTN(c_esmc_arraygethwidth)(ESMC_Array **ptr, int *hwidth, int *status) {
+      
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
+
+         *status = (*ptr)->ESMC_ArrayGetHWidth(hwidth);
      }
 
      void FTN(c_esmc_arraygetrank)(ESMC_Array **ptr, int *rank, int *status) {

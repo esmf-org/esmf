@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.28 2004/04/20 18:00:47 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.29 2004/04/22 22:26:27 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -64,16 +64,10 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
     struct ESMC_AxisIndex ai_total[ESMF_MAXDIM]; // limits for whole array
     struct ESMC_AxisIndex ai_comp[ESMF_MAXDIM];  // for computational region
     struct ESMC_AxisIndex ai_excl[ESMF_MAXDIM];  // never is sent or received
-//  int hwidth[ESMF_MAXGRIDDIM][2];              // lower and upper halo widths
+    int hwidth[ESMF_MAXGRIDDIM][2];              // lower and upper halo widths
     
 // !PUBLIC MEMBER FUNCTIONS:
 //
-// pick one or the other of the init/create sections depending on
-//  whether this is a deep class (the class/derived type has pointers to
-//  other memory which must be allocated/deallocated) or a shallow class
-//  (the class/derived type is self-contained) and needs no destroy methods
-//  other than deleting the memory for the object/derived type itself.
-
   public:
     int ESMC_ArrayConstruct(int irank, ESMC_DataType dt, 
             ESMC_DataKind dk, int *counts, void *base, 
@@ -117,6 +111,9 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
                                                      return ESMF_SUCCESS;}
     ESMC_DataKind ESMC_ArrayGetKind(void) { return this->kind; }
 
+    int ESMC_ArrayGetHWidth(int *hw) { *hw = this->hwidth[0][0]; 
+                                                     return ESMF_SUCCESS; }
+
     int ESMC_ArraySetLengths(int n, int *l) { for (int i = 0; i < n; i++)
                                                   this->counts[i] = l[i]; 
                                               return ESMF_SUCCESS;}
@@ -129,8 +126,10 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
                                               return ESMF_SUCCESS;}
     int ESMC_ArrayGetLengths(int *ni, int *nj=NULL, int *nk=NULL, 
                                 int *nl=NULL, int *nm=NULL) { 
-           *ni = this->counts[0]; if (nj) *nj = this->counts[1]; 
-           if (nk) *nk = this->counts[2]; if (nl) *nl = this->counts[3]; 
+           *ni = this->counts[0]; 
+           if (nj) *nj = this->counts[1]; 
+           if (nk) *nk = this->counts[2]; 
+           if (nl) *nl = this->counts[3]; 
            if (nm) *nm = this->counts[4]; return ESMF_SUCCESS;}
 
     int ESMC_ArraySetBaseAddr(void *base_addr) { this->base_addr = base_addr; 
