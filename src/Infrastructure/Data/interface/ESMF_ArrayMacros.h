@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.1 2003/02/07 23:07:35 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.2 2003/02/10 16:43:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -117,7 +117,7 @@
         endif @\
  @\
 !       !TODO: add code to handle copyflag.  For now, default to NO_COPY @\
-        if (docopy .eq. ESMF_DO_COPY) then @\
+        if (present(docopy) .and. (docopy .eq. ESMF_DO_COPY)) then @\
           allocate(localp( mlen ), stat=status) @\
           if (status .ne. 0) then     ! f90 status, not ESMF @\
             print *, "Array do_copy allocate error" @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_cpp.F90,v 1.2 2003/02/10 16:43:38 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.1 2003/02/10 16:43:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -154,7 +154,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_cpp.F90,v 1.2 2003/02/10 16:43:38 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.1 2003/02/10 16:43:38 nscollins Exp $'
 
 !==============================================================================
 ! 

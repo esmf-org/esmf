@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003/01/30 16:09:26 nscollins Exp $
+# $Id: makefile,v 1.6 2003/02/10 16:43:38 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -38,16 +38,22 @@ CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
 
-# if you have class files which need to be compiled in a particular
-# order, list the dependencies below, with no rules following.
-#
-# e.g.:
-#
-# ESMF_Field.o:   ESMF_DataArray.o
-#
-# ESMF_Bundle.o:  ESMF_Field.o
-#
 
-
+# rule for making ESMF_Array.F90 from ESMF_Array_F90.cpp:
+# either use the F90 with cpp only, or gcc and ignore the
+# warnings about the fortran syntax, depending what is possible on each
+# architecture.  this needs to run on each arch.  nsc 10feb03
+#
+# The rules below work on the mac with gcc and absoft fortran.
+# The -P option prevents putting #line directives in the output, and
+# -E stops after preprocessing.  The 'tr' command substitutes one-for-one,
+# translating @s into newlines to separate multiline macros, and
+# also translate ^ into # so that other include files are ready to
+# be processed by the second runthru of the preprocessor during the 
+# actual compile. (These lines are: ^include "fred" in the
+# original source to shield them from the first preprocess pass.)
+#
+# ESMF_Array.F90: ESMF_Array_F90.cpp
+#	gcc -E -P ESMF_Array_F90.cpp | tr "@^" "\n#" > ESMF_Array.F90
 
 
