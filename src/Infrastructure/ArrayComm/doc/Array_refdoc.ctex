@@ -1,4 +1,4 @@
-% $Id: Array_refdoc.ctex,v 1.1 2003/10/22 14:36:36 cdeluca Exp $
+% $Id: Array_refdoc.ctex,v 1.2 2003/10/23 15:23:11 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -73,12 +73,12 @@
 \input{../Infrastructure/ArrayComm/doc/Array_implnotes}
 #endif
 
-\subsection{Object Model}
-#ifdef STANDALONE
-\input{Array_obj}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/ArrayComm/doc/Array_obj}
-#endif
+%\subsection{Object Model}
+%#ifdef STANDALONE
+%\input{Array_obj}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/ArrayComm/doc/Array_obj}
+%#endif
 
 \subsection{Class API}
 #ifdef STANDALONE
