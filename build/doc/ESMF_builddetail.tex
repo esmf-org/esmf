@@ -1,12 +1,12 @@
-%  $Id: ESMF_builddetail.tex,v 1.3 2003/08/28 15:57:58 flanigan Exp $
+%  $Id: ESMF_builddetail.tex,v 1.4 2003/08/28 17:14:37 flanigan Exp $
 
 
 \subsection{Make System}
 \label{sec:make}
 For most users the description of the build system in previous
-sections should be sufficient.  Some users, however, may wish to have a
-more detailed knowledge of the make system that is used by the library
-either for configuring different build options or other reasons.
+sections should be sufficient.  Some users, however, may wish to have
+a more detailed knowledge of the make system either for configuring
+different build options or for porting to unsupported platforms.
 \subsubsection{General Structure}
 
 The ESMF build system is broken into two parts.  The first is the
@@ -23,8 +23,8 @@ The main components of the make system are:
 There are two directories containing makefile fragment files used by
 the make system.  
 
-The {\tt build} directory contains a generic makefile fragment file
-common.mk that is included by the top level Makefile in the source
+The {\tt build} directory contains the generic makefile fragment file
+common.mk that is included by the top level makefile in the source
 tree.  common.mk contains generic build system settings and build
 rules used across all platforms.  A user should have no reason to edit
 common.mk.
@@ -35,21 +35,21 @@ other definitions that are necessary to build on each platform.  Files
 can also be added to this directory for specific machines where the
 build settings are different from the standards of the architecture.
 One of the files in this directory will be included by the
-build/common.mk file depending the values of the environment variable
+build/common.mk file depending the values of the environment variables
 ESMF\_ARCH and ESMF\_SITE.  See below for more details on environment
 variables.
 
 \item{{\bf Environment Variables}}
 
-The three sets of source code that the build system support all need
+The three sets of source codes that the build system supports all need
 environment variables set to point to their top level source code
-directories. 
+directories.
 
 \begin{description}
 
 \item{ESMF Library} 
 
-To build the ESMF library, ESMF\_DIR set to the top level ESMF
+To build the ESMF library, ESMF\_DIR needs to be set to the top level ESMF
 library source code directory.
 
 \item{Implementation Report} 
@@ -77,9 +77,9 @@ them.  In most cases the default values will be fine.
 
 \item{ESMF\_ARCH} 
 
-Defines current architecture. Default value is value returned by the
-command uname -s.  There should be almost no reason for ESMF\_ARCH to
-be set by a user.
+Defines the current architecture. Default value is the value returned
+by the command uname -s.  There should be almost no reason for
+ESMF\_ARCH to be set by a user.
 
 \item{ESMF\_SITE}
 
@@ -88,7 +88,8 @@ settings for the current machine architecture will be used.  Values
 are created either from a machine's name or the compiler's name that
 is used. In some cases both a machine's name and the compiler's name
 will be used.  Example ESMF\_SITE values could be blackforest or
-jazz\_lahey.
+jazz\_lahey.  See the Build Configuration section below for more
+details on how this variable is used.
 
 \item{ESMF\_PREC}
 
@@ -108,12 +109,12 @@ is O.
 
 \item{{\bf Makefiles}}
 
-Every source tree contains a Makefile in its top level directory.  This
+Every source tree contains a makefile in its top level directory.  This
 makefile includes the common.mk file from the {\tt build} directory.
 The top level makefile contains makefile settings specific for the
 source code that it is found in.
 
-Each directory in the source tree contains a Makefile which includes
+Each directory in the source tree contains a makefile which includes
 the top level makefile.  These local Makefiles include definitions that
 allow the local files and documents to be built.
 \end{itemize}
