@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.3 2003/05/07 17:39:33 eschwab Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.4 2003/06/03 20:31:16 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.3 2003/05/07 17:39:33 eschwab Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.4 2003/06/03 20:31:16 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -171,7 +171,11 @@
           !----------------------------------------------------------------!
           !                      High range test (low end)                 !
           ! start at zero, 11/24/-4713, and move forward one day at a time !
-          ! until 1/1/200,000                                              !
+          ! until 1/1/20,000                                               !
+          !                                                                !
+          ! note: to run test up to 1/1/200,000 (TMG 1.4), edit lines      !
+          ! 174(200,000), 258(200000), 275(200,000), 277(200000), and      !
+          ! 278(74769560)                                                 !
           !----------------------------------------------------------------!
 
           YR = -4713
@@ -194,14 +198,14 @@
 
 #ifdef ESMF_EXHAUSTIVE
           ! start back a few 10,000 years, then come forward
-          D = D - 20000000
+          D = D - 10000000
 
-          ! matching start date is September 7, 292,276,965,156
-          YR = 292276965  ! break up initialization,
+          ! matching start date is October 3, 292,276,992,535
+          YR = 292276992  ! break up initialization,
           YR = YR * 1000  !   since F90 constants
-          YR = YR + 156   !     are 32-bit
-          MM = 9
-          DD = 7
+          YR = YR + 535   !     are 32-bit
+          MM = 10
+          DD = 3
 #else
           ! start back 1000 days, then come forward
           D = D - 1000
@@ -217,7 +221,7 @@
         endif
 
         call ESMF_TimeInit(Time, YR=YR, MM=MM, DD=DD, &
-                         cal=gregorianCalendar, rc=rc)
+                           cal=gregorianCalendar, rc=rc)
         call ESMF_TimeGet(Time, YR=rYR, MM=rMM, DD=rDD, D=rD, rc=rc)
         print *, "High range test #", test
         print *, "  Start Time Gregorian = ", rYR, "/", rMM, "/", rDD
@@ -251,7 +255,7 @@
               if (mod(YR,tenthousand).eq.0) then
                 print *, "YR = ", YR, ", D = ", D
               end if
-              if (YR.eq.200000) then
+              if (YR.eq.20000) then
                 done = .true.
               end if
             end if
@@ -268,10 +272,10 @@
         if (test.eq.HIGH_LO) then
 
           write(failMsg, *) &
-                "High range (low end) not 1/1/200,000 or rc=ESMF_FAILURE"
+                "High range (low end) not 1/1/20,000 or rc=ESMF_FAILURE"
           write(name, *) "Gregorian/Fliegel High Range (low end) Test"
-          call ESMF_Test((YR.eq.200000 .and. MM.eq.1 .and. DD.eq.1 &
-                          .and. D.eq.74769560 .and. rc.eq.ESMF_SUCCESS), &
+          call ESMF_Test((YR.eq.20000 .and. MM.eq.1 .and. DD.eq.1 &
+                          .and. D.eq.9025910 .and. rc.eq.ESMF_SUCCESS), &
                           name, failMsg, result, ESMF_SRCLINE)
           print *
 
