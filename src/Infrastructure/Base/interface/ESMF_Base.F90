@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.44 2003/07/07 22:28:38 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.45 2003/07/09 17:23:09 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -178,7 +178,7 @@
       type ESMF_Domain
       sequence
           integer :: rank
-          type (ESMF_AxisIndex) :: ai[MAXDIM]
+          type (ESMF_AxisIndex) :: ai(ESMF_MAXDIM)
       end type
 
 !------------------------------------------------------------------------------
@@ -312,7 +312,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.44 2003/07/07 22:28:38 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.45 2003/07/09 17:23:09 jwolfe Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -979,7 +979,7 @@ end function
 
       if (present(max)) min = ai%min
       if (present(max)) max = ai%max
-      if (present(gstart)) stride = ai%stride
+      if (present(stride)) stride = ai%stride
 
       if (present(rc)) rc = ESMF_SUCCESS
 
