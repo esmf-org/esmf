@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.6 2004/02/01 13:59:46 nscollins Exp $
+! $Id: user_model1.F90,v 1.7 2004/02/05 17:54:21 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -214,10 +214,10 @@
         call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
 
         ! update field values here
-        call ESMF_StateGetDataPointer(exportstate, "humidity", idata, rc=rc)
-        ! call ESMF_FieldGetData(humidity, array1, rc=rc) 
-        ! Get a pointer to the start of the data
-        ! call ESMF_ArrayGetData(array1, idata, ESMF_DATA_REF, rc)
+        ! call ESMF_StateGetDataPointer(exportstate, "humidity", idata, rc=rc)
+        call ESMF_FieldGetData(humidity, array1, rc=rc) 
+        Get a pointer to the start of the data
+        call ESMF_ArrayGetData(array1, idata, ESMF_DATA_REF, rc)
 
         ! increment data values in place
     !    idata = idata + 10.0
