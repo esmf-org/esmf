@@ -1,4 +1,4 @@
- $Id: README,v 1.6 2001/12/11 22:26:50 cnh Exp $
+ $Id: README,v 1.7 2001/12/13 16:44:18 dneckels Exp $
 ================================================================================
                                    README
 
@@ -8,7 +8,7 @@
 
 The ESMF library source code is available for download at:
 
-  http://sourceforge.net/cvs/?group_id=13142
+  http://sourceforge.net/cvs/?group_id=38089
 
 Follow the directions on that webpage to access the ESMF CVS repository.
 
@@ -63,14 +63,33 @@ under $ESMF_DIR/lib and include the "ESMC.h" file.
 To use the library from F90, link with the appropriate library executable under
 $ESMF_DIR/lib.  Create links to the modules mfm_timemgmt.mod and 
 mfm_timemgmt_types.mod in your application build directory.  Modules are 
-in the $MF_DIR/mod directory.  To include the library in application modules, 
+in the $ESMF_DIR/mod directory.  To include the library in application modules, 
 USE the module MFM_TimeMgmt.
+
+There is an install target which will copy the library and mod files to an
+install location.  To invoke this target use:
+
+  gmake BOPT=[O,g] ESMF_LIB_INSTALL=dir_for_lib ESMF_MOD_INSTALL=dir_for_mod_files install 
+
+Some users may wish for the library to be built in a directory different from 
+where the source code resides.  To do this, build using:
+  
+   gmake ESMF_BUILD=build_directory_here BOPT=[O,g]
+
+The ESMF_BUILD variable gives an alternate path in which to place the libraries,
+mod files and object files.  This variable defaults to ESMF_DIR.  If it is 
+assigned another value, the ESMF_BUILD variable will need to be passed as
+an additional argument to the the above make commands.
+
 
 --------------------------------------------------------------------------------
 
-Additional documentation is available at:
-
+The latest documentation for the project can be found at:
 http://www.esmf.ucar.edu -> User Documentation and Links
+
+The documentation at this site is for the latest release.  To obtain
+the documentation that exactly matches this version, follow the documentation
+build procedures outlined above.
 
 Please contact esmf@ucar.edu with any questions or problems.
 
