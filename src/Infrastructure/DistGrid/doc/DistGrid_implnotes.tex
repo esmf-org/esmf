@@ -1,11 +1,11 @@
-% $Id: DistGrid_implnotes.tex,v 1.3 2003/11/17 20:48:25 jwolfe Exp $
+% $Id: DistGrid_implnotes.tex,v 1.4 2005/01/03 23:43:58 jwolfe Exp $
 
 %\subsection{Implementation Notes}
 
 The DistGrid class contains the mapping between the local grid decompositions
 and the global logical Grid.  It contains methods to synchronize data values
 between the boundaries of subsets, and to collect and communicate global data
-values. It interacts closely with the PhysGrid object.
+values.  It interacts closely with the PhysGrid object.
 
 \begin{enumerate}
 
@@ -28,7 +28,7 @@ first.
 \item {\bf DistGridLocal} The DistGridLocal class contains detailed subgrid
 information for the data located on this PE, such as the local cell count and the
 number of cells along each axis and their position in the global Grid.  When we
-implement multiple DEs per PE then we will have a list of these instead of a single
+implement multiple DEs per PE, then we will have a list of these instead of a single
 one in the DistGrid class.
 \end{itemize}
 
@@ -38,15 +38,15 @@ The primary purpose of DistGrid is to encapsulate information
 about the local decomposition(s) (DE) of the Grid on this PE.  
 This includes such information as the total 
 number of local cells, if logically rectangular the numbers of cells along 
-each dimension, and the relative location of this DE compared to the
-overall ESMF\_Grid.  The minimum information required would be
+each dimension, and the location of this DE's local data in the
+global ESMF\_Grid.  The minimum information required would be
 to compute and store data only for the local DE.
 
 However, at create time DistGrid computes information not only about the
 local decomposition, but also less detailed information about the other
 decompositions for the entire Grid.  While this duplicates some data, it
 avoids communication when a DE requires information to enable it to send data to 
-or receive data from other DEs, 
+or receive data from other DEs. 
 
 \item {\bf Boundary Cells}
 
@@ -57,7 +57,7 @@ each DE.  These boundary cells are distinct from the halo cells which are
 specified on a per-Field basis and are visible to the user code.
 
 The boundary cells inside DistGrid are only used internally to the Framework,
-for example during regridding to avoid unnecessary inter-DE communication and
+for example during regridding, to avoid unnecessary inter-DE communication and
 to handle exterior boundaries in a consistent manner.
 
 \end{enumerate}
@@ -69,10 +69,8 @@ to handle exterior boundaries in a consistent manner.
 Some methods which have a DistGrid interface will actually be
 implemented at the underlying DELayout or Array level; they
 will be inherited by the DistGrid class.  This allows the user
-API (Application Programming Interface) to present functions at
-the level which is most consistent to the application without
-restricting where inside the ESMF the actual implementation
-is done.
+API to present functions at the level which is most consistent to the
+application without restricting the actual implementation.
 
 
 The DistGrid class has two instances of both DistGridLocal and
