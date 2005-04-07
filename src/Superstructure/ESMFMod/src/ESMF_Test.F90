@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.12 2005/03/14 23:56:57 nscollins Exp $
+! $Id: ESMF_Test.F90,v 1.13 2005/04/07 21:05:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.12 2005/03/14 23:56:57 nscollins Exp $'
+      '$Id: ESMF_Test.F90,v 1.13 2005/04/07 21:05:38 svasquez Exp $'
 
 !==============================================================================
 
@@ -404,15 +404,22 @@
 !EOP
 !-------------------------------------------------------------------------------
 
-      character(ESMF_MAXSTR) :: msg
+      character(ESMF_MAXSTR) :: msg, logFileName
       type(ESMF_VM) :: globalVM
-      integer :: numPETs, localrc
+      integer :: numPETs, localrc, underScore, Period
+
+      ! create a file name for the log file
+      ! find locations of the underscore and period
+      underScore = index (file, "_")
+      Period = index (file, ".")
+      logFileName = file(underScore+1:Period)  // "Log"
+
 
       ! initialize the framework.  if this fails, print a message directly
       ! because there is no guarentee that the log code will be working.
-      call ESMF_Initialize(vm=globalVM, defaultlogfilename="UTestLog", &
-                           defaultlogtype=ESMF_LOG_SINGLE, rc=localrc)
-                           !defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
+      call ESMF_Initialize(vm=globalVM, defaultlogfilename=logFileName, &
+                           defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
+                           !defaultlogtype=ESMF_LOG_SINGLE, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) then
           write(msg, *) "FAIL  Unable to initialize the ESMF Framework.  Error code ", localrc
           print *, msg
@@ -433,7 +440,7 @@
       write(msg, *) "Beginning Test, file ", trim(file), ", line", line
       print *, msg
       call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-      !!call ESMF_LogWrite("Beginning Test", ESMF_LOG_INFO, line, file)
+      !!call ESMF_LogWrite("Beginning Test", ESMF_LOG_INFO, line, logFileName)
       if (present(unit)) write(unit, *) msg
 
       write(msg, *) "NUMBER_OF_PROCESSORS", numPETs
