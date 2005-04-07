@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2005/03/01 20:56:41 nscollins Exp $ 
+# $Id: makefile,v 1.5 2005/04/07 22:09:56 svasquez Exp $ 
 
 ALL:  build_tests
 
@@ -39,9 +39,13 @@ CLOBBERDIRS =
 #
 RUN_ESMF_ArrayUTest:
 	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayUTest > $(ESMF_TESTDIR)/ESMF_ArrayUTest.stdout
+	-cat *ArrayUTest.Log > $(ESMC_TESTDIR)/ESMF_ArrayUTest.Log
+	-rm *ArrayUTest.Log
 
 RUN_ESMF_ArrayUTestUNI:
 	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_ArrayUTest > $(ESMF_TESTDIR)/ESMF_ArrayUTest.stdout
+	-cat *ArrayUTest.Log > $(ESMC_TESTDIR)/ESMF_ArrayUTest.Log
+	-rm *ArrayUTest.Log
 
 ESMF_ArrayUTest.rm:
 	-@echo "ESMF_Array.rm target called here."
