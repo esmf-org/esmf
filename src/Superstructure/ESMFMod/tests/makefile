@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2005/03/01 21:06:52 nscollins Exp $
+# $Id: makefile,v 1.7 2005/04/07 21:47:46 svasquez Exp $
 
 ALL:  build_tests
 
@@ -37,9 +37,14 @@ CLOBBERDIRS =
 #
 RUN_ESMF_ESMFModUTest:
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ESMFModUTest > $(ESMC_TESTDIR)/ESMF_ESMFModUTest.stdout
+	-cat *ESMFModUTest.Log > $(ESMC_TESTDIR)/ESMF_ESMFModUTest.Log
+	-rm *ESMFModUTest.Log
+
 
 RUN_ESMF_ESMFModUTestUNI:
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ESMFModUTest > $(ESMC_TESTDIR)/ESMF_ESMFModUTest.stdout
+	-cat *ESMFModUTest.Log > $(ESMC_TESTDIR)/ESMF_ESMFModUTest.Log
+	-rm *ESMFModUTest.Log
 
 
 #
@@ -48,9 +53,13 @@ RUN_ESMF_ESMFModUTestUNI:
 
 RUN_ESMC_ESMFModUTest:
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ESMFModUTest > $(ESMC_TESTDIR)/ESMC_ESMFModUTest.stdout
+	-cat *ESMFModUTest.Log > $(ESMC_TESTDIR)/ESMF_ESMCModUTest.Log
+	-rm *ESMFModUTest.Log
 
 RUN_ESMC_ESMFModUTestUNI:
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ESMFModUTest > $(ESMC_TESTDIR)/ESMC_ESMFModUTest.stdout
+	-cat *ESMFModUTest.Log > $(ESMC_TESTDIR)/ESMF_ESMCModUTest.Log
+	-rm *ESMFModUTest.Log
 
 
 
