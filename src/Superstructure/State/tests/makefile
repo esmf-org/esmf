@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2005/03/01 21:07:09 nscollins Exp $ 
+# $Id: makefile,v 1.8 2005/04/07 22:01:48 svasquez Exp $ 
 
 ALL:  build_tests
 
@@ -41,9 +41,14 @@ CLOBBERDIRS =
 
 RUN_ESMF_StateCreateUTest:
 	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_StateCreateUTest > $(ESMF_TESTDIR)/ESMF_StateCreateUTest.stdout
+	-cat *StateCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_StateCreateUTest.Log
+	-rm *StateCreateUTest.Log
+
 
 RUN_ESMF_StateCreateUTestUNI:
 	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_StateCreateUTest > $(ESMF_TESTDIR)/ESMF_StateCreateUTest.stdout
+	-cat *StateCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_StateCreateUTest.Log
+	-rm *StateCreateUTest.Log
 
 
 
@@ -53,9 +58,13 @@ RUN_ESMF_StateCreateUTestUNI:
 
 RUN_ESMF_StateUTest:
 	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_StateUTest > $(ESMF_TESTDIR)/ESMF_StateUTest.stdout
+	-cat *StateUTest.Log > $(ESMC_TESTDIR)/ESMF_StateUTest.Log
+	-rm *StateUTest.Log
 
 RUN_ESMF_StateUTestUNI:
 	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_StateUTest > $(ESMF_TESTDIR)/ESMF_StateUTest.stdout
+	-cat *StateUTest.Log > $(ESMC_TESTDIR)/ESMF_StateUTest.Log
+	-rm *StateUTest.Log
 
 
 
@@ -66,9 +75,13 @@ RUN_ESMF_StateUTestUNI:
 
 RUN_ESMF_StateReconcileUTest:
 	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_StateReconcileUTest > $(ESMF_TESTDIR)/ESMF_StateReconcileUTest.stdout
+	-cat *StateReconcileUTest.Log > $(ESMC_TESTDIR)/ESMF_StateReconcileUTest.Log
+	-rm *StateReconcileUTest.Log
 
 RUN_ESMF_StateReconcileUTestUNI:
 	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_StateReconcileUTest > $(ESMF_TESTDIR)/ESMF_StateReconcileUTest.stdout
+	-cat *StateReconcileUTest.Log > $(ESMC_TESTDIR)/ESMF_StateReconcileUTest.Log
+	-rm *StateReconcileUTest.Log
 
 
 
