@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.32 2005/03/01 21:01:22 nscollins Exp $ 
+# $Id: makefile,v 1.33 2005/04/07 21:03:15 svasquez Exp $ 
 
 ALL:  build_tests
 
@@ -41,9 +41,13 @@ ESMF_FRoute8UTest.F90:  ESMF_FRoute4UTest.F90
 #
 RUN_ESMF_FieldUTest:
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FieldUTest > $(ESMC_TESTDIR)/ESMF_FieldUTest.stdout
+	-cat *FieldUTest.Log > $(ESMC_TESTDIR)/ESMF_FieldUTest.Log
+	-rm *FieldUTest.Log
 
 RUN_ESMF_FieldUTestUNI:
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldUTest > $(ESMC_TESTDIR)/ESMF_FieldUTest.stdout
+	-cat *FieldUTest.Log > $(ESMC_TESTDIR)/ESMF_FieldUTest.Log
+	-rm *FieldUTest.Log
 
 
 #
@@ -51,7 +55,11 @@ RUN_ESMF_FieldUTestUNI:
 #
 RUN_ESMF_FRouteUTest:
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FRoute4UTest > $(ESMC_TESTDIR)/ESMF_FRoute4UTest.stdout
+	-cat *FRoute4UTest.Log > $(ESMC_TESTDIR)/ESMF_FRoute4UTest.Log
+	-rm *FRoute4UTest.Log
 	-${MPIRUN} -np 8 $(ESMC_TESTDIR)/ESMF_FRoute8UTest > $(ESMC_TESTDIR)/ESMF_FRoute8UTest.stdout
+	-cat *FRoute8UTest.Log > $(ESMC_TESTDIR)/ESMF_FRoute8UTest.Log
+	-rm *FRoute8UTest.Log
 
 	# for now comment out the larger tests.  as far as i know, these
 	# run, but can cause problems for the automatic overnight builds.
