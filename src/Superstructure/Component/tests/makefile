@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2005/03/15 17:22:37 nscollins Exp $ 
+# $Id: makefile,v 1.28 2005/04/07 21:40:22 svasquez Exp $ 
 
 ALL:  build_tests
 
@@ -49,16 +49,24 @@ CLOBBERDIRS =
 #
 RUN_ESMF_ComponentUTest:
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ComponentUTest > $(ESMC_TESTDIR)/ESMF_ComponentUTest.stdout
+	-cat *ComponentUTest.Log > $(ESMC_TESTDIR)/ESMF_ComponentUTest.Log
+	-rm *ComponentUTest.Log
 
 RUN_ESMF_ComponentUTestUNI:
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ComponentUTest > $(ESMC_TESTDIR)/ESMF_ComponentUTest.stdout
+	-cat *ComponentUTest.Log > $(ESMC_TESTDIR)/ESMF_ComponentUTest.Log
+	-rm *ComponentUTest.Log
 
 
 RUN_ESMF_GridCompCreateUTest:
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest > $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest.stdout
+	-cat *GridCompCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest.Log
+	-rm *GridCompCreateUTest.Log
 
 RUN_ESMF_GridCompCreateUTestUNI:
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest > $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest.stdout
+	-cat *GridCompCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest.Log
+	-rm *GridCompCreateUTest.Log
 
 
 
@@ -117,8 +125,12 @@ RUN_ESMC_CompRunUNI:
 
 RUN_ESMF_CplCompCreateUTest:
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest > $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest.stdout
+	-cat *CplCompCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest.Log
+	-rm *CplCompCreateUTest.Log
 
 RUN_ESMF_CplCompCreateUTestUNI:
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest > $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest.stdout
+	-cat *CplCompCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest.Log
+	-rm *CplCompCreateUTest.Log
 
 
