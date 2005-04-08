@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2005/03/01 20:58:08 nscollins Exp $ 
+# $Id: makefile,v 1.6 2005/04/08 15:29:04 svasquez Exp $ 
 
 ALL:  build_tests
 
@@ -38,10 +38,14 @@ CLOBBERDIRS =
 RUN_ESMF_BundleUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BundleUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BundleUTest > $(ESMC_TESTDIR)/ESMF_BundleUTest.stdout
+	-cat *BundleUTest.Log > $(ESMC_TESTDIR)/ESMF_BundleUTest.Log
+	-rm *BundleUTest.Log
 
 RUN_ESMF_BundleUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BundleUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BundleUTest > $(ESMC_TESTDIR)/ESMF_BundleUTest.stdout
+	-cat *BundleUTest.Log > $(ESMC_TESTDIR)/ESMF_BundleUTest.Log
+	-rm *BundleUTest.Log
 
 ESMF_BundleUTest.rm:
 	echo "ESMF_BundleUTest.rm target called here."

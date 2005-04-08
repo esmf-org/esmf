@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2005/03/01 20:59:09 nscollins Exp $
+# $Id: makefile,v 1.8 2005/04/08 15:33:59 svasquez Exp $
 
 ALL:  build_tests
 
@@ -41,10 +41,14 @@ CLOBBERDIRS =
 RUN_ESMF_<Class>UTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_<Class>UTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_<Class>UTest > $(ESMC_TESTDIR)/ESMF_<Class>UTest.stdout
+	-cat *<Class>UTest.Log > $(ESMC_TESTDIR)/ESMF_<Class>UTest.Log
+	-rm *<Class>UTest.Log
 
 RUN_ESMF_<Class>UTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_<Class>UTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_<Class>UTest > $(ESMC_TESTDIR)/ESMF_<Class>UTest.stdout
+	-cat *<Class>UTest.Log > $(ESMC_TESTDIR)/ESMF_<Class>UTest.Log
+	-rm *<Class>UTest.Log
 
 ESMF_<Class>UTest.rm:
 	echo "ESMF_<Class>Test.rm target called here."
@@ -60,10 +64,14 @@ $(ESMC_TESTDIR)/ESMC_<Class>UTest: chkopts ESMC_<Class>UTest.o
 RUN_ESMC_<Class>UTest:
 	-@rm -f testlog stdlog.* logfile.* ESMC_<Class>UTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
+	-cat *<Class>UTest.Log > $(ESMC_TESTDIR)/ESMC_<Class>UTest.Log
+	-rm *<Class>UTest.Log
 
 RUN_ESMC_<Class>UTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMC_<Class>UTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
+	-cat *<Class>UTest.Log > $(ESMC_TESTDIR)/ESMC_<Class>UTest.Log
+	-rm *<Class>UTest.Log
 
 ESMC_<Class>UTest.rm:
 	echo "ESMC_<Class>Test.rm target called here."
