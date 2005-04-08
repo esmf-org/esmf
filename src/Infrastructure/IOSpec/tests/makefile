@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2005/03/01 21:03:09 nscollins Exp $ 
+# $Id: makefile,v 1.3 2005/04/08 16:17:06 svasquez Exp $ 
 
 ALL:  build_tests
 
@@ -34,7 +34,11 @@ CLOBBERDIRS =
 #
 RUN_ESMF_IOSpecUTest:
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_IOSpecUTest > $(ESMC_TESTDIR)/ESMF_IOSpecUTest.stdout
+	-cat *IOSpecUTest.Log > $(ESMC_TESTDIR)/ESMF_IOSpecUTest.Log
+	-rm *IOSpecUTest.Log
 
 RUN_ESMF_IOSpecUTestUNI:
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_IOSpecUTest > $(ESMC_TESTDIR)/ESMF_IOSpecUTest.stdout
+	-cat *IOSpecUTest.Log > $(ESMC_TESTDIR)/ESMF_IOSpecUTest.Log
+	-rm *IOSpecUTest.Log
 
