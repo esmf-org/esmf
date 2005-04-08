@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2005/03/01 21:00:43 nscollins Exp $ 
+# $Id: makefile,v 1.6 2005/04/08 15:48:10 svasquez Exp $ 
 
 ALL:  build_tests
 
@@ -36,7 +36,12 @@ CLOBBERDIRS =
 RUN_ESMF_DELayoutUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_DELayoutUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_DELayoutUTest > $(ESMC_TESTDIR)/ESMF_DELayoutUTest.stdout
+	-cat *DELayoutUTest.Log > $(ESMC_TESTDIR)/ESMF_DELayoutUTest.Log
+	-rm *DELayoutUTest.Log
+
 
 RUN_ESMF_DELayoutUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_DELayoutUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_DELayoutUTest > $(ESMC_TESTDIR)/ESMF_DELayoutUTest.stdout
+	-cat *DELayoutUTest.Log > $(ESMC_TESTDIR)/ESMF_DELayoutUTest.Log
+	-rm *DELayoutUTest.Log

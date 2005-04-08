@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2005/03/01 21:00:07 nscollins Exp $
+# $Id: makefile,v 1.6 2005/04/08 15:44:08 svasquez Exp $
 
 ALL:  build_tests
 
@@ -39,9 +39,14 @@ CLOBBERDIRS =
 #
 RUN_ESMF_ConfigUTest:
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ConfigUTest > $(ESMC_TESTDIR)/ESMF_ConfigUTest.stdout
+	-cat *ConfigUTest.Log > $(ESMC_TESTDIR)/ESMF_ConfigUTest.Log
+	-rm *ConfigUTest.Log
+
 
 RUN_ESMF_ConfigUTestUNI:
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ConfigUTest > $(ESMC_TESTDIR)/ESMF_ConfigUTest.stdout
+	-cat *ConfigUTest.Log > $(ESMC_TESTDIR)/ESMF_ConfigUTest.Log
+	-rm *ConfigUTest.Log
 
 
 #
@@ -49,9 +54,13 @@ RUN_ESMF_ConfigUTestUNI:
 #
 RUN_ESMC_ConfigUTest:
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ConfigUTest > $(ESMC_TESTDIR)/ESMC_ConfigUTest.stdout
+	-cat *ConfigUTest.Log > $(ESMC_TESTDIR)/ESMC_ConfigUTest.Log
+	-rm *ConfigUTest.Log
 
 RUN_ESMC_ConfigUTestUNI:
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ConfigUTest > $(ESMC_TESTDIR)/ESMC_ConfigUTest.stdout
+	-cat *ConfigUTest.Log > $(ESMC_TESTDIR)/ESMC_ConfigUTest.Log
+	-rm *ConfigUTest.Log
 
 
 

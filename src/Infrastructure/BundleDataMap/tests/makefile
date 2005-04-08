@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2005/03/01 20:59:33 nscollins Exp $
+# $Id: makefile,v 1.8 2005/04/08 15:39:33 svasquez Exp $
 
 ALL:  build_tests
 
@@ -45,10 +45,14 @@ CLOBBERDIRS =
 RUN_ESMF_BundleDataMapUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BundleDataMapUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BundleDataMapUTest > $(ESMC_TESTDIR)/ESMF_BundleDataMapUTest.stdout
+	-cat *BundleDataMapUTest.Log > $(ESMC_TESTDIR)/ESMF_BundleDataMapUTest.Log
+	-rm *BundleDataMapUTest.Log
 
 RUN_ESMF_BundleDataMapUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BundleDataMapUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BundleDataMapUTest > $(ESMC_TESTDIR)/ESMF_BundleDataMapUTest.stdout
+	-cat *BundleDataMapUTest.Log > $(ESMC_TESTDIR)/ESMF_BundleDataMapUTest.Log
+	-rm *BundleDataMapUTest.Log
 
 ESMF_BundleDataMapUTest.rm:
 	echo "ESMF_BundleDataMapTest.rm target called here."
@@ -60,10 +64,14 @@ ESMF_BundleDataMapUTest.rm:
 RUN_ESMC_BundleDataMapUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMC_BundleDataMapUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest > $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest.stdout
+	-cat *BundleDataMapUTest.Log > $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest.Log
+	-rm *BundleDataMapUTest.Log
 
 RUN_ESMC_BundleDataMapUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMC_BundleDataMapUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest > $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest.stdout
+	-cat *BundleDataMapUTest.Log > $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest.Log
+	-rm *BundleDataMapUTest.Log
 
 ESMC_BundleDataMapUTest.rm:
 	echo "ESMC_BundleDataMapTest.rm target called here."
