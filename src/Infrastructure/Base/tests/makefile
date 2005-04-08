@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2005/03/01 20:57:54 nscollins Exp $ 
+# $Id: makefile,v 1.14 2005/04/08 15:23:16 svasquez Exp $ 
 
 ALL:  build_tests
 
@@ -42,10 +42,14 @@ CLOBBERDIRS =
 RUN_ESMF_BaseUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BaseUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BaseUTest > $(ESMC_TESTDIR)/ESMF_BaseUTest.stdout
+	-cat *BaseUTest.Log > $(ESMC_TESTDIR)/ESMF_BaseUTest.Log
+	-rm *BaseUTest.Log
 
 RUN_ESMF_BaseUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BaseUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BaseUTest > $(ESMC_TESTDIR)/ESMF_BaseUTest.stdout
+	-cat *BaseUTest.Log > $(ESMC_TESTDIR)/ESMF_BaseUTest.Log
+	-rm *BaseUTest.Log
 
 ESMF_BaseUTest.rm:
 	echo "ESMF_BaseUTest.rm target called here."
@@ -60,10 +64,14 @@ ESMF_StringUTest.o : ESMC_StringSubr.o
 RUN_ESMF_StringUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_StringUTest.tmps
 	-$(ESMC_TESTDIR)/ESMF_StringUTest > $(ESMC_TESTDIR)/ESMF_StringUTest.stdout
+	-cat *StringUTest.Log > $(ESMC_TESTDIR)/ESMF_StringUTest.Log
+	-rm *StringUTest.Log
 
 RUN_ESMF_StringUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_StringUTest.tmps
 	-$(ESMC_TESTDIR)/ESMF_StringUTest > $(ESMC_TESTDIR)/ESMF_StringUTest.stdout
+	-cat *StringUTest.Log > $(ESMC_TESTDIR)/ESMF_StringUTest.Log
+	-rm *StringUTest.Log
 
 
 
