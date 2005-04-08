@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2005/03/01 21:01:55 nscollins Exp $
+# $Id: makefile,v 1.10 2005/04/08 15:56:16 svasquez Exp $
 
 ALL:  build_tests
 
@@ -34,6 +34,8 @@ CLOBBERDIRS =
 #
 RUN_ESMF_FieldGatherUTest:
 	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_FieldGatherUTest > $(ESMC_TESTDIR)/ESMF_FieldGatherUTest.stdout
+	-cat *FieldGatherUTest.Log > $(ESMC_TESTDIR)/ESMF_FieldGatherUTest.Log
+	-rm *FieldGatherUTest.Log
 
 
 RUN_ESMF_FieldGatherUTestUNI:
