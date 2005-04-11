@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.21 2005/04/11 15:53:37 nscollins Exp $
+#  $Id: build_rules.mk,v 1.22 2005/04/11 16:33:23 nscollins Exp $
 #
 #  AIX.default.default
 #
@@ -187,7 +187,7 @@ O_FFLAGS	+= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
 # shared lib section - this platform does make a shared lib.
 
 # libopts are the options used when converting lib.a to lib.so
-SL_LIBOPTS  += -G -qmkshrobj $(C_F90CXXLIBS) $(MPI_LIB)
+C_SL_LIBOPTS  += -G -qmkshrobj $(C_F90CXXLIBS) $(MPI_LIB)
 
 
 # unused?  TODO: remove
