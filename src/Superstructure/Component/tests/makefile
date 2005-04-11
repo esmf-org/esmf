@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.29 2005/04/08 19:15:20 svasquez Exp $ 
+# $Id: makefile,v 1.30 2005/04/11 15:59:55 nscollins Exp $ 
 
-ALL:  build_tests
+ALL:  build_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -71,7 +71,7 @@ RUN_ESMF_GridCompCreateUTestUNI:
 
 
 $(ESMC_TESTDIR)/ESMC_CompCreate: ESMC_CompCreate.o
-	-$(SL_C_LINKER) -o $(ESMC_TESTDIR)/ESMC_CompCreate ESMC_CompCreate.o -lesmf ${MPI_LIB} ${MP_LIB} ${NETCDF_LIB} ${THREAD_LIB} ${PCL_LIB} ${CXXF90LIBS} $(SL_LINKOPTS)
+	-$(CLINKER) $(LINKOPTS) -o $(ESMC_TESTDIR)/ESMC_CompCreate ESMC_CompCreate.o -lesmf ${MPI_LIB} ${EXTRA_LIBS} ${CXXF90LIBS}
 	${RM} -f ESMC_CompCreate.o
 
 RUN_ESMC_CompCreate:
@@ -91,9 +91,8 @@ RUN_ESMC_CompCreateUNI:
 ESMF_UserRun.o: ESMF_UserGComp.o 
 
 $(ESMC_TESTDIR)/ESMF_CompRun: ESMF_UserGComp.o ESMF_CompRun.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_CompRun ESMF_CompRun.o \
-         ESMF_UserGComp.o -lesmf ${MPI_LIB} ${MP_LIB} ${NETCDF_LIB} \
-        ${THREAD_LIB} ${PCL_LIB} ${F90CXXLIBS} $(SL_LINKOPTS)
+	-$(FLINKER) $(LINKOPTS) -o $(ESMC_TESTDIR)/ESMF_CompRun ESMF_CompRun.o \
+         ESMF_UserGComp.o -lesmf ${MPI_LIB} ${EXTRA_LIBS} ${F90CXXLIBS}
 	${RM} -f ESMF_CompRun.o
 
 RUN_ESMF_CompRun:
@@ -115,9 +114,9 @@ ESMC_UserRun.o: ESMF_UserGComp.o ESMF_UserCComp.o ESMF_UserGComp_F.o
 ESMF_UserGComp_F.o : ESMF_UserGComp.o
 
 $(ESMC_TESTDIR)/ESMC_CompRun: ESMF_UserGComp.o ESMF_UserGComp_F.o ESMC_CompRun.o
-	-$(SL_C_LINKER) -o $(ESMC_TESTDIR)/ESMC_CompRun ESMC_CompRun.o \
-         ESMF_UserGComp.o ESMF_UserGComp_F.o -lesmf ${MPI_LIB} ${MP_LIB} \
-        ${NETCDF_LIB} ${THREAD_LIB} ${PCL_LIB} ${CXXF90LIBS} $(SL_LINKOPTS)
+	-$(CLINKER) $(LINKOPTS) -o $(ESMC_TESTDIR)/ESMC_CompRun \
+         ESMC_CompRun.o ESMF_UserGComp.o ESMF_UserGComp_F.o -lesmf \
+         ${MPI_LIB} ${EXTRA_LIBS} ${CXXF90LIBS}
 	${RM} -f ESMC_CompRun.o ESMF_UserGComp_F.o ESMF_UserGComp.o
 
 RUN_ESMC_CompRun:
