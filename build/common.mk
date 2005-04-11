@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.102 2005/03/18 15:59:07 svasquez Exp $
+#  $Id: common.mk,v 1.103 2005/04/11 15:52:56 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -28,7 +28,7 @@
 #-------------------------------------------------------------------------------
 
 ifndef ESMF_ARCH
-export ESMF_ARCH := $(shell uname -s)
+ESMF_ARCH = default
 endif
 ifeq ($(ESMF_ARCH),default)
 export ESMF_ARCH := $(shell uname -s)
@@ -55,6 +55,12 @@ ifndef ESMF_BUILD
 export ESMF_BUILD := $(ESMF_TOP_DIR)
 endif
 
+# make sure ESMF_COMM has a default value, even if it is the explicit 
+# string 'default'
+ifndef ESMF_COMM
+ESMF_COMM = default
+endif
+
 # name of default compiler
 ifndef ESMF_COMPILER
 export ESMF_COMPILER = default
@@ -78,14 +84,11 @@ export ESMF_SITE = default
 endif
 
 # Comment out the following lines if you want to include the IO code
-FPPFLAGS       += $(FPP_PREFIX)-DESMF_NO_IOCODE
+# the cpp flags are automatically added to the fpp lines as well now.
+#FPPFLAGS       += $(FPP_PREFIX)-DESMF_NO_IOCODE
 CPPFLAGS       += -DESMF_NO_IOCODE
 export ESMF_NO_IOCODE = true
 
-# For IRIX64 the default is MPI_Comm_c2f not supported
-ifeq ($(ESMF_ARCH),IRIX64)
-CPPFLAGS       += -DESMF_DONT_HAVE_MPI_COMM_C2F
-endif
 
 # Conditionally turn off ESMF's pthread feature set and use pthread_stubs
 ifndef ESMF_PTHREADS
@@ -94,10 +97,6 @@ endif
 ifneq ($(ESMF_PTHREADS),ON)
 export ESMF_PTHREADS = OFF
 endif
-ifeq ($(ESMF_PTHREADS),OFF)
-CPPFLAGS       += -DESMF_NO_PTHREADS
-endif
-PTHREAD_STUB_INCLUDE=-I${ESMF_DIR}/src/Infrastructure/stubs/pthread
 
 
 # if PREC not already set, default to 64.  architectures which
@@ -105,38 +104,66 @@ PTHREAD_STUB_INCLUDE=-I${ESMF_DIR}/src/Infrastructure/stubs/pthread
 # dependent files, so this only applies to platforms which support
 # more than one wordsize (e.g. ibm, irix).
 ifndef ESMF_PREC
-export ESMF_PREC = 64
+ESMF_PREC = default
 endif
 ifeq ($(ESMF_PREC),default)
 export ESMF_PREC = 64
 endif
 
 #
-#  ESMF_COMM set in site files.
+#  ESMF_COMM set in site files, but if MPI_HOME has a default value
+#  then use it for the compile flags. 
 #
+ifndef MPI_HOME
+MPI_INCLUDE =
+MPI_LIB     =
+MPIRUN      = mpirun
+else
+MPI_INCLUDE = -I${MPI_HOME}/include
+MPI_LIB     = -L${MPI_HOME}/lib
+MPIRUN      = ${MPI_HOME}/bin/mpirun
+endif
 
-# default compiler flag is optimized.
+# if using PBS system, export this for run time
+ifdef PBS_NODEFILE
+export ESMF_NODES := -machinefile $(PBS_NODEFILE)
+endif           
+
+# default compiler flag is neither debug nor optimized.  can be set
+# to g for debug, to O (capital oh) for optimized.
 ifndef ESMF_BOPT
-export ESMF_BOPT = O
+export ESMF_BOPT = 
 endif
 ifeq ($(ESMF_BOPT),default)
-export ESMF_BOPT = O
+export ESMF_BOPT = 
 endif
 
-#-------------------------------------------------------------------------------
-#  Include site specific makefile fragment.
-#-------------------------------------------------------------------------------
 
-include $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk
+# common commands and flags.  override in the platform specific include
+# files if they differ.
+AR		   = ar
+AR_FLAGS	   = cr
+AR_EXTRACT         = -x
+AR32_64            = ${AR}
+RM		   = rm -f
+RANLIB		   = ranlib
+M4	           = m4
 
-#-------------------------------------------------------------------------------
+OMAKE		   = ${MAKE}
+SHELL		   = /bin/sh
+SED		   = /bin/sed
 
-#
-# Now the ESMF_COMM variable is valid and can be used
-ifeq ($(ESMF_COMM),mpiuni)
-CPPFLAGS       += -DESMF_MPIUNI
-endif
-#
+SL_SUFFIX          = so
+SL_LIBS_TO_MAKE    = libesmf
+
+C_FC_MOD           = -I
+C_CLINKER          = ${C_CXX}
+C_FLINKER          = ${C_FC}
+C_LINKOPTS         = -L$(ESMF_LIBDIR)
+C_SLFLAG           = -Wl,-rpath,
+C_SL_LIBLINKER     = ${C_CXX}
+C_SL_LIBOPTS       = 
+
 
 #-------------------------------------------------------------------------------
 #  Common variables
@@ -164,14 +191,14 @@ ESMF_MODDIR     = $(ESMF_BUILD)/mod/mod${ESMF_BOPT}/$(ESMF_ARCH).$(ESMF_COMPILER
 ESMF_TESTDIR    = $(ESMF_BUILD)/test/test$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
 ESMF_EXDIR      = $(ESMF_BUILD)/examples/examples$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
 ESMF_INCDIR     = $(ESMF_BUILD)/src/include
-
-# Building in the moddir solves problems about trying to copy module files
-# in after the fact.  (why are there both ESMC_ and ESMF_ files here??)
-ESMC_OBJDIR	= ${ESMF_MODDIR}
-ESMC_TESTDIR    = ${ESMF_TESTDIR}
-ESMC_DOCDIR	= $(ESMF_TOP_DIR)/doc
+ESMF_DOCDIR	= $(ESMF_TOP_DIR)/doc
 ESMF_BUILD_DOCDIR = $(ESMF_BUILD)/build/doc
 ESMF_STDIR      = $(ESMF_TOP_DIR)/src/system_tests
+
+# (why are there both ESMC_ and ESMF_ files here??)
+ESMC_OBJDIR	= ${ESMF_MODDIR}
+ESMC_TESTDIR    = ${ESMF_TESTDIR}
+ESMC_DOCDIR	= ${ESMF_DOCDIR}
 
 ESMF_TEMPLATES	= ${ESMF_TOP_DIR}/scripts/doc_templates/templates
 PROTEX		= ${ESMF_TEMPLATES}/protex 
@@ -181,12 +208,6 @@ F_PROTEX        = ${ESMF_TEMPLATES}/scripts/do_fprotex
 DO_LATEX	= ${ESMF_TEMPLATES}/scripts/do_latex
 DO_L2H		= ${ESMF_TEMPLATES}/scripts/do_l2h
 
-LIBNAME		= $(ESMF_LIBDIR)/${LIBBASE}.a
-ESMFLIB		= $(ESMF_LIBDIR)/libesmf.a
-
-SOURCE		= ${SOURCEC} ${SOURCEF}
-OBJS		= ${OBJSC} ${OBJSF}
-
 CONFIG_TESTS    = ${ESMF_TESTDIR}/tests.config
 ESMF_TESTSCRIPTS    = ${ESMF_TOP_DIR}/scripts/test_scripts
 DO_UT_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
@@ -194,36 +215,204 @@ DO_EX_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) 
 DO_ST_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_SUM_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT)
 
-ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
-		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
-		  ${LOCAL_INCLUDE} \
-		  -I${ESMF_TOP_DIR}/build_config/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_SITE) \
-		  -I$(ESMF_INCDIR) -I$(ESMF_MODDIR) $(MPI_INCLUDE) \
-                  ${NETCDF_INCLUDE} $(PTHREAD_STUB_INCLUDE)
+# set up the defaults for all compilers, all options.  if the platform
+# dependent files want to add flags, they can += more flags.  if they want
+# to override these flags, they can simply reassign them.
 
-CCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} -DS${ESMF_PREC}=1 ${CPPFLAGS} \
-	 	  -D__SDIR__='"${LOCDIR}"'
-FCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} $(FPP_PREFIX)-DS${ESMF_PREC}=1 \
-                   ${FPPFLAGS} $(FCPP_EXHAUSTIVE)
+# debug option
+G_CFLAGS = -g
+G_FFLAGS = -g
 
-C_SH_LIB_PATH	= ${CLINKER_SLFLAG}${LDIR} ${C_DYLIBPATH}
-F_SH_LIB_PATH	= ${FLINKER_SLFLAG}${LDIR} ${F_DYLIBPATH}
+# either debug nor optimized option
+X_CFLAGS =
+X_FFLAGS =
 
-ESMC_TIME_LIB	 = -L${LDIR}
+# optimize option
+O_CFLAGS = -O
+O_FFLAGS = -O
 
+#-------------------------------------------------------------------------------
+#  Set up all defaults before here.   Next, include both the system dependent
+#  makefile fragment, and if present, the site-specific makefile fragment.
+#  These files can += to add on to existing defaults, or override settings
+#  by setting flags and variables with = to new values.
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+#  Include the default platform-specific makefile fragment.
+#-------------------------------------------------------------------------------
+
+include $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).default/build_rules.mk
+
+
+#-------------------------------------------------------------------------------
+#  Include site specific makefile fragment.  If we want to suppress a warning
+#  message if the site file is not found add a leading dash before the include
+#  keyword.  (If the file is not found it is a warning, not a fatal error.)
+#-------------------------------------------------------------------------------
+
+ifneq ($(ESMF_SITE),default)
+include $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk
+endif
+
+#-------------------------------------------------------------------------------
+#  Now all system-dependent files have been read.  Variables which are C_xxx
+#  are set on a per-platform basic in the makefile fragments.  Now anything
+#  below here is again common code.  Variables should no longer be overwritten
+#  with =, but should be appended to if neeeded with +=
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# The ESMF_COMM variable is valid and can be used now.
+#
+# the default link options if you are compiling with the mpiuni bypass library.
+
+ifeq ($(ESMF_COMM),mpiuni)
+CPPFLAGS       += -DESMF_MPIUNI
+
+MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/stubs/mpiuni
+MPI_INCLUDE    = -I${MPI_HOME}
+MPI_LIB        = -lmpiuni
+MPIRUN         = ${MPI_HOME}/mpirun
+endif
+
+#-------------------------------------------------------------------------------
+
+
+# alternate strategy:
+#ifdef ESMF_HAVE_BLAS  
+# do stuff here to add includes and libs to flags
+# disadvantage: need extra #defines
+# advantage: you can define default values for the lib and include vars
+#   without them being used if the controlling ifdef is not defined.
+# but i suspect that the location of these libs is highly system dependent
+# if they are not in /usr/lib or /usr/local/lib, so trying to guess where
+# they are is a losing proposition.  go with single defines for now.
+#endif
+
+ifdef MP_LIB
+EXTRA_INCLUDES += $(MP_INCLUDE)
+EXTRA_LIBS += $(MP_LIB)
+endif
+
+ifdef THREAD_LIB
+EXTRA_INCLUDES += $(THREAD_INCLUDE)
+EXTRA_LIBS += $(THREAD_LIB)
+endif
+
+ifdef BLAS_LIB
+EXTRA_INCLUDES += $(BLAS_INCLUDE)
+EXTRA_LIBS += $(BLAS_LIB)
+endif
+
+ifdef LAPACK_LIB
+EXTRA_INCLUDES += $(LAPACK_INCLUDE)
+EXTRA_LIBS += $(LAPACK_LIB)
+endif
+
+ifdef ESSL_LIB
+EXTRA_INCLUDES += $(ESSL_INCLUDE)
+EXTRA_LIBS += $(ESSL_LIB)
+endif
+
+ifdef PCL_LIB
+EXTRA_INCLUDES += $(PCL_INCLUDE)
+EXTRA_LIBS += $(PCL_LIB)
+endif
+
+ifdef HDF_LIB
+EXTRA_INCLUDES += $(HDF_INCLUDE)
+EXTRA_LIBS += $(HDF_LIB)
+endif
+
+# netcdf calls are always referenced from the esmf library, so if the user
+# does not have them, we supply a stub library which simply prints an error
+# if they are called.
+ifndef NETCDF_LIB
+NETCDF_INCLUDE   = -I${ESMF_DIR}/src/Infrastructure/stubs/netcdf_stubs
+NETCDF_LIB       = -lnetcdf_stubs
+endif
+
+# at this point netcdf always has a value - either from the user pointing
+# to the real lib location, or our stub lib.
+EXTRA_INCLUDES += $(NETCDF_INCLUDE)
+EXTRA_LIBS += $(NETCDF_LIB)
+
+
+ifeq ($(ESMF_PTHREADS),OFF)
+CPPFLAGS       += -DESMF_NO_PTHREADS
+endif
+# this is needed even if compiling with pthreads on
+EXTRA_INCLUDES += -I${ESMF_DIR}/src/Infrastructure/stubs/pthread
+
+# does this actually get used?   seems not.
 #-------------------------------------------------------------------------------
 # Defines all libraries needed for using linear and nonlinear solvers.
 # The order of listing these libraries is important!
 #
 # PCONF - indicates which OPTIONAL external packages are available at your site
 #-------------------------------------------------------------------------------
+#
+#PCONF		= ${ESMC_HAVE_MPE}  ${ESMC_HAVE_PARMETIS} \
+#                  ${ESMC_HAVE_AMS}  ${ESMC_HAVE_X11}   ${ESMC_HAVE_MATLAB} \
+#                  ${ESMC_HAVE_ADIC} ${ESMC_HAVE_JAVA}
+#EXTERNAL_LIB	= ${MPE_LIB}        ${BLOCKSOLVE_LIB}  ${PARMETIS_LIB} \
+#                  ${AMS_LIB}        ${SPAI_LIB} \
+#                  ${ADIC_LIB} 
+#
+#-------------------------------------------------------------------------------
 
-PCONF		= ${ESMC_HAVE_MPE}  ${ESMC_HAVE_PARMETIS} \
-                  ${ESMC_HAVE_AMS}  ${ESMC_HAVE_X11}   ${ESMC_HAVE_MATLAB} \
-                  ${ESMC_HAVE_ADIC} ${ESMC_HAVE_JAVA}
-EXTERNAL_LIB	= ${MPE_LIB}        ${BLOCKSOLVE_LIB}  ${PARMETIS_LIB} \
-                  ${AMS_LIB}        ${SPAI_LIB} \
-                  ${ADIC_LIB} 
+#-------------------------------------------------------------------------------
+#
+
+LIBNAME		= $(ESMF_LIBDIR)/${LIBBASE}.a
+ESMFLIB		= $(ESMF_LIBDIR)/libesmf.a
+
+SOURCE		= ${SOURCEC} ${SOURCEF}
+OBJS		= ${OBJSC} ${OBJSF}
+
+
+ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
+		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
+		  ${LOCAL_INCLUDE} \
+		  -I${ESMF_TOP_DIR}/build_config/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_SITE) \
+		  -I$(ESMF_INCDIR) -I$(ESMF_MODDIR) $(MPI_INCLUDE) \
+                  ${EXTRA_INCLUDES}
+
+CCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} ${CPPFLAGS} -D__SDIR__='"${LOCDIR}"'
+FCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} ${FPPFLAGS} 
+
+# these seem unused.  TODO remove.
+#C_SH_LIB_PATH	= ${SLFLAG}${LDIR} ${C_DYLIBPATH}
+#F_SH_LIB_PATH	= ${SLFLAG}${LDIR} ${F_DYLIBPATH}
+
+ESMC_TIME_LIB	 = -L${LDIR}
+
+#-------------------------------------------------------------------------------
+#  Common variable definitions.
+#-------------------------------------------------------------------------------
+
+CC             = ${C_CC}
+CXX	       = ${C_CXX}
+FC	       = ${C_FC}
+
+FC_MOD         = ${C_FC_MOD}
+
+# unless CPP has already been defined in the included platform specific
+# makefile, override it here (it defaults to cc, which does not have all
+# the functions needed by our preprocessed code.)
+ifneq ($(origin CPP), file)
+CPP	       = gcc
+endif
+
+#-------------------------------------------------------------------------------
+# add in any FPPOPTS defined in the system dep files, and add a definition
+#  for the selected word size (32/64) by defining the syms S32 or S64.
+#-------------------------------------------------------------------------------
+CPPFLAGS        +=-DS${ESMF_PREC}=1 
+
+FPPFLAGS        += $(addprefix $(FPP_PREFIX), $(C_FPPOPTS))
+FPPFLAGS        += $(addprefix $(FPP_PREFIX), $(CPPFLAGS))
 
 
 #-------------------------------------------------------------------------------
@@ -232,65 +421,83 @@ EXTERNAL_LIB	= ${MPE_LIB}        ${BLOCKSOLVE_LIB}  ${PARMETIS_LIB} \
 #-------------------------------------------------------------------------------
 
 ifeq ($(ESMF_EXHAUSTIVE),ON) 
-FCPP_EXHAUSTIVE  = $(FPP_PREFIX)-DESMF_EXHAUSTIVE 
-CCPPFLAGS       += -DESMF_EXHAUSTIVE 
+# the cpp flags are automatically added to the fpp lines as well now.
+#FPPFLAGS       += $(FPP_PREFIX)-DESMF_EXHAUSTIVE 
+CPPFLAGS       += -DESMF_EXHAUSTIVE 
 endif
 
-#-------------------------------------------------------------------------------
-#  Common variable definitions.
-#-------------------------------------------------------------------------------
-
-CC	       = ${C_CC}
-CXX	       = ${CXX_CC}
-FC	       = ${C_FC}
-# unless CPP has already been defined in the included platform specific
-# makefile, override it here (it defaults to cc, which does not have all
-# the functions needed by our preprocessed code.)
-ifneq ($(origin CPP), file)
-CPP	       = gcc
-endif
-M4	       = m4
-CLINKER_SLFLAG = ${C_CLINKER_SLFLAG}
-FLINKER_SLFLAG = ${C_FLINKER_SLFLAG}
-CLINKER	       = ${C_CLINKER} ${COPTFLAGS} ${C_SH_LIB_PATH}
 
 # C++ <=> F90 
 F90CXXLIBS     = ${C_F90CXXLIBS}
 CXXF90LIBS     = ${C_CXXF90LIBS}
-CXXSO          = ${C_CXXSO}
-CXXSOLIBS      = ${C_CXXSOLIBS}
+# unused?
+#CXXSO          = ${C_CXXSO}
+#CXXSOLIBS      = ${C_CXXSOLIBS}
 ESMC_LANGUAGE = CONLY
 ESMC_SCALAR   = real
-SYS_LIB	       = ${C_SYS_LIB}
 
 #-------------------------------------------------------------------------------
 # Variable definitions for debug option.
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_BOPT),g)
-
-CXXF90LD       = ${C_CXXF90LD} -L$(ESMF_LIBDIR)
-F90CXXLD       = ${C_F90CXXLD} -L$(ESMF_LIBDIR)
-FLINKER	       = ${C_FLINKER} ${FOPTFLAGS} ${F_SH_LIB_PATH}
-COPTFLAGS      = ${G_COPTFLAGS}
-FOPTFLAGS      = ${G_FOPTFLAGS}
-BBOPT	       = ${G_BBOPT}
-
+COPTFLAGS      = ${G_CFLAGS}
+FOPTFLAGS      = ${G_FFLAGS}
 endif
 
 #-------------------------------------------------------------------------------
-# Variable definitions for optimize option.
+# Variable definitions for non-debug, non-optimized option.
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_BOPT),)
+COPTFLAGS      = ${X_CFLAGS}
+FOPTFLAGS      = ${X_FFLAGS}
+endif
+
+#-------------------------------------------------------------------------------
+# Variable definitions for optimized option.
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_BOPT),O)
-
-
-CXXF90LD       = ${C_CXXF90LD} -L$(ESMF_LIBDIR)
-F90CXXLD       = ${C_F90CXXLD} -L$(ESMF_LIBDIR)
-FLINKER	       = ${C_FLINKER} ${FOPTFLAGS} ${F_SH_LIB_PATH}
-COPTFLAGS      = ${O_COPTFLAGS}
-FOPTFLAGS      = ${O_FOPTFLAGS}
-BBOPT	       = ${O_BBOPT}
-
+COPTFLAGS      = ${O_CFLAGS}
+FOPTFLAGS      = ${O_FFLAGS}
 endif
+
+
+#-------------------------------------------------------------------------------
+# Now set the loader and linkers to use the selected set of flags.
+#-------------------------------------------------------------------------------
+# only used by impl report, as far as i can tell.  TODO: remove this
+#CXXF90LD       = ${C_CXXF90LD} -L$(ESMF_LIBDIR)
+#F90CXXLD       = ${C_F90CXXLD} -L$(ESMF_LIBDIR)
+
+# building a shared lib.so from a lib.a
+SL_LIBLINKER = ${C_SL_LIBLINKER}
+SL_LIBOPTS   = ${C_SL_LIBOPTS}
+
+# linking executables, taking into account libesmf might be shared
+SLFLAG       = ${C_SLFLAG}
+
+CLINKER      = ${C_CLINKER}
+FLINKER      = ${C_FLINKER}
+LINKOPTS     = ${C_LINKOPTS}
+
+# original lines - do these options need to be here?
+#FLINKER       = ${C_FLINKER} ${FOPTFLAGS} ${F_SH_LIB_PATH}
+#CLINKER       = ${C_CLINKER} ${COPTFLAGS} ${C_SH_LIB_PATH}
+
+# default is to include the esmf lib dir in the library search path
+LIB_PATHS = -L$(LDIR)
+LD_PATHS  = $(SLFLAG)$(LDIR)
+
+# then append each directory which is in LD_LIBRARY_PATH to
+# the -L flag and also to the run-time load flag.  (on systems which
+# support the 'module' command, that is how it works - by adding dirs
+# to LD_LIBRARY_PATH.)  if your libs are not found, set LD_LIBRARY_PATH,
+# or make a site specific file and edit the paths explicitly.
+ifeq ($(origin LD_LIBRARY_PATH), environment)
+LIB_PATHS  += $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
+LD_PATHS   += $(addprefix $(SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
+endif
+
+
 
 #-------------------------------------------------------------------------------
 # HOWTO:  Warning: Here there be dragons.
@@ -440,16 +647,6 @@ lib:: chk_dir ${SOURCE}
 	@if [ "${QUICKSTART}" != "" ] ; then \
 	   $(MAKE) -f ${MAKEFILE} tree_build_quick_start; fi
 
-#
-#  Does not work for some machines with .F fortran files.
-#
-# Builds library - fast version
-libfast: chk_dir ${SOURCEC} ${SOURCEF}
-	-@if [ "${SOURCEC}" != "" ] ; then \
-	     ${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${SOURCEC} ${SSOURCE} ;\
-	  ${AR} ${AR_FLAGS} ${LIBNAME} ${OBJSC} ${SOBJS}; \
-	  ${RM} -f ${OBJSC} ${SOBJS}; \
-	fi
 
 # copy private include files into src/include directory.
 include: chkdir_include
@@ -507,7 +704,7 @@ clean:
 clobber: clean
 	@for DIR in $(CLOBBERDIRS) foo ; do \
 	   if [ $$DIR != "foo" ] ; then \
-	      rm -rf $$DIR ;\
+	      $(RM) -r $$DIR ;\
 	   fi ;\
 	done
 
@@ -516,10 +713,10 @@ clobber: clean
 tree_clean:
 	@for DIR in $(CLEANDIRS) $(CLEAN_DEFDIRS) foo ; do \
 	   if [ $$DIR != "foo" ] ; then \
-	      rm -rf $$DIR ;\
+	      $(RM) -r $$DIR ;\
 	   fi ;\
 	done
-	rm -f $(CLEANFILES) $(CLEAN_DEFAULTS)
+	$(RM) $(CLEANFILES) $(CLEAN_DEFAULTS)
 
 # target which does a light cleaning - remove files only under the src dir 
 #  (logfiles, doc files, test output files, files made by preprocessing, etc)
@@ -593,9 +790,8 @@ tree_build_system_tests:  $(SYSTEM_TESTS_BUILD)
 #  Link rule for Fortran system tests.
 #
 $(ESMC_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
-	-$(SL_F_LINKER) -o $@ $(SYSTEM_TESTS_OBJ) $< -lesmf ${MPI_LIB} \
-        ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} ${F90CXXLIBS} \
-	$(SL_LINKOPTS)
+	-$(FLINKER) $(LINKOPTS) -o $@ $(SYSTEM_TESTS_OBJ) $< -lesmf \
+        ${MPI_LIB} ${EXTRA_LIBS} ${F90CXXLIBS}
 	${RM} -f *.o *.mod
 
 #
@@ -645,78 +841,76 @@ check_system_tests:
 #  Targets for building and running unit tests.
 #-------------------------------------------------------------------------------
 
-tests: chkopts chkdir_tests build_libs
-	$(MAKE) MULTI="Multiprocessor" config_tests
-	-$(MAKE) ACTION=tree_tests tree
-	$(MAKE) check_tests
+unit_tests: chkopts chkdir_tests build_libs
+	$(MAKE) MULTI="Multiprocessor" config_unit_tests
+	-$(MAKE) ACTION=tree_unit_tests tree
+	$(MAKE) check_unit_tests
 
-tree_tests: tree_build_tests tree_run_tests
+tree_unit_tests: tree_build_unit_tests tree_run_unit_tests
 
 #
 # tests_uni
 #
-tests_uni: chkopts chkdir_tests
-	$(MAKE) MULTI="Uniprocessor" config_tests
-	-$(MAKE) ACTION=tree_tests_uni tree
-	$(MAKE) check_tests
+unit_tests_uni: chkopts chkdir_tests
+	$(MAKE) MULTI="Uniprocessor" config_unit_tests
+	-$(MAKE) ACTION=tree_unit_tests_uni tree
+	$(MAKE) check_unit_tests
 
-tree_tests_uni: tree_build_tests tree_run_tests_uni
+tree_unit_tests_uni: tree_build_unit_tests tree_run_unit_tests_uni
 
 #
-# build_tests
+# build_unit_tests
 #
-build_tests: chkopts chkdir_tests
-	$(MAKE) MULTI="Multiprocessor" config_tests
-	-$(MAKE) ACTION=tree_build_tests tree
+build_unit_tests: chkopts chkdir_tests
+	$(MAKE) MULTI="Multiprocessor" config_unit_tests
+	-$(MAKE) ACTION=tree_build_unit_tests tree
 
-tree_build_tests: $(TESTS_BUILD)
+tree_build_unit_tests: $(TESTS_BUILD)
 
 
 $(ESMC_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o $(ESMFLIB)
-	-$(SL_F_LINKER) -o $@  $(UTEST_$(*)_OBJS) $< -lesmf ${MPI_LIB} \
-        ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} ${F90CXXLIBS} \
-	$(SL_LINKOPTS)
+	-$(FLINKER) $(LINKOPTS) -o $@  $(UTEST_$(*)_OBJS) $< -lesmf \
+        ${MPI_LIB} ${EXTRA_LIBS} ${F90CXXLIBS}
 	${RM} -f *.o *.mod
 
 
 $(ESMC_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)
-	-$(SL_C_LINKER) -o $@  $(UTEST_$(*)_OBJS) $< -lesmf ${MPI_LIB} \
-        ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} ${CXXF90LIBS} \
-	$(SL_LINKOPTS)
+	-$(CLINKER) $(LINKOPTS) -o $@  $(UTEST_$(*)_OBJS) $< -lesmf \
+        ${MPI_LIB} ${EXTRA_LIBS} ${CXXF90LIBS} 
 	${RM} -f *.o *.mod
 
 
 #
-# run_tests
+# run_unit_tests
 #
-run_tests:  chkopts chkdir_tests
+run_unit_tests:  chkopts chkdir_tests
 	-@if [ -f ${CONFIG_TESTS} ] ; then \
 	   sed 's/ .*processor/ Multiprocessor/' ${CONFIG_TESTS} > ${CONFIG_TESTS}.temp; \
            mv -f ${CONFIG_TESTS}.temp ${CONFIG_TESTS}; \
         fi
-	-$(MAKE) ACTION=tree_run_tests tree
-	$(MAKE) check_tests
+	-$(MAKE) ACTION=tree_run_unit_tests tree
+	$(MAKE) check_unit_tests
 
-tree_run_tests: $(TESTS_RUN) 
+tree_run_unit_tests: $(TESTS_RUN) 
 
 #
-# run_tests_uni
+# run_unit_tests_uni
 #
-run_tests_uni:  chkopts chkdir_tests
+run_unit_tests_uni:  chkopts chkdir_tests
 	-@if [ -f ${CONFIG_TESTS} ] ; then \
 	   sed 's/ .*processor/ Uniprocessor/' ${CONFIG_TESTS} > ${CONFIG_TESTS}.temp; \
            mv -f ${CONFIG_TESTS}.temp ${CONFIG_TESTS}; \
         fi
-	-$(MAKE) ACTION=tree_run_tests_uni tree 
-	$(MAKE) check_tests
+	-$(MAKE) ACTION=tree_run_unit_tests_uni tree 
+	$(MAKE) check_unit_tests
 
-tree_run_tests_uni: $(TESTS_RUN_UNI)
+tree_run_unit_tests_uni: $(TESTS_RUN_UNI)
 
 #
 # echo into a file how the tests were built and run, so we can
 # check them correctly.
 #
-config_tests:
+config_unit_tests:
 	-@echo "# This file used by test scripts, please do not delete." > ${CONFIG_TESTS}
 ifeq ($(ESMF_EXHAUSTIVE),ON) 
 	-@echo "Exhaustive " ${MULTI} >> ${CONFIG_TESTS}
@@ -727,8 +921,27 @@ endif
 #
 # report statistics on tests
 #
-check_tests:
+check_unit_tests:
 	$(DO_UT_RESULTS)
+
+#-------------------------------------------------------------------------------
+#  Obsolete targets for building and running unit tests.  Echo an error
+#  and point users to updated target names.
+#-------------------------------------------------------------------------------
+
+.PHONY:  tests tests_uni build_tests run_tests run_tests_uni check_tests
+
+tests: ; $(error Obsolete target, use unit_tests now)
+
+tests_uni: ; $(error Obsolete target, use unit_tests_uni now)
+
+build_tests: ; $(error Obsolete target, use build_unit_tests now)
+
+run_tests: ; $(error Obsolete target, use run_unit_tests now)
+
+run_tests_uni: ; $(error Obsolete target, use run_unit_tests_uni now)
+
+check_tests: ; $(error Obsolete target, use check_unit_tests now)
 
 #-------------------------------------------------------------------------------
 # Targets for building and running examples
@@ -780,15 +993,15 @@ tree_build_examples: $(EXAMPLES_BUILD)
 #  Examples Link commands
 #
 $(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(ESMFLIB)
-	-$(SL_F_LINKER) -o $@ $(EXAMPLE_$(*)_OBJS) $< -lesmf ${MPI_LIB} ${MP_LIB} \
-	${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} ${F90CXXLIBS} $(SL_LINKOPTS)
+	-$(FLINKER) $(LINKOPTS) -o $@ $(EXAMPLE_$(*)_OBJS) $< -lesmf \
+        ${MPI_LIB} ${EXTRA_LIBS} ${F90CXXLIBS}
 	${RM} -f *.o *.mod
 
 
 $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
-	-$(SL_C_LINKER) -o $@ $< -lesmf ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} \
-	${PCL_LIB} ${NETCDF_LIB} ${CXXF90LIBS} $(SL_LINKOPTS)
-	rm -f $<
+	-$(CLINKER) $(LINKOPTS) -o $@ $(EXAMPLE_$(*)_OBJS) $< -lesmf \
+        ${MPI_LIB} ${EXTRA_LIBS} ${CXXF90LIBS}
+	$(RM) $<
 
 #
 # run_examples
@@ -841,8 +1054,8 @@ build_demos: chkopts chkdir_tests
 tree_build_demos: $(DEMOS_BUILD) 
 
 $(ESMC_TESTDIR)/%App : %Demo.o $(DEMOS_OBJ) $(ESMFLIB)
-	$(SL_F_LINKER) -o $@ $(DEMOS_OBJ) $< -lesmf ${MPI_LIB} ${MP_LIB} \
-	${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} ${F90CXXLIBS} $(SL_LINKOPTS)
+	$(FLINKER) $(LINKOPTS) -o $@ $(DEMOS_OBJ) $< -lesmf ${MPI_LIB} \
+	${EXTRA_LIBS} ${F90CXXLIBS}
 	${RM} -f *.o *.mod
 
 
@@ -1005,6 +1218,9 @@ html: chkdir_doc include cppfiles tex
 
 tree_html:chkdir_doc ${HTMLFILES}
 
+clean_doc:
+	@cd $(ESMF_BUILD)/src/doc ;\
+	$(MAKE) tree_clean 
 
 #-------------------------------------------------------------------------------
 # Recursive calls
@@ -1034,17 +1250,24 @@ tree: $(ACTION)
 #  Compile rules for F90, C++, and c files for both to .o and .a files
 #-------------------------------------------------------------------------------
 
+# i suspect that the moddir needs to be given to these first 2 because
+# unlike the libs, we compile the system tests and examples in their
+# own directories without cding first to the test dir?
+
 .F90.o:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} \
+           ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .F.o:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREENOCPP} ${ESMC_INCLUDE} $<
+	${FC} -c ${FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} \
+           ${F_FREENOCPP} $<
 
 .f90.o:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${F_FIXCPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} \
+           ${F_FIXCPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .f.o:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${F_FIXNOCPP} ${ESMC_INCLUDE} $<
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${F_FIXNOCPP} $<
 
 .c.o:
 	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
@@ -1053,22 +1276,25 @@ tree: $(ACTION)
 	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .F90.a:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} \
+           ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
 .F.a:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREENOCPP} ${ESMC_INCLUDE} $<
+	${FC} -c ${FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} \
+           ${F_FREENOCPP} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
 .f90.a:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} ${F_FIXCPP} ${ESMC_INCLUDE} $<
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} \
+           ${F_FIXCPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
 .f.a:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${F_FIXNOCPP} ${ESMC_INCLUDE} $<
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${F_FIXNOCPP} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
@@ -1098,12 +1324,15 @@ tree: $(ACTION)
 #
 ifeq ($(origin CPPRULES),undefined)
 .cpp.F90:
-	${CPP} -E -P -I${ESMF_INCDIR} $< | tr "@^" "\n#" | sed -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@)
+	${CPP} -E -P -I${ESMF_INCDIR} $< | tr "@^" "\n#" | \
+              sed -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@)
 
 
 .cpp.o:
-	${CPP} -E -P -I${ESMF_INCDIR} $< | tr "@^" "\n#" | sed -e '/^#pragma GCC/d' > $(dir $<)$(basename $@).F90
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $(dir $<)$(basename $@).F90
+	${CPP} -E -P -I${ESMF_INCDIR} $< | tr "@^" "\n#" | \
+              sed -e '/^#pragma GCC/d' > $(dir $<)$(basename $@).F90
+	${FC} -c ${FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} \
+          ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $(dir $<)$(basename $@).F90
 endif
 
 
@@ -1114,18 +1343,18 @@ shared:
 	@if [ "${SL_LIBS_TO_MAKE}" != "" ] ; then \
 		echo making shared libraries in $(LDIR); \
 		cd $(LDIR) ; \
-		rm -rf tmp_* ; \
+		$(RM) -r tmp_* ; \
 		for NEXTLIB in $(SL_LIBS_TO_MAKE) foo ;\
 		do \
 		if [ -f $$NEXTLIB.a ] ; then \
-		    rm -f $$NEXTLIB.$(SL_SUFFIX) ; \
+		    $(RM) $$NEXTLIB.$(SL_SUFFIX) ; \
 		    echo Converting $$NEXTLIB.a to $$NEXTLIB.$(SL_SUFFIX) ;\
 		    mkdir tmp_$$NEXTLIB ;\
 		    cd tmp_$$NEXTLIB  ;\
 	            $(AR) $(AR_EXTRACT) ../$$NEXTLIB.a ;\
-		    $(SL_LIB_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$NEXTLIB.$(SL_SUFFIX) *.o ;\
+		    $(SL_LIBLINKER) $(SL_LIBOPTS) -o $(LDIR)/$$NEXTLIB.$(SL_SUFFIX) *.o ;\
 		    cd .. ;\
-		    rm -rf tmp_$$NEXTLIB ;\
+		    $(RM) -r tmp_$$NEXTLIB ;\
 		fi ;\
 		done ; \
 	fi \
@@ -1270,7 +1499,7 @@ $(ESMC_DOCDIR)/%_desdoc: %_desdoc.ctex $(DESDOC_DEP_FILES)
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
 	fi;
 	${DO_L2H} $* des
-	rm -f .latex2html-init
+	$(RM) .latex2html-init
 	mv -f $(@F) $(ESMC_DOCDIR)
 
 
@@ -1282,7 +1511,7 @@ $(ESMC_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
 	fi;
 	${DO_L2H} $* ref
-	rm -f .latex2html-init
+	$(RM) .latex2html-init
 	mv -f $(@F) $(ESMC_DOCDIR)
 
 $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
@@ -1293,14 +1522,14 @@ $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
 	fi;
 	${DO_L2H} $* req
-	rm -f .latex2html-init
+	$(RM) .latex2html-init
 	mv -f $(@F) $(ESMC_DOCDIR)
 
 #-------------------------------------------------------------------------------
 #  These rules are for compiling the test examples.
 #-------------------------------------------------------------------------------
 .cpp.rm .cc.rm .C.rm .F.rm .f.rm .c.rm:
-	-@${RM} -f $* *.o $*.mon.* gmon.out mon.out
+	-@${RM} $* *.o $*.mon.* gmon.out mon.out
 
 
 #-------------------------------------------------------------------------------
