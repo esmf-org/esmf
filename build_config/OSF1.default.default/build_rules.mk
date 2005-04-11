@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.21 2005/04/11 15:53:38 nscollins Exp $
+#  $Id: build_rules.mk,v 1.22 2005/04/11 16:51:51 nscollins Exp $
 #
 #  OSF1.default.default
 #
@@ -90,7 +90,7 @@ O_FFLAGS	+= -w
 
 #
 C_F90CXXLIBS       = -L/usr/ccs/lib/cmplrs/cxx -lcxx -lrt
-C_CXXF90LIBS       = -L/usr/opt/F55A/usr/shlib -lfor -lrt
+C_CXXF90LIBS       = -L/usr/opt/F55A/usr/shlib -lfor -lrt -lm
 # for older Fortran compilers (551, 551A - 551F) the previous line 
 # must be replaced by:
 #C_CXXF90LIBS       = -L/usr/opt/F551/usr/shlib -lfor -lrt
@@ -114,8 +114,8 @@ PARCH			= alpha
 
 # this platform does make shared libs
 
-# are these all necessary?
-C_SL_LIBOPTS = -shared -rpath .:$(ESMF_LIBDIR) \
-               ${C_F90CXXLIBS} ${C_CXXF90LIBS} ${MPI_LIB} ${EXTRA_LIBS} 
+# the options are needed before the .o list, the libs after
+C_SL_LIBOPTS = -shared -rpath .:$(ESMF_LIBDIR) -L$(ESMF_LIBDIR)
 
+C_SL_LIBLIBS = ${C_F90CXXLIBS} ${C_CXXF90LIBS} ${MPI_LIB} ${EXTRA_LIBS} -lm
 
