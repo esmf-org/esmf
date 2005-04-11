@@ -1,11 +1,11 @@
-# $Id: makefile,v 1.14 2005/03/01 21:02:54 nscollins Exp $
+# $Id: makefile,v 1.15 2005/04/11 15:55:11 nscollins Exp $
 
 ALL: build_here
 
 CFLAGS    =
 FFLAGS    = 
 SOURCEC   = 
-SOURCEF   = wrf_io.F field_routines.F module_wrf_error.F wrf_abort.F
+SOURCEF   = wrf_io.F90 field_routines.F90 module_wrf_error.F wrf_abort.F
 STOREH    = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
