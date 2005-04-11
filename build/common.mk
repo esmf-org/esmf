@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.104 2005/04/11 16:50:47 nscollins Exp $
+#  $Id: common.mk,v 1.105 2005/04/11 22:15:32 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -931,19 +931,34 @@ check_unit_tests:
 #  and point users to updated target names.
 #-------------------------------------------------------------------------------
 
-.PHONY:  tests tests_uni build_tests run_tests run_tests_uni check_tests
+# TEMPORARY : re-enable this for one more day until all the nightly
+# build scripts have been updated to use the new targets.
+#
+#.PHONY:  tests tests_uni build_tests run_tests run_tests_uni check_tests
+#
+#tests: ; $(error Obsolete target, use unit_tests now)
+#
+#tests_uni: ; $(error Obsolete target, use unit_tests_uni now)
+#
+#build_tests: ; $(error Obsolete target, use build_unit_tests now)
+#
+#run_tests: ; $(error Obsolete target, use run_unit_tests now)
+#
+#run_tests_uni: ; $(error Obsolete target, use run_unit_tests_uni now)
+#
+#check_tests: ; $(error Obsolete target, use check_unit_tests now)
 
-tests: ; $(error Obsolete target, use unit_tests now)
+tests: unit_tests
 
-tests_uni: ; $(error Obsolete target, use unit_tests_uni now)
+tests_uni:  unit_tests_uni
 
-build_tests: ; $(error Obsolete target, use build_unit_tests now)
+build_tests: build_unit_tests
 
-run_tests: ; $(error Obsolete target, use run_unit_tests now)
+run_tests: run_unit_tests
 
-run_tests_uni: ; $(error Obsolete target, use run_unit_tests_uni now)
+run_tests_uni: run_unit_tests_uni
 
-check_tests: ; $(error Obsolete target, use check_unit_tests now)
+check_tests: check_unit_tests
 
 #-------------------------------------------------------------------------------
 # Targets for building and running examples
