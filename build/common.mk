@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.103 2005/04/11 15:52:56 nscollins Exp $
+#  $Id: common.mk,v 1.104 2005/04/11 16:50:47 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -163,6 +163,7 @@ C_LINKOPTS         = -L$(ESMF_LIBDIR)
 C_SLFLAG           = -Wl,-rpath,
 C_SL_LIBLINKER     = ${C_CXX}
 C_SL_LIBOPTS       = 
+C_SL_LIBLIBS       = 
 
 
 #-------------------------------------------------------------------------------
@@ -471,6 +472,7 @@ endif
 # building a shared lib.so from a lib.a
 SL_LIBLINKER = ${C_SL_LIBLINKER}
 SL_LIBOPTS   = ${C_SL_LIBOPTS}
+SL_LIBLIBS   = ${C_SL_LIBLIBS}
 
 # linking executables, taking into account libesmf might be shared
 SLFLAG       = ${C_SLFLAG}
@@ -1352,7 +1354,7 @@ shared:
 		    mkdir tmp_$$NEXTLIB ;\
 		    cd tmp_$$NEXTLIB  ;\
 	            $(AR) $(AR_EXTRACT) ../$$NEXTLIB.a ;\
-		    $(SL_LIBLINKER) $(SL_LIBOPTS) -o $(LDIR)/$$NEXTLIB.$(SL_SUFFIX) *.o ;\
+		    $(SL_LIBLINKER) $(SL_LIBOPTS) -o $(LDIR)/$$NEXTLIB.$(SL_SUFFIX) *.o $(SL_LIBLIBS) ;\
 		    cd .. ;\
 		    $(RM) -r tmp_$$NEXTLIB ;\
 		fi ;\
