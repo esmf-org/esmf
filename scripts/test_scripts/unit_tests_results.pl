@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: unit_tests_results.pl,v 1.2 2005/04/05 16:37:19 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.3 2005/04/11 16:40:42 svasquez Exp $
 # This script runs at the end of the "run_tests", "run_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -36,7 +36,7 @@ use File::Find
         	if ($SUMMARY) { # Print only if full output requested
                 	print "UNIT TESTS SUMMARY\n";
         	}
-		print "NOTE:Unable to open $TEST_DIR/tests.config file.\n";
+		print "NOTE: Unable to open $TEST_DIR/tests.config file.\n";
 		print "Either the 'gmake ESMF_BOPT=$ESMF_BOPT build_tests' has not been run ";
 		print "or the 'gmake ESMF_BOPT=$ESMF_BOPT' did not build successfully. \n\n";
 
@@ -299,7 +299,7 @@ use File::Find
 		print "\n\nUNIT TESTS SUMMARY\n";
 	}
 	if ($total_test_count == 0) {
-		print "NOTE:Found no ";
+		print "NOTE: Found no ";
 	}
 	else {
         	print "Found $total_test_count ";
