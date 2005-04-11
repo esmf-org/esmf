@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.58 2005/03/29 18:56:55 theurich Exp $
+# $Id: makefile,v 1.59 2005/04/11 15:51:45 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -14,6 +14,10 @@ TOPALL: all
 # Build update 
 # Aug 19, 2003
 #
+
+ifndef ESMF_DIR
+$(error ESMF_DIR needs to be set to the top ESMF directory)
+endif
 
 # name of directory containing the ESMF source
 ESMF_TOP_DIR   = $(ESMF_DIR)
@@ -47,8 +51,8 @@ script_info:
 	-@echo " "
 	-@if [ -n "${C_CCV}" -a "${C_CCV}" != "unknown" ] ; then \
 	  echo "C Compiler version:" ; ${C_CCV} ; echo "" ; fi
-	-@if [ -n "${CXX_CCV}" -a "${CXX_CCV}" != "unknown" ] ; then \
-	  echo "C++ Compiler version:" ; ${CXX_CCV} ; echo "" ; fi
+	-@if [ -n "${C_CXXV}" -a "${C_CXXV}" != "unknown" ] ; then \
+	  echo "C++ Compiler version:" ; ${C_CXXV} ; echo "" ; fi
 	-@if [ -n "${C_FCV}" -a "${C_FCV}" != "unknown" ] ; then \
 	  echo "Fortran Compiler version:" ; ${C_FCV} ; echo "" ; fi
 	-@if [ -f ${ESMF_DIR}/src/Infrastructure/Base/include/ESMC_Macros.h ] ; then \
@@ -91,8 +95,8 @@ info_h:
 	-@echo  "Using C compiler: ${CC} ${COPTFLAGS} ${CCPPFLAGS} " >> MINFO
 	-@if [  "${C_CCV}" -a "${C_CCV}" != "unknown" ] ; then \
 	  echo  "C Compiler version:"  >> MINFO ; ${C_CCV} >> MINFO 2>&1; fi
-	-@if [  "${CXX_CCV}" -a "${CXX_CCV}" != "unknown" ] ; then \
-	  echo  "C++ Compiler version:"  >> MINFO; ${CXX_CCV} >> MINFO 2>&1 ; fi
+	-@if [  "${C_CXXV}" -a "${C_CXXV}" != "unknown" ] ; then \
+	  echo  "C++ Compiler version:"  >> MINFO; ${C_CXXV} >> MINFO 2>&1 ; fi
 	-@echo  "Using Fortran compiler: ${FC} ${FOPTFLAGS} ${FCPPFLAGS}" >> MINFO
 	-@if [  "${C_FCV}" -a "${C_FCV}" != "unknown" ] ; then \
 	  echo  "Fortran Compiler version:" >> MINFO ; ${C_FCV} >> MINFO 2>&1 ; fi
