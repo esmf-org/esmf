@@ -1,6 +1,6 @@
-#  $Id: build_rules.mk,v 1.12 2005/01/11 00:25:07 jwolfe Exp $
+#  $Id: build_rules.mk,v 1.13 2005/04/11 15:53:37 nscollins Exp $
 #
-#  Darwin.absoft.default.mk
+#  Darwin.absoft.default
 #
 
 
@@ -12,9 +12,6 @@ ESMF_PREC = 32
 #
 # Default MPI setting.
 #
-ifndef ESMF_COMM
-export ESMF_COMM := mpiuni
-endif
 ifeq ($(ESMF_COMM),default)
 export ESMF_COMM := mpiuni
 endif
@@ -22,61 +19,44 @@ endif
 
 ############################################################
 #
-#  The following naming convention is used:
-#     XXX_LIB - location of library XXX
-#     XXX_INCLUDE - directory for include files needed for library XXX
+# location of external libs.  if you want to use any of these,
+# define ESMF_SITE to my_site so the build system can find it,
+# copy this file into Darwin.absoft.my_site, and uncomment the
+# libs you want included.  remove the rest of this file since
+# both this file and the site file will be included.
+
+# LAPACK_INCLUDE   = 
+# LAPACK_LIB       = -L/usr/local/lib -llapack -lessl
+# NETCDF_INCLUDE   = -I/usr/local/include/netcdf
+# NETCDF_LIB       = -L/usr/local/lib -lnetcdf
+# HDF_INCLUDE      = -I/usr/local/include/hdf
+# HDF_LIB          = -L/usr/local/lib -lmfhdf
+# BLAS_INCLUDE     = 
+# BLAS_LIB         = -lblas
+
 #
-# Location of BLAS and LAPACK.  See ${ESMF_DIR}/docs/instllation.html
-# for information on retrieving them.
-#
-#
-ifeq ($(ESMF_NO_IOCODE),true)
-BLAS_LIB         =
-LAPACK_LIB       =
-NETCDF_LIB       = -lnetcdf_stubs
-NETCDF_INCLUDE   = -I${ESMF_DIR}/src/Infrastructure/stubs/netcdf_stubs
-HDF_LIB          =
-HDF_INCLUDE      =
-else
-BLAS_LIB         = -L/sw/lib -latlas
-LAPACK_LIB       = -L/sw/lib -llapack
-NETCDF_LIB       = -L/sw/lib -lnetcdf
-NETCDF_INCLUDE   = -I/sw/include
-HDF_LIB          = -L/sw/lib/ -lmfhdf -ldf -ljpeg -lz
-HDF_INCLUDE      = -I/sw/include
-endif
+############################################################
 
 # Location of MPI (Message Passing Interface) software
 
-# comment in one or the other, depending on whether you have
-# installed the mpich or lam library.  (the first sections assume
-# it is installed under /usr/local - change MPI_HOME if other dir.)
+# Set ESMF_COMM depending on whether you have installed the mpich 
+# or lam library.  The default location is to have the include files
+# and libs installed in /usr/local - if they are someplace else,
+# set MPI_HOME first.  (the mpiuni case is handled in the common.mk file.)
 
 ifeq ($(ESMF_COMM),lam)
-# with lam-mpi installed in /usr/local:
-MPI_HOME       = /usr/local
-MPI_LIB        = -L${MPI_HOME}/lib -lmpi -llam -llamf77mpi
-MPI_INCLUDE    = -I${MPI_HOME}/include 
-MPIRUN         = ${MPI_HOME}/bin/mpirun
+# with lam-mpi installed in $MPI_HOME or /usr/local:
+MPI_LIB        += -lmpi -llam -llamf77mpi
 endif
 
 ifeq ($(ESMF_COMM),mpich)
-# with mpich installed in /usr/local:
-MPI_HOME       =  /usr/local
-MPI_LIB        = -lmpich -lpmpich
-MPI_INCLUDE    = -I${MPI_HOME}/include -DESMF_MPICH=1
-MPIRUN         =  ${MPI_HOME}/bin/mpirun
-ESMC_MPIRUN    =  mpirun
+# with mpich installed in $MPI_HOME or /usr/local:
+MPI_INCLUDE    += -DESMF_MPICH=1
+MPI_LIB        += -lmpich -lpmpich
 endif
 
-ifeq ($(ESMF_COMM),mpiuni)
-# without mpich or lam installed:
-MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/stubs/mpiuni
-MPI_LIB        = -lmpiuni
-MPI_INCLUDE    = -I${MPI_HOME}
-MPIRUN         =  ${MPI_HOME}/mpirun
-endif
 
+############################################################
 # if you are using ESMF with any VTK (visualization tool kit) code on the Mac,
 # set ESMF_VTK to include these libraries.
 ifeq ($(ESMF_VTK),1)
@@ -87,96 +67,54 @@ MPI_LIB += -L/usr/local/lib/vtk -L/usr/X11R6/lib -lvtkRendering -lvtkIO \
            -lXt -lvtkFiltering -lvtkCommon -framework AppKit -lpthread \
            -lm -lvtkpng -lvtktiff -lvtkzlib -lvtkjpeg -lvtkexpat 
 endif
+############################################################
 
-# MP_LIB is for openMP
-#MP_LIB          = 
-#MP_INCLUDE      = 
-# For pthreads (or omp)
-THREAD_LIB      = 
+
 
 
 ############################################################
-AR		   = ar
-AR_FLAGS	   = cr
-RM		   = rm -f
-OMAKE		   = ${MAKE}
-RANLIB		   = ranlib
-SHELL		   = /bin/sh
+
+# commands which are not in the default location
 SED		   = /usr/bin/sed
-SH_LD		   = cc
+
 #
-# C and Fortran
+# compilers
 #
-C_CC		   = cc
-C_FC		   = f95 
-C_FC_MOD           = -p
-C_CLINKER_SLFLAG   = -Wl,-rpath,
-C_FLINKER_SLFLAG   = -Wl,-rpath,
-C_CLINKER	   = cc
-C_FLINKER	   = f95
-C_CCV		   = ${C_CC} --version
-C_FCV              = f90fe -V    # docs say f95 -V should work but causes error
-C_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
-#C_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm  #Use /usr/lib/libf2c.a if that's what your f77 uses.
-# ---------------------------- BOPT - g options ----------------------------
-G_COPTFLAGS	   = -g
-G_FOPTFLAGS	   = -g 
-# ----------------------------- BOPT - O options -----------------------------
-O_COPTFLAGS	   = -O 
-O_FOPTFLAGS	   = -O
+C_CC		= cc
+C_CXX		= g++ -fPIC
+C_FC		= f95 
+C_FC_MOD        = -p
+
+
+# version info
+
+C_CCV		= ${C_CC} --version
+C_CXXV		= ${C_CXX} --version
+C_FCV           = f90fe -V    # docs say f95 -V should work but causes error
+
 #
-# Fortran compiler
+# Fortran flags
 #
-FFLAGS          = -YEXT_NAMES=LCS -s
+FFLAGS          += -YEXT_NAMES=LCS -s
 F_FREECPP       = -ffree
 F_FIXCPP        = -ffixed
 F_FREENOCPP     = -ffree
 F_FIXNOCPP      = -ffixed
-#
-# C++ compiler 
-#
-CXX_CC		   = g++ -fPIC
-CXX_FC		   = f95 -YEXT_NAMES=LCS -s
-CXX_CLINKER_SLFLAG = -Wl,-rpath,
-CXX_FLINKER_SLFLAG = -Wl,-rpath,
-CXX_CLINKER	   = g++
-CXX_FLINKER	   = g++
-CXX_CCV		   = ${CXX_CC} --version
-LOCAL_INCLUDE      =
-#CXX_SYS_LIB	   = -ldl -lc -lf2c -lm
-CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
-#CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
-#C_F90CXXLD         = f95 
-C_F90CXXLD         = g++
-C_F90CXXLIBS       = ${MPI_LIB} -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math
-#C_F90CXXLIBS       = ${MPI_LIB} -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math -lU77
-#C_CXXF90LD         = f95
-C_CXXF90LD         = g++
-#C_CXXF90LIBS       = ${MPI_LIB}  
-C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math 
-#C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math -lU77
-# ------------------------- BOPT - g_c++ options ------------------------------
-GCXX_COPTFLAGS	   = -g 
-GCXX_FOPTFLAGS	   = -g
-# ------------------------- BOPT - O_c++ options ------------------------------
-OCXX_COPTFLAGS	   = -O 
-OCXX_FOPTFLAGS	   = -O
-# -------------------------- BOPT - g_complex options ------------------------
-GCOMP_COPTFLAGS	   = -g
-GCOMP_FOPTFLAGS	   = -g
-# --------------------------- BOPT - O_complex options -------------------------
-OCOMP_COPTFLAGS	   = -O
-OCOMP_FOPTFLAGS	   = -O
+
+# for fortran executables use c++ for linking
+C_F90CXXLD      = $(C_CXX)
+C_FLINKER       = $(C_CXX)
+
+
+C_F90CXXLIBS    = -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math
+C_CXXF90LIBS    = -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math 
+
 ##############################################################################
 
 PARCH		   = mac_osx
 
+# set this to libesmf.so to build a shared lib, and add the proper flags
 SL_LIBS_TO_MAKE = 
+C_SL_LIBOPTS  = 
 
-SL_SUFFIX   = 
-SL_LIBOPTS  = 
-SL_LINKOPTS = 
-SL_F_LINKER = $(F90CXXLD)
-SL_C_LINKER = $(CXXF90LD)
-SL_LIB_LINKER = $(CXXF90LD)
 

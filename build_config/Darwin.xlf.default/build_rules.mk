@@ -1,8 +1,8 @@
-#  $Id: build_rules.mk,v 1.14 2005/03/03 22:07:09 theurich Exp $
+#  $Id: build_rules.mk,v 1.15 2005/04/11 15:53:37 nscollins Exp $
 #
-#  Darwin.xlf.default.mk
+#  Darwin.xlf.default
 #
-# if you have xlf and gcc/g++, this should work.
+# if you have xlf and gcc/g++, this should work as-is.
 # if you also have xlc/xlC and want to use them, then:
 #   setenv ESMF_C_COMPILER xlc
 # before building.
@@ -16,9 +16,6 @@ ESMF_PREC = 32
 #
 # Default MPI setting.
 #
-ifndef ESMF_COMM
-export ESMF_COMM := mpiuni
-endif
 ifeq ($(ESMF_COMM),default)
 export ESMF_COMM := mpiuni
 endif
@@ -32,89 +29,46 @@ endif
 
 ############################################################
 #
-#  The following naming convention is used:
-#     XXX_LIB - location of library XXX
-#     XXX_INCLUDE - directory for include files needed for library XXX
+# location of external libs.  if you want to use any of these,
+# define ESMF_SITE to my_site so the build system can find it,
+# copy this file into Darwin.xlf.my_site, and uncomment the
+# libs you want included.  remove the rest of this file since
+# both this file and the site file will be included.
+
+# LAPACK_INCLUDE   = 
+# LAPACK_LIB       = -L/usr/local/lib -llapack
+# NETCDF_INCLUDE   = -I/usr/local/include/netcdf
+# NETCDF_LIB       = -L/usr/local/lib -lnetcdf
+# HDF_INCLUDE      = -I/usr/local/include/hdf
+# HDF_LIB          = -L/usr/local/lib -lmfhdf -ldf -ljpeg -lz
+# BLAS_INCLUDE     = 
+# BLAS_LIB         = -L/usr/local/lib -latlas
+
 #
-# Location of BLAS and LAPACK.  See ${ESMF_DIR}/docs/instllation.html
-# for information on retrieving them.
-#
-#
-ifeq ($(ESMF_NO_IOCODE),true)
-BLAS_LIB         =
-LAPACK_LIB       =
-NETCDF_LIB       = -lnetcdf_stubs
-NETCDF_INCLUDE   = -I${ESMF_DIR}/src/Infrastructure/stubs/netcdf_stubs
-HDF_LIB          =
-HDF_INCLUDE      =
-else
-BLAS_LIB         = -L/sw/lib -latlas
-LAPACK_LIB       = -L/sw/lib -llapack
-NETCDF_LIB       = -L/sw/lib -lnetcdf
-NETCDF_INCLUDE   = -I/sw/include
-HDF_LIB          = -L/sw/lib/ -lmfhdf -ldf -ljpeg -lz
-HDF_INCLUDE      = -I/sw/include
-endif
+############################################################
+
 
 # Location of MPI (Message Passing Interface) software
 
-# conditional sections, depending on whether you have lam, mpich,
-# or neither and want to use the bypass uniprocessor mpi stub library.
-# if these locations don't match your installation location, edit them
-# to correspond to where the files are located.
-# setenv ESMF_COMM to select the proper section before building.
+# Set ESMF_COMM depending on whether you have installed the mpich
+# or lam library.  The default location is to have the include files
+# and libs installed in /usr/local - if they are someplace else,
+# set MPI_HOME first.  (the mpiuni case is handled in the common.mk file.)
 
 ifeq ($(ESMF_COMM),lam)
-# with lam-mpi installed in /usr/local:
-MPI_HOME       =
-MPI_LIB        = -lmpi -llam -llamf77mpi
-MPI_INCLUDE    =
-MPIRUN         =  mpirun
+# with lam-mpi installed in $MPI_HOME or /usr/local:
+MPI_LIB        +=  -lmpi -llam -llamf77mpi
 endif
 
 ifeq ($(ESMF_COMM),mpich)
-# with mpich installed in /usr/local:
-ESMC_MPIRUN      = mpirun
-MPI_HOME       =  /usr/local
-MPI_LIB        = -lmpich -lpmpich
-MPI_INCLUDE    = -I${MPI_HOME}/include -DESMF_MPICH=1
-MPIRUN         =  ${MPI_HOME}/bin/mpirun
+# with mpich installed in $MPI_HOME or /usr/local:
+MPI_INCLUDE    += -DESMF_MPICH=1
+MPI_LIB        += -lmpich -lpmpich
 endif
 
-ifeq ($(ESMF_COMM),mpiuni)
-# without mpich installed:
-MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/stubs/mpiuni
-MPI_LIB        = -lmpiuni
-MPI_INCLUDE    = -I${MPI_HOME}
-MPIRUN         =  ${MPI_HOME}/mpirun
-endif
 
-#
-# standard commands
-#
-AR			= ar
-AR_FLAGS		= cr
-AR_EXTRACT              = -x
-RM			= rm -f
-OMAKE			= ${MAKE}
-RANLIB			= ranlib
-SHELL			= /bin/sh
+# common commands which differ from the defaults somehow
 SED			= /usr/bin/sed
-
-
-#
-# Common compiler flags
-#
-COM_MEMCHECK_FLAG      = 
-COM_FULLPATH_FLAG      =
-COM_DEBUG_FLAG         = $(DEBUG_FLAG)
-COM_ALL_DEBUG_FLAGS    = $(COM_MEMCHECK_FLAG) $(COM_FULLPATH_FLAG) $(DEBUG_FLAG)
-COM_MAXMEM_FLAG        = -qmaxmem=4000
-COM_NOWARN_FLAG        = -w
-COM_SPILL_FLAG         = -qspill=3000
-COM_OPT_FLAG           = -O2
-COM_ALL_OPT_FLAGS      = -O2 $(COM_MAXMEM_FLAG) $(COM_NOWARN_FLAG) $(COM_SPILL_FLAG)
-COM_PLAIN_FLAG         =
 
 #
 # C compiler flags
@@ -129,10 +83,7 @@ NO_LINE_DIRECTIVES	= -P
 #
 REAL8			= -qrealsize=8
 STRICT			= -qstrict
-#FPPOPTS                += -qcclines -qinit=f90ptr
 FPP_PREFIX		= -WF,
-FPPFLAGS		= $(addprefix $(FPP_PREFIX), $(FPPOPTS))
-FPPFLAGS		+= $(addprefix $(FPP_PREFIX), $(CPPFLAGS))
 F_FREECPP               = -qfree=f90 -qsuffix=cpp=F90
 F_FIXCPP                = -qfixed=132 -qsuffix=cpp=f90
 F_FREENOCPP             = -qfree=f90 -qsuffix=f=F
@@ -144,53 +95,48 @@ F_FIXNOCPP              = -qfixed=132 -qsuffix=f=f
 ifeq ($(ESMF_COMM),mpich)
 # with mpich, have to call wrappers instead of compilers directly
 # for now, assume they are built with gcc settings and not around xlc
-C_CC			= mpicc
-C_CCV			= $(C_CC) --version
-CXX_CC			= mpicxx
-CXX_CCV			= $(CXX_CC) --version
-C_FC			= mpif90 
-C_FCV			= $(C_FC) --version
+C_CC		= mpicc
+C_CCV		= $(C_CC) --version
+C_CXX		= mpicxx
+C_CXXV		= $(C_CXX) --version
+C_FC		= mpif90 
+C_FCV		= $(C_FC) --version
 
-CXX_LIB_PATH            =
-F90_LIB_PATH            = -L/opt/ibmcmp/xlf/8.1/lib
-CXX_SYS_LIB		= $(CXX_LIB_PATH) -lcomplex -lisode -lstdc++ \
-			  $(F90_LIB_PATH) -lxlf_r -lxlf90_r
-C_CXXF90LIBS		= -L. $(CXX_LIB_PATH) -lm -lstdc++ \
-			      $(F90_LIB_PATH) -lxlf90_r -lxlfmath -lxl
-C_F90CXXLIBS		= -L. $(CXX_LIB_PATH) -lstdc++ \
-			      $(F90_LIB_PATH) -lxlf90_r
+CXXLIB_PATHS    =
+F90LIB_PATHS    = -L/opt/ibmcmp/xlf/8.1/lib
+C_CXXF90LIBS	= -L. $(CXXLIB_PATHS) -lm -lstdc++ \
+		      $(F90LIB_PATHS) -lxlf90_r -lxlfmath -lxl
+C_F90CXXLIBS	= -L. $(CXXLIB_PATHS) -lstdc++ \
+		      $(F90LIB_PATHS) -lxlf90_r
 
 else
 # non-mpich section: lam or mpiuni
 
 ifeq ($(ESMF_C_COMPILER),gcc)
 # default is to use gcc/g++ for the compiling C files
-C_CC			= gcc
-C_CCV			= $(C_CC) -v
-CXX_CC			= g++
-CXX_CCV			= $(CXX_CC) -v
-CXX_LIB_PATH            =
-F90_LIB_PATH            = -L/opt/ibmcmp/xlf/8.1/lib
-CXX_SYS_LIB		= ${MPI_LIB} -ldl -lc -lg2c -lm
-C_CXXF90LIBS		= ${MPI_LIB} -lstdc++ -L. \
-			  $(F90_LIB_PATH) -lxlf90_r -lxlfmath -lxl
-C_F90CXXLIBS		= ${MPI_LIB} -lstdc++ -L. \
-			  $(F90_LIB_PATH) -lxlf90_r
+C_CC		= gcc
+C_CCV		= $(C_CC) -v
+C_CXX		= g++
+C_CXXV		= $(C_CXX) -v
+CXXLIB_PATHS    =
+F90LIB_PATHS    = -L/opt/ibmcmp/xlf/8.1/lib
+C_CXXF90LIBS	= ${MPI_LIB} -lstdc++ -L. \
+		  $(F90LIB_PATHS) -lxlf90_r -lxlfmath -lxl
+C_F90CXXLIBS	= ${MPI_LIB} -lstdc++ -L. \
+		  $(F90LIB_PATHS) -lxlf90_r
 
 else
 # if you have the ibm xlc/xlC product, setenv ESMF_C_COMPILER xlc first
-C_CC			= xlc_r 
-C_CCV			= which $(C_CC)
-CXX_CC			= xlC_r 
-CXX_CCV			= which $(CXX_CC)
-CXX_LIB_PATH            = -L/opt/ibmcmp/vacpp/6.0/lib/
-F90_LIB_PATH            = -L/opt/ibmcmp/xlf/8.1/lib
-CXX_SYS_LIB		= $(F90_LIB_PATH) -lxlf_r -lxlf90_r  \
-                          $(CXX_LIB_PATH) -lcomplex -lisode -libmc++ -lstdc++
-C_CXXF90LIBS		= -L. $(F90_LIB_PATH) -lxlf90_r -lxlfmath -lxl \
-			      $(CXX_LIB_PATH) -lm -libmc++ -lstdc++
-C_F90CXXLIBS		= -L. $(F90_LIB_PATH) -lxlf90_r \
-			      $(CXX_LIB_PATH) -libmc++ -lstdc++
+C_CC		= xlc_r 
+C_CCV		= which $(C_CC)
+C_CXX		= xlC_r 
+C_CXXV		= which $(C_CXX)
+CXXLIB_PATHS    = -L/opt/ibmcmp/vacpp/6.0/lib/
+F90LIB_PATHS    = -L/opt/ibmcmp/xlf/8.1/lib
+C_CXXF90LIBS	= -L. $(F90LIB_PATHS) -lxlf90_r -lxlfmath -lxl \
+		      $(CXXLIB_PATHS) -lm -libmc++ -lstdc++
+C_F90CXXLIBS	= -L. $(F90LIB_PATHS) -lxlf90_r \
+		      $(CXXLIB_PATHS) -libmc++ -lstdc++
 
 # end of xlc section
 endif
@@ -199,71 +145,22 @@ endif
 #
 # xlf Fortran compiler from ibm for mac os x
 #
-C_FC			= xlf95_r 
-C_FCV			= which $(C_FC)
+C_FC		= xlf95_r 
+C_FCV		= which $(C_FC)
 
 # end of non-mpich section
 endif
 
 # settings independent of which compiler is selected
 
-CXX_FC			= $(C_FC)
+C_SLFLAG                  = -L
 
-C_FC_MOD		= -I
-C_CLINKER		= $(C_CC)
-C_FLINKER		= $(C_FC)
-CXX_CLINKER		= $(CXX_CC)
-CXX_FLINKER		= $(CXX_FC) 
-
-C_SYS_LIB		= -lxlf_r -llf90_r  -lisode
-
-SLFLAG                  = -L
-C_CLINKER_SLFLAG	= $(SLFLAG)
-C_FLINKER_SLFLAG	= $(SLFLAG)
-CXX_CLINKER_SLFLAG	= $(SLFLAG)
-CXX_FLINKER_SLFLAG	= $(SLFLAG)
-
-FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS} $(FCPP_EXHAUSTIVE)
-
-
-# ---------------------------- BOPT - g options ----------------------------
-G_COPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
-G_FOPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
-GCXX_COPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
-GCXX_FOPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
-GCOMP_COPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
-GCOMP_FOPTFLAGS		= $(COM_ALL_DEBUG_FLAGS)
-
-# ----------------------------- BOPT - O options -----------------------------
-O_COPTFLAGS		= $(COM_ALL_OPT_FLAGS)
-O_FOPTFLAGS		= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
-OCXX_COPTFLAGS		= $(COM_ALL_OPT_FLAGS)
-OCXX_FOPTFLAGS		= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
-OCOMP_COPTFLAGS		= $(COM_ALL_OPT_FLAGS)
-OCOMP_FOPTFLAGS		= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
-
-C_CXXF90LD		= ${CXX_CC}
-C_F90CXXLD		= ${CXX_FC}
-
-
-C_CXXSO			= $(CXX_CC) -G
-C_CXXSOLIBS		= -L. $(CXX_LIB_PATH) -lm -lxlf90_r -libmc++ -lstdc++
+###########################################
 
 PARCH			= mac_osx
 
 SL_LIBS_TO_MAKE =
 
-SL_SUFFIX   = so
-SL_LIBOPTS  = -G -qmkshrobj $(C_F90CXXLIBS) $(MPI_LIB)
-SL_LINKOPTS = 
-SL_LIB_LINKER = $(CXX_CC) -L$(ESMF_LIBDIR)
-SL_F_LINKER = $(F90CXXLD) 
-SL_C_LINKER = $(CXXF90LD)
-
-# SL_SUFFIX   =
-# SL_LIBOPTS  =
-# SL_LINKOPTS =
-# SL_F_LINKER = $(F90CXXLD) 
-# SL_C_LINKER = $(CXXF90LD) 
+C_SL_LIBOPTS  = -G -qmkshrobj $(C_F90CXXLIBS) $(MPI_LIB)
 
 

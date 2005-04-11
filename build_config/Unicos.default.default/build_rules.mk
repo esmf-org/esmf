@@ -1,65 +1,41 @@
-# $Id: build_rules.mk,v 1.4 2005/02/15 15:45:43 nscollins Exp $
+# $Id: build_rules.mk,v 1.5 2005/04/11 15:53:38 nscollins Exp $
 # 
-# Unicos.default.default.mk
+# Unicos.default.default
 #
 
 #
 # Default MPI setting.
 #
-ifndef ESMF_COMM
-export ESMF_COMM := mpi
-endif
 ifeq ($(ESMF_COMM),default)
 export ESMF_COMM := mpi
 endif
 
 ############################################################
 #
-#  The following naming convention is used:
-#     XXX_LIB - location of library XXX
-#     XXX_INCLUDE - directory for include files needed for library XXX
+# location of external libs.  if you want to use any of these,
+# define ESMF_SITE to my_site so the build system can find it,
+# copy this file into Linux.absoft.my_site, and uncomment the
+# libs you want included.  remove the rest of this file since
+# both this file and the site file will be included.
+
+# LAPACK_INCLUDE   = 
+# LAPACK_LIB       = -L/usr/local/lib -llapacko
+# NETCDF_INCLUDE   = -I/opt/apptools/include
+# NETCDF_LIB       = -L/opt/apptools/lib -lnetcdf
+# HDF_INCLUDE      = -I /opt/apptools/include
+# HDF_LIB          = -L /opt/apptools/lib -lmfhdf -ldf -ljpeg -lz
+# BLAS_INCLUDE     = 
+# BLAS_LIB         = -latlas
+
 #
-# Location of BLAS and LAPACK.  See ${ESMF_DIR}/docs/instllation.html
-# for information on retrieving them.
-#
-# BLAS usually comes with SGI. Do NOT use the parallel (library names with 
-# mp in them) version of the SGI BLAS.
-#
-ifeq ($(ESMF_NO_IOCODE),true)
-BLAS_LIB         =
-LAPACK_LIB       =
-NETCDF_LIB       = -lnetcdf_stubs
-NETCDF_INCLUDE   = -I${ESMF_DIR}/src/Infrastructure/stubs/netcdf_stubs
-HDF_LIB          =
-HDF_INCLUDE      =
-else
-BLAS_LIB       = -latlas ${FC_LIB}
-LAPACK_LIB     = -llapacko
-NETCDF_LIB       = -L/opt/apptools/lib -lnetcdf
-NETCDF_INCLUDE   = -I/opt/apptools/include
-HDF_LIB          = -L /opt/apptools/lib -lmfhdf -ldf -ljpeg -lz
-HDF_INCLUDE      = -I /opt/apptools/include
-endif
-# end of io bypass section
+############################################################
 
 #
 # Location of MPI (Message Passing Interface) software  
 #
 ifeq ($(ESMF_COMM),mpi)
-ESMC_MPIRUN      = mpirun 
-MPI_LIB        = -lmpi 
-MPI_INCLUDE     = -DESMC_HAVE_INT_MPI_COMM
-MPIRUN          = ${ESMC_MPIRUN}
-endif
-
-#
-# The following is for mpiuni
-#
-ifeq ($(ESMF_COMM),mpiuni)
-MPI_HOME        = ${ESMF_DIR}/src/Infrastructure/stubs/mpiuni
-MPI_LIB         = -lmpiuni
-MPI_INCLUDE     = -I${MPI_HOME}
-MPIRUN          = ${MPI_HOME}/mpirun
+MPI_INCLUDE    += -DESMC_HAVE_INT_MPI_COMM
+MPI_LIB        += -lmpi 
 endif
 
 ############################################################
@@ -69,88 +45,43 @@ LD		   = ftn
 # C and Fortran compiler
 #
 C_CC		   = CC -h new_for_init -h ssp 
+C_CXX		   = CC -h new_for_init -h ssp 
 C_FC		   = ftn -h ssp -dy
-C_CLINKER	   = cc -h ssp
-C_FLINKER	   = $(C_FC)
-#
-# C++ compiler
-#
-CXX_CC		   = CC -h new_for_init -h ssp 
-CXX_FC		   = $(C_FC)
-CXX_CLINKER	   = CC -h ssp 
-CXX_FLINKER	   = $(CXX_CLINKER)
 
-C_CXXF90LD         = $(CXX_CLINKER)
-C_F90CXXLD         = $(CXX_CLINKER)
+C_CLINKER	   = cc -h ssp
+
+# no extra libs needed to cross compile
 C_CXXF90LIBS       =
 C_F90CXXLIBS       =
-C_CXXSO		   = $(CXX_CLINKER)
 
 
-AR		   = ar
-AR_FLAGS	   = cr
-AR_EXTRACT         = -x
-RM		   = rm -f
-RANLIB		   = true
-OMAKE		   = ${MAKE}
-SHELL		   = /bin/sh
-SED		   = /bin/sed
 #
 # C, C++, and Fortran compiler 
 #
 C_FC_MOD           = -em -J
-C_CLINKER_SLFLAG   =
-C_FLINKER_SLFLAG   =
+C_SLFLAG           =
 
 C_CCV		   = cc -V
+C_CXXV		   = CC -V
 C_FCV              = ftn -V
-CXX_CCV		   = CC -V
-C_SYS_LIB	   =
+
 #
 F_FREECPP       = -f free -N 255 -F -M1549
 F_FIXCPP        = -f fixed -N 132 -F -M1549
 F_FREENOCPP     = -f free -N 255
 F_FIXNOCPP      = -f fixed -N 132
-#
-CXX_CLINKER_SLFLAG =
-CXX_FLINKER_SLFLAG =
-CXX_SYS_LIB	   =
 
-###############################################################################
-# ---------------------------- BOPT - g options ----------------------------
-G_COPTFLAGS	   = -g 
-G_FOPTFLAGS	   = -g 
-# ----------------------------- BOPT - O options -----------------------------
-O_COPTFLAGS	   =
-O_FOPTFLAGS	   =
-# ------------------------- BOPT - g_c++ options ------------------------------
-GCXX_COPTFLAGS	   = -g
-GCXX_FOPTFLAGS	   = -g
-# ------------------------- BOPT - O_c++ options ------------------------------
-OCXX_COPTFLAGS	   =
-OCXX_FOPTFLAGS	   =
-# -------------------------- BOPT - g_complex options ------------------------
-GCOMP_COPTFLAGS	   = -g 
-GCOMP_FOPTFLAGS	   = -g
-# --------------------------- BOPT - O_complex options -------------------------
-OCOMP_COPTFLAGS	   =
-OCOMP_FOPTFLAGS	   =
 ###############################################################################
 
 PARCH		   = Unicos
 
+# no shared lib
 SL_LIBS_TO_MAKE =
-
-SL_SUFFIX   = so
-SL_LIBOPTS  =
-SL_LINKOPTS = 
-SL_F_LINKER = $(F90CXXLD)
-SL_C_LINKER = $(CXXF90LD)
-SL_LIB_LINKER = $(CXXF90LD)
-
-##### end common section
+C_SL_LIBOPTS  =
 
 
+
+###############################################################################
 # common.mk overrides
 
 # No gcc available, so use cpp.
@@ -159,7 +90,8 @@ CPP = cpp
 # back in the common.mk file, make sure to not overwrite these rules
 CPPRULES = defined
 
-# change to not depend upon gcc -E -P behavior, remove -P and add filter to delete #line
+# change to not depend upon gcc -E -P behavior, remove -P and add filter 
+# to delete #line
 # amend bad cpp ".TRUE.", ". NOT." , "=>' output
 # fix leading space that seems to show up on some lines
 %.F90 : %.cpp

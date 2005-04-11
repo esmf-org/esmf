@@ -1,6 +1,6 @@
-#  $Id: build_rules.mk,v 1.20 2005/03/02 06:24:33 theurich Exp $
+#  $Id: build_rules.mk,v 1.21 2005/04/11 15:53:38 nscollins Exp $
 #
-#  OSF1.default.default.mk
+#  OSF1.default.default
 #
 #
 
@@ -12,9 +12,6 @@ ESMF_PREC = 64
 #
 # Default MPI setting.
 #
-ifndef ESMF_COMM
-export ESMF_COMM := mpi
-endif
 ifeq ($(ESMF_COMM),default)
 export ESMF_COMM := mpi
 endif
@@ -22,56 +19,39 @@ endif
 
 ############################################################
 #
-#  The following naming convention is used:
-#     XXX_LIB - location of library XXX
-#     XXX_INCLUDE - directory for include files needed for library XXX
+# location of external libs.  if you want to use any of these,
+# define ESMF_SITE to my_site so the build system can find it,
+# copy this file into Linux.absoft.my_site, and uncomment the
+# libs you want included.  remove the rest of this file since
+# both this file and the site file will be included.
+
+# LAPACK_INCLUDE   = 
+# LAPACK_LIB       = -L/usr/lib -lcxml
+# NETCDF_INCLUDE   = -I/usr/local/unsupported/netcdf-3.5.0/include
+# NETCDF_LIB       = -L/usr/local/unsupported/netcdf-3.5.0/lib -lnetcdf
+# HDF_INCLUDE      = -I/usr/local/unsupported/HDF4.1r5/include
+# HDF_LIB          = -L/usr/local/unsupported/HDF4.1r5/lib/ -lmfhdf -ldf -ljpeg -lz
+# BLAS_INCLUDE     = 
+# BLAS_LIB         = -latlas
 #
-# Location of BLAS and LAPACK.  See ${ESMF_DIR}/docs/instllation.html
-# for information on retrieving them.
-#
-#
-ifeq ($(ESMF_NO_IOCODE),true)
-BLAS_LIB         =
-LAPACK_LIB       =
-NETCDF_LIB       = -lnetcdf_stubs
-NETCDF_INCLUDE   = -I${ESMF_DIR}/src/Infrastructure/stubs/netcdf_stubs
-HDF_LIB          =
-HDF_INCLUDE      =
-else
-BLAS_LIB         = 
-LAPACK_LIB       = -L/usr/lib -lcxml
-NETCDF_LIB       = -L/usr/local/unsupported/netcdf-3.5.0/lib -lnetcdf
-NETCDF_INCLUDE   = -I/usr/local/unsupported/netcdf-3.5.0/include
-HDF_LIB          = -L/usr/local/unsupported/HDF4.1r5/lib/ -lmfhdf -ldf -ljpeg -lz
-HDF_INCLUDE      = -I/usr/local/unsupported/HDF4.1r5/include
-endif
+############################################################
+
 
 #
 # Location of MPI (Message Passing Interface) software
 #
-MPI_LIB          = -L/usr/opt/mpi/lib -lmpi
+MPI_HOME         = /usr/opt/mpi/lib
 MPI_INCLUDE      = -I/usr/opt/mpi/include
+MPI_LIB          = -L/usr/opt/mpi/lib -lmpi
 MPIRUN           = ${ESMF_TOP_DIR}/scripts/mpirun.alpha
-MPI64_LIB        = 
-
-# For pthreads (or omp)
-THREAD_LIB        =
+# is this needed?  TODO: remove this
+#MPI64_LIB        = 
 
 
-############################################################
-#
-AR			= ar
-AR_FLAGS		= cr
-AR_EXTRACT              = -x 
-RM			= rm -f
-OMAKE			= ${MAKE}
-RANLIB			= ranlib
-SHELL			= /bin/sh
-SED			= /bin/sed
+
 #
 # Fortran compiler options 
 #
-AR32_64			= ${AR}
 BIG_ENDIAN		= -convert big_endian
 C_64BIT			= 
 DARCH			= -Dalpha -DOSF1
@@ -83,88 +63,59 @@ NO_INLINING		= -noinline
 REAL8			= -r8
 STRICT			= -nopipeline
 EXPAND_TEMPLATES        = -tweak
+
 FPPFLAGS		= $(FPPOPTS)
 F_FREECPP               = -free -cpp
 F_FIXCPP                = -cpp -extend_source
 F_FREENOCPP             = -free
 F_FIXNOCPP              = -extend_source
-#
-# C and Fortran compiler 
-#
-C_CC			= cc
-C_FC			= f90
-C_FC_MOD		= -I
-C_CLINKER_SLFLAG	= -Wl,-rpath,
-C_FLINKER_SLFLAG	= -Wl,-rpath,
-C_CLINKER		= cc
-C_FLINKER		= f90
-C_CCV			= $(C_CC) -V
-C_FCV			= $(C_FC) -version
-C_SYS_LIB		= -lutil -lFutil -lots
-# ---------------------------- BOPT - g options ----------------------------
-G_COPTFLAGS		= -g -assume gfullpath
-G_FOPTFLAGS		= -g -assume gfullpath
-# ----------------------------- BOPT - O options -----------------------------
-O_COPTFLAGS		= -O2 -w
-O_FOPTFLAGS		= -O2 -w
 
 #
-# conditionally add pthread compiler flags
-ifeq ($(ESMF_PTHREADS),ON)
-G_COPTFLAGS    +=  -pthread
-G_FOPTFLAGS    +=  -pthread -reentrancy threaded
-O_COPTFLAGS    +=  -pthread
-O_FOPTFLAGS    +=  -pthread -reentrancy threaded
-endif
+# compilers and flags
+#
+C_CC		= cc
+C_CXX		= cxx -x cxx
+C_FC		= f90
+
+C_CCV		= $(C_CC) -V
+C_CXXV  	= $(C_CXX) -V
+C_FCV		= $(C_FC) -version
+
+
+G_CFLAGS	+= -assume gfullpath
+G_FFLAGS	+= -assume gfullpath
+
+O_CFLAGS	+= -w
+O_FFLAGS	+= -w
 
 #
-# C++ compiler 
-#
-CXX_CC		   = cxx -x cxx
-CXX_FC		   = f90
-CXX_CLINKER_SLFLAG = -Wl,-rpath,
-CXX_FLINKER_SLFLAG = -Wl,-rpath,
-CXX_CLINKER	   = cxx
-CXX_FLINKER	   = f90
-CXX_CCV		   = $(CXX_CC) -V
-CXX_SYS_LIB	   = -lcomplex -lutil -lFutil -lots
-#
-C_F90CXXLD         = f90
 C_F90CXXLIBS       = -L/usr/ccs/lib/cmplrs/cxx -lcxx -lrt
-C_CXXF90LD         = cxx
 C_CXXF90LIBS       = -L/usr/opt/F55A/usr/shlib -lfor -lrt
-# for older Fortran compilers (551, 551A - 551F) the previous line must be replaced by:
+# for older Fortran compilers (551, 551A - 551F) the previous line 
+# must be replaced by:
 #C_CXXF90LIBS       = -L/usr/opt/F551/usr/shlib -lfor -lrt
 
 # conditionally add pthread compiler flags
 ifeq ($(ESMF_PTHREADS),ON)
-C_CXXF90LD   +=  -pthread
-C_F90CXXLD   +=  -pthread -reentrancy threaded
+G_CFLAGS    +=  -pthread
+G_FFLAGS    +=  -pthread -reentrancy threaded
+X_CFLAGS    +=  -pthread
+X_FFLAGS    +=  -pthread -reentrancy threaded
+O_CFLAGS    +=  -pthread
+O_FFLAGS    +=  -pthread -reentrancy threaded
+THREAD_LIB  = -lpthread
+#C_CXXF90LD   +=  -pthread
+#C_F90CXXLD   +=  -pthread -reentrancy threaded
 endif
 
-# ------------------------- BOPT - g_c++ options ------------------------------
-GCXX_COPTFLAGS		= -g  -qfullpath
-GCXX_FOPTFLAGS		= -g  -qfullpath 
-# ------------------------- BOPT - O_c++ options ------------------------------
-OCXX_COPTFLAGS		= -O2  -qmaxmem=4000 -qspill=3000
-OCXX_FOPTFLAGS		= -O2
-# -------------------------- BOPT - g_complex options ------------------------
-GCOMP_COPTFLAGS		= -g  -qfullpath
-GCOMP_FOPTFLAGS		= -g  -qfullpath
-# --------------------------- BOPT - O_complex options -------------------------
-OCOMP_COPTFLAGS		= -O2  -qmaxmem=4000 -qspill=3000
-OCOMP_FOPTFLAGS		= -O2
 ###############################################################################
 
 PARCH			= alpha
 
-SL_LIBS_TO_MAKE = libesmf 
+# this platform does make shared libs
 
-SL_SUFFIX   = so
-SL_LIBOPTS  = -shared -rpath .:$(ESMF_LIBDIR)  ${C_F90CXXLIBS} ${C_CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} 
-SL_LINKOPTS = 
-SL_F_LINKER = $(F90CXXLD)
-SL_C_LINKER = $(CXXF90LD)
-SL_LIB_LINKER = $(CXXF90LD)
+# are these all necessary?
+C_SL_LIBOPTS = -shared -rpath .:$(ESMF_LIBDIR) \
+               ${C_F90CXXLIBS} ${C_CXXF90LIBS} ${MPI_LIB} ${EXTRA_LIBS} 
 
 
