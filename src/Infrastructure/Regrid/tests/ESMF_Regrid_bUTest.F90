@@ -1,12 +1,42 @@
-    program ESMF_FieldRegridUTest
+! $Id: ESMF_Regrid_bUTest.F90,v 1.2 2005/04/11 17:37:51 svasquez Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!
+!==============================================================================
+
+    program ESMF_Regrid_bUTest
 
 !------------------------------------------------------------------------------
 
 #include <ESMF_Macros.inc>
 
+!==============================================================================
+!BOC
+! !PROGRAM: ESMF_Regrid_bUTest - Using the Regridding methods
+!
+! !DESCRIPTION:
+!
+! This program runs Unit tests for F90 Field Regrid routines.
+! 
+!-----------------------------------------------------------------------------
+
     ! USES:Framework module
     use ESMF_TestMod  ! test methods
     use ESMF_Mod      ! Framework module
+    implicit none
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+      character(*), parameter :: version = &
+      '$Id: ESMF_Regrid_bUTest.F90,v 1.2 2005/04/11 17:37:51 svasquez Exp $'
+!------------------------------------------------------------------------------
+
     integer :: lrc,iFunction
     integer ::  npets, localPet
     type(ESMF_VM) :: vm
@@ -18,6 +48,14 @@
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
+
+!------------------------------------------------------------------------------
+!   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+!   always run. When the environment variable, EXHAUSTIVE, is set to ON then
+!   the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+!   Special strings (Non-exhaustive and exhaustive) have been
+!   added to allow a script to count the number and types of unit tests.
+!------------------------------------------------------------------------------
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=lrc)
     call ESMF_VMGetGlobal(vm, rc=lrc)
