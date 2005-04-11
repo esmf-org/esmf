@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid_bUTest.F90,v 1.2 2005/04/11 17:37:51 svasquez Exp $
+! $Id: ESMF_Regrid_bUTest.F90,v 1.3 2005/04/11 18:08:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,7 +23,9 @@
 ! !DESCRIPTION:
 !
 ! This program runs Unit tests for F90 Field Regrid routines.
-! 
+! Tests for regridding from b grid (NE corner data) to A grid.
+! two different decompositions.
+
 !-----------------------------------------------------------------------------
 
     ! USES:Framework module
@@ -34,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_Regrid_bUTest.F90,v 1.2 2005/04/11 17:37:51 svasquez Exp $'
+      '$Id: ESMF_Regrid_bUTest.F90,v 1.3 2005/04/11 18:08:55 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     integer :: lrc,iFunction
@@ -74,7 +76,7 @@
     do iDistr=1,2
      !Four test cases:
       do iFunction=1,4
-        call RegridUtest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+        call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
       end do
     end do
 
@@ -93,7 +95,7 @@
 
     contains
 
-    subroutine RegridUtest(FieldChoice, npetsXY)
+    subroutine RegridUTest(FieldChoice, npetsXY)
 
     implicit none
 
@@ -369,4 +371,4 @@
 
     end subroutine RegridUTest
 
-    end program ESMF_FieldRegridUTest
+    end program ESMF_Regrid_bUTest
