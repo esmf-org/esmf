@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.14 2005/04/11 15:53:37 nscollins Exp $
+# $Id: build_rules.mk,v 1.15 2005/04/11 18:00:58 nscollins Exp $
 #
 # Linux.lahey.default
 #
@@ -77,7 +77,6 @@ F_FIXCPP           = --fix -Cpp
 F_FREENOCPP        = --nfix 
 F_FIXNOCPP         = --fix
 
-
 # use dir values in LD_LIBRARY_PATH, others are defaults if no other choice.
 ifeq ($(origin LD_LIBRARY_PATH), environment)
 C_F90CXXLIBS       = $(LIB_PATHS) $(LD_PATHS) \
@@ -88,6 +87,7 @@ C_CXXF90LIBS       = $(LIB_PATHS) $(LD_PATHS) -lfj9i6 -lfj9ipp -lfj9f6 \
 else
 C_F90CXXLIBS       = -Wl,-rpath /usr/lib/gcc-lib/i386-redhat-linux/3.2.2 \
                      -Wl,-rpath /usr/local/lf9560/lib \
+                     -Wl,-rpath $(ESMF_LIBDIR) \
                      -L/usr/lib/gcc-lib/i386-redhat-linux/3.2.2 \
                      -lstdc++ -lgcc -lg2c -lrt
 
