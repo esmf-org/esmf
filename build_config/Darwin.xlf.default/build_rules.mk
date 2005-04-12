@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.15 2005/04/11 15:53:37 nscollins Exp $
+#  $Id: build_rules.mk,v 1.16 2005/04/12 22:12:05 nscollins Exp $
 #
 #  Darwin.xlf.default
 #
@@ -62,7 +62,7 @@ endif
 
 ifeq ($(ESMF_COMM),mpich)
 # with mpich installed in $MPI_HOME or /usr/local:
-MPI_INCLUDE    += -DESMF_MPICH=1
+CPPFLAGS       += -DESMF_MPICH=1
 MPI_LIB        += -lmpich -lpmpich
 endif
 
