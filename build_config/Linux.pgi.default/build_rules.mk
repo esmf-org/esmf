@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.21 2005/04/11 15:53:38 nscollins Exp $
+# $Id: build_rules.mk,v 1.22 2005/04/12 15:12:09 nscollins Exp $
 #
 #  Linux.pgi.default
 #
@@ -53,13 +53,10 @@ ifeq ($(ESMF_COMM),mpich)
  ifdef MPICH
   export MPI_HOME := $(MPICH)
  endif
-endif
 MPI_INCLUDE    += -DESMF_MPICH=1
 MPI_LIB        += -lpmpich++ -lmpich
 MPIRUN         += $(ESMF_NODES)
 endif
-
-
 
 # compilers
 #
