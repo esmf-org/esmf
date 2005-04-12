@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid_bUTest.F90,v 1.3 2005/04/11 18:08:55 svasquez Exp $
+! $Id: ESMF_Regrid_bUTest.F90,v 1.4 2005/04/12 22:52:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_Regrid_bUTest.F90,v 1.3 2005/04/11 18:08:55 svasquez Exp $'
+      '$Id: ESMF_Regrid_bUTest.F90,v 1.4 2005/04/12 22:52:03 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     integer :: lrc,iFunction
@@ -44,7 +44,7 @@
     type(ESMF_VM) :: vm
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result=0.
-    integer :: loop_rc    !cumulative error indicator
+    integer :: sub_rc    !Subroutine return call
     integer :: iDistr, nXY(2,2)
     integer :: TwoOrOne
     ! individual test failure message
@@ -70,23 +70,97 @@
     TwoOrOne= 1 + mod(npets+1,2)
     nXY(2,:)=(/ npets/TwoOrOne, TwoOrOne /)
 
-    loop_rc=ESMF_SUCCESS
+    sub_rc=ESMF_SUCCESS
 
-   !Two destination domain decomposition choices ( 1=(npets,1)  2=(npets/2,2) )
-    do iDistr=1,2
-     !Four test cases:
-      do iFunction=1,4
-        call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
-      end do
-    end do
 
 #ifdef ESMF_EXHAUSTIVE
-   !Test for "success" of regridding
    !--------------------------------
    !EX_UTest
+   !Test for function, f=x, decomp = (npets,1)
+    iFunction = 1
+    iDistr = 1
+    sub_rc=ESMF_SUCCESS
     write(failMsg, *) "Error in regrid"
-    write(name, *) "Regrid test"
-    call ESMF_Test((loop_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
+    write(name, *) "Regrid f=x, and decomp=(npets,1)"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
+
+   !--------------------------------
+   !EX_UTest
+   !Test for function, f=x, decomp = (npets/2,2)
+    iFunction = 1
+    iDistr = 2
+    sub_rc=ESMF_SUCCESS
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid f=x, and decomp=(npets/2,2)"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
+
+   !--------------------------------
+   !EX_UTest
+   !Test for function, f=2+cos(pi*r/L), decomp = (npets,1)
+    iFunction = 2
+    iDistr = 1
+    sub_rc=ESMF_SUCCESS
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid f=2+cos(pi*r/L), and decomp=(npets,1)"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
+
+   !--------------------------------
+   !EX_UTest
+   !Test for function, f=2+cos(pi*r/L), decomp = (npets/2,2)
+    iFunction = 2
+    iDistr = 2
+    sub_rc=ESMF_SUCCESS
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid f=2+cos(pi*r/L), and decomp=(npets/2,2)"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
+
+   !--------------------------------
+   !EX_UTest
+   !Test for function, f=2+(cos(theta))**2 * cos(2*phi), decomp = (npets,1)
+    iFunction = 3
+    iDistr = 1
+    sub_rc=ESMF_SUCCESS
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid f=2+(cos(theta))**2 * cos(2*phi), and decomp=(npets,1)"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
+
+   !--------------------------------
+   !EX_UTest
+   !Test for function, f=2+cos(pi*r/L), decomp = (npets/2,2)
+    iFunction = 3
+    iDistr = 2
+    sub_rc=ESMF_SUCCESS
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid f=2+cos(pi*r/L), and decomp=(npets/2,2)"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
+
+   !--------------------------------
+   !EX_UTest
+   !Test for function, f=2+ (sin(2*theta))**16 * cos(16*phi), decomp = (npets,1)
+    iFunction = 4
+    iDistr = 1
+    sub_rc=ESMF_SUCCESS
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid f=2+ (sin(2*theta))**16 * cos(16*phi), and decomp=(npets,1)"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
+
+   !--------------------------------
+   !EX_UTest
+   !Test for function, f=2+ (sin(2*theta))**16 * cos(16*phi), decomp = (npets/2,2)
+    iFunction = 4
+    iDistr = 2
+    sub_rc=ESMF_SUCCESS
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid f=2+ (sin(2*theta))**16 * cos(16*phi), and decomp=(npets/2,2)"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
 #endif
 
 
@@ -330,11 +404,11 @@
    max_error=0.
    avg_error=0.
 
-   do j=lb(2),ub(2)
-     do i=lb(1),ub(1)
+   do j=lb(2)+1,ub(2)
+     do i=lb(1)+1,ub(1)
        RelativeError=abs( (SolnOnTarget(i,j)-f90ptr2(i,j)) / SolnOnTarget(i,j) )
        if (RelativeError .gt. epsil ) then
-         loop_rc=ESMF_FAILURE
+         sub_rc=ESMF_FAILURE
          print*,localPet,'ERROR: FieldChoice=',FieldChoice,' npetsXY=', &
                  npetsXY,' i,j=',i,j, &
                 ' SolnOnTarget=',SolnOnTarget(i,j), f90ptr2(i,j), RelativeError
