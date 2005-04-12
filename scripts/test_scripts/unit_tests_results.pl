@@ -1,6 +1,6 @@
 #!/usr/bin/perl
-# $Id: unit_tests_results.pl,v 1.3 2005/04/11 16:40:42 svasquez Exp $
-# This script runs at the end of the "run_tests", "run_tests_uni" and "check_results" targets.
+# $Id: unit_tests_results.pl,v 1.4 2005/04/12 17:24:20 svasquez Exp $
+# This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
 
@@ -37,7 +37,7 @@ use File::Find
                 	print "UNIT TESTS SUMMARY\n";
         	}
 		print "NOTE: Unable to open $TEST_DIR/tests.config file.\n";
-		print "Either the 'gmake ESMF_BOPT=$ESMF_BOPT build_tests' has not been run ";
+		print "Either the 'gmake ESMF_BOPT=$ESMF_BOPT build_unit_tests' has not been run ";
 		print "or the 'gmake ESMF_BOPT=$ESMF_BOPT' did not build successfully. \n\n";
 
 		return 0;
@@ -286,7 +286,7 @@ use File::Find
 			if ($SUMMARY) { # Print only if full output requested
 				print "UNIT TESTS SUMMARY\n";
 			}
-			print "NOTE: There are no executable unit tests files, either the 'gmake ESMF_BOPT=$ESMF_BOPT build_tests' has \n";
+			print "NOTE: There are no executable unit tests files, either the 'gmake ESMF_BOPT=$ESMF_BOPT build_unit_tests' has \n";
 			print "not been run or the 'gmake ESMF_BOPT=$ESMF_BOPT' did not build successfully. \n\n";
 			return 0;
 		}
