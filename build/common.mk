@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.105 2005/04/11 22:15:32 nscollins Exp $
+#  $Id: common.mk,v 1.106 2005/04/12 16:46:56 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -627,6 +627,8 @@ libf:${LIBNAME}(${OBJSF})
 build_libs: chk_dir include cppfiles
 	cd $(ESMF_TOP_DIR) ;\
 	${MAKE} ACTION=tree_lib tree shared
+	@echo "ESMF library built successfully."
+	@echo "To validate the library, run the unit and system tests."
 
 # Build only stuff in and below the current dir.
 build_here: chk_dir
