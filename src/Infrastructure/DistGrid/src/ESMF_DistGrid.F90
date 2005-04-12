@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.136 2005/03/04 19:54:36 jedwards Exp $
+! $Id: ESMF_DistGrid.F90,v 1.137 2005/04/12 16:45:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -152,11 +152,10 @@
         type(ESMF_DELayout) :: delayout    ! the delayout for this grid
 
       ! 1 per dimension of the Grid
-
         integer, dimension(:), pointer :: decompIDs
-                                          ! decomposition identifiers
+                                      ! decomposition identifiers
         logical, dimension(:), pointer :: coversDomain
-                                          ! distgrid covers entire physical domain?
+                                      ! distgrid covers entire physical domain?
 
       ! local and global information, for both the total number of cells 
       ! including the boundary regions, and the computational cells 
@@ -194,8 +193,6 @@
 !
     public ESMF_DistGridCreate
     public ESMF_DistGridDestroy
-    public ESMF_DistGridGetConfig
-    public ESMF_DistGridSetConfig
     public ESMF_DistGridGet
     public ESMF_DistGridSet
     public ESMF_DistGridSetCounts
@@ -205,8 +202,6 @@
     public ESMF_DistGridGetAllCounts
     public ESMF_DistGridGetDELayout
     ! TODO:  combine all the get subroutines into one
-    public ESMF_DistGridGetValue
-    public ESMF_DistGridSetValue
     public ESMF_DistGridLocalToGlobalIndex
     public ESMF_DistGridGlobalToLocalIndex
     public ESMF_DistGridValidate
@@ -219,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.136 2005/03/04 19:54:36 jedwards Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.137 2005/04/12 16:45:11 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1363,151 +1358,6 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridSet
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridGetConfig"
-!BOPI
-! !IROUTINE: ESMF_DistGridGetConfig - Get configuration information from a DistGrid
-
-! !INTERFACE:
-      subroutine ESMF_DistGridGetConfig(distgrid, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_DistGrid), intent(in) :: distgrid
-      integer, intent(out) :: config   
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     Returns the set of resources the {\tt ESMF\_DistGrid} object was configured with.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[distgrid] 
-!          Class to be queried.
-!     \item[config]
-!          Configuration information.         
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS: 
-
-!
-!  code goes here
-!
-      end subroutine ESMF_DistGridGetConfig
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridSetConfig"
-!BOPI
-! !IROUTINE: ESMF_DistGridSetConfig - Set configuration information for a DistGrid
-
-! !INTERFACE:
-      subroutine ESMF_DistGridSetConfig(distgrid, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_DistGrid), intent(in) :: distgrid
-      integer, intent(in) :: config   
-      integer, intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!     Configures the {\tt ESMF\_DistGrid} object with set of resources given.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[distgrid] 
-!          Class to be configured.
-!     \item[config]
-!          Configuration information.         
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS: 
-
-!
-!  code goes here
-!
-      end subroutine ESMF_DistGridSetConfig
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridGetValue"
-!BOPI
-! !IROUTINE: ESMF_DistGridGetValue - Get <Value> for a DistGrid
-
-! !INTERFACE:
-      subroutine ESMF_DistGridGetValue(distgrid, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_DistGrid), intent(in) :: distgrid
-      integer, intent(out) :: value
-      integer, intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!     Returns the value of {\tt ESMF\_DistGrid} attribute <Value>.
-!     May be multiple routines, one per attribute.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[distgrid] 
-!          Class to be queried.
-!     \item[value]
-!          Value to be retrieved.         
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS: 
-
-!
-!  code goes here
-!
-      end subroutine ESMF_DistGridGetValue
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridSetValue"
-!BOPI
-! !IROUTINE: ESMF_DistGridSetValue - Set <Value> for a DistGrid
-
-! !INTERFACE:
-      subroutine ESMF_DistGridSetValue(DistGrid, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_DistGrid), intent(in) :: distgrid
-      integer, intent(in) :: value
-      integer, intent(out), optional :: rc            
-
-!
-! !DESCRIPTION:
-!     Set a {\tt ESMF\_DistGrid} attribute with the given value.
-!     May be multiple routines, one per attribute.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[distgrid] 
-!          Class to be modified.
-!     \item[value]
-!          Value to be set.         
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS: 
-
-!
-!  code goes here
-!
-      end subroutine ESMF_DistGridSetValue
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -3017,6 +2867,8 @@
 !
 !  code goes here
 !
+      if (present(rc)) rc = ESMF_SUCCESS
+
       end subroutine ESMF_DistGridValidate
 
 !------------------------------------------------------------------------------
@@ -3069,6 +2921,8 @@
       else
         print *, 'AIPerDEPerDim array not associated'
       endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridPrint
 
