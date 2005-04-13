@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2005/03/01 21:07:34 nscollins Exp $ 
+# $Id: makefile,v 1.7 2005/04/13 23:03:06 nscollins Exp $ 
 
 
 ALL: tree_build_system_tests
@@ -35,6 +35,17 @@ ESMF_CompCreateSTest.o : user_model.o
 
 
 include $(ESMF_DIR)/makefile
+
+# The Darwin (Mac OS X), xlf 8.1 compiler cannot compile user_model.F90
+# with the -g flag (produces an internal compiler error).  removing the -g
+# allows the file to build.
+ifeq ($(ESMF_ARCH),Darwin)
+ifeq ($(ESMF_COMPILER),xlf)
+ifeq ($(ESMF_BOPT),g)
+G_FFLAGS =
+endif
+endif
+endif
 
 DIRS = 
 
