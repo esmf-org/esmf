@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGather1DUTest.F90,v 1.1 2005/04/13 21:35:34 svasquez Exp $
+! $Id: ESMF_FieldGather1DUTest.F90,v 1.2 2005/04/13 22:24:23 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      program ESMF_FieldGatherUTest
+      program ESMF_FieldGather1DUTest
 
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -19,7 +19,7 @@
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_FieldGatherUTest - This test verifies FieldGather functionality.
+! !PROGRAM: ESMF_FieldGather1DUTest - This test verifies FieldGather functionality.
 !
 ! !DESCRIPTION:
 !
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldGather1DUTest.F90,v 1.1 2005/04/13 21:35:34 svasquez Exp $'
+      '$Id: ESMF_FieldGather1DUTest.F90,v 1.2 2005/04/13 22:24:23 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -292,4 +292,4 @@
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
 
-      end program ESMF_FieldGatherUTest
+      end program ESMF_FieldGather1DUTest
