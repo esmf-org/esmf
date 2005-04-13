@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.20 2005/03/29 23:21:30 jwolfe Exp $
+! $Id: ESMF_Config.F90,v 1.21 2005/04/13 18:00:59 jwolfe Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -433,11 +433,11 @@
       subroutine ESMF_ConfigGetFloatR4( config, value, label, default, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)       :: config    
-      real(ESMF_KIND_R4), intent(out)        :: value    
-      character(len=*), intent(in), optional :: label
-      real, intent(in), optional             :: default 
-      integer, intent(out), optional         :: rc     
+      type(ESMF_Config), intent(inout)         :: config    
+      real(ESMF_KIND_R4), intent(out)          :: value    
+      character(len=*), intent(in), optional   :: label
+      real(ESMF_KIND_R4), intent(in), optional :: default 
+      integer, intent(out), optional           :: rc     
 !
 ! !DESCRIPTION: 
 !   Gets a 4-byte real {\tt value} from the {\tt config} object.
@@ -514,11 +514,11 @@
       subroutine ESMF_ConfigGetFloatR8( config, value, label, default, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)       :: config    
-      real(ESMF_KIND_R8), intent(out)        :: value 
-      character(len=*), intent(in), optional :: label
-      real, intent(in), optional             :: default 
-      integer, intent(out), optional         :: rc     
+      type(ESMF_Config), intent(inout)         :: config    
+      real(ESMF_KIND_R8), intent(out)          :: value 
+      character(len=*), intent(in), optional   :: label
+      real(ESMF_KIND_R8), intent(in), optional :: default 
+      integer, intent(out), optional           :: rc     
 !
 ! !DESCRIPTION: 
 !   Gets an 8-byte real {\tt value} from the {\tt config} object.
@@ -596,12 +596,12 @@
                                          default, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)       :: config    
-      real(ESMF_KIND_R4), intent(inout)      :: valueList(:) 
-      integer, intent(in)                    :: count 
-      character(len=*), intent(in), optional :: label 
-      real, intent(in), optional             :: default
-      integer, intent(out), optional         :: rc    
+      type(ESMF_Config), intent(inout)         :: config    
+      real(ESMF_KIND_R4), intent(inout)        :: valueList(:) 
+      integer, intent(in)                      :: count 
+      character(len=*), intent(in), optional   :: label 
+      real(ESMF_KIND_R4), intent(in), optional :: default
+      integer, intent(out), optional           :: rc    
 !
 ! !DESCRIPTION: 
 !  Gets a 4-byte real {\tt valueList} of a given {\tt count} from
@@ -680,12 +680,12 @@
                                          default, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)       :: config    
-      real(ESMF_KIND_R8), intent(inout)      :: valueList(:) 
-      integer, intent(in)                    :: count 
-      character(len=*), intent(in), optional :: label 
-      real, intent(in), optional             :: default
-      integer, intent(out), optional         :: rc    
+      type(ESMF_Config), intent(inout)         :: config    
+      real(ESMF_KIND_R8), intent(inout)        :: valueList(:) 
+      integer, intent(in)                      :: count 
+      character(len=*), intent(in), optional   :: label 
+      real(ESMF_KIND_R8), intent(in), optional :: default
+      integer, intent(out), optional           :: rc    
 !
 ! !DESCRIPTION: 
 !   Gets an 8-byte real {\tt valueList} of a given {\tt count} from the
@@ -763,11 +763,11 @@
       subroutine ESMF_ConfigGetIntI4( config, value, label, default, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)       :: config     
-      integer(ESMF_KIND_I4), intent(out)     :: value
-      character(len=*), intent(in), optional :: label 
-      integer, intent(in), optional          :: default
-      integer, intent(out), optional         :: rc   
+      type(ESMF_Config), intent(inout)             :: config     
+      integer(ESMF_KIND_I4), intent(out)           :: value
+      character(len=*), intent(in), optional       :: label 
+      integer(ESMF_KIND_I4), intent(in), optional  :: default
+      integer, intent(out), optional               :: rc   
 
 !
 ! !DESCRIPTION: 
@@ -847,11 +847,11 @@
       subroutine ESMF_ConfigGetIntI8( config, value, label, default, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)       :: config     
-      integer(ESMF_KIND_I8), intent(out)     :: value
-      character(len=*), intent(in), optional :: label 
-      integer, intent(in), optional          :: default
-      integer, intent(out), optional         :: rc   
+      type(ESMF_Config), intent(inout)             :: config     
+      integer(ESMF_KIND_I8), intent(out)           :: value
+      character(len=*), intent(in), optional       :: label 
+      integer(ESMF_KIND_I8), intent(in), optional  :: default
+      integer, intent(out), optional               :: rc   
 
 !
 ! !DESCRIPTION: 
@@ -932,12 +932,12 @@
                                        default, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)       :: config      
-      integer(ESMF_KIND_I4), intent(inout)   :: valueList(:)  
-      integer, intent(in)                    :: count  
-      character(len=*), intent(in), optional :: label 
-      integer, intent(in), optional          :: default
-      integer, intent(out), optional         :: rc    
+      type(ESMF_Config), intent(inout)             :: config      
+      integer(ESMF_KIND_I4), intent(inout)         :: valueList(:)  
+      integer, intent(in)                          :: count  
+      character(len=*), intent(in), optional       :: label 
+      integer(ESMF_KIND_I4), intent(in), optional  :: default
+      integer, intent(out), optional               :: rc    
 !
 ! !DESCRIPTION: 
 !  Gets a 4-byte integer {\tt valueList} of given {\tt count} from the 
@@ -1016,12 +1016,12 @@
                                        default, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)       :: config      
-      integer(ESMF_KIND_I8), intent(inout)   :: valueList(:)  
-      integer, intent(in)                    :: count  
-      character(len=*), intent(in), optional :: label 
-      integer, intent(in), optional          :: default
-      integer, intent(out), optional         :: rc    
+      type(ESMF_Config), intent(inout)             :: config      
+      integer(ESMF_KIND_I8), intent(inout)         :: valueList(:)  
+      integer, intent(in)                          :: count  
+      character(len=*), intent(in), optional       :: label 
+      integer(ESMF_KIND_I8), intent(in), optional  :: default
+      integer, intent(out), optional               :: rc    
 !
 ! !DESCRIPTION: 
 !  Gets an 8-byte integer {\tt valueList} of given {\tt count} from
