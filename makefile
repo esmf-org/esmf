@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.60 2005/04/14 20:18:31 nscollins Exp $
+# $Id: makefile,v 1.61 2005/04/14 21:12:46 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -74,6 +74,8 @@ script_info:
 	-@if [ -n "${ESMF_C_COMPILER}" ] ; then \
 	  echo "ESMF_C_COMPILER: ${ESMF_C_COMPILER}" ; fi
 	-@echo "ESMF_BOPT: ${ESMF_BOPT}"
+	-@if [ -n "${ESMF_OPTLEVEL}" ] ; then \
+	  echo "ESMF_OPTLEVEL: ${ESMF_OPTLEVEL}" ; fi
 	-@echo "ESMF_PREC: ${ESMF_PREC}"
 	-@echo "ESMF_COMM: ${ESMF_COMM}"
 	-@echo "ESMF_SITE: ${ESMF_SITE}"
@@ -81,11 +83,39 @@ script_info:
 	-@echo "ESMF_PTHREADS: ${ESMF_PTHREADS}"
 	-@if [ -n "${ESMF_NO_IOCODE}" ] ; then \
 	  echo "ESMF_NO_IOCODE: ${ESMF_NO_IOCODE}" ; fi
+	-@echo " "
+	-@echo "------------------------------------------"
+	-@echo "If set, using additional flags:"
+	-@if [ -n "${MPI_HOME}" ] ; then \
+	  echo "MPI_HOME: ${MPI_HOME}" ; fi
+	-@if [ -n "${NETCDF_LIB}" ] ; then \
+	  echo "NETCDF_LIB: ${NETCDF_LIB}" ; fi
+	-@if [ -n "${BLAS_LIB}" ] ; then \
+	  echo "BLAS_LIB: ${BLAS_LIB}" ; fi
+	-@if [ -n "${LAPACK_LIB}" ] ; then \
+	  echo "LAPACK_LIB: ${LAPACK_LIB}" ; fi
+	-@if [ -n "${LAPACK_LIB}" ] ; then \
+	  echo "LAPACK_LIB: ${LAPACK_LIB}" ; fi
+	-@if [ -n "${ESSL_LIB}" ] ; then \
+	  echo "ESSL_LIB: ${ESSL_LIB}" ; fi
+	-@if [ -n "${PCL_LIB}" ] ; then \
+	  echo "PCL_LIB: ${PCL_LIB}" ; fi
+	-@if [ -n "${HDF_LIB}" ] ; then \
+	  echo "HDF_LIB: ${HDF_LIB}" ; fi
+	-@if [ -n "${MP_LIB}" ] ; then \
+	  echo "MP_LIB: ${MP_LIB}" ; fi
+	-@if [ -n "${THREAD_LIB}" ] ; then \
+	  echo "THREAD_LIB: ${THREAD_LIB}" ; fi
+	-@if [ -n "${PBS_NODEFILE}" ] ; then \
+	  echo "PBS_NODEFILE: ${PBS_NODEFILE}" ; fi
+	-@if [ -n "${MAKEFLAGS}" ] ; then \
+	  echo "MAKEFLAGS: ${MAKEFLAGS}" ; fi
 #
 info:   script_info
 	-@echo " "
 	-@echo "------------------------------------------"
 	-@echo "Compilers, Flags, and Libraries:"
+	-@echo "Location of the preprocessor: " `which ${CPP}`
 	-@echo "Location of the C compiler: " `which ${CC}`
 	-@echo "Location of the C++ compiler: " `which ${CXX}`
 	-@echo "Location of the Fortran compiler: " `which ${FC}`
@@ -94,6 +124,7 @@ info:   script_info
 	-@echo ""
 	-@echo "Compiling C with flags: ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS}"
 	-@echo "Compiling C++ with flags: ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS}"
+	-@echo "C include dir: ${ESMF_INCDIR}"
 	-@echo "Linking C with flags: ${LINKOPTS}"
 	-@echo "Linking C with libraries: -lesmf ${MPI_LIB} ${EXTRALIBS} ${CXXF90LIBS}"
 	-@echo ""
