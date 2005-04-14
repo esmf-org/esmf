@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.61 2005/04/14 21:12:46 nscollins Exp $
+# $Id: makefile,v 1.62 2005/04/14 21:25:28 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -53,85 +53,85 @@ script_info:
 	-@echo " "
 	-@echo "------------------------------------------"
 	-@echo "Version information: "
-	-@if [ -n "${C_CCV}" -a "${C_CCV}" != "unknown" ] ; then \
-	  echo "C Compiler version:" ; ${C_CCV} ; echo "" ; fi
-	-@if [ -n "${C_CXXV}" -a "${C_CXXV}" != "unknown" ] ; then \
-	  echo "C++ Compiler version:" ; ${C_CXXV} ; echo "" ; fi
-	-@if [ -n "${C_FCV}" -a "${C_FCV}" != "unknown" ] ; then \
-	  echo "Fortran Compiler version:" ; ${C_FCV} ; echo "" ; fi
-	-@if [ -f ${ESMF_DIR}/src/Infrastructure/Base/include/ESMC_Macros.h ] ; then \
-	  fgrep ESMF_VERSION_STRING ${ESMF_DIR}/src/Infrastructure/Base/include/ESMC_Macros.h | ${SED} "s/^#define //" ; fi
+	-@if [ -n "$(C_CCV)" -a "$(C_CCV)" != "unknown" ] ; then \
+	  echo "C Compiler version:" ; $(C_CCV) ; echo "" ; fi
+	-@if [ -n "$(C_CXXV)" -a "$(C_CXXV)" != "unknown" ] ; then \
+	  echo "C++ Compiler version:" ; $(C_CXXV) ; echo "" ; fi
+	-@if [ -n "$(C_FCV)" -a "$(C_FCV)" != "unknown" ] ; then \
+	  echo "Fortran Compiler version:" ; $(C_FCV) ; echo "" ; fi
+	-@if [ -f $(ESMF_DIR)/src/Infrastructure/Base/include/ESMC_Macros.h ] ; then \
+	  fgrep ESMF_VERSION_STRING $(ESMF_DIR)/src/Infrastructure/Base/include/ESMC_Macros.h | $(SED) "s/^#define //" ; fi
 	-@echo " "
 	-@echo "------------------------------------------"
 	-@echo "Using ESMF flags:"
-	-@echo "ESMF_DIR: ${ESMF_TOP_DIR}"
-	-@if [ "${ESMF_BUILD}" != "${ESMF_TOP_DIR}" ] ; then \
-	  echo "ESMF_BUILD: ${ESMF_BUILD}" ; fi
-	-@echo "ESMF_ARCH: ${ESMF_ARCH}"
-	-@echo "ESMF_COMPILER: ${ESMF_COMPILER}"
-	-@if [ -n "${ESMF_COMPILER_VERSION}" ] ; then \
-	  echo "ESMF_COMPILER_VERSION: ${ESMF_COMPILER_VERSION}" ; fi
-	-@if [ -n "${ESMF_C_COMPILER}" ] ; then \
-	  echo "ESMF_C_COMPILER: ${ESMF_C_COMPILER}" ; fi
-	-@echo "ESMF_BOPT: ${ESMF_BOPT}"
-	-@if [ -n "${ESMF_OPTLEVEL}" ] ; then \
-	  echo "ESMF_OPTLEVEL: ${ESMF_OPTLEVEL}" ; fi
-	-@echo "ESMF_PREC: ${ESMF_PREC}"
-	-@echo "ESMF_COMM: ${ESMF_COMM}"
-	-@echo "ESMF_SITE: ${ESMF_SITE}"
-	-@echo "ESMF_EXHAUSTIVE: ${ESMF_EXHAUSTIVE}"
-	-@echo "ESMF_PTHREADS: ${ESMF_PTHREADS}"
-	-@if [ -n "${ESMF_NO_IOCODE}" ] ; then \
-	  echo "ESMF_NO_IOCODE: ${ESMF_NO_IOCODE}" ; fi
+	-@echo "ESMF_DIR: $(ESMF_TOP_DIR)"
+	-@if [ "$(ESMF_BUILD)" != "$(ESMF_TOP_DIR)" ] ; then \
+	  echo "ESMF_BUILD: $(ESMF_BUILD)" ; fi
+	-@echo "ESMF_ARCH: $(ESMF_ARCH)"
+	-@echo "ESMF_COMPILER: $(ESMF_COMPILER)"
+	-@if [ -n "$(ESMF_COMPILER_VERSION)" ] ; then \
+	  echo "ESMF_COMPILER_VERSION: $(ESMF_COMPILER_VERSION)" ; fi
+	-@if [ -n "$(ESMF_C_COMPILER)" ] ; then \
+	  echo "ESMF_C_COMPILER: $(ESMF_C_COMPILER)" ; fi
+	-@echo "ESMF_BOPT: $(ESMF_BOPT)"
+	-@if [ -n "$(ESMF_OPTLEVEL)" ] ; then \
+	  echo "ESMF_OPTLEVEL: $(ESMF_OPTLEVEL)" ; fi
+	-@echo "ESMF_PREC: $(ESMF_PREC)"
+	-@echo "ESMF_COMM: $(ESMF_COMM)"
+	-@echo "ESMF_SITE: $(ESMF_SITE)"
+	-@echo "ESMF_EXHAUSTIVE: $(ESMF_EXHAUSTIVE)"
+	-@echo "ESMF_PTHREADS: $(ESMF_PTHREADS)"
+	-@if [ -n "$(ESMF_NO_IOCODE)" ] ; then \
+	  echo "ESMF_NO_IOCODE: $(ESMF_NO_IOCODE)" ; fi
 	-@echo " "
 	-@echo "------------------------------------------"
 	-@echo "If set, using additional flags:"
-	-@if [ -n "${MPI_HOME}" ] ; then \
-	  echo "MPI_HOME: ${MPI_HOME}" ; fi
-	-@if [ -n "${NETCDF_LIB}" ] ; then \
-	  echo "NETCDF_LIB: ${NETCDF_LIB}" ; fi
-	-@if [ -n "${BLAS_LIB}" ] ; then \
-	  echo "BLAS_LIB: ${BLAS_LIB}" ; fi
-	-@if [ -n "${LAPACK_LIB}" ] ; then \
-	  echo "LAPACK_LIB: ${LAPACK_LIB}" ; fi
-	-@if [ -n "${LAPACK_LIB}" ] ; then \
-	  echo "LAPACK_LIB: ${LAPACK_LIB}" ; fi
-	-@if [ -n "${ESSL_LIB}" ] ; then \
-	  echo "ESSL_LIB: ${ESSL_LIB}" ; fi
-	-@if [ -n "${PCL_LIB}" ] ; then \
-	  echo "PCL_LIB: ${PCL_LIB}" ; fi
-	-@if [ -n "${HDF_LIB}" ] ; then \
-	  echo "HDF_LIB: ${HDF_LIB}" ; fi
-	-@if [ -n "${MP_LIB}" ] ; then \
-	  echo "MP_LIB: ${MP_LIB}" ; fi
-	-@if [ -n "${THREAD_LIB}" ] ; then \
-	  echo "THREAD_LIB: ${THREAD_LIB}" ; fi
-	-@if [ -n "${PBS_NODEFILE}" ] ; then \
-	  echo "PBS_NODEFILE: ${PBS_NODEFILE}" ; fi
-	-@if [ -n "${MAKEFLAGS}" ] ; then \
-	  echo "MAKEFLAGS: ${MAKEFLAGS}" ; fi
+	-@if [ -n "$(MPI_HOME)" ] ; then \
+	  echo "MPI_HOME: $(MPI_HOME)" ; fi
+	-@if [ -n "$(NETCDF_LIB)" ] ; then \
+	  echo "NETCDF_LIB: $(NETCDF_LIB)" ; fi
+	-@if [ -n "$(BLAS_LIB)" ] ; then \
+	  echo "BLAS_LIB: $(BLAS_LIB)" ; fi
+	-@if [ -n "$(LAPACK_LIB)" ] ; then \
+	  echo "LAPACK_LIB: $(LAPACK_LIB)" ; fi
+	-@if [ -n "$(LAPACK_LIB)" ] ; then \
+	  echo "LAPACK_LIB: $(LAPACK_LIB)" ; fi
+	-@if [ -n "$(ESSL_LIB)" ] ; then \
+	  echo "ESSL_LIB: $(ESSL_LIB)" ; fi
+	-@if [ -n "$(PCL_LIB)" ] ; then \
+	  echo "PCL_LIB: $(PCL_LIB)" ; fi
+	-@if [ -n "$(HDF_LIB)" ] ; then \
+	  echo "HDF_LIB: $(HDF_LIB)" ; fi
+	-@if [ -n "$(MP_LIB)" ] ; then \
+	  echo "MP_LIB: $(MP_LIB)" ; fi
+	-@if [ -n "$(THREAD_LIB)" ] ; then \
+	  echo "THREAD_LIB: $(THREAD_LIB)" ; fi
+	-@if [ -n "$(PBS_NODEFILE)" ] ; then \
+	  echo "PBS_NODEFILE: $(PBS_NODEFILE)" ; fi
+	-@if [ -n "$(MAKEFLAGS)" ] ; then \
+	  echo "MAKEFLAGS: $(MAKEFLAGS)" ; fi
 #
 info:   script_info
 	-@echo " "
 	-@echo "------------------------------------------"
 	-@echo "Compilers, Flags, and Libraries:"
-	-@echo "Location of the preprocessor: " `which ${CPP}`
-	-@echo "Location of the C compiler: " `which ${CC}`
-	-@echo "Location of the C++ compiler: " `which ${CXX}`
-	-@echo "Location of the Fortran compiler: " `which ${FC}`
-	-@echo "Linking C with: ${CLINKER}"
-	-@echo "Linking Fortran with: ${FLINKER}"
+	-@echo "Location of the preprocessor: " `which $(CPP)`
+	-@echo "Location of the C compiler: " `which $(CC)`
+	-@echo "Location of the C++ compiler: " `which $(CXX)`
+	-@echo "Location of the Fortran compiler: " `which $(FC)`
+	-@echo "Linking C with: $(CLINKER)"
+	-@echo "Linking Fortran with: $(FLINKER)"
 	-@echo ""
-	-@echo "Compiling C with flags: ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS}"
-	-@echo "Compiling C++ with flags: ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS}"
-	-@echo "C include dir: ${ESMF_INCDIR}"
-	-@echo "Linking C with flags: ${LINKOPTS}"
-	-@echo "Linking C with libraries: -lesmf ${MPI_LIB} ${EXTRALIBS} ${CXXF90LIBS}"
+	-@echo "Compiling C with flags: $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS)"
+	-@echo "Compiling C++ with flags: $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS)"
+	-@echo "C include dir: $(ESMF_INCDIR)"
+	-@echo "Linking C with flags: $(LINKOPTS)"
+	-@echo "Linking C with libraries: -lesmf $(MPI_LIB) $(EXTRALIBS) $(CXXF90LIBS)"
 	-@echo ""
-	-@echo "Compiling Fortran with flags: ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS}"
-	-@echo "Fortran module flag: ${FC_MOD}${ESMF_MODDIR}"
-	-@echo "Linking Fortran with flags: ${LINKOPTS}"
-	-@echo "Linking Fortran with libraries: -lesmf ${MPI_LIB} ${EXTRALIBS} ${F90CXXLIBS}"
+	-@echo "Compiling Fortran with flags: $(FOPTFLAGS) $(FFLAGS) $(FCPPFLAGS)"
+	-@echo "Fortran module flag: $(FC_MOD)$(ESMF_MODDIR)"
+	-@echo "Linking Fortran with flags: $(LINKOPTS)"
+	-@echo "Linking Fortran with libraries: -lesmf $(MPI_LIB) $(EXTRALIBS) $(F90CXXLIBS)"
 	-@echo " "
 	-@echo "------------------------------------------"
 	-@echo Compiling on `date` on `hostname`
@@ -140,22 +140,22 @@ info:   script_info
 	-@echo " "
 #
 #
-MINFO = ${ESMF_DIR}/build_config/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_SITE)/machineinfo.h
+MINFO = $(ESMF_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/machineinfo.h
 info_h:
-	-@$(RM) MINFO ${MINFO}
+	-@$(RM) MINFO $(MINFO)
 	-@echo  "static char *machineinfo = \"  " >> MINFO
 	-@$(MAKE) -s info >> MINFO 2>&1  
-	-@cat MINFO | ${SED} -e 's/$$/  \\n\\/' > ${MINFO}
-	-@echo  " \"; " >> ${MINFO}
+	-@cat MINFO | $(SED) -e 's/$$/  \\n\\/' > $(MINFO)
+	-@echo  " \"; " >> $(MINFO)
 	-@$(RM) MINFO
 
 # Ranlib on the libraries
 ranlib:
-	${RANLIB} $(ESMF_LIBDIR)/*.a
+	$(RANLIB) $(ESMF_LIBDIR)/*.a
 
 # Deletes ESMF libraries
 deletelibs: chkopts_basic
-	-${RM} $(ESMF_LIBDIR)/*
+	-$(RM) $(ESMF_LIBDIR)/*
 
 # ESMF_COUPLED_FLOW/demo target.
 ESMF_COUPLED_FLOW: chkopts build_libs chkdir_tests
@@ -193,14 +193,14 @@ SCRIPTS    =
 # also, there should be options to install just the bare lib,
 # the unit tests and quickstart files, and then everything.
 install:
-	@if [ "${ESMF_LIB_INSTALL}" != "" ] ; then \
-	 cp -fp $(ESMF_LIBDIR)/* ${ESMF_LIB_INSTALL} ; \
+	@if [ "$(ESMF_LIB_INSTALL)" != "" ] ; then \
+	 cp -fp $(ESMF_LIBDIR)/* $(ESMF_LIB_INSTALL) ; \
 	fi
-	if [ "${ESMF_MOD_INSTALL}" != "" ] ; then \
-	 cp -fp ${ESMF_MODDIR}/*.mod ${ESMF_MOD_INSTALL} ; \
+	if [ "$(ESMF_MOD_INSTALL)" != "" ] ; then \
+	 cp -fp $(ESMF_MODDIR)/*.mod $(ESMF_MOD_INSTALL) ; \
 	fi
-	if [ "${ESMF_H_INSTALL}" != "" ] ; then \
-	 cp -fp $(ESMF_BUILD)/src/include/*.h ${ESMF_H_INSTALL} ; \
+	if [ "$(ESMF_H_INSTALL)" != "" ] ; then \
+	 cp -fp $(ESMF_BUILD)/src/include/*.h $(ESMF_H_INSTALL) ; \
 	fi
 
 
