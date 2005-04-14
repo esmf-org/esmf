@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid_bUTest.F90,v 1.5 2005/04/14 17:17:06 svasquez Exp $
+! $Id: ESMF_Regrid_bUTest.F90,v 1.6 2005/04/14 19:23:19 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_Regrid_bUTest.F90,v 1.5 2005/04/14 17:17:06 svasquez Exp $'
+      '$Id: ESMF_Regrid_bUTest.F90,v 1.6 2005/04/14 19:23:19 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     integer :: lrc,iFunction
@@ -352,8 +352,8 @@
    !=================================================================
     call ESMF_FieldRegridStore(field1, field2, vm, &
                                routehandle=regrid_rh, &
-                               regridmethod=ESMF_REGRID_METHOD_CONSERV1, rc=rc)
-                              !regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
+                               !regridmethod=ESMF_REGRID_METHOD_CONSERV1, rc=rc)
+                               regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
 
    !Regrid
    !======
