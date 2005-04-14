@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.22 2005/04/11 16:51:51 nscollins Exp $
+#  $Id: build_rules.mk,v 1.23 2005/04/14 21:55:43 nscollins Exp $
 #
 #  OSF1.default.default
 #
@@ -40,11 +40,21 @@ endif
 #
 # Location of MPI (Message Passing Interface) software
 #
-MPI_HOME         = /usr/opt/mpi/lib
-MPI_INCLUDE      = -I/usr/opt/mpi/include
-MPI_LIB          = -L/usr/opt/mpi/lib -lmpi
+# these work for halem at goddard; but do not overwrite them
+# if MPI_HOME is already set by the user.
+ifndef MPI_HOME
+MPI_HOME         = /usr/opt/mpi
+endif
+
+MPI_LIB          += -lmpi
+
+# on halem we have a job submission script, but if the user
+# has already set it, do not overwrite the value of MPIRUN.
+ifndef MPIRUN
 MPIRUN           = ${ESMF_TOP_DIR}/scripts/mpirun.alpha
-# is this needed?  TODO: remove this
+endif
+
+# is this needed?  TODO: remove this because it seems obsolete.
 #MPI64_LIB        = 
 
 
