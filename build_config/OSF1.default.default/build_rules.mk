@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.23 2005/04/14 21:55:43 nscollins Exp $
+#  $Id: build_rules.mk,v 1.24 2005/04/14 22:38:57 nscollins Exp $
 #
 #  OSF1.default.default
 #
@@ -48,9 +48,14 @@ endif
 
 MPI_LIB          += -lmpi
 
-# on halem we have a job submission script, but if the user
+# on halem we provide a system-specific job submission script, but if the user
 # has already set it, do not overwrite the value of MPIRUN.
-ifndef MPIRUN
+# note that there is always a default MPIRUN setting in the top level
+# common.mk makefile, so only override MPIRUN if the definition was not
+# from an environment variable setting.   if this needs to be different on
+# your system, add an assignment in a site file to set MPIRUN, or set MPIRUN
+# as an environment variable before running.
+ifneq ($(origin MPIRUN), environment)
 MPIRUN           = ${ESMF_TOP_DIR}/scripts/mpirun.alpha
 endif
 
