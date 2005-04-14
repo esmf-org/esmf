@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid_bUTest.F90,v 1.4 2005/04/12 22:52:03 svasquez Exp $
+! $Id: ESMF_Regrid_bUTest.F90,v 1.5 2005/04/14 17:17:06 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_Regrid_bUTest.F90,v 1.4 2005/04/12 22:52:03 svasquez Exp $'
+      '$Id: ESMF_Regrid_bUTest.F90,v 1.5 2005/04/14 17:17:06 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     integer :: lrc,iFunction
@@ -73,15 +73,26 @@
     sub_rc=ESMF_SUCCESS
 
 
-#ifdef ESMF_EXHAUSTIVE
    !--------------------------------
-   !EX_UTest
+   !NEX_UTest
    !Test for function, f=x, decomp = (npets,1)
     iFunction = 1
     iDistr = 1
     sub_rc=ESMF_SUCCESS
     write(failMsg, *) "Error in regrid"
     write(name, *) "Regrid f=x, and decomp=(npets,1)"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
+
+#ifdef ESMF_EXHAUSTIVE
+   !--------------------------------
+   !EX_UTest
+   !Test for function, f=x, decomp = (npets)
+    iFunction = 1
+    iDistr = 3
+    sub_rc=ESMF_SUCCESS
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid f=x, and decomp=(npets)"
     call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
     call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
 
@@ -186,7 +197,7 @@
     type(ESMF_Grid) :: srcgrid, dstgrid
     type(ESMF_RouteHandle) :: regrid_rh
     type(ESMF_Array) :: arraya, arrayb
-    type(ESMF_DELayout) :: layout1, layout2
+    type(ESMF_DELayout) :: layout1, layout2, layout3
     integer :: rc
 
     integer :: x, y
@@ -213,6 +224,7 @@
     TwoOrOne= 1 + mod(npets+1,2)
     layout1 = ESMF_DELayoutCreate(vm, (/ 1, npets /), rc=rc)
     layout2 = ESMF_DELayoutCreate(vm, npetsXY, rc=rc)
+    layout3 = ESMF_DELayoutCreate(vm, (/  npets /), rc=rc)
   ! layout2 = ESMF_DELayoutCreate(vm, (/ npets/TwoOrOne, TwoOrOne /), rc=rc)
   ! layout2 = ESMF_DELayoutCreate(vm, (/ npets, 1 /), rc=rc)
 
@@ -235,7 +247,6 @@
    !Create the destination grid
    !===========================
 
-   !dstgrid = ESMF_GridCreateHorzXYUni((/ 64, 80 /), &
     dstgrid = ESMF_GridCreateHorzXYUni((/100,150 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
