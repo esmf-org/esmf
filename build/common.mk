@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.107 2005/04/14 20:18:31 nscollins Exp $
+#  $Id: common.mk,v 1.108 2005/04/14 20:41:39 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -86,7 +86,7 @@ export ESMF_SITE = default
 endif
 
 
-# Conditionally turn off ESMF's pthread feature set and use pthread_stubs
+# Conditionally turn off ESMFs pthread feature set and use pthread_stubs
 ifndef ESMF_PTHREADS
 export ESMF_PTHREADS = ON
 endif
@@ -841,9 +841,23 @@ ALLTESTS_UNI = build_unit_tests run_unit_tests_uni \
 
 validate:
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-	  $(MAKE) $(ALLTESTS) results_summary ;\
-	else \
 	  $(MAKE) $(ALLTESTS_UNI) results_summary ;\
+	else \
+	  $(MAKE) $(ALLTESTS) results_summary ;\
+        fi
+
+
+build_validate:
+	$(MAKE) build_unit_tests build_system_tests build_examples build_demos 
+
+
+run_validate:
+	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
+	  $(MAKE) run_unit_tests_uni run_system_tests_uni \
+                  run_examples_uni run_demos_uni results_summary ;\
+	else \
+	  $(MAKE) run_unit_tests run_system_tests \
+                  run_examples run_demos results_summary ;\
         fi
 
 
@@ -908,14 +922,16 @@ build_system_tests: chkopts reqdir_lib chkdir_tests
 
 tree_build_system_tests:  $(SYSTEM_TESTS_BUILD) 
 
-# TODO: the rm rule below means that any system test which includes
-# additional .o files (which most do) will always rebuild even if it
-# is up-to-date.  but we remove the .o and .mod files because we also
+
+#
+# TODO: the RM in the link rules below means that any system test which 
+# includes additional .o files (which most do) will always rebuild even if 
+# it is up-to-date.  but we remove the .o and .mod files because we also
 # are required to be able to build multiple architectures from a single
 # build tree.  we currently have a race-condition with the system tests
 # in that we build with the current directory being the src dir, which
 # means compilers can trample each others .o and .mod files.  the library
-# cd's into the lib or mod dir before compiling, so .o and .mod files
+# cds into the lib or mod dir before compiling, so .o and .mod files
 # are created in a compiler/platform directory and do not interfere with
 # each other.  
 # 
@@ -925,7 +941,6 @@ tree_build_system_tests:  $(SYSTEM_TESTS_BUILD)
 #
 # this also applies to the tests, examples, and demo code.
 #
-
 
 #
 #  Link rule for Fortran system tests.
