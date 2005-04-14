@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.109 2005/04/14 21:06:28 nscollins Exp $
+#  $Id: common.mk,v 1.110 2005/04/14 21:45:48 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -725,19 +725,19 @@ build_here: chkdir_lib
 
 # Builds library - action for the 'tree' target.
 tree_lib:
-	dir=`pwd`; cd $(ESMF_OBJDIR); $(MAKE) -f $${dir}/makefile MAKEFILE=$${dir}/makefile esmflib
+	dir=`pwd`; cd $(ESMF_MODDIR); $(MAKE) -f $${dir}/makefile MAKEFILE=$${dir}/makefile esmflib
 
 # Builds library
 esmflib:: chkdir_lib $(SOURCE)
-	@if [ "${SOURCEC}" != "" ] ; then \
+	@if [ "$(SOURCEC)" != "" ] ; then \
 	   $(MAKE) -f $(MAKEFILE) libc; fi
-	@if [ "${SOURCEF}" != "" ] ; then \
+	@if [ "$(SOURCEF)" != "" ] ; then \
 	    $(MAKE) -f $(MAKEFILE)  libf; fi
-	@if [ "${OBJS}" != " " ] ; then \
+	@if [ "$(OBJS)" != "" -a "$(OBJS)" != " " ] ; then \
 		$(RANLIB) $(LIBNAME); \
-		$(RM) -f $(OBJS); \
+		$(RM) $(OBJS); \
 	fi
-	@if [ "${QUICKSTART}" != "" ] ; then \
+	@if [ "$(QUICKSTART)" != "" ] ; then \
 	   $(MAKE) -f $(MAKEFILE) tree_build_quick_start; fi
 
 
