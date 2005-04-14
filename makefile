@@ -1,13 +1,10 @@
-# $Id: makefile,v 1.59 2005/04/11 15:51:45 nscollins Exp $
+# $Id: makefile,v 1.60 2005/04/14 20:18:31 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
 # This is the primary makefile for building Earth System Modeling Framework
 # (ESMF) utilities.  
 #===============================================================================
-
-
-TOPALL: all
 
 
 #
@@ -22,12 +19,12 @@ endif
 # name of directory containing the ESMF source
 ESMF_TOP_DIR   = $(ESMF_DIR)
 
+# default target in common.mk is 'lib'
 
+# all common rules, definitions are here
 include $(ESMF_TOP_DIR)/build/common.mk
 
-#
-#  End Build Update 1
-#
+# things specific to framework build
 
 DIRS = src
 
@@ -42,13 +39,20 @@ CLOBBERDIRS = $(ESMF_BUILD)/lib $(ESMF_BUILD)/mod \
 #-------------------------------------------------------------------------------
 # Basic targets to build ESMF libraries.
 #-------------------------------------------------------------------------------
-all       : info info_h chk_dir build_libs 
+# Define what building "all" means for the framework.  This needs to be
+# after the include of common.mk, so it does not interfere with the
+# definition of the default build rule.
+
+all:  lib build_unit_tests build_examples build_system_tests build_demos
+
 
 #-------------------------------------------------------------------------------
 # Prints information about the system and version of ESMF being compiled
 #-------------------------------------------------------------------------------
 script_info:
 	-@echo " "
+	-@echo "------------------------------------------"
+	-@echo "Version information: "
 	-@if [ -n "${C_CCV}" -a "${C_CCV}" != "unknown" ] ; then \
 	  echo "C Compiler version:" ; ${C_CCV} ; echo "" ; fi
 	-@if [ -n "${C_CXXV}" -a "${C_CXXV}" != "unknown" ] ; then \
@@ -57,63 +61,61 @@ script_info:
 	  echo "Fortran Compiler version:" ; ${C_FCV} ; echo "" ; fi
 	-@if [ -f ${ESMF_DIR}/src/Infrastructure/Base/include/ESMC_Macros.h ] ; then \
 	  fgrep ESMF_VERSION_STRING ${ESMF_DIR}/src/Infrastructure/Base/include/ESMC_Macros.h | ${SED} "s/^#define //" ; fi
+	-@echo " "
+	-@echo "------------------------------------------"
+	-@echo "Using ESMF flags:"
 	-@echo "ESMF_DIR: ${ESMF_TOP_DIR}"
+	-@if [ "${ESMF_BUILD}" != "${ESMF_TOP_DIR}" ] ; then \
+	  echo "ESMF_BUILD: ${ESMF_BUILD}" ; fi
 	-@echo "ESMF_ARCH: ${ESMF_ARCH}"
 	-@echo "ESMF_COMPILER: ${ESMF_COMPILER}"
-	-@echo "ESMF_PREC: ${ESMF_PREC}"
-	-@echo "ESMF_SITE: ${ESMF_SITE}"
-	-@echo "ESMF_COMM: ${ESMF_COMM}"
-	-@echo "ESMF_BOPT: ${ESMF_BOPT}"
 	-@if [ -n "${ESMF_COMPILER_VERSION}" ] ; then \
 	  echo "ESMF_COMPILER_VERSION: ${ESMF_COMPILER_VERSION}" ; fi
 	-@if [ -n "${ESMF_C_COMPILER}" ] ; then \
 	  echo "ESMF_C_COMPILER: ${ESMF_C_COMPILER}" ; fi
+	-@echo "ESMF_BOPT: ${ESMF_BOPT}"
+	-@echo "ESMF_PREC: ${ESMF_PREC}"
+	-@echo "ESMF_COMM: ${ESMF_COMM}"
+	-@echo "ESMF_SITE: ${ESMF_SITE}"
+	-@echo "ESMF_EXHAUSTIVE: ${ESMF_EXHAUSTIVE}"
 	-@echo "ESMF_PTHREADS: ${ESMF_PTHREADS}"
+	-@if [ -n "${ESMF_NO_IOCODE}" ] ; then \
+	  echo "ESMF_NO_IOCODE: ${ESMF_NO_IOCODE}" ; fi
 #
 info:   script_info
-	-@echo "-----------------------------------------"
-	-@echo "Using C compiler: ${CC} ${COPTFLAGS} ${CCPPFLAGS}"
-	-@echo "Using Fortran compiler: ${FC} ${FOPTFLAGS} ${FCPPFLAGS}"
-	-@echo "Using C linker: ${CLINKER}"
-	-@echo "Using Fortran linker: ${FLINKER}"
+	-@echo " "
 	-@echo "------------------------------------------"
-	-@echo "Using include paths: ${ESMC_INCLUDE}"
-	-@echo "Using libraries: ${ESMC_TIME_LIB}"
+	-@echo "Compilers, Flags, and Libraries:"
+	-@echo "Location of the C compiler: " `which ${CC}`
+	-@echo "Location of the C++ compiler: " `which ${CXX}`
+	-@echo "Location of the Fortran compiler: " `which ${FC}`
+	-@echo "Linking C with: ${CLINKER}"
+	-@echo "Linking Fortran with: ${FLINKER}"
+	-@echo ""
+	-@echo "Compiling C with flags: ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS}"
+	-@echo "Compiling C++ with flags: ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS}"
+	-@echo "Linking C with flags: ${LINKOPTS}"
+	-@echo "Linking C with libraries: -lesmf ${MPI_LIB} ${EXTRALIBS} ${CXXF90LIBS}"
+	-@echo ""
+	-@echo "Compiling Fortran with flags: ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS}"
+	-@echo "Fortran module flag: ${FC_MOD}${ESMF_MODDIR}"
+	-@echo "Linking Fortran with flags: ${LINKOPTS}"
+	-@echo "Linking Fortran with libraries: -lesmf ${MPI_LIB} ${EXTRALIBS} ${F90CXXLIBS}"
+	-@echo " "
 	-@echo "------------------------------------------"
 	-@echo Compiling on `date` on `hostname`
 	-@echo Machine characteristics: `uname -a`
 	-@echo "=========================================="
+	-@echo " "
 #
 #
 MINFO = ${ESMF_DIR}/build_config/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_SITE)/machineinfo.h
 info_h:
-	-@$(RM) -f MINFO ${MINFO}
+	-@$(RM) MINFO ${MINFO}
 	-@echo  "static char *machineinfo = \"  " >> MINFO
-	-@echo  "Libraries compiled on `date` on `hostname` " >> MINFO
-	-@echo  Machine characteristics: `uname -a` "" >> MINFO
-	-@echo  "-----------------------------------------" >> MINFO
-	-@echo  "Using C compiler: ${CC} ${COPTFLAGS} ${CCPPFLAGS} " >> MINFO
-	-@if [  "${C_CCV}" -a "${C_CCV}" != "unknown" ] ; then \
-	  echo  "C Compiler version:"  >> MINFO ; ${C_CCV} >> MINFO 2>&1; fi
-	-@if [  "${C_CXXV}" -a "${C_CXXV}" != "unknown" ] ; then \
-	  echo  "C++ Compiler version:"  >> MINFO; ${C_CXXV} >> MINFO 2>&1 ; fi
-	-@echo  "Using Fortran compiler: ${FC} ${FOPTFLAGS} ${FCPPFLAGS}" >> MINFO
-	-@if [  "${C_FCV}" -a "${C_FCV}" != "unknown" ] ; then \
-	  echo  "Fortran Compiler version:" >> MINFO ; ${C_FCV} >> MINFO 2>&1 ; fi
-	-@echo  "-----------------------------------------" >> MINFO
-	-@echo  "Using ESMF flags: ${PCONF}" >> MINFO
-	-@echo  "-----------------------------------------" >> MINFO
-	-@echo  "Using configuration flags:" >> MINFO
-	-@echo  "-----------------------------------------" >> MINFO
-	-@echo  "Using include paths: ${ESMC_INCLUDE}" >> MINFO
-	-@echo  "-----------------------------------------" >> MINFO
-	-@echo  "Using ESMF directory: ${ESMF_TOP_DIR}" >> MINFO
-	-@echo  "Using ESMF arch: ${ESMF_ARCH}" >> MINFO
-	-@echo  "------------------------------------------" >> MINFO
-	-@echo  "Using C linker: ${CLINKER}" >> MINFO
-	-@echo  "Using Fortran linker: ${FLINKER}" >> MINFO
+	-@$(MAKE) -s info >> MINFO 2>&1  
 	-@cat MINFO | ${SED} -e 's/$$/  \\n\\/' > ${MINFO}
-	-@echo  "Using libraries: ${ESMC_TIME_LIB} \"; " >> ${MINFO}
+	-@echo  " \"; " >> ${MINFO}
 	-@$(RM) MINFO
 
 # Ranlib on the libraries
@@ -122,7 +124,7 @@ ranlib:
 
 # Deletes ESMF libraries
 deletelibs: chkopts_basic
-	-${RM} -f $(ESMF_LIBDIR)/*
+	-${RM} $(ESMF_LIBDIR)/*
 
 # ESMF_COUPLED_FLOW/demo target.
 ESMF_COUPLED_FLOW: chkopts build_libs chkdir_tests
@@ -146,17 +148,28 @@ DOCS	   = build/README build/doc/*
 
 SCRIPTS    = 
 
+# TODO: this target is not so useful right now - because we try
+# to build shared libs on many of our platforms.  the executables
+# linked against that lib (like the unit tests and examples) then
+# store that build directory inside as where to find the shared
+# lib at load time.  to move them, we have to know the eventual
+# location of the libs (by having something like ESMF_INSTALL_DIR
+# defined at the time the executables are linked, so we can add
+# an extra -rpath or -L flag to the link to add the install lib
+# dir to be searched at load time.
+# also, this should just have a single variable and not separate
+# ones for the lib, mod, and includes.
+# also, there should be options to install just the bare lib,
+# the unit tests and quickstart files, and then everything.
 install:
-	-@if [ "${ESMF_LIB_INSTALL}" != "" ] ; then \
-	cp -fp $(ESMF_LIBDIR)/libesmf.a ${ESMF_LIB_INSTALL} ; \
-	cp -fp $(ESMF_LIBDIR)/libesmf.so ${ESMF_LIB_INSTALL} ; \
-	cp -fp $(ESMF_LIBDIR)/libmpiuni.a ${ESMF_LIB_INSTALL} ; \
+	@if [ "${ESMF_LIB_INSTALL}" != "" ] ; then \
+	 cp -fp $(ESMF_LIBDIR)/* ${ESMF_LIB_INSTALL} ; \
 	fi
-	-if [ "${ESMF_MOD_INSTALL}" != "" ] ; then \
-	cp -fp ${ESMF_MODDIR}/*.mod ${ESMF_MOD_INSTALL} ; \
+	if [ "${ESMF_MOD_INSTALL}" != "" ] ; then \
+	 cp -fp ${ESMF_MODDIR}/*.mod ${ESMF_MOD_INSTALL} ; \
 	fi
-	-if [ "${ESMF_H_INSTALL}" != "" ] ; then \
-	cp -fp $(ESMF_BUILD)/src/include/*.h ${ESMF_H_INSTALL} ; \
+	if [ "${ESMF_H_INSTALL}" != "" ] ; then \
+	 cp -fp $(ESMF_BUILD)/src/include/*.h ${ESMF_H_INSTALL} ; \
 	fi
 
 
