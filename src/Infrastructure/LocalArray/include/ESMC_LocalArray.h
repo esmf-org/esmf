@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.12 2004/12/20 02:26:55 nscollins Exp $
+// $Id: ESMC_LocalArray.h,v 1.13 2005/04/18 21:26:19 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -271,6 +271,8 @@ extern "C" {
                                         int *, int *);
  void FTN(c_esmc_localarraydeserializenodata)(ESMC_LocalArray**, char *, 
                                               int *, int *);
+ void FTN(c_esmc_f90ptrsizeget)(char *, char *, int *, int *);
+ void FTN(c_esmc_f90ptrsizeprint)(char *, char *, int *, int *);
 }
 
 
