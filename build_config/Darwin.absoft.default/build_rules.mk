@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.14 2005/04/18 15:14:02 nscollins Exp $
+#  $Id: build_rules.mk,v 1.15 2005/04/18 17:27:07 nscollins Exp $
 #
 #  Darwin.absoft.default
 #
@@ -46,7 +46,9 @@ endif
 
 ifeq ($(ESMF_COMM),lam)
 # with lam-mpi installed in $MPI_HOME or /usr/local:
-MPI_LIB        += -lmpi -llam -llamf77mpi
+# yes, -lmpi is in there twice.  this seems to be necessary to avoid
+# an undefined reference to _MPI_Comm_dup for some reason.
+MPI_LIB        += -lmpi -llam -llamf77mpi -lmpi
 endif
 
 ifeq ($(ESMF_COMM),mpich)
