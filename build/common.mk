@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.110 2005/04/14 21:45:48 nscollins Exp $
+#  $Id: common.mk,v 1.111 2005/04/18 16:43:56 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -49,8 +49,25 @@ endif
 # for ESMF_COMPILER is lahey.
 # -----------------------------------------------------------------------------
 
-# name of directory containing the generated files from the build
+# name of directory containing the generated files from the build.
 # defaults to the top dir, but can be set to be something different.
+# TODO: in general this is respected - most generated files are created
+# underneath ESMF_BUILD and not ESMF_TOP_DIR.  but there are exceptions.
+# the ones i know about are:  
+# - in the build_config/platform-specific directories is a config file 
+# called 'machineinfo.h' which is generated at build time.  this 
+# build_config dir is included in compiles, so if the machineinfo.h file
+# (and conf.h) are moved, a -I flag will also have to be updated to point to
+# the new location.  the complication is that since this a per-platform file
+# and since we promise to support building for multiple architectures from
+# the same source tree, these files cannot go into a generic include dir.
+# - the 'storeh:' target copies include files into src/include under the
+# distribution tree.  
+# - the system tests and demos (not sure about the unit tests and examples) 
+# are compiled with the current dir set to the src dir (this is
+# i think because if there are multiple .o files, it gets complicated to make
+# them, get their names to link them, and then remove just them if you're 
+# working in the test or examples dir - but still, it should be fixed.)
 ifndef ESMF_BUILD
 export ESMF_BUILD := $(ESMF_TOP_DIR)
 endif
@@ -79,6 +96,13 @@ export ESMF_COMPILER = lahey
 endif
 
 endif
+
+
+# If not set, the default for EXHAUSTIVE is OFF
+ifndef ESMF_EXHAUSTIVE
+export ESMF_EXHAUSTIVE = OFF
+endif
+
 
 # This is ok to remain as default
 ifndef ESMF_SITE
@@ -144,10 +168,11 @@ AR32_64            = $(AR)
 RM		   = rm -f
 RANLIB		   = ranlib
 M4	           = m4
+SED		   = sed 
+WC		   = wc 
 
 OMAKE		   = $(MAKE)
 SHELL		   = /bin/sh
-SED		   = /bin/sed
 
 C_FC_MOD           = -I
 C_CLINKER          = $(C_CXX)
@@ -202,6 +227,8 @@ ESMF_INCDIR     = $(ESMF_BUILD)/src/include
 ESMF_DOCDIR	= $(ESMF_TOP_DIR)/doc
 ESMF_BUILD_DOCDIR = $(ESMF_BUILD)/build/doc
 ESMF_STDIR      = $(ESMF_TOP_DIR)/src/system_tests
+ESMF_CONFDIR    = $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).default
+ESMF_SITEDIR    = $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)
 
 # TODO: these may be leftovers from the impl_rep, and if so, they should
 # be moved up into that makefile.  as far as i know, these are not used
@@ -269,7 +296,7 @@ default: lib
 #  Include the default platform-specific makefile fragment.
 #-------------------------------------------------------------------------------
 
-include $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).default/build_rules.mk
+include $(ESMF_CONFDIR)/build_rules.mk
 
 
 #-------------------------------------------------------------------------------
@@ -279,7 +306,7 @@ include $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).default/build
 #-------------------------------------------------------------------------------
 
 ifneq ($(ESMF_SITE),default)
-include $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk
+include $(ESMF_SITEDIR)/build_rules.mk
 endif
 
 #-------------------------------------------------------------------------------
@@ -716,8 +743,9 @@ lib:  info info_h build_libs
 build_libs: chkdir_lib include cppfiles
 	cd $(ESMF_TOP_DIR) ;\
 	$(MAKE) ACTION=tree_lib tree shared
-	@echo "ESMF library built successfully.  To validate the library, build and "
-	@echo " run the unit and system tests by: $(MAKE) validate "
+	@echo "ESMF library built successfully."
+	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
+	@echo " or the more extensive: $(MAKE) all_tests"
 
 # Build only stuff in and below the current dir.
 build_here: chkdir_lib
@@ -786,13 +814,18 @@ tree_cppfiles:  $(CPPFILES)
 # default list of files and dirs to clean (and surprisingly to me, 
 # you cannot enclose these in quotes - they are preserved and the quotes
 # prevent the wildcards from being expanded.)
+
 CLEAN_DEFDIRS = coredir.*
-CLEAN_DEFAULTS = *.o *.mod *.txt *.stdout NULL core UTestLog *ESMF_LogFile
+CLEAN_DEFAULTS = *.o *.mod *.txt core ESM*.stdout ESM*.Log PET*.Log *ESMF_LogFile
 CLEAN_TEXFILES = *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG
 
 clean:
 	$(MAKE) ACTION=tree_clean tree
 
+# the GNU standard target is 'distclean' but we have had clobber in here
+# for a long time, so for backward compatibility, leave them both.
+
+distclean: clobber
 
 clobber: clean
 	@for DIR in $(CLOBBERDIRS) foo ; do \
@@ -814,11 +847,11 @@ tree_clean:
 # target which does a light cleaning - remove files only under the src dir 
 #  (logfiles, doc files, test output files, files made by preprocessing, etc)
 #  leaves the libs, executables, etc alone.
-dust:
+mostlyclean:
 	@cd $(ESMF_BUILD)/src ;\
-	$(MAKE) ACTION=tree_dust tree
+	$(MAKE) ACTION=tree_mostlyclean tree
 
-tree_dust:
+tree_mostlyclean:
 	@for DIR in $(DUSTDIRS) foo ; do \
 	   if [ $$DIR != "foo" ] ; then \
 	      cd $$DIR; $(MAKE) ACTION=tree_clean tree ;\
@@ -829,29 +862,79 @@ tree_dust:
 # Generic target for building and running all tests, examples, and demos.
 #-------------------------------------------------------------------------------
 
-ALLTESTS = build_unit_tests run_unit_tests \
-           build_system_tests run_system_tests \
-           build_examples run_examples \
-           build_demos run_demos
+# vars used below in the all_tests target, because these are in the pattern
+# (build, run), (build, run), ... not (build, build, ...) then (run, run, ...)
 
-ALLTESTS_UNI = build_unit_tests run_unit_tests_uni \
-           build_system_tests run_system_tests_uni \
-           build_examples run_examples_uni \
-           build_demos run_demos_uni
+TEST_TARGETS = build_unit_tests run_unit_tests \
+               build_system_tests run_system_tests
 
-validate:
+ALLTEST_TARGETS = $(TEST_TARGETS) \
+                  build_examples run_examples \
+                  build_demos run_demos
+
+TEST_TARGETS_UNI = build_unit_tests run_unit_tests_uni \
+                   build_system_tests run_system_tests_uni
+
+ALLTEST_TARGETS_UNI = $(TEST_TARGETS_UNI) \
+                      build_examples run_examples_uni \
+                      build_demos run_demos_uni
+
+
+# TODO: a bit more on what eventually these targets should be:
+#
+# according to the GNU conventions, 'gmake check' should test the build.
+# so check builds and runs the unit and system tests with EXHAUSTIVE pinned off.
+# this does a cursory check, not a full, exhaustive check.
+#
+# 'gmake all_tests' makes and runs the full set of tests, respecting the user
+# setting for EXHAUSTIVE.  it runs the unit tests, system tests, examples,
+# and the demo.
+#
+# 'gmake validate' should probably do some numerical validation to make
+# sure we have something like bit reproducibility, that we are not going to
+# have wordsize problems, etc.   for now, we have no tests like that so it
+# just runs the unit tests.
+#
+
+# quick sanity check, with an override to only do non-exhaustive tests
+check:
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-	  $(MAKE) $(ALLTESTS_UNI) results_summary ;\
+	  $(MAKE) ESMF_EXHAUSTIVE=OFF info clean_check $(TEST_TARGETS_UNI) ;\
 	else \
-	  $(MAKE) $(ALLTESTS) results_summary ;\
+	  $(MAKE) ESMF_EXHAUSTIVE=OFF info clean_check $(TEST_TARGETS) ;\
         fi
 
 
-build_validate:
+build_check:
+	$(MAKE) ESMF_EXHAUSTIVE=OFF build_unit_tests build_system_tests 
+
+
+run_check:
+	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
+	  $(MAKE) run_unit_tests_uni run_system_tests_uni ; \
+	else \
+	  $(MAKE) run_unit_tests run_system_tests ;\
+        fi
+
+
+clean_check:
+	$(MAKE) clean_unit_tests clean_system_tests
+
+
+# all tests, respecting user setting of EXHAUSTIVE
+all_tests:
+	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
+	  $(MAKE) info $(ALLTESTS_UNI) results_summary ;\
+	else \
+	  $(MAKE) info $(ALLTESTS) results_summary ;\
+        fi
+
+
+build_all_tests:
 	$(MAKE) build_unit_tests build_system_tests build_examples build_demos 
 
 
-run_validate:
+run_all_tests:
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
 	  $(MAKE) run_unit_tests_uni run_system_tests_uni \
                   run_examples_uni run_demos_uni results_summary ;\
@@ -859,6 +942,36 @@ run_validate:
 	  $(MAKE) run_unit_tests run_system_tests \
                   run_examples run_demos results_summary ;\
         fi
+
+clean_all_tests:
+	$(MAKE) clean_unit_tests clean_system_tests clean_examples clean_demos
+
+
+# TODO: reserved for running any numerical validation tests, wordsize and
+# precision tests - things which might give wrong computational answers.
+# (currently just run the unit tests because these are not written yet.)
+validate:
+	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
+	  $(MAKE) unit_tests_uni ;\
+	else \
+	  $(MAKE) unit_tests ;\
+        fi
+
+
+build_validate:
+	$(MAKE) build_unit_tests 
+
+
+run_validate:
+	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
+	  $(MAKE) run_unit_tests_uni ;\
+	else \
+	  $(MAKE) run_unit_tests ;\
+        fi
+
+
+clean_validate:
+	$(MAKE) clean_unit_tests 
 
 
 #-------------------------------------------------------------------------------
@@ -874,8 +987,8 @@ system_tests: chkopts build_libs chkdir_tests
                echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
                exit; \
 	   fi; \
-        fi
-	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
+        fi ;\
+	if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor system tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run system_tests_uni instead." ; \
 	  echo "" ; \
@@ -963,7 +1076,7 @@ run_system_tests:  chkopts reqdir_tests
               exit; \
 	   fi; \
         fi; \
-	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
+	if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor system tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run run_system_tests_uni instead." ; \
 	  echo "" ; \
@@ -993,6 +1106,12 @@ run_system_tests_uni:  chkopts reqdir_tests
 tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 
 #
+# this target deletes only the system test related files from the test subdir
+#
+clean_system_tests:
+	$(RM) $(ESMF_TESTDIR)/*STest* 
+
+#
 # report statistics on system tests
 #
 check_system_tests: 
@@ -1002,6 +1121,13 @@ check_system_tests:
 #-------------------------------------------------------------------------------
 #  Targets for building and running unit tests.
 #-------------------------------------------------------------------------------
+
+# TODO: the run_unit_tests targets below a the dash before the make 
+# subcommand ( -$(MAKE) xxx ) to ignore the return code from the command.
+# i would prefer to not do this, but on at least one important platform (AIX) 
+# we cannot force the fortran programs to exit with a zero return code if
+# all is well (it comes out 128).  if this gets fixed in our code, the dashes
+# can be removed and make can correctly stop on error.
 
 unit_tests: chkopts chkdir_tests build_libs
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
@@ -1052,15 +1178,15 @@ $(ESMF_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)
 #
 # run_unit_tests
 #
-run_unit_tests:  chkopts reqdir_tests
+run_unit_tests:  chkopts reqdir_tests verify_exhaustive_flag
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor unit tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run run_unit_tests_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
-	fi
+	fi 
 	@if [ -f $(CONFIG_TESTS) ] ; then \
-	   sed 's/ .*processor/ Multiprocessor/' $(CONFIG_TESTS) > $(CONFIG_TESTS).temp; \
+	   $(SED) -e 's/ .*processor/ Multiprocessor/' $(CONFIG_TESTS) > $(CONFIG_TESTS).temp; \
            mv -f $(CONFIG_TESTS).temp $(CONFIG_TESTS); \
         fi
 	-$(MAKE) ACTION=tree_run_unit_tests tree
@@ -1071,9 +1197,9 @@ tree_run_unit_tests: $(TESTS_RUN)
 #
 # run_unit_tests_uni
 #
-run_unit_tests_uni:  chkopts reqdir_tests
+run_unit_tests_uni:  chkopts reqdir_tests verify_exhaustive_flag
 	@if [ -f $(CONFIG_TESTS) ] ; then \
-	   sed 's/ .*processor/ Uniprocessor/' $(CONFIG_TESTS) > $(CONFIG_TESTS).temp; \
+	   $(SED) -e 's/ .*processor/ Uniprocessor/' $(CONFIG_TESTS) > $(CONFIG_TESTS).temp; \
            mv -f $(CONFIG_TESTS).temp $(CONFIG_TESTS); \
         fi
 	-$(MAKE) ACTION=tree_run_unit_tests_uni tree 
@@ -1094,6 +1220,48 @@ else
 endif
 
 #
+# verify that either there is no CONFIG_TESTS file, or if one exists that
+# the string Exhaustive or Non-exhaustive matches the current setting of the
+# ESMF_EXHAUSTIVE environment variable.  this is used when trying to run
+# already-built unit tests, to be sure the user has not changed the setting
+# of exhaustive and then assumed that it will take effect.  unfortunately at
+# this time, the flag is compile-time and not run-time.   
+#
+verify_exhaustive_flag:
+ifeq ($(ESMF_EXHAUSTIVE),ON) 
+	@$(MAKE) UNIT_TEST_STRING="Exhaustive" exhaustive_flag_check
+else
+	@$(MAKE) UNIT_TEST_STRING="Non-exhaustive" exhaustive_flag_check
+endif
+
+exhaustive_flag_check:
+	@if [ -s $(CONFIG_TESTS) -a \
+	     `$(SED) -ne '/$(UNIT_TEST_STRING)/p' $(CONFIG_TESTS) | $(WC) -l` -ne 1 ] ; then \
+	  echo "The ESMF_EXHAUSTIVE environment variable is a compile-time control for" ;\
+          echo "whether a basic set or an exhaustive set of tests are built." ;\
+	  echo "" ;\
+	  echo "The current setting of ESMF_EXHAUSTIVE is \"$(ESMF_EXHAUSTIVE)\", which" ;\
+	  echo "is not the same as when the unit tests were last built." ;\
+	  echo "(This is based on the contents of the file:" ;\
+          echo "$(CONFIG_TESTS) ";\
+	  echo "which contains: `$(SED) -e '1d' $(CONFIG_TESTS)` )." ;\
+	  echo "" ;\
+	  echo "To rebuild and run the unit tests with the current ESMF_EXHAUSTIVE value, run:" ;\
+	  echo "   $(MAKE) clean_unit_tests unit_tests"  ;\
+	  echo "or change ESMF_EXHAUSTIVE to ON or OFF to match the build-time value." ;\
+	  echo "" ;\
+	  $(MAKE) err ;\
+	fi
+
+#
+# this target deletes only the unit test related files from the test subdir
+# so we can rebuild them with the proper flags if that is what is needed.
+#
+clean_unit_tests:
+	$(RM) $(ESMF_TESTDIR)/*UTest* $(CONFIG_TESTS)
+
+
+#
 # report statistics on tests
 #
 check_unit_tests:
@@ -1104,21 +1272,22 @@ check_unit_tests:
 #  and point users to updated target names.
 #-------------------------------------------------------------------------------
 
-.PHONY: tests tests_uni build_tests run_tests run_tests_uni check_tests err
+.PHONY: tests build_tests run_tests tests_uni run_tests_uni check_tests err
 
 tests: ; $(error Obsolete target, use unit_tests now)
-
-tests_uni: ; $(error Obsolete target, use unit_tests_uni now)
 
 build_tests: ; $(error Obsolete target, use build_unit_tests now)
 
 run_tests: ; $(error Obsolete target, use run_unit_tests now)
+
+tests_uni: ; $(error Obsolete target, use unit_tests_uni now)
 
 run_tests_uni: ; $(error Obsolete target, use run_unit_tests_uni now)
 
 check_tests: ; $(error Obsolete target, use check_unit_tests now)
 
 err: ; $(error gnumake exiting)
+
 
 #-------------------------------------------------------------------------------
 # Targets for building and running examples
@@ -1212,6 +1381,12 @@ run_examples_uni:  chkopts reqdir_examples
 tree_run_examples_uni: $(EXAMPLES_RUN_UNI)
 
 #
+# this target deletes only the example related files from the example subdir
+#
+clean_examples:
+	$(RM) $(ESMF_EXDIR)/*
+
+#
 # report statistics on examples
 #
 check_examples:
@@ -1263,6 +1438,7 @@ run_demos:  chkopts reqdir_tests
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor demo when ESMF_COMM is mpiuni;" ; \
 	  echo "run run_demos_uni instead." ; \
+	  echo "" ; \
 	  $(MAKE) err ; \
 	fi
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
@@ -1276,12 +1452,21 @@ run_demos_uni:  chkopts reqdir_tests
 
 tree_run_demos_uni: $(DEMOS_RUN_UNI) 
 
+#
+# this target deletes only the demos and output files created by the demos
+#
+clean_demos:
+	$(RM) $(ESMF_TESTDIR)/*App 
+	@if [ -d src/demo ] ; then cd src/demo; fi; \
+	$(MAKE) clean
+	
+
 
 #-------------------------------------------------------------------------------
 # Targets for checking the builds
 #-------------------------------------------------------------------------------
 
-check_results: check_tests check_examples check_system_tests
+check_results: check_unit_tests check_examples check_system_tests
 
 results_summary:
 	$(DO_SUM_RESULTS)
@@ -1491,9 +1676,11 @@ endif
 #  Compile rules for F90, C++, and c files for both to .o and .a files
 #-------------------------------------------------------------------------------
 
-# i suspect that the moddir needs to be given to these first 2 because
-# unlike the libs, we compile the system tests and examples in their
-# own directories without cding first to the test dir?
+# TODO:  why were we not passing the mod dirpath to the .f and .f90 files?
+# they are fixed format, but that does not mean they cannot use mods.
+# i went ahead and added the mod dir to the rules but if this causes problems
+# it should be removed.  it was not here originally and had been this way
+# a long time.
 
 .F90.o:
 	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
@@ -1504,11 +1691,11 @@ endif
            $(F_FREENOCPP) $<
 
 .f90.o:
-	$(FC) -c $(FOPTFLAGS) $(FFLAGS) \
+	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
            $(F_FIXCPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $<
 
 .f.o:
-	$(FC) -c $(FOPTFLAGS) $(FFLAGS) $(F_FIXNOCPP) $<
+	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) $(F_FIXNOCPP) $<
 
 .c.o:
 	$(CC) -c $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS) $(ESMF_INCLUDE) $<
@@ -1529,13 +1716,13 @@ endif
 	$(RM) $*.o
 
 .f90.a:
-	$(FC) -c $(FOPTFLAGS) $(FFLAGS) \
+	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
            $(F_FIXCPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $<
 	$(AR) $(AR_FLAGS) $(LIBNAME) $*.o
 	$(RM) $*.o
 
 .f.a:
-	$(FC) -c $(FOPTFLAGS) $(FFLAGS) $(F_FIXNOCPP) $<
+	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) $(F_FIXNOCPP) $<
 	$(AR) $(AR_FLAGS) $(LIBNAME) $*.o
 	$(RM) $*.o
 
@@ -1552,7 +1739,8 @@ endif
 # The rules below generate a valid Fortran file using gcc as a preprocessor.
 # The -P option prevents putting #line directives in the output, and
 # -E stops after preprocessing.  The 'tr' command substitutes one-for-one,
-# translating @s into newlines to separate multiline macros, and
+# translating @ into newline to separate lines in multiline macros (the output
+# of the preprocessor is a single line which must be separated again), and
 # also translates ^ into # so that other include files are ready to
 # be processed by the second runthru of the preprocessor during the
 # actual compile. (These lines are: ^include "fred.h" in the
@@ -1560,19 +1748,19 @@ endif
 # the dir, notdir macros below are to be sure to create the .F90 file
 # in the original source directory, since the makefile has already
 # changed dirs into the mod dir to build.  The sed command removes
-# any lines which start #pragma GCC ...  these are generated by some
-# versions of gcc and confuse other versions of the fortran preprocessor
-# when the resulting file is actually compiled.
-#
+# any lines which start #pragma GCC .  these are generated by a couple
+# versions of gcc and confuse the fortran compiler when trying to compile
+# the newly generated file.
+
 ifeq ($(origin CPPRULES),undefined)
 .cpp.F90:
 	$(CPP) -E -P -I$(ESMF_INCDIR) $< | tr "@^" "\n#" | \
-              sed -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@)
+              $(SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@)
 
 
 .cpp.o:
 	$(CPP) -E -P -I$(ESMF_INCDIR) $< | tr "@^" "\n#" | \
-              sed -e '/^#pragma GCC/d' > $(dir $<)$(basename $@).F90
+              $(SED) -e '/^#pragma GCC/d' > $(dir $<)$(basename $@).F90
 	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
           $(F_FREECPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $(dir $<)$(basename $@).F90
 endif
