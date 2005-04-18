@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.13 2005/04/11 15:53:37 nscollins Exp $
+#  $Id: build_rules.mk,v 1.14 2005/04/18 15:14:02 nscollins Exp $
 #
 #  Darwin.absoft.default
 #
@@ -81,7 +81,7 @@ SED		   = /usr/bin/sed
 # compilers
 #
 C_CC		= cc
-C_CXX		= g++ -fPIC
+C_CXX		= g++
 C_FC		= f95 
 C_FC_MOD        = -p
 
@@ -95,6 +95,7 @@ C_FCV           = f90fe -V    # docs say f95 -V should work but causes error
 #
 # Fortran flags
 #
+CFLAGS          += -fPIC
 FFLAGS          += -YEXT_NAMES=LCS -s
 F_FREECPP       = -ffree
 F_FIXCPP        = -ffixed
