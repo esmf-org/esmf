@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.112 2005/04/18 21:43:05 nscollins Exp $
+#  $Id: common.mk,v 1.113 2005/04/18 22:45:31 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -160,13 +160,16 @@ ifdef PBS_NODEFILE
 export ESMF_NODES := -machinefile $(PBS_NODEFILE)
 endif           
 
-# default compiler flag is neither debug nor optimized.  can be set
-# to g for debug, to O (capital oh) for optimized.
+# compiler option:  g to add debugging info, O (oh) for optimized code.
+# default compiler flag is optimized.  if you want to disable the optimization
+# set ESMF_BOPT to O and set ESMF_OPTLEVEL to 0 (zero).  that will compile
+# with -O0 (dash oh zero), which will disable all optimizations.
+# (notice that the BOPT setting is simply the letter without a leading dash.)
 ifndef ESMF_BOPT
-export ESMF_BOPT = 
+export ESMF_BOPT = O
 endif
 ifeq ($(ESMF_BOPT),default)
-export ESMF_BOPT = 
+export ESMF_BOPT = O
 endif
 
 
