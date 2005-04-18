@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.111 2005/04/18 16:43:56 nscollins Exp $
+#  $Id: common.mk,v 1.112 2005/04/18 21:43:05 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -122,7 +122,18 @@ endif
 # if PREC not already set, default to 64.  architectures which
 # have only one word size set this variable in their compiler/platform
 # dependent files, so this only applies to platforms which support
-# more than one wordsize (e.g. ibm, irix).
+# more than one code pointer size (e.g. ibm, irix).
+# TODO: there is an inconsistency here.  the original requirement was the
+# users wanted control over the default data word size (e.g. in fortran
+# declaring a 'real' might be 4 bytes or 8, with some compilers having a
+# compile-time flag to decide).   our use of the ESMF_PREC variable is only
+# to control the code pointer size - e.g. whether a pointer is 4 or 8 bytes.
+# this is a completely separate issue - one which must be dealt with, but
+# we often mix the terms without being clear on what we are setting and what
+# we are defaulting.  we do not let users control the default data item size
+# with any sort of ESMF_xxx environment variable.  if they want to, they can
+# add something to the fortran compile flags or C compile flags.  this should
+# be cleaned up and clearly documented.
 ifndef ESMF_PREC
 ESMF_PREC = default
 endif
