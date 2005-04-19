@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2005/04/19 16:06:38 svasquez Exp $
+# $Id: makefile,v 1.10 2005/04/19 16:30:09 svasquez Exp $
 
 ALL:  build_unit_tests
 
@@ -41,15 +41,15 @@ CLOBBERDIRS =
 RUN_ESMF_ArrayDataMapUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayDataMapUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.stdout
-        -cat *ArrayDataMapUTest.Log > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.Log
-        -rm *ArrayDataMapUTest.Log
+	-cat *ArrayDataMapUTest.Log > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.Log
+	-rm *ArrayDataMapUTest.Log
 
 
 RUN_ESMF_ArrayDataMapUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayDataMapUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.stdout
-        -cat *ArrayDataMapUTest.Log > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.Log
-        -rm *ArrayDataMapUTest.Log
+	-cat *ArrayDataMapUTest.Log > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.Log
+	-rm *ArrayDataMapUTest.Log
 
 ESMF_ArrayDataMapUTest.rm:
 	echo "ESMF_ArrayDataMapTest.rm target called here."
@@ -62,14 +62,14 @@ ESMF_ArrayDataMapUTest.rm:
 RUN_ESMC_ArrayDataMapUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMC_ArrayDataMapUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.stdout
-        -cat *ArrayDataMapUTest.Log > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.Log
-        -rm *ArrayDataMapUTest.Log
+	-cat *ArrayDataMapUTest.Log > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.Log
+	-rm *ArrayDataMapUTest.Log
 
 RUN_ESMC_ArrayDataMapUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMC_ArrayDataMapUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.stdout
-        -cat *ArrayDataMapUTest.Log > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.Log
-        -rm *ArrayDataMapUTest.Log
+	-cat *ArrayDataMapUTest.Log > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.Log
+	-rm *ArrayDataMapUTest.Log
 
 ESMC_ArrayDataMapUTest.rm:
 	echo "ESMC_ArrayDataMapTest.rm target called here."
