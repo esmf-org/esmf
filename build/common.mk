@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.113 2005/04/18 22:45:31 nscollins Exp $
+#  $Id: common.mk,v 1.114 2005/04/19 15:43:18 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1170,7 +1170,7 @@ tree_unit_tests_uni: tree_build_unit_tests tree_run_unit_tests_uni
 # build_unit_tests
 #
 build_unit_tests: chkopts reqdir_lib chkdir_tests
-	$(MAKE) MULTI="Multiprocessor" config_unit_tests
+	$(MAKE) config_unit_tests 
 	$(MAKE) ACTION=tree_build_unit_tests tree
 	@echo "ESMF unit tests built successfully."
 
@@ -1222,15 +1222,26 @@ run_unit_tests_uni:  chkopts reqdir_tests verify_exhaustive_flag
 tree_run_unit_tests_uni: $(TESTS_RUN_UNI)
 
 #
-# echo into a file how the tests were built and run, so we can
-# check them correctly.
+# echo into a file how the tests were last built and run, so when the perl
+# scripts run to check the results it can compute the number of messages that
+# should be found.  it needs to know exhaustive vs non to know how many total
+# tests we expected to execute; it needs to know multi vs uni so it knows
+# how many messages per test are generated.
 #
 config_unit_tests:
-	@echo "# This file used by test scripts, please do not delete." > $(CONFIG_TESTS)
+	echo "# This file used by test scripts, please do not delete." > $(CONFIG_TESTS)
 ifeq ($(ESMF_EXHAUSTIVE),ON) 
-	@echo "Exhaustive " $(MULTI) >> $(CONFIG_TESTS)
+ifeq ($(MULTI),) 
+	echo "Last built Exhaustive ;  Last run Noprocessor" >> $(CONFIG_TESTS)
 else
-	@echo "Non-exhaustive " $(MULTI) >> $(CONFIG_TESTS)
+	echo "Last built Exhaustive ;  Last run" $(MULTI) >> $(CONFIG_TESTS)
+endif
+else
+ifeq ($(MULTI),) 
+	echo "Last built Non-exhaustive ;  Last run Noprocessor" >> $(CONFIG_TESTS)
+else
+	echo "Last built Non-exhaustive ;  Last run" $(MULTI) >> $(CONFIG_TESTS)
+endif
 endif
 
 #
