@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: unit_tests_results.pl,v 1.4 2005/04/12 17:24:20 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.5 2005/04/19 16:44:48 svasquez Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -17,8 +17,8 @@ use File::Find
 @ut_files = ();		# Unit Test files
 @ut_x_files = ();	# Unit test executable files
 @all_files = (); 	# All files
-@stdout_files = (); 	# Unit Test stdout files 
-@file_lines = ();	# stdout file lines
+@Log_files = (); 	# Unit Test Log files 
+@file_lines = ();	# Log file lines
 @fail_lines = ();	# any file fail lines
 @fail_test_list = ();	# the list of unit tests failures
 @fail_list = ();	# the list of unit tests that fail
@@ -76,9 +76,9 @@ use File::Find
         # Get all unit tests files
         @ut_files=grep (/UTest/, @all_files);
 	# Delete all testg or testO from list
-	@stdout_files=grep (/test$ESMF_BOPT/, @ut_files);
-        # Delete stdout files from list
-        foreach $file ( @stdout_files) {
+	@Log_files=grep (/test$ESMF_BOPT/, @ut_files);
+        # Delete Log files from list
+        foreach $file ( @Log_files) {
                 foreach (@ut_files){
                         s/$file//s;     
                 }               
@@ -93,15 +93,15 @@ use File::Find
         }
 	# Clear all_files list
 	@all_files = ();
-	# Get the list of Unit tests stdout files
-        find(\&wanted_stdoutfiles, $TEST_DIR);
-        sub wanted_stdoutfiles {
+	# Get the list of Unit tests Log files
+        find(\&wanted_Logfiles, $TEST_DIR);
+        sub wanted_Logfiles {
                         # Put all files in a list
                         push all_files, "$File::Find::name\n" if -e ;
         }
-        @stdout_files=grep (/UTest.stdout/, @all_files);
-	# Sort the stdout files list
-	@stdout_files=sort(@stdout_files);
+        @Log_files=grep (/UTest.Log/, @all_files);
+	# Sort the Log files list
+	@Log_files=sort(@Log_files);
 
         # Get stripped unit tests names
         @st_ut_files = @ut_files;
@@ -119,9 +119,9 @@ use File::Find
 	# Sort the unit tests file list
 	@ut_files = sort(@ut_files);
 	# For each unit test file, we need to count the number of tests,
-	# Look for the corresponding stdout file.
+	# Look for the corresponding Log file.
 	# If it does not exist, add the unit test file in the crashed list
-	# If the stdout file exists, read the number of processors.
+	# If the Log file exists, read the number of processors.
 	# Count the PASS/FAILS divide by the number of processors
 	# The results of the division must be egual to the number of tests
 	# If it doesn't put the unit test in the crashed list.
@@ -161,7 +161,7 @@ use File::Find
                 	@file_lines = (); # Clear file lines
 			$total_test_count = $total_test_count + $test_count;
 
-			# Find the corresponding stdout file if the test count is not zero
+			# Find the corresponding Log file if the test count is not zero
 			if ($test_count != 0) {
 				$test_file = $file;
 				foreach ($test_file) {
@@ -169,9 +169,9 @@ use File::Find
                 			s/ESM/ ESM/;# Break it into 2 fields
                 			s/([^ ]*) ([^ ]*)/$2/; # Get rid of the 1st field
                 			s/\./ /; # Break it into 2 fields
-                			s/([^ ]*) ([^ ]*)/$1.stdout\n/; # Get rid of the 2nd field
+                			s/([^ ]*) ([^ ]*)/$1.Log\n/; # Get rid of the 2nd field
         			}
-				# Open the stdout file for this test and read how many processors it used
+				# Open the Log file for this test and read how many processors it used
 				@file_lines = ();
         			$ok=open(F,"$TEST_DIR/$test_file");
         			if (!(defined $ok)) {
@@ -276,7 +276,7 @@ use File::Find
 		}
 		# Get *UTest files
 		@ut_x_files=grep (/UTest/, @all_files);
-		# Count the number unit tests in stdout_ex_files
+		# Count the number unit tests in Log_ex_files
       		$ut_count = 0;
 		foreach $file ( @ut_x_files) {
 			$ut_count = $ut_count + 1;
@@ -292,7 +292,7 @@ use File::Find
 		}
 	}
 	if (!$SUMMARY) { # Print only if full output requested
-		print "\n\nThe stdout files for the unit tests can be found at:\n";
+		print "\n\nThe log and stdout files for the unit tests can be found at:\n";
 		print "$TEST_DIR\n\n\n";
 	}
 	else { # Print only if full output requested
