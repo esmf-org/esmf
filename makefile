@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.62 2005/04/14 21:25:28 nscollins Exp $
+# $Id: makefile,v 1.63 2005/04/19 23:02:44 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -124,12 +124,13 @@ info:   script_info
 	-@echo ""
 	-@echo "Compiling C with flags: $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS)"
 	-@echo "Compiling C++ with flags: $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS)"
-	-@echo "C include dir: $(ESMF_INCDIR)"
+	-@echo "C include dirs: $(ESMF_INCLUDE2)"
 	-@echo "Linking C with flags: $(LINKOPTS)"
 	-@echo "Linking C with libraries: -lesmf $(MPI_LIB) $(EXTRALIBS) $(CXXF90LIBS)"
 	-@echo ""
 	-@echo "Compiling Fortran with flags: $(FOPTFLAGS) $(FFLAGS) $(FCPPFLAGS)"
 	-@echo "Fortran module flag: $(FC_MOD)$(ESMF_MODDIR)"
+	-@echo "Fortran include dirs: $(ESMF_INCLUDE2)"
 	-@echo "Linking Fortran with flags: $(LINKOPTS)"
 	-@echo "Linking Fortran with libraries: -lesmf $(MPI_LIB) $(EXTRALIBS) $(F90CXXLIBS)"
 	-@echo " "
