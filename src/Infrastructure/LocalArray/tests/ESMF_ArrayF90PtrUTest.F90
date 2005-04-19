@@ -8,13 +8,36 @@
     use ESMF_TestMod
     implicit none
 
-    ! compiled_size is the hardcoded value for this dimension array.
-    ! computed_size is computed on-the-fly and is the definitive value.
-    ! if they do not match, the compiled-in size must change in ESMF_Conf.h.   
+    ! This test verifies that the actual size of the Fortran 90 "dope vector"
+    ! (private pointer information which stores the rank, indicies, data type,
+    ! etc for any Fortran array) matches the #define values in ESMC_Conf.h
+    !
+    ! These tests compute (in C) on the fly the difference between the 
+    ! addresses of a(1) and a(2) where a is an array of Fortran pointers.
+    ! This gives the real number of bytes that a "dope vector" takes.
+    ! On all the compilers we have seen there is a base size for rank 1
+    ! arrays, and then a fixed number of additional bytes for each additional
+    ! rank.  (presumably the extra space is where it stores the lower and 
+    ! upper index bounds for that rank).
+    !
+    ! This test compares the run-time computed value with the compiled-in
+    ! fixed numbers.   The variables used below in the tests are:
+    !
+    ! 1. compiled_size - the #define hardcoded value for this dimension array.
+    ! 2. computed_size - computed on-the-fly and the correct, definitive value.
+    !
+    ! if they do not match, the compiled-in size must change in 
+    ! $ESMF_DIR/build_config/platform_and_compiler_dep_name/ESMC_Conf.h.   
+    !
     ! (this size is not computed at run-time because in some places it has
     ! to be known at compile time to declare fixed size buffers.)
 
-    integer :: rc, result, compiled_size, computed_size
+    ! TODO: this test should be part of a preamble or prologue dir which runs
+    ! first because nothing else is going to work reliably if the pointer 
+    ! sizes are off.
+
+    integer :: compiled_size, computed_size
+    integer :: rc, result
     character(len=ESMF_MAXSTR) :: failMsg, name
 
     ! Pointers to arrays of data type Integer * 4 
