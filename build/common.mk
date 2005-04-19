@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.115 2005/04/19 17:10:52 nscollins Exp $
+#  $Id: common.mk,v 1.116 2005/04/19 23:04:47 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -260,7 +260,7 @@ F_PROTEX        = $(ESMF_TEMPLATES)/scripts/do_fprotex
 DO_LATEX	= $(ESMF_TEMPLATES)/scripts/do_latex
 DO_L2H		= $(ESMF_TEMPLATES)/scripts/do_l2h
 
-CONFIG_TESTS    = $(ESMF_TESTDIR)/tests.config
+TESTS_CONFIG    = $(ESMF_TESTDIR)/tests.config
 ESMF_TESTSCRIPTS    = $(ESMF_TOP_DIR)/scripts/test_scripts
 DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
@@ -447,13 +447,30 @@ ESMFLIB		= $(ESMF_LIBDIR)/libesmf.a
 SOURCE		= $(SOURCEC) $(SOURCEF)
 OBJS		= $(OBJSC) $(OBJSF)
 
+# these flags vary because each sub-makefile resets LOCDIR to the local dir.
+# i separated them so we could echo the non-local-dir flags for the info:
+# target - since info runs from the top, it is misleading to indicate that
+# those dirs are part of the search path.
+ESMF_INCLUDE1	= -I$(ESMF_TOP_DIR)/$(LOCDIR) \
+	 	  -I$(ESMF_TOP_DIR)/$(LOCDIR)/../include 
 
-ESMF_INCLUDE	= -I$(ESMF_TOP_DIR)/$(LOCDIR) \
-		  -I$(ESMF_TOP_DIR)/$(LOCDIR)/../include \
-		  $(LOCAL_INCLUDE) \
-		  -I$(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE) \
-		  -I$(ESMF_INCDIR) -I$(ESMF_MODDIR) $(MPI_INCLUDE) \
-                  $(EXTRA_INCLUDES)
+# if the SITE is set to something other than the default, search it
+# first for include files.  this gives the option to replace the 
+# configure files if needed, and also pick up the machineinfo.h file
+# from the correct place.
+ifneq ($(ESMF_SITE),default)
+ESMF_INCLUDE2    = -I$(ESMF_SITEDIR)  \
+		  -I$(ESMF_CONFDIR) 
+else
+ESMF_INCLUDE2    = -I$(ESMF_CONFDIR) 
+endif
+
+ESMF_INCLUDE2	+= $(LOCAL_INCLUDE) \
+		   -I$(ESMF_INCDIR) -I$(ESMF_MODDIR) $(MPI_INCLUDE) \
+                   $(EXTRA_INCLUDES)
+
+# combine the relative-to-local-dir flags with the global dir flags.
+ESMF_INCLUDE    = $(ESMF_INCLUDE1) $(ESMF_INCLUDE2)
 
 ESMC_INCLUDE    = $(ESMF_INCLUDE)
 CCPPFLAGS	+= $(PCONF) $(ESMC_PARCH) $(CPPFLAGS) -D__SDIR__='"$(LOCDIR)"'
@@ -1199,9 +1216,9 @@ run_unit_tests:  chkopts reqdir_tests verify_exhaustive_flag
 	  echo "" ; \
 	  $(MAKE) err ; \
 	fi 
-	@if [ -f $(CONFIG_TESTS) ] ; then \
-	   $(SED) -e 's/ [A-z][A-z]*processor/ Multiprocessor/' $(CONFIG_TESTS) > $(CONFIG_TESTS).temp; \
-           mv -f $(CONFIG_TESTS).temp $(CONFIG_TESTS); \
+	@if [ -f $(TESTS_CONFIG) ] ; then \
+	   $(SED) -e 's/ [A-z][A-z]*processor/ Multiprocessor/' $(TESTS_CONFIG) > $(TESTS_CONFIG).temp; \
+           mv -f $(TESTS_CONFIG).temp $(TESTS_CONFIG); \
         fi
 	-$(MAKE) ACTION=tree_run_unit_tests tree
 	$(MAKE) check_unit_tests
@@ -1212,9 +1229,9 @@ tree_run_unit_tests: $(TESTS_RUN)
 # run_unit_tests_uni
 #
 run_unit_tests_uni:  chkopts reqdir_tests verify_exhaustive_flag
-	@if [ -f $(CONFIG_TESTS) ] ; then \
-	   $(SED) -e 's/ [A-z][A-z]*processor/ Uniprocessor/' $(CONFIG_TESTS) > $(CONFIG_TESTS).temp; \
-           mv -f $(CONFIG_TESTS).temp $(CONFIG_TESTS); \
+	@if [ -f $(TESTS_CONFIG) ] ; then \
+	   $(SED) -e 's/ [A-z][A-z]*processor/ Uniprocessor/' $(TESTS_CONFIG) > $(TESTS_CONFIG).temp; \
+           mv -f $(TESTS_CONFIG).temp $(TESTS_CONFIG); \
         fi
 	-$(MAKE) ACTION=tree_run_unit_tests_uni tree 
 	$(MAKE) check_unit_tests
@@ -1229,23 +1246,23 @@ tree_run_unit_tests_uni: $(TESTS_RUN_UNI)
 # how many messages per test are generated.
 #
 config_unit_tests:
-	echo "# This file used by test scripts, please do not delete." > $(CONFIG_TESTS)
+	@echo "# This file used by test scripts, please do not delete." > $(TESTS_CONFIG)
 ifeq ($(ESMF_EXHAUSTIVE),ON) 
 ifeq ($(MULTI),) 
-	echo "Last built Exhaustive ;  Last run Noprocessor" >> $(CONFIG_TESTS)
+	@echo "Last built Exhaustive ;  Last run Noprocessor" >> $(TESTS_CONFIG)
 else
-	echo "Last built Exhaustive ;  Last run" $(MULTI) >> $(CONFIG_TESTS)
+	@echo "Last built Exhaustive ;  Last run" $(MULTI) >> $(TESTS_CONFIG)
 endif
 else
 ifeq ($(MULTI),) 
-	echo "Last built Non-exhaustive ;  Last run Noprocessor" >> $(CONFIG_TESTS)
+	@echo "Last built Non-exhaustive ;  Last run Noprocessor" >> $(TESTS_CONFIG)
 else
-	echo "Last built Non-exhaustive ;  Last run" $(MULTI) >> $(CONFIG_TESTS)
+	@echo "Last built Non-exhaustive ;  Last run" $(MULTI) >> $(TESTS_CONFIG)
 endif
 endif
 
 #
-# verify that either there is no CONFIG_TESTS file, or if one exists that
+# verify that either there is no TESTS_CONFIG file, or if one exists that
 # the string Exhaustive or Non-exhaustive matches the current setting of the
 # ESMF_EXHAUSTIVE environment variable.  this is used when trying to run
 # already-built unit tests, to be sure the user has not changed the setting
@@ -1260,16 +1277,16 @@ else
 endif
 
 exhaustive_flag_check:
-	@if [ -s $(CONFIG_TESTS) -a \
-	     `$(SED) -ne '/$(UNIT_TEST_STRING)/p' $(CONFIG_TESTS) | $(WC) -l` -ne 1 ] ; then \
+	@if [ -s $(TESTS_CONFIG) -a \
+	     `$(SED) -ne '/$(UNIT_TEST_STRING)/p' $(TESTS_CONFIG) | $(WC) -l` -ne 1 ] ; then \
 	  echo "The ESMF_EXHAUSTIVE environment variable is a compile-time control for" ;\
           echo "whether a basic set or an exhaustive set of tests are built." ;\
 	  echo "" ;\
 	  echo "The current setting of ESMF_EXHAUSTIVE is \"$(ESMF_EXHAUSTIVE)\", which" ;\
 	  echo "is not the same as when the unit tests were last built." ;\
 	  echo "(This is based on the contents of the file:" ;\
-          echo "$(CONFIG_TESTS) ";\
-	  echo "which contains: `$(SED) -e '1d' $(CONFIG_TESTS)` )." ;\
+          echo "$(TESTS_CONFIG) ";\
+	  echo "which contains: `$(SED) -e '1d' $(TESTS_CONFIG)` )." ;\
 	  echo "" ;\
 	  echo "To rebuild and run the unit tests with the current ESMF_EXHAUSTIVE value, run:" ;\
 	  echo "   $(MAKE) clean_unit_tests unit_tests"  ;\
@@ -1283,7 +1300,7 @@ exhaustive_flag_check:
 # so we can rebuild them with the proper flags if that is what is needed.
 #
 clean_unit_tests:
-	$(RM) $(ESMF_TESTDIR)/*UTest* $(CONFIG_TESTS)
+	$(RM) $(ESMF_TESTDIR)/*UTest* $(TESTS_CONFIG)
 
 
 #
