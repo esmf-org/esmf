@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.114 2005/04/19 15:43:18 nscollins Exp $
+#  $Id: common.mk,v 1.115 2005/04/19 17:10:52 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1200,7 +1200,7 @@ run_unit_tests:  chkopts reqdir_tests verify_exhaustive_flag
 	  $(MAKE) err ; \
 	fi 
 	@if [ -f $(CONFIG_TESTS) ] ; then \
-	   $(SED) -e 's/ .*processor/ Multiprocessor/' $(CONFIG_TESTS) > $(CONFIG_TESTS).temp; \
+	   $(SED) -e 's/ [A-z][A-z]*processor/ Multiprocessor/' $(CONFIG_TESTS) > $(CONFIG_TESTS).temp; \
            mv -f $(CONFIG_TESTS).temp $(CONFIG_TESTS); \
         fi
 	-$(MAKE) ACTION=tree_run_unit_tests tree
@@ -1213,7 +1213,7 @@ tree_run_unit_tests: $(TESTS_RUN)
 #
 run_unit_tests_uni:  chkopts reqdir_tests verify_exhaustive_flag
 	@if [ -f $(CONFIG_TESTS) ] ; then \
-	   $(SED) -e 's/ .*processor/ Uniprocessor/' $(CONFIG_TESTS) > $(CONFIG_TESTS).temp; \
+	   $(SED) -e 's/ [A-z][A-z]*processor/ Uniprocessor/' $(CONFIG_TESTS) > $(CONFIG_TESTS).temp; \
            mv -f $(CONFIG_TESTS).temp $(CONFIG_TESTS); \
         fi
 	-$(MAKE) ACTION=tree_run_unit_tests_uni tree 
