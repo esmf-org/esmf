@@ -1,0 +1,20 @@
+Linux Gnu (g95/gcc) configurations for ESMF.
+
+Contact:  Tom Wainwright, NOAA Fisheries, thomas.wainwright@noaa.gov
+
+These configurations are based on the PGI configurations.  They have not
+been optimized.  They have been tested only in single-processor mode.  They
+have been tested only with ESMF_NO_IOCODE.
+
+Test system:
+
+Linux 2.6.5-7.151-default i686 (SuSE 9.1)
+gcc 3.3.3
+g95 (GCC 4.0.0 20050129 (experimental) (g95!) Apr 14 2005)
+ESMF_VERSION_STRING "2.1.0rp2"
+
+Requires the following environment settings:
+
+export ESMF_COMPILER=gnu
+export ESMF_PREC=32
+

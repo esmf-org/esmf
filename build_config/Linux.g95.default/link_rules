@@ -1,0 +1,32 @@
+#  $Id: link_rules,v 1.1 2005/04/20 22:55:32 jwolfe Exp $
+#
+#  link_rules
+#
+
+The following command shows how to link a Fortran90 application with the ESMF 
+shared libraries on Linux. In the command, the Fortran90 application is 
+called "myModel".
+
+It is assumed that the ESMF libraries have been built successfully at ESMF_DIR 
+with the following environment variables:
+ESMF_ARCH = Linux
+ESMF_COMPILER = gnu
+ESMF_PREC = 32
+ESMF_SITE = default
+ESMF_COMM = mpiuni
+ESMF_BOPT = g or O
+
+To simplify the link rules, first define MODDIR and LIBDIR.
+
+MODDIR = ${ESMF_DIR}/mod/mod${ESMF_BOPT}/Linux.gnu.32.default
+LIBDIR = ${ESMF_DIR}/lib/lib${ESMF_BOPT}/Linux.gnu.32.default
+
+Also define: (Probably not needed; g95 should find it!)
+LD_LIBRARY_PATH=/local/g95/linux86/lib
+
+The link rules are:
+
+g95 -I${MODDIR} -o myModel myModel.F -L${LIBDIR} \
+  -lesmf -lmpiuni -lpthread -lnetcdf_stubs  -lrt -lc -lstdc++
+
+
