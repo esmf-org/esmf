@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: unit_tests_results.pl,v 1.5 2005/04/19 16:44:48 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.6 2005/04/20 21:26:38 svasquez Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -252,6 +252,10 @@ use File::Find
 	}
 
 	if (@fail_test_list != ()){
+		# Delete date type and PET part of the fail message.
+		foreach (@fail_test_list) {
+			s/^.*?FAIL/   FAIL/;# Delete everything before FAIL
+		}
 		# Delete repeated lines in fail_test_list
 		$sorted_fail_test_list = ();
 		foreach $file (@fail_test_list){
