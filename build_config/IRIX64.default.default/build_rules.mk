@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.19 2005/04/11 15:53:37 nscollins Exp $
+# $Id: build_rules.mk,v 1.20 2005/04/20 22:37:29 nscollins Exp $
 # 
 # IRIX64.default.default
 #
@@ -76,7 +76,7 @@ C_CC		   = CC $(SIZEFLAG) -mp $(SGI_FLAGS2)
 C_CXX		   = CC $(SIZEFLAG) -mp $(SGI_FLAGS2) -LANG:std
 C_FC		   = f90 $(SIZEFLAG) -mp -macro_expand
 
-C_CLINKER	   = cc $(SIZEFLAG) -mp $(SGI_FLAGS1) -MP:open_mp=ON
+C_CLINKER	   = CC $(SIZEFLAG) -mp $(SGI_FLAGS1) -MP:open_mp=ON
 C_FLINKER	   = f90 $(SIZEFLAG) -mp $(SGI_FLAGS1) -MP:open_mp=ON
 
 C_SLFLAG           = -rpath
