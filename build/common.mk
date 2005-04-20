@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.117 2005/04/20 14:42:20 nscollins Exp $
+#  $Id: common.mk,v 1.118 2005/04/20 20:39:26 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -180,6 +180,7 @@ AR_FLAGS	   = cr
 AR_EXTRACT         = -x
 AR32_64            = $(AR)
 RM		   = rm -f
+MV 		   = mv -f
 RANLIB		   = ranlib
 M4	           = m4
 SED		   = sed 
@@ -1249,8 +1250,8 @@ run_unit_tests:  chkopts reqdir_tests verify_exhaustive_flag
 	  $(MAKE) err ; \
 	fi 
 	@if [ -f $(TESTS_CONFIG) ] ; then \
-	   $(SED) -e 's/ [A-z][A-z]*processor/ Multiprocessor/' $(TESTS_CONFIG) > $(TESTS_CONFIG).temp; \
-           mv -f $(TESTS_CONFIG).temp $(TESTS_CONFIG); \
+	   $(SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Multiprocessor/' $(TESTS_CONFIG) > $(TESTS_CONFIG).temp; \
+           $(MV) $(TESTS_CONFIG).temp $(TESTS_CONFIG); \
         fi
 	-$(MAKE) ACTION=tree_run_unit_tests tree
 	$(MAKE) check_unit_tests
@@ -1262,8 +1263,8 @@ tree_run_unit_tests: $(TESTS_RUN)
 #
 run_unit_tests_uni:  chkopts reqdir_tests verify_exhaustive_flag
 	@if [ -f $(TESTS_CONFIG) ] ; then \
-	   $(SED) -e 's/ [A-z][A-z]*processor/ Uniprocessor/' $(TESTS_CONFIG) > $(TESTS_CONFIG).temp; \
-           mv -f $(TESTS_CONFIG).temp $(TESTS_CONFIG); \
+	   $(SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(TESTS_CONFIG) > $(TESTS_CONFIG).temp; \
+           $(MV) $(TESTS_CONFIG).temp $(TESTS_CONFIG); \
         fi
 	-$(MAKE) ACTION=tree_run_unit_tests_uni tree 
 	$(MAKE) check_unit_tests
@@ -2001,7 +2002,7 @@ $(ESMF_DOCDIR)/%_desdoc: %_desdoc.ctex $(DESDOC_DEP_FILES)
 	fi;
 	$(DO_L2H) $* des
 	$(RM) .latex2html-init
-	mv -f $(@F) $(ESMF_DOCDIR)
+	$(MV) -f $(@F) $(ESMF_DOCDIR)
 
 
 $(ESMF_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
@@ -2013,7 +2014,7 @@ $(ESMF_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
 	fi;
 	$(DO_L2H) $* ref
 	$(RM) .latex2html-init
-	mv -f $(@F) $(ESMF_DOCDIR)
+	$(MV) $(@F) $(ESMF_DOCDIR)
 
 $(ESMF_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 	@echo "========================================="
@@ -2024,7 +2025,7 @@ $(ESMF_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 	fi;
 	$(DO_L2H) $* req
 	$(RM) .latex2html-init
-	mv -f $(@F) $(ESMF_DOCDIR)
+	$(MV) $(@F) $(ESMF_DOCDIR)
 
 #-------------------------------------------------------------------------------
 #  These rules are for compiling the test examples.
