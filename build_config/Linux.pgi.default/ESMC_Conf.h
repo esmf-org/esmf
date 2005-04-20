@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.7 2005/03/31 16:57:00 nscollins Exp $"
+"$Id: ESMC_Conf.h,v 1.8 2005/04/20 21:36:23 nscollins Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -64,11 +64,17 @@ non-character data.  However, PGI says check against entire array to be safe.
 For character data, "not present" optional arguments are marked with the
 address of global compiler-generated variable pghpf_0c_.
 #endif
+#if 0
+This file is included by one F90 file (the test for F90 pointer size), so
+try to protect the F90 file from C declarations.
+#endif
+#ifndef _FROM_FORTRAN
 extern char pghpf_0_[];
 extern char pghpf_0c_;
 #define ESMC_PRESENT(arg) ( ! ( ( (char*)(arg) >=  pghpf_0_ && \
                                   (char*)(arg) <= &pghpf_0_[12] ) || \
 		                  (char*)(arg) == &pghpf_0c_ ) )
+#endif
 
 #if S32
 #define ESMF_IS_32BIT_MACHINE 1

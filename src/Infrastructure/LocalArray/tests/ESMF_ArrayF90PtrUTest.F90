@@ -2,6 +2,8 @@
     program test
     
 #include "ESMF.h"
+
+#define _FROM_FORTRAN 1
 #include "ESMC_Conf.h"
 
     use ESMF_Mod
