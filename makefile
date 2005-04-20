@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.63 2005/04/19 23:02:44 nscollins Exp $
+# $Id: makefile,v 1.64 2005/04/20 21:11:06 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -53,12 +53,9 @@ script_info:
 	-@echo " "
 	-@echo "------------------------------------------"
 	-@echo "Version information: "
-	-@if [ -n "$(C_CCV)" -a "$(C_CCV)" != "unknown" ] ; then \
-	  echo "C Compiler version:" ; $(C_CCV) ; echo "" ; fi
-	-@if [ -n "$(C_CXXV)" -a "$(C_CXXV)" != "unknown" ] ; then \
-	  echo "C++ Compiler version:" ; $(C_CXXV) ; echo "" ; fi
-	-@if [ -n "$(C_FCV)" -a "$(C_FCV)" != "unknown" ] ; then \
-	  echo "Fortran Compiler version:" ; $(C_FCV) ; echo "" ; fi
+	-@echo "C Compiler version:" ; $(C_CCV) ; echo "" 
+	-@echo "C++ Compiler version:" ; $(C_CXXV) ; echo "" 
+	-@echo "Fortran Compiler version:" ; $(C_FCV) ; echo "" 
 	-@if [ -f $(ESMF_DIR)/src/Infrastructure/Base/include/ESMC_Macros.h ] ; then \
 	  fgrep ESMF_VERSION_STRING $(ESMF_DIR)/src/Infrastructure/Base/include/ESMC_Macros.h | $(SED) "s/^#define //" ; fi
 	-@echo " "
