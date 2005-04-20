@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGather1DUTest.F90,v 1.2 2005/04/13 22:24:23 svasquez Exp $
+! $Id: ESMF_FieldGather1DUTest.F90,v 1.3 2005/04/20 23:01:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldGather1DUTest.F90,v 1.2 2005/04/13 22:24:23 svasquez Exp $'
+      '$Id: ESMF_FieldGather1DUTest.F90,v 1.3 2005/04/20 23:01:11 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,7 @@
       integer :: i, j, ifld, jfld
       integer :: npets, myDE
       integer :: hWidth
-      integer, dimension(1) :: counts, localCounts
+      integer, dimension(2) :: counts, localCounts
       logical :: ok
       real(ESMF_KIND_R8) :: pi, minGather, maxGather
       real(ESMF_KIND_R8), dimension(2) :: min, max
