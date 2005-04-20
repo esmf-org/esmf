@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.64 2005/04/20 21:11:06 nscollins Exp $
+# $Id: makefile,v 1.65 2005/04/20 22:34:35 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -112,10 +112,10 @@ info:   script_info
 	-@echo " "
 	-@echo "------------------------------------------"
 	-@echo "Compilers, Flags, and Libraries:"
-	-@echo "Location of the preprocessor: " `which $(CPP)`
-	-@echo "Location of the C compiler: " `which $(CC)`
-	-@echo "Location of the C++ compiler: " `which $(CXX)`
-	-@echo "Location of the Fortran compiler: " `which $(FC)`
+	-@echo "Location of the preprocessor: " `which $(word 1, $(CPP))`
+	-@echo "Location of the C compiler: " `which $(word 1, $(CC))`
+	-@echo "Location of the C++ compiler: " `which $(word 1, $(CXX))`
+	-@echo "Location of the Fortran compiler: " `which $(word 1, $(FC))`
 	-@echo "Linking C with: $(CLINKER)"
 	-@echo "Linking Fortran with: $(FLINKER)"
 	-@echo ""
