@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.16 2005/04/20 20:40:07 nscollins Exp $
+#  $Id: build_rules.mk,v 1.17 2005/04/20 21:11:46 nscollins Exp $
 #
 #  Darwin.absoft.default
 #
@@ -92,11 +92,12 @@ C_FC_MOD        = -p
 
 C_CCV		= ${C_CC} --version
 C_CXXV		= ${C_CXX} --version
-C_FCV           = (f90 -V && f90fe -V)
+C_FCV           = (x="`f95 -V 2>/dev/null`"; \
+                  if [ -n "$$x" ] ; then echo $$x ; else f90fe -V ; fi)
 # on absoft 8 and before, docs say f95 -V should work, but it causes an error.
 # f90fe -V prints good version info.   absoft 9 and later, however, fixes this
 # and now f90 -V prints good info, and f90fe gives license errors.  so try
-# doing both - you will get an error but will at least get some version info.
+# doing both and take the one which is not null.
 
 #
 # Fortran flags

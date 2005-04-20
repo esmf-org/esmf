@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.17 2005/04/11 15:53:37 nscollins Exp $
+#  $Id: build_rules.mk,v 1.18 2005/04/20 21:12:55 nscollins Exp $
 #
 #  Linux.absoft.default makefile fragment
 #
@@ -71,11 +71,12 @@ C_CC            = cc
 C_CXX           = g++ -fPIC
 C_FC            = f95
 FFLAGS          += -YEXT_NAMES=LCS -s  -YEXT_SFX=_
-C_FCV           = f90 -V && f90fe -V
+C_FCV           = (x="`f95 -V 2>/dev/null`"; \
+                  if [ -n "$$x" ] ; then echo $$x ; else f90fe -V ; fi)
 # on absoft 8 and before, docs say f95 -V should work, but it causes an error.
 # f90fe -V prints good version info.   absoft 9 and later, however, fixes this
 # and now f90 -V prints good info, and f90fe gives license errors.  so try
-# doing both - you will get an error but will at least get some version info.
+# doing both, and take the one which is not null.
 endif
 
 ifeq ($(ESMF_COMM),mpich)
