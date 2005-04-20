@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.15 2005/04/11 15:53:37 nscollins Exp $
+#  $Id: build_rules.mk,v 1.16 2005/04/20 22:12:33 nscollins Exp $
 #
 #  Darwin.nag.default
 #
@@ -81,7 +81,9 @@ F_FREENOCPP     = -free
 F_FIXNOCPP      = -fixed
 
 C_F90CXXLIBS       = -L/usr/local/lib/NAGware -lf96 -lstdc++
-C_CXXF90LIBS       = -L/usr/local/lib/NAGware -lf96 -lstdc++
+C_CXXF90LIBS       = -L/usr/local/lib/NAGware -lf96 -lstdc++ \
+                     /usr/local/lib/NAGWare/libf96.a  \
+                     /usr/local/lib/NAGWare/quickfit.o
 
 ###############################################################################
 
