@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.18 2005/04/20 21:12:55 nscollins Exp $
+#  $Id: build_rules.mk,v 1.19 2005/04/20 21:26:17 nscollins Exp $
 #
 #  Linux.absoft.default makefile fragment
 #
@@ -84,7 +84,7 @@ C_CC            = mpicc
 C_CXX           = mpiCC -fPIC
 C_FC            = mpif90 
 FFLAGS          += -YEXT_NAMES=LCS -s 
-C_FCV           = ${C_FC} --version
+C_FCV           = ${C_FC} -v 2>/dev/null
 endif
 
 # common settings
