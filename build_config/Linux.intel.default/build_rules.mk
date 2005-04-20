@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.34 2005/04/11 15:53:37 nscollins Exp $
+# $Id: build_rules.mk,v 1.35 2005/04/20 22:25:46 nscollins Exp $
 #
 # Linux.intel.default
 #
@@ -106,9 +106,8 @@ C_FC	   = mpif90
 endif
 
 ifeq ($(ESMF_PREC),64)
-C_CC	   += -size_lp64
-C_CXX	   += -size_lp64
-C_FC	   += -size_lp64
+CFLAGS	   += -size_lp64
+FFLAGS	   += -size_lp64
 endif
 
 # the default is to link with the intel C and C++ libraries unless you have
@@ -128,15 +127,13 @@ endif
 endif
 
 # add standard flags
-C_CC    +=  $(INTEL_C_LIB_FLAG)
-C_CXX   +=  $(INTEL_C_LIB_FLAG)
-C_FC    +=
+CFLAGS  +=  $(INTEL_C_LIB_FLAG)
+FFLAGS  +=
 
 # conditionally add pthread compiler flags
 ifeq ($(ESMF_PTHREADS),ON)
-C_CC    +=  -pthread
-C_CXX   +=  -pthread
-C_FC    +=  -threads
+CFLAGS  +=  -pthread
+FFLAGS  +=  -threads
 endif
 
 # how to print versions
