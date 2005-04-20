@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.116 2005/04/19 23:04:47 nscollins Exp $
+#  $Id: common.mk,v 1.117 2005/04/20 14:42:20 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -593,8 +593,9 @@ LINKOPTS     = $(C_LINKOPTS)
 #CLINKER       = $(C_CLINKER) $(COPTFLAGS) $(C_SH_LIB_PATH)
 
 # default is to include the esmf lib dir in the library search path
-LIB_PATHS = -L$(LDIR)
-LD_PATHS  = $(SLFLAG)$(LDIR)
+# plus anything set in the platform dep file
+LIB_PATHS = -L$(LDIR) $(C_LIB_PATHS)
+LD_PATHS  = $(SLFLAG)$(LDIR) $(C_LD_PATHS)
 
 # append each directory which is in LD_LIBRARY_PATH to
 # the -L flag and also to the run-time load flag.  (on systems which
@@ -607,6 +608,40 @@ LD_PATHS   += $(addprefix $(SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
 endif
 
 
+# collect all the libs together in a single variable
+CLINKLIBS = -lesmf $(MPI_LIB) $(EXTRA_LIBS) $(CXXF90LIBS)
+FLINKLIBS = -lesmf $(MPI_LIB) $(EXTRA_LIBS) $(F90CXXLIBS)
+
+
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+# alias section:
+# these are here to help the link fragment files.  if users include 
+# common.mk file, then they can use these to link with.  make these 
+# variables have ESMF_ since they are seen by the user.  (it gets too
+# unwieldly here inside the makefile if esmf is prepended to everything.)
+ESMF_FC        = $(FC)
+ESMF_LINKER    = $(FLINKER)
+ESMF_LINKOPTS  = $(LINKOPTS)
+ESMF_LINKLIBS  = $(FLINKLIBS)
+ESMF_CC        = $(CC)
+ESMF_CXX       = $(CXX)
+ESMF_CLINKER   = $(CLINKER)
+ESMF_CLINKOPTS = $(LINKOPTS)
+ESMF_CLINKLIBS = $(CLINKLIBS)
+
+# these seem less useful, since if the user includes this file it already
+# has a rule to make the .o files directly from the .F90 files.  but in case
+# this file causes problems - e.g. conflict with other makefiles - then
+# here are the flags - but it omits the Fixed/Free format, cpp vs not flags.
+# those have to be added explicitly if not using our rules.
+
+# collect all the compile flags together into single variable
+ESMF_FLAGS = $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
+              $(FCPPFLAGS) $(ESMF_INCLUDE)
+ESMF_CFLAGS = $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS) $(ESMF_INCLUDE)
+
+#-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
 # HOWTO:  Warning: Here there be dragons.
@@ -1090,8 +1125,7 @@ tree_build_system_tests:  $(SYSTEM_TESTS_BUILD)
 #  Link rule for Fortran system tests.
 #
 $(ESMF_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
-	$(FLINKER) $(LINKOPTS) -o $@ $(SYSTEM_TESTS_OBJ) $< -lesmf \
-        $(MPI_LIB) $(EXTRA_LIBS) $(F90CXXLIBS)
+	$(FLINKER) $(LINKOPTS) -o $@ $(SYSTEM_TESTS_OBJ) $< $(FLINKLIBS)
 	$(RM) -f *.o *.mod
 
 #
@@ -1195,14 +1229,12 @@ tree_build_unit_tests: $(TESTS_BUILD)
 
 
 $(ESMF_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o $(ESMFLIB)
-	$(FLINKER) $(LINKOPTS) -o $@  $(UTEST_$(*)_OBJS) $< -lesmf \
-        $(MPI_LIB) $(EXTRA_LIBS) $(F90CXXLIBS)
+	$(FLINKER) $(LINKOPTS) -o $@  $(UTEST_$(*)_OBJS) $< $(FLINKLIBS)
 	$(RM) -f *.o *.mod
 
 
 $(ESMF_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)
-	$(CLINKER) $(LINKOPTS) -o $@  $(UTEST_$(*)_OBJS) $< -lesmf \
-        $(MPI_LIB) $(EXTRA_LIBS) $(CXXF90LIBS) 
+	$(CLINKER) $(LINKOPTS) -o $@  $(UTEST_$(*)_OBJS) $< $(CLINKLIBS)
 	$(RM) -f *.o *.mod
 
 
@@ -1388,14 +1420,12 @@ tree_build_examples: $(EXAMPLES_BUILD)
 #  Examples Link commands
 #
 $(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(ESMFLIB)
-	$(FLINKER) $(LINKOPTS) -o $@ $(EXAMPLE_$(*)_OBJS) $< -lesmf \
-        $(MPI_LIB) $(EXTRA_LIBS) $(F90CXXLIBS)
+	$(FLINKER) $(LINKOPTS) -o $@ $(EXAMPLE_$(*)_OBJS) $< $(FLINKLIBS)
 	$(RM) -f *.o *.mod
 
 
 $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
-	$(CLINKER) $(LINKOPTS) -o $@ $(EXAMPLE_$(*)_OBJS) $< -lesmf \
-        $(MPI_LIB) $(EXTRA_LIBS) $(CXXF90LIBS)
+	$(CLINKER) $(LINKOPTS) -o $@ $(EXAMPLE_$(*)_OBJS) $< $(CLINKLIBS)
 	$(RM) $<
 
 #
@@ -1468,8 +1498,7 @@ build_demos: chkopts reqdir_lib chkdir_tests
 tree_build_demos: $(DEMOS_BUILD) 
 
 $(ESMF_TESTDIR)/%App : %Demo.o $(DEMOS_OBJ) $(ESMFLIB)
-	$(FLINKER) $(LINKOPTS) -o $@ $(DEMOS_OBJ) $< -lesmf $(MPI_LIB) \
-	$(EXTRA_LIBS) $(F90CXXLIBS)
+	$(FLINKER) $(LINKOPTS) -o $@ $(DEMOS_OBJ) $< $(FLINKLIBS)
 	$(RM) -f *.o *.mod
 
 
