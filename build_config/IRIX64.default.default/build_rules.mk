@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.20 2005/04/20 22:37:29 nscollins Exp $
+# $Id: build_rules.mk,v 1.21 2005/04/21 15:19:30 nscollins Exp $
 # 
 # IRIX64.default.default
 #
@@ -54,7 +54,8 @@ MPI_INCLUDE    += -DESMC_HAVE_INT_MPI_COMM
 endif
 
 # For IRIX64 the default is MPI_Comm_c2f not supported
-CPPFLAGS       += -DESMF_DONT_HAVE_MPI_COMM_C2F
+# nsc - this seems to be causing problems - try without it.
+#CPPFLAGS       += -DESMF_DONT_HAVE_MPI_COMM_C2F
 
 ############################################################
 
@@ -84,6 +85,7 @@ C_SLFLAG           = -rpath
 C_CXXF90LD         = CC $(SIZEFLAG)
 C_F90CXXLD         = f90 $(SIZEFLAG)
 
+RANLIB             = true
 
 C_CCV		   = cc -version
 C_CXXV		   = CC -version
