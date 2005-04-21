@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.118 2005/04/20 20:39:26 nscollins Exp $
+#  $Id: common.mk,v 1.119 2005/04/21 21:40:22 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -607,6 +607,9 @@ ifeq ($(origin LD_LIBRARY_PATH), environment)
 LIB_PATHS  += $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
 LD_PATHS   += $(addprefix $(SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
 endif
+
+#add the LIB_PATHS and LD_PATHS to the LINKOPTS
+LINKOPTS  += $(LIB_PATHS) $(LD_PATHS)
 
 
 # collect all the libs together in a single variable
