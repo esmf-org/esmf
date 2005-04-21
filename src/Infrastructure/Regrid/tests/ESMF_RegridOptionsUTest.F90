@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridOptionsUTest.F90,v 1.3 2005/03/14 18:15:32 nscollins Exp $
+! $Id: ESMF_RegridOptionsUTest.F90,v 1.4 2005/04/21 21:39:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -32,14 +32,14 @@
 !
 !-----------------------------------------------------------------------------
 ! !USES:
-    use ESMF_TestMod    ! test methods
     use ESMF_Mod
+    use ESMF_TestMod    ! test methods
     implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_RegridOptionsUTest.F90,v 1.3 2005/03/14 18:15:32 nscollins Exp $'
+      '$Id: ESMF_RegridOptionsUTest.F90,v 1.4 2005/04/21 21:39:23 nscollins Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -345,9 +345,9 @@ contains
       type(ESMF_DELayout) :: delayout
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Grid) :: grid
-      integer :: npets, de_id
+      integer :: npets, de_id, decount(2)
       integer :: counts(ESMF_MAXGRIDDIM), order(ESMF_MAXDIM)
-      real(ESMF_KIND_R8) :: min(2), max(2)
+      real(ESMF_KIND_R8) :: mincoord(2), maxcoord(2)
       real(ESMF_KIND_R8), pointer :: idata(:,:,:)
       type(ESMF_GridHorzStagger) :: horz_stagger
       type(ESMF_FieldDataMap) :: datamap
@@ -362,10 +362,11 @@ contains
       if (status .ne. ESMF_SUCCESS) goto 10
 
       if (npets .eq. 1) then
-        delayout = ESMF_DELayoutCreate(vm, (/ 1, 1 /), rc=status)
+        decount(:) = (/ 1, 1 /)
       else
-        delayout = ESMF_DELayoutCreate(vm, (/ 2, npets/2 /), rc=status)
+        decount(:) = (/ 2, npets/2 /)
       endif
+      delayout = ESMF_DELayoutCreate(vm, decount, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! and get our local de number
@@ -379,19 +380,19 @@ contains
       counts(3) = 40
 
       ! Set up the max and min coordinates
-      min(1) = 0.0
-      max(1) = 60.0
-      min(2) = 0.0
-      max(2) = 50.0
+      mincoord(1) = 0.0
+      maxcoord(1) = 60.0
+      mincoord(2) = 0.0
+      maxcoord(2) = 50.0
 
       ! Specify the places on each cell at which data might be located
       horz_stagger = ESMF_GRID_HORZ_STAGGER_A
 
       grid = ESMF_GridCreateHorzXYUni(counts=counts(2:3), &
-                                       minGlobalCoordPerDim=min, &
-                                       maxGlobalCoordPerDim=max, &
-                                       horzStagger=horz_stagger, &
-                                       name="source grid", rc=status)
+                                      minGlobalCoordPerDim=mincoord, &
+                                      maxGlobalCoordPerDim=maxcoord, &
+                                      horzStagger=horz_stagger, &
+                                      name="source grid", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_GridDistribute(grid, delayout=delayout, rc=status)
@@ -454,7 +455,7 @@ contains
       integer :: npets, countsPerDE1(8), countsPerDE2(2)
       integer :: nDE1, nDE2
       integer :: counts(3), order(3)
-      real(ESMF_KIND_R8) :: min(2), max(2)
+      real(ESMF_KIND_R8) :: mincoord(2)
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       real(ESMF_KIND_R8), pointer :: idata(:,:,:)
       type(ESMF_GridHorzStagger) :: horz_stagger
@@ -496,12 +497,12 @@ contains
       if (status .ne. ESMF_SUCCESS) goto 10
 
       counts(1:3)  = (/  4, 40, 50 /)
-      min(1) = 0.0
+      mincoord(1) = 0.0
       delta1 = (/ 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.3, 1.4, &
                   1.4, 1.5, 1.6, 1.6, 1.6, 1.8, 1.8, 1.7, 1.7, 1.6, &
                   1.6, 1.6, 1.8, 1.8, 2.0, 2.0, 2.2, 2.2, 2.2, 2.2, &
                   2.0, 1.7, 1.5, 1.3, 1.2, 1.1, 1.0, 1.0, 1.0, 0.9 /)
-      min(2) = 0.0
+      mincoord(2) = 0.0
       delta2 = (/ 0.8, 0.8, 0.8, 0.8, 0.8, 0.7, 0.7, 0.6, 0.7, 0.8, &
                   0.9, 0.9, 0.9, 0.9, 1.0, 1.0, 1.0, 1.0, 0.9, 1.0, &
                   1.0, 1.0, 1.0, 1.1, 1.2, 1.3, 1.3, 1.3, 1.4, 1.4, &
@@ -510,7 +511,7 @@ contains
 
       horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
 
-      grid = ESMF_GridCreateHorzXY(minGlobalCoordPerDim=min, &
+      grid = ESMF_GridCreateHorzXY(minGlobalCoordPerDim=mincoord, &
                                     delta1=delta1, delta2=delta2, &
                                     horzStagger=horz_stagger, &
                                     name="source grid", rc=status)
@@ -570,7 +571,6 @@ contains
       integer :: i, j, k, status
       type(ESMF_Grid) :: grid
       type(ESMF_Array) :: array1, coordArray(2)
-      real(ESMF_KIND_R8) :: min(2), max(2)
       integer :: counts(ESMF_MAXGRIDDIM)
       real(ESMF_KIND_R8), pointer :: coordX(:,:), coordY(:,:), idata(:,:,:)
       type(ESMF_RelLoc) :: relloc
