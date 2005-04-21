@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.32 2005/04/20 21:19:30 nscollins Exp $ 
+# $Id: makefile,v 1.33 2005/04/21 18:09:33 nscollins Exp $ 
 
 ALL:  build_unit_tests
 
@@ -77,13 +77,9 @@ $(ESMC_TESTDIR)/ESMC_CompCreate: ESMC_CompCreate.o
 
 RUN_ESMC_CompCreate:
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_CompCreate > $(ESMC_TESTDIR)/ESMC_CompCreate.stdout
-	-cat *CompCreate.Log > $(ESMC_TESTDIR)/ESMC_CompCreate.Log
-	-rm *CompCreate.Log
 
 RUN_ESMC_CompCreateUNI:
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_CompCreate > $(ESMC_TESTDIR)/ESMC_CompCreate.stdout
-	-cat *CompCreate.Log > $(ESMC_TESTDIR)/ESMC_CompCreate.Log
-	-rm *CompCreate.Log
 
 
 #
@@ -98,13 +94,9 @@ $(ESMC_TESTDIR)/ESMF_CompRun: ESMF_UserGComp.o ESMF_CompRun.o
 
 RUN_ESMF_CompRun:
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CompRun > $(ESMC_TESTDIR)/ESMF_CompRun.stdout
-	-cat *CompRun.Log > $(ESMC_TESTDIR)/ESMF_CompRun.Log
-	-rm *CompRun.Log
 
 RUN_ESMF_CompRunUNI:
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CompRun > $(ESMC_TESTDIR)/ESMF_CompRun.stdout
-	-cat *CompRun.Log > $(ESMC_TESTDIR)/ESMF_CompRun.Log
-	-rm *CompRun.Log
 
 
 
@@ -121,13 +113,9 @@ $(ESMC_TESTDIR)/ESMC_CompRun: ESMF_UserGComp.o ESMF_UserGComp_F.o ESMC_CompRun.o
 
 RUN_ESMC_CompRun:
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_CompRun > $(ESMC_TESTDIR)/ESMC_CompRun.stdout
-	-cat *CompRun.Log > $(ESMC_TESTDIR)/ESMC_CompRun.Log
-	-rm *CompRun.Log
 
 RUN_ESMC_CompRunUNI:
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_CompRun > $(ESMC_TESTDIR)/ESMC_CompRun.stdout
-	-cat *CompRun.Log > $(ESMC_TESTDIR)/ESMC_CompRun.Log
-	-rm *CompRun.Log
 
 
 #
