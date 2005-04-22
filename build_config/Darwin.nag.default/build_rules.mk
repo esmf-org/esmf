@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.16 2005/04/20 22:12:33 nscollins Exp $
+#  $Id: build_rules.mk,v 1.17 2005/04/22 19:33:40 nscollins Exp $
 #
 #  Darwin.nag.default
 #
@@ -84,6 +84,9 @@ C_F90CXXLIBS       = -L/usr/local/lib/NAGware -lf96 -lstdc++
 C_CXXF90LIBS       = -L/usr/local/lib/NAGware -lf96 -lstdc++ \
                      /usr/local/lib/NAGWare/libf96.a  \
                      /usr/local/lib/NAGWare/quickfit.o
+
+# turn off the search path arg
+C_SLFLAG =
 
 ###############################################################################
 
