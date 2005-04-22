@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.17 2005/04/20 21:11:46 nscollins Exp $
+#  $Id: build_rules.mk,v 1.18 2005/04/22 20:15:33 nscollins Exp $
 #
 #  Darwin.absoft.default
 #
@@ -113,6 +113,8 @@ F_FIXNOCPP      = -ffixed
 C_F90CXXLD      = $(C_CXX)
 C_FLINKER       = $(C_CXX)
 
+# no -rpath flag supported
+C_SLFLAG =
 
 C_F90CXXLIBS    = -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math
 C_CXXF90LIBS    = -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math 
