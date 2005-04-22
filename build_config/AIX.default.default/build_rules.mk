@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.22 2005/04/11 16:33:23 nscollins Exp $
+#  $Id: build_rules.mk,v 1.23 2005/04/22 19:46:36 nscollins Exp $
 #
 #  AIX.default.default
 #
@@ -173,10 +173,6 @@ C_F90CXXLIBS	= -L. -lxlf90_r -lC_r
 # ------------------------- BOPT - g options ------------------------------
 G_CFLAGS	+= $(COM_ALL_DEBUG_FLAGS)
 G_FFLAGS	+= $(COM_ALL_DEBUG_FLAGS)
-
-# ------------------------- BOPT - none options ------------------------------
-X_CFLAGS	+=
-X_FFLAGS	+=
 
 # ------------------------- BOPT - O options ------------------------------
 O_CFLAGS	+= $(COM_ALL_OPT_FLAGS)
