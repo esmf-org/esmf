@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.25 2005/04/22 20:05:54 nscollins Exp $
+#  $Id: build_rules.mk,v 1.26 2005/04/22 22:27:32 nscollins Exp $
 #
 #  OSF1.default.default
 #
@@ -118,8 +118,6 @@ C_CXXF90LIBS       = -lfor -lrt -lm
 ifeq ($(ESMF_PTHREADS),ON)
 G_CFLAGS    +=  -pthread
 G_FFLAGS    +=  -pthread -reentrancy threaded
-X_CFLAGS    +=  -pthread
-X_FFLAGS    +=  -pthread -reentrancy threaded
 O_CFLAGS    +=  -pthread
 O_FFLAGS    +=  -pthread -reentrancy threaded
 THREAD_LIB  = -lpthread
