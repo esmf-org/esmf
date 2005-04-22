@@ -1,4 +1,5 @@
-#  $Id: build_rules.mk,v 1.3 2005/04/11 15:53:38 nscollins Exp $
+#  $Id: build_rules.mk,v 1.4 2005/04/22 22:26:54 nscollins Exp $
+
 #
 #  Linux.pathscale.default makefile
 #
@@ -33,9 +34,6 @@ endif
 ############################################################
 
 # Location of MPI (Message Passing Interface) software
-
-# comment in one or the other, depending on whether you have
-# installed the mpich or lam library. 
 
 ifeq ($(ESMF_COMM),lam)
 # with lam-mpi installed:
