@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.22 2005/04/11 15:53:38 nscollins Exp $
+#  $Id: build_rules.mk,v 1.23 2005/04/22 20:37:19 nscollins Exp $
 #
 #  Linux.nag.default.mk
 #
@@ -82,11 +82,15 @@ F_FIXCPP        = -fixed -fpp
 F_FREENOCPP     = -free
 F_FIXNOCPP      = -fixed
 
+# turn off -rpath share lib flag
+C_SLFLAG =
+
 # use LD_LIBRARY_PATH, but if not set, put in some plausible defaults
 ifneq ($(origin LD_LIBRARY_PATH), environment)
-LIB_PATHS      =
 CXXLIB_PATHS   = -L/soft/com/packages/intel-8.1/lib
 F90LIB_PATHS   = -L/soft/com/packages/nag-f95-5.0/lib
+else
+C_LIB_PATHS += $(ENV_LIB_PATHS)
 endif
 
 # include the lib which defines a fast intel memcpy if compiling optimized.
@@ -94,10 +98,13 @@ ifeq ($(ESMF_BOPT),O)
 EXTRALIBS         += -lifcoremt
 endif
 
-C_F90CXXLIBS       = ${LIB_PATHS} \
-                     ${F90LIB_PATHS} -lrt -lf96 \
+C_F90CXXLIBS       = ${F90LIB_PATHS} -lrt -lf96 \
                      ${CXXLIB_PATHS} -lcxa -lunwind -lstdc++ ${EXTRALIBS}
-C_CXXF90LIBS       = ${LIB_PATHS} ${F90LIB_PATHS} -lrt -lf96 ${EXTRALIBS}
+C_CXXF90LIBS       = ${F90LIB_PATHS} -lrt -lf96 ${EXTRALIBS} \
+                     /soft/com/packages/nag-f95-5.0/lib/quickfit.o
+	             
+# TODO: this last .o file should be in an ESMF_SITE file, += to C_CXXF90FLIBS,
+# but for now hardcode it into the default file.  (this works on Jazz).
 
 
 ###########
