@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.119 2005/04/21 21:40:22 nscollins Exp $
+#  $Id: common.mk,v 1.120 2005/04/22 19:24:12 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -275,10 +275,6 @@ DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d
 # debug option
 G_CFLAGS = -g
 G_FFLAGS = -g
-
-# neither debug nor optimized option
-X_CFLAGS =
-X_FFLAGS =
 
 # optimize option - adjust if ESMF_OPTLEVEL is set
 ifdef ESMF_OPTLEVEL
@@ -594,23 +590,40 @@ LINKOPTS     = $(C_LINKOPTS)
 #CLINKER       = $(C_CLINKER) $(COPTFLAGS) $(C_SH_LIB_PATH)
 
 # default is to include the esmf lib dir in the library search path
-# plus anything set in the platform dep file
+# plus anything set in the platform dep file.   if there is no load-time flag
+# for a platform, set C_SLFLAG to nothing in the platform dep files.
 LIB_PATHS = -L$(LDIR) $(C_LIB_PATHS)
+ifneq ($(SLFLAG),)
 LD_PATHS  = $(SLFLAG)$(LDIR) $(C_LD_PATHS)
-
-# append each directory which is in LD_LIBRARY_PATH to
-# the -L flag and also to the run-time load flag.  (on systems which
-# support the 'module' command, that is how it works - by adding dirs
-# to LD_LIBRARY_PATH.)  if your libs are not found, set LD_LIBRARY_PATH,
-# or make a site specific file and edit the paths explicitly.
-ifeq ($(origin LD_LIBRARY_PATH), environment)
-LIB_PATHS  += $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
-LD_PATHS   += $(addprefix $(SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
+else
+LD_PATHS  =
 endif
 
-#add the LIB_PATHS and LD_PATHS to the LINKOPTS
-LINKOPTS  += $(LIB_PATHS) $(LD_PATHS)
+# TODO: make sure this has actually been fixed correctly.  the current problem
+# is that on some platforms there are inappropriate dirs in the default
+# LD_LIBRARY_PATH variable (e.g. IRIX and o32 vs n32 vs 64).
+# so we can't just add these to all platforms.  on the other hand, for
+# some archs this is the right approach.   my next attempt at fixing this
+# will be:  make sure that any C_LIB_PATHS and C_LD_PATHS which were added
+# in the platform dep files are added the LIB_PATHS and LD_PATHS vars, and
+# those are added to the LINKFLAGS var, which is used at compile and link time.
+# second, the environment is added to a separate variable, which can be
+# appended to the C_LIB_PATHS and C_LD_PATHS variables in the platform-dep
+# files.   i will see how far this one gets me.
+# 
+# append each directory which is in LD_LIBRARY_PATH to the -L flag and also 
+# to the run-time load flag.  (on systems which support the 'module' command, 
+# that is how it works - by adding dirs to LD_LIBRARY_PATH.)  if your libs 
+# are not found, set LD_LIBRARY_PATH, or make a site specific file and edit 
+# the paths explicitly.
+ifeq ($(origin LD_LIBRARY_PATH), environment)
+ENV_LIB_PATHS  += $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
+ENV_LD_PATHS   += $(addprefix $(SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
+endif
 
+# add the LIB_PATHS and LD_PATHS to the LINKOPTS - this does not automatically
+# add the ENV parts - add them yourself in the platform-dep file if needed.
+LINKOPTS  += $(LIB_PATHS) $(LD_PATHS)
 
 # collect all the libs together in a single variable
 CLINKLIBS = -lesmf $(MPI_LIB) $(EXTRA_LIBS) $(CXXF90LIBS)
