@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5 2005/04/11 15:53:38 nscollins Exp $
+# $Id: build_rules.mk,v 1.6 2005/04/22 22:12:11 nscollins Exp $
 # 
 # Unicos.default.default
 #
@@ -34,13 +34,15 @@ endif
 # Location of MPI (Message Passing Interface) software  
 #
 ifeq ($(ESMF_COMM),mpi)
-MPI_INCLUDE    += -DESMC_HAVE_INT_MPI_COMM
 MPI_LIB        += -lmpi 
+CFLAGS         += -DESMC_HAVE_INT_MPI_COMM
 endif
 
 ############################################################
 
 LD		   = ftn
+RANLIB             = true
+
 #
 # C and Fortran compiler
 #
@@ -48,7 +50,8 @@ C_CC		   = CC -h new_for_init -h ssp
 C_CXX		   = CC -h new_for_init -h ssp 
 C_FC		   = ftn -h ssp -dy
 
-C_CLINKER	   = cc -h ssp
+C_CLINKER	   = CC -h ssp
+C_FLINKER	   = CC -h ssp
 
 # no extra libs needed to cross compile
 C_CXXF90LIBS       =
