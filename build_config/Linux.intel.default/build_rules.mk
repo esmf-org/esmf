@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.35 2005/04/20 22:25:46 nscollins Exp $
+# $Id: build_rules.mk,v 1.36 2005/04/22 19:25:27 nscollins Exp $
 #
 # Linux.intel.default
 #
@@ -157,18 +157,23 @@ F_FIXNOCPP         = -fpp0
 # edit the paths explicitly.
 
 ifneq ($(origin LD_LIBRARY_PATH), environment)
+# if env var not set, try this because they are the intel default locations.
 ifeq ($(ESMF_COMPILER_VERSION),80)
-LIB_PATHS       = -L/opt/intel_cc_80/lib
-LD_PATHS        = $(C_SLFLAG)/opt/intel_cc_80/lib
+C_LIB_PATHS       = -L/opt/intel_cc_80/lib
+C_LD_PATHS        = $(C_SLFLAG)/opt/intel_cc_80/lib
 else
-LIB_PATHS       = -L/opt/intel_cc_81/lib
-LD_PATHS        = $(C_SLFLAG)/opt/intel_cc_81/lib
+C_LIB_PATHS       = -L/opt/intel_cc_81/lib
+C_LD_PATHS        = $(C_SLFLAG)/opt/intel_cc_81/lib
 endif
+else
+# add the values from the environment
+C_LIB_PATHS += $(ENV_LIB_PATHS)
+C_LD_PATHS += $(ENV_LD_PATHS)
 endif
 
-C_F90CXXLIBS    = $(LD_PATHS) $(LIB_PATHS) $(INTEL_C_LIB_NEEDED) -lrt -ldl
-C_CXXF90LIBS    = $(LD_PATHS) $(LIB_PATHS) $(INTEL_C_LIB_NEEDED) -lifcoremt \
-                  -lunwind -lrt -ldl
+
+C_F90CXXLIBS    = $(INTEL_C_LIB_NEEDED) -lrt -ldl
+C_CXXF90LIBS    = $(INTEL_C_LIB_NEEDED) -lifcoremt -lunwind -lrt -ldl
 
 ###############################################################################
 
