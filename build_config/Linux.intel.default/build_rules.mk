@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.36 2005/04/22 19:25:27 nscollins Exp $
+# $Id: build_rules.mk,v 1.37 2005/04/22 20:14:25 nscollins Exp $
 #
 # Linux.intel.default
 #
@@ -50,7 +50,13 @@ endif
 # It is assumed to be in a system-standard location, but can be overridden
 # by setting MPI_HOME to another location.
 ifeq ($(ESMF_COMM),mpi)
-MPI_LIB        +=  -lmpi -lmpi++
+MPI_LIB   +=  -lmpi -lmpi++
+endif
+
+ifeq ($(ESMF_COMM),mpi_pbs)
+MPI_LIB    += -lmpi -lmpi++
+MPIRUN      = $(ESMF_DIR)/scripts/mpirun.pbs
+CFLAGS     += -DESMC_HAVE_INT_MPI_COMM
 endif
 
 
@@ -167,8 +173,8 @@ C_LD_PATHS        = $(C_SLFLAG)/opt/intel_cc_81/lib
 endif
 else
 # add the values from the environment
-C_LIB_PATHS += $(ENV_LIB_PATHS)
-C_LD_PATHS += $(ENV_LD_PATHS)
+C_LIB_PATHS  += $(ENV_LIB_PATHS)
+C_LD_PATHS   += $(ENV_LD_PATHS)
 endif
 
 
