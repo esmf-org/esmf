@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.1 2005/04/25 22:03:08 jwolfe Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.2 2005/04/25 22:44:06 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@
 
 !BOC
      ! The second Grid is distributed in arbitrary vectors.  The following code
-     ! snippet calculates the vectors of index pairs in {\tt myIndices}, based
+     ! fragment calculates the vectors of index pairs in {\tt myIndices}, based
      ! on the local DE number.  This is just a simple algorithm to create a
      ! semi-regular distribution of points to the PETs.
 
