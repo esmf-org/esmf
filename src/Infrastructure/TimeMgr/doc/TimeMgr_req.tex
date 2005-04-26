@@ -1,4 +1,4 @@
-   % $Id: TimeMgr_req.tex,v 1.3 2005/04/19 21:45:08 eschwab Exp $
+   % $Id: TimeMgr_req.tex,v 1.4 2005/04/26 18:20:59 eschwab Exp $
 
 
 %======================================================================================
@@ -597,7 +597,7 @@ Following the initialization of a clock and a set of associated alarms, to be ab
 
 %--------------------------------------------------------------------------------------
 \ssreq{Alternate between forward and reverse modes}
-While in "reverse" mode, before the clock reaches its end point ({\tt startTime}), to be able to switch back to "forward" mode.   In general, to be able to switch back and forth between "forward" and "reverse" mode anytime during a single clock run.
+While in "reverse" mode, either before or after the clock reaches its end point ({\tt startTime}), to be able to switch back to "forward" mode.   In general, to be able to switch back and forth between "forward" and "reverse" mode anytime during or after a single clock run.
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} Required for NOAA/NCEP, NCAR/WRF, and MIT/MITgcm. \\
