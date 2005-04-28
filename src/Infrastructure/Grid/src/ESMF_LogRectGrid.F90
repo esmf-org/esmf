@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.87.2.1 2004/07/22 21:02:36 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.87.2.2 2005/04/28 21:02:14 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -57,6 +57,15 @@
 ! !PRIVATE TYPES:
       private
 
+      !integer, parameter :: domainOption = 1
+      ! TODO: temporary fix - the new Reconcile code is not compatible (yet)
+      !  with the fast domainOption.  so make it public and have Reconcile
+      !  turn it off the first time it is called.
+      integer :: domainOption = 1
+      public domainOption
+
+      real(ESMF_KIND_R8), parameter :: fake = -999999.99d0
+
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC TYPES:
@@ -109,7 +118,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.87.2.1 2004/07/22 21:02:36 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.87.2.2 2005/04/28 21:02:14 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1914,18 +1923,18 @@
         if (ESMF_LogMsgFoundAllocError(localrc, "coord1", &
                                        ESMF_CONTEXT, rc)) return
         coord1(1) = min(1)
-        delta     = (max(1) - min(1)) / real(counts(1))
+        delta     = (max(1) - min(1)) / float(counts(1))
         do i = 1,counts(1)
-          coord1(i+1) = coord1(i) + delta
+          coord1(i+1) = min(1) + float(i)*delta
         enddo
         if (dimCount.ge.2) then
           allocate(coord2(counts(2)+1), stat=localrc)
           if (ESMF_LogMsgFoundAllocError(localrc, "coord2", &
                                          ESMF_CONTEXT, rc)) return
           coord2(1) = min(2)
-          delta     = (max(2) - min(2)) / real(counts(2))
+          delta     = (max(2) - min(2)) / float(counts(2))
           do i = 1,counts(2)
-            coord2(i+1) = coord2(i) + delta
+            coord2(i+1) = min(2) + float(i)*delta
           enddo
         endif
       else   ! not uniform
@@ -2027,7 +2036,7 @@
         endif
       enddo
 
-      ! Determine if the axis are decomposed and load counts arrays
+      ! Determine if the axes are decomposed and load counts arrays
       aSize = nDEs(decompIdsUse(1))
       allocate(countsPerDE1(aSize), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "countsPerDE1", &
@@ -2813,7 +2822,7 @@
       call ESMF_LRGridGet(gridp, delayout=delayout)
       call ESMF_DELayoutGet(delayout, localDE=localDE, rc=localrc)
       call ESMF_DELayoutGetDELocalInfo(delayout, de=localDE, &
-        coord=myDEDecomp(1:2), rc=localrc)
+                                       coord=myDEDecomp(1:2), rc=localrc)
       myDEDecomp(0) = 1
 
       ! modify myDE array by decompIds
@@ -2830,20 +2839,12 @@
           localStart(1) = localStart(1) + countsPerDEDim1(j)
         enddo
       endif
-      j1 = localStart(1) + 1
-      j2 = localStart(1) + countsPerDEDim1(myDE(1))
-      localMin(1) = minval(coord1(j1:j2))
-      localMax(1) = maxval(coord1(j1:j2))
 
       if (myDE(2).ge.2) then
         do j = 1,myDE(2)-1
           localStart(2) = localStart(2) + countsPerDEDim2(j)
         enddo
       endif
-      j1 = localStart(2) + 1
-      j2 = localStart(2) + countsPerDEDim2(myDE(2))
-      localMin(2) = minval(coord2(j1:j2))
-      localMax(2) = maxval(coord2(j1:j2))
 
       ! modify global counts to include ghost region
       compCount(1) = size(coord1)
@@ -2961,6 +2962,23 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+      ! set coordinate min/max using total cell count -- but don't include the halo
+      ! region around the global grid
+      counts(1) = countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
+      counts(2) = countsPerDEDim2(myDE(2)) + 2*gridBoundWidth
+      i1 = localStart(1) + 1
+      i2 = localStart(1) + counts(1) + 1
+      j1 = localStart(2) + 1
+      j2 = localStart(2) + counts(2) + 1
+      i1 = max(i1,gridBoundWidth + 1)
+      j1 = max(j1,gridBoundWidth + 1)
+      i2 = min(i2,gridBoundWidth + compCount(1))
+      j2 = min(j2,gridBoundWidth + compCount(2))
+      localMin(1) = minval(coordUse1(i1:i2))
+      localMax(1) = maxval(coordUse1(i1:i2))
+      localMin(2) = minval(coordUse2(j1:j2))
+      localMax(2) = maxval(coordUse2(j1:j2))
+
       do i = 1,dimCount
         tempCoord = ESMF_PhysCoordCreate(coordType(i), coordNames(i), &
                                          coordUnits(i), &
@@ -3001,10 +3019,10 @@
       ! set coordinates using computational cell count
       counts(1) = countsPerDEDim1(myDE(1))
       counts(2) = countsPerDEDim2(myDE(2))
-      i1 = localStart(1) + 1
-      i2 = i1 + countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
-      j1 = localStart(2) + 1
-      j2 = j1 + countsPerDEDim2(myDE(2)) + 2*gridBoundWidth
+      i1 = localStart(1) + 1 + gridBoundWidth
+      i2 = localStart(1) + counts(1) + 1 + gridBoundWidth
+      j1 = localStart(2) + 1 + gridBoundWidth
+      j2 = localStart(2) + counts(2) + 1 + gridBoundWidth
       call ESMF_LRGridSetCoord(grid, physGridId, dimCount, counts, &
                                gridBoundWidth, relloc, &
                                coordUse1(i1:i2), coordUse2(j1:j2), &
@@ -3013,7 +3031,8 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! set mask using total cell count
+      ! set mask using total cell count -- but masks are cell centered instead of
+      ! on the vertices
       counts(1) = countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
       counts(2) = countsPerDEDim2(myDE(2)) + 2*gridBoundWidth
       i1 = localStart(1) + 1
@@ -4085,7 +4104,7 @@
       if (present(global2D)) then
         tempSize  = size(global2D,1)
         tempSize2 = size(global2D,2)
-        aSize = max(aSize, tempSize)
+        aSize = max(aSize, tempSize2)
         allocate(gtemp2D(tempSize,tempSize2), &
                  ltemp2D(tempSize,tempSize2), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "temp2D arrays", &
@@ -4903,7 +4922,7 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: i, j, i1, j1, offsetI, offsetJ, hWidth
+      integer :: i, j, i1, j1, hWidth
       integer, dimension(:), allocatable :: cornerCounts
       logical :: dummy
       real(ESMF_KIND_R8) :: centerUse1, centerUse2
@@ -4928,21 +4947,17 @@
       if (ESMF_LogMsgFoundAllocError(localrc, "local arrays", &
                                      ESMF_CONTEXT, rc)) return
 
+      ! set halo width
+      hWidth = 0
+      if (total) hWidth = gridBoundWidth
+
       ! set up cornerCounts arrays
       cornerCounts(1) = dimCount*2
       do i = 1,size(counts)
-        cornerCounts(i+1) = counts(i)
+        cornerCounts(i+1) = counts(i) - 2*hwidth
       enddo
-     ! create ESMF_Arrays
-      hWidth  = 0
-      offsetI = gridBoundWidth
-      offsetJ = gridBoundWidth
-      if (total) then
-        hWidth  = gridBoundWidth
-        offsetI = 0
-        offsetJ = 0
-      endif
 
+     ! create ESMF_Arrays
       kind = ESMF_R8
       type = ESMF_DATA_REAL
       do i = 1,dimCount
@@ -4963,18 +4978,28 @@
         if (relloc .eq. ESMF_CELL_UNDEFINED) then
           localrc = ESMF_FAILURE
 
-        elseif (relloc.eq.ESMF_CELL_CENTER .or. relloc.eq.ESMF_CELL_CELL) then  ! TODO:?
+        elseif (relloc.eq.ESMF_CELL_CENTER .or. relloc.eq.ESMF_CELL_CELL) then
           do i = 1,counts(1)
             center(  i) = 0.5d0*(coord1(i)+coord1(i+1))
-            corner(1,i) = coord1(i  )
-            corner(2,i) = coord1(i+1)
           enddo
+          if (total) then
+            do i = 1+hWidth,counts(1)-hWidth
+              i1 = i - hWidth
+              corner(1,i1) = coord1(i  )
+              corner(2,i1) = coord1(i+1)
+            enddo
+          endif
         elseif (relloc .eq. ESMF_CELL_TOPFACE) then   ! TODO: check bottom or top
           do i = 1,counts(1)
             center(  i) = coord1(i+1)
-            corner(1,i) = 0.5d0*(coord1(i  )+coord1(i+1))
-            corner(2,i) = 0.5d0*(coord1(i+1)+coord1(i+2))
           enddo
+          if (total) then
+            do i = 1+hWidth,counts(1)-hWidth
+              i1 = i - hWidth
+              corner(1,i1) = 0.5d0*(coord1(i  )+coord1(i+1))
+              corner(2,i1) = 0.5d0*(coord1(i+1)+coord1(i+2))
+            enddo
+          endif
 
         else
           if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
@@ -4998,293 +5023,274 @@
 
         elseif (relloc .eq. ESMF_CELL_CENTER) then
           do i = 1,counts(1)
-            i1 = i + offsetI
-            centerUse1  = 0.5d0*(coord1(i1)+coord1(i1+1))
+            centerUse1  = 0.5d0*(coord1(i)+coord1(i+1))
             do j = 1,counts(2)
-              j1 = j + offsetJ
-              centerUse2  = 0.5d0*(coord2(j1)+coord2(j1+1))
+              centerUse2  = 0.5d0*(coord2(j)+coord2(j+1))
               center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
-            i1 = i + offsetI
-            cornerUse11 = coord1(i1  )
-            cornerUse12 = coord1(i1+1)
-            do j = 1,counts(2)
-              j1 = j + offsetJ
-              cornerUse21 = coord2(j1  )
-              cornerUse22 = coord2(j1+1)
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+          if (total) then
+            do i = 1+hWidth,counts(1)-hWidth
+              i1 = i - hWidth 
+              cornerUse11 = coord1(i  )
+              cornerUse12 = coord1(i+1)
+              do j = 1+hWidth,counts(2)-hWidth
+                j1 = j - hWidth
+                cornerUse21 = coord2(j  )
+                cornerUse22 = coord2(j+1)
+                corner1(1,i1,j1) = cornerUse11  
+                corner1(2,i1,j1) = cornerUse12
+                corner1(3,i1,j1) = cornerUse12
+                corner1(4,i1,j1) = cornerUse11
+                corner2(1,i1,j1) = cornerUse21
+                corner2(2,i1,j1) = cornerUse21
+                corner2(3,i1,j1) = cornerUse22
+                corner2(4,i1,j1) = cornerUse22
+              enddo   
             enddo
-          enddo
           endif
 
         elseif (relloc .eq. ESMF_CELL_NFACE) then
           do i = 1,counts(1)
-            i1 = i + offsetI
-            centerUse1  = 0.5d0*(coord1(i1)+coord1(i1+1))
+            centerUse1  = 0.5d0*(coord1(i)+coord1(i+1))
             do j = 1,counts(2)
-              j1 = j + offsetJ
-              centerUse2  = coord2(j1+1)
+              centerUse2  = coord2(j+1)
               center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
-            i1 = i + offsetI
-            cornerUse11 = coord1(i1  )
-            cornerUse12 = coord1(i1+1)
-            do j = 1,counts(2)
-              j1 = j + offsetJ
-              cornerUse21 = 0.5d0*(coord2(j1  )+coord2(j1+1))
-              cornerUse22 = 0.5d0*(coord2(j1+1)+coord2(j1+2))
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+          if (total) then
+            do i = 1+hWidth,counts(1)-hWidth
+              i1 = i - hWidth
+              cornerUse11 = coord1(i  )
+              cornerUse12 = coord1(i+1)
+              do j = 1+hWidth,counts(2)-hWidth
+                j1 = j - hWidth
+                cornerUse21 = 0.5d0*(coord2(j  )+coord2(j+1))
+                cornerUse22 = 0.5d0*(coord2(j+1)+coord2(j+2))
+                corner1(1,i1,j1) = cornerUse11
+                corner1(2,i1,j1) = cornerUse12
+                corner1(3,i1,j1) = cornerUse12
+                corner1(4,i1,j1) = cornerUse11
+                corner2(1,i1,j1) = cornerUse21
+                corner2(2,i1,j1) = cornerUse21
+                corner2(3,i1,j1) = cornerUse22
+                corner2(4,i1,j1) = cornerUse22
+              enddo
             enddo
-          enddo
           endif
-
+        
         elseif (relloc .eq. ESMF_CELL_SFACE) then
           do i = 1,counts(1)
-            i1 = i + offsetI
-            centerUse1  = 0.5d0*(coord1(i1)+coord1(i1+1))
+            centerUse1  = 0.5d0*(coord1(i)+coord1(i+1))
             do j = 1,counts(2)
-              j1 = j + offsetJ
-              centerUse2  = coord2(j1)
+              centerUse2  = coord2(j)
               center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
-            i1 = i + offsetI
-            cornerUse11 = coord1(i1  )
-            cornerUse12 = coord1(i1+1)
-            do j = 1,counts(2)
-              j1 = j + offsetJ
-              cornerUse21 = 0.5d0*(coord2(j1-1)+coord2(j1  ))
-              cornerUse22 = 0.5d0*(coord2(j1  )+coord2(j1+1))
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+          if (total) then
+            do i = 1+hWidth,counts(1)-hWidth
+              i1 = i - hWidth
+              cornerUse11 = coord1(i  )
+              cornerUse12 = coord1(i+1)
+              do j = 1+hWidth,counts(2)-hWidth
+                j1 = j - hWidth
+                cornerUse21 = 0.5d0*(coord2(j-1)+coord2(j  ))
+                cornerUse22 = 0.5d0*(coord2(j  )+coord2(j+1))
+                corner1(1,i1,j1) = cornerUse11
+                corner1(2,i1,j1) = cornerUse12
+                corner1(3,i1,j1) = cornerUse12
+                corner1(4,i1,j1) = cornerUse11
+                corner2(1,i1,j1) = cornerUse21
+                corner2(2,i1,j1) = cornerUse21
+                corner2(3,i1,j1) = cornerUse22
+                corner2(4,i1,j1) = cornerUse22
+              enddo
             enddo
-          enddo
           endif
 
         elseif (relloc .eq. ESMF_CELL_EFACE) then
           do i = 1,counts(1)
-            i1 = i + offsetI
-            centerUse1  = coord1(i1+1)
+            centerUse1  = coord1(i+1)
             do j = 1,counts(2)
-              j1 = j + offsetJ
-              centerUse2  = 0.5d0*(coord2(j1)+coord2(j1+1))
+              centerUse2  = 0.5d0*(coord2(j)+coord2(j+1))
               center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
-            i1 = i + offsetI
-            cornerUse11 = 0.5d0*(coord1(i1  )+coord1(i1+1))
-            cornerUse12 = 0.5d0*(coord1(i1+1)+coord1(i1+2))
-            do j = 1,counts(2)
-              j1 = j + offsetJ
-              cornerUse21 = coord2(j1  )
-              cornerUse22 = coord2(j1+1)
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+          if (total) then
+            do i = 1+hWidth,counts(1)-hWidth
+              i1 = i - hWidth
+              cornerUse11 = 0.5d0*(coord1(i  )+coord1(i+1))
+              cornerUse12 = 0.5d0*(coord1(i+1)+coord1(i+2))
+              do j = 1+hWidth,counts(2)-hWidth
+                j1 = j - hWidth
+                cornerUse21 = coord2(j  )
+                cornerUse22 = coord2(j+1)
+                corner1(1,i1,j1) = cornerUse11
+                corner1(2,i1,j1) = cornerUse12
+                corner1(3,i1,j1) = cornerUse12
+                corner1(4,i1,j1) = cornerUse11
+                corner2(1,i1,j1) = cornerUse21
+                corner2(2,i1,j1) = cornerUse21
+                corner2(3,i1,j1) = cornerUse22
+                corner2(4,i1,j1) = cornerUse22
+              enddo
             enddo
-          enddo
           endif
 
         elseif (relloc .eq. ESMF_CELL_WFACE) then
           do i = 1,counts(1)
-            i1 = i + offsetI
-            centerUse1  = coord1(i1)
+            centerUse1  = coord1(i)
             do j = 1,counts(2)
-              j1 = j + offsetJ
-              centerUse2  = 0.5d0*(coord2(j1)+coord2(j1+1))
+              centerUse2  = 0.5d0*(coord2(j)+coord2(j+1))
               center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
-            i1 = i + offsetI
-            cornerUse11 = 0.5d0*(coord1(i1-1)+coord1(i1  ))
-            cornerUse12 = 0.5d0*(coord1(i1  )+coord1(i1+1))
-            do j = 1,counts(2)
-              j1 = j + offsetJ
-              cornerUse21 = coord2(j1  )
-              cornerUse22 = coord2(j1+1)
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+          if (total) then
+            do i = 1+hWidth,counts(1)-hWidth
+              i1 = i - hWidth
+              cornerUse11 = 0.5d0*(coord1(i-1)+coord1(i  ))
+              cornerUse12 = 0.5d0*(coord1(i  )+coord1(i+1))
+              do j = 1+hWidth,counts(2)-hWidth
+                j1 = j - hWidth
+                cornerUse21 = coord2(j  )
+                cornerUse22 = coord2(j+1)
+                corner1(1,i1,j1) = cornerUse11
+                corner1(2,i1,j1) = cornerUse12
+                corner1(3,i1,j1) = cornerUse12
+                corner1(4,i1,j1) = cornerUse11
+                corner2(1,i1,j1) = cornerUse21
+                corner2(2,i1,j1) = cornerUse21
+                corner2(3,i1,j1) = cornerUse22
+                corner2(4,i1,j1) = cornerUse22
+              enddo
             enddo
-          enddo
           endif
 
         elseif (relloc .eq. ESMF_CELL_NECORNER) then
           do i = 1,counts(1)
-            i1 = i + offsetI
-            centerUse1  = coord1(i1+1)
+            centerUse1  = coord1(i+1)
             do j = 1,counts(2)
-              j1 = j + offsetJ
-              centerUse2  = coord2(j1+1)
+              centerUse2  = coord2(j+1)
               center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
-            i1 = i + offsetI
-            cornerUse11 = 0.5d0*(coord1(i1  )+coord1(i1+1))
-            cornerUse12 = 0.5d0*(coord1(i1+1)+coord1(i1+2))
-            do j = 1,counts(2)
-              j1 = j + offsetJ
-              cornerUse21 = 0.5d0*(coord2(j1  )+coord2(j1+1))
-              cornerUse22 = 0.5d0*(coord2(j1+1)+coord2(j1+2))
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+          if (total) then
+            do i = 1+hWidth,counts(1)-hWidth
+              i1 = i - hWidth
+              cornerUse11 = 0.5d0*(coord1(i  )+coord1(i+1))
+              cornerUse12 = 0.5d0*(coord1(i+1)+coord1(i+2))
+              do j = 1+hWidth,counts(2)-hWidth
+                j1 = j - hWidth
+                cornerUse21 = 0.5d0*(coord2(j  )+coord2(j+1))
+                cornerUse22 = 0.5d0*(coord2(j+1)+coord2(j+2))
+                corner1(1,i1,j1) = cornerUse11
+                corner1(2,i1,j1) = cornerUse12
+                corner1(3,i1,j1) = cornerUse12
+                corner1(4,i1,j1) = cornerUse11
+                corner2(1,i1,j1) = cornerUse21
+                corner2(2,i1,j1) = cornerUse21
+                corner2(3,i1,j1) = cornerUse22
+                corner2(4,i1,j1) = cornerUse22
+              enddo
             enddo
-          enddo
           endif
 
         elseif (relloc .eq. ESMF_CELL_SWCORNER) then
           do i = 1,counts(1)
-            i1 = i + offsetI
-            centerUse1  = coord1(i1)
+            centerUse1  = coord1(i)
             do j = 1,counts(2)
-              j1 = j + offsetJ
-              centerUse2  = coord2(j1)
+              centerUse2  = coord2(j)
               center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
-            i1 = i + offsetI
-            cornerUse11 = 0.5d0*(coord1(i1-1)+coord1(i1  ))
-            cornerUse12 = 0.5d0*(coord1(i1  )+coord1(i1+1))
-            do j = 1,counts(2)
-              j1 = j + offsetJ
-              cornerUse21 = 0.5d0*(coord2(j1-1)+coord2(j1  ))
-              cornerUse22 = 0.5d0*(coord2(j1  )+coord2(j1+1))
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+          if (total) then
+            do i = 1+hWidth,counts(1)-hWidth
+              i1 = i - hWidth
+              cornerUse11 = 0.5d0*(coord1(i-1)+coord1(i  ))
+              cornerUse12 = 0.5d0*(coord1(i  )+coord1(i+1))
+              do j = 1+hWidth,counts(2)-hWidth
+                j1 = j - hWidth
+                cornerUse21 = 0.5d0*(coord2(j-1)+coord2(j  ))
+                cornerUse22 = 0.5d0*(coord2(j  )+coord2(j+1))
+                corner1(1,i1,j1) = cornerUse11
+                corner1(2,i1,j1) = cornerUse12
+                corner1(3,i1,j1) = cornerUse12
+                corner1(4,i1,j1) = cornerUse11
+                corner2(1,i1,j1) = cornerUse21
+                corner2(2,i1,j1) = cornerUse21
+                corner2(3,i1,j1) = cornerUse22
+                corner2(4,i1,j1) = cornerUse22
+              enddo
             enddo
-          enddo
           endif
 
         elseif (relloc .eq. ESMF_CELL_SECORNER) then
           do i = 1,counts(1)
-            i1 = i + offsetI
-            centerUse1  = coord1(i1+1)
+            centerUse1  = coord1(i+1)
             do j = 1,counts(2)
-              j1 = j + offsetJ
-              centerUse2  = coord2(j1)
+              centerUse2  = coord2(j)
               center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
-            i1 = i + offsetI
-            cornerUse11 = 0.5d0*(coord1(i1  )+coord1(i1+1))
-            cornerUse12 = 0.5d0*(coord1(i1+1)+coord1(i1+2))
-            do j = 1,counts(2)
-              j1 = j + offsetJ
-              cornerUse21 = 0.5d0*(coord2(j1-1)+coord2(j1  ))
-              cornerUse22 = 0.5d0*(coord2(j1  )+coord2(j1+1))
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+          if (total) then
+            do i = 1+hWidth,counts(1)-hWidth
+              i1 = i - hWidth
+              cornerUse11 = 0.5d0*(coord1(i  )+coord1(i+1))
+              cornerUse12 = 0.5d0*(coord1(i+1)+coord1(i+2))
+              do j = 1+hWidth,counts(2)-hWidth
+                j1 = j - hWidth
+                cornerUse21 = 0.5d0*(coord2(j-1)+coord2(j  ))
+                cornerUse22 = 0.5d0*(coord2(j  )+coord2(j+1))
+                corner1(1,i1,j1) = cornerUse11
+                corner1(2,i1,j1) = cornerUse12
+                corner1(3,i1,j1) = cornerUse12
+                corner1(4,i1,j1) = cornerUse11
+                corner2(1,i1,j1) = cornerUse21
+                corner2(2,i1,j1) = cornerUse21
+                corner2(3,i1,j1) = cornerUse22
+                corner2(4,i1,j1) = cornerUse22
+              enddo
             enddo
-          enddo
           endif
 
        elseif (relloc .eq. ESMF_CELL_NWCORNER) then
           do i = 1,counts(1)
-            i1 = i + offsetI
-            centerUse1  = coord1(i1)
+            centerUse1  = coord1(i)
             do j = 1,counts(2)
-              j1 = j + offsetJ
-              centerUse2  = coord2(j1+1)
+              centerUse2  = coord2(1+1)
               center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
             enddo
           enddo
-          if (.not.total) then
-          do i = 1,counts(1)
-            i1 = i + offsetI
-            cornerUse11 = 0.5d0*(coord1(i1-1)+coord1(i1  ))
-            cornerUse12 = 0.5d0*(coord1(i1  )+coord1(i1+1))
-            do j = 1,counts(2)
-              j1 = j + offsetJ
-              cornerUse21 = 0.5d0*(coord2(j1  )+coord2(j1+1))
-              cornerUse22 = 0.5d0*(coord2(j1+1)+coord2(j1+2))
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
+          if (total) then
+            do i = 1+hWidth,counts(1)-hWidth
+              i1 = i - hWidth
+              cornerUse11 = 0.5d0*(coord1(i-1)+coord1(i  ))
+              cornerUse12 = 0.5d0*(coord1(i  )+coord1(i+1))
+              do j = 1+hWidth,counts(2)-hWidth
+                j1 = j - hWidth
+                cornerUse21 = 0.5d0*(coord2(j  )+coord2(j+1))
+                cornerUse22 = 0.5d0*(coord2(j+1)+coord2(j+2))
+                corner1(1,i1,j1) = cornerUse11
+                corner1(2,i1,j1) = cornerUse12
+                corner1(3,i1,j1) = cornerUse12
+                corner1(4,i1,j1) = cornerUse11
+                corner2(1,i1,j1) = cornerUse21
+                corner2(2,i1,j1) = cornerUse21
+                corner2(3,i1,j1) = cornerUse22
+                corner2(4,i1,j1) = cornerUse22
+              enddo
             enddo
-          enddo
           endif
 
-        else
           dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                                         "This relative location not yet supported", &
                                         ESMF_CONTEXT, rc)
@@ -5308,7 +5314,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! set the region array in PhysGrid
-      if (.not.total) then
+      if (total) then
         call ESMF_PhysGridSetRegions(grid%physGrids(physGridId), &
                                      regionType=ESMF_REGION_TYPE_POLYGON, &
                                      vertexArray=cornerArray, &
@@ -6366,19 +6372,22 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: DE, numDE1, numDE2, numDEs, npts
-      integer :: i, i1, j
-      real(ESMF_KIND_R8) :: start, stop
+      integer :: DE, numDE1, numDE2, numDEs, npts, count(2)
+      integer :: i, i1, i2, j
+      real(ESMF_KIND_R8) :: start, stop, huge
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
-
+      
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
-
-      numDE1 = size(countsPerDEDim1)
-      numDE2 = size(countsPerDEDim2)
-      numDEs = numDE1*numDE2
-      npts   = 2**dimCount
-
+      
+      huge     = 999999.     !TODO: could be an ESMF constant -- OK for now
+      numDE1   = size(countsPerDEDim1)
+      numDE2   = size(countsPerDEDim2)
+      numDEs   = numDE1*numDE2
+      npts     = 2**dimCount
+      count(1) = size(coord1)
+      count(2) = size(coord2)
+      
       ! TODO: break out by rank?
       ! Assume the following starage for bounding boxes:
       !   number of DEs * npts * dimCount
@@ -6403,8 +6412,15 @@
       stop  = 0.0
       i1    = 0
       do j = 1,numDE1
-        start = minval(coord1(i1+1:i1+countsPerDEDim1(j)))
-        stop  = maxval(coord1(i1+1:i1+countsPerDEDim1(j)))
+        i2 = i1+countsPerDEDim1(j)
+        start = minval(coord1(i1+1:i2+1))
+        stop  = maxval(coord1(i1+1:i2+1))
+        if (i1.ge.1         ) start = minval(coord1(i1+0:i2+1))
+        if (i2.le.count(1)-2) stop  = maxval(coord1(i1+1:i2+2))
+        if (countsPerDEDim1(j).eq.0) then
+          start = -huge
+          stop  = -huge
+        endif
         do i = 1,numDE2
           DE = (i-1)*numDE1 + j
           boxes(DE,1,1) = start
@@ -6421,8 +6437,15 @@
       stop  = 0.0
       i1    = 0
       do j = 1,numDE2
-        start = minval(coord2(i1+1:i1+countsPerDEDim2(j)))
-        stop  = maxval(coord2(i1+1:i1+countsPerDEDim2(j)))
+        i2 = i1+countsPerDEDim2(j)
+        start = minval(coord2(i1+1:i2+1))
+        stop  = maxval(coord2(i1+1:i2+1))
+        if (i1.ge.1         ) start = minval(coord2(i1+0:i2+1))
+        if (i2.le.count(2)-2) stop  = maxval(coord2(i1+1:i2+2))
+        if (countsPerDEDim2(j).eq.0) then
+          start = -huge
+          stop  = -huge
+        endif
         do i = 1,numDE1
           DE = (j-1)*numDE1 + i
           boxes(DE,1,2) = start
@@ -6433,14 +6456,14 @@
         start = stop
         i1    = i1 + countsPerDEDim2(j)
       enddo
-
+        
       grid%boundingBoxes = ESMF_LocalArrayCreate(boxes, ESMF_DATA_COPY, localrc)
-
+        
       ! Clean up
       deallocate(boxes, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "dellocating boxes", &
                                      ESMF_CONTEXT, rc)) return
-
+        
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridSetBoundingBoxes
@@ -6509,21 +6532,22 @@
 ! !IROUTINE: ESMF_LRGridBoxIntersectRecv - Determine a DomainList covering a box
 !
 ! !INTERFACE:
-      subroutine ESMF_LRGridBoxIntersectRecv(grid, &
-                                             localMinPerDim, localMaxPerDim, &
-                                             domainList, total, rc)
+      subroutine ESMF_LRGridBoxIntersectRecv(srcGrid, dstGrid, domainList, &
+                                             hasDstData, hasSrcData, &
+                                             total, layer, &
+                                             srcRelloc, dstRelloc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid) :: grid
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMinPerDim
-                                                         ! array of local mins
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMaxPerDim
-                                                         ! array of local maxs
-      type(ESMF_DomainList), intent(inout) :: domainList ! domain list
-      logical, intent(in), optional :: total             ! flag to indicate
-                                                         ! total cells in the
-                                                         ! domainList
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_Grid) :: srcGrid
+      type(ESMF_Grid) :: dstGrid
+      type(ESMF_DomainList), intent(inout) :: domainList
+      logical, intent(in) :: hasDstData
+      logical, intent(in) :: hasSrcData
+      logical, intent(in) :: total
+      logical, intent(in) :: layer
+      type(ESMF_RelLoc), intent(in), optional :: srcRelloc
+      type(ESMF_RelLoc), intent(in), optional :: dstRelloc
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     This routine computes the DomainList necessary to cover a given "box"
@@ -6536,18 +6560,18 @@
 !     \item[grid]
 !          Source {\tt ESMF\_Grid} to use to calculate the resulting
 !          {\tt ESMF\_DomainList}.
-!     \item[localMinPerDim]
-!          Array of local minimum coordinates, one per rank of the array,
-!          defining the "box."
-!     \item[localMaxPerDim]
-!          Array of local maximum coordinates, one per rank of the array,
-!          defining the "box."
 !     \item[domainList]
-!          Resulting {\tt ESMF\_DomainList} containing the set of 
+!          Resulting {\tt ESMF\_DomainList} containing the set of
 !          {\tt ESMF\_Domains} necessary to cover the box.
-!     \item[{[total]}]
+!     \item[total]
 !          Logical flag to indicate the domainList should use total cells
 !          instead of computational cells.
+!     \item[layer]
+!          Logical flag to indicate the domainList should add an extra layer
+!          of cells, which in necessary for some regridding algorithms in
+!          some situations.
+!     \item[{[srcRelloc]}]
+!     \item[{[dstRelloc]}]
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -6556,85 +6580,122 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: i, j, rank, nDEs, numDomains
+      integer :: i, i1, j, rank, nDEs, numDomains
       integer :: size, totalPoints
       integer :: counts(ESMF_MAXDIM)
+      integer :: physId
+      integer :: myPET, nPETs, thisPET, srcDEs, srcDE, srcPID
+      integer(ESMF_KIND_I4) :: localIndex(2)
+      integer(ESMF_KIND_I4), dimension(:), allocatable :: globalMinIndex, &
+                                                          globalMaxIndex
+      logical :: hasMin, hasMax
+      real(ESMF_KIND_R8) :: point(2)
+      real(ESMF_KIND_R8), dimension(:), pointer :: localMinPerDim
+      real(ESMF_KIND_R8), dimension(:), pointer :: localMaxPerDim
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: grid_ai, localAI
+      type(ESMF_AxisIndex) :: thisAI(2)
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: gridAI, localAI
       type(ESMF_LocalArray) :: array
+      type(ESMF_RelLoc) :: srcRellocUse, dstRellocUse
+      type(ESMF_DELayout) :: srcDELayout
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! get set of bounding boxes from the grid
-      call ESMF_GridGetBoundingBoxes(grid%ptr, array, localrc)
+      ! set defaults and overwrite with optional arguments
+      srcRellocUse = ESMF_CELL_CENTER
+      dstRellocUse = ESMF_CELL_CENTER
+      if (present(srcRelloc)) srcRellocUse = srcRelloc
+      if (present(dstRelloc)) dstRellocUse = dstRelloc
 
-      ! get rank and counts from the bounding boxes array
-      call ESMF_LocalArrayGet(array, counts=counts, rc=localrc)
-      nDEs = counts(1)
-      rank = counts(3)
-
-      ! allocate arrays now
-      allocate(grid_ai(nDEs,rank), &
-               localAI(nDEs,rank), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "AI arrays", &
+      call ESMF_LRGridGet(dstGrid, dimCount=rank, rc=localrc)
+      allocate(localMinPerDim(rank), &
+               localMaxPerDim(rank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "min/max arrays", &
                                      ESMF_CONTEXT, rc)) return
+      localMinPerDim =  9876543.0d0
+      localMaxPerDim = -9876543.0d0
 
-    !  allocate(boxes(nDEs,2**rank,rank), stat=localrc)
-    !  if (ESMF_LogMsgFoundAllocError(localrc, "boxes", &
-    !                                 ESMF_CONTEXT, rc)) return
+      ! If this DE does not have any destination data, then there is nothing to
+      ! receive.  However, it cannot simply return because it may be involved in
+      ! collective communication calls if it has source data.
+      if (hasDstData) then
 
-      ! get pointer to the actual bounding boxes data
-      call ESMF_LocalArrayGetData(array, boxes, rc=localrc)
+        ! get set of bounding boxes from the source grid
+        call ESMF_GridGetBoundingBoxes(srcGrid%ptr, array, localrc)
 
-      ! get set of axis indices from grid
-      call ESMF_LRGridGetAllAxisIndex(grid, grid_ai, &
-                                      horzRelLoc=ESMF_CELL_CENTER, total=total, &
-                                      rc=localrc)
+        ! get rank and counts from the bounding boxes array
+        call ESMF_LocalArrayGet(array, counts=counts, rc=localrc)
+        nDEs = counts(1)
 
-      ! translate the AIs from global to local
-      call ESMF_LRGridGlobalToDELocalAI(grid, horzRelLoc=ESMF_CELL_CENTER, &
-                                        globalAI2D=grid_ai, &
-                                        localAI2D=localAI, rc=localrc)
+        ! get pointer to the actual bounding boxes data
+        call ESMF_LocalArrayGetData(array, boxes, rc=localrc)
 
-      ! loop through bounding boxes, looking for overlap with our "box"
-      ! TODO: a better algorithm
+        ! allocate arrays now
+        allocate( gridAI(nDEs,rank), &
+                 localAI(nDEs,rank), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "AI arrays", &
+                                       ESMF_CONTEXT, rc)) return
 
-      ! go through list of DEs to calculate the number of domains
-      ! TODO: use David's DomainList routines, but they are untested
-      numDomains = 0
-      do i = 1,nDEs
-        if ((localMinPerDim(1).gt.max(boxes(i,2,1),boxes(i,3,1))) .or. &
-            (localMaxPerDim(1).lt.min(boxes(i,1,1),boxes(i,4,1))) .or. &
-            (localMinPerDim(2).gt.max(boxes(i,3,2),boxes(i,4,2))) .or. &
-            (localMaxPerDim(2).lt.min(boxes(i,1,2),boxes(i,2,2)))) cycle
-        numDomains = numDomains + 1
-      enddo
+        ! get DE-local min/max
+        call ESMF_LRGridGetDELocalInfo(dstGrid, horzRelLoc=dstRellocUse, &
+                                       minLocalCoordPerDim=localMinPerDim, &
+                                       maxLocalCoordPerDim=localMaxPerDim, &
+                                       reorder=.false., rc=localrc)
 
-      domainList = ESMF_DomainListCreate(numDomains)
+        ! get set of axis indices from source grid
+        call ESMF_LRGridGetAllAxisIndex(srcGrid, gridAI, &
+                                        horzRelLoc=srcRellocUse, total=total, &
+                                        rc=localrc)
 
-      ! now fill in the domain list
-      !  TODO: only one loop instead of two, one that figures the number
-      !        of domains and one that fills it in
-      ! TODO: move some of this code to Base and add a DomainList method?
-      numDomains = 0
-      totalPoints  = 0
-      do j = 1,nDEs
-        if ((localMinPerDim(1).gt.max(boxes(j,2,1),boxes(j,3,1))) .or. &
-            (localMaxPerDim(1).lt.min(boxes(j,1,1),boxes(j,4,1))) .or. &
-            (localMinPerDim(2).gt.max(boxes(j,3,2),boxes(j,4,2))) .or. &
-            (localMaxPerDim(2).lt.min(boxes(j,1,2),boxes(j,2,2)))) cycle
-        numDomains = numDomains + 1
-        domainList%domains(numDomains)%DE   = j - 1  ! DEs start with 0
-        domainList%domains(numDomains)%rank = rank
-        size = 1
-        do i = 1,rank
-          domainList%domains(numDomains)%ai(i) = localAI(j,i)
-          size = size * (localAI(j,i)%max - localAI(j,i)%min + 1)
+        ! translate the AIs from global to local
+        call ESMF_LRGridGlobalToDELocalAI(srcGrid, horzRelLoc=srcRellocUse, &
+                                          globalAI2D=gridAI, &
+                                          localAI2D=localAI, rc=localrc)
+
+        ! loop through bounding boxes, looking for overlap with our "box"
+        ! go through list of DEs to calculate the number of domains
+        numDomains = 0
+        do i = 1,nDEs
+          if ((localMinPerDim(1).gt.max(boxes(i,2,1),boxes(i,3,1))) .OR. &
+              (localMaxPerDim(1).lt.min(boxes(i,1,1),boxes(i,4,1))) .OR. &
+              (localMinPerDim(2).gt.max(boxes(i,3,2),boxes(i,4,2))) .OR. &
+              (localMaxPerDim(2).lt.min(boxes(i,1,2),boxes(i,2,2)))) cycle
+          numDomains = numDomains + 1
         enddo
-        totalPoints = totalPoints + size
-      enddo
-      domainList%total_points = totalPoints
+
+        domainList = ESMF_DomainListCreate(numDomains)
+
+        ! now fill in the domain list
+        !  TODO: only one loop instead of two, one that figures the number
+        !        of domains and one that fills it in
+        ! TODO: move some of this code to Base and add a DomainList method?
+        numDomains   = 0
+        totalPoints  = 0
+
+      endif
+
+      ! whole domain from each overlapping DE
+      if (hasDstData) then
+
+        do j = 1,nDEs
+          if ((localMinPerDim(1).gt.max(boxes(j,2,1),boxes(j,3,1))) .OR. &
+              (localMaxPerDim(1).lt.min(boxes(j,1,1),boxes(j,4,1))) .OR. &
+              (localMinPerDim(2).gt.max(boxes(j,3,2),boxes(j,4,2))) .OR. &
+              (localMaxPerDim(2).lt.min(boxes(j,1,2),boxes(j,2,2)))) cycle
+          numDomains = numDomains + 1
+          domainList%domains(numDomains)%DE   = j - 1  ! DEs start with 0
+          domainList%domains(numDomains)%rank = rank
+          size = 1
+          do i = 1,rank
+            domainList%domains(numDomains)%ai(i) = localAI(j,i)
+            size = size * (localAI(j,i)%max - localAI(j,i)%min + 1)
+          enddo
+          totalPoints = totalPoints + size
+        enddo
+        domainList%total_points = totalPoints
+
+      endif
 
       ! TODO:  the code below is taken from Phil's regrid routines and needs
       !        to be incorporated at some point
@@ -6676,10 +6737,14 @@
       !         src_DE_bbox(2) = src_DE_bbox(2) + lon_cycle
       !   endif ! Spherical coords
 
-      deallocate(grid_ai, &
-                 localAI, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
-                                     ESMF_CONTEXT, rc)) return
+      if (hasDstData) then
+        deallocate(localMinPerDim, &
+                   localMaxPerDim, &
+                           gridAI, &
+                          localAI, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -6692,19 +6757,19 @@
 ! !IROUTINE: ESMF_LRGridBoxIntersectSend - Determine a DomainList covering a box
 !
 ! !INTERFACE:
-      subroutine ESMF_LRGridBoxIntersectSend(dstGrid, srcGrid, localMinPerDim, &
-                                             localMaxPerDim, myAI, domainList, rc)
+      subroutine ESMF_LRGridBoxIntersectSend(srcGrid, dstGrid, domainList, &
+                                             total, layer, &
+                                             srcRelloc, dstRelloc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid) :: dstGrid
       type(ESMF_Grid) :: srcGrid
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMinPerDim
-                                                         ! array of local mins
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMaxPerDim
-                                                         ! array of local maxs
-      type(ESMF_AxisIndex), dimension(:), intent(in) :: myAI
-      type(ESMF_DomainList), intent(inout) :: domainList ! domain list
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_Grid) :: dstGrid
+      type(ESMF_DomainList), intent(inout) :: domainList
+      logical, intent(in) :: total
+      logical, intent(in) :: layer
+      type(ESMF_RelLoc), intent(in), optional :: srcRelloc
+      type(ESMF_RelLoc), intent(in), optional :: dstRelloc
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     This routine computes the DomainList necessary to cover a given "box"
@@ -6720,18 +6785,16 @@
 !     \item[srcGrid]
 !          Source {\tt ESMF\_Grid} to use to calculate the resulting
 !          {\tt ESMF\_DomainList}.
-!     \item[localMinPerDim]
-!          Array of local minimum coordinates, one per rank of the array,
-!          defining the "box."
-!     \item[localMaxPerDim]
-!          Array of local maximum coordinates, one per rank of the array,
-!          defining the "box."
-!     \item[myAI]
-!          {\tt ESMF\_AxisIndex} for this DE on the sending (source)
-!          {\tt ESMF\_Grid}, assumed to be in global indexing.
 !     \item[domainList]
-!          Resulting {\tt ESMF\_DomainList} containing the set of 
+!          Resulting {\tt ESMF\_DomainList} containing the set of
 !          {\tt ESMF\_Domains} necessary to cover the box.
+!     \item[total]
+!          Logical flag to indicate the domainList should use total cells
+!          instead of computational cells.
+!     \item[layer]
+!          Logical flag to indicate the domainList should add an extra layer
+!          of cells, which in necessary for some regridding algorithms in
+!          some situations.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -6740,15 +6803,29 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: i, j, rank, nDEs, numDomains
+      integer :: i, i1, j, rank, nDEs, numDomains
       integer :: size, totalPoints
       integer :: counts(ESMF_MAXDIM)
+      integer :: physId
+      integer(ESMF_KIND_I4) :: localIndex(2)
+      integer(ESMF_KIND_I4), dimension(:), pointer :: globalMinIndex, globalMaxIndex
+      logical :: hasMin, hasMax
+      real(ESMF_KIND_R8) :: point(2)
+      real(ESMF_KIND_R8), dimension(:), pointer :: localMinPerDim
+      real(ESMF_KIND_R8), dimension(:), pointer :: localMaxPerDim
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
-      type(ESMF_AxisIndex), dimension(:), pointer :: myLocalAI
+      type(ESMF_AxisIndex), dimension(:), pointer :: myGlobalAI, myLocalAI, thisAI
       type(ESMF_LocalArray) :: array
+      type(ESMF_RelLoc) :: srcRellocUse, dstRellocUse
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! set defaults and overwrite with optional arguments
+      srcRellocUse = ESMF_CELL_CENTER
+      dstRellocUse = ESMF_CELL_CENTER
+      if (present(srcRelloc)) srcRellocUse = srcRelloc
+      if (present(dstRelloc)) dstRellocUse = dstRelloc
 
       ! get set of bounding boxes from the grid
       call ESMF_GridGetBoundingBoxes(dstGrid%ptr, array, localrc)
@@ -6759,23 +6836,34 @@
       rank = counts(3)
 
       ! allocate arrays now
-      allocate(myLocalAI(rank), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "myLocalAI", &
+      allocate(localMinPerDim(rank), &
+               localMaxPerDim(rank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "min/max per dim arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      allocate(myGlobalAI(rank), &
+                myLocalAI(rank), &
+                   thisAI(rank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "AI arrays", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! translate myAI to local index
-      call ESMF_LRGridGlobalToDELocalAI(srcGrid, horzRelLoc=ESMF_CELL_CENTER, &
-                                        globalAI1D=myAI, localAI1D=myLocalAI, &
+      ! get local min/max and myGlobalAI
+      call ESMF_LRGridGetDELocalInfo(srcGrid, horzRelLoc=srcRellocUse, &
+                                     minLocalCoordPerDim=localMinPerDim, &
+                                     maxLocalCoordPerDim=localMaxPerDim, &
+                                     globalAIPerDim=myGlobalAI, &
+                                     total=total, reorder=.false., rc=localrc)
+
+      ! translate myGlobalAI to local index
+      call ESMF_LRGridGlobalToDELocalAI(srcGrid, horzRelLoc=srcRellocUse, &
+                                        globalAI1D=myGlobalAI, localAI1D=myLocalAI, &
                                         rc=localrc)
 
       ! get pointer to the actual bounding boxes data
       call ESMF_LocalArrayGetData(array, boxes, rc=localrc)
 
       ! loop through bounding boxes, looking for overlap with our "box"
-      ! TODO: a better algorithm
 
       ! go through list of DEs to calculate the number of domains
-      ! TODO: use David's DomainList routines, but they are untested
       numDomains = 0
       do i = 1,nDEs
         if ((localMinPerDim(1).gt.max(boxes(i,2,1),boxes(i,3,1))) .or. &
@@ -6792,6 +6880,8 @@
       ! TODO: move some of this code to Base and add a DomainList method
       numDomains  = 0
       totalPoints = 0
+
+      ! whole domain from each overlapping DE
       do j = 1,nDEs
         if ((localMinPerDim(1).gt.max(boxes(j,2,1),boxes(j,3,1))) .or. &
             (localMaxPerDim(1).lt.min(boxes(j,1,1),boxes(j,4,1))) .or. &
@@ -6849,8 +6939,12 @@
       !         src_DE_bbox(2) = src_DE_bbox(2) + lon_cycle
       !   endif ! Spherical coords
 
-      deallocate(myLocalAI, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating myLocalAI", &
+      deallocate(localMaxPerDim, &
+                 localMinPerDim, &
+                     myGlobalAI, &
+                      myLocalAI, &
+                         thisAI, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
                                      ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS

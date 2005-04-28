@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.56 2004/06/15 22:48:41 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.56.2.1 2005/04/28 21:03:30 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -61,6 +61,32 @@
       use ESMF_ArrayCommMod
 
       implicit none
+
+!------------------------------------------------------------------------------
+!     !  ESMF_RegridIndexType
+!
+!     ! Description of ESMF_RegridIndexType.
+
+      type ESMF_RegridIndexType
+      sequence
+      private
+
+        integer, dimension(:), pointer :: srcMinIndex, srcMaxIndex
+
+        integer, dimension(:,:), pointer :: dstMinIndex, dstMaxIndex
+
+      end type
+
+!------------------------------------------------------------------------------
+!     !  ESMF_RegridIndex
+!
+!     !  The RegridIndex data structure that is passed between languages.
+
+      type ESMF_RegridIndex
+      sequence
+      private
+        type(ESMF_RegridIndexType), pointer :: ptr     ! pointer to a regrid index
+      end type
 
 !------------------------------------------------------------------------------
 !     !  ESMF_RegridMethod
@@ -217,6 +243,10 @@
     public ESMF_RegridCreateEmpty     ! creates an empty regrid structure
     public ESMF_RegridConstructEmpty  ! constructs an empty regrid structure
     public ESMF_RegridDestruct        ! deallocate memory associated with a regrid
+    public ESMF_RegridDomainListAddLayer
+    public ESMF_RegridIndexCreate     ! creates a RegridIndex structure
+    public ESMF_RegridIndexDestroy    ! deallocate memory associated with a
+                                      ! RegridIndex structure
 
     public operator(==), operator(/=) ! for overloading method and option
                                       ! comparison functions
@@ -225,7 +255,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.56 2004/06/15 22:48:41 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.56.2.1 2005/04/28 21:03:30 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -338,8 +368,8 @@
       integer :: numList
       real(kind=ESMF_KIND_R8), dimension(:), pointer :: wgtPtr
       type(ESMF_LocalArray) :: srcIndex, dstIndex, weights
-      type (ESMF_Array) :: &! temps for use when re-sizing arrays
-         srcAddTmp, dstAddTmp, weightsTmp
+      !type (ESMF_Array) :: &! temps for use when re-sizing arrays
+      !   srcAddTmp, dstAddTmp, weightsTmp
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -384,7 +414,8 @@
 ! !IROUTINE: ESMF_RegridAddLink2D - Adds address pair and regrid weight to regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridAddLink2D(tv, srcAdd, dstAdd, weight, aggregate, rc)
+      subroutine ESMF_RegridAddLink2D(tv, srcAdd, dstAdd, weight, aggregate, &
+                                      index, rc)
 !
 ! !ARGUMENTS:
 
@@ -393,6 +424,7 @@
       integer, dimension(2), intent(in) :: dstAdd
       real(kind=ESMF_KIND_R8), intent(in) :: weight
       logical, intent(in), optional :: aggregate
+      type(ESMF_RegridIndex), intent(inout), optional :: index
       integer, intent(out), optional :: rc
 
 !
@@ -415,6 +447,9 @@
 !          be searched for an already occurring weight corresponding to the
 !          current address pair and the current weight added on instead of
 !          making a new link.
+!     \item[{[index]}]
+!          Optional regrid index structure to help speed up the search for
+!          aggregated weights.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -423,18 +458,16 @@
 ! !REQUIREMENTS: !  TODO
 
       integer :: localrc
+      integer :: numList, i, i1, startIndex, stopIndex
       integer, dimension(:), pointer :: srcPtr, dstPtr
-      integer :: numList, i, i1
       logical :: aggregateUse, newLink
       real(kind=ESMF_KIND_R8), dimension(:), pointer :: wgtPtr
       type(ESMF_LocalArray) :: srcIndex, dstIndex, weights
-      type (ESMF_Array) :: &! temps for use when re-sizing arrays
-         srcAddTmp, dstAddTmp, weightsTmp
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      newLink = .true.
+      newLink      = .true.
       aggregateUse = .false.
       if (present(aggregate)) aggregateUse=aggregate
 
@@ -451,20 +484,35 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+      ! if the weights are being aggregated, calculate the search indices
+      ! either from the default (the whole damn thang) or the optional
+      ! RegridIndex
+      startIndex = 1
+      stopIndex  = numList
+      if (aggregateUse .AND. present(index)) then
+        startIndex = max(index%ptr%srcMinIndex(srcAdd), &
+                         index%ptr%dstMinIndex(dstAdd(1),dstAdd(2)))
+        stopIndex  = min(index%ptr%srcMaxIndex(srcAdd), &
+                         index%ptr%dstMaxIndex(dstAdd(1),dstAdd(2)))
+        if (startIndex.eq.0) then
+          startIndex = 1
+          stopIndex  = 1
+        endif
+      endif 
+
       ! if the aggregation flag is set, search through the already existing
       ! links for the current address pair
       if (aggregateUse .and. numList.ne.0) then
-        do i = 1,numList
+        do i = startIndex,stopIndex
           i1 = 2*(i-1)
           if ((dstPtr(i1+1) .eq. dstAdd(1)) .AND. &
               (dstPtr(i1+2) .eq. dstAdd(2)) .AND. &
-              (srcPtr(i)    .eq. srcAdd   )) then
-            newLink = .false.
+              (srcPtr(i)    .eq. srcAdd)) then
+            newLink   = .false.
             wgtPtr(i) = wgtPtr(i) + weight
-            go to 10
+            exit
           endif
         enddo
-   10   continue
       endif
 
       ! if this is a new link, increment number of links for this regrid
@@ -479,6 +527,14 @@
         dstPtr(2*(numList-1)+2) = dstAdd(2)
         srcPtr(numList) = srcAdd
         wgtPtr(numList) = weight
+        if (present(index)) then
+          if (index%ptr%srcMinIndex(srcAdd).eq.0) &
+              index%ptr%srcMinIndex(srcAdd) = numList
+          index%ptr%srcMaxIndex(srcAdd) = numList
+          if (index%ptr%dstMinIndex(dstAdd(1),dstAdd(2)).eq.0) &
+              index%ptr%dstMinIndex(dstAdd(1),dstAdd(2)) = numList
+          index%ptr%dstMaxIndex(dstAdd(1),dstAdd(2)) = numList
+        endif
       endif
 
       call ESMF_TransformValuesSet(tv, numList=numList, srcIndex=srcIndex, &
@@ -500,27 +556,31 @@
 ! !INTERFACE:
       function ESMF_RegridRouteConstruct(dimCount, srcGrid, dstGrid, &
                                          recvDomainList, parentDELayout, &
-                                         srcDatamap, srcArray, &
-                                         dstDatamap, dstArray, &
-                                         reorder, total, rc)
+                                         srcDatamap, dstDatamap, &
+                                         hasSrcData, hasDstData, &
+                                         srcArray, dstArray, &
+                                         reorder, total, layer, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Route) :: ESMF_RegridRouteConstruct
 !
 ! !ARGUMENTS:
 
-      integer, intent(in) :: dimCount
-      type(ESMF_Grid), intent(in) :: srcGrid
-      type(ESMF_Grid), intent(in) :: dstGrid
-      type(ESMF_DomainList), intent(inout) :: recvDomainList
-      type(ESMF_DELayout), intent(in) :: parentDELayout
-      type(ESMF_FieldDataMap), intent(in) :: srcDatamap
-      type(ESMF_Array), intent(in), optional :: srcArray
-      type(ESMF_FieldDataMap), intent(in), optional :: dstDatamap
-      type(ESMF_Array), intent(in), optional :: dstArray
-      logical, intent(in), optional :: reorder
-      logical, intent(in), optional :: total
-      integer, intent(out), optional :: rc
+      integer,                 intent(in   ) :: dimCount
+      type(ESMF_Grid),         intent(in   ) :: srcGrid
+      type(ESMF_Grid),         intent(in   ) :: dstGrid
+      type(ESMF_DomainList),   intent(inout) :: recvDomainList
+      type(ESMF_DELayout),     intent(in   ) :: parentDELayout
+      type(ESMF_FieldDataMap), intent(in   ) :: srcDatamap
+      type(ESMF_FieldDataMap), intent(in   ) :: dstDatamap
+      logical,                 intent(in   ), optional :: hasSrcData
+      logical,                 intent(in   ), optional :: hasDstData
+      type(ESMF_Array),        intent(in   ), optional :: srcArray
+      type(ESMF_Array),        intent(in   ), optional :: dstArray
+      logical,                 intent(in   ), optional :: reorder
+      logical,                 intent(in   ), optional :: total
+      logical,                 intent(in   ), optional :: layer
+      integer,                 intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Adds an address pair and regrid weight to an existing regrid.
@@ -536,18 +596,10 @@
 !TODO: Leave here or move to Route?
 
       integer :: localrc
-      integer :: myDE, gridrank, nDEs, theirDE, i, j
-      integer, dimension(:), allocatable :: dimOrder
-      logical :: totalUse
-      real(ESMF_KIND_R8) :: count
-      real(ESMF_KIND_R8), dimension(:), allocatable :: dstMin, dstMax
-      real(ESMF_KIND_R8), dimension(:), allocatable :: srcMin, srcMax
-      type(ESMF_AxisIndex), dimension(:), allocatable :: myAI, myArrayAI, &
-                                                         myArrayLocalAI
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: allAI, allLocalAI
-      type(ESMF_DELayout) :: srcDELayout
+      logical :: layerUse, totalUse, hasSrcDataUse, hasDstDataUse
+      type(ESMF_DELayout) :: srcDELayout, dstDELayout
       type(ESMF_DomainList) :: sendDomainList
-      type(ESMF_RelLoc) :: horzRelLoc
+      type(ESMF_RelLoc) :: dstHorzRelLoc, srcHorzRelLoc
       type(ESMF_Route) :: route
 
 !     Initialize return code; assume failure until success is certain
@@ -556,159 +608,76 @@
 !     use optional arguments if present
       totalUse = .false.
       if (present(total)) totalUse = total
+      layerUse = .false.
+      if (present(layer)) layerUse = layer
+      hasSrcDataUse = .false.
+      if (present(srcArray))   hasSrcDataUse = .true.
+      if (present(hasSrcData)) hasSrcDataUse = hasSrcData
+      hasDstDataUse = .false.
+      if (present(dstArray))   hasDstDataUse = .true.
+      if (present(hasDstData)) hasDstDataUse = hasDstData
 
+      ! Extract some information for use in this regrid.
+      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcHorzRelLoc, &
+                                rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstHorzRelLoc, &
+                                rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! calculate intersections
+      if (hasSrcDataUse) then
+        call ESMF_GridBoxIntersectSend(srcGrid, dstGrid, sendDomainList, &
+                                       totalUse, layerUse, &
+                                       srcHorzRelLoc, dstHorzRelLoc, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, recvDomainList, &
+                                     hasDstDataUse, hasSrcDataUse, &
+                                     totalUse, layerUse, &
+                                     srcHorzRelLoc, dstHorzRelLoc, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! Modify DomainLists for Array AI's and to add ranks larger than Grid dimensions
+
+      ! sendDomainList first
+      if (hasSrcData .AND. present(srcArray)) then
+        call ESMF_RegridDomainListModify('send', dimCount, sendDomainList, srcArray, &
+                                         srcGrid, srcDataMap, totalUse, rc)
+      endif
+
+      ! recvDomainList next
+      if (hasDstDataUse .AND. present(dstArray)) then
+        call ESMF_RegridDomainListModify('recv', dimCount, recvDomainList, dstArray, &
+                                         dstGrid, dstDataMap, totalUse, rc)
+      endif
+
+      ! get layouts for Route calculation
       call ESMF_GridGet(srcGrid, delayout=srcDELayout, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-
-      call ESMF_DELayoutGet(srcDELayout, localDE=myDE, rc=localrc)
+      call ESMF_GridGet(dstGrid, delayout=dstDELayout, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-
-      ! Extract some layout information for use in this regrid.
-      call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=localrc)
-      allocate (myAI(gridrank), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "myAI", &
-                                     ESMF_CONTEXT, rc)) return
-
-      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=localrc)
-      call ESMF_GridGetDELocalAI(srcGrid, myAI, horzRelLoc, &
-                                 reorder=reorder, total=totalUse, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      ! From each grid get the bounding box information on this DE
-      call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=localrc)
-      allocate(srcMin(gridrank), &
-               srcMax(gridrank), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "src arrays", &
-                                     ESMF_CONTEXT, rc)) return
-
-      call ESMF_GridGet(dstGrid, dimCount=gridrank, rc=localrc)
-      allocate(dstMin(gridrank), &
-               dstMax(gridrank), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "dst arrays", &
-                                     ESMF_CONTEXT, rc)) return
-
-      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=localrc)
-      call ESMF_GridGetDELocalInfo(srcGrid, horzRelLoc=horzRelLoc, &
-                                   minLocalCoordPerDim=srcMin, &
-                                   maxLocalCoordPerDim=srcMax, &
-                                   reorder=.false., rc=localrc)
-      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=horzRelLoc, rc=localrc)
-      call ESMF_GridGetDELocalInfo(dstGrid, horzRelLoc=horzRelLoc, &
-                                   minLocalCoordPerDim=dstMin, &
-                                   maxLocalCoordPerDim=dstMax, &
-                                   reorder=.false., rc=localrc)
-
-      ! calculate intersections
-      call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, srcMin, srcMax, &
-                                     myAI, sendDomainList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      call ESMF_GridBoxIntersectRecv(srcGrid, dstMin, dstMax, &
-                                     recvDomainList, total=totalUse, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      ! Modify DomainLists for Array dimensions larger than Grid dimensions
-      ! TODO: move this to its own subroutine?
-      if ((dimCount.gt.gridrank) .and. (present(srcArray))) then ! TODO: fill in
-      ! sendDomainList first
-        allocate(     myArrayAI(dimCount), &
-                 myArrayLocalAI(dimCount), &
-                       dimOrder(dimCount), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "dimCount arrays", &
-                                       ESMF_CONTEXT, rc)) return
-
-        if (totalUse) then
-          call ESMF_ArrayGetAxisIndex(srcArray, totalindex=myArrayAI, rc=localrc)
-        else
-          call ESMF_ArrayGetAxisIndex(srcArray, compindex=myArrayAI, rc=localrc)
-        endif
-        call ESMF_FieldDataMapGet(srcDataMap, dataIndexList=dimOrder, rc=localrc)
-        do i = 1,sendDomainList%num_domains
-          do j = 1,sendDomainList%domains(i)%rank
-            myAI(j) = sendDomainList%domains(i)%ai(j)
-          enddo
-          sendDomainList%domains(i)%rank = dimCount
-          do j = 1,dimCount
-            if (dimOrder(j).eq.1) then
-              sendDomainList%domains(i)%ai(j) = myAI(1)
-            elseif (dimOrder(j).eq.2) then
-              sendDomainList%domains(i)%ai(j) = myAI(2)
-            elseif (dimOrder(j).eq.0) then
-              sendDomainList%domains(i)%ai(j) = myArrayAI(j)
-            else
-              !TODO: add error
-            endif
-          enddo
-        enddo
-        do j = 1,dimCount
-          if (dimOrder(j).eq.0) then
-            count = myArrayAI(j)%max - myArrayAI(j)%min + 1
-            sendDomainList%total_points = sendDomainList%total_points*count
-          endif
-        enddo
-
-      ! recvDomainList next
-        call ESMF_DELayoutGet(srcDELayout, deCount=nDEs, rc=localrc)
-        allocate(     allAI(nDEs,dimCount), &
-                 allLocalAI(nDEs,dimCount), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "allAI arrays", &
-                                       ESMF_CONTEXT, rc)) return
-
-        if (totalUse) then
-          call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
-                                           totalindex=allAI, rc=localrc)
-        else
-          call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
-                                           compindex=allAI, rc=localrc)
-        endif
-        do i = 1,recvDomainList%num_domains
-          theirDE = recvDomainList%domains(i)%DE + 1
-          do j = 1,recvDomainList%domains(i)%rank
-            myAI(j) = recvDomainList%domains(i)%ai(j)
-          enddo
-          recvDomainList%domains(i)%rank = dimCount
-          do j = 1,dimCount
-            if (dimOrder(j).eq.1) then
-              recvDomainList%domains(i)%ai(j) = myAI(1)
-            elseif (dimOrder(j).eq.2) then
-              recvDomainList%domains(i)%ai(j) = myAI(2)
-            elseif (dimOrder(j).eq.0) then
-              recvDomainList%domains(i)%ai(j) = allAI(theirDE,j)
-            else
-              !TODO: add error
-            endif
-          enddo
-        enddo
-        do j = 1,dimCount
-          if (dimOrder(j).eq.0) then
-            count = allAI(theirDE,j)%max - allAI(theirDE,j)%min + 1
-            recvDomainList%total_points = recvDomainList%total_points*count
-          endif
-        enddo
-
-        deallocate(      dimOrder, &
-                        myArrayAI, &
-                   myArrayLocalAI, &
-                            allAI, &
-                       allLocalAI, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
-                                       ESMF_CONTEXT, rc)) return
-      endif
 
       ! Create Route
       route = ESMF_RouteCreate(parentDELayout, localrc)
-      call ESMF_RoutePrecomputeDomList(route, dimCount, myDE, sendDomainList, &
-                                       recvDomainList, localrc)
+      call ESMF_RoutePrecomputeDomList(route, dimCount, &
+                                       srcDELayout, dstDELayout, &
+                                       sendDomainList, recvDomainList, &
+                                       hasSrcDataUse, hasDstDataUse, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -719,15 +688,6 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! Clean up
-      deallocate(  myAI, &
-                 srcMin, &
-                 srcMax, &
-                 dstMin, &
-                 dstMax, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
-                                     ESMF_CONTEXT, rc)) return
-
       ! Set return values
       ESMF_RegridRouteConstruct = route
       if (present(rc)) rc = ESMF_SUCCESS
@@ -737,7 +697,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RegridGet"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridGet - Get an attribute of a Regrid
 
 ! !INTERFACE:
@@ -1082,6 +1042,325 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridDestruct
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridDomainListAddLayer"
+!BOPI
+! !IROUTINE: ESMF_RegridDomainListAddLayer - modify a DomainList to add a layer of cells
+
+! !INTERFACE:
+      subroutine ESMF_RegridDomainListAddLayer(option, nLayers, dimCount, &
+                                               domainList, rc)
+                                             
+!
+! !ARGUMENTS:
+      character(4), intent(in) :: option
+      integer, intent(in) :: nLayers
+      integer, intent(in) :: dimCount
+      type(ESMF_DomainList), intent(inout) :: domainList
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     ESMF routine which creates and initializes a regrid index structure.
+!     The structure is later filled with appropriate data in the routine
+!     addLink2D.  Intended for internal ESMF use only.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[srcCount]
+!          Size of the local source grid.
+!     \item[dstCount]
+!          2D array giving the size of the local destination grid.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:
+
+      integer :: localrc
+      integer :: i, j
+      integer :: size, totalPoints
+      type(ESMF_AxisIndex), dimension(:), pointer :: thisAI
+
+      allocate(thisAI(dimCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dealloc AI arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
+      totalPoints = 0
+      do i   = 1,domainList%num_domains
+        do j = 1,domainList%domains(i)%rank
+          thisAI(j) = domainList%domains(i)%ai(j)
+        enddo
+
+        ! modify thisAI by nLayers
+        size = 1
+        do j = 1,domainList%domains(i)%rank
+          thisAI(j)%min = thisAI(j)%min - nLayers
+          thisAI(j)%max = thisAI(j)%max + nLayers
+          if (option.eq.'recv') thisAI(j)%stride = thisAI(j)%stride + 2*nLayers
+          size = size * (thisAI(j)%max - thisAI(j)%min + 1)
+          domainList%domains(i)%ai(j) = thisAI(j)
+        enddo
+        totalPoints = totalPoints + size
+      enddo
+
+      domainList%total_points = totalPoints
+
+      deallocate(thisAI, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dealloc AI arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_RegridDomainListAddLayer
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridDomainListModify"
+!BOPI
+! !IROUTINE: ESMF_RegridDomainListModify - modify a DomainList from a Grid for an Array
+
+! !INTERFACE:
+      subroutine ESMF_RegridDomainListModify(option, dimCount, domainList, &
+                                             array, grid, dataMap, total, rc)
+!
+! !ARGUMENTS:
+      character(4), intent(in) :: option
+      integer, intent(in) :: dimCount
+      type(ESMF_DomainList), intent(inout) :: domainList
+      type(ESMF_Array), intent(in) :: array
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_FieldDataMap), intent(in) :: dataMap
+      logical, intent(in) :: total
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     ESMF routine which creates and initializes a regrid index structure.
+!     The structure is later filled with appropriate data in the routine
+!     addLink2D.  Intended for internal ESMF use only.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[srcCount]
+!          Size of the local source grid.
+!     \item[dstCount]
+!          2D array giving the size of the local destination grid.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:
+
+      integer :: localrc
+      integer :: count, haloWidth, i, j, nDE, nDEs
+      integer, dimension(:), allocatable :: dimOrder, lbounds
+      type(ESMF_AxisIndex), dimension(:), pointer :: thisAI
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: allAI
+      type(ESMF_DELayout) :: layout
+
+      call ESMF_GridGet(grid, delayout=layout, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_DELayoutGet(layout, deCount=nDEs, rc=localrc)
+
+      ! Modify DomainLists for Array AI's and to add ranks larger than Grid
+      ! dimensions
+      allocate(  dimOrder(dimCount), &
+                   thisAI(dimCount), &
+               allAI(nDEs,dimCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "AI arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
+      if (option.eq.'send') then
+        allocate( lbounds(dimCount), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "dimCount arrays", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
+
+      if (total) then
+        call ESMF_ArrayGetAllAxisIndices(array, grid, dataMap, &
+                                         totalindex=allAI, rc=localrc)
+      else
+        call ESMF_ArrayGetAllAxisIndices(array, grid, dataMap, &
+                                         compindex=allAI, rc=localrc)
+      endif
+
+      call ESMF_FieldDataMapGet(dataMap, dataIndexList=dimOrder, rc=localrc)
+
+      do i   = 1,domainList%num_domains
+        do j = 1,domainList%domains(i)%rank
+          thisAI(j) = domainList%domains(i)%ai(j)
+        enddo
+        domainList%domains(i)%rank = dimCount
+
+        ! modify thisAI to include Array haloWidth and possibly different lbounds
+        if (option.eq.'send') then
+          call ESMF_ArrayGet(array, haloWidth=haloWidth, lbounds=lbounds, &
+                             rc=localrc)
+          do j = 1,dimCount
+            if (dimOrder(j).eq.1) then
+              thisAI(1)%min    = thisAI(1)%min    +   haloWidth + lbounds(j) - 1
+              thisAI(1)%max    = thisAI(1)%max    +   haloWidth + lbounds(j) - 1
+              thisAI(1)%stride = thisAI(1)%stride + 2*haloWidth
+            elseif (dimOrder(j).eq.2) then
+              thisAI(2)%min    = thisAI(2)%min    +   haloWidth + lbounds(j) - 1
+              thisAI(2)%max    = thisAI(2)%max    +   haloWidth + lbounds(j) - 1
+              thisAI(2)%stride = thisAI(2)%stride + 2*haloWidth
+            endif
+          enddo
+        endif
+
+        ! load into appropriate spot of domainList
+        do j = 1,dimCount
+          nDE = domainList%domains(i)%DE + 1
+          if (dimOrder(j).eq.1) then
+            domainList%domains(i)%ai(j) = thisAI(1)
+          elseif (dimOrder(j).eq.2) then
+            domainList%domains(i)%ai(j) = thisAI(2)
+          elseif (dimOrder(j).eq.0) then
+            count = allAI(nDE,j)%max - allAI(nDE,j)%min + 1
+            domainList%domains(i)%ai(j) = allAI(nDE,j)
+            domainList%total_points     = domainList%total_points*count
+          else
+            !TODO: add error
+          endif
+        enddo
+      enddo
+
+      deallocate(dimOrder, &
+                   thisAI, &
+                    allAI, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dealloc AI arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
+      if (option.eq.'send') then
+        deallocate( lbounds, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "dealloc send arrays", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_RegridDomainListModify
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridIndexCreate"
+!BOPI
+! !IROUTINE: ESMF_RegridIndexCreate - Create regrid index structure
+
+! !INTERFACE:
+      function ESMF_RegridIndexCreate(srcCount, dstCount, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_RegridIndex) :: ESMF_RegridIndexCreate
+!
+! !ARGUMENTS:
+      integer, intent(in) :: srcCount
+      integer, dimension(2), intent(in) :: dstCount
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     ESMF routine which creates and initializes a regrid index structure.
+!     The structure is later filled with appropriate data in the routine
+!     addLink2D.  Intended for internal ESMF use only.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[srcCount]
+!          Size of the local source grid.
+!     \item[dstCount]
+!          2D array giving the size of the local destination grid.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:
+
+      integer :: localrc
+      type(ESMF_RegridIndexType), pointer :: ritype    ! Pointer to new regrid index
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+!     Initialize pointers
+      nullify(ritype)
+      nullify(ESMF_RegridIndexCreate%ptr)
+
+      allocate(ritype, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Regrid type", &
+                                     ESMF_CONTEXT, rc)) return
+
+!     allocate and initialize regrid index internals.
+      allocate(ritype%srcMinIndex(srcCount), &
+               ritype%srcMaxIndex(srcCount), stat=localrc)
+      allocate(ritype%dstMinIndex(dstCount(1), dstCount(2)), &
+               ritype%dstMaxIndex(dstCount(1), dstCount(2)), stat=localrc)
+      ritype%srcMinIndex = 0
+      ritype%srcMaxIndex = 0
+      ritype%dstMinIndex = 0
+      ritype%dstMaxIndex = 0
+
+!     Set return values.
+      ESMF_RegridIndexCreate%ptr => ritype
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_RegridIndexCreate
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridIndexDestroy"
+!BOPI
+! !IROUTINE: ESMF_RegridIndexDestroy - destroy regrid index structure
+
+! !INTERFACE:
+      subroutine ESMF_RegridIndexDestroy(index, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_RegridIndex) :: index
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     ESMF routine which destroys a regrid index structure.  Intended for
+!     internal ESMF use only.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[index]
+!          {\tt RegridIndex} to be destroyed.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:
+
+      ! local variables
+      integer :: localrc                             ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+!     deallocate regrid index internals.
+      deallocate(index%ptr%srcMinIndex, &
+                 index%ptr%srcMaxIndex, &
+                 index%ptr%dstMinIndex, &
+                 index%ptr%dstMaxIndex, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Regrid type", &
+                                     ESMF_CONTEXT, rc)) return
+
+!     Destroy all components of the regrid index structure
+      nullify(index%ptr)
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_RegridIndexDestroy
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

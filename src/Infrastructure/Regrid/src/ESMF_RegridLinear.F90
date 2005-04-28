@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.24 2004/06/14 22:31:48 jwolfe Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.24.2.1 2005/04/28 21:03:45 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.24 2004/06/14 22:31:48 jwolfe Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.24.2.1 2005/04/28 21:03:45 jwolfe Exp $'
 
 !==============================================================================
 
@@ -80,24 +80,26 @@
 ! !IROUTINE: ESMF_RegridConstructLinear - Constructs linear Regrid structure 
 
 ! !INTERFACE:
-      function ESMF_RegridConstructLinear(srcArray, srcGrid, srcDataMap, &
-                                          dstArray, dstGrid, dstDataMap, &
+      function ESMF_RegridConstructLinear(srcArray, srcGrid, srcDataMap, hasSrcData, &
+                                          dstArray, dstGrid, dstDataMap, hasDstData, &
                                           parentDELayout, srcMask, dstMask, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_RouteHandle) :: ESMF_RegridConstructLinear
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: srcArray
-      type(ESMF_Grid), intent(inout) :: srcGrid
-      type(ESMF_FieldDataMap), intent(in) :: srcDataMap
-      type(ESMF_Array), intent(inout) :: dstArray
-      type(ESMF_Grid), intent(inout) :: dstGrid
-      type(ESMF_FieldDataMap), intent(in) :: dstDataMap
-      type(ESMF_DELayout), intent(in) :: parentDELayout
-      type(ESMF_Mask), intent(in), optional :: srcMask
-      type(ESMF_Mask), intent(in), optional :: dstMask
-      integer, intent(out), optional :: rc
+      type(ESMF_Array),        intent(in ) :: srcArray
+      type(ESMF_Grid),         intent(in ) :: srcGrid
+      type(ESMF_FieldDataMap), intent(in ) :: srcDataMap
+      logical,                 intent(in ) :: hasSrcData
+      type(ESMF_Array),        intent(in ) :: dstArray
+      type(ESMF_Grid),         intent(in ) :: dstGrid
+      type(ESMF_FieldDataMap), intent(in ) :: dstDataMap
+      logical,                 intent(in ) :: hasDstData
+      type(ESMF_DELayout),     intent(in ) :: parentDELayout
+      type(ESMF_Mask),         intent(in ), optional :: srcMask
+      type(ESMF_Mask),         intent(in ), optional :: dstMask
+      integer,                 intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Given a source field and destination field (and their attached
@@ -129,11 +131,10 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      logical :: hassrcdata        ! does this DE contain localdata from src?
-      logical :: hasdstdata        ! does this DE contain localdata from dst?
       integer :: start, stop, startComp, stopComp
       integer :: srcSizeZ, srcSizeZComp, size
-      integer :: i, j, num_domains, dstCounts(3), srcCounts(3), ij
+      integer :: i, num_domains, dstCounts(3), srcCounts(3)
+      !integer :: j, ij 
       logical, dimension(:), pointer :: srcUserMask, dstUserMask
       logical, dimension(:), pointer :: found
       integer(ESMF_KIND_I4), dimension(:), pointer :: foundCount, srcLocalMask
@@ -143,9 +144,10 @@
       real(ESMF_KIND_R8), dimension(:), pointer :: dstLocalCoordZ
       type(ESMF_CoordSystem) :: coordSystem
       type(ESMF_Array) :: srcMaskArray
-      type(ESMF_Array), pointer :: dstLocalCoordArray
-      type(ESMF_Array), pointer :: srcLocalCoordArray
-      type(ESMF_DomainList) :: recvDomainList, recvDomainListTot
+      type(ESMF_Array), dimension(:), pointer :: dstLocalCoordArray
+      type(ESMF_Array), dimension(:), pointer :: srcLocalCoordArray
+      type(ESMF_DomainList) :: recvDomainList 
+      !type(ESMF_DomainList) :: recvDomainListTot
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
       type(ESMF_Route) :: route, tempRoute
       type(ESMF_RouteHandle) :: rh
@@ -189,14 +191,18 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-!      call ESMF_GridGetCoord(dstGrid, relloc=dstRelLoc, &
-!                             vertCoord=dstLocalCoordArray, &
-!                             reorder=.false., rc=localrc)
-!      if (ESMF_LogMsgFoundError(localrc, &
-!                                ESMF_ERR_PASSTHRU, &
-!                                ESMF_CONTEXT, rc)) return
+      allocate(dstLocalCoordArray(1), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dstLocalCoordArray", &
+                                     ESMF_CONTEXT, rc)) return
 
-      call ESMF_ArrayGetData(dstLocalCoordArray, dstLocalCoordZ, &
+      call ESMF_GridGetCoord(dstGrid, vertrelloc=dstRelLoc, &
+                             centerCoord=dstLocalCoordArray, &
+                             reorder=.false., rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_ArrayGetData(dstLocalCoordArray(1), dstLocalCoordZ, &
                              ESMF_DATA_REF, localrc)
 
       ! get source grid info
@@ -212,24 +218,24 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+      allocate(srcLocalCoordArray(1), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "srcLocalCoordArray", &
+                                     ESMF_CONTEXT, rc)) return
 
-!      call ESMF_GridGetCoord(srcGrid, relloc=srcRelLoc, &
-!                             vertCoord=srcLocalCoordArray, &
-!                             reorder=.false., total=.true., rc=localrc)
-!      if (ESMF_LogMsgFoundError(localrc, &
-!                                ESMF_ERR_PASSTHRU, &
-!                                ESMF_CONTEXT, rc)) return
+      call ESMF_GridGetCoord(srcGrid, vertrelloc=srcRelLoc, &
+                             centerCoord=srcLocalCoordArray, &
+                             reorder=.false., total=.true., rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      call ESMF_ArrayGetData(srcLocalCoordArray, srcLocalCoordZ, &
+      call ESMF_ArrayGetData(srcLocalCoordArray(1), srcLocalCoordZ, &
                              ESMF_DATA_REF, localrc)
 
       call ESMF_GridGetCellMask(srcGrid, srcMaskArray, relloc=srcRelLoc, &
                                 rc=localrc)
       call ESMF_ArrayGetData(srcMaskArray, srcLocalMask, ESMF_DATA_REF, &
                              localrc)
-
-      hassrcdata = .true.   ! temp for now
-      hasdstdata = .true.   ! temp for now
 
    ! Calculate two separate Routes:
    !    the first will be used in the code to gather the data for running
@@ -246,7 +252,7 @@
       call ESMF_RouteHandleSet(rh, route1=route, rc=localrc)
 
 !      tempRoute = ESMF_RegridRouteConstruct(srcGrid, dstGrid, &
-!                                            recvDomainListTot, &parentDELayout, 
+!                                            recvDomainListTot, parentDELayout, &
 !                                            srcDataMap=srcDataMap, &
 !                                            dstDataMap=dstDataMap, &
 !                                            total=.true., rc=localrc)
@@ -304,17 +310,17 @@
      
       ! Loop through domains for the search routine
       call ESMF_GridGet(srcGrid, vertCoordSystem=coordSystem, rc=localrc)
-      num_domains = recvDomainListTot%num_domains
+      num_domains = recvDomainList%num_domains
       start = 1
       startComp = 1
       do i = 1,num_domains
         srcSizeZComp = recvDomainList%domains(i)%ai(3)%max &
                      - recvDomainList%domains(i)%ai(3)%min + 1
         stopComp  = startComp + srcSizeZComp - 1
-        srcSizeZ = recvDomainListTot%domains(i)%ai(3)%max &
-                 - recvDomainListTot%domains(i)%ai(3)%min + 1
+        srcSizeZ = recvDomainList%domains(i)%ai(3)%max &
+                 - recvDomainList%domains(i)%ai(3)%min + 1
         stop  = start + srcSizeZ - 1
-        call ESMF_RegridLinearSearch(tv, recvDomainListTot%domains(i), &
+        call ESMF_RegridLinearSearch(tv, recvDomainList%domains(i), &
                                      coordSystem, srcSizeZ, startComp-1, &
                                      dstCounts(3), found, foundCount, &
                                      srcGatheredCoordZ(start:stop), &
@@ -403,9 +409,9 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
       integer ::           &
-         k,n,iter,         &! loop counters
+         k,                &! loop counters
          kkk,              &! more loop counters
          kp1,              &! neighbor indices
          kbDst, keDst,     &! beg, end of exclusive domain in k-dir of dest grid

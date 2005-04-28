@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.71 2004/06/14 22:31:06 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.71.2.1 2005/04/28 21:02:55 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.71 2004/06/14 22:31:06 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.71.2.1 2005/04/28 21:02:55 jwolfe Exp $'
 
 !==============================================================================
 
@@ -81,24 +81,26 @@
 ! !IROUTINE: ESMF_RegridConstructBilinear - Constructs bilinear Regrid structure 
 
 ! !INTERFACE:
-      function ESMF_RegridConstructBilinear(srcArray, srcGrid, srcDataMap, &
-                                            dstArray, dstGrid, dstDataMap, &
+      function ESMF_RegridConstructBilinear(srcArray, srcGrid, srcDataMap, hasSrcData, &
+                                            dstArray, dstGrid, dstDataMap, hasDstData, &
                                             parentDELayout, srcMask, dstMask, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_RouteHandle) :: ESMF_RegridConstructBilinear
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: srcArray
-      type(ESMF_Grid), intent(in) :: srcGrid
-      type(ESMF_FieldDataMap), intent(in) :: srcDataMap
-      type(ESMF_Array), intent(in) :: dstArray
-      type(ESMF_Grid), intent(in) :: dstGrid
-      type(ESMF_FieldDataMap), intent(in) :: dstDataMap
-      type(ESMF_DELayout), intent(in) :: parentDELayout
-      type(ESMF_Mask), intent(in), optional :: srcMask
-      type(ESMF_Mask), intent(in), optional :: dstMask
-      integer, intent(out), optional :: rc
+      type(ESMF_Array),        intent(in   ) :: srcArray
+      type(ESMF_Grid),         intent(in   ) :: srcGrid
+      type(ESMF_FieldDataMap), intent(in   ) :: srcDataMap
+      logical,                 intent(in   ) :: hasSrcData
+      type(ESMF_Array),        intent(in   ) :: dstArray
+      type(ESMF_Grid),         intent(in   ) :: dstGrid
+      type(ESMF_FieldDataMap), intent(in   ) :: dstDataMap
+      logical,                 intent(in   ) :: hasDstData
+      type(ESMF_DELayout),     intent(in   ) :: parentDELayout
+      type(ESMF_Mask),         intent(in   ), optional :: srcMask
+      type(ESMF_Mask),         intent(in   ), optional :: dstMask
+      integer,                 intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Given a source field and destination field (and their attached
@@ -128,13 +130,12 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      logical :: hassrcdata        ! does this DE contain localdata from src?
-      logical :: hasdstdata        ! does this DE contain localdata from dst?
-      integer :: start, stop, startComp, stopComp, indexMod(2)
+      integer :: start, stop, startComp, stopComp, srcIndexMod(2), dstIndexMod(2)
       integer :: srcSizeX, srcSizeY, srcSizeXComp, srcSizeYComp, size
       integer :: i, numDomains, dstCounts(3), srcCounts(3)
-      integer :: datarank
+      integer :: dataRank, haloWidth
       integer, dimension(3) :: srcOrder, dstOrder
+      integer, dimension(:), allocatable :: dataOrder, lbounds
       logical, dimension(:), pointer :: srcUserMask, dstUserMask
       logical, dimension(:,:), pointer :: found
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: foundCount, srcLocalMask
@@ -159,6 +160,13 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      nullify(srcUserMask, dstUserMask, found)
+      nullify(foundCount, srcLocalMask, srcGatheredMask)
+      nullify(srcGatheredCoordX, srcGatheredCoordY)
+      nullify(srcLocalCoordX, srcLocalCoordY)
+      nullify(dstLocalCoordX, dstLocalCoordY)
+      nullify(dstLocalCoordArray, srcLocalCoordArray)
+
       ! Construct an empty regrid structure
       rh = ESMF_RouteHandleCreate(rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -177,13 +185,21 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+      ! get dataRank and allocate rank-sized arrays
+      call ESMF_ArrayGet(srcArray, rank=dataRank, rc=localrc)
+      allocate(dataOrder(dataRank), &
+                 lbounds(dataRank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dataRank arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
       ! set reordering information
       srcOrder(:) = gridOrder(:,srcGrid%ptr%coordOrder%order,2)
       dstOrder(:) = gridOrder(:,dstGrid%ptr%coordOrder%order,2)
 
       ! get destination grid info
       !TODO: Get grid masks?
-      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstRelLoc, rc=localrc)
+      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstRelLoc, &
+                                dataIndexList=dataOrder, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -196,21 +212,23 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      allocate(dstLocalCoordArray(2), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "dstLocalCoordArray", &
-                                     ESMF_CONTEXT, rc)) return
+      if (hasDstData) then
+        allocate(dstLocalCoordArray(2), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "dstLocalCoordArray", &
+                                       ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridGetCoord(dstGrid, horzRelLoc=dstRelLoc, &
-                             centerCoord=dstLocalCoordArray, &
-                             reorder=.false., rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+        call ESMF_GridGetCoord(dstGrid, horzRelLoc=dstRelLoc, &
+                               centerCoord=dstLocalCoordArray, &
+                               reorder=.false., rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      call ESMF_ArrayGetData(dstLocalCoordArray(1), dstLocalCoordX, &
-                             ESMF_DATA_REF, localrc)
-      call ESMF_ArrayGetData(dstLocalCoordArray(2), dstLocalCoordY, &
-                             ESMF_DATA_REF, localrc)
+        call ESMF_ArrayGetData(dstLocalCoordArray(1), dstLocalCoordX, &
+                               ESMF_DATA_REF, localrc)
+        call ESMF_ArrayGetData(dstLocalCoordArray(2), dstLocalCoordY, &
+                               ESMF_DATA_REF, localrc)
+      endif
 
       ! get source grid info
       call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcRelLoc, rc=localrc)
@@ -226,29 +244,33 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      allocate(srcLocalCoordArray(2), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "srcLocalCoordArray", &
-                                     ESMF_CONTEXT, rc)) return
+      if (hasSrcData) then
+        allocate(srcLocalCoordArray(2), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "srcLocalCoordArray", &
+                                       ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridGetCoord(srcGrid, horzRelLoc=srcRelLoc, &
-                             centerCoord=srcLocalCoordArray, &
-                             reorder=.false., total=.true., rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+        call ESMF_GridGetCoord(srcGrid, horzRelLoc=srcRelLoc, &
+                               centerCoord=srcLocalCoordArray, &
+                               reorder=.false., total=.true., rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      call ESMF_ArrayGetData(srcLocalCoordArray(1), srcLocalCoordX, &
-                             ESMF_DATA_REF, localrc)
-      call ESMF_ArrayGetData(srcLocalCoordArray(2), srcLocalCoordY, &
-                             ESMF_DATA_REF, localrc)
-
-      call ESMF_GridGetCellMask(srcGrid, srcMaskArray, relloc=srcRelLoc, &
-                                rc=localrc)
-      call ESMF_ArrayGetData(srcMaskArray, srcLocalMask, ESMF_DATA_REF, &
-                             localrc)
-
-      hassrcdata = .true.   ! temp for now
-      hasdstdata = .true.   ! temp for now
+        call ESMF_ArrayGetData(srcLocalCoordArray(1), srcLocalCoordX, &
+                               ESMF_DATA_REF, localrc)
+        call ESMF_ArrayGetData(srcLocalCoordArray(2), srcLocalCoordY, &
+                               ESMF_DATA_REF, localrc)
+        call ESMF_GridGetCellMask(srcGrid, srcMaskArray, relloc=srcRelLoc, &
+                                  rc=localrc)
+        call ESMF_ArrayGetData(srcMaskArray, srcLocalMask, ESMF_DATA_REF, &
+                               localrc)
+!      else    ! TODO -- is this necessary?
+!        allocate(srcLocalCoordX(srcCounts(1),srcCounts(2)), &
+!                 srcLocalCoordY(srcCounts(1),srcCounts(2)), &
+!                   srcLocalMask(srcCounts(1),srcCounts(2)), stat=localrc)
+!        if (ESMF_LogMsgFoundAllocError(localrc, "srcCount arrays", &
+!                                       ESMF_CONTEXT, rc)) return
+      endif
 
    ! Calculate two separate Routes:
    !    the first will be used in the code to gather the data for running
@@ -257,12 +279,12 @@
    !              is used internal to this routine to get coordinate 
    !              information locally to calculate the regrid weights
 
-      call ESMF_ArrayGet(srcArray, rank=datarank, rc=localrc)
-      route = ESMF_RegridRouteConstruct(datarank, srcGrid, dstGrid, &
-                                      recvDomainList, parentDELayout, &
-                                      srcArray=srcArray, srcDataMap=srcDataMap, &
-                                      dstArray=dstArray, dstDataMap=dstDataMap, &
-                                      total=.false., rc=localrc)
+      route = ESMF_RegridRouteConstruct(dataRank, srcGrid, dstGrid, &
+                         recvDomainList, parentDELayout, &
+                         srcDataMap=srcDataMap, dstDataMap=dstDataMap, &
+                         hasSrcData=hasSrcData, hasDstData=hasDstData, &
+                         srcArray=srcArray, dstArray=dstArray, &
+                         total=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -272,38 +294,44 @@
       ! just do this to get a recDomainList with the right rank -- could be
       ! different using arrays
       tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
-                                            recvDomainList, parentDELayout, &
-                                            srcDataMap=srcDataMap, &
-                                            dstDataMap=dstDataMap, &
-                                            reorder=.false., total=.false., &
-                                            rc=localrc)
+                             recvDomainList, parentDELayout, &
+                             srcDataMap=srcDataMap, dstDataMap=dstDataMap, &
+                             hasSrcData=hasSrcData, hasDstData=hasDstData, &
+                             reorder=.false., total=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! but this is the one we want to use for gathering grid data
       tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
-                                            recvDomainListTot, parentDELayout, &
-                                            srcDataMap=srcDataMap, &
-                                            dstDataMap=dstDataMap, &
-                                            reorder=.false., total=.true., &
-                                            rc=localrc)
+                             recvDomainListTot, parentDELayout, &
+                             srcDataMap=srcDataMap, dstDataMap=dstDataMap, &
+                             hasSrcData=hasSrcData, hasDstData=hasDstData, &
+                             reorder=.false., total=.true., layer=.true., &
+                             rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! Now use temporary route to gather necessary coordinates
-      ! Create arrays for gathered coordinates 
-      call ESMF_RouteGetRecvItems(tempRoute, size, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+      ! Create arrays for gathered coordinates
+      if (hasDstData) then
+        call ESMF_RouteGetRecvItems(tempRoute, size, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      allocate(srcGatheredCoordX(size), &
-               srcGatheredCoordY(size), &
-               srcGatheredMask  (size), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "src gathered arrays", &
-                                     ESMF_CONTEXT, rc)) return
+        allocate(srcGatheredCoordX(size), &
+                 srcGatheredCoordY(size), &
+                 srcGatheredMask  (size), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "src gathered arrays", &
+                                       ESMF_CONTEXT, rc)) return
+      !else
+      !  ! TODO: make route run routines take a nullified pointers.
+      !  allocate(srcGatheredCoordX(0), &
+      !           srcGatheredCoordY(0), &
+      !           srcGatheredMask  (0), stat=localrc)
+      endif
 
       ! Execute Route now to gather grid center coordinates from source
       ! These arrays are just wrappers for the local coordinate data
@@ -326,6 +354,8 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! now all necessary data is local
+      ! only DEs with destination data need to calculate the regrid
+      if (hasDstData) then
 
       ! TODO: the *4 is to guarantee the max allocation possible is enough
       !  for bilinear interpolation.  eventually the addlinks routine should
@@ -351,6 +381,7 @@
                                        ESMF_CONTEXT, rc)) return
         dstUserMask = .TRUE.
       endif
+
       if (present(srcMask)) then
   !      srcUserMask = srcMask
       else
@@ -366,11 +397,19 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-
-      numDomains = recvDomainListTot%num_domains
-      indexMod = -1
-      start = 1
-      startComp = 1
+      call ESMF_ArrayGet(dstArray, haloWidth=haloWidth, lbounds=lbounds, &
+                         rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      do i = 1,dataRank
+        if (dataOrder(i).eq.1) dstIndexMod(1) = haloWidth + lbounds(i) - 1
+        if (dataOrder(i).eq.2) dstIndexMod(2) = haloWidth + lbounds(i) - 1
+      enddo
+      numDomains  = recvDomainListTot%num_domains
+      srcIndexMod = -1
+      start       = 1
+      startComp   = 1
       do i = 1,numDomains
         srcSizeXComp = recvDomainList%domains(i)%ai(1)%max &
                      - recvDomainList%domains(i)%ai(1)%min + 1
@@ -386,7 +425,8 @@
                                        coordSystem, srcSizeX, srcSizeY, &
                                        startComp-1, srcSizeXComp, &
                                        dstCounts(1), dstCounts(2), &
-                                       indexMod, srcOrder, dstOrder, &
+                                       srcIndexMod, srcOrder, &
+                                       dstIndexMod, dstOrder, &
                                        found, foundCount, &
                                        srcGatheredCoordX(start:stop), &
                                        srcGatheredCoordY(start:stop), &
@@ -398,6 +438,8 @@
         startComp = stopComp + 1 
       enddo 
 
+      endif
+
       call ESMF_RouteHandleSet(rh, tdata=tv, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -405,17 +447,43 @@
 
       ! clean up
       call ESMF_RouteDestroy(tempRoute, localrc)
-      deallocate( srcGatheredCoordX, &
-                  srcGatheredCoordY, &
-                    srcGatheredMask, &
-                 dstLocalCoordArray, &
-                 srcLocalCoordArray, &
-                              found, &
-                         foundCount, &
-                        dstUserMask, &
-                        srcUserMask, stat=localrc)
+      deallocate(dataOrder, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
                                      ESMF_CONTEXT, rc)) return
+      deallocate(  lbounds, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                     ESMF_CONTEXT, rc)) return
+      if (hasSrcData) then
+        deallocate(srcLocalCoordArray, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
+      if (hasDstData) then
+        deallocate( srcGatheredCoordX, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate( srcGatheredCoordY, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(   srcGatheredMask, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                     ESMF_CONTEXT, rc)) return
+        deallocate(dstLocalCoordArray, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(             found, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(        foundCount, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(       dstUserMask, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(       srcUserMask, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
       
       ESMF_RegridConstructBilinear = rh
 
@@ -434,7 +502,8 @@
                                            srcSizeX, srcSizeY, &
                                            srcStart, srcICount, &
                                            dstSizeX, dstSizeY, &
-                                           indexMod, srcOrder, dstOrder, &
+                                           srcIndexMod, srcOrder, &
+                                           dstIndexMod, dstOrder, &
                                            found, foundCount, &
                                            srcCenterX, srcCenterY, &
                                            dstCenterX, dstCenterY, &
@@ -451,8 +520,9 @@
       integer, intent(in) :: srcICount
       integer, intent(in) :: dstSizeX  ! in the lines below.
       integer, intent(in) :: dstSizeY
-      integer, dimension(:), intent(in) :: indexMod
+      integer, dimension(:), intent(in) :: srcIndexMod
       integer, dimension(:), intent(in) :: srcOrder
+      integer, dimension(:), intent(in) :: dstIndexMod
       integer, dimension(:), intent(in) :: dstOrder
       logical, dimension(dstSizeX,dstSizeY), intent(inout) :: found
       integer, dimension(dstSizeX,dstSizeY), intent(inout) :: foundCount
@@ -508,13 +578,15 @@
                                                   ! i-dir of source grid
       integer :: jbSrc, jeSrc                     ! beg, end of excl domain in
                                                   ! j-dir of source grid
+      integer :: iStrt, jStrt
+      integer :: d1, d2, s1, s2
       integer :: srcCount, srcValidCount
       integer :: srcAdd, dstAdd(2), srcTmp(2)     ! address in gathered source
                                                   ! and grid address in dest grid
          
-      real (ESMF_KIND_R8) :: lonThresh
+      !real (ESMF_KIND_R8) :: lonThresh
                            ! threshold for checking longitude crossing
-      real (ESMF_KIND_R8) :: lonCycle
+      !real (ESMF_KIND_R8) :: lonCycle
                            ! 360 for degrees, 2pi for radians
       real (ESMF_KIND_R8) :: dx1, dx2, dx3, dy1, dy2, dy3
                            ! differences for iterative scheme
@@ -527,6 +599,7 @@
       real (ESMF_KIND_R8) :: mat3, mat4
       real (ESMF_KIND_R8) :: dxp, dyp
       real (ESMF_KIND_R8) :: dstX, dstY
+      real (ESMF_KIND_R8) :: maxX, maxY, minX, minY
       real (ESMF_KIND_R8) :: determinant
       real (ESMF_KIND_R8) :: sumWts, zero, half, one, pi
       real (ESMF_KIND_R8), dimension(4) :: srcX
@@ -543,6 +616,7 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      weights(:) = 0.0
       zero = 0.
       half = 0.5
       one  = 1.
@@ -556,6 +630,10 @@
  !           lonCycle  = 2.0*pi
  !        endif
  !     endif
+      d1 = dstOrder(1)
+      d2 = dstOrder(2)
+      s1 = srcOrder(1)
+      s2 = srcOrder(2)
 
       ibDst = 1
       ieDst = dstSizeX
@@ -566,8 +644,10 @@
       jbSrc = domain%ai(2)%min
       jeSrc = domain%ai(2)%max - 1
 
-      do j=jbDst,jeDst
-      do i=ibDst,ieDst
+      jStrt = jbSrc
+      do j  = jbDst,jeDst
+      iStrt = ibSrc
+      do i   = ibDst,ieDst
         dstX = dstCenterX(i,j)
         dstY = dstCenterY(i,j)
             
@@ -575,8 +655,11 @@
         if (dstUserMask(i,j) .and. (.not.found(i,j))) then
           ! for this destination point, look for the proper neighbor cells in the
           ! source grid 
-          search_loop: do jjj=jbSrc,jeSrc
-            do iii=ibSrc,ieSrc
+    5     search_loop: do jjj = jStrt,jeSrc
+            minY = minval(srcCenterY(iStrt:ieSrc+1,jjj:jjj+1))
+            maxY = maxval(srcCenterY(iStrt:ieSrc+1,jjj:jjj+1))
+            if (dstY.lt.minY .OR. dstY.gt.maxY) cycle
+            do iii = iStrt,ieSrc
                
               ! assume ghost cells filled so no worries about boundaries
               ip1 = iii + 1
@@ -613,11 +696,28 @@
        !       endif
 
               ! check to see if point inside cell
+              ! quick and dirty check first
+              minX = minval(srcX)
+              maxX = maxval(srcX)
+              minY = minval(srcY)
+              maxY = maxval(srcY)
+              if (dstX.lt.minX .OR. dstX.gt.maxX .OR. &
+                  dstY.lt.minY .OR. dstY.gt.maxY) cycle
               found(i,j) = ESMF_PhysGridPointInCell(dstX, dstY, srcX, srcY, localrc)
 
-              if (found(i,j)) exit search_loop
+              if (found(i,j)) then
+                iStrt = iii
+                jStrt = jjj
+                exit search_loop
+              endif
             enddo            ! iii-loop on src DE
           enddo search_loop  ! jjj-loop on src DE
+       
+          if (.not.found(i,j) .AND. (iStrt.ne.ibSrc .OR. jStrt.ne.jbSrc)) then
+            iStrt = ibSrc
+            jStrt = jbSrc
+            goto 5
+          endif
                
           ! if we've found a bilinear box containing the point continue with
           ! computation of weights
@@ -626,13 +726,13 @@
             ! check to see if src masks are true at all points
             ! check grid mask to see if it's a ghost cell
             srcCount = 0
-            if (srcUserMask(iii,jjj) .and. (srcGridMask(iii,jjj).ne.1)) &
+            if (srcUserMask(iii,jjj) .AND. (srcGridMask(iii,jjj).ne.1)) &
                 srcCount = srcCount + 1
-            if (srcUserMask(ip1,jjj) .and. (srcGridMask(ip1,jjj).ne.1)) &
+            if (srcUserMask(ip1,jjj) .AND. (srcGridMask(ip1,jjj).ne.1)) &
                 srcCount = srcCount + 1
-            if (srcUserMask(iii,jp1) .and. (srcGridMask(iii,jp1).ne.1)) &
+            if (srcUserMask(iii,jp1) .AND. (srcGridMask(iii,jp1).ne.1)) &
                 srcCount = srcCount + 1
-            if (srcUserMask(ip1,jp1) .and. (srcGridMask(ip1,jp1).ne.1)) &
+            if (srcUserMask(ip1,jp1) .AND. (srcGridMask(ip1,jp1).ne.1)) &
                 srcCount = srcCount + 1
 
             ! if all four are valid points, compute bilinear weights using
@@ -669,7 +769,7 @@
                 deli = (dxp*mat4 - dyp*mat2)/determinant
                 delj = (dyp*mat1 - dxp*mat3)/determinant
 
-                if (abs(deli) < converge .and. &
+                if (abs(deli) < converge .AND. &
                     abs(delj) < converge) exit iter_loop1
 
                 iguess = iguess + deli
@@ -686,16 +786,18 @@
                 weights(4) = (one-iguess)*jguess
 
               else  ! iteration failed
-                print logMsg, "ERROR in ESMF_RegridBilinearSearch"
-        !       call ESMF_LogWrite(logMsg, ESMF_LOG_ERROR)
-                print logMsg, "Point coords: ",dstX,dstY
-        !       call ESMF_LogWrite(logMsg, ESMF_LOG_INFO)
-                print logMsg, "Source cell coords: ",srcX(:),srcY(:)
-        !       call ESMF_LogWrite(logMsg, ESMF_LOG_INFO)
-                print logMsg, "Current i,j : ",iguess, jguess
-        !       call ESMF_LogWrite(logMsg, ESMF_LOG_INFO)
-                print logMsg, "Iteration for i,j exceed max iteration count"
-        !       call ESMF_LogWrite(logMsg, ESMF_LOG_INFO)
+                write(logMsg,*) "ERROR in ESMF_RegridBilinearSearch"
+                if (ESMF_LogWrite(logMsg, ESMF_LOG_ERROR, &
+                                  ESMF_CONTEXT)) continue
+            !    call ESMF_LogWrite(logMsg, ESMF_LOG_ERROR)
+            !    write(logMsg,*) "Point coords: ",dstX,dstY
+            !    call ESMF_LogWrite(logMsg, ESMF_LOG_INFO)
+            !    write(logMsg,*) "Source cell coords: ",srcX(:),srcY(:)
+            !    call ESMF_LogWrite(logMsg, ESMF_LOG_INFO)
+            !    write(logMsg,*) "Current i,j : ",iguess, jguess
+            !    call ESMF_LogWrite(logMsg, ESMF_LOG_INFO)
+            !    write(logMsg,*) "Iteration for i,j exceed max iteration count"
+            !    call ESMF_LogWrite(logMsg, ESMF_LOG_INFO)
                 if (present(rc)) rc = ESMF_RC_ARG_VALUE
                 return
               endif
@@ -785,35 +887,35 @@
 
             ! now store this link into address, weight arrays
             if (srcUserMask(iii,jjj) .and. (srcGridMask(iii,jjj).eq.0)) then
-              dstAdd(dstOrder(1)) = i
-              dstAdd(dstOrder(2)) = j
-              srcTmp(srcOrder(1)) = iii+indexMod(1)
-              srcTmp(srcOrder(2)) = jjj+indexMod(2)
-              srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
+              dstAdd(d1) = i   + dstIndexMod(1)
+              dstAdd(d2) = j   + dstIndexMod(2)
+              srcTmp(s1) = iii + srcIndexMod(1)
+              srcTmp(s2) = jjj + srcIndexMod(2)
+              srcAdd     = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), rc=rc)
             endif
             if (srcUserMask(ip1,jjj) .and. (srcGridMask(ip1,jjj).eq.0)) then
-              dstAdd(dstOrder(1)) = i
-              dstAdd(dstOrder(2)) = j
-              srcTmp(srcOrder(1)) = ip1+indexMod(1)
-              srcTmp(srcOrder(2)) = jjj+indexMod(2)
-              srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
+              dstAdd(d1) = i   + dstIndexMod(1)
+              dstAdd(d2) = j   + dstIndexMod(1)
+              srcTmp(s1) = ip1 + srcIndexMod(1)
+              srcTmp(s2) = jjj + srcIndexMod(2)
+              srcAdd     = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(2), rc=rc)
             endif
             if (srcUserMask(ip1,jp1) .and. (srcGridMask(ip1,jp1).eq.0)) then
-              dstAdd(dstOrder(1)) = i
-              dstAdd(dstOrder(2)) = j
-              srcTmp(srcOrder(1)) = ip1+indexMod(1)
-              srcTmp(srcOrder(2)) = jp1+indexMod(2)
-              srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
+              dstAdd(d1) = i   + dstIndexMod(1)
+              dstAdd(d2) = j   + dstIndexMod(1)
+              srcTmp(s1) = ip1 + srcIndexMod(1)
+              srcTmp(s2) = jp1 + srcIndexMod(2)
+              srcAdd     = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(3), rc=rc)
             endif
             if (srcUserMask(iii,jp1) .and. (srcGridMask(iii,jp1).eq.0)) then
-              dstAdd(dstOrder(1)) = i
-              dstAdd(dstOrder(2)) = j
-              srcTmp(srcOrder(1)) = iii+indexMod(1)
-              srcTmp(srcOrder(2)) = jp1+indexMod(2)
-              srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
+              dstAdd(d1) = i   + dstIndexMod(1)
+              dstAdd(d2) = j   + dstIndexMod(1)
+              srcTmp(s1) = iii + srcIndexMod(1)
+              srcTmp(s2) = jp1 + srcIndexMod(2)
+              srcAdd     = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(4), rc=rc)
             endif
 

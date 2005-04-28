@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridNearNbr.F90,v 1.16 2004/06/08 09:27:19 nscollins Exp $
+! $Id: ESMF_RegridNearNbr.F90,v 1.16.2.1 2005/04/28 21:04:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -60,7 +60,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridNearNbr.F90,v 1.16 2004/06/08 09:27:19 nscollins Exp $'
+      '$Id: ESMF_RegridNearNbr.F90,v 1.16.2.1 2005/04/28 21:04:00 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -140,39 +140,41 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
+      !integer ::           &
+      !  i,j,n,iDE,iter,   &! loop counters
+      !  iii,jjj,          &! more loop counters
+      !  inbr,nnbrs,       &! number of neighbors
+      !  tot_dst_DEs,      &! total num DEs in destination grid distribution
+      !  tot_src_DEs,      &! total num DEs in source      grid distribution
+      !  loc_dst_DEs,      &! num of local DEs in dest   distribution
+      !  loc_src_DEs,      &! num of local DEs in source distribution
+      !  nx_src,           &! dimension size of local DE in i-direction
+      !  ny_src,           &! dimension size of local DE in j-direction
+      !  noverlap_src_DEs, &! num overlapping source DEs
+      !  ib_dst, ie_dst,   &! beg, end of exclusive domain in i-dir of dest grid
+      !  jb_dst, je_dst,   &! beg, end of exclusive domain in j-dir of dest grid
+
       integer ::           &
-         i,j,n,iDE,iter,   &! loop counters
-         iii,jjj,          &! more loop counters
-         inbr,nnbrs,       &! number of neighbors
-         tot_dst_DEs,      &! total num DEs in destination grid distribution
-         tot_src_DEs,      &! total num DEs in source      grid distribution
-         loc_dst_DEs,      &! num of local DEs in dest   distribution
-         loc_src_DEs,      &! num of local DEs in source distribution
-         nx_src,           &! dimension size of local DE in i-direction
-         ny_src,           &! dimension size of local DE in j-direction
-         noverlap_src_DEs, &! num overlapping source DEs
-         ib_dst, ie_dst,   &! beg, end of exclusive domain in i-dir of dest grid
-         jb_dst, je_dst,   &! beg, end of exclusive domain in j-dir of dest grid
          localrc            ! error flag
 
-      integer, dimension(:,:), allocatable :: &
-         srcAdd             ! src neighbor addresses (nnbr,3)
+      !integer, dimension(:,:), allocatable :: &
+      !   srcAdd             ! src neighbor addresses (nnbr,3)
 
-      integer, dimension(:,:,:), allocatable :: &
-         dstadd             ! address in dest grid (i,j,DE)
+      !integer, dimension(:,:,:), allocatable :: &
+      !   dstadd             ! address in dest grid (i,j,DE)
          
-      real(ESMF_KIND_R8), dimension(:), allocatable :: &
-         weights,          &! normalized distance to each neighbor
-         wgtstmp            ! temp for consistency with AddLink call
+      !real(ESMF_KIND_R8), dimension(:), allocatable :: &
+      !   weights,          &! normalized distance to each neighbor
+      !   wgtstmp            ! temp for consistency with AddLink call
 
-      real(ESMF_KIND_R8) :: &
-         distance,         &! distance to current neighbor
-         x1, y1,           &! dst grid x,y coordinates
-         x2, y2             ! src grid x,y coordinates
+      !real(ESMF_KIND_R8) :: &
+      !   distance,         &! distance to current neighbor
+      !   x1, y1,           &! dst grid x,y coordinates
+      !   x2, y2             ! src grid x,y coordinates
 
-      real (ESMF_KIND_R8), dimension(:,:,:), allocatable :: &
-         src_center_x,      &! cell center x-coord for gathered source grid
-         src_center_y        ! cell center y-coord for gathered source grid
+      !real (ESMF_KIND_R8), dimension(:,:,:), allocatable :: &
+      !   src_center_x,      &! cell center x-coord for gathered source grid
+      !   src_center_y        ! cell center y-coord for gathered source grid
 
 !
 !     Construct an empty regrid structure

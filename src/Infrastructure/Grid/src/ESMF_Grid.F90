@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.180.2.2 2004/07/22 22:52:11 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.180.2.3 2005/04/28 21:01:57 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,6 +43,7 @@
       use ESMF_LogErrMod
       use ESMF_LocalArrayMod  ! ESMF local array class
       use ESMF_ArrayDataMapMod     ! ESMF data map class
+      use ESMF_VMMod
       use ESMF_DELayoutMod ! ESMF layout class
       use ESMF_ArrayMod
       use ESMF_DistGridMod    ! ESMF distributed grid class
@@ -104,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.180.2.2 2004/07/22 22:52:11 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.180.2.3 2005/04/28 21:01:57 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -4093,46 +4094,52 @@
 ! !IROUTINE: ESMF_GridBoxIntersectRecv - Determine a DomainList covering a box
 
 ! !INTERFACE:
-      subroutine ESMF_GridBoxIntersectRecv(grid, &
-                                           localMinPerDim, localMaxPerDim, &
-                                           domainList, total, rc)
+      subroutine ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, domainList, &
+                                           hasDstData, hasSrcData, &
+                                           total, layer, &
+                                           srcrelloc, dstrelloc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid) :: grid
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMinPerDim
-                                                         ! array of local mins
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMaxPerDim
-                                                         ! array of local maxs
-      type(ESMF_DomainList), intent(inout) :: domainList ! domain list
-      logical, intent(in), optional :: total             ! flag to indicate
-                                                         ! total cells in the
-                                                         ! domainList
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_Grid) :: srcGrid
+      type(ESMF_Grid) :: dstGrid
+      type(ESMF_DomainList), intent(inout) :: domainList
+      logical, intent(in) :: hasDstData
+      logical, intent(in) :: hasSrcData
+      logical, intent(in) :: total
+      logical, intent(in) :: layer
+      type(ESMF_RelLoc), intent(in), optional :: srcrelloc
+      type(ESMF_RelLoc), intent(in), optional :: dstrelloc
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     This routine computes the DomainList necessary to cover a given "box"
 !     described by an array of min/max's.  This routine is for the case of
 !     a DE that is part of a destination Grid determining which DEs it will
 !     receive data from.
-
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid]
+!     \item[srcGrid]
 !          Source {\tt ESMF\_Grid} to use to calculate the resulting
 !          {\tt ESMF\_DomainList}.
-!     \item[localMinPerDim]
-!          Array of local minimum coordinates, one per rank of the array,
-!          defining the "box."
-!     \item[localMaxPerDim]
-!          Array of local maximum coordinates, one per rank of the array,
-!          defining the "box."
+!     \item[dstGrid]
+!          Destination {\tt ESMF\_Grid} to use to calculate the resulting
+!          {\tt ESMF\_DomainList}.
 !     \item[domainList]
 !          Resulting {\tt ESMF\_DomainList} containing the set of
 !          {\tt ESMF\_Domains} necessary to cover the box.
-!     \item[{[total]}]
-!          Logical flag to indicate the domainList should use total cells
-!          instead of computational cells.
+!     \item[total]
+!          If TRUE, return DomainLists based on the total coordinates including
+!          internally generated boundary cells. If FALSE, return DomainLists
+!          based on the computational cells (which is what the user will be
+!          expecting).
+!     \item[layer]
+!     \item[{[srcrelloc]}]
+!          Optional argument to set the relative location of the source
+!          subGrid for all searches.  The default is ESMF_CELL_CENTER.
+!     \item[{[dstrelloc]}]
+!          Optional argument to set the relative location of the destination
+!          subGrid for all searches.  The default is ESMF_CELL_CENTER.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4145,7 +4152,8 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      if (.not. associated(grid%ptr)) then
+      if ((.not. associated(srcGrid%ptr)) .OR. &
+          (.not. associated(dstGrid%ptr))) then
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                       "Empty or Uninitialized Grid", &
                                       ESMF_CONTEXT, rc)
@@ -4154,7 +4162,7 @@
 
       ! Call intersect routines based on GridStructure
 
-      select case(grid%ptr%gridStructure%gridStructure)
+      select case(srcGrid%ptr%gridStructure%gridStructure)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
@@ -4167,8 +4175,10 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridBoxIntersectRecv(grid, localMinPerDim, localMaxPerDim, &
-                                         domainList, total, localrc)
+        call ESMF_LRGridBoxIntersectRecv(srcGrid, dstGrid, domainList, &
+                                         hasDstData, hasSrcData, &
+                                         total, layer, &
+                                         srcrelloc, dstrelloc, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -4213,20 +4223,19 @@
 ! !IROUTINE: ESMF_GridBoxIntersectSend - Determine a DomainList covering a box
 
 ! !INTERFACE:
-      subroutine ESMF_GridBoxIntersectSend(dstGrid, srcGrid, &
-                                           localMinPerDim, localMaxPerDim, &
-                                           myAI, domainList, rc)
+      subroutine ESMF_GridBoxIntersectSend(srcGrid, dstGrid, domainList, &
+                                           total, layer, &
+                                           srcrelloc, dstrelloc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid) :: dstGrid
       type(ESMF_Grid) :: srcGrid
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMinPerDim
-                                                         ! array of local mins
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMaxPerDim
-                                                         ! array of local maxs
-      type(ESMF_AxisIndex), dimension(:), intent(in) :: myAI
-      type(ESMF_DomainList), intent(inout) :: domainList ! domain list
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_Grid) :: dstGrid
+      type(ESMF_DomainList), intent(inout) :: domainList
+      logical, intent(in) :: total
+      logical, intent(in) :: layer
+      type(ESMF_RelLoc), intent(in), optional :: srcrelloc
+      type(ESMF_RelLoc), intent(in), optional :: dstrelloc
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     This routine computes the DomainList necessary to cover a given "box"
@@ -4236,24 +4245,27 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[dstGrid]
-!          Destination {\tt ESMF\_Grid} to use to calculate the resulting
-!          {\tt ESMF\_DomainList}.
 !     \item[srcGrid]
 !          Source {\tt ESMF\_Grid} to use to calculate the resulting
 !          {\tt ESMF\_DomainList}.
-!     \item[localMinPerDim]
-!          Array of local minimum coordinates, one per rank of the array,
-!          defining the "box."
-!     \item[localMaxPerDim]
-!          Array of local maximum coordinates, one per rank of the array,
-!          defining the "box."
-!     \item[myAI]
-!          {\tt ESMF\_AxisIndex} for this DE on the sending (source)
-!          {\tt ESMF\_Grid}, assumed to be in global indexing.
+!     \item[dstGrid]
+!          Destination {\tt ESMF\_Grid} to use to calculate the resulting
+!          {\tt ESMF\_DomainList}.
 !     \item[domainList]
 !          Resulting {\tt ESMF\_DomainList} containing the set of
 !          {\tt ESMF\_Domains} necessary to cover the box.
+!     \item[total]
+!          If TRUE, return DomainLists based on the total coordinates including
+!          internally generated boundary cells. If FALSE, return DomainLists
+!          based on the computational cells (which is what the user will be
+!          expecting).
+!     \item[layer]
+!     \item[{[srcrelloc]}]
+!          Optional argument to set the relative location of the source
+!          subGrid for all searches.  The default is ESMF_CELL_CENTER.
+!     \item[{[dstrelloc]}]
+!          Optional argument to set the relative location of the destination
+!          subGrid for all searches.  The default is ESMF_CELL_CENTER.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4289,9 +4301,9 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridBoxIntersectSend(dstGrid, srcGrid, &
-                                         localMinPerDim, localMaxPerDim, &
-                                         myAI, domainList, localrc)
+        call ESMF_LRGridBoxIntersectSend(srcGrid, dstGrid, domainList, &
+                                         total, layer, srcrelloc, dstrelloc, &
+                                         localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK

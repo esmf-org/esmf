@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.49 2004/06/23 13:40:33 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.49.2.1 2005/04/28 21:01:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.49 2004/06/23 13:40:33 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.49.2.1 2005/04/28 21:01:25 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1162,9 +1162,10 @@
           !                      dst_datamap, routehandle, &       
           !                        srcMask, dstMask, blockingflag, commhandle, rc)
       else
-          call ESMF_ArrayRegrid(src_array, dst_array, src_datamap, &
-                                dst_datamap, routehandle, &       
-                                srcMask, dstMask, blockingflag, commhandle, rc)
+          call ESMF_ArrayRegrid(src_array, src_datamap, hassrcdata, &
+                                dst_array, dst_datamap, hasdstdata, &
+                                routehandle, srcMask, dstMask, &
+                                blockingflag, commhandle, rc)
       endif
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1339,9 +1340,10 @@
           return
       endif
 
-      call ESMF_ArrayRegridStore(src_array, src_grid, src_datamap, &      
-                                 dst_grid, dst_datamap, parentDelayout, &
-                                 routehandle, regridmethod, regridnorm, &    
+      call ESMF_ArrayRegridStore(src_array, src_grid, src_datamap, hassrcdata, &      
+                                 dst_array, dst_grid, dst_datamap, hasdstdata, &
+                                 parentDelayout, routehandle, &
+                                 regridmethod, regridnorm, &    
                                  srcMask, dstMask, status)
 
       ! Set return values.

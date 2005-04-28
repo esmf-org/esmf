@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.83.2.1 2004/07/22 21:05:54 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.83.2.2 2005/04/28 21:02:39 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -46,7 +46,6 @@
       use ESMF_BaseTypesMod
       use ESMF_BaseMod         ! ESMF base   class
       use ESMF_ArrayDataMapMod ! ESMF array datamap class
-      use ESMF_VMMod           ! ESMF VM class
       use ESMF_DELayoutMod     ! ESMF DE layout class
       use ESMF_ArrayMod        ! ESMF array  class
       use ESMF_ArrayGetMod     ! ESMF array  class
@@ -64,6 +63,7 @@
       use ESMF_RegridNearNbrMod  ! ESMF rg methods related to nearest-nbr regrid
       use ESMF_RegridConservMod  ! ESMF rg methods related to conservative regrid
       use ESMF_RegridLinearMod   ! ESMF rg methods related to linear regrid
+      use ESMF_VMMod
 
       implicit none
 
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.83.2.1 2004/07/22 21:05:54 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.83.2.2 2005/04/28 21:02:39 jwolfe Exp $'
 
 !==============================================================================
 
@@ -111,24 +111,26 @@
 ! !IROUTINE: ESMF_RegridCreate - Precomputes Regrid data
 
 ! !INTERFACE:
-      subroutine ESMF_RegridCreate(srcarray, srcgrid, srcdatamap, &
-                                   dstarray, dstgrid, dstdatamap, &
+      subroutine ESMF_RegridCreate(srcArray, srcGrid, srcDatamap, hasSrcData, &
+                                   dstArray, dstGrid, dstDatamap, hasDstData, &
                                    parentDELayout, routehandle, regridmethod, &
-                                   regridnorm, srcmask, dstmask, rc)
+                                   regridNorm, srcMask, dstMask, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array),         intent(in   ) :: srcarray
-      type(ESMF_Grid),          intent(inout) :: srcgrid
-      type(ESMF_FieldDataMap),  intent(in   ) :: srcdatamap
-      type(ESMF_Array),         intent(inout) :: dstarray
-      type(ESMF_Grid),          intent(inout) :: dstgrid
-      type(ESMF_FieldDataMap),  intent(in   ) :: dstdatamap
+      type(ESMF_Array),         intent(in   ) :: srcArray
+      type(ESMF_Grid),          intent(in   ) :: srcGrid
+      type(ESMF_FieldDataMap),  intent(in   ) :: srcDatamap
+      logical,                  intent(in   ) :: hasSrcData
+      type(ESMF_Array),         intent(in   ) :: dstArray
+      type(ESMF_Grid),          intent(in   ) :: dstGrid
+      type(ESMF_FieldDataMap),  intent(in   ) :: dstDatamap
+      logical,                  intent(in   ) :: hasDstData
       type(ESMF_DELayout),      intent(in   ) :: parentDELayout
       type(ESMF_RouteHandle),   intent(inout) :: routehandle
       type(ESMF_RegridMethod),  intent(in   ) :: regridmethod
-      type(ESMF_RegridNormOpt), intent(in   ), optional :: regridnorm
-      type(ESMF_Mask),          intent(in   ), optional :: srcmask
-      type(ESMF_Mask),          intent(in   ), optional :: dstmask
+      type(ESMF_RegridNormOpt), intent(in   ), optional :: regridNorm
+      type(ESMF_Mask),          intent(in   ), optional :: srcMask
+      type(ESMF_Mask),          intent(in   ), optional :: dstMask
       integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -145,31 +147,37 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [srcarray]
+!     \item [srcArray]
 !           {\tt ESMF\_Array} containing source data.
-!     \item [srcgrid]
+!     \item [srcGrid]
 !           {\tt ESMF\_Grid} which corresponds to how the data in the
 !           source array has been decomposed.
-!     \item [srcdatamap]
+!     \item [srcDatamap]
 !           {\tt ESMF\_FieldDataMap} which describes how the array maps to
 !           the specified source grid.
-!     \item [dstgrid]
+!     \item [hasSrcData]
+!           Logical specifier for whether or not this DE has source data.
+!     \item [dstArray]
+!           {\tt ESMF\_Array} containing destination data.
+!     \item [dstGrid]
 !           {\tt ESMF\_Grid} which corresponds to how the data in the
 !           destination array should be decomposed.
-!     \item [dstdatamap]
+!     \item [dstDatamap]
 !           {\tt ESMF\_FieldDataMap} which describes how the array should map to
 !           the specified destination grid.
+!     \item [hasDstData]
+!           Logical specifier for whether or not this DE has destination data.
 !     \item [routehandle]
 !           Returned value which identifies the precomputed Route and other
 !           necessary information.
 !     \item [regridmethod]
 !           Type of regridding to do.  A set of predefined methods are
 !           supplied.
-!     \item [{[regridnorm]}]
+!     \item [{[regridNorm]}]
 !           Normalization option, only for specific regrid types.
-!     \item [{[srcmask]}]
+!     \item [{[srcMask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
-!     \item [{[dstmask]}]
+!     \item [{[dstMask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid destination data.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -199,7 +207,7 @@
       ! TODO: so this code needs to be overhauled...   
 
       integer :: localrc            ! Error status
-      !character(len=ESMF_MAXSTR) :: regrid_name
+      !character(len=ESMF_MAXSTR) :: regridName
       logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
@@ -215,10 +223,9 @@
       ! ESMF_REGRID_METHOD_BILINEAR
       case(1)
         routehandle = ESMF_RegridConstructBilinear( &
-                                              srcarray, srcgrid, srcdatamap, &
-                                              dstarray, dstgrid, dstdatamap, &
-                                              parentDELayout, srcmask, dstmask, &
-                                              rc=localrc)
+                                 srcArray, srcGrid, srcDatamap, hasSrcData, &
+                                 dstArray, dstGrid, dstDatamap, hasDstData, &
+                                 parentDELayout, srcMask, dstMask, rc=localrc)
 
       !-------------
       ! ESMF_REGRID_METHOD_BICUBIC
@@ -231,18 +238,21 @@
       !-------------
       ! ESMF_REGRID_METHOD_CONSERV1
       case(3)
-          routehandle = ESMF_RegridConstructConserv( &
-                                              srcarray, srcgrid, srcdatamap, &
-                                              dstarray, dstgrid, dstdatamap, &
-                                              parentDELayout, srcmask, dstmask, &
-                                              regridnorm=regridnorm, order=1, &
-                                              rc=localrc)
+        routehandle = ESMF_RegridConstructConserv( &
+                                 srcArray, srcGrid, srcDatamap, hasSrcData, &
+                                 dstArray, dstGrid, dstDatamap, hasDstData, &
+                                 parentDELayout, srcMask, dstMask, &
+                                 regridnorm=regridNorm, order=1, rc=localrc)
 
       !-------------
       ! ESMF_REGRID_METHOD_CONSERV2
       case(4)
-      !   routehandle = ESMF_RegridConstructConserv(srcarray, dstarray, &
-      !                                        regrid_name, order=2, rc=localrc)
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                   "Second-order conservative method not yet supported", &
+                   ESMF_CONTEXT, rc)
+        return
+      !   routehandle = ESMF_RegridConstructConserv(srcArray, dstArray, &
+      !                                        regridName, order=2, rc=localrc)
 
       !-------------
       ! ESMF_REGRID_METHOD_RASTER
@@ -255,8 +265,12 @@
       !-------------
       ! ESMF_REGRID_METHOD_NEAR_NBR
       case(6)
-      !   routehandle = ESMF_RegridConstructNearNbr(srcarray, dstarray, &
-      !                                        regrid_name, rc=localrc)
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                   "Nearest neighbor method not yet supported", &
+                   ESMF_CONTEXT, rc)
+        return
+      !   routehandle = ESMF_RegridConstructNearNbr(srcArray, dstArray, &
+      !                                        regridName, rc=localrc)
 
       !-------------
       ! ESMF_REGRID_METHOD_FOURIER
@@ -285,11 +299,10 @@
       !-------------
       ! ESMF_REGRID_METHOD_LINEAR
       case(10)
-          routehandle = ESMF_RegridConstructLinear( &
-                                              srcarray, srcgrid, srcdatamap, &
-                                              dstarray, dstgrid, dstdatamap, &
-                                              parentDELayout, srcmask, dstmask, &
-                                              rc=localrc)
+        routehandle = ESMF_RegridConstructLinear( &
+                                 srcArray, srcGrid, srcDatamap, hasSrcData, &
+                                 dstArray, dstGrid, dstDatamap, hasDstData, &
+                                 parentDELayout, srcMask, dstMask, rc=localrc)
 
       !-------------
       ! ESMF_REGRID_METHOD_SPLINE
@@ -357,13 +370,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RegridRun"
+#define ESMF_METHOD "ESMF_RegridRunR4"
 !BOPI
-! !IROUTINE: ESMF_RegridRun - Performs a regridding between two arrays
+! !IROUTINE: ESMF_RegridRunR4 - Performs a regridding between two arrays of type R4
 
 ! !INTERFACE:
-      subroutine ESMF_RegridRun(srcarray, dstarray, srcDataMap, dstDataMap, &
-                                routehandle, rc)
+      subroutine ESMF_RegridRunR4(srcarray, dstarray, srcDataMap, dstDataMap, &
+                                  routehandle, rc)
 !
 ! !ARGUMENTS:
 
@@ -392,12 +405,12 @@
       integer, dimension(:,:), allocatable :: dindex, sindex
       integer(ESMF_KIND_I4), dimension(:), pointer :: dstIndex, srcIndex
       logical :: dummy
-      real(ESMF_KIND_R8) :: zero
+      real(ESMF_KIND_R4) :: zero
       real(ESMF_KIND_R8), dimension(:), pointer :: weights
-      real(ESMF_KIND_R8), dimension(:), pointer :: gatheredData
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: dstData2D
-      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: dstData3D
-      !real(ESMF_KIND_R8), dimension(:,:,:,:), pointer :: dstData4D
+      real(ESMF_KIND_R4), dimension(:), pointer :: gatheredData
+      real(ESMF_KIND_R4), dimension(:,:), pointer :: dstData2D
+      real(ESMF_KIND_R4), dimension(:,:,:), pointer :: dstData3D
+      !real(ESMF_KIND_R4), dimension(:,:,:,:), pointer :: dstData4D
       type(ESMF_DataType) :: type
       type(ESMF_DataKind) :: kind
       type(ESMF_Route) :: rh
@@ -441,7 +454,7 @@
                          counts=counts, rc=localrc)
       gatheredArray = ESMF_LocalArrayCreate(1, type, kind, asize, rc=localrc)
       srcLocalArray = srcarray
-      call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, localrc)
+      call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, rc=localrc)
 
       allocate(dstDimOrder(rank), &
                srcDimOrder(rank), stat=localrc)
@@ -626,7 +639,293 @@
       ! set return codes
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_RegridRun
+      end subroutine ESMF_RegridRunR4
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridRunR8"
+!BOPI
+! !IROUTINE: ESMF_RegridRunR8 - Performs a regridding between two arrays of type R8
+
+! !INTERFACE:
+      subroutine ESMF_RegridRunR8(srcArray, srcDataMap, hasSrcData, &
+                                  dstArray, dstDataMap, hasDstData, &
+                                  routehandle, rc)
+!
+! !ARGUMENTS:
+
+      type(ESMF_Array),        intent(in   ) :: srcArray
+      type(ESMF_FieldDataMap), intent(in   ) :: srcDatamap
+      logical,                 intent(in   ) :: hasSrcData
+      type(ESMF_Array),        intent(inout) :: dstArray
+      type(ESMF_FieldDataMap), intent(in   ) :: dstDatamap
+      logical,                 intent(in   ) :: hasDstData
+      type(ESMF_RouteHandle),  intent(in   ) :: routehandle 
+                                                  ! precomputed regrid structure
+                                                  ! with regridding info
+      integer,                 intent(  out), optional :: rc
+!
+! !DESCRIPTION:
+!     Given a source array and precomputed regridding information, this 
+!     routine regrids the source array to a new array on the destination
+!     grid.  
+!
+!EOPI
+
+      integer :: localrc
+      integer :: i, i2, n, d1, d2, s1, asize, rank, counts(ESMF_MAXDIM)
+      integer :: dstUndecomp, srcUndecomp, srcUndecompSize, srcStride
+      integer :: di1, di2, dj1, dj2, dk1, dk2
+      integer :: si1, si2, sj1, sj2, sk1, sk2
+      integer, dimension(:), allocatable :: dstDimOrder, srcDimOrder
+      integer, dimension(:,:), allocatable :: dindex, sindex
+      integer(ESMF_KIND_I4), dimension(:), pointer :: dstIndex, srcIndex
+      logical :: dummy
+      real(ESMF_KIND_R8) :: zero
+      real(ESMF_KIND_R8), dimension(:), pointer :: weights
+      real(ESMF_KIND_R8), dimension(:), pointer :: gatheredData
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: dstData2D
+      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: dstData3D
+      !real(ESMF_KIND_R8), dimension(:,:,:,:), pointer :: dstData4D
+      type(ESMF_DataType) :: type
+      type(ESMF_DataKind) :: kind
+      type(ESMF_Route) :: rh
+      type(ESMF_LocalArray) :: srcindexarr, dstindexarr, weightsarr
+      integer :: numlinks
+      type(ESMF_LocalArray) :: gatheredArray, srcLocalArray
+      type(ESMF_TransformValues) :: tv
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      zero = 0.0
+      nullify(gatheredData)
+
+      ! get the first route from the table and run it to gather the
+      ! data values which overlap this bounding box.
+      call ESMF_RouteHandleGet(routehandle, route1=rh, rc=localrc)
+
+      call ESMF_ArrayGet(srcArray, rank=rank, type=type, kind=kind, &
+                         counts=counts, rc=localrc)
+
+      ! get the indirect indices and weights from the routehandle
+      asize = 1
+      if (hasDstData) then
+        call ESMF_RouteHandleGet(routehandle, tdata=tv, rc=localrc)
+
+        ! get a real f90 pointer from all the arrays
+        ! srcIndex, dstIndex and weights TKR can be fixed, but unfortunately the
+        ! gatheredData and dstData can be whatever the user wants - so this code
+        ! might need to move into another file and be macroized heavily for TKR.
+        call ESMF_TransformValuesGet(tv, numlist=numlinks, srcindex=srcindexarr, &
+                                     dstindex=dstindexarr, weights=weightsarr, rc=rc)
+        call ESMF_LocalArrayGetData(srcindexarr, srcIndex, ESMF_DATA_REF, rc)
+        call ESMF_LocalArrayGetData(dstindexarr, dstIndex, ESMF_DATA_REF, rc)
+        call ESMF_LocalArrayGetData(weightsarr, weights, ESMF_DATA_REF, rc)
+
+        ! from the domain or from someplace, get the counts of how many data points
+        ! we are expecting from other DEs.  we might also need to know what
+        ! data type is coming since this is user data and not coordinates at 
+        ! execution time.  or does the incoming data have to match the type
+        ! of the outgoing array?  so we can get the data type and shape from
+        ! the dstarray argument to this function.  and what about halo widths?
+
+        call ESMF_RouteGetRecvItems(rh, asize, localrc)
+      endif
+
+      gatheredArray = ESMF_LocalArrayCreate(1, type, kind, asize, rc=localrc)
+      srcLocalArray = srcArray
+
+      call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, rc=localrc)
+
+      allocate(dstDimOrder(rank), &
+               srcDimOrder(rank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dim orders", &
+                                     ESMF_CONTEXT, rc)) return
+
+      call ESMF_FieldDataMapGet(dstDataMap, dataIndexList=dstDimOrder, rc=localrc)
+      call ESMF_FieldDataMapGet(srcDataMap, dataIndexList=srcDimOrder, rc=localrc)
+
+      ! break out here by rank   TODO: compare datarank to regridrank (or
+      !                                compare datamaps)
+      if (hasDstData) then
+      select case(rank)
+
+      ! TODO: apply the weights from src to destination
+      !  does this need a nested loop and an array of ESMF_Arrays, one
+      !  for each DE which sends data?  i think the answer is not for now
+      !  because all data has been pushed into a single array.  but eventually
+      !  if we want to start supporting vectors or other complicated data 
+      !  shapes, we may have to start preserving the array and datamaps
+      !  from the original locations.
+
+      !-------------
+      case(2) ! 2D data for regrid
+
+        call ESMF_LocalArrayGetData(gatheredArray, gatheredData, &
+                                    ESMF_DATA_REF, rc)
+        call ESMF_ArrayGetData(dstarray, dstData2D, ESMF_DATA_REF, rc)
+
+        !*** initialize dest field to zero
+   
+        dstData2D = zero
+
+        !*** do the regrid
+
+        do n = 1,numlinks
+          d1 = dstIndex((n-1)*2 + 1)
+          d2 = dstIndex((n-1)*2 + 2)
+          s1 = srcIndex(n)
+          dstData2D(d1,d2) = dstData2D(d1,d2) &
+                           + (gatheredData(s1) * weights(n))
+        enddo
+
+      !-------------
+      case(3) ! 3D data for regrid
+
+        call ESMF_LocalArrayGetData(gatheredArray, gatheredData, &
+                                    ESMF_DATA_REF, rc)
+        call ESMF_ArrayGetData(dstarray, dstData3D, ESMF_DATA_REF, rc)
+
+        !*** initialize dest field to zero
+   
+        dstData3D = zero
+
+        !*** for cases where datarank>gridrank, figure out the undecomposed
+        dstUndecomp     = 0   !TODO: should be arrays to be general
+        srcUndecomp     = 0
+        srcUndecompSize = 0
+        srcStride       = 1
+        do i = 1,rank
+          if (dstDimOrder(i).eq.0) then
+            dstUndecomp = i
+          endif
+          if (srcDimOrder(i).eq.0) then
+            srcUndecomp = i
+            srcUndecompSize = counts(i)
+          else
+            srcStride = srcStride * counts(i)
+          endif
+        enddo
+
+        !*** special code if Undecomp = 1 or rank
+        if (srcUndecomp.eq.1 .and. dstUndecomp.eq.1) then
+
+          !*** do the regrid
+          i2 = size(dstData3D,1)
+          do n = 1,numlinks
+            d1 = dstIndex((n-1)*2 + 1)
+            d2 = dstIndex((n-1)*2 + 2)
+            s1 = (srcIndex(n)-1)*i2        ! assumes i2 = srcUndecompSize
+            do i = 1,i2
+              dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
+                                 + (gatheredData(s1+i) * weights(n))
+            enddo
+          enddo
+
+        elseif (srcUndecomp.eq.rank .and. dstUndecomp.eq.rank) then
+
+          !*** do the regrid
+          i2 = size(dstData3D,rank)
+          do i = 1,i2
+            do n = 1,numlinks
+              d1 = dstIndex((n-1)*2 + 1)
+              d2 = dstIndex((n-1)*2 + 2)
+              s1 = (i-1)*srcStride + srcIndex(n)
+              dstData3D(d1,d2,i) = dstData3D(d1,d2,i) &
+                                 + (gatheredData(s1) * weights(n))
+            enddo
+          enddo
+
+        elseif (srcUndecomp.eq.1 .and. dstUndecomp.eq.rank) then
+
+          !*** do the regrid
+          i2 = size(dstData3D,rank)
+          do i = 1,i2
+            do n = 1,numlinks
+              d1 = dstIndex((n-1)*2 + 1)
+              d2 = dstIndex((n-1)*2 + 2)
+              s1 = (srcIndex(n)-1)*i2 + i    ! assumes i2 = srcUndecompSize
+              dstData3D(d1,d2,i) = dstData3D(d1,d2,i) &
+                                 + (gatheredData(s1) * weights(n))
+            enddo
+          enddo
+
+        elseif (srcUndecomp.eq.rank .and. dstUndecomp.eq.1) then
+
+          !*** do the regrid
+          i2 = size(dstData3D,1)
+          do n = 1,numlinks
+            d1 = dstIndex((n-1)*2 + 1)
+            d2 = dstIndex((n-1)*2 + 2)
+            do i = 1,i2
+              s1 = (i-1)*srcStride + srcIndex(n)
+              dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
+                                 + (gatheredData(s1) * weights(n))
+            enddo
+          enddo
+
+        else
+          allocate(dindex(rank,2), &
+                   sindex(rank,2), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "Indexes", &
+                                         ESMF_CONTEXT, rc)) return
+          do n = 1,numlinks
+            dindex(1,1) = 1
+            dindex(1,2) = size(dstData3D,dstUndecomp)
+            dindex(2,1) = dstIndex((n-1)*2 + 1)
+            dindex(2,2) = dstIndex((n-1)*2 + 1)
+            dindex(3,1) = dstIndex((n-1)*2 + 2)
+            dindex(3,2) = dstIndex((n-1)*2 + 2)
+            di1 = dindex(dstDimOrder(1)+1,1)
+            di2 = dindex(dstDimOrder(1)+1,2)
+            dj1 = dindex(dstDimOrder(2)+1,1)
+            dj2 = dindex(dstDimOrder(2)+1,2)
+            dk1 = dindex(dstDimOrder(3)+1,1)
+            dk2 = dindex(dstDimOrder(3)+1,2)
+            sindex(1,1) = 1
+            sindex(1,2) = size(gatheredData,srcUndecomp)
+            sindex(2,1) = srcIndex((n-1)*2 + 1)
+            sindex(2,2) = srcIndex((n-1)*2 + 1)
+            sindex(3,1) = srcIndex((n-1)*2 + 2)
+            sindex(3,2) = srcIndex((n-1)*2 + 2)
+            si1 = sindex(srcDimOrder(1)+1,1)
+            si2 = sindex(srcDimOrder(1)+1,2)
+            sj1 = sindex(srcDimOrder(2)+1,1)
+            sj2 = sindex(srcDimOrder(2)+1,2)
+            sk1 = sindex(srcDimOrder(3)+1,1)
+            sk2 = sindex(srcDimOrder(3)+1,2)
+   !         dstData3D(di1:di2,dj1:dj2,dk1:dk2) = &
+   !                  dstData3D(di1:di2,dj1:dj2,dk1:dk2) &
+   !               + (gatheredData(si1:si2,sj1:sj2) * weights(n))
+
+          enddo
+          deallocate(dindex, &
+                     sindex, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "deallocate indexes", &
+                                         ESMF_CONTEXT, rc)) return
+        endif
+
+      case default
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                                    "Invalid rank", &
+                                    ESMF_CONTEXT, rc)
+        return
+      end select
+
+      endif
+
+      ! nuke temp arrays
+      call ESMF_LocalArrayDestroy(gatheredArray, rc=localrc)
+      deallocate(dstDimOrder, &
+                 srcDimOrder, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate dim orders", &
+                                     ESMF_CONTEXT, rc)) return
+
+      ! set return codes
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_RegridRunR8
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -768,18 +1067,22 @@
 #define ESMF_METHOD "ESMF_ArrayRegridStore"
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayRegridStore(srcarray, srcgrid, srcdatamap, &
-                                       dstgrid, dstdatamap, parentDElayout, &
-                                       routehandle, regridmethod, regridnorm, &
+      subroutine ESMF_ArrayRegridStore(srcArray, srcGrid, srcDatamap, hasSrcData, &
+                                       dstArray, dstGrid, dstDatamap, hasDstData, &
+                                       parentDELayout, routehandle, &
+                                       regridmethod, regridnorm, &
                                        srcmask, dstmask, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_Array),         intent(in   ) :: srcarray
-      type(ESMF_Grid),          intent(inout) :: srcgrid
-      type(ESMF_FieldDataMap),  intent(in   ) :: srcdatamap
-      type(ESMF_Grid),          intent(inout) :: dstgrid
-      type(ESMF_FieldDataMap),  intent(in   ) :: dstdatamap
-      type(ESMF_DELayout),      intent(in   ) :: parentDElayout
+      type(ESMF_Array),         intent(in   ) :: srcArray
+      type(ESMF_Grid),          intent(in   ) :: srcGrid
+      type(ESMF_FieldDataMap),  intent(in   ) :: srcDatamap
+      logical,                  intent(in   ) :: hasSrcData
+      type(ESMF_Array),         intent(in   ) :: dstArray
+      type(ESMF_Grid),          intent(in   ) :: dstGrid
+      type(ESMF_FieldDataMap),  intent(in   ) :: dstDatamap
+      logical,                  intent(in   ) :: hasDstData
+      type(ESMF_DELayout),      intent(in   ) :: parentDELayout
       type(ESMF_RouteHandle),   intent(inout) :: routehandle
       type(ESMF_RegridMethod),  intent(in   ) :: regridmethod
       type(ESMF_RegridNormOpt), intent(in   ), optional :: regridnorm
@@ -791,26 +1094,27 @@
 ! Used to Regrid data in an Array.
 !
 !     \begin{description}
-!     \item [srcarray]
+!     \item [srcArray]
 !           {\tt ESMF\_Array} containing source data.
-!     \item [srcgrid]
+!     \item [srcGrid]
 !           {\tt ESMF\_Grid} which corresponds to how the data in the
 !           source array has been decomposed.  
-!     \item [srcdatamap]
+!     \item [srcDatamap]
 !           {\tt ESMF\_FieldDataMap} which describes how the array maps to
 !           the specified source grid.
-!     \item [dstgrid]
+!     \item [hasSrcData]
+!           Logical specifier for whether or not this DE has source data.
+!     \item [dstArray]
+!           {\tt ESMF\_Array} containing destination data.
+!     \item [dstGrid]
 !           {\tt ESMF\_Grid} which corresponds to how the data in the
 !           destination array should be decomposed.  
-!     \item [dstdatamap]
+!     \item [dstDatamap]
 !           {\tt ESMF\_FieldDataMap} which describes how the array should map to
 !           the specified destination grid.
+!     \item [hasDstData]
+!           Logical specifier for whether or not this DE has destination data.
 !     \item [parentDElayout]
-!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Field}s,
-!           most commonly the layout
-!           of the Coupler if the regridding is inter-component, but could
-!           also be the individual layout for a component if the
-!           regridding is intra-component.
 !     \item [routehandle]
 !           Returned value which identifies the precomputed Route and other
 !           necessary information.
@@ -831,9 +1135,7 @@
 ! !REQUIREMENTS:
 
       integer :: localrc        ! local error status
-      !integer :: size_rank_trans
-      !integer :: size_decomp
-      type(ESMF_Array) :: dstarray     ! is this really needed?
+      type(ESMF_Route) :: route
 
       ! assume failure until success certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -845,8 +1147,8 @@
       !  here will be internal interfaces and not public.  The interfaces
       !  need to be as useful to the regrid code as possible.
 
-      call ESMF_RegridCreate(srcarray, srcgrid, srcdatamap, &   
-                             dstarray, dstgrid, dstdatamap, &
+      call ESMF_RegridCreate(srcArray, srcGrid, srcDatamap, hasSrcData, &   
+                             dstArray, dstGrid, dstDatamap, hasDstData, &
                              parentDELayout, routehandle, regridmethod, &
                              regridnorm=regridnorm, &
                              srcmask=srcmask, dstmask=dstmask, rc=localrc)
@@ -867,20 +1169,24 @@
 #define ESMF_METHOD "ESMF_ArrayRegrid"
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayRegrid(srcarray, dstarray, srcDataMap, dstDataMap, &
-                                  routehandle, srcmask, dstmask, blocking, commhandle, rc)
+      subroutine ESMF_ArrayRegrid(srcArray, srcDataMap, hasSrcData, &
+                                  dstArray, dstDataMap, hasDstData, &
+                                  routehandle, srcmask, dstmask, &
+                                  blocking, commhandle, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: srcarray
-      type(ESMF_Array), intent(inout) :: dstarray
+      type(ESMF_Array),        intent(inout) :: srcarray
       type(ESMF_FieldDataMap), intent(inout) :: srcDataMap
+      logical,                 intent(in   ) :: hasSrcData
+      type(ESMF_Array),        intent(inout) :: dstarray
       type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
-      type(ESMF_RouteHandle), intent(in) :: routehandle
-      type(ESMF_Mask), intent(in), optional :: srcmask
-      type(ESMF_Mask), intent(in), optional :: dstmask
-      type(ESMF_BlockingFlag), intent(in), optional :: blocking
-      type(ESMF_CommHandle), intent(inout), optional :: commhandle
-      integer, intent(out), optional :: rc
+      logical,                 intent(in   ) :: hasDstData
+      type(ESMF_RouteHandle),  intent(in   ) :: routehandle
+      type(ESMF_Mask),         intent(in   ), optional :: srcmask
+      type(ESMF_Mask),         intent(in   ), optional :: dstmask
+      type(ESMF_BlockingFlag), intent(in   ), optional :: blocking
+      type(ESMF_CommHandle),   intent(inout), optional :: commhandle
+      integer,                 intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Perform a {\tt Regrid} operation over the data in an {\tt ESMF\_Array}.
@@ -920,13 +1226,37 @@
 ! !REQUIREMENTS:
 
       integer :: localrc        ! local error status
+      logical :: dummy
+      type(ESMF_DataKind) :: srcKind, dstKind
+      type(ESMF_Route) :: route
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
  
-      ! Execute the communications call.
-      call ESMF_RegridRun(srcarray, dstarray, srcDataMap, dstDataMap, &
-                          routehandle, localrc)
+      ! get datakinds from the two arrays
+      call ESMF_ArrayGet(srcArray, kind=srcKind, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_ArrayGet(dstArray, kind=dstKind, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! Execute the communications call based on datakinds
+      if (srcKind.eq.ESMF_R4 .AND. dstKind.eq.ESMF_R4) then
+        call ESMF_RegridRunR4(srcarray, dstarray, srcDataMap, dstDataMap, &
+                              routehandle, localrc)
+      elseif (srcKind.eq.ESMF_R8 .AND. dstKind.eq.ESMF_R8) then
+        call ESMF_RegridRunR8(srcArray, srcDataMap, hasSrcData, &
+                              dstArray, dstDataMap, hasDstData, &
+                              routehandle, localrc)
+      else
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                "arrays of differing types or this type not yet supported", &
+                ESMF_CONTEXT, rc)
+        return
+      endif
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
