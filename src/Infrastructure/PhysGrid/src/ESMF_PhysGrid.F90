@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.92 2005/04/12 16:46:23 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.93 2005/04/29 19:07:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -143,11 +143,9 @@
       sequence
 !      private
         type(ESMF_Base) :: base   ! ESMF Base class object
-
-        type(ESMF_Array) :: data  ! mask data at each grid point
-
         type(ESMF_GridMaskType) :: maskType
                                   ! type of mask
+        type(ESMF_Array) :: data  ! mask data at each grid point
       end type
 
 !------------------------------------------------------------------------------
@@ -186,11 +184,10 @@
         type(ESMF_CoordSystem) :: coordSystem
                                   ! Coordinate system 
                                   ! (eg Cartesian, Spherical, ...etc)
+        integer :: numDims        ! Number of physical dimensions
         type(ESMF_PhysGridOrientation) :: orientation
                                   ! Orientation
                                   ! (eg Horizontal, Vertical, Unknown)
-        integer :: numDims        ! Number of physical dimensions
-
         type(ESMF_PhysCoord), dimension(:), pointer :: coords
                                   ! Description of each physical coordinate axis,
                                   ! including extents for this grid.  
@@ -201,12 +198,14 @@
                                   ! Information about grid regions, which
                                   ! typically describe each grid cell, but can
                                   ! be either polygons or circles/spheres/ellipses
+        integer :: numMasks
         type(ESMF_GridMask), dimension(:), pointer :: masks
                                   ! Grid-based masks.  Includes both logical 
                                   ! and multiplicative masks.  Default mask 
                                   ! (for query) is the first one if no name
                                   ! given.  Region IDs can be encoded as a mask
                                   ! as well.
+        integer :: numMetrics
         type(ESMF_Array), dimension(:), pointer :: metrics
                                   ! A place to store metrics for the grid.  
                                   ! There is no support for the Framework to use
@@ -215,9 +214,6 @@
                                   ! there arises a need for internally computed
                                   ! metrics, they will also be set here.
 
-
-        integer :: numMasks
-        integer :: numMetrics
       end type
 
 !------------------------------------------------------------------------------
@@ -327,7 +323,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.92 2005/04/12 16:46:23 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.93 2005/04/29 19:07:25 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1757,8 +1753,6 @@
 !
 !  code goes here
 !
-      if (present(rc)) rc = ESMF_SUCCESS
-
       end subroutine ESMF_PhysGridValidate
 
 !------------------------------------------------------------------------------
@@ -2209,16 +2203,8 @@
 
       ! if total, modify the results slightly for internal grid halo width
       if (totalUse) then
-        if (dstAdd(1).eq.ie) then
-          dstAdd(1) = dstAdd(1) + 2
-        elseif (dstAdd(1).gt.ib .AND. dstAdd(1).lt.ie) then
-          if (option.eq.'max') dstAdd(1) = dstAdd(1) + 2
-        endif
-        if (dstAdd(2).eq.je) then
-          dstAdd(2) = dstAdd(2) + 2
-        elseif (dstAdd(2).gt.jb .AND. dstAdd(2).lt.je) then
-          if (option.eq.'max') dstAdd(2) = dstAdd(2) + 2
-        endif
+        dstAdd(1) = dstAdd(1) + 1
+        dstAdd(2) = dstAdd(2) + 1
       endif
 
       ! set return code
