@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.83 2004/12/20 18:23:00 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.84 2005/04/29 19:15:49 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.83 2004/12/20 18:23:00 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.84 2005/04/29 19:15:49 jwolfe Exp $'
 
 !==============================================================================
 
@@ -307,7 +307,8 @@
                              recvDomainListTot, parentVM, &
                              srcDataMap=srcDataMap, dstDataMap=dstDataMap, &
                              hasSrcData=hasSrcData, hasDstData=hasDstData, &
-                             reorder=.false., total=.true., rc=localrc)
+                             reorder=.false., total=.true., layer=.true., &
+                             rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
