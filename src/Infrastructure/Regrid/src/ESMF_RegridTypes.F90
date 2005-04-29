@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.70 2004/12/28 07:19:24 theurich Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.71 2005/04/29 19:12:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -244,6 +244,7 @@
     public ESMF_RegridCreateEmpty     ! creates an empty regrid structure
     public ESMF_RegridConstructEmpty  ! constructs an empty regrid structure
     public ESMF_RegridDestruct        ! deallocate memory associated with a regrid
+    public ESMF_RegridDomainListAddLayer
     public ESMF_RegridIndexCreate     ! creates a RegridIndex structure
     public ESMF_RegridIndexDestroy    ! deallocate memory associated with a
                                       ! RegridIndex structure
@@ -255,7 +256,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.70 2004/12/28 07:19:24 theurich Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.71 2005/04/29 19:12:25 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -556,9 +557,10 @@
 ! !INTERFACE:
       function ESMF_RegridRouteConstruct(dimCount, srcGrid, dstGrid, &
                                          recvDomainList, parentVM, &
-                                         srcDatamap, srcArray, hasSrcData, &
-                                         dstDatamap, dstArray, hasDstData, &
-                                         reorder, total, rc)
+                                         srcDatamap, dstDatamap, &
+                                         hasSrcData, hasDstData, &
+                                         srcArray, dstArray, &
+                                         reorder, total, layer, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Route) :: ESMF_RegridRouteConstruct
@@ -571,13 +573,14 @@
       type(ESMF_DomainList),   intent(inout) :: recvDomainList
       type(ESMF_VM),           intent(in   ) :: parentVM
       type(ESMF_FieldDataMap), intent(in   ) :: srcDatamap
-      type(ESMF_Array),        intent(in   ), optional :: srcArray
+      type(ESMF_FieldDataMap), intent(in   ) :: dstDatamap
       logical,                 intent(in   ), optional :: hasSrcData
-      type(ESMF_FieldDataMap), intent(in   ), optional :: dstDatamap
-      type(ESMF_Array),        intent(in   ), optional :: dstArray
       logical,                 intent(in   ), optional :: hasDstData
+      type(ESMF_Array),        intent(in   ), optional :: srcArray
+      type(ESMF_Array),        intent(in   ), optional :: dstArray
       logical,                 intent(in   ), optional :: reorder
       logical,                 intent(in   ), optional :: total
+      logical,                 intent(in   ), optional :: layer
       integer,                 intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -594,26 +597,20 @@
 !TODO: Leave here or move to Route?
 
       integer :: localrc
-      integer :: gridrank, nDEs, theirDE, i, j, haloWidth
-      integer, dimension(:), allocatable :: dimOrder, lbounds
-      logical :: totalUse, hasSrcDataUse, hasDstDataUse
-      real(ESMF_KIND_R8) :: count
-      real(ESMF_KIND_R8), dimension(:), allocatable :: dstMin, dstMax
-      real(ESMF_KIND_R8), dimension(:), allocatable :: srcMin, srcMax
-      type(ESMF_AxisIndex), dimension(:), allocatable :: myAI, myArrayAI, &
-                                                         myArrayLocalAI
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: allAI, allLocalAI
+      logical :: layerUse, totalUse, hasSrcDataUse, hasDstDataUse
       type(ESMF_DELayout) :: srcDELayout, dstDELayout
       type(ESMF_DomainList) :: sendDomainList
       type(ESMF_RelLoc) :: dstHorzRelLoc, srcHorzRelLoc
       type(ESMF_Route) :: route
 
-!     Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-!     use optional arguments if present
+      ! use optional arguments if present
       totalUse = .false.
       if (present(total)) totalUse = total
+      layerUse = .false.
+      if (present(layer)) layerUse = layer
       hasSrcDataUse = .false.
       if (present(srcArray))   hasSrcDataUse = .true.
       if (present(hasSrcData)) hasSrcDataUse = hasSrcData
@@ -621,6 +618,53 @@
       if (present(dstArray))   hasDstDataUse = .true.
       if (present(hasDstData)) hasDstDataUse = hasDstData
 
+      ! Extract some information for use in this regrid.
+      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcHorzRelLoc, &
+                                rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstHorzRelLoc, &
+                                rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! calculate intersections
+      if (hasSrcDataUse) then
+        call ESMF_GridBoxIntersectSend(srcGrid, dstGrid, sendDomainList, &
+                                       totalUse, layerUse, &
+                                       srcHorzRelLoc, dstHorzRelLoc, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, &
+                                     parentVM, recvDomainList, &
+                                     hasDstDataUse, hasSrcDataUse, &
+                                     totalUse, layerUse, &
+                                     srcHorzRelLoc, dstHorzRelLoc, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! Modify DomainLists for Array AI's and to add ranks larger than Grid dimensions
+
+      ! sendDomainList first
+      if (hasSrcDataUse .AND. present(srcArray)) then
+        call ESMF_RegridDomainListModify('send', dimCount, sendDomainList, srcArray, &
+                                         srcGrid, srcDataMap, totalUse, rc)
+      endif
+
+      ! recvDomainList next
+      if (hasDstDataUse .AND. present(dstArray)) then
+        call ESMF_RegridDomainListModify('recv', dimCount, recvDomainList, dstArray, &
+                                         dstGrid, dstDataMap, totalUse, rc)
+      endif
+
+      ! get layouts for Route calculation
       call ESMF_GridGet(srcGrid, delayout=srcDELayout, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -630,193 +674,12 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! Extract some layout information for use in this regrid.
-      call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=localrc)
-      allocate (myAI(gridrank), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "myAI", &
-                                     ESMF_CONTEXT, rc)) return
-
-      if (hasSrcDataUse) then
-        call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcHorzRelLoc, &
-                                  rc=localrc)
-        call ESMF_GridGetDELocalAI(srcGrid, myAI, srcHorzRelLoc, &
-                                   reorder=reorder, total=totalUse, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        ! From each grid get the bounding box information on this DE
-        call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=localrc)
-        allocate(srcMin(gridrank), &
-                 srcMax(gridrank), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "src arrays", &
-                                       ESMF_CONTEXT, rc)) return
-
-        call ESMF_GridGetDELocalInfo(srcGrid, horzRelLoc=srcHorzRelLoc, &
-                                     minLocalCoordPerDim=srcMin, &
-                                     maxLocalCoordPerDim=srcMax, &
-                                     reorder=.false., rc=localrc)
-      endif
-
-      call ESMF_GridGet(dstGrid, dimCount=gridrank, rc=localrc)
-      allocate(dstMin(gridrank), &
-               dstMax(gridrank), stat=localrc)
-      dstMin =  9876543.0d0
-      dstMax = -9876543.0d0
-      if (ESMF_LogMsgFoundAllocError(localrc, "dst arrays", &
-                                     ESMF_CONTEXT, rc)) return
-
-      if (hasDstDataUse) then
-        call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstHorzRelLoc, &
-                                  rc=localrc)
-        call ESMF_GridGetDELocalInfo(dstGrid, horzRelLoc=dstHorzRelLoc, &
-                                     minLocalCoordPerDim=dstMin, &
-                                     maxLocalCoordPerDim=dstMax, &
-                                     reorder=.false., rc=localrc)
-      endif
-
-      ! calculate intersections
-      if (hasSrcDataUse) then
-        call ESMF_GridBoxIntersectSend(srcGrid, dstGrid, srcMin, srcMax, &
-                                       myAI, sendDomainList, &
-                                       total=totalUse, rc=localrc)
-                             !          srcHorzRelLoc, dstHorzRelLoc, &
-                             !          total=totalUse, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-        deallocate(srcMin, &
-                   srcMax, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
-                                       ESMF_CONTEXT, rc)) return
-      endif
-
-      call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, parentVM, &
-                                     dstMin, dstMax, &
-                                     recvDomainList, hasDstDataUse, hasSrcData, &
-                                     total=totalUse, rc=localrc)
-                         !            srcHorzRelLoc, dstHorzRelLoc, &
-                         !            total=totalUse, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      deallocate(dstMin, &
-                 dstMax, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
-                                     ESMF_CONTEXT, rc)) return
-
-      ! Modify DomainLists for Array AI's and to add ranks larger than Grid dimensions
-      ! TODO: move this to its own subroutine?
-      allocate(     myArrayAI(dimCount), &
-               myArrayLocalAI(dimCount), &
-                      lbounds(dimCount), &
-                     dimOrder(dimCount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "dimCount arrays", &
-                                     ESMF_CONTEXT, rc)) return
-
-      ! sendDomainList first
-      if (hasSrcData .AND. present(srcArray)) then
-        if (totalUse) then
-          call ESMF_ArrayGetAxisIndex(srcArray, totalindex=myArrayAI, rc=localrc)
-        else
-          call ESMF_ArrayGetAxisIndex(srcArray, compindex=myArrayAI, rc=localrc)
-        endif
-        call ESMF_ArrayGet(srcArray, haloWidth=haloWidth, lbounds=lbounds, rc=localrc)
-        call ESMF_FieldDataMapGet(srcDataMap, dataIndexList=dimOrder, rc=localrc)
-        do i   = 1,sendDomainList%num_domains
-          do j = 1,sendDomainList%domains(i)%rank
-            myAI(j) = sendDomainList%domains(i)%ai(j)
-          enddo
-          sendDomainList%domains(i)%rank = dimCount
-
-          ! modify myAI to include Array haloWidth and possibly different lbounds
-          ! and load into appropriate spot of domainList
-          do j = 1,dimCount
-            if (dimOrder(j).eq.1) then
-              myAI(1)%min    = myAI(1)%min    +   haloWidth + lbounds(j) - 1
-              myAI(1)%max    = myAI(1)%max    +   haloWidth + lbounds(j) - 1
-              myAI(1)%stride = myAI(1)%stride + 2*haloWidth
-              sendDomainList%domains(i)%ai(j) = myAI(1)
-            elseif (dimOrder(j).eq.2) then
-              myAI(2)%min    = myAI(2)%min    +   haloWidth + lbounds(j) - 1
-              myAI(2)%max    = myAI(2)%max    +   haloWidth + lbounds(j) - 1
-              myAI(2)%stride = myAI(2)%stride + 2*haloWidth
-              sendDomainList%domains(i)%ai(j) = myAI(2)
-            elseif (dimOrder(j).eq.0) then
-              sendDomainList%domains(i)%ai(j) = myArrayAI(j)
-            else
-              !TODO: add error
-            endif
-          enddo
-        enddo
-        do j = 1,dimCount
-          if (dimOrder(j).eq.0) then
-            count = myArrayAI(j)%max - myArrayAI(j)%min + 1
-            sendDomainList%total_points = sendDomainList%total_points*count
-          endif
-        enddo
-      endif
-
-      ! recvDomainList next
-      if (hasDstDataUse .AND. present(dstArray)) then
-        call ESMF_DELayoutGet(srcDELayout, deCount=nDEs, rc=localrc)
-        allocate(     allAI(nDEs,dimCount), &
-                 allLocalAI(nDEs,dimCount), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "allAI arrays", &
-                                       ESMF_CONTEXT, rc)) return
-        if (totalUse) then
-          call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
-                                           totalindex=allAI, rc=localrc)
-        else
-          call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
-                                           compindex=allAI, rc=localrc)
-        endif
-        call ESMF_FieldDataMapGet(dstDataMap, dataIndexList=dimOrder, rc=localrc)
-
-        do i = 1,recvDomainList%num_domains
-          theirDE = recvDomainList%domains(i)%DE + 1
-          do j = 1,recvDomainList%domains(i)%rank
-            myAI(j) = recvDomainList%domains(i)%ai(j)
-          enddo
-          recvDomainList%domains(i)%rank = dimCount
-          do j = 1,dimCount
-            if (dimOrder(j).eq.1) then
-              recvDomainList%domains(i)%ai(j) = myAI(1)
-            elseif (dimOrder(j).eq.2) then
-              recvDomainList%domains(i)%ai(j) = myAI(2)
-            elseif (dimOrder(j).eq.0) then
-              recvDomainList%domains(i)%ai(j) = allAI(theirDE,j)
-            else
-              !TODO: add error
-            endif
-          enddo
-        enddo
-        do j = 1,dimCount
-          if (dimOrder(j).eq.0) then
-            count = allAI(theirDE,j)%max - allAI(theirDE,j)%min + 1
-            recvDomainList%total_points = recvDomainList%total_points*count
-          endif
-        enddo
-        deallocate(     allAI, &
-                   allLocalAI, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
-                                       ESMF_CONTEXT, rc)) return
-      endif
-
-      deallocate(      dimOrder, &
-                        lbounds, &
-                      myArrayAI, &
-                 myArrayLocalAI, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
-                                     ESMF_CONTEXT, rc)) return
-
       ! Create Route
       route = ESMF_RouteCreate(parentVM, localrc)
       call ESMF_RoutePrecomputeDomList(route, dimCount, &
                                        srcDELayout, dstDELayout, &
                                        sendDomainList, recvDomainList, &
-                                       hasSrcData, hasDstData, localrc)
+                                       hasSrcDataUse, hasDstDataUse, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -826,11 +689,6 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-
-      ! Clean up
-      deallocate(myAI, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
-                                     ESMF_CONTEXT, rc)) return
 
       ! Set return values
       ESMF_RegridRouteConstruct = route
@@ -1186,6 +1044,209 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridDestruct
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridDomainListAddLayer"
+!BOPI
+! !IROUTINE: ESMF_RegridDomainListAddLayer - modify a DomainList to add a layer of cells
+
+! !INTERFACE:
+      subroutine ESMF_RegridDomainListAddLayer(option, nLayers, dimCount, &
+                                               domainList, rc)
+                                             
+!
+! !ARGUMENTS:
+      character(4), intent(in) :: option
+      integer, intent(in) :: nLayers
+      integer, intent(in) :: dimCount
+      type(ESMF_DomainList), intent(inout) :: domainList
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     ESMF routine which creates and initializes a regrid index structure.
+!     The structure is later filled with appropriate data in the routine
+!     addLink2D.  Intended for internal ESMF use only.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[srcCount]
+!          Size of the local source grid.
+!     \item[dstCount]
+!          2D array giving the size of the local destination grid.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:
+
+      integer :: localrc
+      integer :: i, j
+      integer :: size, totalPoints
+      type(ESMF_AxisIndex), dimension(:), pointer :: thisAI
+
+      allocate(thisAI(dimCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dealloc AI arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
+      totalPoints = 0
+      do i   = 1,domainList%num_domains
+        do j = 1,domainList%domains(i)%rank
+          thisAI(j) = domainList%domains(i)%ai(j)
+        enddo
+
+        ! modify thisAI by nLayers
+        size = 1
+        do j = 1,domainList%domains(i)%rank
+          thisAI(j)%min = thisAI(j)%min - nLayers
+          thisAI(j)%max = thisAI(j)%max + nLayers
+          if (option.eq.'recv') thisAI(j)%stride = thisAI(j)%stride + 2*nLayers
+          size = size * (thisAI(j)%max - thisAI(j)%min + 1)
+          domainList%domains(i)%ai(j) = thisAI(j)
+        enddo
+        totalPoints = totalPoints + size
+      enddo
+
+      domainList%total_points = totalPoints
+
+      deallocate(thisAI, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dealloc AI arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_RegridDomainListAddLayer
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridDomainListModify"
+!BOPI
+! !IROUTINE: ESMF_RegridDomainListModify - modify a DomainList from a Grid for an Array
+
+! !INTERFACE:
+      subroutine ESMF_RegridDomainListModify(option, dimCount, domainList, &
+                                             array, grid, dataMap, total, rc)
+!
+! !ARGUMENTS:
+      character(4), intent(in) :: option
+      integer, intent(in) :: dimCount
+      type(ESMF_DomainList), intent(inout) :: domainList
+      type(ESMF_Array), intent(in) :: array
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_FieldDataMap), intent(in) :: dataMap
+      logical, intent(in) :: total
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     ESMF routine which creates and initializes a regrid index structure.
+!     The structure is later filled with appropriate data in the routine
+!     addLink2D.  Intended for internal ESMF use only.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[srcCount]
+!          Size of the local source grid.
+!     \item[dstCount]
+!          2D array giving the size of the local destination grid.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:
+
+      integer :: localrc
+      integer :: count, haloWidth, i, j, nDE, nDEs
+      integer, dimension(:), allocatable :: dimOrder, lbounds
+      type(ESMF_AxisIndex), dimension(:), pointer :: thisAI
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: allAI
+      type(ESMF_DELayout) :: layout
+
+      call ESMF_GridGet(grid, delayout=layout, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_DELayoutGet(layout, deCount=nDEs, rc=localrc)
+
+      ! Modify DomainLists for Array AI's and to add ranks larger than Grid dimensions
+      allocate(  dimOrder(dimCount), &
+                   thisAI(dimCount), &
+               allAI(nDEs,dimCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "AI arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
+      if (option.eq.'send') then
+        allocate( lbounds(dimCount), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "dimCount arrays", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
+
+      if (total) then
+        call ESMF_ArrayGetAllAxisIndices(array, grid, dataMap, &
+                                         totalindex=allAI, rc=localrc)
+      else
+        call ESMF_ArrayGetAllAxisIndices(array, grid, dataMap, &
+                                         compindex=allAI, rc=localrc)
+      endif
+
+      call ESMF_FieldDataMapGet(dataMap, dataIndexList=dimOrder, rc=localrc)
+
+      do i   = 1,domainList%num_domains
+        do j = 1,domainList%domains(i)%rank
+          thisAI(j) = domainList%domains(i)%ai(j)
+        enddo
+        domainList%domains(i)%rank = dimCount
+
+        ! modify thisAI to include Array haloWidth and possibly different lbounds
+        if (option.eq.'send') then
+          call ESMF_ArrayGet(array, haloWidth=haloWidth, lbounds=lbounds, &
+                             rc=localrc)
+          do j = 1,dimCount
+            if (dimOrder(j).eq.1) then
+              thisAI(1)%min    = thisAI(1)%min    +   haloWidth + lbounds(j) - 1
+              thisAI(1)%max    = thisAI(1)%max    +   haloWidth + lbounds(j) - 1
+              thisAI(1)%stride = thisAI(1)%stride + 2*haloWidth
+            elseif (dimOrder(j).eq.2) then
+              thisAI(2)%min    = thisAI(2)%min    +   haloWidth + lbounds(j) - 1
+              thisAI(2)%max    = thisAI(2)%max    +   haloWidth + lbounds(j) - 1
+              thisAI(2)%stride = thisAI(2)%stride + 2*haloWidth
+            endif
+          enddo
+        endif
+
+        ! load into appropriate spot of domainList
+        do j = 1,dimCount
+          nDE = domainList%domains(i)%DE + 1
+          if (dimOrder(j).eq.1) then
+            domainList%domains(i)%ai(j) = thisAI(1)
+          elseif (dimOrder(j).eq.2) then
+            domainList%domains(i)%ai(j) = thisAI(2)
+          elseif (dimOrder(j).eq.0) then
+            count = allAI(nDE,j)%max - allAI(nDE,j)%min + 1
+            domainList%domains(i)%ai(j) = allAI(nDE,j)
+            domainList%total_points     = domainList%total_points*count
+          else
+            !TODO: add error
+          endif
+        enddo
+      enddo
+
+      deallocate(dimOrder, &
+                   thisAI, &
+                    allAI, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dealloc AI arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
+      if (option.eq.'send') then
+        deallocate( lbounds, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "dealloc send arrays", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_RegridDomainListModify
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
