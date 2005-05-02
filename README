@@ -14,7 +14,7 @@
 
 ================================================================================
 
-README file for ESMF v2.0.0rp2 release.
+README file for ESMF v2.0.0rp3 release.
 
 The files contained here include the ESMF source code and build system.
 
@@ -210,4 +210,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 ================================================================================
 
- $Id: README,v 1.50.2.2 2004/07/26 15:35:06 nscollins Exp $
+ $Id: README,v 1.50.2.3 2005/05/02 15:35:57 svasquez Exp $
