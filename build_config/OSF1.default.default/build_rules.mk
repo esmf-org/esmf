@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.26 2005/04/22 22:27:32 nscollins Exp $
+#  $Id: build_rules.mk,v 1.27 2005/05/03 18:04:24 nscollins Exp $
 #
 #  OSF1.default.default
 #
@@ -103,7 +103,18 @@ G_FFLAGS	+= -assume gfullpath
 O_CFLAGS	+= -w
 O_FFLAGS	+= -w
 
-# add the LD_LIBRARY_PATHs
+# add the LD_LIBRARY_PATHs, but the ld on this system only takes the
+# last -rpath argument, and expects it to be dir:dir:dir format, not
+# adding on each -rpath to the existing one like most other systems.
+# note that here i am using = and not += because i want to override
+# the default values for these which are computed in common.mk
+ifeq ($(origin LD_LIBRARY_PATH), environment)
+ENV_LIB_PATHS  = $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
+ENV_LD_PATHS   = -Wl,-rpath,$(LDIR):$(LD_LIBRARY_PATH)
+endif
+
+# explicitly turn off the SLFLAG here after constructing the ld path.
+C_SLFLAG =  
 C_LIB_PATHS += $(ENV_LIB_PATHS)
 C_LD_PATHS  += $(ENV_LD_PATHS)
 

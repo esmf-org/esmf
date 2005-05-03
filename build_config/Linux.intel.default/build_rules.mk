@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.37 2005/04/22 20:14:25 nscollins Exp $
+# $Id: build_rules.mk,v 1.38 2005/05/03 18:04:23 nscollins Exp $
 #
 # Linux.intel.default
 #
@@ -162,14 +162,18 @@ F_FIXNOCPP         = -fpp0
 # either set LD_LIBRARY_PATH first, or make a site specific file and
 # edit the paths explicitly.
 
+# first, include the esmf lib dir, then add on either LD_LIBRARY_PATH
+# or the default locations the libs are installed.
+C_LD_PATHS = $(C_SLFLAG)$(LDIR)
+
 ifneq ($(origin LD_LIBRARY_PATH), environment)
 # if env var not set, try this because they are the intel default locations.
 ifeq ($(ESMF_COMPILER_VERSION),80)
 C_LIB_PATHS       = -L/opt/intel_cc_80/lib
-C_LD_PATHS        = $(C_SLFLAG)/opt/intel_cc_80/lib
+C_LD_PATHS       += $(C_SLFLAG)/opt/intel_cc_80/lib
 else
 C_LIB_PATHS       = -L/opt/intel_cc_81/lib
-C_LD_PATHS        = $(C_SLFLAG)/opt/intel_cc_81/lib
+C_LD_PATHS       += $(C_SLFLAG)/opt/intel_cc_81/lib
 endif
 else
 # add the values from the environment
@@ -187,3 +191,4 @@ PARCH		   = linux_intel
 
 SL_LIBS_TO_MAKE = 
 C_SL_LIBOPTS  =
+
