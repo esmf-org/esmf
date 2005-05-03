@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.120 2005/04/22 19:24:12 nscollins Exp $
+#  $Id: common.mk,v 1.121 2005/05/03 18:06:28 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -194,6 +194,28 @@ C_CLINKER          = $(C_CXX)
 C_FLINKER          = $(C_FC)
 C_LINKOPTS         = -L$(ESMF_LIBDIR)
 C_SLFLAG           = -Wl,-rpath,
+
+# TODO: make sure this has actually been fixed correctly.  the current problem
+# is that on some platforms there are inappropriate dirs in the default
+# LD_LIBRARY_PATH variable (e.g. IRIX and o32 vs n32 vs 64).
+# so we can't just add these to all platforms.  on the other hand, for
+# some archs this is the right approach.   my next attempt at fixing this
+# will be:  make sure that any C_LIB_PATHS and C_LD_PATHS which were added
+# in the platform dep files are added the LIB_PATHS and LD_PATHS vars, and
+# those are added to the LINKFLAGS var, which is used at compile and link time.
+# second, the environment is added to a separate variable, which can be
+# appended to the C_LIB_PATHS and C_LD_PATHS variables in the platform-dep
+# files.   i will see how far this one gets me.
+# 
+# append each directory which is in LD_LIBRARY_PATH to the -L flag and also 
+# to the run-time load flag.  (on systems which support the 'module' command, 
+# that is how it works - by adding dirs to LD_LIBRARY_PATH.)  if your libs 
+# are not found, set LD_LIBRARY_PATH, or make a site specific file and edit 
+# the paths explicitly.
+ifeq ($(origin LD_LIBRARY_PATH), environment)
+ENV_LIB_PATHS  = $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
+ENV_LD_PATHS   = $(addprefix $(SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
+endif
 
 # SL in the next section refers to a shared library.  if a platform
 # does not support building a shared library, redefine SL_LIBS_TO_MAKE
@@ -590,35 +612,14 @@ LINKOPTS     = $(C_LINKOPTS)
 #CLINKER       = $(C_CLINKER) $(COPTFLAGS) $(C_SH_LIB_PATH)
 
 # default is to include the esmf lib dir in the library search path
-# plus anything set in the platform dep file.   if there is no load-time flag
-# for a platform, set C_SLFLAG to nothing in the platform dep files.
+# plus anything set in the platform dep file.   if there is a load-time 
+# flag needed for a platform, set C_LD_PATHS in the platform dep files and
+# be sure to include $(LDIR).
 LIB_PATHS = -L$(LDIR) $(C_LIB_PATHS)
-ifneq ($(SLFLAG),)
-LD_PATHS  = $(SLFLAG)$(LDIR) $(C_LD_PATHS)
+ifneq ($(C_LD_PATHS),)
+LD_PATHS  = $(C_LD_PATHS)
 else
 LD_PATHS  =
-endif
-
-# TODO: make sure this has actually been fixed correctly.  the current problem
-# is that on some platforms there are inappropriate dirs in the default
-# LD_LIBRARY_PATH variable (e.g. IRIX and o32 vs n32 vs 64).
-# so we can't just add these to all platforms.  on the other hand, for
-# some archs this is the right approach.   my next attempt at fixing this
-# will be:  make sure that any C_LIB_PATHS and C_LD_PATHS which were added
-# in the platform dep files are added the LIB_PATHS and LD_PATHS vars, and
-# those are added to the LINKFLAGS var, which is used at compile and link time.
-# second, the environment is added to a separate variable, which can be
-# appended to the C_LIB_PATHS and C_LD_PATHS variables in the platform-dep
-# files.   i will see how far this one gets me.
-# 
-# append each directory which is in LD_LIBRARY_PATH to the -L flag and also 
-# to the run-time load flag.  (on systems which support the 'module' command, 
-# that is how it works - by adding dirs to LD_LIBRARY_PATH.)  if your libs 
-# are not found, set LD_LIBRARY_PATH, or make a site specific file and edit 
-# the paths explicitly.
-ifeq ($(origin LD_LIBRARY_PATH), environment)
-ENV_LIB_PATHS  += $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
-ENV_LD_PATHS   += $(addprefix $(SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
 endif
 
 # add the LIB_PATHS and LD_PATHS to the LINKOPTS - this does not automatically
