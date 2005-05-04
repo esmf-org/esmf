@@ -37,9 +37,8 @@ Follow the directions on that webpage to access the ESMF CVS repository.
 Quickstart information for the impatient:
 
  - Set required environment variable(s) (see next section below).
- - Type 'gmake' (the GNU make program) to build the ESMF library and all
-     tests, examples, and demo programs.
- - Type 'gmake check' to run the unit and system tests.
+ - Type 'gmake' (the GNU make program) to build the ESMF library.
+ - Type 'gmake check' to build and run the unit and system tests.
  - Type 'gmake doc' to build the latex documentation (see ESMF web page for
      a list of required macro packages and additional utilities.  The web page
      also contains pre-built pdf and html versions of all documentation.)
@@ -52,7 +51,8 @@ Other useful gnumake targets:
  clean   : remove all files built for this platform/compiler/wordsize.
  clobber : remove all files built for all architectures
 
- lib : build the ESMF libraries only
+ lib : build the ESMF libraries only (default)
+ all : build the libraries, unit and system test, examples, and demos.
 
  unit_tests       : build and run the unit tests
  build_unit_tests : build only
@@ -195,4 +195,4 @@ documentation build procedures outlined above.
 Please contact esmf_support@ucar.edu with any questions or problems.
 
 ================================================================================
- $Id: README,v 1.57 2005/05/04 21:10:14 nscollins Exp $
+ $Id: README,v 1.58 2005/05/04 22:36:18 nscollins Exp $
