@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.121 2005/05/03 18:06:28 nscollins Exp $
+#  $Id: common.mk,v 1.122 2005/05/04 17:15:53 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1198,7 +1198,7 @@ clean_system_tests:
 # report statistics on system tests
 #
 check_system_tests: 
-	$(DO_ST_RESULTS)
+	@$(DO_ST_RESULTS)
 
 
 #-------------------------------------------------------------------------------
@@ -1357,7 +1357,7 @@ clean_unit_tests:
 # report statistics on tests
 #
 check_unit_tests:
-	$(DO_UT_RESULTS)
+	@$(DO_UT_RESULTS)
 
 #-------------------------------------------------------------------------------
 #  Obsolete targets for building and running unit tests.  Echo an error
@@ -1480,7 +1480,7 @@ clean_examples:
 # report statistics on examples
 #
 check_examples:
-	$(DO_EX_RESULTS)
+	@$(DO_EX_RESULTS)
 
 
 #-------------------------------------------------------------------------------
@@ -1558,7 +1558,7 @@ clean_demos:
 check_results: check_unit_tests check_examples check_system_tests
 
 results_summary:
-	$(DO_SUM_RESULTS)
+	@$(DO_SUM_RESULTS)
 
 
 #-------------------------------------------------------------------------------
