@@ -52,6 +52,8 @@ Other useful gnumake targets:
  clean   : remove all files built for this platform/compiler/wordsize.
  clobber : remove all files built for all architectures
 
+ lib : build the ESMF libraries only
+
  unit_tests       : build and run the unit tests
  build_unit_tests : build only
  run_unit_tests   : run only
@@ -74,8 +76,8 @@ Other useful gnumake targets:
 
 Note:
 
- The normal 'install' target is *NOT CURRENTLY SUPPORTED*.  It will be added 
- in a future release of the ESMF system.
+ The normal 'install' target is *NOT CURRENTLY SUPPORTED*.  Neither is the
+ 'uninstall' target.  They will be added in a future release of ESMF.
 
 ================================================================================
 
@@ -193,4 +195,4 @@ documentation build procedures outlined above.
 Please contact esmf_support@ucar.edu with any questions or problems.
 
 ================================================================================
- $Id: README,v 1.56 2005/05/04 17:10:45 nscollins Exp $
+ $Id: README,v 1.57 2005/05/04 21:10:14 nscollins Exp $
