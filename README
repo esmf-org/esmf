@@ -5,7 +5,7 @@
                     Earth System Modeling Framework (ESMF)
 
  Earth System Modeling Framework
- Copyright 2002-2004, University Corporation for Atmospheric Research,
+ Copyright 2002-2005, University Corporation for Atmospheric Research,
  Massachusetts Institute of Technology, Geophysical Fluid Dynamics
  Laboratory, University of Michigan, National Centers for Environmental
  Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -34,36 +34,122 @@ Follow the directions on that webpage to access the ESMF CVS repository.
 
 ================================================================================
 
-QuickStart information for the impatient.
+Quickstart information for the impatient:
 
- - set environment variable(s) (see below).
- - Type 'gmake' (the GNU make program) to build the ESMF library.
- - Type 'gmake tests' to make and run the unit tests
-    (or 'gmake tests_uni' for non-mpi machines).
- - Type 'gmake system_tests' to make and run the system tests
-    (or 'gmake system_tests_uni' for non-mpi machines).
- - Type 'gmake examples' to make and run the examples applications
-    (or 'gmake examples_uni' for non-mpi machines).
- - Type 'gmake demos' to make and run the demos
-    (or 'gmake demos_uni' for non-mpi machines).
- - Type 'gmake ESMF_COUPLED_FLOW' to compile and run a coupled fluid flow 
-   demo program.  It will run in parallel, 4-way, compute 3600 time steps, and
-   produce 10 data outputs.
- - Type 'gmake ESMF_COUPLED_FLOW_uni' to compile and run a coupled fluid flow 
-   demo program on a non-mpi machine.  It will run serially, compute 3600 time
-   steps, and produce 10 data outputs.
+ - Set required environment variable(s) (see next section below).
+ - Type 'gmake' (the GNU make program) to build the ESMF library and all
+     tests, examples, and demo programs.
+ - Type 'gmake check' to run the unit and system tests.
+ - Type 'gmake doc' to build the latex documentation (see ESMF web page for
+     a list of required macro packages and additional utilities.  The web page
+     also contains pre-built pdf and html versions of all documentation.)
 
+Other useful gnumake targets:
+
+ info : print out extensive system configuration information about what
+        compilers, libraries, paths, flags, etc are being used
+
+ clean   : remove all files built for this platform/compiler/wordsize.
+ clobber : remove all files built for all architectures
+
+ unit_tests       : build and run the unit tests
+ build_unit_tests : build only
+ run_unit_tests   : run only
+
+ system_tests       : build and run the more comprehensive system tests
+ build_system_tests : build only
+ run_system_tests   : run only
+
+ examples       : build and run the examples
+ build_examples : build only
+ run_examples   : run only
+
+ demos       : build and run the more comprehensive demos
+ build_demos : build only
+ run_demos   : run only
+
+ all_tests       : build and run all available tests and demos
+ build_all_tests : build only
+ run_all_tests   : run only
+
+Note:
+
+ The normal 'install' target is *NOT CURRENTLY SUPPORTED*.  It will be added 
+ in a future release of the ESMF system.
+
+================================================================================
+
+Environment Variables
+---------------------
+
+ESMF_DIR
+
+The environment variable ESMF_DIR must be set to the full pathname of the 
+top level ESMF directory before building the framework.  This is the only 
+environment variable which is required to be set on all platforms under 
+all conditions.
+
+bsh/ksh example  :  export ESMF_DIR=/home/joeuser/esmf
+csh/tcsh example :  setenv ESMF_DIR /home/joeuser/esmf
+
+ESMF_COMPILER
+
+On any platform which does not come with a single vendor's Fortran compiler
+installed (e.g. Linux or Mac OS X) ESMF_COMPILER must be set to select
+which Fortran compiler has been installed.  To see valid values for 
+ESMF_COMPILER, cd to $ESMF_DIR/build_config and list the directories there.
+The first part of each directory name corresponds to the output of 
+'uname -s' for this platform.  The second part contains valid values 
+for ESMF_COMPILER.
+
+ESMF_COMM
+
+For multiprocessor systems with a vendor-supplied MPI communications library,
+that is the default for communications and ESMF_COMM should not be set.  
+For other systems, ESMF comes with with a single-processor MPI-bypass 
+library which is the default.   To select an MPI implementation (e.g. mpich,
+lam) set ESMF_COMM to select which one to use.  Valid values depend on the
+platform; see the README in the build_config directory for more details.
+(generally, 'mpich' or 'lam' are supported on all platforms, with additional
+options on some specific machines.)  If not installed in a system location
+also set MPI_HOME to the directory containing the include, lib, and bin dirs.
+
+ESMF_SITE
+
+The esmfcontrib repository contains makefiles which have already been 
+customized for certain machines.  If one exists for your site and you wish
+to use it, download the corresponding files into the build_contrib directory
+and set ESMF_SITE to your location.  See the sourceforge site
+http://sourceforge.net/projects/esmfcontrib  for more information.
+
+ESMF_BOPT
+
+To make a debuggable version of the library set ESMF_BOPT to 'g' before
+building.  The default is 'O' (capital oh) which builds an optimized library.
+If ESMF_BOPT is O, ESMF_OPTLEVEL can also be set to a numeric value 
+between 0 and 4 to select a specific optimization level.
+
+ESMF_PREC
+
+If this system supports the building of both 32-bit and 64-bit executables
+(pointer wordsize), this variable can be set to select which format to use.
+Valid values are '32' or '64'.
+
+
+There are other environment variables which can be set to customize
+the ESMF make process.  The README file in the build_config directory
+documents the entire list of environment variables in detail, as does
+the ESMF User's Guide.
 
 ================================================================================
 
 Directories
 -----------
 
-build_config:    Contains makefile fragments that can 
-                 be customized by the user for specific platforms,
-                 compilers, and sites.
+build_config:    Contains makefile fragments that can be customized by the 
+                 user for specific platforms, compilers, and sites.
 
-build:           Contains the generic portion of the build, that a
+build:           Contains the generic portion of the build that a
                  user would not be expected to modify.
 
 scripts:         Contains scripts for testing and uniprocessor runs, and some
@@ -74,141 +160,28 @@ src:             Contains the source code.
 In addition, the following directories are created during the building
 and testing stages:
 
-doc:             Contains documentation (if built).
-
 lib:             Contains the ESMF libraries.
 
 mod:             Contains the Fortran module files.
+
+quick_start:     Contains skeleton application files to use as a template.
 
 test:            Contains unit and system test executables and output.
 
 examples:	 Contains examples executables and output.
 
+doc:             Contains documentation (if built).
+
 
 System Information
 ------------------
 
-The following platforms are fully supported: Alpha, IRIX64 32-bit and 64-bit
-addressing, IBM 32-bit and 64-bit addressing, and Linux with any of the
-following compilers: Intel 32-bit and 64-bit addressing, NAG, Absoft, Lahey,
-and PGI.  ESMF is built and debugged on other platforms on a regular basis.
-Check the build_config directory for more information.
+Check the "Downloads & Documentation" link on the ESMF web site for a 
+current list of supported platforms.  Also list the directories in the
+build_config subdirectory to see which platforms and compiler combinations
+have makefiles already supplied.
 
 
-Environment Variables
----------------------
-
-The only environment variable which must be set on all platforms 
-is ESMF_DIR, which should be set to the path of the top level ESMF directory.
-The ESMF_COMPILER environment variable must be set only on 
-Linux platforms. The possible values are: absoft, intel, lahey, pgi or nag. 
-The ESMF_COMM environment variable can be set on Linux platforms to
-specify which communications library to use (mpich, lam, or mpiuni).
-
-There are several other environment variables which can be set to 
-customize the ESMF make process.  The README file in the directory 
-build_config documents the entire list of environment variables in detail, 
-as does the ESMF User's Guide.  Some sites have separate versions of the
-makefiles which have already been customized for a particular machine.
-See http://sourceforge.net/projects/esmfcontrib/ for the CVS repository
-for contributed site-specific makefiles.
-
-
-Build Information
------------------
-
-GNU make is required to build the library.  On most systems this will
-be just the command gmake.  On others it might be installed as gnumake
-or even just make.  In any event, use the --version option with these
-make commands to determine which is GNU make.
-
-Build the library with the command:
- 
-  gmake
-
-or 
-
-  gmake ESMF_BOPT=O
-
-for an optimized version or
-
-  gmake ESMF_BOPT=g
-
-for a debug version.
-
-To build and run the coupled fluid flow demo:
-
-  gmake  ESMF_COUPLED_FLOW
-  gmake  ESMF_COUPLED_FLOW_uni  ! for non-mpi machines
-
-To build and run the demos:
-
-  gmake  demos 
-  gmake  demos_uni          ! for non-mpi machines
-
-To build and run the system tests:
-
-  gmake  system_tests
-  gmake  system_tests_uni   ! for non-mpi machines
-
-To build and run the unit tests:
-
-  gmake  tests
-  gmake  tests_uni          ! for non-mpi machines
-
-To build and run the unit tests in exhaustive mode:
-
-  gmake  ESMF_EXHAUSTIVE=ON tests
-  gmake  ESMF_EXHAUSTIVE=ON tests_uni    ! for non-mpi machines
-
-The exhaustive unit tests option is a *compile* time option.  Use
-
-  gmake clean 
-
-first if the unit tests have already been compiled without the
-ESMF_EXHAUSTIVE=ON option.
-
-Output files from the tests are directed to files in
-${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_COMPILER}.${ESMF_PREC}.${ESMF_SITE}
-directories.  ESMF_SITE will be 'default' if no specific site has
-been specified.
-
-To build documentation, including the Requirements Specification,
-the User's Guide, and the Fortran Reference Manual:
-
-  gmake doc           ! Builds these three manuals, including pdf and html
-
-Final documentation files will be located in the ${ESMF_DIR}/doc directory.  
-
-
-Usage
------
-
-After building ESMF, to use ESMF from Fortran add the directory that contains
-the ESMF *.mod file(s),
-
-${ESMF_DIR}/mod/mod${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_COMPILER}.${ESMF_PREC}.${ESMF_SITE}
-
-to your search path for *.mod files.  For most compilers this path is
-identified either with a -I or a -M.  You must also link with the ESMF
-library.  On some platforms a shared library, libesmf.so, is built. 
-On all platforms, a standard library, libesmf.a, is built.  In addition,
-on some platforms an MPI bypass library, libmpiuni.a will be built.
-These libraries will be located in the following directory:
-
-${ESMF_DIR}/lib/lib${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_COMPILER}.${ESMF_PREC}.${ESMF_SITE}
-
-There is a single ESMF module, called ESMF_Mod, that should be
-included in applications with the Fortran USE statement.  It is not
-necessary to include any header files in Fortran.
-
-To use ESMF from C/C++, link with the ESMF shared object library and
-include the ESMC.h file.
-
-For information on how to link with shared libraries on a particular
-platform, please see the link_rules files in the platform directories
-in build_config.
- 
 ================================================================================
 The latest documentation for the project can be found at:
 http://www.esmf.ucar.edu -> Downloads & Documentation
@@ -220,4 +193,4 @@ documentation build procedures outlined above.
 Please contact esmf_support@ucar.edu with any questions or problems.
 
 ================================================================================
- $Id: README,v 1.55 2005/02/02 20:37:40 jwolfe Exp $
+ $Id: README,v 1.56 2005/05/04 17:10:45 nscollins Exp $
