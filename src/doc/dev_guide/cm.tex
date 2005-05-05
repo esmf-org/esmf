@@ -1,0 +1,139 @@
+%===============================================================================
+% CVS $Id: cm.tex,v 1.1 2005/05/05 22:55:21 nscollins Exp $
+% CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/Attic/cm.tex,v $
+% CVS $Name:  $
+%===============================================================================
+
+\section{Configuration Management}
+\label{sec:cm}
+
+A central ESMF CVS repository is maintained on the 
+SourceForge open source, web-based environment.  The CVS repository is 
+web-accessible at: \newline
+\htmladdnormallink{{\bf http://sourceforge.net/cvs/?group\_id=38089}}
+{http://sourceforge.net/cvs/?group_id=38089} \\
+
+The SourceForge site has instructions for checking out code.  Other CVS
+documentation is available at: \newline
+\htmladdnormallink{{\bf http://www.gnu.org/manual/cvs/html\_node/cvs\_toc.html}}{http://www.gnu.org/manual/cvs/html_node/cvs_toc.html} \\
+
+All documents, source code, test and other scripts, and ESMF website
+files are stored in the central ESMF CVS repository.  For code releases 
+test scripts will be available for download from the ESMF website along 
+with the framework source code.  Some data sets may be too large to store 
+in the this 
+repository and will be stored on the ESMF testbed system.  The ESMF
+website will include a link to download these datasets once they are
+available.
+
+\subsection{Procedures for the ESMF SourceForge Repository}
+
+\begin{description}
+
+\item [Tagging of new releases]  A gatekeeper will be established for the 
+ESMF Core Team at NCAR.  The gatekeeper will assess the 
+status of ESMF code at regular intervals and will tag new 
+system versions with coherent changes.  Prior to release all ESMF software 
+will be regression-tested on all platforms and interfaces.  The gatekeeper 
+will be responsible for regression testing, identifying problems and 
+notifying the appropriate developers, and sending out release notes. 
+
+\item [Check-in] ESMF developers will check their changes into the 
+SourceForge repository as they complete them.  
+
+We expect that developers will be able to resolve most conflicts 
+at check-in themselves. If developers cannot agree or need more information,
+the gatekeeper or one or more of the technical leads will make a decision
+in consultation with appropriate team members.
+
+\end{description}
+
+\subsection{Source Code Naming and Tagging Conventions}
+\label{sec:tagging}
+
+We provide two types of releases, public and internal, with similiar tagging conventions.
+
+\subsubsection{Public Releases}
+Public releases are each given a branch created from the main CVS repository ESMF trunk. The tagging convention
+for public releases is 
+{\tt ESMF\_*\_*\_*r[p\#]}, e.g., {\tt ESMF\_0\_2\_1r}, where the first digit represents a major release, the 
+second digit an incremental release, the third digit a routine update, and an official release {\tt r}.
+Subsequent patches to the release are identified with the letter {\tt p} followed by the patch number,
+e.g., {\tt ESMF\_1\_0\_0rp2}. Patches are tagged on the release branch.
+After the ESMF community has had an opportunity to download and use the release, a quality assessment
+of {\tt good}, {\tt fair}, or {\tt poor} will be assigned by the ESMF Core group.  The grade will 
+be posted on the ESMF web site.
+
+\subsubsection{Internal Releases}
+ESMF software internal releases are identified as tags on the CVS main trunk on a monthly basis.
+The tagging convention for internal releases is
+{\tt ESMF\_*\_*\_*}, e.g., {\tt ESMF\_1\_0\_1}, where the first digit represents a 
+major release, the second digit an incremental release, and the third digit a routine update.
+Similiarly as the case with public releases, internal releases will be assigned a grade
+after an evaluation period, which will be posted on the ESMF web site.
+
+Application components are tagged following the conventions of their
+home institution.
+
+\subsection{Document Naming and Tagging Conventions}
+
+The following labeling convention is used for ESMF document tagging:
+
+{\tt <NAME>\_<DOC TYPE>\_<STATUS>\_<TARGET MILESTONE>\_<SUFFIX>}
+
+\noindent Valid {\tt <NAME>} values are the abbreviations for each functionality 
+class - e.g., {\tt TMG} for Time Manager.  The value {\tt ESMF} is used 
+for general documents.
+
+\noindent Valid <DOC TYPE> values are:
+\begin{description}
+  \item {\tt REQ} - requirements 
+  \item {\tt ARCH} - architecture
+  \item {\tt DES} - design
+  \item {\tt REF} - reference manual
+  \item {\tt USR} - user's manual
+  \item {\tt POL} - policies 
+\end{description}
+
+\noindent Valid {\tt <STATUS>} values are:
+\begin{description}
+  \item {\tt DRAFT} - draft, prior to any review 
+  \item {\tt REVIEW} - version subject to team review
+  \item {\tt SIGNOFF} - stable, signoff version
+  \item {\tt RELEASE} - version released for a milestone
+\end{description}
+
+\noindent {\tt <SUFFIX>}es are as follows:
+\begin{description}
+  \item For {\tt DRAFT} tags: {\tt <SUFFIX> = <REVNUMBER>}
+  \item For {\tt REVIEW} tags: {\tt <SUFFIX> = <MAJOR REVNUMBER>\_<MINOR REVNUMBER>}
+  \item For {\tt SIGNOFF} tags: {\tt <SUFFIX> = <MAJOR REVNUMBER>\_<MINOR REVNUMBER>}
+  \item For {\tt RELEASE} tags: {\tt <SUFFIX> = <REVNUMBER>}
+
+  {\tt MAJOR REVNUMBER}s begin at 1 and {\tt MINOR REVNUMBERS} begin at 0.
+\end{description}
+
+\subsection{Backups}
+
+The ESMF SourceForge repository is backed up nightly.  The tarball
+from this backup is downloaded on a weekly basis and stored on a local
+machine, currently an IBM at NCAR and eventually the NASA testbed 
+system.  Datasets that are not included in the CVS repository will be 
+stored and backed up on the ESMF testbed and mirrored at a second site, 
+likely NCAR.  We anticipate that the systems staff at NASA will perform
+frequent and regular backups of data on the testbed, perhaps on a nightly 
+or weekly basis.  If this is not the case other arrangements for regular
+backups will be made. 
+
+\subsection{Contact Information}
+
+If there are any questions or concerns about the SourceForge CVS 
+repository, mail should be sent to \htmladdnormallink{esmf@ucar.edu}
+{mailto:esmf@ucar.edu}.
+
+
+
+
+
+
+

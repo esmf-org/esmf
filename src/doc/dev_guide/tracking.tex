@@ -1,0 +1,115 @@
+% $Id: tracking.tex,v 1.1 2005/05/05 22:55:21 nscollins Exp $
+
+\section{Tracking and Software Task Sequencing}
+\label{sec:tracking}
+
+Software tasks are prioritized in the {\it Build Plan} 
+(see Section~\ref{sec:build}), as
+a result of discussion during core team developer meetngs and
+core team developer status reports, and distributed team telecons and
+meetings.  The person primarily responsible for prioritizing software
+tasks is the ESMF Software Engineering Manager at NCAR.  Developer
+skill and integrity is the primary mechanism for assuring that
+tasks are correct and complete.  Unit tests and system tests 
+performed by the integrator confirm that code works as expected.
+
+Eventually we envision the formation of a Change Review Board,
+but this may not occur until after the period of NASA funding is over.
+
+\subsection{Tools for Software Tracking}
+\label{sec:tracking_tools}
+
+Developers will use the software tracker available on the ESMF 
+SourceForge site to monitor and prioritize software tasks such as 
+defect fixes and requests for enhancement.  
+(See \htmladdnormallink{http://www.sourceforge.net/projects/esmf}
+{http://www.sourceforge.net/projects/esmf}, under the ``Bugs or Support'' links.
+This tracking system is used successfully by major software 
+efforts such as the
+\htmladdnormallink{Python language} {http://www.sourceforge.net/projects/python}
+and \htmladdnormallink{TCL}{http://www.sourceforge.net/projects/tcl}.
+Both developers and deployment team members can submit tracking items.  
+
+Each task in the tracker is associated with a category, assignee, 
+group, priority, resolution and status.  These are explained 
+in more detail below. 
+\begin{description}
+\item[Category] The functionality class associated with the task; for
+example, time management.
+\item[Assignee] The person who is assigned implementation or resolution
+of the task.  Default assignees can be specified for each category.
+\item[Group] Currently ESMF groups include Bug, Documentation,
+Optimization, Port, Request for Enhancement, and Standardization, among 
+others.  These may change somewhat as the ESMF project evolves. 
+\item[Priority] The priority listing is from 1-9, and is visually indicated
+by color intensity.  Generally, 9 indicates a problem that is causing 
+system failure, and 1 indicates a cosmetic or inessential modification.
+A defect that results in a priority 1 requirement or milestone not being
+met shall receive a high priority, while defects that reult in less
+critical requirements nor being satisfied shall receive a lower priority.  
+Specific values are determined by common sense.  More reductive
+associations (e.g., 8 means a priority 1 requirement is not being met) 
+would be overly restrictive and unlikely to be used in practice.  
+\item[Resolution] Possible resolutions include Fixed, Postponed, 
+Works for me, and others - see the tracker itself, URL shown 
+above, for the complete list.
+\item[Status] Status options include Open, Closed, Deleted, and Pending.
+\end{description}
+
+Tasks can conveniently be sorted and viewed based on priority, status, 
+category, group, or assignee.
+
+\subsection{Metrics}
+
+The NCAR core team integrator is responsible for tracking the
+various aspects of the ESMF project to measure the implementation and
+testing progress.
+\subsubsection{Unit and System Tests Coverage}
+Throughout the ESMF software development process, the software is constantly
+being unit and system tested. It is essential to know the percentage of the
+code that has been fully or partially tested. A script has been written that 
+lists all the public interface subprograms (functions and subroutines) and 
+determines which of these have been unit and/or system tested. From this script
+output, the tested percentage can be calculated.
+\subsubsection{ESMF Requirements Coverage}
+An Excel spreadsheet is maintained listing the requirements as described in the
+ESMF Requirements Document. A hardcopy of the spreadsheet has been posted in a
+convenient place for the core team. Using color coding the core team indicates
+which requirements have been implemented and of these which have been tested.
+\subsubsection{Source Lines of Code, SLOC}
+The ESMF SLOC information is provided in an internal ESMF webpage. The
+SLOC data is presented in graph form with the following columns:
+\begin{description}
+\item[Fortran] 
+\item[C++] 
+\item[c] 
+\item[Makefiles] 
+\item[SLOC Total] 
+\item[Lines of text] 
+\end{description}
+
+The graphs are a monthly breakdown from January 1, 2002 to the present.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

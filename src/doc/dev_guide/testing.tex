@@ -1,0 +1,349 @@
+%===============================================================================
+% CVS $Id: testing.tex,v 1.1 2005/05/05 22:55:21 nscollins Exp $
+% CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/testing.tex,v $
+% CVS $Name:  $
+%===============================================================================
+
+\section{Build Plan}
+\label{sec:build}
+
+The {\it ESMF Build Plan} is resident on the 
+\htmladdnormallink{http://www.sourceforge.net/projects/esmf} 
+{http://www.sourceforge.net/projects/esmf} website, under the 
+{\it Tasks} link. The SourceForge website allows managers to
+assign, prioritize, and monitor software tasks. Developers are
+able to update their progress as a percentage and add comments to
+task assignment as required. For more detail on software
+tracking tools, see Section ~\ref{sec:tracking}.
+
+\section{Testing and Validation Plan}
+\label{sec:testing}
+
+Regular unit and system testing of the ESMF are required to ensure that 
+software quality and integrity are maintained throughout 
+the development process.  This section will serve as 
+the {\it ESMF Test Plan}, which includes details 
+of recommended testing procedures, strategies, goals, documentation 
+and the test activities being performed by the NASA Computational 
+Technologies Team.
+We have included this section in the {\it Guide} 
+so that information pertinent to developers is collected in one 
+place.  Should there be a reevaluation of requirements or significant 
+changes to design this section shall be updated along with other 
+test materials as appropriate.
+
+A {\bf Test and Validation} webpage providing unit and system testing 
+information is accessible via the {\bf Development} link on the ESMF 
+website. This webpage includes:
+\begin{itemize}
+\item Separate webpages for each system test.
+\item Separate webpages for the results of each system test.
+\item Links to the {\it Developer's Guide}, SourceForge Tracker, Requirements 
+Spreadsheet, and any other pertinent information.
+\item Separate webpage for automated regression test information and results.
+\item Separate webpages for EVA Suite tests.
+\end{itemize}
+
+Our software testing will be both {\it fault-directed}, where the intent 
+is to reveal faults through failure, and {\it conformance-directed}, 
+where the intent is to demonstrate conformance with the 
+requirements. In general, unit testing tends to be more 
+{\it fault-directed}, while system testing more {\it conformance-directed}, 
+but these testing goals are not mutually exclusive ~\cite{binder}. 
+
+All requirements delivered will be verified in one or more ways, typically by 
+{\it code inspection}, {\it unit test}, or {\it system test} as specified
+in the {\it Requirements Document}. However, our goal is to include at 
+least one test case for each delivered requirement in unit tests and/or 
+system tests.
+
+\subsection{Unit Tests}
+
+Each class in the framework will be associated with a suite of unit tests.
+Typically the unit tests will be stored in one file per class, and will be 
+located near the corresponding source code in a test directory.  The 
+framework {\tt make} system will have an option to build and run unit tests.
+The user will have the option of building either a "sanity check" type tests
+or an exhaustive suite. The exhaustive tests will include tests of all 
+functionalities and a variety of valid and invalid input values. The sanity 
+tests will be a minumum set of tests to indicate whether, for example, the 
+software has been installed correctly. It is the responsiblity of the 
+software developer to write and execute the unit tests. These unit tests 
+will be released with the framework software.
+
+\subsubsection{Unit Test Goals and Strategies}
+
+To achieve adequate unit testing, developers shall attempt to meet the following goals. 
+
+\begin{itemize}
+\item Individual procedures will be evaluated with at least one test function.  However,
+as many test functions as necessary will be implemented to assure that 
+each procedure works properly.  
+\item The result of each test will be a {\tt PASS/FAIL}.  
+In some cases for floating point comparisons, an epsilon value will be used.
+\item Unit tests will be implemented for each language interface that is 
+supported.
+\item Developers will unit test their code to the degree possible  
+before it is checked into the repository.  It is assumed that 
+developers will use stubs as necessary.
+\item Unit testing will be executed on all supported platforms.
+\item Unit testing will include a variety of paradigms (e.g. pure shared memory,
+pure distributed memory, and a mix of both).
+\item Unit testing will be executed on a range of configurations (e.g. uni-processor,
+multi-processor).
+\item Variables will be tested for acceptable range and precision.
+\item Variables will be tested for a range of valid values, including boundary
+values.
+\item Unit tests will verify that error handling works correctly.
+\end{itemize}
+
+\subsection{System Tests}
+
+System testing will be performed on periodic internal and public releases in 
+accordance with the descriptions in these sections of the document. Software 
+releases will be tagged with a version number prior to testing. 
+
+The purpose of system testing is to identify faults that are present
+only at system scope, demonstrate that the software meets all the
+required capabilities, and thus to measure the quality of the 
+software. The following areas will be given special
+consideration during our system testing.
+
+\begin{itemize}
+\item Design omissions (e.g. incomplete or incorrect behaviors).
+\item Associations between objects. (e.g. fields, grids, bundles)
+\item Control and Infrastructure. (e.g. couplers, time management, error handling)
+\item Feature interactions or side effects when multiple features are used
+simultaneously.
+\item Compatibility between previously working software releases and new releases.
+\item Different behaviors among different platforms.
+\item Language interfaces.
+\end{itemize}
+
+The system tester shall issue a test log after each software release is tested,
+which shall be recorded on the {\bf Test and Validation} webpage. The test 
+log shall
+include: a test ID number, a software release ID number, testing environment 
+descriptions, a list of test cases executed, results, and any unexpected 
+events. New bugs will be documented in the \htmladdnormallink{{\it SourceForge Bug 
+Tracker}}{https://sourceforge.net/tracker/?group\_id=38089&atid=421185} and 
+any bug fixes shall be validated.
+
+\subsubsection{System Test Goals and Strategies}
+
+The ESMF is designed to run on several target platforms, in different 
+configurations, and is required to interoperate with many combinations 
+of application software. To increase our confidence in the quality in 
+our software releases, the following system test goals shall be met.
+
+\begin{itemize}
+\item System tests shall be executed on all target platforms. Note: Successful
+execution on all platforms may not be required for some software deliveries.
+\item System tests shall be executed on a variety of programming paradigms
+(e.g pure shared memory, pure distributed memory and a mix of both) as
+applicable.
+\item System testing shall be executed on as many configurations (e.g. uni-processor,
+multi-processor) as applicable.
+\end{itemize}
+
+\subsection{Automated Regression Tests}
+
+The purpose of regression testing is to reveal faults caused by new
+or modified software (e.g. side effects, incompatibility between 
+releases, and bad bug fixes).  Automated regression testing tools shall 
+be available to ESMF developers.  
+The regression tests will regularly exercise all interfaces of the code on 
+all target platforms.  The gatekeeper (see Section~\ref{sec:cm}) runs 
+automated nightly builds on a wide variety of machines, listed on the
+{\bf Test and Validation} website. 
+Log files of the build results are stored at {\tt /fs/projects/css/esmf/esmf\_test/daily\_builds} on the NCAR fileserver. 
+The log files are kept on a monthly basis in 
+separate directories. For example, the December 2002 directory is named {\tt 0212\_test}. The 
+directory contains an {\tt ESMFdailyLog} file which has a one line entry for each platform on 
+which the build was attempted indicating whether the build was successful or not. 
+
+The \htmladdnormallink{{\tt ESMFdailyLog}}
+{https://www.esmf.ucar.edu/test/daily\_test/ESMFdailyLog} file for the current month is available on the {\bf Test and Validation} website.
+
+If the build is not successful, then a file containing the build output is stored in 
+the {\tt /fs/projects/css/esmf/esmf\_test/daily\_builds} directory on the NCAR fileserver. The file naming convention for the build output file is 
+{\tt build\_BOPT\_(day)(platform)ESMF\_ARCH}. For example, if the build fails on longs on the 19th of the month with {\tt BOPT=g}, the file would be called {\tt build\_g\_19longslinux\_lf95}. 
+
+Email is sent daily to the ESMF core team listing all the platforms on which the build was attempted with a {\tt PASS/FAIL} indication. 
+
+\subsubsection{Regression system tests with non-linear codes}
+ For regression tests of full codes a two-stage
+numerical checksum procedure will be used.
+
+\begin{itemize}
+\item A primary set of tests that
+use bit-wise reproducible options shall be
+maintained. These tests may not always use fully optimized
+forms of user code or framework communication code.
+A simple {\tt PASS/FAIL} metric based on bit-wise
+check sums will be used in these tests.
+
+\item A secondary set of tests that can validate
+optimized framework code, in particular communication primitives, but
+that may not yield exact bit reproducibility
+with a non-linear user code will also
+be maintained. For these tests a {\tt PASS/FAIL}
+status will be established based on the number of
+matching digits for an appropriately chosen measure.
+This scheme will allow us to track any time
+digits change between framework code changes, system upgrades,
+system changes. The level of {\tt PASS/FAIL} will be determined for
+each test configuration.
+
+\end{itemize}
+
+Together these sets of tests will allow fully optimized code
+to be validated using very short (a few minutes or less of compute time)
+test runs. These tests can be run automatically on a daily basis
+to enable fine-scale monitoring of the system.
+
+\subsection{Internal Alpha and Beta Testing}
+
+Application groups within the ESMF collaboration will be serving as Alpha 
+and Beta testers for the ESMF software.  We will not arrange for Alpha
+and Beta testers outside our group for the code releases at Milestones
+F (April 2003) or G (April 2004).  For Milestone K (January 2005) we
+have committed to supporting one new group beyond our collaboration.
+
+\subsection{EVA Suite Tests}
+
+The ESMF VAlidation (EVA) suite shall be used to test the ESMF software. There
+are seven codes in the collection representive of those used in climate,
+weather, and data assimilation applications. They are based on real,
+working research and operational codes that have been stripped of
+extraneous details but retain their basic computational 
+characteristics.  Initially, the EVA Suite will utilize the
+drivers, coupling tools and utilities native to the institutions and
+groups that developed the applications.  As the ESMF project
+progresses, the framework will replace the codes' native infrastructure.  This
+will enables ESMF developers to monitor the evolution of functionality
+and performance in the framework in a controlled environment.  It also
+will provide clear examples of framework usage for application
+groups directly involved in ESMF development, and for the
+broader community of Earth science researchers.  Thus
+the EVA Suite codes will be used throughout the
+ESMF project for prototyping ESMF software, for benchmarking its
+performance, and for demonstrating to framework users how the
+ESMF works. The results of the EVA Suite tests shall be documented on
+the {\bf Test and Validation} website in the same manner as the
+other system tests.
+
+Currently the EVA codes (3dvar, coupled\_mpmd, coupled\_spmd, gridpoint, land, and spectral) are 
+built weekly on a Compaq SC (halem), the 
+\htmladdnormallink{log file}
+{https://www.esmf.ucar.edu/test/eva\_test/eva\_builds.html} of the builds
+is accessable on the {\bf Test and Validation} website.
+Log files of the build results are also stored at {\tt /fs/projects/css/esmf/esmf\_test/eva\_tests} on the NCAR fileserver.
+The log files are kept on a monthly basis in
+separate directories. For example, the January 2003 directory is named {\tt 0301\_test}. The
+directory contains an {\tt eva\-builds} file which has a one line entry for each code on
+which the build was attempted indicating whether the build was successful or not.
+EVA jobs are submitted for the codes that build successfully.
+
+If a build is not successful, then a file containing the build output is stored in
+the directory. The file naming convention for the build output file is
+{\tt build\_CODE(day)(platform)ESMF\_ARCH}. For example, if the build fails on halem on the 19th of the month with {\tt CODE=land}, the file
+would be called {\tt build\_land19halemalpha}. 
+Email is sent weekly to the ESMF core team listing all the codes on which the build was attempted with a {\tt PASS/FAIL} indication. 
+
+The EVA Suite is part of the {\it Joint Milestone
+Codeset}, a set of twenty-two applications that will be delivered
+with the public release of the framework.  Unlike the synthetic,
+functionally frozen EVA codes, the other codes in the JMC will
+be under active development while the ESMF project is underway.
+Each of the JMC codes is tagged with an identifier and
+is described on the ESMF website under the {\bf Applications} link.
+
+\subsection{Bug Tracking}
+
+All software bugs found during system and unit testing are recorded in the SourceForge Bug Tracking 
+System, which provides the following fields:
+\begin{itemize}
+\item Catagory: Area of software affected ( e. g. Application, Arrays, Build, etc).
+\item Assigned To: 
+\item Summary:
+\item Detailed Description:
+\item Group: ( e. g. Bug, Documentation, Increase Robustness, etc)
+\item Priority: 1 through 9, where 9 is the highest.
+\item Status: Open, Closed, Deleted, and Pending.
+\end{itemize}
+
+When a bug is identified, the tester opens a bug report on SourceForge, giving as much detail
+about the bug as possible to help the developer reproduce the problem. When the developer
+fixes the bug, he/she logs into SourceForge, adds a note to the bug report, and changes the status
+to Pending. This triggers SourceForge to send an email to the originator of the bug report. It is
+the responsibility of the originator to verify that the bug has been fixed and close the bug report.
+
+CVS allows projects to be developed on several branches simultaneously. The ongoing development
+is done on the main trunk, and as software releases are identified, branches are created and tagged. Once this
+occurs, software development may continue on separate versions of the code. 
+
+When a bug is found, it may exist on the trunk, a branch or both. The originator of the bug report
+must state where the bug was found in the bug report.  A bug that exists on both the trunk and a 
+branch, will generally be fixed only on the trunk. If the bug is fixed on both the trunk and branch, the 
+developer must state this explicitly in the bug report.  Customer queries about known problems for a 
+release will be directed to the developers.
+
+
+
+\subsection{Software Release Test Procedures}
+
+We provide two types of tar files, the ESMF source and the shared libraries of 
+the supported platforms. Consequently, there are two test procedures followed before placing the 
+tar files on the ESMF download website. 
+
+\subsubsection{Source Code Test Procedure}
+
+This procedure is followed on all the supported platforms for the particular release.
+
+\begin{enumerate}
+\item Verify that the source code builds in both {\tt BOPT=g} and {\tt BOPT=O}.
+\item Verify that  the {\tt ESMF\_COUPLED\_FLOW} demonstration executes successfully.
+\item Verify that the unit tests run successfully, and that there are no {\tt NON-EXHAUSTIVE} unit tests  failures.
+\item Verify that all system tests run successfully. 
+\end{enumerate}
+
+
+\subsubsection{Shared Libraries Test Procedure}
+
+\begin{enumerate}
+\item Change to the {\tt CoupledFlowEx} directory and execute {\tt gmake}. Verify that the demo runs successfully.
+\item Change to the {\tt CoupledFlowSrc} directory and execute {\tt gmake} then {\tt gmake run}. Verify that the demo runs successfully.
+\item Change to the {\tt examples} directory and execute {\tt gmake} and {\tt gmake run}. Verify that the example runs successfully.
+\end{enumerate}
+
+
+\subsection{Testing Resources}
+
+To accomplish our testing strategy, we are dependent on several specific
+resources. 
+
+\begin{itemize}
+\item System tester and integrator/gatekeeper.
+\item Developer-provided unit tests.
+\item Test scripts.
+\item Availability of target platforms.
+\item \htmladdnormallink{{\it SourceForge}}{https://sourceforge.net/projects/esmf/}
+capabilities ( e.g. code repository, bug and task tracker).
+\item {\bf Test and Validation} webpage on the ESMF website {\bf Development}
+link and associated test logs.
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
