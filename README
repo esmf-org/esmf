@@ -1,6 +1,7 @@
 
 ================================================================================
-                                   README
+
+                        README - ESMF v2.1.1 release
 
                     Earth System Modeling Framework (ESMF)
 
@@ -14,72 +15,48 @@
 
 ================================================================================
 
-README file for ESMF v2.1.1 release.
-
-The files contained here include the ESMF source code and build system.
-
 More information about the ESMF project can be found at the ESMF web site:
-        
         http://www.esmf.ucar.edu
 
-For additional documentation on building and running the ESMF please
-see the ESMF User's Guide on the ESMF web site, under the "Downloads &
-Documentation" link.
+The latest documentation for the project can be found at:
+        http://www.esmf.ucar.edu -> Downloads & Documentation
+
+The ESMF User's Guide contains information on building and installing the ESMF.
+The ESMF Reference Manual contains information on the architecture of the ESMF,
+example code, and details of the APIs (Application Programming Interfaces).
 
 The ESMF library source code is also available for download at:
-
 	http://sourceforge.net/projects/esmf
 
-Follow the directions on that webpage to access the ESMF CVS repository.
+Follow the directions on that web page to download a tarball and for
+access to the ESMF CVS repository.  The Sourceforge site also contains 
+the bugs, support, and task lists for ESMF.
+
+Contributions from ESMF users are available at:
+	http://sourceforge.net/projects/esmfcontrib
+
+Please contact esmf_support@ucar.edu with any questions or problems.
 
 ================================================================================
 
 Quickstart information for the impatient:
 
  - Set required environment variable(s) (see next section below).
+
  - Type 'gmake' (the GNU make program) to build the ESMF library.
+
  - Type 'gmake check' to build and run the unit and system tests.
- - Type 'gmake doc' to build the latex documentation (see ESMF web page for
-     a list of required macro packages and additional utilities.  The web page
-     also contains pre-built pdf and html versions of all documentation.)
-
-Other useful gnumake targets:
-
- info : print out extensive system configuration information about what
-        compilers, libraries, paths, flags, etc are being used
-
- clean   : remove all files built for this platform/compiler/wordsize.
- clobber : remove all files built for all architectures
-
- lib : build the ESMF libraries only (default)
- all : build the libraries, unit and system test, examples, and demos.
-
- unit_tests       : build and run the unit tests
- build_unit_tests : build only
- run_unit_tests   : run only
-
- system_tests       : build and run the more comprehensive system tests
- build_system_tests : build only
- run_system_tests   : run only
-
- examples       : build and run the examples
- build_examples : build only
- run_examples   : run only
-
- demos       : build and run the more comprehensive demos
- build_demos : build only
- run_demos   : run only
-
- all_tests       : build and run all available tests and demos
- build_all_tests : build only
- run_all_tests   : run only
-
-Note:
-
- The normal 'install' target is *NOT CURRENTLY SUPPORTED*.  Neither is the
- 'uninstall' target.  They will be added in a future release of ESMF.
 
 ================================================================================
+
+GNUmake
+-------
+
+The ESMF build system uses the GNU make program; it is generally named 'gmake'
+but may also be simply 'make' or 'gnumake' on some platforms.  We do not
+use configure or autoconf;  the selection of various options is done by
+setting environment variables before building the framework. 
+
 
 Environment Variables
 ---------------------
@@ -106,14 +83,14 @@ for ESMF_COMPILER.
 
 ESMF_COMM
 
-For multiprocessor systems with a vendor-supplied MPI communications library,
+On multiprocessor systems with a vendor-supplied MPI communications library,
 that is the default for communications and ESMF_COMM should not be set.  
 For other systems, ESMF comes with with a single-processor MPI-bypass 
-library which is the default.   To select an MPI implementation (e.g. mpich,
-lam) set ESMF_COMM to select which one to use.  Valid values depend on the
-platform; see the README in the build_config directory for more details.
-(generally, 'mpich' or 'lam' are supported on all platforms, with additional
-options on some specific machines.)  If not installed in a system location
+library which is the default.   To run multiprocessor applications
+select an MPI implementation by setting ESMF_COMM to one of 'mpich' or
+'lam' before building ESMF.  Additional valid values may exist; check the
+release notes for the specific platform on the web site for more details.
+If the MPI files are not installed in a system directory (e.g. /usr/lib)
 also set MPI_HOME to the directory containing the include, lib, and bin dirs.
 
 ESMF_SITE
@@ -139,17 +116,58 @@ Valid values are '32' or '64'.
 
 
 There are other environment variables which can be set to customize
-the ESMF make process.  The README file in the build_config directory
-documents the entire list of environment variables in detail, as does
-the ESMF User's Guide.
+the ESMF make process.  The ESMF User's Guide documents these in detail.
 
-================================================================================
+
+Supported makefile Targets
+--------------------------
+
+ info    : print out extensive system configuration information about what
+           compilers, libraries, paths, flags, etc are being used
+
+ clean   : remove all files built for this platform/compiler/wordsize.
+ clobber : remove all files built for all architectures
+
+ lib     : build the ESMF libraries only (default)
+ all     : build the libraries, unit and system test, examples, and demos.
+ doc     : build the documentation (requires specific latex macros packages
+           and additional utilities).  See the ESMF web site for details;  it
+           also contains pre-built pdf and html versions of all docs.
+
+ unit_tests         : build and run the unit tests
+ build_unit_tests   : build only
+ run_unit_tests     : run only
+
+ system_tests       : build and run the more comprehensive system tests
+ build_system_tests : build only
+ run_system_tests   : run only
+
+ examples           : build and run the examples
+ build_examples     : build only
+ run_examples       : run only
+
+ demos              : build and run the more comprehensive demos
+ build_demos        : build only
+ run_demos          : run only
+
+ all_tests          : build and run all available tests and demos
+ build_all_tests    : build only
+ run_all_tests      : run only
+
+Note:
+
+ The normal 'install' target is *NOT CURRENTLY SUPPORTED*.  Neither is the
+ 'uninstall' target.  They will be added in a future release of ESMF.
+
+
 
 Directories
 -----------
 
 build_config:    Contains makefile fragments that can be customized by the 
                  user for specific platforms, compilers, and sites.
+                 See the README in this directory for help with porting to
+                 new platforms or compilers.
 
 build:           Contains the generic portion of the build that a
                  user would not be expected to modify.
@@ -159,8 +177,8 @@ scripts:         Contains scripts for testing and uniprocessor runs, and some
 
 src:             Contains the source code.
 
-In addition, the following directories are created during the building
-and testing stages:
+
+The following directories are created during the building and testing stages:
 
 lib:             Contains the ESMF libraries.
 
@@ -175,24 +193,32 @@ examples:	 Contains examples executables and output.
 doc:             Contains documentation (if built).
 
 
-System Information
-------------------
+Supported Platforms
+-------------------
 
 Check the "Downloads & Documentation" link on the ESMF web site for a 
-current list of supported platforms.  Also list the directories in the
-build_config subdirectory to see which platforms and compiler combinations
-have makefiles already supplied.
+current list of supported platforms.  You can also list the build_config
+directory to see exactly which platforms and compiler combinations have 
+makefiles supplied already.
 
+
+Porting Information
+-------------------
+
+If the build_config directory does not already contain a directory for your
+platform/compiler, see the README file in build_config for specific help with
+which files will most likely need to be edited to support a new platform.
+
+If your platform/compiler is already supported but you need to make some
+adaptions for your local system, see the README file in build_config for
+help in creating a site-specific directory and which files it will most
+likely need to contain.
+
+
+Contact Information
+-------------------
+
+Email esmf_support@ucar.edu with any questions or problems.
 
 ================================================================================
-The latest documentation for the project can be found at:
-http://www.esmf.ucar.edu -> Downloads & Documentation
-
-The documentation at this site is for the latest release.  To obtain
-the documentation that exactly matches this version, follow the
-documentation build procedures outlined above.
-
-Please contact esmf_support@ucar.edu with any questions or problems.
-
-================================================================================
- $Id: README,v 1.58 2005/05/04 22:36:18 nscollins Exp $
+ $Id: README,v 1.59 2005/05/05 17:11:06 nscollins Exp $
