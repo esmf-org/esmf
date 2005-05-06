@@ -137,22 +137,27 @@ Supported makefile Targets
  unit_tests         : build and run the unit tests
  build_unit_tests   : build only
  run_unit_tests     : run only
+ clean_unit_tests   : remove unit test executables only
 
  system_tests       : build and run the more comprehensive system tests
  build_system_tests : build only
  run_system_tests   : run only
+ clean_system_tests : remove system test executables only
 
  examples           : build and run the examples
  build_examples     : build only
  run_examples       : run only
+ clean_examples     : remove example executables only
 
  demos              : build and run the more comprehensive demos
  build_demos        : build only
  run_demos          : run only
+ clean_demos        : remove demo executables only
 
  all_tests          : build and run all available tests and demos
  build_all_tests    : build only
  run_all_tests      : run only
+ clean_all_tests    : remove all test and demo executables 
 
 Note:
 
@@ -221,4 +226,4 @@ Contact Information
 Email esmf_support@ucar.edu with any questions or problems.
 
 ================================================================================
- $Id: README,v 1.59 2005/05/05 17:11:06 nscollins Exp $
+ $Id: README,v 1.60 2005/05/06 15:23:32 nscollins Exp $
