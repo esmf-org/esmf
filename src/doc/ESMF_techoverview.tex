@@ -1,15 +1,34 @@
-% $Id: ESMF_techoverview.tex,v 1.9 2004/08/02 22:54:04 nscollins Exp $
+% $Id: ESMF_techoverview.tex,v 1.10 2005/05/06 20:10:39 nscollins Exp $
 
 \setlength{\parskip}{1.5ex}
 \setlength{\parindent}{0em}
 
-\section{Building and Validating the ESMF}
+\section{Installing and Building the ESMF}
 \label{sec:TechOver}
 
-\input{../../build/doc/ESMF_builddetail}
-\input{ESMF_buildinstall}
+This section goes into more detail about how to build
+the ESMF software, and how to customize the build if
+your platform is not supported by the makefiles packaged
+with the system.
+
+\input{ESMF_install}
+\input{ESMF_builddetail}
+% since we really do not yet support installation correctly; e.g. you
+% cannot move a shared library after anything which has linked to it
+% (like our tests and examples) without telling the executables the eventual
+% destination; remove this section for now.  Also, it was only moving the
+% lib and mod files - nothing about the C++ header files, the examples,
+% the demos, etc.
+%\input{ESMF_buildinstall}
+
+\section{Validating and Running with ESMF}
+\label{sec:TechOver2}
+
+This section goes into more detail about how to run the tests which are
+included with the ESMF software, how to run the examples, demos, and
+quick\_start software, and how to link your own applications with ESMF.
+
 \input{ESMF_testing}
 \input{ESMF_examples}
-
-
-
+\input{ESMF_use}
+\input{ESMF_wavedemo}

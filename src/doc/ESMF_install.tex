@@ -1,5 +1,6 @@
-% $Id: ESMF_install.tex,v 1.45 2005/04/01 17:29:38 theurich Exp $
+% $Id: ESMF_install.tex,v 1.46 2005/05/06 20:10:39 nscollins Exp $
 
+%\section{Installing and Building the ESMF}
 \subsection{ESMF Download Options}
 
 Major releases of the ESMF software can be downloaded by following
@@ -10,9 +11,8 @@ website, \htmladdnormallink{http://www.esmf.ucar.edu}{http://www.esmf.ucar.edu}.
 The ESMF is distributed as a full source code tree.  You will need
 to compile the code into the {\tt libesmf.a} library.
 On some platforms a shared library, {\tt libesmf.so}, is also created.
-Follow the instructions in the following sections of the 
-{\it Quick Start} guide, beginning with Section~\ref{InstallProcedures},
-Installation, to build the library and link it with your application.
+Follow the instructions in the following sections
+to build the library and link it with your application.
 
 \subsection{Installation}
 \label{InstallProcedures}
@@ -22,40 +22,43 @@ Installation, to build the library and link it with your application.
 \subsubsection{ESMF Environment Variables}
 \label{EnvironmentVariables}
 
-Currently the ESMF\_DIR environment variable must be set on all
-platforms.  ESMF\_DIR should be set to the path of the top
-level ESMF directory.  
+The following is a full list of all environment variables which
+are used by the ESMF build system.  In many cases only {\tt ESMF\_DIR}
+must be set, and on Linux clusters {\tt ESMF\_COMPILER} must also be
+set to select which vendor's Fortran compiler is installed.
+The other variables have defaults which work for most systems.
 
-There are several other environment variables that the build system uses.
-In most cases they do not have to be set by the user.  If they are not
-set, then the build system will assign default values to them.  For the
-current supported platforms, the default values are fine.  The other
-environment variables are:
-\begin{quote}
 \begin{description}
 
-  \item[ESMF\_ARCH] Variable that has the value of uname -s.  
-                 For example, this will be AIX for IBM
-                 RS6000's.  There should be no reason for the
-                 user to set ESMF\_ARCH since the proper value should be
-                 determined automatically.
+\item[ESMF\_ARCH] 
 
-  \item[ESMF\_BOPT] Build option value of g (for debug mode) or O (for
-                 optimize mode).  Default value will be O.
+Variable that has the value of {\tt uname -s}.  For example, this will be
+AIX for IBM RS6000's.  There should be no reason for the user to set 
+{\tt ESMF\_ARCH} since the proper value should be determined automatically.
 
-  \item[ESMF\_COMM] Defines which MPI communications library to use.  
-                 Many times a machine will come with its own MPI 
-                 library and in those cases the default setting 
-                 will be the native mpi.  Otherwise the default setting 
-                 will be mpiuni so that the mpi stub library will be used.
-                 This is the case for Linux and Darwin systems.
-                 Other possible settings are mpich and lam.
+\item[ESMF\_BOPT] 
+
+Build option value of {\tt g} for debug mode or {\tt O} (capital oh) for
+optimized mode.  Default value is O.  See the related {\tt ESMF\_OPTLEVEL}
+entry.
+
+\item[ESMF\_COMM] 
+
+Defines which MPI communications library to use.  Many larger machines
+will come with a vendor-supplied  MPI library and in those cases the
+default setting will be the native MPI.  Otherwise the default setting will
+be {\tt mpiuni} so that the mpi stub bypass library will be used.  
+With this library ESMF programs can be executed but only single process.
+This is the default case for Linux and Darwin systems.  
+To run multiprocess an MPI implementation must be installed, and this
+variable indicates which one it is.  Generally, the value will be either
+{\tt mpich} or {\tt lam}.
 
 \item[ESMF\_COMPILER]
 
 Variable specifying which compiler to use.  Value can be default,
-absoft, intel, lahey, nag, pgi, or xlf.  If the value is default or
-ESMF\_COMPILER is left unset, then the default compiler will be
+absoft, g95, intel, lahey, nag, pgi, or xlf.  If the value is default 
+or {\tt ESMF\_COMPILER} is left unset, then the default compiler will be
 used. On systems which usually come with a single vendor-supplied
 compiler, the default is to use this compiler.  On systems like
 Linux clusters where there is no single vendor compiler installed
@@ -68,10 +71,11 @@ systems it is absoft.
 Variable specifying which C/C++ compiler to use.   In most cases
 this should not be set; the default is to use the vendor-supplied
 compilers on those systems which normally come with a single
-development environment; on other systems like Linux clusters,
-the default is to use the ESMF\_COMPILER setting.  However, some
-Fortran compilers support linking with C and C++ code compiled
-with the GNU compilers; in these cases, you can set this variable
+development environment; for Fortran compilers which do not normally
+come with a companion C++ compiler, the default is to use the GNU C compilers.
+However, some Fortran compilers support linking with either their
+own C++ compiler or code compiled with the GNU compilers; 
+in these cases, you can set this variable
 to the value gnu in order to compile with the vendor Fortran
 compiler and the GNU C/C++.   This option is only supported for
 ESMF\_ARCH=Darwin, ESMF\_COMPILER=xlf, and ESMF\_ARCH=Linux,
@@ -90,38 +94,61 @@ In these cases, you can set this variable
 to the value gnu in order to link with the GNU C/C++ libraries.
 This option is only supported for ESMF\_ARCH=Linux, ESMF\_COMPILER=intel.
 
+\item[ESMF\_EXHAUSTIVE] 
 
-  \item[ESMF\_EXHAUSTIVE] Variable specifying how to compile the unit tests.
-                 If set to the value ON, then all unit tests will be compiled
-                 and will be executed when the test is run.  If unset or set 
-                 to any other value, only a subset of the unit tests will 
-                 be included to verify basic functions.  Note that this
-                 is a compile-time selection, not a run-time option.
+Variable specifying how to compile the unit tests.
+If set to the value ON, then all unit tests will be compiled
+and will be executed when the test is run.  If unset or set 
+to any other value, only a subset of the unit tests will 
+be included to verify basic functions.  Note that this
+is a compile-time selection, not a run-time option.
 
-  \item[ESMF\_NO\_IOCODE] This version of the framework is prepared to use
-                 the {\tt netCDF} I/O library.  However, because the location
-                 of the library and include files varies widely from 
-                 system to system the support for I/O is disabled by default.
-                 To enable support, edit build/common.mk and comment out the 
-                 two lines which set ESMF\_NO\_IOCODE to ON and set the 
-                 CPP flag,
-                 and recompile.
+\item[ESMF\_NO\_IOCODE] 
 
-  \item[ESMF\_PREC] Variable specifying the size of an address on systems
-                 which can build either 32 or 64 bit executables.
-                 When possible the default value will be 64, otherwise 
-                 it will be 32.
+This version of the framework is prepared to use the {\tt netCDF} I/O
+library.  However, because the location of the library and include files
+varies widely from system to system the support for I/O is disabled by
+default.  To enable support, edit build/common.mk and comment out the two
+lines which set ESMF\_NO\_IOCODE to ON and set the CPP flag, and recompile.
+
+\item[ESMF\_PREC] 
+
+Variable specifying the size of an address on systems which can build
+either 32 or 64 bit executables.  When possible the default value will be
+64, otherwise it will be 32.
 
 \item[ESMF\_PTHREADS]
 
-This compile-time option controls ESMF's dependency on a functioning Pthreads library. The default option is set to {\tt ON}. Setting this variable to {\tt OFF} will turn ESMF's pthreads feature set off and a stubs header file will be used instead of the Pthreads header during library compilation. This may be necessary on systems that do not supply a working Pthreads implementation. It may also be desirable to disable ESMF's pthreads features for purpose of debugging ESMF applications. Linking an ESMF application against a pthreads-disabled ESMF library will result in run-time ESMF errors if the application makes use of any ESMF pthreads features. The features offered by a pthreads-enabled ESMF library form a proper superset of the pthreads-disabled version. Specifically, a pthreads-disabled ESMF library does not support ESMF multi-threading and concurrent execution of components with overlapping PET lists. It also limits the communication API as well as place some restrictions on {\em where} Components may be created. See the VM section of the reference document for more details on Pthreads in ESMF. (Notice that on some platforms even a pthreads-{\em disabled} version of the ESMF library will need to be linked against a functioning Pthreads library. In those cases this dependency originates from the used compiler or the MPI implementation.)
+This compile-time option controls ESMF's dependency on a functioning
+Pthreads library. The default option is set to {\tt ON}. Setting this
+variable to {\tt OFF} will turn ESMF's pthreads feature set off and a
+stubs header file will be used instead of the Pthreads header during
+library compilation. This may be necessary on systems that do not
+supply a working Pthreads implementation. It may also be desirable to
+disable ESMF's pthreads features for purpose of debugging ESMF
+applications. Linking an ESMF application against a pthreads-disabled
+ESMF library will result in run-time ESMF errors if the application
+makes use of any ESMF pthreads features. The features offered by a
+pthreads-enabled ESMF library form a proper superset of the
+pthreads-disabled version. Specifically, a pthreads-disabled ESMF
+library does not support ESMF multi-threading and concurrent execution
+of components with overlapping PET lists. It also limits the
+communication API as well as place some restrictions on {\em where}
+Components may be created. See the VM section of the reference
+document for more details on Pthreads in ESMF. (Notice that on some
+platforms even a pthreads-{\em disabled} version of the ESMF library
+will need to be linked against a functioning Pthreads library. In
+those cases this dependency originates from the used compiler or the
+MPI implementation.)
 
-  \item[ESMF\_SITE] Build configure file site name or the value default.  
-                 If not set, then the value of default is assumed.
-
+\item[ESMF\_SITE] 
+Build configure file site name or the value default.  
+If not set, then the value of default is assumed.
+When including platform-specific files, this value is used as the
+third part of the directory name (parts 1 and 2 are the
+ESMF\_ARCH value and ESMF\_COMPILER value, respectively.)
 
 \end{description}
-\end{quote}
 
 On Alpha machines an additional environment variable needs
 to be set:
@@ -160,8 +187,11 @@ Environment variables can also be set from the gmake command line:
 \subsubsection{Supported Platforms}
 \input{../../build/doc/user_arch}
 
-Simultaneous multiple architecture builds are supported, with
-one restriction; the test cases may only be run on one platform at a time. 
+Building the library for multiple architectures or options at the same
+time is supported; building or running the tests or examples is restricted
+to one platform/architecture at a time.  The output from the test cases
+will be stored in a separate directories so the results will be kept 
+separate for different architectures or options.
 
 \subsubsection{Building the ESMF Libraries}
 \label{BuildESMF}
@@ -173,18 +203,9 @@ Build the library with the command:
 \begin{verbatim}
   gmake 
 \end{verbatim}
-or 
-\begin{verbatim}
-  gmake ESMF_BOPT=O
-\end{verbatim}
-  for an optimized version or
-\begin{verbatim}
-  gmake ESMF_BOPT=g  
-\end{verbatim}
-  for the debug version.
 
-Build options that enable you to copy the library and *.mod files to
-specified directories are explained in Section~\ref{BuildOptions}. 
+%Build options that enable you to copy the library and *.mod files to
+%specified directories are explained in Section~\ref{BuildOptions}. 
 
 Makefiles throughout the framework are configured to allow users to
 compile files only in the directory where {\tt gmake} is entered. Shared
@@ -196,15 +217,16 @@ described in Section~\ref{EnvironmentVariables}.
 Users may also run examples or execute unit tests of specific classes
 by changing directories to the desired class {\tt examples} or {\tt tests} 
 directories and entering {\tt gmake run\_examples} or 
-{\tt gmake run\_tests}, respectively.  For non-multiprocessor machines,
+{\tt gmake run\_unit\_tests}, respectively.  For non-multiprocessor machines,
 uni-processor targets are available as {\tt gmake run\_examples\_uni} or
-{\tt gmake run\_tests\_uni}.
+{\tt gmake run\_unit\_tests\_uni}.
 
 \subsubsection{Building the ESMF Documentation}
 \label{BuildDocumentation}
 
-The documentation consists of an {\it ESMF User's Guide}, {\it ESMF Requirements 
-Document}, and {\it ESMF Reference Manual for Fortran}.  
+The documentation consists of an {\it ESMF User's Guide}, 
+{\it ESMF Requirements Document}, and 
+{\it ESMF Reference Manual for Fortran}.  
 \noindent To build documentation:
 \begin{verbatim}
   gmake doc              ! Builds the manuals, including pdf and html.

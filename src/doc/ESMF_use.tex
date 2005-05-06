@@ -1,4 +1,4 @@
-% $Id: ESMF_use.tex,v 1.20 2004/07/30 15:09:44 svasquez Exp $
+% $Id: ESMF_use.tex,v 1.21 2005/05/06 20:10:39 nscollins Exp $
 
 \subsection{Using the ESMF}
 \label{UsingLibrary}
@@ -72,6 +72,9 @@ refer to the {\tt link\_rules} files found in the following directories:
 	$ESMF_DIR/build_config/OSF1.default.default
 \end{verbatim}
 
+
+\subsubsection{Customized SITE Files}
+
 In an effort to provide platform specific information for building ESMF 
 and linking the libraries with your application, a SourceForge 
 site, {\tt esmfcontrib}, has been created.
@@ -101,21 +104,21 @@ and use the following CVS command:
 The following directories will be checked out:
 
 \begin{verbatim}
-	AIX.default.blackforest
 	AIX.default.bluesky
 	Linux.lahey.longs
 \end{verbatim}
 
 To build using these makefiles you must set the environment 
-variable {\tt ESMF\_SITE} to {\tt blackforest}, {\tt bluesky}, or {\tt longs}.
+variable {\tt ESMF\_SITE} to {\tt bluesky}, or {\tt longs}.
 
 At the present time, we have files for the following institutions:
 
 \begin{verbatim}
-	anl  - Argonne National Laboratory
-	cola - Center for Ocean-Land-Atmosphere Studies
-	gsfc - Goddard Space Flight Center
-	ncar - National Center for Atmospheric Research
+anl  - Argonne National Laboratory
+cola - Center for Ocean-Land-Atmosphere Studies
+gsfc - Goddard Space Flight Center
+mit  - Massachusetts Institute of Technology
+ncar - National Center for Atmospheric Research
 \end{verbatim}
 
 
