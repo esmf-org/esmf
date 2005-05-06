@@ -73,15 +73,15 @@ Pthreads header during library compilation. This may be necessary on systems
 that do not supply a working Pthreads implementation.
 
 
-Compiling with or without I/O libraries:
+Compiling with or without netCDF I/O libraries:
 
-ESMF_NO_IOCODE    
+NETCDF_LIB
+NETCDF_INCLUDE    
 
 By default the system does not try to link in the netCDF I/O libraries, but
-the makefiles are prepared to link with it.  Since the installation location
-of the libraries and include files varies widely from system to system, it is
-generally necessary to set the NETCDF_LIB and NETCDF_INCLUDE environment
-variables to point to the location of these files.
+the makefiles are prepared to include them if these variables are defined.
+To use netCDF I/O, set both NETCDF_LIB and NETCDF_INCLUDE environment 
+variables to the directories where the netCDF files have been installed.
 
 
 Selecting a particular C compiler or Compiler Version:
@@ -136,7 +136,7 @@ Adding a New Platform
    the link line when the link is being done with the C++ compiler), and the
    C_F90CXXLIBS line (C++ libs which need to be added when the link is being
    done with the F90 compiler) will need to be updated.  Running a C++ or F90
-   link in a single language with the -v (or whatever flag gives verbose output
+   link in a single language with -v (or whatever flag gives verbose output
    about the exact lines being executed) may help find what libraries are
    silently added by the compilers.
 
@@ -148,8 +148,9 @@ Adding a New Platform
 4. Edit the ESMC_Conf.h file and look over the values.  (In reality, most
    of these variables are not actually used.)  However, see the ESMF_F90_PTR
    settings at the end of the file.  These *must* match the size of the 
-   "dope vector" that the Fortran compiler uses on this machine.  Put in
-   a good guess (or leave them as-is) and build and run the unit tests.
+   "dope vector" that the Fortran compiler uses on this machine to store
+   information about Fortran arrays (rank, lower bounds, upper bounds, etc).  
+   Put in a good guess (or leave them as-is) and build and run the unit tests.
 
    Ignore the output of all other unit tests until the ESMF_ArrayF90PtrUTest
    passes cleanly without complaining about byte count mismatches.  Adjust the
@@ -182,4 +183,4 @@ gcc or xlc.  Use ESMF_C_COMPILER to control this choice.
 
 
 ================================================================================
- $Id: README,v 1.22 2005/05/05 21:08:25 nscollins Exp $
+ $Id: README,v 1.23 2005/05/06 20:32:27 nscollins Exp $
