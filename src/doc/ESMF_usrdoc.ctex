@@ -1,4 +1,4 @@
-% $Id: ESMF_usrdoc.ctex,v 1.23 2004/12/29 20:54:02 nscollins Exp $
+% $Id: ESMF_usrdoc.ctex,v 1.24 2005/05/06 15:30:05 nscollins Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -67,13 +67,14 @@
 %\section{Quick Start}
 \input{ESMF_quickstart}
 
+%\section{ESMF Technical Overview}
+\input{ESMF_techoverview}
+
+\newpage
 %\section{ESMF Architectural Overview}
 \input{ESMF_archoverview}
 
 #include "../demo/coupled_flow/doc/CoupledFlow_usrdoc.ctex"
-
-%\section{ESMF Technical Overview}
-\input{ESMF_techoverview}
 
 %\section{How to Adapt Applications for ESMF}
 \input{ESMF_adoption}
