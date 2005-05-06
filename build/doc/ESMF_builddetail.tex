@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.16 2005/04/01 17:29:38 theurich Exp $
+%  $Id: ESMF_builddetail.tex,v 1.17 2005/05/06 20:01:57 nscollins Exp $
 
 
 \subsection{Make System}
@@ -76,20 +76,20 @@ them.  In most cases the default values will be fine.
 
 \begin{description}
 
-\item{ESMF\_ARCH} 
+\item[ESMF\_ARCH] 
 
 Defines the current architecture. Default value is the value returned
 by the command uname -s.  There should be almost no reason for
 ESMF\_ARCH to be set by a user.
 
-\item{ESMF\_BOPT} 
+\item[ESMF\_BOPT] 
 
 Variable specifying that the build system use either debugging or
 optimization options.  Value of g specifies the debugging options.
 Value of O (capital oh) specifies optimization options.  Default value
 is O.
 
-\item{ESMF\_COMM}
+\item[ESMF\_COMM]
 
 Defines which MPI communications library to use.  Many times a machine
 will come with its own MPI library and in those cases the default
@@ -97,7 +97,7 @@ setting will be mpi.  Otherwise the default setting will be mpiuni so
 that the mpiuni library will be used.  This is the case for Linux and
 Darwin systems.  Other possible settings are mpich and lam.
 
-\item{ESMF\_COMPILER}
+\item[ESMF\_COMPILER]
 
 Variable specifying which compiler to use.  Value can be default,
 absoft, intel, lahey, nag, pgi, or xlf.  If the value is default or the
@@ -109,7 +109,7 @@ on all systems, you will generally want to set this.
 The default for Linux systems is lahey and on Darwin (Mac OS X)
 systems it is absoft.
 
-\item{ESMF\_C\_COMPILER}
+\item[ESMF\_C\_COMPILER]
 
 Variable specifying which C/C++ compiler to use.   In most cases
 this should not be set; the default is to use the vendor-supplied
@@ -123,7 +123,7 @@ compiler and the GNU C/C++.   This option is only supported for
 ESMF\_ARCH=Darwin, ESMF\_COMPILER=xlf, and ESMF\_ARCH=Linux,
 ESMF\_COMPILER=intel.
 
-\item{ESMF\_C\_LIBRARY}
+\item[ESMF\_C\_LIBRARY]
 
 Variable specifying which C/C++ libraries to link with.  In most cases
 this should not be set; the default is to use the vendor-supplied
@@ -136,14 +136,14 @@ In these cases, you can set this variable
 to the value gnu in order to link with the GNU C/C++ libraries.
 This option is only supported for ESMF\_ARCH=Linux, ESMF\_COMPILER=intel.
 
-\item{ESMF\_EXHAUSTIVE}
+\item[ESMF\_EXHAUSTIVE]
 
 The unit tests by default compile only a subset of the unit tests.
 If ESMF\_EXHAUSTIVE is set to the value {\tt ON}, then when
 compiling the unit tests, all tests will be included.  Note that this
 is a compile time, not run time, option.
 
-\item{ESMF\_NO\_IOCODE}
+\item[ESMF\_NO\_IOCODE]
 
 The current release of the system is prepared to link with the
 {\tt netCDF} I/O libraries, but since the installation of the
@@ -154,17 +154,36 @@ of both the CPPFLAG and environment variable.  Additional customization
 will be needed in the build\_config makefile fragments to point the
 framework to the location of the include and library files.
 
-\item{ESMF\_PREC}
+\item[ESMF\_PREC]
 
 Variable specifying the size of an address on systems which can build
 either 32 or 64 bit executables.
 When possible the default value will be 64, otherwise it will be 32.
 
-\item{ESMF\_PTHREADS}
+\item[ESMF\_PTHREADS]
 
-This compile-time option controls ESMF's dependency on a functioning Pthreads library. The default option is set to {\tt ON}. Setting this variable to {\tt OFF} will turn ESMF's pthreads feature set off and a stubs header file will be used instead of the Pthreads header during library compilation. This may be necessary on systems that do not supply a working Pthreads implementation. It may also be desirable to disable ESMF's pthreads features for purpose of debugging ESMF applications. Linking an ESMF application against a pthreads-disabled ESMF library will result in run-time ESMF errors if the application makes use of any ESMF pthreads features. The features offered by a pthreads-enabled ESMF library form a proper superset of the pthreads-disabled version. Specifically, a pthreads-disabled ESMF library does not support ESMF multi-threading and concurrent execution of components with overlapping PET lists. It also limits the communication API as well as place some restrictions on {\em where} Components may be created. See the VM section of the reference document for more details on Pthreads in ESMF. (Notice that on some platforms even a pthreads-{\em disabled} version of the ESMF library will need to be linked against a functioning Pthreads library. In those cases this dependency originates from the used compiler or the MPI implementation.)
+This compile-time option controls ESMF's dependency on a functioning
+Pthreads library. The default option is set to {\tt ON}. Setting this
+variable to {\tt OFF} will turn ESMF's pthreads feature set off and a stubs
+header file will be used instead of the Pthreads header during library
+compilation. This may be necessary on systems that do not supply a working
+Pthreads implementation. It may also be desirable to disable ESMF's
+pthreads features for purpose of debugging ESMF applications. Linking an
+ESMF application against a pthreads-disabled ESMF library will result in
+run-time ESMF errors if the application makes use of any ESMF pthreads
+features. The features offered by a pthreads-enabled ESMF library form a
+proper superset of the pthreads-disabled version. Specifically, a
+pthreads-disabled ESMF library does not support ESMF multi-threading and
+concurrent execution of components with overlapping PET lists. It also
+limits the communication API as well as place some restrictions on {\em
+where} Components may be created. See the VM section of the reference
+document for more details on Pthreads in ESMF. (Notice that on some
+platforms even a pthreads-{\em disabled} version of the ESMF library will
+need to be linked against a functioning Pthreads library. In those cases
+this dependency originates from the used compiler or the MPI
+implementation.)
 
-\item{ESMF\_SITE}
+\item[ESMF\_SITE]
 
 If ESMF\_SITE is not set or has the value of default, default build
 settings for the current machine architecture and compiler will be
