@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.70.2.1 2005/05/09 21:33:39 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.70.2.2 2005/05/09 22:24:58 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -255,7 +255,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.70.2.1 2005/05/09 21:33:39 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.70.2.2 2005/05/09 22:24:58 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -640,7 +640,7 @@
 
       call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, &
                                      parentVM, recvDomainList, &
-                                     hasDstDataUse, hasSrcDataUse, &
+                                     hasSrcDataUse, hasDstDataUse, &
                                      totalUse, layerUse, &
                                      srcHorzRelLoc, dstHorzRelLoc, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
