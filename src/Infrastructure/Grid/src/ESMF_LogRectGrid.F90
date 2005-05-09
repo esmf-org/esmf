@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.134.2.1 2005/02/09 21:31:59 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.134.2.2 2005/05/09 21:35:02 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -58,7 +58,6 @@
 ! !PRIVATE TYPES:
       private
 
-      !integer, parameter :: domainOption = 1
       ! TODO: temporary fix - the new Reconcile code is not compatible (yet)
       !  with the fast domainOption.  so make it public and have Reconcile
       !  turn it off the first time it is called.
@@ -127,7 +126,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.134.2.1 2005/02/09 21:31:59 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.134.2.2 2005/05/09 21:35:02 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -8401,51 +8400,66 @@
 ! !IROUTINE: ESMF_LRGridBoxIntersectRecv - Determine a DomainList covering a box
 !
 ! !INTERFACE:
-      subroutine ESMF_LRGridBoxIntersectRecv(srcGrid, dstGrid, parentVM, &
-                                             localMinPerDim, localMaxPerDim, &
-                                             domainList, hasDstData, hasSrcData, &
-                                             srcRelloc, dstRelloc, &
-                                             total, rc)
+      subroutine ESMF_LRGridBoxIntersectRecv(srcGrid, dstGrid, &
+                                             parentVM, domainList, &
+                                             hasSrcData, hasDstData, &
+                                             total, layer, &
+                                             srcRelloc, dstRelloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: srcGrid
       type(ESMF_Grid) :: dstGrid
       type(ESMF_VM), intent(in) :: parentVM
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMinPerDim
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMaxPerDim
       type(ESMF_DomainList), intent(inout) :: domainList
-      logical, intent(in) :: hasDstData
       logical, intent(in) :: hasSrcData
+      logical, intent(in) :: hasDstData
+      logical, intent(in) :: total
+      logical, intent(in) :: layer
       type(ESMF_RelLoc), intent(in), optional :: srcRelloc
       type(ESMF_RelLoc), intent(in), optional :: dstRelloc
-      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     This routine computes the DomainList necessary to cover a given "box"
-!     described by an array of min/max's.  This routine is for the case of
-!     a DE that is part of a destination Grid determining which DEs it will
-!     receive data from.
+!     This routine computes the DomainList that must be received in order to
+!     cover the de-local "boxes" of a destination Grid.  This routine is for the
+!     case of a DE that is part of a destination Grid determining which DEs it
+!     will receive data from.  All PETs that are part of either the source or
+!     destination DELayouts must call this routine, due to some necessary
+!     global communication calls.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid]
+!     \item[srcGrid]
 !          Source {\tt ESMF\_Grid} to use to calculate the resulting
 !          {\tt ESMF\_DomainList}.
-!     \item[localMinPerDim]
-!          Array of local minimum coordinates, one per rank of the array,
-!          defining the "box."
-!     \item[localMaxPerDim]
-!          Array of local maximum coordinates, one per rank of the array,
-!          defining the "box."
+!     \item[dstGrid]
+!          Destination {\tt ESMF\_Grid} to use to calculate the resulting
+!          {\tt ESMF\_DomainList}.
+!     \item[parentVM]
+!          {\tt ESMF\_VM} covering the union of the source and destination
+!          Grids.
 !     \item[domainList]
-!          Resulting {\tt ESMF\_DomainList} containing the set of 
+!          Resulting {\tt ESMF\_DomainList} containing the set of
 !          {\tt ESMF\_Domains} necessary to cover the box.
-!     \item[{[srcRelloc]}]
-!     \item[{[dstRelloc]}]
-!     \item[{[total]}]
+!     \item[hasSrcData]
+!          Logical flag to indicate whether or not the local PET has data
+!          on the source Grid.
+!     \item[hasDstData]
+!          Logical flag to indicate whether or not the local PET has data
+!          on the destination Grid.
+!     \item[total]
 !          Logical flag to indicate the domainList should use total cells
 !          instead of computational cells.
+!     \item[layer]
+!          Logical flag to indicate the domainList should add an extra layer
+!          of cells, which in necessary for some regridding algorithms in
+!          some situations.
+!     \item[{[srcRelloc]}]
+!          Relative location of the source data.  The default value is
+!          ESMF_CELL_CENTER.
+!     \item[{[dstRelloc]}]
+!          Relative location of the destination data.  The default value is
+!          ESMF_CELL_CENTER.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8464,6 +8478,8 @@
                                                           globalMaxIndex
       logical :: hasMin, hasMax
       real(ESMF_KIND_R8) :: point(2)
+      real(ESMF_KIND_R8), dimension(:), pointer :: localMinPerDim
+      real(ESMF_KIND_R8), dimension(:), pointer :: localMaxPerDim
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
       type(ESMF_AxisIndex) :: thisAI(2)
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gridAI, localAI
@@ -8480,6 +8496,20 @@
       if (present(srcRelloc)) srcRellocUse = srcRelloc
       if (present(dstRelloc)) dstRellocUse = dstRelloc
 
+      ! allocate local min/max arrays to the rank of the dst Grid.
+      ! Must still do this even if this DE does not have any dst data for
+      ! use below, so set huge default values.
+      call ESMF_LRGridGet(dstGrid, dimCount=rank, rc=localrc)
+      allocate(localMinPerDim(rank), &
+               localMaxPerDim(rank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "min/max arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      localMinPerDim =  9876543.0d0          ! TODO: use ESMF_Huge once it is
+      localMaxPerDim = -9876543.0d0          !       defined
+
+      ! If this DE does not have any destination data, then there is nothing to
+      ! receive.  However, it cannot simply return because it may be involved in
+      ! collective communication calls if it has source data.
       if (hasDstData) then
 
         ! get set of bounding boxes from the source grid
@@ -8488,7 +8518,6 @@
         ! get rank and counts from the bounding boxes array
         call ESMF_LocalArrayGet(array, counts=counts, rc=localrc)
         nDEs = counts(1)
-        rank = counts(3)
 
         ! get pointer to the actual bounding boxes data
         call ESMF_LocalArrayGetData(array, boxes, rc=localrc)
@@ -8498,6 +8527,12 @@
                  localAI(nDEs,rank), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "AI arrays", &
                                        ESMF_CONTEXT, rc)) return
+
+        ! get DE-local min/max
+        call ESMF_LRGridGetDELocalInfo(dstGrid, horzRelLoc=dstRellocUse, &
+                                       minLocalCoordPerDim=localMinPerDim, &
+                                       maxLocalCoordPerDim=localMaxPerDim, &
+                                       reorder=.false., rc=localrc)
 
         ! get set of axis indices from source grid
         call ESMF_LRGridGetAllAxisIndex(srcGrid, gridAI, &
@@ -8531,11 +8566,19 @@
 
       endif
 
+      ! branch on different domainOption, which is a more or less private used
+      ! to select the algorithm for deciding how much data from each DE will be
+      ! gathered.  If 0, then the entire domain of any DE overlapping this one
+      ! will be gathered.  If 1, then the framework will use a different set of
+      ! coding to identify the smallest logically rectangular domain (with some
+      ! minor efficiency adjustments) to gather.
       select case(domainOption)
 
-      ! whole domain from each overlapping DE
+      ! whole domain from each overlapping DE.  If there is an overlap, then use 
+      ! the entire local source domain for the domainList.
       case(0)
 
+        ! only PETs with destination data need to check for overlap
         if (hasDstData) then
 
           do j = 1,nDEs
@@ -8560,6 +8603,7 @@
       !  reduced domain from each overlapping DE
       case(1)
 
+        ! allocate arrays to store intersection results
         call ESMF_VMGet(parentVM, localPet=myPET, petCount=nPETs, rc=localrc)
         allocate(globalMinIndex(nPETs*2), &
                  globalMaxIndex(nPETs*2), stat=rc)
@@ -8567,6 +8611,10 @@
         ! determine the right physgrid to look at in calls below
         call ESMF_GridGetPhysGridId(srcGrid%ptr, srcRellocUse, physId, localrc)
 
+        ! loop over PETs in the parent VM, where the PET matching the loop
+        ! counter broadcasts its minima and maxima.  All PETs that have source
+        ! data then search for those points in the intended physgrid and return
+        ! the row and column if found.
         do j  = 1,nPETs
           localIndex = 0
           thisPET    = j - 1
@@ -8588,7 +8636,7 @@
           endif
           call ESMF_VMBroadcast(parentVM, point, 2, thisPET, rc=localrc)
           if (hasSrcData) then
-            call ESMF_PhysGridSearchMyDERowCol(srcGrid%ptr%physGrids(physId), & 
+            call ESMF_PhysGridSearchMyDERowCol(srcGrid%ptr%physGrids(physId), &
                                                localIndex, point, &
                                                option='max', total=total, rc=rc)
           endif
@@ -8596,13 +8644,14 @@
                              rc=localrc)
         enddo
 
+        ! only PETs with destination data have to worry about a recv domainList
         if (hasDstData) then
 
           ! first get the appropriate layout
           call ESMF_LRGridGet(srcGrid, delayout=srcDELayout, rc=localrc)
           call ESMF_DELayoutGet(srcDELayout, deCount=srcDEs, rc=localrc)
 
-          ! unload index array info to AI's
+          ! loop over PETs, checking for intersections
           size = 0
           do i = 1,nPETs
             i1 = (i-1)*2 + 1
@@ -8618,17 +8667,30 @@
                 globalMaxIndex(i1  ).ne.0                    .AND. &
                 globalMaxIndex(i1+1).ne.0) &
                 hasMax = .true.
+
+            ! in here only if an intersection is found
             if (hasMin .AND. hasMax) then
+
+              ! modify the gathered indices with a layer of cells, if requested
+              if (layer) then
+                globalMinIndex(i1  ) = globalMinIndex(i1  ) - 1
+                globalMinIndex(i1+1) = globalMinIndex(i1+1) - 1
+                globalMaxIndex(i1  ) = globalMaxIndex(i1  ) + 1
+                globalMaxIndex(i1+1) = globalMaxIndex(i1+1) + 1
+              endif
 
               ! so this is a domain -- figure out the corresponding DE in
               ! the source layout
               do j = 1,srcDEs
-                srcDE = j - 1           ! DE's are 0-based
+                srcDE = j - 1              ! DE's are 0-based
                 call ESMF_DELayoutGetDELocalInfo(srcDELayout, srcDE, &
                                                  pid=srcPID, rc=localrc)
                 if (srcPID.eq.i-1) exit   ! TODO: fix once we talk to Gerhard
               enddo
 
+              ! set AIs for the domainList.  Note that since we are looking for data
+              ! to receive and being efficient, the AI corresponds only to the chunk
+              ! of data to transfer.  That way, the data is packed as it is received.
               thisAI(1) = localAI(j,1)
               thisAI(2) = localAI(j,2)
               thisAI(1)%min = 1
@@ -8637,9 +8699,10 @@
               thisAI(2)%max = globalMaxIndex(i1+1) - globalMinIndex(i1+1) + 1
               thisAI(1)%stride = thisAI(1)%max
               thisAI(2)%stride = thisAI(2)%max
-  
+
               numDomains = numDomains + 1
 
+              ! load AI and information into the domainList
               domainList%domains(numDomains)%DE    = srcDE
               domainList%domains(numDomains)%rank  = rank
               domainList%domains(numDomains)%ai(1) = thisAI(1)
@@ -8697,10 +8760,16 @@
       !         src_DE_bbox(2) = src_DE_bbox(2) + lon_cycle
       !   endif ! Spherical coords
 
+      ! clean up
+      deallocate(localMinPerDim, &
+                 localMaxPerDim, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating min/max arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
       if (hasDstData) then
         deallocate( gridAI, &
                    localAI, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating AI arrays", &
                                        ESMF_CONTEXT, rc)) return
       endif
 
@@ -8715,27 +8784,26 @@
 ! !IROUTINE: ESMF_LRGridBoxIntersectSend - Determine a DomainList covering a box
 !
 ! !INTERFACE:
-      subroutine ESMF_LRGridBoxIntersectSend(srcGrid, dstGrid, localMinPerDim, &
-                                             localMaxPerDim, myAI, domainList, &
-                                             srcRelloc, dstRelloc, total, rc)
+      subroutine ESMF_LRGridBoxIntersectSend(srcGrid, dstGrid, domainList, &
+                                             total, layer, &
+                                             srcRelloc, dstRelloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: srcGrid
       type(ESMF_Grid) :: dstGrid
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMinPerDim
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMaxPerDim
-      type(ESMF_AxisIndex), dimension(:), intent(in) :: myAI
       type(ESMF_DomainList), intent(inout) :: domainList
+      logical, intent(in) :: total
+      logical, intent(in) :: layer
       type(ESMF_RelLoc), intent(in), optional :: srcRelloc
       type(ESMF_RelLoc), intent(in), optional :: dstRelloc
-      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     This routine computes the DomainList necessary to cover a given "box"
-!     described by an array of min/max's.  This routine is for the case of
-!     a DE that is part of a source Grid determining which DEs it will send
-!     its data to.
+!     This routine computes the DomainList that must be sent in order to cover
+!     the de-local "boxes" of a destination Grid.  This routine is for the case
+!     of a DE that is part of a source Grid determining which DEs it will send
+!     its data to.  This routine should not be called if this PET does not
+!     have any source data.
 !
 !     The arguments are:
 !     \begin{description}
@@ -8745,18 +8813,22 @@
 !     \item[srcGrid]
 !          Source {\tt ESMF\_Grid} to use to calculate the resulting
 !          {\tt ESMF\_DomainList}.
-!     \item[localMinPerDim]
-!          Array of local minimum coordinates, one per rank of the array,
-!          defining the "box."
-!     \item[localMaxPerDim]
-!          Array of local maximum coordinates, one per rank of the array,
-!          defining the "box."
-!     \item[myAI]
-!          {\tt ESMF\_AxisIndex} for this DE on the sending (source)
-!          {\tt ESMF\_Grid}, assumed to be in global indexing.
 !     \item[domainList]
-!          Resulting {\tt ESMF\_DomainList} containing the set of 
+!          Resulting {\tt ESMF\_DomainList} containing the set of
 !          {\tt ESMF\_Domains} necessary to cover the box.
+!     \item[total]
+!          Logical flag to indicate the domainList should use total cells
+!          instead of computational cells.
+!     \item[layer]
+!          Logical flag to indicate the domainList should add an extra layer
+!          of cells, which in necessary for some regridding algorithms in
+!          some situations.
+!     \item[{[srcRelloc]}]
+!          Relative location of the source data.  The default value is
+!          ESMF_CELL_CENTER.
+!     \item[{[dstRelloc]}]
+!          Relative location of the destination data.  The default value is
+!          ESMF_CELL_CENTER.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8770,11 +8842,14 @@
       integer :: counts(ESMF_MAXDIM)
       integer :: physId
       integer(ESMF_KIND_I4) :: localIndex(2)
-      integer(ESMF_KIND_I4), dimension(:), allocatable :: globalMinIndex, globalMaxIndex
+      integer(ESMF_KIND_I4), dimension(:), pointer :: globalMinIndex, &
+                                                      globalMaxIndex
       logical :: hasMin, hasMax
       real(ESMF_KIND_R8) :: point(2)
+      real(ESMF_KIND_R8), dimension(:), pointer :: localMinPerDim
+      real(ESMF_KIND_R8), dimension(:), pointer :: localMaxPerDim
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
-      type(ESMF_AxisIndex), dimension(:), pointer :: myLocalAI, thisAI
+      type(ESMF_AxisIndex), dimension(:), pointer :: myGlobalAI, myLocalAI, thisAI
       type(ESMF_LocalArray) :: array
       type(ESMF_RelLoc) :: srcRellocUse, dstRellocUse
 
@@ -8787,7 +8862,7 @@
       if (present(srcRelloc)) srcRellocUse = srcRelloc
       if (present(dstRelloc)) dstRellocUse = dstRelloc
 
-      ! get set of bounding boxes from the grid
+      ! get set of bounding boxes from the destination grid
       call ESMF_GridGetBoundingBoxes(dstGrid%ptr, array, localrc)
 
       ! get rank and counts from the bounding boxes array
@@ -8796,24 +8871,33 @@
       rank = counts(3)
 
       ! allocate arrays now
-      allocate(myLocalAI(rank), &
-                  thisAI(rank), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "myLocalAI", &
+      allocate(localMinPerDim(rank), &
+               localMaxPerDim(rank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "min/max per dim arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      allocate(myGlobalAI(rank), &
+                myLocalAI(rank), &
+                   thisAI(rank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "AI arrays", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! translate myAI to local index
+      ! get local min/max and myGlobalAI
+      call ESMF_LRGridGetDELocalInfo(srcGrid, horzRelLoc=srcRellocUse, &
+                                     minLocalCoordPerDim=localMinPerDim, &
+                                     maxLocalCoordPerDim=localMaxPerDim, &
+                                     globalAIPerDim=myGlobalAI, &
+                                     total=total, reorder=.false., rc=localrc)
+
+      ! translate myGlobalAI to local index
       call ESMF_LRGridGlobalToDELocalAI(srcGrid, horzRelLoc=srcRellocUse, &
-                                        globalAI1D=myAI, localAI1D=myLocalAI, &
-                                        rc=localrc)
+                                        globalAI1D=myGlobalAI, &
+                                        localAI1D=myLocalAI, rc=localrc)
 
       ! get pointer to the actual bounding boxes data
       call ESMF_LocalArrayGetData(array, boxes, rc=localrc)
 
-      ! loop through bounding boxes, looking for overlap with our "box"
-      ! TODO: a better algorithm
-
+      ! loop through bounding boxes, looking for overlap with our "box".
       ! go through list of DEs to calculate the number of domains
-      ! TODO: use David's DomainList routines, but they are untested
       numDomains = 0
       do i = 1,nDEs
         if ((localMinPerDim(1).gt.max(boxes(i,2,1),boxes(i,3,1))) .or. &
@@ -8823,6 +8907,7 @@
         numDomains = numDomains + 1
       enddo
 
+      ! create the domainList
       domainList = ESMF_DomainListCreate(numDomains)
 
       ! now fill in the domain list  TODO: only one loop instead of two, one that
@@ -8831,11 +8916,18 @@
       numDomains  = 0
       totalPoints = 0
 
+      ! branch on different domainOption, which is a more or less private used
+      ! to select the algorithm for deciding how much data from each DE will be
+      ! gathered.  If 0, then the entire domain of any DE overlapping this one
+      ! will be gathered.  If 1, then the framework will use a different set of
+      ! coding to identify the smallest logically rectangular domain (with some
+      ! minor efficiency adjustments) to gather.
       select case(domainOption)
 
       ! whole domain from each overlapping DE
       case(0)
 
+        ! loop over the DEs in the destination grid
         do j = 1,nDEs
           if ((localMinPerDim(1).gt.max(boxes(j,2,1),boxes(j,3,1))) .or. &
               (localMaxPerDim(1).lt.min(boxes(j,1,1),boxes(j,4,1))) .or. &
@@ -8856,14 +8948,20 @@
       !  reduced domain from each overlapping DE
       case(1)
 
+        ! allocate arrays to store intersection data, sized by the number of
+        ! DEs for the destination Grid and the rank, assumed to be two
         allocate(globalMinIndex(nDEs*2), &
                  globalMaxIndex(nDEs*2), stat=rc)
 
         ! determine the right physgrid to look at in calls below
         call ESMF_GridGetPhysGridId(srcGrid%ptr, srcRellocUse, physId, localrc)
 
+        ! loop over the DEs in the destination Grid
         do j  = 1,nDEs
           localIndex = 0
+
+          ! pick out min and max for each DE from its bounding box and search for
+          ! that point in my source Grid
           point(1) = min(boxes(j,1,1),boxes(j,4,1))
           point(2) = min(boxes(j,1,2),boxes(j,2,2))
           call ESMF_PhysGridSearchMyDERowCol(srcGrid%ptr%physGrids(physId), &
@@ -8897,12 +8995,26 @@
               globalMaxIndex(i1+1).ne.0) &
               hasMax = .true.
           if (hasMin .AND. hasMax) then
-            thisAI(1) = myLocalAI(1)
-            thisAI(2) = myLocalAI(2)
-            thisAI(1)%min = globalMinIndex(i1)
-            thisAI(2)%min = globalMinIndex(i1+1)
-            thisAI(1)%max = globalMaxIndex(i1)
-            thisAI(2)%max = globalMaxIndex(i1+1)
+
+            ! modify the gathered indices with a layer of cells, if requested
+            if (layer) then
+              globalMinIndex(i1  ) = globalMinIndex(i1  ) - 1
+              globalMinIndex(i1+1) = globalMinIndex(i1+1) - 1
+              globalMaxIndex(i1  ) = globalMaxIndex(i1  ) + 1
+              globalMaxIndex(i1+1) = globalMaxIndex(i1+1) + 1
+
+            endif
+
+            ! load the appropriate information into thisAI, using the indices
+            ! calculated earlier for min and max and the local stride
+            thisAI(1)%min    = globalMinIndex(i1)
+            thisAI(2)%min    = globalMinIndex(i1+1)
+            thisAI(1)%max    = globalMaxIndex(i1)
+            thisAI(2)%max    = globalMaxIndex(i1+1)
+            thisAI(1)%stride = myLocalAI(1)%stride
+            thisAI(2)%stride = myLocalAI(2)%stride
+
+            ! add the AI and related information to the domainList
             numDomains = numDomains + 1
             domainList%domains(numDomains)%DE    = i-1  ! DEs start with 0
             domainList%domains(numDomains)%rank  = rank
@@ -8959,9 +9071,13 @@
       !         src_DE_bbox(2) = src_DE_bbox(2) + lon_cycle
       !   endif ! Spherical coords
 
-      deallocate(myLocalAI, &
-                    thisAI, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating myLocalAI", &
+      ! clean up
+      deallocate(localMaxPerDim, &
+                 localMinPerDim, &
+                     myGlobalAI, &
+                      myLocalAI, &
+                         thisAI, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
                                      ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS

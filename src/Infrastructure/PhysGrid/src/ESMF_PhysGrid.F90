@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.90 2005/01/03 23:29:01 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.90.2.1 2005/05/09 21:34:02 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -323,7 +323,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.90 2005/01/03 23:29:01 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.90.2.1 2005/05/09 21:34:02 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2203,16 +2203,8 @@
 
       ! if total, modify the results slightly for internal grid halo width
       if (totalUse) then
-        if (dstAdd(1).eq.ie) then
-          dstAdd(1) = dstAdd(1) + 2
-        elseif (dstAdd(1).gt.ib .AND. dstAdd(1).lt.ie) then
-          if (option.eq.'max') dstAdd(1) = dstAdd(1) + 2
-        endif
-        if (dstAdd(2).eq.je) then
-          dstAdd(2) = dstAdd(2) + 2
-        elseif (dstAdd(2).gt.jb .AND. dstAdd(2).lt.je) then
-          if (option.eq.'max') dstAdd(2) = dstAdd(2) + 2
-        endif
+        dstAdd(1) = dstAdd(1) + 1
+        dstAdd(2) = dstAdd(2) + 1
       endif
 
       ! set return code

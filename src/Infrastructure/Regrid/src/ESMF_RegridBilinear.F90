@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.83 2004/12/20 18:23:00 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.83.2.1 2005/05/09 21:32:48 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -57,14 +57,13 @@
 
     public ESMF_RegridConstructBilinear ! create and fill a regrid object
                                         ! for a bilinear regridding
-    public ESMF_RegridBilinearSearch
 !
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.83 2004/12/20 18:23:00 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.83.2.1 2005/05/09 21:32:48 jwolfe Exp $'
 
 !==============================================================================
 
@@ -136,12 +135,12 @@
       integer :: dataRank, haloWidth
       integer, dimension(3) :: srcOrder, dstOrder
       integer, dimension(:), allocatable :: dataOrder, lbounds
-      logical, dimension(:), pointer :: srcUserMask, dstUserMask
+      logical, dimension(:),   pointer :: srcUserMask, dstUserMask
       logical, dimension(:,:), pointer :: found
+      integer(ESMF_KIND_I4), dimension(:),   pointer :: srcGatheredMask
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: foundCount, srcLocalMask
-      integer(ESMF_KIND_I4), dimension(:), pointer :: srcGatheredMask
-      real(ESMF_KIND_R8), dimension(:), pointer :: srcGatheredCoordX, &
-                                                   srcGatheredCoordY
+      real(ESMF_KIND_R8), dimension(:),   pointer :: srcGatheredCoordX, &
+                                                     srcGatheredCoordY
       real(ESMF_KIND_R8), dimension(:,:), pointer :: srcLocalCoordX, &
                                                      srcLocalCoordY
       real(ESMF_KIND_R8), dimension(:,:), pointer :: dstLocalCoordX, &
@@ -160,6 +159,7 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! nullify pointers
       nullify(srcUserMask, dstUserMask, found)
       nullify(foundCount, srcLocalMask, srcGatheredMask)
       nullify(srcGatheredCoordX, srcGatheredCoordY)
@@ -178,7 +178,7 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! Set name and field pointers
+      ! Set name and array pointers
       call ESMF_RegridSet(tempRegrid, srcArray=srcArray, dstArray=dstArray, &
                           method = ESMF_REGRID_METHOD_BILINEAR, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -280,11 +280,12 @@
    !              information locally to calculate the regrid weights
 
       route = ESMF_RegridRouteConstruct(dataRank, srcGrid, dstGrid, &
-                         recvDomainList, parentVM, &
-                         srcArray=srcArray, srcDataMap=srcDataMap, &
-                         dstArray=dstArray, dstDataMap=dstDataMap, &
-                         hasSrcData=hasSrcData, hasDstData=hasDstData, &
-                         total=.false., rc=localrc)
+                                        recvDomainList, parentVM, &
+                                        srcArray=srcArray, srcDataMap=srcDataMap, &
+                                        dstArray=dstArray, dstDataMap=dstDataMap, &
+                                        hasSrcData=hasSrcData, &
+                                        hasDstData=hasDstData, &
+                                        total=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -294,20 +295,21 @@
       ! just do this to get a recDomainList with the right rank -- could be
       ! different using arrays
       tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
-                             recvDomainList, parentVM, &
-                             srcDataMap=srcDataMap, dstDataMap=dstDataMap, &
-                             hasSrcData=hasSrcData, hasDstData=hasDstData, &
-                             reorder=.false., total=.false., rc=localrc)
+                                            recvDomainList, parentVM, &
+                                            srcDataMap=srcDataMap, dstDataMap=dstDataMap, &
+                                            hasSrcData=hasSrcData, hasDstData=hasDstData, &
+                                            reorder=.false., total=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! but this is the one we want to use for gathering grid data
       tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
-                             recvDomainListTot, parentVM, &
-                             srcDataMap=srcDataMap, dstDataMap=dstDataMap, &
-                             hasSrcData=hasSrcData, hasDstData=hasDstData, &
-                             reorder=.false., total=.true., rc=localrc)
+                                            recvDomainListTot, parentVM, &
+                                            srcDataMap=srcDataMap, dstDataMap=dstDataMap, &
+                                            hasSrcData=hasSrcData, hasDstData=hasDstData, &
+                                            reorder=.false., total=.true., layer=.true., &
+                                            rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -360,6 +362,7 @@
       !  for bilinear interpolation.  eventually the addlinks routine should
       !  grow the arrays internally.
       size = ((dstCounts(1)*dstCounts(2)) + 1) * 4
+
       ! Create a Transform Values object
       tv = ESMF_TransformValuesCreate(size, rc)
 
@@ -414,12 +417,12 @@
                      - recvDomainList%domains(i)%ai(1)%min + 1
         srcSizeYComp = recvDomainList%domains(i)%ai(2)%max &
                      - recvDomainList%domains(i)%ai(2)%min + 1
-        stopComp  = startComp + srcSizeXComp*srcSizeYComp - 1
-        srcSizeX = recvDomainListTot%domains(i)%ai(1)%max &
-                 - recvDomainListTot%domains(i)%ai(1)%min + 1
-        srcSizeY = recvDomainListTot%domains(i)%ai(2)%max &
-                 - recvDomainListTot%domains(i)%ai(2)%min + 1
-        stop  = start + srcSizeX*srcSizeY - 1
+        stopComp     = startComp + srcSizeXComp*srcSizeYComp - 1
+        srcSizeX     = recvDomainListTot%domains(i)%ai(1)%max &
+                     - recvDomainListTot%domains(i)%ai(1)%min + 1
+        srcSizeY     = recvDomainListTot%domains(i)%ai(2)%max &
+                     - recvDomainListTot%domains(i)%ai(2)%min + 1
+        stop         = start + srcSizeX*srcSizeY - 1
         call ESMF_RegridBilinearSearch(tv, recvDomainListTot%domains(i), &
                                        coordSystem, srcSizeX, srcSizeY, &
                                        startComp-1, srcSizeXComp, &
@@ -433,7 +436,7 @@
                                        srcGatheredMask(start:stop), &
                                        srcUserMask(start:stop), dstUserMask, &
                                        localrc)
-        start = stop + 1 
+        start     = stop     + 1 
         startComp = stopComp + 1 
       enddo 
 
@@ -652,6 +655,7 @@
             
         ! only perform interpolation on un-masked and un-found points
         if (dstUserMask(i,j) .and. (.not.found(i,j))) then
+
           ! for this destination point, look for the proper neighbor cells in the
           ! source grid 
     5     search_loop: do jjj = jStrt,jeSrc

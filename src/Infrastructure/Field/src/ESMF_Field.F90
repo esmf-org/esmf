@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.200 2005/01/10 22:10:09 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.200.2.1 2005/05/09 21:35:43 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.200 2005/01/10 22:10:09 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.200.2.1 2005/05/09 21:35:43 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -4967,37 +4967,21 @@
 !EOPI
 
       integer :: status                           ! Error status
-      integer :: my_DE, my_dst_DE, my_src_DE, gridrank
-      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: dst_min, dst_max
-      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: src_min, src_max
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: myAI
-      type(ESMF_DELayout) :: parentDElayout, srcDElayout, dstDElayout
-      type(ESMF_FieldType) :: stypep, dtypep      ! field type info
+      type(ESMF_DELayout) :: parentDElayout, srcDElayout
       type(ESMF_Grid) :: srcGrid, dstGrid
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
-      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc 
+      type(ESMF_RelLoc) :: dstHorzRelLoc, dstVertRelLoc, &
+                           srcHorzRelLoc, srcVertRelLoc
       type(ESMF_VM) :: vm
 
       ! Initialize return code
       if (present(rc)) rc = ESMF_FAILURE
 
-      stypep = srcField%ftypep
-      dtypep = dstField%ftypep
-
-      ! Our DE number in the parent layout  TODO: for now, just use one of the
-      !                                           grid layouts.  In the future,
-      !                                           there will be proxy grids on all
-      !                                           DEs of the coupler layout and a
-      !                                           different method for determining
-      !                                           if my_DE is part of a layout
-      call ESMF_GridGet(stypep%grid, delayout=parentDElayout, rc=status)
-      call ESMF_DELayoutGet(parentDElayout, localDE=my_DE, rc=status)
+      ! TODO: replace this with a better way to get the current VM
+      call ESMF_GridGet(srcField%ftypep%grid, delayout=parentDElayout, rc=status)
       call ESMF_DELayoutGetVM(parentDElayout, vm, rc=status)
-
-      ! TODO: we need not only to know if this DE has data in the field,
-      !   but also the de id for both src & dest fields
 
       ! This routine is called on every processor in the parent layout.
       !  It is quite possible that the source and destination fields do
@@ -5005,29 +4989,24 @@
       !  we do not go lower than this on the processors which are uninvolved
       !  in this communication.
 
-      ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
-      call ESMF_GridGet(stypep%grid, delayout=srcDElayout, rc=status)
-  !jw    call ESMF_DELayoutGetDEExists(parentDElayout, my_DE, srcDElayout, hasdata)
       hassrcdata = (hasdata .eq. ESMF_TRUE)
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
-        ! don't ask for our de number if this de isn't part of the layout
-        call ESMF_DELayoutGet(srcDElayout, localDE=my_src_DE, rc=status)
-        call ESMF_GridGet(stypep%grid, distDimCount=gridrank, rc=status)
-        call ESMF_FieldGet(srcField, horzRelloc=horzRelLoc, &
-                           vertRelloc=vertRelLoc, rc=rc)
-        call ESMF_GridGetDELocalAI(stypep%grid, myAI(1:gridrank), horzRelLoc, &
-                                   vertRelLoc=vertRelLoc, rc=status)
+        call ESMF_FieldGet(srcField, horzRelloc=srcHorzRelLoc, &
+                           vertRelloc=srcVertRelLoc, grid=srcGrid, rc=rc)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
-      ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
-      call ESMF_GridGet(dtypep%grid, delayout=dstDElayout, rc=status)
-   !jw   call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
       hasdstdata = (hasdata .eq. ESMF_TRUE)
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
-        ! don't ask for our de number if this de isn't part of the layout
-        call ESMF_DELayoutGet(dstDElayout, localDE=my_dst_DE, rc=status)
+        call ESMF_FieldGet(dstField, horzRelloc=dstHorzRelLoc, &
+                           vertRelloc=dstVertRelLoc, grid=dstGrid, rc=rc)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       ! if neither are true this DE cannot be involved in the communication
@@ -5039,43 +5018,16 @@
 
       ! if src field exists on this DE, query it for information
       if (hassrcdata) then
-        ! Query the datamap and set info for grid so it knows how to
-        ! match up the array indices and the grid indices.
-        call ESMF_FieldGet(srcField, grid=srcGrid, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
         ! From the grid get the bounding box on this DE
-        call ESMF_FieldGet(srcField, horzRelloc=horzRelLoc, &
-                           vertRelloc=vertRelLoc, rc=rc)
-        call ESMF_GridGetDELocalInfo(srcGrid, &
-                                     horzRelLoc=horzRelLoc, &
-                                     vertRelLoc=vertRelLoc, &
-                                     minLocalCoordPerDim=src_min, &
-                                     maxLocalCoordPerDim=src_max, rc=status)
-        call ESMF_GridBoxIntersectSend(srcGrid, dstGrid, src_min, src_max, &
-                                       myAI, sendDomainList, rc=status)
+        call ESMF_GridBoxIntersectSend(srcGrid, dstGrid, sendDomainList, &
+                                       total=.false., layer=.false., rc=status)
       endif
 
       ! if dst field exists on this DE, query it for information
       if (hasdstdata) then
-        ! Query the datamap and set info for grid so it knows how to
-        ! match up the array indices and the grid indices.
-        call ESMF_FieldGet(dstField, grid=dstGrid, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-        ! From the grid get the bounding box on this DE
-        call ESMF_FieldGet(dstField, horzRelloc=horzRelLoc, &
-                           vertRelloc=vertRelLoc, rc=rc)
-        call ESMF_GridGetDELocalInfo(dstGrid, &
-                                     horzRelLoc=horzRelLoc, &
-                                     vertRelLoc=vertRelLoc, &
-                                     minLocalCoordPerDim=dst_min, &
-                                     maxLocalCoordPerDim=dst_max, rc=status)
-        call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, vm, dst_min, dst_max, &
-                                       recvDomainList, hasdstdata, hassrcdata, &
-                                       rc=status)
+        call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, vm, recvDomainList, &
+                                       hasdstdata, hassrcdata, &
+                                       total=.false., layer=.false., rc=status)
       endif
 
       if  (present(rc)) rc = ESMF_SUCCESS
