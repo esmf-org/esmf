@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.217 2005/04/29 19:03:36 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.218 2005/05/09 20:51:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.217 2005/04/29 19:03:36 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.218 2005/05/09 20:51:31 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -4727,7 +4727,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, parentVM, &
-                                           domainList, hasDstData, hasSrcData, &
+                                           domainList, hasSrcData, hasDstData, &
                                            total, layer, &
                                            srcrelloc, dstrelloc, rc)
 !
@@ -4736,8 +4736,8 @@
       type(ESMF_Grid) :: dstGrid
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_DomainList), intent(inout) :: domainList
-      logical, intent(in) :: hasDstData
       logical, intent(in) :: hasSrcData
+      logical, intent(in) :: hasDstData
       logical, intent(in) :: total
       logical, intent(in) :: layer
       type(ESMF_RelLoc), intent(in), optional :: srcrelloc
@@ -4745,10 +4745,12 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     This routine computes the DomainList necessary to cover a given "box"
-!     described by an array of min/max's.  This routine is for the case of
-!     a DE that is part of a destination Grid determining which DEs it will
-!     receive data from.
+!     This routine computes the DomainList that must be received in order to
+!     cover the de-local "boxes" of a destination Grid.  This routine is for the
+!     case of a DE that is part of a destination Grid determining which DEs it
+!     will receive data from.  All PETs that are part of either the source or
+!     destination DELayouts must call this routine, due to some necessary
+!     global communication calls.
 !
 !     The arguments are:
 !     \begin{description}
@@ -4758,15 +4760,27 @@
 !     \item[dstGrid]
 !          Destination {\tt ESMF\_Grid} to use to calculate the resulting
 !          {\tt ESMF\_DomainList}.
+!     \item[parentVM]
+!          {\tt ESMF\_VM} covering the union of the source and destination
+!          Grids.
 !     \item[domainList]
 !          Resulting {\tt ESMF\_DomainList} containing the set of
 !          {\tt ESMF\_Domains} necessary to cover the box.
+!     \item[hasSrcData]
+!          Logical flag to indicate whether or not the local PET has data
+!          on the source Grid.
+!     \item[hasDstData]
+!          Logical flag to indicate whether or not the local PET has data
+!          on the destination Grid.
 !     \item[total]
 !          If TRUE, return DomainLists based on the total coordinates including
 !          internally generated boundary cells. If FALSE, return DomainLists
 !          based on the computational cells (which is what the user will be
 !          expecting).
 !     \item[layer]
+!          Logical flag to indicate the domainList should add an extra layer
+!          of cells, which in necessary for some regridding algorithms in
+!          some situations.
 !     \item[{[srcrelloc]}]
 !          Optional argument to set the relative location of the source
 !          subGrid for all searches.  The default is ESMF_CELL_CENTER.
@@ -4809,7 +4823,7 @@
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridBoxIntersectRecv(srcGrid, dstGrid, parentVM, &
-                                         domainList, hasDstData, hasSrcData, &
+                                         domainList, hasSrcData, hasDstData, &
                                          total, layer, &
                                          srcrelloc, dstrelloc, localrc)
 
@@ -4871,10 +4885,11 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     This routine computes the DomainList necessary to cover a given "box"
-!     described by an array of min/max's.  This routine is for the case of
-!     a DE that is part of a source Grid determining which DEs it will send
-!     its data to.
+!     This routine computes the DomainList that must be sent in order to cover
+!     the de-local "boxes" of a destination Grid.  This routine is for the case
+!     of a DE that is part of a source Grid determining which DEs it will send
+!     its data to.  This routine should not be called if this PET does not
+!     have any source data.
 !
 !     The arguments are:
 !     \begin{description}
@@ -4893,6 +4908,9 @@
 !          based on the computational cells (which is what the user will be
 !          expecting).
 !     \item[layer]
+!          Logical flag to indicate the domainList should add an extra layer
+!          of cells, which in necessary for some regridding algorithms in
+!          some situations.
 !     \item[{[srcrelloc]}]
 !          Optional argument to set the relative location of the source
 !          subGrid for all searches.  The default is ESMF_CELL_CENTER.
