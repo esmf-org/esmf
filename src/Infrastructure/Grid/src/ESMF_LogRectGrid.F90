@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.137 2005/04/29 19:05:27 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.138 2005/05/09 20:52:05 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -126,7 +126,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.137 2005/04/29 19:05:27 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.138 2005/05/09 20:52:05 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -8400,9 +8400,9 @@
 ! !IROUTINE: ESMF_LRGridBoxIntersectRecv - Determine a DomainList covering a box
 !
 ! !INTERFACE:
-      subroutine ESMF_LRGridBoxIntersectRecv(srcGrid, dstGrid, parentVM, &
-                                             domainList, &
-                                             hasDstData, hasSrcData, &
+      subroutine ESMF_LRGridBoxIntersectRecv(srcGrid, dstGrid, &
+                                             parentVM, domainList, &
+                                             hasSrcData, hasDstData, &
                                              total, layer, &
                                              srcRelloc, dstRelloc, rc)
 !
@@ -8411,8 +8411,8 @@
       type(ESMF_Grid) :: dstGrid
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_DomainList), intent(inout) :: domainList
-      logical, intent(in) :: hasDstData
       logical, intent(in) :: hasSrcData
+      logical, intent(in) :: hasDstData
       logical, intent(in) :: total
       logical, intent(in) :: layer
       type(ESMF_RelLoc), intent(in), optional :: srcRelloc
@@ -8420,19 +8420,33 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     This routine computes the DomainList necessary to cover a given "box"
-!     described by an array of min/max's.  This routine is for the case of
-!     a DE that is part of a destination Grid determining which DEs it will
-!     receive data from.
+!     This routine computes the DomainList that must be received in order to
+!     cover the de-local "boxes" of a destination Grid.  This routine is for the
+!     case of a DE that is part of a destination Grid determining which DEs it
+!     will receive data from.  All PETs that are part of either the source or
+!     destination DELayouts must call this routine, due to some necessary
+!     global communication calls.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid]
+!     \item[srcGrid]
 !          Source {\tt ESMF\_Grid} to use to calculate the resulting
 !          {\tt ESMF\_DomainList}.
+!     \item[dstGrid]
+!          Destination {\tt ESMF\_Grid} to use to calculate the resulting
+!          {\tt ESMF\_DomainList}.
+!     \item[parentVM]
+!          {\tt ESMF\_VM} covering the union of the source and destination
+!          Grids.
 !     \item[domainList]
 !          Resulting {\tt ESMF\_DomainList} containing the set of
 !          {\tt ESMF\_Domains} necessary to cover the box.
+!     \item[hasSrcData]
+!          Logical flag to indicate whether or not the local PET has data
+!          on the source Grid.
+!     \item[hasDstData]
+!          Logical flag to indicate whether or not the local PET has data
+!          on the destination Grid.
 !     \item[total]
 !          Logical flag to indicate the domainList should use total cells
 !          instead of computational cells.
@@ -8441,7 +8455,11 @@
 !          of cells, which in necessary for some regridding algorithms in
 !          some situations.
 !     \item[{[srcRelloc]}]
+!          Relative location of the source data.  The default value is
+!          ESMF_CELL_CENTER.
 !     \item[{[dstRelloc]}]
+!          Relative location of the destination data.  The default value is
+!          ESMF_CELL_CENTER.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8478,13 +8496,16 @@
       if (present(srcRelloc)) srcRellocUse = srcRelloc
       if (present(dstRelloc)) dstRellocUse = dstRelloc
 
+      ! allocate local min/max arrays to the rank of the dst Grid.
+      ! Must still do this even if this DE does not have any dst data for
+      ! use below, so set huge default values.
       call ESMF_LRGridGet(dstGrid, dimCount=rank, rc=localrc)
       allocate(localMinPerDim(rank), &
                localMaxPerDim(rank), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "min/max arrays", &
                                      ESMF_CONTEXT, rc)) return
-      localMinPerDim =  9876543.0d0
-      localMaxPerDim = -9876543.0d0
+      localMinPerDim =  9876543.0d0          ! TODO: use ESMF_Huge once it is
+      localMaxPerDim = -9876543.0d0          !       defined
 
       ! If this DE does not have any destination data, then there is nothing to
       ! receive.  However, it cannot simply return because it may be involved in
@@ -8553,9 +8574,11 @@
       ! minor efficiency adjustments) to gather.
       select case(domainOption)
 
-      ! whole domain from each overlapping DE
+      ! whole domain from each overlapping DE.  If there is an overlap, then use 
+      ! the entire local source domain for the domainList.
       case(0)
 
+        ! only PETs with destination data need to check for overlap
         if (hasDstData) then
 
           do j = 1,nDEs
@@ -8588,9 +8611,10 @@
         ! determine the right physgrid to look at in calls below
         call ESMF_GridGetPhysGridId(srcGrid%ptr, srcRellocUse, physId, localrc)
 
-        ! loop over PETs, which broadcast their minima and maxima.  All PETs
-        ! then search for those points in the intended physgrid and return the
-        ! row and column if found
+        ! loop over PETs in the parent VM, where the PET matching the loop
+        ! counter broadcasts its minima and maxima.  All PETs that have source
+        ! data then search for those points in the intended physgrid and return
+        ! the row and column if found.
         do j  = 1,nPETs
           localIndex = 0
           thisPET    = j - 1
@@ -8620,6 +8644,7 @@
                              rc=localrc)
         enddo
 
+        ! only PETs with destination data have to worry about a recv domainList
         if (hasDstData) then
 
           ! first get the appropriate layout
@@ -8646,8 +8671,7 @@
             ! in here only if an intersection is found
             if (hasMin .AND. hasMax) then
 
-              ! modify the gathered indices for bilinear regridding, which needs a layer
-              ! of cells around the coordinate arrays only  TODO: make a correct flag
+              ! modify the gathered indices with a layer of cells, if requested
               if (layer) then
                 globalMinIndex(i1  ) = globalMinIndex(i1  ) - 1
                 globalMinIndex(i1+1) = globalMinIndex(i1+1) - 1
@@ -8666,7 +8690,7 @@
 
               ! set AIs for the domainList.  Note that since we are looking for data
               ! to receive and being efficient, the AI corresponds only to the chunk
-              ! of data to transfer
+              ! of data to transfer.  That way, the data is packed as it is received.
               thisAI(1) = localAI(j,1)
               thisAI(2) = localAI(j,2)
               thisAI(1)%min = 1
@@ -8678,6 +8702,7 @@
 
               numDomains = numDomains + 1
 
+              ! load AI and information into the domainList
               domainList%domains(numDomains)%DE    = srcDE
               domainList%domains(numDomains)%rank  = rank
               domainList%domains(numDomains)%ai(1) = thisAI(1)
@@ -8735,6 +8760,7 @@
       !         src_DE_bbox(2) = src_DE_bbox(2) + lon_cycle
       !   endif ! Spherical coords
 
+      ! clean up
       deallocate(localMinPerDim, &
                  localMaxPerDim, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocating min/max arrays", &
@@ -8773,10 +8799,11 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     This routine computes the DomainList necessary to cover a given "box"
-!     described by an array of min/max's.  This routine is for the case of
-!     a DE that is part of a source Grid determining which DEs it will send
-!     its data to.
+!     This routine computes the DomainList that must be sent in order to cover
+!     the de-local "boxes" of a destination Grid.  This routine is for the case
+!     of a DE that is part of a source Grid determining which DEs it will send
+!     its data to.  This routine should not be called if this PET does not
+!     have any source data.
 !
 !     The arguments are:
 !     \begin{description}
@@ -8796,6 +8823,12 @@
 !          Logical flag to indicate the domainList should add an extra layer
 !          of cells, which in necessary for some regridding algorithms in
 !          some situations.
+!     \item[{[srcRelloc]}]
+!          Relative location of the source data.  The default value is
+!          ESMF_CELL_CENTER.
+!     \item[{[dstRelloc]}]
+!          Relative location of the destination data.  The default value is
+!          ESMF_CELL_CENTER.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8829,7 +8862,7 @@
       if (present(srcRelloc)) srcRellocUse = srcRelloc
       if (present(dstRelloc)) dstRellocUse = dstRelloc
 
-      ! get set of bounding boxes from the grid
+      ! get set of bounding boxes from the destination grid
       call ESMF_GridGetBoundingBoxes(dstGrid%ptr, array, localrc)
 
       ! get rank and counts from the bounding boxes array
@@ -8863,8 +8896,7 @@
       ! get pointer to the actual bounding boxes data
       call ESMF_LocalArrayGetData(array, boxes, rc=localrc)
 
-      ! loop through bounding boxes, looking for overlap with our "box"
-
+      ! loop through bounding boxes, looking for overlap with our "box".
       ! go through list of DEs to calculate the number of domains
       numDomains = 0
       do i = 1,nDEs
@@ -8875,6 +8907,7 @@
         numDomains = numDomains + 1
       enddo
 
+      ! create the domainList
       domainList = ESMF_DomainListCreate(numDomains)
 
       ! now fill in the domain list  TODO: only one loop instead of two, one that
@@ -8883,11 +8916,18 @@
       numDomains  = 0
       totalPoints = 0
 
+      ! branch on different domainOption, which is a more or less private used
+      ! to select the algorithm for deciding how much data from each DE will be
+      ! gathered.  If 0, then the entire domain of any DE overlapping this one
+      ! will be gathered.  If 1, then the framework will use a different set of
+      ! coding to identify the smallest logically rectangular domain (with some
+      ! minor efficiency adjustments) to gather.
       select case(domainOption)
 
       ! whole domain from each overlapping DE
       case(0)
 
+        ! loop over the DEs in the destination grid
         do j = 1,nDEs
           if ((localMinPerDim(1).gt.max(boxes(j,2,1),boxes(j,3,1))) .or. &
               (localMaxPerDim(1).lt.min(boxes(j,1,1),boxes(j,4,1))) .or. &
@@ -8908,15 +8948,20 @@
       !  reduced domain from each overlapping DE
       case(1)
 
+        ! allocate arrays to store intersection data, sized by the number of
+        ! DEs for the destination Grid and the rank, assumed to be two
         allocate(globalMinIndex(nDEs*2), &
                  globalMaxIndex(nDEs*2), stat=rc)
 
         ! determine the right physgrid to look at in calls below
         call ESMF_GridGetPhysGridId(srcGrid%ptr, srcRellocUse, physId, localrc)
 
+        ! loop over the DEs in the destination Grid
         do j  = 1,nDEs
           localIndex = 0
 
+          ! pick out min and max for each DE from its bounding box and search for
+          ! that point in my source Grid
           point(1) = min(boxes(j,1,1),boxes(j,4,1))
           point(2) = min(boxes(j,1,2),boxes(j,2,2))
           call ESMF_PhysGridSearchMyDERowCol(srcGrid%ptr%physGrids(physId), &
@@ -8951,8 +8996,7 @@
               hasMax = .true.
           if (hasMin .AND. hasMax) then
 
-            ! modify the gathered indices for bilinear regridding, which needs a layer
-            ! of cells around the coordinate arrays only  TODO: make a correct flag
+            ! modify the gathered indices with a layer of cells, if requested
             if (layer) then
               globalMinIndex(i1  ) = globalMinIndex(i1  ) - 1
               globalMinIndex(i1+1) = globalMinIndex(i1+1) - 1
@@ -8961,12 +9005,16 @@
 
             endif
 
-            thisAI(1) = myLocalAI(1)
-            thisAI(2) = myLocalAI(2)
-            thisAI(1)%min = globalMinIndex(i1)
-            thisAI(2)%min = globalMinIndex(i1+1)
-            thisAI(1)%max = globalMaxIndex(i1)
-            thisAI(2)%max = globalMaxIndex(i1+1)
+            ! load the appropriate information into thisAI, using the indices
+            ! calculated earlier for min and max and the local stride
+            thisAI(1)%min    = globalMinIndex(i1)
+            thisAI(2)%min    = globalMinIndex(i1+1)
+            thisAI(1)%max    = globalMaxIndex(i1)
+            thisAI(2)%max    = globalMaxIndex(i1+1)
+            thisAI(1)%stride = myLocalAI(1)%stride
+            thisAI(2)%stride = myLocalAI(2)%stride
+
+            ! add the AI and related information to the domainList
             numDomains = numDomains + 1
             domainList%domains(numDomains)%DE    = i-1  ! DEs start with 0
             domainList%domains(numDomains)%rank  = rank
@@ -9023,6 +9071,7 @@
       !         src_DE_bbox(2) = src_DE_bbox(2) + lon_cycle
       !   endif ! Spherical coords
 
+      ! clean up
       deallocate(localMaxPerDim, &
                  localMinPerDim, &
                      myGlobalAI, &
