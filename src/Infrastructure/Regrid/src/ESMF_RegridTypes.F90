@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.71 2005/04/29 19:12:25 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.72 2005/05/09 20:55:43 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -244,7 +244,6 @@
     public ESMF_RegridCreateEmpty     ! creates an empty regrid structure
     public ESMF_RegridConstructEmpty  ! constructs an empty regrid structure
     public ESMF_RegridDestruct        ! deallocate memory associated with a regrid
-    public ESMF_RegridDomainListAddLayer
     public ESMF_RegridIndexCreate     ! creates a RegridIndex structure
     public ESMF_RegridIndexDestroy    ! deallocate memory associated with a
                                       ! RegridIndex structure
@@ -256,7 +255,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.71 2005/04/29 19:12:25 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.72 2005/05/09 20:55:43 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -619,14 +618,12 @@
       if (present(hasDstData)) hasDstDataUse = hasDstData
 
       ! Extract some information for use in this regrid.
-      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcHorzRelLoc, &
-                                rc=localrc)
+      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcHorzRelLoc, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstHorzRelLoc, &
-                                rc=localrc)
+      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstHorzRelLoc, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1047,79 +1044,6 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RegridDomainListAddLayer"
-!BOPI
-! !IROUTINE: ESMF_RegridDomainListAddLayer - modify a DomainList to add a layer of cells
-
-! !INTERFACE:
-      subroutine ESMF_RegridDomainListAddLayer(option, nLayers, dimCount, &
-                                               domainList, rc)
-                                             
-!
-! !ARGUMENTS:
-      character(4), intent(in) :: option
-      integer, intent(in) :: nLayers
-      integer, intent(in) :: dimCount
-      type(ESMF_DomainList), intent(inout) :: domainList
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     ESMF routine which creates and initializes a regrid index structure.
-!     The structure is later filled with appropriate data in the routine
-!     addLink2D.  Intended for internal ESMF use only.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[srcCount]
-!          Size of the local source grid.
-!     \item[dstCount]
-!          2D array giving the size of the local destination grid.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS:
-
-      integer :: localrc
-      integer :: i, j
-      integer :: size, totalPoints
-      type(ESMF_AxisIndex), dimension(:), pointer :: thisAI
-
-      allocate(thisAI(dimCount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "dealloc AI arrays", &
-                                     ESMF_CONTEXT, rc)) return
-
-      totalPoints = 0
-      do i   = 1,domainList%num_domains
-        do j = 1,domainList%domains(i)%rank
-          thisAI(j) = domainList%domains(i)%ai(j)
-        enddo
-
-        ! modify thisAI by nLayers
-        size = 1
-        do j = 1,domainList%domains(i)%rank
-          thisAI(j)%min = thisAI(j)%min - nLayers
-          thisAI(j)%max = thisAI(j)%max + nLayers
-          if (option.eq.'recv') thisAI(j)%stride = thisAI(j)%stride + 2*nLayers
-          size = size * (thisAI(j)%max - thisAI(j)%min + 1)
-          domainList%domains(i)%ai(j) = thisAI(j)
-        enddo
-        totalPoints = totalPoints + size
-      enddo
-
-      domainList%total_points = totalPoints
-
-      deallocate(thisAI, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "dealloc AI arrays", &
-                                     ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_RegridDomainListAddLayer
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RegridDomainListModify"
 !BOPI
 ! !IROUTINE: ESMF_RegridDomainListModify - modify a DomainList from a Grid for an Array
@@ -1129,25 +1053,38 @@
                                              array, grid, dataMap, total, rc)
 !
 ! !ARGUMENTS:
-      character(4), intent(in) :: option
-      integer, intent(in) :: dimCount
-      type(ESMF_DomainList), intent(inout) :: domainList
-      type(ESMF_Array), intent(in) :: array
-      type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_FieldDataMap), intent(in) :: dataMap
-      logical, intent(in) :: total
-      integer, intent(out), optional :: rc
+      character(4),            intent(in   ) :: option
+      integer,                 intent(in   ) :: dimCount
+      type(ESMF_DomainList),   intent(inout) :: domainList
+      type(ESMF_Array),        intent(in   ) :: array
+      type(ESMF_Grid),         intent(in   ) :: grid
+      type(ESMF_FieldDataMap), intent(in   ) :: dataMap
+      logical,                 intent(in   ) :: total
+      integer,                 intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
-!     ESMF routine which creates and initializes a regrid index structure.
-!     The structure is later filled with appropriate data in the routine
-!     addLink2D.  Intended for internal ESMF use only.
+!     ESMF routine which modifies a regrid index structure, changing it from
+!     being Grid-based to Array-based.  This means adding in information for
+!     Array ranks that do not correspond to a Grid axis, and modifying the
+!     domainList for the Array's halo and lower bounds.  Intended for internal
+!     ESMF use only.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[srcCount]
-!          Size of the local source grid.
-!     \item[dstCount]
+!     \item[option]
+!          Character array of length four, indicating whether the domainList
+!          is for receiving or sending data.  Valid values are "recv" and "send".
+!     \item[dimCount]
+!          2D array giving the size of the local destination grid.
+!     \item[domainList]
+!          2D array giving the size of the local destination grid.
+!     \item[array]
+!          2D array giving the size of the local destination grid.
+!     \item[grid]
+!          2D array giving the size of the local destination grid.
+!     \item[dataMap]
+!          2D array giving the size of the local destination grid.
+!     \item[total]
 !          2D array giving the size of the local destination grid.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
