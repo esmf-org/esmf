@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.127 2005/03/29 19:34:47 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.128 2005/05/09 22:58:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -175,7 +175,7 @@
          logical            :: isdel, esdel
          integer            :: status
 
-! gjt - I added this new member at the end as to not desturb the above order
+! gjt - I added this new member at the end as to not disturb the above order
          type(ESMF_ContextFlag) :: contextflag    ! contextflag
 
       end type
@@ -258,7 +258,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.127 2005/03/29 19:34:47 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.128 2005/05/09 22:58:34 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -415,6 +415,45 @@ end function
 
         ! component type
         compp%ctype = ctype
+
+        ! set initial values for the derived type members, so if they
+        ! do not get set later they have known initial values.
+        compp%this = ESMF_NULL_POINTER
+        compp%base%this = ESMF_NULL_POINTER
+        compp%compstatus = ESMF_STATUS_INVALID 
+        compp%ctype = ESMF_COMPTYPE_GRID
+        ! type(ESMF_Config) compp%config              ! configuration object
+        ! type(ESMF_Clock) compp%clock                ! private component clock
+        compp%configFile = "uninitialized"
+        compp%dirPath = "uninitialized"
+        compp%grid%ptr => NULL()
+        compp%npetlist = 0
+        ! type(ESMF_GridCompType) compp%gridcomptype
+        compp%parent => NULL()
+        ! type(ESMF_CWrap)   compp%compw
+        ! type(ESMF_VM)      compp%vm
+        ! type(ESMF_VM)      compp%vm_parent
+        compp%petlist => NULL()
+        ! type(ESMF_VMPlan)  compp%vmplan
+        compp%vm_info = ESMF_NULL_POINTER
+        compp%vm_cargo = ESMF_NULL_POINTER
+        compp%is%statep => NULL()
+        compp%es%statep => NULL()
+        compp%multiphaseinit = .FALSE.
+        compp%initphasecount = 0
+        compp%multiphaserun = .FALSE.
+        compp%runphasecount = 0 
+        compp%multiphasefinal = .FALSE.
+        compp%finalphasecount = 0 
+        compp%vm_released = .FALSE.
+
+        compp%isdel = .FALSE.
+        compp%esdel = .FALSE.
+        compp%status = 0
+
+        compp%contextflag = ESMF_CHILD_IN_NEW_VM
+
+        ! now continue with rest of normal initialization.
 
         ! initialize base class, including component name
         call ESMF_BaseCreate(compp%base, "Component", name, 0, status)
