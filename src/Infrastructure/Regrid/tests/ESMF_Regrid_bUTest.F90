@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid_bUTest.F90,v 1.6 2005/04/14 19:23:19 svasquez Exp $
+! $Id: ESMF_Regrid_bUTest.F90,v 1.7 2005/05/11 19:44:34 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_Regrid_bUTest.F90,v 1.6 2005/04/14 19:23:19 svasquez Exp $'
+      '$Id: ESMF_Regrid_bUTest.F90,v 1.7 2005/05/11 19:44:34 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     integer :: lrc,iFunction
@@ -89,7 +89,7 @@
    !EX_UTest
    !Test for function, f=x, decomp = (npets)
     iFunction = 1
-    iDistr = 3
+    iDistr = 2
     sub_rc=ESMF_SUCCESS
     write(failMsg, *) "Error in regrid"
     write(name, *) "Regrid f=x, and decomp=(npets)"
