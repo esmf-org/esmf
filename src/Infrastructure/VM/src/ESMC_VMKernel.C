@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.39 2005/04/05 23:44:10 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.40 2005/05/13 18:05:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -3070,6 +3070,37 @@ void ESMC_VMK::vmk_gather(void *in, void *out, int len, int root){
       // all other PETs send their chunk
       vmk_send(in, len, root);
     }
+  }
+}
+
+
+void ESMC_VMK::vmk_allgather(void *in, void *out, int len){
+  if (mpionly){
+    MPI_Allgather(in, len, MPI_BYTE, out, len, MPI_BYTE, mpi_c);
+  }else{
+    // This is a very simplistic, probably very bad peformance implementation.
+    int root = 0; // arbitrary root, 0 always exists!
+    if (mypet==root){
+      // I am root -> receive chunks from all other PETs
+      char *rootout = (char *)out;
+      for (int i=0; i<root; i++){
+        vmk_recv(rootout, len, i);
+        rootout += len;
+      }
+      // memcpy root's chunk
+      memcpy(rootout, in, len);
+      rootout += len;
+      // keep sending chunks
+      for (int i=root+1; i<npets; i++){
+        vmk_recv(rootout, len, i);
+        rootout += len;
+      }
+    }else{
+      // all other PETs send their chunk
+      vmk_send(in, len, root);
+    }
+    // now broadcast root's out to all other PETs
+    vmk_broadcast(out, len, root);
   }
 }
 

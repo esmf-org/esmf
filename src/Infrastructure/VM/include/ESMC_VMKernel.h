@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.17 2005/03/22 03:55:51 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.18 2005/05/13 18:05:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -219,6 +219,7 @@ class ESMC_VMK{
       vmOp op);
     void vmk_scatter(void *in, void *out, int len, int root);
     void vmk_gather(void *in, void *out, int len, int root);
+    void vmk_allgather(void *in, void *out, int len);
     void vmk_broadcast(void *data, int len, int root);
 
     void vmk_wait(vmk_commhandle **commhandle);

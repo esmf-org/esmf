@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.59 2005/04/05 23:52:53 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.60 2005/05/13 18:05:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -134,6 +134,7 @@ module ESMF_VMMod
 
 ! - ESMF-public methods:
   public ESMF_VMAllFullReduce
+  public ESMF_VMAllGather
   public ESMF_VMAllReduce
   public ESMF_VMBarrier
   public ESMF_VMBroadcast
@@ -175,7 +176,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.59 2005/04/05 23:52:53 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.60 2005/05/13 18:05:43 theurich Exp $'
 
 !==============================================================================
 
@@ -201,6 +202,26 @@ module ESMF_VMMod
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMAllFullReduce} functions.   
+!EOPI 
+      end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMAllGather -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMAllGather
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMAllGatherI4
+      module procedure ESMF_VMAllGatherR4
+      module procedure ESMF_VMAllGatherR8
+      module procedure ESMF_VMAllGatherLogical
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMAllGather} functions.   
 !EOPI 
       end interface
 
@@ -617,6 +638,346 @@ module ESMF_VMMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMAllFullReduceR8
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllGatherI4()"
+!BOP
+! !IROUTINE: ESMF_VMAllGather - AllGather 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllGather()
+  subroutine ESMF_VMAllGatherI4(vm, sendData, recvData, count, &
+    blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)
+    integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)
+    integer,                  intent(in)              :: count
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that gathers contigous data 
+!   of kind {\tt ESMF\_KIND\_I4} from all PETs of an {\tt ESMF\_VM} object 
+!   into an array on all PETs.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contigous data arry holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[recvData] 
+!        Contigous data array for data to be received. All PETs must specify a
+!        valid {\tt recvData} argument.
+!   \item[count] 
+!        Number of elements to be gathered from each PET. Must be the
+!        same on all PETs.
+!   \item[{[blockingflag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             Block until local operation has completed. 
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commhandle]}]
+!        A communication handle will be returned in case of a non-blocking
+!        request (see argument {\tt blockingflag}).
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: size
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Flag not implemented features
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)
+        return
+      endif
+    endif
+
+    size = count * 4 ! 4 bytes
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMAllGatherI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllGatherR4()"
+!BOP
+! !IROUTINE: ESMF_VMAllGather - AllGather 4-byte reals
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllGather()
+  subroutine ESMF_VMAllGatherR4(vm, sendData, recvData, count, &
+    blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    real(ESMF_KIND_R4),       intent(in)              :: sendData(:)
+    real(ESMF_KIND_R4),       intent(out)             :: recvData(:)
+    integer,                  intent(in)              :: count
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that gathers contigous data 
+!   of kind {\tt ESMF\_KIND\_R4} from all PETs of an {\tt ESMF\_VM} object 
+!   into an array on all PETs.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contigous data arry holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[recvData] 
+!        Contigous data array for data to be received. All PETs must specify a
+!        valid {\tt recvData} argument.
+!   \item[count] 
+!        Number of elements to be gathered from each PET. Must be the
+!        same on all PETs.
+!   \item[{[blockingflag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             Block until local operation has completed. 
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commhandle]}]
+!        A communication handle will be returned in case of a non-blocking
+!        request (see argument {\tt blockingflag}).
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: size
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Flag not implemented features
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)
+        return
+      endif
+    endif
+
+    size = count * 4 ! 4 bytes
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMAllGatherR4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllGatherR8()"
+!BOP
+! !IROUTINE: ESMF_VMAllGather - AllGather 8-byte reals
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllGather()
+  subroutine ESMF_VMAllGatherR8(vm, sendData, recvData, count, &
+    blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    real(ESMF_KIND_R8),       intent(in)              :: sendData(:)
+    real(ESMF_KIND_R8),       intent(out)             :: recvData(:)
+    integer,                  intent(in)              :: count
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that gathers contigous data 
+!   of kind {\tt ESMF\_KIND\_R8} from all PETs of an {\tt ESMF\_VM} object 
+!   into an array on all PETs.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contigous data arry holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[recvData] 
+!        Contigous data array for data to be received. All PETs must specify a
+!        valid {\tt recvData} argument.
+!   \item[count] 
+!        Number of elements to be gathered from each PET. Must be the
+!        same on all PETs.
+!   \item[{[blockingflag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             Block until local operation has completed. 
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commhandle]}]
+!        A communication handle will be returned in case of a non-blocking
+!        request (see argument {\tt blockingflag}).
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: size
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Flag not implemented features
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)
+        return
+      endif
+    endif
+
+    size = count * 8 ! 8 bytes
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMAllGatherR8
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllGatherLogical()"
+!BOP
+! !IROUTINE: ESMF_VMAllGather - AllGather ESMF_Logical
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllGather()
+  subroutine ESMF_VMAllGatherLogical(vm, sendData, recvData, count, &
+    blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    type(ESMF_Logical),       intent(in)              :: sendData(:)
+    type(ESMF_Logical),       intent(out)             :: recvData(:)
+    integer,                  intent(in)              :: count
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that gathers contigous data 
+!   of kind {\tt ESMF\_Logical} from all PETs of an {\tt ESMF\_VM} object 
+!   into an array on all PETs.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contigous data arry holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[recvData] 
+!        Contigous data array for data to be received. All PETs must specify a
+!        valid {\tt recvData} argument.
+!   \item[count] 
+!        Number of elements to be gathered from each PET. Must be the
+!        same on all PETs.
+!   \item[{[blockingflag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             Block until local operation has completed. 
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commhandle]}]
+!        A communication handle will be returned in case of a non-blocking
+!        request (see argument {\tt blockingflag}).
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: size
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Flag not implemented features
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)
+        return
+      endif
+    endif
+
+    size = count * 4 ! 4 bytes
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMAllGatherLogical
 !------------------------------------------------------------------------------
 
 

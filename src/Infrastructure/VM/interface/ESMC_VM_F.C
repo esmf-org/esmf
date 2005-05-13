@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.38 2005/04/05 23:52:03 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.39 2005/05/13 18:05:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -69,6 +69,14 @@ extern "C" {
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"Unknown data type.", rc))
       return;
     (*vm)->vmk_allglobalreduce(input, output, *count, vmt, (vmOp)(*op));
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+  }
+
+  void FTN(c_esmc_vmallgather)(ESMC_VM **vm, void *input, void *output, 
+    int *size, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmallgather()"
+    (*vm)->vmk_allgather(input, output, *size);
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
