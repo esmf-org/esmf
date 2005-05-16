@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2005/04/12 16:52:46 nscollins Exp $ 
+# $Id: makefile,v 1.9 2005/05/16 23:04:12 nscollins Exp $ 
 
 ALL:  build_unit_tests
 
@@ -15,16 +15,13 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/LocalArray/tests
 
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest \
-		$(ESMF_TESTDIR)/ESMF_ArrayDataUTest \
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayDataUTest \
 		$(ESMF_TESTDIR)/ESMF_LocalArrayUTest 
 
-TESTS_RUN     = RUN_ESMF_ArrayF90PtrUTest \
-		RUN_ESMF_ArrayDataUTest \
+TESTS_RUN     = RUN_ESMF_ArrayDataUTest \
 		RUN_ESMF_LocalArrayUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_ArrayF90PtrUTestUNI \
-		RUN_ESMF_ArrayDataUTestUNI \
+TESTS_RUN_UNI = RUN_ESMF_ArrayDataUTestUNI \
 		RUN_ESMF_LocalArrayUTestUNI
 
 
@@ -38,18 +35,6 @@ CLEANFILES  = $(TESTS_BUILD) TestArrayData
 CLOBBERDIRS =
 
 
-#
-#  ESMF_ArrayF90PtrUTest
-#
-RUN_ESMF_ArrayF90PtrUTest:
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest > $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest.stdout
-	-cat *ArrayF90PtrUTest.Log > $(ESMC_TESTDIR)/ESMF_ArrayF90PtrUTest.Log
-	-rm *ArrayF90PtrUTest.Log
-
-RUN_ESMF_ArrayF90PtrUTestUNI:
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest > $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest.stdout
-	-cat *ArrayF90PtrUTest.Log > $(ESMC_TESTDIR)/ESMF_ArrayF90PtrUTest.Log
-	-rm *ArrayF90PtrUTest.Log
 
 #
 #  ESMF_ArrayDataUTest
