@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2005/05/16 22:16:23 nscollins Exp $ 
+# $Id: makefile,v 1.2 2005/05/16 22:35:35 nscollins Exp $ 
 
 ALL:  build_unit_tests
 
@@ -15,7 +15,7 @@ LIBBASE	  =
 LOCDIR	  = src/prologue/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_StringUTest \
-                $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTestUNI
+                $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest
 
 TESTS_RUN     = RUN_ESMF_StringUTest \
                 RUN_ESMF_ArrayF90PtrUTest
