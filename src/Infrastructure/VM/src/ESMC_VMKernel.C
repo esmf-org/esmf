@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.40 2005/05/13 18:05:43 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.41 2005/05/17 17:04:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -270,7 +270,10 @@ void ESMC_VMK::vmk_init(void){
   pth_mutex2 = new pthread_mutex_t;
   pthread_mutex_init(pth_mutex2, NULL);
   // the mutex flag must be reset
-  mpi_mutex_flag = 0;
+  if (mpi_thread_level<MPI_THREAD_MULTIPLE)
+    mpi_mutex_flag = 1; // must use muteces around mpi comms
+  else
+    mpi_mutex_flag = 0; // don't need to use muteces around mpi comms
   // set up the communication array
   commarray = new comminfo*[npets];
   for (int i=0; i<npets; i++){
@@ -363,7 +366,8 @@ void ESMC_VMK::vmk_abort(void){
 void ESMC_VMK::vmk_construct(int mypet, pthread_t pthid, int npets, int *lpid,
   int *pid, int *tid, int *ncpet, int **cid, MPI_Group mpi_g, 
   MPI_Comm mpi_c, pthread_mutex_t *pth_mutex2, pthread_mutex_t *pth_mutex, 
-  int *pth_finish_count, comminfo **commarray, int pref_intra_ssi){
+  int *pth_finish_count, comminfo **commarray, int pref_intra_ssi,
+  int nothreadsflag){
   // fill an already existing ESMC_VMK object with info
   this->mypet=mypet;
   this->mypthid=pthid;
@@ -387,7 +391,7 @@ void ESMC_VMK::vmk_construct(int mypet, pthread_t pthid, int npets, int *lpid,
   this->pth_mutex2 = pth_mutex2;
   this->pth_mutex = pth_mutex;
   this->pth_finish_count = pth_finish_count;
-  if (vmk_nthreads(mypet)>1 && mpi_thread_level<MPI_THREAD_MULTIPLE)
+  if (mpi_thread_level<MPI_THREAD_MULTIPLE)
     this->mpi_mutex_flag = 1; // must use muteces around mpi comms
   else
     this->mpi_mutex_flag = 0; // don't need to use muteces around mpi comms
@@ -467,6 +471,7 @@ void ESMC_VMK::vmk_construct(int mypet, pthread_t pthid, int npets, int *lpid,
   for (int i=0; i<npets; i++)
     if (this->tid[i]>0) this->mpionly=0;    // found multi-threading PET
 #endif
+  this->nothreadsflag = nothreadsflag;
   // need a barrier here before any of the PETs get into user code...
   //vmk_barrier();
 }
@@ -578,6 +583,7 @@ struct vmk_spawn_arg{
   int **cid;
   MPI_Group mpi_g;
   MPI_Comm mpi_c;
+  int nothreadsflag;
   // shared memory variables
   pthread_mutex_t *pth_mutex2;
   pthread_mutex_t *pth_mutex;
@@ -614,7 +620,7 @@ static void *vmk_spawn(void *arg){
   vm->vmk_construct(sarg->mypet, sarg->pthid, sarg->npets, sarg->lpid, 
     sarg->pid, sarg->tid, sarg->ncpet, sarg->cid, sarg->mpi_g, sarg->mpi_c,
     sarg->pth_mutex2, sarg->pth_mutex, sarg->pth_finish_count,
-    sarg->commarray, sarg->pref_intra_ssi);
+    sarg->commarray, sarg->pref_intra_ssi, sarg->nothreadsflag);
   // note: The VM above must be constructed _before_ back-sync'ing #2 to
   //       vmkt_create in order to assure that the entries in the VM are valid!
   // now use vmkt features to prepare for catch/release loop (back-sync)
@@ -1322,6 +1328,8 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
     sarg[i].pref_intra_ssi = vmp->pref_intra_ssi;
     // cargo
     sarg[i].cargo = cargo;
+    // threading stuff
+    sarg[i].nothreadsflag = vmp->nothreadflag;
     if (vmp->nothreadflag){
       // for a VM that is not thread-based the VM can already be constructed
       // obtain reference to the vm instance on heap
@@ -1331,7 +1339,8 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
       vm.vmk_construct(sarg[0].mypet, sarg[0].pthid, sarg[0].npets,
         sarg[0].lpid, sarg[0].pid, sarg[0].tid, sarg[0].ncpet, sarg[0].cid,
         sarg[0].mpi_g, sarg[0].mpi_c, sarg[0].pth_mutex2, sarg[0].pth_mutex,
-        sarg[0].pth_finish_count, sarg[0].commarray, sarg[0].pref_intra_ssi);
+        sarg[0].pth_finish_count, sarg[0].commarray, sarg[0].pref_intra_ssi,
+        sarg[0].nothreadsflag);
     }else{
       // if this is a thread-based VM then...
       // ...finally spawn threads from this pet...
@@ -1523,6 +1532,8 @@ void ESMC_VMK::vmk_print(void){
   printf("MPI_Comm_size: %d\n", size);
   printf("MPI thread level support: %d\n", mpi_thread_level);
   printf("mpi_mutex_flag: %d\n", mpi_mutex_flag);
+  printf("mpionly: %d\n", mpionly);
+  printf("nothreadsflag: %d\n", nothreadsflag);
   for (int i=0; i<npets; i++){
     printf("  lpid[%d]=%d, pid[%d]=%d, tid[%d]=%d, ncpet[%d]=%d",
       i, lpid[i], i, pid[i], i, tid[i], i, ncpet[i]);

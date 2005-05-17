@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.18 2005/05/13 18:05:43 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.19 2005/05/17 17:04:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -126,6 +126,7 @@ class ESMC_VMK{
     int **cid;      // core id of the cores this pet references
     // general information about this ESMC_VMK
     int mpionly;    // 0: there is multi-threading, 1: MPI-only
+    int nothreadsflag; // 0-threaded VM, 1-non-threaded VM
     // MPI communication handles for MPI processes associated with this ESMC_VMK
     MPI_Group mpi_g;
     MPI_Comm mpi_c;
@@ -172,7 +173,8 @@ class ESMC_VMK{
     void vmk_construct(int mypet, pthread_t pthid, int npets, int *lpid, 
       int *pid, int *tid, int *ncpet, int **cid, MPI_Group mpi_g, 
       MPI_Comm mpi_c, pthread_mutex_t *pth_mutex2, pthread_mutex_t *pth_mutex,
-      int *pth_finish_count, comminfo **commarray, int pref_intra_ssi);
+      int *pth_finish_count, comminfo **commarray, int pref_intra_ssi,
+      int nothreadsflag);
       // fill an already existing ESMC_VMK object with info
     void vmk_destruct(void);
       // free allocations within an existing ESMC_VMK object
