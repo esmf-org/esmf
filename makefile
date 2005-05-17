@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.65 2005/04/20 22:34:35 nscollins Exp $
+# $Id: makefile,v 1.66 2005/05/17 16:15:30 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -78,6 +78,8 @@ script_info:
 	-@echo "ESMF_SITE: $(ESMF_SITE)"
 	-@echo "ESMF_EXHAUSTIVE: $(ESMF_EXHAUSTIVE)"
 	-@echo "ESMF_PTHREADS: $(ESMF_PTHREADS)"
+	-@if [ -n "$(ESMF_TESTWITHTHREADS)" ] ; then \
+	  echo "ESMF_TESTWITHTHREADS: $(ESMF_TESTWITHTHREADS)" ; fi
 	-@if [ -n "$(ESMF_NO_IOCODE)" ] ; then \
 	  echo "ESMF_NO_IOCODE: $(ESMF_NO_IOCODE)" ; fi
 	-@echo " "
