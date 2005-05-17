@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.17 2005/05/06 20:01:57 nscollins Exp $
+%  $Id: ESMF_builddetail.tex,v 1.18 2005/05/17 20:29:45 theurich Exp $
 
 
 \subsection{Make System}
@@ -182,6 +182,10 @@ platforms even a pthreads-{\em disabled} version of the ESMF library will
 need to be linked against a functioning Pthreads library. In those cases
 this dependency originates from the used compiler or the MPI
 implementation.)
+
+\item[ESMF\_TESTWITHTHREADS]
+
+If this environment variable is set to {\tt ON} {\em before} the ESMF system tests are build they will activate ESMF threading in their code. Specifically each component will be executed using ESMF single threading instead of the default non-threaded mode. The difference between non-threaded and ESMF single threaded execution should be completely transparent. Notice that the setting of {\tt ESMF\_TESTWITHTHREADS} does {\em not} alter ESMF's dependency on Pthreads but tests ESMF threading features during the system tests. An ESMF library that was compiled with disabled Pthread features (via the {\tt ESMF\_PTHREADS} variable) will produce ESMF error messages during system test execution if the system tests were compiled with {\tt ESMF\_TESTWITHTHREADS} set to {\tt ON}.
 
 \item[ESMF\_SITE]
 

@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.46 2005/05/06 20:10:39 nscollins Exp $
+% $Id: ESMF_install.tex,v 1.47 2005/05/17 20:29:45 theurich Exp $
 
 %\section{Installing and Building the ESMF}
 \subsection{ESMF Download Options}
@@ -147,6 +147,10 @@ If not set, then the value of default is assumed.
 When including platform-specific files, this value is used as the
 third part of the directory name (parts 1 and 2 are the
 ESMF\_ARCH value and ESMF\_COMPILER value, respectively.)
+
+\item[ESMF\_TESTWITHTHREADS]
+
+If this environment variable is set to {\tt ON} {\em before} the ESMF system tests are build they will activate ESMF threading in their code. Specifically each component will be executed using ESMF single threading instead of the default non-threaded mode. The difference between non-threaded and ESMF single threaded execution should be completely transparent. Notice that the setting of {\tt ESMF\_TESTWITHTHREADS} does {\em not} alter ESMF's dependency on Pthreads but tests ESMF threading features during the system tests. An ESMF library that was compiled with disabled Pthread features (via the {\tt ESMF\_PTHREADS} variable) will produce ESMF error messages during system test execution if the system tests were compiled with {\tt ESMF\_TESTWITHTHREADS} set to {\tt ON}.
 
 \end{description}
 
