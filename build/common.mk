@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.122 2005/05/04 17:15:53 nscollins Exp $
+#  $Id: common.mk,v 1.123 2005/05/17 16:01:42 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -117,6 +117,13 @@ endif
 ifneq ($(ESMF_PTHREADS),ON)
 export ESMF_PTHREADS = OFF
 endif
+
+
+# If not set, the default for TESTWITHTHREADS is OFF
+ifndef ESMF_TESTWITHTHREADS
+export ESMF_TESTWITHTHREADS = OFF
+endif
+
 
 
 # if PREC not already set, default to 64.  architectures which
@@ -437,6 +444,12 @@ CPPFLAGS       += -DESMF_NO_PTHREADS
 endif
 # this is needed even if compiling with pthreads on
 EXTRA_INCLUDES += -I$(ESMF_DIR)/src/Infrastructure/stubs/pthread
+
+
+ifeq ($(ESMF_TESTWITHTHREADS),ON)
+CPPFLAGS       += -DESMF_TESTWITHTHREADS
+endif
+
 
 # TODO:  does this actually get used?   seems not.  leave it here until
 # we are sure it is not needed, and then remove it.    (or put in cases
