@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.8 2005/02/28 17:02:49 nscollins Exp $
+! $Id: user_coupler.F90,v 1.9 2005/05/17 18:22:05 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -47,6 +47,15 @@
                                      ESMF_SINGLEPHASE, rc)
 
       print *, "Registered Initialize, Run, and Finalize routines"
+
+#ifdef ESMF_TESTWITHTHREADS
+        ! The following call will turn on ESMF-threading (single threaded)
+        ! for this component. If you are using this file as a template for 
+        ! your own code development you probably don't want to include the 
+        ! following call unless you are interested in exploring ESMF's 
+        ! threading features.
+        call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
+#endif
 
       rc = ESMF_SUCCESS
 

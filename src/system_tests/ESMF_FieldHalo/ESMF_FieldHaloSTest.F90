@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.36 2005/02/14 04:06:58 theurich Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.37 2005/05/17 18:22:03 theurich Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -193,6 +193,15 @@
                                                           ESMF_SINGLEPHASE, rc)
       if (rc .ne. ESMF_SUCCESS) return
   
+#ifdef ESMF_TESTWITHTHREADS
+        ! The following call will turn on ESMF-threading (single threaded)
+        ! for this component. If you are using this file as a template for 
+        ! your own code development you probably don't want to include the 
+        ! following call unless you are interested in exploring ESMF's 
+        ! threading features.
+        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+#endif
+
       rc = ESMF_SUCCESS
 
     end subroutine setserv

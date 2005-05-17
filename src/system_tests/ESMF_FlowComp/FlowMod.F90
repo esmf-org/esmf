@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.15 2004/06/21 19:38:36 theurich Exp $
+! $Id: FlowMod.F90,v 1.16 2005/05/17 18:22:06 theurich Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -42,6 +42,15 @@
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, User1_Final, 0, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
+
+#ifdef ESMF_TESTWITHTHREADS
+        ! The following call will turn on ESMF-threading (single threaded)
+        ! for this component. If you are using this file as a template for 
+        ! your own code development you probably don't want to include the 
+        ! following call unless you are interested in exploring ESMF's 
+        ! threading features.
+        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+#endif
 
         rc = ESMF_SUCCESS
 
