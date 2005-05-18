@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid2UTest.F90,v 1.1.2.3 2005/05/18 21:16:29 svasquez Exp $
+! $Id: ESMF_Regrid2UTest.F90,v 1.1.2.4 2005/05/18 21:33:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_Regrid2UTest.F90,v 1.1.2.3 2005/05/18 21:16:29 svasquez Exp $'
+      '$Id: ESMF_Regrid2UTest.F90,v 1.1.2.4 2005/05/18 21:33:04 svasquez Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -249,6 +249,7 @@
 !EOC
 
    !===========================
+    !NEX_UTest_Multi_Proc_Only
     !Get a pointer to the data in the destination field
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
     write(name, *) "Getting a pointer to the destination field"
