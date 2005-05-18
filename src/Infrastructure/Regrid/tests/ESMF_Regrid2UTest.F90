@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid2UTest.F90,v 1.1.2.1 2005/05/18 20:30:06 jwolfe Exp $
+! $Id: ESMF_Regrid2UTest.F90,v 1.1.2.2 2005/05/18 20:53:28 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_Regrid2UTest.F90,v 1.1.2.1 2005/05/18 20:30:06 jwolfe Exp $'
+      '$Id: ESMF_Regrid2UTest.F90,v 1.1.2.2 2005/05/18 20:53:28 svasquez Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -168,6 +168,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
    !===========================
+    !NEX_UTest
     !NEX_UTest
     !get the actual values of the x and y coordinate arrays
     write(failMsg, *) "Did not return ESMF_SUCCESS"
