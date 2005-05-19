@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.123 2005/05/17 16:01:42 theurich Exp $
+#  $Id: common.mk,v 1.124 2005/05/19 22:50:36 jwolfe Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1783,6 +1783,7 @@ endif
 # i went ahead and added the mod dir to the rules but if this causes problems
 # it should be removed.  it was not here originally and had been this way
 # a long time.
+# TODO more: add CXXFLAGS
 
 .F90.o:
 	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
