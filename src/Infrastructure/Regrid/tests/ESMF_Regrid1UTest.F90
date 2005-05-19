@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid1UTest.F90,v 1.3.2.2 2005/05/12 16:08:40 svasquez Exp $
+! $Id: ESMF_Regrid1UTest.F90,v 1.3.2.3 2005/05/19 20:08:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_Regrid1UTest.F90,v 1.3.2.2 2005/05/12 16:08:40 svasquez Exp $'
+      '$Id: ESMF_Regrid1UTest.F90,v 1.3.2.3 2005/05/19 20:08:04 svasquez Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -97,7 +97,7 @@
     mincoords = (/  0.0,  0.0 /)
     maxcoords = (/ 20.0, 30.0 /)
    !===========================
-    !NEX_UTest
+    !NEX_UTest_Multi_Proc_Only
     !Test source grid creation
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating source grid"
@@ -108,7 +108,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
    !===========================
-    !NEX_UTest
+    !NEX_UTest_Multi_Proc_Only
     !Test source grid creation
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Distributing source grid"
@@ -116,7 +116,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
    !===========================
-    !NEX_UTest
+    !NEX_UTest_Multi_Proc_Only
     ! Create with similar grid coordinates, but different layout
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating destination grid"
@@ -127,7 +127,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
    !===========================
-    !NEX_UTest
+    !NEX_UTest_Multi_Proc_Only
     !Test source grid creation
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Distributing destination grid"
@@ -135,7 +135,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
    !===========================
-    !NEX_UTest
+    !NEX_UTest_Multi_Proc_Only
     !Test specifications setting for the field array
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Setting array specifications"
@@ -143,7 +143,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
    !===========================
-    !NEX_UTest
+    !NEX_UTest_Multi_Proc_Only
     ! allow for a halo width of 3, let field create data space
     halo = 3
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -153,7 +153,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
                                 
    !===========================
-    !NEX_UTest
+    !NEX_UTest_Multi_Proc_Only
     ! get a fortran pointer to the data spacd
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting a pointer to the source field"
@@ -161,7 +161,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     
    !===========================
-    !NEX_UTest
+    !NEX_UTest_Multi_Proc_Only
     !get the cell-centeredcoordinates of the source grid
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting the c-c coordinate ESMF array of the source grid"
@@ -170,7 +170,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
    !===========================
-    !NEX_UTest
+    !NEX_UTest_Multi_Proc_Only
     !get the actual values of the x coordinate array 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting the actual values of the ESMF x coordinate array"
@@ -189,7 +189,7 @@
     enddo
 
    !===========================
-    !NEX_UTest
+    !NEX_UTest_Multi_Proc_Only
     !create the destination field
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
     write(name, *) "Creating the destination field"
@@ -215,7 +215,7 @@
 !BOC
 
    !===========================
-    !NEX_UTest
+    !NEX_UTest_Multi_Proc_Only
     !create a Route Handle
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
     write(name, *) "Creating a Route Handle"
@@ -225,7 +225,7 @@
 
 !BOC
    !===========================
-    !NEX_UTest
+    !NEX_UTest_Multi_Proc_Only
     !Do all the calculations in preparation for the actual re-gridding
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
     write(name, *) "Do and Store all the Regrid calcuations"
@@ -237,7 +237,7 @@
 
 !BOC
    !===========================
-    !NEX_UTest
+    !NEX_UTest_Multi_Proc_Only
     !Regrid
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
     write(name, *) "Regrid"
@@ -246,7 +246,7 @@
 !EOC
 
    !===========================
-    !NEX_UTest
+    !NEX_UTest_Multi_Proc_Only
     !Get a pointer to the data in the destination field
     write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
     write(name, *) "Getting a pointer to the destination field"
@@ -270,7 +270,7 @@
      end do
    end do
    !---------------------------------------------------------------
-   !NEX_UTest
+   !NEX_UTest_Multi_Proc_Only
    !Test Regrid for simple re-distribution operation
     write(failMsg, *) "Error in regrid --simple redistribution"
     write(name, *) "Regrid test"
