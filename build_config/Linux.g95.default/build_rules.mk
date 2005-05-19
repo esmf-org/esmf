@@ -1,19 +1,14 @@
-# $Id: build_rules.mk,v 1.2 2005/04/22 22:24:37 nscollins Exp $
+# $Id: build_rules.mk,v 1.3 2005/05/19 22:48:16 jwolfe Exp $
 #
 #  Linux.g95.default
 #  T. Wainwright, April 2005, based on Linux.pgi.default
 #  updated by nancy collins, after massive makefile updates
 #
 
-
-# Make sure ESMF_PREC is set to 32, until g95 supports 64 bit platforms.
-ESMF_PREC = 32
-
 # these have not been tested.
 ifeq ($(ESMF_COMM),lam)
 # with lam-mpi installed:
 MPI_LIB        += -lmpi -llam
-THREAD_LIB     = -lpthread
 endif
 
 ifeq ($(ESMF_COMM),mpich)
@@ -23,6 +18,7 @@ MPI_INCLUDE    += -DESMF_MPICH
 MPIRUN         += $(ESMF_NODES)
 endif
 
+THREAD_LIB     = -lpthread
 
 #
 # compilers or mpich wrappers
@@ -35,7 +31,8 @@ endif
 
 ifeq ($(ESMF_COMM),mpich)
 C_CC    	= mpicc
-C_CXX   	= mpiCC
+# MPICH_IGNORE_CXX_SEEK is workaround for MPI-2 bug (see MPICH2 docs)
+C_CXX   	= mpiCC -DMPICH_IGNORE_CXX_SEEK
 C_FC    	= mpif90
 endif
 
@@ -44,6 +41,10 @@ C_CXXV		= ${C_CXX} -dumpversion
 C_FCV           = ${C_FC} -dumpversion
 
 FFLAGS          = -fno-second-underscore
+ifeq ($(ESMF_PREC),64)
+CFLAGS         += -march=k8 -m64 -mcmodel=medium
+FFLAGS         += -march=k8 -m64 -mcmodel=medium
+endif
 F_FREECPP       = -cpp -ffree-form
 F_FIXCPP        = -cpp -ffixed-form
 F_FREENOCPP     = -ffree-form
@@ -51,11 +52,10 @@ F_FIXNOCPP      = -ffixed-form
 
 
 C_F90CXXLIBS    = -lrt -lc -lstdc++
-C_CXXF90LIBS    = -lrt -lf95
+C_CXXF90LIBS    = -lrt -lf95 -lstdc++
 
 
-
-PARCH		   = linux_g95
+PARCH	        = linux_g95
 
 SL_LIBS_TO_MAKE = 
 
