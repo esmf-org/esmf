@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.124 2005/05/19 22:50:36 jwolfe Exp $
+#  $Id: common.mk,v 1.125 2005/05/20 16:51:26 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -199,7 +199,7 @@ SHELL		   = /bin/sh
 C_FC_MOD           = -I
 C_CLINKER          = $(C_CXX)
 C_FLINKER          = $(C_FC)
-C_LINKOPTS         = -L$(ESMF_LIBDIR)
+C_LINKOPTS         = 
 C_SLFLAG           = -Wl,-rpath,
 
 # TODO: make sure this has actually been fixed correctly.  the current problem
