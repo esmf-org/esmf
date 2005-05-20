@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.38 2005/05/03 18:04:23 nscollins Exp $
+# $Id: build_rules.mk,v 1.39 2005/05/20 16:48:23 nscollins Exp $
 #
 # Linux.intel.default
 #
@@ -39,11 +39,9 @@ endif
 # mpirun executable are installed in the dirs normally searched by the
 # compiler/loader you do not have to set anything.  If installed in a 
 # nonstandard place, set MPI_HOME to the location where the include, lib, 
-# and bin subdirs will be found.   plus, lam required pthreads here.
+# and bin subdirs will be found. 
 ifeq ($(ESMF_COMM),lam)
 MPI_LIB        += -llamf77mpi -lmpi -llam 
-# lam requires pthreads
-THREAD_LIB     = -lpthread
 endif
 
 # This section is set up for vendor supplied MPI (e.g. SGI Altix).
@@ -83,6 +81,9 @@ MPI_LIB        += -lmpich
 MPIRUN         += $(ESMF_NODES)
 endif
 
+
+# name of the lib which includes the posix thread support.
+THREAD_LIB     = -lpthread
 
 #
 # ################## Compilers, Linkers, and Loaders ########################

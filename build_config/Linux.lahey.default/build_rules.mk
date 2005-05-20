@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.15 2005/04/11 18:00:58 nscollins Exp $
+# $Id: build_rules.mk,v 1.16 2005/05/20 16:48:23 nscollins Exp $
 #
 # Linux.lahey.default
 #
@@ -44,8 +44,6 @@ endif
 ifeq ($(ESMF_COMM),lam)
 # with lam-mpi installed in MPI_HOME or /usr/local:
 MPI_LIB        += -lmpi -llam
-# lam needs pthreads
-THREAD_LIB      = -lpthread
 endif
 
 ifeq ($(ESMF_COMM),mpich)
@@ -54,6 +52,9 @@ MPI_INCLUDE    += -DESMF_MPICH=1
 MPI_LIB        += -lmpich
 MPIRUN         +=  $(ESMF_NODES)
 endif
+
+# name of the lib which includes the posix thread support.
+THREAD_LIB     = -lpthread
 
 
 ############################################################

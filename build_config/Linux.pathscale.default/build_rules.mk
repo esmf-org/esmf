@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.4 2005/04/22 22:26:54 nscollins Exp $
+#  $Id: build_rules.mk,v 1.5 2005/05/20 16:48:23 nscollins Exp $
 
 #
 #  Linux.pathscale.default makefile
@@ -38,7 +38,6 @@ endif
 ifeq ($(ESMF_COMM),lam)
 # with lam-mpi installed:
 MPI_LIB        += -lmpi -llam 
-THREAD_LIB     = -lpthread
 endif
 
 ifeq ($(ESMF_COMM),mpich)
@@ -48,7 +47,11 @@ MPI_INCLUDE    += -DESMF_MPICH
 MPIRUN         += $(ESMF_NODES)
 endif
 
+# name of the lib which includes the posix thread support.
+THREAD_LIB     = -lpthread
 
+
+############################################################
 # compilers
 
 ifneq ($(ESMF_COMM),mpich)

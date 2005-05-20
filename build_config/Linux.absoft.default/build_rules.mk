@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.19 2005/04/20 21:26:17 nscollins Exp $
+#  $Id: build_rules.mk,v 1.20 2005/05/20 16:48:23 nscollins Exp $
 #
 #  Linux.absoft.default makefile fragment
 #
@@ -58,6 +58,9 @@ MPI_INCLUDE    += -DESMF_MPICH
 MPI_LIB        += -lmpich
 MPIRUN         += $(ESMF_NODES)
 endif
+
+# name of the lib which includes the posix thread support.
+THREAD_LIB     = -lpthread
 
 
 ############################################################

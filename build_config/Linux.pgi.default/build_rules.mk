@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.22 2005/04/12 15:12:09 nscollins Exp $
+# $Id: build_rules.mk,v 1.23 2005/05/20 16:48:24 nscollins Exp $
 #
 #  Linux.pgi.default
 #
@@ -37,7 +37,6 @@ endif
 ifeq ($(ESMF_COMM),lam)
 # this section is set up for LAM mpi
 MPI_LIB        += -lmpi -llam
-THREAD_LIB     = -lpthread
 endif
 
 # for mpich: if your system sets either MPI_HOME or MPICH to the location of
@@ -57,6 +56,9 @@ MPI_INCLUDE    += -DESMF_MPICH=1
 MPI_LIB        += -lpmpich++ -lmpich
 MPIRUN         += $(ESMF_NODES)
 endif
+
+# name of the lib which includes the posix thread support.
+THREAD_LIB     = -lpthread
 
 # compilers
 #

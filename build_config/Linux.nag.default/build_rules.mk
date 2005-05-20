@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.23 2005/04/22 20:37:19 nscollins Exp $
+#  $Id: build_rules.mk,v 1.24 2005/05/20 16:48:23 nscollins Exp $
 #
 #  Linux.nag.default.mk
 #
@@ -33,7 +33,6 @@ endif
 # HDF_LIB          = -L/usr/local/lib/ -lmfhdf -ldf -ljpeg -lz
 # BLAS_INCLUDE     = 
 # BLAS_LIB         = -latlas
-
 #
 ############################################################
 
@@ -45,7 +44,6 @@ endif
 ifeq ($(ESMF_COMM),lam)
 # with lam-mpi installed:
 MPI_LIB        += -lmpi -llam 
-THREAD_LIB     = -lpthread
 endif
 
 ifeq ($(ESMF_COMM),mpich)
@@ -54,6 +52,10 @@ MPI_INCLUDE    += -DESMF_MPICH=1
 MPIRUN         += $(ESMF_NODES)
 endif
 
+# name of the lib which includes the posix thread support.
+THREAD_LIB     = -lpthread
+
+############################################################
 
 # compilers
 ifeq ($(ESMF_COMM),mpich)
