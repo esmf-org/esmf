@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.27 2005/05/03 18:04:24 nscollins Exp $
+#  $Id: build_rules.mk,v 1.28 2005/05/20 16:46:46 nscollins Exp $
 #
 #  OSF1.default.default
 #
@@ -46,7 +46,25 @@ ifndef MPI_HOME
 MPI_HOME         = /usr/opt/mpi
 endif
 
+ifeq ($(ESMF_COMM),mpi)
 MPI_LIB          += -lmpi
+endif
+
+ifeq ($(ESMF_COMM),lam)
+# with lam-mpi installed:
+MPI_LIB        += -lmpi -llam
+endif
+
+ifeq ($(ESMF_COMM),mpich)
+# with mpich installed:
+MPI_INCLUDE    += -DESMF_MPICH
+MPI_LIB        += -lmpich
+MPIRUN         += $(ESMF_NODES)
+endif
+
+# name of the lib which includes the posix thread support.
+THREAD_LIB     = -lpthread
+
 
 # on halem we provide a system-specific job submission script, but if the user
 # has already set it, do not overwrite the value of MPIRUN.
@@ -88,6 +106,7 @@ F_FIXNOCPP              = -extend_source
 #
 # compilers and flags
 #
+ifneq ($(ESMF_COMM),mpich)
 C_CC		= cc
 C_CXX		= cxx -x cxx
 C_FC		= f90
@@ -95,6 +114,19 @@ C_FC		= f90
 C_CCV		= $(C_CC) -V
 C_CXXV  	= $(C_CXX) -V
 C_FCV		= $(C_FC) -version
+endif
+
+ifeq ($(ESMF_COMM),mpich)
+C_CC            = mpicc
+C_CXX           = mpiCC 
+C_FC            = mpif90
+
+C_CCV		= $(C_CC) --version
+C_CXXV  	= $(C_CXX) --version
+C_FCV		= $(C_FC) --version
+endif
+
+
 
 
 G_CFLAGS	+= -assume gfullpath
