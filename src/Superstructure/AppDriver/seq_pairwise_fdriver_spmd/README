@@ -7,7 +7,8 @@ computational node (SPMD).
 
 To compile as-is for testing, run 'gmake' in this directory.
 The resulting skeleton and driver files should produce an executable
-which can be run and will print out messages during each stage of execution.
+which can be run and will output messages to the log describing
+each stage of execution.
 
 
 To use these files as a basis for a real application begin by copying

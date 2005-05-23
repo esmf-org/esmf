@@ -58,7 +58,8 @@
 
     ! Variables related to grid and clock
     integer :: i_max, j_max
-    real(ESMF_KIND_I8) :: x_min, x_max, y_min, y_max
+    real(ESMF_KIND_R4) :: x_min4, x_max4, y_min4, y_max4
+    real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
 
     ! Return codes for error checks
     integer :: rc
@@ -93,10 +94,10 @@
     !
     call ESMF_ConfigGetAttribute(config, i_max, 'I Counts:', default=20, rc=rc)
     call ESMF_ConfigGetAttribute(config, j_max, 'J Counts:', default=80, rc=rc)
-    call ESMF_ConfigGetAttribute(config, x_min, 'X Min:', default=0.0, rc=rc)
-    call ESMF_ConfigGetAttribute(config, y_min, 'Y Min:', default=-180.0, rc=rc)
-    call ESMF_ConfigGetAttribute(config, x_max, 'X Max:', default=90.0, rc=rc)
-    call ESMF_ConfigGetAttribute(config, y_max, 'Y Max:', default=180.0, rc=rc)
+    call ESMF_ConfigGetAttribute(config, x_min4, 'X Min:', default=0.0, rc=rc)
+    call ESMF_ConfigGetAttribute(config, y_min4, 'Y Min:', default=-180.0, rc=rc)
+    call ESMF_ConfigGetAttribute(config, x_max4, 'X Max:', default=90.0, rc=rc)
+    call ESMF_ConfigGetAttribute(config, y_max4, 'Y Max:', default=180.0, rc=rc)
 
 !!------------------------------------------------------------------------------
 !!------------------------------------------------------------------------------
@@ -146,6 +147,10 @@
       ! Same with the grid.  Get a default layout based on the VM.
       defaultlayout = ESMF_DELayoutCreate(defaultvm, rc=rc)
 
+      x_min = x_min4
+      y_min = y_min4
+      x_max = x_max4
+      y_max = y_max4
       grid = ESMF_GridCreateHorzXYUni(counts=(/i_max, j_max/), &
                              minGlobalCoordPerDim=(/x_min, y_min/), &
                              maxGlobalCoordPerDim=(/x_max, y_max/), &

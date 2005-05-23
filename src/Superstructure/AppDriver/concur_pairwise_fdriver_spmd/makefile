@@ -1,18 +1,8 @@
-# $Id: makefile,v 1.2 2005/03/01 21:05:45 nscollins Exp $ 
+# $Id: makefile,v 1.3 2005/05/23 17:00:42 nscollins Exp $ 
 
 # by default, this makefile builds the executable named "Application"
 ALL:  executable
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Superstructure/AppDriver/concur_pairwise_fdriver_spmd
 
 # this includes all the ESMF definitions that we use below.
@@ -35,16 +25,15 @@ APPOBJS = CplCompTemplate.o GridComp1Template.o GridComp2Template.o \
 
 # build the executable.
 executable: $(APPOBJS)
-	-$(SL_F_LINKER) -o Application $(APPOBJS) -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
-	${RM} -f $(CLEANFILES)
+	$(FLINKER) $(LINKOPTS) -o Application $(APPOBJS) $(FLINKLIBS)
 
 # run the executable in parallel.
 run:  Application
-	-${MPIRUN} -np 4 ./Application
+	${MPIRUN} -np 4 ./Application
 
 # run only a single copy.
 rununi: Application
-	-${MPIRUN} -np 1 ./Application
+	${MPIRUN} -np 1 ./Application
 
 
 # files to be deleted when cleaning up.
