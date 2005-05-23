@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.85 2005/05/09 20:54:57 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.86 2005/05/23 23:49:28 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.85 2005/05/09 20:54:57 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.86 2005/05/23 23:49:28 jwolfe Exp $'
 
 !==============================================================================
 
@@ -897,7 +897,7 @@
             endif
             if (srcUserMask(ip1,jjj) .and. (srcGridMask(ip1,jjj).eq.0)) then
               dstAdd(d1) = i   + dstIndexMod(1)
-              dstAdd(d2) = j   + dstIndexMod(1)
+              dstAdd(d2) = j   + dstIndexMod(2)
               srcTmp(s1) = ip1 + srcIndexMod(1)
               srcTmp(s2) = jjj + srcIndexMod(2)
               srcAdd     = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
@@ -905,7 +905,7 @@
             endif
             if (srcUserMask(ip1,jp1) .and. (srcGridMask(ip1,jp1).eq.0)) then
               dstAdd(d1) = i   + dstIndexMod(1)
-              dstAdd(d2) = j   + dstIndexMod(1)
+              dstAdd(d2) = j   + dstIndexMod(2)
               srcTmp(s1) = ip1 + srcIndexMod(1)
               srcTmp(s2) = jp1 + srcIndexMod(2)
               srcAdd     = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
@@ -913,7 +913,7 @@
             endif
             if (srcUserMask(iii,jp1) .and. (srcGridMask(iii,jp1).eq.0)) then
               dstAdd(d1) = i   + dstIndexMod(1)
-              dstAdd(d2) = j   + dstIndexMod(1)
+              dstAdd(d2) = j   + dstIndexMod(2)
               srcTmp(s1) = iii + srcIndexMod(1)
               srcTmp(s2) = jp1 + srcIndexMod(2)
               srcAdd     = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
