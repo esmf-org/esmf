@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.77 2005/04/02 00:17:16 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.78 2005/05/23 19:23:46 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -142,7 +142,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.77 2005/04/02 00:17:16 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.78 2005/05/23 19:23:46 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -470,7 +470,7 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ClockIsLeapYear - Determine if given year is a leap year
+! !IROUTINE: ESMF_CalendarIsLeapYear - Determine if given year is a leap year
 !
 ! !INTERFACE:
       interface ESMF_CalendarIsLeapYear
@@ -506,7 +506,7 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ClockSetDefault - Set the default ESMF Calendar
+! !IROUTINE: ESMF_CalendarSetDefault - Set the default ESMF Calendar
 !
 ! !INTERFACE:
       interface ESMF_CalendarSetDefault
