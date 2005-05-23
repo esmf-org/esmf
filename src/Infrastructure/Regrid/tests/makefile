@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2005/04/12 16:52:46 nscollins Exp $
+# $Id: makefile,v 1.24 2005/05/23 17:26:51 svasquez Exp $
 
 ALL:  build_unit_tests
  
@@ -20,16 +20,19 @@ LOCDIR	  = src/Infrastructure/Regrid/tests
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_RegridUTest \
 		$(ESMF_TESTDIR)/ESMF_RegridOptionsUTest \
 		$(ESMF_TESTDIR)/ESMF_Regrid1UTest \
+		$(ESMF_TESTDIR)/ESMF_Regrid2UTest \
 		$(ESMF_TESTDIR)/ESMF_Regrid_bUTest
 
 TESTS_RUN     = RUN_ESMF_RegridUTest \
 		RUN_ESMF_RegridOptionsUTest \
 		RUN_ESMF_Regrid1UTest \
+		RUN_ESMF_Regrid2UTest \
 		RUN_ESMF_Regrid_bUTest
 
 TESTS_RUN_UNI = RUN_ESMF_RegridUTestUNI \
 	        RUN_ESMF_RegridOptionsUTestUNI \
 	        RUN_ESMF_Regrid1UTestUNI \
+	        RUN_ESMF_Regrid2UTestUNI \
 		RUN_ESMF_Regrid_bUTestUNI
 
 
@@ -82,6 +85,19 @@ RUN_ESMF_Regrid1UTestUNI:
 	-cat *Regrid1UTest.Log > $(ESMC_TESTDIR)/ESMF_Regrid1UTest.Log
 	-rm *Regrid1UTest.Log
 
+
+#
+#
+#
+RUN_ESMF_Regrid2UTest:
+	-${MPIRUN} -np 8 $(ESMF_TESTDIR)/ESMF_Regrid2UTest > $(ESMF_TESTDIR)/ESMF_Regrid2UTest.stdout
+	-cat *Regrid2UTest.Log > $(ESMC_TESTDIR)/ESMF_Regrid2UTest.Log
+	-rm *Regrid2UTest.Log
+
+RUN_ESMF_Regrid2UTestUNI:
+	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_Regrid2UTest > $(ESMF_TESTDIR)/ESMF_Regrid2UTest.stdout
+	-cat *Regrid2UTest.Log > $(ESMC_TESTDIR)/ESMF_Regrid2UTest.Log
+	-rm *Regrid2UTest.Log
 #
 #
 #
