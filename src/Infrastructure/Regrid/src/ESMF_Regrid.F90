@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.92 2005/02/28 21:57:57 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.93 2005/05/24 20:51:16 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.92 2005/02/28 21:57:57 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.93 2005/05/24 20:51:16 jwolfe Exp $'
 
 !==============================================================================
 
@@ -397,7 +397,7 @@
 !EOPI
 
       integer :: localrc
-      integer :: i, i2, n, d1, d2, s1, asize, rank, counts(ESMF_MAXDIM)
+      integer :: i, i1, i2, n, d1, d2, s1, asize, rank, counts(ESMF_MAXDIM)
       integer :: dstUndecomp, srcUndecomp, srcUndecompSize, srcStride
       integer :: di1, di2, dj1, dj2, dk1, dk2
       integer :: si1, si2, sj1, sj2, sk1, sk2
@@ -529,12 +529,13 @@
         if (srcUndecomp.eq.1 .and. dstUndecomp.eq.1) then
 
           !*** do the regrid
-          i2 = size(dstData3D,1)
+          i1 = lbound(dstData3D,1)
+          i2 = ubound(dstData3D,1)
           do n = 1,numlinks
             d1 = dstIndex((n-1)*2 + 1)
             d2 = dstIndex((n-1)*2 + 2)
             s1 = (srcIndex(n)-1)*i2        ! assumes i2 = srcUndecompSize
-            do i = 1,i2
+            do i = i1,i2
               dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
                                  + (gatheredData(s1+i) * weights(n))
             enddo
@@ -543,8 +544,9 @@
         elseif (srcUndecomp.eq.rank .and. dstUndecomp.eq.rank) then
 
           !*** do the regrid
-          i2 = size(dstData3D,rank)
-          do i = 1,i2
+          i1 = lbound(dstData3D,rank)
+          i2 = ubound(dstData3D,rank)
+          do i = i1,i2
             do n = 1,numlinks
               d1 = dstIndex((n-1)*2 + 1)
               d2 = dstIndex((n-1)*2 + 2)
@@ -557,8 +559,9 @@
         elseif (srcUndecomp.eq.1 .and. dstUndecomp.eq.rank) then
 
           !*** do the regrid
-          i2 = size(dstData3D,rank)
-          do i = 1,i2
+          i1 = lbound(dstData3D,rank)
+          i2 = ubound(dstData3D,rank)
+          do i = i1,i2
             do n = 1,numlinks
               d1 = dstIndex((n-1)*2 + 1)
               d2 = dstIndex((n-1)*2 + 2)
@@ -571,11 +574,12 @@
         elseif (srcUndecomp.eq.rank .and. dstUndecomp.eq.1) then
 
           !*** do the regrid
-          i2 = size(dstData3D,1)
+          i1 = lbound(dstData3D,1)
+          i2 = ubound(dstData3D,1)
           do n = 1,numlinks
             d1 = dstIndex((n-1)*2 + 1)
             d2 = dstIndex((n-1)*2 + 2)
-            do i = 1,i2
+            do i = i1,i2
               s1 = (i-1)*srcStride + srcIndex(n)
               dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
                                  + (gatheredData(s1) * weights(n))
@@ -588,8 +592,8 @@
           if (ESMF_LogMsgFoundAllocError(localrc, "Indexes", &
                                          ESMF_CONTEXT, rc)) return
           do n = 1,numlinks
-            dindex(1,1) = 1
-            dindex(1,2) = size(dstData3D,dstUndecomp)
+            dindex(1,1) = lbound(dstData3D,dstUndecomp)
+            dindex(1,2) = ubound(dstData3D,dstUndecomp)
             dindex(2,1) = dstIndex((n-1)*2 + 1)
             dindex(2,2) = dstIndex((n-1)*2 + 1)
             dindex(3,1) = dstIndex((n-1)*2 + 2)
@@ -673,7 +677,7 @@
 !EOPI
 
       integer :: localrc
-      integer :: i, i2, n, d1, d2, s1, asize, rank, counts(ESMF_MAXDIM)
+      integer :: i, i1, i2, n, d1, d2, s1, asize, rank, counts(ESMF_MAXDIM)
       integer :: dstUndecomp, srcUndecomp, srcUndecompSize, srcStride
       integer :: di1, di2, dj1, dj2, dk1, dk2
       integer :: si1, si2, sj1, sj2, sk1, sk2
@@ -812,12 +816,13 @@
         if (srcUndecomp.eq.1 .and. dstUndecomp.eq.1) then
 
           !*** do the regrid
-          i2 = size(dstData3D,1)
+          i1 = lbound(dstData3D,1)
+          i2 = ubound(dstData3D,1)
           do n = 1,numlinks
             d1 = dstIndex((n-1)*2 + 1)
             d2 = dstIndex((n-1)*2 + 2)
             s1 = (srcIndex(n)-1)*i2        ! assumes i2 = srcUndecompSize
-            do i = 1,i2
+            do i = i1,i2
               dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
                                  + (gatheredData(s1+i) * weights(n))
             enddo
@@ -826,8 +831,9 @@
         elseif (srcUndecomp.eq.rank .and. dstUndecomp.eq.rank) then
 
           !*** do the regrid
-          i2 = size(dstData3D,rank)
-          do i = 1,i2
+          i1 = lbound(dstData3D,rank)
+          i2 = ubound(dstData3D,rank)
+          do i = i1,i2
             do n = 1,numlinks
               d1 = dstIndex((n-1)*2 + 1)
               d2 = dstIndex((n-1)*2 + 2)
@@ -840,8 +846,9 @@
         elseif (srcUndecomp.eq.1 .and. dstUndecomp.eq.rank) then
 
           !*** do the regrid
-          i2 = size(dstData3D,rank)
-          do i = 1,i2
+          i1 = lbound(dstData3D,rank)
+          i2 = ubound(dstData3D,rank)
+          do i = i1,i2
             do n = 1,numlinks
               d1 = dstIndex((n-1)*2 + 1)
               d2 = dstIndex((n-1)*2 + 2)
@@ -854,11 +861,12 @@
         elseif (srcUndecomp.eq.rank .and. dstUndecomp.eq.1) then
 
           !*** do the regrid
-          i2 = size(dstData3D,1)
+          i1 = lbound(dstData3D,1)
+          i2 = ubound(dstData3D,1)
           do n = 1,numlinks
             d1 = dstIndex((n-1)*2 + 1)
             d2 = dstIndex((n-1)*2 + 2)
-            do i = 1,i2
+            do i = i1,i2
               s1 = (i-1)*srcStride + srcIndex(n)
               dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
                                  + (gatheredData(s1) * weights(n))
@@ -871,8 +879,8 @@
           if (ESMF_LogMsgFoundAllocError(localrc, "Indexes", &
                                          ESMF_CONTEXT, rc)) return
           do n = 1,numlinks
-            dindex(1,1) = 1
-            dindex(1,2) = size(dstData3D,dstUndecomp)
+            dindex(1,1) = lbound(dstData3D,dstUndecomp)
+            dindex(1,2) = ubound(dstData3D,dstUndecomp)
             dindex(2,1) = dstIndex((n-1)*2 + 1)
             dindex(2,2) = dstIndex((n-1)*2 + 1)
             dindex(3,1) = dstIndex((n-1)*2 + 2)
