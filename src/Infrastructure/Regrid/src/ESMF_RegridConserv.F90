@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.49 2005/02/28 16:55:13 nscollins Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.50 2005/05/26 15:47:37 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.49 2005/02/28 16:55:13 nscollins Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.50 2005/05/26 15:47:37 jwolfe Exp $'
 
 !==============================================================================
 
@@ -1032,17 +1032,17 @@
       srcMaxY = maxval(srcCornerY)
 
       srcAdd = 0
-      do jDst            = jbDst,jeDst
-        dstLoop: do iDst = ibDst,ieDst
+      dstLoopOuter: do jDst   = jbDst,jeDst
+        dstLoopInner: do iDst = ibDst,ieDst
 
-          if (.not. dstMask(iDst,jDst)) cycle dstLoop
+          if (.not. dstMask(iDst,jDst)) cycle dstLoopInner
 
           dstMinX = minval(dstCornerX(:,iDst,jDst))
           dstMinY = minval(dstCornerY(:,iDst,jDst))
           dstMaxX = maxval(dstCornerX(:,iDst,jDst))
           dstMaxY = maxval(dstCornerY(:,iDst,jDst))
           if (dstMinX.gt.srcMaxX .OR. dstMaxX.lt.srcMinX .OR. &
-              dstMinY.gt.srcMaxY .OR. dstMaxY.lt.srcMinY) cycle dstLoop  ! not right loop
+              dstMinY.gt.srcMaxY .OR. dstMaxY.lt.srcMinY) cycle dstLoopOuter  ! not right loop
 
           xref = dstCenterX(iDst,jDst)
           yref = dstCenterY(iDst,jDst)
@@ -1171,8 +1171,8 @@
           enddo dstCornerLoop
           ! finished with this cell - start on next cell
 
-        enddo dstLoop
-      enddo
+        enddo dstLoopInner
+      enddo dstLoopOuter
 
       deallocate(cornerX, &
                  cornerY, stat=localrc)
