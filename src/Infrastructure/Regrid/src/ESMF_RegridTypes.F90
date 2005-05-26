@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.73 2005/05/09 22:23:53 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.74 2005/05/26 15:46:22 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -255,7 +255,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.73 2005/05/09 22:23:53 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.74 2005/05/26 15:46:22 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1141,12 +1141,16 @@
                              rc=localrc)
           do j = 1,dimCount
             if (dimOrder(j).eq.1) then
-              thisAI(1)%min    = thisAI(1)%min    +   haloWidth + lbounds(j) - 1
-              thisAI(1)%max    = thisAI(1)%max    +   haloWidth + lbounds(j) - 1
+         !jw     thisAI(1)%min    = thisAI(1)%min    +   haloWidth + lbounds(j) - 1
+         !jw     thisAI(1)%max    = thisAI(1)%max    +   haloWidth + lbounds(j) - 1
+              thisAI(1)%min    = thisAI(1)%min    +   haloWidth
+              thisAI(1)%max    = thisAI(1)%max    +   haloWidth
               thisAI(1)%stride = thisAI(1)%stride + 2*haloWidth
             elseif (dimOrder(j).eq.2) then
-              thisAI(2)%min    = thisAI(2)%min    +   haloWidth + lbounds(j) - 1
-              thisAI(2)%max    = thisAI(2)%max    +   haloWidth + lbounds(j) - 1
+          !jw    thisAI(2)%min    = thisAI(2)%min    +   haloWidth + lbounds(j) - 1
+          !jw    thisAI(2)%max    = thisAI(2)%max    +   haloWidth + lbounds(j) - 1
+              thisAI(2)%min    = thisAI(2)%min    +   haloWidth 
+              thisAI(2)%max    = thisAI(2)%max    +   haloWidth
               thisAI(2)%stride = thisAI(2)%stride + 2*haloWidth
             endif
           enddo
