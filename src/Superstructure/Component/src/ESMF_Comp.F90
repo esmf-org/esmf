@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.128 2005/05/09 22:58:34 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.129 2005/05/26 16:17:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -258,7 +258,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.128 2005/05/09 22:58:34 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.129 2005/05/26 16:17:09 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -426,19 +426,19 @@ end function
         ! type(ESMF_Clock) compp%clock                ! private component clock
         compp%configFile = "uninitialized"
         compp%dirPath = "uninitialized"
-        compp%grid%ptr => NULL()
+        nullify(compp%grid%ptr)
         compp%npetlist = 0
         ! type(ESMF_GridCompType) compp%gridcomptype
-        compp%parent => NULL()
+        nullify(compp%parent)
         ! type(ESMF_CWrap)   compp%compw
         ! type(ESMF_VM)      compp%vm
         ! type(ESMF_VM)      compp%vm_parent
-        compp%petlist => NULL()
+        nullify(compp%petlist)
         ! type(ESMF_VMPlan)  compp%vmplan
         compp%vm_info = ESMF_NULL_POINTER
         compp%vm_cargo = ESMF_NULL_POINTER
-        compp%is%statep => NULL()
-        compp%es%statep => NULL()
+        nullify(compp%is%statep)
+        nullify(compp%es%statep)
         compp%multiphaseinit = .FALSE.
         compp%initphasecount = 0
         compp%multiphaserun = .FALSE.
