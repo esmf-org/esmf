@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap_C.F90,v 1.6 2004/06/15 11:18:36 nscollins Exp $
+! $Id: ESMF_BundleDataMap_C.F90,v 1.7 2005/05/31 17:39:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 !==============================================================================
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_BundleDataMap_C.F90,v 1.6 2004/06/15 11:18:36 nscollins Exp $'
+!      '$Id: ESMF_BundleDataMap_C.F90,v 1.7 2005/05/31 17:39:51 nscollins Exp $'
 !==============================================================================
 ! 
 !------------------------------------------------------------------------------
@@ -41,7 +41,7 @@
 
 !------------------------------------------------------------------------------
     subroutine f_esmf_bundledatamapsetdefault(bdmp, btype, rc)
-      use ESMF_BaseTypesMod    ! ESMF base class
+      use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_ArrayDataMapMod
       use ESMF_BundleDataMapMod
@@ -58,7 +58,7 @@
 
 !------------------------------------------------------------------------------
     subroutine f_esmf_bundledatamapget(bdmp, btype, rc)
-      use ESMF_BaseTypesMod    ! ESMF base class
+      use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_ArrayDataMapMod
       use ESMF_BundleDataMapMod
@@ -74,7 +74,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_bundledatamapset(bdmp, btype, rc)
-      use ESMF_BaseTypesMod    ! ESMF base class
+      use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_ArrayDataMapMod
       use ESMF_BundleDataMapMod
@@ -90,7 +90,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_bundledatamapvalidate(bdmp, options, rc)
-      use ESMF_BaseTypesMod    ! ESMF base class
+      use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_BundleDataMapMod
 
@@ -105,7 +105,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_bundledatamapprint(bdmp, options, rc)
-      use ESMF_BaseTypesMod    ! ESMF base class
+      use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_BundleDataMapMod
 

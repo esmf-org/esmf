@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpec.F90,v 1.13 2004/06/21 22:52:03 cdeluca Exp $
+! $Id: ESMF_IOSpec.F90,v 1.14 2005/05/31 17:39:57 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IOSpec module
@@ -32,7 +32,7 @@
 ! !MODULE: ESMF_IOSpecMod
 !
 ! !USES:
-      use ESMF_BaseTypesMod    ! ESMF base class
+      use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_BaseMod
       !use ESMF_LogErrMod
       implicit none

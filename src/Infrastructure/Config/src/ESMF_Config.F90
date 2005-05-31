@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.21 2005/04/13 18:00:59 jwolfe Exp $
+! $Id: ESMF_Config.F90,v 1.22 2005/05/31 17:39:51 nscollins Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -33,7 +33,7 @@
 !
 ! !USES:
 
-      use ESMF_BaseTypesMod    ! ESMF base class
+      use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_BaseMod
       use ESMF_DELayoutMod
       use ESMF_LogErrMod 

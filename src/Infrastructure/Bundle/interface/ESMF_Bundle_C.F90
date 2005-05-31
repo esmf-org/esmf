@@ -1,4 +1,4 @@
-!  $Id: ESMF_Bundle_C.F90,v 1.3 2004/10/04 20:07:14 nscollins Exp $
+!  $Id: ESMF_Bundle_C.F90,v 1.4 2005/05/31 17:39:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,11 +23,11 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Bundle_C.F90,v 1.3 2004/10/04 20:07:14 nscollins Exp $'
+!      '$Id: ESMF_Bundle_C.F90,v 1.4 2005/05/31 17:39:50 nscollins Exp $'
 !==============================================================================
    subroutine f_esmf_bundlecreate(bundlep, rc)
-       use ESMF_BaseTypesMod    ! ESMF base class
-       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_UtilTypesMod    ! ESMF generic types class
+       use ESMF_BaseMod         ! ESMF base class
        use ESMF_BundleMod
      type(ESMF_Bundle), pointer :: bundlep
      type(ESMF_Bundle), target :: thebundle
@@ -41,8 +41,8 @@
    end subroutine f_esmf_bundlecreate
 
    subroutine f_esmf_bundledestroy(bundlep, rc)
-       use ESMF_BaseTypesMod    ! ESMF base class
-       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_UtilTypesMod    ! ESMF generic types class
+       use ESMF_BaseMod         ! ESMF base class
        use ESMF_BundleMod
      type(ESMF_Bundle), pointer :: bundlep      
      integer, intent(out), optional :: rc     

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.cpp,v 1.18 2004/12/07 17:20:49 nscollins Exp $
+! $Id: ESMF_LocalArray.cpp,v 1.19 2005/05/31 17:39:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_BaseTypesMod
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod
       use ESMF_LogErrMod
       use ESMF_IOSpecMod
@@ -178,7 +178,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.cpp,v 1.18 2004/12/07 17:20:49 nscollins Exp $'
+      '$Id: ESMF_LocalArray.cpp,v 1.19 2005/05/31 17:39:57 nscollins Exp $'
 
 !==============================================================================
 ! 

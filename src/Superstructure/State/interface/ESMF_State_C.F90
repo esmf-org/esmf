@@ -1,4 +1,4 @@
-!  $Id: ESMF_State_C.F90,v 1.3 2004/06/08 09:27:21 nscollins Exp $
+!  $Id: ESMF_State_C.F90,v 1.4 2005/05/31 17:40:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.3 2004/06/08 09:27:21 nscollins Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.4 2005/05/31 17:40:02 nscollins Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -40,7 +40,7 @@
 !EOP
 !------------------------------------------------------------------------------
    subroutine f_esmf_statecreate(state, name, rc)
-       use ESMF_BaseTypesMod
+       use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
 
@@ -53,7 +53,7 @@
    end subroutine f_esmf_statecreate
 
    subroutine f_esmf_statedestroy(state, rc)
-       use ESMF_BaseTypesMod
+       use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
 
@@ -65,7 +65,7 @@
    end subroutine f_esmf_statedestroy
 
    subroutine f_esmf_stateadddata(statep, name, func, rc)
-       use ESMF_BaseTypesMod
+       use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
 
@@ -78,7 +78,7 @@
    end subroutine f_esmf_stateadddata
 
    subroutine f_esmf_stategetdata(statep, name, rc)
-       use ESMF_BaseTypesMod
+       use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
 
@@ -91,7 +91,7 @@
    end subroutine f_esmf_stategetdata
 
    subroutine f_esmf_stateget(statep, name, rc)
-       use ESMF_BaseTypesMod
+       use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
 

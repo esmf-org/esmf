@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid_C.F90,v 1.2 2004/06/08 09:27:19 nscollins Exp $
+! $Id: ESMF_Regrid_C.F90,v 1.3 2005/05/31 17:39:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 !==============================================================================
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Regrid_C.F90,v 1.2 2004/06/08 09:27:19 nscollins Exp $'
+      '$Id: ESMF_Regrid_C.F90,v 1.3 2005/05/31 17:39:57 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -48,7 +48,7 @@
 
 !------------------------------------------------------------------------------
     subroutine f_esmf_regridcreate(regridp, arg1, arg2, arg3, rc)
-      use ESMF_BaseTypesMod
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
 
@@ -68,7 +68,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_regriddestroy(regridp, rc)
-      use ESMF_BaseTypesMod
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
 
@@ -86,7 +86,7 @@
 
 !------------------------------------------------------------------------------
     subroutine f_esmf_regridinit(regridp, arg1, arg2, arg3, rc)
-      use ESMF_BaseTypesMod
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
 
@@ -104,7 +104,7 @@
 
 !------------------------------------------------------------------------------
     subroutine f_esmf_regridgetconfig(regridp, config, rc)
-      use ESMF_BaseTypesMod
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
 
@@ -119,7 +119,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_regridsetconfig(regridp, config, rc)
-      use ESMF_BaseTypesMod
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
 
@@ -134,7 +134,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_regridget(regridp, <value>, rc)
-      use ESMF_BaseTypesMod
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
 
@@ -149,7 +149,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_regridset(regridp, <value>, rc)
-      use ESMF_BaseTypesMod
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
 
@@ -164,7 +164,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_regridvalidate(regridp, options, rc)
-      use ESMF_BaseTypesMod
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
 
@@ -179,7 +179,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_regridprint(regridp, options, rc)
-      use ESMF_BaseTypesMod
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_RegridMod
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.73 2005/03/04 19:54:35 jedwards Exp $
+! $Id: ESMF_Bundle.F90,v 1.74 2005/05/31 17:39:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 
 !
 ! !USES:
-      use ESMF_BaseTypesMod    ! ESMF base class
+      use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_BaseMod
       
       use ESMF_VMMod

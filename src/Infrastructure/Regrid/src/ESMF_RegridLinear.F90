@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.30 2005/01/14 18:59:12 jwolfe Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.31 2005/05/31 17:39:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_BaseTypesMod
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod        ! ESMF base   class
       use ESMF_LocalArrayMod
       use ESMF_ArrayDataMapMod
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.30 2005/01/14 18:59:12 jwolfe Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.31 2005/05/31 17:39:59 nscollins Exp $'
 
 !==============================================================================
 

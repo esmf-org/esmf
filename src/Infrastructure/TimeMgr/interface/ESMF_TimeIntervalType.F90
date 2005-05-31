@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalType.F90,v 1.4 2004/10/27 18:52:50 eschwab Exp $
+! $Id: ESMF_TimeIntervalType.F90,v 1.5 2005/05/31 17:40:01 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       ! inherit from ESMF base class
-      use ESMF_BaseTypesMod
+      use ESMF_UtilTypesMod
 
       ! inherit from base time class
       use ESMF_BaseTimeMod
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeIntervalType.F90,v 1.4 2004/10/27 18:52:50 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalType.F90,v 1.5 2005/05/31 17:40:01 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       end module ESMF_TimeIntervalTypeMod
