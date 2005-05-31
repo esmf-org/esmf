@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2005/05/16 21:48:47 nscollins Exp $
+# $Id: makefile,v 1.2 2005/05/31 17:27:16 nscollins Exp $
 
 ALL:  build_here
 
@@ -9,17 +9,14 @@ LOCDIR	  = src/Infrastructure/Util/
 # Leave this line alone.
 include $(ESMF_DIR)/makefile
 
+# This directory needs to be compiled first and contains generic utility
+# routines which are used by all parts of the framework; e.g. string
+# handling routines, getting time-of-day from the system for a timestamp, etc.
+
 # The DIRS line needs to contain all subdirectories which exist 
 # directly below this directory, and have either library,
 # example/test code, or documents which need to be generated.
-
-# This directory is currently a placeholder for generic utility
-# routines which are not part of any particular class; e.g. string
-# handling routines, getting time-of-day from the system for a timestamp, etc.
-# When code is actually moved here, comment back in the appropropriate 
-# subdirs from the list below.
-#DIRS	  = src interface doc tests examples
-DIRS	  = 
+DIRS	  = src interface tests examples doc
 
 CLEANDIRS   =
 CLEANFILES  =
