@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayUTest.F90,v 1.13 2005/02/28 21:26:21 nscollins Exp $
+! $Id: ESMF_ArrayUTest.F90,v 1.14 2005/06/01 16:40:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,15 +35,16 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArrayUTest.F90,v 1.13 2005/02/28 21:26:21 nscollins Exp $'
+      '$Id: ESMF_ArrayUTest.F90,v 1.14 2005/06/01 16:40:17 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
     type(ESMF_Array) :: array1
-    !character(ESMF_MAXSTR) :: filename
-    real, dimension(:,:), pointer :: f90ptr1
+    real(ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1
     integer :: width, attribute
+    integer :: counts(2), lbounds(2), ubounds(2)
     real :: attribute4
+    type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_DataType) :: att_datatype
     type(ESMF_DataKind) :: att_datakind
 
@@ -51,7 +52,7 @@
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name, array_name
-    integer :: rc, att_count, result = 0
+    integer :: rc, status, att_count, result = 0
 
     
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -77,17 +78,26 @@
     call ESMF_ArrayDestroy(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+!-------------------------------------------------------------------------------
+!   !  Deallocate the user-allocated memory (framework should *not* have
+!   !   deallocated it at array destroy time).
+
+    !NEX_UTest
+    write(failMsg, *) "Did not return Fortran status code = 0" 
+    write(name, *) "Deallocate memory"
+    deallocate(f90ptr1, stat=status)
+    call ESMF_Test((status.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
 #ifdef ESMF_EXHAUSTIVE
 !-------------------------------------------------------------------------------
-
 !   !  Create an Array Test with data copy
+
     !EX_UTest
     allocate(f90ptr1(10,20))
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Create Array Test"
     array1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    print *, "array 1 create returned"
 
 !-------------------------------------------------------------------------------
 !   !  Set Array Name Test
@@ -97,7 +107,6 @@
     write(name, *) "Set Array Name Test"
     call ESMF_ArraySet(array1, name="SAM", rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    print *, "array 1 create returned"
 
 !-------------------------------------------------------------------------------
 !   !  Get Array Name Test
@@ -107,7 +116,6 @@
     write(name, *) "Get Array Name Test"
     call ESMF_ArrayGet(array1, name=array_name, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS.and.array_name.eq."SAM"), name, failMsg, result, ESMF_SRCLINE)
-    print *, "array 1 is called ", array_name
 
 !-------------------------------------------------------------------------------
 !   !  Destroy an Array Test
@@ -117,10 +125,19 @@
     write(name, *) "Destroy Array Test"
     call ESMF_ArrayDestroy(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    print *, "array 1 destroy returned"
 
 !-------------------------------------------------------------------------------
-!
+!-------------------------------------------------------------------------------
+!   !  Deallocate the user-allocated memory (framework should *not* have
+!   !   deallocated it at array destroy time).
+
+    !NEX_UTest
+    write(failMsg, *) "Did not return Fortran status code = 0" 
+    write(name, *) "Deallocate memory"
+    deallocate(f90ptr1, stat=status)
+    call ESMF_Test((status.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
 !   !  Create an Array with a halo width
  
     !EX_UTest
@@ -130,7 +147,6 @@
     write(name, *) "Create Array with HaloWidth Test"
     array1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, haloWidth=2, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    print *, "array 1 create returned"
 
 !-------------------------------------------------------------------------------
 !   !  Get Halo Width back
@@ -144,11 +160,10 @@
     write(name, *) "Verify Array HaloWidth Test"
     write(failMsg, *) "Halo Width not 2" 
     call ESMF_Test((width.eq.2), name, failMsg, result, ESMF_SRCLINE)
-    print *, "array 1 get halowidth returned"
 
 !-------------------------------------------------------------------------------
-!
-   !  Print an Array
+!  !  Print an Array
+
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Print an Array Test"
@@ -156,8 +171,9 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
-!
-   !  Get Attribute count from an Array
+!-------------------------------------------------------------------------------
+!  !  Get Attribute count from an Array
+
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
@@ -165,16 +181,16 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
-!
-   !  Verify Attribute count from an Array
+!  !  Verify Attribute count from an Array
+
     !EX_UTest
     write(failMsg, *) "Attribute count is incorrect" 
     write(name, *) "Verify Attribute count from an Array Test"
     call ESMF_Test((attribute.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
-!
-   !  Set an Attribute in an Array
+!  !  Set an Attribute in an Array
+
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
@@ -182,14 +198,13 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
-!
-   !  Set an Attribute in an Array
+!  !  Set an Attribute in an Array
+
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
     call ESMF_ArraySetAttribute(array1, "test_attribute1", 0, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
 
 !-------------------------------------------------------------------------------
 !
@@ -201,18 +216,17 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
-!
-   !  Set an Attribute in an Array
+!  !  Set an Attribute in an Array
+
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
     call ESMF_ArraySetAttribute(array1, "test_attribute3", 6789, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
 !-------------------------------------------------------------------------------
-!
-   !  Set an Attribute in an Array
+!  !  Set an Attribute in an Array
+
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
@@ -220,8 +234,8 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
-!
-   !  Get Attribute count from an Array
+!  !  Get Attribute count from an Array
+
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get an Attribute from an Array Test"
@@ -229,16 +243,16 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
-!
-   !  Verify Attribute count from an Array
+!  !  Verify Attribute count from an Array
+
     !EX_UTest
     write(failMsg, *) "Attribute count is incorrect" 
     write(name, *) "Verify Attribute count from an Array Test"
     call ESMF_Test((attribute.eq.5), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
-!
-   !  Get an Attribute from an Array
+!  !  Get an Attribute from an Array
+
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get an Attribute from an Array Test"
@@ -246,47 +260,51 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
-!
-   !  Verify the value of the Attribute
+!  !  Verify the value of the Attribute
+
     !EX_UTest
     write(failMsg, *) "Attribute value is wrong" 
     write(name, *) "Verify Attribute value from an Array Test"
     call ESMF_Test((attribute.eq.123456789), name, failMsg, result, ESMF_SRCLINE)
 !-------------------------------------------------------------------------------
-!
-   !  Get Attribute Info from an Array
+!  !  Get Attribute Info from an Array
+
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get Attribute Info from an Array Test"
-    call ESMF_ArrayGetAttributeInfo(array1, "test_attribute", datatype=att_datatype, &
-                                     datakind=att_datakind, count=att_count, rc=rc)
+    call ESMF_ArrayGetAttributeInfo(array1, "test_attribute", &
+                                    datatype=att_datatype, &
+                                    datakind=att_datakind, &
+                                    count=att_count, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
-!
-   !  Verify datatype of Attribute
+!  !  Verify datatype of Attribute
+
     !EX_UTest
     write(failMsg, *) "Attribute datatype is wrong" 
     write(name, *) "Verify Attribute datatype from an Array Test"
     call ESMF_Test((att_datatype.eq.ESMF_DATA_INTEGER), name, failMsg, result, ESMF_SRCLINE)
+
 !-------------------------------------------------------------------------------
-!
-   !  Verify datakind of Attribute
+!  !  Verify datakind of Attribute
+
     !EX_UTest
     write(failMsg, *) "Attribute datakind is wrong" 
     write(name, *) "Verify Attribute datakind from an Array Test"
     call ESMF_Test((att_datakind.eq.ESMF_I4), name, failMsg, result, ESMF_SRCLINE)
+
 !-------------------------------------------------------------------------------
-!
-   !  Verify count of Attribute
+!  !  Verify count of Attribute
+
     !EX_UTest
     write(failMsg, *) "Attribute count is wrong" 
     write(name, *) "Verify Attribute count from an Array Test"
     call ESMF_Test((att_count.eq.1), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
-!
-   !  Get an Attribute from an Array with wrong data type
+!  !  Get an Attribute from an Array with wrong data type
+
     !EX_UTest
     write(failMsg, *) "Should not return ESMF_SUCCESS" 
     write(name, *) "Get a Wrong Data type Attribute from an Array Test"
@@ -294,8 +312,8 @@
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
-!
-   !  Get an Attribute from an Array
+!  !  Get an Attribute from an Array
+
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get an Attribute from an Array Test"
@@ -303,46 +321,51 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
-!
-   !  Verify the value of the Attribute
+!  !  Verify the value of the Attribute
+
     !EX_UTest
     write(failMsg, *) "Attribute value is wrong" 
     write(name, *) "Verify Attribute value from an Array Test"
     call ESMF_Test((attribute4.eq.5.87), name, failMsg, result, ESMF_SRCLINE)
     print *, "test_attribute4 = ", attribute4
+
 !-------------------------------------------------------------------------------
-!
-   !  Get Attribute Info from an Array
+!  !  Get Attribute Info from an Array
+
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get Attribute Info from an Array Test"
-    call ESMF_ArrayGetAttributeInfo(array1, "test_attribute4", datatype=att_datatype, &
-                                     datakind=att_datakind, count=att_count, rc=rc)
+    call ESMF_ArrayGetAttributeInfo(array1, "test_attribute4", &
+                                    datatype=att_datatype, &
+                                    datakind=att_datakind, &
+                                    count=att_count, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
-!
-   !  Verify datatype of Attribute
+!  !  Verify datatype of Attribute
+
     !EX_UTest
     write(failMsg, *) "Attribute datatype is wrong" 
     write(name, *) "Verify Attribute datatype from an Array Test"
     call ESMF_Test((att_datatype.eq.ESMF_DATA_REAL), name, failMsg, result, ESMF_SRCLINE)
+
 !-------------------------------------------------------------------------------
-!
-   !  Verify datakind of Attribute
+!  !  Verify datakind of Attribute
+
     !EX_UTest
     write(failMsg, *) "Attribute datakind is wrong" 
     write(name, *) "Verify Attribute datakind from an Array Test"
     call ESMF_Test((att_datakind.eq.ESMF_R4), name, failMsg, result, ESMF_SRCLINE)
+
 !-------------------------------------------------------------------------------
-!
-   !  Verify count of Attribute
+!  !  Verify count of Attribute
+
     !EX_UTest
     write(failMsg, *) "Attribute count is wrong" 
     write(name, *) "Verify Attribute count from an Array Test"
     call ESMF_Test((att_count.eq.1), name, failMsg, result, ESMF_SRCLINE)
-
     print *, "Attribute count =", att_count
+
 !-------------------------------------------------------------------------------
 !   !  Destroy an Array Test
 
@@ -351,9 +374,112 @@
     write(name, *) "Destroy Array Test"
     call ESMF_ArrayDestroy(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    print *, "array 1 destroy returned"
 
 !-------------------------------------------------------------------------------
+!   !  Deallocate the user-allocated memory (framework should *not* have
+!   !   deallocated it at array destroy time).
+
+    !NEX_UTest
+    write(failMsg, *) "Did not return Fortran status code = 0" 
+    write(name, *) "Deallocate memory"
+    deallocate(f90ptr1, stat=status)
+    call ESMF_Test((status.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!   !  Create an ArraySpec for use below
+ 
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Create ArraySpec for use in ArrayCreate"
+    call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
+                             kind=ESMF_R8, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!   !  Create an Array with data allocation inside the framework
+ 
+    !EX_UTest
+    nullify(f90ptr1)
+    counts(1) = 10
+    counts(2) = 20
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Create Array with data allocated by framework"
+    array1 = ESMF_ArrayCreate(f90ptr1, counts, haloWidth=2, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!  !  Print an Array
+
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Print an Array Test"
+    call ESMF_ArrayPrint(array1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!   !  Destroy an Array Test
+
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Destroy Array Test"
+    call ESMF_ArrayDestroy(array1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!   !  Try to deallocate the user-allocated memory, should fail. 
+!   !  (framework should have deallocated this space at array destroy time).
+
+    !NEX_UTest
+    write(failMsg, *) "Did not return Fortran status code != 0" 
+    write(name, *) "Deallocate memory"
+    deallocate(f90ptr1, stat=status)
+    call ESMF_Test((status.ne.0), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!   !  Create an Array with data allocation inside the framework
+ 
+    !EX_UTest
+    nullify(f90ptr1)
+    counts(1) = 11
+    counts(2) = 36 
+    lbounds(1) = -3
+    lbounds(2) = -3
+    ubounds(1) = 8
+    ubounds(2) = 33
+    width = 3
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Create Array with data allocated by framework"
+    array1 = ESMF_ArrayCreate(f90ptr1, counts, width, lbounds, ubounds, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!  !  Print an Array
+
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Print an Array Test"
+    call ESMF_ArrayPrint(array1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!   !  Destroy an Array Test
+
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Destroy Array Test"
+    call ESMF_ArrayDestroy(array1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!   !  Try to deallocate the user-allocated memory, should fail. 
+!   !  (framework should have deallocated this space at array destroy time).
+
+    !NEX_UTest
+    write(failMsg, *) "Did not return Fortran status code != 0" 
+    write(name, *) "Deallocate memory"
+    deallocate(f90ptr1, stat=status)
+    call ESMF_Test((status.ne.0), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 
