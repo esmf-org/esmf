@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayUTest.F90,v 1.14 2005/06/01 16:40:17 nscollins Exp $
+! $Id: ESMF_ArrayUTest.F90,v 1.15 2005/06/02 19:10:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArrayUTest.F90,v 1.14 2005/06/01 16:40:17 nscollins Exp $'
+      '$Id: ESMF_ArrayUTest.F90,v 1.15 2005/06/02 19:10:18 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -44,6 +44,7 @@
     integer :: width, attribute
     integer :: counts(2), lbounds(2), ubounds(2)
     real :: attribute4
+    logical :: tf_result
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_DataType) :: att_datatype
     type(ESMF_DataKind) :: att_datakind
@@ -79,6 +80,16 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
+!   !  Check memory status test - this memory should not be deallocated 
+!   !  by the array destroy call, so the associated() call should return true.
+
+    !NEX_UTest
+    write(failMsg, *) "Data area should not be deallocated"
+    write(name, *) "Data not deallocated at destroy time"
+    tf_result = associated(f90ptr1)
+    call ESMF_Test((tf_result), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
 !   !  Deallocate the user-allocated memory (framework should *not* have
 !   !   deallocated it at array destroy time).
 
@@ -87,6 +98,16 @@
     write(name, *) "Deallocate memory"
     deallocate(f90ptr1, stat=status)
     call ESMF_Test((status.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!   !  Check memory status test - this memory should now be deallocated,
+!   !  so the associated() call should return false.
+
+    !NEX_UTest
+    write(failMsg, *) "Data area should be deallocated"
+    write(name, *) "Data not deallocated"
+    tf_result = associated(f90ptr1)
+    call ESMF_Test((.not. tf_result), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
 !-------------------------------------------------------------------------------
@@ -131,7 +152,7 @@
 !   !  Deallocate the user-allocated memory (framework should *not* have
 !   !   deallocated it at array destroy time).
 
-    !NEX_UTest
+    !EX_UTest
     write(failMsg, *) "Did not return Fortran status code = 0" 
     write(name, *) "Deallocate memory"
     deallocate(f90ptr1, stat=status)
@@ -379,7 +400,7 @@
 !   !  Deallocate the user-allocated memory (framework should *not* have
 !   !   deallocated it at array destroy time).
 
-    !NEX_UTest
+    !EX_UTest
     write(failMsg, *) "Did not return Fortran status code = 0" 
     write(name, *) "Deallocate memory"
     deallocate(f90ptr1, stat=status)
@@ -427,14 +448,14 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
-!   !  Try to deallocate the user-allocated memory, should fail. 
-!   !  (framework should have deallocated this space at array destroy time).
+!   !  Check memory status test - this memory should be deallocated 
+!   !  by the array destroy call, so the associated() call should return false.
 
-    !NEX_UTest
-    write(failMsg, *) "Did not return Fortran status code != 0" 
-    write(name, *) "Deallocate memory"
-    deallocate(f90ptr1, stat=status)
-    call ESMF_Test((status.ne.0), name, failMsg, result, ESMF_SRCLINE)
+    !EX_UTest
+    write(failMsg, *) "Data area should be deallocated"
+    write(name, *) "Data not deallocated at destroy time"
+    tf_result = associated(f90ptr1)
+    call ESMF_Test((.not. tf_result), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
 !   !  Create an Array with data allocation inside the framework
@@ -472,14 +493,14 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
-!   !  Try to deallocate the user-allocated memory, should fail. 
-!   !  (framework should have deallocated this space at array destroy time).
+!   !  Check memory status test - this memory should be deallocated 
+!   !  by the array destroy call, so the associated() call should return false.
 
-    !NEX_UTest
-    write(failMsg, *) "Did not return Fortran status code != 0" 
-    write(name, *) "Deallocate memory"
-    deallocate(f90ptr1, stat=status)
-    call ESMF_Test((status.ne.0), name, failMsg, result, ESMF_SRCLINE)
+    !EX_UTest
+    write(failMsg, *) "Data area should be deallocated"
+    write(name, *) "Data not deallocated at destroy time"
+    tf_result = associated(f90ptr1)
+    call ESMF_Test((.not. tf_result), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 
