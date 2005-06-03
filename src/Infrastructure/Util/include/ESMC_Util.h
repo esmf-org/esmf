@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.1 2005/05/31 17:27:19 nscollins Exp $
+// $Id: ESMC_Util.h,v 1.2 2005/06/03 16:10:52 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -154,7 +154,16 @@ int ESMC_AxisIndexSet(ESMC_AxisIndex *ai, int min, int max, int stride);
 int ESMC_AxisIndexGet(ESMC_AxisIndex *ai, int *min, int *max, int *stride);
 int ESMC_AxisIndexCopy(ESMC_AxisIndex *src, ESMC_AxisIndex *dst);
 ESMC_Logical ESMC_AxisIndexIntersect(ESMC_AxisIndex *src1, 
-                                     ESMC_AxisIndex *src2, ESMC_AxisIndex *dst);
+                                     ESMC_AxisIndex *src2, int ndims, 
+                                     ESMC_AxisIndex *dst);
+int ESMC_AxisIndexLocalToGlobal(ESMC_AxisIndex *srclocal, 
+                                     ESMC_AxisIndex *global, 
+                                     int *globalStarts, int ndims, 
+                                     ESMC_AxisIndex *dstglobal);
+int ESMC_AxisIndexGlobalToLocal(ESMC_AxisIndex *srcglobal, 
+                                     ESMC_AxisIndex *local, 
+                                     int *globalStarts, int ndims, 
+                                     ESMC_AxisIndex *dstlocal);
 int ESMC_AxisIndexPrint(ESMC_AxisIndex *ai);
 ESMC_Logical ESMC_AxisIndexEqual(ESMC_AxisIndex *ai1, ESMC_AxisIndex *ai2);
 

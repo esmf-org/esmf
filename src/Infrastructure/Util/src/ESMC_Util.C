@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.1 2005/05/31 17:27:20 nscollins Exp $
+// $Id: ESMC_Util.C,v 1.2 2005/06/03 16:10:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.1 2005/05/31 17:27:20 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.2 2005/06/03 16:10:53 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -225,6 +225,7 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 // !ARGUMENTS:
         ESMC_AxisIndex *src1,          // in - ESMC_AxisIndex
         ESMC_AxisIndex *src2,          // in - ESMC_AxisIndex
+        int ndims,                     // in - number of dimensions
         ESMC_AxisIndex *dst) {         // out - ESMC_AxisIndex
 //
 // !DESCRIPTION:
@@ -236,43 +237,145 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
   int i, len;
   ESMC_AxisIndex *lo, *hi;
 
-  // get local labels sorted out so we have fewer cases to deal with.
-  // lo has the smallest (or equal) minimum.
-  if (src1->min < src2->min) {
-    lo = src1;
-    hi = src2;
-  } else {
-    lo = src2;
-    hi = src1;
+  // the inputs to this routine must be lists of AIs, ndims long.
+  // the output is a list of AIs, ndims long.
+  // for there to be an actual overlap of area, the overlap for each rank
+  // must be true.  if any are false, the overall overlap is false and we
+  // can return early.
+  
+
+  for (i=0; i<ndims; i++) {
+
+    // get local labels sorted out so we have fewer cases to deal with.
+    // lo has the smallest (or equal) minimum.
+    if (src1[i].min < src2[i].min) {
+      lo = src1+i;
+      hi = src2+i;
+    } else {
+      lo = src2+i;
+      hi = src1+i;
+    }
+  
+    // disjoint completely?  (if edges touch, we need to capture that as a
+    // yes and return the line as an overlap somehow.)  if disjoint, we cannot
+    // have an overlap - exit early with the bad news.
+    if (lo->max < hi->min) {
+      dst[i].min = 0;
+      dst[i].max = 0;
+      dst[i].stride = 0;
+      return ESMF_FALSE;
+    }
+  
+    // there is an overlap in this dim - figure out what it is.
+    // 2 cases - one is fully contained in the other, or partial overlap.
+  
+    // look for complete containment.
+    if (lo->max > hi->max) {
+      dst[i].min = hi->min;
+      dst[i].max = hi->max;
+      dst[i].stride = 0;   // we do not know the global strides at this point.
+
+    } else {
+
+      // only partial overlap, but good enough to continue.
+      dst[i].min = hi->min;
+      dst[i].max = lo->max;
+      dst[i].stride = 0;   // we do not know the global strides at this point.
+    }
+
+    // and continue looping thru the ranks.
   }
 
-  // disjoint completely?  (if edges touch, we need to capture that as a
-  // yes and return the line as an overlap somehow.)
-  if (lo->max < hi->min) {
-    dst->min = 0;
-    dst->max = 0;
-    dst->stride = 0;
-    return ESMF_FALSE;
-  }
 
-  // there is an overlap in this dim - figure out what it is.
-  // 2 cases - one is fully contained in the other, or partial overlap.
-
-  // look for complete containment.
-  if (lo->max > hi->max) {
-    dst->min = hi->min;
-    dst->max = hi->max;
-    dst->stride = 0;    // we do not know the strides at this point.
-    return ESMF_TRUE;
-  }
-
-  // only partial overlap.
-  dst->min = hi->min;
-  dst->max = lo->max;
-  dst->stride = 0;      // what is this??
+  // if we have not returned yet, they overlap.
   return ESMF_TRUE;
+}
 
- // not reached.
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AxisIndexLocalToGlobal"
+//BOP
+// !IROUTINE:  ESMC_AxisIndexLocalToGlobal - translate local AI to global AIs
+//
+// !INTERFACE:
+      int ESMC_AxisIndexLocalToGlobal(
+//
+// !RETURN VALUE:
+//    error code 
+//
+// !ARGUMENTS:
+        ESMC_AxisIndex *srclocal,      // in - local AI extents
+        ESMC_AxisIndex *global,        // in - AIs for the global extents
+        int *globalStarts,             // in - array of global offsets
+        int ndims,                     // in - number of dimensions
+        ESMC_AxisIndex *dstglobal) {   // out - AIs translated to global space
+//
+// !DESCRIPTION:
+//   take a list of ndims AIs that are relative to the local decomposition,
+//   plus a list of offsets to the local chunks, and translate this into
+//   a list of AIs which are relative to the global grid, with (0,0) being
+//   the true origin, and not accounting for halo regions.
+//
+//   TODO: the global starts should be only for the grid axes, not the others.
+//   do we fix that when we make global starts? (we think yes.)
+//   there are global grid starts which are the same dim as the grid.
+//   then based on the field datamap we need to add 0 for non-grid dims
+//   and reorder if needed and then use the global starts which are the
+//   same dim as the data array from there onwards.  (these routines are
+//   assuming ndims == data array dims).
+//
+//EOP
+  int i;
+
+  for (i=0; i<ndims; i++) {
+
+    dstglobal[i].min = srclocal[i].min + globalStarts[i];
+    dstglobal[i].max = srclocal[i].max + globalStarts[i];
+    dstglobal[i].stride = global[i].stride;
+
+  }
+  
+  return ESMF_SUCCESS;
+}
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AxisIndexGlobalToLocal"
+//BOP
+// !IROUTINE:  ESMC_AxisIndexGlobalToLocal - translate global AI to local AI
+//
+// !INTERFACE:
+      int ESMC_AxisIndexGlobalToLocal(
+//
+// !RETURN VALUE:
+//    error code 
+//
+// !ARGUMENTS:
+        ESMC_AxisIndex *srcglobal,     // in - global AI extents
+        ESMC_AxisIndex *local,         // in - the original local AI
+        int *globalStarts,             // in - array of global offsets
+        int ndims,                     // in - number of dimensions
+        ESMC_AxisIndex *dstlocal) {    // out - AIs translated to local space
+//
+// !DESCRIPTION:
+//   take a list of ndims AIs that are relative to the global decomposition,
+//   plus a list of offsets to the local chunks, and translate this into
+//   a list of AIs which are relative to the local chunk, with (0,0) being
+//   the true origin, and strides must account for halo regions. (TODO: is this
+//   last part true?)
+//
+//EOP
+  int i;
+
+  for (i=0; i<ndims; i++) {
+
+    dstlocal[i].min = srcglobal[i].min - globalStarts[i];
+    dstlocal[i].max = srcglobal[i].max - globalStarts[i];
+    dstlocal[i].stride = local[i].stride;
+
+  }
+  
+  return ESMF_SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
