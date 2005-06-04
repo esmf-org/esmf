@@ -1,4 +1,4 @@
-! $Id: ESMF_VMBarrierUTest.F90,v 1.5 2005/02/28 16:31:06 nscollins Exp $
+! $Id: ESMF_VMBarrierUTest.F90,v 1.6 2005/06/04 00:16:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMBarrierUTest.F90,v 1.5 2005/02/28 16:31:06 nscollins Exp $'
+      '$Id: ESMF_VMBarrierUTest.F90,v 1.6 2005/06/04 00:16:12 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -50,7 +50,7 @@
       integer:: i, rc, loop_rc
       type(ESMF_VM):: vm
       integer:: localPet, petCount
-      real(ESMF_KIND_R8)  t_a, t0, t1, t_b, dt, max_time,delay
+      real(ESMF_KIND_R8)  t_a, t0, t1, t_b, dt, max_time, delay, dt_prec
       real(ESMF_KIND_R8), allocatable:: delay_time(:)
 
 
@@ -71,6 +71,18 @@
 
       ! Allocate localData
       allocate(delay_time(0:petCount-1))
+      
+      ! Determine the precision of the timer function
+      dt_prec = 0.
+      do i=1, 10
+        t_a = get_time()
+        t_b = t_a
+        do while (t_b == t_a)
+          t_b = get_time()
+        end do
+        if (t_b - t_a > dt_prec) dt_prec = t_b - t_a
+      end do
+      print *, "timing precision is: ", dt_prec
 
       !Loop to test delaying each of the processors in turn
       ! Preset loop_rc to ESMF_SUCCESS
@@ -106,14 +118,14 @@
         write(failMsg, *) "Barrier did not hold. Slow PET=", i
         write(name, *) "Barrier Test"
 
-        if ((t_b - t_a) < max_time) then
+        if ((t_b - t_a) < (max_time - dt_prec)) then
           loop_rc=ESMF_FAILURE
         end if
 
 
            delay= t_b - t_a
            print*, 'slow Pet=', i,'Pet=', localPet,'time delay = ', &
-         &         delay,'[  -- should be >= ',max_time,'--  ]'
+         &         delay,'[  -- should be >= ',max_time-dt_prec,'--  ]'
       end do   !Loop over i -- "slow" Pet's
 
       !EX_UTest
