@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.125 2005/05/20 16:51:26 nscollins Exp $
+#  $Id: common.mk,v 1.126 2005/06/06 17:43:18 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -833,6 +833,10 @@ VPATH = $(ESMF_TOP_DIR)/$(LOCDIR):$(ESMF_TOP_DIR)/include
 libc:$(LIBNAME)($(OBJSC))
 libf:$(LIBNAME)($(OBJSF))
 
+# building the libesmf.a file
+$(ESMFLIB):  build_libs
+
+
 # Build all of ESMF from the top.  This target can be called from any
 # subdir and it will go up to the top dir and build from there.
 lib:  info info_h build_libs
@@ -1075,7 +1079,7 @@ clean_validate:
 # Targets for building and running system tests.
 #-------------------------------------------------------------------------------
 
-system_tests: chkopts build_libs chkdir_tests
+system_tests: chkdir_tests
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR); fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
@@ -1084,14 +1088,15 @@ system_tests: chkopts build_libs chkdir_tests
                echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
                exit; \
 	   fi; \
-        fi ;\
+	   echo current working directory is now `pwd` ; \
+        fi; \
 	if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor system tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run system_tests_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
-	fi
-	$(MAKE) ACTION=tree_system_tests tree
+	fi; \
+	$(MAKE) ACTION=tree_system_tests tree ; \
 	$(MAKE) check_system_tests
 
 tree_system_tests: tree_build_system_tests tree_run_system_tests
@@ -1099,7 +1104,7 @@ tree_system_tests: tree_build_system_tests tree_run_system_tests
 #
 # system_tests_uni, build and run uni versions of the system tests
 #
-system_tests_uni: chkopts build_libs chkdir_tests
+system_tests_uni: chkdir_tests
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR); fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
@@ -1108,8 +1113,9 @@ system_tests_uni: chkopts build_libs chkdir_tests
               echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
               exit; \
 	   fi; \
-	fi
-	$(MAKE) ACTION=tree_system_tests_uni tree
+	   echo current working directory is now `pwd` ; \
+	fi; \
+	$(MAKE) ACTION=tree_system_tests_uni tree ; \
 	$(MAKE) check_system_tests
 
 tree_system_tests_uni: tree_build_system_tests tree_run_system_tests_uni
@@ -1117,7 +1123,7 @@ tree_system_tests_uni: tree_build_system_tests tree_run_system_tests_uni
 #
 # build_system_tests
 #
-build_system_tests: chkopts reqdir_lib chkdir_tests
+build_system_tests: reqdir_lib chkdir_tests
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR) ; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
@@ -1126,9 +1132,10 @@ build_system_tests: chkopts reqdir_lib chkdir_tests
               echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
               exit; \
 	   fi; \
+	   echo current working directory is now `pwd` ; \
         fi; \
-	$(MAKE) ACTION=tree_build_system_tests tree
-	@echo "ESMF system tests built successfully."
+	$(MAKE) ACTION=tree_build_system_tests tree ; \
+	echo "ESMF system tests built successfully."
 
 tree_build_system_tests:  $(SYSTEM_TESTS_BUILD) 
 
@@ -1162,7 +1169,7 @@ $(ESMF_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
 #
 # run_system_tests
 #
-run_system_tests:  chkopts reqdir_tests
+run_system_tests:  reqdir_tests
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR) ; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
@@ -1171,14 +1178,15 @@ run_system_tests:  chkopts reqdir_tests
               echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
               exit; \
 	   fi; \
+	   echo current working directory is now `pwd` ; \
         fi; \
 	if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor system tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run run_system_tests_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
-	fi
-	$(MAKE) ACTION=tree_run_system_tests tree
+	fi; \
+	$(MAKE) ACTION=tree_run_system_tests tree ; \
 	$(MAKE) check_system_tests
 
 tree_run_system_tests: $(SYSTEM_TESTS_RUN) 
@@ -1186,7 +1194,7 @@ tree_run_system_tests: $(SYSTEM_TESTS_RUN)
 #
 # run_system_tests_uni
 #
-run_system_tests_uni:  chkopts reqdir_tests
+run_system_tests_uni:  reqdir_tests
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR) ; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
@@ -1195,8 +1203,9 @@ run_system_tests_uni:  chkopts reqdir_tests
               echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
               exit; \
 	   fi; \
+	   echo current working directory is now `pwd` ; \
         fi; \
-	$(MAKE) ACTION=tree_run_system_tests_uni tree
+	$(MAKE) ACTION=tree_run_system_tests_uni tree ; \
 	$(MAKE) check_system_tests
 
 tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
@@ -1225,7 +1234,7 @@ check_system_tests:
 # all is well (it comes out 128).  if this gets fixed in our code, the dashes
 # can be removed and make can correctly stop on error.
 
-unit_tests: chkopts chkdir_tests build_libs
+unit_tests: chkdir_tests build_libs
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor unit tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run unit_tests_uni instead." ; \
@@ -1241,7 +1250,7 @@ tree_unit_tests: tree_build_unit_tests tree_run_unit_tests
 #
 # tests_uni
 #
-unit_tests_uni: chkopts chkdir_tests build_libs
+unit_tests_uni: chkdir_tests build_libs
 	$(MAKE) MULTI="Uniprocessor" config_unit_tests
 	-$(MAKE) ACTION=tree_unit_tests_uni tree
 	$(MAKE) check_unit_tests
@@ -1251,7 +1260,7 @@ tree_unit_tests_uni: tree_build_unit_tests tree_run_unit_tests_uni
 #
 # build_unit_tests
 #
-build_unit_tests: chkopts reqdir_lib chkdir_tests
+build_unit_tests: reqdir_lib chkdir_tests
 	$(MAKE) config_unit_tests 
 	$(MAKE) ACTION=tree_build_unit_tests tree
 	@echo "ESMF unit tests built successfully."
@@ -1272,7 +1281,7 @@ $(ESMF_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)
 #
 # run_unit_tests
 #
-run_unit_tests:  chkopts reqdir_tests verify_exhaustive_flag
+run_unit_tests:  reqdir_tests verify_exhaustive_flag
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor unit tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run run_unit_tests_uni instead." ; \
@@ -1291,7 +1300,7 @@ tree_run_unit_tests: $(TESTS_RUN)
 #
 # run_unit_tests_uni
 #
-run_unit_tests_uni:  chkopts reqdir_tests verify_exhaustive_flag
+run_unit_tests_uni:  reqdir_tests verify_exhaustive_flag
 	@if [ -f $(TESTS_CONFIG) ] ; then \
 	   $(SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(TESTS_CONFIG) > $(TESTS_CONFIG).temp; \
            $(MV) $(TESTS_CONFIG).temp $(TESTS_CONFIG); \
@@ -1416,7 +1425,7 @@ err: ; $(error gnumake exiting)
 #
 # examples
 #
-examples: chkopts chkdir_examples build_libs
+examples: chkdir_examples build_libs
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor examples when ESMF_COMM is mpiuni;" ; \
 	  echo "run examples_uni instead." ; \
@@ -1432,7 +1441,7 @@ tree_examples: tree_build_examples tree_run_examples
 #
 # examples_uni
 #
-examples_uni: chkopts chkdir_examples build_libs
+examples_uni: chkdir_examples build_libs
 	-$(MAKE) ACTION=tree_examples_uni tree
 	$(MAKE) check_examples
 
@@ -1441,7 +1450,7 @@ tree_examples_uni: tree_build_examples tree_run_examples_uni
 #
 # build_examples
 #
-build_examples: chkopts reqdir_lib chkdir_examples
+build_examples: reqdir_lib chkdir_examples
 	$(MAKE) ACTION=tree_build_examples tree
 	@echo "ESMF examples built successfully."
 
@@ -1462,7 +1471,7 @@ $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
 #
 # run_examples
 #
-run_examples:  chkopts reqdir_examples
+run_examples:  reqdir_examples
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor examples when ESMF_COMM is mpiuni;" ; \
 	  echo "run run_examples_uni instead." ; \
@@ -1477,7 +1486,7 @@ tree_run_examples: $(EXAMPLES_RUN)
 
 # run_examples_uni
 #
-run_examples_uni:  chkopts reqdir_examples
+run_examples_uni:  reqdir_examples
 	-$(MAKE) ACTION=tree_run_examples_uni tree 
 	$(MAKE) check_examples
 
@@ -1500,7 +1509,7 @@ check_examples:
 # Targets for building and running demos.
 #-------------------------------------------------------------------------------
 
-demos: chkopts build_libs chkdir_tests
+demos: build_libs chkdir_tests
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor demo when ESMF_COMM is mpiuni;" ; \
 	  echo "run demos_uni instead." ; \
@@ -1512,7 +1521,7 @@ demos: chkopts build_libs chkdir_tests
 
 tree_demos: tree_build_demos tree_run_demos
 
-demos_uni: chkopts build_libs chkdir_tests
+demos_uni: build_libs chkdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
 	$(MAKE) ACTION=tree_demos_uni tree
 
@@ -1521,7 +1530,7 @@ tree_demos_uni: tree_build_demos tree_run_demos_uni
 #
 # build_demos
 #
-build_demos: chkopts reqdir_lib chkdir_tests
+build_demos: reqdir_lib chkdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
 	$(MAKE) ACTION=tree_build_demos tree
 	@echo "ESMF demos built successfully."
@@ -1536,7 +1545,7 @@ $(ESMF_TESTDIR)/%App : %Demo.o $(DEMOS_OBJ) $(ESMFLIB)
 #
 # run_demos
 #
-run_demos:  chkopts reqdir_tests
+run_demos:  reqdir_tests
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
           echo "Cannot run multiprocessor demo when ESMF_COMM is mpiuni;" ; \
 	  echo "run run_demos_uni instead." ; \
@@ -1548,7 +1557,7 @@ run_demos:  chkopts reqdir_tests
 
 tree_run_demos: $(DEMOS_RUN) 
 
-run_demos_uni:  chkopts reqdir_tests
+run_demos_uni:  reqdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
 	$(MAKE) ACTION=tree_run_demos_uni tree
 
