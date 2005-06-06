@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.126 2005/06/06 17:43:18 nscollins Exp $
+#  $Id: common.mk,v 1.127 2005/06/06 19:52:19 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -813,6 +813,15 @@ reqdir_examples:
           $(MAKE) err ; fi
 
 #-------------------------------------------------------------------------------
+# test to see if this will help our lack of real dependencies.  require that
+# the file libesmf.a exists in the lib dir; if not, build it.  if it is there,
+# call it success, even if a source file is more recent than the lib.
+
+reqfile_libesmf:  
+	if [ ! -f $(ESMFLIB) ]; then \
+	  $(MAKE) lib ; fi
+
+#-------------------------------------------------------------------------------
 # This target used to check that variables which had to have settings
 # were indeed set.  All have been removed now, but this target is still
 # here keep from breaking other dependency rules.  At some point it can
@@ -833,8 +842,18 @@ VPATH = $(ESMF_TOP_DIR)/$(LOCDIR):$(ESMF_TOP_DIR)/include
 libc:$(LIBNAME)($(OBJSC))
 libf:$(LIBNAME)($(OBJSF))
 
-# building the libesmf.a file
-$(ESMFLIB):  build_libs
+# TODO: the dependencies need fixing here.
+# the goal here is to only rebuild libesmf.a when a source file has
+# changed - but this rule invokes a traversal of the entire source
+# tree each time.   i guess what really needs to be done is that a
+# real 'make depend' rule needs to make libesmf.a dependent on all
+# the constituent .h, .C, and .F90 files without doing a full tree
+# traversal.  having this line commented in makes it try to call the
+# build_libs rule each time the unit tests, examples, or system tests
+# are built, whether it's needed or not.
+#
+## building the libesmf.a file
+#$(ESMFLIB):  build_libs
 
 
 # Build all of ESMF from the top.  This target can be called from any
@@ -1123,7 +1142,7 @@ tree_system_tests_uni: tree_build_system_tests tree_run_system_tests_uni
 #
 # build_system_tests
 #
-build_system_tests: reqdir_lib chkdir_tests
+build_system_tests: reqfile_libesmf reqdir_lib chkdir_tests
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR) ; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
@@ -1260,7 +1279,7 @@ tree_unit_tests_uni: tree_build_unit_tests tree_run_unit_tests_uni
 #
 # build_unit_tests
 #
-build_unit_tests: reqdir_lib chkdir_tests
+build_unit_tests: reqfile_libesmf reqdir_lib chkdir_tests
 	$(MAKE) config_unit_tests 
 	$(MAKE) ACTION=tree_build_unit_tests tree
 	@echo "ESMF unit tests built successfully."
@@ -1450,7 +1469,7 @@ tree_examples_uni: tree_build_examples tree_run_examples_uni
 #
 # build_examples
 #
-build_examples: reqdir_lib chkdir_examples
+build_examples: reqfile_libesmf reqdir_lib chkdir_examples
 	$(MAKE) ACTION=tree_build_examples tree
 	@echo "ESMF examples built successfully."
 
@@ -1530,7 +1549,7 @@ tree_demos_uni: tree_build_demos tree_run_demos_uni
 #
 # build_demos
 #
-build_demos: reqdir_lib chkdir_tests
+build_demos: reqfile_libesmf reqdir_lib chkdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
 	$(MAKE) ACTION=tree_build_demos tree
 	@echo "ESMF demos built successfully."
