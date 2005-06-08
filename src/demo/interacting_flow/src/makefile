@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2005/03/01 20:56:04 nscollins Exp $
+# $Id: makefile,v 1.5 2005/06/08 21:50:39 nscollins Exp $
 
 ALL: demos
 
@@ -43,7 +43,8 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   =
-CLEANFILES  = SIE.* U_velocity.* V_velocity.* FLAG.* DE.*
+CLEANFILES  = SIE.* U_velocity.* V_velocity.* FLAG.* DE.* \
+              $(DEMOS_BUILD).stdout
 CLOBBERDIRS =
 
 RUN_InteractingFlowApp:
