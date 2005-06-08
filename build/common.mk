@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.127 2005/06/06 19:52:19 nscollins Exp $
+#  $Id: common.mk,v 1.128 2005/06/08 22:19:57 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1044,9 +1044,9 @@ clean_check:
 # all tests, respecting user setting of EXHAUSTIVE
 all_tests:
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-	  $(MAKE) info $(ALLTESTS_UNI) results_summary ;\
+	  $(MAKE) info $(ALLTEST_TARGETS_UNI) results_summary ;\
 	else \
-	  $(MAKE) info $(ALLTESTS) results_summary ;\
+	  $(MAKE) info $(ALLTEST_TARGETS) results_summary ;\
         fi
 
 
