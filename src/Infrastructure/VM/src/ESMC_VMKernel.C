@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.41 2005/05/17 17:04:59 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.42 2005/06/08 19:38:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -3181,6 +3181,27 @@ void ESMC_VMK::vmk_waitqueue(void){
     vmk_wait(&fh);
   }
 //  printf("vmk_waitqueue: %d\n", nhandles);
+}
+
+
+void vmk_wtime(double *time){
+  *time = MPI_Wtime();
+}
+
+
+void vmk_wtimeprec(double *prec){
+  double temp_prec = 0.;
+  double t1, t2, dt;
+  for(int i=0; i<10; i++){
+    vmk_wtime(&t1);
+    t2 = t1;
+    while(t1==t2){
+      vmk_wtime(&t2);
+    };
+    dt = t2 - t1;
+    if (dt > temp_prec) temp_prec = dt;
+  }  
+  *prec = temp_prec;
 }
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.61 2005/05/31 17:40:01 nscollins Exp $
+! $Id: ESMF_VM.F90,v 1.62 2005/06/08 19:38:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -155,6 +155,8 @@ module ESMF_VMMod
   public ESMF_VMThreadBarrier
   public ESMF_VMWait
   public ESMF_VMWaitQueue
+  public ESMF_VMWtime
+  public ESMF_VMWtimePrec
 ! - ESMF-private methods:
   public ESMF_VMInitialize
   public ESMF_VMFinalize
@@ -176,7 +178,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.61 2005/05/31 17:40:01 nscollins Exp $'
+      '$Id: ESMF_VM.F90,v 1.62 2005/06/08 19:38:36 theurich Exp $'
 
 !==============================================================================
 
@@ -4205,6 +4207,113 @@ module ESMF_VMMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMWaitQueue
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMWtime()"
+!BOP
+! !IROUTINE: ESMF_VMWtime - Get floating-point number of seconds
+
+! !INTERFACE:
+  subroutine ESMF_VMWtime(time, rc)
+!
+! !ARGUMENTS:
+    real(ESMF_KIND_R8),     intent(out)             :: time
+    integer,                intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Get floating-point number of seconds of elapsed wall-clock time since some
+!   time in the past.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[time] 
+!        Time in seconds.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface
+    call c_ESMC_VMWtime(time, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMWtime
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMWtimePrec()"
+!BOP
+! !IROUTINE: ESMF_VMWtimePrec - Timer precision as floating-point number of seconds
+
+! !INTERFACE:
+  subroutine ESMF_VMWtimePrec(prec, rc)
+!
+! !ARGUMENTS:
+    real(ESMF_KIND_R8),     intent(out)             :: prec
+    integer,                intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Get a run-time estimate of the timer precision as floating-point number 
+!   of seconds. This is a relatively expensive call since the timer precision
+!   is measured several times before the maximum is returned as the estimate.
+!   The returned value is PET-specific and may differ across the VM context.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[prec] 
+!        Timer precision in seconds.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    real(ESMF_KIND_R8):: t_1, t_2, temp_prec  ! timer variables
+    integer:: i
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Measuring the timer precision here by explicitly calling ESMF_WTime() will
+    ! provide a better estimate than determining the precision inside the C++ 
+    ! interface.
+    temp_prec = 0.
+    do i=1, 10
+      call ESMF_VMWtime(t_1)
+      t_2 = t_1
+      do while (t_2 == t_1)
+        call ESMF_VMWtime(t_2)
+      end do
+      if (t_2 - t_1 > temp_prec) temp_prec = t_2 - t_1
+    end do
+    prec = temp_prec
+    ! Success
+    localrc = ESMF_SUCCESS
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMWtimePrec
 !------------------------------------------------------------------------------
 
 
