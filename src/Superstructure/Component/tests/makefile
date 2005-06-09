@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.33 2005/04/21 18:09:33 nscollins Exp $ 
+# $Id: makefile,v 1.34 2005/06/09 16:27:12 nscollins Exp $ 
 
 ALL:  build_unit_tests
 
@@ -14,26 +14,39 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Superstructure/Component/tests
 
-TESTS_BUILD   =	$(ESMC_TESTDIR)/ESMF_ComponentUTest \
-		$(ESMC_TESTDIR)/ESMF_GridCompCreateUTest \
-		$(ESMC_TESTDIR)/ESMC_CompCreate \
-		$(ESMC_TESTDIR)/ESMF_CompRun \
-		$(ESMC_TESTDIR)/ESMC_CompRun \
-		$(ESMC_TESTDIR)/ESMF_CplCompCreateUTest
+# TODO: these are very old tests which predate the current unit test
+#  conventions for file names and for using the test macros.
+#  when someone has the time, these files should be renamed
+#  to have UTest in the names, and should have the standard test macros
+#  handle the testing and results.  until then, i have removed them from
+#  the build list because the results are not tabulated and the files are
+#  simply left around and not cleaned out when unit tests are cleaned.
+#
+#TESTS_BUILD   =
+#		$(ESMF_TESTDIR)/ESMC_CompCreate \
+#		$(ESMF_TESTDIR)/ESMF_CompRun \
+#		$(ESMF_TESTDIR)/ESMC_CompRun \
+#TESTS_RUN     =
+#		RUN_ESMC_CompCreate \
+#		RUN_ESMF_CompRun \
+#		RUN_ESMC_CompRun
+#TESTS_RUN_UNI =
+#		RUN_ESMC_CompCreateUNI \
+#		RUN_ESMF_CompRunUNI \
+#		RUN_ESMC_CompRunUNI
+#
+
+TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_ComponentUTest \
+		$(ESMF_TESTDIR)/ESMF_GridCompCreateUTest \
+		$(ESMF_TESTDIR)/ESMF_CplCompCreateUTest
 
 TESTS_RUN     =	RUN_ESMF_ComponentUTest \
 		RUN_ESMF_GridCompCreateUTest \
-		RUN_ESMF_CplCompCreateUTest \
-		RUN_ESMC_CompCreate \
-		RUN_ESMF_CompRun \
-		RUN_ESMC_CompRun
+		RUN_ESMF_CplCompCreateUTest
 
 TESTS_RUN_UNI =	RUN_ESMF_ComponentUTestUNI \
 		RUN_ESMF_GridCompCreateUTestUNI \
-		RUN_ESMF_CplCompCreateUTestUNI \
-		RUN_ESMC_CompCreateUNI \
-		RUN_ESMF_CompRunUNI \
-		RUN_ESMC_CompRunUNI
+		RUN_ESMF_CplCompCreateUTestUNI
 
 
 include $(ESMF_DIR)/makefile
