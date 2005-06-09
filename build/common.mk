@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.129 2005/06/09 18:41:41 nscollins Exp $
+#  $Id: common.mk,v 1.130 2005/06/09 19:08:20 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -158,7 +158,7 @@ ESMF_PREC = default
 endif
 ifeq ($(ESMF_PREC),default)
  ifeq ($(ESMF_ARCH),Linux)
-  MACH_ARCH = `uname -i`
+  MACH_ARCH = $(shell uname -i)
   ifeq ($(MACH_ARCH),i386)
    export ESMF_PREC = 32
   else
