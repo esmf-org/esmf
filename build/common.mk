@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.128 2005/06/08 22:19:57 nscollins Exp $
+#  $Id: common.mk,v 1.129 2005/06/09 18:41:41 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -126,10 +126,21 @@ endif
 
 
 
-# if PREC not already set, default to 64.  architectures which
-# have only one word size set this variable in their compiler/platform
-# dependent files, so this only applies to platforms which support
-# more than one code pointer size (e.g. ibm, irix).
+# if PREC is not already set, the default value is as follows:
+#
+# for non-Linux systems, the default is 64.  for those architectures which
+# can only support 32-bit pointer size, this will be overridden in the
+# compiler/platform dependent files. check the supported platform list for
+# which pointer sizes are supported on which platform/compiler combinations. 
+#
+# for Linux systems, the default depends on what 'uname -i' reports back for
+# the hardware type. 32-bit hardware (i386) defaults to 32; 64-bit 
+# hardware (ia64) defaults to 64.  
+#
+# set ESMF_PREC explicitly if the default value is not what is wanted and the 
+# makefiles will honor that if possible.  note that only a few platforms
+# fully support code with more than one pointer size (e.g. ibm, irix)
+#
 # TODO: there is an inconsistency here.  the original requirement was the
 # users wanted control over the default data word size (e.g. in fortran
 # declaring a 'real' might be 4 bytes or 8, with some compilers having a
@@ -141,11 +152,21 @@ endif
 # with any sort of ESMF_xxx environment variable.  if they want to, they can
 # add something to the fortran compile flags or C compile flags.  this should
 # be cleaned up and clearly documented.
+
 ifndef ESMF_PREC
 ESMF_PREC = default
 endif
 ifeq ($(ESMF_PREC),default)
-export ESMF_PREC = 64
+ ifeq ($(ESMF_ARCH),Linux)
+  MACH_ARCH = `uname -i`
+  ifeq ($(MACH_ARCH),i386)
+   export ESMF_PREC = 32
+  else
+   export ESMF_PREC = 64
+  endif
+ else
+  export ESMF_PREC = 64
+ endif
 endif
 
 #
