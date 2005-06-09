@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.42 2005/05/31 17:39:51 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.43 2005/06/09 19:34:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@
       use ESMF_FieldDataMapMod
       use ESMF_FieldMod
       use ESMF_BundleMod
-      use ESMF_RegridMod
+      use ESMF_RegridTypesMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.42 2005/05/31 17:39:51 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.43 2005/06/09 19:34:08 nscollins Exp $'
 
 !==============================================================================
 !
@@ -935,15 +935,20 @@
 ! !IROUTINE: ESMF_BundleRegridStore - Precompute regrid operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRegridStore(srcbundle, dstbundle, parentVM, &
-                                        routehandle, routeOptions, rc)
+      subroutine ESMF_BundleRegridStore(srcBundle, dstBundle, parentVM, &
+                                       routehandle, regridmethod, regridnorm, &
+                                       srcMask, dstMask, routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: srcbundle
-      type(ESMF_Bundle), intent(inout) :: dstbundle
+      type(ESMF_Bundle), intent(in) :: srcBundle
+      type(ESMF_Bundle), intent(inout) :: dstBundle
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteHandle), intent(out) :: routehandle
+      type(ESMF_RegridMethod), intent(in) :: regridmethod
+      type(ESMF_RegridNormOpt), intent(in), optional :: regridnorm
+      type(ESMF_Mask), intent(in), optional :: srcMask
+      type(ESMF_Mask), intent(in), optional :: dstMask
       type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       integer, intent(out), optional :: rc
 !
@@ -959,9 +964,9 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [srcbundle] 
+!     \item [srcBundle] 
 !           {\tt ESMF\_Bundle} containing source data.
-!     \item [dstbundle] 
+!     \item [dstBundle] 
 !           {\tt ESMF\_Bundle} containing destination grid and data map.
 !     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Bundle}s, 
@@ -972,6 +977,15 @@
 !     \item [routehandle]
 !           Output from this call, identifies the precomputed work which
 !           will be executed when {\tt ESMF\_FieldRegrid} is called.
+!     \item [regridmethod]
+!           Type of regridding to do.  A set of predefined methods are
+!           supplied.
+!     \item [{[regridnorm]}]
+!           Normalization option, only for specific regrid types.
+!     \item [{[srcMask]}]
+!           Optional {\tt ESMF\_Mask} identifying valid source data.
+!     \item [{[dstMask]}]
+!           Optional {\tt ESMF\_Mask} identifying valid destination data.
 !     \item [{[routeOptions]}]
 !           Not normally specified.  Specify which internal strategy to select
 !           when executing the communication needed to execute the regrid.
@@ -984,14 +998,49 @@
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
+      type(ESMF_BundleType), pointer :: stypep, dtypep
    
       ! Initialize return code   
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! Sanity checks for good bundle, and that it has an associated grid
+      ! and data before going down to the next level.
+      if (.not.associated(dstBundle%btypep)) then
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+      if (.not.associated(srcBundle%btypep)) then
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
 
-      !TODO: add code  here
+      dtypep => dstBundle%btypep
+      stypep => srcBundle%btypep
 
+      if (dtypep%bundlestatus.ne.ESMF_STATUS_READY .or. &
+          stypep%bundlestatus.ne.ESMF_STATUS_READY) then
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! TODO: this only works for all fields in the bundle being identical,
+      ! including relloc.  if that is not true, we have to compute different
+      ! weights for each field. 
+
+      ! TODO: for now, add a check in the bundle to be sure all fields are
+      ! what - conformant? congruent? confused?
+
+      call ESMF_FieldRegridStore(stypep%flist(1), dtypep%flist(1), &
+                                 parentVM, routehandle, regridmethod, &
+                                 regridnorm, srcMask, dstMask, &
+                                 routeOptions, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       !if (present(rc)) rc = ESMF_SUCCESS
