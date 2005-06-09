@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.68 2005/05/31 17:39:59 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.69 2005/06/09 16:39:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -107,6 +107,7 @@
       public ESMF_RoutePrecomputeRegrid
       public ESMF_RoutePrecomputeDomList
       public ESMF_RouteRun
+      public ESMF_RouteRunMulti
       public ESMF_RouteRunF90PtrI411D
       public ESMF_RouteRunF90PtrI421D
       public ESMF_RouteRunF90PtrR811D
@@ -131,7 +132,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.68 2005/05/31 17:39:59 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.69 2005/06/09 16:39:53 nscollins Exp $'
 
 !==============================================================================
 !
@@ -188,18 +189,13 @@ end function radd
         ! local variables
         type (ESMF_Route) :: route         ! new C++ Route
         integer :: status                  ! local error status
-        logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
         status = ESMF_FAILURE
-        rcpresent = .FALSE.   
         route%this = ESMF_NULL_POINTER
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        if (present(rc)) rc = ESMF_FAILURE
 
         ! Call C++ create code
         call c_ESMC_RouteCreate(route, vm, status)
@@ -210,7 +206,7 @@ end function radd
         ! Set return values
         ESMF_RouteCreate = route
 
-        if (rcpresent) rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_RouteCreate
 
@@ -243,17 +239,9 @@ end function radd
 
         ! local variables
         integer :: status                  ! local error status
-        logical :: rcpresent               ! did user specify rc?
-
-        ! Set initial values
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        if (present(rc)) rc = ESMF_FAILURE
 
         ! Call C++ destroy code
         call c_ESMC_RouteDestroy(route, status)
@@ -264,7 +252,7 @@ end function radd
         ! nullify pointer
         route%this = ESMF_NULL_POINTER
 
-        if (rcpresent) rc = ESMF_SUCCESS
+        ! logerr routine already set rc
 
         end subroutine ESMF_RouteDestroy
 
@@ -304,17 +292,9 @@ end function radd
 
         ! local variables
         integer :: status                  ! local error status
-        logical :: rcpresent               ! did user specify rc?
-
-        ! Set initial values
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.   
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        if (present(rc)) rc = ESMF_FAILURE
 
         if (present(value1)) then
           ! code to be added here
@@ -326,11 +306,12 @@ end function radd
 
         ! Call C++  code
 !       call c_ESMC_RouteGet(route, value1, value2, status)
+        status = ESMF_FAILURE  ! not implemented yet
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        if (rcpresent) rc = ESMF_SUCCESS
+        ! logerr already set rc
 
         end subroutine ESMF_RouteGet
 
@@ -1425,8 +1406,8 @@ end function radd
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
-      type(ESMF_LocalArray), intent(in), optional :: srcarray
-      type(ESMF_LocalArray), intent(in), optional :: dstarray
+      type(ESMF_LocalArray), intent(inout), optional :: srcarray
+      type(ESMF_LocalArray), intent(inout), optional :: dstarray
       integer, intent(out), optional :: rc            
 
 !
@@ -1437,10 +1418,11 @@ end function radd
 !     \begin{description}
 !     \item[route] 
 !          {\tt ESMF\_Route} to be executed.
-!     \item[{[srcarray]}]
+!     \item[{[srcArray]}]
 !          {\tt ESMF\_LocalArray} containing data to be sent.
-!     \item[{[dstarray]}]
+!     \item[{[dstArray]}]
 !          {\tt ESMF\_LocalArray} containing data to be received.
+!          If not specified, {\tt srcArray} is both source and destination.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1471,6 +1453,65 @@ end function radd
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_RouteRun
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteRunMulti"
+!BOPI
+! !IROUTINE: ESMF_RouteRunMulti - Execute the communications the Route represents
+
+! !INTERFACE:
+      subroutine ESMF_RouteRunMulti(route, srcArrayList, dstArrayList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Route), intent(in) :: route
+      type(ESMF_LocalArray), intent(inout), optional :: srcArrayList(:)
+      type(ESMF_LocalArray), intent(inout), optional :: dstArrayList(:)
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Execute the communications this {\tt ESMF\_Route} represents.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[route] 
+!          {\tt ESMF\_Route} to be executed.
+!     \item[{[srcArrayList]}]
+!          List of {\tt ESMF\_LocalArray}s containing data to be sent.
+!     \item[{[dstArrayList]}]
+!          List of {\tt ESMF\_LocalArray}s containing data to be received.
+!          If not specified, {\tt srcArrayList} is both source and destination.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        logical :: rcpresent               ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        call c_ESMC_RouteRunLAL(route, srcArrayList, dstArrayList, status)
+
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_RouteRunMulti
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

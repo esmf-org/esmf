@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.31 2005/03/10 17:42:01 nscollins Exp $
+// $Id: ESMC_XPacket.h,v 1.32 2005/06/09 16:39:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -60,14 +60,38 @@
      // one of these blocks describes an N-d hyperslab of data
      // embedded in a larger N-d array.
      
+     int rank;                       // dimensionality of hyperslab
+     int offset;                     // item offset from base of memory block
+     int contig_length;              // #contig items in fastest varying dim
+     int contigrank;                 // highest rank for which block is contig
+
+     // TODO: are we going to need an index number for the case where
+     // multiple addresses are passed into each call to the run routine?
+     // (for example, loose bundles with multiple fields, or fields
+     // with multiple logical blocks)?  if multiple addresses are passed in,
+     // the list must be in the same order at Store() time as at Run() time.
+     // proposed new member of the xpacket would be 'block_index' to indicate
+     // the address index this xpacket applies to.  (if the block don't have
+     // identical index orders, or ranks, or whatever, we may have to
+     // compute a separate xpacket per block.)
+  
+   // int block_index;               // if multiple addrs, which address
+
+     // TODO: there exists the case in loose bundles where all the fields
+     // contain identical data layouts, in all aspects:  scalar/vector,
+     // data rank, data type, interleave, index order, etc.  if so, we can
+     // build xpackets based on inspecting data from the first field/block 
+     // and then at run time apply it to all fields/blocks sequentially.  
+     // proposed new member of the xpacket would be 'congruent'. 
+
+   // bool congruent;                // if true, xpackets apply to all addrs
+
      // TODO: stride and rep_count are really only ESMF_MAXDIM-1 because
      // contig_length implicitly stores the first rep_count, and the first
-     // stride is always 1 item.
+     // stride is always 1 item.  if we fix this in the class, we need to
+     // find and fix all interfaces which get and set those values and
+     // make sure they are also declared maxdim-1.
 
-     int rank;                       // dimensionality of hyperslab
-     int offset;                     // offset from "base" of memory block
-     int contigrank;                 // highest rank for which block is contig
-     int contig_length;              // #contig items in fastest varying dim
      int stride[ESMF_MAXDIM];        // number of items to skip in each dim-1
      int rep_count[ESMF_MAXDIM];     // repeat count for each dim-1
      

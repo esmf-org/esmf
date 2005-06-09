@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.35 2005/02/28 16:37:00 nscollins Exp $
+// $Id: ESMC_Route_F.C,v 1.36 2005/06/09 16:39:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -94,20 +94,69 @@ extern "C" {
            void *dst_base_addr = NULL;
            ESMC_DataKind sdk, ddk;
 
-	   if (((long int)*src != 0) && ((long int)*src != -1)) {
+           sdk = ESMF_NOKIND;
+           ddk = ESMF_NOKIND;
+
+	   if (((long int)src != 0) && ((long int)src != -1) &&
+	       ((long int)*src != 0) && ((long int)*src != -1)) {
                (*src)->ESMC_LocalArrayGetBaseAddr(&src_base_addr);
                sdk = (*src)->ESMC_LocalArrayGetKind();
+               // allow destination to be optional; if not specified, use the
+               // src as both src and dst.
+               dst_base_addr = src_base_addr;
+               ddk = sdk;
            }
-	   if (((long int)*dst != 0) && ((long int)*dst != -1)) {
+
+	   if (((long int)dst != 0) && ((long int)dst != -1) &&
+	       ((long int)*dst != 0) && ((long int)*dst != -1)) {
                (*dst)->ESMC_LocalArrayGetBaseAddr(&dst_base_addr);
                ddk = (*dst)->ESMC_LocalArrayGetKind();
            }
+
            if (sdk != ddk) {
                ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
                      "; source & destination datatypes not the same", status);
                return;
            }
            *status = (*ptr)->ESMC_RouteRun(src_base_addr, dst_base_addr, sdk);
+       }
+#undef ESMC_METHOD
+
+#define ESMC_METHOD "c_ESMC_RouteRunLAL"
+       void FTN(c_esmc_routerunlal)(ESMC_Route **ptr, ESMC_LocalArray **src,
+                                   ESMC_LocalArray **dst, int *status) {
+           void *src_base_addr = NULL;
+           void *dst_base_addr = NULL;
+           ESMC_DataKind sdk, ddk;
+           int srcCount, dstCount;
+
+           sdk = ESMF_NOKIND;
+           ddk = ESMF_NOKIND;
+
+           srcCount = 1;
+           dstCount = 1;
+
+	   if (((long int)*src != 0) && ((long int)*src != -1)) {
+               (*src)->ESMC_LocalArrayGetBaseAddr(&src_base_addr);
+               sdk = (*src)->ESMC_LocalArrayGetKind();
+               // allow destination to be optional; if not specified, use the
+               // src as both src and dst.
+               dst_base_addr = src_base_addr;
+               ddk = sdk;
+           }
+
+	   if (((long int)*dst != 0) && ((long int)*dst != -1)) {
+               (*dst)->ESMC_LocalArrayGetBaseAddr(&dst_base_addr);
+               ddk = (*dst)->ESMC_LocalArrayGetKind();
+           }
+
+           if (sdk != ddk) {
+               ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
+                     "; source & destination datatypes not the same", status);
+               return;
+           }
+           *status = (*ptr)->ESMC_RouteRunMulti(src_base_addr, dst_base_addr, 
+                             sdk, srcCount, dstCount);
        }
 #undef ESMC_METHOD
 

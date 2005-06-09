@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.135 2005/03/14 18:14:46 nscollins Exp $
+//$Id: ESMC_Route.C,v 1.136 2005/06/09 16:39:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.135 2005/03/14 18:14:46 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.136 2005/06/09 16:39:53 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -569,7 +569,6 @@
     char *sendBuffer, *recvBuffer;
     char **sendBufferList, **recvBufferList;
     vmk_commhandle **handle;
-
 
     VMType = 0;   // TODO: unused so far, here for future use
     nbytes = ESMC_DataKindSize(dk);
@@ -1684,6 +1683,37 @@
 
  } // end ESMC_RouteRun
 
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteRunMulti"
+//BOP
+// !IROUTINE:  ESMC_RouteRunMulti - Execute the comm described by this obj
+//
+// !INTERFACE:
+      int ESMC_Route::ESMC_RouteRunMulti(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      void *sendAddr,                 // in, list of local send buffer addrs
+      void *recvAddr,                 // in, list of local receive buffer addrs
+      ESMC_DataKind dk,               // in, data kind for both src & dest
+      int numSrcBlocks,               // in, count of src addresses
+      int numDstBlocks) {             // in, count of dst addresses
+//
+// !DESCRIPTION:
+//     Calls the communications routines to send/recv the information
+//     set up in this table.
+//
+//EOP
+// !REQUIREMENTS:  
+    
+    return ESMC_RouteRun(sendAddr, recvAddr, dk);
+
+}
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_RoutePrecomputeHalo"
@@ -1964,6 +1994,7 @@
 
     ESMC_AxisIndex myAI[ESMF_MAXDIM], myTotalAI[ESMF_MAXDIM],
                                         theirAI[ESMF_MAXDIM];
+    ESMC_AxisIndex intersectAI[ESMF_MAXDIM], intersectLocalAI[ESMF_MAXDIM];
     ESMC_XPacket *myXP = NULL;
     ESMC_XPacket *theirXP = NULL;
     ESMC_XPacket intersectXP;
@@ -1978,6 +2009,21 @@
     rc = ESMF_SUCCESS;
     didsomething = 0;
 
+    // TODO: 
+    // start of precompute overhaul.   the proposed plan:
+    //  compute real AIs only for grid axes
+    //    (for the others, use what -- the full min/max?)
+    //  use the new AxisIndexIntersect routines to decide if the src
+    //    and dst overlap; if so, that routine returns a new AI.
+    //    (must pass in array of AIs for destination; routine does not alloc)
+    //  convert the overlap AI into an XPacket.
+    //  add that XP to the route table just like before.
+    //
+    // this should allow any dimensionality of data array to be supported.
+    // the rewritten route code already handles up to 7d xpackets.
+    //
+
+
     // Calculate the sending table.  If this DE is not part of the sending
     // layout skip this loop.
     if (srcMyDE != -1) {
@@ -1987,13 +2033,17 @@
       // get "my" AI out of the srcAI array
       // TODO:  this is NOT going to work for data dims which are not
       //  equal the grid dims, e.g. a 2d grid with 4d data.
+      // (question - does a 4d data w/ 2d grid have 2 or 4 AIs?)
+      // (and do we have access to the datamap here so we know which are which?)
       for (k=0; k<rank; k++) {
         myAI[k]          =      srcCompAI[srcMyDE + k*srcAICount];
         myTotalAI[k]     =     srcTotalAI[srcMyDE + k*srcAICount];
         myGlobalStart[k] = srcGlobalStart[srcMyDE + k*srcAICount];
       }
 
+      // TODO: in the revised flow, this does not happen yet - stay with AI
       // calculate "my" (local DE's) XPacket in the sense of the global data
+      // you do have to translate into global AI space here.
       rc = ESMC_XPacketFromAxisIndex(myAI, rank, srcGlobalCount,
                                      NULL, &myXP, &myXPCount);
 
@@ -2015,9 +2065,20 @@
             theirAI[k]     =  dstCompAI[theirDE + k*dstAICount];
           }
  
+      // TODO: in the revised flow, this does not happen yet - stay with AI
+      // but translate into global AI space
           // calculate "their" XPacket in the sense of the global data
           rc = ESMC_XPacketFromAxisIndex(theirAI, rank, dstGlobalCount,
                                          NULL, &theirXP, &theirXPCount);
+
+      // TODO: intersect the AI lists, use intersectGlobalAI as dest
+      // like this:
+      // if (!ESMC_AxisIndexIntersect(myglobalAI, theirglobalAI, rank, &
+      //                              intersectGlobalAI)) 
+      //    continue;
+
+      // TODO: then translate from global AI to ? directly to xp, or first
+      // to local AI, then local AI to xp? 
 
           // calculate the intersection
           intersectXP.ESMC_XPacketIntersect(&myXP[0], &theirXP[0]);
@@ -2028,6 +2089,9 @@
               delete [] theirXP;
               continue;
           }
+
+      // TODO: translate intersect back to local AI space
+      // then translate the local AI into an xpacket and add to route
 
           // translate from global to local data space
           intersectXP.ESMC_XPacketGlobalToLocal(&intersectXP, myTotalAI, 

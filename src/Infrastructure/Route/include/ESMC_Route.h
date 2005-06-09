@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.52 2005/03/10 17:38:26 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.53 2005/06/09 16:39:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -145,7 +145,11 @@
                        ESMC_Logical *hasSrcData, ESMC_Logical *hasDstData);
 
     // execute the communication routines set up in this route object
+    // most frequently used interface is the first; the second one allows
+    // a list of src and dst addrs to be passed in.
     int ESMC_RouteRun(void *srcaddr, void *dstaddr, ESMC_DataKind dk);
+    int ESMC_RouteRunMulti(void *srcaddr, void *dstaddr, ESMC_DataKind dk, 
+                           int numSrcBlocks=1, int numDstBlocks=1);
 
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_RouteValidate(const char *options) const;

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.66 2005/05/31 17:39:49 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.67 2005/06/09 16:38:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.66 2005/05/31 17:39:49 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.67 2005/06/09 16:38:12 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -226,7 +226,6 @@
 !EOPI
 
         integer :: localrc         ! local error status
-        logical :: rcpresent      ! did user specify rc?
         integer :: size_decomp, size_AI
         integer :: i
 
@@ -583,18 +582,13 @@
 !EOPI
 
         integer :: status         ! local error status
-        logical :: rcpresent      ! did user specify rc?
         integer :: size_decomp
 
-! initialize return code; assume failure until success is certain
+        ! initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        if (present(rc)) rc = ESMF_FAILURE
  
-! call c routine to halo
+        ! call c routine to execute halo
         size_decomp = size(decompids)
         call c_ESMC_ArrayHalo(array, delayout, AI_global, global_dimlens, &
                               decompids, size_decomp, periodic, status)
@@ -602,10 +596,106 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+        ! logerr routine sets rc based on return from C call.
 
         end subroutine ESMF_ArrayHaloDeprecated
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayHaloMulti"
+!BOP
+! !IROUTINE: ESMF_ArrayHalo - Halo an Array
+!
+! !INTERFACE:
+    ! Private name; call using ESMF_ArrayHalo()
+    subroutine ESMF_ArrayHaloMulti(arrayList, routehandle, blocking, &
+                                   commhandle, routeOptions, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array), intent(inout) :: arrayList(:)
+    type(ESMF_RouteHandle), intent(in) :: routehandle
+    type(ESMF_BlockingFlag), intent(in), optional :: blocking
+    type(ESMF_CommHandle), intent(inout), optional :: commhandle
+    type(ESMF_RouteOptions), intent(in), optional :: routeOptions
+    integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Perform a halo operation over the data in a list of {\tt ESMF\_Array}s.
+!   This routine updates the data inside the {\tt ESMF\_Array}s in place.
+!   It uses a precomputed {\tt ESMF\_Route} for the communications pattern.
+!   (See {\tt ESMF\_ArrayHaloPrecompute()} for how to precompute and 
+!   associate an {\tt ESMF\_Route} with an {\tt ESMF\_RouteHandle}).
+!
+!   \begin{description}
+!   \item [arrayList]
+!         List of {\tt ESMF\_Array}s containing data to be haloed.
+!   \item [routehandle]
+!         {\tt ESMF\_RouteHandle} which was returned from an
+!         {\tt ESMF\_ArrayHaloPrecompute()} call.
+!   \item [{[blocking]}]
+!         Optional argument which specifies whether the operation should
+!         wait until complete before returning or return as soon
+!         as the communication between DEs has been scheduled.
+!         If not present, default is to do synchronous communications.
+!         Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!         {\tt ESMF\_NONBLOCKING}.
+!      (This feature is not yet supported.  All operations are synchronous.)
+!   \item [{[commhandle]}]
+!         If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!         argument is required.  Information about the pending operation
+!         will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!         or waited for later.
+!    \item [{[routeOptions]}]
+!          Not normally specified.  Specify which internal strategy to select
+!          when executing the communication needed to execute the halo.
+!          See Section~\ref{opt:routeopt} for possible values.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+      integer :: status         ! local error status
+      integer :: i, nitems
+      type(ESMF_LocalArray), allocatable :: local_arrayList(:)
+      type(ESMF_Route) :: route
+
+      ! initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
+ 
+      call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      nitems = size(arrayList)
+      allocate(local_arrayList(nitems), stat=status)
+      ! TODO: add error check for failed allocation
+ 
+      ! fortran equivalent of a cast - routerun wants a local array 
+      do i=1, nitems
+        local_arrayList(i)%this%ptr = arrayList(i)%this%ptr
+      enddo
+
+      ! Execute the communications call.
+      if (present(routeOptions)) &
+                         call c_ESMC_RouteSet(route, routeOptions, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      call ESMF_RouteRunMulti(route, local_arrayList, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      deallocate(local_arrayList, stat=status)
+      ! TODO: add error check for failed allocation
+
+      ! last call to route run set rc
+
+      end subroutine ESMF_ArrayHaloMulti
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -663,19 +753,17 @@
 !EOP
 
       integer :: status         ! local error status
-      logical :: rcpresent      ! did user specify rc?
       type(ESMF_LocalArray) :: local_array
       type(ESMF_Route) :: route
 
       ! initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
  
       call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! fortran equivalent of a cast - routerun wants a local array 
       local_array%this%ptr = array%this%ptr
@@ -687,15 +775,14 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_RouteRun(route, local_array, local_array, rc=status)
+      call ESMF_RouteRun(route, local_array, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+      ! last call to logerr already set rc
 
-        end subroutine ESMF_ArrayHaloNew
+      end subroutine ESMF_ArrayHaloNew
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
