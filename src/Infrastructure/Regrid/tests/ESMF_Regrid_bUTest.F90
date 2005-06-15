@@ -1,4 +1,3 @@
-! $Id: ESMF_Regrid_bUTest.F90,v 1.7 2005/05/11 19:44:34 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_Regrid_bUTest.F90,v 1.7 2005/05/11 19:44:34 svasquez Exp $'
+      '$Id: ESMF_Regrid_bUTest.F90,v 1.8 2005/06/15 21:58:06 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     integer :: lrc,iFunction
@@ -46,7 +45,8 @@
     integer :: result=0.
     integer :: sub_rc    !Subroutine return call
     integer :: iDistr, nXY(2,2)
-    integer :: TwoOrOne
+    integer :: TwoOrOne, rc
+    real(ESMF_KIND_R8) :: startTime, endTime, testTime
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
@@ -75,103 +75,127 @@
 
    !--------------------------------
    !NEX_UTest
-   !Test for function, f=x, decomp = (npets,1)
+   !Test for function, f=x, decomp = (npets,1) regrid_method = ESMF_REGRID_METHOD_BILINEAR
     iFunction = 1
     iDistr = 1
     sub_rc=ESMF_SUCCESS
     write(failMsg, *) "Error in regrid"
-    write(name, *) "Regrid f=x, and decomp=(npets,1)"
-    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    write(name, *) "Regrid f=x, decomp=(npets,1) and Bilinear"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:),regridmethod=ESMF_REGRID_METHOD_BILINEAR)
     call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
    !--------------------------------
    !EX_UTest
-   !Test for function, f=x, decomp = (npets)
+   !Test for function, f=x, decomp = (npets) regrid_method = ESMF_REGRID_METHOD_BILINEAR
     iFunction = 1
     iDistr = 2
     sub_rc=ESMF_SUCCESS
     write(failMsg, *) "Error in regrid"
-    write(name, *) "Regrid f=x, and decomp=(npets)"
-    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    write(name, *) "Regrid f=x, decomp=(npets) and Bilinear"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:),regridmethod=ESMF_REGRID_METHOD_BILINEAR)
     call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
 
    !--------------------------------
    !EX_UTest
-   !Test for function, f=x, decomp = (npets/2,2)
+   !Test for function, f=x, decomp = (npets/2,2), regrid_method = ESMF_REGRID_METHOD_BILINEAR
     iFunction = 1
     iDistr = 2
     sub_rc=ESMF_SUCCESS
     write(failMsg, *) "Error in regrid"
-    write(name, *) "Regrid f=x, and decomp=(npets/2,2)"
-    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    write(name, *) "Regrid f=x, decomp=(npets/2,2) and Bilinear"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:),regridmethod=ESMF_REGRID_METHOD_BILINEAR)
     call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
 
    !--------------------------------
    !EX_UTest
-   !Test for function, f=2+cos(pi*r/L), decomp = (npets,1)
+   !Test for function, f=2+cos(pi*r/L), decomp = (npets,1), regrid_method = ESMF_REGRID_METHOD_BILINEAR
     iFunction = 2
     iDistr = 1
     sub_rc=ESMF_SUCCESS
     write(failMsg, *) "Error in regrid"
-    write(name, *) "Regrid f=2+cos(pi*r/L), and decomp=(npets,1)"
-    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    write(name, *) "Regrid f=2+cos(pi*r/L), decomp=(npets,1) and Bilinear"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:),regridmethod=ESMF_REGRID_METHOD_BILINEAR)
     call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
 
    !--------------------------------
    !EX_UTest
-   !Test for function, f=2+cos(pi*r/L), decomp = (npets/2,2)
+   !Test for function, f=2+cos(pi*r/L), decomp = (npets/2,2), regrid_method = ESMF_REGRID_METHOD_BILINEAR
     iFunction = 2
     iDistr = 2
     sub_rc=ESMF_SUCCESS
     write(failMsg, *) "Error in regrid"
-    write(name, *) "Regrid f=2+cos(pi*r/L), and decomp=(npets/2,2)"
-    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    write(name, *) "Regrid f=2+cos(pi*r/L), decomp=(npets/2,2) and Bilinear"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:),regridmethod=ESMF_REGRID_METHOD_BILINEAR)
     call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
 
    !--------------------------------
    !EX_UTest
-   !Test for function, f=2+(cos(theta))**2 * cos(2*phi), decomp = (npets,1)
+   !Test for function, f=2+(cos(theta))**2 * cos(2*phi), decomp = (npets,1), regrid_method = ESMF_REGRID_METHOD_BILINEAR
     iFunction = 3
     iDistr = 1
     sub_rc=ESMF_SUCCESS
     write(failMsg, *) "Error in regrid"
-    write(name, *) "Regrid f=2+(cos(theta))**2 * cos(2*phi), and decomp=(npets,1)"
-    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    write(name, *) "Regrid f=2+(cos(theta))**2 * cos(2*phi), decomp=(npets,1) and Bilinear"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:),regridmethod=ESMF_REGRID_METHOD_BILINEAR)
     call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
 
    !--------------------------------
    !EX_UTest
-   !Test for function, f=2+cos(pi*r/L), decomp = (npets/2,2)
+   !Test for function, f=2+cos(pi*r/L), decomp = (npets/2,2), regrid_method = ESMF_REGRID_METHOD_BILINEAR
     iFunction = 3
     iDistr = 2
     sub_rc=ESMF_SUCCESS
     write(failMsg, *) "Error in regrid"
-    write(name, *) "Regrid f=2+cos(pi*r/L), and decomp=(npets/2,2)"
-    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    write(name, *) "Regrid f=2+cos(pi*r/L), decomp=(npets/2,2) and Bilinear"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:),regridmethod=ESMF_REGRID_METHOD_BILINEAR)
     call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
 
    !--------------------------------
    !EX_UTest
-   !Test for function, f=2+ (sin(2*theta))**16 * cos(16*phi), decomp = (npets,1)
+   !Test for function, f=2+ (sin(2*theta))**16 * cos(16*phi), decomp = (npets,1), regrid_method = ESMF_REGRID_METHOD_BILINEAR
     iFunction = 4
     iDistr = 1
     sub_rc=ESMF_SUCCESS
     write(failMsg, *) "Error in regrid"
-    write(name, *) "Regrid f=2+ (sin(2*theta))**16 * cos(16*phi), and decomp=(npets,1)"
-    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    write(name, *) "Regrid f=2+ (sin(2*theta))**16 * cos(16*phi), decomp=(npets,1) and Bilinear"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:),regridmethod=ESMF_REGRID_METHOD_BILINEAR)
     call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
 
    !--------------------------------
    !EX_UTest
-   !Test for function, f=2+ (sin(2*theta))**16 * cos(16*phi), decomp = (npets/2,2)
+   !Test for function, f=2+ (sin(2*theta))**16 * cos(16*phi), decomp = (npets/2,2) regrid_method = ESMF_REGRID_METHOD_BILINEAR
     iFunction = 4
     iDistr = 2
     sub_rc=ESMF_SUCCESS
     write(failMsg, *) "Error in regrid"
-    write(name, *) "Regrid f=2+ (sin(2*theta))**16 * cos(16*phi), and decomp=(npets/2,2)"
-    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:))
+    write(name, *) "Regrid f=2+ (sin(2*theta))**16 * cos(16*phi), decomp=(npets/2,2) and Bilinear"
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:),regridmethod=ESMF_REGRID_METHOD_BILINEAR)
     call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
+
+   !--------------------------------
+   !EX_UTest
+   !Test for function, f=2+ (sin(2*theta))**16 * cos(16*phi), decomp = (npets/2,2), regrid_method = ESMF_REGRID_METHOD_CONSERV1
+    iFunction = 4
+    iDistr = 2
+    sub_rc=ESMF_SUCCESS
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid f=2+ (sin(2*theta))**16 * cos(16*phi), decomp=(npets/2,2), and Conserv1"
+    !Get startTime
+    call ESMF_VMWtime(startTime,rc=rc)
+    call RegridUTest(FieldChoice=iFunction,npetsXY=nXY(iDistr,:),regridmethod=ESMF_REGRID_METHOD_CONSERV1)
+    !Get endTime
+    call ESMF_VMWTime(endTime,rc=rc)
+    testTime = endTime - startTime
+    call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
+
+   !--------------------------------
+   !EX_UTest
+   ! Verify that the regrid does not take too long
+    write(failMsg, *) "Regrid took too long"
+    write(name, *) " Verify Conserv Regrid takes no longer than 5 seconds"
+    print *, testTime
+    call ESMF_Test((testTime.lt.5),name, failMsg, result, ESMF_SRCLINE)
 #endif
 
 
@@ -180,7 +204,7 @@
 
     contains
 
-    subroutine RegridUTest(FieldChoice, npetsXY)
+    subroutine RegridUTest(FieldChoice, npetsXY, regridmethod)
 
     implicit none
 
@@ -191,6 +215,7 @@
       ! 4-->    f=2+ (sin(2*theta))**16 * cos(16*phi)
 
       integer :: FieldChoice
+      type(ESMF_RegridMethod) :: regridmethod
 
     ! Local variables
     type(ESMF_Field) :: field1, field2
@@ -213,6 +238,7 @@
     real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
     real (ESMF_KIND_R8) :: epsil, length_scale, pi,radius, RelativeError
     real (ESMF_KIND_R8) :: max_error, avg_error
+
 
 
 !-------------------------------------------------------------------------
@@ -352,8 +378,9 @@
    !=================================================================
     call ESMF_FieldRegridStore(field1, field2, vm, &
                                routehandle=regrid_rh, &
+                               regridmethod=regridmethod, rc=rc)
                                !regridmethod=ESMF_REGRID_METHOD_CONSERV1, rc=rc)
-                               regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
+                               !regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
 
    !Regrid
    !======
