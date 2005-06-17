@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.2 2005/06/17 22:24:03 eschwab Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.3 2005/06/17 22:53:09 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -392,6 +392,8 @@
 
       public ESMF_Logical, ESMF_TRUE, ESMF_FALSE
 
+      public ESMF_Direction, ESMF_MODE_FORWARD, ESMF_MODE_REVERSE
+
       public ESMF_ReduceFlag, ESMF_SUM, ESMF_MIN, ESMF_MAX
       public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_NONBLOCKING
       public ESMF_ContextFlag, ESMF_CHILD_IN_NEW_VM, ESMF_CHILD_IN_PARENT_VM
@@ -445,6 +447,7 @@ interface operator (.eq.)
  module procedure ESMF_bfeq
  module procedure ESMF_cfeq
  module procedure ESMF_tnfeq
+ module procedure ESMF_freq
 end interface
 
 interface operator (.ne.)
@@ -457,6 +460,7 @@ interface operator (.ne.)
  module procedure ESMF_bfne
  module procedure ESMF_cfne
  module procedure ESMF_tnfne
+ module procedure ESMF_frne
 end interface
 
 interface assignment (=)
@@ -670,6 +674,23 @@ function ESMF_aine(ai1, ai2)
               (ai1%max .ne. ai2%max) .or. &
               (ai1%stride .ne. ai2%stride))
 
+end function
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_Direction types
+
+function ESMF_freq(fr1, fr2)
+ logical ESMF_freq
+ type(ESMF_Direction), intent(in) :: fr1, fr2
+
+ ESMF_freq = (fr1%value .eq. fr2%value)
+end function
+
+function ESMF_frne(fr1, fr2)
+ logical ESMF_frne
+ type(ESMF_Direction), intent(in) :: fr1, fr2
+
+ ESMF_frne = (fr1%value .ne. fr2%value)
 end function
 
 !------------------------------------------------------------------------------
