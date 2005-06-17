@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.1 2005/05/31 17:27:20 nscollins Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.2 2005/06/17 22:24:03 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -357,6 +357,19 @@
         ESMF_ABORT        = ESMF_TerminationFlag(2)
 
 !------------------------------------------------------------------------------
+!
+!     ! Direction type
+
+      type ESMF_Direction
+      sequence
+      private
+          integer :: value
+      end type
+
+      type(ESMF_Direction), parameter:: &
+        ESMF_MODE_FORWARD = ESMF_Direction(1), &
+        ESMF_MODE_REVERSE = ESMF_Direction(2)
+
 !------------------------------------------------------------------------------
 !BOPI
 !
