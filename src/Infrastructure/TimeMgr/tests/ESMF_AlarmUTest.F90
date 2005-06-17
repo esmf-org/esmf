@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.26 2004/12/10 22:39:53 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.27 2005/06/17 21:51:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.26 2004/12/10 22:39:53 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.27 2005/06/17 21:51:33 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,22 +52,27 @@
 
       logical :: bool
       ! instantiate a clock 
-      type(ESMF_Clock) :: clock, clock1, clock2
+      type(ESMF_Clock) :: clock, clock1, clock2, domainClock
       type(ESMF_Alarm) :: alarm, alarm1, alarm2, alarm3, alarm4
+      type(ESMF_Alarm) :: beforeAlarm, afterAlarm
       type(ESMF_Alarm) :: alarm5(200)
       type(ESMF_Alarm) :: alarmList(201)
+      type(ESMF_Direction) :: forwardDirection, reverseDirection
       logical :: enabled, isringing, sticky, alarmsEqual, alarmsNotEqual
-      logical :: willRingNext
-      integer :: alarmCount, nstep, sstep, i
+      logical :: willRingNext, testPass
+      integer(ESMF_KIND_I8) :: forwardCount, reverseCount
+      integer :: alarmCount, nclock, nstep, sstep, i, iteration
+      integer :: yy, mm, dd, h, m
 
       ! instantiate a calendar
       type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, &
                              no_leapCalendar, esmf_360dayCalendar
 
       ! instantiate timestep, start and stop times
-      type(ESMF_TimeInterval) :: timeStep, alarmStep, ringDuration
+      type(ESMF_TimeInterval) :: timeStep, alarmStep, alarmStep2, ringDuration
       type(ESMF_Time) :: startTime, stopTime, nextTime
       type(ESMF_Time) :: alarmTime, alarmStopTime
+      type(ESMF_Time) :: beforeAlarmTime, afterAlarmTime
       type(ESMF_Time) :: currentTime
       character(ESMF_MAXSTR) :: aName
 
@@ -911,6 +916,436 @@
 
       call ESMF_AlarmDestroy(alarm4, rc=rc)
       call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Non-Sticky Alarms 5
+      !  Test reverse non-sticky alarm 
+      write(failMsg, *) "Did not return nstep=24, forwardCount=96, reverseCount=0, etc., and ESMF_SUCCESS"
+      write(name, *) "Non-Sticky Alarm Test 5"
+      call ESMF_TimeIntervalSet(timeStep, m=15, rc=rc)
+      call ESMF_TimeSet(startTime, yy=1999, mm=12, dd=31, h=23, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, h=23, &
+                        calendar=gregorianCalendar, rc=rc)
+      clock2 = ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, h=1, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(alarmStep, h=2, rc=rc)
+      call ESMF_TimeIntervalSet(ringDuration, m=30, rc=rc)
+      call ESMF_TimeSet(alarmStopTime, yy=2000, mm=1, dd=1, h=13, &
+                        calendar=gregorianCalendar, rc=rc)
+      alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, &
+                                ringInterval=alarmStep, &
+                                ringDuration=ringDuration, &
+                                stopTime=alarmStopTime, sticky=.false., rc=rc)
+      ! number of clock time steps alarm rings for
+      nstep = 0
+
+      ! number of times the clock has been run
+      nclock = 0
+
+      do while (nclock < 2)
+        ! run the clock
+        do while (.not. ESMF_ClockIsDone(clock2, rc=rc))
+          call ESMF_ClockGet(clock2, currTime=currentTime, rc=rc)
+          call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, m=m, rc=rc)
+          !print *, mm, "/", dd, "/", yy, " ", h, ":", m
+          if (ESMF_AlarmIsRinging(alarm4)) then
+            nstep = nstep + 1
+            !print *, "on"
+          else
+            !print *, "off"
+          endif
+          call ESMF_ClockAdvance(clock2, rc=rc)
+        enddo
+
+        if (nclock.eq.0) then
+          call ESMF_ClockGet(clock2, direction=forwardDirection, &
+                                     advanceCount=forwardCount, rc=rc)
+          !print *, "forwardCount = ", forwardCount
+        else
+          call ESMF_ClockGet(clock2, direction=reverseDirection, &
+                             advanceCount=reverseCount, rc=rc)
+          !print *, "reverseCount = ", reverseCount
+        endif
+
+        call ESMF_ClockSet(clock2, direction=ESMF_MODE_REVERSE, rc=rc)
+        nclock = nclock + 1
+
+
+      enddo
+
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nstep.eq.24).and. &
+                     (forwardCount.eq.96).and.(reverseCount.eq.0).and. &
+                     (forwardDirection.eq.ESMF_MODE_FORWARD).and. &
+                     (reverseDirection.eq.ESMF_MODE_REVERSE).and. &
+                     ESMF_ClockIsReverse(clock2), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !print *, "nstep = ", nstep, " nclock = ", nclock
+
+      call ESMF_AlarmDestroy(alarm4, rc=rc)
+      call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Sticky Alarms 1
+      !  Test reverse sticky alarm 
+      write(failMsg, *) " Did not return nstep=2 and ESMF_SUCCESS"
+      write(name, *) "Sticky Alarm Test 1"
+      call ESMF_TimeIntervalSet(timeStep, m=15, rc=rc)
+      call ESMF_TimeSet(startTime, yy=1999, mm=12, dd=31, h=23, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, h=23, &
+                        calendar=gregorianCalendar, rc=rc)
+      clock2 = ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, h=1, &
+                        calendar=gregorianCalendar, rc=rc)
+      alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, rc=rc)
+      ! number of clock time steps alarm rings for
+      nstep = 0
+
+      ! number of times the clock has been run
+      nclock = 0
+
+      do while (nclock < 2)
+        ! run the clock
+        do while (.not. ESMF_ClockIsDone(clock2, rc=rc))
+          call ESMF_ClockGet(clock2, currTime=currentTime, rc=rc)
+          call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, m=m, rc=rc)
+          !print *, mm, "/", dd, "/", yy, " ", h, ":", m
+          if (ESMF_AlarmIsRinging(alarm4)) then
+            nstep = nstep + 1
+            !print *, "on"
+            call ESMF_AlarmRingerOff(alarm4, rc=rc)
+          else
+            !print *, "off"
+          endif
+          call ESMF_ClockAdvance(clock2, rc=rc)
+        enddo
+
+        call ESMF_ClockSet(clock2, direction=ESMF_MODE_REVERSE, rc=rc)
+        nclock = nclock + 1
+      enddo
+
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nstep.eq.2), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "nstep = ", nstep, " nclock = ", nclock
+
+      call ESMF_AlarmDestroy(alarm4, rc=rc)
+      call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Sticky Alarms 2
+      !  Test reverse interval sticky alarm 
+      write(failMsg, *) " Did not return nstep=23 and ESMF_SUCCESS"
+      write(name, *) "Sticky Alarm Test 2"
+      call ESMF_TimeIntervalSet(timeStep, m=15, rc=rc)
+      call ESMF_TimeSet(startTime, yy=1999, mm=12, dd=31, h=23, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, h=23, &
+                        calendar=gregorianCalendar, rc=rc)
+      clock2 = ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, h=1, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(alarmStep, h=2, rc=rc)
+      alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, &
+                                ringInterval=alarmStep, rc=rc)
+      ! number of clock time steps alarm rings for
+      nstep = 0
+
+      ! number of times the clock has been run
+      nclock = 0
+
+      do while (nclock < 2)
+        ! run the clock
+        do while (.not. ESMF_ClockIsDone(clock2, rc=rc))
+          call ESMF_ClockGet(clock2, currTime=currentTime, rc=rc)
+          call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, m=m, rc=rc)
+          !print *, mm, "/", dd, "/", yy, " ", h, ":", m
+          if (ESMF_AlarmIsRinging(alarm4)) then
+            nstep = nstep + 1
+            !print *, "on"
+            call ESMF_AlarmRingerOff(alarm4, rc=rc)
+          else
+            !print *, "off"
+          endif
+          call ESMF_ClockAdvance(clock2, rc=rc)
+        enddo
+
+        call ESMF_ClockSet(clock2, direction=ESMF_MODE_REVERSE, rc=rc)
+        nclock = nclock + 1
+      enddo
+
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nstep.eq.23), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !print *, "nstep = ", nstep, " nclock = ", nclock
+
+      call ESMF_AlarmDestroy(alarm4, rc=rc)
+      call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Sticky Alarms 3
+      !  Test reverse one-shot sticky alarms per WRF use case
+      !  From Tom Henderson/WRF
+
+      write(name, *) "Sticky Alarm Test 3"
+      write(failMsg, *) " Alarms did not turn on/off at the correct time/iteration or did not return ESMF_SUCCESS"
+
+      call ESMF_TimeIntervalSet(timeStep, h=1, rc=rc)
+      call ESMF_TimeSet(startTime, yy=2005, mm=6, dd=15, h=1, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=2005, mm=6, dd=15, h=5, &
+                        calendar=gregorianCalendar, rc=rc)
+      domainClock = ESMF_ClockCreate("WRF Clock", &
+                                     timeStep, startTime, stopTime, rc=rc)
+
+      call ESMF_TimeSet(beforeAlarmTime, yy=2005, mm=6, dd=15, h=2, &
+                        calendar=gregorianCalendar, rc=rc)
+      beforeAlarm = ESMF_AlarmCreate(clock=domainClock, &
+                                     ringTime=beforeAlarmTime, &
+                                     sticky=.true., rc=rc)
+
+      call ESMF_TimeSet(afterAlarmTime, yy=2005, mm=6, dd=15, h=3, &
+                        calendar=gregorianCalendar, rc=rc)
+      afterAlarm  = ESMF_AlarmCreate(clock=domainClock, &
+                                     ringTime=afterAlarmTime, &
+                                     sticky=.true., rc=rc)
+
+      ! any single failure will cause the whole test to fail
+      testPass = .true.
+
+      ! track loop iterations
+      iteration = 0
+
+      call ESMF_ClockGet(domainClock, currTime=currentTime, rc=rc)
+      call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, rc=rc)
+      print *, "Begin"
+      print *, mm, "/", dd, "/", yy, " ", h, ": 0"
+
+      ! run the clock forward
+      do while (.not. ESMF_ClockIsDone(domainClock, rc=rc))
+        iteration = iteration + 1
+        print *, "Iteration = ", iteration
+
+        if (ESMF_AlarmIsRinging(beforeAlarm, rc=rc)) then
+          if (iteration .ne. 2 .or. h .ne. 2) then
+            testPass = .false.
+          endif
+          print *, "  beforeAlarm on"
+          call ESMF_AlarmRingerOff(beforeAlarm, rc=rc)
+        else
+          print *, "  beforeAlarm off"
+        endif
+
+        ! would call WRF solver here, before clock advance
+        print *, "  Solve"
+
+        call ESMF_ClockAdvance(domainClock, rc=rc)
+        call ESMF_ClockGet(domainClock, currTime=currentTime, rc=rc)
+        call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, rc=rc)
+        print *, " ClockAdvance()"
+        print *, mm, "/", dd, "/", yy, " ", h, ": 0"
+
+        if (ESMF_AlarmIsRinging(afterAlarm, rc=rc)) then
+          if (iteration .ne. 2 .or. h .ne. 3) then
+            testPass = .false.
+          endif
+          print *, "  afterAlarm on"
+          call ESMF_AlarmRingerOff(afterAlarm, rc=rc)
+        else
+          print *, "  afterAlarm off"
+        endif
+      enddo
+
+      ! run the clock backwards
+      call ESMF_ClockSet(domainClock, direction=ESMF_MODE_REVERSE, rc=rc)
+      print *
+      print *, "domainClock set in reverse"
+      print *
+
+      do while (.not. ESMF_ClockIsDone(domainClock, rc=rc))
+        print *, "Iteration = ", iteration
+
+        if (ESMF_AlarmIsRinging(afterAlarm, rc=rc)) then
+          if (iteration .ne. 2 .or. h .ne. 3) then
+            testPass = .false.
+          endif
+          print *, "  afterAlarm on"
+          call ESMF_AlarmRingerOff(afterAlarm, rc=rc)
+        else
+          print *, "  afterAlarm off"
+        endif
+
+        ! advance clock
+        call ESMF_ClockAdvance(domainClock, rc=rc)
+        call ESMF_ClockGet(domainClock, currTime=currentTime, rc=rc)
+        call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, rc=rc)
+        print *, " ClockAdvance()"
+        print *, mm, "/", dd, "/", yy, " ", h, ": 0"
+
+        ! would call WRF solver here, after clock advance
+        print *, "  Solve"
+
+        if (ESMF_AlarmIsRinging(beforeAlarm, rc=rc)) then
+          if (iteration .ne. 2 .or. h .ne. 2) then
+            testPass = .false.
+          endif
+          print *, "  beforeAlarm on"
+          call ESMF_AlarmRingerOff(beforeAlarm, rc=rc)
+        else
+          print *, "  beforeAlarm off"
+        endif
+
+        iteration = iteration - 1
+      enddo
+
+      call ESMF_Test(testPass.and.(rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy(afterAlarm, rc=rc)
+      call ESMF_AlarmDestroy(beforeAlarm, rc=rc)
+      call ESMF_ClockDestroy(domainClock, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Sticky Alarms 4
+      !  Test reverse *interval* sticky alarms; variation on WRF use case above
+
+      write(name, *) "Sticky Alarm Test 4"
+      write(failMsg, *) " Alarms did not turn on/off at the correct time/iteration or did not return ESMF_SUCCESS"
+
+      call ESMF_TimeIntervalSet(timeStep, h=1, rc=rc)
+      call ESMF_TimeSet(startTime, yy=2005, mm=6, dd=15, h=1, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=2005, mm=6, dd=15, h=10, &
+                        calendar=gregorianCalendar, rc=rc)
+      domainClock = ESMF_ClockCreate("WRF Clock", &
+                                     timeStep, startTime, stopTime, rc=rc)
+
+      call ESMF_TimeSet(beforeAlarmTime, yy=2005, mm=6, dd=15, h=2, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(alarmStep, h=3, rc=rc)
+      beforeAlarm = ESMF_AlarmCreate(clock=domainClock, &
+                                     ringTime=beforeAlarmTime, &
+                                     ringInterval=alarmStep, rc=rc)
+
+      call ESMF_TimeSet(afterAlarmTime, yy=2005, mm=6, dd=15, h=3, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(alarmStep2, h=2, rc=rc)
+      afterAlarm  = ESMF_AlarmCreate(clock=domainClock, &
+                                     ringTime=afterAlarmTime, &
+                                     ringInterval=alarmStep2, rc=rc)
+
+      ! any single failure will cause the whole test to fail
+      testPass = .true.
+
+      ! track loop iterations
+      iteration = 0
+
+      call ESMF_ClockGet(domainClock, currTime=currentTime, rc=rc)
+      call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, rc=rc)
+      print *, "Begin"
+      print *, mm, "/", dd, "/", yy, " ", h, ": 0"
+
+      ! run the clock forward
+      do while (.not. ESMF_ClockIsDone(domainClock, rc=rc))
+        iteration = iteration + 1
+        print *, "Iteration = ", iteration
+
+        if (ESMF_AlarmIsRinging(beforeAlarm, rc=rc)) then
+          if ((iteration .ne. 2 .or. h .ne. 2).and. &
+              (iteration .ne. 5 .or. h .ne. 5).and. &
+              (iteration .ne. 8 .or. h .ne. 8)) then
+            testPass = .false.
+          endif
+          print *, "  beforeAlarm on"
+          call ESMF_AlarmRingerOff(beforeAlarm, rc=rc)
+        else
+          print *, "  beforeAlarm off"
+        endif
+
+        ! would call WRF solver here, before clock advance
+        print *, "  Solve"
+
+        call ESMF_ClockAdvance(domainClock, rc=rc)
+        call ESMF_ClockGet(domainClock, currTime=currentTime, rc=rc)
+        call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, rc=rc)
+        print *, " ClockAdvance()"
+        print *, mm, "/", dd, "/", yy, " ", h, ": 0"
+
+        if (ESMF_AlarmIsRinging(afterAlarm, rc=rc)) then
+          if ((iteration .ne. 2 .or. h .ne. 3).and. &
+              (iteration .ne. 4 .or. h .ne. 5).and. &
+              (iteration .ne. 6 .or. h .ne. 7).and. &
+              (iteration .ne. 8 .or. h .ne. 9)) then
+            testPass = .false.
+          endif
+          print *, "  afterAlarm on"
+          call ESMF_AlarmRingerOff(afterAlarm, rc=rc)
+        else
+          print *, "  afterAlarm off"
+        endif
+      enddo
+
+      ! run the clock backwards
+      call ESMF_ClockSet(domainClock, direction=ESMF_MODE_REVERSE, rc=rc)
+      print *
+      print *, "domainClock set in reverse"
+      print *
+
+      do while (.not. ESMF_ClockIsDone(domainClock, rc=rc))
+        print *, "Iteration = ", iteration
+
+        if (ESMF_AlarmIsRinging(afterAlarm, rc=rc)) then
+          if ((iteration .ne. 2 .or. h .ne. 3).and. &
+              (iteration .ne. 4 .or. h .ne. 5).and. &
+              (iteration .ne. 6 .or. h .ne. 7).and. &
+              (iteration .ne. 8 .or. h .ne. 9)) then
+            testPass = .false.
+          endif
+          print *, "  afterAlarm on"
+          call ESMF_AlarmRingerOff(afterAlarm, rc=rc)
+        else
+          print *, "  afterAlarm off"
+        endif
+
+        ! advance clock
+        call ESMF_ClockAdvance(domainClock, rc=rc)
+        call ESMF_ClockGet(domainClock, currTime=currentTime, rc=rc)
+        call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, rc=rc)
+        print *, " ClockAdvance()"
+        print *, mm, "/", dd, "/", yy, " ", h, ": 0"
+
+        ! would call WRF solver here, after clock advance
+        print *, "  Solve"
+
+        if (ESMF_AlarmIsRinging(beforeAlarm, rc=rc)) then
+          if ((iteration .ne. 2 .or. h .ne. 2).and. &
+              (iteration .ne. 5 .or. h .ne. 5).and. &
+              (iteration .ne. 8 .or. h .ne. 8)) then
+            testPass = .false.
+          endif
+          print *, "  beforeAlarm on"
+          call ESMF_AlarmRingerOff(beforeAlarm, rc=rc)
+        else
+          print *, "  beforeAlarm off"
+        endif
+
+        iteration = iteration - 1
+      enddo
+
+      call ESMF_Test(testPass.and.(rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy(afterAlarm, rc=rc)
+      call ESMF_AlarmDestroy(beforeAlarm, rc=rc)
+      call ESMF_ClockDestroy(domainClock, rc=rc)
 
       ! ----------------------------------------------------------------------------
       !EX_UTest

@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.78 2005/04/02 00:23:45 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.79 2005/06/17 21:51:33 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.78 2005/04/02 00:23:45 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.79 2005/06/17 21:51:33 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -2132,6 +2132,30 @@
     // in an arithmetic or comparison operation.
 
     return(diff);
+
+}  // end ESMC_TimeInterval::operator-
+
+//-------------------------------------------------------------------------
+//BOP 
+// !IROUTINE:  ESMC_TimeInterval(-) - Unary negation of a TimeInterval
+//    
+// !INTERFACE:
+      ESMC_TimeInterval ESMC_TimeInterval::operator-(void) const {
+//    
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//    
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//    Negates this {\tt timeinterval} and returns the result.
+//
+//EOP
+// !REQUIREMENTS:  TMG1.5.10
+
+    // simply re-use multiplication by an integer!
+    return(-1 * *this);
 
 }  // end ESMC_TimeInterval::operator-
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.41 2005/05/27 15:28:25 svasquez Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.42 2005/06/17 21:51:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.41 2005/05/27 15:28:25 svasquez Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.42 2005/06/17 21:51:33 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -321,6 +321,18 @@
       call ESMF_Test((YY==2009 .and. MM==3 .and. DD==1 .and. &
                       H==12 .and. M==17 .and. S==58 .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Should be yy=-2, mm=-24, d=-90 and ESMF_SUCCESS"
+      write(name, *) "Negate Time Step Test 1"
+      timeStep = -timeStep
+      call ESMF_TimeIntervalGet(timeStep, yy=years, mm=months, d=days, rc=rc)
+      call ESMF_Test((years.eq.-2.and.months.eq.-24.and.days.eq.-90.and. &
+                      rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, " yy,mm,d = ", years, ",", months, ",", days
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -338,6 +350,18 @@
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Should be yy=2, mm=-24, d=90 and ESMF_SUCCESS"
+      write(name, *) "Negate Time Step Test 2"
+      timeStep = -timeStep
+      call ESMF_TimeIntervalGet(timeStep, yy=years, mm=months, d=days, rc=rc)
+      call ESMF_Test((years.eq.2.and.months.eq.-24.and.days.eq.90.and. &
+                      rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, " yy,mm,d = ", years, ",", months, ",", days
+
+      ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Testing the - operator
       ! resultTime = ESMF_TimeOperator(-)(time, timestep)
@@ -351,6 +375,20 @@
       call ESMF_Test((YY==1999 .and. MM==12 .and. DD==1 .and. &
                       H==22 .and. M==14 .and. S==50 .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Should be yy=-2, mm=-24, d=-90, h=-14, m=-3, s=-8 and ESMF_SUCCESS"
+      write(name, *) "Negate Time Step Test 3"
+      timeStep = -timeStep
+      call ESMF_TimeIntervalGet(timeStep, yy=YY, mm=MM, d=D, &
+                                h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY.eq.-2.and.MM.eq.-24.and.D.eq.-90.and. &
+                      H.eq.-14.and.M.eq.-3.and.S.eq.-8.and. &
+                      rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, " yy,mm,d,h,m,s = ", YY, ",", MM, ",", D, ",", H, ",", M, ",", S
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -368,6 +406,20 @@
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Should be yy=-2, mm=24, d=-90, h=11, m=59, s=8 and ESMF_SUCCESS"
+      write(name, *) "Negate Time Step Test 4"
+      timeStep = -timeStep
+      call ESMF_TimeIntervalGet(timeStep, yy=YY, mm=MM, d=D, &
+                                h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY.eq.-2.and.MM.eq.24.and.D.eq.-90.and. &
+                      H.eq.11.and.M.eq.59.and.S.eq.8.and. &
+                      rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, " yy,mm,d,h,m,s = ", YY, ",", MM, ",", D, ",", H, ",", M, ",", S
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -2464,12 +2516,35 @@
       write(failMsg, *) "Seconds should = 86400"
       write(name, *) "Get Time Step in seconds Test 1"
       call ESMF_TimeIntervalGet(timeStep, s=secs, rc=rc)
-      call ESMF_Test((secs.eq.86400), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
+      call ESMF_Test((secs.eq.86400), name, failMsg, result, ESMF_SRCLINE)
 
       print *, " Seconds = ", secs
 
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Seconds should = -86400 and ESMF_SUCCESS"
+      write(name, *) "Negate Time Step Test 5"
+      timeStep = -timeStep
+      call ESMF_TimeIntervalGet(timeStep, s=secs, rc=rc)
+      call ESMF_Test((secs.eq.-86400.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, " Seconds = ", secs
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Hours should = 24 and ESMF_SUCCESS"
+      write(name, *) "Negate Time Step Test 6"
+      timeStep = -timeStep
+      call ESMF_TimeIntervalGet(timeStep, h=hours, rc=rc)
+      call ESMF_Test((hours.eq.24.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, " Hours = ", hours
+
+      ! ----------------------------------------------------------------------------
       call ESMF_CalendarSetDefault(ESMF_CAL_NOCALENDAR, rc)
 
       ! ----------------------------------------------------------------------------
@@ -3237,6 +3312,18 @@
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
+      write(name, *) "Negate Time Interval Test 7"
+      write(failMsg, *) " Did not return -6 -1/21 seconds and ESMF_SUCCESS"
+      timeInterval3 = -timeInterval3
+      call ESMF_TimeIntervalGet(timeInterval3, s=S, sN=sN, sD=sD, rc=rc)
+      call ESMF_Test((S.eq.-6.and.sN.eq.-1.and.sD.eq.21.and. &
+                     rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "S sN/sD = ", S, sN, "/", sD
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
       ! Suggested by John Michalakes/WRF
       write(name, *) "Sum of two fractional Time Intervals Test 4"
       write(failMsg, *) " Did not return 1/3 second and ESMF_SUCCESS"
@@ -3266,6 +3353,18 @@
       call ESMF_TimeIntervalGet(timeInterval1, s=S, sN=sN, sD=sD, rc=rc)
       call ESMF_Test((S.eq.0.and.sN.eq.-1.and.sD.eq.7.and.rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(name, *) "Negate Time Interval Test 8"
+      write(failMsg, *) " Did not return 1/7 seconds and ESMF_SUCCESS"
+      timeInterval1 = -timeInterval1
+      call ESMF_TimeIntervalGet(timeInterval1, s=S, sN=sN, sD=sD, rc=rc)
+      call ESMF_Test((S.eq.0.and.sN.eq.1.and.sD.eq.7.and. &
+                     rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "sN/sD = ", sN, "/", sD
 
       ! ----------------------------------------------------------------------------
       !EX_UTest

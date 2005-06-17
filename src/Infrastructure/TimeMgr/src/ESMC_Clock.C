@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.72 2005/04/02 00:22:13 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.73 2005/06/17 21:51:33 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.72 2005/04/02 00:22:13 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.73 2005/06/17 21:51:33 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -252,7 +252,8 @@ int ESMC_Clock::count=0;
       int               *runTimeStepCount, // in
       ESMC_Time         *refTime,          // in
       ESMC_Time         *currTime,         // in
-      ESMF_KIND_I8      *advanceCount) {   // in
+      ESMF_KIND_I8      *advanceCount,     // in
+      ESMC_Direction    *direction) {      // in
 
 // !DESCRIPTION:
 //      Sets a {\tt ESMC\_Clock}'s properties
@@ -318,6 +319,8 @@ int ESMC_Clock::count=0;
 
     if (advanceCount != ESMC_NULL_POINTER) this->advanceCount = *advanceCount;
 
+    if (direction != ESMC_NULL_POINTER) this->direction = *direction;
+
     rc = ESMC_ClockValidate();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc)) {
       // restore original clock values
@@ -356,7 +359,8 @@ int ESMC_Clock::count=0;
       ESMC_CalendarType *calendarType,     // out
       int               *timeZone,         // out
       ESMF_KIND_I8      *advanceCount,     // out
-      int               *alarmCount) {     // out
+      int               *alarmCount,       // out
+      ESMC_Direction    *direction) {      // out
 
 // !DESCRIPTION:
 //      Gets a {\tt ESMC\_Clock}'s property values
@@ -474,6 +478,7 @@ int ESMC_Clock::count=0;
 
     if (advanceCount != ESMC_NULL_POINTER) *advanceCount = this->advanceCount;
     if (alarmCount   != ESMC_NULL_POINTER) *alarmCount   = this->alarmCount;
+    if (direction    != ESMC_NULL_POINTER) *direction    = this->direction;
 
     return(rc);
 
@@ -520,14 +525,44 @@ int ESMC_Clock::count=0;
       return(rc);
     }
 
-    // save current time, then advance it
-    prevTime = currTime;
+    if (direction == ESMF_MODE_FORWARD) {
 
-    // use passed-in timestep if specified, otherwise use the clock's
-    currTime += (timeStep != ESMC_NULL_POINTER) ? *timeStep : this->timeStep;
+      // save current time, then advance it
+      prevTime = currTime;
 
-    // count number of timesteps
-    advanceCount++;
+      // use passed-in timestep if specified, otherwise use the clock's
+      currTime += (timeStep != ESMC_NULL_POINTER) ? *timeStep : this->timeStep;
+
+      // count number of timesteps
+      advanceCount++;
+
+    } else { // ESMF_MODE_REVERSE
+
+      // TODO: make more robust by removing simplifying assumptions:
+      //       1) timeSteps are constant throughout clock run.
+
+      // Note:  Clocks can be stepped in reverse without first having been
+      //        stepped forward.  This implies that the logic cannot use
+      //        the prevTime state variable in order to step back; the
+      //        currTime state variable must be reconstructed from timeStep.
+      //        advanceCount represents the number of actual calls to
+      //        ClockAdvance(), so if a clock is jumped forward via a
+      //        ClockSet() and then reversed, the advanceCount does not
+      //        account for the "missing" timeSteps.
+
+      // step backwards; use passed-in timestep if specified, otherwise
+      //   use the clock's prevTime
+      currTime -= (timeStep != ESMC_NULL_POINTER) ? *timeStep : this->timeStep;
+
+      // restore previous "previous" time
+      // TODO:  remove assumption of constant timeStep; need to allow for
+      //        variable timeSteps
+      prevTime -= this->timeStep;
+
+      // decrement timeStep count
+      advanceCount--;
+
+    }
 
     // TODO: validate (range check) new time against its calendar ?
 
@@ -540,6 +575,7 @@ int ESMC_Clock::count=0;
     // address order.
     // TODO:  calculate once during ESMF_FrameworkInitialize() (runtime),
     //        since this is a platform constant. compile-time constant ?
+    //        put into src/prologue directory.
     // see also ESMC_ClockGetAlarmList().
 
     int f90ArrayElementSize = 0; 
@@ -746,6 +782,108 @@ int ESMC_Clock::count=0;
     return(stopTimeEnabled);
 
  } // end ESMC_ClockIsStopTimeEnabled
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockIsDone - check if Clock's stop time or start time has been reached, depending on direction
+//
+// !INTERFACE:
+      bool ESMC_Clock::ESMC_ClockIsDone(
+//
+// !RETURN VALUE:
+//    bool is done or not
+//
+// !ARGUMENTS:
+      int  *rc) const {        // out - error return code
+//
+// !DESCRIPTION:
+//    Checks if {\tt ESMC\_Clock}'s stop time has been reached if in
+//    {\tt ESMF\_MODE\_FORWARD} or if it has reached start time if in
+//    {\tt ESMF\_MODE\_REVERSE}.
+//
+//EOP
+// !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_ClockIsDone()"
+
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", rc);
+      return(false);
+    }
+
+    if (direction == ESMF_MODE_FORWARD) {
+
+      if (!stopTimeEnabled) return(false);
+
+      // check if stopTime has been reached or crossed
+
+      // positive stopTime direction ?
+      if (stopTime > startTime) {
+        return(currTime >= stopTime);
+  
+      // or negative stopTime direction ?
+      } else if (stopTime < startTime) {
+        return(currTime <= stopTime);
+
+      // or no stopTime direction ? (stopTime == startTime)
+      } else return(currTime == stopTime);
+
+    } else { // ESMF_MODE_REVERSE
+
+      // check if startTime has been reached or crossed
+
+      // positive stopTime direction ?
+      if (stopTime > startTime) {
+        return(currTime <= startTime);
+  
+      // or negative stopTime direction ?
+      } else if (stopTime < startTime) {
+        return(currTime >= startTime);
+
+      // or no stopTime direction ? (stopTime == startTime)
+      } else return(currTime == startTime);
+
+    }
+
+ } // end ESMC_ClockIsDone
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockIsReverse - test if clock is in reverse mode
+//
+// !INTERFACE:
+      bool ESMC_Clock::ESMC_ClockIsReverse(
+//
+// !RETURN VALUE:
+//    bool is reverse mode or not
+//
+// !ARGUMENTS:
+      int  *rc) const {        // out - error return code
+//
+// !DESCRIPTION:
+//    Checks if {\tt ESMC\_Clock}'s direction is {\tt ESMF\_MODE\_REVERSE}.
+//
+//EOP
+// !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_ClockIsReverse()"
+
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", rc);
+      return(false);
+    }
+
+    return(direction == ESMF_MODE_REVERSE);
+
+ } // end ESMC_ClockIsReverse
 
 //-------------------------------------------------------------------------
 //BOP
@@ -1676,6 +1814,7 @@ int ESMC_Clock::count=0;
 
     name[0] = '\0';
     advanceCount = 0;
+    direction = ESMF_MODE_FORWARD;
     stopTimeEnabled = false;
     id = ++count;  // TODO: inherit from ESMC_Base class
     // copy = false;  // TODO: see notes in constructors and destructor below

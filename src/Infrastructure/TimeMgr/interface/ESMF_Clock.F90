@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.63 2005/05/31 17:40:00 nscollins Exp $
+! $Id: ESMF_Clock.F90,v 1.64 2005/06/17 21:51:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -76,6 +76,8 @@
       public ESMF_ClockGetAlarm
       public ESMF_ClockGetAlarmList
       public ESMF_ClockGetNextTime
+      public ESMF_ClockIsDone
+      public ESMF_ClockIsReverse
       public ESMF_ClockIsStopTime
       public ESMF_ClockIsStopTimeEnabled
       public ESMF_ClockPrint
@@ -97,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.63 2005/05/31 17:40:00 nscollins Exp $'
+      '$Id: ESMF_Clock.F90,v 1.64 2005/06/17 21:51:33 eschwab Exp $'
 
 !==============================================================================
 !
@@ -441,7 +443,7 @@
                                runDuration, runTimeStepCount, refTime, &
                                currTime, prevTime, currSimTime, prevSimTime, &
                                calendar, calendarType, timeZone, advanceCount, &
-                               alarmCount, rc)
+                               alarmCount, direction, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(in)            :: clock
@@ -461,6 +463,7 @@
       integer,                 intent(out), optional :: timeZone
       integer(ESMF_KIND_I8),   intent(out), optional :: advanceCount
       integer,                 intent(out), optional :: alarmCount
+      type(ESMF_Direction),    intent(out), optional :: direction
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -508,6 +511,10 @@
 !     \item[{[alarmCount]}]
 !          The number of {\tt ESMF\_Alarm}s in the {\tt ESMF\_Clock}'s
 !          {\tt ESMF\_Alarm} list.
+!     \item[{[direction]}]
+!          The {\tt ESMF\_Clock}'s time stepping direction.  See also
+!          {\tt ESMF\_ClockIsReverse()}, an alternative for convenient use in
+!          "if" and "do while" constructs.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -536,7 +543,7 @@
                            runDuration, runTimeStepCount, refTime, &
                            currTime, prevTime, currSimTime, prevSimTime, &
                            calendar, calendarType, timeZone, advanceCount, &
-                           alarmCount, rc)
+                           alarmCount, direction, rc)
 
       ! copy temp name back to given name to restore native Fortran
       !   storage style
@@ -711,6 +718,76 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ClockIsDone - Based on its direction, test if the Clock has reached or exceeded its stop time or start time
+
+! !INTERFACE:
+      function ESMF_ClockIsDone(clock, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_ClockIsDone
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(in)            :: clock
+      integer,          intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Returns true if currentTime is greater than or equal to stopTime
+!     in {\tt ESMF\_MODE\_FORWARD}, or if currentTime is less than or equal to
+!     startTime in {ESMF\_MODE\_REVERSE}.  It returns false otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!          The object instance to check.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+! !REQUIREMENTS:
+!     TMG3.5.7
+
+!     invoke C to C++ entry point
+      call c_ESMC_ClockIsDone(clock, ESMF_ClockIsDone, rc)
+    
+      end function ESMF_ClockIsDone
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockIsReverse - Test if the Clock is in reverse mode
+
+! !INTERFACE:
+      function ESMF_ClockIsReverse(clock, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_ClockIsReverse
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(in)            :: clock
+      integer,          intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Returns true if clock is in {\tt ESMF\_MODE\_REVERSE}, and false if in
+!     {\tt ESMF\_MODE\_FORWARD}.  Allows convenient use in "if" and "do while"
+!     constructs.  Alternative to {\tt ESMF\_ClockGet(...direction=...)}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!          The object instance to check.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+! !REQUIREMENTS:
+!     TMG3.4.6
+
+!     invoke C to C++ entry point
+      call c_ESMC_ClockIsReverse(clock, ESMF_ClockIsReverse, rc)
+    
+      end function ESMF_ClockIsReverse
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_ClockIsStopTime - Test if the Clock has reached or exceeded its stop time
 
 ! !INTERFACE:
@@ -873,7 +950,7 @@
 ! !INTERFACE:
       subroutine ESMF_ClockSet(clock, name, timeStep, startTime, stopTime, &
                                runDuration, runTimeStepCount, refTime, &
-                               currTime, advanceCount, rc)
+                               currTime, advanceCount, direction, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(inout)         :: clock
@@ -886,6 +963,7 @@
       type(ESMF_Time),         intent(in),  optional :: refTime
       type(ESMF_Time),         intent(in),  optional :: currTime
       integer(ESMF_KIND_I8),   intent(in),  optional :: advanceCount
+      type(ESMF_Direction),    intent(in),  optional :: direction
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -901,9 +979,11 @@
 !     \item[{[timeStep]}]
 !          The {\tt ESMF\_Clock}'s time step interval, which can be positive or
 !          negative.  This is used to change a clock's timestep property for
-!          those applications that need variable timesteps.  Also see
+!          those applications that need variable timesteps.  See
 !          {\tt ESMF\_ClockAdvance()} below for specifying variable timesteps
 !          that are NOT saved as the clock's internal time step property.
+!          See 'direction' argument below for behavior with
+!          {\\t ESMF\_MODE\_REVERSE} direction.
 !     \item[{[startTime]}]
 !          The {\tt ESMF\_Clock}'s starting time.  Can be less than or
 !          or greater than stopTime, depending on a positive or negative
@@ -934,6 +1014,21 @@
 !          The current time.
 !     \item[{[advanceCount]}]
 !          The number of times the clock has been timestepped.
+!     \item[{[direction]}]
+!          Sets the clock's time-stepping direction.  If called with
+!          {\tt ESMF\_MODE\_REVERSE}, sets the clock in "reverse" mode;
+!          if called with {\tt ESMF\_MODE\_FORWARD}, sets the clock in
+!          normal, "forward" mode.  The default mode is
+!          {\tt ESMF\_MODE\_FORWARD}, established at {\tt ESMF\_ClockCreate()}.
+!          Existing property timeStep can also be specified at the same time,
+!          which allows for a change in magnitude and/or sign of the clock's
+!          timeStep.  If not specified with {\tt ESMF\_MODE\_REVERSE}, the
+!          clock's current timeStep is simply negated.  If timeStep is
+!          specified, its sign is used as specified; it is not negated
+!          internally.  E.g., if the specified timeStep is negative and the
+!          clock is placed in {\tt ESMF\_MODE\_REVERSE}, subsequent calls to
+!          {\tt ESMF\_ClockAdvance()} will cause the clock's current time to
+!          be decremented by the new timeStep's magnitude.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -954,7 +1049,7 @@
 !     invoke C to C++ entry point
       call c_ESMC_ClockSet(clock, nameLen, name, timeStep, startTime, &
                            stopTime, runDuration, runTimeStepCount, &
-                           refTime, currTime, advanceCount, rc)
+                           refTime, currTime, advanceCount, direction, rc)
     
       end subroutine ESMF_ClockSet
 

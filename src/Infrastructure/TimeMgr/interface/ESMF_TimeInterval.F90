@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.72 2005/05/31 17:40:00 nscollins Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.73 2005/06/17 21:51:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -93,6 +93,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
       private ESMF_TimeIntervalSum
       private ESMF_TimeIntervalDiff
+      private ESMF_TimeIntervalNegate
       private ESMF_TimeIntervalRQuot
       private ESMF_TimeIntervalQuotI
       private ESMF_TimeIntervalQuotR
@@ -122,7 +123,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.72 2005/05/31 17:40:00 nscollins Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.73 2005/06/17 21:51:33 eschwab Exp $'
 
 !==============================================================================
 !
@@ -199,6 +200,37 @@
 !
 ! !REQUIREMENTS:
 !     TMG1.5.4, TMG5.1, TMG7.2
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalOperator(-) - Perform unary negation on a TimeInterval
+!
+! !INTERFACE:
+!     interface operator(-)
+!     timeinterval = -timeinterval
+!
+! !RETURN VALUE:
+!     type(ESMF_TimeInterval) :: -timeInterval
+!
+! !ARGUMENTS:
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval
+!
+! !DESCRIPTION:
+!     Overloads the (-) operator for the {\tt ESMF\_TimeInterval} class to
+!     perform unary negation on {\tt timeinterval} and return the result.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The time interval to be negated.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalNegate   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.10
 
       end interface
 !
@@ -2781,6 +2813,30 @@
                                    ESMF_TimeIntervalDiff)
 
       end function ESMF_TimeIntervalDiff
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  ESMF_TimeIntervalNegate - Perform unary negation on a TimeInterval
+   
+! !INTERFACE:
+      function ESMF_TimeIntervalNegate(timeinterval)
+
+! !RETURN VALUE:
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalNegate
+
+! !ARGUMENTS: 
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
+
+! !DESCRIPTION:
+!     This method overloads the (-) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(-)" above for complete description.
+!
+!EOPI
+! !REQUIREMENTS:
+
+      call c_ESMC_TimeIntervalNegate(timeinterval, ESMF_TimeIntervalNegate)
+
+      end function ESMF_TimeIntervalNegate
 
 !------------------------------------------------------------------------------
 !BOPI

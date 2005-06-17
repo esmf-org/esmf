@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.41 2004/11/24 00:30:03 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.42 2005/06/17 21:51:32 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -186,6 +186,9 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     // addition, subtraction
     ESMC_TimeInterval operator+(const ESMC_TimeInterval &) const;
     ESMC_TimeInterval operator-(const ESMC_TimeInterval &) const;
+
+    // unary negation
+    ESMC_TimeInterval operator-(void) const;
 
     // comparison methods (TMG 1.5.3, 7.2)
     bool operator==(const ESMC_TimeInterval &) const;

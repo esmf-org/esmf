@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.30 2005/04/02 00:07:27 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.31 2005/06/17 21:51:32 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,9 +105,15 @@ class ESMC_Alarm {
     ESMC_TimeInterval ringInterval; // (TMG 4.5.2) for periodic alarming
     ESMC_TimeInterval ringDuration; // how long alarm stays on
     ESMC_Time         ringTime;     // (TMG 4.5.1) next time to ring
+    ESMC_Time         firstRingTime;    // the first ring time
+                                        //   (save for reverse mode)
     ESMC_Time         prevRingTime; // previous alarm time 
     ESMC_Time         stopTime;     // when alarm intervals end.
     ESMC_Time         ringBegin;    // note time when alarm turns on.
+    ESMC_Time         ringEnd;      // save time when alarm is turned off via
+                                    //   ESMC_RingerOff().  For reverse mode.
+                                    //   TODO: make array for variable
+                                    //   turn off durations.
     ESMC_Time         refTime;      // reference time.
     int               ringTimeStepCount;      // how long alarm rings;
                                               //  mutually exclusive with
@@ -120,15 +126,16 @@ class ESMC_Alarm {
     bool              ringingOnCurrTimeStep; // was ringing immedidately after
                                              // current clock timestep.
                                              // (could have been turned off
-                                             //  later due to TurnOff or
+                                             //  later due to RingerOff or
                                              //  Disable commands or
                                              //  non-sticky alarm expiration).
     bool              ringingOnPrevTimeStep; // was ringing immediately after
                                              // previous clock timestep.
     bool              enabled;    // able to ring (TMG 4.5.3)
-    bool              sticky;     // must be turned off via ESMC_AlarmTurnOff(),
+    bool              sticky;     // must be turned off via
+                                  //   ESMC_AlarmRingerOff(),
                                   //  otherwise will turn self off after
-                                  //  ringDuration.
+                                  //  ringDuration or ringTimeStepCount.
     int               id;         // unique identifier. used for equality
                                   //    checks and to generate unique default
                                   //    names.
@@ -248,6 +255,12 @@ class ESMC_Alarm {
   private:
 //
  // < declare private interface methods here >
+
+    // check if time to turn on alarm
+    bool ESMC_AlarmCheckTurnOn(bool timeStepPositive);
+
+    // reconstruct ringBegin during ESMF_MODE_REVERSE
+    int ESMC_AlarmResetRingBegin(bool timeStepPositive);
 
     // friend class alarm
     friend class ESMC_Clock;

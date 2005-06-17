@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.37 2004/11/24 00:36:41 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.38 2005/06/17 21:51:33 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -554,6 +554,10 @@ extern "C" {
            *esmf_timeintervalDiff = (*timeinterval1 - *timeinterval2);
        }
 
+       void FTN(c_esmc_timeintervalnegate)(ESMC_TimeInterval *timeinterval,
+                                 ESMC_TimeInterval *esmf_timeintervalNegate) {
+           *esmf_timeintervalNegate = (-(*timeinterval));
+       }
 
        //
        // overloaded comparison operators

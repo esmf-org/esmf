@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.41 2005/04/02 00:12:24 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.42 2005/06/17 21:51:32 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,6 +94,9 @@
                                                 //   ESMC_ClockAdvance has
                                                 //   been called (number of
                                                 //   time steps taken so far)
+
+    ESMC_Direction    direction;                // forward (default) or reverse
+
     int               alarmCount;               // number of defined alarms
     int               alarmListCapacity;        // max number of defined alarms
                                                 //  before a reallocation is
@@ -131,7 +134,8 @@
 // TODO: add overload for ESMF_KIND_R8  *runTimeStepCount=0,
                       ESMC_Time         *refTime=0,    // (TMG 3.1, 3.4.4)
                       ESMC_Time         *currTime=0,
-                      ESMF_KIND_I8      *advanceCount=0);
+                      ESMF_KIND_I8      *advanceCount=0,
+                      ESMC_Direction    *direction=0);
 
     int ESMC_ClockGet(int                nameLen,
                       int               *tempNameLen,
@@ -150,7 +154,8 @@
                       ESMC_CalendarType *calendarType=0,
                       int               *timeZone=0,
                       ESMF_KIND_I8      *advanceCount=0, 
-                      int               *alarmCount=0);
+                      int               *alarmCount=0,
+                      ESMC_Direction    *direction=0);
 
     int ESMC_ClockAdvance(ESMC_TimeInterval *timeStep=0,
                           char *ringingAlarmList1stElementPtr=0, 
@@ -165,6 +170,9 @@
     int  ESMC_ClockStopTimeEnable(ESMC_Time *stopTime=0); // WRF
     int  ESMC_ClockStopTimeDisable(void);                 // WRF
     bool ESMC_ClockIsStopTimeEnabled(int *rc=0) const;    // WRF
+
+    bool ESMC_ClockIsDone(int *rc=0) const;           // TMG3.5.7
+    bool ESMC_ClockIsReverse(int *rc=0) const;        // TMG3.4.6
 
     int ESMC_ClockGetNextTime(ESMC_Time         *nextTime,
                               ESMC_TimeInterval *timeStep=0);
