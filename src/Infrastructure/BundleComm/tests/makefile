@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2005/04/12 16:52:43 nscollins Exp $
+# $Id: makefile,v 1.10 2005/06/20 16:42:30 nscollins Exp $ 
 
 ALL:  build_unit_tests
 
@@ -12,69 +12,43 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
+DIRS	  = 
 LOCDIR	  = src/Infrastructure/BundleComm/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_<Class>UTest \
-	        $(ESMC_TESTDIR)/ESMC_<Class>UTest 
+TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_BundleCommUTest
 
-TESTS_RUN     = RUN_ESMF_<Class>UTest \
-		RUN_ESMC_<Class>UTest 
+TESTS_RUN     = RUN_ESMF_BundleCommUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_<Class>UTestUNI \
-		RUN_ESMC_<Class>UTestUNI 
+TESTS_RUN_UNI = RUN_ESMF_BundleCommUTestUNI 
 
-TESTS_RM      = ESMF_<Class>UTest.rm \
-                ESMC_<Class>UTest.rm
-
+TESTS_RM      = ESMF_BundleCommUTest.rm 
 
 include ${ESMF_DIR}/makefile
 
-DIRS	  = 
+DIRS      =
 
 CLEANDIRS   = 
 CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
-#
-# Fortran unit test
-#
-RUN_ESMF_<Class>UTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_<Class>UTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_<Class>UTest > $(ESMC_TESTDIR)/ESMF_<Class>UTest.stdout
-	-cat *<Class>UTest.Log > $(ESMC_TESTDIR)/ESMF_<Class>UTest.Log
-	-rm *<Class>UTest.Log
-
-RUN_ESMF_<Class>UTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_<Class>UTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_<Class>UTest > $(ESMC_TESTDIR)/ESMF_<Class>UTest.stdout
-	-cat *<Class>UTest.Log > $(ESMC_TESTDIR)/ESMF_<Class>UTest.Log
-	-rm *<Class>UTest.Log
-
-ESMF_<Class>UTest.rm:
-	echo "ESMF_<Class>Test.rm target called here."
-
 
 #
-# C++ Unit tests
+#  BundleComms
 #
-$(ESMC_TESTDIR)/ESMC_<Class>UTest: chkopts ESMC_<Class>UTest.o
-	-${CXXF90LD} -o $(ESMC_TESTDIR)/ESMC_<Class>UTest ESMC_<Class>UTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
-	${RM} ESMC_<Class>UTest.o
+RUN_ESMF_BundleCommUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCommUTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BundleCommUTest > $(ESMC_TESTDIR)/ESMF_BundleCommUTest.stdout
+	-cat *BundleCommUTest.Log > $(ESMC_TESTDIR)/ESMF_BundleCommUTest.Log
+	-rm *BundleCommUTest.Log
 
-RUN_ESMC_<Class>UTest:
-	-@rm -f testlog stdlog.* logfile.* ESMC_<Class>UTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
-	-cat *<Class>UTest.Log > $(ESMC_TESTDIR)/ESMC_<Class>UTest.Log
-	-rm *<Class>UTest.Log
+RUN_ESMF_BundleCommUTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCommUTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BundleCommUTest > $(ESMC_TESTDIR)/ESMF_BundleCommUTest.stdout
+	-cat *BundleCommUTest.Log > $(ESMC_TESTDIR)/ESMF_BundleCommUTest.Log
+	-rm *BundleCommUTest.Log
 
-RUN_ESMC_<Class>UTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMC_<Class>UTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
-	-cat *<Class>UTest.Log > $(ESMC_TESTDIR)/ESMC_<Class>UTest.Log
-	-rm *<Class>UTest.Log
-
-ESMC_<Class>UTest.rm:
-	echo "ESMC_<Class>Test.rm target called here."
+ESMF_BundleCommUTest.rm:
+	echo "ESMF_BundleCommUTest.rm target called here."
 
 
 
