@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.18 2005/01/12 22:49:46 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.19 2005/06/20 17:34:30 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -288,7 +288,7 @@
 ! !ARGUMENTS:
      type(ESMF_GridComp), intent(inout) :: gcomp
      type(ESMF_State), intent(inout) :: importState, exportState
-     type(ESMF_Clock), intent(inout) :: clock
+     type(ESMF_Clock), intent(in) :: clock
      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -356,7 +356,7 @@
 ! !ARGUMENTS:
      type(ESMF_GridComp), intent(inout) :: comp
      type(ESMF_State), intent(inout) :: importState, exportState
-     type(ESMF_Clock), intent(inout) :: clock
+     type(ESMF_Clock), intent(in) :: clock
      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -488,7 +488,7 @@
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: comp
       type(ESMF_State), intent(inout) :: importState, exportState
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:

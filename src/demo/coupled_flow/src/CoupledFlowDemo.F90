@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.25 2005/01/12 20:37:29 nscollins Exp $
+! $Id: CoupledFlowDemo.F90,v 1.26 2005/06/20 17:34:29 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -106,7 +106,7 @@
 ! !ARGUMENTS:
      type(ESMF_GridComp), intent(inout) :: gcomp
      type(ESMF_State), intent(inout) :: importState, exportState
-     type(ESMF_Clock), intent(inout) :: clock
+     type(ESMF_Clock), intent(in) :: clock
      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -317,7 +317,7 @@
 ! !ARGUMENTS:
      type(ESMF_GridComp), intent(inout) :: comp
      type(ESMF_State), intent(inout) :: importState, exportState
-     type(ESMF_Clock), intent(inout) :: clock
+     type(ESMF_Clock), intent(in) :: clock
      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -345,7 +345,7 @@
 
 
      ! make our own local copy of the clock
-     localclock = clock
+     localclock = ESMF_ClockCreate(clock, rc)
 
      print *, "Run Loop Start time"
      call ESMF_ClockPrint(localclock, "currtime string", rc)
@@ -368,11 +368,13 @@
         call ESMF_ClockAdvance(localclock, rc=rc)
         !call ESMF_ClockPrint(localclock, "currtime string", rc)
 
-
      enddo
+
      print *, "Run Loop End time"
      call ESMF_ClockPrint(localclock, "currtime string", rc)
  
+     call ESMF_ClockDestroy(localclock, rc)
+
 end subroutine coupledflow_run
 
 
@@ -386,7 +388,7 @@ end subroutine coupledflow_run
 ! !ARGUMENTS:
      type(ESMF_GridComp), intent(inout) :: comp
      type(ESMF_State), intent(inout) :: importState, exportState
-     type(ESMF_Clock), intent(inout) :: clock
+     type(ESMF_Clock), intent(in) :: clock
      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
