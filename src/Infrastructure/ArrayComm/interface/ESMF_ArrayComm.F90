@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.67 2005/06/09 16:38:12 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.68 2005/06/20 23:04:38 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.67 2005/06/09 16:38:12 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.68 2005/06/20 23:04:38 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -434,15 +434,15 @@
 
       ! allocate dimOrder array and get from datamap
       maxrank = max(datarank, gridrank)
-      if (gridStorage.eq.ESMF_GRID_STORAGE_VECTOR) &
-        maxrank = max(datarank+1, gridrank)     ! possible for vector storage
+      if (gridStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) &
+        maxrank = max(datarank+1, gridrank)     ! possible for arbitrary storage
       allocate(dimOrder(maxrank), stat=status)
       call ESMF_FieldDataMapGet(datamap, dataIndexList=dimOrder, &
                            horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                            rc=status)
     
-      ! for vector storage, modify the dimOrder array
-      if (gridStorage.eq.ESMF_GRID_STORAGE_VECTOR) then
+      ! for arbitrary storage, modify the dimOrder array
+      if (gridStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
         do i = maxrank,gridrank,-1
           dimOrder(i) = dimOrder(i-1)
         enddo
@@ -451,7 +451,7 @@
 
       ! set the number of AIs based on the grid storage
       nAIs = nDEs
-      if (gridStorage.eq.ESMF_GRID_STORAGE_VECTOR) then
+      if (gridStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
         allocate(countPerDim(gridrank))
         call ESMF_GridGet(grid, horzrelloc=horzRelLoc, vertrelloc=vertRelLoc, &
                           globalCellCountPerDim=countPerDim, rc=status)
@@ -483,7 +483,7 @@
         endif
       enddo
 
-      if (gridStorage.eq.ESMF_GRID_STORAGE_VECTOR) then
+      if (gridStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
         if (present(compindex)) then
           do j=1,size(compindex, 2)
             do i=1, nAIs
@@ -1361,14 +1361,14 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! allocate more local arrays for vector storage
-      if (dstStorage.eq.ESMF_GRID_STORAGE_VECTOR) then
+      ! allocate more local arrays for arbitrary storage
+      if (dstStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
         dstVector  = .true.
         dstAICount = dstCellCountPerDim(1)*dstCellCountPerDim(2)
         allocate(  dstCompAI(dstAICount, gridrank), &
                   dstTotalAI(dstAICount, gridrank), stat=status)
       endif
-      if (srcStorage.eq.ESMF_GRID_STORAGE_VECTOR) then
+      if (srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
         srcVector  = .true.
         srcAICount = srcCellCountPerDim(1)*srcCellCountPerDim(2)
         allocate(  srcCompAI(srcAICount, gridrank), &
@@ -1386,7 +1386,7 @@
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      if (srcStorage.eq.ESMF_GRID_STORAGE_VECTOR) datarank = datarank + 1
+      if (srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) datarank = datarank + 1
 
       ! TODO: apply dimorder and decompids to get mapping of array to data
 
@@ -1417,7 +1417,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      elseif (dstStorage.eq.ESMF_GRID_STORAGE_VECTOR) then
+      elseif (dstStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
         call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
                                          compindex=dstCompAI, &
                                          AICountPerDE=dstAICountPerDE, rc=status)
@@ -1457,7 +1457,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      elseif (srcStorage.eq.ESMF_GRID_STORAGE_VECTOR) then
+      elseif (srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
         call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
                                          compindex=srcCompAI, &
                                          AICountPerDE=srcAICountPerDE, rc=status)

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.44 2005/05/31 17:39:56 nscollins Exp $
+! $Id: ESMF_GridTypes.F90,v 1.45 2005/06/20 23:03:57 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -478,18 +478,20 @@
       ESMF_GRID_VERT_STAGGER_BOTTOM   = ESMF_GridVertStagger( 3)
 
   ! Recognized grid storage schemes
-  !   ESMF_GRID_STORAGE_UNKNOWN  ! unknown or undefined grid storage
-  !   ESMF_GRID_STORAGE_LOGRECT  ! uses logically rectangular storage, one block per DE
-  !   ESMF_GRID_STORAGE_BLOCK    ! uses logically rectangular storage, multiple blocks per DE
-  !   ESMF_GRID_STORAGE_VECTOR   ! uses vector storage, which infers a scattering of grid
-  !                              ! cell locations and limits available communication and query
-  !                              ! functions
+  !   ESMF_GRID_STORAGE_UNKNOWN   ! unknown or undefined grid storage
+  !   ESMF_GRID_STORAGE_LOGRECT   ! uses logically rectangular storage, one
+  !                               ! block per DE
+  !   ESMF_GRID_STORAGE_BLOCK     ! uses logically rectangular storage, multiple
+  !                               ! blocks per DE
+  !   ESMF_GRID_STORAGE_ARBITRARY ! uses arbitrary storage, which infers a
+  !                               ! scattering of grid cell locations and limits
+  !                               ! available communication and query functions
 
-   type (ESMF_GridStorage), parameter, public ::       &
-      ESMF_GRID_STORAGE_UNKNOWN = ESMF_GridStorage(0), &
-      ESMF_GRID_STORAGE_LOGRECT = ESMF_GridStorage(1), &
-      ESMF_GRID_STORAGE_BLOCK   = ESMF_GridStorage(2), &
-      ESMF_GRID_STORAGE_VECTOR  = ESMF_GridStorage(3)
+   type (ESMF_GridStorage), parameter, public ::         &
+      ESMF_GRID_STORAGE_UNKNOWN   = ESMF_GridStorage(0), &
+      ESMF_GRID_STORAGE_LOGRECT   = ESMF_GridStorage(1), &
+      ESMF_GRID_STORAGE_BLOCK     = ESMF_GridStorage(2), &
+      ESMF_GRID_STORAGE_ARBITRARY = ESMF_GridStorage(3)
 
   ! Recognized coordinate orderings
   !   ESMF_COORD_ORDER_UNKNOWN  ! unknown or undefined coord ordering
@@ -544,7 +546,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.44 2005/05/31 17:39:56 nscollins Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.45 2005/06/20 23:03:57 jwolfe Exp $'
 
 !==============================================================================
 !

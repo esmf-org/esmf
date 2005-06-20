@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.219 2005/05/31 17:39:54 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.220 2005/06/20 23:03:12 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.219 2005/05/31 17:39:54 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.220 2005/06/20 23:03:12 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -144,7 +144,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_GridDistributeBlock
-        module procedure ESMF_GridDistributeVect
+        module procedure ESMF_GridDistributeArbitrary
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that distribute
@@ -1280,14 +1280,14 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridDistributeVect"
+#define ESMF_METHOD "ESMF_GridDistributeArbitrary"
 !BOP
-! !IROUTINE: ESMF_GridDistribute - Distribute a Grid as an arbitrary vector 
+! !IROUTINE: ESMF_GridDistribute - Distribute a Grid as an arbitrary vector of points
 
 ! !INTERFACE:
      ! Private name; call using ESMF_GridDistribute()
-      subroutine ESMF_GridDistributeVect(grid, delayout, myCount, myIndices, &
-                                         decompIds, rc)
+      subroutine ESMF_GridDistributeArbitrary(grid, delayout, myCount, &
+                                              myIndices, decompIds, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -1359,8 +1359,8 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridDistributeVect(grid%ptr, delayout, myCount, myIndices, &
-                                       decompIds, localrc)
+        call ESMF_LRGridDistributeArbitrary(grid%ptr, delayout, myCount, &
+                                            myIndices, decompIds, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -1396,7 +1396,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridDistributeVect
+      end subroutine ESMF_GridDistributeArbitrary
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1469,7 +1469,7 @@
 !          Number of dimensions represented by this Grid.
 !     \item[{[distDimCount]}]
 !          Number of dimensions represented by the distribution of this Grid.
-!          For Grids distributed as a vector, this could be different than the
+!          For Grids distributed arbitrarily, this could be different than the
 !          rank of the underlying Grid.
 !     \item[{[gridstorage]}]
 !          {\tt ESMF\_GridStorage} specifier denoting Grid storage.

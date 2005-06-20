@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.138 2005/05/31 17:39:51 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.139 2005/06/20 23:04:18 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -166,7 +166,7 @@
         type (ESMF_DistGridGlobal) :: globalComp
 
         integer :: dimCount               ! Number of dimensions
-        integer :: vector                 ! identifier for vector storage
+        integer :: arbitrary              ! identifier for arbitrary storage
         integer :: gridBoundaryWidth      ! # of exterior cells/edge
 
       end type
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.138 2005/05/31 17:39:51 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.139 2005/06/20 23:04:18 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -228,7 +228,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_DistGridCreateEmpty
          module procedure ESMF_DistGridCreateBlock
-         module procedure ESMF_DistGridCreateVect
+         module procedure ESMF_DistGridCreateArb
 !        module procedure ESMF_DistGridCreateCopy
 
 ! !DESCRIPTION:
@@ -246,7 +246,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_DistGridConstructNew
          module procedure ESMF_DistGridConstructBlock
-         module procedure ESMF_DistGridConstructVect
+         module procedure ESMF_DistGridConstructArb
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that construct
@@ -262,7 +262,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_DistGridGetAllAIBlock
-         module procedure ESMF_DistGridGetAllAIVect
+         module procedure ESMF_DistGridGetAllAIArb
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that get
@@ -293,7 +293,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_DistGridSetDEBlock
-         module procedure ESMF_DistGridSetDEVect
+         module procedure ESMF_DistGridSetDEArb
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
@@ -461,17 +461,17 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateVect"
+#define ESMF_METHOD "ESMF_DistGridCreateArb"
 !BOPI
 ! !IROUTINE: ESMF_DistGridCreate - Create a new DistGrid internally
 
 ! !INTERFACE:
       ! Private name; call using ESMF_DistGridCreate()
-      function ESMF_DistGridCreateVect(dimCount, myCount, myIndices, counts, &
-                                       delayout, decompIDs, name, rc)
+      function ESMF_DistGridCreateArb(dimCount, myCount, myIndices, counts, &
+                                      delayout, decompIDs, name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_DistGrid) :: ESMF_DistGridCreateVect
+      type(ESMF_DistGrid) :: ESMF_DistGridCreateArb
 !
 ! !ARGUMENTS:
       integer, intent(in) :: dimCount
@@ -519,7 +519,7 @@
 
 !     Initialize pointers
       nullify(dgtype)
-      nullify(ESMF_DistGridCreateVect%ptr)
+      nullify(ESMF_DistGridCreateArb%ptr)
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -529,14 +529,14 @@
                                      ESMF_CONTEXT, rc)) return
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_DistGridConstructVect(dgtype, dimCount, delayout, decompIDs, &
+      call ESMF_DistGridConstructArb(dgtype, dimCount, delayout, decompIDs, &
                                       myCount, myIndices, counts, name, rc)
 
 !     Set return values.
-      ESMF_DistGridCreateVect%ptr => dgtype
+      ESMF_DistGridCreateArb%ptr => dgtype
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_DistGridCreateVect
+      end function ESMF_DistGridCreateArb
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -646,7 +646,7 @@
 !                                          as defaults
 !     DistGridType contents here:
       dgtype%dimCount          = 0
-      dgtype%vector            = 0
+      dgtype%arbitrary         = 0
       dgtype%gridBoundaryWidth = 1   ! TODO: this must be settable
       nullify(dgtype%decompIDs)
       nullify(dgtype%coversDomain)
@@ -928,15 +928,15 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridConstructVect"
+#define ESMF_METHOD "ESMF_DistGridConstructArb"
 !BOPI
 ! !IROUTINE: ESMF_DistGridConstruct - Construct the internals of an allocated DistGrid
 
 ! !INTERFACE:
       ! Private name; call using ESMF_DistGridConstruct()
-      subroutine ESMF_DistGridConstructVect(dgtype, dimCount, delayout, &
-                                            decompIDs, myCount, myIndices, &
-                                            counts, name, rc)
+      subroutine ESMF_DistGridConstructArb(dgtype, dimCount, delayout, &
+                                           decompIDs, myCount, myIndices, &
+                                           counts, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype 
@@ -1023,21 +1023,21 @@
     !  endif
 
       ! Allocate necessary arrays
-      call ESMF_DistGridAllocateVect(dgtype, nDEs, size(counts), myCount, &
-                                     localrc)
+      call ESMF_DistGridAllocateArb(dgtype, nDEs, size(counts), myCount, &
+                                    localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! Fill in distgrid derived type with input
       dgtype%dimCount = dimCount
-      dgtype%vector   = 1
+      dgtype%arbitrary= 1
       dgtype%delayout = delayout
       do i = 1,dimCount
         dgtype%decompIDs(i) = decompIDs(i)
       enddo
 
-      ! Calculate values for computational domain -- for vector storage
+      ! Calculate values for computational domain -- for arbitrary storage
       ! there is no difference
       glob => dgtype%globalComp
       me   => dgtype%myDEComp
@@ -1057,7 +1057,7 @@
       glob%globalCellCount       = globalCellCount
 
       ! call internal routine to set counts per DE
-      call ESMF_DistGridSetCountsVect(dgtype, dimCount, delayout, counts, &
+      call ESMF_DistGridSetCountsArb(dgtype, dimCount, delayout, counts, &
                                       myCount, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1072,7 +1072,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_DistGridConstructVect
+      end subroutine ESMF_DistGridConstructArb
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1195,20 +1195,20 @@
       ! If total is true, get info for the total cells including
       ! boundary areas; otherwise get only computational areas.
       dgtype => distgrid%ptr
-      glob => distgrid%ptr%globalComp
+      glob   => distgrid%ptr%globalComp
       if (present(total)) then
         if (total) glob => dgtype%globalTotal
       endif
 
-      ! set count -- helps set the correct size for vector distribution
-      count = dgtype%dimCount + dgtype%vector
+      ! set count -- helps set the correct size for storage distribution
+      count = dgtype%dimCount + dgtype%arbitrary
 
       ! If present, get information from distgrid derived type
       if (present(dimCount))     dimCount     = dgtype%dimCount
       if (present(coversDomain)) coversDomain = dgtype%coversDomain
 
       if (present(globalCellCount)) &
-                 globalCellCount = glob%globalCellCount
+                  globalCellCount = glob%globalCellCount
 
       if (present(globalCellCountPerDim)) then
                  ! TODO: add check that globalCellCountPerDim is large enough
@@ -1600,12 +1600,12 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridSetCountsVect"
+#define ESMF_METHOD "ESMF_DistGridSetCountsArb"
 !BOPI
-! !IROUTINE: ESMF_DistGridSetCountsVect - Set extent counts for a DistGrid
+! !IROUTINE: ESMF_DistGridSetCountsArb - Set extent counts for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridSetCountsVect(dgtype, dimCount, delayout, &
+      subroutine ESMF_DistGridSetCountsArb(dgtype, dimCount, delayout, &
                                             counts, myCount, rc)
 !
 ! !ARGUMENTS:
@@ -1683,7 +1683,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_DistGridSetCountsVect
+      end subroutine ESMF_DistGridSetCountsArb
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1885,13 +1885,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridSetDEVect"
+#define ESMF_METHOD "ESMF_DistGridSetDEArb"
 !BOPI
 ! !IROUTINE: ESMF_DistGridSetDE - Set DE information for a DistGrid
 
 ! !INTERFACE:
       ! Private name; call using ESMF_DistGridSetDE()
-      subroutine ESMF_DistGridSetDEVect(dgtype, myCount, myIndices, rc)
+      subroutine ESMF_DistGridSetDEArb(dgtype, myCount, myIndices, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype
@@ -1948,7 +1948,7 @@
 
       rc = ESMF_SUCCESS
 
-      end subroutine ESMF_DistGridSetDEVect
+      end subroutine ESMF_DistGridSetDEArb
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2017,12 +2017,12 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridGetAllAIVect"
+#define ESMF_METHOD "ESMF_DistGridGetAllAIArb"
 !BOPI
-! !IROUTINE: ESMF_DistGridGetAllAIVect - Get array of AxisIndices for DistGrid
+! !IROUTINE: ESMF_DistGridGetAllAIArb - Get array of AxisIndices for DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGetAllAIVect(dgtype, AI, AIcountPerDE, rc)
+      subroutine ESMF_DistGridGetAllAIArb(dgtype, AI, AIcountPerDE, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype
@@ -2107,7 +2107,7 @@
                                      ESMF_CONTEXT, rc)) return
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_DistGridGetAllAIVect
+      end subroutine ESMF_DistGridGetAllAIArb
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2768,12 +2768,12 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridAllocateVect"
+#define ESMF_METHOD "ESMF_DistGridAllocateArb"
 !BOPI
-! !IROUTINE: ESMF_DistGridAllocateVect - Allocate arrays in a DistGrid
+! !IROUTINE: ESMF_DistGridAllocateArb - Allocate arrays in a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridAllocateVect(dgtype, nDEs, dimCount, myCount, rc)
+      subroutine ESMF_DistGridAllocateArb(dgtype, nDEs, dimCount, myCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype 
@@ -2832,7 +2832,7 @@
 
       rc = ESMF_SUCCESS
 
-      end subroutine ESMF_DistGridAllocateVect
+      end subroutine ESMF_DistGridAllocateArb
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
