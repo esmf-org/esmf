@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.48 2005/05/31 17:39:51 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.49 2005/06/21 00:39:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -150,7 +150,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.48 2005/05/31 17:39:51 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.49 2005/06/21 00:39:29 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -310,13 +310,13 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
-  function ESMF_DELayoutCreateND(vm, deCountList, dePetList, &
+  function ESMF_DELayoutCreateND(vm, deCountList, petList, &
     connectionWeightDimList, cyclicFlagDimList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)              :: vm
     integer, target,    intent(in),   optional  :: deCountList(:)
-    integer, target,    intent(in),   optional  :: dePetList(:)
+    integer, target,    intent(in),   optional  :: petList(:)
     integer,            intent(in),   optional  :: connectionWeightDimList(:)
     type(ESMF_Logical), intent(in),   optional  :: cyclicFlagDimList(:)
     integer,            intent(out),  optional  :: rc
@@ -336,13 +336,29 @@ contains
 !           N-dimensional layout, where N is equal to the the size of {\tt
 !           deCountList}. The number of DEs will be {\tt deCountList(1)}
 !           $\times$
-!           {\tt deCountList(2)}$\times$...$\times${\tt deCountList(N)}.
+!           {\tt deCountList(2)} $\times$ ... $\times$ {\tt deCountList(N)}.
+!           The DE labeling sequence follows column major order for the
+!           {\tt deCountList} argument. For example {\tt deCountList=(/2, 3/)}
+!           would result in the following DE labels:
+!         \begin{verbatim}
+!         --------------> 2nd dimension
+!         | +---+---+---+
+!         | | 0 | 2 | 4 |
+!         | +---+---+---+
+!         | | 1 | 3 | 5 |
+!         | +---+---+---+
+!         |
+!         v
+!         1st dimension
+!         \end{verbatim}
 !     \end{itemize}
 !
-!     In either case, if {\tt dePetList} is given and its size is equal to the
-!     number of DEs in the created {\tt ESMF\_DELayout}, it will be used to
-!     determine the DE-to-PET mapping. Otherwise a DE-to-PET mapping will be
-!     determined automatically.
+!     In either case, if the {\tt petList} argument is given and its size is 
+!     equal to the number of DEs in the created {\tt ESMF\_DELayout}, it will 
+!     be used to determine the DE-to-PET mapping. The list elements correspond 
+!     to DE 0, 1, 2, ... and assign the specified PET to the respective DE. If 
+!     {\tt petList} is not present, or is of incompatible size, a default 
+!     DE-to-PET mapping will be chosen.
 !
 !     The {\tt connectionWeightDimList} argument, if present, must have N
 !     entries which will be used to ascribe connection weights along each
@@ -362,8 +378,9 @@ contains
 !          {\tt ESMF\_DELayout} object shall operate.
 !     \item[{[deCountList]}] 
 !          List DE count in each dimension.
-!     \item[{[dePetList]}] 
-!          List specifying DE-to-PET mapping.
+!     \item[{[petList]}] 
+!          List specifying DE-to-PET mapping. The list elements correspond to 
+!          DE 0, 1, 2, ... and assign the specified PET to the respective DE.
 !     \item[{[connectionWeightDimList]}] 
 !          List of connection weights along each dimension.
 !     \item[{[cyclicFlagDimList]}]
@@ -379,8 +396,8 @@ contains
     integer :: localrc                        ! local return code
 
     type(ESMF_DELayout):: delayout  ! opaque pointer to new C++ DELayout
-    integer :: len_deCountList, len_dePetList
-    integer, pointer :: opt_deCountList(:), opt_dePetList(:)
+    integer :: len_deCountList, len_petList
+    integer, pointer :: opt_deCountList(:), opt_petList(:)
     integer, target :: dummy(0)     ! used to satisfy the C interface...
 
     ! Assume failure until success
@@ -399,17 +416,17 @@ contains
       len_deCountList = 0
       opt_deCountList => dummy
     endif
-    if (present(dePetList)) then
-      len_dePetList = size(dePetList)
-      opt_dePetList => dePetList
+    if (present(petList)) then
+      len_petList = size(petList)
+      opt_petList => petList
     else
-      len_dePetList = 0
-      opt_dePetList => dummy
+      len_petList = 0
+      opt_petList => dummy
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutCreate(delayout, vm, opt_deCountList, len_deCountList, &
-      opt_dePetList, len_dePetList, localrc)
+      opt_petList, len_petList, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -463,54 +480,6 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
  
   end subroutine ESMF_DELayoutDestroy
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DELayoutGetVM()"
-!BOP
-! !IROUTINE: ESMF_DELayoutGetVM - Get VM on which this DELayout is defined
-
-! !INTERFACE:
-  subroutine ESMF_DELayoutGetVM(delayout, vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DELayout),  intent(in)              :: delayout
-    type(ESMF_VM),        intent(out)             :: vm
-    integer,              intent(out),  optional  :: rc  
-!         
-!
-! !DESCRIPTION:
-!     Get internal decomposion information.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout] 
-!        Queried {\tt ESMF\_DELayout} object.
-!     \item[{vm}]
-!        Upon return this holds the {\tt ESMF\_VM} object on which delayout
-!        is defined.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutGetVM(delayout, vm, localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-  end subroutine ESMF_DELayoutGetVM
 !------------------------------------------------------------------------------
 
 
@@ -655,7 +624,8 @@ contains
 !        Upon return this holds the list of connection weights of all the
 !        connections with the specified DE.
 !     \item[{[pid]}] 
-!          Actual memory address index.
+!          Upon return this holds the virtual address space (VAS) index of the
+!          PET that is associated with {\tt de}.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -872,6 +842,54 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_DELayoutGetDEMatchPET
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGetVM()"
+!BOP
+! !IROUTINE: ESMF_DELayoutGetVM - Get VM on which this DELayout is defined
+
+! !INTERFACE:
+  subroutine ESMF_DELayoutGetVM(delayout, vm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),  intent(in)              :: delayout
+    type(ESMF_VM),        intent(out)             :: vm
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Get internal decomposion information.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!        Queried {\tt ESMF\_DELayout} object.
+!     \item[{vm}]
+!        Upon return this holds the {\tt ESMF\_VM} object on which delayout
+!        is defined.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_DELayoutGetVM(delayout, vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_DELayoutGetVM
 !------------------------------------------------------------------------------
 
 
