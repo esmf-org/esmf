@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.24 2004/12/17 20:46:33 theurich Exp $
+// $Id: ESMC_DELayout_F.C,v 1.25 2005/06/21 19:26:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,14 +42,14 @@ extern "C" {
   // - ESMF-public methods:
 
   void FTN(c_esmc_delayoutcreate)(ESMC_DELayout **ptr, ESMC_VM **vm,
-    int *deCountList, int *len_deCountList, int *dePetList, int *len_dePetList,
+    int *deCountList, int *len_deCountList, int *petList, int *len_petList,
     int *rc){
     int localrc;
     ESMC_Logical cyclic = ESMF_TRUE;  // TODO: fix API
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutcreate()"
-    *ptr = ESMC_DELayoutCreate(**vm, deCountList, *len_deCountList, dePetList,
-      *len_dePetList, &cyclic, &localrc);
+    *ptr = ESMC_DELayoutCreate(**vm, deCountList, *len_deCountList, petList,
+      *len_petList, &cyclic, &localrc);
     // Use LogErr to handle return code
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));

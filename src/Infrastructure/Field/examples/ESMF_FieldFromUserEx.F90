@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldFromUserEx.F90,v 1.3 2005/02/14 04:36:23 theurich Exp $
+! $Id: ESMF_FieldFromUserEx.F90,v 1.4 2005/06/21 19:26:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -77,7 +77,7 @@
     ! This is the first ESMF call that must match the user's implementation.
     ! In this case, decompX and decompY represent the layout of processors
     ! (or PEs) used in the domain decomposition of the user code.  An optional
-    ! argument to the following ESMF_DELayoutCreate call, dePetList, allows
+    ! argument to the following ESMF_DELayoutCreate call, petList, allows
     ! the user to specify a subset or ordering of the processors in case
     ! the user code has a given processor topology.
 

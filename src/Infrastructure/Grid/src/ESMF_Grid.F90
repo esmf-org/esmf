@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.220 2005/06/20 23:03:12 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.221 2005/06/21 19:26:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.220 2005/06/20 23:03:12 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.221 2005/06/21 19:26:15 theurich Exp $'
 
 !==============================================================================
 !
@@ -6093,7 +6093,7 @@
   !    endif
 
       ! create new delayout from the vm and petlist
-      newDELayout = ESMF_DELayoutCreate(vm, deCountList=newNDEs, dePetList=petlist, &
+      newDELayout = ESMF_DELayoutCreate(vm, deCountList=newNDEs, petList=petlist, &
                                         rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
