@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.27 2005/06/17 21:51:33 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.28 2005/06/21 20:09:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.27 2005/06/17 21:51:33 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.28 2005/06/21 20:09:33 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1108,14 +1108,12 @@
       call ESMF_TimeSet(beforeAlarmTime, yy=2005, mm=6, dd=15, h=2, &
                         calendar=gregorianCalendar, rc=rc)
       beforeAlarm = ESMF_AlarmCreate(clock=domainClock, &
-                                     ringTime=beforeAlarmTime, &
-                                     sticky=.true., rc=rc)
+                                     ringTime=beforeAlarmTime, rc=rc)
 
       call ESMF_TimeSet(afterAlarmTime, yy=2005, mm=6, dd=15, h=3, &
                         calendar=gregorianCalendar, rc=rc)
       afterAlarm  = ESMF_AlarmCreate(clock=domainClock, &
-                                     ringTime=afterAlarmTime, &
-                                     sticky=.true., rc=rc)
+                                     ringTime=afterAlarmTime, rc=rc)
 
       ! any single failure will cause the whole test to fail
       testPass = .true.
@@ -1530,6 +1528,12 @@
 
       ! ----------------------------------------------------------------------------
 #endif
+
+      ! destroy calendars
+      call ESMF_CalendarDestroy(esmf_360dayCalendar, rc)
+      call ESMF_CalendarDestroy(no_leapCalendar, rc)
+      call ESMF_CalendarDestroy(julianCalendar, rc)
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
 
       ! finalize ESMF framework
       call ESMF_TestEnd(result, ESMF_SRCLINE)
