@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.74 2005/06/22 19:11:43 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.75 2005/06/22 19:31:49 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.74 2005/06/22 19:11:43 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.75 2005/06/22 19:31:49 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -1524,6 +1524,14 @@ int ESMC_Clock::count=0;
        return(rc);
     }
 
+    if (direction != ESMF_MODE_FORWARD && direction != ESMF_MODE_REVERSE) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "direction property %d is not ESMF_MODE_FORWARD or "
+              "ESMF_MODE_REVERSE", direction);
+      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+      return(ESMF_FAILURE);
+    }
+
     // validate optional stopTime property if set
     if (stopTimeEnabled) {
       if(ESMC_LogDefault.ESMC_LogMsgFoundError(stopTime.ESMC_TimeValidate(),
@@ -1743,6 +1751,9 @@ int ESMC_Clock::count=0;
       else if (strncmp(opts, "advancecount", 12) == 0) {
         printf("advanceCount = %lld\n", advanceCount);
       }
+      else if (strncmp(opts, "direction", 9) == 0) {
+        printf("direction = %d\n", direction);
+      }
       else if (strncmp(opts, "alarmcount", 10) == 0) {
         printf("alarmCount = %d\n", alarmCount);
       }
@@ -1766,6 +1777,7 @@ int ESMC_Clock::count=0;
       printf("currTime = \n");  currTime.ESMC_TimePrint(options);
       printf("prevTime = \n");  prevTime.ESMC_TimePrint(options);
       printf("advanceCount = %lld\n", advanceCount);
+      printf("direction = %d\n", direction);
       printf("alarmCount = %d\n", alarmCount);
       printf("alarmList = \n");
       for (int i=0; i<alarmCount; i++) {
