@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.53 2005/06/17 21:51:33 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.54 2005/06/22 20:32:56 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.53 2005/06/17 21:51:33 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.54 2005/06/22 20:32:56 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -408,6 +408,7 @@ int ESMC_Alarm::count=0;
       int               *ringTimeStepCount,      // out
       int               *timeStepRingingCount,   // out
       ESMC_Time         *ringBegin,              // out
+      ESMC_Time         *ringEnd,                // out
       ESMC_Time         *refTime,                // out
       bool              *ringing,                // out
       bool              *ringingOnPrevTimeStep,  // out
@@ -478,6 +479,9 @@ int ESMC_Alarm::count=0;
     }
     if (ringBegin != ESMC_NULL_POINTER) {
       *ringBegin = this->ringBegin;
+    }
+    if (ringEnd != ESMC_NULL_POINTER) {
+      *ringEnd = this->ringEnd;
     }
     if (refTime != ESMC_NULL_POINTER) {
       *refTime = this->refTime;
@@ -1492,6 +1496,14 @@ int ESMC_Alarm::count=0;
           ringTime.ESMC_TimePrint();
         }
       }
+      else if (strncmp(opts, "firstringtime", 13) == 0) {
+        printf("firstRingTime = \n");
+        if (strstr(opts, "string") != ESMC_NULL_POINTER) {
+          firstRingTime.ESMC_TimePrint("string");
+        } else {
+          firstRingTime.ESMC_TimePrint();
+        }
+      }
       else if (strncmp(opts, "prevringtime", 12) == 0) {
         printf("prevRingTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
@@ -1514,6 +1526,14 @@ int ESMC_Alarm::count=0;
           ringBegin.ESMC_TimePrint("string");
         } else {
           ringBegin.ESMC_TimePrint();
+        }
+      }
+      else if (strncmp(opts, "ringend", 7) == 0) {
+        printf("ringEnd = \n");
+        if (strstr(opts, "string") != ESMC_NULL_POINTER) {
+          ringEnd.ESMC_TimePrint("string");
+        } else {
+          ringEnd.ESMC_TimePrint();
         }
       }
       else if (strncmp(opts, "reftime", 7) == 0) {
@@ -1550,11 +1570,13 @@ int ESMC_Alarm::count=0;
       printf("name = %s\n", name);
       printf("ringInterval = \n"); ringInterval.ESMC_TimeIntervalPrint(options);
       printf("ringDuration = \n"); ringDuration.ESMC_TimeIntervalPrint(options);
-      printf("ringTime = \n");     ringTime.ESMC_TimePrint(options);
-      printf("prevRingTime = \n"); prevRingTime.ESMC_TimePrint(options);
-      printf("stopTime = \n");     stopTime.ESMC_TimePrint(options);
-      printf("ringBegin = \n");    ringBegin.ESMC_TimePrint(options);
-      printf("refTime = \n");      refTime.ESMC_TimePrint(options);
+      printf("ringTime = \n");      ringTime.ESMC_TimePrint(options);
+      printf("firstRingTime = \n"); firstRingTime.ESMC_TimePrint(options);
+      printf("prevRingTime = \n");  prevRingTime.ESMC_TimePrint(options);
+      printf("stopTime = \n");      stopTime.ESMC_TimePrint(options);
+      printf("ringBegin = \n");     ringBegin.ESMC_TimePrint(options);
+      printf("ringEnd = \n");       ringEnd.ESMC_TimePrint(options);
+      printf("refTime = \n");       refTime.ESMC_TimePrint(options);
       printf("ringTimeStepCount = %d\n",    ringTimeStepCount);
       printf("timeStepRingingCount = %d\n", timeStepRingingCount);
       printf("ringing = %s\n", ringing ? "true" : "false");
