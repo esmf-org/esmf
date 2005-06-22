@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.26 2004/07/02 20:27:25 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.27 2005/06/22 20:35:17 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -102,8 +102,9 @@ extern "C" {
                 ESMC_TimeInterval *ringInterval, ESMC_Time *stopTime,
                 ESMC_TimeInterval *ringDuration, int *ringTimeStepCount,
                 int *timeStepRingingCount, ESMC_Time *ringBegin,
-                ESMC_Time *refTime, bool *ringing, bool *ringingOnPrevTimeStep,
-                bool *enabled, bool *sticky, int *status) {
+                ESMC_Time *ringEnd, ESMC_Time *refTime, bool *ringing,
+                bool *ringingOnPrevTimeStep, bool *enabled, bool *sticky,
+                int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_AlarmGet(
 			                 // always presnet internal arguments
@@ -119,6 +120,7 @@ extern "C" {
                     ESMC_NOT_PRESENT_FILTER(ringTimeStepCount),
                     ESMC_NOT_PRESENT_FILTER(timeStepRingingCount),
                     ESMC_NOT_PRESENT_FILTER(ringBegin),
+                    ESMC_NOT_PRESENT_FILTER(ringEnd),
                     ESMC_NOT_PRESENT_FILTER(refTime),
                     ESMC_NOT_PRESENT_FILTER(ringing),
                     ESMC_NOT_PRESENT_FILTER(ringingOnPrevTimeStep),
