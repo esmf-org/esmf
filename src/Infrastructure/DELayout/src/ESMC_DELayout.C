@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.32 2005/02/15 17:07:34 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.33 2005/06/22 03:41:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.32 2005/02/15 17:07:34 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.33 2005/06/22 03:41:20 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -81,6 +81,29 @@ ESMC_DELayout *ESMC_DELayoutCreate(
   ESMC_Logical cyclic = ESMF_FALSE;
   if (cyclic_opt != ESMC_NULL_POINTER)
     cyclic = *cyclic_opt;
+  
+  
+  // CAUTION: todo: THIS IS A _NASTY_ HACK to make things happy on higher levels
+  // that rely on DELayout to be _always 2D! Here I promote a 1D layout request
+  // to 2D: N x 1. I write a message to LogErr to make people aware of this!!!
+  if (ndim==0){
+    ESMC_LogDefault.ESMC_LogWrite("HACK: Promoting 1D DELayout to 2D",
+      ESMC_LOG_WARN);
+    ndim = 2;
+    nDEs = new int[2];  // this will leave a memor leak, but hey, its a hack!
+    nDEs[0] = vm.vmk_npets();
+    nDEs[1] = 1;
+  }
+  if (ndim==1){
+    ESMC_LogDefault.ESMC_LogWrite("HACK: Promoting 1D DELayout to 2D",
+      ESMC_LOG_WARN);
+    ndim = 2;
+    int firstDEdim = nDEs[0];
+    nDEs = new int[2];  // this will leave a memor leak, but hey, its a hack!
+    nDEs[0] = firstDEdim;
+    nDEs[1] = 1;
+  }
+  
 
   // decide whether this is a 1D or an ND layout
   if (ndim==0){
