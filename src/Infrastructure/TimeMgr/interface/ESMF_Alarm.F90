@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.61 2005/05/31 17:40:00 nscollins Exp $
+! $Id: ESMF_Alarm.F90,v 1.62 2005/06/22 20:35:44 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.61 2005/05/31 17:40:00 nscollins Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.62 2005/06/22 20:35:44 eschwab Exp $'
 
 !==============================================================================
 !
@@ -451,7 +451,7 @@
       subroutine ESMF_AlarmGet(alarm, name, clock, ringTime, prevRingTime, &
                                ringInterval, stopTime, ringDuration, &
                                ringTimeStepCount, timeStepRingingCount, &
-                               ringBegin, refTime, ringing, &
+                               ringBegin, ringEnd, refTime, ringing, &
                                ringingOnPrevTimeStep, enabled, sticky, rc)
 
 ! !ARGUMENTS:
@@ -466,6 +466,7 @@
       integer,                 intent(out), optional :: ringTimeStepCount
       integer,                 intent(out), optional :: timeStepRingingCount
       type(ESMF_Time),         intent(out), optional :: ringBegin
+      type(ESMF_Time),         intent(out), optional :: ringEnd
       type(ESMF_Time),         intent(out), optional :: refTime
       logical,                 intent(out), optional :: ringing
       logical,                 intent(out), optional :: ringingOnPrevTimeStep
@@ -507,6 +508,9 @@
 !          The time when the alarm began ringing.  Used internally for tracking
 !          ringDuration (see above).  Mutually exclusive with
 !          timeStepRingingCount (see above).
+!     \item[{[ringEnd]}]
+!          The time when the alarm ended ringing.  Used internally for
+!          re-ringing alarm in {\tt ESMF\_MODE\_REVERSE}.
 !     \item[{[refTime]}]
 !          The reference (i.e. base) time for an interval alarm.
 !     \item[{[ringing]}]
@@ -544,7 +548,7 @@
       call c_ESMC_AlarmGet(alarm, nameLen, tempNameLen, tempName, clock, &
                            ringTime, prevRingTime, ringInterval, stopTime, &
                            ringDuration, ringTimeStepCount, &
-                           timeStepRingingCount, ringBegin, refTime, &
+                           timeStepRingingCount, ringBegin, ringEnd, refTime, &
                            ringing, ringingOnPrevTimeStep, enabled, sticky, rc)
 
       ! copy temp name back to given name to restore native Fortran
@@ -729,6 +733,7 @@
 !          "prevRingTime" - print the alarm's previous ring time. \\
 !          "ringBegin"    - print time when the alarm actually begins to ring.\\
 !          "ringDuration" - print how long this alarm is to remain ringing. \\
+!          "ringEnd"      - print time when the alarm actually ends ringing.\\
 !          "ringing"                - print the alarm's current ringing state.\\
 !          "ringingOnPrevTimeStep"  - print whether the alarm was ringing 
 !                                     immediately after the previous clock
