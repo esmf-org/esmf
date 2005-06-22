@@ -211,6 +211,13 @@
 \input{../Infrastructure/TimeMgr/doc/Clock_desc}
 #endif
 
+\subsection{Clock Options}
+#ifdef STANDALONE
+\input{Clock_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/Clock_options}
+#endif
+
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Clock_usage}

@@ -1,0 +1,39 @@
+% $Id: Clock_options.tex,v 1.1 2005/06/22 22:08:48 eschwab Exp $
+
+\subsubsection{ESMF\_Direction}
+
+{\sf DESCRIPTION:\\}
+Specifies the time-stepping direction of a clock.  Use as argument to
+methods {\tt ESMF\_ClockSet()} and {\tt ESMF\_ClockGet()}.  Cannot be used
+with method {\tt ESMF\_ClockCreate()}, since it only initializes a clock in
+the default forward mode; a clock must be advanced (timestepped) at least once
+before reversing direction via {\tt ESMF\_ClockSet()}.  This also holds true 
+for negative timestep clocks which are initialized (created) with
+stopTime < startTime, since "forward" means timestepping from startTime
+towards stopTime (see ESMF\_MODE\_FORWARD below).
+
+"Forward" and "reverse" directions are distinct from postive and negative
+timesteps.  "Forward" means timestepping in the direction established at
+{\tt ESMF\_ClockCreate()}, from startTime towards stopTime, regardless
+of the timestep sign.  "Reverse" means timestepping in the opposite direction,
+back towards the clock's startTime, regardless of the timestep sign.
+
+Valid values are:
+\begin{description}
+
+\item [ESMF\_MODE\_FORWARD] 
+      Upon calling {\tt ESMF\_ClockAdvance()}, the clock will timestep from
+its startTime toward its stopTime.  This is the default direction.  A user
+can use either {\tt ESMF\_ClockIsStopTime()} or {\tt ESMF\_ClockIsDone()}
+methods to determine when stopTime is reached.  This forward behavior also
+holds for negative timestep clocks which are initialized (created) with
+stopTime < startTime.
+
+\item [ESMF\_MODE\_REVERSE] 
+      Upon calling {\tt ESMF\_ClockAdvance()}, the clock will timestep backwards
+toward its startTime.  Use method {\tt ESMF\_ClockIsDone()} to determine when
+startTime is reached.  This reverse behavior also holds for negative timestep
+clocks which are initialized (created) with stopTime < startTime.
+
+\end{description}
+
