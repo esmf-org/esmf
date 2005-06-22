@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.64 2005/06/17 21:51:33 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.65 2005/06/22 20:37:13 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.64 2005/06/17 21:51:33 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.65 2005/06/22 20:37:13 eschwab Exp $'
 
 !==============================================================================
 !
@@ -867,21 +867,23 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Prints out an {\tt ESMF\_Clock}'s properties to {\tt stdout}, in support of testing
-!     and debugging.  The options control the type of information and level     
-!     of detail.
+!     Prints out an {\tt ESMF\_Clock}'s properties to {\tt stdout}, in
+!     support of testing and debugging.  The options control the type of
+!     information and level of detail.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
 !          {\tt ESMF\_Clock} to be printed out.
 !     \item[{[options]}]
-!          Print options. If none specified, prints all {\tt clock} property values.\\
+!          Print options. If none specified, prints all {\tt clock} property
+!          values.\\
 !          "advanceCount" - print the number of times the clock has been
 !                           advanced. \\
 !          "alarmCount"   - print the number of alarms in the clock's list. \\
 !          "alarmList"    - print the clock's alarm list. \\
 !          "currTime"     - print the current clock time. \\
+!          "direction"    - print the clock's timestep direction. \\
 !          "name"         - print the clock's name. \\
 !          "prevTime"     - print the previous clock time. \\
 !          "refTime"      - print the clock's reference time. \\
