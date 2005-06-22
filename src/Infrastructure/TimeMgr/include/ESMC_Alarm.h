@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.31 2005/06/17 21:51:32 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.32 2005/06/22 20:31:28 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -182,6 +182,7 @@ class ESMC_Alarm {
                       int               *ringTimeStepCount=0,
                       int               *timeStepRingingCount=0,
                       ESMC_Time         *ringBegin=0,
+                      ESMC_Time         *ringEnd=0,
                       ESMC_Time         *refTime=0,
                       bool              *ringing=0,
                       bool              *ringingOnPrevTimeStep=0,
