@@ -8,10 +8,10 @@ integer, parameter, dimension(1:nOptions) :: nChoices=(/ 2,2,4,2,3,3 /)
 character(len=25),parameter, dimension(1:nOptions) :: Option_name= &
        (/ 'SRCDELAYOUT'  &   ! (1)
         , 'DSTDELAYOUT'  &   ! (2)
-        , 'FUNCTION'     &   ! (3)
-        , 'REGSCHEME'    &   ! (4)
-        , 'SRCGRID'      &   ! (5)
-        , 'DSTGRID'      &   ! (6)
+        , 'FUNCTION   '  &   ! (3)
+        , 'REGSCHEME  '  &   ! (4)
+        , 'SRCGRID    '  &   ! (5)
+        , 'DSTGRID    '  &   ! (6)
        /)
 character(len=25),  dimension(1:4,1:nOptions) :: Option_choice
 
