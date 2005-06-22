@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.26 2005/06/20 17:34:29 nscollins Exp $
+! $Id: CoupledFlowDemo.F90,v 1.27 2005/06/22 17:18:36 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -345,7 +345,14 @@
 
 
      ! make our own local copy of the clock
-     localclock = ESMF_ClockCreate(clock, rc)
+
+  ! TODO: possible problem with clock create by copy?
+  ! This code is supposed to make a real copy and update only a local
+  ! clock.  When this code is commented in, the time loop does not stop
+  ! because the clock is stepping backwards in time.
+  !   localclock = ESMF_ClockCreate(clock, rc)
+  ! so for now go back to the reference to the original:
+      localclock = clock
 
      print *, "Run Loop Start time"
      call ESMF_ClockPrint(localclock, "currtime string", rc)
@@ -373,7 +380,8 @@
      print *, "Run Loop End time"
      call ESMF_ClockPrint(localclock, "currtime string", rc)
  
-     call ESMF_ClockDestroy(localclock, rc)
+     ! TODO: when the clock copy code is commented back in, add this also
+     ! call ESMF_ClockDestroy(localclock, rc)
 
 end subroutine coupledflow_run
 
