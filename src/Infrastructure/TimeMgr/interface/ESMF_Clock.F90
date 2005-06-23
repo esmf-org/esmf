@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.65 2005/06/22 20:37:13 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.66 2005/06/23 04:34:34 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.65 2005/06/22 20:37:13 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.66 2005/06/23 04:34:34 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1018,14 +1018,18 @@
 !          The number of times the clock has been timestepped.
 !     \item[{[direction]}]
 !          Sets the clock's time-stepping direction.  If called with
-!          {\tt ESMF\_MODE\_REVERSE}, sets the clock in "reverse" mode;
-!          if called with {\tt ESMF\_MODE\_FORWARD}, sets the clock in
-!          normal, "forward" mode.  The default mode is
+!          {\tt ESMF\_MODE\_REVERSE}, sets the clock in "reverse" mode,
+!          causing it to timestep back towards its startTime.  If called
+!          with {\tt ESMF\_MODE\_FORWARD}, sets the clock in normal,
+!          "forward" mode, causing it to timestep in the direction of its
+!          startTime to stopTime.  This holds true for negative timestep
+!          clocks as well, which are initialized (created) with
+!          stopTime < startTime.  The default mode is
 !          {\tt ESMF\_MODE\_FORWARD}, established at {\tt ESMF\_ClockCreate()}.
 !          Existing property timeStep can also be specified at the same time,
 !          which allows for a change in magnitude and/or sign of the clock's
 !          timeStep.  If not specified with {\tt ESMF\_MODE\_REVERSE}, the
-!          clock's current timeStep is simply negated.  If timeStep is
+!          clock's current timeStep is effectively negated.  If timeStep is
 !          specified, its sign is used as specified; it is not negated
 !          internally.  E.g., if the specified timeStep is negative and the
 !          clock is placed in {\tt ESMF\_MODE\_REVERSE}, subsequent calls to
