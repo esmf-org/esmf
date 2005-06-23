@@ -1,7 +1,7 @@
-! $Id: ESMF_Bundle.F90,v 1.74 2005/05/31 17:39:50 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.75 2005/06/23 22:47:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Copyright 2002-2005, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -157,8 +157,11 @@
 !
 ! !PUBLIC TYPES:
       public ESMF_Bundle, ESMF_PackFlag, ESMF_PACKED_DATA, ESMF_NO_PACKED_DATA
+
       ! intended for internal ESMF use only but public for BundleComms
-      public ESMF_BundleType, ESMF_LocalBundle, ESMF_BundleFieldInterleave
+      public ESMF_BundleType           ! internal ESMF use only, for BundleComm
+      public ESMF_LocalBundle          ! internal ESMF use only, for BundleComm
+      public ESMF_BundleFieldInterleave ! internal ESMF use only, for BundleComm
 
 
 ! !PUBLIC MEMBER FUNCTIONS:
