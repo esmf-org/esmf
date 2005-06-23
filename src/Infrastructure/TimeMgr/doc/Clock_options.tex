@@ -1,16 +1,17 @@
-% $Id: Clock_options.tex,v 1.1 2005/06/22 22:08:48 eschwab Exp $
+% $Id: Clock_options.tex,v 1.2 2005/06/23 04:37:23 eschwab Exp $
 
 \subsubsection{ESMF\_Direction}
 
 {\sf DESCRIPTION:\\}
-Specifies the time-stepping direction of a clock.  Use as argument to
-methods {\tt ESMF\_ClockSet()} and {\tt ESMF\_ClockGet()}.  Cannot be used
-with method {\tt ESMF\_ClockCreate()}, since it only initializes a clock in
-the default forward mode; a clock must be advanced (timestepped) at least once
-before reversing direction via {\tt ESMF\_ClockSet()}.  This also holds true 
-for negative timestep clocks which are initialized (created) with
-stopTime < startTime, since "forward" means timestepping from startTime
-towards stopTime (see ESMF\_MODE\_FORWARD below).
+Specifies the time-stepping direction of a clock.  Use with "direction"
+argument to methods {\tt ESMF\_ClockSet()} and {\tt ESMF\_ClockGet()}.
+Cannot be used with method {\tt ESMF\_ClockCreate()}, since it only
+initializes a clock in the default forward mode; a clock must be advanced
+(timestepped) at least once before reversing direction via
+{\tt ESMF\_ClockSet()}.  This also holds true for negative timestep clocks
+which are initialized (created) with stopTime < startTime, since "forward"
+means timestepping from startTime towards stopTime
+(see ESMF\_MODE\_FORWARD below).
 
 "Forward" and "reverse" directions are distinct from postive and negative
 timesteps.  "Forward" means timestepping in the direction established at
