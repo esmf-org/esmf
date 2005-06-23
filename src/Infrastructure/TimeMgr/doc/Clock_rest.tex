@@ -1,9 +1,10 @@
-% $Id: Clock_rest.tex,v 1.7 2004/06/18 22:27:45 eschwab Exp $
+% $Id: Clock_rest.tex,v 1.8 2005/06/23 04:36:50 eschwab Exp $
 
 \begin{enumerate}
 
-\item {\bf Limit on number of Alarms.}  The maximum number of Alarms that 
-can be associated with a Clock is currently hard-coded at 100.  This is done
-in both Fortran and C++ with a \#define for ease of modification.
+\item {\bf Alarm list allocation factor}  The alarm list within a clock is
+dynamically allocated automatically, 200 alarm references at a time.
+This constant is defined in both Fortran and C++ with a \#define for ease
+of modification.
 
 \end{enumerate}
