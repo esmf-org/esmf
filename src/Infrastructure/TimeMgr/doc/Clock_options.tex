@@ -1,4 +1,4 @@
-% $Id: Clock_options.tex,v 1.3 2005/06/24 22:45:01 eschwab Exp $
+% $Id: Clock_options.tex,v 1.4 2005/06/24 23:31:47 eschwab Exp $
 
 \subsubsection{ESMF\_Direction}
 
@@ -11,7 +11,7 @@ initializes a clock in the default forward mode; a clock must be advanced
 {\tt ESMF\_ClockSet()}.  This also holds true for negative timestep clocks
 which are initialized (created) with stopTime < startTime, since "forward"
 means timestepping from startTime towards stopTime
-(see ESMF\_MODE\_FORWARD below).
+(see {\tt ESMF\_MODE\_FORWARD} below).
 
 "Forward" and "reverse" directions are distinct from postive and negative
 timesteps.  "Forward" means timestepping in the direction established at
