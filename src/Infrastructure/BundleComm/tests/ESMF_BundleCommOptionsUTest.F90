@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.1 2005/06/24 21:01:58 nscollins Exp $
+! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.2 2005/06/24 23:00:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -22,6 +22,11 @@
 !
 ! !DESCRIPTION:
 !
+! TODO: this test currently works at the Field level; once the Bundle
+!  communications code is complete, this test needs to be revised to create
+!  a loose Bundle of Fields with different data values, and redist them
+!  into a second Bundle of Fields which are decomposed differently.
+!
 ! The code in this file exercises various combinations of internal options
 !  controlling how to do the actual redist communications - e.g. pack 
 !  small discontig chunks into a buffer and do a single send, or make
@@ -39,7 +44,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.1 2005/06/24 21:01:58 nscollins Exp $'
+      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.2 2005/06/24 23:00:19 nscollins Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
