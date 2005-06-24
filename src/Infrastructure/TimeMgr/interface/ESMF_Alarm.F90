@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.62 2005/06/22 20:35:44 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.63 2005/06/24 22:45:01 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.62 2005/06/22 20:35:44 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.63 2005/06/24 22:45:01 eschwab Exp $'
 
 !==============================================================================
 !
@@ -242,6 +242,10 @@
 ! !DESCRIPTION:
 !     Creates and sets the initial values in a new {\tt ESMF\_Alarm}.
 !
+!     In {\tt ESMF\_MODE\_REVERSE} (see Section~\ref{sec:Clock}), alarms ring
+!     in reverse, i.e., they begin ringing when they originally ended, and end
+!     ringing when they originally began.
+!
 !     This is a private method; invoke via the public overloaded entry point
 !     {\tt ESMF\_AlarmCreate()}.
 !
@@ -289,7 +293,13 @@
 !          manually via a user call to {\tt ESMF\_AlarmRingerOff()}.
 !          If not sticky, an alarm will turn itself off after a certain
 !          ring duration specified by either ringDuration or
-!          ringTimeStepCount (see above).
+!          ringTimeStepCount (see above).  There is an implicit limitation
+!          that in order to properly reverse timestep through a ring end
+!          time in {\tt ESMF\_MODE\_REVERSE}, that time must have already
+!          been traversed in the forward direction.  This is due to the fact
+!          that the Time Manager cannot predict when user code will call
+!          {\tt ESMF\_AlarmRingerOff()}.  An error message will be logged
+!          when this limitation is not satisfied.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -503,7 +513,8 @@
 !          The number of time steps for which the alarm has been ringing thus
 !          far.  Used internally for tracking ringTimeStepCount ring 
 !          durations (see above).  Mutually exclusive with ringBegin
-!          (see below).
+!          (see below).  Increments in {\tt ESMF\_MODE\_FORWARD} and decrements
+!          in {\tt ESMF\_MODE\_REVERSE}; see Section~\ref{sec:Clock}.
 !     \item[{[ringBegin]}]
 !          The time when the alarm began ringing.  Used internally for tracking
 !          ringDuration (see above).  Mutually exclusive with
@@ -816,7 +827,10 @@
       integer,          intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Turn off an {\tt ESMF\_Alarm}; unsets ringing state.
+!     Turn off an {\tt ESMF\_Alarm}; unsets ringing state.  For a sticky
+!     alarm, this method must be called to turn off its ringing state.
+!     This is true for either {\tt ESMF\_MODE\_FORWARD} (default) or
+!     {\tt ESMF\_MODE\_REVERSE}.  See Section~\ref{sec:Clock}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -936,6 +950,11 @@
 !          {\tt ESMF\_AlarmRingerOff()}.  If not sticky, an alarm will turn
 !          itself off after a certain ring duration specified by either
 !          ringDuration or ringTimeStepCount (see above).
+!          There is an implicit limitation that in order to properly reverse
+!          timestep through a ring end time in {\tt ESMF\_MODE\_REVERSE},
+!          that time must have already been traversed in the forward direction. !          This is due to the fact that the Time Manager cannot predict when
+!          user code will call {\tt ESMF\_AlarmRingerOff()}.  An error message
+!          will be logged when this limitation is not satisfied.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -977,6 +996,12 @@
 ! !DESCRIPTION:
 !     Set an {\tt ESMF\_Alarm}'s sticky flag; once alarm is ringing,
 !     it remains ringing until {\tt ESMF\_AlarmRingerOff()} is called.
+!     There is an implicit limitation that in order to properly reverse
+!     timestep through a ring end time in {\tt ESMF\_MODE\_REVERSE}, that
+!     time must have already been traversed in the forward direction.
+!     This is due to the fact that the Time Manager cannot predict when
+!     user code will call {\tt ESMF\_AlarmRingerOff()}.  An error message
+!     will be logged when this limitation is not satisfied.
 !
 !     The arguments are:
 !     \begin{description}

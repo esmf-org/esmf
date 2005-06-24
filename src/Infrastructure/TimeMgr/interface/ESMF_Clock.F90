@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.66 2005/06/23 04:34:34 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.67 2005/06/24 22:45:01 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.66 2005/06/23 04:34:34 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.67 2005/06/24 22:45:01 eschwab Exp $'
 
 !==============================================================================
 !
@@ -224,9 +224,14 @@
 !   
 ! !DESCRIPTION:
 !     Advances the {\tt clock}'s current time by one time step:  either the
-!     {\tt clock}'s, or the passed-in {\tt timeStep} (see below).  This
-!     method optionally returns a list and number of ringing {\tt ESMF\_Alarm}s.
-!     See also method {\tt ESMF\_ClockGetRingingAlarms}.
+!     {\tt clock}'s, or the passed-in {\tt timeStep} (see below).  When the
+!     {\tt clock} is in {\tt ESMF\_MODE\_FORWARD} (default), this method adds
+!     the {\tt timeStep} to the {\tt clock}'s current time.
+!     In {\tt ESMF\_MODE\_REVERSE}, {\tt timeStep} is subtracted from the
+!     current time.  In either case, {\tt timeStep} can be positive or negative.
+!     See the "direction" argument in method {\tt ESMF\_ClockSet()}.
+!     {\tt ESMF\_ClockAdvance()} optionally returns a list and number of ringing
+!     {\tt ESMF\_Alarm}s.  See also method {\tt ESMF\_ClockGetRingingAlarms()}.
 !  
 !     The arguments are:
 !     \begin{description}
@@ -508,6 +513,9 @@
 !          The timezone within which all the {\tt Clock}'s times are defined.
 !     \item[{[advanceCount]}]
 !          The number of times the {\tt ESMF\_Clock} has been advanced.
+!          Increments in {\tt ESMF\_MODE\_FORWARD} and decrements in
+!          {\tt ESMF\_MODE\_REVERSE}; see "direction" argument below and in
+!          {\tt ESMF\_ClockSet()}.
 !     \item[{[alarmCount]}]
 !          The number of {\tt ESMF\_Alarm}s in the {\tt ESMF\_Clock}'s
 !          {\tt ESMF\_Alarm} list.
@@ -733,7 +741,7 @@
 ! !DESCRIPTION:
 !     Returns true if currentTime is greater than or equal to stopTime
 !     in {\tt ESMF\_MODE\_FORWARD}, or if currentTime is less than or equal to
-!     startTime in {ESMF\_MODE\_REVERSE}.  It returns false otherwise.
+!     startTime in {\tt ESMF\_MODE\_REVERSE}.  It returns false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -984,7 +992,7 @@
 !          those applications that need variable timesteps.  See
 !          {\tt ESMF\_ClockAdvance()} below for specifying variable timesteps
 !          that are NOT saved as the clock's internal time step property.
-!          See 'direction' argument below for behavior with
+!          See "direction" argument below for behavior with
 !          {\\t ESMF\_MODE\_REVERSE} direction.
 !     \item[{[startTime]}]
 !          The {\tt ESMF\_Clock}'s starting time.  Can be less than or
@@ -1026,7 +1034,7 @@
 !          clocks as well, which are initialized (created) with
 !          stopTime < startTime.  The default mode is
 !          {\tt ESMF\_MODE\_FORWARD}, established at {\tt ESMF\_ClockCreate()}.
-!          Existing property timeStep can also be specified at the same time,
+!          timeStep can also be specified as an argument at the same time,
 !          which allows for a change in magnitude and/or sign of the clock's
 !          timeStep.  If not specified with {\tt ESMF\_MODE\_REVERSE}, the
 !          clock's current timeStep is effectively negated.  If timeStep is

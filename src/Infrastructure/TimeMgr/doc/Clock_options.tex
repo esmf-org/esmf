@@ -1,4 +1,4 @@
-% $Id: Clock_options.tex,v 1.2 2005/06/23 04:37:23 eschwab Exp $
+% $Id: Clock_options.tex,v 1.3 2005/06/24 22:45:01 eschwab Exp $
 
 \subsubsection{ESMF\_Direction}
 
@@ -18,6 +18,12 @@ timesteps.  "Forward" means timestepping in the direction established at
 {\tt ESMF\_ClockCreate()}, from startTime towards stopTime, regardless
 of the timestep sign.  "Reverse" means timestepping in the opposite direction,
 back towards the clock's startTime, regardless of the timestep sign.
+
+Clocks and alarms run in reverse in such a way that the state of a clock and
+its alarms after each time step is precisely replicated as it was in forward
+time-stepping mode.  All methods which query clock and alarm state will
+return the same result for a given timeStep, regardless of the direction of
+arrival.
 
 Valid values are:
 \begin{description}
