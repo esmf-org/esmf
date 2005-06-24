@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.38 2005/02/14 04:36:24 theurich Exp $
+! $Id: ESMF_ClockEx.F90,v 1.39 2005/06/24 23:33:37 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -148,6 +148,42 @@
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
+!BOE
+!\subsubsection{Clock Reversal}
+
+! This example shows how to time-step an {\tt ESMF\_Clock} in reverse mode.
+!EOE
+
+!BOC
+      call ESMF_ClockSet(clock, direction=ESMF_MODE_REVERSE, rc=rc)
+!EOC
+
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+      ! time step clock in reverse from stop time back to start time;
+      !  note use of ESMF_ClockIsDone() rather than ESMF_ClockIsStopTime()
+      do while (.not.ESMF_ClockIsDone(clock, rc))
+!EOC
+
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+        call ESMF_ClockPrint(clock, "currTime string", rc)
+!EOC
+
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+        call ESMF_ClockAdvance(clock, rc=rc)
+!EOC
+
+        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+      end do
+!EOC
+
 !BOE
 !\subsubsection{Clock Destruction}
 
