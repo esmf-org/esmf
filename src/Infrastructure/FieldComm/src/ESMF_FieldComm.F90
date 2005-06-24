@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.70 2005/05/31 17:39:54 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.71 2005/06/24 21:01:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.70 2005/05/31 17:39:54 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.71 2005/06/24 21:01:59 nscollins Exp $'
 
 !==============================================================================
 !
@@ -114,12 +114,33 @@
       interface ESMF_FieldHalo
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldHaloRun
         module procedure ESMF_FieldHaloDeprecated
+        module procedure ESMF_FieldHaloRun
 
 ! !DESCRIPTION:
 !     Temporary interface to east transition from old syntax to new.
 !     All new code should be using the {\tt ESMF\_FieldHaloRun} syntax.
+!    
+!EOPI
+      end interface
+!
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldRegrid - Regrid data, either with a routehandle or not
+!
+! !INTERFACE:
+      interface ESMF_FieldRegrid
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_FieldRegridAllinOne
+        module procedure ESMF_FieldRegridRun
+
+! !DESCRIPTION:
+!     Allow a single call to regrid which precomputes, runs and releases
+!     the route table; also support the more commonly expected use of 
+!     executing a route handle multiple times, where the user explicitly
+!     calls store and release on the routehandle. 
 !    
 !EOPI
       end interface
@@ -1059,12 +1080,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldRegrid"
+#define ESMF_METHOD "ESMF_FieldRegridAllinOne"
 !BOP
 ! !IROUTINE: ESMF_FieldRegrid - Data regrid operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRegrid(srcField, dstField, routehandle, &
+      ! Private name; call using ESMF_FieldRegrid()
+      subroutine ESMF_FieldRegridAllinOne(srcField, dstField, &
                                   parentVM, regridmethod, regridnorm, &
                                   srcMask, dstMask, blockingflag, &
                                   commhandle, routeOptions, rc)
@@ -1072,9 +1094,8 @@
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField                 
       type(ESMF_Field), intent(inout) :: dstField                 
-      type(ESMF_RouteHandle), intent(inout) :: routehandle
-      type(ESMF_VM), intent(in), optional :: parentVM
-      type(ESMF_RegridMethod), intent(in), optional :: regridmethod
+      type(ESMF_VM), intent(in) :: parentVM
+      type(ESMF_RegridMethod), intent(in) :: regridmethod
       type(ESMF_RegridNormOpt), intent(in), optional :: regridnorm
       type(ESMF_Mask), intent(in), optional :: srcMask                 
       type(ESMF_Mask), intent(in), optional :: dstMask                 
@@ -1085,7 +1106,12 @@
 !
 ! !DESCRIPTION:
 !     Perform a regrid operation over the data
-!     in an {\tt ESMF\_Field}.  This routine reads the source field and 
+!     in an {\tt ESMF\_Field}.  This version does not take a {\tt routehandle}
+!     and computes, runs, and releases the communication information in a
+!     single subroutine.  It should be used when a regrid operation will be
+!     done only a single time; otherwise commputing and reusing a communication
+!     pattern will be more efficient.
+!     This routine reads the source field and 
 !     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
 !     {\tt ESMF\_FieldDataMap} information in the destination field to
 !     control the transformation of data.  The array data in the 
@@ -1097,26 +1123,16 @@
 !           {\tt ESMF\_Field} containing source data.
 !     \item [dstField] 
 !           {\tt ESMF\_Field} containing destination grid and data map.
-!     \item [routehandle]
-!           {\tt ESMF\_RouteHandle} which will be returned after being
-!           associated with the precomputed
-!           information for a regrid operation on this {\tt ESMF\_Field}.
-!           This handle must be supplied at run time to execute the regrid.
-!     \item [{[parentVM]}]
+!     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s,
 !           most commonly the VM of the Coupler if the regridding is
 !           inter-component, but could also be the individual VM for
-!           a component if the regridding is intra-component.  This argument
-!           is used only if the routehandle has not been previously computed
-!           during a RegridStore call.
-!     \item [{[regridmethod]}]
+!           a component if the regridding is intra-component. 
+!     \item [regridmethod]
 !           Type of regridding to do.  A set of predefined methods are
-!           supplied.  This argument is used only if the routehandle has
-!           not been previously computed during a RegridStore call.
+!           supplied.  
 !     \item [{[regridnorm]}]
 !           Normalization option, only for specific regrid types.
-!           This argument is used only if the routehandle has not been
-!           previously computed during a RegridStore call.
 !     \item [{[srcMask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
 !           (Not yet implemented.)
@@ -1148,8 +1164,115 @@
 ! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
-      integer :: htype, srcCount, dstCount
-      logical :: allInOne
+      type(ESMF_RouteHandle) :: routehandle
+   
+      ! Initialize return code   
+      if (present(rc)) rc = ESMF_FAILURE
+
+      routehandle = ESMF_RouteHandleCreate(localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      
+      ! call FieldRegridStore to set up the routehandle
+      call ESMF_FieldRegridStore(srcField, dstField, parentVM, &
+                                 routehandle, regridmethod, regridnorm, &
+                                 srcMask, dstMask, routeOptions, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_FieldRegrid(srcField, dstField, routehandle, &
+                            srcMask, dstMask, blockingflag, &
+                            commhandle, routeOptions, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_FieldRegridRelease(routehandle, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldRegridAllinOne
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRegridRun"
+!BOP
+! !IROUTINE: ESMF_FieldRegrid - Data regrid operation on a Field
+
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldRegrid()
+      subroutine ESMF_FieldRegridRun(srcField, dstField, routehandle, &
+                                  srcMask, dstMask, blockingflag, &
+                                  commhandle, routeOptions, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: srcField                 
+      type(ESMF_Field), intent(inout) :: dstField                 
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_Mask), intent(in), optional :: srcMask                 
+      type(ESMF_Mask), intent(in), optional :: dstMask                 
+      type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Perform a regrid operation over the data
+!     in an {\tt ESMF\_Field}.  This routine reads the source field and 
+!     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
+!     {\tt ESMF\_FieldDataMap} information in the destination field to
+!     control the transformation of data.  The array data in the 
+!     destination field is overwritten by this call.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [srcField] 
+!           {\tt ESMF\_Field} containing source data.
+!     \item [dstField] 
+!           {\tt ESMF\_Field} containing destination grid and data map.
+!     \item [routehandle]
+!           {\tt ESMF\_RouteHandle} which will be returned after being
+!           associated with the precomputed
+!           information for a regrid operation on this {\tt ESMF\_Field}.
+!           This handle must be supplied at run time to execute the regrid.
+!     \item [{[srcMask]}]
+!           Optional {\tt ESMF\_Mask} identifying valid source data.
+!           (Not yet implemented.)
+!     \item [{[dstMask]}]
+!           Optional {\tt ESMF\_Mask} identifying valid destination data.
+!           (Not yet implemented.)
+!     \item [{[blockingflag]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between DEs has been scheduled.
+!           If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!      (This feature is not yet supported.  All operations are synchronous.)
+!     \item [{[commhandle]}]
+!           If the {\tt blockingflag} is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to execute the regrid.
+!           See Section~\ref{opt:routeopt} for possible values.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: localrc                          ! Error status
+      integer :: srcCount, dstCount
       logical :: hasSrcData        ! does this DE contain localdata from src?
       logical :: hasDstData        ! does this DE contain localdata from dst?
       type(ESMF_Array) :: srcArray, dstArray
@@ -1160,38 +1283,13 @@
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! Initialize other variables
-      allInOne = .false.
-
       ! if the routehandle has not been precomputed, do so now
       ! first check if the RouteHandle is valid (constructed)
       call ESMF_RouteHandleValidate(routehandle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      ! if valid, check the routehandle type
-      if (localrc.eq.ESMF_SUCCESS) then
-        call ESMF_RouteHandleGet(routehandle, htype=htype, rc=localrc)
-        if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
-          allInOne = .true.
-        elseif (htype .ne. ESMF_REGRIDHANDLE) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-                                   "routehandle not defined for regrid", &
-                                   ESMF_CONTEXT, rc)
-          return
-        endif
-      ! if not valid, try calling RegridStore to initialize
-      else
-        allInOne = .true.
-      endif
-
-      ! if needed, call FieldRegridStore to set up the routehandle
-      if (allInOne) then
-        call ESMF_LogWrite("uninitialized routehandle: calling FieldRegridStore", &
-                           ESMF_LOG_WARNING, &
-                           ESMF_CONTEXT)
-        call ESMF_FieldRegridStore(srcField, dstField, parentVM, &
-                                   routehandle, regridmethod, regridnorm, &
-                                   srcMask, dstMask, routeOptions, localrc)
-      endif
 
       ! TODO: we need not only to know if this DE has data in the field,
       !   but also the de id for both src & dest fields
@@ -1244,14 +1342,10 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! if this is a regrid call with an uninitialized routehandle, then 
-      ! destroy it before returning    TODO:  is this right?
-      if (allInOne) call ESMF_FieldRegridRelease(routehandle, localrc)
-
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldRegrid
+      end subroutine ESMF_FieldRegridRun
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

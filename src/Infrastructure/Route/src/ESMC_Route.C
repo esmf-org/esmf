@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.136 2005/06/09 16:39:53 nscollins Exp $
+//$Id: ESMC_Route.C,v 1.137 2005/06/24 21:02:00 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.136 2005/06/09 16:39:53 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.137 2005/06/24 21:02:00 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -524,9 +524,44 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      void *sendAddr,                 // in, local send buffer base address
-      void *recvAddr,                 // in, local receive buffer base address
-      ESMC_DataKind dk) {             // in, data kind for both src & dest
+      void *sendAddr,         // in, single local send buffer base address
+      void *recvAddr,         // in, single local receive buffer base address
+      ESMC_DataKind dk) {     // in, data kind for both src & dest
+//
+// !DESCRIPTION:
+//     Calls the communications routines to send/recv the information
+//     set up in this table.
+//
+//EOP
+// !REQUIREMENTS:  
+
+     void *sendAddrList[1];
+     void *recvAddrList[1];
+   
+     sendAddrList[0] = sendAddr;
+     recvAddrList[0] = recvAddr;
+
+     return ESMC_RouteRun(sendAddrList, recvAddrList, dk, 1, 1);
+}
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteRun"
+//BOP
+// !IROUTINE:  ESMC_RouteRun - Execute the comm routine described by this obj
+//
+// !INTERFACE:
+      int ESMC_Route::ESMC_RouteRun(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      void **sendAddr,       // in, list of local send buffer base addresses
+      void **recvAddr,       // in, list of local receive buffer base addresses
+      ESMC_DataKind dk,      // in, data kind for both src & dest
+      int numSrcBlocks,      // in, count of src addresses
+      int numDstBlocks) {    // in, count of dst addresses
 //
 // !DESCRIPTION:
 //     Calls the communications routines to send/recv the information
@@ -536,7 +571,7 @@
 // !REQUIREMENTS:  
     
     int rc = ESMF_FAILURE;
-    int i, j, k, l, m;
+    int i, j, k, l, m, n;
     int ixs, ixr;
     int commCount;
     int myPET, theirPET;
@@ -550,6 +585,7 @@
     int sendItemPtr, recvItemPtr;
     int sendItems, recvItems;
     int sendOffset, recvOffset;
+    int sendBlock, recvBlock;
     int sendReps, recvReps, maxReps;
     int sendContigLength, recvContigLength;
     int sendIndex[ESMF_MAXDIM], recvIndex[ESMF_MAXDIM];
@@ -559,7 +595,8 @@
     int sendBufferSize, recvBufferSize;
     char msgbuf[ESMF_MAXSTR];
     int VMType;
-    int nbytes, maxReqCount, sendXPCount, recvXPCount, maxXPCount;
+    int nbytes, maxReqCount; 
+    int sendXPCount, recvXPCount, maxXPCount;
 #define STACKLIMIT 64
     vmk_commhandle *stackHandle[STACKLIMIT];
     char *stackSendBuffer[STACKLIMIT];
@@ -636,7 +673,7 @@
           rc = ESMC_XPacketMakeBuffer(sendXPCount, sendXPList, VMType, nbytes,
                                       &sendBuffer, &sendBufferSize);
           rc = ESMC_XPacketPackBuffer(sendXPCount, sendXPList, VMType, nbytes,
-                                      sendAddr, sendBuffer);
+                                      sendAddr[0], sendBuffer);
 
           // if my PET is both the sender and receiver, there is no need
           // to allocate a separate buffer; just point both at the single
@@ -656,7 +693,7 @@
           // whether myPET = theirPET or not, we still have to unpack the 
           // receive buffer to move the data into the final location.
           rc = ESMC_XPacketUnpackBuffer(recvXPCount, recvXPList, VMType, 
-                                          nbytes, recvBuffer, recvAddr);
+                                          nbytes, recvBuffer, recvAddr[0]);
 
           // delete the lists of pointers, plus the local packing buffers
           // allocated during this loop.
@@ -695,7 +732,7 @@
               // otherwise create a buffer and pack it if necessary
               if (sendXP->ESMC_XPacketIsContig()) {
                   sendContig = true;
-                  sendBuffer = (char *)sendAddr+(sendOffset*nbytes); 
+                  sendBuffer = (char *)sendAddr[0]+(sendOffset*nbytes); 
                   sendBufferSize = sendContigLength * nbytes;
                   for (k=0; k<sendRank-1; k++)
                       sendBufferSize *= sendRepCount[k];
@@ -704,7 +741,7 @@
                   rc = ESMC_XPacketMakeBuffer(1, &sendXP, VMType, nbytes,
                                               &sendBuffer, &sendBufferSize);
                   rc = ESMC_XPacketPackBuffer(1, &sendXP, VMType, nbytes,
-                                              sendAddr, sendBuffer);
+                                              sendAddr[0], sendBuffer);
                   madeSendBuf = true;
               }
 
@@ -725,7 +762,7 @@
               // and receiver are the same PET.
               if (recvXP->ESMC_XPacketIsContig()) {
                   recvContig = true;
-                  recvBuffer = (char *)recvAddr+(recvOffset*nbytes); 
+                  recvBuffer = (char *)recvAddr[0]+(recvOffset*nbytes); 
                   recvBufferSize = recvContigLength * nbytes;
                   for (k=0; k<recvRank-1; k++)
                       recvBufferSize *= recvRepCount[k];
@@ -772,7 +809,7 @@
             //  unpack the receive buffer
             if ((recvBufferSize > 0) && (!recvContig)) {
               rc = ESMC_XPacketUnpackBuffer(1, &recvXP, VMType, nbytes,
-                                            recvBuffer, recvAddr);
+                                            recvBuffer, recvAddr[0]);
             }
  
             // free buffers if allocated
@@ -882,7 +919,7 @@
             for (k=0; k<maxReps; k++) {
                 if (k < sendReps) {
                   // set up sendbuf 
-                  sendBuffer = (char *)sendAddr+(sendItemPtr*nbytes);
+                  sendBuffer = (char *)sendAddr[0]+(sendItemPtr*nbytes);
                 } else if (k == sendReps) {
                   sendBuffer = NULL;
                   sendBufferSize = 0;
@@ -890,7 +927,7 @@
 
                 if (k < recvReps) {
                   // set up recvbuf 
-                  recvBuffer = (char *)recvAddr+(recvItemPtr*nbytes);
+                  recvBuffer = (char *)recvAddr[0]+(recvItemPtr*nbytes);
                 } else if (k == recvReps) {
                   recvBuffer = NULL;
                   recvBufferSize = 0;
@@ -963,7 +1000,7 @@
                        sendBuffer = NULL;
                        sendBufferSize = 0;
                      } else {
-                       sendBuffer = (char *)sendAddr+(sendItemPtr*nbytes);
+                       sendBuffer = (char *)sendAddr[0]+(sendItemPtr*nbytes);
                        sendBufferSize = sendContigLength*nbytes;
                        sendItemPtr += sendStride[0];
                      }
@@ -971,7 +1008,7 @@
                        recvBuffer = NULL;
                        recvBufferSize = 0;
                      } else {
-                       recvBuffer = (char *)recvAddr+(recvItemPtr*nbytes);
+                       recvBuffer = (char *)recvAddr[0]+(recvItemPtr*nbytes);
                        recvBufferSize = recvContigLength*nbytes;
                        recvItemPtr += recvStride[0];
                      }
@@ -1176,7 +1213,7 @@
           rc = ESMC_XPacketMakeBuffer(sendXPCount, sendXPList, VMType, nbytes,
                                       &sendBufferList[req], &sendBufferSize);
           rc = ESMC_XPacketPackBuffer(sendXPCount, sendXPList, VMType, nbytes,
-                                      sendAddr, sendBufferList[req]);
+                                      sendAddr[0], sendBufferList[req]);
 
           // if my PET is both the sender and receiver, there is no need
           // to allocate a separate buffer; just point both at the single
@@ -1231,7 +1268,7 @@
               // otherwise create a buffer and pack it if necessary
               if (sendXP->ESMC_XPacketIsContig()) {
                   sendContig = true;
-                  sendBufferList[req] = (char *)sendAddr+(sendOffset*nbytes); 
+                  sendBufferList[req] = (char *)sendAddr[0]+(sendOffset*nbytes); 
                   sendBufferSize = sendContigLength * nbytes;
                   for (k=0; k<sendRank-1; k++)
                       sendBufferSize *= sendRepCount[k];
@@ -1240,7 +1277,7 @@
                   rc = ESMC_XPacketMakeBuffer(1, &sendXP, VMType, nbytes,
                                               &sendBufferList[req], &sendBufferSize);
                   rc = ESMC_XPacketPackBuffer(1, &sendXP, VMType, nbytes,
-                                              sendAddr, sendBufferList[req]);
+                                              sendAddr[0], sendBufferList[req]);
                   madeSendBufList[req] = true;
               }
 
@@ -1261,7 +1298,7 @@
               // and receiver are the same PET.
               if (recvXP->ESMC_XPacketIsContig()) {
                   recvContig = true;
-                  recvBufferList[req] = (char *)recvAddr+(recvOffset*nbytes); 
+                  recvBufferList[req] = (char *)recvAddr[0]+(recvOffset*nbytes); 
                   recvBufferSize = recvContigLength * nbytes;
                   for (k=0; k<recvRank-1; k++)
                       recvBufferSize *= recvRepCount[k];
@@ -1406,7 +1443,7 @@
             for (k=0; k<maxReps; k++) {
                 if (k < sendReps) {
                   // set up sendbuf 
-                  sendBufferList[req] = (char *)sendAddr+(sendItemPtr*nbytes);
+                  sendBufferList[req] = (char *)sendAddr[0]+(sendItemPtr*nbytes);
                 } else if (k == sendReps) {
                   sendBufferList[req] = NULL;
                   sendBufferSize = 0;
@@ -1414,7 +1451,7 @@
 
                 if (k < recvReps) {
                   // set up recvbuf 
-                  recvBufferList[req] = (char *)recvAddr+(recvItemPtr*nbytes);
+                  recvBufferList[req] = (char *)recvAddr[0]+(recvItemPtr*nbytes);
                 } else if (k == recvReps) {
                   recvBufferList[req] = NULL;
                   recvBufferSize = 0;
@@ -1518,7 +1555,7 @@
           // whether myPET = theirPET or not, we still have to unpack the 
           // receive buffer to move the data into the final location.
           rc = ESMC_XPacketUnpackBuffer(recvXPCount, recvXPList, VMType, 
-                                        nbytes, recvBufferList[req], recvAddr);
+                                        nbytes, recvBufferList[req], recvAddr[0]);
 
           // delete the individual buffers for this transfer
           delete [] recvXPList;
@@ -1575,7 +1612,7 @@
             // the data from the receive buffer into the final location.
             if (!recvContig) {
               rc = ESMC_XPacketUnpackBuffer(1, &recvXP, VMType, nbytes,
-                                            recvBufferList[req], recvAddr);
+                                            recvBufferList[req], recvAddr[0]);
             }
 
             // free buffers if allocated
@@ -1683,36 +1720,6 @@
 
  } // end ESMC_RouteRun
 
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_RouteRunMulti"
-//BOP
-// !IROUTINE:  ESMC_RouteRunMulti - Execute the comm described by this obj
-//
-// !INTERFACE:
-      int ESMC_Route::ESMC_RouteRunMulti(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      void *sendAddr,                 // in, list of local send buffer addrs
-      void *recvAddr,                 // in, list of local receive buffer addrs
-      ESMC_DataKind dk,               // in, data kind for both src & dest
-      int numSrcBlocks,               // in, count of src addresses
-      int numDstBlocks) {             // in, count of dst addresses
-//
-// !DESCRIPTION:
-//     Calls the communications routines to send/recv the information
-//     set up in this table.
-//
-//EOP
-// !REQUIREMENTS:  
-    
-    return ESMC_RouteRun(sendAddr, recvAddr, dk);
-
-}
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

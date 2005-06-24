@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.10 2005/06/20 16:42:30 nscollins Exp $ 
+# $Id: makefile,v 1.11 2005/06/24 21:01:58 nscollins Exp $ 
 
 ALL:  build_unit_tests
+run:  run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -15,13 +16,14 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/BundleComm/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_BundleCommUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_BundleCommUTest \
+                $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest
 
-TESTS_RUN     = RUN_ESMF_BundleCommUTest 
+TESTS_RUN     = RUN_ESMF_BundleCommUTest \
+                RUN_ESMF_BundleCommOptionsUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_BundleCommUTestUNI 
-
-TESTS_RM      = ESMF_BundleCommUTest.rm 
+TESTS_RUN_UNI = RUN_ESMF_BundleCommUTestUNI \
+                RUN_ESMF_BundleCommOptionsUTestUNI 
 
 include ${ESMF_DIR}/makefile
 
@@ -37,18 +39,31 @@ CLOBBERDIRS =
 #
 RUN_ESMF_BundleCommUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCommUTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BundleCommUTest > $(ESMC_TESTDIR)/ESMF_BundleCommUTest.stdout
-	-cat *BundleCommUTest.Log > $(ESMC_TESTDIR)/ESMF_BundleCommUTest.Log
+	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_BundleCommUTest > $(ESMF_TESTDIR)/ESMF_BundleCommUTest.stdout
+	-cat *BundleCommUTest.Log > $(ESMF_TESTDIR)/ESMF_BundleCommUTest.Log
 	-rm *BundleCommUTest.Log
 
 RUN_ESMF_BundleCommUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCommUTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BundleCommUTest > $(ESMC_TESTDIR)/ESMF_BundleCommUTest.stdout
-	-cat *BundleCommUTest.Log > $(ESMC_TESTDIR)/ESMF_BundleCommUTest.Log
+	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_BundleCommUTest > $(ESMF_TESTDIR)/ESMF_BundleCommUTest.stdout
+	-cat *BundleCommUTest.Log > $(ESMF_TESTDIR)/ESMF_BundleCommUTest.Log
 	-rm *BundleCommUTest.Log
 
-ESMF_BundleCommUTest.rm:
-	echo "ESMF_BundleCommUTest.rm target called here."
+
+#
+#  BundleCommOptions
+#
+RUN_ESMF_BundleCommOptionsUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCommOptionsUTest.tmps
+	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest > $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest.stdout
+	-cat *BundleCommOptionsUTest.Log > $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest.Log
+	-rm *BundleCommOptionsUTest.Log
+
+RUN_ESMF_BundleCommOptionsUTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCommOptionsUTest.tmps
+	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest > $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest.stdout
+	-cat *BundleCommOptionsUTest.Log > $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest.Log
+	-rm *BundleCommOptionsUTest.Log
 
 
 

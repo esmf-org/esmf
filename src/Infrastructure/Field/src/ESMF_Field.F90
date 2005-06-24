@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.205 2005/05/31 17:39:53 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.206 2005/06/24 21:01:58 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.205 2005/05/31 17:39:53 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.206 2005/06/24 21:01:58 nscollins Exp $'
 
 !==============================================================================
 !
@@ -4956,7 +4956,7 @@
       integer :: status                           ! Error status
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
-      type(ESMF_DELayout) :: parentDElayout, srcDElayout
+      type(ESMF_DELayout) :: gridDELayout
       type(ESMF_Grid) :: srcGrid, dstGrid
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
       type(ESMF_RelLoc) :: dstHorzRelLoc, dstVertRelLoc, &
@@ -4967,8 +4967,8 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! TODO: replace this with a better way to get the current VM
-      call ESMF_GridGet(srcField%ftypep%grid, delayout=parentDElayout, rc=status)
-      call ESMF_DELayoutGetVM(parentDElayout, vm, rc=status)
+      call ESMF_GridGet(srcField%ftypep%grid, delayout=gridDELayout, rc=status)
+      call ESMF_DELayoutGetVM(gridDELayout, vm, rc=status)
 
       ! This routine is called on every processor in the parent layout.
       !  It is quite possible that the source and destination fields do

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.68 2005/06/20 23:04:38 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.69 2005/06/24 21:01:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.68 2005/06/20 23:04:38 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.69 2005/06/24 21:01:57 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -93,6 +93,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
           module procedure ESMF_ArrayHaloNew
+          module procedure ESMF_ArrayHaloList
           module procedure ESMF_ArrayHaloDeprecated
 
 ! !DESCRIPTION:
@@ -112,6 +113,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
           module procedure ESMF_ArrayRedistNew
+          module procedure ESMF_ArrayRedistList
           module procedure ESMF_ArrayRedistDeprecated
 
 ! !DESCRIPTION:
@@ -602,13 +604,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayHaloMulti"
+#define ESMF_METHOD "ESMF_ArrayHaloList"
 !BOP
-! !IROUTINE: ESMF_ArrayHalo - Halo an Array
+! !IROUTINE: ESMF_ArrayHalo - Halo a list of Arrays
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayHalo()
-    subroutine ESMF_ArrayHaloMulti(arrayList, routehandle, blocking, &
+    subroutine ESMF_ArrayHaloList(arrayList, routehandle, blocking, &
                                    commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
@@ -685,7 +687,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_RouteRunMulti(route, local_arrayList, rc=status)
+      call ESMF_RouteRunList(route, local_arrayList, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -695,7 +697,7 @@
 
       ! last call to route run set rc
 
-      end subroutine ESMF_ArrayHaloMulti
+      end subroutine ESMF_ArrayHaloList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1050,12 +1052,135 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedistList"
+!BOP
+! !IROUTINE: ESMF_ArrayRedist - Redistribute a list of Arrays
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayRedist()
+      subroutine ESMF_ArrayRedistList(srcArrayList, dstArrayList, routehandle, &
+                                       blocking, commhandle, routeOptions, rc) 
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: srcArrayList(:)
+      type(ESMF_Array), intent(inout) :: dstArrayList(:)
+      type(ESMF_RouteHandle), intent(in) :: routehandle
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!  Redistribute the data in one set of {\tt ESMF\_Array}s to another
+!  set of {\tt ESMF\_Array}s.  Data redistribution does no interpolation,
+!  so during the {\tt ESMF\_ArrayRedistPrecompute()} call the 
+!  {\tt ESMF\_Grid}s must have identical coordinates.  
+!  The distribution of the {\tt ESMF\_Grid} can be over different
+!  {\tt ESMF\_DELayout}s, or the {\tt ESMF\_FieldDataMaps} can differ.
+!  The {\tt routehandle} argument must be the one which was associated
+!  with the precomputed data movements during the precompute operation, and
+!  if the data movement is identical for different collections of
+!  {\tt ESMF\_Array}s, the same {\tt routehandle} can be supplied during
+!  multiple calls to this execution routine, specifying a different set of
+!  source and destination {\tt ESMF\_Array}s each time.
+!
+!     \begin{description}
+!     \item [srcArrayList]
+!           List of {\tt ESMF\_Array}s containing source data.
+!     \item [dstArrayList]
+!           List of {\tt ESMF\_Array}s containing results.
+!     \item [routehandle]
+!           {\tt ESMF\_RouteHandle} precomputed by 
+!           {\tt ESMF\_ArrayRedistPrecompute()}.
+!     \item [{[blocking]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!      (This feature is not yet supported.  All operations are synchronous.)
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to execute the
+!           See Section~\ref{opt:routeopt} for possible values.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status         ! local error status
+      integer :: i, nitemsSrc, nitemsDst
+      type(ESMF_LocalArray), allocatable :: srcLocalArrayList(:)
+      type(ESMF_LocalArray), allocatable :: dstLocalArrayList(:)
+      type(ESMF_Route) :: route
+
+      ! initialize return code; assume failure until success certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      ! figure out the length of the input args and allocate enough space
+      ! for localarray copies; if fortran could do better inheritance this
+      ! would not be necessary.  (routerun wants a localarray object;
+      ! we can pass in a pointer to an array because routerun will only
+      ! access the localarray part of the array object.)
+      nitemsSrc = size(srcArrayList)
+      allocate(srcLocalArrayList(nitemsSrc), stat=status)
+      nitemsDst = size(dstArrayList)
+      allocate(dstLocalArrayList(nitemsDst), stat=status)
+
+      do i=1, nitemsSrc
+        srcLocalArrayList(i)%this%ptr = srcArrayList(i)%this%ptr
+      enddo
+
+      do i=1, nitemsDst
+        dstLocalArrayList(i)%this%ptr = dstArrayList(i)%this%ptr
+      enddo
+
+      ! Set the route options if given.
+      if (present(routeOptions)) &
+                         call c_ESMC_RouteSet(route, routeOptions, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) goto 10
+
+      ! Execute the communications call.
+      call ESMF_RouteRunList(route, srcLocalArrayList, dstLocalArrayList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) goto 10
+
+      ! come here on error to free the temp buffers
+ 10   continue
+
+      deallocate(srcLocalArrayList, stat=status)
+      deallocate(dstLocalArrayList, stat=status)
+      ! TODO: add error check for failed allocation
+
+      ! rc has already been set, just check to see if user wants to get it.
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayRedistList
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayRedistNew"
 !BOP
 ! !IROUTINE: ESMF_ArrayRedist - Redistribute an Array
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayRedist
+      ! Private name; call using ESMF_ArrayRedist()
       subroutine ESMF_ArrayRedistNew(srcArray, dstArray, routehandle, &
                                      blocking, commhandle, routeOptions, rc) 
 !

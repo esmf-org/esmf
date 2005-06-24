@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.75 2005/06/23 22:47:39 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.76 2005/06/24 21:01:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research, 
@@ -134,6 +134,7 @@
         type(ESMF_BundleDataMap) :: mapping      ! map info
         type(ESMF_IOSpec) :: iospec              ! iospec values
         type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
+        logical :: isCongruent                   ! are all fields identical?
         integer :: field_count      
       end type
 
@@ -3674,6 +3675,7 @@ end function
       nullify(matchgrid%ptr)
       if (btype%gridstatus .eq. ESMF_STATUS_UNINIT) then
           do i=1, fieldCount
+            ! an error here is not fatal; just means field has no grid yet.
             call ESMF_FieldGet(fields(i), grid=testgrid, rc=status)
             if (status .ne. ESMF_SUCCESS) cycle
 
@@ -3757,6 +3759,14 @@ end function
          call ESMF_BundleTypeRepackData(btype, rc=rc)
 
       endif
+
+      ! TODO: somewhere in here we need to test the data and datamaps in 
+      ! the fields to see if they are completely consistent.  for now, 
+      ! assume they are not, and to test the new optimized route code,
+      ! set the congruent flag to true.  this must be fixed to be computed
+      ! before users will see any communication advantage.
+      !btype%isCongruent = .TRUE.
+      btype%isCongruent = .FALSE.
 
       if (present(rc)) rc = ESMF_SUCCESS
 

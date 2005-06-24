@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.44 2005/06/10 18:42:44 jwolfe Exp $
+! $Id: ESMF_BundleComm.F90,v 1.45 2005/06/24 21:01:58 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.44 2005/06/10 18:42:44 jwolfe Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.45 2005/06/24 21:01:58 nscollins Exp $'
 
 !==============================================================================
 !
@@ -554,6 +554,7 @@
       integer :: status                            ! Error status
       integer :: i                                 ! loop counter
       type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
+      type(ESMF_Array), allocatable :: srcArrayList(:), dstArrayList(:)
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -568,14 +569,52 @@
                                     ESMF_CONTEXT, rc)) return
       endif
 
-      do i = 1, stypep%field_count
-          call ESMF_ArrayRedist(stypep%flist(i)%ftypep%localfield%localdata, &
-                       dtypep%flist(i)%ftypep%localfield%localdata, &
-                       routehandle, blocking, commhandle, routeOptions, status)
+      ! If the bundle consists of identical fields - in every way: data type,
+      ! relloc, index order, the works -- then pass in a list of all arrays
+      ! and RouteRun will have the option of looping over the arrays and 
+      ! packing at a higher level.   If the fields differ, then call routerun
+      ! once per separate field, essentially doing a loop inside the framework
+      ! instead of having to be done by the user outside; but there is no
+      ! additional optimization possible other than reusing the same route
+      ! table each time.
+      if ((stypep%isCongruent) .and. (dtypep%isCongruent)) then
+
+          allocate(srcArrayList(stypep%field_count), stat=status)
+          allocate(dstArrayList(dtypep%field_count), stat=status)
+   
+          do i=1, stypep%field_count
+              srcArrayList(i) = stypep%flist(i)%ftypep%localfield%localdata
+          enddo
+    
+          do i=1, dtypep%field_count
+              dstArrayList(i) = dtypep%flist(i)%ftypep%localfield%localdata
+          enddo
+    
+          call ESMF_ArrayRedist(srcArrayList, dstArrayList, &
+                                routehandle, blocking, commhandle, &
+                                routeOptions, status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
-      enddo
+                                    ESMF_CONTEXT, rc)) then
+              deallocate(srcArrayList, dstArrayList, stat=status) 
+              return
+          endif
+
+          deallocate(srcArrayList, dstArrayList, stat=status) 
+      else
+          !  loop and do each field separately; no internal optimization 
+          !  possible with this path, but most general -- does not require
+          !  the datamaps of all fields to be identical.
+          do i = 1, stypep%field_count
+
+            call ESMF_ArrayRedist(stypep%flist(i)%ftypep%localfield%localdata, &
+                                  dtypep%flist(i)%ftypep%localfield%localdata, &
+                        routehandle, blocking, commhandle, routeOptions, status)
+            if (ESMF_LogMsgFoundError(status, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+          enddo
+      endif
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS

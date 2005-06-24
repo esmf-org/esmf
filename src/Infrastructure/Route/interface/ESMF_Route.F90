@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.69 2005/06/09 16:39:53 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.70 2005/06/24 21:02:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
       public ESMF_RoutePrecomputeRegrid
       public ESMF_RoutePrecomputeDomList
       public ESMF_RouteRun
-      public ESMF_RouteRunMulti
+      public ESMF_RouteRunList
       public ESMF_RouteRunF90PtrI411D
       public ESMF_RouteRunF90PtrI421D
       public ESMF_RouteRunF90PtrR811D
@@ -132,7 +132,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.69 2005/06/09 16:39:53 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.70 2005/06/24 21:02:00 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1456,12 +1456,12 @@ end function radd
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RouteRunMulti"
+#define ESMF_METHOD "ESMF_RouteRunList"
 !BOPI
-! !IROUTINE: ESMF_RouteRunMulti - Execute the communications the Route represents
+! !IROUTINE: ESMF_RouteRunList - Execute the communications the Route represents
 
 ! !INTERFACE:
-      subroutine ESMF_RouteRunMulti(route, srcArrayList, dstArrayList, rc)
+      subroutine ESMF_RouteRunList(route, srcArrayList, dstArrayList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
@@ -1492,6 +1492,7 @@ end function radd
         ! local variables
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
+        integer :: srcCount, dstCount
 
         ! Set initial values
         status = ESMF_FAILURE
@@ -1503,7 +1504,18 @@ end function radd
           rc = ESMF_FAILURE
         endif
 
-        call c_ESMC_RouteRunLAL(route, srcArrayList, dstArrayList, status)
+        ! Pass exact counts into c interface.
+        srcCount = 0
+        dstCount = 0
+        if (present(srcArrayList)) then
+          srcCount = size(srcArrayList)
+        endif
+        if (present(dstArrayList)) then
+          dstCount = size(srcArrayList)
+        endif
+
+        call c_ESMC_RouteRunLAL(route, srcArrayList, dstArrayList, &
+                                srcCount, dstCount, status)
 
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1511,7 +1523,7 @@ end function radd
 
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_RouteRunMulti
+        end subroutine ESMF_RouteRunList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
