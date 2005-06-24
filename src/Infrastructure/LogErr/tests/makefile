@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2005/04/12 16:52:46 nscollins Exp $ 
+# $Id: makefile,v 1.7 2005/06/24 23:04:37 nscollins Exp $ 
 
 ALL:  build_unit_tests
 
@@ -28,7 +28,7 @@ TESTS_RUN_UNI = RUN_ESMF_LogErrUTestUNI \
 include ${ESMF_DIR}/makefile
 
 CLEANDIRS   = 
-CLEANFILES  = $(TESTS_BUILD)
+CLEANFILES  = $(TESTS_BUILD) Log*
 CLOBBERDIRS =
 
 
