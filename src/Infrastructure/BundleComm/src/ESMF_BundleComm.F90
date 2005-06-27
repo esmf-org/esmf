@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.45 2005/06/24 21:01:58 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.46 2005/06/27 20:57:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.45 2005/06/24 21:01:58 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.46 2005/06/27 20:57:23 nscollins Exp $'
 
 !==============================================================================
 !
@@ -206,14 +206,14 @@
 ! !IROUTINE: ESMF_BundleGather - Data gather operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleGather(bundle, destinationDE, array, blocking, &
+      subroutine ESMF_BundleGather(bundle, destinationDE, arrayList, blocking, &
                                     commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle                 
       integer, intent(in) :: destinationDE
-      type(ESMF_Array), intent(out) :: array
+      type(ESMF_Array), intent(out) :: arrayList(:)
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
@@ -232,8 +232,9 @@
 !           {\tt ESMF\_Bundle} containing data to be gathered.
 !     \item [destinationDE] 
 !           Destination DE number where the gathered data is to be returned.
-!     \item [array] 
-!           Newly created {\tt ESMF\_Array} containing the collected data on the
+!     \item [arrayList] 
+!           Newly created list of {\tt ESMF\_Array}s, one per {\tt ESMF\_Field}
+!           in the {\tt ESMF\_Bundle}, containing the collected data on the
 !           specified DE.  It is the size of the entire undecomposed grid.
 !           On all other DEs this argument returns an invalid object.
 !     \item [{[blocking]}]
@@ -257,6 +258,7 @@
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
+      integer :: i                                ! loop counter
       type(ESMF_BundleType), pointer :: btypep    ! bundle type info
    
       ! Initialize return code   
@@ -265,13 +267,15 @@
 
       btypep => bundle%btypep
 
-      ! Call Array method to perform actual work
-      call ESMF_ArrayGather(btypep%flist(1)%ftypep%localfield%localdata, &
-                            btypep%grid, btypep%flist(1)%ftypep%mapping, &
-                            destinationDE, array, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      do i=1, btypep%field_count
+          ! Call Array method to perform actual work
+          call ESMF_ArrayGather(btypep%flist(i)%ftypep%localfield%localdata, &
+                                btypep%grid, btypep%flist(i)%ftypep%mapping, &
+                                destinationDE, arrayList(i), status)
+          if (ESMF_LogMsgFoundError(status, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+      enddo
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
