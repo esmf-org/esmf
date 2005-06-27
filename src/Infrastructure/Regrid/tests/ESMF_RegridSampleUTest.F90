@@ -1,3 +1,14 @@
+! $Id: ESMF_RegridSampleUTest.F90,v 1.3 2005/06/27 15:53:00 nscollins Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2005, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!
+
 module options_table
 
 public
