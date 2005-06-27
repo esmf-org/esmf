@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommUTest.F90,v 1.1 2005/06/20 16:42:30 nscollins Exp $
+! $Id: ESMF_BundleCommUTest.F90,v 1.2 2005/06/27 17:22:59 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommUTest.F90,v 1.1 2005/06/20 16:42:30 nscollins Exp $'
+      '$Id: ESMF_BundleCommUTest.F90,v 1.2 2005/06/27 17:22:59 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -126,7 +126,7 @@
       !EX_UTest
       !  Verify the Field count query from an uninitialized Bundle is 0
       write(failMsg, *) "Field count not zero"
-      write(name, *) "Verify Field count from an uninitialized Bundle is zero Test"
+      write(name, *) "Get Field count from an uninitialized Bundle Test"
       call ESMF_Test((fieldCount.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
