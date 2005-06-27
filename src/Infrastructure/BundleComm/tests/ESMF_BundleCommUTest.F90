@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommUTest.F90,v 1.3 2005/06/27 20:45:55 nscollins Exp $
+! $Id: ESMF_BundleCommUTest.F90,v 1.4 2005/06/27 20:58:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -37,15 +37,16 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommUTest.F90,v 1.3 2005/06/27 20:45:55 nscollins Exp $'
+      '$Id: ESMF_BundleCommUTest.F90,v 1.4 2005/06/27 20:58:25 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
       integer :: rc
       type(ESMF_Grid) :: grid
       type(ESMF_VM) :: vm
-      type(ESMF_Field) :: fields(10)
+      type(ESMF_Field) :: fields(2)
       type(ESMF_Field) :: nofield
+      type(ESMF_Array) :: arrayList(2)
       type(ESMF_Bundle) :: bundle1, bundle2, nobundle
       type(ESMF_RouteHandle) :: rh
 
@@ -231,8 +232,8 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
       !EX_UTest
-      !  BUG - if fields are empty this dies.
       call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Precompute Redist Communication"
@@ -254,6 +255,40 @@
       write(name, *) "Release the RouteHandle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+      !EX_UTest
+      call ESMF_BundleRegridStore(bundle1, bundle2, vm, rh, &
+                                  ESMF_REGRID_METHOD_BILINEAR, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Precompute Regrid Communication"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      !  Regrid both fields in a single Bundle call.
+      call ESMF_BundleRegrid(bundle1, bundle2, rh, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Regriding all Fields in a Bundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      !  Release the routehandle
+      call ESMF_BundleRegridRelease(rh, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Release the RouteHandle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+      !EX_UTest
+      call ESMF_BundleGather(bundle1, 1, arrayList, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Gathering Bundle Array data to a single processor"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !EX_UTest
       ! Clean up by deleting the Fields.
