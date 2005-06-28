@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2005/04/19 16:30:09 svasquez Exp $
+# $Id: makefile,v 1.11 2005/06/28 20:00:46 svasquez Exp $
 
 ALL:  build_unit_tests
 
@@ -39,17 +39,19 @@ CLOBBERDIRS =
 # Fortran unit test
 #
 RUN_ESMF_ArrayDataMapUTest:
+	-$(RM) *ArrayDataMapUTest.Log
 	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayDataMapUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.stdout
 	-cat *ArrayDataMapUTest.Log > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.Log
-	-rm *ArrayDataMapUTest.Log
+	-$(RM) *ArrayDataMapUTest.Log
 
 
 RUN_ESMF_ArrayDataMapUTestUNI:
+	-$(RM) *ArrayDataMapUTest.Log
 	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayDataMapUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.stdout
 	-cat *ArrayDataMapUTest.Log > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.Log
-	-rm *ArrayDataMapUTest.Log
+	-$(RM) *ArrayDataMapUTest.Log
 
 ESMF_ArrayDataMapUTest.rm:
 	echo "ESMF_ArrayDataMapTest.rm target called here."
@@ -60,16 +62,18 @@ ESMF_ArrayDataMapUTest.rm:
 #
 
 RUN_ESMC_ArrayDataMapUTest:
+	-$(RM) *ArrayDataMapUTest.Log
 	-@rm -f testlog stdlog.* logfile.* ESMC_ArrayDataMapUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.stdout
 	-cat *ArrayDataMapUTest.Log > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.Log
-	-rm *ArrayDataMapUTest.Log
+	-$(RM) *ArrayDataMapUTest.Log
 
 RUN_ESMC_ArrayDataMapUTestUNI:
+	-$(RM) *ArrayDataMapUTest.Log
 	-@rm -f testlog stdlog.* logfile.* ESMC_ArrayDataMapUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.stdout
 	-cat *ArrayDataMapUTest.Log > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.Log
-	-rm *ArrayDataMapUTest.Log
+	-$(RM) *ArrayDataMapUTest.Log
 
 ESMC_ArrayDataMapUTest.rm:
 	echo "ESMC_ArrayDataMapTest.rm target called here."

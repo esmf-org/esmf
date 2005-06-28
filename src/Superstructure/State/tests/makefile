@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2005/04/12 16:52:57 nscollins Exp $ 
+# $Id: makefile,v 1.10 2005/06/28 19:57:22 svasquez Exp $ 
 
 ALL:  build_unit_tests
 
@@ -40,15 +40,17 @@ CLOBBERDIRS =
 #
 
 RUN_ESMF_StateCreateUTest:
+	-$(RM) *StateCreateUTest.Log
 	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_StateCreateUTest > $(ESMF_TESTDIR)/ESMF_StateCreateUTest.stdout
 	-cat *StateCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_StateCreateUTest.Log
-	-rm *StateCreateUTest.Log
+	-$(RM) *StateCreateUTest.Log
 
 
 RUN_ESMF_StateCreateUTestUNI:
+	-$(RM) *StateCreateUTest.Log
 	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_StateCreateUTest > $(ESMF_TESTDIR)/ESMF_StateCreateUTest.stdout
 	-cat *StateCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_StateCreateUTest.Log
-	-rm *StateCreateUTest.Log
+	-$(RM) *StateCreateUTest.Log
 
 
 
@@ -57,14 +59,16 @@ RUN_ESMF_StateCreateUTestUNI:
 #
 
 RUN_ESMF_StateUTest:
+	-$(RM) *StateUTest.Log
 	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_StateUTest > $(ESMF_TESTDIR)/ESMF_StateUTest.stdout
 	-cat *StateUTest.Log > $(ESMC_TESTDIR)/ESMF_StateUTest.Log
-	-rm *StateUTest.Log
+	-$(RM) *StateUTest.Log
 
 RUN_ESMF_StateUTestUNI:
+	-$(RM) *StateUTest.Log
 	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_StateUTest > $(ESMF_TESTDIR)/ESMF_StateUTest.stdout
 	-cat *StateUTest.Log > $(ESMC_TESTDIR)/ESMF_StateUTest.Log
-	-rm *StateUTest.Log
+	-$(RM) *StateUTest.Log
 
 
 
@@ -74,14 +78,16 @@ RUN_ESMF_StateUTestUNI:
 #
 
 RUN_ESMF_StateReconcileUTest:
+	-$(RM) *StateReconcileUTest.Log
 	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_StateReconcileUTest > $(ESMF_TESTDIR)/ESMF_StateReconcileUTest.stdout
 	-cat *StateReconcileUTest.Log > $(ESMC_TESTDIR)/ESMF_StateReconcileUTest.Log
-	-rm *StateReconcileUTest.Log
+	-$(RM) *StateReconcileUTest.Log
 
 RUN_ESMF_StateReconcileUTestUNI:
+	-$(RM) *StateReconcileUTest.Log
 	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_StateReconcileUTest > $(ESMF_TESTDIR)/ESMF_StateReconcileUTest.stdout
 	-cat *StateReconcileUTest.Log > $(ESMC_TESTDIR)/ESMF_StateReconcileUTest.Log
-	-rm *StateReconcileUTest.Log
+	-$(RM) *StateReconcileUTest.Log
 
 
 

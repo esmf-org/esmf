@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.34 2005/06/09 16:27:12 nscollins Exp $ 
+# $Id: makefile,v 1.35 2005/06/28 19:56:14 svasquez Exp $ 
 
 ALL:  build_unit_tests
 
@@ -61,25 +61,29 @@ CLOBBERDIRS =
 # Components
 #
 RUN_ESMF_ComponentUTest:
+	-${RM} *ComponentUTest.Log
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ComponentUTest > $(ESMC_TESTDIR)/ESMF_ComponentUTest.stdout
 	-cat *ComponentUTest.Log > $(ESMC_TESTDIR)/ESMF_ComponentUTest.Log
-	-rm *ComponentUTest.Log
+	-${RM} *ComponentUTest.Log
 
 RUN_ESMF_ComponentUTestUNI:
+	-${RM} *ComponentUTest.Log
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ComponentUTest > $(ESMC_TESTDIR)/ESMF_ComponentUTest.stdout
 	-cat *ComponentUTest.Log > $(ESMC_TESTDIR)/ESMF_ComponentUTest.Log
-	-rm *ComponentUTest.Log
+	-${RM} *ComponentUTest.Log
 
 
 RUN_ESMF_GridCompCreateUTest:
+	-${RM} *GridCompCreateUTest.Log
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest > $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest.stdout
 	-cat *GridCompCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest.Log
-	-rm *GridCompCreateUTest.Log
+	-${RM} *GridCompCreateUTest.Log
 
 RUN_ESMF_GridCompCreateUTestUNI:
+	-${RM} *GridCompCreateUTest.Log
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest > $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest.stdout
 	-cat *GridCompCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest.Log
-	-rm *GridCompCreateUTest.Log
+	-${RM} *GridCompCreateUTest.Log
 
 
 
@@ -136,13 +140,15 @@ RUN_ESMC_CompRunUNI:
 #
 
 RUN_ESMF_CplCompCreateUTest:
+	-${RM} *CplCompCreateUTest.Log
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest > $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest.stdout
 	-cat *CplCompCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest.Log
-	-rm *CplCompCreateUTest.Log
+	-${RM} *CplCompCreateUTest.Log
 
 RUN_ESMF_CplCompCreateUTestUNI:
+	-${RM} *CplCompCreateUTest.Log
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest > $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest.stdout
 	-cat *CplCompCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest.Log
-	-rm *CplCompCreateUTest.Log
+	-${RM} *CplCompCreateUTest.Log
 
 
