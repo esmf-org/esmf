@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2005/06/24 23:04:37 nscollins Exp $ 
+# $Id: makefile,v 1.8 2005/06/28 20:39:05 svasquez Exp $ 
 
 ALL:  build_unit_tests
 
@@ -36,28 +36,32 @@ CLOBBERDIRS =
 # LogErr
 #
 RUN_ESMF_LogErrUTest:
+	-$(RM) *LogErrUTest.Log
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_LogErrUTest > $(ESMC_TESTDIR)/ESMF_LogErrUTest.stdout
 	-cat *LogErrUTest.Log > $(ESMC_TESTDIR)/ESMF_LogErrUTest.Log
-	-rm *LogErrUTest.Log
+	-$(RM) *LogErrUTest.Log
 
 RUN_ESMF_LogErrUTestUNI:
+	-$(RM) *LogErrUTest.Log
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_LogErrUTest > $(ESMC_TESTDIR)/ESMF_LogErrUTest.stdout
 	-cat *LogErrUTest.Log > $(ESMC_TESTDIR)/ESMF_LogErrUTest.Log
-	-rm *LogErrUTest.Log
+	-$(RM) *LogErrUTest.Log
 
 #
 # LogErrHalt
 #
 
 RUN_ESMF_LogErrHaltUTest:
+	-$(RM) *LogErrHaltUTest.Log
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_LogErrHaltUTest > $(ESMC_TESTDIR)/ESMF_LogErrHaltUTest.stdout
 	-cat *LogErrHaltUTest.Log > $(ESMC_TESTDIR)/ESMF_LogErrHaltUTest.Log
-	-rm *LogErrHaltUTest.Log
+	-$(RM) *LogErrHaltUTest.Log
 
 RUN_ESMF_LogErrHaltUTestUNI:
+	-$(RM) *LogErrHaltUTest.Log
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_LogErrHaltUTest > $(ESMC_TESTDIR)/ESMF_LogErrHaltUTest.stdout
 	-cat *LogErrHaltUTest.Log > $(ESMC_TESTDIR)/ESMF_LogErrHaltUTest.Log
-	-rm *LogErrHaltUTest.Log
+	-$(RM) *LogErrHaltUTest.Log
 
 
 

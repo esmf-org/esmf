@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2005/04/12 16:52:45 nscollins Exp $ 
+# $Id: makefile,v 1.13 2005/06/28 20:33:37 svasquez Exp $ 
 
 ALL:  tree_build_unit_tests
 
@@ -39,32 +39,36 @@ CLOBBERDIRS =
 #  Grid
 #
 RUN_ESMF_GridUTest:
+	-$(RM) *GridUTest.Log
 	-@rm -f testlog stdlog.* logfile.* ESMF_GridUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_GridUTest > $(ESMC_TESTDIR)/ESMF_GridUTest.stdout
 	-cat *GridUTest.Log > $(ESMC_TESTDIR)/ESMF_GridUTest.Log
-	-rm *GridUTest.Log
+	-$(RM) *GridUTest.Log
 
 RUN_ESMF_GridUTestUNI:
+	-$(RM) *GridUTest.Log
 	-@rm -f testlog stdlog.* logfile.* ESMF_GridUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_GridUTest > $(ESMC_TESTDIR)/ESMF_GridUTest.stdout
 	-cat *GridUTest.Log > $(ESMC_TESTDIR)/ESMF_GridUTest.Log
-	-rm *GridUTest.Log
+	-$(RM) *GridUTest.Log
 
 ESMF_GridUTest.rm:
 	echo "ESMF_GridUTest.rm target called here."
 
 ##
 RUN_ESMF_GridCreateUTest:
+	-$(RM) *GridCreateUTest.Log
 	-@rm -f testlog stdlog.* logfile.* ESMF_GridCreateUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_GridCreateUTest > $(ESMC_TESTDIR)/ESMF_GridCreateUTest.stdout
 	-cat *GridCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_GridCreateUTest.Log
-	-rm *GridCreateUTest.Log
+	-$(RM) *GridCreateUTest.Log
 
 RUN_ESMF_GridCreateUTestUNI:
+	-$(RM) *GridCreateUTest.Log
 	-@rm -f testlog stdlog.* logfile.* ESMF_GridCreateUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_GridCreateUTest > $(ESMC_TESTDIR)/ESMF_GridCreateUTest.stdout
 	-cat *GridCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_GridCreateUTest.Log
-	-rm *GridCreateUTest.Log
+	-$(RM) *GridCreateUTest.Log
 
 ESMF_GridCreateUTest.rm:
 	echo "ESMF_GridCreateUTest.rm target called here."

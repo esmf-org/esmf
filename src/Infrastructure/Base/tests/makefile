@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2005/05/16 23:02:55 nscollins Exp $ 
+# $Id: makefile,v 1.18 2005/06/28 20:11:58 svasquez Exp $ 
 
 ALL:  build_unit_tests
 
@@ -35,15 +35,17 @@ CLOBBERDIRS =
 #
 
 RUN_ESMF_BaseUTest:
+	-$(RM) *BaseUTest.Log
 	-@rm -f testlog stdlog.* logfile.* ESMF_BaseUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BaseUTest > $(ESMC_TESTDIR)/ESMF_BaseUTest.stdout
 	-cat *BaseUTest.Log > $(ESMC_TESTDIR)/ESMF_BaseUTest.Log
-	-rm *BaseUTest.Log
+	-$(RM) *BaseUTest.Log
 
 RUN_ESMF_BaseUTestUNI:
+	-$(RM) *BaseUTest.Log
 	-@rm -f testlog stdlog.* logfile.* ESMF_BaseUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BaseUTest > $(ESMC_TESTDIR)/ESMF_BaseUTest.stdout
 	-cat *BaseUTest.Log > $(ESMC_TESTDIR)/ESMF_BaseUTest.Log
-	-rm *BaseUTest.Log
+	-$(RM) *BaseUTest.Log
 
 
