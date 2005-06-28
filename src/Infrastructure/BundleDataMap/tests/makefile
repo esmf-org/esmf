@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2005/04/12 16:52:43 nscollins Exp $
+# $Id: makefile,v 1.10 2005/06/28 20:18:21 svasquez Exp $
 
 ALL:  build_unit_tests
 
@@ -43,16 +43,18 @@ CLOBBERDIRS =
 # Fortran unit test
 #
 RUN_ESMF_BundleDataMapUTest:
+	-$(RM) *BundleDataMapUTest.Log
 	-@rm -f testlog stdlog.* logfile.* ESMF_BundleDataMapUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BundleDataMapUTest > $(ESMC_TESTDIR)/ESMF_BundleDataMapUTest.stdout
 	-cat *BundleDataMapUTest.Log > $(ESMC_TESTDIR)/ESMF_BundleDataMapUTest.Log
-	-rm *BundleDataMapUTest.Log
+	-$(RM) *BundleDataMapUTest.Log
 
 RUN_ESMF_BundleDataMapUTestUNI:
+	-$(RM) *BundleDataMapUTest.Log
 	-@rm -f testlog stdlog.* logfile.* ESMF_BundleDataMapUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BundleDataMapUTest > $(ESMC_TESTDIR)/ESMF_BundleDataMapUTest.stdout
 	-cat *BundleDataMapUTest.Log > $(ESMC_TESTDIR)/ESMF_BundleDataMapUTest.Log
-	-rm *BundleDataMapUTest.Log
+	-$(RM) *BundleDataMapUTest.Log
 
 ESMF_BundleDataMapUTest.rm:
 	echo "ESMF_BundleDataMapTest.rm target called here."
@@ -62,16 +64,18 @@ ESMF_BundleDataMapUTest.rm:
 # C++ Unit tests
 #
 RUN_ESMC_BundleDataMapUTest:
+	-$(RM) *BundleDataMapUTest.Log
 	-@rm -f testlog stdlog.* logfile.* ESMC_BundleDataMapUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest > $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest.stdout
 	-cat *BundleDataMapUTest.Log > $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest.Log
-	-rm *BundleDataMapUTest.Log
+	-$(RM) *BundleDataMapUTest.Log
 
 RUN_ESMC_BundleDataMapUTestUNI:
+	-$(RM) *BundleDataMapUTest.Log
 	-@rm -f testlog stdlog.* logfile.* ESMC_BundleDataMapUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest > $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest.stdout
 	-cat *BundleDataMapUTest.Log > $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest.Log
-	-rm *BundleDataMapUTest.Log
+	-$(RM) *BundleDataMapUTest.Log
 
 ESMC_BundleDataMapUTest.rm:
 	echo "ESMC_BundleDataMapTest.rm target called here."
