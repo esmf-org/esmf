@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2005/04/13 21:36:20 svasquez Exp $
+# $Id: makefile,v 1.13 2005/06/28 20:29:18 svasquez Exp $
 
 ALL:  build_unit_tests
 
@@ -36,9 +36,10 @@ CLOBBERDIRS =
 # FieldComm unit tests
 #
 RUN_ESMF_FieldGatherUTest:
+	-$(RM) *FieldGatherUTest.Log
 	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_FieldGatherUTest > $(ESMC_TESTDIR)/ESMF_FieldGatherUTest.stdout
 	-cat *FieldGatherUTest.Log > $(ESMC_TESTDIR)/ESMF_FieldGatherUTest.Log
-	-rm *FieldGatherUTest.Log
+	-$(RM) *FieldGatherUTest.Log
 
 
 RUN_ESMF_FieldGatherUTestUNI:
@@ -46,13 +47,15 @@ RUN_ESMF_FieldGatherUTestUNI:
 
 
 RUN_ESMF_FieldGather1DUTest:
+	-$(RM) *FieldGather1DUTest.Log
 	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_FieldGather1DUTest > $(ESMC_TESTDIR)/ESMF_FieldGather1DUTest.stdout
 	-cat *FieldGather1DUTest.Log > $(ESMC_TESTDIR)/ESMF_FieldGather1DUTest.Log
-	-rm *FieldGather1DUTest.Log
+	-$(RM) *FieldGather1DUTest.Log
 
 
 RUN_ESMF_FieldGather1DUTestUNI:
+	-$(RM) *FieldGather1DUTest.Log
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldGather1DUTest > $(ESMC_TESTDIR)/ESMF_FieldGather1DUTest.stdout
 	-cat *FieldGather1DUTest.Log > $(ESMC_TESTDIR)/ESMF_FieldGather1DUTest.Log
-	-rm *FieldGather1DUTest.Log
+	-$(RM) *FieldGather1DUTest.Log
 
