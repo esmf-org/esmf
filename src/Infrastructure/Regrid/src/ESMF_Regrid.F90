@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.95 2005/06/27 17:07:11 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.96 2005/06/28 19:52:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.95 2005/06/27 17:07:11 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.96 2005/06/28 19:52:44 nscollins Exp $'
 
 !==============================================================================
 !
@@ -461,29 +461,31 @@
 ! !IROUTINE: ESMF_RegridRunR4 - Performs a regridding between two arrays of type R4
 
 ! !INTERFACE:
-      subroutine ESMF_RegridRunR4(srcarray, dstarray, srcDataMap, dstDataMap, &
+      subroutine ESMF_RegridRunR4(srcArrayList, dstArrayList, &
+                                  srcDataMap, dstDataMap, &
                                   routehandle, rc)
 !
 ! !ARGUMENTS:
 
-      type(ESMF_Array), intent(in) :: srcarray    ! array to be regridded
-      type(ESMF_Array), intent(inout) :: dstarray   ! resulting regridded array
+      type(ESMF_Array), intent(in) :: srcArrayList(:)
+      type(ESMF_Array), intent(inout) :: dstArrayList(:)
       type (ESMF_FieldDataMap), intent(in) :: srcDatamap
       type (ESMF_FieldDataMap), intent(in) :: dstDatamap
       type(ESMF_RouteHandle), intent(in) :: routehandle 
-                                                  ! precomputed regrid structure
-                                                  ! with regridding info
+                                                 ! precomputed regrid structure
+                                                 ! with regridding info
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Given a source array and precomputed regridding information, this 
-!     routine regrids the source array to a new array on the destination
-!     grid.  
+!   Given a list of source arrays and precomputed regridding information, 
+!   this routine regrids the source arrays to new arrays on the destination
+!   grid.  
 !
 !EOPI
 
       integer :: localrc
       integer :: i, i1, i2, n, nf, d1, d2, s1, asize, rank, counts(ESMF_MAXDIM)
+      integer :: na, narrays
       integer :: dstUndecomp, srcUndecomp, srcUndecompSize, srcStride
       integer :: di1, di2, dj1, dj2, dk1, dk2
       integer :: si1, si2, sj1, sj2, sk1, sk2
@@ -509,6 +511,7 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       zero = 0.0
+
       ! get the first route from the table and run it to gather the
       ! data values which overlap this bounding box.
  
@@ -536,212 +539,224 @@
 
       call ESMF_RouteGetRecvItems(rh, asize, localrc)
 
-      call ESMF_ArrayGet(srcarray, rank=rank, type=type, kind=kind, &
-                         counts=counts, rc=localrc)
-      gatheredArray = ESMF_LocalArrayCreate(1, type, kind, asize, rc=localrc)
-      srcLocalArray = srcarray
-      call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, rc=localrc)
+      ! up to here the code is common for all input arrays
+      ! loop starts below here.
 
-      allocate(dstDimOrder(rank), &
-               srcDimOrder(rank), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "dim orders", &
-                                     ESMF_CONTEXT, rc)) return
+      narrays = size(srcArrayList)
+      ! TODO: remove this once we know it is working
+      if (narrays .gt. 1) print *, "looping inside regrid"
+      do na = 1, narrays
 
-      call ESMF_FieldDataMapGet(dstDataMap, dataIndexList=dstDimOrder, rc=localrc)
-      call ESMF_FieldDataMapGet(srcDataMap, dataIndexList=srcDimOrder, rc=localrc)
-
-      ! break out here by rank   TODO: compare datarank to regridrank (or
-      !                                compare datamaps)
-      select case(rank)
-
-      ! TODO: apply the weights from src to destination
-      !  does this need a nested loop and an array of ESMF_Arrays, one
-      !  for each DE which sends data?  i think the answer is not for now
-      !  because all data has been pushed into a single array.  but eventually
-      !  if we want to start supporting vectors or other complicated data 
-      !  shapes, we may have to start preserving the array and datamaps
-      !  from the original locations.
-
-      !-------------
-      case(2) ! 2D data for regrid
-
-      ! TODO: optimized bundle communications
-      !   the plan here is to make an outer loop, which runs from 1 to nfields
-      !   and bumps up the dstData2D pointer each time thru the loop, and
-      !   then applies the weights to each point.   for now, add a dummy
-      !   loop which goes from 1 to 1, then work up to a real num fields.
- 
-
-        do nf=1, 1
-
-          ! TODO: we have to decide how to handle the gatheredData for
-          ! multiple fields - either gather them into an ND+1 array, or
-          ! join them end-to-end, or gather them into a list of arrays.
-
+        call ESMF_ArrayGet(srcArrayList(na), rank=rank, type=type, kind=kind, &
+                           counts=counts, rc=localrc)
+        gatheredArray = ESMF_LocalArrayCreate(1, type, kind, asize, rc=localrc)
+        srcLocalArray = srcArrayList(na)
+        call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, rc=localrc)
+  
+        allocate(dstDimOrder(rank), &
+                 srcDimOrder(rank), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "dim orders", &
+                                       ESMF_CONTEXT, rc)) return
+  
+        call ESMF_FieldDataMapGet(dstDataMap, dataIndexList=dstDimOrder, &
+                                  rc=localrc)
+        call ESMF_FieldDataMapGet(srcDataMap, dataIndexList=srcDimOrder, &
+                                  rc=localrc)
+  
+        ! break out here by rank   TODO: compare datarank to regridrank (or
+        !                                compare datamaps)
+        select case(rank)
+  
+        ! TODO: apply the weights from src to destination
+        !  does this need a nested loop and an array of ESMF_Arrays, one
+        !  for each DE which sends data?  i think the answer is not for now
+        !  because all data has been pushed into a single array.  but eventually
+        !  if we want to start supporting vectors or other complicated data 
+        !  shapes, we may have to start preserving the array and datamaps
+        !  from the original locations.
+  
+        !-------------
+        case(2) ! 2D data for regrid
+  
+        ! TODO: optimized bundle communications
+        !   the plan here is to make an outer loop, which runs from 1 to nfields
+        !   and bumps up the dstData2D pointer each time thru the loop, and
+        !   then applies the weights to each point.   for now, add a dummy
+        !   loop which goes from 1 to 1, then work up to a real num fields.
+   
+  
+          do nf=1, 1
+  
+            ! TODO: we have to decide how to handle the gatheredData for
+            ! multiple fields - either gather them into an ND+1 array, or
+            ! join them end-to-end, or gather them into a list of arrays.
+  
+            call ESMF_LocalArrayGetData(gatheredArray, gatheredData, &
+                                        ESMF_DATA_REF, rc)
+  
+     
+            call ESMF_ArrayGetData(dstArrayList(na), dstData2D, ESMF_DATA_REF, rc)
+    
+            !*** initialize dest field to zero
+       
+            dstData2D = zero
+    
+            !*** do the regrid
+    
+            do n = 1,numlinks
+              d1 = dstIndex((n-1)*2 + 1)
+              d2 = dstIndex((n-1)*2 + 2)
+              s1 = srcIndex(n)
+              dstData2D(d1,d2) = dstData2D(d1,d2) &
+                               + (gatheredData(s1) * weights(n))
+            enddo  ! numlinks
+  
+          enddo  ! nfields
+  
+        !-------------
+        case(3) ! 3D data for regrid
+  
           call ESMF_LocalArrayGetData(gatheredArray, gatheredData, &
                                       ESMF_DATA_REF, rc)
-
-          ! TODO: this becomes dstarray(nf) when dstarray becomes a list
-          call ESMF_ArrayGetData(dstarray, dstData2D, ESMF_DATA_REF, rc)
+          call ESMF_ArrayGetData(dstArrayList(na), dstData3D, ESMF_DATA_REF, rc)
   
           !*** initialize dest field to zero
      
-          dstData2D = zero
+          dstData3D = zero
   
-          !*** do the regrid
+          !*** for cases where datarank>gridrank, figure out the undecomposed
+          dstUndecomp     = 0   !TODO: should be arrays to be general
+          srcUndecomp     = 0
+          srcUndecompSize = 0
+          srcStride       = 1
+          do i = 1,rank
+            if (dstDimOrder(i).eq.0) then
+              dstUndecomp = i
+            endif
+            if (srcDimOrder(i).eq.0) then
+              srcUndecomp = i
+              srcUndecompSize = counts(i)
+            else
+              srcStride = srcStride * counts(i)
+            endif
+          enddo
   
-          do n = 1,numlinks
-            d1 = dstIndex((n-1)*2 + 1)
-            d2 = dstIndex((n-1)*2 + 2)
-            s1 = srcIndex(n)
-            dstData2D(d1,d2) = dstData2D(d1,d2) &
-                             + (gatheredData(s1) * weights(n))
-          enddo  ! numlinks
-
-        enddo  ! nfields
-
-      !-------------
-      case(3) ! 3D data for regrid
-
-        call ESMF_LocalArrayGetData(gatheredArray, gatheredData, &
-                                    ESMF_DATA_REF, rc)
-        call ESMF_ArrayGetData(dstarray, dstData3D, ESMF_DATA_REF, rc)
-
-        !*** initialize dest field to zero
-   
-        dstData3D = zero
-
-        !*** for cases where datarank>gridrank, figure out the undecomposed
-        dstUndecomp     = 0   !TODO: should be arrays to be general
-        srcUndecomp     = 0
-        srcUndecompSize = 0
-        srcStride       = 1
-        do i = 1,rank
-          if (dstDimOrder(i).eq.0) then
-            dstUndecomp = i
-          endif
-          if (srcDimOrder(i).eq.0) then
-            srcUndecomp = i
-            srcUndecompSize = counts(i)
+          !*** special code if Undecomp = 1 or rank
+          if (srcUndecomp.eq.1 .and. dstUndecomp.eq.1) then
+  
+            !*** do the regrid
+            i1 = lbound(dstData3D,1)
+            i2 = ubound(dstData3D,1)
+            do n = 1,numlinks
+              d1 = dstIndex((n-1)*2 + 1)
+              d2 = dstIndex((n-1)*2 + 2)
+              s1 = (srcIndex(n)-1)*i2        ! assumes i2 = srcUndecompSize
+              do i = i1,i2
+                dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
+                                   + (gatheredData(s1+i) * weights(n))
+              enddo
+            enddo
+  
+          elseif (srcUndecomp.eq.rank .and. dstUndecomp.eq.rank) then
+  
+            !*** do the regrid
+            i1 = lbound(dstData3D,rank)
+            i2 = ubound(dstData3D,rank)
+            do i = i1,i2
+              do n = 1,numlinks
+                d1 = dstIndex((n-1)*2 + 1)
+                d2 = dstIndex((n-1)*2 + 2)
+                s1 = (i-1)*srcStride + srcIndex(n)
+                dstData3D(d1,d2,i) = dstData3D(d1,d2,i) &
+                                   + (gatheredData(s1) * weights(n))
+              enddo
+            enddo
+  
+          elseif (srcUndecomp.eq.1 .and. dstUndecomp.eq.rank) then
+  
+            !*** do the regrid
+            i1 = lbound(dstData3D,rank)
+            i2 = ubound(dstData3D,rank)
+            do i = i1,i2
+              do n = 1,numlinks
+                d1 = dstIndex((n-1)*2 + 1)
+                d2 = dstIndex((n-1)*2 + 2)
+                s1 = (srcIndex(n)-1)*i2 + i    ! assumes i2 = srcUndecompSize
+                dstData3D(d1,d2,i) = dstData3D(d1,d2,i) &
+                                   + (gatheredData(s1) * weights(n))
+              enddo
+            enddo
+  
+          elseif (srcUndecomp.eq.rank .and. dstUndecomp.eq.1) then
+  
+            !*** do the regrid
+            i1 = lbound(dstData3D,1)
+            i2 = ubound(dstData3D,1)
+            do n = 1,numlinks
+              d1 = dstIndex((n-1)*2 + 1)
+              d2 = dstIndex((n-1)*2 + 2)
+              do i = i1,i2
+                s1 = (i-1)*srcStride + srcIndex(n)
+                dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
+                                   + (gatheredData(s1) * weights(n))
+              enddo
+            enddo
+  
           else
-            srcStride = srcStride * counts(i)
+            allocate(dindex(rank,2), &
+                     sindex(rank,2), stat=localrc)
+            if (ESMF_LogMsgFoundAllocError(localrc, "Indexes", &
+                                           ESMF_CONTEXT, rc)) return
+            do n = 1,numlinks
+              dindex(1,1) = lbound(dstData3D,dstUndecomp)
+              dindex(1,2) = ubound(dstData3D,dstUndecomp)
+              dindex(2,1) = dstIndex((n-1)*2 + 1)
+              dindex(2,2) = dstIndex((n-1)*2 + 1)
+              dindex(3,1) = dstIndex((n-1)*2 + 2)
+              dindex(3,2) = dstIndex((n-1)*2 + 2)
+              di1 = dindex(dstDimOrder(1)+1,1)
+              di2 = dindex(dstDimOrder(1)+1,2)
+              dj1 = dindex(dstDimOrder(2)+1,1)
+              dj2 = dindex(dstDimOrder(2)+1,2)
+              dk1 = dindex(dstDimOrder(3)+1,1)
+              dk2 = dindex(dstDimOrder(3)+1,2)
+              sindex(1,1) = 1
+              sindex(1,2) = size(gatheredData,srcUndecomp)
+              sindex(2,1) = srcIndex((n-1)*2 + 1)
+              sindex(2,2) = srcIndex((n-1)*2 + 1)
+              sindex(3,1) = srcIndex((n-1)*2 + 2)
+              sindex(3,2) = srcIndex((n-1)*2 + 2)
+              si1 = sindex(srcDimOrder(1)+1,1)
+              si2 = sindex(srcDimOrder(1)+1,2)
+              sj1 = sindex(srcDimOrder(2)+1,1)
+              sj2 = sindex(srcDimOrder(2)+1,2)
+              sk1 = sindex(srcDimOrder(3)+1,1)
+              sk2 = sindex(srcDimOrder(3)+1,2)
+     !         dstData3D(di1:di2,dj1:dj2,dk1:dk2) = &
+     !                  dstData3D(di1:di2,dj1:dj2,dk1:dk2) &
+     !               + (gatheredData(si1:si2,sj1:sj2) * weights(n))
+  
+            enddo
+            deallocate(dindex, &
+                       sindex, stat=localrc)
+            if (ESMF_LogMsgFoundAllocError(localrc, "deallocate indexes", &
+                                           ESMF_CONTEXT, rc)) return
           endif
-        enddo
-
-        !*** special code if Undecomp = 1 or rank
-        if (srcUndecomp.eq.1 .and. dstUndecomp.eq.1) then
-
-          !*** do the regrid
-          i1 = lbound(dstData3D,1)
-          i2 = ubound(dstData3D,1)
-          do n = 1,numlinks
-            d1 = dstIndex((n-1)*2 + 1)
-            d2 = dstIndex((n-1)*2 + 2)
-            s1 = (srcIndex(n)-1)*i2        ! assumes i2 = srcUndecompSize
-            do i = i1,i2
-              dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
-                                 + (gatheredData(s1+i) * weights(n))
-            enddo
-          enddo
-
-        elseif (srcUndecomp.eq.rank .and. dstUndecomp.eq.rank) then
-
-          !*** do the regrid
-          i1 = lbound(dstData3D,rank)
-          i2 = ubound(dstData3D,rank)
-          do i = i1,i2
-            do n = 1,numlinks
-              d1 = dstIndex((n-1)*2 + 1)
-              d2 = dstIndex((n-1)*2 + 2)
-              s1 = (i-1)*srcStride + srcIndex(n)
-              dstData3D(d1,d2,i) = dstData3D(d1,d2,i) &
-                                 + (gatheredData(s1) * weights(n))
-            enddo
-          enddo
-
-        elseif (srcUndecomp.eq.1 .and. dstUndecomp.eq.rank) then
-
-          !*** do the regrid
-          i1 = lbound(dstData3D,rank)
-          i2 = ubound(dstData3D,rank)
-          do i = i1,i2
-            do n = 1,numlinks
-              d1 = dstIndex((n-1)*2 + 1)
-              d2 = dstIndex((n-1)*2 + 2)
-              s1 = (srcIndex(n)-1)*i2 + i    ! assumes i2 = srcUndecompSize
-              dstData3D(d1,d2,i) = dstData3D(d1,d2,i) &
-                                 + (gatheredData(s1) * weights(n))
-            enddo
-          enddo
-
-        elseif (srcUndecomp.eq.rank .and. dstUndecomp.eq.1) then
-
-          !*** do the regrid
-          i1 = lbound(dstData3D,1)
-          i2 = ubound(dstData3D,1)
-          do n = 1,numlinks
-            d1 = dstIndex((n-1)*2 + 1)
-            d2 = dstIndex((n-1)*2 + 2)
-            do i = i1,i2
-              s1 = (i-1)*srcStride + srcIndex(n)
-              dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
-                                 + (gatheredData(s1) * weights(n))
-            enddo
-          enddo
-
-        else
-          allocate(dindex(rank,2), &
-                   sindex(rank,2), stat=localrc)
-          if (ESMF_LogMsgFoundAllocError(localrc, "Indexes", &
-                                         ESMF_CONTEXT, rc)) return
-          do n = 1,numlinks
-            dindex(1,1) = lbound(dstData3D,dstUndecomp)
-            dindex(1,2) = ubound(dstData3D,dstUndecomp)
-            dindex(2,1) = dstIndex((n-1)*2 + 1)
-            dindex(2,2) = dstIndex((n-1)*2 + 1)
-            dindex(3,1) = dstIndex((n-1)*2 + 2)
-            dindex(3,2) = dstIndex((n-1)*2 + 2)
-            di1 = dindex(dstDimOrder(1)+1,1)
-            di2 = dindex(dstDimOrder(1)+1,2)
-            dj1 = dindex(dstDimOrder(2)+1,1)
-            dj2 = dindex(dstDimOrder(2)+1,2)
-            dk1 = dindex(dstDimOrder(3)+1,1)
-            dk2 = dindex(dstDimOrder(3)+1,2)
-            sindex(1,1) = 1
-            sindex(1,2) = size(gatheredData,srcUndecomp)
-            sindex(2,1) = srcIndex((n-1)*2 + 1)
-            sindex(2,2) = srcIndex((n-1)*2 + 1)
-            sindex(3,1) = srcIndex((n-1)*2 + 2)
-            sindex(3,2) = srcIndex((n-1)*2 + 2)
-            si1 = sindex(srcDimOrder(1)+1,1)
-            si2 = sindex(srcDimOrder(1)+1,2)
-            sj1 = sindex(srcDimOrder(2)+1,1)
-            sj2 = sindex(srcDimOrder(2)+1,2)
-            sk1 = sindex(srcDimOrder(3)+1,1)
-            sk2 = sindex(srcDimOrder(3)+1,2)
-   !         dstData3D(di1:di2,dj1:dj2,dk1:dk2) = &
-   !                  dstData3D(di1:di2,dj1:dj2,dk1:dk2) &
-   !               + (gatheredData(si1:si2,sj1:sj2) * weights(n))
-
-          enddo
-          deallocate(dindex, &
-                     sindex, stat=localrc)
-          if (ESMF_LogMsgFoundAllocError(localrc, "deallocate indexes", &
-                                         ESMF_CONTEXT, rc)) return
-        endif
-
-      case default
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                    "Invalid rank", &
-                                    ESMF_CONTEXT, rc)
-        return
-      end select
-
-      ! nuke temp arrays
-      deallocate(dstDimOrder, &
-                 srcDimOrder, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate dim orders", &
-                                     ESMF_CONTEXT, rc)) return
+  
+        case default
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                                      "Invalid rank", &
+                                      ESMF_CONTEXT, rc)
+          return
+        end select
+  
+        ! nuke temp arrays
+        deallocate(dstDimOrder, &
+                   srcDimOrder, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate dim orders", &
+                                       ESMF_CONTEXT, rc)) return
+  
+      enddo    ! do na=1, narrays
 
       ! set return codes
       if (present(rc)) rc = ESMF_SUCCESS
@@ -755,16 +770,16 @@
 ! !IROUTINE: ESMF_RegridRunR8 - Performs a regridding between two arrays of type R8
 
 ! !INTERFACE:
-      subroutine ESMF_RegridRunR8(srcArray, srcDataMap, hasSrcData, &
-                                  dstArray, dstDataMap, hasDstData, &
+      subroutine ESMF_RegridRunR8(srcArrayList, srcDataMap, hasSrcData, &
+                                  dstArrayList, dstDataMap, hasDstData, &
                                   routehandle, rc)
 !
 ! !ARGUMENTS:
 
-      type(ESMF_Array),        intent(in   ) :: srcArray
+      type(ESMF_Array),        intent(in   ) :: srcArrayList(:)
       type(ESMF_FieldDataMap), intent(in   ) :: srcDatamap
       logical,                 intent(in   ) :: hasSrcData
-      type(ESMF_Array),        intent(inout) :: dstArray
+      type(ESMF_Array),        intent(inout) :: dstArrayList(:)
       type(ESMF_FieldDataMap), intent(in   ) :: dstDatamap
       logical,                 intent(in   ) :: hasDstData
       type(ESMF_RouteHandle),  intent(in   ) :: routehandle 
@@ -773,14 +788,15 @@
       integer,                 intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Given a source array and precomputed regridding information, this 
-!     routine regrids the source array to a new array on the destination
-!     grid.  
+!   Given a list of source arrays and precomputed regridding information, 
+!   this routine regrids the source arrays to new arrays on the destination
+!   grid.  
 !
 !EOPI
 
       integer :: localrc
       integer :: i, i1, i2, n, d1, d2, s1, asize, rank, counts(ESMF_MAXDIM)
+      integer :: na, narrays
       integer :: dstUndecomp, srcUndecomp, srcUndecompSize, srcStride
       integer :: di1, di2, dj1, dj2, dk1, dk2
       integer :: si1, si2, sj1, sj2, sk1, sk2
@@ -812,9 +828,6 @@
       ! data values which overlap this bounding box.
       call ESMF_RouteHandleGet(routehandle, route1=rh, rc=localrc)
 
-      call ESMF_ArrayGet(srcArray, rank=rank, type=type, kind=kind, &
-                         counts=counts, rc=localrc)
-
       ! get the indirect indices and weights from the routehandle
       asize = 1
       if (hasDstData) then
@@ -824,8 +837,9 @@
         ! srcIndex, dstIndex and weights TKR can be fixed, but unfortunately the
         ! gatheredData and dstData can be whatever the user wants - so this code
         ! might need to move into another file and be macroized heavily for TKR.
-        call ESMF_TransformValuesGet(tv, numlist=numlinks, srcindex=srcindexarr, &
-                                     dstindex=dstindexarr, weights=weightsarr, rc=rc)
+        call ESMF_TransformValuesGet(tv, numlist=numlinks, &
+                                  srcindex=srcindexarr, dstindex=dstindexarr, &
+                                  weights=weightsarr, rc=rc)
         call ESMF_LocalArrayGetData(srcindexarr, srcIndex, ESMF_DATA_REF, rc)
         call ESMF_LocalArrayGetData(dstindexarr, dstIndex, ESMF_DATA_REF, rc)
         call ESMF_LocalArrayGetData(weightsarr, weights, ESMF_DATA_REF, rc)
@@ -840,198 +854,213 @@
         call ESMF_RouteGetRecvItems(rh, asize, localrc)
       endif
 
-      gatheredArray = ESMF_LocalArrayCreate(1, type, kind, asize, rc=localrc)
-      srcLocalArray = srcArray
+      ! up to here the code does not depend on the src or dst lists
 
-      call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, rc=localrc)
+      narrays = size(srcArrayList)
+      ! TODO: remove this once we know it is working
+      if (narrays .gt. 1) print *, "looping inside regrid"
+      do na = 1, narrays
 
-      allocate(dstDimOrder(rank), &
-               srcDimOrder(rank), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "dim orders", &
-                                     ESMF_CONTEXT, rc)) return
-
-      call ESMF_FieldDataMapGet(dstDataMap, dataIndexList=dstDimOrder, rc=localrc)
-      call ESMF_FieldDataMapGet(srcDataMap, dataIndexList=srcDimOrder, rc=localrc)
-
-      ! break out here by rank   TODO: compare datarank to regridrank (or
-      !                                compare datamaps)
-      if (hasDstData) then
-      select case(rank)
-
-      ! TODO: apply the weights from src to destination
-      !  does this need a nested loop and an array of ESMF_Arrays, one
-      !  for each DE which sends data?  i think the answer is not for now
-      !  because all data has been pushed into a single array.  but eventually
-      !  if we want to start supporting vectors or other complicated data 
-      !  shapes, we may have to start preserving the array and datamaps
-      !  from the original locations.
-
-      !-------------
-      case(2) ! 2D data for regrid
-
-        call ESMF_LocalArrayGetData(gatheredArray, gatheredData, &
-                                    ESMF_DATA_REF, rc)
-        call ESMF_ArrayGetData(dstarray, dstData2D, ESMF_DATA_REF, rc)
-
-        !*** initialize dest field to zero
-   
-        dstData2D = zero
-
-        !*** do the regrid
-
-        do n = 1,numlinks
-          d1 = dstIndex((n-1)*2 + 1)
-          d2 = dstIndex((n-1)*2 + 2)
-          s1 = srcIndex(n)
-          dstData2D(d1,d2) = dstData2D(d1,d2) &
-                           + (gatheredData(s1) * weights(n))
-        enddo
-
-      !-------------
-      case(3) ! 3D data for regrid
-
-        call ESMF_LocalArrayGetData(gatheredArray, gatheredData, &
-                                    ESMF_DATA_REF, rc)
-        call ESMF_ArrayGetData(dstarray, dstData3D, ESMF_DATA_REF, rc)
-
-        !*** initialize dest field to zero
-   
-        dstData3D = zero
-
-        !*** for cases where datarank>gridrank, figure out the undecomposed
-        dstUndecomp     = 0   !TODO: should be arrays to be general
-        srcUndecomp     = 0
-        srcUndecompSize = 0
-        srcStride       = 1
-        do i = 1,rank
-          if (dstDimOrder(i).eq.0) then
-            dstUndecomp = i
-          endif
-          if (srcDimOrder(i).eq.0) then
-            srcUndecomp = i
-            srcUndecompSize = counts(i)
+        call ESMF_ArrayGet(srcArrayList(na), rank=rank, type=type, kind=kind, &
+                           counts=counts, rc=localrc)
+  
+        gatheredArray = ESMF_LocalArrayCreate(1, type, kind, asize, rc=localrc)
+        srcLocalArray = srcArrayList(na)
+  
+        call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, rc=localrc)
+  
+        allocate(dstDimOrder(rank), &
+                 srcDimOrder(rank), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "dim orders", &
+                                       ESMF_CONTEXT, rc)) return
+  
+        call ESMF_FieldDataMapGet(dstDataMap, dataIndexList=dstDimOrder, &
+                                  rc=localrc)
+        call ESMF_FieldDataMapGet(srcDataMap, dataIndexList=srcDimOrder, &
+                                  rc=localrc)
+  
+        ! break out here by rank   TODO: compare datarank to regridrank (or
+        !                                compare datamaps)
+        if (hasDstData) then
+        select case(rank)
+  
+        ! TODO: apply the weights from src to destination
+        ! does this need a nested loop and an array of ESMF_Arrays, one
+        ! for each DE which sends data?  i think the answer is not for now
+        ! because all data has been pushed into a single array.  but eventually
+        ! if we want to start supporting vectors or other complicated data 
+        ! shapes, we may have to start preserving the array and datamaps
+        ! from the original locations.
+  
+        !-------------
+        case(2) ! 2D data for regrid
+  
+          call ESMF_LocalArrayGetData(gatheredArray, gatheredData, &
+                                      ESMF_DATA_REF, rc)
+          call ESMF_ArrayGetData(dstArrayList(na), dstData2D, ESMF_DATA_REF, rc)
+  
+          !*** initialize dest field to zero
+     
+          dstData2D = zero
+  
+          !*** do the regrid
+  
+          do n = 1,numlinks
+            d1 = dstIndex((n-1)*2 + 1)
+            d2 = dstIndex((n-1)*2 + 2)
+            s1 = srcIndex(n)
+            dstData2D(d1,d2) = dstData2D(d1,d2) &
+                             + (gatheredData(s1) * weights(n))
+          enddo
+  
+        !-------------
+        case(3) ! 3D data for regrid
+  
+          call ESMF_LocalArrayGetData(gatheredArray, gatheredData, &
+                                      ESMF_DATA_REF, rc)
+          call ESMF_ArrayGetData(dstArrayList(na), dstData3D, ESMF_DATA_REF, rc)
+  
+          !*** initialize dest field to zero
+     
+          dstData3D = zero
+  
+          !*** for cases where datarank>gridrank, figure out the undecomposed
+          dstUndecomp     = 0   !TODO: should be arrays to be general
+          srcUndecomp     = 0
+          srcUndecompSize = 0
+          srcStride       = 1
+          do i = 1,rank
+            if (dstDimOrder(i).eq.0) then
+              dstUndecomp = i
+            endif
+            if (srcDimOrder(i).eq.0) then
+              srcUndecomp = i
+              srcUndecompSize = counts(i)
+            else
+              srcStride = srcStride * counts(i)
+            endif
+          enddo
+  
+          !*** special code if Undecomp = 1 or rank
+          if (srcUndecomp.eq.1 .and. dstUndecomp.eq.1) then
+  
+            !*** do the regrid
+            i1 = lbound(dstData3D,1)
+            i2 = ubound(dstData3D,1)
+            do n = 1,numlinks
+              d1 = dstIndex((n-1)*2 + 1)
+              d2 = dstIndex((n-1)*2 + 2)
+              s1 = (srcIndex(n)-1)*i2        ! assumes i2 = srcUndecompSize
+              do i = i1,i2
+                dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
+                                   + (gatheredData(s1+i) * weights(n))
+              enddo
+            enddo
+  
+          elseif (srcUndecomp.eq.rank .and. dstUndecomp.eq.rank) then
+  
+            !*** do the regrid
+            i1 = lbound(dstData3D,rank)
+            i2 = ubound(dstData3D,rank)
+            do i = i1,i2
+              do n = 1,numlinks
+                d1 = dstIndex((n-1)*2 + 1)
+                d2 = dstIndex((n-1)*2 + 2)
+                s1 = (i-1)*srcStride + srcIndex(n)
+                dstData3D(d1,d2,i) = dstData3D(d1,d2,i) &
+                                   + (gatheredData(s1) * weights(n))
+              enddo
+            enddo
+  
+          elseif (srcUndecomp.eq.1 .and. dstUndecomp.eq.rank) then
+  
+            !*** do the regrid
+            i1 = lbound(dstData3D,rank)
+            i2 = ubound(dstData3D,rank)
+            do i = i1,i2
+              do n = 1,numlinks
+                d1 = dstIndex((n-1)*2 + 1)
+                d2 = dstIndex((n-1)*2 + 2)
+                s1 = (srcIndex(n)-1)*i2 + i    ! assumes i2 = srcUndecompSize
+                dstData3D(d1,d2,i) = dstData3D(d1,d2,i) &
+                                   + (gatheredData(s1) * weights(n))
+              enddo
+            enddo
+  
+          elseif (srcUndecomp.eq.rank .and. dstUndecomp.eq.1) then
+  
+            !*** do the regrid
+            i1 = lbound(dstData3D,1)
+            i2 = ubound(dstData3D,1)
+            do n = 1,numlinks
+              d1 = dstIndex((n-1)*2 + 1)
+              d2 = dstIndex((n-1)*2 + 2)
+              do i = i1,i2
+                s1 = (i-1)*srcStride + srcIndex(n)
+                dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
+                                   + (gatheredData(s1) * weights(n))
+              enddo
+            enddo
+  
           else
-            srcStride = srcStride * counts(i)
+            allocate(dindex(rank,2), &
+                     sindex(rank,2), stat=localrc)
+            if (ESMF_LogMsgFoundAllocError(localrc, "Indexes", &
+                                           ESMF_CONTEXT, rc)) return
+            do n = 1,numlinks
+              dindex(1,1) = lbound(dstData3D,dstUndecomp)
+              dindex(1,2) = ubound(dstData3D,dstUndecomp)
+              dindex(2,1) = dstIndex((n-1)*2 + 1)
+              dindex(2,2) = dstIndex((n-1)*2 + 1)
+              dindex(3,1) = dstIndex((n-1)*2 + 2)
+              dindex(3,2) = dstIndex((n-1)*2 + 2)
+              di1 = dindex(dstDimOrder(1)+1,1)
+              di2 = dindex(dstDimOrder(1)+1,2)
+              dj1 = dindex(dstDimOrder(2)+1,1)
+              dj2 = dindex(dstDimOrder(2)+1,2)
+              dk1 = dindex(dstDimOrder(3)+1,1)
+              dk2 = dindex(dstDimOrder(3)+1,2)
+              sindex(1,1) = 1
+              sindex(1,2) = size(gatheredData,srcUndecomp)
+              sindex(2,1) = srcIndex((n-1)*2 + 1)
+              sindex(2,2) = srcIndex((n-1)*2 + 1)
+              sindex(3,1) = srcIndex((n-1)*2 + 2)
+              sindex(3,2) = srcIndex((n-1)*2 + 2)
+              si1 = sindex(srcDimOrder(1)+1,1)
+              si2 = sindex(srcDimOrder(1)+1,2)
+              sj1 = sindex(srcDimOrder(2)+1,1)
+              sj2 = sindex(srcDimOrder(2)+1,2)
+              sk1 = sindex(srcDimOrder(3)+1,1)
+              sk2 = sindex(srcDimOrder(3)+1,2)
+     !         dstData3D(di1:di2,dj1:dj2,dk1:dk2) = &
+     !                  dstData3D(di1:di2,dj1:dj2,dk1:dk2) &
+     !               + (gatheredData(si1:si2,sj1:sj2) * weights(n))
+  
+            enddo
+            deallocate(dindex, &
+                       sindex, stat=localrc)
+            if (ESMF_LogMsgFoundAllocError(localrc, "deallocate indexes", &
+                                           ESMF_CONTEXT, rc)) return
           endif
-        enddo
-
-        !*** special code if Undecomp = 1 or rank
-        if (srcUndecomp.eq.1 .and. dstUndecomp.eq.1) then
-
-          !*** do the regrid
-          i1 = lbound(dstData3D,1)
-          i2 = ubound(dstData3D,1)
-          do n = 1,numlinks
-            d1 = dstIndex((n-1)*2 + 1)
-            d2 = dstIndex((n-1)*2 + 2)
-            s1 = (srcIndex(n)-1)*i2        ! assumes i2 = srcUndecompSize
-            do i = i1,i2
-              dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
-                                 + (gatheredData(s1+i) * weights(n))
-            enddo
-          enddo
-
-        elseif (srcUndecomp.eq.rank .and. dstUndecomp.eq.rank) then
-
-          !*** do the regrid
-          i1 = lbound(dstData3D,rank)
-          i2 = ubound(dstData3D,rank)
-          do i = i1,i2
-            do n = 1,numlinks
-              d1 = dstIndex((n-1)*2 + 1)
-              d2 = dstIndex((n-1)*2 + 2)
-              s1 = (i-1)*srcStride + srcIndex(n)
-              dstData3D(d1,d2,i) = dstData3D(d1,d2,i) &
-                                 + (gatheredData(s1) * weights(n))
-            enddo
-          enddo
-
-        elseif (srcUndecomp.eq.1 .and. dstUndecomp.eq.rank) then
-
-          !*** do the regrid
-          i1 = lbound(dstData3D,rank)
-          i2 = ubound(dstData3D,rank)
-          do i = i1,i2
-            do n = 1,numlinks
-              d1 = dstIndex((n-1)*2 + 1)
-              d2 = dstIndex((n-1)*2 + 2)
-              s1 = (srcIndex(n)-1)*i2 + i    ! assumes i2 = srcUndecompSize
-              dstData3D(d1,d2,i) = dstData3D(d1,d2,i) &
-                                 + (gatheredData(s1) * weights(n))
-            enddo
-          enddo
-
-        elseif (srcUndecomp.eq.rank .and. dstUndecomp.eq.1) then
-
-          !*** do the regrid
-          i1 = lbound(dstData3D,1)
-          i2 = ubound(dstData3D,1)
-          do n = 1,numlinks
-            d1 = dstIndex((n-1)*2 + 1)
-            d2 = dstIndex((n-1)*2 + 2)
-            do i = i1,i2
-              s1 = (i-1)*srcStride + srcIndex(n)
-              dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
-                                 + (gatheredData(s1) * weights(n))
-            enddo
-          enddo
-
-        else
-          allocate(dindex(rank,2), &
-                   sindex(rank,2), stat=localrc)
-          if (ESMF_LogMsgFoundAllocError(localrc, "Indexes", &
-                                         ESMF_CONTEXT, rc)) return
-          do n = 1,numlinks
-            dindex(1,1) = lbound(dstData3D,dstUndecomp)
-            dindex(1,2) = ubound(dstData3D,dstUndecomp)
-            dindex(2,1) = dstIndex((n-1)*2 + 1)
-            dindex(2,2) = dstIndex((n-1)*2 + 1)
-            dindex(3,1) = dstIndex((n-1)*2 + 2)
-            dindex(3,2) = dstIndex((n-1)*2 + 2)
-            di1 = dindex(dstDimOrder(1)+1,1)
-            di2 = dindex(dstDimOrder(1)+1,2)
-            dj1 = dindex(dstDimOrder(2)+1,1)
-            dj2 = dindex(dstDimOrder(2)+1,2)
-            dk1 = dindex(dstDimOrder(3)+1,1)
-            dk2 = dindex(dstDimOrder(3)+1,2)
-            sindex(1,1) = 1
-            sindex(1,2) = size(gatheredData,srcUndecomp)
-            sindex(2,1) = srcIndex((n-1)*2 + 1)
-            sindex(2,2) = srcIndex((n-1)*2 + 1)
-            sindex(3,1) = srcIndex((n-1)*2 + 2)
-            sindex(3,2) = srcIndex((n-1)*2 + 2)
-            si1 = sindex(srcDimOrder(1)+1,1)
-            si2 = sindex(srcDimOrder(1)+1,2)
-            sj1 = sindex(srcDimOrder(2)+1,1)
-            sj2 = sindex(srcDimOrder(2)+1,2)
-            sk1 = sindex(srcDimOrder(3)+1,1)
-            sk2 = sindex(srcDimOrder(3)+1,2)
-   !         dstData3D(di1:di2,dj1:dj2,dk1:dk2) = &
-   !                  dstData3D(di1:di2,dj1:dj2,dk1:dk2) &
-   !               + (gatheredData(si1:si2,sj1:sj2) * weights(n))
-
-          enddo
-          deallocate(dindex, &
-                     sindex, stat=localrc)
-          if (ESMF_LogMsgFoundAllocError(localrc, "deallocate indexes", &
-                                         ESMF_CONTEXT, rc)) return
+  
+        case default
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                                      "Invalid rank", &
+                                      ESMF_CONTEXT, rc)
+          return
+        end select
+  
         endif
-
-      case default
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                    "Invalid rank", &
-                                    ESMF_CONTEXT, rc)
-        return
-      end select
-
-      endif
-
-      ! nuke temp arrays
-      call ESMF_LocalArrayDestroy(gatheredArray, rc=localrc)
-      deallocate(dstDimOrder, &
-                 srcDimOrder, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate dim orders", &
-                                     ESMF_CONTEXT, rc)) return
+  
+  
+        ! nuke temp arrays
+        call ESMF_LocalArrayDestroy(gatheredArray, rc=localrc)
+        deallocate(dstDimOrder, &
+                   srcDimOrder, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate dim orders", &
+                                       ESMF_CONTEXT, rc)) return
+  
+      enddo    ! do na=1, narrays
 
       ! set return codes
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1531,6 +1560,7 @@
       logical :: dummy
       type(ESMF_DataKind) :: srcKind, dstKind
       type(ESMF_Route) :: route
+      type(ESMF_Array) :: srcArrayList(1), dstArrayList(1)
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -1562,13 +1592,17 @@
       ! TODO: the R4 and R8 routines should have consistent arg lists.
       ! are the "has data" args required or not?
 
+      srcArrayList(1) = srcArray
+      dstArrayList(1) = dstArray
+
       ! Execute the communications call based on datakinds
       if (srcKind.eq.ESMF_R4 .AND. dstKind.eq.ESMF_R4) then
-        call ESMF_RegridRunR4(srcarray, dstarray, srcDataMap, dstDataMap, &
+        call ESMF_RegridRunR4(srcArrayList, dstArrayList, &
+                              srcDataMap, dstDataMap, &
                               routehandle, localrc)
       elseif (srcKind.eq.ESMF_R8 .AND. dstKind.eq.ESMF_R8) then
-        call ESMF_RegridRunR8(srcArray, srcDataMap, hasSrcData, &
-                              dstArray, dstDataMap, hasDstData, &
+        call ESMF_RegridRunR8(srcArrayList, srcDataMap, hasSrcData, &
+                              dstArrayList, dstDataMap, hasDstData, &
                               routehandle, localrc)
       else
         dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
@@ -1700,12 +1734,12 @@
 
       ! Execute the communications call based on datakinds
       if (srcKind.eq.ESMF_R4 .AND. dstKind.eq.ESMF_R4) then
-        call ESMF_RegridRunR4(srcArrayList(1), dstArrayList(1), &
+        call ESMF_RegridRunR4(srcArrayList, dstArrayList, &
                               srcDataMap, dstDataMap, &
                               routehandle, localrc)
       elseif (srcKind.eq.ESMF_R8 .AND. dstKind.eq.ESMF_R8) then
-        call ESMF_RegridRunR8(srcArrayList(1), srcDataMap, hasSrcData, &
-                              dstArrayList(1), dstDataMap, hasDstData, &
+        call ESMF_RegridRunR8(srcArrayList, srcDataMap, hasSrcData, &
+                              dstArrayList, dstDataMap, hasDstData, &
                               routehandle, localrc)
       else
         dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
