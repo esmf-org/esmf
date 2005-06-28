@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.14 2005/05/17 18:22:03 theurich Exp $
+! $Id: user_coupler.F90,v 1.15 2005/06/28 19:14:21 jwolfe Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -23,7 +23,7 @@
     public usercpl_register
         
     ! global data
-    type(ESMF_RouteHandle), save :: routehandle
+    type(ESMF_RouteHandle), save :: redistRH12, redistRH23, regridRH
 
     contains
 
@@ -78,6 +78,7 @@
       ! Local variables
       integer :: itemcount, status
       type(ESMF_Field) :: humidity1, humidity2
+      type(ESMF_Field) :: pressure1, pressure2, pressure3
       type(ESMF_VM) :: vm
       integer :: pet_id
 
@@ -106,21 +107,40 @@
       call ESMF_StateGet(importState, itemcount=itemcount, rc=status)
       !print *, "Import State contains ", itemcount, " items."
 
-      ! Get input data
+      ! Get input data for Regrid test
       call ESMF_StateGetField(importState, "humidity1", humidity1, rc=status)
 
-      ! Get location of output data
+      ! Get location of output data for Regrid test
       call ESMF_StateGetField(exportState, "humidity2", humidity2, rc=status)
 
       ! These are fields on different Grids - call RegridStore to set
       ! up the Regrid structure
 
-      call ESMF_FieldRegridStore(humidity1, humidity2, vm, routehandle, &
+      call ESMF_FieldRegridStore(humidity1, humidity2, vm, regridRH, &
                                  regridmethod=ESMF_REGRID_METHOD_BILINEAR, &
                                  rc=status)
 
       ! for debugging, this prints who is planning to send data and where 
-      ! call ESMF_RouteHandlePrint(routehandle, "", rc=status)
+      ! call ESMF_RouteHandlePrint(regridRH, "", rc=status)
+
+      ! Get input data and final location for Redist test
+      call ESMF_StateGetField(importState, "pressure1", pressure1, rc=status)
+      call ESMF_StateGetField(importState, "pressure3", pressure3, rc=status)
+
+      ! Get location of field on the different layout for Redist test
+      call ESMF_StateGetField(exportState, "pressure2", pressure2, rc=status)
+
+      ! These are fields on different layouts - call RedistStore to set
+      ! up the Redist structures
+
+      call ESMF_FieldRedistStore(pressure1, pressure2, vm, &
+                                 routehandle=redistRH12, rc=status)
+      call ESMF_FieldRedistStore(pressure2, pressure3, vm, &
+                                 routehandle=redistRH23, rc=status)
+
+      ! for debugging, this prints who is planning to send data and where 
+      ! call ESMF_RouteHandlePrint(redistRH12, "", rc=status)
+      ! call ESMF_RouteHandlePrint(redistRH23, "", rc=status)
 
       !print *, "User Coupler Init returning"
    
@@ -146,15 +166,16 @@
 
       ! Local variables
       type(ESMF_Field) :: humidity1, humidity2
+      type(ESMF_Field) :: pressure1, pressure2, pressure3
       integer :: status
 
       !print *, "User Coupler Run starting"
 
-      ! Get input data
+      ! Get input data for regrid test
       call ESMF_StateGetField(importState, "humidity1", humidity1, rc=status)
       ! call ESMF_FieldPrint(humidity1, rc=status)
 
-      ! Get location of output data
+      ! Get location of output data for regrid test
       call ESMF_StateGetField(exportState, "humidity2", humidity2, rc=status)
       ! call ESMF_FieldPrint(humidity2, rc=status)
 
@@ -162,7 +183,28 @@
       !  the data.   The communication pattern was computed at init,
       !  this simply has to execute the send and receive equivalents.
 
-      call ESMF_FieldRegrid(humidity1, humidity2, routehandle, rc=status)
+      call ESMF_FieldRegrid(humidity1, humidity2, regridRH, rc=status)
+
+      ! Data is moved directly to the field in the output state, so no
+      ! "put" is needed here.
+ 
+      ! Get input data and final array for redist test
+      call ESMF_StateGetField(importState, "pressure1", pressure1, rc=status)
+      call ESMF_StateGetField(importState, "pressure3", pressure3, rc=status)
+      ! call ESMF_FieldPrint(pressure1, rc=status)
+      ! call ESMF_FieldPrint(pressure3, rc=status)
+
+      ! Get location of output data for redist test
+      call ESMF_StateGetField(exportState, "pressure2", pressure2, rc=status)
+      ! call ESMF_FieldPrint(pressure2, rc=status)
+
+      ! These are fields on different layouts - call Redist to rearrange
+      ! the data to the secodn layout and then back to the first.   The
+      ! communication patterns was computed at init, this simply has to
+      ! execute the send and receive equivalents.
+
+      call ESMF_FieldRedist(pressure1, pressure2, redistRH12, rc=status)
+      call ESMF_FieldRedist(pressure2, pressure3, redistRH23, rc=status)
 
       ! Data is moved directly to the field in the output state, so no
       ! "put" is needed here.
@@ -191,7 +233,9 @@
       status = ESMF_FAILURE
    
       ! Release resources stored for the Regridding.
-      call ESMF_FieldRegridRelease(routehandle, rc=status)
+      call ESMF_FieldRegridRelease(regridRH,   rc=status)
+      call ESMF_FieldRedistRelease(redistRH12, rc=status)
+      call ESMF_FieldRedistRelease(redistRH23, rc=status)
 
       !print *, "User Coupler Final returning"
    

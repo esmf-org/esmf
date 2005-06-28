@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.12 2005/05/17 18:22:03 theurich Exp $
+! $Id: user_model2.F90,v 1.13 2005/06/28 19:15:01 jwolfe Exp $
 !
 ! System test for Exclusive Components, user-written component 2.
 
@@ -72,17 +72,18 @@
       integer, intent(out) :: rc
 
 !   ! Local variables
-      type(ESMF_Field) :: humidity2
+      type(ESMF_Field) :: humidity2, pressure2
       type(ESMF_VM) :: vm
       type(ESMF_DELayout) :: delayout
-      type(ESMF_Grid) :: grid1
-      type(ESMF_Array) :: array1
+      type(ESMF_Grid) :: grid1, grid2
+      type(ESMF_Array) :: array1, array2
       type(ESMF_ArraySpec) :: arrayspec
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
-      real(ESMF_KIND_R8) :: min(2)
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: humidityData, &
+                                                     pressureData
+      real(ESMF_KIND_R8) :: min(2), max(2)
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       integer :: countsPerDE1(3), countsPerDE2(1)
-      integer :: npets, pet_id
+      integer :: npets, pet_id, counts(2)
       type(ESMF_GridHorzStagger) :: horz_stagger
       integer :: status
 
@@ -142,12 +143,42 @@
       ! Get the allocated array back and get an F90 array pointer
       call ESMF_FieldGetArray(humidity2, array1, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_ArrayGetData(array1, idata, rc=status)
+      call ESMF_ArrayGetData(array1, humidityData, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
   
       call ESMF_StateAddField(importState, humidity2, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
       !   call ESMF_StatePrint(importState, rc=status)
+
+
+      ! create the second grid and field for use in the redist part of the test
+      counts(1) = 800
+      counts(2) = 40
+      min(1) = 0.0
+      max(1) = 60.0
+      min(2) = 0.0
+      max(2) = 50.0
+      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
+
+      grid2 = ESMF_GridCreateHorzXYUni(counts=counts, &
+                                       minGlobalCoordPerDim=min, &
+                                       maxGlobalCoordPerDim=max, &
+                                       horzStagger=horz_stagger, &
+                                       name="redist grid", rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
+      call ESMF_GridDistribute(grid2, delayout=delayout, &
+                               rc=status)
+
+      ! Create the field and have it create the array internally
+      pressure2 = ESMF_FieldCreate(grid2, arrayspec, &
+                                   horzRelloc=ESMF_CELL_CENTER, &
+                                   haloWidth=2, name="pressure2", rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
+  
+      call ESMF_StateAddField(importState, pressure2, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
+      !   call ESMF_StatePrint(importState, rc=status)
+
   
       !print *, pet_id, "User Comp 2 Init returning"
    
@@ -172,8 +203,8 @@
       integer, intent(out) :: rc
 
 !   ! Local variables
-      type(ESMF_Field) :: humidity2
-      type(ESMF_Array) :: array1
+      type(ESMF_Field) :: humidity2, pressure2
+      type(ESMF_Array) :: array1, array2
       integer :: status
 
       status = ESMF_FAILURE
@@ -181,9 +212,11 @@
 
       ! Get information from the component.
       call ESMF_StateGetField(importState, "humidity2", humidity2, rc=status)
+      call ESMF_StateGetField(importState, "pressure2", pressure2, rc=status)
     
       ! This is where the model specific computation goes.
       call ESMF_FieldGetArray(humidity2, array1, rc=status)
+      call ESMF_FieldGetArray(pressure2, array2, rc=status)
 
       !print *, "User Comp Run returning"
 

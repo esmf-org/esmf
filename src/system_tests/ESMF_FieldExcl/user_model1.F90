@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.12 2005/05/17 18:22:03 theurich Exp $
+! $Id: user_model1.F90,v 1.13 2005/06/28 19:14:44 jwolfe Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -72,13 +72,13 @@
         integer, intent(out) :: rc
 
        ! Local variables
-        type(ESMF_Field) :: humidity1
+        type(ESMF_Field) :: humidity1, pressure1, pressure3
         type(ESMF_VM) :: vm
         type(ESMF_DELayout) :: delayout
         type(ESMF_Grid) :: grid1
-        type(ESMF_Array) :: array1
+        type(ESMF_Array) :: array1, array2
         type(ESMF_ArraySpec) :: arrayspec
-        real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
+        real(ESMF_KIND_R8), dimension(:,:), pointer :: humidityData, pressureData
         real(ESMF_KIND_R8) :: min(2), max(2)
         integer :: counts(ESMF_MAXGRIDDIM)
         integer :: npets, pet_id, countsPerDE1(2), countsPerDE2(2)
@@ -98,7 +98,6 @@
 
         !print *, pet_id, "User Comp 1 Init starting"
 
-        ! Add a "humidity1" field to the export state.
         countsPerDE1 = (/ 760, 40 /)
         countsPerDE2 = (/ 30, 10 /)
 
@@ -128,22 +127,40 @@
                                 kind=ESMF_R8)
         if (status .ne. ESMF_SUCCESS) goto 10
 
-        ! Create the field and have it create the array internally
+        ! Create three fields and have it create the arrays internally
         humidity1 = ESMF_FieldCreate(grid1, arrayspec, &
                                      horzRelloc=ESMF_CELL_CENTER, &
                                      haloWidth=0, name="humidity1", rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
+        pressure1 = ESMF_FieldCreate(grid1, arrayspec, &
+                                     horzRelloc=ESMF_CELL_CENTER, &
+                                     haloWidth=2, name="pressure1", rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        pressure3 = ESMF_FieldCreate(grid1, arrayspec, &
+                                     horzRelloc=ESMF_CELL_CENTER, &
+                                     haloWidth=2, name="pressure3", rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
-        ! Get the allocated array back and get an F90 array pointer
+        ! Get the allocated arrays back and get F90 array pointers
         call ESMF_FieldGetArray(humidity1, array1, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_ArrayGetData(array1, idata, rc=status)
+        call ESMF_ArrayGetData(array1, humidityData, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        call ESMF_FieldGetArray(pressure1, array2, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        call ESMF_ArrayGetData(array2, pressureData, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
-        ! Set initial data values over whole array to our de id
-        idata = real(pet_id)
+        ! Set initial data values over whole arrays to our de id
+        humidityData = real(pet_id)
+        pressureData = real(pet_id)
 
+        ! Add a "humidity" fields to the export state.
         call ESMF_StateAddField(exportState, humidity1, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        call ESMF_StateAddField(exportState, pressure1, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        call ESMF_StateAddField(exportState, pressure3, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         !call ESMF_StatePrint(exportState, rc=status)
@@ -171,13 +188,15 @@
         integer, intent(out) :: rc
 
        ! Local variables
-        type(ESMF_Field) :: humidity1
+        type(ESMF_Field) :: humidity1, pressure1
         type(ESMF_RelLoc) :: relloc
-        type(ESMF_Array) :: array1
+        type(ESMF_Array) :: array1, array2
         type(ESMF_Array), dimension(:), pointer :: coordArray
         type(ESMF_Grid) :: grid
         real(ESMF_KIND_R8) :: pi
-        real(ESMF_KIND_R8), dimension(:,:), pointer :: idata, coordX, coordY
+        real(ESMF_KIND_R8), dimension(:,:), pointer :: humidityData, &
+                                                       pressureData, &
+                                                       coordX, coordY
         integer :: status, i, j, counts(2)
 
         !print *, "User Comp Run starting"
@@ -186,6 +205,7 @@
 
         ! Get the Field and Bundle data from the State
         call ESMF_StateGetField(exportState, "humidity1", humidity1, rc=status)
+        call ESMF_StateGetField(exportState, "pressure1", pressure1, rc=status)
       
         ! get the grid and coordinates
         allocate(coordArray(2))
@@ -200,18 +220,22 @@
         endif
 
         ! update field values here
-        ! call ESMF_StateGetDataPointer(exportState, "humidity1", idata, rc=status)
+        ! call ESMF_StateGetDataPointer(exportState, "humidity1", humidityData, &
+        !                               rc=status)
         call ESMF_FieldGetArray(humidity1, array1, rc=status) 
+        call ESMF_FieldGetArray(pressure1, array2, rc=status) 
         ! Get a pointer to the start of the data
-        call ESMF_ArrayGetData(array1, idata, ESMF_DATA_REF, rc=status)
+        call ESMF_ArrayGetData(array1, humidityData, ESMF_DATA_REF, rc=status)
+        call ESMF_ArrayGetData(array2, pressureData, ESMF_DATA_REF, rc=status)
 
         ! increment data values in place
-    !    idata = idata + 10.0
         if (counts(1)*counts(2).ne.0) then
           do j   = 1,counts(2)
             do i = 1,counts(1)
-              idata(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
-                                + 2.0*sin(coordY(i,j)/50.0*pi)
+              humidityData(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
+                                       + 2.0*sin(coordY(i,j)/50.0*pi)
+              pressureData(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
+                                       + 2.0*sin(coordY(i,j)/50.0*pi)
             enddo
           enddo
         endif
@@ -240,19 +264,94 @@
         integer, intent(out) :: rc
 
         ! Local variables
-        integer :: status
+        type(ESMF_Field) :: field1, field2
+        integer :: localrc, finalrc
 
         !print *, "User Comp Final starting"
-    
-        ! currently nothing to do - replace this if we add code here.
-        status = ESMF_SUCCESS
+
+        ! set this up to run the validate code on all fields
+        ! so we can see and compare the output.  but if any of
+        ! the verify routines return error, return error at the end.
+        finalrc = ESMF_SUCCESS
+
+        ! check validity of results
+        ! Get Fields from import state
+        call ESMF_StateGetField(exportState, "pressure1", field1, rc=localrc)
+        if (localrc .ne. ESMF_SUCCESS) then
+          finalrc = localrc
+          goto 30
+        endif
+        call ESMF_StateGetField(exportState, "pressure3", field2, rc=localrc)
+        if (localrc .ne. ESMF_SUCCESS) then
+          finalrc = localrc
+          goto 30
+        endif
+        call verifyResults(field1, field2, localrc)
+        if (localrc .ne. ESMF_SUCCESS) finalrc = localrc
+
+30   continue
+        ! come straight here if you cannot get the data from the state.
+        ! otherwise error codes are accumulated but ignored until the
+        ! end so we can see the output from all the cases to help track
+        ! down errors.
 
         !print *, "User Comp Final returning"
-   
-        rc = status
+        rc = finalrc
 
     end subroutine user_final
 
+!--------------------------------------------------------------------------------
+!   !  The routine where results are validated.
+!   !
+      
+    subroutine verifyResults(field1, field2, rc)
+      type(ESMF_Field), intent(in) :: field1
+      type(ESMF_Field), intent(in) :: field2
+      integer, intent(out) :: rc
+
+      ! Local variables
+      integer :: status, i, j, miscount, counts(2)
+      logical :: match
+      type(ESMF_Array) :: array1, array2
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: data1, data2
+      
+      !print *, "User verifyResults starting"
+      
+      ! update field values here
+      call ESMF_FieldGetArray(field1, array1, rc=status)
+      call ESMF_FieldGetArray(field2, array2, rc=status)
+
+      call ESMF_ArrayGet(array1, counts=counts, rc=status)
+
+      ! Get pointers to the start of the data
+      call ESMF_ArrayGetData(array1, data1, ESMF_DATA_REF, rc=status)
+      call ESMF_ArrayGetData(array2, data2, ESMF_DATA_REF, rc=status)
+
+      ! check and make sure the data in the two fields match exactly
+      match    = .true.
+      miscount = 0
+      do j   = 1,counts(2)
+        do i = 1,counts(1)
+          if (data1(i,j).ne.data2(i,j)) then
+            match = .false.
+            miscount = miscount + 1
+            if (miscount .gt. 40) then
+              print *, "more than 40 mismatches, skipping rest of loop"
+              goto 10
+            endif
+          endif
+        enddo
+      enddo
+  10  continue
+
+      if (match) then
+        write(*,*) "Array contents matched correctly!!"
+        rc = ESMF_SUCCESS
+      else
+        rc = ESMF_FAILURE
+      endif
+
+    end subroutine verifyResults
 
     end module user_model1
     
