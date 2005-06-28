@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.76 2005/06/24 21:01:57 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.77 2005/06/28 19:50:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research, 
@@ -56,11 +56,11 @@
       private
 
 !------------------------------------------------------------------------------
-!     ! ESMF_PackFlag   
-!     !
-!     ! Data type to set the status of data in this Bundle; it can either be
-!     ! simply a collection of Fields which contain the data, or it can also 
-!     ! have a private packed data buffer associated directly with the Bundle.
+!! ESMF_PackFlag   
+!!
+!! Data type to set the status of data in this Bundle; it can either be
+!! simply a collection of Fields which contain the data, or it can also 
+!! have a private packed data buffer associated directly with the Bundle.
 
       type ESMF_PackFlag
       sequence
@@ -72,7 +72,7 @@
                                         ESMF_NO_PACKED_DATA = ESMF_PackFlag(2)
 
 !------------------------------------------------------------------------------
-!  ! For ease of accessing data for an individual field for a packed array.
+!! For ease of accessing data for an individual field for a packed array.
 
       type ESMF_BundleFieldAccess
       sequence
@@ -84,14 +84,14 @@
       end type
 
 
-
 !------------------------------------------------------------------------------
-!       ! ESMF_BundleFieldInterleave
-!       !
-!       !  Data type to record the ordering information for multiple field
-!       !  data which is packed in a bundle.  Each has an associated
-!       !  {\tt ESMF\_FieldDataMap} object to track the ordering of that 
-!       !  {\tt ESMF\_Field}'s data in the packed buffer.
+!! ESMF_BundleFieldInterleave
+!!
+!!  Data type to record the ordering information for multiple field
+!!  data which is packed in a bundle.  Each has an associated
+!!  {\tt ESMF\_FieldDataMap} object to track the ordering of that 
+!!  {\tt ESMF\_Field}'s data in the packed buffer.
+
         type ESMF_BundleFieldInterleave
         sequence
         private
@@ -101,7 +101,24 @@
         end type
 
 !------------------------------------------------------------------------------
-!     ! ESMF_LocalBundle
+!! For bookkeeping information which must be identical in each constituent
+!! Field in order to optimize some of the communications calls.
+
+      type ESMF_BundleCongruentData
+      sequence
+      private
+        ! for starters:
+        integer :: datarank
+        type(ESMF_DataType) :: datatype
+        type(ESMF_DataKind) :: datakind
+        integer :: indexorders(ESMF_MAXDIM)
+        integer :: nonindexcounts(ESMF_MAXDIM) 
+        type(ESMF_Relloc) :: datahorzrelloc, datavertrelloc
+      end type
+
+
+!------------------------------------------------------------------------------
+!! ESMF_LocalBundle
 !
       type ESMF_LocalBundle
       sequence
@@ -113,10 +130,19 @@
       end type
 
 !------------------------------------------------------------------------------
-!     ESMF_BundleType
+!!     ESMF_BundleType
 !
       type ESMF_BundleType
       sequence
+      ! this data type is not private so the bundlecomm code can
+      ! reach directly in and get at the localdata without a loop
+      ! of subroutine calls.  but this causes problems with the 'pattern'
+      ! declaration below - the bundlecongruentdata derived type is
+      ! private and so it wants this to be private as well.
+      ! since pattern is not being used yet, comment it out below, but this
+      ! needs to be rationalized at some point soon.  perhaps the comm code
+      ! will have to go through a subroutine interface.  this is where
+      ! fortran needs a 'friend' type of access.
       !private
         type(ESMF_Base) :: base                   ! base class object
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
@@ -135,14 +161,16 @@
         type(ESMF_IOSpec) :: iospec              ! iospec values
         type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
         logical :: isCongruent                   ! are all fields identical?
+        logical :: hasPattern                    ! first data field sets this
+        !type(ESMF_BundleCongruentData) :: pattern ! what they must match
         integer :: field_count      
       end type
 
 !------------------------------------------------------------------------------
-!     ! ESMF_Bundle
+!! ESMF_Bundle
 
-!     ! The Bundle data structure that is passed between implementation and
-!     ! calling languages.
+!! The Bundle data structure that is passed between implementation and
+!! calling languages.
 
       type ESMF_Bundle
       sequence
@@ -3641,6 +3669,7 @@ end function
       type(ESMF_Field), dimension(:), pointer :: temp_flist  
                                                   ! list of fields
       type(ESMF_Grid) :: testgrid, matchgrid
+      logical :: wasempty
 
       ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
@@ -3716,6 +3745,8 @@ end function
       ! Add the fields in the list, checking for consistency.
       if (btype%field_count .eq. 0) then
         
+          wasempty = .TRUE. 
+
           allocate(btype%flist(fieldCount), stat=status)
           if (ESMF_LogMsgFoundAllocError(status, "Fieldlist allocate", &
                                        ESMF_CONTEXT, rc)) return
@@ -3727,6 +3758,9 @@ end function
 
           btype%field_count = fieldCount
       else
+
+          wasempty = .FALSE.
+
           ! make a list the right length
           allocate(temp_flist(btype%field_count + fieldCount), stat=status)
           if (ESMF_LogMsgFoundAllocError(status, "temp Fieldlist allocate", &
@@ -3760,14 +3794,54 @@ end function
 
       endif
 
-      ! TODO: somewhere in here we need to test the data and datamaps in 
-      ! the fields to see if they are completely consistent.  for now, 
-      ! assume they are not, and to test the new optimized route code,
-      ! set the congruent flag to true.  this must be fixed to be computed
-      ! before users will see any communication advantage.
-      !btype%isCongruent = .TRUE.
-      btype%isCongruent = .FALSE.
+      ! TODO: outstanding architectural issue:
+      ! unless all the fields are required to contain data before they are
+      ! added to the bundle, we cannot set the congruent flag yet -- it is
+      ! possible with the current interfaces to add empty fields to a bundle
+      ! and then add inconsistent grids to the fields -- which needs to be
+      ! avoided; but also the data can be added afterwards and there is no
+      ! obvious time to check for consistency/congruency.   the suggested
+      ! fix is that a field being added to a bundle must already contain both
+      ! a grid and the data array, so we can do the checking here.
 
+      ! all the handling below is to fool around with maintaining information
+      ! about whether the data fields inside this bundle are identical in
+      ! rank, data type, relloc, index order, etc.  if we know they already
+      ! are not, we can jump around the code to the continue.  otherwise we
+      ! have to test the new fields to make sure they match in datatype.
+
+      ! if already known that field data is not the same, then do not
+      ! bother to test recently added fields.  but if true, then compare
+      ! the fields to see if the types all match.   an optimization is to
+      ! only compare the newly added fields and not search the old ones.
+      if (btype%isCongruent) then
+          ! compare the last fieldCount fields against the congruent data
+          ! type stored in the bundle.  if the bundle is empty, set the
+          ! congruent info from the first one and then proceed from fields
+          ! 2 thru fieldCount.
+         
+          ! if not contradicted by the data, leave isCongruent .TRUE.
+          ! else at the first mismatch, set isCongruent to .FALSE. and
+          ! bail out of the loop.
+          if (wasempty) then
+              ! search the fields looking for one with data (it is possible
+              ! none have data - in which case we cannot change the flag)
+              ! the first one sets the congruent pattern which all others
+              ! must match to optimize the communication of this bundle
+              ! in the most extreme version.  (other optimizations are possible
+              ! with non-congruent bundles.
+              
+              ! if all empty, get out
+              ! if not, set the congruent datainfo here
+          endif
+          
+      endif
+
+      ! TODO: this code sets the congruent flag to true regardless of the
+      ! data in the fields.   this needs to be fixed before the bundle
+      ! communication code can be considered robust.
+
+10 continue
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleTypeAddFieldList
@@ -3967,10 +4041,15 @@ end function
                                   ESMF_CONTEXT, rc)) return
 
    
-      ! Initialize bundle contents
+      ! Initialize bundle contents.  An empty Bundle starts out with the
+      ! status flags uninitialized, and assumes all data is congruent.
+      ! As fields are added, the first non-compliant one turns the flag
+      ! to false, and after it is false, there is no way to set it back
+      ! to true.
       btype%localbundle%gridstatus = ESMF_STATUS_UNINIT
       btype%localbundle%arraystatus = ESMF_STATUS_UNINIT
       btype%gridstatus = ESMF_STATUS_UNINIT
+      btype%isCongruent = .TRUE.
    
       btype%field_count = 0
       nullify(btype%flist)
