@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.2 2005/05/31 17:40:03 nscollins Exp $
+! $Id: ESMF_Test.F90,v 1.3 2005/06/28 15:14:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.2 2005/05/31 17:40:03 nscollins Exp $'
+      '$Id: ESMF_Test.F90,v 1.3 2005/06/28 15:14:44 nscollins Exp $'
 
 !==============================================================================
 
@@ -88,17 +88,15 @@
 
       if(condition) then
         write(msg, *) "PASS ", trim(name), ", ", trim(file), ", line", line
-        print *, msg
+        print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-        !!call ESMF_LogWrite("PASS "//trim(name), ESMF_LOG_INFO, line, file)
-        if (present(unit)) write(unit, *) msg
+        if (present(unit)) write(unit, *) trim(msg)
       else
         write(msg, *) "FAIL ", trim(name), ", ", trim(file), ", line", &
                       line, trim(failMsg)
-        print *, msg
+        print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-        !!call ESMF_LogWrite("FAIL "//trim(name), ESMF_LOG_INFO, line, file)
-        if (present(unit)) write(unit, *) msg
+        if (present(unit)) write(unit, *) trim(msg)
         result = result + 1  ! count total failures; 0 = all pass
       end if
 
@@ -132,22 +130,21 @@
       character(ESMF_MAXSTR) :: msg
 
       write(msg, *) "Number of failed tests:", result
-      print *, msg
+      print *, trim(msg)
       call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-      if (present(unit)) write(unit, *) msg
+      if (present(unit)) write(unit, *) trim(msg)
 
       write(msg, *) "Ending Test, file ", trim(file), ", line", line
-      print *, msg
+      print *, trim(msg)
       call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-      !!call ESMF_LogWrite("Ending Test", ESMF_LOG_INFO, line, file)
-      if (present(unit)) write(unit, *) msg
+      if (present(unit)) write(unit, *) trim(msg)
 
       call ESMF_Finalize(rc=rc)
       if (rc .ne. ESMF_SUCCESS) then
           write(msg, *) "Failure in Finalizing ESMF"
-          print *, msg
+          print *, trim(msg)
           call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-          if (present(unit)) write(unit, *) msg
+          if (present(unit)) write(unit, *) trim(msg)
       endif
 
       end subroutine ESMF_TestEnd
@@ -189,10 +186,9 @@
       if (localrc .ne. ESMF_SUCCESS) then
         failMsg = "Unable to get global VM" 
         write(msg, *) "FAIL ", trim(file), ", line", line, trim(failMsg)
-        print *, msg
+        print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-        !!call ESMF_LogWrite("FAIL ", ESMF_LOG_INFO, line, file)
-        if (present(unit)) write(unit, *) msg
+        if (present(unit)) write(unit, *) trim(msg)
         return
       end if
 
@@ -201,10 +197,9 @@
         failMsg = "Unable to get number of PETS from global VM" 
         write(msg, *) "FAIL ", trim(file), ", line", &
                       line, trim(failMsg)
-        print *, msg
+        print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-        !!call ESMF_LogWrite("FAIL "//trim(failMsg), ESMF_LOG_INFO, line, file)
-        if (present(unit)) write(unit, *) msg
+        if (present(unit)) write(unit, *) trim(msg)
         return
       endif
 
@@ -216,10 +211,9 @@
         write(failMsg, *) "These tests must run on at least", petCount, " processors."
         write(msg, *) "SKIP ", trim(file), ", line", &
                       line, trim(failMsg)
-        print *, msg
+        print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-        !!call ESMF_LogWrite("SKIP "//trim(failMsg), ESMF_LOG_INFO, line, file)
-        if (present(unit)) write(unit, *) msg
+        if (present(unit)) write(unit, *) trim(msg)
         return
       endif
 
@@ -265,10 +259,9 @@
       if (localrc .ne. ESMF_SUCCESS) then
         failMsg = "Unable to get global VM" 
         write(msg, *) "FAIL ", trim(file), ", line", line, trim(failMsg)
-        print *, msg
+        print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-        !!call ESMF_LogWrite("FAIL "//trim(failMsg), ESMF_LOG_INFO, line, file)
-        if (present(unit)) write(unit, *) msg
+        if (present(unit)) write(unit, *) trim(msg)
         return
       end if
 
@@ -277,10 +270,9 @@
         failMsg = "Unable to query global VM" 
         write(msg, *) "FAIL ", trim(file), ", line", &
                       line, trim(failMsg)
-        print *, msg
+        print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-        !!call ESMF_LogWrite("FAIL "//trim(failMsg), ESMF_LOG_INFO, line, file)
-        if (present(unit)) write(unit, *) msg
+        if (present(unit)) write(unit, *) trim(msg)
         return
       endif
 
@@ -292,10 +284,9 @@
         write(failMsg, *) "These tests must run not more than", petCount, " processors."
         write(msg, *) "SKIP ", trim(file), ", line", &
                       line, trim(failMsg)
-        print *, msg
+        print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-        !!call ESMF_LogWrite("SKIP "//trim(failMsg), ESMF_LOG_INFO, line, file)
-        if (present(unit)) write(unit, *) msg
+        if (present(unit)) write(unit, *) trim(msg)
         return
       endif
 
@@ -341,10 +332,9 @@
       if (localrc .ne. ESMF_SUCCESS) then
         failMsg = "Unable to get global VM" 
         write(msg, *) "FAIL ", trim(file), ", line", line, trim(failMsg)
-        print *, msg
+        print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-        !!call ESMF_LogWrite("FAIL "//trim(failMsg), ESMF_LOG_INFO, line, file)
-        if (present(unit)) write(unit, *) msg
+        if (present(unit)) write(unit, *) trim(msg)
         return
       end if
 
@@ -353,10 +343,9 @@
         failMsg = "Unable to query global VM" 
         write(msg, *) "FAIL ", trim(file), ", line", &
                       line, trim(failMsg)
-        print *, msg
+        print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-        !!call ESMF_LogWrite("FAIL "//trim(failMsg), ESMF_LOG_INFO, line, file)
-        if (present(unit)) write(unit, *) msg
+        if (present(unit)) write(unit, *) trim(msg)
         return
       endif
 
@@ -368,10 +357,9 @@
         write(failMsg, *) "These tests must run on exactly", petCount, " processors."
         write(msg, *) "SKIP ", trim(file), ", line", &
                       line, trim(failMsg)
-        print *, msg
+        print *, trim(msg)
         call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-        !!call ESMF_LogWrite("SKIP "//trim(failMsg), ESMF_LOG_INFO, line, file)
-        if (present(unit)) write(unit, *) msg
+        if (present(unit)) write(unit, *) trim(msg)
         return
       endif
 
@@ -422,8 +410,8 @@
                            !defaultlogtype=ESMF_LOG_SINGLE, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) then
           write(msg, *) "FAIL  Unable to initialize the ESMF Framework.  Error code ", localrc
-          print *, msg
-          if (present(unit)) write(unit, *) msg
+          print *, trim(msg)
+          if (present(unit)) write(unit, *) trim(msg)
           if (present(rc)) rc = localrc
           return
       endif
@@ -431,22 +419,21 @@
       call ESMF_VMGet(globalVM, petCount=numPETs, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) then
           write(msg, *) "FAIL  Unable to get number of PETs.  Error code ", localrc
-          print *, msg
-          if (present(unit)) write(unit, *) msg
+          print *, trim(msg)
+          if (present(unit)) write(unit, *) trim(msg)
           if (present(rc)) rc = localrc
           return
        endif
 
       write(msg, *) "Beginning Test, file ", trim(file), ", line", line
-      print *, msg
+      print *, trim(msg)
       call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-      !!call ESMF_LogWrite("Beginning Test", ESMF_LOG_INFO, line, logFileName)
-      if (present(unit)) write(unit, *) msg
+      if (present(unit)) write(unit, *) trim(msg)
 
       write(msg, *) "NUMBER_OF_PROCESSORS", numPETs
-      print *, msg
+      print *, trim(msg)
       call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
-      if (present(unit)) write(unit, *) msg
+      if (present(unit)) write(unit, *) trim(msg)
 
       end subroutine ESMF_TestStart
 
