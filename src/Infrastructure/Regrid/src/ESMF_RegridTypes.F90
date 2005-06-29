@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.75 2005/05/31 17:39:59 nscollins Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.76 2005/06/29 22:14:30 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -247,6 +247,8 @@
     public ESMF_RegridIndexCreate     ! creates a RegridIndex structure
     public ESMF_RegridIndexDestroy    ! deallocate memory associated with a
                                       ! RegridIndex structure
+    public ESMF_VertBinsCreate        ! creates vertical bins for use in regridding
+    public ESMF_VertBinsDestroy       ! destroys vertical bins for use in regridding
 
     public operator(==), operator(/=) ! for overloading method and option
                                       ! comparison functions
@@ -255,7 +257,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.75 2005/05/31 17:39:59 nscollins Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.76 2005/06/29 22:14:30 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1303,6 +1305,188 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridIndexDestroy
+
+!----------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VertBinsCreate"
+!BOPI
+! !IROUTINE: ESMF_VertBinsCreate - Create vertical bins
+
+! !INTERFACE:
+      subroutine ESMF_VertBinsCreate(rank, targetBinSize, start, stop, &
+                                     numBins, binMin, binMax, &
+                                     binAddrMin, binAddrMax, &
+                                     cornerX1D, cornerY1D, &
+                                     cornerX2D, cornerY2D, rc)
+
+! !ARGUMENTS:
+
+      integer, intent(in) :: rank
+      integer, intent(in) :: targetBinSize
+      integer, dimension(2), intent(in ) :: start
+      integer, dimension(2), intent(in ) :: stop
+      integer, dimension(2), intent(out) :: numBins
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: binMin
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: binMax
+      integer, dimension(:), pointer :: binAddrMin
+      integer, dimension(:), pointer :: binAddrMax
+      real(ESMF_KIND_R8), dimension(:,:), intent(in), optional :: cornerX1D
+      real(ESMF_KIND_R8), dimension(:,:), intent(in), optional :: cornerY1D
+      real(ESMF_KIND_R8), dimension(:,:,:), intent(in), optional :: cornerX2D
+      real(ESMF_KIND_R8), dimension(:,:,:), intent(in), optional :: cornerY2D
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!
+!     The arguments are:
+!     \begin{description}
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  TODO
+
+      integer :: i, j, ijAddr, n
+      integer :: localSize
+      logical :: dummy
+      real(ESMF_KIND_R8) :: localMinX, localMaxX, localMinY, localMaxY
+      real(ESMF_KIND_R8) :: minX, maxX, minY, maxY, deltaBin(2)
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      if (rank.eq.1) then
+        localMinX = minval(cornerX1D)
+        localMinY = minval(cornerY1D)
+        localMaxX = maxval(cornerX1D)
+        localMaxY = maxval(cornerY1D)
+        localSize = stop(1) - start(1) + 1
+      else if (rank.eq.2) then
+        localMinX = minval(cornerX2D)
+        localMinY = minval(cornerY2D)
+        localMaxX = maxval(cornerX2D)
+        localMaxY = maxval(cornerY2D)
+        localSize = stop(1) - start(1) + 1
+      else
+        !TODO: log entry
+        return
+      endif
+
+      ! allocate and fill bins -- make sure there is at least one
+      numBins(2) = max(localSize/targetBinSize, 1)
+
+      ! makes no sense to have more bins than points in the vertical direction
+      if (rank.eq.2) numBins(2) = min(numBins(2), stop(2)-start(2)+1)
+
+      allocate(binAddrMin(numBins(2)), &
+               binAddrMax(numBins(2)), &
+                 binMin(2,numBins(2)), &
+                 binMax(2,numBins(2)))
+
+      deltaBin(2) = (localMaxY - localMinY)/numBins(2)
+      do n = 1, numBins(2)
+        binMin  (1,n) = localMaxX
+        binMax  (1,n) = localMinX
+        binMin  (2,n) = localMinY + (n-1)*deltaBin(2)
+        binMax  (2,n) = localMinY +  n   *deltaBin(2)
+        binAddrMin(n) = localSize + 1
+        binAddrMax(n) = 0
+      enddo
+
+      select case(rank)
+
+      !----------------
+      case(1)
+        do ijAddr = start(1), stop(1)
+          minX    = minval(cornerX1D(:,ijAddr))
+          minY    = minval(cornerY1D(:,ijAddr))
+          maxX    = maxval(cornerX1D(:,ijAddr))
+          maxY    = maxval(cornerY1D(:,ijAddr))
+          do n    = 1, numBins(2)
+            if (minY.le.binMax(2,n) .AND. maxY.ge.binMin(2,n)) then
+              binAddrMin(n) = min(ijAddr,binAddrMin(n))
+              binAddrMax(n) = max(ijAddr,binAddrMax(n))
+            endif
+            if (minX.lt.binMin(1,n)) binMin(1,n) = minX
+            if (maxX.gt.binMax(1,n)) binMax(1,n) = maxX
+          enddo
+        enddo
+
+      !----------------
+      case(2)
+        do j       = start(2), stop(2)
+          do i     = start(1), stop(1)
+            ijAddr = (j-start(2))*(stop(1)-start(1)+1) + (i-start(1)) + 1
+            minX   = minval(cornerX2D(:,i,j))
+            minY   = minval(cornerY2D(:,i,j))
+            maxX   = maxval(cornerX2D(:,i,j))
+            maxY   = maxval(cornerY2D(:,i,j))
+            do n   = 1, numBins(2)
+              if (minY.le.binMax(2,n) .AND. maxY.ge.binMin(2,n)) then
+                binAddrMin(n) = min(ijAddr,binAddrMin(n))
+                binAddrMax(n) = max(ijAddr,binAddrMax(n))
+              endif
+              if (minX.lt.binMin(1,n)) binMin(1,n) = minX
+              if (maxX.gt.binMax(1,n)) binMax(1,n) = maxX
+            enddo
+          enddo
+        enddo
+
+      !----------------
+      case default
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                      "Invalid rank", &
+                                      ESMF_CONTEXT, rc)
+
+      end select
+
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_VertBinsCreate
+
+!----------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VertBinsDestroy"
+!BOPI
+! !IROUTINE: ESMF_VertBinsDestroyCreate - Destroy vertical bins
+
+! !INTERFACE:
+      subroutine ESMF_VertBinsDestroy(binMin, binMax, &
+                                      binAddrMin, binAddrMax, rc)
+
+! !ARGUMENTS:
+
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: binMin
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: binMax
+      integer, dimension(:), pointer :: binAddrMin
+      integer, dimension(:), pointer :: binAddrMax
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!
+!     The arguments are:
+!     \begin{description}
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  TODO
+
+      integer :: localrc
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      deallocate(binAddrMin, &
+                 binAddrMax, &
+                     binMin, &
+                     binMax, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dealloc bin arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_VertBinsDestroy
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
