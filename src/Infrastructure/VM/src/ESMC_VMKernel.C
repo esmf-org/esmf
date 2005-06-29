@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.42 2005/06/08 19:38:37 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.43 2005/06/29 03:41:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -162,6 +162,17 @@ void ESMC_VMK::vmk_obtain_args(void){
     fclose(fp);
   }else{
     uname[0]='\0';  // empty uname string
+  }
+  // some systems may not work correctly
+  int skip_obtain_args = 0;
+  // IRIX64 with ABI -64 has problems. I take IRIX64 out (with ABI -n32 and -64)
+  // for now. I suspect the -64 problem to be Fortran/C++ runtime lib related!
+  // Somehow the system() calls and fgets() don't work correctly!
+  if (!strncmp(uname, "IRIX64", 6)) skip_obtain_args=1; 
+  if (skip_obtain_args){
+    argc = 0;
+    argv = NULL;
+    return; // bail out
   }
   // determine whether this is a SUS3=sysV or BSD derived OS
   int bsdflag=0;
