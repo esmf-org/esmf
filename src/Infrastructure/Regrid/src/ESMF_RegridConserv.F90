@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.52 2005/06/29 05:51:31 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.53 2005/06/29 22:14:04 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.52 2005/06/29 05:51:31 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.53 2005/06/29 22:14:04 jwolfe Exp $'
 
 !==============================================================================
 
@@ -885,11 +885,11 @@
 
       ! allocate and fill bins, if necessary
       ! for now, assume vertical bins only
-      call ESMF_MakeBinsVert(2, targetBinSize, &
-                             (/ibDst, jbDst/), (/ieDst, jeDst/), &
-                             numBins, binMin, binMax, binAddrMin, binAddrMax, &
-                             cornerX2D=dstCornerX, cornerY2D=dstCornerY, &
-                             rc=localrc)
+      call ESMF_VertBinsCreate(2, targetBinSize, &
+                               (/ibDst, jbDst/), (/ieDst, jeDst/), &
+                               numBins, binMin, binMax, binAddrMin, binAddrMax, &
+                               cornerX2D=dstCornerX, cornerY2D=dstCornerY, &
+                               rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1097,10 +1097,11 @@
 
       enddo srcLoop
 
-      deallocate(binAddrMin, &
-                 binAddrMax, &
-                 binMin, &
-                 binMax)
+      call ESMF_VertBinsDestroy(binMin, binMax, binAddrMin, binAddrMax, &
+                                rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       deallocate(cornerX, &
                  cornerY, stat=localrc)
@@ -1124,10 +1125,10 @@
 
       ! allocate and fill bins, if necessary
       ! for now, assume vertical bins only
-      call ESMF_MakeBinsVert(1, targetBinSize, (/ibSrc, 1/), (/ieSrc, 1/), &
-                             numBins, binMin, binMax, binAddrMin, binAddrMax, &
-                             cornerX1D=srcCornerX, cornerY1D=srcCornerY, &
-                             rc=localrc)
+      call ESMF_VertBinsCreate(1, targetBinSize, (/ibSrc, 1/), (/ieSrc, 1/), &
+                               numBins, binMin, binMax, binAddrMin, binAddrMax, &
+                               cornerX1D=srcCornerX, cornerY1D=srcCornerY, &
+                               rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1324,10 +1325,11 @@
         enddo dstLoopInner
       enddo dstLoopOuter
 
-      deallocate(binAddrMin, &
-                 binAddrMax, &
-                 binMin, &
-                 binMax)
+      call ESMF_VertBinsDestroy(binMin, binMax, binAddrMin, binAddrMax, &
+                                rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       deallocate(cornerX, &
                  cornerY, stat=localrc)
@@ -3236,142 +3238,6 @@
       ! all done
 
       end subroutine ESMF_PoleXYToLatLon
-
-!----------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_MakeBinsVert"
-!BOPI
-! !IROUTINE: ESMF_MakeBinsVert - Create vertical bins
-
-! !INTERFACE:
-      subroutine ESMF_MakeBinsVert(rank, targetBinSize, start, stop, &
-                                   numBins, binMin, binMax, &
-                                   binAddrMin, binAddrMax, &
-                                   cornerX1D, cornerY1D, &
-                                   cornerX2D, cornerY2D, rc)
-
-! !ARGUMENTS:
-
-      integer, intent(in) :: rank
-      integer, intent(in) :: targetBinSize
-      integer, dimension(2), intent(in ) :: start
-      integer, dimension(2), intent(in ) :: stop
-      integer, dimension(2), intent(out) :: numBins
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: binMin
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: binMax
-      integer, dimension(:), pointer :: binAddrMin
-      integer, dimension(:), pointer :: binAddrMax
-      real(ESMF_KIND_R8), dimension(:,:), intent(in), optional :: cornerX1D
-      real(ESMF_KIND_R8), dimension(:,:), intent(in), optional :: cornerY1D
-      real(ESMF_KIND_R8), dimension(:,:,:), intent(in), optional :: cornerX2D
-      real(ESMF_KIND_R8), dimension(:,:,:), intent(in), optional :: cornerY2D
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!
-!     The arguments are:
-!     \begin{description}
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS:  TODO
-
-      integer :: i, j, ijAddr, n
-      integer :: localSize
-      logical :: dummy
-      real(ESMF_KIND_R8) :: localMinX, localMaxX, localMinY, localMaxY
-      real(ESMF_KIND_R8) :: minX, maxX, minY, maxY, deltaBin(2)
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
-
-      if (rank.eq.1) then
-        localMinX = minval(cornerX1D)
-        localMinY = minval(cornerY1D)
-        localMaxX = maxval(cornerX1D)
-        localMaxY = maxval(cornerY1D)
-        localSize = stop(1) - start(1) + 1
-      else if (rank.eq.2) then
-        localMinX = minval(cornerX2D)
-        localMinY = minval(cornerY2D)
-        localMaxX = maxval(cornerX2D)
-        localMaxY = maxval(cornerY2D)
-        localSize = stop(1) - start(1) + 1
-      else
-        !TODO: log entry
-        return
-      endif
-
-      ! allocate and fill bins, if necessary
-      ! for now, assume vertical bins only
-      numBins(2)    = localSize/targetBinSize
-      allocate(binAddrMin(numBins(2)), &
-               binAddrMax(numBins(2)), &
-                 binMin(2,numBins(2)), &
-                 binMax(2,numBins(2)))
-
-      deltaBin(2) = (localMaxY - localMinY)/numBins(2)
-      do n = 1, numBins(2)
-        binMin  (1,n) = localMaxX
-        binMax  (1,n) = localMinX
-        binMin  (2,n) = localMinY + (n-1)*deltaBin(2)
-        binMax  (2,n) = localMinY +  n   *deltaBin(2)
-        binAddrMin(n) = localSize + 1
-        binAddrMax(n) = 0
-      enddo
-
-      select case(rank)
-
-      !----------------
-      case(1)
-        do ijAddr = start(1), stop(1)
-          minX    = minval(cornerX1D(:,ijAddr))
-          minY    = minval(cornerY1D(:,ijAddr))
-          maxX    = maxval(cornerX1D(:,ijAddr))
-          maxY    = maxval(cornerY1D(:,ijAddr))
-          do n    = 1, numBins(2)
-            if (minY.le.binMax(2,n) .AND. maxY.ge.binMin(2,n)) then
-              binAddrMin(n) = min(ijAddr,binAddrMin(n))
-              binAddrMax(n) = max(ijAddr,binAddrMax(n))
-            endif
-            if (minX.lt.binMin(1,n)) binMin(1,n) = minX
-            if (maxX.gt.binMax(1,n)) binMax(1,n) = maxX
-          enddo
-        enddo
-
-      !----------------
-      case(2)
-        do j       = start(2), stop(2)
-          do i     = start(1), stop(1)
-            ijAddr = (j-start(2))*(stop(1)-start(1)+1) + (i-start(1)) + 1
-            minX   = minval(cornerX2D(:,i,j))
-            minY   = minval(cornerY2D(:,i,j))
-            maxX   = maxval(cornerX2D(:,i,j))
-            maxY   = maxval(cornerY2D(:,i,j))
-            do n   = 1, numBins(2)
-              if (minY.le.binMax(2,n) .AND. maxY.ge.binMin(2,n)) then
-                binAddrMin(n) = min(ijAddr,binAddrMin(n))
-                binAddrMax(n) = max(ijAddr,binAddrMax(n))
-              endif
-              if (minX.lt.binMin(1,n)) binMin(1,n) = minX
-              if (maxX.gt.binMax(1,n)) binMax(1,n) = maxX
-            enddo
-          enddo
-        enddo
-
-      !----------------
-      case default
-        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                      "Invalid rank", &
-                                      ESMF_CONTEXT, rc)
-
-      end select
-
-      ! Set return values.
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_MakeBinsVert
-
 
 !------------------------------------------------------------------------------
 
