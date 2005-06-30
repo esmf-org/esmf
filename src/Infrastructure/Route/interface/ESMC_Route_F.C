@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.37 2005/06/24 21:02:00 nscollins Exp $
+// $Id: ESMC_Route_F.C,v 1.38 2005/06/30 21:05:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -224,7 +224,7 @@ extern "C" {
                      ESMC_DELayout **layout_snd,
                      int *status) {
 
-           *status = (*ptr)->ESMC_RoutePrecomputeRegrid(*rank, 
+           *status = (*ptr)->ESMC_RoutePrecomputeRegrid(*rank,
                              *my_DE_rcv, AI_rcv_exc, AI_rcv_tot, 
                              *AI_rcv_count, global_start_rcv, 
                              global_count_rcv, *layout_rcv,
@@ -234,29 +234,34 @@ extern "C" {
        }
 
        void FTN(c_esmc_routeprecomputeredist)(ESMC_Route **ptr, int *rank, 
+                     ESMC_Logical *hasDstData, 
                      int *dstMyDE, ESMC_AxisIndex *dstCompAI,
                      ESMC_AxisIndex *dstTotalAI, int *dstAICount,
                      int *dstGlobalStart, int *dstGlobalCount,
                      ESMC_DELayout **dstLayout,
+                     ESMC_Logical *hasSrcData, 
                      int *srcMyDE, ESMC_AxisIndex *srcCompAI,
                      ESMC_AxisIndex *srcTotalAI, int *srcAICount,
                      int *srcGlobalStart, int *srcGlobalCount,
                      ESMC_DELayout **srcLayout, 
                      int *status) {
 
-           *status = (*ptr)->ESMC_RoutePrecomputeRedist(*rank, 
+           *status = (*ptr)->ESMC_RoutePrecomputeRedist(*rank, *hasDstData,
                              *dstMyDE, dstCompAI, dstTotalAI, *dstAICount,
                              dstGlobalStart, dstGlobalCount, *dstLayout,
+                             *hasSrcData,
                              *srcMyDE, srcCompAI, srcTotalAI, *srcAICount,
                              srcGlobalStart, srcGlobalCount, *srcLayout);
        }
 
        void FTN(c_esmc_routeprecomputeredistv)(ESMC_Route **ptr, int *rank, 
+                     ESMC_Logical *hasDstData, 
                      int *dstMyDE, ESMC_Logical *dstVector, 
                      ESMC_AxisIndex *dstCompAI, ESMC_AxisIndex *dstTotalAI,
                      int *dstAICount, int *dstAICountPerDE,
                      int *dstGlobalStart, int *dstGSCount,
                      int *dstGlobalCount, ESMC_DELayout **dstLayout,
+                     ESMC_Logical *hasSrcData, 
                      int *srcMyDE, ESMC_Logical *srcVector,
                      ESMC_AxisIndex *srcCompAI, ESMC_AxisIndex *srcTotalAI,
                      int *srcAICount, int *srcAICountPerDE,
@@ -264,11 +269,11 @@ extern "C" {
                      int *srcGlobalCount, ESMC_DELayout **srcLayout, 
                      int *status) {
 
-           *status = (*ptr)->ESMC_RoutePrecomputeRedistV(*rank, 
+           *status = (*ptr)->ESMC_RoutePrecomputeRedistV(*rank, *hasDstData,
                              *dstMyDE, *dstVector, dstCompAI, dstTotalAI,
                              *dstAICount, dstAICountPerDE,
                              dstGlobalStart, *dstGSCount,
-                             dstGlobalCount, *dstLayout,
+                             dstGlobalCount, *dstLayout, *hasSrcData,
                              *srcMyDE, *srcVector, srcCompAI, srcTotalAI,
                              *srcAICount, srcAICountPerDE,
                              srcGlobalStart, *srcGSCount,

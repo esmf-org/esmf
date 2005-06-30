@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.70 2005/06/24 21:02:00 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.71 2005/06/30 21:05:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -132,7 +132,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.70 2005/06/24 21:02:00 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.71 2005/06/30 21:05:43 nscollins Exp $'
 
 !==============================================================================
 !
@@ -632,9 +632,11 @@ end function radd
 ! !IROUTINE: ESMF_RoutePrecomputeRedist - Precompute communication paths
 
 ! !INTERFACE:
-      subroutine ESMF_RoutePrecomputeRedist(route, rank, dstMyDE, dstCompAI, &
+      subroutine ESMF_RoutePrecomputeRedist(route, rank, hasDstData, &
+                                            dstMyDE, dstCompAI, &
                                             dstTotalAI, dstGlobalStart, &
                                             dstGlobalCount, dstDElayout, &
+                                            hasSrcData, &
                                             srcMyDE, srcCompAI, &
                                             srcTotalAI, srcGlobalStart, &
                                             srcGlobalCount, srcDElayout, rc)
@@ -642,12 +644,14 @@ end function radd
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
       integer, intent(in) :: rank
+      type(ESMF_Logical), intent(in) :: hasDstData
       integer, intent(in) :: dstMyDE
       type(ESMF_AxisIndex), dimension(:,:), pointer :: dstCompAI
       type(ESMF_AxisIndex), dimension(:,:), pointer :: dstTotalAI
       integer, dimension(:,:), intent(in) :: dstGlobalStart
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dstGlobalCount
       type(ESMF_DELayout), intent(in) :: dstDElayout
+      type(ESMF_Logical), intent(in) :: hasSrcData
       integer, intent(in) :: srcMyDE
       type(ESMF_AxisIndex), dimension(:,:), pointer :: srcCompAI
       type(ESMF_AxisIndex), dimension(:,:), pointer :: srcTotalAI
@@ -668,6 +672,8 @@ end function radd
 !          {\tt ESMF\_Route} to associate this information with.
 !     \item[rank]
 !          Data rank.
+!     \item[hasDstData]
+!          ESMF logical for whether this PET contains valid data.
 !     \item[dstMyDE]
 !          The ID of the destination DE.
 !     \item[dstCompAI]
@@ -684,6 +690,8 @@ end function radd
 !          of items for the undecomposed destination object.
 !     \item[dstDELayout]
 !          {\tt ESMF\_DELayout} for the destination data decomposition.
+!     \item[hasSrcData]
+!          ESMF logical for whether this PET contains valid data.
 !     \item[srcMyDE]
 !          The ID of the source DE.
 !     \item[srcCompAI]
@@ -743,10 +751,11 @@ end function radd
         enddo
 
         ! Call C++  code
-        call c_ESMC_RoutePrecomputeRedist(route, rank, &
+        call c_ESMC_RoutePrecomputeRedist(route, rank, hasDstData, &
                                           dstMyDE, dstCompAI, dstTotalAI, &
                                           dstAICount, dstGlobalStart, &
                                           dstGlobalCount, dstDElayout, &
+                                          hasSrcData, &
                                           srcMyDE, srcCompAI, srcTotalAI, &
                                           srcAICount, srcGlobalStart, &
                                           srcGlobalCount, srcDElayout, status)
@@ -780,11 +789,12 @@ end function radd
 ! !IROUTINE: ESMF_RoutePrecomputeRedistV - Precompute communication paths
 
 ! !INTERFACE:
-      subroutine ESMF_RoutePrecomputeRedistV(route, rank, &
+      subroutine ESMF_RoutePrecomputeRedistV(route, rank, hasDstData, &
                                              dstMyDE, dstVector, dstCompAI, &
                                              dstTotalAI, dstAICountPerDE, &
                                              dstGlobalStart, &
                                              dstGlobalCount, dstDElayout, &
+                                             hasSrcData, &
                                              srcMyDE, srcVector, srcCompAI, &
                                              srcTotalAI, srcAICountPerDE, &
                                              srcGlobalStart, &
@@ -793,6 +803,7 @@ end function radd
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
       integer, intent(in) :: rank
+      type(ESMF_Logical), intent(in) :: hasDstData
       integer, intent(in) :: dstMyDE
       logical, intent(in) :: dstVector
       type(ESMF_AxisIndex), dimension(:,:), pointer :: dstCompAI
@@ -801,6 +812,7 @@ end function radd
       integer, dimension(:,:), intent(in) :: dstGlobalStart
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dstGlobalCount
       type(ESMF_DELayout), intent(in) :: dstDElayout
+      type(ESMF_Logical), intent(in) :: hasSrcData
       integer, intent(in) :: srcMyDE
       logical, intent(in) :: srcVector
       type(ESMF_AxisIndex), dimension(:,:), pointer :: srcCompAI
@@ -922,12 +934,13 @@ end function radd
         if (srcVector) srcESMFVector = ESMF_TRUE
 
         ! Call C++  code
-        call c_ESMC_RoutePrecomputeRedistV(route, rank, &
+        call c_ESMC_RoutePrecomputeRedistV(route, rank, hasDstData, &
                                            dstMyDE, dstESMFVector, &
                                            dstCompAI, dstTotalAI, &
                                            dstAICount, dstAICountPerDE, &
                                            dstGlobalStart, dstGSCount, &
                                            dstGlobalCount, dstDElayout, &
+                                           hasSrcData, &
                                            srcMyDE, srcESMFVector, &
                                            srcCompAI, srcTotalAI, &
                                            srcAICount, srcAICountPerDE, &

@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.138 2005/06/27 17:07:34 nscollins Exp $
+//$Id: ESMC_Route.C,v 1.139 2005/06/30 21:06:30 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.138 2005/06/27 17:07:34 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.139 2005/06/30 21:06:30 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -606,6 +606,9 @@
     char *sendBuffer, *recvBuffer;
     char **sendBufferList, **recvBufferList;
     vmk_commhandle **handle;
+
+    // debug
+    ESMC_RoutePrint("");
 
     VMType = 0;   // TODO: unused so far, here for future use
     nbytes = ESMC_DataKindSize(dk);
@@ -1968,6 +1971,7 @@
 //
 // !ARGUMENTS:
       int rank,                   // in  - rank of data in both Fields
+      ESMC_Logical  hasDstData,   // in  - has destination data on this DE?
       int dstMyDE,                // in  - DE identifier in the DELayout of
                                   //       the destination Field
       ESMC_AxisIndex *dstCompAI,  // in  - array of axis indices for all DE's
@@ -1987,6 +1991,7 @@
       int *dstGlobalCount,        // in  - array of global strides for each
                                   //       direction for the receiving Field
       ESMC_DELayout *dstdeLayout,   // in  - pointer to the rcv DELayout
+      ESMC_Logical  hasSrcData,   // in  - has source data on this DE?
       int srcMyDE,                // in  - DE identifier in the DELayout of
                                   //       the source Field
       ESMC_AxisIndex *srcCompAI,  // in  - array of axis indices for all DE's
@@ -2048,7 +2053,7 @@
 
     // Calculate the sending table.  If this DE is not part of the sending
     // layout skip this loop.
-    if (srcMyDE != -1) {
+    if (hasSrcData == ESMF_TRUE) {
  
        didsomething++;
  
@@ -2081,7 +2086,10 @@
   //        printf("Match1: %d, %d\n", theirDE, theirMatchingPET);
           //theirMatchingPET = theirDE;     // temporarily
           if (theirMatchingPET != theirDE) 
-	     printf("theirDE = %d, parentDE = %d\n", theirDE, theirMatchingPET);
+             printf("redist hasSrcData: theirDE = %d, theirMatchingPET = %d\n", 
+                      theirDE, theirMatchingPET);
+          theirDE = theirMatchingPET;       // temporarily
+          printf("resetting DE to PET number\n");
           // get "their" AI out of the dstAI array
           for (k=0; k<rank; k++) {
             theirAI[k]     =  dstCompAI[theirDE + k*dstAICount];
@@ -2133,7 +2141,7 @@
 
     // Calculate the receiving table.  If this DE is not part of the receiving
     // layout skip this loop completely.
-    if (dstMyDE != -1) {
+    if (hasDstData == ESMF_TRUE) {
  
        didsomething++;
  
@@ -2158,7 +2166,10 @@
   //        printf("Match2: %d, %d\n", theirDE, theirMatchingPET);
           //theirMatchingPET = theirDE;     // temporarily
           if (theirMatchingPET != theirDE) 
-             printf("theirDE = %d, parentDE = %d\n", theirDE, theirMatchingPET);
+             printf("redist hasDstData: theirDE = %d, theirMatchingPET = %d\n", 
+                      theirDE, theirMatchingPET);
+          theirDE = theirMatchingPET;       // temporarily
+          printf("resetting DE to PET number\n");
 
           // get "their" AI out of the srcAI array
           for (k=0; k<rank; k++) {
@@ -2217,6 +2228,7 @@
 //
 // !ARGUMENTS:
       int rank,                   // in  - rank of data in both Fields
+      ESMC_Logical  hasDstData,   // in  - has destination data on this DE?
       int dstMyDE,                // in  - DE identifier in the DELayout of
                                   //       the destination Field
       ESMC_Logical dstVector,     // in  - ESMC_Logical identifier denoting
@@ -2241,6 +2253,7 @@
       int *dstGlobalCount,        // in  - array of global strides for each
                                   //       direction for the receiving Field
       ESMC_DELayout *dstdeLayout, // in  - pointer to the rcv DELayout
+      ESMC_Logical  hasSrcData,   // in  - has source data on this DE?
       int srcMyDE,                // in  - DE identifier in the DELayout of
                                   //       the source Field
       ESMC_Logical srcVector,     // in  - ESMC_Logical identifier denoting
@@ -2296,7 +2309,7 @@
 
     // Calculate the sending table.  If this DE is not part of the sending
     // layout skip this loop.
-    if (srcMyDE != -1) {
+    if (hasSrcData == ESMF_TRUE) {
 
       // get the number of destination DEs 
       dstdeLayout->ESMC_DELayoutGet(&theirDECount, NULL, NULL, NULL, 0,  
@@ -2334,6 +2347,7 @@
                                                   &theirMatchingPET, 1);
           if (theirMatchingPET != theirDE)
              printf("theirDE = %d, parentDE = %d\n", theirDE, theirMatchingPET);
+          theirDE = theirMatchingPET;       // temporarily
     
           // loop over the number of AI's for their DE
           for (m=0; m<dstAICountPerDE[theirDE]; m++) {
@@ -2387,7 +2401,7 @@
             
     // Calculate the receiving table.  If this DE is not part of the receiving
     // layout skip this loop completely.
-    if (dstMyDE != -1) {
+    if (hasDstData == ESMF_TRUE) {
 
       // get the number of source DEs
       srcdeLayout->ESMC_DELayoutGet(&theirDECount, NULL, NULL, NULL, 0, 
@@ -2423,6 +2437,7 @@
                                                   &theirMatchingPET, 1);
           if (theirMatchingPET != theirDE)
              printf("theirDE = %d, parentDE = %d\n", theirDE, theirMatchingPET);
+          theirDE = theirMatchingPET;       // temporarily
 
           // loop over the number of AI's for their DE
           for (m=0; m<srcAICountPerDE[theirDE]; m++) {
@@ -2585,7 +2600,9 @@
  //         printf("Match1: %d, %d\n", their_de, their_matching_pet);
           //their_matching_pet = their_de;     // temporarily
           if (their_matching_pet != their_de) 
-	     printf("theirDE = %d, parentDE = %d\n", their_de, their_matching_pet);
+	     printf("regrid: theirDE = %d, parentDE = %d\n", 
+                      their_de, their_matching_pet);
+          //their_de = their_matching_pet;     // temporarily
 
           // get "their" AI out of the AI_rcv array
           for (k=0; k<rank; k++) {
@@ -2650,7 +2667,9 @@
   //        printf("Match2: %d, %d\n", their_de, their_matching_pet);
           //their_matching_pet = their_de;     // temporarily
           if (their_matching_pet != their_de) 
-	     printf("theirDE = %d, parentDE = %d\n", their_de, their_matching_pet);
+	     printf("regrid: theirDE = %d, parentDE = %d\n", 
+                     their_de, their_matching_pet);
+          //their_de = their_matching_pet;     // temporarily
 
           // get "their" AI out of the AI_snd array
           for (k=0; k<rank; k++) {
