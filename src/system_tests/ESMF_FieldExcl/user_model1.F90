@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.14 2005/06/30 21:08:16 nscollins Exp $
+! $Id: user_model1.F90,v 1.15 2005/06/30 22:05:37 nscollins Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -94,8 +94,8 @@
         if (status .ne. ESMF_SUCCESS) goto 10
         delayout = ESMF_DELayoutCreate(vm, (/ 2, 2 /), rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_DELayoutPrint(delayout, rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 10
+        !call ESMF_DELayoutPrint(delayout, rc=status)
+        !if (status .ne. ESMF_SUCCESS) goto 10
 
         !print *, pet_id, "User Comp 1 Init starting"
 
@@ -325,6 +325,7 @@
       miscount = 0
       do j   = 1,counts(2)
         do i = 1,counts(1)
+          write(*,*) data1(i,j), data2(i,j)
           if (data1(i,j).ne.data2(i,j)) then
             match = .false.
             miscount = miscount + 1

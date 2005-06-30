@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.14 2005/06/30 21:08:17 nscollins Exp $
+! $Id: user_model2.F90,v 1.15 2005/06/30 22:05:46 nscollins Exp $
 !
 ! System test for Exclusive Components, user-written component 2.
 
@@ -96,8 +96,8 @@
       if (status .ne. ESMF_SUCCESS) goto 10
       delayout = ESMF_DELayoutCreate(vm, (/ 3, 1 /), rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_DELayoutPrint(delayout, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 10
+      !call ESMF_DELayoutPrint(delayout, rc=status)
+      !if (status .ne. ESMF_SUCCESS) goto 10
 
       !print *, pet_id, "User Comp 2 Init starting"
 
