@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.77 2005/06/28 19:50:59 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.78 2005/06/30 19:10:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research, 
@@ -114,6 +114,7 @@
         integer :: indexorders(ESMF_MAXDIM)
         integer :: nonindexcounts(ESMF_MAXDIM) 
         type(ESMF_Relloc) :: datahorzrelloc, datavertrelloc
+        integer :: haloWidth
       end type
 
 
@@ -220,6 +221,8 @@
 
 !      public ESMF_BundleGetGlobalDataInfo ! Return global data info
 !      public ESMF_BundleGetLocalDataInfo  ! Return local data info
+
+      public ESMF_BundleIsCongruent        ! private to framework
 
    ! These are the recommended entry points; the code itself is in Array:
    !public ESMF_BundleRedist   ! Redistribute existing arrays, matching grids
@@ -1856,6 +1859,149 @@ end function
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleGetAttrInfoByNum
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleIsCongruent"
+!BOPI
+! !IROUTINE: ESMF_BundleIsCongruent - Is data in Bundle the same?
+!
+! !INTERFACE:
+      function ESMF_BundleIsCongruent(bundle, rc)
+
+! !RETURN VALUE:
+      logical :: ESMF_BundleIsCongruent
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: bundle
+      integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!      Returns {\tt .TRUE.} if the data in all {\tt ESMF\_Fields} in the
+!      {\tt bundle} are completely congruent, meaning they have the same
+!      data rank, type, kind, index ordering, relative location in a cell, etc.
+!      This may allow more optimized communication by grouping data together
+!      and making fewer communcations calls.  Returns {\tt .FALSE.} if the
+!      data is not congruent.   A {\tt ESMF\_Bundle} with no data, or on error
+!      this routine returns {\tt .FALSE.}.
+!
+!      This routine also resets the internal bundle flag to a known state
+!      before returning.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           The {\tt ESMF\_Bundle} object to query.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status                            ! Error status
+      integer :: i, j, newstart
+      type(ESMF_BundleType), pointer :: btype      ! internal data
+      type(ESMF_BundleCongruentData) :: pattern    ! values to compare against
+      type(ESMF_BundleCongruentData) :: candidate  ! values being compared
+      type(ESMF_Field), pointer :: fieldp
+      type(ESMF_Array) :: array
+      type(ESMF_FieldDataMap) :: datamap
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+      ESMF_BundleIsCongruent = .FALSE.
+      bundle%btypep%isCongruent = .FALSE.
+
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      btype => bundle%btypep
+
+      ! find the first field with data and set the pattern to be matched
+      do i=1, btype%field_count
+       
+        fieldp => btype%flist(i)
+        call ESMF_FieldGet(fieldp, array=array, datamap=datamap, &
+                           horzRelloc=pattern%datahorzrelloc, &
+                           vertRelloc=pattern%datavertrelloc, &
+                           haloWidth=pattern%haloWidth, rc=status)
+        if (status .ne. ESMF_SUCCESS) cycle
+
+
+        ! if you get here, this field has an array.  check it for 
+        ! data types, etc.
+        call ESMF_ArrayGet(array, rank=pattern%datarank, &
+                           type=pattern%datatype, kind=pattern%datakind, &
+                           rc=status)
+        if (status .ne. ESMF_SUCCESS) cycle
+
+        call ESMF_FieldDataMapGet(datamap, dataIndexList=pattern%indexorders, &
+                                  counts=pattern%nonindexcounts, rc=status)
+        if (status .ne. ESMF_SUCCESS) cycle
+
+        newstart = i+1
+        exit
+
+      enddo
+  
+      ! now starting from the pattern field, compare the rest to see if they
+      ! match.  first nonmatch we can exit with return .FALSE.
+
+      ! set this here so we can just return if we find a mismatch
+      rc = ESMF_SUCCESS
+      do i=newstart, btype%field_count
+       
+        fieldp => btype%flist(i)
+        call ESMF_FieldGet(fieldp, array=array, datamap=datamap, &
+                           horzRelloc=candidate%datahorzrelloc, &
+                           vertRelloc=candidate%datavertrelloc, &
+                           haloWidth=candidate%haloWidth, rc=status)
+        if (status .ne. ESMF_SUCCESS) return
+
+        ! if you get here, this field has an array.  check it for 
+        ! data types, etc.
+        call ESMF_ArrayGet(array, rank=candidate%datarank, &
+                           type=candidate%datatype, kind=candidate%datakind, &
+                           rc=status)
+        if (status .ne. ESMF_SUCCESS) return
+
+        call ESMF_FieldDataMapGet(datamap, &
+                                  dataIndexList=candidate%indexorders, &
+                                  counts=candidate%nonindexcounts, rc=status)
+        if (status .ne. ESMF_SUCCESS) return
+
+        ! now we have all the info; compare and bail on first mismatch
+        if (pattern%datarank .ne. candidate%datarank ) return
+        if (pattern%datatype .ne. candidate%datatype ) return
+        if (pattern%datakind .ne. candidate%datakind ) return
+        if (pattern%haloWidth .ne. candidate%haloWidth) return
+        if (pattern%datahorzrelloc .ne. candidate%datahorzrelloc) return
+        ! TODO: if grid is 2d, then this is not set.  can it still be tested?
+        if (pattern%datavertrelloc .ne. candidate%datavertrelloc ) return
+
+        ! TODO: finish this
+        !do j=1, gridrank
+        !if (pattern%indexorders(ESMF_MAXDIM) .ne. &
+        !     candidate%indexorders(ESMF_MAXDIM)) return
+        !do j=1, datarank-gridrank 
+        !if (pattern%nonindexcounts(ESMF_MAXDIM) .ne. &
+        !     candidate%nonindexcounts(ESMF_MAXDIM)) return
+
+      enddo
+     
+      ! if you get here, all fields matched
+      ESMF_BundleIsCongruent = .TRUE.
+      btype%isCongruent = .TRUE.
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+
+      end function ESMF_BundleIsCongruent
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -4049,7 +4195,8 @@ end function
       btype%localbundle%gridstatus = ESMF_STATUS_UNINIT
       btype%localbundle%arraystatus = ESMF_STATUS_UNINIT
       btype%gridstatus = ESMF_STATUS_UNINIT
-      btype%isCongruent = .TRUE.
+      btype%isCongruent = .FALSE.
+      !btype%isCongruent = .TRUE.
    
       btype%field_count = 0
       nullify(btype%flist)
