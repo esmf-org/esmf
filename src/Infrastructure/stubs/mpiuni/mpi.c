@@ -1,9 +1,10 @@
-/*$Id: mpi.c,v 1.2 2005/01/13 22:10:08 jwolfe Exp $*/
+/*$Id: mpi.c,v 1.3 2005/06/30 04:20:18 theurich Exp $*/
 
 /*
       This provides a few of the MPI-uni functions that cannot be implemented
     with C macros
 */
+#include <sys/time.h>
 #include "mpi.h"
 
 #if defined (MPIUNI_USE_STDCALL)
@@ -169,6 +170,17 @@ int Petsc_MPI_Finalize(void)
   MPI_was_initialized = 0;   /* this was how it was */
   MPI_was_finalized = 1;     /* and this line is new */
   return 0;
+}
+
+double ESMC_MPI_Wtime(void)
+{
+  struct timeval tv;
+  struct timezone tz;
+  double seconds;
+ 
+  gettimeofday(&tv, &tz);
+  seconds = tv.tv_sec + tv.tv_usec * 0.000001;
+  return seconds;
 }
 
 /* -------------------     Fortran versions of several routines ------------------ */
