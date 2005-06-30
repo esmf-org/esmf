@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.15 2005/06/30 22:05:37 nscollins Exp $
+! $Id: user_model1.F90,v 1.16 2005/06/30 23:44:38 jwolfe Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -303,7 +303,7 @@
       integer, intent(out) :: rc
 
       ! Local variables
-      integer :: status, i, j, miscount, counts(2)
+      integer :: status, i, j, miscount, haloWidth, counts(2)
       logical :: match
       type(ESMF_Array) :: array1, array2
       real(ESMF_KIND_R8), dimension(:,:), pointer :: data1, data2
@@ -313,6 +313,7 @@
       ! update field values here
       call ESMF_FieldGetArray(field1, array1, rc=status)
       call ESMF_FieldGetArray(field2, array2, rc=status)
+      call ESMF_FieldGet(field1, haloWidth=haloWidth, rc=status)
 
       call ESMF_ArrayGet(array1, counts=counts, rc=status)
 
@@ -323,9 +324,8 @@
       ! check and make sure the data in the two fields match exactly
       match    = .true.
       miscount = 0
-      do j   = 1,counts(2)
-        do i = 1,counts(1)
-          write(*,*) data1(i,j), data2(i,j)
+      do j   = 1+haloWidth, counts(2)-haloWidth
+        do i = 1+haloWidth, counts(1)-haloWidth
           if (data1(i,j).ne.data2(i,j)) then
             match = .false.
             miscount = miscount + 1
