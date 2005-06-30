@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.69 2005/06/24 21:01:57 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.70 2005/06/30 21:04:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.69 2005/06/24 21:01:57 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.70 2005/06/30 21:04:11 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -1373,6 +1373,11 @@
       integer :: status         ! local error status
       integer :: dstAICount, srcAICount
       integer :: dstDEs, srcDEs, dstMyDE, srcMyDE
+      integer :: numpets, pet_id
+      integer :: petMatchCount, petMatchList(32)  ! TODO: what is good len?
+      integer :: deMatchCount, deMatchList(32)    ! TODO: what is good len?
+      integer :: srcCount, dstCount
+      type(ESMF_DELayout) :: parDElayout
       integer :: gridrank, datarank
       integer, dimension(ESMF_MAXDIM) :: dstDimOrder, srcDimOrder, dimlengths
       integer, dimension(:), allocatable :: dstCellCountPerDim, decompids, &
@@ -1388,6 +1393,7 @@
       type(ESMF_DELayout) :: dstDElayout, srcDElayout
       type(ESMF_GridStorage) :: dstStorage, srcStorage
       type(ESMF_Logical), dimension(:), allocatable :: periodic
+      type(ESMF_Logical) :: hasSrcData, hasDstData
       type(ESMF_RelLoc) :: dstHorzRelLoc, srcHorzRelLoc, &
                            dstVertRelLoc, srcVertRelLoc
       type(ESMF_Route) :: route
@@ -1433,6 +1439,13 @@
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+      call ESMF_GridGetDELocalInfo(dstGrid, &
+                        horzRelLoc=dstHorzRelLoc, vertRelLoc=dstVertRelLoc, &
+                        localCellCount=dstCount, &
+                        rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       call ESMF_GridGet(srcGrid, delayout=srcDElayout, &
                         gridStorage=srcStorage, dimCount=gridrank, &
                         horzRelLoc=srcHorzRelLoc, vertRelLoc=srcVertRelLoc, &
@@ -1440,12 +1453,83 @@
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+      call ESMF_GridGetDELocalInfo(srcGrid, &
+                        horzRelLoc=srcHorzRelLoc, vertRelLoc=srcVertRelLoc, &
+                        localCellCount=srcCount, &
+                        rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Our DE number in the layout and the total number of DEs
-      call ESMF_DELayoutGet(dstDElayout, deCount=dstDEs, localDe=dstMyDE, &
-                            rc=status)
-      call ESMF_DELayoutGet(srcDElayout, deCount=srcDEs, localDE=srcMyDE, &
-                            rc=status)
+      call ESMF_DELayoutGet(dstDElayout, deCount=dstDEs,  &
+                            localDE=dstMyDE, rc=status)
+      call ESMF_DELayoutGet(srcDElayout, deCount=srcDEs, &
+                            localDE=srcMyDE, rc=status)
+
+      if (dstCount .gt. 0) then
+          hasDstData = ESMF_TRUE
+      else
+          hasDstData = ESMF_FALSE
+      endif
+      if (srcCount .gt. 0) then
+          hasSrcData = ESMF_TRUE
+      else
+          hasSrcData = ESMF_FALSE
+      endif
+ 
+  !! TODO: remove this code when we have the mapping right.
+  !! start of new code to get mapping of excl comps correct.
+
+  call ESMF_VMGet(parentVM, localPet=pet_id, petCount=numpets, rc=status)
+
+  ! TODO: debug only
+  !print *, "before: ", &
+  !         "srcMyDE=", srcMyDE, "dstMyDE=", dstMyDE, &
+  !         "srcDEcount=", srcDEs, "dstDEcount=", dstDEs, "localpet=", pet_id
+
+      !parDELayout = ESMF_DELayoutCreate(parentVM, rc=status)
+
+      !call ESMF_DELayoutGetDEMatchDE(dstDELayout, dstMyDE, parDELayout, &
+      !                                    deMatchCount, deMatchList, rc)
+      !if (deMatchCount > 1) then
+      !  print *, "more than one DE for this DE, no code to handle this yet"
+      !endif
+      !dstMyDE = deMatchList(1)
+
+      !call ESMF_DELayoutGetDEMatchPET(dstDELayout, dstMyDE, parentVM, &
+      !                                    petMatchCount, petMatchList, rc)
+      !if (petMatchCount > 1) then
+      !  print *, "more than one PET for this DE, no code to handle this yet"
+      !endif
+      !dstMyDE = petMatchList(1)
+
+      !call ESMF_DELayoutGetDEMatchDE(srcDELayout, srcMyDE, parDELayout, &
+      !                                    deMatchCount, deMatchList, rc)
+      !if (deMatchCount > 1) then
+      !  print *, "more than one DE for this DE, no code to handle this yet"
+      !endif
+      !srcMyDE = deMatchList(1)
+
+      !call ESMF_DELayoutGetDEMatchPET(srcDELayout, srcMyDE, parentVM, &
+      !                                    petMatchCount, petMatchList, rc)
+      !if (petMatchCount > 1) then
+      !  print *, "more than one PET for this DE, no code to handle this yet"
+      !endif
+      !srcMyDE = petMatchList(1)
+
+      !dstDEs = numpets
+      !srcDEs = numpets
+
+      !call ESMF_DELayoutDestroy(parDELayout)
+
+
+  ! TODO: debug only
+  !print *, "after:  ", &
+  !         "srcMyDE=", srcMyDE, "dstMyDE=", dstMyDE, &
+  !         "srcDEcount=", srcDEs, "dstDEcount=", dstDEs, "localpet=", pet_id
+
+  !! end of new code
 
       ! Allocate temporary arrays
       dstVector = .false.
@@ -1601,12 +1685,12 @@
       route = ESMF_RouteCreate(parentVM, rc)
 
       if (dstVector .OR. srcVector) then
-        call ESMF_RoutePrecomputeRedistV(route, datarank, &
+        call ESMF_RoutePrecomputeRedistV(route, datarank, hasDstData, &
                                          dstMyDE, dstVector, &
                                          dstCompAI, dstTotalAI, &
                                          dstAICountPerDE, dstStartPerDEPerDim, &
                                          dstCellCountPerDim, dstDElayout, &
-                                         srcMyDE, srcVector, &
+                                         hasSrcData, srcMyDE, srcVector, &
                                          srcCompAI, srcTotalAI, &
                                          srcAICountPerDE, srcStartPerDEPerDim, &
                                          srcCellCountPerDim, srcDElayout, status)
@@ -1614,11 +1698,12 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       else
-        call ESMF_RoutePrecomputeRedist(route, datarank, dstMyDE, dstCompAI, &
+        call ESMF_RoutePrecomputeRedist(route, datarank, hasDstData, &
+                                        dstMyDE, dstCompAI, &
                                         dstTotalAI, dstStartPerDEPerDim, &
                                         dstCellCountPerDim, dstDElayout, &
-                                        srcMyDE, srcCompAI, srcTotalAI, &
-                                        srcStartPerDEPerDim, &
+                                        hasSrcData, srcMyDE, srcCompAI, &
+                                        srcTotalAI, srcStartPerDEPerDim, &
                                         srcCellCountPerDim, srcDElayout, status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
