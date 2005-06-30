@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.13 2005/06/28 19:14:44 jwolfe Exp $
+! $Id: user_model1.F90,v 1.14 2005/06/30 21:08:16 nscollins Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -76,7 +76,6 @@
         type(ESMF_VM) :: vm
         type(ESMF_DELayout) :: delayout
         type(ESMF_Grid) :: grid1
-        type(ESMF_Array) :: array1, array2
         type(ESMF_ArraySpec) :: arrayspec
         real(ESMF_KIND_R8), dimension(:,:), pointer :: humidityData, pressureData
         real(ESMF_KIND_R8) :: min(2), max(2)
@@ -94,6 +93,8 @@
         call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
         delayout = ESMF_DELayoutCreate(vm, (/ 2, 2 /), rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        call ESMF_DELayoutPrint(delayout, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         !print *, pet_id, "User Comp 1 Init starting"
@@ -142,13 +143,9 @@
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Get the allocated arrays back and get F90 array pointers
-        call ESMF_FieldGetArray(humidity1, array1, rc=status)
+        call ESMF_FieldGetDataPointer(humidity1, humidityData, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_ArrayGetData(array1, humidityData, rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_FieldGetArray(pressure1, array2, rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_ArrayGetData(array2, pressureData, rc=status)
+        call ESMF_FieldGetDataPointer(pressure1, pressureData, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set initial data values over whole arrays to our de id
@@ -190,7 +187,6 @@
        ! Local variables
         type(ESMF_Field) :: humidity1, pressure1
         type(ESMF_RelLoc) :: relloc
-        type(ESMF_Array) :: array1, array2
         type(ESMF_Array), dimension(:), pointer :: coordArray
         type(ESMF_Grid) :: grid
         real(ESMF_KIND_R8) :: pi
@@ -222,11 +218,9 @@
         ! update field values here
         ! call ESMF_StateGetDataPointer(exportState, "humidity1", humidityData, &
         !                               rc=status)
-        call ESMF_FieldGetArray(humidity1, array1, rc=status) 
-        call ESMF_FieldGetArray(pressure1, array2, rc=status) 
         ! Get a pointer to the start of the data
-        call ESMF_ArrayGetData(array1, humidityData, ESMF_DATA_REF, rc=status)
-        call ESMF_ArrayGetData(array2, pressureData, ESMF_DATA_REF, rc=status)
+        call ESMF_FieldGetDataPointer(humidity1, humidityData, ESMF_DATA_REF, rc=status)
+        call ESMF_FieldGetDataPointer(pressure1, pressureData, ESMF_DATA_REF, rc=status)
 
         ! increment data values in place
         if (counts(1)*counts(2).ne.0) then
@@ -242,7 +236,6 @@
 
      !   call ESMF_StatePrint(exportState, rc=status)
      !   call ESMF_FieldPrint(humidity1, rc=status)
-     !   call ESMF_ArrayPrint(array1, "", rc=status)
      
         deallocate(coordArray)
         

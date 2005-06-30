@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.13 2005/06/28 19:15:01 jwolfe Exp $
+! $Id: user_model2.F90,v 1.14 2005/06/30 21:08:17 nscollins Exp $
 !
 ! System test for Exclusive Components, user-written component 2.
 
@@ -76,7 +76,6 @@
       type(ESMF_VM) :: vm
       type(ESMF_DELayout) :: delayout
       type(ESMF_Grid) :: grid1, grid2
-      type(ESMF_Array) :: array1, array2
       type(ESMF_ArraySpec) :: arrayspec
       real(ESMF_KIND_R8), dimension(:,:), pointer :: humidityData, &
                                                      pressureData
@@ -96,6 +95,8 @@
       call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
       delayout = ESMF_DELayoutCreate(vm, (/ 3, 1 /), rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
+      call ESMF_DELayoutPrint(delayout, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
       !print *, pet_id, "User Comp 2 Init starting"
@@ -140,10 +141,8 @@
                                    haloWidth=0, name="humidity2", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
   
-      ! Get the allocated array back and get an F90 array pointer
-      call ESMF_FieldGetArray(humidity2, array1, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_ArrayGetData(array1, humidityData, rc=status)
+      ! Get the F90 array pointer to the data
+      call ESMF_FieldGetDataPointer(humidity2, humidityData, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
   
       call ESMF_StateAddField(importState, humidity2, rc=status)
@@ -173,6 +172,10 @@
       pressure2 = ESMF_FieldCreate(grid2, arrayspec, &
                                    horzRelloc=ESMF_CELL_CENTER, &
                                    haloWidth=2, name="pressure2", rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
+  
+      ! Get the F90 array pointer to the data
+      call ESMF_FieldGetDataPointer(pressure2, pressureData, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
   
       call ESMF_StateAddField(importState, pressure2, rc=status)
