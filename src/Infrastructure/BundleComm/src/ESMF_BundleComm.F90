@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.47 2005/06/28 19:51:27 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.48 2005/06/30 19:13:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.47 2005/06/28 19:51:27 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.48 2005/06/30 19:13:04 nscollins Exp $'
 
 !==============================================================================
 !
@@ -450,38 +450,48 @@
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
+      integer :: i
       type(ESMF_BundleType), pointer :: btypep     ! bundle type info
    
       ! Initialize return code   
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! Sanity checks for good bundle, and that it has an associated grid
-      ! and data before going down to the next level.
-      if (.not.associated(bundle%btypep)) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Bundle", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       btypep => bundle%btypep
 
-      if (btypep%bundlestatus .ne. ESMF_STATUS_READY) then
-        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Bundle", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-
-
-      ! TODO: does this need to be in a loop, with a separate routehandle
-      ! (or internal to routehandle a list of routehandles) for each field?
-      call ESMF_ArrayHaloStore(btypep%flist(1)%ftypep%localfield%localdata, &
-                               btypep%grid, &
-                               btypep%flist(1)%ftypep%mapping, routehandle, &
-                               halodirection, routeOptions, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      ! if all fields are identical, they can share a route
+      if (ESMF_BundleIsCongruent(bundle, rc=status)) then
+        call ESMF_ArrayHaloStore(btypep%flist(1)%ftypep%localfield%localdata, &
+                                 btypep%grid, &
+                                 btypep%flist(1)%ftypep%mapping, routehandle, &
+                                 halodirection, routeOptions, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+      else
+        ! TODO: this needs to be in a loop, with a separate routehandle
+        ! (or internal to routehandle a list of routehandles) for each field
+        do i=1, btypep%field_count
+ 
+      !call ESMF_ArrayHaloStore(btypep%flist(i)%ftypep%localfield%localdata, &
+      !                           btypep%grid, &
+      !                           btypep%flist(i)%ftypep%mapping, &
+      !                           routehandle(i), &
+      !                           halodirection, routeOptions, rc=status)
+  
+        status = ESMF_RC_NOT_IMPL
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        enddo
+
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -573,6 +583,7 @@
                                     ESMF_CONTEXT, rc)) return
       endif
 
+      
       ! If the bundle consists of identical fields - in every way: data type,
       ! relloc, index order, the works -- then pass in a list of all arrays
       ! and RouteRun will have the option of looping over the arrays and 
@@ -611,9 +622,11 @@
           !  the datamaps of all fields to be identical.
           do i = 1, stypep%field_count
 
-            call ESMF_ArrayRedist(stypep%flist(i)%ftypep%localfield%localdata, &
-                                  dtypep%flist(i)%ftypep%localfield%localdata, &
-                        routehandle, blocking, commhandle, routeOptions, status)
+            ! this needs the routehandle to internally store multiple routes
+           !call ESMF_ArrayRedist(stypep%flist(i)%ftypep%localfield%localdata, &
+           !                      dtypep%flist(i)%ftypep%localfield%localdata, &
+           !            routehandle, blocking, commhandle, routeOptions, status)
+            status = ESMF_RC_NOT_IMPL
             if (ESMF_LogMsgFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
@@ -716,36 +729,33 @@
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
+      integer :: i
       type(ESMF_BundleType), pointer :: stypep, dtypep
    
       ! Initialize return code   
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! Sanity checks for good bundle, and that it has an associated grid
-      ! and data before going down to the next level.
-      if (.not.associated(dstBundle%btypep)) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Bundle", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-      if (.not.associated(srcBundle%btypep)) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Bundle", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(srcBundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_BundleValidate(dstBundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       dtypep => dstBundle%btypep
       stypep => srcBundle%btypep
+ 
 
-      if (dtypep%bundlestatus.ne.ESMF_STATUS_READY .or. &
-          stypep%bundlestatus.ne.ESMF_STATUS_READY) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Bundle", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-
-      call ESMF_ArrayRedistStore(stypep%flist(1)%ftypep%localfield%localdata, &
+      ! if all fields are identical, they can share a route
+      if (ESMF_BundleIsCongruent(srcBundle, rc=status) .and. &
+          ESMF_BundleIsCongruent(dstBundle, rc=status)) then
+             call ESMF_ArrayRedistStore( &
+                                 stypep%flist(1)%ftypep%localfield%localdata, &
                                  stypep%grid, &
                                  stypep%flist(1)%ftypep%mapping, &
                                  dtypep%flist(1)%ftypep%localfield%localdata, &
@@ -753,9 +763,28 @@
                                  dtypep%flist(1)%ftypep%mapping, &
                                  parentVM, &
                                  routeOptions, routehandle, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+              if (ESMF_LogMsgFoundError(status, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) return
+      else
+        ! TODO: this needs to be in a loop, with a separate routehandle
+        ! (or internal to routehandle a list of routehandles) for each field
+        do i=1, stypep%field_count
+ 
+      !  call ESMF_ArrayRedistStore(stypep%flist(i)%ftypep%localfield%localdata, &
+      !                           stypep%grid, &
+      !                           stypep%flist(i)%ftypep%mapping, &
+      !                           dtypep%flist(i)%ftypep%localfield%localdata, &
+      !                           dtypep%grid, &
+      !                           dtypep%flist(i)%ftypep%mapping, &
+      !                           parentVM, &
+      !                           routeOptions, routehandle(i), status)
+          status = ESMF_RC_NOT_IMPL
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+        enddo
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1082,49 +1111,55 @@
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
+      integer :: i
       type(ESMF_BundleType), pointer :: stypep, dtypep
    
       ! Initialize return code   
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! Sanity checks for good bundle, and that it has an associated grid
-      ! and data before going down to the next level.
-      if (.not.associated(dstBundle%btypep)) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Bundle", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
-      if (.not.associated(srcBundle%btypep)) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Bundle", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(srcBundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_BundleValidate(dstBundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       dtypep => dstBundle%btypep
       stypep => srcBundle%btypep
-
-      if (dtypep%bundlestatus.ne.ESMF_STATUS_READY .or. &
-          stypep%bundlestatus.ne.ESMF_STATUS_READY) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Bundle", &
-                                 ESMF_CONTEXT, rc)) return
-      endif
 
       ! TODO: this only works for all fields in the bundle being identical,
       ! including relloc.  if that is not true, we have to compute different
       ! weights for each field. 
 
-      ! TODO: for now, add a check in the bundle to be sure all fields are
-      ! what - conformant? congruent? confused?
-
-      call ESMF_FieldRegridStore(stypep%flist(1), dtypep%flist(1), &
-                                 parentVM, routehandle, regridmethod, &
-                                 regridnorm, srcMask, dstMask, &
-                                 routeOptions, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      if (ESMF_BundleIsCongruent(srcBundle, rc=status) .and. &
+          ESMF_BundleIsCongruent(dstBundle, rc=status)) then
+               call ESMF_FieldRegridStore(stypep%flist(1), dtypep%flist(1), &
+                                         parentVM, routehandle, regridmethod, &
+                                         regridnorm, srcMask, dstMask, &
+                                         routeOptions, status)
+                if (ESMF_LogMsgFoundError(status, &
+                                          ESMF_ERR_PASSTHRU, &
+                                          ESMF_CONTEXT, rc)) return
+      else
+        ! TODO: this needs to be in a loop, with a separate routehandle
+        ! (or internal to routehandle a list of routehandles) for each field
+        do i=1, stypep%field_count
+ 
+          ! call ESMF_FieldRegridStore(stypep%flist(i), dtypep%flist(i), &
+          !                           parentVM, routehandle(i), regridmethod, &
+          !                           regridnorm, srcMask, dstMask, &
+          !                           routeOptions, status)
+            status = ESMF_RC_NOT_IMPL
+            if (ESMF_LogMsgFoundError(status, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+        enddo
+      endif
 
       ! Set return values.
       !if (present(rc)) rc = ESMF_SUCCESS
@@ -1139,7 +1174,8 @@
 ! !IROUTINE: ESMF_BundleScatter - Data scatter operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleScatter(array, sourceDE, bundle, blocking, commhandle, rc)
+      subroutine ESMF_BundleScatter(array, sourceDE, bundle, &
+                                    blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
