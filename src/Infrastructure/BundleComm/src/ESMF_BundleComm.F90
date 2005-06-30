@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.48 2005/06/30 19:13:04 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.49 2005/06/30 21:04:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.48 2005/06/30 19:13:04 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.49 2005/06/30 21:04:26 nscollins Exp $'
 
 !==============================================================================
 !
@@ -683,7 +683,7 @@
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: srcBundle
+      type(ESMF_Bundle), intent(inout) :: srcBundle
       type(ESMF_Bundle), intent(inout) :: dstBundle
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteHandle), intent(out) :: routehandle
@@ -1054,7 +1054,7 @@
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: srcBundle
+      type(ESMF_Bundle), intent(inout) :: srcBundle
       type(ESMF_Bundle), intent(inout) :: dstBundle
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteHandle), intent(out) :: routehandle
