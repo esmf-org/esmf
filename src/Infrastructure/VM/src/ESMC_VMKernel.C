@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.43 2005/06/29 03:41:07 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.44 2005/06/30 17:26:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -905,10 +905,14 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
   // next, determine new_npets and new_mypet_base ...
   int new_mypet_base=0;
   int new_npets=0;
-  for (int i=0; i<npets; i++){
+  int found_my_pet_flag = 0;
+  for (int ii=0; ii<npets; ii++){
+    int i = vmp->petlist[ii];
     new_npets += vmp->spawnflag[i];
-    if (i<mypet)
+    if (mypet == i) found_my_pet_flag = 1;
+    if (!found_my_pet_flag){
       new_mypet_base += vmp->spawnflag[i];
+    }
   }
   // now:
   //    new_npets is equal to the total number of pets in the new ESMC_VMK
@@ -946,11 +950,12 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
   int new_petid=0;      // used for keeping track of new_petid in loop
   // next, run through all current pets and check the ESMC_VMKPlan ...
   // inside the following loop pet "i" will be refered to as "this pet"
-  for (int i=0; i<npets; i++){
+  for (int ii=0; ii<npets; ii++){
+    int i = vmp->petlist[ii];
     // get the last max_tid count of a pet with same pid
     int local_tid = 0;
-    for (int j=0; j<i; j++)
-      if (pid[j]==pid[i])
+    for (int j=0; j<ii; j++)
+      if (pid[j]==pid[ii])
         local_tid = keep_max_tid[j];
     // now:
     //    local_tid is the tid index for the first pet this pet might spawn
@@ -981,7 +986,8 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
       // next, determine how many cores the new pet will have & its contributors
       new_ncpet[new_petid]=0;         // reset the counter
       new_ncontributors[new_petid]=0; // reset the counter
-      for (int k=0; k<npets; k++)
+      for (int kk=0; kk<npets; kk++){
+        int k = vmp->petlist[kk];
         if (vmp->contribute[k]==i && vmp->cspawnid[k]==j){
           // pet k contributes to this pet's spawned thread number j
           new_ncpet[new_petid]+=ncpet[k]; // add in all the cores from pet k
@@ -990,6 +996,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
             ++new_ncontributors[new_petid]; // increase count of contributors
           }
         }
+      }
       // now:
       //    new_lpid[new_petid] is valid lpid of new pet
       //    new_pid[new_petid] is valid pid of new pet
@@ -1003,7 +1010,8 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
       int ncpet_counter=0;      // reset core counter
       int ncontrib_counter=0;   // reset contributor counter
       // loop over all current pets and see how they contribute tho this pet
-      for (int k=0; k<npets; k++){
+      for (int kk=0; kk<npets; kk++){
+        int k = vmp->petlist[kk];
         if (vmp->contribute[k]==i && vmp->cspawnid[k]==j){
           // found a contributor pet (k) which contributes cores
           // to this pet (i) for its spawned thread (j)
@@ -1546,8 +1554,8 @@ void ESMC_VMK::vmk_print(void){
   printf("mpionly: %d\n", mpionly);
   printf("nothreadsflag: %d\n", nothreadsflag);
   for (int i=0; i<npets; i++){
-    printf("  lpid[%d]=%d, pid[%d]=%d, tid[%d]=%d, ncpet[%d]=%d",
-      i, lpid[i], i, pid[i], i, tid[i], i, ncpet[i]);
+    printf("  lpid[%d]=%d, tid[%d]=%d, vas[%d]=%d, ncpet[%d]=%d",
+      i, lpid[i], i, tid[i], i, pid[i], i, ncpet[i]);
     for (int j=0; j<ncpet[i]; j++)
       printf(", cid[%d][%d]=%d", i, j, cid[i][j]);
     printf("\n");
@@ -1634,6 +1642,7 @@ ESMC_VMKPlan::~ESMC_VMKPlan(void){
 void ESMC_VMKPlan::vmkplan_garbage(void){
   // perform garbage collection within a ESMC_VMKPlan object
   if (spawnflag != NULL){
+    delete [] petlist;
     delete [] spawnflag;
     delete [] contribute;
     delete [] cspawnid;
@@ -1701,9 +1710,27 @@ void ESMC_VMKPlan::vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist,
   // now set stuff up...
   nothreadflag = 0; // this plan will allow ESMF-threading
   npets = vm.npets;
+  petlist = new int[npets];
   spawnflag = new int[npets];
   contribute = new int[npets];
   cspawnid = new int[npets];
+  // setup petlist
+  for (int i=0; i<npets; i++)
+    petlist[i] = i;   //default sequence
+  if (nplist != 0){
+    // an explicit petlist was provided
+    for (int i=0; i<nplist; i++){
+      int pet = plist[i];
+      int j;
+      for (j=0; j<npets; j++){
+        // search for 'pet'
+        if (petlist[j] == pet) break;
+      }
+      // j is position that holds 'pet' -> swap elements
+      petlist[j] = petlist[i];
+      petlist[i] = pet;
+    }
+  }
   // set up a table for ssiid-to-petid mapping and invalidate all entries
   int *issiid = new int[npets]; // can only have as many different ssi as pets
   int *nssiid = new int[npets]; // can only have as many different ssi as pets
@@ -1819,9 +1846,27 @@ void ESMC_VMKPlan::vmkplan_minthreads(ESMC_VMK &vm, int max, int *plist,
   // now set stuff up...
   nothreadflag = 0; // this plan will allow ESMF-threading
   npets = vm.npets;
+  petlist = new int[npets];
   spawnflag = new int[npets];
   contribute = new int[npets];
   cspawnid = new int[npets];
+  // setup petlist
+  for (int i=0; i<npets; i++)
+    petlist[i] = i;   //default sequence
+  if (nplist != 0){
+    // an explicit petlist was provided
+    for (int i=0; i<nplist; i++){
+      int pet = plist[i];
+      int j;
+      for (j=0; j<npets; j++){
+        // search for 'pet'
+        if (petlist[j] == pet) break;
+      }
+      // j is position that holds 'pet' -> swap elements
+      petlist[j] = petlist[i];
+      petlist[i] = pet;
+    }
+  }
   // need temporary array to hold core count for each lpid
   int *core_count = new int[vm.npets];        // maximum lpid is <= npets
   int *first_pet_index = new int[vm.npets];   // maximum lpid is <= npets
@@ -1909,9 +1954,27 @@ void ESMC_VMKPlan::vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist,
   // now set stuff up...
   nothreadflag = 0; // this plan will allow ESMF-threading
   npets = vm.npets;
+  petlist = new int[npets];
   spawnflag = new int[npets];
   contribute = new int[npets];
   cspawnid = new int[npets];
+  // setup petlist
+  for (int i=0; i<npets; i++)
+    petlist[i] = i;   //default sequence
+  if (nplist != 0){
+    // an explicit petlist was provided
+    for (int i=0; i<nplist; i++){
+      int pet = plist[i];
+      int j;
+      for (j=0; j<npets; j++){
+        // search for 'pet'
+        if (petlist[j] == pet) break;
+      }
+      // j is position that holds 'pet' -> swap elements
+      petlist[j] = petlist[i];
+      petlist[i] = pet;
+    }
+  }
   // set up a table for ssiid-to-petid mapping and invalidate all entries
   int *issiid = new int[npets]; // can only have as many different ssi as pets
   int *nssiid = new int[npets]; // can only have as many different ssi as pets
