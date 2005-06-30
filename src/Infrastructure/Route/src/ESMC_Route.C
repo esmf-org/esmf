@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.139 2005/06/30 21:06:30 nscollins Exp $
+//$Id: ESMC_Route.C,v 1.140 2005/06/30 22:04:10 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.139 2005/06/30 21:06:30 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.140 2005/06/30 22:04:10 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -608,7 +608,7 @@
     vmk_commhandle **handle;
 
     // debug
-    ESMC_RoutePrint("");
+    // ESMC_RoutePrint("");
 
     VMType = 0;   // TODO: unused so far, here for future use
     nbytes = ESMC_DataKindSize(dk);
@@ -2074,9 +2074,11 @@
       rc = ESMC_XPacketFromAxisIndex(myAI, rank, srcGlobalCount,
                                      NULL, &myXP, &myXPCount);
 
-      // loop over DE's from receiving layout to calculate send table
+      // get the count of how many DEs there are in the destination
       dstdeLayout->ESMC_DELayoutGet(&theirDECount, NULL, NULL, NULL, 0, 
                                        NULL, NULL, NULL, NULL, 0);
+
+      // loop over DE's from receiving layout to calculate send table
       for (i=0; i<theirDECount; i++) {
           theirDE = i;
 
@@ -2088,8 +2090,6 @@
           if (theirMatchingPET != theirDE) 
              printf("redist hasSrcData: theirDE = %d, theirMatchingPET = %d\n", 
                       theirDE, theirMatchingPET);
-          theirDE = theirMatchingPET;       // temporarily
-          printf("resetting DE to PET number\n");
           // get "their" AI out of the dstAI array
           for (k=0; k<rank; k++) {
             theirAI[k]     =  dstCompAI[theirDE + k*dstAICount];
@@ -2156,20 +2156,22 @@
       rc = ESMC_XPacketFromAxisIndex(myAI, rank, dstGlobalCount,
                                      NULL, &myXP, &myXPCount);
 
+      // get the count of how many DEs there are in the src
+      srcdeLayout->ESMC_DELayoutGet(&theirDECount, NULL, NULL, NULL, 0, 
+                                       NULL, NULL, NULL, NULL, 0);
+
       // loop over DE's from sending layout to calculate receive table
       for (i=0; i<theirDECount; i++) {
           theirDE = i;
 
           // get the parent DE identifier for this DE in the src layout
-          dstdeLayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, NULL,
+          srcdeLayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, NULL,
                                                   &theirMatchingPET, 1);
   //        printf("Match2: %d, %d\n", theirDE, theirMatchingPET);
           //theirMatchingPET = theirDE;     // temporarily
           if (theirMatchingPET != theirDE) 
              printf("redist hasDstData: theirDE = %d, theirMatchingPET = %d\n", 
                       theirDE, theirMatchingPET);
-          theirDE = theirMatchingPET;       // temporarily
-          printf("resetting DE to PET number\n");
 
           // get "their" AI out of the srcAI array
           for (k=0; k<rank; k++) {
@@ -2347,7 +2349,6 @@
                                                   &theirMatchingPET, 1);
           if (theirMatchingPET != theirDE)
              printf("theirDE = %d, parentDE = %d\n", theirDE, theirMatchingPET);
-          theirDE = theirMatchingPET;       // temporarily
     
           // loop over the number of AI's for their DE
           for (m=0; m<dstAICountPerDE[theirDE]; m++) {
@@ -2437,7 +2438,6 @@
                                                   &theirMatchingPET, 1);
           if (theirMatchingPET != theirDE)
              printf("theirDE = %d, parentDE = %d\n", theirDE, theirMatchingPET);
-          theirDE = theirMatchingPET;       // temporarily
 
           // loop over the number of AI's for their DE
           for (m=0; m<srcAICountPerDE[theirDE]; m++) {
