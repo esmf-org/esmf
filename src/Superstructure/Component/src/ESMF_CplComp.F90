@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.55 2005/05/31 17:40:02 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.56 2005/07/01 19:06:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.55 2005/05/31 17:40:02 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.56 2005/07/01 19:06:01 theurich Exp $'
 
 !==============================================================================
 !
@@ -366,10 +366,11 @@
 !    not be the parent component clock, which should be maintained and passed
 !    down to the initialize/run/finalize routines separately.
 !   \item[{[petList]}]
-!    List of {\tt PET}s in the given {\tt ESMF\_VM} that the parent 
-!    component is giving to the created child 
-!    component. If {\tt petList} is not specified all of the 
-!    parents {\tt PET}s will be given to the child component.
+!    List of parent {\tt PET}s given to the created child component by the
+!    parent component. If {\tt petList} is not specified all of the
+!    parent {\tt PET}s will be given to the child component. The order of
+!    PETs in {\tt petList} determines how the child local PETs refer back to
+!    the parent PETs.
 !   \item[{[contextflag]}]
 !    Specify the component's VM context. The default context is
 !    {\tt ESMF\_CHILD\_IN\_NEW\_VM}. See section \ref{opt:contextflag} for a
@@ -474,10 +475,11 @@
 !    {\tt ESMF\_VM} virtual machine object.  If unspecified, 
 !    inherit parents' {\tt ESMF\_VM}.
 !   \item[{[petlist]}]
-!    List of {\tt PET}s in the given {\tt ESMF\_VM} that the parent 
-!    component is giving to the created child 
-!    component. If {\tt petList} is not specified all of the 
-!    parents {\tt PET}s will be given to the child component.
+!    List of parent {\tt PET}s given to the created child component by the
+!    parent component. If {\tt petList} is not specified all of the
+!    parent {\tt PET}s will be given to the child component. The order of
+!    PETs in {\tt petList} determines how the child local PETs refer back to
+!    the parent PETs.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -578,10 +580,11 @@
 !    {\tt ESMF\_VM} virtual machine object.  If unspecified, 
 !    inherit parents' {\tt ESMF\_VM}.
 !   \item[{[petlist]}]
-!    List of {\tt PET}s in the given {\tt ESMF\_VM} that the parent 
-!    component is giving to the created child 
-!    component. If {\tt petList} is not specified all of the 
-!    parents {\tt PET}s will be given to the child component.
+!    List of parent {\tt PET}s given to the created child component by the
+!    parent component. If {\tt petList} is not specified all of the
+!    parent {\tt PET}s will be given to the child component. The order of
+!    PETs in {\tt petList} determines how the child local PETs refer back to
+!    the parent PETs.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
