@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.70 2005/06/30 21:04:11 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.71 2005/07/01 16:20:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.70 2005/06/30 21:04:11 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.71 2005/07/01 16:20:20 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -673,8 +673,10 @@
 
       nitems = size(arrayList)
       allocate(local_arrayList(nitems), stat=status)
-      ! TODO: add error check for failed allocation
- 
+      if (ESMF_LogMsgFoundAllocError(status, &
+                                     "Allocating localarraylist information", &
+                                      ESMF_CONTEXT, rc)) return
+
       ! fortran equivalent of a cast - routerun wants a local array 
       do i=1, nitems
         local_arrayList(i)%this%ptr = arrayList(i)%this%ptr
@@ -693,7 +695,9 @@
                                   ESMF_CONTEXT, rc)) return
 
       deallocate(local_arrayList, stat=status)
-      ! TODO: add error check for failed allocation
+      if (ESMF_LogMsgFoundAllocError(status, &
+                                    "Deallocating localarraylist information", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! last call to route run set rc
 
@@ -881,7 +885,7 @@
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths
       integer, dimension(:,:), allocatable :: globalStartPerDEPerDim
       integer :: nDEs, my_DE
-      integer :: gridrank, datarank
+      integer :: gridrank, datarank, cellCount
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -897,21 +901,39 @@
       call ESMF_GridGet(grid, delayout=delayout, rc=status)
       call ESMF_GridGet(grid, dimCount=gridrank, rc=status)
       
-      ! Get the associated VM
-      call ESMF_DELayoutGetVM(delayout, vm, rc=status)
+      ! Get the current VM context
+      call ESMF_VMGetCurrent(vm, rc)
+      !call ESMF_DELayoutGetVM(delayout, vm, rc=status)
 
       ! Our DE number in the layout and the total number of DEs
       call ESMF_DELayoutGet(delayout, deCount=nDEs, localDE=my_DE, rc=status)
 
       ! Allocate temporary arrays
-      allocate(              periodic(      gridrank), stat=status)
-      allocate(             decompids(      gridrank), stat=status)
-      allocate( globalCellCountPerDim(      gridrank), stat=status)
+      allocate(periodic(gridrank), stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
+                                       ESMF_CONTEXT, rc)) return
+      allocate(decompids(gridrank), stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
+                                       ESMF_CONTEXT, rc)) return
+      allocate(globalCellCountPerDim(gridrank), stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
+                                       ESMF_CONTEXT, rc)) return
       allocate(globalStartPerDEPerDim(nDEs, gridrank), stat=status)
-      allocate(                src_AI(nDEs, gridrank), stat=status)
-      allocate(                dst_AI(nDEs, gridrank), stat=status)
-      allocate(             gl_src_AI(nDEs, gridrank), stat=status)
-      allocate(             gl_dst_AI(nDEs, gridrank), stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
+                                       ESMF_CONTEXT, rc)) return
+      allocate(src_AI(nDEs, gridrank), stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
+                                       ESMF_CONTEXT, rc)) return
+      allocate(dst_AI(nDEs, gridrank), stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
+                                       ESMF_CONTEXT, rc)) return
+      allocate(gl_src_AI(nDEs, gridrank), stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
+                                       ESMF_CONTEXT, rc)) return
+      allocate(gl_dst_AI(nDEs, gridrank), stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
+                                       ESMF_CONTEXT, rc)) return
+
 
       ! Query the datamap and set info for grid so it knows how to
       ! match up the array indicies and the grid indicies.
@@ -929,6 +951,15 @@
                         globalStartPerDEPerDim=globalStartPerDEPerDim, &
                         periodic=periodic, rc=status)
       ! TODO: get decompids, get grid rank here?
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      ! see if you have local data
+      call ESMF_GridGetDELocalInfo(grid, &
+                        horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                        localCellCount=cellCount, &
+                        rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -964,11 +995,16 @@
       ! Create the route object.
       route = ESMF_RouteCreate(vm, rc)
 
-      call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
+      if (cellCount .gt. 0)  then
+          call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
                                         gl_dst_AI, nDEs, &
                                         globalStartPerDEPerDim, &
                                         globalCellCountPerDim, delayout, &
                                         periodic, status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) goto 10
+      endif
 
       ! Set the route options if given.
       if (present(routeOptions)) &
@@ -981,16 +1017,36 @@
       call ESMF_RouteHandleSet(routehandle, route1=route, &
                                htype=ESMF_HALOHANDLE, rc=status)
 
+      ! clean up
+10  continue
       ! get rid of temporary arrays
+      status = 0
       if (allocated(periodic))    deallocate(periodic, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Deallocating local information", &
+                                       ESMF_CONTEXT, rc)) return
       if (allocated(decompids))   deallocate(decompids, stat=status)
-      if (allocated(globalCellCountPerDim)) deallocate(globalCellCountPerDim, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Deallocating local information", &
+                                       ESMF_CONTEXT, rc)) return
+      if (allocated(globalCellCountPerDim)) &
+                                  deallocate(globalCellCountPerDim, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Deallocating local information", &
+                                       ESMF_CONTEXT, rc)) return
       if (allocated(globalStartPerDEPerDim)) &
-         deallocate(globalStartPerDEPerDim, stat=status)
+                                 deallocate(globalStartPerDEPerDim, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Deallocating local information", &
+                                       ESMF_CONTEXT, rc)) return
       if (associated(    src_AI)) deallocate(src_AI, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Deallocating local information", &
+                                       ESMF_CONTEXT, rc)) return
       if (associated(    dst_AI)) deallocate(dst_AI, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Deallocating local information", &
+                                       ESMF_CONTEXT, rc)) return
       if (associated( gl_src_AI)) deallocate(gl_src_AI, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Deallocating local information", &
+                                       ESMF_CONTEXT, rc)) return
       if (associated( gl_dst_AI)) deallocate(gl_dst_AI, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Deallocating local information", &
+                                       ESMF_CONTEXT, rc)) return
 
       ! set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1137,8 +1193,13 @@
       ! access the localarray part of the array object.)
       nitemsSrc = size(srcArrayList)
       allocate(srcLocalArrayList(nitemsSrc), stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
+                                       ESMF_CONTEXT, rc)) return
+
       nitemsDst = size(dstArrayList)
       allocate(dstLocalArrayList(nitemsDst), stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating local information", &
+                                       ESMF_CONTEXT, rc)) return
 
       do i=1, nitemsSrc
         srcLocalArrayList(i)%this%ptr = srcArrayList(i)%this%ptr
@@ -1166,7 +1227,8 @@
 
       deallocate(srcLocalArrayList, stat=status)
       deallocate(dstLocalArrayList, stat=status)
-      ! TODO: add error check for failed allocation
+      if (ESMF_LogMsgFoundAllocError(status, "Deallocating local information", &
+                                       ESMF_CONTEXT, rc)) return
 
       ! rc has already been set, just check to see if user wants to get it.
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1373,11 +1435,7 @@
       integer :: status         ! local error status
       integer :: dstAICount, srcAICount
       integer :: dstDEs, srcDEs, dstMyDE, srcMyDE
-      integer :: numpets, pet_id
-      integer :: petMatchCount, petMatchList(32)  ! TODO: what is good len?
-      integer :: deMatchCount, deMatchList(32)    ! TODO: what is good len?
       integer :: srcCount, dstCount
-      type(ESMF_DELayout) :: parDElayout
       integer :: gridrank, datarank
       integer, dimension(ESMF_MAXDIM) :: dstDimOrder, srcDimOrder, dimlengths
       integer, dimension(:), allocatable :: dstCellCountPerDim, decompids, &
@@ -1478,59 +1536,6 @@
           hasSrcData = ESMF_FALSE
       endif
  
-  !! TODO: remove this code when we have the mapping right.
-  !! start of new code to get mapping of excl comps correct.
-
-  call ESMF_VMGet(parentVM, localPet=pet_id, petCount=numpets, rc=status)
-
-  ! TODO: debug only
-  !print *, "before: ", &
-  !         "srcMyDE=", srcMyDE, "dstMyDE=", dstMyDE, &
-  !         "srcDEcount=", srcDEs, "dstDEcount=", dstDEs, "localpet=", pet_id
-
-      !parDELayout = ESMF_DELayoutCreate(parentVM, rc=status)
-
-      !call ESMF_DELayoutGetDEMatchDE(dstDELayout, dstMyDE, parDELayout, &
-      !                                    deMatchCount, deMatchList, rc)
-      !if (deMatchCount > 1) then
-      !  print *, "more than one DE for this DE, no code to handle this yet"
-      !endif
-      !dstMyDE = deMatchList(1)
-
-      !call ESMF_DELayoutGetDEMatchPET(dstDELayout, dstMyDE, parentVM, &
-      !                                    petMatchCount, petMatchList, rc)
-      !if (petMatchCount > 1) then
-      !  print *, "more than one PET for this DE, no code to handle this yet"
-      !endif
-      !dstMyDE = petMatchList(1)
-
-      !call ESMF_DELayoutGetDEMatchDE(srcDELayout, srcMyDE, parDELayout, &
-      !                                    deMatchCount, deMatchList, rc)
-      !if (deMatchCount > 1) then
-      !  print *, "more than one DE for this DE, no code to handle this yet"
-      !endif
-      !srcMyDE = deMatchList(1)
-
-      !call ESMF_DELayoutGetDEMatchPET(srcDELayout, srcMyDE, parentVM, &
-      !                                    petMatchCount, petMatchList, rc)
-      !if (petMatchCount > 1) then
-      !  print *, "more than one PET for this DE, no code to handle this yet"
-      !endif
-      !srcMyDE = petMatchList(1)
-
-      !dstDEs = numpets
-      !srcDEs = numpets
-
-      !call ESMF_DELayoutDestroy(parDELayout)
-
-
-  ! TODO: debug only
-  !print *, "after:  ", &
-  !         "srcMyDE=", srcMyDE, "dstMyDE=", dstMyDE, &
-  !         "srcDEcount=", srcDEs, "dstDEcount=", dstDEs, "localpet=", pet_id
-
-  !! end of new code
-
       ! Allocate temporary arrays
       dstVector = .false.
       srcVector = .false.
