@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommUTest.F90,v 1.6 2005/06/27 23:34:24 nscollins Exp $
+! $Id: ESMF_BundleCommUTest.F90,v 1.7 2005/07/01 17:21:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -37,17 +37,17 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommUTest.F90,v 1.6 2005/06/27 23:34:24 nscollins Exp $'
+      '$Id: ESMF_BundleCommUTest.F90,v 1.7 2005/07/01 17:21:37 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
       integer :: rc
       type(ESMF_Grid) :: grid, grid2
       type(ESMF_VM) :: vm
-      type(ESMF_Field) :: fields(4)
+      type(ESMF_Field) :: fields(6)
       type(ESMF_Field) :: nofield
       type(ESMF_Array) :: arrayList(2)
-      type(ESMF_Bundle) :: bundle1, bundle2, bundle3, nobundle
+      type(ESMF_Bundle) :: bundle1, bundle2, bundle3, bundle4, nobundle
       type(ESMF_RouteHandle) :: rh
 
 
@@ -278,7 +278,7 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      !  Create an empty bundle for use below.
+      !  Create a bundle for use below.
       bundle3 = ESMF_BundleCreate(2, fields(3:4), name="time step 3", rc=rc)
       write(name, *) "Creating Bundle w/ 2 Fields Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -371,32 +371,125 @@
       
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
       !EX_UTest
-      call ESMF_BundleRegridStore(bundle1, bundle2, vm, rh, &
+      !  Create another data Field for use below.
+      !  Get grid from previous field and reuse it.
+      fields(5) = CreateDataField3("pressure", rvalue=3.3_ESMF_KIND_R4, rc=rc)
+      write(name, *) "Creating Data Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      !  Create another data Field for use below.
+      call ESMF_FieldGet(fields(5), grid=grid2, rc=rc)
+      write(name, *) "Getting Grid from Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      !  Create another data Field for use below.
+      !  Get grid from previous field and reuse it.
+      fields(6) = CreateDataField2("partial pressure", grid2, -1.0_ESMF_KIND_R8, rc)
+      write(name, *) "Creating Data Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      !  Create a bundle for use below.
+      bundle4 = ESMF_BundleCreate(2, fields(5:6), name="time step 4", rc=rc)
+      write(name, *) "Creating Bundle w/ 2 non-compatible Fields Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+     
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! with current code, should fail; will be fixed in a future release.
+      call ESMF_BundleRegridStore(bundle1, bundle4, vm, rh, &
                                   ESMF_REGRID_METHOD_BILINEAR, rc=rc)
       write(name, *) "Precompute Regrid Communication"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
-      !  Print out precomputed Route Table
-      call ESMF_RouteHandlePrint(rh, rc=rc)
-      write(name, *) "Printing out the contents of a Route Table"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !!E-X_UTest
+      !!  Print out precomputed Route Table
+      !call ESMF_RouteHandlePrint(rh, rc=rc)
+      !write(name, *) "Printing out the contents of a Route Table"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
-      !  Regrid both fields in a single Bundle call.
-      call ESMF_BundleRegrid(bundle1, bundle2, rh, rc=rc)
-      write(name, *) "Regriding all Fields in a Bundle"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !!E-X_UTest
+      !!  Regrid both fields in a single Bundle call.
+      !call ESMF_BundleRegrid(bundle1, bundle4, rh, rc=rc)
+      !write(name, *) "Regriding all Fields in a Bundle"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
+      !!E-X_UTest
+      !!  Release the routehandle
+      !call ESMF_BundleRegridRelease(rh, rc=rc)
+      !write(name, *) "Release the RouteHandle"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
       !EX_UTest
-      !  Release the routehandle
-      call ESMF_BundleRegridRelease(rh, rc=rc)
-      write(name, *) "Release the RouteHandle"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      ! with current code, should fail; will be fixed in a future release.
+      call ESMF_BundleRedistStore(bundle1, bundle4, vm, rh, rc=rc)
+      write(name, *) "Precompute Redist Communication"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !!E-X_UTest
+      !!  Print out precomputed Route Table
+      !call ESMF_RouteHandlePrint(rh, rc=rc)
+      !write(name, *) "Printing out the contents of a Route Table"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !!E-X_UTest
+      !!  Redist both fields in a single Bundle call, but looping inside
+      !!  because the fields are not the same data types.
+      !call ESMF_BundleRedist(bundle1, bundle4, rh, rc=rc)
+      !write(name, *) "Redist all Fields in a Bundle with a loop"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !!E-X_UTest
+      !!  Release the routehandle
+      !call ESMF_BundleRegridRelease(rh, rc=rc)
+      !write(name, *) "Release the RouteHandle"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! with current code, should fail; will be fixed in a future release.
+      call ESMF_BundleHaloStore(bundle4, rh, rc=rc)
+      write(name, *) "Precompute Halo Communication"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !!E-X_UTest
+      !!  Print out precomputed Route Table
+      !call ESMF_RouteHandlePrint(rh, rc=rc)
+      !write(name, *) "Printing out the contents of a Route Table"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !!E-X_UTest
+      !!  Halo both fields in a single Bundle call, but looping inside
+      !!  because the fields are not the same data types.
+      !call ESMF_BundleHalo(bundle4, rh, rc=rc)
+      !write(name, *) "Halo all Fields in a Bundle with a loop"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !!E-X_UTest
+      !!  Release the routehandle
+      !call ESMF_BundleRegridRelease(rh, rc=rc)
+      !write(name, *) "Release the RouteHandle"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
       
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
@@ -453,6 +546,13 @@
       ! Clean up by deleting the Bundle.
       call ESMF_BundleDestroy(bundle3, rc=rc)
       write(name, *) "Bundle 3 Destroy Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Clean up by deleting the Bundle.
+      call ESMF_BundleDestroy(bundle4, rc=rc)
+      write(name, *) "Bundle 4 Destroy Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
@@ -617,6 +717,78 @@ function CreateDataField2(name, grid, rvalue, rc)
   ! just return at this point
 
 end function CreateDataField2
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "CreateDataField3"
+function CreateDataField3(name, grid, rvalue, rc)
+  type(ESMF_Field) :: CreateDataField3
+
+  character(len=*), intent(in) :: name                ! field name
+  type(ESMF_Grid), intent(in), optional :: grid       ! if set, grid to use
+  real(ESMF_KIND_R4), intent(in), optional :: rvalue  ! if set, initial value
+  integer, intent(out), optional :: rc                ! return code
+
+  type(ESMF_Grid) :: newgrid
+  type(ESMF_ArraySpec) :: as
+  type(ESMF_VM) :: vm
+  type(ESMF_DELayout) :: lay
+  integer :: status
+  real(ESMF_KIND_R4), pointer :: r4data(:,:)
+
+  rc = ESMF_FAILURE
+
+  call ESMF_VMGetGlobal(vm, rc=status)
+  if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                            ESMF_CONTEXT, rc)) goto 10
+
+  lay = ESMF_DELayoutCreate(vm, rc=status)
+  if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                            ESMF_CONTEXT, rc)) goto 10
+
+  if (.not. present(grid)) then
+      newgrid = ESMF_GridCreateHorzXYUni(counts=(/100, 200/), &
+                               minGlobalCoordPerDim=(/0.0_ESMF_KIND_R8, &
+                                                      0.0_ESMF_KIND_R8/), &
+                               maxGlobalCoordPerDim=(/180.0_ESMF_KIND_R8, &
+                                                      360.0_ESMF_KIND_R8/), &
+                               rc=status)
+      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) goto 10
+      call ESMF_GridDistribute(newgrid, delayout=lay, rc=status)
+      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) goto 10
+
+  else
+      newgrid = grid
+  endif
+
+  call ESMF_ArraySpecSet(as, rank=2, type=ESMF_DATA_REAL, &
+                         kind=ESMF_R4, rc=status)
+  if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                            ESMF_CONTEXT, rc)) goto 10
+
+  CreateDataField3 = ESMF_FieldCreate(grid=newgrid, arrayspec=as, &
+                    horzRelloc=ESMF_CELL_CENTER, haloWidth=0, &
+                    name=name, rc=status)
+  if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                            ESMF_CONTEXT, rc)) goto 10
+
+  call ESMF_FieldGetDataPointer(CreateDataField3, r4data, ESMF_DATA_REF, rc)
+  if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                            ESMF_CONTEXT, rc)) goto 10
+
+  if (present(rvalue)) then
+      r4data = rvalue
+  else
+      r4data = 2.71828
+  endif
+  
+10 continue
+  ! rc will have been set by the call to logerr; 
+  ! just return at this point
+
+end function CreateDataField3
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
