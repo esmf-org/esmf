@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.66 2005/05/17 16:15:30 theurich Exp $
+# $Id: makefile,v 1.66.2.1 2005/07/01 21:11:21 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -56,8 +56,8 @@ script_info:
 	-@echo "C Compiler version:" ; $(C_CCV) ; echo "" 
 	-@echo "C++ Compiler version:" ; $(C_CXXV) ; echo "" 
 	-@echo "Fortran Compiler version:" ; $(C_FCV) ; echo "" 
-	-@if [ -f $(ESMF_DIR)/src/Infrastructure/Base/include/ESMC_Macros.h ] ; then \
-	  fgrep ESMF_VERSION_STRING $(ESMF_DIR)/src/Infrastructure/Base/include/ESMC_Macros.h | $(SED) "s/^#define //" ; fi
+	-@if [ -f $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h ] ; then \
+	  fgrep ESMF_VERSION_STRING $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(SED) "s/^#define //" ; fi
 	-@echo " "
 	-@echo "------------------------------------------"
 	-@echo "Using ESMF flags:"
