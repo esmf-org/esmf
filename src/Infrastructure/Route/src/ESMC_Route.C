@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.140 2005/06/30 22:04:10 nscollins Exp $
+//$Id: ESMC_Route.C,v 1.141 2005/07/01 16:40:50 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.140 2005/06/30 22:04:10 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.141 2005/07/01 16:40:50 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1790,10 +1790,11 @@
     int rc; 
     int i, j, k, nextxp, start;
     int their_de, decount, dummy;
+    int theirMatchingPET;
 
     // Calculate the sending table.  If this DE is not part of the sending
     // TODO: this assumes a 2D layout?  (certainly < 3D)
-        delayout->ESMC_DELayoutGet(&decount, NULL, NULL, NULL, 0, NULL,
+    delayout->ESMC_DELayoutGet(&decount, NULL, NULL, NULL, 0, NULL,
                                       NULL, NULL, nde, ESMF_MAXGRIDDIM);
 
     // Calculate the sending table.
@@ -1819,7 +1820,11 @@
     for (k=0; k<decount; k++) {
       their_de = k;
       delayout->ESMC_DELayoutGetDELocalInfo(their_de, DEpos,
-        ESMF_MAXGRIDDIM, NULL, 0, NULL, 0, NULL, NULL);
+                  ESMF_MAXGRIDDIM, NULL, 0, NULL, 0, NULL, NULL);
+
+      // get the actual pet number for use later on.
+      delayout->ESMC_DELayoutGetDEMatchPET(their_de, *vm, NULL,
+                                                  &theirMatchingPET, 1);
       // get "their" AI out of the AI_tot array
       for (j=0; j<rank; j++) {
         their_AI[j] = AI_tot[their_de + j*AI_count];
@@ -1857,8 +1862,8 @@
                                                rank, my_global_start);
 
         // load the intersecting XPacket into the sending RTable
-        sendRT->ESMC_RTableSetEntry(their_de, &intersect_XP);
-        ct->ESMC_CommTableSetPartner(their_de);
+        sendRT->ESMC_RTableSetEntry(theirMatchingPET, &intersect_XP);
+        ct->ESMC_CommTableSetPartner(theirMatchingPET);
       }
   
       // free XPs allocated by XPacketFromAxisIndex() routine above
@@ -1912,6 +1917,10 @@
     // loop over DE's from layout to calculate receive table
     for (k=0; k<decount; k++) {
       their_de = k;
+
+      // get actual PET number to put into route table
+      delayout->ESMC_DELayoutGetDEMatchPET(their_de, *vm, NULL,
+                                                  &theirMatchingPET, 1);
       // get "their" AI out of the AI_exc array
       for (j=0; j<rank; j++) {
         their_AI[j] = AI_exc[their_de + j*AI_count];
@@ -1939,8 +1948,8 @@
                                                rank, my_global_start);
 
         // load the intersecting XPacket into the receiving RTable
-        recvRT->ESMC_RTableSetEntry(their_de, &intersect_XP);
-        ct->ESMC_CommTableSetPartner(their_de);
+        recvRT->ESMC_RTableSetEntry(theirMatchingPET, &intersect_XP);
+        ct->ESMC_CommTableSetPartner(theirMatchingPET);
       }
 
       // free their_XP allocated in XPacketFromAxisIndex above.
