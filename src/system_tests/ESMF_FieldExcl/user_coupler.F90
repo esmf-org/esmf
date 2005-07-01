@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.15 2005/06/28 19:14:21 jwolfe Exp $
+! $Id: user_coupler.F90,v 1.16 2005/07/01 16:39:02 nscollins Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -23,7 +23,7 @@
     public usercpl_register
         
     ! global data
-    type(ESMF_RouteHandle), save :: redistRH12, redistRH23, regridRH
+    type(ESMF_RouteHandle), save :: redistRH12, redistRH23, regridRH, haloRH3
 
     contains
 
@@ -137,6 +137,7 @@
                                  routehandle=redistRH12, rc=status)
       call ESMF_FieldRedistStore(pressure2, pressure3, vm, &
                                  routehandle=redistRH23, rc=status)
+      call ESMF_FieldHaloStore(pressure3, routehandle=haloRH3, rc=status)
 
       ! for debugging, this prints who is planning to send data and where 
       ! call ESMF_RouteHandlePrint(redistRH12, "", rc=status)
@@ -204,7 +205,11 @@
       ! execute the send and receive equivalents.
 
       call ESMF_FieldRedist(pressure1, pressure2, redistRH12, rc=status)
+      ! call ESMF_FieldPrint(pressure2)
       call ESMF_FieldRedist(pressure2, pressure3, redistRH23, rc=status)
+      ! call ESMF_FieldPrint(pressure3)
+      call ESMF_FieldHalo(pressure3, haloRH3, rc=status)
+      ! call ESMF_FieldPrint(pressure3)
 
       ! Data is moved directly to the field in the output state, so no
       ! "put" is needed here.
@@ -236,6 +241,7 @@
       call ESMF_FieldRegridRelease(regridRH,   rc=status)
       call ESMF_FieldRedistRelease(redistRH12, rc=status)
       call ESMF_FieldRedistRelease(redistRH23, rc=status)
+      call ESMF_FieldHaloRelease(haloRH3, rc=status)
 
       !print *, "User Coupler Final returning"
    

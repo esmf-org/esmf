@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.15 2005/06/30 22:05:46 nscollins Exp $
+! $Id: user_model2.F90,v 1.16 2005/07/01 16:39:02 nscollins Exp $
 !
 ! System test for Exclusive Components, user-written component 2.
 
@@ -256,7 +256,7 @@
         finalrc = localrc
         goto 30
       endif
-      call verifyResults(field, localrc)
+      call verifyRegridResults(field, localrc)
       if (localrc .ne. ESMF_SUCCESS) finalrc = localrc
 
 30 continue
@@ -274,7 +274,7 @@
 !   !  The routine where results are validated.
 !   !
  
-    subroutine verifyResults(humidity, rc)
+    subroutine verifyRegridResults(humidity, rc)
       type(ESMF_Field), intent(in) :: humidity
       integer, intent(out) :: rc
 
@@ -288,7 +288,7 @@
       real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue
       real(ESMF_KIND_R8), dimension(:,:), pointer :: calc, data, coordX, coordY
 
-      !print *, "User verifyResults starting"  
+      !print *, "User verifyRegridResults starting"  
 
       pi = 3.14159
 
@@ -353,7 +353,7 @@
       write(*,*) "   maximum computed value  = ", maxCValue
       write(*,*) "   maximum error           = ", maxError
       write(*,*) "   maximum percent error   = ", maxPerError
-      !print *, "User verifyResults returning"
+      !print *, "User verifyRegridResults returning"
    
       ! only accept this test as successful if the max percent
       ! error is below 2%
@@ -364,7 +364,7 @@
           rc = ESMF_SUCCESS
       endif
 
-    end subroutine verifyResults
+    end subroutine verifyRegridResults
 
 
     end module user_model2
