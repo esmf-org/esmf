@@ -1,0 +1,377 @@
+! $Id: ESMF_ArbitraryDistSTest.F90,v 1.1 2005/07/01 17:26:36 jwolfe Exp $
+!
+! System test ArbitraryDistribution
+!  Description on Sourceforge under System Test #XXXXX
+
+!-------------------------------------------------------------------------
+!SYSTEM_TEST        String used by test script to count system tests.
+!=========================================================================
+
+!BOP
+!
+! !DESCRIPTION:
+! System test ArbitraryDistribution.
+!
+! This system test checks the functionality of the arbitrary grid distribution
+! routines by redistributing data from one Field distributed in the normal
+! block structure to another Field that has been distributed arbitrarily
+! and then back again.  The original data should exactly match the final
+! data, which serves as the test for SUCCESS.  This program creates two
+! identical Grids with different distributions, one with the normal block
+! structure and the other with a semi-random arbitrary distribution.  The first
+! Grid has two Fields created from it, the first as the source for the test
+! and the second for the final results.  The second Grid has a single Field
+! that serves as an intermediate result between the two redistributions.
+!
+!\begin{verbatim}
+
+     program ArbitraryDistribution
+
+#include <ESMF_Macros.inc>
+
+     ! ESMF Framework module
+     use ESMF_Mod
+     use ESMF_TestMod
+    
+     implicit none
+
+     ! Local variables
+     integer :: status
+     integer :: i, j, j1, add
+     integer :: counts(2), localCounts(2), miscount
+     integer :: npets, myDE, myPet
+     integer, dimension(:,:), allocatable :: myIndices
+     logical :: match
+     real(ESMF_KIND_R8) :: min(2), max(2), compval
+     real(ESMF_KIND_R8) :: pi = 3.1416d0
+     real(ESMF_KIND_R8), dimension(:,:), pointer :: coordX, coordY
+     real(ESMF_KIND_R8), dimension(:,:), pointer :: srcdata, resdata
+     type(ESMF_Array) :: array1, array2, array3
+     type(ESMF_Array), dimension(:), pointer :: coordArray
+     type(ESMF_ArraySpec) :: arrayspec1, arrayspec2
+     type(ESMF_DELayout) :: delayout1, delayout2
+     type(ESMF_Field) :: humidity1, humidity2, humidity3
+     type(ESMF_Grid) :: grid1, grid2
+     type(ESMF_GridHorzStagger) :: horz_stagger
+     type(ESMF_RouteHandle) :: rh12, rh23
+     type(ESMF_VM) :: vm
+
+     ! cumulative result: count failures; no failures equals "all pass"
+     integer :: testresult = 0
+
+     ! individual test name
+     character(ESMF_MAXSTR) :: testname
+
+     ! individual test failure message and final rc msg
+     character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+     print *, "System Test ArbitraryDistribution."
+!
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!  Create section
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!
+     ! Initialize the framework and get back the default global VM
+     call ESMF_Initialize(vm=vm, rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+
+     ! Get the PET count and our PET number
+     call ESMF_VMGet(vm, localPet=myPet, petCount=npets, rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+
+     miscount = 0
+
+     if (npets .eq. 1) then
+       print *, "This test must run with > 1 processor"
+       goto 20
+     endif
+
+     print *, "Create section finished"
+!
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!  Init section
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!
+     ! create two layouts, one for a normal distribution and a 1D layout
+     ! for arbitrary distribution
+     delayout1 = ESMF_DELayoutCreate(vm, (/ 2, npets/2 /), rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+     delayout2 = ESMF_DELayoutCreate(vm, (/ npets, 1 /), rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+
+     ! and get our local DE number on the first layout
+     call ESMF_DELayoutGet(delayout1, localDE=myDE, rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+
+     ! Create the grids and corresponding Fields
+     counts(1) = 60
+     counts(2) = 40
+     min(1) = 0.0
+     max(1) = 60.0
+     min(2) = 0.0
+     max(2) = 50.0
+     horz_stagger = ESMF_GRID_HORZ_STAGGER_A
+
+     ! make two identical grids, except one is distributed in the normal
+     ! block style and the second is distributed in arbitrary style
+     grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
+                             minGlobalCoordPerDim=min, &
+                             maxGlobalCoordPerDim=max, &
+                             horzStagger=horz_stagger, &
+                             name="source grid", rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+     call ESMF_GridDistribute(grid1, delayout=delayout1, rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+
+     grid2 = ESMF_GridCreateHorzXYUni(counts=counts, &
+                             minGlobalCoordPerDim=min, &
+                             maxGlobalCoordPerDim=max, &
+                             horzStagger=horz_stagger, &
+                             name="source grid", rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+
+     ! allocate myIndices to maximum number of points on any DE in the first
+     ! dimension and 2 in the second dimension.
+     i = int((counts(1)*counts(2) + npets -1)/npets)
+     allocate (myIndices(i,2))
+
+     ! calculate myIndices based on DE number
+     ! for now, start at point (1,1+myDE) and go up in the j-direction first
+     ! to create a semi-regular distribution of points
+     j1  = 1 + myDE
+     add = 0
+     do i = 1,counts(1)
+       do j = j1,counts(2),npets
+         add = add + 1
+         myIndices(add,1) = i
+         myIndices(add,2) = j
+       enddo
+       j1 = j - counts(2)
+     enddo
+
+     ! the distribute call is similar to the block distribute but with
+     ! a couple of different arguments
+     call ESMF_GridDistribute(grid2, delayout=delayout2, myCount=add, &
+                              myIndices=myIndices, rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+
+     ! Set up a 1D (for the arbitrarily distributed Field) and a 2D real array
+     call ESMF_ArraySpecSet(arrayspec1, rank=2, type=ESMF_DATA_REAL, &
+                            kind=ESMF_R8)
+     if (status .ne. ESMF_SUCCESS) goto 20
+     call ESMF_ArraySpecSet(arrayspec2, rank=1, type=ESMF_DATA_REAL, &
+                            kind=ESMF_R8)
+     if (status .ne. ESMF_SUCCESS) goto 20
+
+     ! Create the field and have it create the array internally for each grid
+     humidity1 = ESMF_FieldCreate(grid1, arrayspec1, &
+                                  horzRelloc=ESMF_CELL_CENTER, &
+                                  haloWidth=0, name="humidity1", rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+     humidity2 = ESMF_FieldCreate(grid2, arrayspec2, &
+                                  horzRelloc=ESMF_CELL_CENTER, &
+                                  haloWidth=0, name="humidity2", rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+     humidity3 = ESMF_FieldCreate(grid1, arrayspec1, &
+                                  horzRelloc=ESMF_CELL_CENTER, &
+                                  haloWidth=0, name="humidity3", rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+
+     ! precompute communication patterns, the first from the regularly
+     ! distributed Field to the arbitrarily distributed Field and the second
+     ! from the arbitrarily distributed Field back to a different regularly
+     ! distributed Field
+     rh12 = ESMF_RouteHandleCreate(status)
+     rh23 = ESMF_RouteHandleCreate(status)
+     call ESMF_FieldRedistStore(humidity1, humidity2, vm, &
+                                routehandle=rh12, rc=status)
+     call ESMF_FieldRedistStore(humidity2, humidity3, vm, &
+                                routehandle=rh23, rc=status)
+
+    ! get coordinate arrays available for setting the source data array
+    allocate(coordArray(2))
+    call ESMF_GridGetCoord(grid1, horzRelloc=ESMF_CELL_CENTER, &
+                           centerCoord=coordArray, rc=status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+
+    ! Get pointers to the data and set it up
+    call ESMF_FieldGetArray(humidity1, array1, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_ArrayGetData(array1, srcdata, ESMF_DATA_REF, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldGetArray(humidity3, array3, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_ArrayGetData(array3, resdata, ESMF_DATA_REF, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+
+    ! initialize data arrays
+    srcdata = 0.0
+    resdata = 0.0
+
+    ! get sizes of local pieces of the coordinate arrays
+    call ESMF_ArrayGet(coordArray(1), counts=localCounts, rc=status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+
+    ! set data array to a function of coordinates (in the computational part
+    ! of the array only, not the halo region)
+    do j    = 1,localCounts(2)
+      do i = 1,localCounts(1)
+        srcdata(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
+                            + 2.0*sin(coordY(i,j)/50.0*pi) 
+      enddo
+    enddo
+
+    print *, "Initial data, before Redistribution:"
+    call ESMF_ArrayPrint(array1, "foo", status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+
+    ! No deallocate() is needed for array data, it will be freed when the
+    ! Array is destroyed. 
+
+    print *, "Init section finished"
+!
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!  Run section
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!
+
+    ! Call redistribution method here, output ends up in humidity2
+    call ESMF_FieldRedist(humidity1, humidity2, rh12, rc=status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldGetArray(humidity2, array2, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+
+    print *, "Array contents after Transpose:"
+    call ESMF_ArrayPrint(array2, "", status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+
+    ! Redistribute back so we can compare contents
+    ! output ends up in humidity3
+    call ESMF_FieldRedist(humidity2, humidity3, rh23, rc=status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldGetArray(humidity3, array3, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+
+    print *, "Array contents after second Redistribution, should match original:"
+    call ESMF_ArrayPrint(array3, "", status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+
+    print *, "Run section finished"
+
+!
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!   Finalize section
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!   Print result
+
+    call ESMF_DELayoutGet(delayout1, localDE=myDE, rc=status)
+
+    print *, "-----------------------------------------------------------------"
+    print *, "-----------------------------------------------------------------"
+    print *, "Result from DE number ", myDE
+    print *, "-----------------------------------------------------------------"
+    print *, "-----------------------------------------------------------------"
+
+    ! check and make sure the original data and the data that has been 
+    ! distributed to the 1D Field and back again are the same
+    match    = .true.
+    miscount = 0
+    do j   = 1,localCounts(2)
+      do i = 1,localCounts(1)
+        compval = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
+                       + 2.0*sin(coordY(i,j)/50.0*pi)
+        if ((srcdata(i,j) .ne. resdata(i,j)) .OR. &
+            (abs(resdata(i,j)-compval).ge.1.0d-12)) then
+          print *, "array contents do not match at: (", i,j, ") on DE ", &
+                   myDE, ".  src=", srcdata(i,j), "dst=", &
+                   resdata(i,j), "realval=", compval
+          match = .false.
+          miscount = miscount + 1
+          if (miscount .gt. 40) then
+            print *, "more than 40 mismatches, skipping rest of loop"
+            goto 10
+          endif
+        endif
+      enddo
+    enddo
+    if (match) print *, "Array contents matched correctly!! DE = ", myDE
+10  continue
+
+    print *, "Finalize section finished"
+
+!
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!   Destroy section
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!   Clean up
+
+    deallocate(myIndices)
+
+    call ESMF_FieldRedistRelease(rh12, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldRedistRelease(rh23, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldDestroy(humidity1, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldDestroy(humidity2, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldDestroy(humidity3, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_GridDestroy(grid1, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_GridDestroy(grid2, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_DELayoutDestroy(delayout1, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_DELayoutDestroy(delayout2, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    print *, "All Destroy routines done"
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+20    print *, "System Test ArbitraryDistribution complete."
+
+    if ((myPet .eq. 0) .or. (status .ne. ESMF_SUCCESS)) then
+      write(failMsg, *)  "Redistribution back not same as original"
+      write(testname, *) "System Test ArbitraryDistribution: Field Redistribute"
+
+      call ESMF_Test((miscount.eq.0) .and. (status.eq.ESMF_SUCCESS), &
+                     testname, failMsg, testresult, ESMF_SRCLINE)
+
+      ! Separate message to console, for quick confirmation of success/failure
+      if ((miscount.eq.0) .and. (status .eq. ESMF_SUCCESS)) then
+        write(finalMsg, *) "SUCCESS: Data redistributed twice same as original."
+      else
+        write(finalMsg, *) "System Test did not succeed. ", &
+        "Data redistribution does not match expected values, or error code", &
+        " set ",status 
+      endif
+      write(0, *) ""
+      write(0, *) trim(testname)
+      write(0, *) trim(finalMsg)
+      write(0, *) ""
+
+    endif
+    
+    call ESMF_Finalize(rc=status)
+
+    end program ArbitraryDistribution
+    
+!\end{verbatim}
