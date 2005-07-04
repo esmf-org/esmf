@@ -38,6 +38,11 @@ variable ESMF_SITE has a value, the corresponding directory will be
 searched after the default directory, for overrides and additional settings 
 of directory names, values, flags, and other custom information.
 
+Note that building on the SGI Altix is the same as the other Linux/Intel 
+platforms, so set ESMF_COMPILER to 'intel' to use the files in the
+Linux.intel.default directory.  Also for Altix, set ESMF_COMM to 'mpi'
+and make sure ESMF_PREC is unset.  
+
 
 File Descriptions
 -----------------
@@ -183,4 +188,4 @@ gcc or xlc.  Use ESMF_C_COMPILER to control this choice.
 
 
 ================================================================================
- $Id: README,v 1.23 2005/05/06 20:32:27 nscollins Exp $
+ $Id: README,v 1.24 2005/07/04 14:03:13 nscollins Exp $
