@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.130 2005/06/09 19:08:20 nscollins Exp $
+#  $Id: common.mk,v 1.130.2.1 2005/07/06 22:45:52 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -133,8 +133,8 @@ endif
 # compiler/platform dependent files. check the supported platform list for
 # which pointer sizes are supported on which platform/compiler combinations. 
 #
-# for Linux systems, the default depends on what 'uname -i' reports back for
-# the hardware type. 32-bit hardware (i386) defaults to 32; 64-bit 
+# for Linux systems, the default depends on what 'uname -m' reports back for
+# the hardware type. 32-bit hardware (i686) defaults to 32; 64-bit 
 # hardware (ia64) defaults to 64.  
 #
 # set ESMF_PREC explicitly if the default value is not what is wanted and the 
@@ -158,11 +158,11 @@ ESMF_PREC = default
 endif
 ifeq ($(ESMF_PREC),default)
  ifeq ($(ESMF_ARCH),Linux)
-  MACH_ARCH = $(shell uname -i)
-  ifeq ($(MACH_ARCH),i386)
-   export ESMF_PREC = 32
-  else
+  MACH_ARCH = $(shell uname -m)
+  ifeq ($(MACH_ARCH),ia64)
    export ESMF_PREC = 64
+  else
+   export ESMF_PREC = 32
   endif
  else
   export ESMF_PREC = 64
