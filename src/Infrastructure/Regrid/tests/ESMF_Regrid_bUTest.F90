@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_Regrid_bUTest.F90,v 1.9 2005/06/28 21:45:01 svasquez Exp $'
+      '$Id: ESMF_Regrid_bUTest.F90,v 1.9.2.1 2005/07/06 21:08:30 nscollins Exp $'
 !------------------------------------------------------------------------------
 
     integer :: lrc,iFunction
@@ -193,14 +193,14 @@
    !EX_UTest
    ! Verify that the regrid does not take too long
     write(failMsg, *) "Regrid took too long"
-    write(name, *) " Verify Conserv Regrid takes no longer than 5 seconds"
+    write(name, *) " Verify Conserv Regrid takes no longer than 30 seconds"
     print *, "Start Time is:"
     print *, startTime
     print *, "End Time is:"
     print *, endTime
     print *, "Test Duration Time is:"
     print *, testTime
-    call ESMF_Test((testTime.lt.5),name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((testTime.lt.30),name, failMsg, result, ESMF_SRCLINE)
 
    !--------------------------------
    !EX_UTest
