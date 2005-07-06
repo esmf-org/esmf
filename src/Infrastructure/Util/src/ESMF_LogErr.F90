@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.1 2005/05/31 17:27:20 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.1.2.1 2005/07/06 19:42:10 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -1074,8 +1074,8 @@ end subroutine ESMF_LogOpen
 !      \end{description}
 ! 
 !EOP
-    integer :: status
-    type(ESMF_LOG),pointer          :: alog
+    integer :: i, status
+    type(ESMF_LOG), pointer          :: alog
     type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
 
     if (present(log)) then
@@ -1084,23 +1084,33 @@ end subroutine ESMF_LogOpen
       alog => ESMF_LogDefault
     endif
 
-	if (present(rc)) rc=ESMF_FAILURE
-	if (present(verbose)) alog%verbose=verbose
-	if (present(flush)) alog%flushImmediately=flush
-	if (present(rootOnly)) alog%rootOnly=rootOnly
-	if (present(halt)) alog%halt=halt
-	if (present(stream)) alog%stream=stream
-	if (present(maxElements)) then
-            if (maxElements.gt.0 .AND. alog%maxElements.ne.maxElements) then
-	        allocate(localbuf(maxElements), &
-                     stat=status)
-                ! TODO: copy old contents over, or flush first!!
-	        deallocate(alog%LOG_ENTRY,stat=status)
-                alog%LOG_ENTRY => localbuf
-		alog%maxElements=maxElements
-	    endif
-	endif    
-	if (present(rc)) rc=ESMF_SUCCESS 
+    if (present(rc)) rc=ESMF_FAILURE
+    if (present(verbose)) alog%verbose=verbose
+    if (present(flush)) alog%flushImmediately=flush
+    if (present(rootOnly)) alog%rootOnly=rootOnly
+    if (present(halt)) alog%halt=halt
+    if (present(stream)) alog%stream=stream
+    if (present(maxElements)) then
+      if (maxElements.gt.0 .AND. alog%maxElements.ne.maxElements) then
+        allocate(localbuf(maxElements), stat=status)
+
+        ! if the current number of log entries is greater than the new
+        ! maxElements, then call flush.  Otherwise copy old contents over.
+        if (alog%findex.ge.maxElements) then
+          call ESMF_LogFlush(alog,rc=status)
+        else
+          do i = 1,alog%findex
+            call ESMF_LogEntryCopy(alog%LOG_ENTRY(i), localbuf(i), rc=status)
+          enddo
+        endif
+        deallocate(alog%LOG_ENTRY,stat=status)
+        alog%LOG_ENTRY => localbuf
+        alog%maxElements=maxElements
+      endif
+    endif    
+
+    if (present(rc)) rc=ESMF_SUCCESS 
+
 end subroutine ESMF_LogSet
 
 !--------------------------------------------------------------------------
@@ -1224,6 +1234,54 @@ end subroutine ESMF_LogSet
     endif
     if (present(rc)) rc=ESMF_SUCCESS
 end subroutine ESMF_LogWrite
+
+!--------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_LogEntryCopy - Copy a Log entry
+
+! !INTERFACE: 
+	subroutine ESMF_LogEntryCopy(logEntryIn, logEntryOut, rc)
+!
+! !ARGUMENTS:
+        type(ESMF_LOGENTRY), intent(in)  :: logEntryIn
+        type(ESMF_LOGENTRY), intent(out) :: logEntryOut
+        integer, intent(out), optional   :: rc
+
+! !DESCRIPTION:
+!      This routine copies the internals from one log entry to another.
+!
+!      The arguments are:
+!      \begin{description}
+! 
+!      \item [logEntryIn]
+!            Log entry to copy from.
+!      \item [logEntryOut]
+!            Log entry to copy into.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+! 
+!EOPI
+    
+    logEntryOut%h    = logEntryIn%h
+    logEntryOut%m    = logEntryIn%m
+    logEntryOut%s    = logEntryIn%s
+    logEntryOut%ms   = logEntryIn%ms
+    logEntryOut%line = logEntryIn%line
+
+    logEntryOut%methodflag = logEntryIn%methodflag
+    logEntryOut%lineflag   = logEntryIn%lineflag
+    logEntryOut%fileflag   = logEntryIn%fileflag
+
+    logEntryOut%msg    = logEntryIn%msg
+    logEntryOut%file   = logEntryIn%file
+    logEntryOut%method = logEntryIn%method
+    logEntryOut%d      = logEntryIn%d
+    logEntryOut%lt     = logEntryIn%lt
+    
+    if (present(rc)) rc=ESMF_SUCCESS
+
+end subroutine ESMF_LogEntryCopy
 
 end module ESMF_LogErrMod
 
