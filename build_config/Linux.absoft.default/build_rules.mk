@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.20 2005/05/20 16:48:23 nscollins Exp $
+#  $Id: build_rules.mk,v 1.21 2005/07/06 20:43:30 nscollins Exp $
 #
 #  Linux.absoft.default makefile fragment
 #
@@ -115,11 +115,15 @@ F_FIXNOCPP      = -ffixed
 ifneq ($(origin LD_LIBRARY_PATH), environment)
 CXXLIB_PATHS   = -L/usr/lib
 F90LIB_PATHS   = -L/soft/com/packages/absoft-9.0/opt/absoft/lib
-LIB_PATHS      = ${CXXLIB_PATHS} ${F90LIB_PATHS}
+C_LIB_PATHS      = ${CXXLIB_PATHS} ${F90LIB_PATHS}
+C_LD_PATHS       = ${CXXLIB_PATHS} ${F90LIB_PATHS}
+else
+C_LIB_PATHS      = $(ENV_LIB_PATHS)
+C_LD_PATHS       = $(ENV_LD_PATHS)
 endif
 
-C_F90CXXLIBS       = ${LIB_PATHS} -lf90math -lfio -lf77math -lrt -lstdc++ 
-C_CXXF90LIBS       = ${LIB_PATHS} -lstdc++ -lf90math -lrt -lfio -lf77math
+C_F90CXXLIBS       = -lf90math -lfio -lf77math -lrt -lstdc++ 
+C_CXXF90LIBS       = -lstdc++ -lf90math -lrt -lfio -lf77math
 
 ###############################################################################
 
