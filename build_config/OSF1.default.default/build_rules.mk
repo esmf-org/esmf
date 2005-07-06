@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.28 2005/05/20 16:46:46 nscollins Exp $
+#  $Id: build_rules.mk,v 1.28.2.1 2005/07/06 20:59:49 nscollins Exp $
 #
 #  OSF1.default.default
 #
@@ -142,7 +142,7 @@ O_FFLAGS	+= -w
 # the default values for these which are computed in common.mk
 ifeq ($(origin LD_LIBRARY_PATH), environment)
 ENV_LIB_PATHS  = $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
-ENV_LD_PATHS   = -Wl,-rpath,$(LDIR):$(LD_LIBRARY_PATH)
+ENV_LD_PATHS   = -rpath $(LDIR):$(LD_LIBRARY_PATH)
 endif
 
 # explicitly turn off the SLFLAG here after constructing the ld path.
