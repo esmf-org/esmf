@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.130 2005/06/09 19:08:20 nscollins Exp $
+#  $Id: common.mk,v 1.131 2005/07/06 21:12:24 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -968,7 +968,15 @@ clean:
 
 distclean: clobber
 
-clobber: clean
+clobber:
+	@if [ `pwd` != $(ESMF_DIR) ]; then \
+	  echo "Must run clobber from ESMF_DIR" ; \
+	  echo "Current directory is `pwd`" ; \
+	  echo "ESMF_DIR is $(ESMF_DIR)" ; \
+	  echo "" ; \
+	  $(MAKE) err ; \
+	fi
+	$(MAKE) clean
 	@for DIR in $(CLOBBERDIRS) foo ; do \
 	   if [ $$DIR != "foo" ] ; then \
 	      $(RM) -r $$DIR ;\
