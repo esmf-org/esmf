@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.4 2005/07/07 16:42:54 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.5 2005/07/07 19:47:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,13 +55,11 @@ implicit none
       end subroutine f_ESMF_VMGlobalGet
     end interface
 
-! TODO:
-! remove until this works on more platforms
-!    interface 
-!      subroutine ESMF_VMAbort(rc)
-!        integer, intent(out), optional :: rc    
-!      end subroutine ESMF_VMAbort
-!    end interface
+    interface 
+      subroutine f_ESMF_VMAbort(rc)
+        integer, intent(out), optional :: rc    
+      end subroutine f_ESMF_VMAbort
+    end interface
 
 
 !
@@ -1241,7 +1239,7 @@ end subroutine ESMF_LogSet
     	endif	
     endif
     ! if requested, halt the program right now.
-    !if (alog%stopprogram) call ESMF_VMAbort()
+    if (alog%stopprogram) call f_ESMF_VMAbort()
     if (present(rc)) rc=ESMF_SUCCESS
 end subroutine ESMF_LogWrite
 
