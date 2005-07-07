@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.1.2.1 2005/07/06 19:42:10 jwolfe Exp $
+! $Id: ESMF_LogErr.F90,v 1.1.2.2 2005/07/07 20:03:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -53,6 +53,12 @@ implicit none
         integer, intent(out), optional  :: localPet
         integer, intent(out), optional  :: petCount
       end subroutine f_ESMF_VMGlobalGet
+    end interface
+
+    interface 
+      subroutine f_ESMF_VMAbort(rc)
+        integer, intent(out), optional :: rc    
+      end subroutine f_ESMF_VMAbort
     end interface
 
 
@@ -1232,6 +1238,8 @@ end subroutine ESMF_LogSet
         	alog%findex = alog%findex + 1	
     	endif	
     endif
+    ! if requested, halt the program right now.
+    if (alog%stopprogram) call f_ESMF_VMAbort()
     if (present(rc)) rc=ESMF_SUCCESS
 end subroutine ESMF_LogWrite
 
