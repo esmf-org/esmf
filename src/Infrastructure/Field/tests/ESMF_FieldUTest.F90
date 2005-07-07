@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.80 2005/03/10 16:21:03 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.81 2005/07/07 19:44:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.80 2005/03/10 16:21:03 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.81 2005/07/07 19:44:17 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -554,6 +554,27 @@
       call ESMF_GridDistribute(grid5, delayout=delayout, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a 3D Grid to use in Field Tests"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !E-X_UTest
+      ! TODO: this fails.
+      ! Create a Field with 3D grid and 3D data array, vertex centered in vert
+      !call ESMF_ArraySpecSet(arrayspec, 3, ESMF_DATA_REAL, ESMF_R4, rc=rc)
+      !f7 = ESMF_FieldCreate(grid5, arrayspec, ESMF_ALLOC, ESMF_CELL_CENTER, &
+      !                      ESMF_CELL_VERTEX, 3, name="Field 7", rc=rc)
+      !write(failMsg, *) ""
+      !write(name, *) "Creating Field with 3D grid and 3D data, vert=vertex"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Create a Field with 3D grid and 3D data array, cell centered
+      call ESMF_ArraySpecSet(arrayspec, 3, ESMF_DATA_REAL, ESMF_R4, rc=rc)
+      f7 = ESMF_FieldCreate(grid5, arrayspec, ESMF_ALLOC, ESMF_CELL_CENTER, &
+                            ESMF_CELL_CELL, 3, name="Field 7", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating Field with 3D grid and 3D data, vert=cell"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
