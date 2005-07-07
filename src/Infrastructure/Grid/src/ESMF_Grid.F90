@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.221 2005/06/21 19:26:15 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.222 2005/07/07 20:48:44 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.221 2005/06/21 19:26:15 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.222 2005/07/07 20:48:44 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -374,7 +374,7 @@
 !          Array of physical coordinates in the vertical direction.
 !     \item[{[vertstagger]}]
 !          {\tt ESMF\_GridVertStagger} specifier denoting vertical subGrid
-!          stagger.
+!          stagger.  The default value is ESMF_GRID_VERT_STAGGER_CENTER.
 !     \item[{[dimName]}]
 !          Dimension name.
 !     \item[{[dimUnit]}]
@@ -393,6 +393,7 @@
       real(ESMF_KIND_R8) :: minGlobalCoord
       type(ESMF_GridVertType) :: vertGridType
       type(ESMF_CoordSystem) :: vertCoordSystem
+      type(ESMF_GridVertStagger) :: vertStaggerUse
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -400,6 +401,8 @@
       ! Set default values
       vertGridType    = ESMF_GRID_VERT_TYPE_HEIGHT
       vertCoordSystem = ESMF_COORD_SYSTEM_HEIGHT
+      vertStaggerUse  = ESMF_GRID_VERT_STAGGER_CENTER
+      if (present(vertstagger)) vertstaggerUse = vertStagger
       minGlobalCoord  = 0.0d0
 
       ! Call GridAddVert routines based on GridStructure
@@ -418,7 +421,7 @@
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridAddVert(grid%ptr, minGlobalCoord, delta, coord, &
-                                vertGridType, vertstagger, &
+                                vertGridType, vertStaggerUse, &
                                 vertCoordSystem, dimName, dimUnit, &
                                 name, localrc)
 
