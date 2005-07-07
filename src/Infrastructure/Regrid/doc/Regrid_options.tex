@@ -183,10 +183,17 @@ A = \left[\begin{array}{cc}
      first iteration.
 
      In order to compute the weights using this general bilinear iteration,
-     it must be determined in which box the point $P$ resides.  For this,
-     the search algorithms outlined in the previous chapter are used with
-     the exception that instead of using cell corners, the relevant box is
-     formed by neighbor cell centers as shown in Fig.~\ref{fig:quad}.
+     it must be determined in which box the point $P$ resides.  Because this
+     method is valid only for logically-rectangular grids, the search algorithm
+     can be optimized to take advantage of this restriction.  The search
+     algorithm currently in ESMF loops through cells on the source grid comparing
+     the coordinates of point $P$ with the bounding box formed by each cell's
+     minimum and maximum coordinates.  Most cells can efficiently be eliminated
+     from the search via this simple test.  This loop is further optimized by
+     tracking the location of the previously found source cell and using that as
+     initial starting point for the next search, since both grids are logically
+     ordered.
+
 
 %\item[ESMF\_REGRID\_METHOD\_CONSERV1 and ESMF\_REGRID\_METHOD\_CONSERV2]
 \item[ESMF\_REGRID\_METHOD\_CONSERV1]
@@ -374,12 +381,18 @@ w_{3nk} & = & {1\over{A_k}}\int\int_{A_{nk}}\cos\theta(\phi-\phi_n)dA \nonumber 
      is relatively simple.  The process amounts to finding the location of
      the endpoint of a segment and then finding the next intersection with
      the other grid.  The line integrals are then computed and summed according
-     to which grid cells are associated with that particular subsegment. The
+     to which grid cells are associated with that particular subsegment.  The
      most time-consuming portion of the algorithm is finding which cell on one
-     grid contains an endpoint from the other grid.  Currently in ESMF, we
-     restrict the search to cells on the source grid who fall within the
-     bounding box of the local piece of the decomposed destination grid.  More
-     optimal search algorithms may be added later.
+     grid contains an endpoint from the other grid.  Optimal search algorithms
+     can be written when the grid is well structured and regular.  However, if
+     one requires a search algorithm that will work for any general grid, a 
+     hierarchy of search algorithms appears to work best.  In the ESMF
+     implementation, each grid cell address is assigned to one or more vertical
+     coordinate bins. When the search begins, only those cells belonging to the
+     same vertical coordinate bin as the search point are used.  The second stage
+     checks the bounding box of each grid cell in the determined bin.
+     The bounding box is formed by the cells minimum and maximum coordinates.
+     This process further restricts the search to a small number of cells.
 
      Once the search has been restricted, a robust algorithm that works for most
      cases is a cross-product test.  In this test, a cross product is computed
