@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrHaltUTest.F90,v 1.1 2005/04/05 16:43:37 svasquez Exp $
+! $Id: ESMF_LogErrHaltUTest.F90,v 1.1.2.1 2005/07/07 19:59:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrHaltUTest.F90,v 1.1 2005/04/05 16:43:37 svasquez Exp $'
+      '$Id: ESMF_LogErrHaltUTest.F90,v 1.1.2.1 2005/07/07 19:59:24 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,8 +52,9 @@
 
 !     !LOCAL VARIABLES:
       type(ESMF_Clock) :: clock1
-      type(ESMF_Alarm) :: alarm1
       type(ESMF_Log) :: log1
+      type(ESMF_Field) :: field1
+      character(ESMF_MAXSTR) :: field1name
 
 
 !------------------------------------------------------------------------------
@@ -74,20 +75,22 @@
       !EX_UTest
       ! Set Log HaltOnError
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogSet(log=log1, halt=ESMF_LOG_HALTERROR, rc=rc)
+      call ESMF_LogSet(halt=ESMF_LOG_HALTERROR, rc=rc)
       write(name, *) "Log Set Halt on Error Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Create Alarm without ringTime to create an error to test the
-      ! halt on error feature. Execution should halt on the ESMF_ALARM Create
-      ! Print a pass assuming that execution will stop.
+      ! Query a deleted Field to intentionally create an error to test the
+      ! halt on error feature. Execution should halt inside ESMF_FieldGet().
+      ! Print a pass first assuming that execution will stop.
+      field1 = ESMF_FieldCreateNoData()
+      call ESMF_FieldDestroy(field1)
       write(failMsg, *) "Should never fail."
       write(name, *) "Force an Error Test"
       call ESMF_Test((.true.), name, failMsg, result, ESMF_SRCLINE)
-      alarm1 = ESMF_AlarmCreate(name="WAKEUP", clock=clock1,  rc=rc)
+      call ESMF_FieldGet(field1, name=field1name, rc=rc)
 
       ! If the following code is executed, the HALT ON ERROR test failed.
       ! Print a special Fail message which will be handled by the test scripts.
