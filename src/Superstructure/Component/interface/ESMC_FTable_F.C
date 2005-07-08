@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable_F.C,v 1.18 2004/10/26 21:34:36 theurich Exp $
+// $Id: ESMC_FTable_F.C,v 1.19 2005/07/08 21:23:45 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -73,8 +73,15 @@ extern "C" {
 
          localrc = (*ptr)->ESMC_FTableCallVFuncPtr(name, &funcrc);
 
-         *status = funcrc;
-
+         if (status) {
+             if (localrc != ESMF_SUCCESS)
+                 *status = localrc;
+             else if (funcrc != ESMF_SUCCESS)
+                 *status = funcrc;
+             else
+                 *status = ESMF_SUCCESS;
+	}
+     
          delete[] name;
      }
 
