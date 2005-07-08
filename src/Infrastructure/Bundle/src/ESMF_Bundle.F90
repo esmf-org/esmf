@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.78 2005/06/30 19:10:17 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.79 2005/07/08 21:19:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research, 
@@ -1900,7 +1900,7 @@ end function
 !EOP
 
       integer :: status                            ! Error status
-      integer :: i, j, newstart
+      integer :: i, newstart
       type(ESMF_BundleType), pointer :: btype      ! internal data
       type(ESMF_BundleCongruentData) :: pattern    ! values to compare against
       type(ESMF_BundleCongruentData) :: candidate  ! values being compared
