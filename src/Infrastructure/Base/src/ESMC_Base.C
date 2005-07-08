@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.59 2005/05/31 17:32:24 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.60 2005/07/08 21:36:25 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.59 2005/05/31 17:32:24 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.60 2005/07/08 21:36:25 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -571,8 +571,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //    Turn a stream of bytes into an object.
 //
 //EOPI
-    int fixedpart, nbytes;
-    int *ip, i;
+    
+    int *ip, i, nbytes;
     ESMC_Status *sp;
     char *cp;
 
@@ -1388,7 +1388,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOP
 
-  int rc, i;
+  int rc;
   ESMC_Attribute *attr;
 
   // simple sanity checks
@@ -1509,7 +1509,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOP
 
-  int rc, i;
+  int rc;
   ESMC_Attribute *attr;
 
   // simple sanity checks
@@ -1630,7 +1630,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOP
 
-  int rc, i;
+  int rc;
   ESMC_Attribute *attr;
 
   // simple sanity checks
@@ -1751,7 +1751,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOP
 
-  int rc, i;
+  int rc;
   ESMC_Attribute *attr;
 
   // simple sanity checks
@@ -1872,7 +1872,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOP
 
-  int rc, i;
+  int rc;
   ESMC_Attribute *attr;
 
   // simple sanity checks
@@ -1984,7 +1984,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOP
 
-  int rc, i;
+  int rc;
   ESMC_Attribute *attr;
 
   // simple sanity checks
@@ -2723,7 +2723,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //   copy an attribute, including contents, to current object (this)
 //
 //EOP
-  int i, len;
+  int i;
 
   memcpy(attrName, source.attrName, ESMF_MAXSTR);
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.2 2005/06/03 16:10:53 nscollins Exp $
+// $Id: ESMC_Util.C,v 1.3 2005/07/08 21:32:32 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.2 2005/06/03 16:10:53 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.3 2005/07/08 21:32:32 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -201,7 +201,6 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 //   copy an AxisIndex
 //
 //EOP
-  int i, len;
 
   dst->min = src->min;
   dst->max = src->max;
@@ -234,7 +233,8 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 //   a third AI.
 //
 //EOP
-  int i, len;
+  
+  int i;
   ESMC_AxisIndex *lo, *hi;
 
   // the inputs to this routine must be lists of AIs, ndims long.
@@ -417,14 +417,14 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 
 int  ESMC_DomainList::ESMC_DomainListGetDE(int domainnum) {
     int rc, de;
-    ESMC_DomainList *dp = this;
+    //ESMC_DomainList *dp = this;
     FTN(f_esmf_domainlistgetde)(this, &domainnum, &de, &rc);
     return de;
 }
 
 ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
     int rc;
-    ESMC_DomainList *dp = this;
+    //ESMC_DomainList *dp = this;
     ESMC_AxisIndex AI;
     FTN(f_esmf_domainlistgetai)(this, &domainnum, &ainum, &AI, &rc);
     return AI;
@@ -655,7 +655,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
     int dlen) {               // in - max len of C dst buffer, inc term NULL
 //EOPI
 
-    char *cp, *ctmp;
+    char *cp;
     int clen, rc;
     char msgbuf[ESMF_MAXSTR];
 
@@ -707,7 +707,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
     int dlen) {               // in - length of dst buffer, space padded
 //EOPI
 
-    char *cp, *ctmp;
+    char *cp;
     int clen, rc;
     char msgbuf[ESMF_MAXSTR];
 
@@ -762,7 +762,7 @@ extern "C" {
     int *dlen) {        // *hidden* in - max len of C dst buffer, inc term NULL
 //EOPI
 
-    char *cp, *ctmp;
+    char *cp;
     int clen;
     char msgbuf[ESMF_MAXSTR];
 
@@ -821,7 +821,7 @@ extern "C" {
     int *dlen) {       // *hidden* in - max len of C dst buffer, inc term NULL
 //EOPI
 
-    char *cp, *ctmp;
+    char *cp;
     int clen;
     char msgbuf[ESMF_MAXSTR];
 
