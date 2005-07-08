@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.16 2005/03/22 04:42:41 theurich Exp $
+// $Id: ESMC_FTable.C,v 1.17 2005/07/08 21:13:46 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.16 2005/03/22 04:42:41 theurich Exp $";
+           "$Id: ESMC_FTable.C,v 1.17 2005/07/08 21:13:46 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -240,8 +240,6 @@
 //
 //EOP
 // !REQUIREMENTS:  
-
-    int i;
 
  // TODO: test this code
     if (funccount >= funcalloc) {
