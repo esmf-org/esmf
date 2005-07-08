@@ -1,7 +1,7 @@
-!  $Id: ESMF_LogErr_C.F90,v 1.1 2005/06/28 19:54:47 nscollins Exp $
+!  $Id: ESMF_LogErr_C.F90,v 1.2 2005/07/08 17:11:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2005, University Corporation for Atmospheric Research, 
+! Copyright 2002-2003, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -11,8 +11,7 @@
 !==============================================================================
 !
 ! F77 interface files for C++ layer calling into F90 implementation layer.
-!  This cannot use any F90 syntax, including modules, or allocatable 
-!   arrays, or ...
+!  This cannot use any F90 modules.
 !
 !==============================================================================
 !
@@ -23,23 +22,23 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LogErr_C.F90,v 1.1 2005/06/28 19:54:47 nscollins Exp $'
+!      '$Id: ESMF_LogErr_C.F90,v 1.2 2005/07/08 17:11:44 nscollins Exp $'
 !==============================================================================
-
-   subroutine f_esmf_logwrite(message, rc)
-
-       use ESMF_UtilTypesMod    ! ESMF utility functions and parameters
+   subroutine f_esmf_logerrwritedirect(message, length, rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod         ! ESMF base class
        use ESMF_LogErrMod
-
-     character(len=*), intent(in) :: message
-     integer, intent(out) :: rc              
+     character(len=ESMF_MAXSTR*2), intent(in) :: message
+     integer, intent(in) :: length
+     integer, intent(out), optional :: rc              
 
      integer :: localrc              
 
-     call ESMF_LogWrite(message, ESMF_LOG_INFO, rc=local)
+     ! TODO: fix this
+     !thelogerr = ESMF_LogErrWriteDirect(rc=localrc)
+     localrc = ESMF_FAILURE
     
-     rc = localrc
-
-   end subroutine f_esmf_logwrite
+     if (present(rc)) rc = localrc
+   end subroutine f_esmf_logerrwritedirect
 
 
