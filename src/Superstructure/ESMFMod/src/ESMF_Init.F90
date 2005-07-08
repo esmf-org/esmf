@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.31 2005/05/31 17:40:02 nscollins Exp $
+! $Id: ESMF_Init.F90,v 1.32 2005/07/08 21:10:03 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -218,7 +218,7 @@
       ! incompatible with vmachine. ESMF_VMInitialize must install correct
       ! signal handlers _before_ possible helper threads are spawned by 
       ! MPI_Init.
-      call ESMF_VMInitialize(status);
+      call ESMF_VMInitialize(status)
       if (status .ne. ESMF_SUCCESS) then
           print *, "Error initializing VM"
           return
@@ -287,6 +287,16 @@
       !    print *, "Error initializing the machine characteristics"
       !    return
       !endif
+
+      ! in case we need to know what the language was for main, we have it.
+      ! right now we do not make use of it for anything.
+      if (lang .eq. ESMF_MAIN_C) then
+          continue
+      else if (lang .eq. ESMF_MAIN_F90) then
+          continue
+      else
+          continue
+      endif
 
       already_init = .true.
 
