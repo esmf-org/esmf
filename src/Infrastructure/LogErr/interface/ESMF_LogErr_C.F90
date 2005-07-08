@@ -1,4 +1,4 @@
-!  $Id: ESMF_LogErr_C.F90,v 1.2 2005/07/08 17:11:44 nscollins Exp $
+!  $Id: ESMF_LogErr_C.F90,v 1.3 2005/07/08 21:04:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,9 +22,10 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LogErr_C.F90,v 1.2 2005/07/08 17:11:44 nscollins Exp $'
+!      '$Id: ESMF_LogErr_C.F90,v 1.3 2005/07/08 21:04:44 nscollins Exp $'
 !==============================================================================
-   subroutine f_esmf_logerrwritedirect(message, length, rc)
+
+   subroutine f_esmf_logerrwritenoform(message, length, rc)
        use ESMF_UtilTypesMod    ! ESMF base class
        use ESMF_BaseMod         ! ESMF base class
        use ESMF_LogErrMod
@@ -35,10 +36,10 @@
      integer :: localrc              
 
      ! TODO: fix this
-     !thelogerr = ESMF_LogErrWriteDirect(rc=localrc)
+     call ESMF_LogWriteNoForm(message, ESMF_LOG_ERROR, rc=localrc)
      localrc = ESMF_FAILURE
     
      if (present(rc)) rc = localrc
-   end subroutine f_esmf_logerrwritedirect
+   end subroutine f_esmf_logerrwritenoform
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.34 2005/01/10 23:49:50 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.35 2005/07/08 21:06:03 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -410,8 +410,6 @@ extern "C" {
 //
 //EOP
 
-  int i, status;
-
   if (!array) {
     //printf("uninitialized Array object\n");
     ESMC_LogDefault.ESMC_LogWrite("Array object uninitialized", ESMC_LOG_INFO);
@@ -448,8 +446,6 @@ extern "C" {
 //     Deserialize the contents of a array object.
 //
 //EOP
-
-  int i, status;
 
   // create a new array object to deserialize into
   *array = new ESMC_Array;
@@ -488,8 +484,6 @@ extern "C" {
 //
 //EOP
 
-  int i, status;
-
   if (!array) {
     //printf("uninitialized Array object\n");
     ESMC_LogDefault.ESMC_LogWrite("Array object uninitialized", ESMC_LOG_INFO);
@@ -527,8 +521,6 @@ extern "C" {
 //     any of the data (counts explicitly set to 0).
 //
 //EOP
-
-  int i, status;
 
   // create a new array object to deserialize into
   *array = new ESMC_Array;

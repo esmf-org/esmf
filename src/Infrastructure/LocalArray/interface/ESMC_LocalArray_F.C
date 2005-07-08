@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.16 2005/04/18 21:25:59 nscollins Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.17 2005/07/08 21:04:30 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -374,8 +374,6 @@ char *name = NULL;
 //
 //EOP
 
-  int i, status;
-
   if (!localarray) {
     //printf("uninitialized LocalArray object\n");
     ESMC_LogDefault.ESMC_LogWrite("LocalArray object uninitialized", ESMC_LOG_INFO);
@@ -412,8 +410,6 @@ char *name = NULL;
 //     Deserialize the contents of a localarray object.
 //
 //EOP
-
-  int i, status;
 
   // create a new localarray object to deserialize into
   *localarray = new ESMC_LocalArray;
@@ -452,8 +448,6 @@ char *name = NULL;
 //
 //EOP
 
-  int i, status;
-
   if (!localarray) {
     //printf("uninitialized LocalArray object\n");
     ESMC_LogDefault.ESMC_LogWrite("LocalArray object uninitialized", ESMC_LOG_INFO);
@@ -491,8 +485,6 @@ char *name = NULL;
 //     any of the data (counts explicitly set to 0).
 //
 //EOP
-
-  int i, status;
 
   // create a new localarray object to deserialize into
   *localarray = new ESMC_LocalArray;
