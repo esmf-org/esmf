@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.44 2005/06/30 17:26:40 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.45 2005/07/11 17:28:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -240,7 +240,9 @@ void ESMC_VMK::vmk_init(void){
   sigaddset(&sigs_to_block, VM_SIG1);
   sigprocmask(SIG_BLOCK, &sigs_to_block, NULL); // block VM_SIG1
   // obtain command line arguments and store in the VM class
+#ifdef ESMF_MPICH
   vmk_obtain_args();
+#endif
   // next check is whether MPI has been initialized yet
   // actually we need to indicate an error if MPI has been initialized before
   // because signal blocking might not reach all of the threads again...
