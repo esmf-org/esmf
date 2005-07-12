@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2005/06/28 20:39:05 svasquez Exp $ 
+# $Id: makefile,v 1.8.2.1 2005/07/12 20:26:06 svasquez Exp $ 
 
 ALL:  build_unit_tests
 
@@ -15,14 +15,15 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/LogErr/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_LogErrUTest \
-		$(ESMC_TESTDIR)/ESMF_LogErrHaltUTest
+TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_LogErrUTest
+#		$(ESMC_TESTDIR)/ESMF_LogErrHaltUTest
 
-TESTS_RUN     = RUN_ESMF_LogErrUTest \
-                RUN_ESMF_LogErrHaltUTest
+TESTS_RUN     = RUN_ESMF_LogErrUTest
+#                RUN_ESMF_LogErrHaltUTest
 
-TESTS_RUN_UNI = RUN_ESMF_LogErrUTestUNI \
-                RUN_ESMF_LogErrHaltUTestUNI
+TESTS_RUN_UNI = RUN_ESMF_LogErrUTestUNI
+#                RUN_ESMF_LogErrHaltUTestUNI
+# Not running Halt on error test, it causes problems with lam.
 
 
 include ${ESMF_DIR}/makefile
