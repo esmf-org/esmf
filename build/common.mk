@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.132 2005/07/06 22:46:54 nscollins Exp $
+#  $Id: common.mk,v 1.133 2005/07/14 17:16:22 jwolfe Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -968,15 +968,27 @@ clean:
 
 distclean: clobber
 
+# figure out if the current dir is the same as ESMF_DIR.  set the inode
+# makefile variables here first, because it is easier to parse out the
+# first word of the output with makefile builtins rather than depend on
+# awk or some other command which must then be identical on every system 
+# we try to support.   the -i on the ls command prints the numerical inode
+# number of the directory; do it in this indirect way because the simple
+# string comparison fails easily because of simple formatting differences
+# (e.g. trailing slash vs not)
+
+export INODE1 = $(word 1, $(shell ls -di .) )
+export INODE2 = $(word 1, $(shell ls -di $(ESMF_DIR)) )
+
 clobber:
-	@if [ `pwd` != $(ESMF_DIR) ]; then \
+	@if [ $(INODE1) != $(INODE2) ] ; then \
 	  echo "Must run clobber from ESMF_DIR" ; \
 	  echo "Current directory is `pwd`" ; \
 	  echo "ESMF_DIR is $(ESMF_DIR)" ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
-	fi
-	$(MAKE) clean
+	fi 
+	$(MAKE) clean 
 	@for DIR in $(CLOBBERDIRS) foo ; do \
 	   if [ $$DIR != "foo" ] ; then \
 	      $(RM) -r $$DIR ;\
