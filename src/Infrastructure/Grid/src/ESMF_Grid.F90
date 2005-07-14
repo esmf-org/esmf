@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.221.2.1 2005/07/07 20:54:26 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.221.2.2 2005/07/14 23:20:53 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.221.2.1 2005/07/07 20:54:26 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.221.2.2 2005/07/14 23:20:53 svasquez Exp $'
 
 !==============================================================================
 !
@@ -374,7 +374,7 @@
 !          Array of physical coordinates in the vertical direction.
 !     \item[{[vertstagger]}]
 !          {\tt ESMF\_GridVertStagger} specifier denoting vertical subGrid
-!          stagger.  The default value is ESMF_GRID_VERT_STAGGER_CENTER.
+!          stagger.  The default value is {\tt ESMF\_GRID\_VERT\_STAGGER\_CENTER}.
 !     \item[{[dimName]}]
 !          Dimension name.
 !     \item[{[dimUnit]}]
@@ -4786,10 +4786,10 @@
 !          some situations.
 !     \item[{[srcrelloc]}]
 !          Optional argument to set the relative location of the source
-!          subGrid for all searches.  The default is ESMF_CELL_CENTER.
+!          subGrid for all searches.  The default is {\tt ESMF\_CELL\_CENTER}.
 !     \item[{[dstrelloc]}]
 !          Optional argument to set the relative location of the destination
-!          subGrid for all searches.  The default is ESMF_CELL_CENTER.
+!          subGrid for all searches.  The default is {\tt ESMF\_CELL\_CENTER}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4916,10 +4916,10 @@
 !          some situations.
 !     \item[{[srcrelloc]}]
 !          Optional argument to set the relative location of the source
-!          subGrid for all searches.  The default is ESMF_CELL_CENTER.
+!          subGrid for all searches.  The default is {\tt ESMF\_CELL\_CENTER}.
 !     \item[{[dstrelloc]}]
 !          Optional argument to set the relative location of the destination
-!          subGrid for all searches.  The default is ESMF_CELL_CENTER.
+!          subGrid for all searches.  The default is {\tt ESMF\_CELL\_CENTER}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

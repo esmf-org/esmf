@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.140 2005/06/20 23:03:36 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.140.2.1 2005/07/14 23:20:54 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.140 2005/06/20 23:03:36 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.140.2.1 2005/07/14 23:20:54 svasquez Exp $'
 
 !==============================================================================
 !
@@ -8458,10 +8458,10 @@
 !          some situations.
 !     \item[{[srcRelloc]}]
 !          Relative location of the source data.  The default value is
-!          ESMF_CELL_CENTER.
+!          {\tt ESMF\_CELL\_CENTER}.
 !     \item[{[dstRelloc]}]
 !          Relative location of the destination data.  The default value is
-!          ESMF_CELL_CENTER.
+!          {\tt ESMF\_CELL\_CENTER}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8827,10 +8827,10 @@
 !          some situations.
 !     \item[{[srcRelloc]}]
 !          Relative location of the source data.  The default value is
-!          ESMF_CELL_CENTER.
+!          {\tt ESMF\_CELL\_CENTER}.
 !     \item[{[dstRelloc]}]
 !          Relative location of the destination data.  The default value is
-!          ESMF_CELL_CENTER.
+!          {\tt ESMF\_CELL\_CENTER}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
