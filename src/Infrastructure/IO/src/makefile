@@ -1,11 +1,15 @@
-# $Id: makefile,v 1.15 2005/04/11 15:55:11 nscollins Exp $
+# $Id: makefile,v 1.16 2005/07/15 21:29:53 jwolfe Exp $
 
 ALL: build_here
 
 CFLAGS    =
-FFLAGS    = 
+FFLAGS    =
 SOURCEC   = 
+ifeq ($(ESMF_NO_IOCODE),true)
+SOURCEF   = wrf_io.F90
+else
 SOURCEF   = wrf_io.F90 field_routines.F90 module_wrf_error.F wrf_abort.F
+endif
 STOREH    = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
