@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.134 2005/07/15 03:41:46 nscollins Exp $
+#  $Id: common.mk,v 1.135 2005/07/15 20:46:31 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1072,9 +1072,9 @@ build_check:
 
 run_check:
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-	  $(MAKE) run_unit_tests_uni run_system_tests_uni ; \
+	  $(MAKE) ESMF_EXHAUSTIVE=OFF run_unit_tests_uni run_system_tests_uni ; \
 	else \
-	  $(MAKE) run_unit_tests run_system_tests ;\
+	  $(MAKE) ESMF_EXHAUSTIVE=OFF run_unit_tests run_system_tests ;\
         fi
 
 
@@ -1456,16 +1456,18 @@ check_unit_tests:
 # the cat step.)
 #
 ftest:
-	-$(RM) $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log
-	-$(MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest > $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout
-	-cat $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log > $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.Log
-	-$(RM) $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log
+	-cd $(ESMF_TESTDIR) ; \
+	$(RM) ./PET*$(TNAME)UTest.Log ; \
+	$(MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest > ./ESMF_$(TNAME)UTest.stdout ; \
+	cat ./PET*$(TNAME)UTest.Log > ./ESMF_$(TNAME)UTest.Log ; \
+	$(RM) ./PET*$(TNAME)UTest.Log
 
 ctest:
-	-$(RM) $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log
-	-$(MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest > $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest.stdout
-	-cat $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log > $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest.Log
-	-$(RM) $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log
+	-cd $(ESMF_TESTDIR) ; \
+	$(RM) ./PET*$(TNAME)UTest.Log ; \
+	$(MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest > ./ESMC_$(TNAME)UTest.stdout ; \
+	cat ./PET*$(TNAME)UTest.Log > ./ESMC_$(TNAME)UTest.Log ; \
+	$(RM) ./PET*$(TNAME)UTest.Log
 
 
 #-------------------------------------------------------------------------------
