@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.26 2005/06/28 20:56:14 svasquez Exp $
+# $Id: makefile,v 1.27 2005/07/15 03:41:47 nscollins Exp $
 
 ALL:  build_unit_tests
+run:  tree_run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -14,13 +15,13 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/TimeMgr/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_AlarmUTest \
-		$(ESMC_TESTDIR)/ESMF_ClockUTest \
-		$(ESMC_TESTDIR)/ESMF_CalendarUTest \
-		$(ESMC_TESTDIR)/ESMF_CalRangeUTest \
-		$(ESMC_TESTDIR)/ESMF_TimeIntervalUTest \
-		$(ESMC_TESTDIR)/ESMF_TimeUTest 
-#	        $(ESMC_TESTDIR)/ESMC_ClockUTest 
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_AlarmUTest \
+		$(ESMF_TESTDIR)/ESMF_ClockUTest \
+		$(ESMF_TESTDIR)/ESMF_CalendarUTest \
+		$(ESMF_TESTDIR)/ESMF_CalRangeUTest \
+		$(ESMF_TESTDIR)/ESMF_TimeIntervalUTest \
+		$(ESMF_TESTDIR)/ESMF_TimeUTest 
+#	        $(ESMF_TESTDIR)/ESMC_ClockUTest 
 # remove temporarily
 
 TESTS_RUN     = RUN_ESMF_AlarmUTest \
@@ -50,125 +51,59 @@ CLOBBERDIRS =
 
 
 
-#
-#
-#
 
 RUN_ESMF_AlarmUTest:
-	-$(RM) *AlarmUTest.Log
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_AlarmUTest > $(ESMC_TESTDIR)/ESMF_AlarmUTest.stdout
-	-cat *AlarmUTest.Log > $(ESMC_TESTDIR)/ESMF_AlarmUTest.Log
-	-$(RM) *AlarmUTest.Log
+	$(MAKE) TNAME=Alarm NP=4 ftest
 
 RUN_ESMF_AlarmUTestUNI:
-	-$(RM) *AlarmUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_AlarmUTest > $(ESMC_TESTDIR)/ESMF_AlarmUTest.stdout
-	-cat *AlarmUTest.Log > $(ESMC_TESTDIR)/ESMF_AlarmUTest.Log
-	-$(RM) *AlarmUTest.Log
+	$(MAKE) TNAME=Alarm NP=1 ftest
 
 
-
-#
-#
-#
 
 RUN_ESMF_ClockUTest:
-	-$(RM) *ClockUTest.Log
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ClockUTest > $(ESMC_TESTDIR)/ESMF_ClockUTest.stdout
-	-cat *ClockUTest.Log > $(ESMC_TESTDIR)/ESMF_ClockUTest.Log
-	-$(RM) *ClockUTest.Log
+	$(MAKE) TNAME=Clock NP=4 ftest
 
 RUN_ESMF_ClockUTestUNI:
-	-$(RM) *ClockUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ClockUTest > $(ESMC_TESTDIR)/ESMF_ClockUTest.stdout
-	-cat *ClockUTest.Log > $(ESMC_TESTDIR)/ESMF_ClockUTest.Log
-	-$(RM) *ClockUTest.Log
+	$(MAKE) TNAME=Clock NP=1 ftest
 
 
-
-#
-#
-#
 
 RUN_ESMF_CalendarUTest:
-	-$(RM) *CalendarUTest.Log
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CalendarUTest > $(ESMC_TESTDIR)/ESMF_CalendarUTest.stdout
-	-cat *CalendarUTest.Log > $(ESMC_TESTDIR)/ESMF_CalendarUTest.Log
-	-$(RM) *CalendarUTest.Log
+	$(MAKE) TNAME=Calendar NP=4 ftest
 
 RUN_ESMF_CalendarUTestUNI:
-	-$(RM) *CalendarUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CalendarUTest > $(ESMC_TESTDIR)/ESMF_CalendarUTest.stdout
-	-cat *CalendarUTest.Log > $(ESMC_TESTDIR)/ESMF_CalendarUTest.Log
-	-$(RM) *CalendarUTest.Log
+	$(MAKE) TNAME=Calendar NP=1 ftest
 
 
 
-#
-#
-#
+RUN_ESMC_ClockUTest:
+	$(MAKE) TNAME=Clock NP=4 ctest
 
-#RUN_ESMC_ClockUTest:
-#	-$(RM) *ClockUTest.Log
-#	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ClockUTest > $(ESMC_TESTDIR)/ESMC_ClockUTest.stdout
-#	-cat *ClockUTest.Log > $(ESMC_TESTDIR)/ESMC_ClockUTest.Log
-#	-$(RM) *ClockUTest.Log
-
-#RUN_ESMC_ClockUTestUNI:
-#	-$(RM) *ClockUTest.Log
-#	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ClockUTest > $(ESMC_TESTDIR)/ESMC_ClockUTest.stdout
-#	-cat *ClockUTest.Log > $(ESMC_TESTDIR)/ESMC_ClockUTest.Log
-#	-$(RM) *ClockUTest.Log
+RUN_ESMC_ClockUTestUNI:
+	$(MAKE) TNAME=Clock NP=1 ctest
 
 
-#
-#
-#
 
 RUN_ESMF_CalRangeUTest:
-	-$(RM) *CalRangeUTest.Log
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CalRangeUTest > $(ESMC_TESTDIR)/ESMF_CalRangeUTest.stdout
-	-cat *CalRangeUTest.Log > $(ESMC_TESTDIR)/ESMF_CalRangeUTest.Log
-	-$(RM) *CalRangeUTest.Log
+	$(MAKE) TNAME=CalRange NP=4 ftest
 
 RUN_ESMF_CalRangeUTestUNI:
-	-$(RM) *CalRangeUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CalRangeUTest > $(ESMC_TESTDIR)/ESMF_CalRangeUTest.stdout
-	-cat *CalRangeUTest.Log > $(ESMC_TESTDIR)/ESMF_CalRangeUTest.Log
-	-$(RM) *CalRangeUTest.Log
+	$(MAKE) TNAME=CalRange NP=1 ftest
 
 
-#
-#
-#
 
 RUN_ESMF_TimeIntervalUTest:
-	-$(RM) *TimeIntervalUTest.Log
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_TimeIntervalUTest > $(ESMC_TESTDIR)/ESMF_TimeIntervalUTest.stdout
-	-cat *TimeIntervalUTest.Log > $(ESMC_TESTDIR)/ESMF_TimeIntervalUTest.Log
-	-$(RM) *TimeIntervalUTest.Log
+	$(MAKE) TNAME=TimeInterval NP=4 ftest
 
 RUN_ESMF_TimeIntervalUTestUNI:
-	-$(RM) *TimeIntervalUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_TimeIntervalUTest > $(ESMC_TESTDIR)/ESMF_TimeIntervalUTest.stdout
-	-cat *TimeIntervalUTest.Log > $(ESMC_TESTDIR)/ESMF_TimeIntervalUTest.Log
-	-$(RM) *TimeIntervalUTest.Log
+	$(MAKE) TNAME=TimeInterval NP=1 ftest
 
 
-
-#
-#
-#
 
 RUN_ESMF_TimeUTest:
-	-$(RM) *TimeUTest.Log
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_TimeUTest > $(ESMC_TESTDIR)/ESMF_TimeUTest.stdout
-	-cat *TimeUTest.Log > $(ESMC_TESTDIR)/ESMF_TimeUTest.Log
-	-$(RM) *TimeUTest.Log
+	$(MAKE) TNAME=Time NP=4 ftest
 
 RUN_ESMF_TimeUTestUNI:
-	-$(RM) *TimeUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_TimeUTest > $(ESMC_TESTDIR)/ESMF_TimeUTest.stdout
-	-cat *TimeUTest.Log > $(ESMC_TESTDIR)/ESMF_TimeUTest.Log
-	-$(RM) *TimeUTest.Log
+	$(MAKE) TNAME=Time NP=1 ftest
+
 

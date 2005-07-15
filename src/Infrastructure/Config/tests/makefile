@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.8 2005/06/28 20:20:44 svasquez Exp $
+# $Id: makefile,v 1.9 2005/07/15 03:41:46 nscollins Exp $
 
 ALL:  build_unit_tests
+run:  tree_run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -14,8 +15,8 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  =  src/Infrastructure/Config/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_ConfigUTest
-#	        $(ESMC_TESTDIR)/ESMC_ConfigUTest 
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ConfigUTest
+#	        $(ESMF_TESTDIR)/ESMC_ConfigUTest 
 
 TESTS_RUN     = RUN_ESMF_ConfigUTest
 #		RUN_ESMC_ConfigUTest 
@@ -38,33 +39,20 @@ CLOBBERDIRS =
 # ESMF_ConfigUTest
 #
 RUN_ESMF_ConfigUTest:
-	-$(RM) *ConfigUTest.Log
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ConfigUTest > $(ESMC_TESTDIR)/ESMF_ConfigUTest.stdout
-	-cat *ConfigUTest.Log > $(ESMC_TESTDIR)/ESMF_ConfigUTest.Log
-	-$(RM) *ConfigUTest.Log
-
+	$(MAKE) TNAME=Config NP=4 ftest
 
 RUN_ESMF_ConfigUTestUNI:
-	-$(RM) *ConfigUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ConfigUTest > $(ESMC_TESTDIR)/ESMF_ConfigUTest.stdout
-	-cat *ConfigUTest.Log > $(ESMC_TESTDIR)/ESMF_ConfigUTest.Log
-	-$(RM) *ConfigUTest.Log
+	$(MAKE) TNAME=Config NP=1 ftest
 
 
 #
 # ESMC_ConfigUTest
 #
 RUN_ESMC_ConfigUTest:
-	-$(RM) *ConfigUTest.Log
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ConfigUTest > $(ESMC_TESTDIR)/ESMC_ConfigUTest.stdout
-	-cat *ConfigUTest.Log > $(ESMC_TESTDIR)/ESMC_ConfigUTest.Log
-	-$(RM) *ConfigUTest.Log
+	$(MAKE) TNAME=Config NP=4 ctest
 
 RUN_ESMC_ConfigUTestUNI:
-	-$(RM) *ConfigUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ConfigUTest > $(ESMC_TESTDIR)/ESMC_ConfigUTest.stdout
-	-cat *ConfigUTest.Log > $(ESMC_TESTDIR)/ESMC_ConfigUTest.Log
-	-$(RM) *ConfigUTest.Log
+	$(MAKE) TNAME=Config NP=1 ctest
 
 
 

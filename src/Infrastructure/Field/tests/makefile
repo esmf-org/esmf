@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.35 2005/06/28 20:27:23 svasquez Exp $ 
+# $Id: makefile,v 1.36 2005/07/15 03:41:46 nscollins Exp $ 
 
 ALL:  build_unit_tests
+run:  tree_run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -16,9 +17,9 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/Field/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldUTest \
-		$(ESMC_TESTDIR)/ESMF_FRoute4UTest \
-		$(ESMC_TESTDIR)/ESMF_FRoute8UTest 
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldUTest \
+		$(ESMF_TESTDIR)/ESMF_FRoute4UTest \
+		$(ESMF_TESTDIR)/ESMF_FRoute8UTest 
 
 TESTS_RUN     = RUN_ESMF_FieldUTest \
 		RUN_ESMF_FRouteUTest 
@@ -40,45 +41,38 @@ ESMF_FRoute8UTest.F90:  ESMF_FRoute4UTest.F90
 # Field
 #
 RUN_ESMF_FieldUTest:
-	-$(RM) *FieldUTest.Log
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FieldUTest > $(ESMC_TESTDIR)/ESMF_FieldUTest.stdout
-	-cat *FieldUTest.Log > $(ESMC_TESTDIR)/ESMF_FieldUTest.Log
-	-$(RM) *FieldUTest.Log
+	$(MAKE) TNAME=Field NP=4 ftest
 
 RUN_ESMF_FieldUTestUNI:
-	-$(RM) *FieldUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldUTest > $(ESMC_TESTDIR)/ESMF_FieldUTest.stdout
-	-cat *FieldUTest.Log > $(ESMC_TESTDIR)/ESMF_FieldUTest.Log
-	-$(RM) *FieldUTest.Log
+	$(MAKE) TNAME=Field NP=1 ftest
 
 
 #
 # Field Route function
 #
 RUN_ESMF_FRouteUTest:
-	-$(RM) *FRoute4UTest.Log
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FRoute4UTest > $(ESMC_TESTDIR)/ESMF_FRoute4UTest.stdout
-	-cat *FRoute4UTest.Log > $(ESMC_TESTDIR)/ESMF_FRoute4UTest.Log
-	-$(RM) *FRoute4UTest.Log
-	-$(RM) *FRoute8UTest.Log
-	-${MPIRUN} -np 8 $(ESMC_TESTDIR)/ESMF_FRoute8UTest > $(ESMC_TESTDIR)/ESMF_FRoute8UTest.stdout
-	-cat *FRoute8UTest.Log > $(ESMC_TESTDIR)/ESMF_FRoute8UTest.Log
-	-$(RM) *FRoute8UTest.Log
+	$(MAKE) TNAME=FRoute4 NP=4 ftest
+	$(MAKE) TNAME=FRoute8 NP=8 ftest
 
 	# for now comment out the larger tests.  as far as i know, these
 	# run, but can cause problems for the automatic overnight builds.
-	#-${MPIRUN} -np 12 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest12.stdout
-	#-${MPIRUN} -np 16 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest16.stdout
-	#-${MPIRUN} -np 20 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest20.stdout
-	#-${MPIRUN} -np 24 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest24.stdout
-	#-${MPIRUN} -np 32 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest24.stdout
+	#$(MAKE) TNAME=FRoute12 NP=12 ftest
+	#$(MAKE) TNAME=FRoute16 NP=16 ftest
+	#$(MAKE) TNAME=FRoute20 NP=20 ftest
+	#$(MAKE) TNAME=FRoute24 NP=24 ftest
+	#$(MAKE) TNAME=FRoute32 NP=32 ftest
 
-RUN_ESMF_FRouteUTestUNI:
-	echo "PASS: ESMF_FRouteUTest not set up to run on one processor." > $(ESMC_TESTDIR)/ESMF_FRouteUTest.stdout
+RUN_ESMF_FRoute4UTest:
+	$(MAKE) TNAME=FRoute4 NP=4 ftest
+
+RUN_ESMF_FRoute8UTest:
+	$(MAKE) TNAME=FRoute8 NP=8 ftest
+
 
 RUN_ESMF_FRoute4UTestUNI:
 	echo "PASS: ESMF_FRoute4UTest not set up to run on one processor." > $(ESMC_TESTDIR)/ESMF_FRoute4UTest.stdout
 
 RUN_ESMF_FRoute8UTestUNI:
 	echo "PASS: ESMF_FRoute8UTest not set up to run on one processor." > $(ESMC_TESTDIR)/ESMF_FRoute8UTest.stdout
+
 

@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.2 2005/05/16 22:35:35 nscollins Exp $ 
+# $Id: makefile,v 1.3 2005/07/15 03:41:48 nscollins Exp $ 
 
 ALL:  build_unit_tests
+run:  tree_run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -55,14 +56,10 @@ RUN_ESMF_StringUTestUNI:
 #
 
 RUN_ESMF_ArrayF90PtrUTest:
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest > $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest.stdout
-	-cat *ArrayF90PtrUTest.Log > $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest.Log
-	-rm *ArrayF90PtrUTest.Log
+	$(MAKE) TNAME=ArrayF90Ptr NP=4 ftest
 
 RUN_ESMF_ArrayF90PtrUTestUNI:
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest > $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest.stdout
-	-cat *ArrayF90PtrUTest.Log > $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest.Log
-	-rm *ArrayF90PtrUTest.Log
+	$(MAKE) TNAME=ArrayF90Ptr NP=1 ftest
 
 
 

@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.10 2005/06/28 19:57:22 svasquez Exp $ 
+# $Id: makefile,v 1.11 2005/07/15 03:41:48 nscollins Exp $ 
 
 ALL:  build_unit_tests
+run:  tree_run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -40,18 +41,11 @@ CLOBBERDIRS =
 #
 
 RUN_ESMF_StateCreateUTest:
-	-$(RM) *StateCreateUTest.Log
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_StateCreateUTest > $(ESMF_TESTDIR)/ESMF_StateCreateUTest.stdout
-	-cat *StateCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_StateCreateUTest.Log
-	-$(RM) *StateCreateUTest.Log
+	$(MAKE) TNAME=StateCreate NP=4 ftest
 
 
 RUN_ESMF_StateCreateUTestUNI:
-	-$(RM) *StateCreateUTest.Log
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_StateCreateUTest > $(ESMF_TESTDIR)/ESMF_StateCreateUTest.stdout
-	-cat *StateCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_StateCreateUTest.Log
-	-$(RM) *StateCreateUTest.Log
-
+	$(MAKE) TNAME=StateCreate NP=1 ftest
 
 
 #       
@@ -59,17 +53,10 @@ RUN_ESMF_StateCreateUTestUNI:
 #
 
 RUN_ESMF_StateUTest:
-	-$(RM) *StateUTest.Log
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_StateUTest > $(ESMF_TESTDIR)/ESMF_StateUTest.stdout
-	-cat *StateUTest.Log > $(ESMC_TESTDIR)/ESMF_StateUTest.Log
-	-$(RM) *StateUTest.Log
+	$(MAKE) TNAME=State NP=4 ftest
 
 RUN_ESMF_StateUTestUNI:
-	-$(RM) *StateUTest.Log
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_StateUTest > $(ESMF_TESTDIR)/ESMF_StateUTest.stdout
-	-cat *StateUTest.Log > $(ESMC_TESTDIR)/ESMF_StateUTest.Log
-	-$(RM) *StateUTest.Log
-
+	$(MAKE) TNAME=State NP=1 ftest
 
 
 
@@ -78,16 +65,9 @@ RUN_ESMF_StateUTestUNI:
 #
 
 RUN_ESMF_StateReconcileUTest:
-	-$(RM) *StateReconcileUTest.Log
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_StateReconcileUTest > $(ESMF_TESTDIR)/ESMF_StateReconcileUTest.stdout
-	-cat *StateReconcileUTest.Log > $(ESMC_TESTDIR)/ESMF_StateReconcileUTest.Log
-	-$(RM) *StateReconcileUTest.Log
+	$(MAKE) TNAME=StateReconcile NP=4 ftest
 
 RUN_ESMF_StateReconcileUTestUNI:
-	-$(RM) *StateReconcileUTest.Log
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_StateReconcileUTest > $(ESMF_TESTDIR)/ESMF_StateReconcileUTest.stdout
-	-cat *StateReconcileUTest.Log > $(ESMC_TESTDIR)/ESMF_StateReconcileUTest.Log
-	-$(RM) *StateReconcileUTest.Log
-
+	$(MAKE) TNAME=StateReconcile NP=1 ftest
 
 

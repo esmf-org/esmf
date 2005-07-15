@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.11 2005/06/28 20:00:46 svasquez Exp $
+# $Id: makefile,v 1.12 2005/07/15 03:41:46 nscollins Exp $
 
 ALL:  build_unit_tests
+run:  tree_run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -14,17 +15,15 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/ArrayDataMap/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest \
-#	        $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest 
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayDataMapUTest
+#	        $(ESMF_TESTDIR)/ESMC_ArrayDataMapUTest 
 
-TESTS_RUN     = RUN_ESMF_ArrayDataMapUTest \
+TESTS_RUN     = RUN_ESMF_ArrayDataMapUTest
 #		RUN_ESMC_ArrayDataMapUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_ArrayDataMapUTestUNI \
+TESTS_RUN_UNI = RUN_ESMF_ArrayDataMapUTestUNI
 #		RUN_ESMC_ArrayDataMapUTestUNI 
 
-TESTS_RM      = ESMF_ArrayDataMapUTest.rm \
-#                ESMC_ArrayDataMapUTest.rm
 
 
 include ${ESMF_DIR}/makefile
@@ -39,22 +38,10 @@ CLOBBERDIRS =
 # Fortran unit test
 #
 RUN_ESMF_ArrayDataMapUTest:
-	-$(RM) *ArrayDataMapUTest.Log
-	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayDataMapUTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.stdout
-	-cat *ArrayDataMapUTest.Log > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.Log
-	-$(RM) *ArrayDataMapUTest.Log
-
+	$(MAKE) TNAME=ArrayDataMap NP=4 ftest
 
 RUN_ESMF_ArrayDataMapUTestUNI:
-	-$(RM) *ArrayDataMapUTest.Log
-	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayDataMapUTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.stdout
-	-cat *ArrayDataMapUTest.Log > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.Log
-	-$(RM) *ArrayDataMapUTest.Log
-
-ESMF_ArrayDataMapUTest.rm:
-	echo "ESMF_ArrayDataMapTest.rm target called here."
+	$(MAKE) TNAME=ArrayDataMap NP=1 ftest
 
 
 #
@@ -62,21 +49,10 @@ ESMF_ArrayDataMapUTest.rm:
 #
 
 RUN_ESMC_ArrayDataMapUTest:
-	-$(RM) *ArrayDataMapUTest.Log
-	-@rm -f testlog stdlog.* logfile.* ESMC_ArrayDataMapUTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.stdout
-	-cat *ArrayDataMapUTest.Log > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.Log
-	-$(RM) *ArrayDataMapUTest.Log
+	$(MAKE) TNAME=ArrayDataMap NP=4 ctest
 
 RUN_ESMC_ArrayDataMapUTestUNI:
-	-$(RM) *ArrayDataMapUTest.Log
-	-@rm -f testlog stdlog.* logfile.* ESMC_ArrayDataMapUTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.stdout
-	-cat *ArrayDataMapUTest.Log > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.Log
-	-$(RM) *ArrayDataMapUTest.Log
-
-ESMC_ArrayDataMapUTest.rm:
-	echo "ESMC_ArrayDataMapTest.rm target called here."
+	$(MAKE) TNAME=ArrayDataMap NP=1 ctest
 
 
 

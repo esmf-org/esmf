@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.13 2005/06/28 20:29:18 svasquez Exp $
+# $Id: makefile,v 1.14 2005/07/15 03:41:46 nscollins Exp $
 
 ALL:  build_unit_tests
+run:  tree_run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -36,26 +37,15 @@ CLOBBERDIRS =
 # FieldComm unit tests
 #
 RUN_ESMF_FieldGatherUTest:
-	-$(RM) *FieldGatherUTest.Log
-	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_FieldGatherUTest > $(ESMC_TESTDIR)/ESMF_FieldGatherUTest.stdout
-	-cat *FieldGatherUTest.Log > $(ESMC_TESTDIR)/ESMF_FieldGatherUTest.Log
-	-$(RM) *FieldGatherUTest.Log
-
+	$(MAKE) TNAME=FieldGather NP=6 ftest
 
 RUN_ESMF_FieldGatherUTestUNI:
 	echo "PASS: ESMF_FieldGatherUTest not set up to run on one processor." > $(ESMF_TESTDIR)/ESMF_FieldGatherUTest.stdout
 
 
 RUN_ESMF_FieldGather1DUTest:
-	-$(RM) *FieldGather1DUTest.Log
-	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_FieldGather1DUTest > $(ESMC_TESTDIR)/ESMF_FieldGather1DUTest.stdout
-	-cat *FieldGather1DUTest.Log > $(ESMC_TESTDIR)/ESMF_FieldGather1DUTest.Log
-	-$(RM) *FieldGather1DUTest.Log
-
+	$(MAKE) TNAME=FieldGather1D NP=6 ftest
 
 RUN_ESMF_FieldGather1DUTestUNI:
-	-$(RM) *FieldGather1DUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldGather1DUTest > $(ESMC_TESTDIR)/ESMF_FieldGather1DUTest.stdout
-	-cat *FieldGather1DUTest.Log > $(ESMC_TESTDIR)/ESMF_FieldGather1DUTest.Log
-	-$(RM) *FieldGather1DUTest.Log
+	$(MAKE) TNAME=FieldGather1D NP=1 ftest
 

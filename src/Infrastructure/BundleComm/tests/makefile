@@ -1,7 +1,7 @@
-# $Id: makefile,v 1.12 2005/06/28 20:16:11 svasquez Exp $ 
+# $Id: makefile,v 1.13 2005/07/15 03:41:46 nscollins Exp $ 
 
 ALL:  build_unit_tests
-run:  run_unit_tests
+run:  tree_run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -38,36 +38,20 @@ CLOBBERDIRS =
 #  BundleComms
 #
 RUN_ESMF_BundleCommUTest:
-	-$(RM) *BundleCommUTest.Log
-	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCommUTest.tmps
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_BundleCommUTest > $(ESMF_TESTDIR)/ESMF_BundleCommUTest.stdout
-	-cat *BundleCommUTest.Log > $(ESMF_TESTDIR)/ESMF_BundleCommUTest.Log
-	-$(RM) *BundleCommUTest.Log
+	$(MAKE) TNAME=BundleComm NP=4 ftest
 
 RUN_ESMF_BundleCommUTestUNI:
-	-$(RM) *BundleCommUTest.Log
-	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCommUTest.tmps
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_BundleCommUTest > $(ESMF_TESTDIR)/ESMF_BundleCommUTest.stdout
-	-cat *BundleCommUTest.Log > $(ESMF_TESTDIR)/ESMF_BundleCommUTest.Log
-	-$(RM) *BundleCommUTest.Log
+	$(MAKE) TNAME=BundleComm NP=1 ftest
 
 
 #
 #  BundleCommOptions
 #
 RUN_ESMF_BundleCommOptionsUTest:
-	-$(RM) *BundleCommOptionsUTest.Log
-	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCommOptionsUTest.tmps
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest > $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest.stdout
-	-cat *BundleCommOptionsUTest.Log > $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest.Log
-	-$(RM) *BundleCommOptionsUTest.Log
+	$(MAKE) TNAME=BundleCommOptions NP=4 ftest
 
 RUN_ESMF_BundleCommOptionsUTestUNI:
-	-$(RM) *BundleCommOptionsUTest.Log
-	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCommOptionsUTest.tmps
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest > $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest.stdout
-	-cat *BundleCommOptionsUTest.Log > $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest.Log
-	-$(RM) *BundleCommOptionsUTest.Log
+	$(MAKE) TNAME=BundleCommOptions NP=1 ftest
 
 
 

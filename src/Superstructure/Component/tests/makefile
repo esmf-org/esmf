@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.35 2005/06/28 19:56:14 svasquez Exp $ 
+# $Id: makefile,v 1.36 2005/07/15 03:41:48 nscollins Exp $ 
 
 ALL:  build_unit_tests
+run:  tree_run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -61,31 +62,28 @@ CLOBBERDIRS =
 # Components
 #
 RUN_ESMF_ComponentUTest:
-	-${RM} *ComponentUTest.Log
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ComponentUTest > $(ESMC_TESTDIR)/ESMF_ComponentUTest.stdout
-	-cat *ComponentUTest.Log > $(ESMC_TESTDIR)/ESMF_ComponentUTest.Log
-	-${RM} *ComponentUTest.Log
+	$(MAKE) TNAME=Component NP=4 ftest
 
 RUN_ESMF_ComponentUTestUNI:
-	-${RM} *ComponentUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ComponentUTest > $(ESMC_TESTDIR)/ESMF_ComponentUTest.stdout
-	-cat *ComponentUTest.Log > $(ESMC_TESTDIR)/ESMF_ComponentUTest.Log
-	-${RM} *ComponentUTest.Log
+	$(MAKE) TNAME=Component NP=1 ftest
 
 
 RUN_ESMF_GridCompCreateUTest:
-	-${RM} *GridCompCreateUTest.Log
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest > $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest.stdout
-	-cat *GridCompCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest.Log
-	-${RM} *GridCompCreateUTest.Log
+	$(MAKE) TNAME=GridCompCreate NP=4 ftest
 
 RUN_ESMF_GridCompCreateUTestUNI:
-	-${RM} *GridCompCreateUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest > $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest.stdout
-	-cat *GridCompCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest.Log
-	-${RM} *GridCompCreateUTest.Log
+	$(MAKE) TNAME=GridCompCreate NP=1 ftest
 
 
+RUN_ESMF_CplCompCreateUTest:
+	$(MAKE) TNAME=CplCompCreate NP=4 ftest
+
+RUN_ESMF_CplCompCreateUTestUNI:
+	$(MAKE) TNAME=CplCompCreate NP=1 ftest
+
+#
+# older tests
+#
 
 $(ESMC_TESTDIR)/ESMC_CompCreate: ESMC_CompCreate.o
 	-$(CLINKER) $(LINKOPTS) -o $(ESMC_TESTDIR)/ESMC_CompCreate \
@@ -133,22 +131,5 @@ RUN_ESMC_CompRun:
 
 RUN_ESMC_CompRunUNI:
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_CompRun > $(ESMC_TESTDIR)/ESMC_CompRun.stdout
-
-
-#
-#
-#
-
-RUN_ESMF_CplCompCreateUTest:
-	-${RM} *CplCompCreateUTest.Log
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest > $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest.stdout
-	-cat *CplCompCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest.Log
-	-${RM} *CplCompCreateUTest.Log
-
-RUN_ESMF_CplCompCreateUTestUNI:
-	-${RM} *CplCompCreateUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest > $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest.stdout
-	-cat *CplCompCreateUTest.Log > $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest.Log
-	-${RM} *CplCompCreateUTest.Log
 
 

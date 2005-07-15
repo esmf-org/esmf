@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.18 2005/06/28 21:02:04 svasquez Exp $ 
+# $Id: makefile,v 1.19 2005/07/15 03:41:48 nscollins Exp $ 
 
 ALL:  build_unit_tests
+run:  tree_run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -51,104 +52,62 @@ CLOBBERDIRS =
 # VM
 #
 RUN_ESMF_VMUTest:
-	-$(RM) *VMUTest.Log
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_VMUTest > $(ESMF_TESTDIR)/ESMF_VMUTest.stdout
-	-cat *VMUTest.Log > $(ESMC_TESTDIR)/ESMF_VMUTest.Log
-	-$(RM) *VMUTest.Log
+	$(MAKE) TNAME=VM NP=4 ftest
 
 RUN_ESMF_VMUTestUNI:
-	-$(RM) *VMUTest.Log
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_VMUTest > $(ESMF_TESTDIR)/ESMF_VMUTest.stdout
-	-cat *VMUTest.Log > $(ESMC_TESTDIR)/ESMF_VMUTest.Log
-	-$(RM) *VMUTest.Log
+	$(MAKE) TNAME=VM NP=1 ftest
 
 #
 # VM Send Receive
 #
 RUN_ESMF_VMSendVMRecvUTest:
-	-$(RM) *VMSendVMRecvUTest.Log
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_VMSendVMRecvUTest > $(ESMF_TESTDIR)/ESMF_VMSendVMRecvUTest.stdout
-	-cat *VMSendVMRecvUTest.Log > $(ESMC_TESTDIR)/ESMF_VMSendVMRecvUTest.Log
-	-$(RM) *VMSendVMRecvUTest.Log
+	$(MAKE) TNAME=VMSendVMRecv NP=4 ftest
 
 RUN_ESMF_VMSendVMRecvUTestUNI:
-	-$(RM) *VMSendVMRecvUTest.Log
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_VMSendVMRecvUTest > $(ESMF_TESTDIR)/ESMF_VMSendVMRecvUTest.stdout
-	-cat *VMSendVMRecvUTest.Log > $(ESMC_TESTDIR)/ESMF_VMSendVMRecvUTest.Log
-	-$(RM) *VMSendVMRecvUTest.Log
+	$(MAKE) TNAME=VMSendVMRecv NP=1 ftest
 
 #
 # VM Sendreceive
 #
 RUN_ESMF_VMSendRecvUTest:
-	-$(RM) *VMSendRecvUTest.Log
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_VMSendRecvUTest > $(ESMF_TESTDIR)/ESMF_VMSendRecvUTest.stdout
-	-cat *VMSendRecvUTest.Log > $(ESMC_TESTDIR)/ESMF_VMSendRecvUTest.Log
-	-$(RM) *VMSendRecvUTest.Log
+	$(MAKE) TNAME=VMSendRecv NP=4 ftest
 
 RUN_ESMF_VMSendRecvUTestUNI:
-	-$(RM) *VMSendRecvUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_VMSendRecvUTest > $(ESMC_TESTDIR)/ESMF_VMSendRecvUTest.stdout
-	-cat *VMSendRecvUTest.Log > $(ESMC_TESTDIR)/ESMF_VMSendRecvUTest.Log
-	-$(RM) *VMSendRecvUTest.Log
+	$(MAKE) TNAME=VMSendRecv NP=1 ftest
 
 #
 # VM Scatter 
 #
 RUN_ESMF_VMScatterUTest:
-	-$(RM) *VMScatterUTest.Log
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_VMScatterUTest > $(ESMF_TESTDIR)/ESMF_VMScatterUTest.stdout
-	-cat *VMScatterUTest.Log > $(ESMC_TESTDIR)/ESMF_VMScatterUTest.Log
-	-$(RM) *VMScatterUTest.Log
+	$(MAKE) TNAME=VMScatter NP=4 ftest
 
 RUN_ESMF_VMScatterUTestUNI:
-	-$(RM) *VMScatterUTest.Log
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_VMScatterUTest > $(ESMF_TESTDIR)/ESMF_VMScatterUTest.stdout
-	-cat *VMScatterUTest.Log > $(ESMC_TESTDIR)/ESMF_VMScatterUTest.Log
-	-$(RM) *VMScatterUTest.Log
+	$(MAKE) TNAME=VMScatter NP=1 ftest
 
 #
 # VM Gather
 #
 RUN_ESMF_VMGatherUTest:
-	-$(RM) *VMGatherUTest.Log
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_VMGatherUTest > $(ESMF_TESTDIR)/ESMF_VMGatherUTest.stdout
-	-cat *VMGatherUTest.Log > $(ESMC_TESTDIR)/ESMF_VMGatherUTest.Log
-	-$(RM) *VMGatherUTest.Log
+	$(MAKE) TNAME=VMGather NP=4 ftest
 
 RUN_ESMF_VMGatherUTestUNI:
-	-$(RM) *VMGatherUTest.Log
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_VMGatherUTest > $(ESMF_TESTDIR)/ESMF_VMGatherUTest.stdout
-	-cat *VMGatherUTest.Log > $(ESMC_TESTDIR)/ESMF_VMGatherUTest.Log
-	-$(RM) *VMGatherUTest.Log
+	$(MAKE) TNAME=VMGather NP=1 ftest
 
 #
 # VM Broadcast
 #
 RUN_ESMF_VMBroadcastUTest:
-	-$(RM) *VMBroadcastUTest.Log
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_VMBroadcastUTest > $(ESMF_TESTDIR)/ESMF_VMBroadcastUTest.stdout
-	-cat *VMBroadcastUTest.Log > $(ESMC_TESTDIR)/ESMF_VMBroadcastUTest.Log
-	-$(RM) *VMBroadcastUTest.Log
+	$(MAKE) TNAME=VMBroadcast NP=4 ftest
 
 RUN_ESMF_VMBroadcastUTestUNI:
-	-$(RM) *VMBroadcastUTest.Log
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_VMBroadcastUTest > $(ESMF_TESTDIR)/ESMF_VMBroadcastUTest.stdout
-	-cat *VMBroadcastUTest.Log > $(ESMC_TESTDIR)/ESMF_VMBroadcastUTest.Log
-	-$(RM) *VMBroadcastUTest.Log
+	$(MAKE) TNAME=VMBroadcast NP=1 ftest
 
 #
 # VM Barrier
 #
 RUN_ESMF_VMBarrierUTest:
-	-$(RM) *VMBarrierUTest.Log
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_VMBarrierUTest > $(ESMF_TESTDIR)/ESMF_VMBarrierUTest.stdout
-	-cat *VMBarrierUTest.Log > $(ESMC_TESTDIR)/ESMF_VMBarrierUTest.Log
-	-$(RM) *VMBarrierUTest.Log
+	$(MAKE) TNAME=VMBarrier NP=4 ftest
 
 RUN_ESMF_VMBarrierUTestUNI:
-	-$(RM) *VMBarrierUTest.Log
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_VMBarrierUTest > $(ESMF_TESTDIR)/ESMF_VMBarrierUTest.stdout
-	-cat *VMBarrierUTest.Log > $(ESMC_TESTDIR)/ESMF_VMBarrierUTest.Log
-	-$(RM) *VMBarrierUTest.Log
+	$(MAKE) TNAME=VMBarrier NP=1 ftest
 

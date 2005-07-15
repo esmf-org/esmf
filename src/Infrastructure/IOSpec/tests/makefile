@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.5 2005/06/28 20:34:59 svasquez Exp $ 
+# $Id: makefile,v 1.6 2005/07/15 03:41:47 nscollins Exp $ 
 
 ALL:  build_unit_tests
+run:  tree_run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -15,7 +16,7 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/IOSpec/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_IOSpecUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_IOSpecUTest
 
 TESTS_RUN     = RUN_ESMF_IOSpecUTest
 
@@ -33,14 +34,9 @@ CLOBBERDIRS =
 # IOSpec
 #
 RUN_ESMF_IOSpecUTest:
-	-$(RM) *IOSpecUTest.Log
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_IOSpecUTest > $(ESMC_TESTDIR)/ESMF_IOSpecUTest.stdout
-	-cat *IOSpecUTest.Log > $(ESMC_TESTDIR)/ESMF_IOSpecUTest.Log
-	-$(RM) *IOSpecUTest.Log
+	$(MAKE) TNAME=IOSpec NP=4 ftest
 
 RUN_ESMF_IOSpecUTestUNI:
-	-$(RM) *IOSpecUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_IOSpecUTest > $(ESMC_TESTDIR)/ESMF_IOSpecUTest.stdout
-	-cat *IOSpecUTest.Log > $(ESMC_TESTDIR)/ESMF_IOSpecUTest.Log
-	-$(RM) *IOSpecUTest.Log
+	$(MAKE) TNAME=IOSpec NP=1 ftest
+
 

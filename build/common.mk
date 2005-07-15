@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.133 2005/07/14 17:16:22 jwolfe Exp $
+#  $Id: common.mk,v 1.134 2005/07/15 03:41:46 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1440,6 +1440,33 @@ clean_unit_tests:
 #
 check_unit_tests:
 	@$(DO_UT_RESULTS)
+
+#
+# internal targets used to actually run the fortran and c++ unit tests
+#
+#  the call in the local makefiles is something like:
+#    $(MAKE) TNAME=testname NP=4 ftest
+#
+# running a test is:  remove any old existing per-process log files, then
+# run the test with the right number of processors.  the standard output is
+# captured in a .stdout file; the test macros open PETx.name.Log files by
+# default (set when the tests call ESMF_Initialize()).  after the tests run,
+# we cat all the per-pet files together into a single log file.  (after the
+# log can collate output from different PETs all by itself, we can remove
+# the cat step.)
+#
+ftest:
+	-$(RM) $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log
+	-$(MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest > $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout
+	-cat $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log > $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.Log
+	-$(RM) $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log
+
+ctest:
+	-$(RM) $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log
+	-$(MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest > $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest.stdout
+	-cat $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log > $(ESMF_TESTDIR)/ESMC_$(TNAME)UTest.Log
+	-$(RM) $(ESMF_TESTDIR)/PET*$(TNAME)UTest.Log
+
 
 #-------------------------------------------------------------------------------
 #  Obsolete targets for building and running unit tests.  Echo an error

@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.8 2005/06/28 20:13:59 svasquez Exp $ 
+# $Id: makefile,v 1.9 2005/07/15 03:41:46 nscollins Exp $ 
 
 ALL:  build_unit_tests
+run:  tree_run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -21,7 +22,6 @@ TESTS_RUN     = RUN_ESMF_BundleUTest
 
 TESTS_RUN_UNI = RUN_ESMF_BundleUTestUNI 
 
-TESTS_RM      = ESMF_BundleUTest.rm 
 
 include ${ESMF_DIR}/makefile
 
@@ -36,21 +36,9 @@ CLOBBERDIRS =
 #  Bundles
 #
 RUN_ESMF_BundleUTest:
-	-$(RM) *BundleUTest.Log
-	-@rm -f testlog stdlog.* logfile.* ESMF_BundleUTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BundleUTest > $(ESMC_TESTDIR)/ESMF_BundleUTest.stdout
-	-cat *BundleUTest.Log > $(ESMC_TESTDIR)/ESMF_BundleUTest.Log
-	-$(RM) *BundleUTest.Log
+	$(MAKE) TNAME=Bundle NP=4 ftest
 
 RUN_ESMF_BundleUTestUNI:
-	-$(RM) *BundleUTest.Log
-	-@rm -f testlog stdlog.* logfile.* ESMF_BundleUTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BundleUTest > $(ESMC_TESTDIR)/ESMF_BundleUTest.stdout
-	-cat *BundleUTest.Log > $(ESMC_TESTDIR)/ESMF_BundleUTest.Log
-	-$(RM) *BundleUTest.Log
-
-ESMF_BundleUTest.rm:
-	echo "ESMF_BundleUTest.rm target called here."
-
+	$(MAKE) TNAME=Bundle NP=1 ftest
 
 

@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.2 2005/06/28 20:57:43 svasquez Exp $ 
+# $Id: makefile,v 1.3 2005/07/15 03:41:47 nscollins Exp $ 
 
 ALL:  build_unit_tests
+run:  tree_run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -14,7 +15,7 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Util/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_UtilUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_UtilUTest
 
 TESTS_RUN     = RUN_ESMF_UtilUTest
 
@@ -35,17 +36,9 @@ CLOBBERDIRS =
 #
 
 RUN_ESMF_UtilUTest:
-	-$(RM) *UtilUTest.Log
-	-@rm -f testlog stdlog.* logfile.* ESMF_UtilUTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_UtilUTest > $(ESMC_TESTDIR)/ESMF_UtilUTest.stdout
-	-cat *UtilUTest.Log > $(ESMC_TESTDIR)/ESMF_UtilUTest.Log
-	-$(RM) *UtilUTest.Log
+	$(MAKE) TNAME=Util NP=4 ftest
 
 RUN_ESMF_UtilUTestUNI:
-	-$(RM) *UtilUTest.Log
-	-@rm -f testlog stdlog.* logfile.* ESMF_UtilUTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_UtilUTest > $(ESMC_TESTDIR)/ESMF_UtilUTest.stdout
-	-cat *UtilUTest.Log > $(ESMC_TESTDIR)/ESMF_UtilUTest.Log
-	-$(RM) *UtilUTest.Log
+	$(MAKE) TNAME=Util NP=1 ftest
 
 

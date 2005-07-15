@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.9 2005/06/28 19:56:50 svasquez Exp $
+# $Id: makefile,v 1.10 2005/07/15 03:41:48 nscollins Exp $
 
 ALL:  build_unit_tests
+run:  tree_run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -14,8 +15,8 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Superstructure/ESMFMod/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_ESMFModUTest \
-	        $(ESMC_TESTDIR)/ESMC_ESMFModUTest 
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ESMFModUTest \
+	        $(ESMF_TESTDIR)/ESMC_ESMFModUTest 
 
 TESTS_RUN     = RUN_ESMF_ESMFModUTest \
 		RUN_ESMC_ESMFModUTest 
@@ -36,17 +37,10 @@ CLOBBERDIRS =
 # Fortran unit test
 #
 RUN_ESMF_ESMFModUTest:
-	-$(RM) *ESMFModUTest.Log
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ESMFModUTest > $(ESMC_TESTDIR)/ESMF_ESMFModUTest.stdout
-	-cat *ESMFModUTest.Log > $(ESMC_TESTDIR)/ESMF_ESMFModUTest.Log
-	-$(RM) *ESMFModUTest.Log
-
+	$(MAKE) TNAME=ESMFMod NP=4 ftest
 
 RUN_ESMF_ESMFModUTestUNI:
-	-$(RM) *ESMFModUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ESMFModUTest > $(ESMC_TESTDIR)/ESMF_ESMFModUTest.stdout
-	-cat *ESMFModUTest.Log > $(ESMC_TESTDIR)/ESMF_ESMFModUTest.Log
-	-$(RM) *ESMFModUTest.Log
+	$(MAKE) TNAME=ESMFMod NP=1 ftest
 
 
 #
@@ -54,16 +48,10 @@ RUN_ESMF_ESMFModUTestUNI:
 #
 
 RUN_ESMC_ESMFModUTest:
-	-$(RM) *ESMFModUTest.Log
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ESMFModUTest > $(ESMC_TESTDIR)/ESMC_ESMFModUTest.stdout
-	-cat *ESMFModUTest.Log > $(ESMC_TESTDIR)/ESMF_ESMCModUTest.Log
-	-$(RM) *ESMFModUTest.Log
+	$(MAKE) TNAME=ESMFMod NP=4 ctest
 
 RUN_ESMC_ESMFModUTestUNI:
-	-$(RM) *ESMFModUTest.Log
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ESMFModUTest > $(ESMC_TESTDIR)/ESMC_ESMFModUTest.stdout
-	-cat *ESMFModUTest.Log > $(ESMC_TESTDIR)/ESMF_ESMCModUTest.Log
-	-$(RM) *ESMFModUTest.Log
+	$(MAKE) TNAME=ESMFMod NP=1 ctest
 
 
 

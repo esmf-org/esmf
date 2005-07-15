@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.8 2005/06/28 20:23:30 svasquez Exp $ 
+# $Id: makefile,v 1.9 2005/07/15 03:41:46 nscollins Exp $ 
 
 ALL:  build_unit_tests
+run:  tree_run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -15,13 +16,12 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/DELayout/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_DELayoutUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_DELayoutUTest
 
 TESTS_RUN     = RUN_ESMF_DELayoutUTest
 
 TESTS_RUN_UNI = RUN_ESMF_DELayoutUTestUNI
 
-TESTS_RM      =
 
 include ${ESMF_DIR}/makefile
 
@@ -31,19 +31,12 @@ CLOBBERDIRS =
 
 
 #
-# VM
+# DELayout tests
 #
 RUN_ESMF_DELayoutUTest:
-	-$(RM) *DELayoutUTest.Log
-	-@rm -f testlog stdlog.* logfile.* ESMF_DELayoutUTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_DELayoutUTest > $(ESMC_TESTDIR)/ESMF_DELayoutUTest.stdout
-	-cat *DELayoutUTest.Log > $(ESMC_TESTDIR)/ESMF_DELayoutUTest.Log
-	-$(RM) *DELayoutUTest.Log
-
+	$(MAKE) TNAME=DELayout NP=4 ftest
 
 RUN_ESMF_DELayoutUTestUNI:
-	-$(RM) *DELayoutUTest.Log
-	-@rm -f testlog stdlog.* logfile.* ESMF_DELayoutUTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_DELayoutUTest > $(ESMC_TESTDIR)/ESMF_DELayoutUTest.stdout
-	-cat *DELayoutUTest.Log > $(ESMC_TESTDIR)/ESMF_DELayoutUTest.Log
-	-$(RM) *DELayoutUTest.Log
+	$(MAKE) TNAME=DELayout NP=1 ftest
+
+
