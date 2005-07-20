@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.17 2005/07/08 21:13:46 nscollins Exp $
+// $Id: ESMC_FTable.C,v 1.18 2005/07/20 19:11:12 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.17 2005/07/08 21:13:46 nscollins Exp $";
+           "$Id: ESMC_FTable.C,v 1.18 2005/07/20 19:11:12 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -154,16 +154,33 @@
 //EOP
 // !REQUIREMENTS:  
 
+    int i, thisfunc;
+    //char msgbuf[ESMF_MAXSTR];
 
- // TODO: test this code
-    if (funccount >= funcalloc) {
- 	funcs = (struct funcinfo *)realloc((void *)funcs, (funccount+4) * sizeof(struct funcinfo));
-        funcalloc = funccount+4;
+    // look for the name already existing in the table.  if found
+    // replace it.  otherwise add it to the end.
+    for (i=0; i<funccount; i++) {
+        if (!strcmp(name, funcs[i].funcname))
+	   break;
     }
-    funcs[funccount].funcptr = func;
-    funcs[funccount].funcname = new char[strlen(name)+1];
-    strcpy(funcs[funccount].funcname, name);
-    funcs[funccount].ftype = FT_VOID;
+
+    // we found the function, or we got to the end of the table.
+    // either way we are ready to add it.
+
+    thisfunc = i;
+
+    // extend the table if needed
+    if (thisfunc >= funcalloc) {
+ 	funcs = (struct funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(struct funcinfo));
+        funcalloc = thisfunc+4;
+    }
+    funcs[thisfunc].funcptr = func;
+    funcs[thisfunc].ftype = FT_VOID;
+    // do these only if not replacing an existing entry.
+    if (thisfunc == funccount) {
+        funcs[thisfunc].funcname = new char[strlen(name)+1];
+        strcpy(funcs[thisfunc].funcname, name);
+    }
    
     funccount++;
 
@@ -196,19 +213,33 @@
 //EOP
 // !REQUIREMENTS:  
 
+    int i, thisfunc;
+    //char msgbuf[ESMF_MAXSTR];
 
- // TODO: search table for existing function with same name and 
- //        overwrite it, instead of just adding again to end of table.
-
- // TODO: test this code
-    if (funccount >= funcalloc) {
- 	funcs = (struct funcinfo *)realloc((void *)funcs, (funccount+4) * sizeof(struct funcinfo));
-        funcalloc = funccount+4;
+    // look for the name already existing in the table.  if found
+    // replace it.  otherwise add it to the end.
+    for (i=0; i<funccount; i++) {
+        if (!strcmp(name, funcs[i].funcname))
+	   break;
     }
-    funcs[funccount].funcptr = func;
-    funcs[funccount].funcname = new char[strlen(name)+1];
-    strcpy(funcs[funccount].funcname, name);
-    funcs[funccount].ftype = ftype;
+
+    // we found the function, or we got to the end of the table.
+    // either way we are ready to add it.
+
+    thisfunc = i;
+
+    // extend the table if needed
+    if (thisfunc >= funcalloc) {
+ 	funcs = (struct funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(struct funcinfo));
+        funcalloc = thisfunc+4;
+    }
+    funcs[thisfunc].funcptr = func;
+    funcs[thisfunc].ftype = ftype;
+    // do these only if not replacing an existing entry.
+    if (thisfunc == funccount) {
+        funcs[thisfunc].funcname = new char[strlen(name)+1];
+        strcpy(funcs[thisfunc].funcname, name);
+    }
    
     funccount++;
 
@@ -241,17 +272,35 @@
 //EOP
 // !REQUIREMENTS:  
 
- // TODO: test this code
-    if (funccount >= funcalloc) {
- 	funcs = (struct funcinfo *)realloc((void *)funcs, (funccount+4) * sizeof(struct funcinfo));
-        funcalloc = funccount+4;
+    int i, thisfunc;
+    //char msgbuf[ESMF_MAXSTR];
+
+    // look for the name already existing in the table.  if found
+    // replace it.  otherwise add it to the end.
+    for (i=0; i<funccount; i++) {
+        if (!strcmp(name, funcs[i].funcname))
+	   break;
     }
-    funcs[funccount].funcptr = func;
-    funcs[funccount].funcname = new char[strlen(name)+1];
-    strcpy(funcs[funccount].funcname, name);
-    funcs[funccount].ftype = FT_VOIDPINTP;
-    funcs[funccount].funcarg[0] = arg1;
-    funcs[funccount].funcarg[1] = (void *)arg2;
+
+    // we found the function, or we got to the end of the table.
+    // either way we are ready to add it.
+
+    thisfunc = i;
+
+    // extend the table if needed
+    if (thisfunc >= funcalloc) {
+ 	funcs = (struct funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(struct funcinfo));
+        funcalloc = thisfunc+4;
+    }
+    funcs[thisfunc].funcptr = func;
+    funcs[thisfunc].ftype = FT_VOIDPINTP;
+    funcs[thisfunc].funcarg[0] = arg1;
+    funcs[thisfunc].funcarg[1] = (void *)arg2;
+    // do these only if not replacing an existing entry.
+    if (thisfunc == funccount) {
+        funcs[thisfunc].funcname = new char[strlen(name)+1];
+        strcpy(funcs[thisfunc].funcname, name);
+    }
    
     funccount++;
 
@@ -284,19 +333,35 @@
 //EOP
 // !REQUIREMENTS:  
 
-    int i;
+    int i, thisfunc;
+    //char msgbuf[ESMF_MAXSTR];
 
- // TODO: test this code
-    if (funccount >= funcalloc) {
- 	funcs = (struct funcinfo *)realloc((void *)funcs, (funccount+4) * sizeof(struct funcinfo));
-        funcalloc = funccount+4;
+    // look for the name already existing in the table.  if found
+    // replace it.  otherwise add it to the end.
+    for (i=0; i<funccount; i++) {
+        if (!strcmp(name, funcs[i].funcname))
+	   break;
     }
-    funcs[funccount].funcptr = func;
-    funcs[funccount].funcname = new char[strlen(name)+1];
-    strcpy(funcs[funccount].funcname, name);
-    funcs[funccount].ftype = ftype;
+
+    // we found the function, or we got to the end of the table.
+    // either way we are ready to add it.
+
+    thisfunc = i;
+
+    // extend the table if needed
+    if (thisfunc >= funcalloc) {
+ 	funcs = (struct funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(struct funcinfo));
+        funcalloc = thisfunc+4;
+    }
+    funcs[thisfunc].funcptr = func;
+    funcs[thisfunc].ftype = ftype;
     for(i=0; i<acount; i++)
-        funcs[funccount].funcarg[i] = arglist[i];
+        funcs[thisfunc].funcarg[i] = arglist[i];
+    // do these only if not replacing an existing entry.
+    if (thisfunc == funccount) {
+        funcs[thisfunc].funcname = new char[strlen(name)+1];
+        strcpy(funcs[thisfunc].funcname, name);
+    }
    
     funccount++;
 
