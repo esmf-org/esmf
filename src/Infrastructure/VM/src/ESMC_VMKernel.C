@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.46 2005/07/20 15:48:32 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.47 2005/07/20 18:23:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ void ESMC_VMK::vmk_obtain_args(void){
     sprintf(command, "env COLUMNS=8000 ps -p %d -o command > .args.%d", mypid,
       mypid);
   else
-    sprintf(command, "env COLUMNS=8000 ps -p %d -o args > .args.%d", mypid,
+    sprintf(command, "env COLUMNS=8000 ps -p %d -o args= > .args.%d", mypid,
       mypid);
   system(command);
   sprintf(fname, ".args.%d", mypid);
@@ -192,7 +192,7 @@ void ESMC_VMK::vmk_obtain_args(void){
 //    fgets(args, 8000, fp);  // scan off header line of ps output
 //    fgets(args, 8000, fp);
     // fgets() changes dir on Linux/MPICH
-    fscanf(fp, "%[^\n]", args);
+//    fscanf(fp, "%[^\n]", args);
     fscanf(fp, "%[^\n]", args);
     fclose(fp);
   }else{
