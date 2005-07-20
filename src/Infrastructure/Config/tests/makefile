@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2005/07/15 03:41:46 nscollins Exp $
+# $Id: makefile,v 1.10 2005/07/20 19:05:05 nscollins Exp $
 
 ALL:  build_unit_tests
 run:  tree_run_unit_tests
@@ -39,9 +39,11 @@ CLOBBERDIRS =
 # ESMF_ConfigUTest
 #
 RUN_ESMF_ConfigUTest:
+	cp -f ESMF_Resource_File_Sample.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=Config NP=4 ftest
 
 RUN_ESMF_ConfigUTestUNI:
+	cp -f ESMF_Resource_File_Sample.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=Config NP=1 ftest
 
 
@@ -49,9 +51,11 @@ RUN_ESMF_ConfigUTestUNI:
 # ESMC_ConfigUTest
 #
 RUN_ESMC_ConfigUTest:
+	cp -f ESMF_Resource_File_Sample.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=Config NP=4 ctest
 
 RUN_ESMC_ConfigUTestUNI:
+	cp -f ESMF_Resource_File_Sample.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=Config NP=1 ctest
 
 
