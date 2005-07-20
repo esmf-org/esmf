@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.94 2005/06/17 21:51:33 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.95 2005/07/20 19:52:16 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.94 2005/06/17 21:51:33 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.95 2005/07/20 19:52:16 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -2045,7 +2045,7 @@
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      write(name, *) "Reverse day clock test"
+      write(name, *) "Reverse day clock test 1"
       call ESMF_TimeSet(startTime, yy=2005, mm=5, dd=24, &
                                 calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime,  yy=2005, mm=6, dd=24, &
@@ -2083,8 +2083,100 @@
 
       end do
 
-      write(failMsg, *) "Reverse clock failed."
+      write(failMsg, *) "Reverse clock 1 failed."
       call ESMF_Test((stepOnePass .and. stepTwoPass), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ClockDestroy(clock, rc)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(name, *) "Reverse day clock test 2"
+      call ESMF_TimeSet(startTime, yy=2005, mm=5, dd=24, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime,  yy=2005, mm=6, dd=24, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=1, rc=rc)
+      clock = ESMF_ClockCreate("Day Clock", &
+                                         timeStep, startTime, stopTime, rc=rc)
+
+      stepOnePass = .false.
+      stepTwoPass = .false.
+
+      ! time step 2/3 of the way from start time to stop time and back again
+      do while (.not.ESMF_ClockIsDone(clock, rc))
+        call ESMF_ClockAdvance(clock, rc=rc)
+
+        call ESMF_ClockGet(clock, advanceCount=advanceCounts, &
+                           direction=direction, rc=rc)
+        ! print *, "Reverse clock advanceCount = ", advanceCounts
+
+        if (direction .eq. ESMF_MODE_FORWARD) then
+          if (advanceCounts .eq. 20 .and. rc .eq. ESMF_SUCCESS) then
+            print *, "Reverse clock advanced ", advanceCounts, " times forward."
+            stepOnePass = .true.
+            call ESMF_ClockSet(clock, direction=ESMF_MODE_REVERSE, rc=rc)
+          end if
+        else
+          if (advanceCounts .eq. 0 .and. rc .eq. ESMF_SUCCESS) then
+            print *, "Reverse clock count is ", advanceCounts, "."
+            stepTwoPass = .true.
+          end if
+        end if
+
+      end do
+
+      write(failMsg, *) "Reverse clock 2 failed."
+      call ESMF_Test((stepOnePass .and. stepTwoPass), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ClockDestroy(clock, rc)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(name, *) "Reverse day clock test 3"
+      call ESMF_TimeSet(startTime, yy=2005, mm=5, dd=24, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime,  yy=2005, mm=6, dd=24, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=1, rc=rc)
+      clock = ESMF_ClockCreate("Day Clock", &
+                                         timeStep, startTime, stopTime, rc=rc)
+
+      stepOnePass = .false.
+      stepTwoPass = .false.
+
+      ! time step 2/3 of the way from start time to stop time, then back 1/3,
+      !   and then forward to stopTime
+      do while (.not.ESMF_ClockIsDone(clock, rc))
+        call ESMF_ClockAdvance(clock, rc=rc)
+
+        call ESMF_ClockGet(clock, advanceCount=advanceCounts, &
+                           direction=direction, rc=rc)
+        ! print *, "Reverse clock advanceCount = ", advanceCounts
+
+        if (direction .eq. ESMF_MODE_FORWARD) then
+          if (.not.stepOnePass) then
+            if (advanceCounts .eq. 20 .and. rc .eq. ESMF_SUCCESS) then
+              print *, "Reverse clock advanced ", advanceCounts, " times forward."
+              stepOnePass = .true.
+              call ESMF_ClockSet(clock, direction=ESMF_MODE_REVERSE, rc=rc)
+            end if
+          end if
+        else
+          if (advanceCounts .eq. 10 .and. rc .eq. ESMF_SUCCESS) then
+            print *, "Reverse clock reversed to ", advanceCounts, "."
+            call ESMF_ClockSet(clock, direction=ESMF_MODE_FORWARD, rc=rc)
+            stepTwoPass = .true.
+          end if
+        end if
+
+      end do
+
+      print *, "Reverse clock ended at advanceCount ", advanceCounts
+      write(failMsg, *) "Reverse clock 3 failed."
+      call ESMF_Test((stepOnePass .and. stepTwoPass .and. &
+                      advanceCounts .eq. 31), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_ClockDestroy(clock, rc)
 
