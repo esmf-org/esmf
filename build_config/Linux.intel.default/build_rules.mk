@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.40 2005/05/20 20:04:29 nscollins Exp $
+# $Id: build_rules.mk,v 1.41 2005/07/29 14:27:38 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -109,6 +109,13 @@ ifeq ($(ESMF_COMM),mpich)
 C_CC	   = mpicc
 C_CXX	   = mpiCC
 C_FC	   = mpif90
+endif
+
+# set the mpich2 compiler wrappers
+ifeq ($(ESMF_COMM),mpich2)
+C_CC       = mpicc
+C_CXX      = mpicxx
+C_FC       = mpif90
 endif
 
 ifeq ($(ESMF_PREC),64)

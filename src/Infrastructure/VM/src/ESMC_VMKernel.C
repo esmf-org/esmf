@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.47 2005/07/20 18:23:07 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.48 2005/07/29 14:27:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -54,6 +54,7 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 
+#define MPICH_IGNORE_CXX_SEEK
 #include <mpi.h>
 
 #include "ESMC_VMKernel.h"
