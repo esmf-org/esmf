@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.41 2005/07/29 14:27:38 theurich Exp $
+# $Id: build_rules.mk,v 1.42 2005/08/01 20:15:06 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -116,6 +116,13 @@ ifeq ($(ESMF_COMM),mpich2)
 C_CC       = mpicc
 C_CXX      = mpicxx
 C_FC       = mpif90
+endif
+
+# set the IntelMPI compiler wrappers
+ifeq ($(ESMF_COMM),intelmpi)
+C_CC       = mpiicc
+C_CXX      = mpiicpc
+C_FC       = mpiifort
 endif
 
 ifeq ($(ESMF_PREC),64)
