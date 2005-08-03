@@ -1,9 +1,16 @@
-# $Id: build_rules.mk,v 1.3 2005/05/19 22:48:16 jwolfe Exp $
+# $Id: build_rules.mk,v 1.4 2005/08/03 22:14:23 jwolfe Exp $
 #
 #  Linux.g95.default
 #  T. Wainwright, April 2005, based on Linux.pgi.default
 #  updated by nancy collins, after massive makefile updates
 #
+
+#
+# Default MPI setting.
+#
+ifeq ($(ESMF_COMM),default)
+export ESMF_COMM := mpiuni
+endif
 
 # these have not been tested.
 ifeq ($(ESMF_COMM),lam)
