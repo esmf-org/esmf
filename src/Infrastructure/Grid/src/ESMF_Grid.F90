@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.222 2005/07/07 20:48:44 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.223 2005/08/05 19:53:59 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.222 2005/07/07 20:48:44 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.223 2005/08/05 19:53:59 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -374,7 +374,7 @@
 !          Array of physical coordinates in the vertical direction.
 !     \item[{[vertstagger]}]
 !          {\tt ESMF\_GridVertStagger} specifier denoting vertical subGrid
-!          stagger.  The default value is ESMF_GRID_VERT_STAGGER_CENTER.
+!          stagger.  The default value is ESMF\_GRID\_VERT\_STAGGER\_CENTER.
 !     \item[{[dimName]}]
 !          Dimension name.
 !     \item[{[dimUnit]}]
