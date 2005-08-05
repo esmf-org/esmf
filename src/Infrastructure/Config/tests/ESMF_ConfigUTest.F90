@@ -152,12 +152,12 @@ module config_subrs
       
       counter_total =counter_total + 1
       if ( rc /= 0 ) then      
-         print *,'ESMF_ConfigGetInt got nDE =', nDE,' rc =', rc
+         print *,'ESMF_ConfigGetAttribute(int) got nDE =', nDE,' rc =', rc
       else
          if (nDE == nDE_0) then
             counter_success =counter_success + 1
          else
-            print *,'ESMF_ConfigGetInt ERROR: got nDE =', nDE, &
+            print *,'ESMF_ConfigGetAttribute(int) ERROR: got nDE =', nDE, &
               ' should be ', nDE_0
          endif
       endif
@@ -187,12 +187,12 @@ module config_subrs
    
       counter_total =counter_total + 1
       if ( rc /= 0 ) then      
-         print *,'ESMF_ConfigGetFloat got tau =', tau,' rc =', rc
+         print *,'ESMF_ConfigGetAttribute(float) got tau =', tau,' rc =', rc
       else
          if (tau == tau_0) then
             counter_success =counter_success + 1
          else
-            print *,'ESMF_ConfigGetFloat ERROR: got tau =', tau, &
+            print *,'ESMF_ConfigGetAttribute(float) ERROR: got tau =', tau, &
               ' should be ', tau_0
          endif
       endif
@@ -221,13 +221,14 @@ module config_subrs
 
       counter_total =counter_total + 1
       if ( rc /= 0 ) then      
-         print *,'ESMF_ConfigGetChar got answer =', answer,' rc =', rc
+         print *,'ESMF_ConfigGetAttribute(char) got answer =', &
+                 answer,' rc =', rc
       else
          if (answer == answer_0) then
             counter_success =counter_success + 1
          else
-            print *,'ESMF_ConfigGetChar ERROR: got answer =', answer, &
-              ' should be ', answer_0
+            print *,'ESMF_ConfigGetAttribute(char) ERROR: got answer =', &
+                     answer, ' should be ', answer_0
          endif
       endif
      !------------------------------------------------------------------------
@@ -255,13 +256,14 @@ module config_subrs
 
       counter_total =counter_total + 1
       if ( rc /= 0 ) then      
-         print *,'ESMF_ConfigGetString got =', restart_file,' rc =', rc
+         print *,'ESMF_ConfigGetAttribute(string) got =', &
+                  restart_file,' rc =', rc
       else
          if (answer == answer_0) then
             counter_success =counter_success + 1
          else
-            print *,'ESMF_ConfigGetString ERROR: got  =', restart_file, &
-              ' should be ', restart_file_0
+            print *,'ESMF_ConfigGetAttribute(string) ERROR: got  =', &
+                     restart_file, ' should be ', restart_file_0
          endif
       endif
      !------------------------------------------------------------------------
@@ -321,15 +323,15 @@ module config_subrs
 
       counter_total =counter_total + 1
       if (rc /= 0) then
-         print *,'ESMF_ConfigGetString failed, rc =', rc
+         print *,'ESMF_ConfigGetAttribute(string) failed, rc =', rc
          return
       endif
 
       if(u_dataType ==  u_dataType_0) then
          counter_success =counter_success + 1
       else
-         print *,'ESMF_ConfigGetString ERROR: got  =', u_dataType, &
-              ' should be ', u_dataType_0
+         print *,'ESMF_ConfigGetAttribute(string) ERROR: got  =', &
+                 u_dataType, ' should be ', u_dataType_0
          return
       endif
 
@@ -353,14 +355,14 @@ module config_subrs
 
       counter_total =counter_total + 1
       if (rc /= 0) then
-         print *,'ESMF_ConfigGetInt failed, rc =', rc
+         print *,'ESMF_ConfigGetAttribute(int) failed, rc =', rc
          return
       endif
 
       if( nu == nu_0 ) then
          counter_success =counter_success + 1
       else
-         print *,'ESMF_ConfigGetInt ERROR: got  =', nu, &
+         print *,'ESMF_ConfigGetAttribute(int) ERROR: got  =', nu, &
               ' should be ', nu_0 
          return
       endif
@@ -368,7 +370,7 @@ module config_subrs
      !------------------------------------------------------------------------
      !EX_UTest
      ! Config Get Attribute Int Verification Test
-     write(failMsg, *) "Attribute String value is incorrect"
+     write(failMsg, *) "Attribute Int value is incorrect"
      write(name, *) "Verify Attribute Int Value Test"
      call ESMF_Test((nu.eq.nu_0), name, failMsg, result, ESMF_SRCLINE)
 
@@ -386,13 +388,13 @@ module config_subrs
 
       counter_total =counter_total + 1
       if (rc /= 0) then
-         print *,'ESMF_ConfigGetFloats failed, rc =', rc
+         print *,'ESMF_ConfigGetAttribute(floats) failed, rc =', rc
          return
       endif
 
       if( any(sigU /= sigU_0) ) then
-         print *,'ESMF_ConfigGetInt ERROR: got sigU =', sigU(1:nu), &
-              ' should be sigU =', sigU_0(1:nu) 
+         print *,'ESMF_ConfigGetAttribute(floats) ERROR: got sigU =', &
+                  sigU(1:nu), ' should be sigU =', sigU_0(1:nu) 
          return
       else
          counter_success =counter_success + 1
@@ -451,14 +453,14 @@ subroutine MultPar_SingleLine_V
 
       counter_total =counter_total + 1
       if (rc /= 0) then
-         print *,'ESMF_ConfigGetString failed, rc =', rc
+         print *,'ESMF_ConfigGetAttribute(string) failed, rc =', rc
          return
       endif
 
       if(v_dataType ==  v_dataType_0) then
          counter_success =counter_success + 1
       else
-         print *,'ESMF_ConfigGetString ERROR: got  =', v_dataType, &
+         print *,'ESMF_ConfigGetAttribute(string) ERROR: got  =', v_dataType, &
               ' should be ', v_dataType_0
          return
       endif
@@ -483,14 +485,14 @@ subroutine MultPar_SingleLine_V
 
       counter_total =counter_total + 1
       if (rc /= 0) then
-         print *,'ESMF_ConfigGetInt failed, rc =', rc
+         print *,'ESMF_ConfigGetAttribute(int) failed, rc =', rc
          return
       endif
 
       if( nv == nv_0 ) then
          counter_success =counter_success + 1
       else
-         print *,'ESMF_ConfigGetInt ERROR: got  =', nv, &
+         print *,'ESMF_ConfigGetAttribute(int) ERROR: got  =', nv, &
               ' should be ', nv_0 
          return
       endif
@@ -515,13 +517,13 @@ subroutine MultPar_SingleLine_V
 
       counter_total =counter_total + 1
       if (rc /= 0) then
-         print *,'ESMF_ConfigGetFloats failed, rc =', rc
+         print *,'ESMF_ConfigGetAttribute(floats) failed, rc =', rc
          return
       endif
 
       if( any(sigV /= sigV_0) ) then
-         print *,'ESMF_ConfigGetInt ERROR: got sigV =', sigV(1:nv), &
-              ' should be sigV =', sigV_0(1:nv) 
+         print *,'ESMF_ConfigGetAttribute(floats) ERROR: got sigV =', &
+                 sigV(1:nv), ' should be sigV =', sigV_0(1:nv) 
          return
       else
         counter_success =counter_success + 1
@@ -604,15 +606,15 @@ subroutine MultPar_SingleLine_V
 
       counter_total =counter_total + 1
       if (rc /= 0) then
-         print *,'ESMF_ConfigGetString failed, rc =', rc
+         print *,'ESMF_ConfigGetAttribute(string) failed, rc =', rc
          return
       endif
 
       if(u_dataType ==  u_dataType_1) then
          counter_success =counter_success + 1
       else
-         print *,'ESMF_ConfigGetString ERROR: got  =', u_dataType, &
-              ' should be ', u_dataType_1
+         print *,'ESMF_ConfigGetAttribute(string) ERROR: got  =', &
+                 u_dataType, ' should be ', u_dataType_1
          return
       endif
 
@@ -636,14 +638,14 @@ subroutine MultPar_SingleLine_V
 
       counter_total =counter_total + 1
       if (rc /= 0) then
-         print *,'ESMF_ConfigGetInt failed, rc =', rc
+         print *,'ESMF_ConfigGetAttribute(int) failed, rc =', rc
          return
       endif
 
       if( nu == nu_1 ) then
          counter_success =counter_success + 1
       else
-         print *,'ESMF_ConfigGetInt ERROR: got  =', nu, &
+         print *,'ESMF_ConfigGetAttribute(int) ERROR: got  =', nu, &
               ' should be ', nu_1 
          return
       endif
@@ -661,13 +663,13 @@ subroutine MultPar_SingleLine_V
 
      counter_total =counter_total + 1
       if (rc /= 0) then
-         print *,'ESMF_ConfigGetFloats failed, rc =', rc
+         print *,'ESMF_ConfigGetAttribute(floats) failed, rc =', rc
          return
       endif
 
       if( any(sigU /= sigU_1) ) then
-         print *,'ESMF_ConfigGetInt ERROR: got sigU =', sigU(1:nu), &
-              ' should be sigU =', sigU_1(1:nu_1) 
+         print *,'ESMF_ConfigGetAttribute(floats) ERROR: got sigU =', &
+                  sigU(1:nu), ' should be sigU =', sigU_1(1:nu_1) 
          return
       else
         counter_success =counter_success + 1
@@ -714,15 +716,15 @@ subroutine MultPar_SingleLine_V
 
       counter_total =counter_total + 1
       if (rc /= 0) then
-         print *,'ESMF_ConfigGetString failed, rc =', rc
+         print *,'ESMF_ConfigGetAttribute(string) failed, rc =', rc
          return
       endif
 
       if(v_dataType ==  v_dataType_1) then
          counter_success =counter_success + 1
       else
-         print *,'ESMF_ConfigGetString ERROR: got  =', v_dataType, &
-              ' should be ', v_dataType_1
+         print *,'ESMF_ConfigGetAttribute(string) ERROR: got  =', &
+                  v_dataType, ' should be ', v_dataType_1
          return
       endif
 
@@ -745,14 +747,14 @@ subroutine MultPar_SingleLine_V
 
       counter_total =counter_total + 1
       if (rc /= 0) then
-         print *,'ESMF_ConfigGetInt failed, rc =', rc
+         print *,'ESMF_ConfigGetAttribute(int) failed, rc =', rc
          return
       endif
 
       if( nv == nv_1 ) then
          counter_success =counter_success + 1
       else
-         print *,'ESMF_ConfigGetInt ERROR: got  =', nv, &
+         print *,'ESMF_ConfigGetAttribute(int) ERROR: got  =', nv, &
               ' should be ', nv_1 
          return
       endif
@@ -777,13 +779,13 @@ subroutine MultPar_SingleLine_V
 
      counter_total =counter_total + 1
       if (rc /= 0) then
-         print *,'ESMF_ConfigGetFloats failed, rc =', rc
+         print *,'ESMF_ConfigGetAttribute(floats) failed, rc =', rc
          return
       endif
 
       if( any(sigV /= sigV_1) ) then
-         print *,'ESMF_ConfigGetInt ERROR: got sigV =', sigV(1:nv), &
-              ' should be sigV =', sigV_1(1:nv_1) 
+         print *,'ESMF_ConfigGetAttribute(floats) ERROR: got sigV =', &
+                 sigV(1:nv), ' should be sigV =', sigV_1(1:nv_1) 
          return
       else
         counter_success =counter_success + 1
@@ -966,14 +968,13 @@ subroutine MultPar_SingleLine_V
             call ESMF_ConfigGetAttribute( cf, plev(line), rc=rc )
 !''''''''''''''''''''''''''''
          if (rc /= 0) then
-            print *,'ESMF_ConfigNextLine failed, rc =', rc 
+            print *,'ESMF_ConfigAttribute failed, rc =', rc 
             exit
          endif
 
          if( plev(line) /= plev_0(line) ) then
-            print *,'ESMF_ConfigGetFloat ERROR: got plev =', &
-                 plev(line), ' should be plev =',        &
-                 plev_0(line) 
+            print *,'ESMF_ConfigGetAttribute(float) ERROR: got plev =', &
+                 plev(line), ' should be plev =', plev_0(line) 
             exit
          else
             counter_success =counter_success + 1
@@ -991,16 +992,16 @@ subroutine MultPar_SingleLine_V
          end do
 !''''''''''''''''''''''''''''
          if (rc /= 0) then
-            print *,'ESMF_ConfigGetFloat failed, rc =', rc 
+            print *,'ESMF_ConfigGetAttribute(float) failed, rc =', rc 
             exit        
          endif
 
          
          do col =1, ncol(line)
             if (vCorr(line, col) /= vCorr_0(col, line)) then
-               print *,'ESMF_ConfigGetFloat:  Wrong value in vCorr line =', &
-                    line,' col =', col,' VCorr = ', vCorr(col, line), &
-               ' should be ', vCorr_0(line, col)
+               print *,'ESMF_ConfigGetAttribute(float):  Wrong value in vCorr line =', &
+                   line,' col =', col,' VCorr = ', vCorr(col, line), &
+                   ' should be ', vCorr_0(line, col)
                exit
             endif
          end do
@@ -1065,7 +1066,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.15 2005/02/28 16:29:13 nscollins Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.16 2005/08/05 17:46:33 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0
@@ -1117,8 +1118,7 @@ end module config_subrs
 ! ----------------------------------------------------
 
       call  MultPar_SingleLine_U()
-
-      call  MultPar_SingleLine_v()
+      call  MultPar_SingleLine_V()
 
 
 ! Retrieval of a group of parameters on multiple lines
