@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.79 2005/05/31 17:40:00 nscollins Exp $
+! $Id: ESMF_Calendar.F90,v 1.80 2005/08/05 17:38:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -142,7 +142,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.79 2005/05/31 17:40:00 nscollins Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.80 2005/08/05 17:38:21 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -1350,6 +1350,8 @@
 
 ! !DESCRIPTION:
 !     Checks whether a {\tt calendar} is valid.  
+!     Must be one of the defined calendar types.  daysPerMonth, daysPerYear,
+!     secondsPerDay must all be greater than or equal to zero.
 ! 
 !     The arguments are:
 !     \begin{description}

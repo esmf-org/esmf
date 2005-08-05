@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.73 2005/06/17 21:51:33 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.74 2005/08/05 17:38:30 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -123,7 +123,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.73 2005/06/17 21:51:33 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.74 2005/08/05 17:38:30 eschwab Exp $'
 
 !==============================================================================
 !
@@ -2417,8 +2417,9 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Checks whether a {\tt timeinterval} is valid.  The options control
-!     the type of validation.
+!     Checks whether a {\tt timeinterval} is valid.
+!     If fractional value, denominator must be non-zero.
+!     The options control the type of validation.
 !
 !     The arguments are:
 !     \begin{description}

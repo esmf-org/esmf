@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.84 2005/05/31 17:40:00 nscollins Exp $
+! $Id: ESMF_Time.F90,v 1.85 2005/08/05 17:38:29 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.84 2005/05/31 17:40:00 nscollins Exp $'
+      '$Id: ESMF_Time.F90,v 1.85 2005/08/05 17:38:29 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1079,8 +1079,9 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Checks whether an {\tt ESMF\_Time} is valid.  The options control the type
-!     of validation.
+!     Checks whether an {\tt ESMF\_Time} is valid.
+!     Must be a valid date/time on a valid calendar.
+!     The options control the type of validation.
 !
 !     The arguments are:
 !     \begin{description}

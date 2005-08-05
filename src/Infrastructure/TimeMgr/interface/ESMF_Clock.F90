@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.67 2005/06/24 22:45:01 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.68 2005/08/05 17:38:24 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.67 2005/06/24 22:45:01 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.68 2005/08/05 17:38:24 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1178,6 +1178,9 @@
 
 ! !DESCRIPTION:
 !     Checks whether a {\tt clock} is valid.  
+!     Must have a valid startTime and timeStep.  If {\tt clock} has a
+!     stopTime, its currTime must be within startTime to stopTime, inclusive;
+!     also startTime's and stopTime's calendars must be the same.
 !
 !     The arguments are:  
 !     \begin{description}

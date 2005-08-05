@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.63 2005/06/24 22:45:01 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.64 2005/08/05 17:38:19 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.63 2005/06/24 22:45:01 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.64 2005/08/05 17:38:19 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1034,6 +1034,8 @@
 
 ! !DESCRIPTION:
 !     Performs a validation check on an {\tt ESMF\_Alarm}'s properties.
+!     Must have a valid ringTime, set either directly or indirectly via
+!     ringInterval.  See {\tt ESMF\_AlarmCreate()}.
 !
 !     The arguments are:  
 !     \begin{description}
