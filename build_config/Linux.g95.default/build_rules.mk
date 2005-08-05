@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.4 2005/08/03 22:14:23 jwolfe Exp $
+# $Id: build_rules.mk,v 1.5 2005/08/05 20:09:01 nscollins Exp $
 #
 #  Linux.g95.default
 #  T. Wainwright, April 2005, based on Linux.pgi.default
@@ -56,6 +56,24 @@ F_FREECPP       = -cpp -ffree-form
 F_FIXCPP        = -cpp -ffixed-form
 F_FREENOCPP     = -ffree-form
 F_FIXNOCPP      = -ffixed-form
+
+# by default append each directory which is in LD_LIBRARY_PATH to
+# the -L flag and also to the run-time load flag.  (on systems which
+# support the 'module' command, that is how it works - by adding dirs
+# to LD_LIBRARY_PATH.)  if it is not set, default to one of the many
+# possible places the gcc compilers try to install themselves.  
+# if your compiler installs these libs someplace else
+# either set LD_LIBRARY_PATH first, or make a site specific file and
+# edit the paths explicitly.
+ifneq ($(origin LD_LIBRARY_PATH), environment)
+CXXLIB_PATHS   = -L/usr/lib
+F90LIB_PATHS   = -L/usr/lib
+C_LIB_PATHS      = ${CXXLIB_PATHS} ${F90LIB_PATHS}
+C_LD_PATHS       = ${CXXLIB_PATHS} ${F90LIB_PATHS}
+else
+C_LIB_PATHS      = $(ENV_LIB_PATHS)
+C_LD_PATHS       = $(ENV_LD_PATHS)
+endif
 
 
 C_F90CXXLIBS    = -lrt -lc -lstdc++
