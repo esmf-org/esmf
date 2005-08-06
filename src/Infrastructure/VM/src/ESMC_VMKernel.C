@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.48 2005/07/29 14:27:39 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.49 2005/08/06 05:06:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -75,6 +75,8 @@
 #define VM_COMM_TYPE_SHMHACK  (2)
 #define VM_COMM_TYPE_POSIXIPC (3)
 
+
+#define PARTCOMM (1)
 
 // initialization of class static variables
 MPI_Group ESMC_VMK::default_mpi_g;
@@ -914,7 +916,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
   int new_npets=0;
   int found_my_pet_flag = 0;
   for (int ii=0; ii<npets; ii++){
-    int i = vmp->petlist[ii];
+    int i = vmp->petlist[ii];   // indirection to preserve petlist order
     new_npets += vmp->spawnflag[i];
     if (mypet == i) found_my_pet_flag = 1;
     if (!found_my_pet_flag){
@@ -958,7 +960,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
   // next, run through all current pets and check the ESMC_VMKPlan ...
   // inside the following loop pet "i" will be refered to as "this pet"
   for (int ii=0; ii<npets; ii++){
-    int i = vmp->petlist[ii];
+    int i = vmp->petlist[ii];   // indirection to preserve petlist order
     // get the last max_tid count of a pet with same pid
     int local_tid = 0;
     for (int j=0; j<ii; j++)
@@ -994,7 +996,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
       new_ncpet[new_petid]=0;         // reset the counter
       new_ncontributors[new_petid]=0; // reset the counter
       for (int kk=0; kk<npets; kk++){
-        int k = vmp->petlist[kk];
+        int k = vmp->petlist[kk];   // indirection to preserve petlist order
         if (vmp->contribute[k]==i && vmp->cspawnid[k]==j){
           // pet k contributes to this pet's spawned thread number j
           new_ncpet[new_petid]+=ncpet[k]; // add in all the cores from pet k
@@ -1018,7 +1020,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
       int ncontrib_counter=0;   // reset contributor counter
       // loop over all current pets and see how they contribute tho this pet
       for (int kk=0; kk<npets; kk++){
-        int k = vmp->petlist[kk];
+        int k = vmp->petlist[kk];  // indirection to preserve petlist order
         if (vmp->contribute[k]==i && vmp->cspawnid[k]==j){
           // found a contributor pet (k) which contributes cores
           // to this pet (i) for its spawned thread (j)
@@ -1133,7 +1135,8 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
     lpid_list[1][i] = 0;   // no pets associated yet
     pet_list[i] = new int[npets];  // npets is maximum possible number here!
   }
-  for (int i=0; i<npets; i++){
+  for (int ii=0; ii<npets; ii++){
+    int i = vmp->petlist[ii];     // indirection to preserve petlist order
     if (vmp->spawnflag[i]){
       // this pet will spawn, so look if its lpid has already been recorded
       int j;
@@ -1151,78 +1154,67 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
   // next, create MPI group
   // since this is a local MPI operation each pet can call this here...
   MPI_Group new_mpi_g;
+  
+#ifdef PARTCOMM  
+  // the new group will be derived from the mpi_g_part group so there is an
+  // additional level of indirection here
+  int *grouplist = new int[num_diff_pids];
+  for (int i=0; i<num_diff_pids; i++){
+    grouplist[i] = vmp->lpid_mpi_g_part_map[lpid_list[0][i]];
+  }
+  MPI_Group_incl(vmp->mpi_g_part, num_diff_pids, grouplist, &new_mpi_g);
+#else
   MPI_Group_incl(mpi_g, num_diff_pids, lpid_list[0], &new_mpi_g);
+#endif
+  
   // setting up MPI communicators is a collective MPI communication call
   // thus it requires that exactly one pet of each process running in the 
   // current ESMC_VMK makes that call, even if this process will not participate
   // in the new ESMC_VMK...
   MPI_Comm new_mpi_c;
-  for (int first_lpid=0; first_lpid<=lpid[npets-1]; first_lpid++){
-    // find the first pet whose lpid is qual to first_lpid
-    int i;
-    for (i=0; i<npets; i++)
-      if (lpid[i]==first_lpid) break;
-#if (VERBOSITY > 9)
-    printf("pet %d of current ESMC_VMK is first one with lpid=%d\n", i,lpid[i]);
+  
+  int foundfirstflag=0;
+  int foundfirstpet;
+  int mylpid = lpid[mypet];
+#ifdef PARTCOMM  
+  for (int ii=0; ii<vmp->nplist; ii++){
+#else
+  for (int ii=0; ii<npets; ii++){
 #endif
-    if (mypet==i){
-      // mypet is the first one with this lpid, thus call MPI_Comm_create
-#if (VERBOSITY > 9)
-      printf("... and mypet is %d, thus calling MPI_Comm_create\n", mypet);
-#endif
-      MPI_Comm_create(mpi_c, new_mpi_g, &new_mpi_c);
-      // check and see whether pets with this lpid will spawn threads
-      int j;
-      for (j=0; j<num_diff_pids; j++)
-        if (lpid_list[0][j]==first_lpid) break;
-      if (j<num_diff_pids){
-        // found first_lpid in lpid_list, the list of lpids with at least one
-        // pet of the current ESMC_VMK that spawns threads for the new ESMC_VMK
-        // next loop over all pet that spawn threads with this lpid
-        for(int k=0; k<lpid_list[1][j]; k++){
-          if (pet_list[j][k]!=mypet){
-            // send MPI_Comm to all the other pets of the current ESMC_VMK which
-            // spawn threads under the same lpid
-#if (VERBOSITY > 9)
-            printf("mypet %d sends new_mpi_c to pet %d\n",mypet,pet_list[j][k]);
-#endif
-            vmk_send(&new_mpi_c, sizeof(MPI_Comm), pet_list[j][k]);
-          }
-        }
+    int i = vmp->petlist[ii];     // indirection to preserve petlist order
+    if (mylpid == lpid[i]){
+      // found lpid match
+      if (!foundfirstflag){
+        // found first pet with that spawns under this lpid
+        foundfirstflag = 1;
+        foundfirstpet = i;
       }
-    }else if (lpid[mypet]==first_lpid){
-      // mypet is not the first one for lpid, but has the same lpid association
-#if (VERBOSITY > 4)
-      printf("mypet %d is not first thread to run under this pid\n", mypet);
+      if (mypet == i){
+        // I am this pet
+        if (foundfirstpet == i){
+          // I am the first under this lpid and must create communicator
+#ifdef PARTCOMM
+          MPI_Comm_create(vmp->mpi_c_part, new_mpi_g, &new_mpi_c);
+#else
+          MPI_Comm_create(mpi_c, new_mpi_g, &new_mpi_c);
 #endif
-      // check and see whether pets with this lpid will spawn threads
-      int j;
-      for (j=0; j<num_diff_pids; j++)
-        if (lpid_list[0][j]==first_lpid) break;
-      if (j<num_diff_pids){
-        // found first_lpid in lpid_list, the list of lpids with at least one
-        // pet of the current ESMC_VMK that spawns threads for the new ESMC_VMK
-        // next loop over all pet that spawn threads with this lpid
-        for(int k=0; k<lpid_list[1][j]; k++){
-          if (pet_list[j][k]==mypet){
-            // receive the MPI_comm from the pet which created it
-#if (VERBOSITY > 4)
-            printf("mypet %d recvs new_mpi_c frm %d\n", mypet, i);
+        }else{
+          // I am not the first under this lpid and must receive 
+#if (VERBOSITY > 9)
+          printf("mypet %d recvs new_mpi_c from %d\n", mypet, foundfirstpet);
 #endif
-            vmk_recv(&new_mpi_c, sizeof(MPI_Comm), i);
-            // debug output to see what we got...
-            int rank, size;
-            MPI_Comm_rank(new_mpi_c, &rank);
-            MPI_Comm_size(new_mpi_c, &size);
-#if (VERBOSITY > 4)
-            printf("mypet = %d, new_mpi_c: rank: %d, size: %d\n", mypet, 
-                rank, size);
-#endif
-          }
+          vmk_recv(&new_mpi_c, sizeof(MPI_Comm), foundfirstpet);
         }
+      }else if (mypet == foundfirstpet){
+        // I am the master and must send the communicator
+#if (VERBOSITY > 9)
+        printf("mypet %d sends new_mpi_c to pet %d\n", mypet, i);
+#endif
+        vmk_send(&new_mpi_c, sizeof(MPI_Comm), i);
       }
     }
   }
+  
   // now:
   //    new_mpi_g is the valid MPI_Group for the new ESMC_VMK
   //    new_mpi_c is the valid MPI_Comm for the new ESMC_VMK
@@ -1472,13 +1464,9 @@ void ESMC_VMK::vmk_exit(class ESMC_VMKPlan *vmp, void *arg){
       vmkt_catch(&(sarg[0].vmkt_extra));
     }
   }
-  // The following barrier ensures that all parent PETs block until all threads
-  // of this VM have been caught. Even parent PETs that don't participate in
-  // this child's VM will be blocked to provide correct synchronization between
-  // different child VMs. If you want two child VMs to run concurrently don't
-  // call vmk_exit until after you started _all_ concurrent child VMs. The
-  // vmk_exit() exit method is a synchronization method for the parent!
-  vmk_barrier();
+  // The following threadbarrier ensures that each parent PET blocks until 
+  // all threads that work in the PET-local VAS have completed.
+  vmk_threadbarrier();
 }
 
 
@@ -1551,11 +1539,15 @@ void ESMC_VMK::vmk_print(void){
          "  pth_finish_count =\t %p\n"
          "  commarray =\t\t %p\n", 
     pth_mutex, pth_finish_count, commarray);
-  int size;
+  int size, rank;
   MPI_Group_size(mpi_g, &size);
   printf("MPI_Group_size: %d\n", size);
   MPI_Comm_size(mpi_c, &size);
   printf("MPI_Comm_size: %d\n", size);
+  MPI_Comm_rank(mpi_c, &rank);
+  printf("MPI_Comm_rank in local MPI communicator: %d\n", rank);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  printf("MPI_Comm_rank in MPI_COMM_WORLD: %d\n", rank);
   printf("MPI thread level support: %d\n", mpi_thread_level);
   printf("mpi_mutex_flag: %d\n", mpi_mutex_flag);
   printf("mpionly: %d\n", mpionly);
@@ -1620,6 +1612,10 @@ int ESMC_VMK::vmk_pid(int i){
   return pid[i];
 }
 
+int ESMC_VMK::vmk_lpid(int i){
+  return lpid[i];
+}
+
 // --- ESMC_VMKPlan methods ---
 
 
@@ -1643,6 +1639,10 @@ ESMC_VMKPlan::ESMC_VMKPlan(void){
 ESMC_VMKPlan::~ESMC_VMKPlan(void){
   // native destructor
   vmkplan_garbage();
+  delete [] lpid_mpi_g_part_map;
+  if (commfreeflag)
+    MPI_Comm_free(&mpi_c_part);
+  MPI_Group_free(&mpi_g_part);
 }
 
   
@@ -1670,6 +1670,52 @@ int ESMC_VMKPlan::vmkplan_nspawn(void){
 void ESMC_VMKPlan::vmkplan_myvms(ESMC_VMK **myvms){
   // set the internal myvms pointer array
   this->myvms = myvms;
+}
+
+
+void ESMC_VMKPlan::vmkplan_mpi_c_part(ESMC_VMK &vm){
+  // set up the communicator of participating PETs
+  int *grouplist = new int[nplist];     // that's big enough
+  int *grouppetlist = new int[nplist];  // associated list of pets
+  int n=0;  // counter
+  for (int i=0; i<nplist; i++){
+    int pet = petlist[i];
+    int lpid = vm.vmk_lpid(pet);
+    int j;
+    for (j=0; j<n; j++)
+      if (grouplist[j] == lpid) break;
+    if (j==n){
+      grouplist[n] = lpid;
+      grouppetlist[n] = pet;
+      ++n;
+    }
+  }
+  MPI_Group_incl(vm.mpi_g, n, grouplist, &mpi_g_part);
+ 
+  // all master PETs of the current vm must create the communicator
+  int mypet = vm.vmk_mypet();
+  if (vm.vmk_tid(mypet) == 0){
+    // master PET in this VAS
+    MPI_Comm_create(vm.mpi_c, mpi_g_part, &mpi_c_part);
+    commfreeflag = 1;   // this PET is responsible for freeing the communicator
+  }else{
+    commfreeflag = 0;   // this PET is _not_ responsible for freeing the commu.
+  }
+  
+  // reset those commfreeflags for PETs outside the group of participants
+  int j;
+  for (j=0; j<n; j++)
+    if (mypet == grouppetlist[j]) break;
+  if (j == n)
+    commfreeflag = 0;
+
+  lpid_mpi_g_part_map = new int[vm.vmk_npets()];
+  for (int i=0; i<n; i++){
+    lpid_mpi_g_part_map[grouplist[i]] = i;
+  }
+  
+  delete [] grouppetlist;
+  delete [] grouplist;
 }
 
 
@@ -1717,6 +1763,10 @@ void ESMC_VMKPlan::vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist,
   // now set stuff up...
   nothreadflag = 0; // this plan will allow ESMF-threading
   npets = vm.npets;
+  if (nplist != 0)
+    this->nplist = nplist;
+  else
+    this->nplist = npets;
   petlist = new int[npets];
   spawnflag = new int[npets];
   contribute = new int[npets];
@@ -1853,6 +1903,10 @@ void ESMC_VMKPlan::vmkplan_minthreads(ESMC_VMK &vm, int max, int *plist,
   // now set stuff up...
   nothreadflag = 0; // this plan will allow ESMF-threading
   npets = vm.npets;
+  if (nplist != 0)
+    this->nplist = nplist;
+  else
+    this->nplist = npets;
   petlist = new int[npets];
   spawnflag = new int[npets];
   contribute = new int[npets];
@@ -1961,6 +2015,10 @@ void ESMC_VMKPlan::vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist,
   // now set stuff up...
   nothreadflag = 0; // this plan will allow ESMF-threading
   npets = vm.npets;
+  if (nplist != 0)
+    this->nplist = nplist;
+  else
+    this->nplist = npets;
   petlist = new int[npets];
   spawnflag = new int[npets];
   contribute = new int[npets];
