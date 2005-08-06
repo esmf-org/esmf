@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.3 2005/06/17 22:24:02 eschwab Exp $
+// $Id: ESMC_Util.h,v 1.4 2005/08/06 04:53:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -59,6 +59,7 @@ enum ESMC_Status { ESMF_STATUS_UNINIT=1,
 
 // comm types
 enum ESMC_BlockingFlag { ESMF_BLOCKING=1,
+                         ESMF_VASBLOCKING,
                          ESMF_NONBLOCKING};
 
 // context flag
