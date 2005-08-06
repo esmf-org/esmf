@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.66 2005/07/01 19:06:03 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.67 2005/08/06 05:18:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -84,12 +84,15 @@
       ! Return from user-provided routines
       public ESMF_GridCompWait
       
+      ! function to simplify user code pet-conditionals
+      public ESMF_GridCompMyParticipation
+      
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.66 2005/07/01 19:06:03 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.67 2005/08/06 05:18:32 theurich Exp $'
 
 !==============================================================================
 !
@@ -327,7 +330,7 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_GridCompCreate()      
-      function ESMF_GridCompCreateVM(vm, name, gridcomptype, grid, &
+      recursive function ESMF_GridCompCreateVM(vm, name, gridcomptype, grid, &
         config, configFile, clock, petList, contextflag, rc)
 !
 ! !RETURN VALUE:
@@ -1456,6 +1459,60 @@
   end subroutine ESMF_GridCompWait
 !------------------------------------------------------------------------------
 
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompMyParticipation"
+!BOP
+! !IROUTINE: ESMF_GridCompMyParticipation - Inquire if calling PET is participating in this component
+!
+! !INTERFACE:
+      recursive function ESMF_GridCompMyParticipation(gridcomp, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_GridCompMyParticipation
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp), intent(in) :: gridcomp
+      integer, intent(out), optional  :: rc 
+!
+! !DESCRIPTION:
+!  Inquire whether the calling PET is participating in the {\tt ESMF\_GridComp}
+!  object.
+!
+!  The return value is {\tt .true.} if calling PET participates in component, 
+!  {\tt .false.} otherwise.
+!    
+!  The arguments are:
+!  \begin{description}
+!   \item[gridcomp] 
+!    {\tt ESMF\_GridComp} queried.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+    integer :: localrc                     ! local error status
+    logical :: localresult
+
+    ! Initialize return code; assume failure until success is certain       
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! call CompClass method
+    localresult = ESMF_CompMyParticipation(gridcomp%compp, localrc)
+    ! if (ESMF_LogPassFoundError(localrc, rc)) return
+    if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+    ! Set return values
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ESMF_GridCompMyParticipation = localresult
+    
+  end function ESMF_GridCompMyParticipation
+    
+!------------------------------------------------------------------------------
 
 end module ESMF_GridCompMod
 
