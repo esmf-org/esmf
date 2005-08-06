@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.4 2005/07/01 20:41:15 nscollins Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.5 2005/08/06 04:51:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -326,7 +326,8 @@
 
       type(ESMF_BlockingFlag), parameter:: &
         ESMF_BLOCKING     = ESMF_BlockingFlag(1), &
-        ESMF_NONBLOCKING  = ESMF_BlockingFlag(2)
+        ESMF_VASBLOCKING  = ESMF_BlockingFlag(2), &
+        ESMF_NONBLOCKING  = ESMF_BlockingFlag(3)
 
 !------------------------------------------------------------------------------
 !
@@ -395,7 +396,8 @@
       public ESMF_Direction, ESMF_MODE_FORWARD, ESMF_MODE_REVERSE
 
       public ESMF_ReduceFlag, ESMF_SUM, ESMF_MIN, ESMF_MAX
-      public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_NONBLOCKING
+      public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_VASBLOCKING, &
+             ESMF_NONBLOCKING
       public ESMF_ContextFlag, ESMF_CHILD_IN_NEW_VM, ESMF_CHILD_IN_PARENT_VM
       public ESMF_TerminationFlag, ESMF_FINAL, ESMF_ABORT
 
@@ -464,6 +466,7 @@ interface operator (.ne.)
 end interface
 
 interface assignment (=)
+ module procedure ESMF_bfas
  module procedure ESMF_dtas
  module procedure ESMF_dkas
  module procedure ESMF_tfas
@@ -544,15 +547,17 @@ end subroutine
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_BlockingFlags
 
+subroutine ESMF_bfas(bf1, bf2)
+ type(ESMF_BlockingFlag), intent(out) :: bf1
+ type(ESMF_BlockingFlag), intent(in)  :: bf2
+
+ bf1%value = bf2%value
+end subroutine
+
 function ESMF_bfeq(bf1, bf2)
  logical ESMF_bfeq
  type(ESMF_BlockingFlag), intent(in) :: bf1, bf2
 
-! if (bf1%value .eq. bf2%value) then
-!   ESMF_bfeq = .true.
-! else 
-!   ESMF_bfeq = .false.
-! endif
  ESMF_bfeq = (bf1%value .eq. bf2%value)
 end function
 
