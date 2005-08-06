@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.56 2005/07/01 19:06:01 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.57 2005/08/06 05:17:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -84,6 +84,9 @@
       ! Return from user-provided routines
       public ESMF_CplCompWait
 
+      ! function to simplify user code pet-conditionals
+      public ESMF_CplCompMyParticipation
+
       !public operator(.eq.), operator(.ne.), assignment(=)
 
 !EOPI
@@ -91,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.56 2005/07/01 19:06:01 theurich Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.57 2005/08/06 05:17:48 theurich Exp $'
 
 !==============================================================================
 !
@@ -315,7 +318,7 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
-      function ESMF_CplCompCreateVM(vm, name, config, configFile, &
+      recursive function ESMF_CplCompCreateVM(vm, name, config, configFile, &
                                     clock, petList, contextflag, rc)
 !
 ! !RETURN VALUE:
@@ -790,7 +793,7 @@
 !   \item[{[vm]}]
 !    Return the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
 !   \item[{[contextflag]}]
-!    Return the {\tt ESMF\_ContextFlag} for this {\tt ESMF\_GridComp}.
+!    Return the {\tt ESMF\_ContextFlag} for this {\tt ESMF\_CplComp}.
 !    See section \ref{opt:contextflag} for a complete list of valid flags.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1388,6 +1391,60 @@
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_CplCompWait
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompMyParticipation"
+!BOP
+! !IROUTINE: ESMF_CplCompMyParticipation - Inquire if calling PET is participating in this component
+!
+! !INTERFACE:
+      recursive function ESMF_CplCompMyParticipation(cplcomp, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_CplCompMyParticipation
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp), intent(in) :: cplcomp
+      integer, intent(out), optional  :: rc 
+!
+! !DESCRIPTION:
+!  Inquire whether the calling PET is participating in the {\tt ESMF\_CplComp}
+!  object.
+!
+!  The return value is {\tt .true.} if calling PET participates in component, 
+!  {\tt .false.} otherwise.
+!    
+!  The arguments are:
+!  \begin{description}
+!   \item[cplcomp] 
+!    {\tt ESMF\_CplComp} queried.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+    integer :: localrc                     ! local error status
+    logical :: localresult
+
+    ! Initialize return code; assume failure until success is certain       
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! call CompClass method
+    localresult = ESMF_CompMyParticipation(cplcomp%compp, localrc)
+    ! if (ESMF_LogPassFoundError(localrc, rc)) return
+    if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+    ! Set return values
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ESMF_CplCompMyParticipation = localresult
+    
+  end function ESMF_CplCompMyParticipation
+    
 !------------------------------------------------------------------------------
 
 
