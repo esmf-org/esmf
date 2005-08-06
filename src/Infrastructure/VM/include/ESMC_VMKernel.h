@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.22 2005/07/29 14:27:39 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.23 2005/08/06 04:56:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -200,6 +200,7 @@ class ESMC_VMK{
     int vmk_nthreads(int i);       // return number of threads in group PET
     int vmk_tid(int i);            // return tid for PET
     int vmk_pid(int i);            // return pid for PET
+    int vmk_lpid(int i);           // return lpid for PET
     
     
     // communication calls
@@ -238,6 +239,7 @@ void vmk_wtimeprec(double *prec);
 class ESMC_VMKPlan{
   public:
     int npets;
+    int nplist;       // number of PETs in petlist that participate
     int *petlist;     // keeping sequence of parent pets
     int nothreadflag; // 0-default threaded VM, 1-non-threaded VM
     int parentVMflag; // 0-create child VM, 1-run on parent VM
@@ -253,6 +255,11 @@ class ESMC_VMKPlan{
     int pref_intra_process;     // default: PREF_INTRA_PROCESS_SHMHACK
     int pref_intra_ssi;         // default: PREF_INTRA_SSI_POSIXIPC
     int pref_inter_ssi;         // defualt: PREF_INTER_SSI_MPI1
+    // MPI communicator for the participating PET group of parent VM
+    int *lpid_mpi_g_part_map;
+    MPI_Group mpi_g_part;
+    MPI_Comm mpi_c_part;
+    int commfreeflag;   // flag to indicate which PETs must free communicator
         
   public:
     ESMC_VMKPlan(void);
@@ -265,6 +272,8 @@ class ESMC_VMKPlan{
       // return number of PETs that are being spawned out of current PET
     void vmkplan_myvms(ESMC_VMK **myvms);
       // set the internal myvms pointer array
+    void vmkplan_mpi_c_part(ESMC_VMK &vm);
+      // set the mpi communicator for participating PETs
     void vmkplan_useparentvm(ESMC_VMK &vm);
       // use the parent VM, don't create new context
     void vmkplan_maxthreads(ESMC_VMK &vm);  
