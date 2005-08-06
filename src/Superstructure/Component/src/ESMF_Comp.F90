@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.130 2005/05/31 17:40:02 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.131 2005/08/06 05:15:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -163,6 +163,8 @@
 
          integer            :: npetlist           ! number of PETs in petlist
 #endif
+         logical  :: iAmParticipant     ! .false. : PET does not participate
+                                        ! .true.  : PET participates in comp
 
          logical :: multiphaseinit                ! multiple init, run, final
          integer :: initphasecount                ! max inits, for error check
@@ -242,7 +244,8 @@
       public ESMF_CompConstruct, ESMF_CompDestruct
       public ESMF_CompInitialize, ESMF_CompRun, ESMF_CompFinalize
       public ESMF_CompWriteRestart, ESMF_CompReadRestart
-      public ESMF_CompGet, ESMF_CompSet 
+      public ESMF_CompGet, ESMF_CompSet
+      public ESMF_CompMyParticipation
 
       public ESMF_CompValidate, ESMF_CompPrint
 
@@ -258,7 +261,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.130 2005/05/31 17:40:02 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.131 2005/08/06 05:15:14 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -329,7 +332,7 @@ end function
 ! !IROUTINE: ESMF_CompConstruct - Internal routine to fill in a comp struct
 
 ! !INTERFACE:
-      subroutine ESMF_CompConstruct(compp, ctype, name, gridcomptype, &
+      recursive subroutine ESMF_CompConstruct(compp, ctype, name, gridcomptype, &
                           dirPath, configFile, config, grid, clock, parent, &
                           vm, petlist, contextflag, rc)
 !
@@ -396,7 +399,7 @@ end function
         character(len=ESMF_MAXSTR) :: fullpath       ! config file + dirPath
         character(len=ESMF_MAXSTR) :: msgbuf
         integer, pointer :: petlist_loc(:)
-        integer :: npets
+        integer :: npets, mypet, i
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -555,7 +558,7 @@ end function
           allocate(compp%petlist(0))
         endif
 
-        call ESMF_VMGet(compp%vm_parent, petCount=npets)
+        call ESMF_VMGet(compp%vm_parent, localPet=mypet, petCount=npets)
         if (present(contextflag)) then
           if (contextflag==ESMF_CHILD_IN_PARENT_VM) then
             if (compp%npetlist>0 .and. compp%npetlist<npets) then
@@ -568,6 +571,18 @@ end function
           compp%contextflag = contextflag
         else
           compp%contextflag = ESMF_CHILD_IN_NEW_VM    ! default
+        endif
+        
+        ! set the participation flag
+        compp%iAmParticipant = .false.  ! reset
+        if (compp%npetlist>0) then
+          ! see if mypet is in the petlist
+          do i=1, compp%npetlist
+            if (compp%petlist(i) == mypet) compp%iAmParticipant = .true.  ! set
+          enddo
+        else
+          ! no petlist -> all PETs participate
+          compp%iAmParticipant = .true. ! set
         endif
 
         ! instantiate a default VMPlan
@@ -713,7 +728,10 @@ end function
 !    If multiple-phase init, which phase number this is.
 !    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !   \item[{[blockingFlag]}]  
-!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
+!    Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+!    for a list of valid blocking options. Default option is
+!    {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!    across each VAS.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -726,8 +744,9 @@ end function
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
         integer :: dummy
-        logical :: blocking
+        type(ESMF_BlockingFlag):: blocking
         integer :: callrc
+        type(ESMF_VM)::vm
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -749,10 +768,11 @@ end function
                                   ESMF_CONTEXT, rc)) return
         endif
 
-        ! set the default mode to ESMF_BLOCKING
-        blocking = .true.
+        ! set the default mode to ESMF_VASBLOCKING
         if (present(blockingFlag)) then
-          if (blockingFlag.eq.ESMF_NONBLOCKING) blocking=.false.
+          blocking = blockingFlag
+        else
+          blocking = ESMF_VASBLOCKING
         endif
         
         ! supply default objects if unspecified by the caller
@@ -798,13 +818,17 @@ end function
           
         compp%vm_released = .true.
           
-        if (blocking) then
+        if (blocking == ESMF_VASBLOCKING .or. blocking == ESMF_BLOCKING) then
           call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
             compp%vm_cargo, callrc, status)
           status = callrc
           if (compp%isdel) call ESMF_StateDestroy(compp%is, rc=dummy)
           if (compp%esdel) call ESMF_StateDestroy(compp%es, rc=dummy)
           compp%vm_released = .false.
+          if (blocking == ESMF_BLOCKING) then
+            call ESMF_VMGetCurrent(vm)
+            call ESMF_VMBarrier(vm)
+          endif
         endif
 
 #if 0
@@ -859,7 +883,10 @@ end function
 !     If multiple-phase checkpoint, which phase number this is.
 !     Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !   \item[{[blockingFlag]}]  
-!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
+!    Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+!    for a list of valid blocking options. Default option is
+!    {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!    across each VAS.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -894,11 +921,11 @@ end function
 
         call ESMF_GetName(compp%base, cname, status)
 
-        ! set the default mode to ESMF_BLOCKING
+        ! set the default mode to ESMF_VASBLOCKING
         if (present(blockingFlag)) then
           blocking = blockingFlag
         else
-          blocking = ESMF_BLOCKING
+          blocking = ESMF_VASBLOCKING
         endif
 
         ! TODO: add rest of default handling here.
@@ -996,11 +1023,11 @@ end function
 
         call ESMF_GetName(compp%base, cname, status)
 
-        ! set the default mode to ESMF_BLOCKING
+        ! set the default mode to ESMF_VASBLOCKING
         if (present(blockingFlag)) then
           blocking = blockingFlag
         else
-          blocking = ESMF_BLOCKING
+          blocking = ESMF_VASBLOCKING
         endif
 
         ! TODO: put in rest of default argument handling here
@@ -1081,9 +1108,10 @@ end function
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
         integer :: dummy
-        type(ESMF_BlockingFlag):: blocking
+        type(ESMF_BlockingFlag) :: blocking
         integer :: callrc
-
+        type(ESMF_VM):: vm
+        
         ! Finalize return code; assume failure until success is certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
@@ -1104,11 +1132,11 @@ end function
                                   ESMF_CONTEXT, rc)) return
         endif
 
-        ! set the default mode to ESMF_BLOCKING
+        ! set the default mode to ESMF_VASBLOCKING
         if (present(blockingFlag)) then
           blocking = blockingFlag
         else
-          blocking = ESMF_BLOCKING
+          blocking = ESMF_VASBLOCKING
         endif
 
         ! supply default objects if unspecified by the caller
@@ -1153,13 +1181,17 @@ end function
           
         compp%vm_released = .true.
          
-        if (blocking == ESMF_BLOCKING) then
+        if (blocking == ESMF_VASBLOCKING .or. blocking == ESMF_BLOCKING) then
           call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
             compp%vm_cargo, callrc, status)
           status = callrc
           if (compp%isdel) call ESMF_StateDestroy(compp%is, rc=dummy)
           if (compp%esdel) call ESMF_StateDestroy(compp%es, rc=dummy)
           compp%vm_released = .false.
+          if (blocking == ESMF_BLOCKING) then
+            call ESMF_VMGetCurrent(vm)
+            call ESMF_VMBarrier(vm)
+          endif
         endif
 #if 0
         ! old pre-VM interface
@@ -1233,6 +1265,7 @@ end function
         integer :: dummy
         type(ESMF_BlockingFlag):: blocking
         integer :: callrc
+        type(ESMF_VM)::vm
 
         ! Run return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -1254,11 +1287,11 @@ end function
                                   ESMF_CONTEXT, rc)) return
         endif
 
-        ! set the default mode to ESMF_BLOCKING
+        ! set the default mode to ESMF_VASBLOCKING
         if (present(blockingFlag)) then
           blocking = blockingFlag
         else
-          blocking = ESMF_BLOCKING
+          blocking = ESMF_VASBLOCKING
         endif
 
         ! handle creating defaults if not specified by the user
@@ -1303,13 +1336,17 @@ end function
           
         compp%vm_released = .true.          
                                             
-        if (blocking == ESMF_BLOCKING) then
+        if (blocking == ESMF_VASBLOCKING .or. blocking == ESMF_BLOCKING) then
           call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
             compp%vm_cargo, callrc, status)
           status = callrc
           if (compp%isdel) call ESMF_StateDestroy(compp%is, rc=dummy)
           if (compp%esdel) call ESMF_StateDestroy(compp%es, rc=dummy)
           compp%vm_released = .false.
+          if (blocking == ESMF_BLOCKING) then
+            call ESMF_VMGetCurrent(vm)
+            call ESMF_VMBarrier(vm)
+          endif
         endif
 #if 0
         ! old pre-VM name
@@ -1551,6 +1588,66 @@ end function
 
         end subroutine ESMF_CompSet
 
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompMyParticipation"
+!BOPI
+! !IROUTINE: ESMF_CompMyParticipation -- Inquire if calling PET is participating in this component
+!
+! !INTERFACE:
+      recursive function ESMF_CompMyParticipation(compp, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_CompMyParticipation
+!
+! !ARGUMENTS:
+      type (ESMF_CompClass), pointer :: compp
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!  Inquire whether the calling PET is participating in the {\tt ESMF\_Comp}
+!  object.
+!
+!  The return value is {\tt .true.} if calling PET participates in component, 
+!  {\tt .false.} otherwise.
+!    
+!
+!EOPI
+        ! local vars
+        integer :: status                       ! local error status
+        logical :: rcpresent                    ! did user specify rc?
+
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        if (.not.associated(compp)) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "Uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+
+        if (compp%compstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "uninitialized or destroyed component", &
+                                  ESMF_CONTEXT, rc)) return
+        endif
+        
+        ESMF_CompMyParticipation = compp%iAmParticipant
+
+ 
+        ! Set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end function ESMF_CompMyParticipation
+
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
