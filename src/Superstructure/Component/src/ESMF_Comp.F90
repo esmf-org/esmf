@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.132 2005/08/08 19:37:14 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.133 2005/08/08 21:37:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -261,7 +261,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.132 2005/08/08 19:37:14 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.133 2005/08/08 21:37:47 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -727,7 +727,7 @@ end function
 !   \item[{[phase]}]  
 !    If multiple-phase init, which phase number this is.
 !    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!   \item[{[blockingFlag]}]  
+!   \item[{[blockingFlag]}]
 !    Blocking behavior of this method call. See section \ref{opt:blockingflag} 
 !    for a list of valid blocking options. Default option is
 !    {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
@@ -2089,11 +2089,12 @@ end function
 ! !IROUTINE: ESMF_CompWait - Wait for component to return
 
 ! !INTERFACE:
-  subroutine ESMF_CompWait(compp, rc)
+  subroutine ESMF_CompWait(compp, blockingFlag, rc)
 !
 ! !ARGUMENTS:
-    type (ESMF_CompClass), pointer ::             compp
-    integer, intent(out), optional ::             rc           
+    type (ESMF_CompClass), pointer ::                 compp
+    type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
+    integer, intent(out), optional ::                 rc           
 !
 ! !DESCRIPTION:
 !     Wait for component to return
@@ -2102,6 +2103,10 @@ end function
 !     \begin{description}
 !     \item[compp] 
 !          component object
+!     \item[{[blockingFlag]}]
+!       The blocking behavior determines exactly what this call waits for. The
+!       default is {\tt ESMF\_VASBLOCKING} which blocks PETs across each VAS.
+!       See section \ref{opt:blockingflag} for a list of valid blocking options.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2112,6 +2117,8 @@ end function
     integer :: dummy
     logical :: rcpresent
     integer :: callrc
+    type(ESMF_VM)::vm
+    type(ESMF_BlockingFlag):: blocking
 
     ! Initialize return code; assume failure until success is certain       
     status = ESMF_FAILURE
@@ -2142,6 +2149,20 @@ end function
       ! call into C++ 
       call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
                            compp%vm_cargo, callrc, status)
+      
+      ! set the default mode to ESMF_VASBLOCKING
+      if (present(blockingFlag)) then
+        blocking = blockingFlag
+      else
+        blocking = ESMF_VASBLOCKING
+      endif
+    
+      ! conditionally issue a VM wide barrier                     
+      if (blocking == ESMF_BLOCKING) then
+        call ESMF_VMGetCurrent(vm)
+        call ESMF_VMBarrier(vm)
+      endif
+
 
       ! TODO: what is the relationship between callrc and status and rc
       if (ESMF_LogMsgFoundError(status, &

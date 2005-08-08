@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.68 2005/08/08 19:37:21 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.69 2005/08/08 21:37:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.68 2005/08/08 19:37:21 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.69 2005/08/08 21:37:48 theurich Exp $'
 
 !==============================================================================
 !
@@ -1422,11 +1422,12 @@
 ! !IROUTINE: ESMF_GridCompWait - Wait for a GridComp to return
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompWait(gridcomp, rc)
+  subroutine ESMF_GridCompWait(gridcomp, blockingFlag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(inout)             :: gridcomp
-    integer,             intent(out), optional  :: rc           
+    type(ESMF_GridComp), intent(inout)              :: gridcomp
+    type (ESMF_BlockingFlag), intent(in), optional  :: blockingFlag
+    integer,             intent(out), optional      :: rc           
 !
 ! !DESCRIPTION:
 !     When executing asychronously, wait for an {\tt ESMF\_GridComp} to return.
@@ -1435,6 +1436,10 @@
 !     \begin{description}
 !     \item[gridcomp] 
 !      {\tt ESMF\_GridComp} to wait for.
+!     \item[{[blockingFlag]}]
+!       The blocking behavior determines exactly what this call waits for. The
+!       default is {\tt ESMF\_VASBLOCKING} which blocks PETs across each VAS.
+!       See section \ref{opt:blockingflag} for a list of valid blocking options.
 !     \item[{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1447,7 +1452,7 @@
     if (present(rc)) rc = ESMF_FAILURE
 
     ! call CompClass method
-    call ESMF_CompWait(gridcomp%compp, localrc)
+    call ESMF_CompWait(gridcomp%compp, blockingFlag, localrc)
     ! if (ESMF_LogPassFoundError(localrc, rc)) return
     if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
