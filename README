@@ -1,7 +1,7 @@
 
 ================================================================================
 
-                        README - ESMF v2.2.2 release
+                        README - ESMF v2.2.1 release
 
                     Earth System Modeling Framework (ESMF)
 
@@ -226,4 +226,4 @@ Contact Information
 Email esmf_support@ucar.edu with any questions or problems.
 
 ================================================================================
- $Id: README,v 1.63 2005/08/08 22:08:11 nscollins Exp $
+ $Id: README,v 1.64 2005/08/08 22:21:22 nscollins Exp $
