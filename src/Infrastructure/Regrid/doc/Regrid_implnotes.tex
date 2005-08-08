@@ -47,7 +47,7 @@ Figure \ref{fig:RegridScaling} for scaling graphs from an example application).
 
 
 
-%\subsubsection{Overview of Parallelization of Regrid}
+\subsubsection{Overview of Parallelization of Regrid}
 On parallel processing platforms, the physical domains of the source and
 destination Grids are decomposed into logical Decomposition Elements (DEs), as
 illustrated in Figure \ref{fig:ParallelRegrid}.  In order to calculate
@@ -78,7 +78,7 @@ interpolation weights to calculate regridded Fields.  Each will be discussed
 below.
 
 
-%\subsubsection{Parallelization of Regrid: Identification of Necessary Data}
+\subsubsection{Parallelization of Regrid: Identification of Necessary Data}
 The calculation of interpolation weights requires coordinate information from
 both source and destination Grids, and the application of those weights to
 determine regridded values needs corresponding source data.  In a serial
@@ -163,7 +163,7 @@ region, but are not assigned weights themselves.  However, these points could be
 used in the future as a mechanism for regridding of periodic grids or to avoid
 extrapolation issues near the edges of computational grids.
 
-%\subsubsection{Parallelization of Regrid: Data Transfer}
+\subsubsection{Parallelization of Regrid: Data Transfer}
 Once a block of data to send or receive has been identified, it is stored as an
 internal structure called a {\tt domain} and added to a {\tt domainList}.  There
 are separate send and receive domainLists for each DE.  From the domainLists,
@@ -183,7 +183,7 @@ Each PET has its own unique Route.  The data it gathers, either Grid coordinates
 or Field values, are stored locally as single 1D Arrays.
 
 
-%\subsubsection{Parallelization of Regrid: Sweep Algorithms}
+\subsubsection{Parallelization of Regrid: Sweep Algorithms}
 The conservative regrid schemes create vertical coordinate bins to decrease the
 number of cells that must be swept (or searched), as described earlier.  SCRIP
 had an input parameter to set the number of bins to be created, but for a
@@ -215,7 +215,7 @@ a single domain at a time, which typically represents just a part of the 1D
 gathered Arrays.  It is otherwise unaffected by parallelization.
 
 
-%\subsubsection{Parallelization of Regrid: Calculation and Application of Interpolation Weights}
+\subsubsection{Parallelization of Regrid: Calculation and Application of Interpolation Weights}
 incomplete
 
 
