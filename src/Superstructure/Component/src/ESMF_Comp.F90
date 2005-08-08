@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.131 2005/08/06 05:15:14 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.132 2005/08/08 19:37:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -245,7 +245,7 @@
       public ESMF_CompInitialize, ESMF_CompRun, ESMF_CompFinalize
       public ESMF_CompWriteRestart, ESMF_CompReadRestart
       public ESMF_CompGet, ESMF_CompSet
-      public ESMF_CompMyParticipation
+      public ESMF_CompIsPetLocal
 
       public ESMF_CompValidate, ESMF_CompPrint
 
@@ -261,7 +261,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.131 2005/08/06 05:15:14 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.132 2005/08/08 19:37:14 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1591,15 +1591,15 @@ end function
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CompMyParticipation"
+#define ESMF_METHOD "ESMF_CompIsPetLocal"
 !BOPI
-! !IROUTINE: ESMF_CompMyParticipation -- Inquire if calling PET is participating in this component
+! !IROUTINE: ESMF_CompIsPetLocal -- Inquire if this component is to execute on the calling PET.
 !
 ! !INTERFACE:
-      recursive function ESMF_CompMyParticipation(compp, rc)
+      recursive function ESMF_CompIsPetLocal(compp, rc)
 !
 ! !RETURN VALUE:
-      logical :: ESMF_CompMyParticipation
+      logical :: ESMF_CompIsPetLocal
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
@@ -1607,11 +1607,10 @@ end function
 
 !
 ! !DESCRIPTION:
-!  Inquire whether the calling PET is participating in the {\tt ESMF\_Comp}
-!  object.
+!  Inquire if this component is to execute on the calling PET.
 !
-!  The return value is {\tt .true.} if calling PET participates in component, 
-!  {\tt .false.} otherwise.
+!  The return value is {\tt .true.} if the component is to execute on the 
+!  calling PET, {\tt .false.} otherwise.
 !    
 !
 !EOPI
@@ -1639,13 +1638,13 @@ end function
                                   ESMF_CONTEXT, rc)) return
         endif
         
-        ESMF_CompMyParticipation = compp%iAmParticipant
+        ESMF_CompIsPetLocal = compp%iAmParticipant
 
  
         ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_CompMyParticipation
+        end function ESMF_CompIsPetLocal
 
 !------------------------------------------------------------------------------
 

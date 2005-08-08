@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.57 2005/08/06 05:17:48 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.58 2005/08/08 19:37:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@
       public ESMF_CplCompWait
 
       ! function to simplify user code pet-conditionals
-      public ESMF_CplCompMyParticipation
+      public ESMF_CplCompIsPetLocal
 
       !public operator(.eq.), operator(.ne.), assignment(=)
 
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.57 2005/08/06 05:17:48 theurich Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.58 2005/08/08 19:37:19 theurich Exp $'
 
 !==============================================================================
 !
@@ -1394,26 +1394,25 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CplCompMyParticipation"
+#define ESMF_METHOD "ESMF_CplCompIsPetLocal"
 !BOP
-! !IROUTINE: ESMF_CplCompMyParticipation - Inquire if calling PET is participating in this component
+! !IROUTINE: ESMF_CplCompIsPetLocal - Inquire if this component is to execute on the calling PET.
 !
 ! !INTERFACE:
-      recursive function ESMF_CplCompMyParticipation(cplcomp, rc)
+      recursive function ESMF_CplCompIsPetLocal(cplcomp, rc)
 !
 ! !RETURN VALUE:
-      logical :: ESMF_CplCompMyParticipation
+      logical :: ESMF_CplCompIsPetLocal
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(in) :: cplcomp
       integer, intent(out), optional  :: rc 
 !
 ! !DESCRIPTION:
-!  Inquire whether the calling PET is participating in the {\tt ESMF\_CplComp}
-!  object.
+!  Inquire if this {\tt ESMF\_CplComp} object is to execute on the calling PET.
 !
-!  The return value is {\tt .true.} if calling PET participates in component, 
-!  {\tt .false.} otherwise.
+!  The return value is {\tt .true.} if the component is to execute on the 
+!  calling PET, {\tt .false.} otherwise.
 !    
 !  The arguments are:
 !  \begin{description}
@@ -1432,7 +1431,7 @@
     if (present(rc)) rc = ESMF_FAILURE
 
     ! call CompClass method
-    localresult = ESMF_CompMyParticipation(cplcomp%compp, localrc)
+    localresult = ESMF_CompIsPetLocal(cplcomp%compp, localrc)
     ! if (ESMF_LogPassFoundError(localrc, rc)) return
     if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1441,9 +1440,9 @@
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ESMF_CplCompMyParticipation = localresult
+    ESMF_CplCompIsPetLocal = localresult
     
-  end function ESMF_CplCompMyParticipation
+  end function ESMF_CplCompIsPetLocal
     
 !------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.67 2005/08/06 05:18:32 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.68 2005/08/08 19:37:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -85,14 +85,14 @@
       public ESMF_GridCompWait
       
       ! function to simplify user code pet-conditionals
-      public ESMF_GridCompMyParticipation
+      public ESMF_GridCompIsPetLocal
       
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.67 2005/08/06 05:18:32 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.68 2005/08/08 19:37:21 theurich Exp $'
 
 !==============================================================================
 !
@@ -1461,26 +1461,25 @@
 
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCompMyParticipation"
+#define ESMF_METHOD "ESMF_GridCompIsPetLocal"
 !BOP
-! !IROUTINE: ESMF_GridCompMyParticipation - Inquire if calling PET is participating in this component
+! !IROUTINE: ESMF_GridCompIsPetLocal - Inquire if this component is to execute on the calling PET.
 !
 ! !INTERFACE:
-      recursive function ESMF_GridCompMyParticipation(gridcomp, rc)
+      recursive function ESMF_GridCompIsPetLocal(gridcomp, rc)
 !
 ! !RETURN VALUE:
-      logical :: ESMF_GridCompMyParticipation
+      logical :: ESMF_GridCompIsPetLocal
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(in) :: gridcomp
       integer, intent(out), optional  :: rc 
 !
 ! !DESCRIPTION:
-!  Inquire whether the calling PET is participating in the {\tt ESMF\_GridComp}
-!  object.
+!  Inquire if this {\tt ESMF\_GridComp} object is to execute on the calling PET.
 !
-!  The return value is {\tt .true.} if calling PET participates in component, 
-!  {\tt .false.} otherwise.
+!  The return value is {\tt .true.} if the component is to execute on the 
+!  calling PET, {\tt .false.} otherwise.
 !    
 !  The arguments are:
 !  \begin{description}
@@ -1499,7 +1498,7 @@
     if (present(rc)) rc = ESMF_FAILURE
 
     ! call CompClass method
-    localresult = ESMF_CompMyParticipation(gridcomp%compp, localrc)
+    localresult = ESMF_CompIsPetLocal(gridcomp%compp, localrc)
     ! if (ESMF_LogPassFoundError(localrc, rc)) return
     if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1508,9 +1507,9 @@
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ESMF_GridCompMyParticipation = localresult
+    ESMF_GridCompIsPetLocal = localresult
     
-  end function ESMF_GridCompMyParticipation
+  end function ESMF_GridCompIsPetLocal
     
 !------------------------------------------------------------------------------
 
