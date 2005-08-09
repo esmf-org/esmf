@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.20 2005/02/16 04:11:16 nscollins Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.21 2005/08/09 06:49:52 theurich Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -206,11 +206,11 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
  
       ! Wait for both components to finish before coupling
-      call ESMF_GridCompWait(comp1, rc)
+      call ESMF_GridCompWait(comp1, rc=rc)
       !print *, "Comp 1 Wait returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_GridCompWait(comp2, rc)
+      call ESMF_GridCompWait(comp2, rc=rc)
       !print *, "Comp 2 Wait returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -232,11 +232,11 @@
 
     enddo
  
-    call ESMF_GridCompWait(comp1, rc)
+    call ESMF_GridCompWait(comp1, rc=rc)
     !print *, "Comp 1 Wait returned, rc =", rc
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    call ESMF_GridCompWait(comp2, rc)
+    call ESMF_GridCompWait(comp2, rc=rc)
     !print *, "Comp 2 Wait returned, rc =", rc
     if (rc .ne. ESMF_SUCCESS) goto 10
 
