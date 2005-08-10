@@ -1,20 +1,8 @@
-! $Id: ESMF_RegridSampleUTest.F90,v 1.3 2005/06/27 15:53:00 nscollins Exp $
-!
-! Earth System Modeling Framework
-! Copyright 2002-2005, University Corporation for Atmospheric Research,
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
-! Laboratory, University of Michigan, National Centers for Environmental
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
-! NASA Goddard Space Flight Center.
-! Licensed under the GPL.
-!
-
 module options_table
-
 public
 
-integer, parameter :: nOptions=6
-integer, parameter, dimension(1:nOptions) :: nChoices=(/ 2,2,4,2,3,3 /)
+integer, parameter :: nOptions=7
+integer, parameter, dimension(1:nOptions) :: nChoices=(/ 2,2,4,2,3,3,2 /)
 
 character(len=25),parameter, dimension(1:nOptions) :: Option_name= &
        (/ 'SRCDELAYOUT'  &   ! (1)
@@ -23,6 +11,7 @@ character(len=25),parameter, dimension(1:nOptions) :: Option_name= &
         , 'REGSCHEME  '  &   ! (4)
         , 'SRCGRID    '  &   ! (5)
         , 'DSTGRID    '  &   ! (6)
+        , 'DOMAIN     '  &   ! (7)
        /)
 character(len=25),  dimension(1:4,1:nOptions) :: Option_choice
 
@@ -30,6 +19,7 @@ character(len=25),  dimension(1:4,1:nOptions) :: Option_choice
 contains
 
 subroutine get_table
+
 !Option_name(1) = 'SRCDELAYOUT'
   Option_choice(1,1) = '1DX'
   Option_choice(2,1) = '1DY'
@@ -59,6 +49,12 @@ subroutine get_table
   Option_choice(1,6)='A'
   Option_choice(2,6)='D_NE'
   Option_choice(3,6)='C_NE'
+
+!Option_name(7) = 'DOMAIN'
+  Option_choice(1,7)='WHOLEGLOBE'
+  Option_choice(2,7)='REGIONAL'
+
+  return
 end subroutine get_table
 
 !==============================
@@ -191,7 +187,7 @@ end module Unit_Test
 #include <ESMF_Macros.inc>
 
     !--- USES:Framework module
-   !use ESMF_TestMod  ! test methods
+    use ESMF_TestMod  ! test methods
     use ESMF_Mod      ! Framework module
     integer :: lrc,iFunction,iRegrid,ig
     integer ::  npets, localPet
@@ -205,7 +201,7 @@ end module Unit_Test
                          DstRelLocChoice(n_grid_pairs)
 
     !--- cumulative result: count failures; no failures equals "all pass"
-    integer :: result
+    integer :: result=0
     integer :: regrid_rc    !single test error indicator
     integer :: iSrcDistr, iDstDistr, nXY(3,2)
     integer :: TwoOrOne
@@ -237,8 +233,8 @@ end module Unit_Test
     SrcGridHorzChoice(2) = ESMF_GRID_HORZ_STAGGER_D_NE
     SrcRelLocChoice(2) = ESMF_CELL_EFACE
 
-    SrcGridHorzChoice(3) = ESMF_GRID_HORZ_STAGGER_D_NE
-    SrcRelLocChoice(3) = ESMF_CELL_EFACE
+    SrcGridHorzChoice(3) = ESMF_GRID_HORZ_STAGGER_B_NE
+    SrcRelLocChoice(3) = ESMF_CELL_NECORNER
 
     SrcGridHorzChoice(4) = ESMF_GRID_HORZ_STAGGER_C_NE
     SrcRelLocChoice(4) = ESMF_CELL_NFACE
@@ -247,14 +243,14 @@ end module Unit_Test
     DstGridHorzChoice(1) = ESMF_GRID_HORZ_STAGGER_A
     DstRelLocChoice(1) = ESMF_CELL_CENTER
 
-    DstGridHorzChoice(2) = ESMF_GRID_HORZ_STAGGER_A
-    DstRelLocChoice(2) = ESMF_CELL_CENTER
+    DstGridHorzChoice(2) = ESMF_GRID_HORZ_STAGGER_D_NE
+    DstRelLocChoice(2) = ESMF_CELL_EFACE 
 
     DstGridHorzChoice(3) = ESMF_GRID_HORZ_STAGGER_B_NE
     DstRelLocChoice(3) = ESMF_CELL_NECORNER
 
-    DstGridHorzChoice(4) = ESMF_GRID_HORZ_STAGGER_D_NE
-    DstRelLocChoice(4) = ESMF_CELL_EFACE
+    DstGridHorzChoice(4) = ESMF_GRID_HORZ_STAGGER_C_NE
+    DstRelLocChoice(4) = ESMF_CELL_NFACE
 
   !TODO: Print documentation for what 1)the 1-4 field test functions are
   !TODO:                              2)source and dest. grid choices are
@@ -265,10 +261,8 @@ end module Unit_Test
 !================================================================================
 
 
-
     program ESMF_FieldRegridUTest
 
-    use ESMF_TestMod
     use RegridArgs
 
     character(len=100) :: longString
@@ -277,12 +271,21 @@ end module Unit_Test
     call ESMF_VMGetGlobal(vm, rc=lrc)
     !--- Get number of PETs we are running with
     call ESMF_VMGet(vm, petCount=npets, localPET=localPet,  rc=lrc)
-    result=0
+
+  !--LongString specifies all the adjustable parameters of the regrid test.
+  !  Possible options are as follows (Ref: Options_Table subroutine):
+  !   FUNCTION: C, D    (Note, A and B are not appropriate for a sphere)
+  !   REGSCHEME: BILINEAR, 1CONSERV
+  !   SRCGRID  : A, D_NE, C_NE
+  !   DSTGRID  : A, D_NE, C_NE
+  !   SRCDELAYOUT: 1DX, 1DY, 2D
+  !   DSTDELAYOUT: 1DX, 1DY, 2D
 
     longString='FUNCTION:D:REGSCHEME:1CONSERV' &
-               //':SRCGRID:D_NE:DSTGRID:C_NE:SRCDELAYOUT:1DY:DSTDELAYOUT:1DX'
+               //':SRCGRID:D_NE:DSTGRID:A:SRCDELAYOUT:1DY:DSTDELAYOUT:1DX' &
+               //':DOMAIN:REGIONAL'
 
-    call RegridUTest(longString,ier)
+    call setupRegridUTest(longString,ier)
 
 #ifdef ESMF_EXHAUSTIVE
    !Test for "success" of regridding
@@ -300,8 +303,7 @@ end module Unit_Test
     end program ESMF_FieldRegridUTest
 
 !============================================================================
-
-    subroutine RegridUTest(longString,ier)
+    subroutine setupRegridUTest(longString,ier)
 
     use RegridArgs
     use options_table, only : nOptions
@@ -319,6 +321,25 @@ interface
   end subroutine find_indices
 end interface
 
+interface
+    subroutine Regrid(FieldChoice, nSrcPetsXY, npetsXY, MethodChoice, &
+                           SrcGridChoice,DstGridChoice, &
+                           SrcLocChoice, DstLocChoice, &
+                           domainType, error_threshold, ier )
+    use RegridArgs
+    implicit none
+      integer, intent(in) :: FieldChoice
+      type(ESMF_RegridMethod), intent(in) :: MethodChoice
+      type(ESMF_GridHorzStagger), intent(in) :: SrcGridChoice, DstGridChoice
+      type(ESMF_RelLoc), intent(in) :: SrcLocChoice, DstLocChoice
+      real(ESMF_KIND_R8), optional :: error_threshold
+      integer, intent(in) :: npetsXY(2)
+      integer, intent(in) :: nSrcPetsXY(2)
+      integer, intent(in) :: domainType
+      integer, optional, intent(out) :: ier
+    end subroutine Regrid
+end interface
+
     character(len=*), intent(in) :: longString
 
     integer :: ier
@@ -327,6 +348,9 @@ end interface
     integer :: nChoices
     integer :: nSelected
     integer :: iSrcRelLoc, iDstRelLoc
+    integer :: iDomain
+    real(ESMF_KIND_R8) :: err_threshold=0.01
+    
 
     !--- Initialize the error flag
     regrid_rc=ESMF_SUCCESS
@@ -354,36 +378,72 @@ end interface
      iRegrid   =2
      iSrcRelLoc=2
      iDstRelLoc=3
+     iDomain   =1
 
     !---Modify according to the choices in longString...
      if (MaskName(1)) iSrcDistr=ChoiceIndex(1)
-     if (MaskName(2)) iSrcDistr=ChoiceIndex(2)
+     if (MaskName(2)) iDstDistr=ChoiceIndex(2)
      if (MaskName(3)) iFunction=CHoiceIndex(3)
      if (MaskName(4)) iRegrid=ChoiceIndex(4)
      if (MaskName(5)) iSrcRelLoc=ChoiceIndex(5)
-     if (MaskName(6)) iSrcRelLoc=ChoiceIndex(6)
+     if (MaskName(6)) iDstRelLoc=ChoiceIndex(6)
+     if (MaskName(7)) iDomain=ChoiceIndex(7)
 
+     err_threshold=0.2
+
+    !--Start the test..
           call Regrid(FieldChoice = iFunction,nSrcPetsXY= nXY(iSrcDistr,:), &
                            npetsXY=nXY(iDstDistr,:), &
                            MethodChoice = RegridChoice(iRegrid), &
                            SrcGridChoice = SrcGridHorzChoice(iSrcRelLoc), &
                            DstGridChoice = DstGridHorzChoice(iDstRelLoc), &
-                           SrcRelLocChoice = SrcRelLocChoice(iSrcRelLoc), &
-                           DstRelLocChoice = DstRelLocChoice(iDstRelLoc) )
-          write(*,'(a,i2,a,i2,a,i2,a,i2,a,i2)') &
-                  'iDstDistr=',iDstDistr, 'FieldChoice=',iFunction, &
+                           SrcLocChoice = SrcRelLocChoice(iSrcRelLoc), &
+                           DstLocChoice = DstRelLocChoice(iDstRelLoc), &
+                           domainType   = iDomain, &
+                           error_threshold= err_threshold )
+          write(*,'(a,i2,a,i2,a,i2,a,i2,a,i2,a,i2)') &
+                  'iSrcDistr=',iSrcDistr, &
+                  ' iDstDistr=',iDstDistr, 'FieldChoice=',iFunction, &
                   ' RegridChoice=',iRegrid,' iSrcRelLoc=',iSrcRelLoc, &
+                  ' iDstRelLoc=',iDstRelLoc,' iDomain=',iDomain, &
                   ' COMPLETED at process ', localPet
 
-    contains
-
+  end subroutine setupRegridUTest
     !-------------------------------------------------------------------
     subroutine Regrid(FieldChoice, nSrcPetsXY, npetsXY, MethodChoice, &
                            SrcGridChoice,DstGridChoice, &
-                           SrcRelLocChoice, DstRelLocChoice, &
-                           error_threshold, ier )
+                           SrcLocChoice, DstLocChoice, &
+                           domainType, error_threshold, ier )
 
+  !--Execute a Regrid Unit test for a single set of testing parameter choices.
+
+  !  FieldChoice -- Choice of test function (ESMF_RegridMethod).
+  !  nSrcPetsXY -- Choice of geom. decomposition on the source grid (int).
+  !  npetsXY -- Choice of geom. decomposition on destination grid (int).
+  !  MethodCHoice -- Regridding Method Choice (ESMF_RegridMethod).
+  !  Src(Dst)GridChoice -- Type of (Arakawa) grid (ESMF_GridHorzStagger).
+  !  Src(Dst)LocChoice -- In cell relative location of data (ESMF_RelLoc).
+  !  error_threshold -- Normalized error threshold (int).
+
+    use RegridArgs
     implicit none
+  
+  
+interface
+  subroutine functionValues(Choice, xCoord, yCoord, Phi, Theta, &
+                            lb, ub, halo, maxCoor, f90ptr, ier)
+
+  use ESMF_Mod
+  integer, intent(in)                             :: Choice
+  real(ESMF_KIND_R8), dimension(:,:), pointer     :: xCoord, yCoord
+  real(ESMF_KIND_R8), dimension(:,:), pointer     :: Theta, Phi
+  integer, dimension(2), intent(in)               :: lb, ub
+  integer, intent(in)                             :: halo
+  real(ESMF_KIND_R8), dimension(2), intent(in)    :: maxCoor
+  real(ESMF_KIND_R8), dimension(:,:), pointer     :: f90ptr
+  integer :: ier
+  end subroutine functionValues
+end interface
 
       ! Choice of test function for the field to be regridded
       ! 1 -->   f=x+y
@@ -394,37 +454,38 @@ end interface
       integer, intent(in) :: FieldChoice
       type(ESMF_RegridMethod), intent(in) :: MethodChoice
       type(ESMF_GridHorzStagger), intent(in) :: SrcGridChoice, DstGridChoice
-      type(ESMF_RelLoc), intent(in) :: SrcRelLocChoice, DstRelLocChoice 
+      type(ESMF_RelLoc), intent(in) :: SrcLocChoice, DstLocChoice 
       real(ESMF_KIND_R8), optional :: error_threshold
       integer, intent(in) :: npetsXY(2)
       integer, intent(in) :: nSrcPetsXY(2)
+      integer, intent(in) :: domainType
       integer, optional, intent(out) :: ier
 
     !--- Local variables
     type(ESMF_Field) :: field1, field2
     type(ESMF_Grid) :: srcgrid, dstgrid
     type(ESMF_RouteHandle) :: regrid_rh
-    type(ESMF_Array) :: arraya, arrayb
     type(ESMF_DELayout) :: layout1, layout2
     integer :: rc
 
-    real (ESMF_KIND_R8) :: x_srcPlus, y_srcPlus
-    real (ESMF_KIND_R8) :: x_dstPlus, y_dstPlus
-    integer :: i, j, lb(2), ub(2), halo
-    integer :: TwoOrOne
+    integer :: i, j, SrcHalo,DstHalo
+    integer :: lbSrc(2), ubSrc(2)
+    integer :: lbDst(2), ubDst(2)
     integer :: nx_domain, ny_domain
     integer ::  n_cells(2)
     type(ESMF_ArraySpec) :: arrayspec
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
-    type (ESMF_Array), dimension(2) :: ESMF_coords, ESMF_coords2
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: x_coords,y_coords
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: x_coords2,y_coords2
-    real (ESMF_KIND_R8), dimension(:,:), allocatable :: SolnOnTarget
-    real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
-    real (ESMF_KIND_R8) ::  length_scale, pi,radius, RelativeError
-    real (ESMF_KIND_R8) :: epsil,max_error, avg_error
-    real (ESMF_KIND_R8) :: xmin, ymin, xmax, ymax
-    real (ESMF_KIND_R8) :: crop_factor
+    real(ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
+    type(ESMF_Array), dimension(2) :: ESMF_coords, ESMF_coords2
+    real(ESMF_KIND_R8), dimension(:,:), pointer :: x_coords,y_coords
+    real(ESMF_KIND_R8), dimension(:,:), pointer :: x_coords2,y_coords2
+    real(ESMF_KIND_R8), dimension(:,:), pointer :: Phi, Theta
+    real(ESMF_KIND_R8), dimension(:,:), pointer     :: SolnOnTarget
+    real(ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
+    real(ESMF_KIND_R8) ::  length_scale, radius, RelativeError
+    real(ESMF_KIND_R8) :: epsil,max_error, avg_error
+    real(ESMF_KIND_R8) :: xmin, ymin, xmax, ymax
+    real(ESMF_KIND_R8) :: crop_factor
+    real(ESMF_KIND_R8), parameter ::  pi            = 3.1416d0
 
 
 !-------------------------------------------------------------------------
@@ -433,144 +494,76 @@ end interface
 !   !  Create a source and destination grid with data on it, to use
 !   !  in the Regrid calls below.
  
-    TwoOrOne= 1 + mod(npets+1,2)
     layout1 = ESMF_DELayoutCreate(vm, nSrcPetsXY    , rc=rc)
-    layout1 = ESMF_DELayoutCreate(vm, (/ 1, npets /), rc=rc)
     layout2 = ESMF_DELayoutCreate(vm, npetsXY, rc=rc)
 
-    !--- Full physical domain dimension
-    xmin = 0.0
-    ymin = 0.0
-    xmax = 20.
-    ymax = 30.
-
-    crop_factor=.2   !portion of the domain to be covered by the grid
-
-    !--- Grid dimension to cover full physical domain.
-    nx_domain=100
-    ny_domain=150
-
-    !--- Number of cells in the current grid.
-    n_cells = (/real(nx_domain)*crop_factor, real(ny_domain)*crop_factor /)
-    mincoords = (/ xmin*crop_factor,  ymin*crop_factor /)
-    maxcoords = (/ xmax*crop_factor,  ymax*crop_factor /)
-
-    if (localPET == 0) then
-      print*,'n_cells=',n_cells
-      print*,'mincoords=',mincoords
-      print*,'maxcoords=',maxcoords
+   !--Create and distribute the source and destination grids
+   !=========================================================
+!   domainType=2
+   !...tab for choice of DOMAIN type:
+    if ( domainType == 1 )  then         !WholeGlobe
+      call createWholeGlobeGrids
+    else if ( domainType == 2 ) then     !Regional
+      call createRegionalGrids
+    else                          !ERROR
+      print*,'ERROR! domainType=', domainType,'  valid values= 1,2 '
+      stop
     end if
 
-    if ( present(error_threshold) ) then
-      epsil=error_threshold
-    else
-      epsil=0.5 !threshold for normalized error
-    end if
-
-    !Create the source grid
-   !===========================
-    srcgrid = ESMF_GridCreateHorzXYUni( n_cells, &
-                   mincoords, maxcoords, &
-                   horzStagger=SrcGridChoice, &
-                   name="srcgrid", rc=rc)
-
-   !Distribute the source grid
-   !===========================
-    call ESMF_GridDistribute(srcgrid, delayout=layout1, rc=rc)
-
-   !Create the destination grid
-   !===========================
-
-    dstgrid = ESMF_GridCreateHorzXYUni( n_cells, & 
-                   mincoords, maxcoords, &
-                   horzStagger=DstGridChoice, &
-                   name="srcgrid", rc=rc)
-
-   !Distribute destination grid 
-   !=========================== 
-    call ESMF_GridDistribute(dstgrid, delayout=layout2, rc=rc)
- 
-   !Specify settings for the field array
-   !====================================
+   !Specify settings for the fields' arrays
+   !=======================================
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
 
-   !Create the field (with halo width of 3)
-   !=======================================
-    halo = 3
-    field1 = ESMF_FieldCreate(srcgrid, arrayspec, &
-                              horzRelloc=SrcRelLocChoice, &
-                              haloWidth=halo, name="src pressure", rc=rc)
 
+   !Create the source field (with halo width of 3)
+   !==============================================
+    srcHalo=3
+    call createField(grid=srcgrid,               &
+                     LocChoice = SrcLocChoice,   &
+                     halo      = SrcHalo,        &
+                     fieldName = "src pressure", &
+                     field     = field1,         &
+                     f90ptr    = f90ptr1,        &
+                     xCoor     = x_coords,       &
+                     yCoor     = y_coords         )
 
-   !Create a pointer to the source field data space
-   !===============================================
-    call ESMF_FieldGetDataPointer(field1, f90ptr1, ESMF_DATA_REF, rc=rc)
-
-
-   !Get the coordinates of the source grid
-   !======================================
-    call ESMF_GridGetCoord(srcgrid,horzRelLoc=SrcRelLocChoice,  &
-           centercoord=ESMF_coords,rc=rc)
-
-   !Get the actual values of the x and y coordinate arrays 
-   !====================================================== 
-    call ESMF_ArrayGetData(ESMF_coords(1), x_coords, ESMF_DATA_COPY, rc=rc)
-    call ESMF_ArrayGetData(ESMF_coords(2), y_coords, ESMF_DATA_COPY, rc=rc)
 
     !--- Assign values to the source field data (4 case choices) via pointer
-    lb(:) = lbound(f90ptr1)
-    ub(:) = ubound(f90ptr1)
-    pi = 3.1416
-    select case(FieldChoice)
-    case(1) !** f=x+y
-      f90ptr1(:,:) = 0.0
-      do j=lb(2)+halo, ub(2)-halo
-        do i=lb(1)+halo, ub(1)-halo
-        f90ptr1(i, j) = x_coords(i-halo,j-halo) + y_coords(i-halo,j-halo)
-        enddo
-      enddo
-    case(2) !**f=2+cos(pi*r/L)
-      f90ptr1(:,:) = 0.0
-      length_scale=sqrt( maxcoords(1)**2 + maxcoords(2)**2 )
-      do j=lb(2)+halo, ub(2)-halo
-        do i=lb(1)+halo, ub(1)-halo
-          radius=sqrt( x_coords(i-halo,j-halo)**2 +   &
-                       y_coords(i-halo,j-halo)**2 )
-          f90ptr1(i, j) = 2. + cos( pi * radius / length_scale )
-        end do
-      end do
+    !=======================================================================
+                            ! -->Array bounds<-- !
+    lbSrc(:) = lbound(f90ptr1)
+    ubSrc(:) = ubound(f90ptr1)
+                           ! -->Define Phi, Theta values<-- !
+    if (domainType == 1) then
+      !--Whole_globe domain.
+      Phi => x_coords
+      Theta => y_coords
+    else if (domainType == 2) then
+      !--Regional domain
+      allocate( Phi( size(x_coords,1), size(x_coords,2) ) )
+      allocate( Theta( size(y_coords,1) , size(y_coords,2) ) )
+      Phi   = 2.  * pi * (x_coords+10.) / xmax
+      Theta = 0.5 * pi * (y_coords+10.) / ymax
+    else
+      print*,'ERROR! domainType=',domainType,' valid values=1,2'
+    end if
+                    ! -->Assign values to test function<-- !             
+    call functionValues(FieldChoice, x_coords, y_coords, Phi, Theta, &
+                        lbSrc, ubSrc, Srchalo, maxcoords, f90ptr1, ier)
 
-    case(3) !**f=2+cos((pi/2)*y/ymax)*cos(4*pi*x/xmax)
-      do j=lb(2)+halo, ub(2)-halo
-        do i=lb(1)+halo, ub(1)-halo
-          x_srcPlus = x_coords(i-halo,j-halo)+10.
-          y_srcPlus = y_coords(i-halo,j-halo)+10.
-          f90ptr1(i, j) = 2. + &
-                        cos( pi * y_srcPlus/(2.*ymax) ) &
-                         *cos( 4.*pi * x_srcPlus/xmax  )
-        end do
-      end do
-    case(4) !**f=2+sin(pi*y/ymax)**16 * cos(16*pi*x/xmax)
-      do j=lb(2)+halo, ub(2)-halo
-        do i=lb(1)+halo, ub(1)-halo
-          x_srcPlus = x_coords(i-halo,j-halo)+10.
-          y_srcPlus = y_coords(i-halo,j-halo)+10.
-          f90ptr1(i, j) = 2. + &
-                 sin( pi* y_srcPlus/ymax )**16 &
-                *cos( 16.*pi* x_srcPlus/xmax )
-        end do
-      end do
-    case default
-      print*,'ERROR! invalid iFunction value (=',FieldChoice, &
-             ') valid range is [ 1 -> 4 ]'
-      ier=1
-    end select
+   !print*,'Source grid: x_coords(1,1)=',x_coords(1,1)
 
-
-    !Create the destination field
-   !=============================
-    field2 = ESMF_FieldCreate(dstgrid, arrayspec, horzRelloc=DstRelLocChoice, &
-                                                   name="dst pressure", rc=rc)
+   !Create the destination field (with halo width of 0)
+   !===================================================
+    DstHalo=0
+    call createField(grid=Dstgrid,               &
+                     LocChoice = DstLocChoice,   &
+                     halo      = DstHalo,        &
+                     fieldName = "Dst pressure", &
+                     field     = field2,         &
+                     f90ptr    = f90ptr2,        &
+                     xCoor     = x_coords2,      &
+                     yCoor     = y_coords2        )
 
     ! fields all ready to go
 
@@ -588,81 +581,72 @@ end interface
    !=====================
     regrid_rh = ESMF_RouteHandleCreate(rc)
 
+
    !Do all the calculations in preparation for the actual re-gridding
    !=================================================================
     call ESMF_FieldRegridStore(field1, field2, vm, &
                                routehandle=regrid_rh, &
-                               regridmethod=MethodChoice               , rc=rc)
-                              !regridmethod=ESMF_REGRID_METHOD_CONSERV1, rc=rc)
-                              !regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
+                               regridmethod=MethodChoice, rc=rc)
 
+ 
    !Regrid
    !======
     call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)
 
 
-   !Get a pointer to the data in the destination field
-   !==================================================
-    call ESMF_FieldGetDataPointer(field2, f90ptr2, ESMF_DATA_REF, rc=rc)
+!===============================================================
+!Verification: Compare to the "exact solution" on the dest. grid
+!===============================================================
 
     !Array bounds in the destination grid (local indexing)
-    !-----------------------------------------------------
-    lb(:) = lbound(f90ptr2)
-    ub(:) = ubound(f90ptr2)
-    
-    !Compute the "exact" array values in the destination grid (for verification)
-    !---------------------------------------------------------------------------
-    allocate( SolnOnTarget( lb(1):ub(1) , lb(2):ub(2) ) )
+    !=====================================================
+     lbDst(:) = lbound(f90ptr2)
+     ubDst(:) = ubound(f90ptr2)
 
-    call ESMF_GridGetCoord(dstgrid,horzRelLoc=DstRelLocChoice,  &
-           centercoord=ESMF_coords2,rc=rc)
-    call ESMF_ArrayGetData(ESMF_coords2(1), x_coords2, ESMF_DATA_COPY, rc=rc)
-    call ESMF_ArrayGetData(ESMF_coords2(2), y_coords2, ESMF_DATA_COPY, rc=rc)
+    !Allocate the array pointer for the "exact solution at the dest. grid
+    !====================================================================
+     allocate( SolnOnTarget( lbDst(1):ubDst(1) , lbDst(2):ubDst(2) ) )
 
-    !Solution values at the target grid -- 4 cases
-    select case (FieldChoice)
-    case(1) !** f=x+y
-      SolnOnTarget(:,:)=x_coords2(:,:)+y_coords2(:,:)
-    case(2) !** f=2+cos(pi*r/L)
-      do j=lb(2),ub(2)
-        do i=lb(1),ub(1)
-          radius=sqrt( x_coords2(i,j)**2 + y_coords2(i,j)**2 )
-          SolnOnTarget(i, j) = 2. + cos( pi * radius / length_scale )
-        end do
-      end do
-    case(3) !**f=2+cos((pi/2)*y/ymax)*cos(4*pi*x/xmax)
-      do j=lb(2),ub(2)
-        do i=lb(1),ub(1)
-          x_dstPlus = x_coords2(i,j)+10.
-          y_dstPlus = y_coords2(i,j)+10.
-          SolnOnTarget(i, j) = 2. + &
-                        cos( pi* y_dstPlus/(2.*ymax) ) &
-                         *cos( 4.*pi* x_dstPlus/xmax  )
-        end do
-      end do
-    case(4) !**f=2+sin(pi*y/ymax)**16 * cos(16*pi*x/xmax)
-      do j=lb(2), ub(2)
-        do i=lb(1), ub(1)
-          x_dstPlus = x_coords2(i,j)+10.
-          y_dstPlus = y_coords2(i,j)+10.
-          SolnOnTarget(i, j) = 2. + &
-                 sin( pi* y_dstPlus/ymax )**16 &
-                *cos( 16.*pi* x_dstPlus/xmax )
-        end do
-      end do
-    case default
-      print*,'ERROR! invalid iFunction value (=',FieldChoice, &
-             ') valid range is [ 1 -> 4 ]'
-      ier=1
-    end select
+
+   !--Re-associate the Phi and Theta pointers to the field2 coordinates
+   !===================================================================
+    if (domainType == 1) then
+      !--Whole_globe domain:
+      Phi => x_coords2
+      Theta => y_coords2
+    else if (domainType ==2) then
+      !--Regional domain:
+      allocate( Phi( size(x_coords2,1), size(x_coords2,2) ) )
+      allocate( Theta( size(y_coords2,1) , size(y_coords2,2) ) )
+      Phi   = 2.  * pi * (x_coords2+10.) / xmax
+      Theta = 0.5 * pi * (y_coords2+10.) / ymax
+    else
+      print*,'ERROR! domainType=',domainType,' valid values=1,2'
+    end if
+   !print*,'Destination grid: x_coords2(1,1)=',x_coords2(1,1)
+
+
+   !--Compute exact fcn. values at the Destination Grid 
+   !===================================================
+    DstHalo=0
+    call functionValues(FieldChoice, x_coords2, y_coords2, Phi, Theta, &
+                        lbDst, ubDst, DstHalo, maxcoords, SolnOnTarget, ier)
+
  
    !Verify success in regridding. Compute maximum and average normalized error
-   !--------------------------------------------------------------------------
+   !==========================================================================
    max_error=0.
    avg_error=0.
 
-   do j=lb(2)+1,ub(2)
-     do i=lb(1),ub(1)
+   !--set the threshold for the normalized error..
+    if ( present(error_threshold) ) then
+      epsil=error_threshold
+    else
+      epsil=0.5 !threshold for normalized error
+    end if
+
+   do j=lbDst(2)+1,ubDst(2)
+     do i=lbDst(1),ubDst(1)
        RelativeError=abs( (SolnOnTarget(i,j)-f90ptr2(i,j)) / SolnOnTarget(i,j) )
       !write(*,'(a,i2,a,2i3,1x,e11.4,1x,e11.4)') &
       !     'localPET=',localPet,' i,j=',i,j,SolnOnTarget(i,j), &
@@ -682,8 +666,7 @@ end interface
    end do
 
   !TODO: compute the GLOBAL average and maximum normalized errors
-   avg_error=avg_error/( (ub(1)-lb(1)+1) * (ub(2)-lb(2)+1) )
-   if (localPet .eq. 0) &
+   avg_error=avg_error/( (ubDst(1)-lbDst(1)+1) * (ubDst(2)-lbDst(2)+1) )
    write(*,'(a,i3,a,i1,a,e12.4,a,e12.4)' ) &
          'localPet=',localPet,' FieldChoice=',FieldChoice, &
          '  local max norm error=',max_error, &
@@ -704,10 +687,245 @@ end interface
     call ESMF_GridDestroy(srcgrid, rc=rc)
 
     call ESMF_GridDestroy(dstgrid, rc=rc)
+!----------------------------------------------------------------
+    return
+
+contains
+
+!==================================================================
+    subroutine createWholeGlobeGrids
+
+ ! Create grids covering the whole globe. Note that crop factor was introduced
+ ! for the benefit of regional grids originally. It is not needed here.
+
+    !--- Full physical domain dimension
+    xmin = 0.0
+    ymin = -0.5*pi
+    xmax = 2.*pi
+    ymax = 0.5*pi
+
+    crop_factor=1.  !portion of the domain to be covered by the grid
+
+    !--- Grid dimension to cover full physical domain.
+    nx_domain=100
+    ny_domain=150
+
+    !--Coordinate ranges of the "test grids"
+    mincoords = (/ xmin*crop_factor,  ymin*crop_factor /)
+    maxcoords = (/ xmax*crop_factor,  ymax*crop_factor /)
+
+    !--- Number of cells in the current grid.
+    n_cells = (/real(nx_domain)*crop_factor, real(ny_domain)*crop_factor /)
+
+    if (localPET == 0) then
+      print*,'n_cells=',n_cells
+      print*,'mincoords=',mincoords
+      print*,'maxcoords=',maxcoords
+    end if
+
+
+    !Create the source grid
+   !===========================
+    srcgrid = ESMF_GridCreateHorzLatLonUni( n_cells, &
+                   mincoords, maxcoords, &
+                   horzStagger=SrcGridChoice, &
+                   dimUnits= (/ "radians" , "radians" /), &
+                   periodic=(/ ESMF_true , ESMF_false /), &
+                   name="srcgrid", rc=rc)
+
+   !Distribute the source grid
+   !===========================
+    call ESMF_GridDistribute(srcgrid, delayout=layout1, rc=rc)
+
+   !Create the destination grid
+   !===========================
+    dstgrid = ESMF_GridCreateHorzLatLonUni( n_cells, &
+                   mincoords, maxcoords, &
+                   horzStagger=DstGridChoice, &
+                   dimUnits= (/ "radians" , "radians" /), &
+                   periodic=(/ ESMF_true , ESMF_false /), &
+                   name="dstgrid", rc=rc)
+
+   !Distribute destination grid
+   !===========================
+    call ESMF_GridDistribute(dstgrid, delayout=layout2, rc=rc)
+
+    return
+    end subroutine createWholeGlobeGrids
+
+!===========================================================================
+
+    subroutine createRegionalGrids
+
+!--Create a Regional (not whole-globe) rectangular grid.
+   
+    !---Maximum range of physical dimensions of the grid
+    xmin = 0.0
+    ymin = 0.0
+    xmax = 20.
+    ymax = 30.
+
+    crop_factor=.2   !Fraction of the maximum range covered by the actual grid
+
+    !--- Maximum size of the grid (# of grid cells).
+    nx_domain=100
+    ny_domain=150
+
+    !--- Number of cells in the current grid.
+    n_cells = (/real(nx_domain)*crop_factor, real(ny_domain)*crop_factor /)
+    mincoords = (/ xmin*crop_factor,  ymin*crop_factor /)
+    maxcoords = (/ xmax*crop_factor,  ymax*crop_factor /)
+
+    if (localPET == 0) then
+      print*,'n_cells=',n_cells
+      print*,'mincoords=',mincoords
+      print*,'maxcoords=',maxcoords
+    end if
+
+    !Create the source grid
+   !===========================
+    srcgrid = ESMF_GridCreateHorzXYUni( n_cells, &
+                   mincoords, maxcoords, &
+                   horzStagger=SrcGridChoice, &
+                   name="srcgrid", rc=rc)
+
+   !Distribute the source grid
+   !===========================
+    call ESMF_GridDistribute(srcgrid, delayout=layout1, rc=rc)
+
+   !Create the destination grid
+   !===========================
+    dstgrid = ESMF_GridCreateHorzXYUni( n_cells, &
+                   mincoords, maxcoords, &
+                   horzStagger=DstGridChoice, &
+                   name="srcgrid", rc=rc)
+
+   !Distribute destination grid
+   !===========================
+    call ESMF_GridDistribute(dstgrid, delayout=layout2, rc=rc)
+
+    return
+    end subroutine createRegionalGrids
+
+!=========================================================================
+
+    subroutine createField(grid, LocChoice, halo, fieldName, field, &
+                              f90ptr, xCoor,  yCoor )
+    type(ESMF_Grid), intent(in)                 :: grid
+    type(ESMF_RelLoc), intent(in)               :: LocChoice
+    integer, intent(in)                         :: halo
+    character (len=*), intent(in)               :: fieldName
+    type(ESMF_Field)                            :: field
+    real(ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
+    real(ESMF_KIND_R8), dimension(:,:), pointer :: xCoor, yCoor
+    
+
+ !-------------------------------------------------------------------------
+ !--Create a field and return a pointer to its data array, and the arrays 
+ !  of coordinates --- x and y.
+ !--------------------------------------------------------------------------
+
+   !Create the field 
+   !================
+    field = ESMF_FieldCreate(grid, arrayspec, &
+                              horzRelloc=LocChoice, &
+                              haloWidth=halo, name=fieldName, rc=rc)
+
+
+   !Create a pointer to the field data space
+   !========================================
+    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
+
+
+   !Get the coordinates of the grid
+   !===============================
+    call ESMF_GridGetCoord(grid,horzRelLoc=LocChoice,  &
+           centercoord=ESMF_coords,rc=rc)
+
+
+   !Get the actual values of the x and y coordinate arrays
+   !======================================================
+    call ESMF_ArrayGetData(ESMF_coords(1), xCoor, ESMF_DATA_COPY, rc=rc)
+    call ESMF_ArrayGetData(ESMF_coords(2), yCoor, ESMF_DATA_COPY, rc=rc)
+
+    return
+    end subroutine createField
 
     end subroutine Regrid
+!=============================================
+  subroutine functionValues(Choice, xCoord, yCoord, Phi, Theta, &
+                            lb, ub, halo, maxCoor, f90ptr, ier)
 
-    end subroutine RegridUTest
+ !--Compute the values of the test function and store in the f90ptr.
+ !  The parameter Choice determines which function is returned.
+ !  Choice 3 and 4 are the only ones appropriate for WHOLE_GLOBE tests.
+
+  use ESMF_Mod
+
+  integer, intent(in)                             :: Choice
+  real(ESMF_KIND_R8), dimension(:,:), pointer     :: xCoord, yCoord
+  real(ESMF_KIND_R8), dimension(:,:), pointer     :: Theta, Phi
+  integer, dimension(2), intent(in)               :: lb, ub
+  integer, intent(in)                             :: halo
+  real(ESMF_KIND_R8), dimension(2), intent(in)    :: maxCoor
+  real(ESMF_KIND_R8), dimension(:,:), pointer     :: f90ptr
+  integer :: ier
+
+ !--Local Variables
+  integer :: i,j
+  real(ESMF_KIND_R8) :: length_scale, radius
+  real(ESMF_KIND_R8), parameter ::  pi            = 3.1416d0
+
+    select case(Choice)
+    case(1) !** f=x+y
+      f90ptr(:,:) = 0.0
+      do j=lb(2)+halo, ub(2)-halo
+        do i=lb(1)+halo, ub(1)-halo
+        f90ptr(i, j) = xCoord(i-halo,j-halo) + yCoord(i-halo,j-halo)
+        enddo
+      enddo
+    case(2) !**f=2+cos(pi*r/L)
+      f90ptr(:,:) = 0.0
+      length_scale=sqrt( maxCoor(1)**2 + maxCoor(2)**2 )
+      do j=lb(2)+halo, ub(2)-halo
+        do i=lb(1)+halo, ub(1)-halo
+          radius=sqrt( xCoord(i-halo,j-halo)**2 +   &
+                       yCoord(i-halo,j-halo)**2 )
+          f90ptr(i, j) = 2. + cos( pi * radius / length_scale )
+        end do
+      end do
+
+    case(3) !**f=2+cos(y)**2*cos(2*x)
+      do j=lb(2)+halo, ub(2)-halo
+        do i=lb(1)+halo, ub(1)-halo
+         !Phi = xCoord(i-halo,j-halo)
+         !Theta = yCoord(i-halo,j-halo)
+          f90ptr(i, j) = 2. + &
+                        cos(Theta(i-halo,j-halo))**2 * &
+                        cos( 2.*Phi(i-halo,j-halo))
+        end do
+      end do
+    case(4) !**f=2+sin(2*y)**16 * cos(16*x)
+      do j=lb(2)+halo, ub(2)-halo
+        do i=lb(1)+halo, ub(1)-halo
+         !Phi = xCoord(i-halo,j-halo)
+         !Theta = yCoord(i-halo,j-halo)
+          f90ptr(i, j) = 2. + &
+                        sin( 2*Theta(i-halo,j-halo) )**16 * &
+                        cos( 16.* Phi(i-halo,j-halo) )
+        end do
+      end do
+    case default
+      print*,'ERROR! invalid iFunction value (=',Choice, &
+             ') valid range is [ 1 -> 4 ]'
+      ier=1
+    end select
+
+    return
+    end subroutine functionValues
+
+
+!   end subroutine setupRegridUTest
 
 !=============================================================================
 subroutine find_indices( long_string, maskName, choiceIndex, nOptions, nSelected, ier)
