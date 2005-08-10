@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.42 2005/08/01 20:15:06 theurich Exp $
+# $Id: build_rules.mk,v 1.43 2005/08/10 23:44:58 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -81,6 +81,7 @@ ifeq ($(ESMF_COMM),mpich2)
 MPI_INCLUDE    += -DESMF_MPICH=1
 MPI_LIB        += -lmpich
 MPIRUN         += $(ESMF_NODES)
+MPIMPMDRUN      = mpiexec
 endif
 
 
