@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.135 2005/07/15 20:46:31 nscollins Exp $
+#  $Id: common.mk,v 1.136 2005/08/10 23:43:24 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1224,6 +1224,22 @@ tree_build_system_tests:  $(SYSTEM_TESTS_BUILD)
 #
 $(ESMF_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
 	$(FLINKER) $(LINKOPTS) -o $@ $(SYSTEM_TESTS_OBJ) $< $(FLINKLIBS)
+	$(RM) -f *.o *.mod
+
+#
+#  Link rule for Fortran system tests (MPMD).
+#
+$(ESMF_TESTDIR)/ESMF_%STestA : $(SYSTEM_TESTS_OBJ_A) $(ESMFLIB) ESMF_%STestA.o
+	$(FLINKER) $(LINKOPTS) -o $@ $(SYSTEM_TESTS_OBJ_A) ESMF_$*STestA.o $(FLINKLIBS)
+$(ESMF_TESTDIR)/ESMF_%STestB : $(SYSTEM_TESTS_OBJ_B) $(ESMFLIB) ESMF_%STestB.o 
+	$(FLINKER) $(LINKOPTS) -o $@ $(SYSTEM_TESTS_OBJ_B) ESMF_$*STestB.o $(FLINKLIBS)
+$(ESMF_TESTDIR)/ESMF_%STestC : $(SYSTEM_TESTS_OBJ_C) $(ESMFLIB) ESMF_%STestC.o 
+	$(FLINKER) $(LINKOPTS) -o $@ $(SYSTEM_TESTS_OBJ_C) ESMF_$*STestC.o $(FLINKLIBS)
+$(ESMF_TESTDIR)/ESMF_%STestD : $(SYSTEM_TESTS_OBJ_D) $(ESMFLIB) ESMF_%STestD.o 
+	$(FLINKER) $(LINKOPTS) -o $@ $(SYSTEM_TESTS_OBJ_D) ESMF_$*STestD.o $(FLINKLIBS)
+$(ESMF_TESTDIR)/ESMF_%STestE : $(SYSTEM_TESTS_OBJ_E) $(ESMFLIB) ESMF_%STestE.o 
+	$(FLINKER) $(LINKOPTS) -o $@ $(SYSTEM_TESTS_OBJ_E) ESMF_$*STestE.o $(FLINKLIBS)
+MPMDCLEANUP:
 	$(RM) -f *.o *.mod
 
 #
