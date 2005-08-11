@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.43 2005/08/10 23:44:58 theurich Exp $
+# $Id: build_rules.mk,v 1.44 2005/08/11 00:04:25 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -51,6 +51,7 @@ endif
 # by setting MPI_HOME to another location.
 ifeq ($(ESMF_COMM),mpi)
 MPI_LIB   +=  -lmpi -lmpi++
+MPIMPMDRUN = mpirun
 endif
 
 ifeq ($(ESMF_COMM),mpi_pbs)
