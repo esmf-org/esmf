@@ -281,7 +281,7 @@ end module Unit_Test
   !   SRCDELAYOUT: 1DX, 1DY, 2D
   !   DSTDELAYOUT: 1DX, 1DY, 2D
 
-    longString='FUNCTION:D:REGSCHEME:1CONSERV' &
+    longString='FUNCTION:C:REGSCHEME:1CONSERV' &
                //':SRCGRID:D_NE:DSTGRID:A:SRCDELAYOUT:1DY:DSTDELAYOUT:1DX' &
                //':DOMAIN:REGIONAL'
 
@@ -654,7 +654,7 @@ end interface
        if (RelativeError .gt. epsil ) then
          regrid_rc=ESMF_FAILURE
      !TODO compute the global values of i,j for diagnostic printing
-         write( *, '(i3,a,i2,a,i2,a,2i2,a,2i4,a,3e11.4)' )                &
+         write( *, '(i3,a,i2,a,i2,a,2i2,a,2i4,a,3pe11.4)' )                &
                  localPet,' ERROR! Regr= ',iRegrid,' Field=',FieldChoice, &
                  ' npetsXY=',npetsXY, ' i,j=',i,j,             &
                  '  exact/actual/Err',SolnOnTarget(i,j), f90ptr2(i,j),    &
@@ -667,7 +667,7 @@ end interface
 
   !TODO: compute the GLOBAL average and maximum normalized errors
    avg_error=avg_error/( (ubDst(1)-lbDst(1)+1) * (ubDst(2)-lbDst(2)+1) )
-   write(*,'(a,i3,a,i1,a,e12.4,a,e12.4)' ) &
+   write(*,'(a,i3,a,i1,a,1pe12.4,a,1pe12.4)' ) &
          'localPet=',localPet,' FieldChoice=',FieldChoice, &
          '  local max norm error=',max_error, &
          '  local avg norm error=',avg_error
