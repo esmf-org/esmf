@@ -1,0 +1,25 @@
+This directory contains three executables that make up an MPMD tool chain for use on OSF1 alpha systems (such as the halem system at NCCS).
+
+
+INSTALLATION
+------------
+
+env INSTALLDIR="your-install-location" gmake
+
+
+USEAGE
+======
+
+The chain is as follows:
+
+mpimpmdrun -> pprun -> pprunlaunch
+
+There are two entry points for using this tool chain. The mpimpmdrun entry point allows to be called similar to how the MPI standard's mpiexec suggests for MPMD, i.e. 
+
+mpimpmdrun -np 1 ./a.out : -np 1 ./b.out : -np ......
+
+The pprun entry point utilizes a procfile where each line lists the number of processes and the executable name. mpimpmdrun produces such a procfile and calls pprun.
+
+pprun the uses RMS' prun command to start pprunlaunch on each process and execute the correct executable.
+
+Optional prun arguments to mpimpmdrun and pprun must be specified first.

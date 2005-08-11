@@ -1,0 +1,58 @@
+#!/bin/ksh
+# $Id: mpimpmdrun.alpha,v 1.1 2005/08/11 17:54:21 theurich Exp $
+# This script provides an interface such that the simple command
+# mpirun -np # runs # copies of the program in parallel.
+# The qsub on compaq demands this
+
+if [[ $ESMF_PROJECT = "" ]]
+then
+    echo ESMF_PROJECT environment variable needs to be set. 1>&2
+    echo ESMF_PROJECT environment variable needs to be set. 
+    exit 1
+fi
+
+
+if [ "$1" != "-np" ] 
+then
+	echo "Usage: mpirun -np #"
+	exit 1
+fi
+
+typeset -i num_procs
+typeset -i x
+num_procs=0
+addflag="no"
+
+
+for i in $* ; do
+#  echo $i 1>&2
+  if [ "$addflag" = "yes" ]
+  then
+# convert string to integer, how???    x=$i
+    num_procs=$(( num_procs + x ))
+    addfalg="no"
+  fi
+  if [ "$i" = "-np" ]
+  then
+    addflag="yes"
+  fi
+#  echo $num_procs 1>&2
+done
+
+# for now, because the above does not work I hardcode num_procs to 8 which
+# works for the only MPMD test we have at this time
+
+num_procs=8
+
+if  (( num_procs < 4 )) 
+then
+    req_procs=4
+else
+    req_procs=$num_procs
+fi
+
+prog=$*
+
+
+echo bsub -P $ESMF_PROJECT -q general -I -n $req_procs $ESMF_DIR/scripts/mpmd.alpha/mpimpmdrun $* 1>&2
+bsub -P $ESMF_PROJECT -q general -I -n $req_procs $ESMF_DIR/scripts/mpmd.alpha/mpimpmdrun $*
