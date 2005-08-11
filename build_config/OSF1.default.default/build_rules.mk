@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.29 2005/07/06 21:01:47 nscollins Exp $
+#  $Id: build_rules.mk,v 1.30 2005/08/11 17:57:42 theurich Exp $
 #
 #  OSF1.default.default
 #
@@ -75,6 +75,7 @@ THREAD_LIB     = -lpthread
 # as an environment variable before running.
 ifneq ($(origin MPIRUN), environment)
 MPIRUN           = ${ESMF_TOP_DIR}/scripts/mpirun.alpha
+MPIMPMDRUN	 = ${ESMF_TOP_DIR}/scripts/mpimpmdrun.alpha
 endif
 
 # is this needed?  TODO: remove this because it seems obsolete.
