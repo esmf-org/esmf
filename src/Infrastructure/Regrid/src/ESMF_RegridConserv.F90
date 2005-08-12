@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.53 2005/06/29 22:14:04 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.54 2005/08/12 22:15:28 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.53 2005/06/29 22:14:04 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.54 2005/08/12 22:15:28 jwolfe Exp $'
 
 !==============================================================================
 
@@ -1055,7 +1055,7 @@
               ! also add contributions to cell areas and centroids.
               nDst = 0
               if (searchAdd.gt.0) nDst = searchAddList(searchAdd)
-              if (nDst.ne.0 .AND. (.not.coinc)) then
+              if (nDst.ne.0) then
                 jDst = (nDst-1)/dstSizeX + 1
                 iDst = nDst - (jDst-1)*dstSizeX
                 ! is this the right mask -- in SCRIP it looks like the srcMask
@@ -1286,7 +1286,6 @@
               srcAdd = 0
               if (searchAdd.gt.0) srcAdd = searchAddList(searchAdd)
               if (srcAdd.ne.0 .AND. (.not.coinc)) then
-      !jw        if (srcAdd.ne.0) then
                 if (srcMask(srcAdd)) then
                   dstAdd(dstOrder(1)) = iDst + dstIndexMod(1)
                   dstAdd(dstOrder(2)) = jDst + dstIndexMod(2)
