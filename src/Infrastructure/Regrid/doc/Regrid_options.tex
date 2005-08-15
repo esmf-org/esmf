@@ -184,15 +184,16 @@ A = \left[\begin{array}{cc}
 
      In order to compute the weights using this general bilinear iteration,
      it must be determined in which box the point $P$ resides.  Because this
-     method is valid only for logically-rectangular grids, the search algorithm
-     can be optimized to take advantage of this restriction.  The search
-     algorithm currently in ESMF loops through cells on the source grid comparing
-     the coordinates of point $P$ with the bounding box formed by each cell's
-     minimum and maximum coordinates.  Most cells can efficiently be eliminated
-     from the search via this simple test.  This loop is further optimized by
-     tracking the location of the previously found source cell and using that as
-     initial starting point for the next search, since both grids are logically
-     ordered.
+     method is valid only for logically-rectangular grids, the sweep algorithm
+     can be optimized to take advantage of this restriction.  The sweep
+     method currently in ESMF steps through each data point $P$ on the destination
+     grid.  For each destination point, it then loops through the cells on the
+     source grid, comparing the coordinates of point $P$ with the bounding box
+     formed by each cell's minimum and maximum coordinates.  Most source cells can
+     be efficiently eliminated from the sweep via this simple test.  This loop is
+     further optimized by tracking the index of the source cell containing the
+     previous point and using that as the initial starting index for the next
+     point's sweep, since both grids are logically ordered.
 
 
 %\item[ESMF\_REGRID\_METHOD\_CONSERV1 and ESMF\_REGRID\_METHOD\_CONSERV2]
@@ -375,26 +376,35 @@ w_{3nk} & = & {1\over{A_k}}\int\int_{A_{nk}}\cos\theta(\phi-\phi_n)dA \nonumber 
 \end{picture}
 \end{figure}
 
-% \subsubsection{Search algorithms}\label{sec:search}
-
      As described above, the algorithm for computing the remapping weights
      is relatively simple.  The process amounts to finding the location of
      the endpoint of a segment and then finding the next intersection with
      the other grid.  The line integrals are then computed and summed according
      to which grid cells are associated with that particular subsegment.  The
      most time-consuming portion of the algorithm is finding which cell on one
-     grid contains an endpoint from the other grid.  Optimal search algorithms
-     can be written when the grid is well structured and regular.  However, if
-     one requires a search algorithm that will work for any general grid, a 
-     hierarchy of search algorithms appears to work best.  In the ESMF
-     implementation, each grid cell address is assigned to one or more vertical
-     coordinate bins. When the search begins, only those cells belonging to the
-     same vertical coordinate bin as the search point are used.  The second stage
-     checks the bounding box of each grid cell in the determined bin.
-     The bounding box is formed by the cells minimum and maximum coordinates.
-     This process further restricts the search to a small number of cells.
+     grid contains an endpoint from the other grid.  This process consists
+     of sweeping through lists of cells from the other grid, hunting for
+     intersections with an identified subsegment.   Much of the potential for
+     optimization of regridding algorithms comes from limiting the range of
+     cells to sweep.  Optimal methods can be more easily written when the grid
+     is well structured and regular.  However, for a general grid, a hierarchy
+     of methods appears to work best.  In the ESMF
+     implementation, two algorithms are used to restrict the range of cells
+     that are swept.  First, prior to looping through the cells on either grid,
+     coordinate bins are created from the other grid.  In this process, the local
+     physical domain of the grid being swept is divided into logical blocks, each
+     one represented by a bin.  The cells of the grid being swept are looped through
+     to determine the minimum and maximum grid indices corresponding to each bin's
+     range of physical coordinates.  Each bin therefore identifies an index range
+     corresponding to a physical coordinate range.  Then when the sweep begins,
+     only those cells in the index range belonging to the same coordinate bin as
+     the identifed subsegment are used.  Note that currently ESMF creates bins based
+     only on coordinates in the second grid direction (typically "y" or "latitude").
+     The second stage checks the bounding box of each grid cell in the determined
+     bin.  The bounding box is formed by the cell's minimum and maximum coordinates.
+     This process further restricts the actual sweep to a small number of cells.
 
-     Once the search has been restricted, a robust algorithm that works for most
+     Once the sweep has been restricted, a robust algorithm that works for most
      cases is a cross-product test.  In this test, a cross product is computed
      between the vector corresponding to a cell side ($\vec{r}_{12}$ in
      Figure~\ref{fig:grids}) and a vector extending from the beginning of the
