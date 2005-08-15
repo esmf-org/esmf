@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.25 2005/02/14 04:36:25 theurich Exp $
+! $Id: CoupledFlowApp.F90,v 1.26 2005/08/15 22:53:40 theurich Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -100,6 +100,30 @@
         
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+!    ESMF_Initialize
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!
+
+!BOP
+!
+! !DESCRIPTION:
+! \subsubsection{Example of Initializing the Framework:}
+!
+!     The first call to ESMF must be the initialize method.   As part of
+!     initialization the default Calendar can be specified, some options
+!     for logging can be set, and the default global VM can be returned.
+!     Here we are setting the default Calendar to be Gregorian, and getting
+!     back the global VM:
+!\begin{verbatim}
+    ! Initialize ESMF, get the default Global VM, and set
+    ! the default calendar to be Gregorian.
+    call ESMF_Initialize(vm=vm, defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
+!\end{verbatim}
+!EOP 
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
     print *, "Coupled Flow Demo Application Start"
 
@@ -119,6 +143,7 @@
       endif
       read(9, input, end=20)
    20 continue
+      close(9)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -128,20 +153,7 @@
 !
 
 !BOP
-!
-! !DESCRIPTION:
-! \subsubsection{Example of Initializing the Framework:}
-!
-!     The first call to ESMF must be the initialize method.   As part of
-!     initialization the default Calendar can be specified, some options
-!     for logging can be set, and the default global VM can be returned.
-!     Here we are setting the default Calendar to be Gregorian, and getting
-!     back the global VM:
 !\begin{verbatim}
-    ! Initialize ESMF, get the default Global VM, and set
-    ! the default calendar to be Gregorian.
-    call ESMF_Initialize(vm=vm, defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
-
     ! Create the top level Gridded Component, passing in the default VM.
     compGridded = ESMF_GridCompCreate(vm, "Coupled Flow Demo", rc=rc)
 !\end{verbatim}
