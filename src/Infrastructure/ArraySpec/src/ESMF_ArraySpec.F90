@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.10 2005/05/31 17:39:49 nscollins Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.11 2005/08/16 21:57:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -82,7 +82,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArraySpec.F90,v 1.10 2005/05/31 17:39:49 nscollins Exp $'
+      '$Id: ESMF_ArraySpec.F90,v 1.11 2005/08/16 21:57:45 nscollins Exp $'
 
 !==============================================================================
 !
@@ -145,9 +145,9 @@
 !  {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL},
 !  {\tt ESMF\_DATA\_CHARACTER}.
 ! \item[kind]
-!  {\tt ESMF\_Array} kind. Valid kinds include {\tt ESMF\_KIND\_I4},
-!  {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
-!  {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
+!  {\tt ESMF\_Array} kind. Valid kinds include {\tt ESMF\_I4},
+!  {\tt ESMF\_I8}, {\tt ESMF\_R4}, {\tt ESMF\_R8},
+!  {\tt ESMF\_C8}, {\tt ESMF\_C16}.
 ! \item[[rc]]
 !  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -210,9 +210,9 @@
 !  {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL},
 !  {\tt ESMF\_DATA\_CHARACTER}.
 ! \item[kind]
-!  {\tt ESMF\_Array} kind. Valid kinds include {\tt ESMF\_KIND\_I4},
-!  {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
-!  {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
+!  {\tt ESMF\_Array} kind. Valid kinds include {\tt ESMF\_I4},
+!  {\tt ESMF\_I8}, {\tt ESMF\_R4}, {\tt ESMF\_R8},
+!  {\tt ESMF\_C8}, {\tt ESMF\_C16}.
 ! \item[{[rc]}]
 !  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
