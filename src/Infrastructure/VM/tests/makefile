@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2005/07/15 03:41:48 nscollins Exp $ 
+# $Id: makefile,v 1.20 2005/08/17 22:38:37 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  tree_run_unit_tests
@@ -17,6 +17,7 @@ DIRS	  =
 LOCDIR	  = src/Infrastructure/VM/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_VMUTest \
+		$(ESMF_TESTDIR)/ESMF_VMUserMpiInitUTest \
 		$(ESMF_TESTDIR)/ESMF_VMSendVMRecvUTest \
 		$(ESMF_TESTDIR)/ESMF_VMSendRecvUTest \
 		$(ESMF_TESTDIR)/ESMF_VMScatterUTest \
@@ -25,6 +26,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_VMUTest \
 		$(ESMF_TESTDIR)/ESMF_VMBarrierUTest
 
 TESTS_RUN     = RUN_ESMF_VMUTest \
+                RUN_ESMF_VMUserMpiInitUTest \
                 RUN_ESMF_VMSendVMRecvUTest \
                 RUN_ESMF_VMSendRecvUTest \
                 RUN_ESMF_VMScatterUTest \
@@ -33,6 +35,7 @@ TESTS_RUN     = RUN_ESMF_VMUTest \
 		RUN_ESMF_VMBarrierUTest
 
 TESTS_RUN_UNI = RUN_ESMF_VMUTestUNI \
+                RUN_ESMF_VMUserMpiInitUTestUNI \
                 RUN_ESMF_VMSendVMRecvUTestUNI \
                 RUN_ESMF_VMSendRecvUTestUNI \
                 RUN_ESMF_VMScatterUTestUNI \
@@ -56,6 +59,15 @@ RUN_ESMF_VMUTest:
 
 RUN_ESMF_VMUTestUNI:
 	$(MAKE) TNAME=VM NP=1 ftest
+
+#
+# VM user mpi init
+#
+RUN_ESMF_VMUserMpiInitUTest:
+	$(MAKE) TNAME=VMUserMpiInit NP=4 ftest
+
+RUN_ESMF_VMUTestUNI:
+	$(MAKE) TNAME=VMUserMpiInit NP=1 ftest
 
 #
 # VM Send Receive
