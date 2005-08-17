@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.14 2005/03/31 05:13:13 theurich Exp $
+% $Id: ESMF_options.tex,v 1.15 2005/08/17 17:32:19 nscollins Exp $
 
 \section{Global Options and Parameters}
 
@@ -184,7 +184,11 @@ Valid values are:
 \subsubsection{ESMF\_DataKind}
 
 {\sf DESCRIPTION:\\}
-Supported ESMF data kinds.
+Supported ESMF data kinds.   These are an 
+ESMF derived type used for arguments to subroutines and functions
+which want to specify a data precision and type.
+They cannot be used when declaring variables; see the
+section below for more details.
 
 Valid values are:
 \begin{description}
@@ -203,6 +207,43 @@ Valid values are:
 \item [ESMF\_C8]
       8 byte character.
 \item [ESMF\_C16]
+      16 byte character.
+\end{description}
+
+\subsubsection{Fortran 90 Kinds}
+
+{\sf DESCRIPTION:\\}
+These are integer parameters of the proper type to be
+used when declaring variables with a specific precision 
+in Fortran 90 syntax.  For example:
+\begin{verbatim}
+ integer(ESMF_KIND_I4) :: myintegervariable
+ real(ESMF_KIND_R4) :: myrealvariable
+\end{verbatim}
+The Fortran 90 standard does not mandate what numeric values
+correspond to actual number of bytes allocated for the
+various kinds, so these are defined by ESMF to be correct across
+the different supported Fortran 90 compilers.   Note that not
+all compilers support every kind listed below; in particular
+1 and 2 byte integers can be problematic.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_KIND\_I1]
+      1 byte integer.
+\item [ESMF\_KIND\_I2]
+      2 byte integer.
+\item [ESMF\_KIND\_I4]
+      4 byte integer.
+\item [ESMF\_KIND\_I8]
+      8 byte integer.
+\item [ESMF\_KIND\_R4]
+      4 byte real.
+\item [ESMF\_KIND\_R8]
+      8 byte real.
+\item [ESMF\_KIND\_C8]
+      8 byte character.
+\item [ESMF\_KIND\_C16]
       16 byte character.
 \end{description}
 
