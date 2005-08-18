@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.15 2005/08/17 17:32:19 nscollins Exp $
+% $Id: ESMF_options.tex,v 1.16 2005/08/18 19:40:15 nscollins Exp $
 
 \section{Global Options and Parameters}
 
@@ -184,9 +184,9 @@ Valid values are:
 \subsubsection{ESMF\_DataKind}
 
 {\sf DESCRIPTION:\\}
-Supported ESMF data kinds.   These are an 
-ESMF derived type used for arguments to subroutines and functions
-which want to specify a data precision and type.
+Supported ESMF data kinds.   
+These are an ESMF derived type used for arguments to subroutines 
+and functions which want to specify or query a data precision and type.
 They cannot be used when declaring variables; see the
 section below for more details.
 
@@ -251,6 +251,8 @@ Valid values are:
 
 {\sf DESCRIPTION:\\}
 Supported ESMF data types.
+These are an ESMF derived type used for arguments to subroutines 
+and functions which want to specify or query a data type.
 
 Valid values are:
 \begin{description}
