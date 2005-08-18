@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2005/08/17 22:38:37 theurich Exp $ 
+# $Id: makefile,v 1.21 2005/08/18 17:55:39 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  tree_run_unit_tests
@@ -66,7 +66,7 @@ RUN_ESMF_VMUTestUNI:
 RUN_ESMF_VMUserMpiInitUTest:
 	$(MAKE) TNAME=VMUserMpiInit NP=4 ftest
 
-RUN_ESMF_VMUTestUNI:
+RUN_ESMF_VMUserMpiInitUTestUNI:
 	$(MAKE) TNAME=VMUserMpiInit NP=1 ftest
 
 #
