@@ -14,6 +14,7 @@
 \usepackage{epsf}
 \usepackage{html}
 \usepackage{times}
+\usepackage{alltt}
 \usepackage[T1]{fontenc}
 \usepackage[dvips]{graphics,color}
 
@@ -40,34 +41,6 @@
 \newpage
 #endif
 
-%\section{Synopsis}
-%#ifdef STANDALONE
-%\input{Regrid_syn}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Regrid/doc/Regrid_syn}
-%#endif
-
-%\section{Algorithmic Description}
-%#ifdef STANDALONE
-%\input{Regrid_alg}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Regrid/doc/Regrid_alg}
-%#endif
-
-%\section{Object Model}
-%#ifdef STANDALONE
-%\input{Regrid_obj}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Regrid/doc/Regrid_obj}
-%#endif
-
-%\section{Global Parameters and Definitions}
-%#ifdef STANDALONE
-%\input{Regrid_param}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Regrid/doc/Regrid_param}
-%#endif
-
 \section{Regrid Method}
 
 \subsection{Description}
@@ -84,19 +57,14 @@
 \input{../Infrastructure/Regrid/doc/Regrid_options}
 #endif
 
-\subsection{Design and Implementation Notes}
+\subsection{Use and Examples}
 #ifdef STANDALONE
-\input{Regrid_implnotes}
+\input{Regrid_usage}
+\input{ESMF_RegridEx_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Regrid/doc/Regrid_implnotes}
+\input{../Infrastructure/Regrid/doc/Regrid_usage}
+\input{../Infrastructure/Regrid/doc/ESMF_RegridEx_fapi}
 #endif
-
-%\subsubsection{Class Definition}
-%#ifdef STANDALONE
-%\input{Regrid_def}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Regrid/doc/Regrid_def}
-%#endif
 
 \subsubsection{Restrictions and Future Work}
 #ifdef STANDALONE
@@ -105,19 +73,12 @@
 \input{../Infrastructure/Regrid/doc/Regrid_rest}
 #endif
 
-%\subsection{Use and Examples}
+\subsection{Design and Implementation Notes}
 #ifdef STANDALONE
-\input{ESMF_RegridEx_fapi}
+\input{Regrid_implnotes}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Regrid/doc/ESMF_RegridEx_fapi}
+\input{../Infrastructure/Regrid/doc/Regrid_implnotes}
 #endif
-
-%\subsection{Parameters and Definitions}
-%#ifdef STANDALONE
-%\input{Regrid_fparam}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Regrid/doc/Regrid_fparam}
-%#endif
 
 %\subsection{Class API}
 %#ifdef STANDALONE
