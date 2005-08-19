@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.32 2005/07/08 21:10:03 nscollins Exp $
+! $Id: ESMF_Init.F90,v 1.33 2005/08/19 19:49:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -142,7 +142,16 @@
       call ESMF_FrameworkInternalInit(ESMF_MAIN_F90, defaultConfigFileName, &
                                       defaultCalendar, defaultLogFileName, &
                                       defaultLogType, rc)
+      if (rc .ne. ESMF_SUCCESS) then
+          print *, "Error initializing framework"
+          return 
+      endif 
+
       call ESMF_VMGetGlobal(localvm, rc)
+      if (ESMF_LogMsgFoundError(rc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       if (present(vm)) vm = localvm
 
       call ESMF_VMBarrier(localvm, rc)
