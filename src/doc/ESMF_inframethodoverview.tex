@@ -1,4 +1,4 @@
-% $Id: ESMF_inframethodoverview.tex,v 1.4 2005/02/28 23:34:07 nscollins Exp $
+% $Id: ESMF_inframethodoverview.tex,v 1.5 2005/08/19 17:20:14 nscollins Exp $
 
 \section{Overview of Distributed Data Methods}
 
@@ -84,59 +84,269 @@ to the user by specifying the following route options.
 
 \item
 
-All distributed methods use the same underlying code, provided
-in an internal Route class.  There are 3 additional internal
-classes which are related: XPacket, CommTable, and RTable.
+There is an internal Route class which supports the distributed
+communication methods.  There are 4 additional internal-only
+classes which are related: AxisIndex, XPacket, CommTable, and RTable;
+and one public RouteHandle class which is what the user sets and gets.
 The implementation is in C++, with interfaces in Fortran 90.
 
 The general communication strategy is that each
-DE computes its own route information in parallel, and
-each DE has a different set of route table information
-which is all relative to itself.
+DE computes its own communication information independently,
+in parallel, and adds entries to a per-PET route table
+which contains all needed sends and receives (or gets and puts) 
+stored in terms relative to itself.  (Implementation note: this
+code will need to be made thread-safe if multiple threads are
+trying to add information to the same route table.)
 
-Exchange Packets (XPackets)
-describe a region of memory.  They have
-an offset, a contiguous run length, a stride per dimension
-and a repeat count per dimension.  It therefore can describe an
-n-dimensional cube of data to be communicated.
-The methods include basic set/get, how to turn
-a list of AxisIndex objects into an XPacket, 
-compute a local XPacket from one
-in global (undecomposed grid) space, and a method to
-compute the intersection
-of 2 XPackets and produce a 3rd XPacket describing
-that region.  An AxisIndex structure captures
-the min and max along each axis for a region -- it is an
-index space type of object.  These are  
-turned into XPackets by a Route method.
+An AxisIndex is a small helper class which contains an index minimum
+and maximum for each dimension and is used to describe an n-dimensional
+hypercube of information in index space.  These are associated with 
+logically rectangular grids and local data arrays.  
+There are usually multiple instances of them, for example the local
+data chunk, and the overall global index-space grid this data is
+a subset of.  Within each of the local or global categories, there are
+also multiple instances to describe: 
+the total allocated space (which includes halo regions), the computational
+space, and the exclusive space (data which is not read during a halo update).
+(Implementation note: there is an outstanding request to separate total
+space from allocated space, to allow the halo area of an array to live
+inside a larger space which has unused padding areas.)
 
-The CommTable code encapsulates which other DEs this
-DE needs to talk to, and in what order.  There are
-methods to create and destroy one, methods for higher
-level code to set a DE number as having data to either
+An Exchange Packet (XPacket) describes groups of memory addresses
+which constitute an n-dimensional hypercube of data.
+Each XPacket has an offset from a base address, 
+a contiguous run length, 
+a stride (or number of items to skip) per dimension,
+and a repeat count per dimension. 
+< add a figure here for how xpackets work.>
+The actual unit size stored in an XPacket is an item count, 
+so before using an XPacket to address bytes of memory
+the item size must be known and the
+counts multiplied by the number of bytes per item.  This allows
+the same XPacket to describe different data types which have the
+same memory layout, for example 4 byte integers and 8 byte reals/doubles.
+The XPacket methods include basic set/get, how to turn
+a list of AxisIndex objects into an XPacket, compute a local XPacket from one
+in global (undecomposed grid) space, and a method to compute the intersection
+of 2 XPackets and produce a 3rd XPacket describing that region.  
+
+The Communication Table (CommTable) class encapsulates which other PETs this
+PET needs to talk to, and in what order.  There are create and destroy
+methods, methods to set that a PET has data either to
 send or receive, and query routines that return an answer
-to the question 'which DE should I talk to next'.  
+to the question 'which PET should I exchange data with next'.  
 
-The Route Table (RTable) code contains a list of
-XPackets to be sent and received from other DEs.
-It has create/destroy code, code to add exchange
-packets to the list for each DE, and code
-to retrieve the XPackets from any list.
+The Route Table (RTable) class contains a list of
+XPackets to be sent and received from other PETs.
+It has create/destroy methods, methods to add XPackets to the list for 
+each PET, and methods to retrieve the XPackets from any list.
 
-Finally, the top level code is in Route.  A Route
-object contains a send RTable, a recv RTable,
-a CommTable, and the DELayout.   
+The top level class is a Route.  A Route object contains a send RTable, 
+a recv RTable, a CommTable, and a pointer to a Virtual Machine.   
+The VM must include all PETs which are participating
+in this communication.
 The Route methods
 include create/destroy, setting a send or recv XPacket
-for a particular DE,
+for a particular PET,
 and some higher level functions specific to each
 type of communication, for example RoutePrecomputeHalo
 or RoutePrecomputeRedist.  These latter functions
 are where the XPackets are actually computed and added to
 the Route table.  Each DE computes its own set of intersections,
-either source or destination, and fills its own table.
-Then RouteRun executes the code which actually traverses
-the table and sends the information between DEs.
+either source or destination, and fills its own corresponding PET table.
+The Route methods also include a RouteRun method which executes the code
+which actually traverses the table and sends the information between PETs.
+
+A RouteHandle class is a small helper class which is returned through
+the public API to the user when a Route is created, and passed back in
+through the API to select which precomputed Route is to be executed.
+A RouteHandle contains a handle type and a pointer to a Route object.
+In addition, for use only by the Regrid code, there is an additional Route
+pointer and a TransformValues pointer.  (TransformValues is an internal
+class only used by the Regridding code.)
+The RouteHandle methods are fairly basic; mostly accessor methods
+for getting and setting values.
+
+
+\item
+
+While intended for any distributed data communication method,
+the current implementation only builds a Route object for
+the halo, redist, and regrid methods.  Scatter, Gather,
+AllGather, and AlltoAll 
+should have the option of building a Route for operations
+which are executed repeatedly.  This should only require
+writing a Precompute method for each one; the existing 
+RouteRun can be invoked for these operations.
+(This is a lack-of-implementation-time issue, not a design
+or architecture issue.)
+
+\item
+
+The original design included automatic detection of different
+Routes and internal caching, so the user API did not have to
+include a RouteHandle object to identify which Route was
+being invoked.  However, users requested that the framework
+not cache and that explicit RouteHandle arguments be created
+and required to invoke the distributed data methods.
+Nothing prevents this code from being revived from the CVS
+repository and reinstated in the system, should automatic
+caching be desired by future users.
+
+\item
+
+The current distributed methods have 2 related but distinct
+interfaces which differ in what information they require
+and whether they use RouteHandles:
+
+\begin{enumerate}
+\item[Precompute/Run/Release]
+This is the most frequently used interface set.
+It contains 3 distinct phases: precomputing which bytes must
+be moved, actually executing the communications operation,
+and releasing the stored information.  This is intended for
+any communication pattern which will be executed more than once.
+\item[All-in-One]
+For a communication which will only be executed once, or in
+any situation in which the user does not want to save a RouteHandle,
+there are interfaces which do not have RouteHandles as part of
+the argument list.  Internally the code computes a Route,
+executes it, and releases the resources before returning.
+\end{enumerate}
+
+\item
+
+The current CommTable code executes one very specific communication
+strategy based on input from a user who did extensive timing
+measurements on several different hardware platforms.  Rather than
+broadcasting all data at once asychronously, it selects combinations
+of pairs of processors and has them execute a SendRecv operation, which
+does both a data send and a data receive in a single call.
+At each step in the execution, different pairs of processors
+exchange data until all pair combinations have been selected.
+
+There are many alternative execution strategies, including a
+completely asynchronous execution, in numeric PET order, without
+computing processor pairs.  Also one-sided executions are
+possible (only the Send XPackets are processed, or only
+the Receive XPackets) in an asynchronous mode.  This would
+not require any changes to the XPacket or RTable classes,
+but would require writing a set of alternative RouteRun methods.
+
+\item
+
+The current RouteRun routine has many possible performance options for how
+to make the tradeoff between time spent packing disjoint memory
+blocks into a single buffer to minimize the number of sends,
+verses simply sending the contiguous blocks without the pack overhead.
+The tradeoffs are not expected to be the same on all systems;
+hardware latency verses bandwith characteristics will differ,
+plus the underlying communication software (MPI, shared memory, etc)
+will change the performance.  Also the size of the data blocks
+to be sent, the amount of contiguity, and limits on the number 
+of outstanding communication buffers all affect what options are best.
+
+The ESMF\_RouteOptions were listed in a section above; the following
+is more implementation detail about what each of the options
+controls inside the execution of a Route.  Note that the options
+do not affect the creation of a Route, nor any of the Precompute
+code, and can be changed at run time.  
+
+Packing options:
+\begin{enumerate}
+\item[By MultiBlock]
+If multiple memory addresses are provided to the Route (from
+bundle-level communications, for example), then this option
+packs data from all blocks communicated to and from each
+remote PET into a single buffer before sending or receiving.
+\item[By PET]
+All data from a single block
+intended for a remote PET is packed into a single send
+buffer, and sent in a single VM communications call.  
+A buffer large enough to receive all data 
+coming from that remote PET is allocated, the data is received,
+and then the data is copied into the final location.
+\item[By XP]
+All data described by a single XPacket (which is a n-dimensional
+hyperslab of memory) is packed into a single buffer for sending,
+and a single buffer large enough to receive an XPacket is 
+allocated for receiving the data.
+\item[No Packing]
+A VM communication call is made for each single contiguous strip
+of memory, regardless of how long or short.
+\item[MPI Vector]
+MPI implements a set of interfaces for sending and receiving which
+allows certain strided memory patters to be sent in a single call.
+The actual implementation is up to the MPI library itself.  But no
+user-level data copy is needed in this case.
+\end{enumerate}
+Note that in all packing options, if the XPacket describes a
+chunk of memory which is completely contiguous, then the code
+does not allocate a packing or unpacking buffer but supplies the
+actual data address to the communications call so the data is
+read or written in place.
+
+< to be created here - several figures showing in pictures
+the various loops and packing options which we support,
+out of many others which are possible but not useful. >
+
+The following options refer to the internal strategy for 
+executing the route and not to whether the user-level API call
+returns before the route has finished executing.  The current
+system only implements user-synchronous calls; asynchronous calls
+are on the to-be-written list.
+
+\begin{enumerate}
+
+\item[Sync] Each pair of processors exchanges data with the VM
+equivalent of an MPI\_SendRecv() call, which does not return until
+both the send and receive have completed.
+
+\item[Async] Each processor executes both an asynchronous send
+and asychronous receive to the other processor and does not wait
+for completion before moving on to the next communication in the
+CommTable.  Then in a separate loop through the RTables, each
+call is waited for in turn and when all outstanding communication
+calls have completed, then the API call returns to the user.
+
+\end{enumerate}
+
+\item
+
+The precompute code for all operations must have enough
+information to compute which parts of the data arrays
+are expected to be sent to remote PETs and also what
+remote data is expected to be received by this PET.
+
+These computations depend heavily on what type of distributed
+method is being executed.  The regridding methods are described
+in detail separately in the Regrid Design and Implementation Notes
+section.  The halo and redistribution operations are described here.
+
+\begin{enumerate}
+
+\item[Halo]  <to be completed>  The total array area, which
+includes any halo regions (ghost zones),
+are intersected with the computational
+area of other DEs. The overlap regions are converted from index
+space into memory space and stored as XPackets in the RTables.
+This code must be aware of: whether the grid was defined as
+periodic in any or all of the dimensions since that affects
+which halo regions overlap at the grid edges; if the data
+is only decomposed into a single block in any dimension (which
+means it halos with itself); and if the halo region is large
+enough that a halo operation may require intersection with
+the N+1 neighbor in any dimension.
+
+\item[Redistribute]  <to be completed>  The DE computes the overlap
+between its own computational region and all DEs in the 
+remote Grid, again only working in computational area.  
+The overlap regions are converted from index
+space into memory space and stored as XPackets in the RTables.
+After execution a redistribution, a halo operation may be required
+to populate any halo regions with consistent data.
+
+\end{enumerate}
 
 \end{enumerate}
 
