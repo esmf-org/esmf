@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.21 2005/04/21 15:19:30 nscollins Exp $
+# $Id: build_rules.mk,v 1.22 2005/08/19 21:18:12 theurich Exp $
 # 
 # IRIX64.default.default
 #
@@ -42,6 +42,7 @@ endif
 #
 ifeq ($(ESMF_COMM),mpi)
 MPI_INCLUDE     += -DESMC_HAVE_INT_MPI_COMM
+MPIMPMDRUN	 = mpirun
 endif
 
 
