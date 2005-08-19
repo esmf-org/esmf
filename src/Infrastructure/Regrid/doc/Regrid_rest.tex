@@ -1,4 +1,4 @@
-% $Id: Regrid_rest.tex,v 1.2 2004/06/22 20:53:57 jwolfe Exp $
+% $Id: Regrid_rest.tex,v 1.3 2005/08/19 23:18:55 jwolfe Exp $
 
 %\subsubsection{Restrictions and Future Work}
 
@@ -8,7 +8,16 @@
 support is limited to two dimensions.
 
 \item {\bf Masks are not implemented.}  Regridding methods take
-masks in their argument lists, but they have no effect.
+masks in their argument lists, but they currently have no effect.
+
+\item {\bf Special pole treatment is not implemented.}
+Conservative regridding methods do not yet have the special pole
+treatment completed.
+
+\item {\bf Spherical coordinates are not shifted.}
+ Regrid methods do not yet shift longitude coordinates
+(or their equivalent) from the source Grid to place them on the same
+360 degree (or 2*pi) range as the destination Grid. 
 
 \item {\bf Future regrid methods.}  The following methods will
 be added:
