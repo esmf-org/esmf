@@ -1,4 +1,4 @@
-% $Id: ESMF_inframethodoverview.tex,v 1.5 2005/08/19 17:20:14 nscollins Exp $
+% $Id: ESMF_inframethodoverview.tex,v 1.6 2005/08/22 19:36:47 nscollins Exp $
 
 \section{Overview of Distributed Data Methods}
 
@@ -70,6 +70,7 @@ result is delivered to all DEs in the set.
 \end{itemize}
 
 \subsection{Common Options}
+\label{sec:routeoptions}
 
 ESMF will select an appropriate default for the
 internal communication strategy for executing the communications.  
@@ -118,7 +119,8 @@ Each XPacket has an offset from a base address,
 a contiguous run length, 
 a stride (or number of items to skip) per dimension,
 and a repeat count per dimension. 
-< add a figure here for how xpackets work.>
+See Figure \ref{fig:xpacketbasic} for a diagram of how the XPacket
+describes memory.
 The actual unit size stored in an XPacket is an item count, 
 so before using an XPacket to address bytes of memory
 the item size must be known and the
@@ -129,6 +131,15 @@ The XPacket methods include basic set/get, how to turn
 a list of AxisIndex objects into an XPacket, compute a local XPacket from one
 in global (undecomposed grid) space, and a method to compute the intersection
 of 2 XPackets and produce a 3rd XPacket describing that region.  
+
+\begin{center}
+\begin{figure}
+\caption{How an Exchange Packet (XPacket) describes the memory
+layout for a rectangular hypercube of data.}
+\label{fig:xpacketbasic}
+\scalebox{0.5}{\includegraphics{Basic_xpacket.eps}}
+\end{figure}
+\end{center}
 
 The Communication Table (CommTable) class encapsulates which other PETs this
 PET needs to talk to, and in what order.  There are create and destroy
@@ -225,6 +236,10 @@ does both a data send and a data receive in a single call.
 At each step in the execution, different pairs of processors
 exchange data until all pair combinations have been selected.
 
+The table itself must be a power of 2 in size; the number of
+PETs is rounded up to the next power of 2 and then all entries
+for PETs larger than the actual number are marked as no-ops.
+
 There are many alternative execution strategies, including a
 completely asynchronous execution, in numeric PET order, without
 computing processor pairs.  Also one-sided executions are
@@ -246,11 +261,12 @@ will change the performance.  Also the size of the data blocks
 to be sent, the amount of contiguity, and limits on the number 
 of outstanding communication buffers all affect what options are best.
 
-The ESMF\_RouteOptions were listed in a section above; the following
-is more implementation detail about what each of the options
+The ESMF\_RouteOptions were listed in \ref{sec:routeoptions}; 
+the following description contains more implementation detail 
+about what each of the options
 controls inside the execution of a Route.  Note that the options
 do not affect the creation of a Route, nor any of the Precompute
-code, and can be changed at run time.  
+code, and can be changed each time the Route is run.
 
 Packing options:
 \begin{enumerate}
@@ -289,6 +305,39 @@ read or written in place.
 < to be created here - several figures showing in pictures
 the various loops and packing options which we support,
 out of many others which are possible but not useful. >
+
+\begin{center}
+\begin{figure}
+\caption{A common XPacket pattern which generally benefits from
+packing; the overlap region between 2 DEs during a halo update
+are often short in the contiguous dimension and have a high 
+repeat count.}
+\label{fig:xpacketpack}
+\scalebox{0.5}{\includegraphics{Basic_xpacket_pack.eps}}
+\end{figure}
+\end{center}
+
+\begin{center}
+\begin{figure}
+\caption{When there are multiple XPackets destined for the
+same remote PET there are more options for how to order the
+contiguous pieces into a packed buffer.}
+\label{fig:xpacket2up}
+\scalebox{0.5}{\includegraphics{Basic_xpacket_2up.eps}}
+\end{figure}
+\end{center}
+
+\begin{center}
+\begin{figure}
+\caption{When the XPacket describes memory which is physically
+a single contiguous region, there is no need to copy the data
+into another buffer; it can be communicated inplace.  There is
+a flag in the XPacket which marks how many of the dimensions
+are contiguous.}
+\label{fig:xpacketcontig}
+\scalebox{0.5}{\includegraphics{Basic_xpacket_contig.eps}}
+\end{figure}
+\end{center}
 
 The following options refer to the internal strategy for 
 executing the route and not to whether the user-level API call
