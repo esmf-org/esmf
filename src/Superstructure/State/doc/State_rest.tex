@@ -1,4 +1,4 @@
-% $Id: State_rest.tex,v 1.5 2004/12/14 22:44:16 nscollins Exp $
+% $Id: State_rest.tex,v 1.6 2005/08/23 17:10:45 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -18,6 +18,28 @@ required for restart, read/write status - are not fully implemented.
 Although their defaults can be set, the associated methods for 
 setting and getting these flags have not been implemented.
 (The {\tt needed} flag is fully supported.)
+
+\item{\bf No synchronization at object create time.}
+Object IDs are using during the reconcile process to identify objects
+which are unknown to some subset of the PETs in the currently running VM.
+Object IDs are assigned in sequential order at object create time.
+User input at design time requested there be no communication overhead
+during the create of an object, so there is no opportunity to
+synchronize IDs if one or more PETs create objects which
+are not in unison (not all PETs in the VM make the same calls).
+
+Even if the user follows the unison rules, if components are running on 
+a subset of the PETs, when they return to the parent (calling) component
+the next available ID will potentially not be the same across all
+PETs in the VM.  Part of the reconcile process or part of the return
+to the parent will need to have a broadcast which sends the current
+ID number, and all PETs can reset the next available number to the highest
+number broadcast.  This could be an async call to avoid as much as
+possible serialization and barrier issues.
+
+Default object names are based on the object id (e.g. "Field1", "Field2")
+to create unique object names, so basing the detection of unique objects 
+on the name instead of on the object id is no better solution.
 
 \end{enumerate}
 
