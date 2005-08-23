@@ -1,4 +1,4 @@
-% $Id: ESMF_inframethodoverview.tex,v 1.6 2005/08/22 19:36:47 nscollins Exp $
+% $Id: ESMF_inframethodoverview.tex,v 1.7 2005/08/23 16:17:44 nscollins Exp $
 
 \section{Overview of Distributed Data Methods}
 
@@ -275,6 +275,8 @@ If multiple memory addresses are provided to the Route (from
 bundle-level communications, for example), then this option
 packs data from all blocks communicated to and from each
 remote PET into a single buffer before sending or receiving.
+Other than handling multiple base addresses, this is the
+same type of packing as {\t By PET}, see \ref{fig:routepackall}.
 \item[By PET]
 All data from a single block
 intended for a remote PET is packed into a single send
@@ -282,11 +284,13 @@ buffer, and sent in a single VM communications call.
 A buffer large enough to receive all data 
 coming from that remote PET is allocated, the data is received,
 and then the data is copied into the final location.
+See \ref{fig:routepackall}.
 \item[By XP]
 All data described by a single XPacket (which is a n-dimensional
 hyperslab of memory) is packed into a single buffer for sending,
 and a single buffer large enough to receive an XPacket is 
 allocated for receiving the data.
+See \ref{fig:routepack}.
 \item[No Packing]
 A VM communication call is made for each single contiguous strip
 of memory, regardless of how long or short.
@@ -336,6 +340,32 @@ a flag in the XPacket which marks how many of the dimensions
 are contiguous.}
 \label{fig:xpacketcontig}
 \scalebox{0.5}{\includegraphics{Basic_xpacket_contig.eps}}
+\end{figure}
+\end{center}
+
+\begin{center}
+\begin{figure}
+\caption{Often the overhead of making a communication call outweighs
+the cost of copying non-contiguous data into a contiguous buffer,
+sending it in a single operation, and then copying it to the final
+memory locations on the receiving side.}
+\label{fig:routepack}
+\scalebox{0.5}{\includegraphics{Basic_pack_route.eps}}
+\end{figure}
+\end{center}
+
+\begin{center}
+\begin{figure}
+\caption{Once there is more than a single XPacket to pack, there
+are many more interleave options.  For example, packing in the
+order: 1, 4, 2, 5, 3, 6 would also be possible here.  However
+the code becomes more complicated when the XPackets have different
+repeat counts, and has no real performance advantage over the
+straightforward packing of each XPacket in sequence.  Note that
+this packing is the same whether it refers to multiple XPackets
+from the same memory buffer or from multiple buffers.}
+\label{fig:routepackall}
+\scalebox{0.5}{\includegraphics{Basic_2up_route.eps}}
 \end{figure}
 \end{center}
 
