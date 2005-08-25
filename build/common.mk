@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.136 2005/08/10 23:43:24 theurich Exp $
+#  $Id: common.mk,v 1.137 2005/08/25 21:21:59 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1474,14 +1474,14 @@ check_unit_tests:
 ftest:
 	-cd $(ESMF_TESTDIR) ; \
 	$(RM) ./PET*$(TNAME)UTest.Log ; \
-	$(MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest > ./ESMF_$(TNAME)UTest.stdout ; \
+	$(MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
 	cat ./PET*$(TNAME)UTest.Log > ./ESMF_$(TNAME)UTest.Log ; \
 	$(RM) ./PET*$(TNAME)UTest.Log
 
 ctest:
 	-cd $(ESMF_TESTDIR) ; \
 	$(RM) ./PET*$(TNAME)UTest.Log ; \
-	$(MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest > ./ESMC_$(TNAME)UTest.stdout ; \
+	$(MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest 1> ./ESMC_$(TNAME)UTest.stdout 2&1 ; \
 	cat ./PET*$(TNAME)UTest.Log > ./ESMC_$(TNAME)UTest.Log ; \
 	$(RM) ./PET*$(TNAME)UTest.Log
 
