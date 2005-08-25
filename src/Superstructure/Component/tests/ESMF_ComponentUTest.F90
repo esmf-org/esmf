@@ -1,4 +1,4 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.1 2005/03/14 23:54:07 nscollins Exp $
+! $Id: ESMF_ComponentUTest.F90,v 1.2 2005/08/25 21:59:58 theurich Exp $
 !
 ! Test code which creates a new Component.
 
@@ -39,7 +39,7 @@
 !   !
 !   !  Quick Test - Create, Print, Destroy a Component.
 
-    call ESMF_TestStart(ESMF_SRCLINE, rc)
+    call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
  
     !------------------------------------------------------------------------
     !NEX_UTest
