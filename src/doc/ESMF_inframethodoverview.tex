@@ -1,4 +1,4 @@
-% $Id: ESMF_inframethodoverview.tex,v 1.7 2005/08/23 16:17:44 nscollins Exp $
+% $Id: ESMF_inframethodoverview.tex,v 1.8 2005/08/26 20:26:19 nscollins Exp $
 
 \section{Overview of Distributed Data Methods}
 
@@ -345,8 +345,8 @@ are contiguous.}
 
 \begin{center}
 \begin{figure}
-\caption{Often the overhead of making a communication call outweighs
-the cost of copying non-contiguous data into a contiguous buffer,
+\caption{Generally the overhead of making multiple communication calls 
+outweighs the cost of copying non-contiguous data into a contiguous buffer,
 sending it in a single operation, and then copying it to the final
 memory locations on the receiving side.}
 \label{fig:routepack}
