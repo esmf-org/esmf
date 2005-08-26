@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.24 2005/05/20 16:48:23 nscollins Exp $
+#  $Id: build_rules.mk,v 1.25 2005/08/26 15:56:20 jwolfe Exp $
 #
 #  Linux.nag.default.mk
 #
@@ -47,7 +47,7 @@ MPI_LIB        += -lmpi -llam
 endif
 
 ifeq ($(ESMF_COMM),mpich)
-MPI_LIB        += -lmpich
+MPI_LIB        += -lpmpich++ -lmpich
 MPI_INCLUDE    += -DESMF_MPICH=1
 MPIRUN         += $(ESMF_NODES)
 endif
