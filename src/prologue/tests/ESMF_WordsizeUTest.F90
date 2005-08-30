@@ -1,4 +1,4 @@
-! $Id: ESMF_WordsizeUTest.F90,v 1.1 2005/08/30 21:31:40 nscollins Exp $
+! $Id: ESMF_WordsizeUTest.F90,v 1.2 2005/08/30 22:21:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -20,34 +20,41 @@
 
     integer :: rc, result
     character(len=ESMF_MAXSTR) :: failMsg, name
-    integer :: diff, i1, i2
+    integer(ESMF_KIND_I8) :: diff, i1, i2
     integer :: i2size, i4size, i8size, r4size, r8size
 
     type testi 
+    sequence
         integer :: fredi
     end type
 
     type testr 
+    sequence
         real :: fredr
     end type
 
     type testp 
+    sequence
         integer, pointer :: fredp
     end type
 
     type testi4 
+    sequence
         integer(ESMF_KIND_I4) :: fredi4
     end type
 
     type testi8 
+    sequence
         integer(ESMF_KIND_I8) :: fredi8
     end type
 
     type testr4 
+    sequence
         integer(ESMF_KIND_R4) :: fredr4
     end type
 
     type testr8 
+    sequence
         integer(ESMF_KIND_R8) :: fredr8
     end type
 
