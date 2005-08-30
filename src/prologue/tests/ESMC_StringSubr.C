@@ -1,16 +1,37 @@
+// $Id: ESMC_StringSubr.C,v 1.2 2005/08/30 21:31:40 nscollins Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2005, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+// NASA Goddard Space Flight Center.
+// Licensed under the GPL.
+//
+//-------------------------------------------------------------------------
+//
+// !DESCRIPTION:
+//
+// The code in this file implements C++ methods used to verify that strings
+// can be passed correctly between F90 and C++.
+//
+//-------------------------------------------------------------------------
+//
+ #define ESMC_FILENAME "ESMC_StringSubr.C"
+
 #include <stdio.h>
 #include <string.h>
 #include "ESMC_Conf.h"
 
-typedef void (*FUNC)(int *, int *, int *, int *);
-typedef void (*FUNC2)(int *, int *, char *, int *, int *, int);
-typedef void (*FUNC3)(int *, char *, int *, char *, int *, int *, int, int);
+typedef void (*FUNC)(int *, int *, int *, int *, int *);
+typedef void (*FUNC2)(int *, int *, char *, int *, int *, int *, int);
+typedef void (*FUNC3)(int *, char *, int *, char *, int *, int *, int *, int, int);
 
 extern "C" {
 
-      void FTN(c_strings)(FUNC f90cb, FUNC2 f90cb2, FUNC3 f90cb3, 
-                          int *i1, int *i2, char *fstr,
-                          int *i3, int *i4, int slen) {
+void FTN(c_strings)(FUNC f90cb, FUNC2 f90cb2, FUNC3 f90cb3, 
+                    int *i1, int *i2, char *fstr,
+                    int *i3, int *i4, int *rc, int slen) {
 
       int ni1, ni2, ni3, ni4;
       int clen, clen2;
@@ -32,33 +53,34 @@ extern "C" {
       ni4 = 499;
 
   
-      printf("\n\n-- ready to call f90string by callback\n");
-      (*f90cb)(&ni1, &ni2, &ni3, &ni4);
-      printf("\n\n-- returned from call of f90string by calback\n");
+      printf("\n\n-- ready to call f90int by callback\n");
+      (*f90cb)(&ni1, &ni2, &ni3, &ni4, rc);
+      printf("\n\n-- returned from call of f90int by callback\n");
 
       clen = 15;
 
       printf("\n\n-- ready to call f90string2 by callback, passing 15\n");
-      (*f90cb2)(&ni1, &ni2, newstr, &ni3, &ni4, clen);
+      (*f90cb2)(&ni1, &ni2, newstr, &ni3, &ni4, rc, clen);
       printf("\n\n-- returned from call f90string2 by callback\n");
 
       clen = 25;
 
       printf("\n\n-- ready to call f90string2 by callback, passing 25\n");
-      (*f90cb2)(&ni1, &ni2, newstr, &ni3, &ni4, clen);
+      (*f90cb2)(&ni1, &ni2, newstr, &ni3, &ni4, rc, clen);
       printf("\n\n-- returned from call f90string2 by callback\n");
 
       clen = 14;
       clen2 = 24;
 
       printf("\n\n-- ready to call f90string3 by callback, passing 14, 24\n");
-      (*f90cb3)(&ni1, newstr, &ni2, newstr2, &ni3, &ni4, clen, clen2);
+      (*f90cb3)(&ni1, newstr, &ni2, newstr2, &ni3, &ni4, rc, clen, clen2);
       printf("\n\n-- returned from call f90string3 by callback\n");
 
       printf("\n\n-- leaving c_strings\n");
-   }
 
-}
+}  // end of c_strings()
+
+} // end of extern "C"
 
 
 
