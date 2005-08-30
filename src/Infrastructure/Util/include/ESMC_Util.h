@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.4 2005/08/06 04:53:10 theurich Exp $
+// $Id: ESMC_Util.h,v 1.5 2005/08/30 22:04:47 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -209,6 +209,8 @@ extern "C" {
 void FTN(f_esmf_domainlistgetde)(ESMC_DomainList *, int *, int *, int *);
 void FTN(f_esmf_domainlistgetai)(ESMC_DomainList *, int *, int *, 
                                                     ESMC_AxisIndex *ai, int *);
+void FTN(esmf_pointertoint)(short *s, long *len);
+
 }
 
 // general reduction operator value - MUST MATCH F90

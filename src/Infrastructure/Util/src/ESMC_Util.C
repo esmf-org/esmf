@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.3 2005/07/08 21:32:32 nscollins Exp $
+// $Id: ESMC_Util.C,v 1.4 2005/08/30 22:04:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.3 2005/07/08 21:32:32 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.4 2005/08/30 22:04:55 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -855,4 +855,31 @@ extern "C" {
     return;
  }
 }
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "esmf_pointertoint"
+//BOPI
+// !IROUTINE:  ESMF_PointerToInt - Fortran-callable routine which returns
+//   the value of a fortran address as a simple integer.
+//
+// !INTERFACE:
+extern "C" {
+    void  FTN(esmf_pointertoint)(
+//
+// !RETURN VALUE:
+//  converts a F90 pointer into a normal integer.
+// 
+// !ARGUMENTS:
+    short *s,          // in - F90 pointer of some kind
+    long *len) {       // out - that same value cast to an long
+//EOPI
+
+    // what about short/int/long wordsize problems?  is long always 64 bits?
+    *len = (long)s;
+    return;
+ }
+}
+
 
