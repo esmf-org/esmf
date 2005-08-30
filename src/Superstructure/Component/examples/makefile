@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2005/03/01 21:06:12 nscollins Exp $ 
+# $Id: makefile,v 1.22 2005/08/30 16:28:51 nscollins Exp $ 
 
 ALL:  build_examples
 
@@ -101,9 +101,11 @@ CLOBBERDIRS =
 # ESMC_AppMainEx
 #
 run_ESMC_AppMainEx:
+	cp -f setup.rc $(ESMF_EXDIR)
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_AppMainEx > $(ESMF_EXDIR)/ESMC_AppMainEx.stdout
 
 run_ESMC_AppMainEx_uni:
+	cp -f setup.rc $(ESMF_EXDIR)
 	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_AppMainEx > $(ESMF_EXDIR)/ESMC_AppMainEx.stdout
 
 #
@@ -128,9 +130,11 @@ run_ESMC_GCompEx_uni:
 # ESMF_AppMainEx
 #
 run_ESMF_AppMainEx:
+	cp -f setup.rc $(ESMF_EXDIR)
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_AppMainEx > $(ESMF_EXDIR)/ESMF_AppMainEx.stdout
 
 run_ESMF_AppMainEx_uni:
+	cp -f setup.rc $(ESMF_EXDIR)
 	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_AppMainEx > $(ESMF_EXDIR)/ESMF_AppMainEx.stdout
 
 #
