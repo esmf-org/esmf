@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.16 2005/05/20 16:48:23 nscollins Exp $
+# $Id: build_rules.mk,v 1.17 2005/09/02 21:00:41 nscollins Exp $
 #
 # Linux.lahey.default
 #
@@ -80,6 +80,9 @@ F_FIXNOCPP         = --fix
 
 # use dir values in LD_LIBRARY_PATH, others are defaults if no other choice.
 ifeq ($(origin LD_LIBRARY_PATH), environment)
+C_LIB_PATHS  += $(ENV_LIB_PATHS)
+C_LD_PATHS   += $(ENV_LD_PATHS)
+
 C_F90CXXLIBS       = $(LIB_PATHS) $(LD_PATHS) \
                      -lstdc++ -lgcc -lg2c -lrt
 
