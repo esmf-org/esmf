@@ -226,7 +226,7 @@ end module Unit_Test
     RegridChoice(1)=ESMF_REGRID_METHOD_BILINEAR
     RegridChoice(2)=ESMF_REGRID_METHOD_CONSERV1
 
-   !--- SOURCE Grid types and corresponding field relative_cell_location 
+   !--- SOURCE Grid types and corresponding field relative_cell_location
     SrcGridHorzChoice(1) = ESMF_GRID_HORZ_STAGGER_A
     SrcRelLocChoice(1) = ESMF_CELL_CENTER
 
@@ -244,7 +244,7 @@ end module Unit_Test
     DstRelLocChoice(1) = ESMF_CELL_CENTER
 
     DstGridHorzChoice(2) = ESMF_GRID_HORZ_STAGGER_D_NE
-    DstRelLocChoice(2) = ESMF_CELL_EFACE 
+    DstRelLocChoice(2) = ESMF_CELL_EFACE
 
     DstGridHorzChoice(3) = ESMF_GRID_HORZ_STAGGER_B_NE
     DstRelLocChoice(3) = ESMF_CELL_NECORNER
@@ -654,7 +654,7 @@ end interface
        if (RelativeError .gt. epsil ) then
          regrid_rc=ESMF_FAILURE
      !TODO compute the global values of i,j for diagnostic printing
-         write( *, '(i3,a,i2,a,i2,a,2i2,a,2i4,a,3pe11.4)' )                &
+         write( *, '(i3,a,i2,a,i2,a,2i2,a,2i4,a,3(1pe11.4))' )                &
                  localPet,' ERROR! Regr= ',iRegrid,' Field=',FieldChoice, &
                  ' npetsXY=',npetsXY, ' i,j=',i,j,             &
                  '  exact/actual/Err',SolnOnTarget(i,j), f90ptr2(i,j),    &
@@ -664,7 +664,6 @@ end interface
        if(RelativeError > max_error) max_error=RelativeError
      end do
    end do
-
   !TODO: compute the GLOBAL average and maximum normalized errors
    avg_error=avg_error/( (ubDst(1)-lbDst(1)+1) * (ubDst(2)-lbDst(2)+1) )
    write(*,'(a,i3,a,i1,a,1pe12.4,a,1pe12.4)' ) &
