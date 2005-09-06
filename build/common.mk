@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.138 2005/09/02 21:16:50 nscollins Exp $
+#  $Id: common.mk,v 1.139 2005/09/06 22:26:10 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -651,7 +651,8 @@ LINKOPTS     = $(C_LINKOPTS)
 # be sure to include $(LDIR).
 LIB_PATHS = -L$(LDIR) $(C_LIB_PATHS)
 ifneq ($(C_LD_PATHS),)
-LD_PATHS  = $(SLFLAG)$(LDIR) $(C_LD_PATHS)
+LD_PATHS  = $(C_LD_PATHS)
+#LD_PATHS  = $(SLFLAG)$(LDIR) $(C_LD_PATHS)
 else
 LD_PATHS  =
 endif
