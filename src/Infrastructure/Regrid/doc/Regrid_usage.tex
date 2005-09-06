@@ -1,4 +1,4 @@
-% $Id: Regrid_usage.tex,v 1.6 2004/05/07 21:59:33 jwolfe Exp $
+% $Id: Regrid_usage.tex,v 1.7 2005/09/06 22:52:20 jwolfe Exp $
 
 
 Regrid is designed to be called with Field or Bundle
@@ -33,14 +33,4 @@ prevent the main Regrid module from becoming too
 large.  The user is unaware of this hierarchy as the
 top-level module provides a unified API.
 
-The Regrid object created by the RegridStore function
-contains a set of ``links''
-which identify how a field at a point on the
-destination grid is related to a field at a
-point on the source grid.  As such, a ``link''
-consists of a source address, a destination address
-and a weight.  Because the Grids are generally
-distributed very differently, the Regrid object
-also contains communication information
-for any data motion required for the regridding.
 
