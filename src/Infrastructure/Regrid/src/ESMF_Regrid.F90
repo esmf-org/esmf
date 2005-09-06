@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.96 2005/06/28 19:52:44 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.97 2005/09/06 22:44:48 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.96 2005/06/28 19:52:44 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.97 2005/09/06 22:44:48 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -484,7 +484,8 @@
 !EOPI
 
       integer :: localrc
-      integer :: i, i1, i2, n, nf, d1, d2, s1, asize, rank, counts(ESMF_MAXDIM)
+      integer :: i, ii, i1, i2, n, nf, d1, d2, s1, asize, rank
+      integer :: counts(ESMF_MAXDIM)
       integer :: na, narrays
       integer :: dstUndecomp, srcUndecomp, srcUndecompSize, srcStride
       integer :: di1, di2, dj1, dj2, dk1, dk2
@@ -647,10 +648,11 @@
             !*** do the regrid
             i1 = lbound(dstData3D,1)
             i2 = ubound(dstData3D,1)
+            ii = (i2 - i1) + 1
             do n = 1,numlinks
               d1 = dstIndex((n-1)*2 + 1)
               d2 = dstIndex((n-1)*2 + 2)
-              s1 = (srcIndex(n)-1)*i2        ! assumes i2 = srcUndecompSize
+              s1 = (srcIndex(n)-1)*ii 
               do i = i1,i2
                 dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
                                    + (gatheredData(s1+i) * weights(n))
@@ -677,11 +679,12 @@
             !*** do the regrid
             i1 = lbound(dstData3D,rank)
             i2 = ubound(dstData3D,rank)
+            ii = (i2 - i1) + 1
             do i = i1,i2
               do n = 1,numlinks
                 d1 = dstIndex((n-1)*2 + 1)
                 d2 = dstIndex((n-1)*2 + 2)
-                s1 = (srcIndex(n)-1)*i2 + i    ! assumes i2 = srcUndecompSize
+                s1 = (srcIndex(n)-1)*ii + i
                 dstData3D(d1,d2,i) = dstData3D(d1,d2,i) &
                                    + (gatheredData(s1) * weights(n))
               enddo
@@ -795,7 +798,7 @@
 !EOPI
 
       integer :: localrc
-      integer :: i, i1, i2, n, d1, d2, s1, asize, rank, counts(ESMF_MAXDIM)
+      integer :: i, ii, i1, i2, n, d1, d2, s1, asize, rank, counts(ESMF_MAXDIM)
       integer :: na, narrays
       integer :: dstUndecomp, srcUndecomp, srcUndecompSize, srcStride
       integer :: di1, di2, dj1, dj2, dk1, dk2
@@ -838,8 +841,9 @@
         ! gatheredData and dstData can be whatever the user wants - so this code
         ! might need to move into another file and be macroized heavily for TKR.
         call ESMF_TransformValuesGet(tv, numlist=numlinks, &
-                                  srcindex=srcindexarr, dstindex=dstindexarr, &
-                                  weights=weightsarr, rc=rc)
+                                     srcindex=srcindexarr, &
+                                     dstindex=dstindexarr, &
+                                     weights=weightsarr, rc=rc)
         call ESMF_LocalArrayGetData(srcindexarr, srcIndex, ESMF_DATA_REF, rc)
         call ESMF_LocalArrayGetData(dstindexarr, dstIndex, ESMF_DATA_REF, rc)
         call ESMF_LocalArrayGetData(weightsarr, weights, ESMF_DATA_REF, rc)
@@ -947,10 +951,11 @@
             !*** do the regrid
             i1 = lbound(dstData3D,1)
             i2 = ubound(dstData3D,1)
+            ii = (i2 - i1) + 1
             do n = 1,numlinks
               d1 = dstIndex((n-1)*2 + 1)
               d2 = dstIndex((n-1)*2 + 2)
-              s1 = (srcIndex(n)-1)*i2        ! assumes i2 = srcUndecompSize
+              s1 = (srcIndex(n)-1)*ii 
               do i = i1,i2
                 dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
                                    + (gatheredData(s1+i) * weights(n))
@@ -977,11 +982,12 @@
             !*** do the regrid
             i1 = lbound(dstData3D,rank)
             i2 = ubound(dstData3D,rank)
+            ii = (i2 - i1) + 1
             do i = i1,i2
               do n = 1,numlinks
                 d1 = dstIndex((n-1)*2 + 1)
                 d2 = dstIndex((n-1)*2 + 2)
-                s1 = (srcIndex(n)-1)*i2 + i    ! assumes i2 = srcUndecompSize
+                s1 = (srcIndex(n)-1)*ii + i
                 dstData3D(d1,d2,i) = dstData3D(d1,d2,i) &
                                    + (gatheredData(s1) * weights(n))
               enddo
