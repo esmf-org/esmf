@@ -19,8 +19,8 @@ large.  The user is unaware of this hierarchy as the top-level module provides
 a unified API.
 
 The RouteHandle object created by the RegridStore function contains a set of
-``links'' which identify how a Field at a point on the destination Grid is
-related to a Field at a point on the source Grid.  As such, a ``link''
+"links" which identify how a Field at a point on the destination Grid is
+related to a Field at a point on the source Grid.  As such, a "link"
 consists of a source address, a destination address and a weight.  The addresses
 are stored as indices to allow reuse by different Fields on the same Grids.
 Because the Grids are generally distributed very differently, the Regrid object
@@ -35,13 +35,13 @@ that takes place inside Store.  In initial timings, typical RegridStore calls
 take on the order of seconds while the application routines themselves require
 more on the order of milliseconds.  Scaling on parallel architectures is
 reasonably good up until communication overhead dominates timings (see 
-Figure \ref{fig:RegridScaling} for scaling graphs from an example application).
+Figure \ref{fig:RegridScaling} for scaling curves from an example application).
 
 \begin{center}
 \begin{figure}
 \caption{Sample scaling graphs for Regrid Run and Store routines. }
 \label{fig:RegridScaling}
-\includegraphics{RegridScaling}
+\includegraphics{RegridScaling2002}
 \end{figure}
 \end{center}
 
@@ -50,14 +50,14 @@ Figure \ref{fig:RegridScaling} for scaling graphs from an example application).
 \subsubsection{Overview of Parallelization of Regrid}
 On parallel processing platforms, the physical domains of the source and
 destination Grids are decomposed into logical Decomposition Elements (DEs), as
-illustrated in Figure \ref{fig:ParallelRegrid}.  In order to calculate
+illustrated in Figure \ref{fig:ParallelRegridding}.  In order to calculate
 interpolation weights, each
 
 \begin{center}
 \begin{figure}
 \caption{Illustration of Parallel Regridding. }
-\label{fig:ParallelRegrid}
-\includegraphics{ParallelRegrid}
+\label{fig:ParallelRegridding}
+\includegraphics{ParallelRegridding2002}
 \end{figure}
 \end{center}
 
@@ -73,9 +73,8 @@ regridding algorithms discussed earlier can be applied.
 
 There are four major sections of regridding that are impacted by the
 parallelization process: identifying necessary data, transferring that data, the
-sweeping or search algorithms, and then calculating and applying the
-interpolation weights to calculate regridded Fields.  Each will be discussed
-below.
+sweep algorithms, and then calculating and applying the interpolation weights to
+calculate regridded Fields.  Each will be discussed below.
 
 
 \subsubsection{Parallelization of Regrid: Identification of Necessary Data}
@@ -103,7 +102,7 @@ another decomposed by columns as illustrated in Figure \ref{fig:RToCRegrid}, tha
 \caption{Example of parallel regridding requiring transfer of all data,
          when transferring all data between intersecting DEs. }
 \label{fig:RToCRegrid}
-\includegraphics{RToCRegrid}
+\includegraphics{RToCRegrid2002}
 \end{figure}
 \end{center}
 
@@ -131,7 +130,7 @@ shown in Figure \ref{fig:RegridIntersection},
 \begin{figure}
 \caption{Intersection of DE Domains in Parallel Regridding. }
 \label{fig:RegridIntersection}
-\includegraphics{RegridIntersection}
+\includegraphics{RegridIntersection2002}
 \end{figure}
 \end{center}
 
@@ -151,7 +150,8 @@ data points (see Figure \ref{fig:RegridExtraLayer}).
 
 \begin{center}
 \begin{figure} 
-\caption{Illustration of the extra layer of points required by point-based Regrid algorithms. }
+\caption{Illustration of the extra layer of points required by point-based Regrid
+         algorithms. }
 \label{fig:RegridExtraLayer}
 \includegraphics{RegridExtraLayer}
 \end{figure}
@@ -184,8 +184,8 @@ or Field values, are stored locally as single 1D Arrays.
 
 
 \subsubsection{Parallelization of Regrid: Sweep Algorithms}
-The conservative regrid schemes create vertical coordinate bins to decrease the
-number of cells that must be swept (or searched), as described earlier.  SCRIP
+The conservative regrid schemes create coordinate bins to decrease the
+number of cells that must be swept, as described earlier.  SCRIP
 had an input parameter to set the number of bins to be created, but for a
 parallel implementation that number needs to be dynamic.  Dynamic binning
 balances the cost, in terms of computational efficiency and storage, of setting
@@ -201,7 +201,7 @@ Regrid Store (see Figure \ref{fig:TargetBinSize}).
 \begin{figure}
 \caption{Example of TargetBinSize on RegridStore timing. }
 \label{fig:TargetBinSize}
-\includegraphics{TargetBinSize}
+\includegraphics{TargetBinSize2002}
 \end{figure}
 \end{center}
 
@@ -215,22 +215,69 @@ a single domain at a time, which typically represents just a part of the 1D
 gathered Arrays.  It is otherwise unaffected by parallelization.
 
 
-\subsubsection{Parallelization of Regrid: Calculation and Application of Interpolation Weights}
-incomplete
+\subsubsection{Parallelization of Regrid: Calculation and Application of
+               Interpolation Weights}
+
+Once the necessary data has been identified and gathered, the calculation and
+application of interpolation weights are entirely local operations, requiring no
+inter-processor communication.  Once an interpolation weight has been determined
+using one of the algorithms described earlier, the weight is stored as part of a
+local list of links (described previously) in an object called an
+{\tt ESMF\_TransformValues}.  This object is itself part of the 
+{\tt ESMF\_RouteHandle} object, and contains:
+\begin{description}
+   \item [numlist]
+         The number of links included in the object.  It also represents the
+         size of the corresponding arrays.
+   \item [srcindex]
+         An array of indices into the local array of source data.
+         This array is of size [numlist] and kind ESMF_KIND_I4.  Only a single
+         integer is required to identify the source index because the source data
+         has been gathered as a vector.
+   \item [dstindex]
+         An array of indices into the local array of destination data.
+         This array is of size [2*numlist] and kind ESMF_KIND_I4.  Each
+         destination index address requires two integers, one for each rank
+         of the data array that corresponds to a Grid axis.  However, rather
+         than being an array of rank 2, the index pairs are stored sequentially
+         in the [dstindex] array.
+   \item [weights]
+         An array of interpolation weights.  This array is of size [numlist] and
+         kind ESMF_KIND_R8.
+\end{description}
+Each link is represented by an entry in this set of arrays.  Also note that there
+is a single link for each unique combination of source and destination indices.
+
+The application of the interpolation weights occurs during the Regrid run
+routines.  The only necessary communication is that to gather the required source
+data locally into a one-dimensional array, using a precomputed Route.
+Fundamentally, the application of the weights is a vector multiply of a sparse
+matrix, with indirect addressing of the indices.  The main calculation is a loop
+over the number of links that effectively sums the product of the source data and
+the interpolation weights and loads the result into the corresponding destination
+address.  A sample code fragment below illustrates the simplest case, where both
+the source and destination data are two-dimensional arrays whose data axes 
+correspond to the grids' exactly, with no reordering:
+
+\begin{verbatim}
+      do n = 1,numlinks     
+        d1 = dstIndex((n-1)*2 + 1)
+        d2 = dstIndex((n-1)*2 + 2) 
+        s1 = srcIndex(n)           
+        dstData2D(d1,d2) = dstData2D(d1,d2) &
+                         + (gatheredData(s1) * weights(n))
+      enddo  ! numlinks
+\end{verbatim}
+
+The coding becomes increasingly more complicated for data arrys of higher rank,
+but is inherently similar.
 
 
-During the run routine, the source data is first gathered using the
-precomputed Route and stored as a 1-D vector.  The main calculation is then 
-a loop over the number of links that effectively sums the product of the
-source data and the interpolation weights and loads the result into the
-corresponding destination Array address.
 
 \subsubsection{Regrid Objects}
-The {\tt ESMF\_Regrid} object itself is relatively small, containing mostly
-just pointers to the source and destination Field information and settings
-for regrid options.  Regrid methods also create an {\tt ESMF\_TransformValues}
-object, which holds information about the ``links'', including the number of
-them and Arrays of source addresses, destination addresses, and interpolation
-weights.  Both the Regrid and TransformValues objects are private and 
-contained by the RouteHandle object.
 
+There is no {\tt ESMF\_Regrid} object per se.  Users are returned an
+{\tt ESMF_RouteHandle} object, which contains one or more {\tt ESMF\_Routes}
+used to gather source data, an {\tt ESMF\_TransformValues} object with the
+list of links, and an identifier for the type of RouteHandle.  All of these
+objects are private and users are not expected to access or modify them.
