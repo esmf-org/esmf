@@ -193,7 +193,17 @@ A = \left[\begin{array}{cc}
      be efficiently eliminated from the sweep via this simple test.  This loop is
      further optimized by tracking the index of the source cell containing the
      previous point and using that as the initial starting index for the next
-     point's sweep, since both grids are logically ordered.
+     point's sweep, since both grids are logically ordered.  Please see
+     Figure \ref{fig:BilinearSweep} for an illustration of the sweep algorithm.
+
+\begin{center}
+\begin{figure}
+\caption{Illustration of the Bilinear Sweep Algorithm. }
+\label{fig:BilinearSweep}
+\includegraphics{BilinearSweep2002}
+\end{figure}
+\end{center}
+
 
 
 %\item[ESMF\_REGRID\_METHOD\_CONSERV1 and ESMF\_REGRID\_METHOD\_CONSERV2]
@@ -398,7 +408,19 @@ w_{3nk} & = & {1\over{A_k}}\int\int_{A_{nk}}\cos\theta(\phi-\phi_n)dA \nonumber 
      range of physical coordinates.  Each bin therefore identifies an index range
      corresponding to a physical coordinate range.  Then when the sweep begins,
      only those cells in the index range belonging to the same coordinate bin as
-     the identifed subsegment are used.  Note that currently ESMF creates bins based
+     the identifed subsegment are used.  Please reference Figure 
+     \ref{fig:ConservSweep} for an illustration of binning and the sweep
+     algorithm.
+
+\begin{center}
+\begin{figure}
+\caption{Illustration of the Conservative Sweep Algorithm. }
+\label{fig:ConservSweep}
+\includegraphics{ConservSweep2002}
+\end{figure}
+\end{center}
+
+     Note that currently ESMF creates bins based
      only on coordinates in the second grid direction (typically "y" or "latitude").
      The second stage checks the bounding box of each grid cell in the determined
      bin.  The bounding box is formed by the cell's minimum and maximum coordinates.
