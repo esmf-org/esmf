@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.140 2005/06/20 23:03:36 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.141 2005/09/09 17:51:34 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.140 2005/06/20 23:03:36 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.141 2005/09/09 17:51:34 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -8714,6 +8714,7 @@
               totalPoints = totalPoints + size
             endif
           enddo
+          domainList%num_domains  = numDomains
           domainList%total_points = totalPoints
         endif
 
@@ -9027,6 +9028,7 @@
             totalPoints = totalPoints + size
           endif
         enddo
+        domainList%num_domains  = numDomains
         domainList%total_points = totalPoints
 
         deallocate(globalMinIndex, &
