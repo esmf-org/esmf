@@ -1,8 +1,8 @@
 module options_table
 public
 
-integer, parameter :: nOptions=7
-integer, parameter, dimension(1:nOptions) :: nChoices=(/ 2,2,4,2,3,3,2 /)
+integer, parameter :: nOptions=9
+integer, parameter, dimension(1:nOptions) :: nChoices=(/ 2,2,4,2,3,3,2,4,4 /)
 
 character(len=25),parameter, dimension(1:nOptions) :: Option_name= &
        (/ 'SRCDELAYOUT'  &   ! (1)
@@ -12,6 +12,8 @@ character(len=25),parameter, dimension(1:nOptions) :: Option_name= &
         , 'SRCGRID    '  &   ! (5)
         , 'DSTGRID    '  &   ! (6)
         , 'DOMAIN     '  &   ! (7)
+        , 'SRCHALO    '  &   ! (8)
+        , 'DSTHALO    '  &   ! (9)
        /)
 character(len=25),  dimension(1:4,1:nOptions) :: Option_choice
 
@@ -53,6 +55,18 @@ subroutine get_table
 !Option_name(7) = 'DOMAIN'
   Option_choice(1,7)='WHOLEGLOBE'
   Option_choice(2,7)='REGIONAL'
+
+!Option_name(8) = 'SRCHALO'
+   Option_choice(1,8)='0'
+   Option_choice(2,8)='1'
+   Option_choice(3,8)='2'
+   Option_choice(4,8)='3'
+
+!Option_name(9) = 'DSTHALO'
+   Option_choice(1,9)='0'
+   Option_choice(2,9)='1'
+   Option_choice(3,9)='2'
+   Option_choice(4,9)='3'
 
   return
 end subroutine get_table
@@ -203,8 +217,12 @@ end module Unit_Test
     !--- cumulative result: count failures; no failures equals "all pass"
     integer :: result=0
     integer :: regrid_rc    !single test error indicator
+
     integer :: iSrcDistr, iDstDistr, nXY(3,2)
     integer :: TwoOrOne
+
+    integer, parameter :: nHalo=4
+    integer, dimension(nHalo) :: SrcHaloChoice, DstHaloChoice
 
     !--- individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -214,6 +232,8 @@ end module Unit_Test
 
 
     subroutine initTables
+
+    integer :: i
    !--- Domain Decompositions used
     nXY(1,:)=(/ npets, 1 /)                       !1DX
     nXY(2,:)=(/ 1, npets /)                       !1DY
@@ -252,6 +272,12 @@ end module Unit_Test
     DstGridHorzChoice(4) = ESMF_GRID_HORZ_STAGGER_C_NE
     DstRelLocChoice(4) = ESMF_CELL_NFACE
 
+   !---SOURCE  and DESTINATION  halo size 
+    do i=1,4
+      SrcHaloChoice(i) = i-1
+      DstHaloChoice(i) = i-1
+    end do
+
   !TODO: Print documentation for what 1)the 1-4 field test functions are
   !TODO:                              2)source and dest. grid choices are
   !TODO:                              3)formula is used for relative error calc
@@ -265,7 +291,8 @@ end module Unit_Test
 
     use RegridArgs
 
-    character(len=100) :: longString
+    character(len=100           ) :: longString    ! [128]
+   !character(len=ESMF_MAXSTR-13) :: longString    ! [128]
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=lrc)
     call ESMF_VMGetGlobal(vm, rc=lrc)
@@ -282,8 +309,8 @@ end module Unit_Test
   !   DSTDELAYOUT: 1DX, 1DY, 2D
 
     longString='FUNCTION:C:REGSCHEME:1CONSERV' &
-               //':SRCGRID:D_NE:DSTGRID:A:SRCDELAYOUT:1DY:DSTDELAYOUT:1DX' &
-               //':DOMAIN:REGIONAL'
+             ! //':SRCGRID:D_NE:DSTGRID:A:SRCDELAYOUT:1DY:DSTDELAYOUT:1DX' &
+               //':DOMAIN:WHOLEGLOBE:SRCHALO:3:DSTHALO:0'
 
     call setupRegridUTest(longString,ier)
 
@@ -325,12 +352,14 @@ interface
     subroutine Regrid(FieldChoice, nSrcPetsXY, npetsXY, MethodChoice, &
                            SrcGridChoice,DstGridChoice, &
                            SrcLocChoice, DstLocChoice, &
+                           SrcHalo, DstHalo, &
                            domainType, error_threshold, ier )
     use RegridArgs
     implicit none
       integer, intent(in) :: FieldChoice
       type(ESMF_RegridMethod), intent(in) :: MethodChoice
       type(ESMF_GridHorzStagger), intent(in) :: SrcGridChoice, DstGridChoice
+      integer, intent(in) :: SrcHalo, DstHalo
       type(ESMF_RelLoc), intent(in) :: SrcLocChoice, DstLocChoice
       real(ESMF_KIND_R8), optional :: error_threshold
       integer, intent(in) :: npetsXY(2)
@@ -348,6 +377,7 @@ end interface
     integer :: nChoices
     integer :: nSelected
     integer :: iSrcRelLoc, iDstRelLoc
+    integer :: iSrcHalo, iDstHalo
     integer :: iDomain
     real(ESMF_KIND_R8) :: err_threshold=0.01
     
@@ -379,7 +409,8 @@ end interface
      iSrcRelLoc=2
      iDstRelLoc=3
      iDomain   =1
-
+     iSrcHalo  =4
+     iDstHalo  =1
     !---Modify according to the choices in longString...
      if (MaskName(1)) iSrcDistr=ChoiceIndex(1)
      if (MaskName(2)) iDstDistr=ChoiceIndex(2)
@@ -388,6 +419,8 @@ end interface
      if (MaskName(5)) iSrcRelLoc=ChoiceIndex(5)
      if (MaskName(6)) iDstRelLoc=ChoiceIndex(6)
      if (MaskName(7)) iDomain=ChoiceIndex(7)
+     if (MaskName(8)) iSrcHalo=ChoiceIndex(8)
+     if (MaskName(9)) iSrcHalo=ChoiceIndex(9)
 
      err_threshold=0.2
 
@@ -399,6 +432,8 @@ end interface
                            DstGridChoice = DstGridHorzChoice(iDstRelLoc), &
                            SrcLocChoice = SrcRelLocChoice(iSrcRelLoc), &
                            DstLocChoice = DstRelLocChoice(iDstRelLoc), &
+                           SrcHalo = SrcHaloChoice(iSrcHalo), &
+                           DstHalo = DstHaloChoice(iDstHalo), &
                            domainType   = iDomain, &
                            error_threshold= err_threshold )
           write(*,'(a,i2,a,i2,a,i2,a,i2,a,i2,a,i2)') &
@@ -413,6 +448,7 @@ end interface
     subroutine Regrid(FieldChoice, nSrcPetsXY, npetsXY, MethodChoice, &
                            SrcGridChoice,DstGridChoice, &
                            SrcLocChoice, DstLocChoice, &
+                           SrcHalo, DstHalo, &
                            domainType, error_threshold, ier )
 
   !--Execute a Regrid Unit test for a single set of testing parameter choices.
@@ -455,6 +491,7 @@ end interface
       type(ESMF_RegridMethod), intent(in) :: MethodChoice
       type(ESMF_GridHorzStagger), intent(in) :: SrcGridChoice, DstGridChoice
       type(ESMF_RelLoc), intent(in) :: SrcLocChoice, DstLocChoice 
+      integer, intent(in) :: SrcHalo, DstHalo
       real(ESMF_KIND_R8), optional :: error_threshold
       integer, intent(in) :: npetsXY(2)
       integer, intent(in) :: nSrcPetsXY(2)
@@ -468,7 +505,7 @@ end interface
     type(ESMF_DELayout) :: layout1, layout2
     integer :: rc
 
-    integer :: i, j, SrcHalo,DstHalo
+    integer :: i, j
     integer :: lbSrc(2), ubSrc(2)
     integer :: lbDst(2), ubDst(2)
     integer :: nx_domain, ny_domain
@@ -517,7 +554,6 @@ end interface
 
    !Create the source field (with halo width of 3)
    !==============================================
-    srcHalo=3
     call createField(grid=srcgrid,               &
                      LocChoice = SrcLocChoice,   &
                      halo      = SrcHalo,        &
@@ -555,7 +591,6 @@ end interface
 
    !Create the destination field (with halo width of 0)
    !===================================================
-    DstHalo=0
     call createField(grid=Dstgrid,               &
                      LocChoice = DstLocChoice,   &
                      halo      = DstHalo,        &
@@ -628,7 +663,6 @@ end interface
 
    !--Compute exact fcn. values at the Destination Grid 
    !===================================================
-    DstHalo=0
     call functionValues(FieldChoice, x_coords2, y_coords2, Phi, Theta, &
                         lbDst, ubDst, DstHalo, maxcoords, SolnOnTarget, ier)
 
