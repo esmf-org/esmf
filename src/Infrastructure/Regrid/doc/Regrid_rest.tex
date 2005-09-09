@@ -1,4 +1,4 @@
-% $Id: Regrid_rest.tex,v 1.3 2005/08/19 23:18:55 jwolfe Exp $
+% $Id: Regrid_rest.tex,v 1.4 2005/09/09 17:59:48 jwolfe Exp $
 
 %\subsubsection{Restrictions and Future Work}
 
@@ -10,9 +10,17 @@ support is limited to two dimensions.
 \item {\bf Masks are not implemented.}  Regridding methods take
 masks in their argument lists, but they currently have no effect.
 
+\item {\bf Regridding only fills computational domains.}  Currently,
+regridded values are not automatically applied to halo regions.
+Users must manually call Halo after regridding in order to do so.
+
 \item {\bf Special pole treatment is not implemented.}
 Conservative regridding methods do not yet have the special pole
 treatment completed.
+
+\item {\bf Interpolation weights are not available to users.}  
+Currently, there is no method to allow users access to the interpolation
+weights for any desired manipulations.
 
 \item {\bf Spherical coordinates are not shifted.}
  Regrid methods do not yet shift longitude coordinates
