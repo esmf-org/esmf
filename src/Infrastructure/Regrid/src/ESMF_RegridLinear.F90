@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.31 2005/05/31 17:39:59 nscollins Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.32 2005/09/12 20:50:33 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.31 2005/05/31 17:39:59 nscollins Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.32 2005/09/12 20:50:33 jwolfe Exp $'
 
 !==============================================================================
 
@@ -151,7 +151,9 @@
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
       type(ESMF_Route) :: route, tempRoute
       type(ESMF_RouteHandle) :: rh
-      type(ESMF_Regrid) :: tempRegrid
+! TODO: currently the ESMF_Regrid object is not used anywhere, so all references
+!       are commented out
+!     type(ESMF_Regrid) :: tempRegrid
       type(ESMF_TransformValues) :: tv
       character (len = ESMF_MAXSTR) :: name
 
@@ -164,18 +166,20 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      tempRegrid = ESMF_RegridCreateEmpty(rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+! TODO: currently the ESMF_Regrid object is not used anywhere, so all references
+!       are commented out
+!     tempRegrid = ESMF_RegridCreateEmpty(rc=localrc)
+!     if (ESMF_LogMsgFoundError(localrc, &
+!                               ESMF_ERR_PASSTHRU, &
+!                               ESMF_CONTEXT, rc)) return
 
-      ! Set name and field pointers
-      call ESMF_RegridSet(tempRegrid, name=name, &
-                          srcArray = srcArray, dstArray = dstArray, &
-                          method = ESMF_REGRID_METHOD_LINEAR, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+!     ! Set name and field pointers
+!     call ESMF_RegridSet(tempRegrid, name=name, &
+!                         srcArray = srcArray, dstArray = dstArray, &
+!                         method = ESMF_REGRID_METHOD_LINEAR, rc=localrc)
+!     if (ESMF_LogMsgFoundError(localrc, &
+!                               ESMF_ERR_PASSTHRU, &
+!                               ESMF_CONTEXT, rc)) return
       
       ! get destination grid info
       !TODO: Get grid masks?

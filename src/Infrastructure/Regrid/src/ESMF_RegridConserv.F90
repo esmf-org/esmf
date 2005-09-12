@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.54 2005/08/12 22:15:28 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.55 2005/09/12 20:50:15 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.54 2005/08/12 22:15:28 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.55 2005/09/12 20:50:15 jwolfe Exp $'
 
 !==============================================================================
 
@@ -228,8 +228,10 @@
            coordSystem             !
       type(ESMF_DomainList) :: &
            recvDomainList          !
-      type(ESMF_Regrid) :: &
-           tempRegrid              !
+! TODO: currently the ESMF_Regrid object is not used anywhere, so all references
+!       are commented out
+!     type(ESMF_Regrid) :: &
+!          tempRegrid              !
       type(ESMF_RegridNormOpt) :: &
            regridNormUse           !
       type(ESMF_RelLoc) :: &
@@ -248,36 +250,39 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! Construct an empty regrid structure
-      rh = ESMF_RouteHandleCreate(rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      tempRegrid = ESMF_RegridCreateEmpty(rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
       ! Set optional parameters if present - otherwise set defaults
       orderUse      = 1
       regridNormUse = ESMF_REGRID_NORM_FRACAREA
       if (present(order     )) orderUse      = order
       if (present(regridnorm)) regridNormUse = regridnorm
 
-      ! Set regrid method and array pointers       TODO: add name
-      if (orderUse.eq.1) then
-        call ESMF_RegridSet(tempRegrid, &
-                            srcArray=srcArray, dstArray=dstArray, &
-                            method = ESMF_REGRID_METHOD_CONSERV1, rc=localrc)
-      else
-        call ESMF_RegridSet(tempRegrid, &
-                            srcArray=srcArray, dstArray=dstArray, &
-                            method = ESMF_REGRID_METHOD_CONSERV2, rc=localrc)
-      endif
+      ! Construct an empty routehandle structure
+      rh = ESMF_RouteHandleCreate(rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+
+! TODO: currently the ESMF_Regrid object is not used anywhere, so all references
+!       are commented out
+!     ! Construct an empty regrid structure
+!     tempRegrid = ESMF_RegridCreateEmpty(rc=localrc)
+!     if (ESMF_LogMsgFoundError(localrc, &
+!                               ESMF_ERR_PASSTHRU, &
+!                               ESMF_CONTEXT, rc)) return
+
+!     ! Set regrid method and array pointers       TODO: add name
+!     if (orderUse.eq.1) then
+!       call ESMF_RegridSet(tempRegrid, &
+!                           srcArray=srcArray, dstArray=dstArray, &
+!                           method = ESMF_REGRID_METHOD_CONSERV1, rc=localrc)
+!     else
+!       call ESMF_RegridSet(tempRegrid, &
+!                           srcArray=srcArray, dstArray=dstArray, &
+!                           method = ESMF_REGRID_METHOD_CONSERV2, rc=localrc)
+!     endif
+!     if (ESMF_LogMsgFoundError(localrc, &
+!                               ESMF_ERR_PASSTHRU, &
+!                               ESMF_CONTEXT, rc)) return
 
       ! get dataRank and allocate rank-sized arrays
       call ESMF_ArrayGet(srcArray, rank=dataRank, rc=localrc)

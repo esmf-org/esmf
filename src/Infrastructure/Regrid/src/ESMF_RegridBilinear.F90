@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.87 2005/05/31 17:39:58 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.88 2005/09/12 20:49:52 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.87 2005/05/31 17:39:58 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.88 2005/09/12 20:49:52 jwolfe Exp $'
 
 !==============================================================================
 
@@ -153,7 +153,9 @@
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
       type(ESMF_Route) :: route, tempRoute
       type(ESMF_RouteHandle) :: rh
-      type(ESMF_Regrid) :: tempRegrid
+! TODO: currently the ESMF_Regrid object is not used anywhere, so all references
+!       are commented out
+!     type(ESMF_Regrid) :: tempRegrid
       type(ESMF_TransformValues) :: tv
 
       ! Initialize return code; assume failure until success is certain
@@ -173,17 +175,19 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      tempRegrid = ESMF_RegridCreateEmpty(rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      ! Set name and array pointers
-      call ESMF_RegridSet(tempRegrid, srcArray=srcArray, dstArray=dstArray, &
-                          method = ESMF_REGRID_METHOD_BILINEAR, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+! TODO: currently the ESMF_Regrid object is not used anywhere, so all references
+!       are commented out
+!     tempRegrid = ESMF_RegridCreateEmpty(rc=localrc)
+!     if (ESMF_LogMsgFoundError(localrc, &
+!                               ESMF_ERR_PASSTHRU, &
+!                               ESMF_CONTEXT, rc)) return
+!
+!     ! Set name and array pointers
+!     call ESMF_RegridSet(tempRegrid, srcArray=srcArray, dstArray=dstArray, &
+!                         method = ESMF_REGRID_METHOD_BILINEAR, rc=localrc)
+!     if (ESMF_LogMsgFoundError(localrc, &
+!                               ESMF_ERR_PASSTHRU, &
+!                               ESMF_CONTEXT, rc)) return
 
       ! get dataRank and allocate rank-sized arrays
       call ESMF_ArrayGet(srcArray, rank=dataRank, rc=localrc)
