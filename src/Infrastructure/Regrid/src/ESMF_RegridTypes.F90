@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.77 2005/06/30 17:09:28 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.78 2005/09/12 19:14:09 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -257,7 +257,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.77 2005/06/30 17:09:28 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.78 2005/09/12 19:14:09 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1039,6 +1039,9 @@
 
       ! and free anything associated with the base object
       call ESMF_BaseDestroy(regrid%ptr%base, localrc)
+
+      ! nullify the pointer
+      nullify(regrid%ptr)
 
       if (present(rc)) rc = ESMF_SUCCESS
 
