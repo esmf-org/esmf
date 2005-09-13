@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.139 2005/06/20 23:04:18 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.140 2005/09/13 22:36:50 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.139 2005/06/20 23:04:18 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.140 2005/09/13 22:36:50 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1105,15 +1105,121 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-      !integer :: localrc                          ! Error status
+      integer :: localrc                          ! Error status
+      logical :: dummy
+      type(ESMF_DistGridType), pointer :: dgtype
+      type(ESMF_DistGridLocal), pointer :: me     
+      type(ESMF_DistGridGlobal), pointer :: glob
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      dgtype => distgrid%ptr
+
+      ! deallocate DistGrid arrays and nullify pointers
+
+      ! globalComp contents here:
+      glob => dgtype%globalComp
+      deallocate(glob%globalCellCountPerDim  , &
+                 glob%maxLocalCellCountPerDim, &
+                 glob%cellCountPerDE         , &
+                 glob%cellCountPerDEPerDim   , &
+                 glob%globalStartPerDEPerDim , &
+                 glob%AIPerDEPerDim          , stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, &
+                                     "deallocating globalComp contents", &
+                                     ESMF_CONTEXT, rc)) return
+      nullify(glob%globalCellCountPerDim)
+      nullify(glob%maxLocalCellCountPerDim)
+      nullify(glob%cellCountPerDE)
+      nullify(glob%cellCountPerDEPerDim)
+      nullify(glob%globalStartPerDEPerDim)
+      nullify(glob%AIPerDEPerDim)
+ 
+      ! myDEComp contents here:
+      me => dgtype%myDEComp
+      deallocate(me%localCellCountPerDim, &
+                 me%globalStartPerDim   , &
+                 me%globalAIPerDim      , stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating myDEComp", &
+                                     ESMF_CONTEXT, rc)) return
+      nullify(me%localCellCountPerDim)
+      nullify(me%globalStartPerDim)
+      nullify(me%globalAIPerDim)
+
+      select case(dgtype%arbitrary)
+
+      !-------------
+      !  block structure
+      case(0)
+
+        ! globalTotal contents here:
+        glob => dgtype%globalTotal
+        deallocate(glob%globalCellCountPerDim  , &
+                   glob%maxLocalCellCountPerDim, &
+                   glob%cellCountPerDE         , &
+                   glob%cellCountPerDEPerDim   , &
+                   glob%globalStartPerDEPerDim , &
+                   glob%AIPerDEPerDim          , stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                       "deallocating globalTotal contents", &
+                                       ESMF_CONTEXT, rc)) return
+        nullify(glob%globalCellCountPerDim)
+        nullify(glob%maxLocalCellCountPerDim)
+        nullify(glob%cellCountPerDE)
+        nullify(glob%cellCountPerDEPerDim)
+        nullify(glob%globalStartPerDEPerDim)
+        nullify(glob%AIPerDEPerDim)
+
+        ! myDETotal contents here:
+        me => dgtype%myDETotal
+        deallocate(me%localCellCountPerDim, &
+                   me%globalStartPerDim   , &
+                   me%globalAIPerDim      , stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating myDETotal", &
+                                       ESMF_CONTEXT, rc)) return
+        nullify(me%localCellCountPerDim)
+        nullify(me%globalStartPerDim)
+        nullify(me%globalAIPerDim)
+
+      !-------------
+      !  vector (arbitrary) structure
+      case(1)
+
+        ! myDEComp contents here:
+        me => dgtype%myDEComp
+        deallocate(me%localIndices, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating myDEComp", &
+                                       ESMF_CONTEXT, rc)) return
+        nullify(me%localIndices)
+
+      case default
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                      "Invalid distgrid structure", &
+                                      ESMF_CONTEXT, rc)
+        return
+      end select
+
+      ! DistGridType contents here:
+      deallocate(dgtype%decompIDs   , &
+                 dgtype%coversDomain, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating distgrid contents", &
+                                     ESMF_CONTEXT, rc)) return
+      nullify(dgtype%decompIDs)
+      nullify(dgtype%coversDomain)
+
+      ! destroy associated classes
+
+      ! delete the base class
+      call ESMF_BaseDestroy(dgtype%base, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       ! TODO: Agree that this is correct.  The Grid is passed in a layout
       !  created outside this grid (and perhaps shared amongst many grids)
       !  so it seems that it should not be destroyed here.)
-      !call ESMF_DELayoutDestroy(distgrid%ptr%delayout, localrc)
+      !call ESMF_DELayoutDestroy(dgtype%delayout, localrc)
       !if (ESMF_LogMsgFoundError(localrc, &
       !                          ESMF_ERR_PASSTHRU, &
       !                          ESMF_CONTEXT, rc)) return
