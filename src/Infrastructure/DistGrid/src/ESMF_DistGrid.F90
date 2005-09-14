@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.141 2005/09/14 21:41:50 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.142 2005/09/14 22:55:45 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.141 2005/09/14 21:41:50 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.142 2005/09/14 22:55:45 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1307,6 +1307,10 @@
       !if (ESMF_LogMsgFoundError(localrc, &
       !                          ESMF_ERR_PASSTHRU, &
       !                          ESMF_CONTEXT, rc)) return
+
+      deallocate(dgtype, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating distgrid type", &
+                                     ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
