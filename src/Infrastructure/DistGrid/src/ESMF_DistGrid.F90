@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.140 2005/09/13 22:36:50 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.141 2005/09/14 21:41:50 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.140 2005/09/13 22:36:50 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.141 2005/09/14 21:41:50 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1116,36 +1116,73 @@
 
       dgtype => distgrid%ptr
 
-      ! deallocate DistGrid arrays and nullify pointers
+      ! deallocate DistGrid arrays and nullify pointers -- check for "associated" first
 
       ! globalComp contents here:
       glob => dgtype%globalComp
-      deallocate(glob%globalCellCountPerDim  , &
-                 glob%maxLocalCellCountPerDim, &
-                 glob%cellCountPerDE         , &
-                 glob%cellCountPerDEPerDim   , &
-                 glob%globalStartPerDEPerDim , &
-                 glob%AIPerDEPerDim          , stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, &
-                                     "deallocating globalComp contents", &
-                                     ESMF_CONTEXT, rc)) return
-      nullify(glob%globalCellCountPerDim)
-      nullify(glob%maxLocalCellCountPerDim)
-      nullify(glob%cellCountPerDE)
-      nullify(glob%cellCountPerDEPerDim)
-      nullify(glob%globalStartPerDEPerDim)
-      nullify(glob%AIPerDEPerDim)
- 
+      if (associated(glob%globalCellCountPerDim)) then
+        deallocate(glob%globalCellCountPerDim, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                       "deallocating globalComp contents", &
+                                       ESMF_CONTEXT, rc)) return
+        nullify(glob%globalCellCountPerDim)
+      endif
+      if (associated(glob%maxLocalCellCountPerDim)) then
+        deallocate(glob%maxLocalCellCountPerDim, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                       "deallocating globalComp contents", &
+                                       ESMF_CONTEXT, rc)) return
+        nullify(glob%maxLocalCellCountPerDim)
+      endif
+      if (associated(glob%cellCountPerDE)) then
+        deallocate(glob%cellCountPerDE, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                       "deallocating globalComp contents", &
+                                       ESMF_CONTEXT, rc)) return
+        nullify(glob%cellCountPerDE)
+      endif
+      if (associated(glob%cellCountPerDEPerDim)) then
+        deallocate(glob%cellCountPerDEPerDim, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                       "deallocating globalComp contents", &
+                                       ESMF_CONTEXT, rc)) return
+        nullify(glob%cellCountPerDEPerDim)
+      endif
+      if (associated(glob%globalStartPerDEPerDim)) then
+        deallocate(glob%globalStartPerDEPerDim, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                       "deallocating globalComp contents", &
+                                       ESMF_CONTEXT, rc)) return
+        nullify(glob%globalStartPerDEPerDim)
+      endif
+      if (associated(glob%AIPerDEPerDim)) then
+        deallocate(glob%AIPerDEPerDim, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                       "deallocating globalComp contents", &
+                                       ESMF_CONTEXT, rc)) return
+        nullify(glob%AIPerDEPerDim)
+      endif
+
       ! myDEComp contents here:
       me => dgtype%myDEComp
-      deallocate(me%localCellCountPerDim, &
-                 me%globalStartPerDim   , &
-                 me%globalAIPerDim      , stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating myDEComp", &
-                                     ESMF_CONTEXT, rc)) return
-      nullify(me%localCellCountPerDim)
-      nullify(me%globalStartPerDim)
-      nullify(me%globalAIPerDim)
+      if (associated(me%localCellCountPerDim)) then
+        deallocate(me%localCellCountPerDim, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating myDEComp", &
+                                       ESMF_CONTEXT, rc)) return
+        nullify(me%localCellCountPerDim)
+      endif
+      if (associated(me%globalStartPerDim)) then
+        deallocate(me%globalStartPerDim, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating myDEComp", &
+                                       ESMF_CONTEXT, rc)) return
+        nullify(me%globalStartPerDim)
+      endif
+      if (associated(me%globalAIPerDim)) then
+        deallocate(me%globalAIPerDim, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating myDEComp", &
+                                       ESMF_CONTEXT, rc)) return
+        nullify(me%globalAIPerDim)
+      endif
 
       select case(dgtype%arbitrary)
 
@@ -1155,32 +1192,69 @@
 
         ! globalTotal contents here:
         glob => dgtype%globalTotal
-        deallocate(glob%globalCellCountPerDim  , &
-                   glob%maxLocalCellCountPerDim, &
-                   glob%cellCountPerDE         , &
-                   glob%cellCountPerDEPerDim   , &
-                   glob%globalStartPerDEPerDim , &
-                   glob%AIPerDEPerDim          , stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
-                                       "deallocating globalTotal contents", &
-                                       ESMF_CONTEXT, rc)) return
-        nullify(glob%globalCellCountPerDim)
-        nullify(glob%maxLocalCellCountPerDim)
-        nullify(glob%cellCountPerDE)
-        nullify(glob%cellCountPerDEPerDim)
-        nullify(glob%globalStartPerDEPerDim)
-        nullify(glob%AIPerDEPerDim)
+        if (associated(glob%globalCellCountPerDim)) then
+          deallocate(glob%globalCellCountPerDim, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, &
+                                         "deallocating globalTotal contents", &
+                                         ESMF_CONTEXT, rc)) return
+          nullify(glob%globalCellCountPerDim)
+        endif
+        if (associated(glob%maxLocalCellCountPerDim)) then
+          deallocate(glob%maxLocalCellCountPerDim, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, &
+                                         "deallocating globalTotal contents", &
+                                         ESMF_CONTEXT, rc)) return
+          nullify(glob%maxLocalCellCountPerDim)
+        endif
+        if (associated(glob%cellCountPerDE)) then
+          deallocate(glob%cellCountPerDE, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, &
+                                         "deallocating globalTotal contents", &
+                                         ESMF_CONTEXT, rc)) return
+          nullify(glob%cellCountPerDE)
+        endif
+        if (associated(glob%cellCountPerDEPerDim)) then
+          deallocate(glob%cellCountPerDEPerDim, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, &
+                                         "deallocating globalTotal contents", &
+                                         ESMF_CONTEXT, rc)) return
+          nullify(glob%cellCountPerDEPerDim)
+        endif
+        if (associated(glob%globalStartPerDEPerDim)) then
+          deallocate(glob%globalStartPerDEPerDim, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, &
+                                         "deallocating globalTotal contents", &
+                                         ESMF_CONTEXT, rc)) return
+          nullify(glob%globalStartPerDEPerDim)
+        endif
+        if (associated(glob%AIPerDEPerDim)) then
+          deallocate(glob%AIPerDEPerDim, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, &
+                                         "deallocating globalTotal contents", &
+                                         ESMF_CONTEXT, rc)) return
+          nullify(glob%AIPerDEPerDim)
+        endif
 
         ! myDETotal contents here:
         me => dgtype%myDETotal
-        deallocate(me%localCellCountPerDim, &
-                   me%globalStartPerDim   , &
-                   me%globalAIPerDim      , stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating myDETotal", &
-                                       ESMF_CONTEXT, rc)) return
-        nullify(me%localCellCountPerDim)
-        nullify(me%globalStartPerDim)
-        nullify(me%globalAIPerDim)
+        if (associated(me%localCellCountPerDim)) then
+          deallocate(me%localCellCountPerDim, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "deallocating myDETotal", &
+                                         ESMF_CONTEXT, rc)) return
+          nullify(me%localCellCountPerDim)
+        endif
+        if (associated(me%globalStartPerDim)) then
+          deallocate(me%globalStartPerDim, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "deallocating myDETotal", &
+                                         ESMF_CONTEXT, rc)) return
+          nullify(me%globalStartPerDim)
+        endif
+        if (associated(me%globalAIPerDim)) then
+          deallocate(me%globalAIPerDim, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "deallocating myDETotal", &
+                                         ESMF_CONTEXT, rc)) return
+          nullify(me%globalAIPerDim)
+        endif
 
       !-------------
       !  vector (arbitrary) structure
@@ -1188,10 +1262,12 @@
 
         ! myDEComp contents here:
         me => dgtype%myDEComp
-        deallocate(me%localIndices, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating myDEComp", &
-                                       ESMF_CONTEXT, rc)) return
-        nullify(me%localIndices)
+        if (associated(me%localIndices)) then
+          deallocate(me%localIndices, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "deallocating myDEComp", &
+                                         ESMF_CONTEXT, rc)) return
+          nullify(me%localIndices)
+        endif
 
       case default
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
@@ -1201,12 +1277,20 @@
       end select
 
       ! DistGridType contents here:
-      deallocate(dgtype%decompIDs   , &
-                 dgtype%coversDomain, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating distgrid contents", &
-                                     ESMF_CONTEXT, rc)) return
-      nullify(dgtype%decompIDs)
-      nullify(dgtype%coversDomain)
+      if (associated(dgtype%decompIDs)) then
+        deallocate(dgtype%decompIDs, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                       "deallocating distgrid contents", &
+                                       ESMF_CONTEXT, rc)) return
+        nullify(dgtype%decompIDs)
+      endif
+      if (associated(dgtype%coversDomain)) then
+        deallocate(dgtype%coversDomain, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                       "deallocating distgrid contents", &
+                                       ESMF_CONTEXT, rc)) return
+        nullify(dgtype%coversDomain)
+      endif
 
       ! destroy associated classes
 
