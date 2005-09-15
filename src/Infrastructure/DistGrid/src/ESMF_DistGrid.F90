@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.142 2005/09/14 22:55:45 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.143 2005/09/15 20:58:24 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -179,7 +179,12 @@
       type ESMF_DistGrid
       sequence
       !private
-        type (ESMF_DistGridType), pointer :: ptr  ! pointer to a distgrid type
+#ifndef ESMF_NO_INITIALIZERS
+        type (ESMF_DistGridType), pointer :: ptr => NULL()
+#else
+        type (ESMF_DistGridType), pointer :: ptr 
+#endif
+
       end type
 
 !------------------------------------------------------------------------------
@@ -214,7 +219,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.142 2005/09/14 22:55:45 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.143 2005/09/15 20:58:24 jwolfe Exp $'
 
 !==============================================================================
 !
