@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.1 2005/05/31 17:27:20 nscollins Exp $
+! $Id: ESMF_Util.F90,v 1.2 2005/09/16 00:06:29 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -72,6 +72,8 @@
       public ESMF_SetPointer
       public ESMF_SetNullPointer
       public ESMF_GetPointer
+      public ESMF_StringLowerCase
+      public ESMF_StringUpperCase
 
 !  Misc type-to-string methods
       public ESMF_StatusString
@@ -111,7 +113,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.1 2005/05/31 17:27:20 nscollins Exp $'
+               '$Id: ESMF_Util.F90,v 1.2 2005/09/16 00:06:29 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -609,6 +611,92 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GetPointer
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StringLowerCase"
+!BOPI
+!  !IROUTINE:  ESMF_StringLowerCase - convert string to lowercase
+!  
+! !INTERFACE: 
+      subroutine ESMF_StringLowerCase(string, rc) 
+!
+! !ARGUMENTS:
+      character(len=*), intent(inout) :: string
+      integer, intent(out), optional  :: rc  
+
+!
+! !DESCRIPTION:
+!   Converts given string to lowercase.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[string]
+!       A character string.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: shift, i
+      character(len=1) :: c
+
+      shift = ichar('a') - ichar('A')
+      do i = 1, len(string)
+        c = string(i:i)
+        if(c .ge. 'A' .and. c .le. 'Z') then
+          string(i:i) = char(ichar(c) + shift)
+        endif
+      enddo
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StringLowerCase
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StringUpperCase"
+!BOPI
+!  !IROUTINE:  ESMF_StringUpperCase - convert string to uppercase
+!  
+! !INTERFACE: 
+      subroutine ESMF_StringUpperCase(string, rc) 
+!
+! !ARGUMENTS:
+      character(len=*), intent(inout) :: string
+      integer, intent(out), optional  :: rc  
+
+!
+! !DESCRIPTION:
+!   Converts given string to uppercase.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[string]
+!       A character string.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: shift, i
+      character(len=1) :: c
+
+      shift = ichar('a') - ichar('A')
+      do i = 1, len(string)
+        c = string(i:i)
+        if(c .ge. 'a' .and. c .le. 'z') then
+          string(i:i) = char(ichar(c) - shift)
+        endif
+      enddo
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StringUpperCase
 
 !------------------------------------------------------------------------- 
 !------------------------------------------------------------------------- 
