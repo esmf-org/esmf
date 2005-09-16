@@ -54,11 +54,13 @@ module config_subrs
       logical :: unique
       integer   :: nDE
       real      :: tau
+      logical   :: optimize
       logical   :: Doing_QC
       character(len=1)   :: answer
-      character(len=10) :: u_dataType, v_dataType
+      character(len=10) :: u_dataType, v_dataType, vf_dataType
       integer           :: nu, nv
       real              :: sigU(6), sigV(6)
+      logical           :: sigVf(6)
       integer, parameter :: MAXLEV = 100, EOL = 111
       real    :: plev(MAXLEV), vCorr(MAXLEV, MAXLEV)
       integer :: nlev
@@ -131,6 +133,7 @@ module config_subrs
       real, parameter      :: tau_0 = 14.0
       character, parameter :: restart_file_0 = 'RestartFile123'
       character, parameter   :: answer_0 = 'y'
+      logical, parameter     :: optimize_0 = .false.
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
       integer :: result = 0
@@ -273,8 +276,41 @@ module config_subrs
      write(name, *) "Verify Attribute String Value Test"
      call ESMF_Test((answer.eq.answer_0), name, failMsg, result, ESMF_SRCLINE)
 
-    end subroutine SinglePar
+! Logical
 
+      rc = 0
+!''''''''''''''''''''''''''''
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Config Get Attribute Logical Test
+     write(failMsg, *) "Did not return ESMF_SUCCESS"
+     write(name, *) "Config Get Attribute Logical Test"
+     call ESMF_ConfigGetAttribute( cf, optimize, 'Optimization:', rc = rc )
+     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!''''''''''''''''''''''''''''
+
+      counter_total =counter_total + 1
+      if ( rc /= 0 ) then      
+         print *,'ESMF_ConfigGetAttribute(logical) got optimize = ', &
+                 optimize,' rc =', rc
+      else
+         if (optimize == optimize_0) then
+            counter_success =counter_success + 1
+         else
+            print *,'ESMF_ConfigGetAttribute(logical) ERROR: got optimize =', &
+                     optimize, ' should be ', optimize_0
+         endif
+      endif
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Config Get Attribute Logical Verification Test
+     write(failMsg, *) "Attribute logical value is incorrect"
+     write(name, *) "Verify Attribute Logical Value Test"
+     call ESMF_Test((optimize.eq.optimize_0), name, failMsg, result, &
+                     ESMF_SRCLINE)
+
+
+    end subroutine SinglePar
 
 
 
@@ -537,6 +573,136 @@ subroutine MultPar_SingleLine_V
      call ESMF_Test((all(sigV.eq.sigV_0)), name, failMsg, result, ESMF_SRCLINE)
 
     end subroutine MultPar_SingleLine_V
+
+!--------------------------------------------------------------------
+subroutine MultPar_SingleLine_Vf
+!--------------------------------------------------------------------
+!  array of logicals
+      character(len=6), parameter :: vf_dataType_0 = 'v_Flag'
+      integer, parameter   :: nv_0 = 6
+      logical, dimension(nv_0), parameter :: sigVf_0 = &
+           (/ .true., .false., .true., .true., .false., .false. /)
+      character(ESMF_MAXSTR) :: failMsg
+      character(ESMF_MAXSTR) :: name
+      integer :: result = 0
+
+      rc = 0
+
+!''''''''''''''''''''''''''''
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Config Find Label Test
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Find Label Test"
+      call ESMF_ConfigFindLabel( cf, 'v-wind_flag:', rc )
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!''''''''''''''''''''''''''''
+
+      counter_total =counter_total + 1
+      if (rc == 0) then
+         counter_success =counter_success + 1
+      else
+         print *,'ESMF_ConfigFindLabel failed, label = v-wind_flag:, rc =', rc
+         return        
+      endif
+
+!''''''''''''''''''''''''''''
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Config Get String Test
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Get String Test"
+      call ESMF_ConfigGetAttribute( cf, vf_dataType, rc = rc )
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!''''''''''''''''''''''''''''
+
+      counter_total =counter_total + 1
+      if (rc /= 0) then
+         print *,'ESMF_ConfigGetAttribute(string) failed, rc =', rc
+         return
+      endif
+
+      if(vf_dataType ==  vf_dataType_0) then
+         counter_success =counter_success + 1
+      else
+         print *,'ESMF_ConfigGetAttribute(string) ERROR: got  =', vf_dataType, &
+              ' should be ', vf_dataType_0
+         return
+      endif
+
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Config Get Attribute String Verification Test
+     write(failMsg, *) "Attribute String values are incorrect"
+     write(name, *) "Verify Attribute String Values Test"
+     call ESMF_Test((vf_dataType.eq.vf_dataType_0), name, failMsg, result, ESMF_SRCLINE)
+
+!''''''''''''''''''''''''''''
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Config Get Int Test
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Get Int Test"
+      call ESMF_ConfigGetAttribute( cf, nv, rc = rc )
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!''''''''''''''''''''''''''''
+
+      counter_total =counter_total + 1
+      if (rc /= 0) then
+         print *,'ESMF_ConfigGetAttribute(int) failed, rc =', rc
+         return
+      endif
+
+      if( nv == nv_0 ) then
+         counter_success =counter_success + 1
+      else
+         print *,'ESMF_ConfigGetAttribute(int) ERROR: got  =', nv, &
+              ' should be ', nv_0 
+         return
+      endif
+
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Config Get Attribute Int Verification Test
+     write(failMsg, *) "Attribute Int values are incorrect"
+     write(name, *) "Verify Attribute Int Values Test"
+     call ESMF_Test((nv.eq.nv_0), name, failMsg, result, ESMF_SRCLINE)
+
+!''''''''''''''''''''''''''''
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Config Get Logicals Test
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Config Get Logicals Test"
+      call ESMF_ConfigGetAttribute( cf, sigVf, count=nv_0, rc=rc )
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!''''''''''''''''''''''''''''
+
+      counter_total =counter_total + 1
+      if (rc /= 0) then
+         print *,'ESMF_ConfigGetAttribute(logicals) failed, rc =', rc
+         return
+      endif
+
+      if( any(sigVf /= sigVf_0) ) then
+         print *,'ESMF_ConfigGetAttribute(logicals) ERROR: got sigVf =', &
+                 sigVf(1:nv), ' should be sigVf =', sigVf_0(1:nv) 
+         return
+      else
+        counter_success =counter_success + 1
+      endif
+
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Config Get Attribute Logicals Verification Test
+     write(failMsg, *) "Attribute Logicals values are incorrect"
+     write(name, *) "Verify Attribute Logicals Values Test"
+     call ESMF_Test((all(sigVf.eq.sigVf_0)), name, failMsg, result, &
+                     ESMF_SRCLINE)
+
+    end subroutine MultPar_SingleLine_Vf
 
 !--------------------------------------------------------------------
     subroutine MultPar_MultLines()
@@ -1066,7 +1232,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.16 2005/08/05 17:46:33 eschwab Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.17 2005/09/16 00:04:36 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0
@@ -1119,6 +1285,7 @@ end module config_subrs
 
       call  MultPar_SingleLine_U()
       call  MultPar_SingleLine_V()
+      call  MultPar_SingleLine_Vf()
 
 
 ! Retrieval of a group of parameters on multiple lines
