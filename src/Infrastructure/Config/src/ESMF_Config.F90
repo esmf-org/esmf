@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.22 2005/05/31 17:39:51 nscollins Exp $
+! $Id: ESMF_Config.F90,v 1.23 2005/09/16 00:04:03 eschwab Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -34,6 +34,7 @@
 ! !USES:
 
       use ESMF_UtilTypesMod    ! ESMF base class
+      use ESMF_UtilMod
       use ESMF_BaseMod
       use ESMF_DELayoutMod
       use ESMF_LogErrMod 
@@ -50,7 +51,7 @@
        public :: ESMF_ConfigNextLine   ! selects next line (for tables)
        public :: ESMF_ConfigGetAttribute ! returns next value
        public :: ESMF_ConfigGetChar    ! returns only a single character
-       public :: ESMF_ConfigGetLen ! gets number of words in the line(funcion)
+       public :: ESMF_ConfigGetLen ! gets number of words in the line(function)
        public :: ESMF_ConfigGetDim ! gets number of lines in the table
                                    ! and max number of columns by word 
 !                                  ! counting disregarding type (function)
@@ -81,6 +82,8 @@
         module procedure ESMF_ConfigGetIntI8
         module procedure ESMF_ConfigGetIntsI4
         module procedure ESMF_ConfigGetIntsI8
+        module procedure ESMF_ConfigGetLogical
+        module procedure ESMF_ConfigGetLogicals
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for getting
@@ -1084,6 +1087,178 @@
       return
     end subroutine ESMF_ConfigGetIntsI8
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGetLogical"
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a logical value
+
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ConfigGetAttribute()
+      subroutine ESMF_ConfigGetLogical( config, value, label, default, rc )
+
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout)             :: config     
+      logical, intent(out)                         :: value
+      character(len=*), intent(in), optional       :: label 
+      logical, intent(in), optional                :: default
+      integer, intent(out), optional               :: rc   
+
+!
+! !DESCRIPTION: 
+!  Gets an logical {\tt value} from the {\tt config} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [config]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [value]
+!     Returned logical value. 
+!   \item [{[label]}]
+!     Identifying label. 
+!   \item [{[default]}]
+!     Default value if label is not found in configuration object. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP -------------------------------------------------------------------
+      character*256 string
+      integer       iret
+
+      iret = 0
+
+! Default setting
+      if( present( default ) ) then 
+         value = default
+      else
+         value = .false.
+      endif
+
+! Processing
+      if (present (label ) ) then
+         call ESMF_ConfigGetString( config, string, label, rc = iret )
+      else
+         call ESMF_ConfigGetString( config, string, rc = iret )
+      endif
+
+      if ( iret .eq. ESMF_SUCCESS ) then
+
+! Convert string to lower case
+         call ESMF_StringLowerCase(string, iret)
+
+! Check if valid true/false keyword
+         if (string == 't'      .or. string == 'true' .or. &
+             string == '.true.' .or. string == '.t.'  .or. &
+             string == 'y'      .or. string == 'yes'  .or. &
+             string == 'on') then
+           value = .true.
+         else
+            if (string == 'f'       .or. string == 'false' .or. &
+                string == '.false.' .or. string == '.f.'   .or. &
+                string == 'n'       .or. string == 'no'    .or. &
+                string == 'off') then
+              value = .false.
+            endif
+         endif
+      else
+         if( present( default )) then
+            iret = ESMF_SUCCESS
+         endif
+      end if
+
+      if( present( rc )) rc = iret
+      
+      return
+    end subroutine ESMF_ConfigGetLogical
+
+
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGetLogicals"
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of logical values
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ConfigGetAttribute()
+      subroutine ESMF_ConfigGetLogicals( config, valueList, count, label,  &
+                                         default, rc )
+
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout)             :: config      
+      logical, intent(inout)                       :: valueList(:)  
+      integer, intent(in)                          :: count  
+      character(len=*), intent(in), optional       :: label 
+      logical, intent(in), optional                :: default
+      integer, intent(out), optional               :: rc    
+!
+! !DESCRIPTION: 
+!  Gets a logical {\tt valueList} of given {\tt count} from the 
+!  {\tt config} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [config]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [valueList]
+!     Returned values. 
+!   \item [count]
+!     Number of returned values expected. 
+!   \item [{[label]}]
+!     Identifying label. 
+!   \item [{[default]}]
+!     Default value if label is not found in configuration object. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP -------------------------------------------------------------------
+      character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetLogical_array'
+      integer iret, i 
+      
+      iret = 0
+
+      if (count.le.0) then
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "invalid SIZE", &
+                                 ESMF_CONTEXT, rc)) return
+         !print *,myname_,' invalid SIZE =', count
+         !iret = -1
+         !if(present( rc )) rc = iret
+         !return
+      endif
+       
+ ! Default setting
+      if( present( default ) ) then 
+         valueList(1:count) = default
+      else
+         valueList(1:count) = .false.
+      endif
+
+! Processing 
+      if (present( label )) then
+         call ESMF_ConfigFindLabel( config, label, rc = iret )
+      end if
+
+      do i = 1, count
+         
+         if(present( default )) then
+            call ESMF_ConfigGetLogical( config, valueList(i), &
+                                        default = default, rc = iret)
+         else
+            call ESMF_ConfigGetLogical( config, valueList(i), rc = iret)
+         endif
+      enddo
+
+      if(present( rc )) rc = iret
+      return
+    end subroutine ESMF_ConfigGetLogicals
 
 
 
