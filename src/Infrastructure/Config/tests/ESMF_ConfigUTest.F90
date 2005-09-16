@@ -294,7 +294,7 @@ module config_subrs
          print *,'ESMF_ConfigGetAttribute(logical) got optimize = ', &
                  optimize,' rc =', rc
       else
-         if (optimize == optimize_0) then
+         if (optimize .eqv. optimize_0) then
             counter_success =counter_success + 1
          else
             print *,'ESMF_ConfigGetAttribute(logical) ERROR: got optimize =', &
@@ -306,7 +306,7 @@ module config_subrs
      ! Config Get Attribute Logical Verification Test
      write(failMsg, *) "Attribute logical value is incorrect"
      write(name, *) "Verify Attribute Logical Value Test"
-     call ESMF_Test((optimize.eq.optimize_0), name, failMsg, result, &
+     call ESMF_Test((optimize.eqv.optimize_0), name, failMsg, result, &
                      ESMF_SRCLINE)
 
 
@@ -686,7 +686,7 @@ subroutine MultPar_SingleLine_Vf
          return
       endif
 
-      if( any(sigVf /= sigVf_0) ) then
+      if( any(sigVf .neqv. sigVf_0) ) then
          print *,'ESMF_ConfigGetAttribute(logicals) ERROR: got sigVf =', &
                  sigVf(1:nv), ' should be sigVf =', sigVf_0(1:nv) 
          return
@@ -699,7 +699,7 @@ subroutine MultPar_SingleLine_Vf
      ! Config Get Attribute Logicals Verification Test
      write(failMsg, *) "Attribute Logicals values are incorrect"
      write(name, *) "Verify Attribute Logicals Values Test"
-     call ESMF_Test((all(sigVf.eq.sigVf_0)), name, failMsg, result, &
+     call ESMF_Test((all(sigVf.eqv.sigVf_0)), name, failMsg, result, &
                      ESMF_SRCLINE)
 
     end subroutine MultPar_SingleLine_Vf
@@ -1232,7 +1232,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.17 2005/09/16 00:04:36 eschwab Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.18 2005/09/16 22:05:04 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0
