@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.23 2005/09/16 00:04:03 eschwab Exp $
+! $Id: ESMF_Config.F90,v 1.24 2005/09/16 21:10:14 eschwab Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -1109,7 +1109,13 @@
 
 !
 ! !DESCRIPTION: 
-!  Gets an logical {\tt value} from the {\tt config} object.
+!  Gets a logical {\tt value} from the {\tt config} object.
+!
+!  Recognizes any upper/lowercase composition of the following keywords as
+!  logical true/false values:
+!  
+!  true  t .true.  .t. yes y on  \\
+!  false f .false. .f. no  n off \\
 !
 !   The arguments are:
 !   \begin{description}
@@ -1121,6 +1127,7 @@
 !     Identifying label. 
 !   \item [{[default]}]
 !     Default value if label is not found in configuration object. 
+!     If not specified, the default value is .false.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
