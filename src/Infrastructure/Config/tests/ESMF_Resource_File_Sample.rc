@@ -5,6 +5,7 @@ Number_of_DEs: 32
 Relaxation_time_scale_in_days: 14
 Do_you_want_quality_control: yes
 restart_file_name: RestartFile123
+Optimization: off
 
 # EXAMPLE 2 - retrieval of group of parameters in a single line
 #---------------------------------------------------------------
@@ -12,6 +13,7 @@ restart_file_name: RestartFile123
 # Wind error statistics
 u-wind_error:   u_UprAir  6  2.0   2.0   2.2   2.3   2.7   3.2
 v-wind_error:   v_UprAir  6  2.2   2.2   2.3   2.7   3.2   3.4
+v-wind_flag:    v_Flag    6  T     F     T     T     F     F
 
 
 # EXAMPLE 3 - retrieval of group of parameters multiple lines
@@ -20,6 +22,7 @@ v-wind_error:   v_UprAir  6  2.2   2.2   2.3   2.7   3.2   3.4
 ObsErr*QSCAT::   # kx = 154  Scatterometer
   u_UprAir.u   6  2.0   2.0   2.2   2.3   2.7   3.2
   v_UprAir.u   6  2.0   2.0   2.2   2.3   2.7   3.2
+  v_Flag.u     6  2.0   2.0   2.2   2.3   2.7   3.2
 ::
 
 
