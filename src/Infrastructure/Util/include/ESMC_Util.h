@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.5 2005/08/30 22:04:47 nscollins Exp $
+// $Id: ESMC_Util.h,v 1.6 2005/09/20 19:50:57 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -209,7 +209,7 @@ extern "C" {
 void FTN(f_esmf_domainlistgetde)(ESMC_DomainList *, int *, int *, int *);
 void FTN(f_esmf_domainlistgetai)(ESMC_DomainList *, int *, int *, 
                                                     ESMC_AxisIndex *ai, int *);
-void FTN(esmf_pointertoint)(short *s, long *len);
+void FTN(esmf_pointertoint)(short *s, long long *len);
 
 }
 
