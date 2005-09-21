@@ -1,4 +1,4 @@
-!  $Id: ESMF_LogErr_C.F90,v 1.5 2005/07/08 21:24:58 nscollins Exp $
+!  $Id: ESMF_LogErr_C.F90,v 1.6 2005/09/21 17:28:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,24 +22,43 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LogErr_C.F90,v 1.5 2005/07/08 21:24:58 nscollins Exp $'
+!      '$Id: ESMF_LogErr_C.F90,v 1.6 2005/09/21 17:28:19 nscollins Exp $'
 !==============================================================================
 
-   subroutine f_esmf_logwritenoform(message, length, rc)
+#if 0
+   subroutine f_esmf_logwritenoform(message, msgtype, rc)
        use ESMF_UtilTypesMod    ! ESMF base class
        use ESMF_BaseMod         ! ESMF base class
        use ESMF_LogErrMod
-     character(len=ESMF_MAXSTR*2), intent(in) :: message
-     integer, intent(in) :: length
+     character(len=*), intent(in) :: message
+     type(ESMF_MsgType), intent(in) :: msgtype
      integer, intent(out), optional :: rc              
 
      integer :: localrc              
 
-     ! TODO: fix this
-     !call ESMF_LogWriteNoForm(message, ESMF_LOG_ERROR, rc=localrc)
-     localrc = ESMF_FAILURE
+     call ESMF_LogWriteNoForm(message, msgtype, rc=localrc)
     
      if (present(rc)) rc = localrc
+
    end subroutine f_esmf_logwritenoform
+#endif
+
+
+   subroutine f_esmf_logwrite(msg,msgtype,line,file,method,log,rc)
+       use ESMF_UtilTypesMod    ! ESMF base class
+       use ESMF_BaseMod         ! ESMF base class
+       use ESMF_LogErrMod
+        character(len=*), intent(in)                :: msg
+        type(ESMF_MsgType), intent(in)              :: msgtype
+        integer, intent(in), optional               :: line
+        character(len=*), intent(in), optional      :: file
+        character(len=*), intent(in), optional      :: method
+        type(ESMF_LOG),target,optional              :: log
+        integer, intent(out),optional               :: rc
+
+        call ESMF_LogWrite(msg, msgtype, rc=rc)
+        !call ESMF_LogWrite(msg, msgtype, line, file, method, rc=rc)
+
+   end subroutine f_esmf_logwrite
 
 
