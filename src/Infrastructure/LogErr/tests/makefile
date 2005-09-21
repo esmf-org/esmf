@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2005/07/15 03:41:47 nscollins Exp $ 
+# $Id: makefile,v 1.10 2005/09/21 20:22:04 nscollins Exp $ 
 
 ALL:  build_unit_tests
 run:  tree_run_unit_tests
@@ -44,13 +44,28 @@ RUN_ESMF_LogErrUTestUNI:
 
 
 #
-# LogErrHalt
+# LogErrHalt - special for the lam implementation of MPI.  halting a
+#  task in the middle of execution leaves lam in a bad state.  try to
+#  bring lam down and restart it so that subsequent tests can succeed.
 #
 
 RUN_ESMF_LogErrHaltUTest:
 	$(MAKE) TNAME=LogErrHalt NP=4 ftest
+ifeq ($(ESMF_COMM),lam)
+	$(MAKE) lamrestart
+endif
 
 RUN_ESMF_LogErrHaltUTestUNI:
 	$(MAKE) TNAME=LogErrHalt NP=1 ftest
+ifeq ($(ESMF_COMM),lam)
+	$(MAKE) lamrestart
+endif
 
 
+# try to restart lam in a controlled way
+lamrestart:
+	lamhalt
+	lamwipe
+	sleep 5
+	lamboot
+	
