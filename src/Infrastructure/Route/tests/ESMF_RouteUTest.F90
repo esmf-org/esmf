@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteUTest.F90,v 1.7 2005/06/24 21:02:00 nscollins Exp $
+! $Id: ESMF_RouteUTest.F90,v 1.8 2005/09/21 20:50:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RouteUTest.F90,v 1.7 2005/06/24 21:02:00 nscollins Exp $'
+      '$Id: ESMF_RouteUTest.F90,v 1.8 2005/09/21 20:50:43 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -97,7 +97,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
       ! test validate method via option string
-      call ESMF_RouteValidate(route, validate_options, rc)
+      call ESMF_RouteValidate(route, options=validate_options, rc=rc)
       write(name, *) "ESMF_RouteValidate"
       write(failMsg, *) "rc =", rc, ", validate_options =", &
                                    trim(validate_options)
