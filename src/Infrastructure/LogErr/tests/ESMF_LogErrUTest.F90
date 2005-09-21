@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.24 2005/06/15 15:23:02 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.25 2005/09/21 20:20:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.24 2005/06/15 15:23:02 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.25 2005/09/21 20:20:50 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -311,6 +311,8 @@
       print *, " rc = ", rc
 
       !------------------------------------------------------------------------
+
+      print *, "Starting a no-op loop to wait before testing time and date"
       ! Get the local PET number
       call ESMF_VMGetGlobal(vm, rc=rc)
       call ESMF_VMGet(vm, localPet=my_pet, rc=rc)
@@ -319,10 +321,12 @@
          ! This call put here to waste time
      	 call date_and_time(date=my_todays_date, time=my_time)
       end do
+      print *, "Ending the no-op loop"
+
       ! Generate a random string using clock as seed and write it to log file
       call date_and_time(values=v(:))
       rndseed(1)=v(8)*v(7)+1
-      print *, "rndseed= " , rndseed(1)
+      print *, "generated a random seed based on current time = " , rndseed(1)
       call random_seed(put=rndseed)
       do i=1, 5
       	call random_number(r1)
@@ -330,7 +334,7 @@
       	random_char  = achar(ran_num)
 	random_chars(i:i) = random_char
       end do
-	print *, "Random string is ", random_chars
+      print *, "Random string is ", random_chars
 
       ! Convert PET to character
       pet_char  = achar(my_pet + 48)
