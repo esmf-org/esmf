@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2005/08/18 17:55:39 theurich Exp $ 
+# $Id: makefile,v 1.22 2005/09/22 22:09:54 svasquez Exp $ 
 
 ALL:  build_unit_tests
 run:  tree_run_unit_tests
@@ -22,6 +22,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_VMUTest \
 		$(ESMF_TESTDIR)/ESMF_VMSendRecvUTest \
 		$(ESMF_TESTDIR)/ESMF_VMScatterUTest \
 		$(ESMF_TESTDIR)/ESMF_VMGatherUTest \
+		$(ESMF_TESTDIR)/ESMF_VMAllGatherUTest \
 		$(ESMF_TESTDIR)/ESMF_VMBroadcastUTest \
 		$(ESMF_TESTDIR)/ESMF_VMBarrierUTest
 
@@ -31,6 +32,7 @@ TESTS_RUN     = RUN_ESMF_VMUTest \
                 RUN_ESMF_VMSendRecvUTest \
                 RUN_ESMF_VMScatterUTest \
                 RUN_ESMF_VMGatherUTest \
+                RUN_ESMF_VMAllGatherUTest \
 		RUN_ESMF_VMBroadcastUTest \
 		RUN_ESMF_VMBarrierUTest
 
@@ -40,6 +42,7 @@ TESTS_RUN_UNI = RUN_ESMF_VMUTestUNI \
                 RUN_ESMF_VMSendRecvUTestUNI \
                 RUN_ESMF_VMScatterUTestUNI \
                 RUN_ESMF_VMGatherUTestUNI \
+                RUN_ESMF_VMAllGatherUTestUNI \
                 RUN_ESMF_VMBroadcastUTestUNI \
                 RUN_ESMF_VMBarrierUTestUNI
 
@@ -105,6 +108,17 @@ RUN_ESMF_VMGatherUTest:
 RUN_ESMF_VMGatherUTestUNI:
 	$(MAKE) TNAME=VMGather NP=1 ftest
 
+
+#
+# VM AllGather
+#
+RUN_ESMF_VMAllGatherUTest:
+	$(MAKE) TNAME=VMAllGather NP=4 ftest
+
+RUN_ESMF_VMAllGatherUTestUNI:
+	$(MAKE) TNAME=VMAllGather NP=1 ftest
+
+#
 #
 # VM Broadcast
 #
