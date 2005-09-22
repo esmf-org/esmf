@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2005/07/15 03:41:47 nscollins Exp $
+# $Id: makefile,v 1.24 2005/09/22 22:26:57 nscollins Exp $
 
 ALL:  build_unit_tests
 run:  tree_run_unit_tests
@@ -17,13 +17,16 @@ LOCDIR	  = src/Infrastructure/Route/tests
 
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_RouteUTest \
-                $(ESMF_TESTDIR)/ESMF_CommTableUTest 
+                $(ESMF_TESTDIR)/ESMF_CommTableUTest \
+                $(ESMF_TESTDIR)/ESMF_RedistUTest
 
 TESTS_RUN     = RUN_ESMF_RouteUTest \
-                RUN_ESMF_CommTableUTest
+                RUN_ESMF_CommTableUTest \
+                RUN_ESMF_RedistUTest
 
 TESTS_RUN_UNI = RUN_ESMF_RouteUTestUNI \
-                RUN_ESMF_CommTableUTestUNI
+                RUN_ESMF_CommTableUTestUNI \
+                RUN_ESMF_RedistUTestUNI
 
 
 
@@ -65,6 +68,7 @@ RUN_ESMF_RouteUTest:
 
 RUN_ESMF_RouteUTestUNI:
 	echo "PASS: ESMF_RouteUTest not set up to run on one processor." > $(ESMF_TESTDIR)/ESMF_RouteUTest.stdout
+
 
 #
 # C++ Route
@@ -116,5 +120,15 @@ RUN_ESMC_RTableUTest:
 
 RUN_ESMC_RTableUTestUNI:
 	echo "PASS: ESMC_RTableUTest not set up to run on one processor." > $(ESMF_TESTDIR)/ESMC_RTableUTest.stdout
+
+
+#
+#  F90 Redist
+#
+RUN_ESMF_RedistUTest:
+	$(MAKE) TNAME=Redist NP=4 ftest
+
+RUN_ESMF_RedistUTestUNI:
+	$(MAKE) TNAME=Redist NP=1 ftest
 
 
