@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2005/03/01 21:05:16 nscollins Exp $
+# $Id: makefile,v 1.8 2005/09/22 18:12:10 nscollins Exp $
 
 # leave alone.
 ALL: build_here
@@ -9,13 +9,18 @@ ALL: build_here
 CFLAGS    =
 FFLAGS    =
 
-# If you have C files in this directory, list them all on the line below.
+ifeq ($(ESMF_COMM),lam)
+# only include the casefix files for lam communications.
+# they might be useful other places, but we used the lam header files
+# as the template for the interfaces, so it may need to be altered to
+# match another implementation of mpi.
+SOURCEC	  = ESMC_VM_F.C mpi_lcasefix.C mpi_ucasefix.C
+else
 SOURCEC	  = ESMC_VM_F.C
-# If you have F90 files in this directory, list them all on the line below.
+endif
+
 SOURCEF	  = ESMF_VM.F90
-# If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
-# List all .h files which should be copied to common include dir
 STOREH	  = 
 
 # Leave these alone.

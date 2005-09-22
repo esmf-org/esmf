@@ -462,8 +462,8 @@ int MPI_WAITSOME (int a, MPI_Request *b, int *c, int *d, MPI_Status *e) {
 					return MPI_Waitsome(a,b,c,d,e); }
 
 MPI_Fint MPI_WIN_C2F (MPI_Win a) { return MPI_Win_c2f(a); }
-int MPI_WIN_CALL_ERRHANDLER (MPI_Win a, int b) { 
-					return MPI_Win_call_errhandler(a,b); }
+//int MPI_WIN_CALL_ERRHANDLER (MPI_Win a, int b) { 
+//					return MPI_Win_call_errhandler(a,b); }
 int MPI_WIN_COMPLETE (MPI_Win a) { return MPI_Win_complete(a); }
 int MPI_WIN_CREATE (void *a, MPI_Aint b, int c, MPI_Info d, MPI_Comm e, 
 		    MPI_Win *f) { return MPI_Win_create(a,b,c,d,e,f); }
@@ -485,7 +485,7 @@ int MPI_WIN_GET_ERRHANDLER (MPI_Win a, MPI_Errhandler *b) {
 int MPI_WIN_GET_GROUP (MPI_Win a, MPI_Group *b) { return MPI_Win_get_group(a,b); }
 int MPI_WIN_GET_NAME (MPI_Win a, char *b, int *c) { 
 					return MPI_Win_get_name(a,b,c); }
-int MPI_WIN_LOCK (int a, int b, int c, MPI_Win d) { return MPI_Win_lock(a,b,c,d); }
+//int MPI_WIN_LOCK (int a, int b, int c, MPI_Win d) { return MPI_Win_lock(a,b,c,d); }
 int MPI_WIN_POST (MPI_Group a, int b, MPI_Win c) { return MPI_Win_post(a,b,c); }
 int MPI_WIN_SET_ATTR (MPI_Win a, int b, void *c) { 
 					return MPI_Win_set_attr(a,b,c); }
@@ -493,8 +493,8 @@ int MPI_WIN_SET_ERRHANDLER (MPI_Win a, MPI_Errhandler b) {
 					return MPI_Win_set_errhandler(a,b); }
 int MPI_WIN_SET_NAME (MPI_Win a, char *b) { return MPI_Win_set_name(a,b); }
 int MPI_WIN_START (MPI_Group a, int b, MPI_Win c) { return MPI_Win_start(a,b,c); }
-int MPI_WIN_TEST (MPI_Win a, int *b) { return MPI_Win_test(a,b); }
-int MPI_WIN_UNLOCK (int a, MPI_Win b) { return MPI_Win_unlock(a,b); }
+//int MPI_WIN_TEST (MPI_Win a, int *b) { return MPI_Win_test(a,b); }
+//int MPI_WIN_UNLOCK (int a, MPI_Win b) { return MPI_Win_unlock(a,b); }
 int MPI_WIN_WAIT (MPI_Win a) { return MPI_Win_wait(a); }
 
 double MPI_WTICK (void) { return MPI_Wtick(); }
