@@ -1,4 +1,4 @@
-! $Id: ESMF_RedistUTest.F90,v 1.3 2005/09/23 17:01:11 nscollins Exp $
+! $Id: ESMF_RedistUTest.F90,v 1.4 2005/09/23 21:45:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -24,11 +24,11 @@
 !
 ! The code in this file drives F90 Redist unit tests, using the Route code.
 !
-!  "Redist" is sending data from one grid to another, where the grids 
-!   themselves are identical, but the decomposition (which subsets of the
-!   grid are located on each processor) is different.  Redist sends data
-!   from one processor to another, with no interpolation.  See Regrid for
-!   routines which do interpolation of data from one grid to another.
+!  "Redist" is sending data from one field to another, where the grids 
+!   themselves are identical, but the decompositions (which subsets of the
+!   grid are located on each processor) are different.  Redist sends data
+!   from one processor to another with no interpolation.  See Regrid for
+!   routines which do data interpolation from one grid to another.
 !
 !-----------------------------------------------------------------------------
 ! !USES:
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RedistUTest.F90,v 1.3 2005/09/23 17:01:11 nscollins Exp $'
+      '$Id: ESMF_RedistUTest.F90,v 1.4 2005/09/23 21:45:20 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -80,8 +80,8 @@
       ! fill source field with known data
       val1 = 1.0
       call FillConstantField(field1, val1, rc)
-      write(name, *) "Filling src field with known data values"
-      write(failMsg, *) "Filling src field with known data values"
+      write(name, *) "Filling src field with constant data values"
+      write(failMsg, *) "Filling src field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -89,8 +89,8 @@
       ! fill destination field with known data
       val2 = -1.0
       call FillConstantField(field2, val2, rc)
-      write(name, *) "Filling dst field with known data values"
-      write(failMsg, *) "Filling dst field with known data values"
+      write(name, *) "Filling dst field with constant data values"
+      write(failMsg, *) "Filling dst field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -113,7 +113,57 @@
 
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! release
+      ! validate destination field
+      call ValidateConstantField(field2, val1, rc)
+      write(name, *) "Validating constant data in dest fields"
+      write(failMsg, *) "Validating constant data in dest fields"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+#if ESMF_EXHAUSTIVE
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! fill source field with known data
+      call FillIndexField(field1, rc)
+      write(name, *) "Filling src field with indexed data values"
+      write(failMsg, *) "Filling src field with indexed data values"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! fill destination field with known data
+      val2 = -1.0
+      call FillConstantField(field2, val2, rc)
+      write(name, *) "Filling dst field with constant data values"
+      write(failMsg, *) "Filling dst field with constant data values"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! run
+      call ESMF_FieldRedist(field1, field2, routehandle=redist_rh, rc=rc)
+      write(name, *) "Executing redist 2"
+      write(failMsg, *) "Executing redist 2"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! validate destination field, data regions only
+      call ValidateIndexField(field2, rc)
+      write(name, *) "Validating indexed data in dest fields"
+      write(failMsg, *) "Validating indexed data in dest fields"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! validate halo regions in destination field - should be unchanged
+      call ValidateConstantHalo(field2, val2, rc)
+      write(name, *) "Validating halo area in dest fields"
+      write(failMsg, *) "Validating indexed data in dest fields"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! release first route handle, compute another below
       call ESMF_FieldRedistRelease(redist_rh, rc=rc)
       write(name, *) "Releasing route"
       write(failMsg, *) "Releasing route"
@@ -121,10 +171,97 @@
 
       !------------------------------------------------------------------------
       !NEX_UTest
+      ! fill source field with known data
+      val1 = 1.0
+      call FillConstantField(field2, val1, rc)
+      write(name, *) "Filling src field with constant data values"
+      write(failMsg, *) "Filling src field with constant data values"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! fill destination field with known data
+      val2 = -1.0
+      call FillConstantField(field1, val2, rc)
+      write(name, *) "Filling dst field with constant data values"
+      write(failMsg, *) "Filling dst field with constant data values"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! store
+      call ESMF_VMGetGlobal(vm, rc=rc)
+      call ESMF_FieldRedistStore(field2, field1, vm, &
+                                                routehandle=redist_rh, rc=rc)
+      write(name, *) "Computing route for redist, 2 to 1"
+      write(failMsg, *) "Computing route for redist, 2 to 1"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! run
+      call ESMF_FieldRedist(field2, field1, routehandle=redist_rh, rc=rc)
+      write(name, *) "Executing redist"
+      write(failMsg, *) "Executing redist"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
       ! validate destination field
-      call ValidateConstantField(field2, val1, rc)
-      write(name, *) "Validating data created dest fields"
-      write(failMsg, *) "Validating data created dest fields"
+      call ValidateConstantField(field1, val1, rc)
+      write(name, *) "Validating constant data in dest fields"
+      write(failMsg, *) "Validating constant data in dest fields"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! fill source field with known data
+      call FillIndexField(field2, rc)
+      write(name, *) "Filling src field with indexed data values"
+      write(failMsg, *) "Filling src field with indexed data values"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! fill destination field with known data
+      val2 = -1.0
+      call FillConstantField(field1, val2, rc)
+      write(name, *) "Filling dst field with constant data values"
+      write(failMsg, *) "Filling dst field with constant data values"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! run
+      call ESMF_FieldRedist(field2, field1, routehandle=redist_rh, rc=rc)
+      write(name, *) "Executing redist 2 -> 1"
+      write(failMsg, *) "Executing redist 2 -> 1"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! validate destination field
+      call ValidateIndexField(field1, rc)
+      write(name, *) "Validating indexed data in dest fields"
+      write(failMsg, *) "Validating indexed data in dest fields"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! validate halo regions in destination field - should be unchanged
+      call ValidateConstantHalo(field1, val2, rc)
+      write(name, *) "Validating halo area in dest fields"
+      write(failMsg, *) "Validating indexed data in dest fields"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+#endif
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! release
+      call ESMF_FieldRedistRelease(redist_rh, rc=rc)
+      write(name, *) "Releasing route"
+      write(failMsg, *) "Releasing route"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -234,8 +371,6 @@ subroutine FillConstantField(field, val, rc)
     integer, intent(out) :: rc
     
     ! Local variables
-    integer :: i, j
-    integer :: lb(2), ub(2), halo
     real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
 
     rc = ESMF_FAILURE
@@ -270,13 +405,13 @@ subroutine FillIndexField(field, rc)
     
     ! Local variables
     integer :: i, j
-    integer :: lb(2), ub(2), haloWidth
+    integer :: lb(2), ub(2), haloWidth, cellNum, rownum, colnum
     integer :: localCellCounts(2), globalCellCounts(2), gridOffsets(2)
     real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
     type(ESMF_Grid) :: grid
 
     rc = ESMF_FAILURE
-        
+          
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
 
@@ -289,30 +424,24 @@ subroutine FillIndexField(field, rc)
     call ESMF_GridGetDELocalInfo(grid, horzrelloc=ESMF_CELL_CENTER, &
                                  localCellCountPerDim=localCellCounts, &
                                  globalStartPerDim=gridOffsets, rc=rc)
-    
-
-    ! offsets are number of cells before the start of this one.  add one
-    ! to set the start of the global cell numbers.
-    lb(1) = gridOffsets(1) + 1
-    lb(2) = gridOffsets(2) + 1
-
-    ! calculate upper bounds from lower bounds and counts
-    do i = 1,2
-      ub(i) = lb(i) + localCellCounts(i) - 1
-    enddo
-
 
     ! get a Fortran 90 pointer back to the data
     call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
     
+    lb(:) = lbound(f90ptr)
+    ub(:) = ubound(f90ptr)
+
     ! Set the data values to the global cell index number.
     do j=lb(2)+haloWidth, ub(2)-haloWidth
+      rownum = j - halowidth - 1
+      cellNum = (gridOffsets(1) + 1) + &
+                ((gridOffsets(2)+rownum) * globalCellCounts(1)) 
       do i=lb(1)+haloWidth, ub(1)-haloWidth
-        f90ptr(i, j) = j + i
+        colnum = i - haloWidth - 1
+        f90ptr(i, j) = cellNum + colnum
       enddo
     enddo
-
 
     rc = ESMF_SUCCESS
     return
@@ -370,13 +499,14 @@ end subroutine ValidateConstantField
 
 
 !
-! Make sure the data in a field contains the correct global index numbers.
+! Make sure the halo data in a field matches the constant value.
 ! Assumes data is real*8.
 !
-subroutine ValidateIndexField(field, rc)
+subroutine ValidateConstantHalo(field, val, rc)
     ! ESMF Framework module
     use ESMF_Mod
     type(ESMF_Field), intent(in) :: field
+    real (ESMF_KIND_R8), intent(in) :: val
     integer, intent(out) :: rc
     
     ! Local variables
@@ -395,23 +525,131 @@ subroutine ValidateIndexField(field, rc)
     call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
     
+
     lb(:) = lbound(f90ptr)
     ub(:) = ubound(f90ptr)
     
-    do j=lb(2)+halo, ub(2)-halo
-      do i=lb(1)+halo, ub(1)-halo
-        if (f90ptr(i, j) .ne. i*1000 + j) then
-            ! TODO: got to compute this based on original i,j - not ones
-            ! from other layout.
-            !print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", i*1000+j
-            !rc = ESMF_FAILURE
+    ! now check the chunks, one at a time.  this duplicates the overlaps
+    ! at the corners, but it is the simplest to program.
+ 
+    rc = ESMF_SUCCESS
+
+    ! bottom / south
+    do j=lb(2), lb(2)+halo-1
+      do i=lb(1), ub(1)
+        if (f90ptr(i, j) .ne. val) then
+            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+            rc = ESMF_FAILURE
+            print *, "(bailing on first error - may be others)"
+            return 
+        endif
+      enddo
+    enddo
+
+    ! west edge
+    do j=lb(2), ub(2)
+      do i=lb(1), lb(1)+halo-1
+        if (f90ptr(i, j) .ne. val) then
+            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+            rc = ESMF_FAILURE
+            print *, "(bailing on first error - may be others)"
+            return 
+        endif
+      enddo
+    enddo
+
+    ! east edge
+    do j=lb(2), ub(2)
+      do i=ub(1)-halo+1, ub(1)
+        if (f90ptr(i, j) .ne. val) then
+            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+            rc = ESMF_FAILURE
+            print *, "(bailing on first error - may be others)"
+            return 
+        endif
+      enddo
+    enddo
+
+    ! top / north
+    do j=ub(2)-halo+1, ub(2)
+      do i=lb(1), ub(1)
+        if (f90ptr(i, j) .ne. val) then
+            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+            rc = ESMF_FAILURE
+            print *, "(bailing on first error - may be others)"
+            return 
+        endif
+      enddo
+    enddo
+
+    ! return with whatever rc value it has
+
+    return
+
+end subroutine ValidateConstantHalo
+
+
+!
+! Make sure the data in a field contains the correct global index numbers.
+! Assumes data is real*8.
+!
+subroutine ValidateIndexField(field, rc)
+    ! ESMF Framework module
+    use ESMF_Mod
+    type(ESMF_Field), intent(in) :: field
+    integer, intent(out) :: rc
+    
+    ! Local variables
+    integer :: i, j
+    integer :: lb(2), ub(2), haloWidth, cellNum, rownum, colnum
+    integer :: localCellCounts(2), globalCellCounts(2), gridOffsets(2)
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
+    type(ESMF_Grid) :: grid
+
+    rc = ESMF_FAILURE
+        
+    ! need a query here to be sure our data pointer is the same t/k/r
+    ! as what is in the field.
+
+    call ESMF_FieldGet(field, haloWidth=haloWidth, grid=grid, rc=rc)
+
+    call ESMF_GridGet(grid, horzrelloc=ESMF_CELL_CENTER, &
+                      globalCellCountPerDim=globalCellCounts, rc=rc)
+
+    ! get grid information used to calculate global indices
+    call ESMF_GridGetDELocalInfo(grid, horzrelloc=ESMF_CELL_CENTER, &
+                                 localCellCountPerDim=localCellCounts, &
+                                 globalStartPerDim=gridOffsets, rc=rc)
+
+    ! get a Fortran 90 pointer back to the data
+    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+    
+    lb(:) = lbound(f90ptr)
+    ub(:) = ubound(f90ptr)
+
+    ! start with success, and any mismatch sets error
+    rc = ESMF_SUCCESS
+
+    ! Check the data values against the global cell index number.
+    do j=lb(2)+haloWidth, ub(2)-haloWidth
+      rownum = j - halowidth - 1
+      cellNum = (gridOffsets(1) + 1) + &
+                ((gridOffsets(2)+rownum) * globalCellCounts(1)) 
+      do i=lb(1)+haloWidth, ub(1)-haloWidth
+        colnum = i - haloWidth - 1
+        if (f90ptr(i, j) .ne. cellNum + colnum) then
+            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", &
+                        cellNum + colnum
+            rc = ESMF_FAILURE
             !!print *, "(bailing on first error - may be others)"
             !!return 
         endif
       enddo
     enddo
 
-    rc = ESMF_SUCCESS
+    ! rc set above, leave it as is
+
     return
 
 end subroutine ValidateIndexField
