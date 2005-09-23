@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2005/09/22 18:12:10 nscollins Exp $
+# $Id: makefile,v 1.9 2005/09/23 19:01:14 nscollins Exp $
 
 # leave alone.
 ALL: build_here
@@ -9,16 +9,7 @@ ALL: build_here
 CFLAGS    =
 FFLAGS    =
 
-ifeq ($(ESMF_COMM),lam)
-# only include the casefix files for lam communications.
-# they might be useful other places, but we used the lam header files
-# as the template for the interfaces, so it may need to be altered to
-# match another implementation of mpi.
-SOURCEC	  = ESMC_VM_F.C mpi_lcasefix.C mpi_ucasefix.C
-else
 SOURCEC	  = ESMC_VM_F.C
-endif
-
 SOURCEF	  = ESMF_VM.F90
 SOURCEH	  = 
 STOREH	  = 
