@@ -1,4 +1,4 @@
-! $Id: ESMF_RedistUTest.F90,v 1.2 2005/09/22 22:27:10 nscollins Exp $
+! $Id: ESMF_RedistUTest.F90,v 1.3 2005/09/23 17:01:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RedistUTest.F90,v 1.2 2005/09/22 22:27:10 nscollins Exp $'
+      '$Id: ESMF_RedistUTest.F90,v 1.3 2005/09/23 17:01:11 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -60,10 +60,9 @@
       type(ESMF_RouteHandle) :: redist_rh
       type(ESMF_Field) :: field1, field2
       type(ESMF_VM) :: vm
+      real(ESMF_KIND_R8) :: val1, val2
 
 
-      ! -------- all variable declarations above here ----------
-!------------------------------------------------------------------------------
       ! -------- beginning of executable code below here -------
 
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -79,9 +78,19 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! fill source field with known data
-      call FillField(field1, rc)
+      val1 = 1.0
+      call FillConstantField(field1, val1, rc)
       write(name, *) "Filling src field with known data values"
       write(failMsg, *) "Filling src field with known data values"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! fill destination field with known data
+      val2 = -1.0
+      call FillConstantField(field2, val2, rc)
+      write(name, *) "Filling dst field with known data values"
+      write(failMsg, *) "Filling dst field with known data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -113,7 +122,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! validate destination field
-      call ValidateField(field2, rc)
+      call ValidateConstantField(field2, val1, rc)
       write(name, *) "Validating data created dest fields"
       write(failMsg, *) "Validating data created dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -131,29 +140,32 @@
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
   
-      ! end of unit test code
+      ! -------- end of unit test code ------------------------
 
       contains
 
 
+!
+! Create 2 fields with the same grid but different layouts.
+!
 subroutine CreateFields(field1, field2, rc)
     ! ESMF Framework module
     use ESMF_Mod
     type(ESMF_Field), intent(out) :: field1, field2
     integer, intent(out) :: rc
     
-!   ! Local variables
-    integer :: npets
-    integer :: i, j
-    integer :: halo
+    ! Local variables
+    integer :: npets, halo
     type(ESMF_Grid) :: srcgrid, dstgrid
     type(ESMF_ArraySpec) :: arrayspec
     !type(ESMF_FieldDataMap) :: datamap
     type(ESMF_DELayout) :: layout1, layout2
     type(ESMF_VM) :: vm
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
     real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
 
+ 
+    ! pick a default halowidth, must be same for both src and dst
+    halo = 3
 
     rc = ESMF_FAILURE
         
@@ -194,109 +206,204 @@ subroutine CreateFields(field1, field2, rc)
     if (rc.NE.ESMF_SUCCESS) return
     
     ! allow for a halo width of 3, let the field allocate the proper space
-    halo = 3
     field1 = ESMF_FieldCreate(srcgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                                haloWidth=3, name="src pressure", rc=rc)
+                                haloWidth=halo, name="src pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
                                 
-    
-    ! get a Fortran 90 pointer back to the data
-    call ESMF_FieldGetDataPointer(field1, f90ptr1, ESMF_DATA_REF, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
-    
-    ! initialize entire dataset
-    f90ptr1(:,:) = -1.0
-
-    field2 = ESMF_FieldCreate(dstgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                                    haloWidth=3,  name="dst pressure", rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
-
-
-    ! get a Fortran 90 pointer back to the data
-    call ESMF_FieldGetDataPointer(field2, f90ptr2, ESMF_DATA_REF, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
-    
-    ! initialize entire dataset
-    f90ptr2(:,:) = -1.0
-    
  
+    ! allow for a halo width of 3, let the field allocate the proper space
+    field2 = ESMF_FieldCreate(dstgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+                                haloWidth=halo, name="dst pressure", rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+                                
     rc = ESMF_SUCCESS
     return
 
 end subroutine CreateFields
 
 
-
-subroutine FillField(src, rc)
+!
+! Fill all the data associated with a field with a constant value.
+! This assumes the data is real*8, 2D.
+!
+subroutine FillConstantField(field, val, rc)
     ! ESMF Framework module
     use ESMF_Mod
-    type(ESMF_Field), intent(inout) :: src
+    type(ESMF_Field), intent(inout) :: field
+    real (ESMF_KIND_R8), intent(in) :: val
     integer, intent(out) :: rc
     
-!   ! Local variables
+    ! Local variables
     integer :: i, j
     integer :: lb(2), ub(2), halo
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
 
     rc = ESMF_FAILURE
         
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
 
-    ! need to query for this
-    halo = 3
+    ! TODO: if it is important to set the halo to something other than the
+    ! constant value, then we will need the halo width and the grid info.
+    ! for now, simply set the entire data space to the constant value.
+    !call ESMF_FieldGet(field, haloWidth=halo, grid=grid, rc=rc)
 
-    ! get a Fortran 90 pointer back to the data
-    call ESMF_FieldGetDataPointer(src, f90ptr1, ESMF_DATA_REF, rc=rc)
+    ! get a Fortran 90 pointer back to the data block
+    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
     
-    lb(:) = lbound(f90ptr1)
-    ub(:) = ubound(f90ptr1)
-    
-    do j=lb(2)+halo, ub(2)-halo
-      do i=lb(1)+halo, ub(1)-halo
-        f90ptr1(i, j) = i*1000 + j
-      enddo
-    enddo
+    f90ptr(:,:) = val
 
     rc = ESMF_SUCCESS
     return
 
-end subroutine FillField
+end subroutine FillConstantField
 
-
-subroutine ValidateField(dst, rc)
+!
+! Fill a field with real*8 values which are the global cell index number.
+!
+subroutine FillIndexField(field, rc)
     ! ESMF Framework module
     use ESMF_Mod
-    type(ESMF_Field), intent(in) :: dst
+    type(ESMF_Field), intent(inout) :: field
     integer, intent(out) :: rc
     
-!   ! Local variables
+    ! Local variables
     integer :: i, j
-    integer :: lb(2), ub(2), halo
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1
+    integer :: lb(2), ub(2), haloWidth
+    integer :: localCellCounts(2), globalCellCounts(2), gridOffsets(2)
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
+    type(ESMF_Grid) :: grid
 
     rc = ESMF_FAILURE
         
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
 
-    ! need to query for this
-    halo = 3
+    call ESMF_FieldGet(field, haloWidth=haloWidth, grid=grid, rc=rc)
+
+    call ESMF_GridGet(grid, horzrelloc=ESMF_CELL_CENTER, &
+                      globalCellCountPerDim=globalCellCounts, rc=rc)
+
+    ! get grid information used to calculate global indices
+    call ESMF_GridGetDELocalInfo(grid, horzrelloc=ESMF_CELL_CENTER, &
+                                 localCellCountPerDim=localCellCounts, &
+                                 globalStartPerDim=gridOffsets, rc=rc)
+    
+
+    ! offsets are number of cells before the start of this one.  add one
+    ! to set the start of the global cell numbers.
+    lb(1) = gridOffsets(1) + 1
+    lb(2) = gridOffsets(2) + 1
+
+    ! calculate upper bounds from lower bounds and counts
+    do i = 1,2
+      ub(i) = lb(i) + localCellCounts(i) - 1
+    enddo
+
 
     ! get a Fortran 90 pointer back to the data
-    call ESMF_FieldGetDataPointer(dst, f90ptr1, ESMF_DATA_REF, rc=rc)
+    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
     
-    lb(:) = lbound(f90ptr1)
-    ub(:) = ubound(f90ptr1)
+    ! Set the data values to the global cell index number.
+    do j=lb(2)+haloWidth, ub(2)-haloWidth
+      do i=lb(1)+haloWidth, ub(1)-haloWidth
+        f90ptr(i, j) = j + i
+      enddo
+    enddo
+
+
+    rc = ESMF_SUCCESS
+    return
+
+end subroutine FillIndexField
+
+!
+! Make sure the data in a field matches the constant value.
+! Assumes data is real*8.
+!
+subroutine ValidateConstantField(field, val, rc)
+    ! ESMF Framework module
+    use ESMF_Mod
+    type(ESMF_Field), intent(in) :: field
+    real (ESMF_KIND_R8), intent(in) :: val
+    integer, intent(out) :: rc
+    
+    ! Local variables
+    integer :: i, j
+    integer :: lb(2), ub(2), halo
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
+
+    rc = ESMF_FAILURE
+        
+    ! need a query here to be sure our data pointer is the same t/k/r
+    ! as what is in the field.
+
+    call ESMF_FieldGet(field, haloWidth=halo, rc=rc)
+
+    ! get a Fortran 90 pointer back to the data
+    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+    
+
+    lb(:) = lbound(f90ptr)
+    ub(:) = ubound(f90ptr)
+    
+    rc = ESMF_SUCCESS
+    do j=lb(2)+halo, ub(2)-halo
+      do i=lb(1)+halo, ub(1)-halo
+        if (f90ptr(i, j) .ne. val) then
+            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+            rc = ESMF_FAILURE
+            print *, "(bailing on first error - may be others)"
+            return 
+        endif
+      enddo
+    enddo
+
+    ! return with whatever rc value it has
+
+    return
+
+end subroutine ValidateConstantField
+
+
+!
+! Make sure the data in a field contains the correct global index numbers.
+! Assumes data is real*8.
+!
+subroutine ValidateIndexField(field, rc)
+    ! ESMF Framework module
+    use ESMF_Mod
+    type(ESMF_Field), intent(in) :: field
+    integer, intent(out) :: rc
+    
+    ! Local variables
+    integer :: i, j
+    integer :: lb(2), ub(2), halo
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
+
+    rc = ESMF_FAILURE
+        
+    ! need a query here to be sure our data pointer is the same t/k/r
+    ! as what is in the field.
+
+    call ESMF_FieldGet(field, haloWidth=halo, rc=rc)
+
+    ! get a Fortran 90 pointer back to the data
+    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+    
+    lb(:) = lbound(f90ptr)
+    ub(:) = ubound(f90ptr)
     
     do j=lb(2)+halo, ub(2)-halo
       do i=lb(1)+halo, ub(1)-halo
-        if (f90ptr1(i, j) .ne. i*1000 + j) then
+        if (f90ptr(i, j) .ne. i*1000 + j) then
             ! TODO: got to compute this based on original i,j - not ones
             ! from other layout.
-            !print *, "data mismatch at", i, j, f90ptr1(i,j), " ne ", i*1000+j
+            !print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", i*1000+j
             !rc = ESMF_FAILURE
             !!print *, "(bailing on first error - may be others)"
             !!return 
@@ -307,7 +414,7 @@ subroutine ValidateField(dst, rc)
     rc = ESMF_SUCCESS
     return
 
-end subroutine ValidateField
+end subroutine ValidateIndexField
 
 
 
@@ -317,7 +424,7 @@ subroutine Cleanup(field1, field2, rc)
     type(ESMF_Field), intent(inout) :: field1, field2
     integer, intent(out) :: rc
     
-!   ! Local variables
+    ! Local variables
     type(ESMF_Grid) :: srcgrid, dstgrid
     type(ESMF_Array) :: srcarray, dstarray
 
