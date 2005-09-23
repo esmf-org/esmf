@@ -1,4 +1,4 @@
-! $Id: ESMF_RedistUTest.F90,v 1.4 2005/09/23 21:45:20 nscollins Exp $
+! $Id: ESMF_RedistUTest.F90,v 1.5 2005/09/23 22:41:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RedistUTest.F90,v 1.4 2005/09/23 21:45:20 nscollins Exp $'
+      '$Id: ESMF_RedistUTest.F90,v 1.5 2005/09/23 22:41:02 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -162,7 +162,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! release first route handle, compute another below
       call ESMF_FieldRedistRelease(redist_rh, rc=rc)
       write(name, *) "Releasing route"
@@ -170,7 +170,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! fill source field with known data
       val1 = 1.0
       call FillConstantField(field2, val1, rc)
@@ -179,7 +179,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! fill destination field with known data
       val2 = -1.0
       call FillConstantField(field1, val2, rc)
@@ -188,7 +188,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! store
       call ESMF_VMGetGlobal(vm, rc=rc)
       call ESMF_FieldRedistStore(field2, field1, vm, &
@@ -198,7 +198,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! run
       call ESMF_FieldRedist(field2, field1, routehandle=redist_rh, rc=rc)
       write(name, *) "Executing redist"
@@ -206,7 +206,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! validate destination field
       call ValidateConstantField(field1, val1, rc)
       write(name, *) "Validating constant data in dest fields"
