@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.13 2005/01/12 22:09:19 jwolfe Exp $
+% $Id: Grid_desc.tex,v 1.14 2005/09/23 22:12:40 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,19 +24,10 @@ ESMF Grids are currently assumed to be two-dimensional, logically-rectangular
 horizontal grids, with an optional vertical grid whose coordinates are
 independent of those of the horizontal grid.  Each Grid is assigned a
 staggering in its create method call, which helps define the Grid according
-to typical Arakawa nomenclature.  The Grid will spawn subGrids at the relative
-cell locations that are associated with its staggering.  For example, an
-Arakawa C grid has some computational fields defined at the cell centers
-and other fields defined at cell face centers.  An {\tt ESMF\_Grid} assigned
-Arakawa C staggering will therefore make subGrids at the cell centers and
-specified cell faces (please see the Grid Options section for more information
-and a complete list of staggerings).  A vertical grid may also be represented
-as one or more subGrids.  When an {\tt ESMF\_Field} is created, it must be
-assigned to one of the appropriate subGrids, represented by the identifier
-{\tt ESMF\_RelLoc} (or relative location), present in the {\tt ESMF\_Grid} it 
-is being created from.  Continuing the example above, an {\tt ESMF\_Field}
-created from a Grid with Arakawa C staggering would have to be defined at either
-the cell center or one of the prescribed cell faces. 
+to typical Arakawa nomenclature.  The staggering of the Grid sets the possible
+relative locations ({\tt ESMF\_Rellocs}) for the Fields associated with that
+Grid.  This interaction between Grid and data placement is explained in detail
+in section \ref{sec:GridDataPlacement}.
 
 ESMF differentiates between global data, which describes a complete set of data,
 and DE-local data, which describes a distributed or decomposed chuck of data
@@ -52,3 +43,55 @@ information as well as its own DE-local Grid data.  The DE-local data represente
 by an {\tt ESMF\_Field} is defined by the decomposition of the underlying
 {\tt ESMF\_Grid}.
 
+\subsubsection{Grids and Data Placement}
+\label{sec:GridDataPlacement}
+An {\tt ESMF\_Grid} will support data placement only at specific cell relative
+locations, defined by its staggering and following typical Arakawa nomenclature.
+In ESMF, there are nine possible relative locations for data on a typical
+horizontal Grid cell, though each staggering will use a subset of them.  These
+locations, with their corresponding {\tt ESMF\_Rellocs}, are illustrated in
+Figure \ref{fig:GridDataLocations}.
+
+\begin{center}
+\begin{figure}
+\caption{Possible data locations for a representative computational cell. }
+\label{fig:GridDataLocations}
+\includegraphics{GridDataLocations}
+\end{figure}
+\end{center}
+
+{\tt ESMF\_Grids} are created with only those underlying structures, called
+subGrids, to support data at the specific cell locations defined by its given
+staggering.  For example, an Arakawa C grid has some computational fields
+defined at the cell centers and other fields defined at specific cell face
+centers.  An {\tt ESMF\_Grid} created with Arakawa C staggering will therefore
+make subGrids at the cell centers and specified cell faces (please see section
+\ref{sec:GridOptions} for a complete list of implemented staggerings and their
+corresponding Rellocs).  An example of the data locations for an Arakawa C_SE
+Grid is presented in Figure \ref{fig:ArakawaC_SE}.
+
+\begin{center}
+\begin{figure}
+\caption{Data locations for an Arakawa C_SE Grid. }
+\label{fig:ArakawaC_SE}
+\includegraphics{ArakawaC_SE}
+\end{figure}
+\end{center}
+
+A vertical grid is also represented as one or more subGrids.
+
+The staggering of the Grid limits the relative locations of any ESMF data 
+class corresponding to it.  When an {\tt ESMF\_Field} is created, it must be
+assigned to one (or more, in the case of a horizontal Grid with a vertical
+subGrid) of the appropriate subGrids present in the {\tt ESMF\_Grid} from
+which it is being created.  Continuing the example above, an {\tt ESMF\_Field}
+created from a Grid with Arakawa C staggering would have to be defined at either
+the cell center or one of the prescribed cell faces. 
+
+
+\subsubsection{Grid Distribution}
+
+The distribution (also referred to as decomposition) of the Grid on an
+{\tt ESMF\_DELayout} determines the distribution as well for all related
+ESMF data classes.  ESMF has currently implemented two different distribution
+strategies: block and arbitrary.
