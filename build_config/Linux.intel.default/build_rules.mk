@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.45 2005/09/30 15:54:12 theurich Exp $
+# $Id: build_rules.mk,v 1.46 2005/09/30 17:15:14 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -42,8 +42,11 @@ endif
 # and bin subdirs will be found.   plus, lam required pthreads here.
 ifeq ($(ESMF_COMM),lam)
 MPI_LIB        += -llamf77mpi -lmpi -llam 
-# lam requires pthreads
+# lam requires pthreads, so if pthreads is not turned on we need to at least
+# link against the pthread library for lam
+ifneq ($(ESMF_PTHREADS),ON)
 THREAD_LIB     = -lpthread
+endif
 endif
 
 # This section is set up for vendor supplied MPI (e.g. SGI Altix).
