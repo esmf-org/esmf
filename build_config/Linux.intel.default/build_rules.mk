@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.44 2005/08/11 00:04:25 theurich Exp $
+# $Id: build_rules.mk,v 1.45 2005/09/30 15:54:12 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -198,8 +198,17 @@ C_LD_PATHS   += $(ENV_LD_PATHS)
 endif
 
 
-C_F90CXXLIBS    = $(INTEL_C_LIB_NEEDED) -lrt -ldl
+C_F90CXXLIBS    = $(INTEL_C_LIB_NEEDED) -limf -lm -lcxa -lunwind -lrt -ldl
 C_CXXF90LIBS    = $(INTEL_C_LIB_NEEDED) -lifcoremt -lunwind -lrt -ldl
+
+# conditionally add pthread compiler flags to the LIBS variable
+# gjt: this is a work around because I could not figure out how I can pass
+# an option flag to the linker front end from here all the way to where the 
+# link rule is actually formulated in common.mk
+ifeq ($(ESMF_PTHREADS),ON)
+C_CXXF90LIBS  +=  -pthread
+C_F90CXXLIBS  +=  -threads
+endif
 
 ###############################################################################
 
