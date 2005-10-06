@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.97 2005/09/06 22:44:48 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.98 2005/10/06 17:07:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.97 2005/09/06 22:44:48 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.98 2005/10/06 17:07:39 svasquez Exp $'
 
 !==============================================================================
 !
@@ -1129,7 +1129,8 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RegridValidate"
-!BOP
+! TODO: this routine should be BOP once it is filled in
+!BOPI
 ! !IROUTINE: ESMF_RegridValidate - Check internal consistency of a Regrid
 
 ! !INTERFACE:
