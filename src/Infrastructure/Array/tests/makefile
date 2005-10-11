@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2005/07/15 03:41:46 nscollins Exp $ 
+# $Id: makefile,v 1.9 2005/10/11 21:57:21 svasquez Exp $ 
 
 ALL:  build_unit_tests
 run:  tree_run_unit_tests
@@ -16,11 +16,14 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/Array/tests
 
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayUTest \
+		$(ESMF_TESTDIR)/ESMF_ArrayGatherUTest
 
-TESTS_RUN     = RUN_ESMF_ArrayUTest
+TESTS_RUN     = RUN_ESMF_ArrayUTest \
+		RUN_ESMF_ArrayGatherUTest
 
-TESTS_RUN_UNI = RUN_ESMF_ArrayUTestUNI
+TESTS_RUN_UNI = RUN_ESMF_ArrayUTestUNI \
+		RUN_ESMF_ArrayGatherUTestUNI
 
 
 
@@ -41,6 +44,18 @@ RUN_ESMF_ArrayUTest:
 
 RUN_ESMF_ArrayUTestUNI:
 	$(MAKE) TNAME=Array NP=1 ftest
+
+
+
+#
+#  ESMF_ArrayGatherUTest
+#
+RUN_ESMF_ArrayGatherUTest:
+	$(MAKE) TNAME=ArrayGather NP=4 ftest
+
+RUN_ESMF_ArrayGatherUTestUNI:
+	$(MAKE) TNAME=ArrayGather NP=1 ftest
+
 
 
 
