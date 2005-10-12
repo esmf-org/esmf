@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.139 2005/09/06 22:26:10 svasquez Exp $
+#  $Id: common.mk,v 1.140 2005/10/12 20:10:49 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1226,6 +1226,12 @@ tree_build_system_tests:  $(SYSTEM_TESTS_BUILD)
 $(ESMF_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
 	$(FLINKER) $(LINKOPTS) -o $@ $(SYSTEM_TESTS_OBJ) $< $(FLINKLIBS)
 	$(RM) -f *.o *.mod
+	if [ "$(ESMF_SYSTEST_SYMLINKS)" == "true" ] ; then \
+		$(RM) t s l ; \
+		ln -s $@ t ; \
+		ln -s $@.Log l ; \
+		ln -s $@.stdout s ; \
+	fi
 
 #
 #  Link rule for Fortran system tests (MPMD).
@@ -1354,6 +1360,11 @@ $(ESMF_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)
 	$(CLINKER) $(LINKOPTS) -o $@  $(UTEST_$(*)_OBJS) $< $(CLINKLIBS)
 	$(RM) -f *.o *.mod
 
+unit_test_links:
+	rm -f t s l
+	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest t
+	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.stdout s
+	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest.Log l
 
 #
 # run_unit_tests
