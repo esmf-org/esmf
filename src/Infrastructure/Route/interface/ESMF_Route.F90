@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.72 2005/10/12 19:06:17 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.73 2005/10/12 20:24:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -132,7 +132,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.72 2005/10/12 19:06:17 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.73 2005/10/12 20:24:55 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1446,6 +1446,7 @@ end function radd
         ! local variables
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
+        integer :: zero = 0
 
         ! Set initial values
         status = ESMF_FAILURE
@@ -1461,9 +1462,9 @@ end function radd
             ! nothing to do here
             status = ESMF_SUCCESS
         else if (.not.present(srcarray)) then
-            call c_ESMC_RouteRunLA(route, 0, dstarray, status)
+            call c_ESMC_RouteRunLA(route, zero, dstarray, status)
         else if (.not.present(dstarray)) then
-            call c_ESMC_RouteRunLA(route, srcarray, 0, status)
+            call c_ESMC_RouteRunLA(route, srcarray, zero, status)
         else  ! both srcarray and dstarray are specified
             call c_ESMC_RouteRunLA(route, srcarray, dstarray, status)
         endif
@@ -1515,6 +1516,7 @@ end function radd
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
         integer :: srcCount, dstCount
+        integer :: zero = 0
 
         ! Set initial values
         status = ESMF_FAILURE
@@ -1540,10 +1542,10 @@ end function radd
             ! nothing to do here
             status = ESMF_SUCCESS
         else if (srcCount .eq. 0) then
-            call c_ESMC_RouteRunLAL(route, 0, dstArrayList, &
+            call c_ESMC_RouteRunLAL(route, zero, dstArrayList, &
                                     srcCount, dstCount, status)
         else if (dstCount .eq. 0) then
-            call c_ESMC_RouteRunLAL(route, srcArrayList, 0, &
+            call c_ESMC_RouteRunLAL(route, srcArrayList, zero, &
                                     srcCount, dstCount, status)
         else  ! both srcCount and dstCount is > 0
             call c_ESMC_RouteRunLAL(route, srcArrayList, dstArrayList, &
@@ -1594,6 +1596,7 @@ end function radd
         ! local variables
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
+        integer :: zero = 0
 
         ! Set initial values
         status = ESMF_FAILURE
@@ -1610,13 +1613,13 @@ end function radd
           if (associated(dstarray)) then
             call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_I4, status)
           else
-            call c_ESMC_RouteRunNA(route, srcarray, 0, ESMF_I4, status)
+            call c_ESMC_RouteRunNA(route, srcarray, zero, ESMF_I4, status)
           endif
         else
           if (associated(dstarray)) then
-            call c_ESMC_RouteRunNA(route, 0, dstarray, ESMF_I4, status)
+            call c_ESMC_RouteRunNA(route, zero, dstarray, ESMF_I4, status)
           else
-            call c_ESMC_RouteRunNA(route, 0, 0, ESMF_I4, status)
+            call c_ESMC_RouteRunNA(route, zero, zero, ESMF_I4, status)
           endif
         endif
         if (ESMF_LogMsgFoundError(status, &
@@ -1663,6 +1666,7 @@ end function radd
         ! local variables
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
+        integer :: zero = 0
 
         ! Set initial values
         status = ESMF_FAILURE
@@ -1679,13 +1683,13 @@ end function radd
           if (associated(dstarray)) then
             call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_I4, status)
           else
-            call c_ESMC_RouteRunNA(route, srcarray, 0, ESMF_I4, status)
+            call c_ESMC_RouteRunNA(route, srcarray, zero, ESMF_I4, status)
           endif
         else
           if (associated(dstarray)) then
-            call c_ESMC_RouteRunNA(route, 0, dstarray, ESMF_I4, status)
+            call c_ESMC_RouteRunNA(route, zero, dstarray, ESMF_I4, status)
           else
-            call c_ESMC_RouteRunNA(route, 0, 0, ESMF_I4, status)
+            call c_ESMC_RouteRunNA(route, zero, zero, ESMF_I4, status)
           endif
         endif
         if (ESMF_LogMsgFoundError(status, &
@@ -1732,6 +1736,7 @@ end function radd
         ! local variables
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
+        integer :: zero = 0
 
         ! Set initial values
         status = ESMF_FAILURE
@@ -1748,13 +1753,13 @@ end function radd
           if (associated(dstarray)) then
             call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_R8, status)
           else
-            call c_ESMC_RouteRunNA(route, srcarray, 0, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, srcarray, zero, ESMF_R8, status)
           endif
         else
           if (associated(dstarray)) then
-            call c_ESMC_RouteRunNA(route, 0, dstarray, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, zero, dstarray, ESMF_R8, status)
           else
-            call c_ESMC_RouteRunNA(route, 0, 0, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, zero, zero, ESMF_R8, status)
           endif
         endif
         if (ESMF_LogMsgFoundError(status, &
@@ -1801,6 +1806,7 @@ end function radd
         ! local variables
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
+        integer :: zero = 0
 
         ! Set initial values
         status = ESMF_FAILURE
@@ -1817,13 +1823,13 @@ end function radd
           if (associated(dstarray)) then
             call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_R8, status)
           else
-            call c_ESMC_RouteRunNA(route, srcarray, 0, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, srcarray, zero, ESMF_R8, status)
           endif
         else
           if (associated(dstarray)) then
-            call c_ESMC_RouteRunNA(route, 0, dstarray, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, zero, dstarray, ESMF_R8, status)
           else
-            call c_ESMC_RouteRunNA(route, 0, 0, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, zero, zero, ESMF_R8, status)
           endif
         endif
         if (ESMF_LogMsgFoundError(status, &
@@ -1870,6 +1876,7 @@ end function radd
         ! local variables
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
+        integer :: zero = 0
 
         ! Set initial values
         status = ESMF_FAILURE
@@ -1886,13 +1893,13 @@ end function radd
           if (associated(dstarray)) then
             call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_R8, status)
           else
-            call c_ESMC_RouteRunNA(route, srcarray, 0, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, srcarray, zero, ESMF_R8, status)
           endif
         else
           if (associated(dstarray)) then
-            call c_ESMC_RouteRunNA(route, 0, dstarray, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, zero, dstarray, ESMF_R8, status)
           else
-            call c_ESMC_RouteRunNA(route, 0, 0, ESMF_R8, status)
+            call c_ESMC_RouteRunNA(route, zero, zero, ESMF_R8, status)
           endif
         endif
         if (ESMF_LogMsgFoundError(status, &
