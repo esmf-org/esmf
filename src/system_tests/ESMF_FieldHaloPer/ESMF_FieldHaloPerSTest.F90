@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.33 2005/05/17 18:22:04 theurich Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.34 2005/10/12 19:06:23 nscollins Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -392,8 +392,6 @@
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      routehandle(1) = ESMF_RouteHandleCreate(rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_FieldHaloStore(field(1), routehandle(1), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
@@ -403,8 +401,6 @@
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      routehandle(2) = ESMF_RouteHandleCreate(rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_FieldHaloStore(field(2), routehandle(2), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
@@ -414,8 +410,6 @@
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      routehandle(3) = ESMF_RouteHandleCreate(rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_FieldHaloStore(field(3), routehandle(3), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
@@ -425,8 +419,6 @@
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      routehandle(4) = ESMF_RouteHandleCreate(rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_FieldHaloStore(field(4), routehandle(4), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
@@ -625,8 +617,6 @@
 
       do i=1, 4
         call ESMF_FieldHaloRelease(routehandle(i), rc)
-        if (rc .ne. ESMF_SUCCESS) goto 30
-        call ESMF_RouteHandleDestroy(routehandle(i), rc)
         if (rc .ne. ESMF_SUCCESS) goto 30
       enddo
 

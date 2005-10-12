@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StdCppMacros.h,v 1.1 2005/05/31 17:27:19 nscollins Exp $
+! $Id: ESMF_StdCppMacros.h,v 1.2 2005/10/12 19:06:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,31 +105,33 @@
 #define InterfaceMacro(funcname) \
 !------------------------------------------------------------------------------ @\
 ! <This section created by macro - do not edit directly> @\
+^ifndef ESMF_NO_INTEGER_1_BYTE @\
     module procedure ESMF_##funcname##1DI1 @\
+    module procedure ESMF_##funcname##2DI1 @\
+    module procedure ESMF_##funcname##3DI1 @\
+    module procedure ESMF_##funcname##4DI1 @\
+    module procedure ESMF_##funcname##5DI1 @\
+    module procedure ESMF_##funcname##6DI1 @\
+    module procedure ESMF_##funcname##7DI1 @\
+^endif @\
     module procedure ESMF_##funcname##1DI2 @\
     module procedure ESMF_##funcname##1DI4 @\
     module procedure ESMF_##funcname##1DI8 @\
-    module procedure ESMF_##funcname##2DI1 @\
     module procedure ESMF_##funcname##2DI2 @\
     module procedure ESMF_##funcname##2DI4 @\
     module procedure ESMF_##funcname##2DI8 @\
-    module procedure ESMF_##funcname##3DI1 @\
     module procedure ESMF_##funcname##3DI2 @\
     module procedure ESMF_##funcname##3DI4 @\
     module procedure ESMF_##funcname##3DI8 @\
-    module procedure ESMF_##funcname##4DI1 @\
     module procedure ESMF_##funcname##4DI2 @\
     module procedure ESMF_##funcname##4DI4 @\
     module procedure ESMF_##funcname##4DI8 @\
-    module procedure ESMF_##funcname##5DI1 @\
     module procedure ESMF_##funcname##5DI2 @\
     module procedure ESMF_##funcname##5DI4 @\
     module procedure ESMF_##funcname##5DI8 @\
-    module procedure ESMF_##funcname##6DI1 @\
     module procedure ESMF_##funcname##6DI2 @\
     module procedure ESMF_##funcname##6DI4 @\
     module procedure ESMF_##funcname##6DI8 @\
-    module procedure ESMF_##funcname##7DI1 @\
     module procedure ESMF_##funcname##7DI2 @\
     module procedure ESMF_##funcname##7DI4 @\
     module procedure ESMF_##funcname##7DI8 @\

@@ -1,7 +1,7 @@
-# $Id: makefile,v 1.10 2005/09/21 20:22:04 nscollins Exp $ 
+# $Id: makefile,v 1.11 2005/10/12 19:06:16 nscollins Exp $ 
 
 ALL:  build_unit_tests
-run:  tree_run_unit_tests
+run:  run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -65,6 +65,7 @@ endif
 # try to restart lam in a controlled way
 lamrestart:
 	lamhalt
+	sleep 1
 	lamwipe
 	sleep 5
 	lamboot

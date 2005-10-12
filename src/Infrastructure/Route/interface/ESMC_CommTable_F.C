@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable_F.C,v 1.4 2004/04/23 21:58:15 nscollins Exp $
+// $Id: ESMC_CommTable_F.C,v 1.5 2005/10/12 19:06:17 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,9 +36,9 @@
 extern "C" {
 
        // keep these for deep classes, or see init below for shallow
-       void FTN(c_esmc_commtablecreate)(ESMC_CommTable **ptr, int *mydeid,
+       void FTN(c_esmc_commtablecreate)(ESMC_CommTable **ptr, int *myvmid,
                                                    int *cnt, int *status) {
-           *ptr = ESMC_CommTableCreate(*mydeid, *cnt, status);
+           *ptr = ESMC_CommTableCreate(*myvmid, *cnt, status);
        }
 
        void FTN(c_esmc_commtabledestroy)(ESMC_CommTable **ptr, int *status) {

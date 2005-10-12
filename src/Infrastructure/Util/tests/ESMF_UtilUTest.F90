@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.1 2005/05/31 17:27:21 nscollins Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.2 2005/10/12 19:06:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.1 2005/05/31 17:27:21 nscollins Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.2 2005/10/12 19:06:21 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -43,17 +43,17 @@
       integer :: rc
 
       ! individual test name
-      character(ESMF_MAXSTR) :: name
+      !character(ESMF_MAXSTR) :: name
 
       ! individual test failure messages
-      character(ESMF_MAXSTR*2) :: failMsg
+      !character(ESMF_MAXSTR*2) :: failMsg
 
       ! local variables needed to pass into function/subroutine calls
-      character(ESMF_MAXSTR) :: validate_options
-      character(ESMF_MAXSTR) :: print_options
+      !character(ESMF_MAXSTR) :: validate_options
+      !character(ESMF_MAXSTR) :: print_options
       !type(ESMF_UtilConfig) :: config_set
       !type(ESMF_UtilConfig) :: config_get
-      character(ESMF_MAXSTR) :: name_set, name_get
+      !character(ESMF_MAXSTR) :: name_set, name_get
 
 
 !-------------------------------------------------------------------------------

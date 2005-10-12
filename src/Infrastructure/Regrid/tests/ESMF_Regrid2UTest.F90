@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid2UTest.F90,v 1.3 2005/05/23 18:34:06 svasquez Exp $
+! $Id: ESMF_Regrid2UTest.F90,v 1.4 2005/10/12 19:06:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_Regrid2UTest.F90,v 1.3 2005/05/23 18:34:06 svasquez Exp $'
+      '$Id: ESMF_Regrid2UTest.F90,v 1.4 2005/10/12 19:06:17 nscollins Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -50,7 +50,7 @@
     type(ESMF_Field) :: field1, field2
     type(ESMF_Grid) :: srcgrid, dstgrid
     type(ESMF_RouteHandle) :: regrid_rh
-    type(ESMF_DELayout) :: layout1, layout2
+    type(ESMF_DELayout) :: layout1
     integer :: rc, loop_rc
 !EOC
 
@@ -215,16 +215,6 @@
 !  objects must be supplied, along with the same {\tt ESMF\_RouteHandle}.
 !EOE
       
-!BOC
-
-   !===========================
-    !NEX_UTest
-    !create a Route Handle
-    write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-    write(name, *) "Creating a Route Handle"
-    regrid_rh = ESMF_RouteHandleCreate(rc)
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!EOC
 
 !BOC
    !===========================
@@ -292,9 +282,6 @@
     call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
 !EOC
 
-!BOC
-    call ESMF_RouteHandleDestroy(regrid_rh)
-!EOC
 
     print *, "Regrid Unit test  returned"
 

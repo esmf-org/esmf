@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridOptionsUTest.F90,v 1.4 2005/04/21 21:39:23 nscollins Exp $
+! $Id: ESMF_RegridOptionsUTest.F90,v 1.5 2005/10/12 19:06:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_RegridOptionsUTest.F90,v 1.4 2005/04/21 21:39:23 nscollins Exp $'
+      '$Id: ESMF_RegridOptionsUTest.F90,v 1.5 2005/10/12 19:06:17 nscollins Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -352,10 +352,6 @@ contains
       type(ESMF_GridHorzStagger) :: horz_stagger
       type(ESMF_FieldDataMap) :: datamap
 
-      ! local vars only needed by the test macros
-      character(ESMF_MAXSTR) :: failMsg
-      character(ESMF_MAXSTR) :: name
-
 
       ! compute which axes we want decomposed 
       call ESMF_VMGet(vm, petCount=npets, rc=status)
@@ -460,10 +456,6 @@ contains
       real(ESMF_KIND_R8), pointer :: idata(:,:,:)
       type(ESMF_GridHorzStagger) :: horz_stagger
       type(ESMF_FieldDataMap) :: datamap
-
-      ! local vars only needed by the test macros
-      character(ESMF_MAXSTR) :: failMsg
-      character(ESMF_MAXSTR) :: name
 
 
       call ESMF_VMGet(vm, petCount=npets, rc=status)
@@ -575,12 +567,7 @@ contains
       real(ESMF_KIND_R8), pointer :: coordX(:,:), coordY(:,:), idata(:,:,:)
       type(ESMF_RelLoc) :: relloc
       real(ESMF_KIND_R8) :: pi = 3.14159
-      type(ESMF_FieldDataMap) :: datamap
-
-      ! local vars only needed by the test macros
-      character(ESMF_MAXSTR) :: failMsg
-      character(ESMF_MAXSTR) :: name
-
+      !type(ESMF_FieldDataMap) :: datamap
 
 
       ! get the grid and coordinates
@@ -645,10 +632,6 @@ contains
       real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue
       real(ESMF_KIND_R8), dimension(:,:), pointer :: calc, coordX, coordY
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: data
-
-      ! local vars only needed by the test macros
-      character(ESMF_MAXSTR) :: failMsg
-      character(ESMF_MAXSTR) :: name
 
 
       pi = 3.14159

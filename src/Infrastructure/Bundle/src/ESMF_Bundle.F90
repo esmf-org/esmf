@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.79 2005/07/08 21:19:35 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.80 2005/10/12 19:06:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research, 
@@ -449,7 +449,7 @@ end function
       subroutine ESMF_BundleAddOneField(bundle, field, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Bundle), intent(inout) :: bundle
       type(ESMF_Field), intent(in) :: field
       integer, intent(out), optional :: rc
 !
@@ -472,6 +472,7 @@ end function
 !EOP
 
       integer :: status                                ! Error status
+      logical :: dummy
       type(ESMF_Field) :: temp_list(1)
       type(ESMF_BundleType), pointer :: btype
 
@@ -491,6 +492,9 @@ end function
     
       call ESMF_BundleTypeAddFieldList(btype, 1, temp_list, rc)
 
+      ! this resets the congruent flag as a side effect
+      dummy = ESMF_BundleIsCongruent(bundle, rc)
+
       end subroutine ESMF_BundleAddOneField
 
 
@@ -505,7 +509,7 @@ end function
       subroutine ESMF_BundleAddFieldList(bundle, fieldCount, fieldList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle        
+      type(ESMF_Bundle), intent(inout) :: bundle        
       integer, intent(in) :: fieldCount
       type(ESMF_Field), dimension(:), intent(in) :: fieldList
       integer, intent(out), optional :: rc          
@@ -535,6 +539,7 @@ end function
 !EOP
 
       integer :: status                                ! Error status
+      logical :: dummy
       type(ESMF_BundleType), pointer :: btype
 
       ! Initialize return code in case we return early.
@@ -551,6 +556,9 @@ end function
     
       call ESMF_BundleTypeAddFieldList(btype, fieldCount, fieldList, rc)
       
+      ! this resets the congruent flag as a side effect
+      dummy = ESMF_BundleIsCongruent(bundle, rc)
+
       end subroutine ESMF_BundleAddFieldList
 
 
@@ -625,6 +633,7 @@ end function
 !EOP
 
       type(ESMF_BundleType), pointer :: btypep         ! Pointer to new bundle
+      logical :: dummy
       integer :: status                                ! Error status
 
       ! Initialize pointers
@@ -650,8 +659,13 @@ end function
           return
       endif
 
-      ! Set return values.
+      ! set the return bundle
       ESMF_BundleCreateNew%btypep => btypep
+
+      ! this resets the congruent flag as a side effect
+      dummy = ESMF_BundleIsCongruent(ESMF_BundleCreateNew, rc)
+
+      ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
 
@@ -3983,9 +3997,9 @@ end function
           
       endif
 
-      ! TODO: this code sets the congruent flag to true regardless of the
-      ! data in the fields.   this needs to be fixed before the bundle
-      ! communication code can be considered robust.
+      ! TODO: this code does nothing with the congruent flag right now.
+      ! this needs to be fixed before the bundle communication code can 
+      ! be considered robust.
 
 10 continue
       if (present(rc)) rc = ESMF_SUCCESS
@@ -4195,8 +4209,7 @@ end function
       btype%localbundle%gridstatus = ESMF_STATUS_UNINIT
       btype%localbundle%arraystatus = ESMF_STATUS_UNINIT
       btype%gridstatus = ESMF_STATUS_UNINIT
-      btype%isCongruent = .FALSE.
-      !btype%isCongruent = .TRUE.
+      btype%isCongruent = .TRUE.
    
       btype%field_count = 0
       nullify(btype%flist)

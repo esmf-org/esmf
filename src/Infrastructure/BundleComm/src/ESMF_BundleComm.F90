@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.49 2005/06/30 21:04:26 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.50 2005/10/12 19:06:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.49 2005/06/30 21:04:26 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.50 2005/10/12 19:06:16 nscollins Exp $'
 
 !==============================================================================
 !
@@ -337,21 +337,50 @@
 
       integer :: status                           ! Error status
       integer :: i                                ! loop counter
-      type(ESMF_BundleType) :: btypep             ! bundle type info
+      integer :: nitems
+      type(ESMF_BundleType), pointer :: btypep    ! bundle type info
+      type(ESMF_Array), allocatable :: arrayList(:)
+
    
       ! Initialize return code   
       status = ESMF_FAILURE
       if(present(rc)) rc = ESMF_FAILURE
 
-      btypep = bundle%btypep
+      ! Validate bundle before going further
+      call ESMF_BundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      do i=1, btypep%field_count
-          call ESMF_ArrayHalo(btypep%flist(i)%ftypep%localfield%localdata, &
-                              routehandle, blocking, commhandle, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
-      enddo
+      btypep => bundle%btypep
+
+      ! if all fields are identical, they can share a route
+      if (ESMF_BundleIsCongruent(bundle, rc=status)) then
+
+          nitems = btypep%field_count
+          allocate(arrayList(nitems), stat=status)
+          if (ESMF_LogMsgFoundAllocError(status, & 
+                                         "Allocating arraylist information", &
+                                          ESMF_CONTEXT, rc)) return
+          ! make a list of arrays
+          do i=1, nitems
+            arrayList(i) = btypep%flist(i)%ftypep%localfield%localdata
+          enddo
+
+
+          call ESMF_ArrayHalo(arrayList, routehandle, 1,  &
+                              blocking, commhandle, rc=status)
+
+      else 
+          do i=1, btypep%field_count
+
+            call ESMF_ArrayHalo(btypep%flist(i)%ftypep%localfield%localdata, &
+                                routehandle, i, blocking, commhandle, rc=status)
+            if (ESMF_LogMsgFoundError(status, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+          enddo
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -467,29 +496,40 @@
 
       ! if all fields are identical, they can share a route
       if (ESMF_BundleIsCongruent(bundle, rc=status)) then
-        call ESMF_ArrayHaloStore(btypep%flist(1)%ftypep%localfield%localdata, &
-                                 btypep%grid, &
-                                 btypep%flist(1)%ftypep%mapping, routehandle, &
-                                 halodirection, routeOptions, rc=status)
+        call ESMF_ArrayHaloStore( &
+                                  btypep%flist(1)%ftypep%localfield%localdata, &
+                                  1, ESMF_ALLTO1HANDLEMAP, 1, &
+                                  btypep%grid, &
+                                  btypep%flist(1)%ftypep%mapping, routehandle, &
+                                  halodirection, routeOptions, rc=status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       else
-        ! TODO: this needs to be in a loop, with a separate routehandle
-        ! (or internal to routehandle a list of routehandles) for each field
+        ! exercise the new code in routehandle - it can now contain multiple
+        ! routes inside a single handle.  set the map to be 1 to 1.
         do i=1, btypep%field_count
  
-      !call ESMF_ArrayHaloStore(btypep%flist(i)%ftypep%localfield%localdata, &
-      !                           btypep%grid, &
-      !                           btypep%flist(i)%ftypep%mapping, &
-      !                           routehandle(i), &
-      !                           halodirection, routeOptions, rc=status)
+        call ESMF_ArrayHaloStore( &
+                                  btypep%flist(i)%ftypep%localfield%localdata, &
+                                  i, ESMF_1TO1HANDLEMAP, btypep%field_count, &
+                                  btypep%grid, &
+                                  btypep%flist(i)%ftypep%mapping, &
+                                  routehandle, &
+                                  halodirection, routeOptions, rc=status)
   
-        status = ESMF_RC_NOT_IMPL
+        ! TODO: when this works, remove this next line completely.
+        ! for now, toggle it in and out as we test the new store code.
+        !status = ESMF_RC_NOT_IMPL
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
         enddo
+
+        ! TODO:  when we want to support the minimal set of routes for
+        ! all fields in the bundle (e.g. all 2d, integer fields share a route),
+        ! put the logic here and set the handle type to INDIRECTHANDLEMAP.
 
       endif
 
@@ -606,7 +646,7 @@
           enddo
     
           call ESMF_ArrayRedist(srcArrayList, dstArrayList, &
-                                routehandle, blocking, commhandle, &
+                                routehandle, 1, blocking, commhandle, &
                                 routeOptions, status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
@@ -622,14 +662,15 @@
           !  the datamaps of all fields to be identical.
           do i = 1, stypep%field_count
 
-            ! this needs the routehandle to internally store multiple routes
-           !call ESMF_ArrayRedist(stypep%flist(i)%ftypep%localfield%localdata, &
-           !                      dtypep%flist(i)%ftypep%localfield%localdata, &
-           !            routehandle, blocking, commhandle, routeOptions, status)
-            status = ESMF_RC_NOT_IMPL
-            if (ESMF_LogMsgFoundError(status, &
-                                      ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) return
+           ! routehandle now internally stores multiple routes
+           call ESMF_ArrayRedist(stypep%flist(i)%ftypep%localfield%localdata, &
+                                 dtypep%flist(i)%ftypep%localfield%localdata, &
+                                 routehandle, i, blocking, commhandle, &
+                                 routeOptions, status)
+           !status = ESMF_RC_NOT_IMPL
+           if (ESMF_LogMsgFoundError(status, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
           enddo
       endif
 
@@ -761,6 +802,7 @@
                                  dtypep%flist(1)%ftypep%localfield%localdata, &
                                  dtypep%grid, &
                                  dtypep%flist(1)%ftypep%mapping, &
+                                 1, ESMF_ALLTO1HANDLEMAP, 1, &
                                  parentVM, &
                                  routeOptions, routehandle, status)
               if (ESMF_LogMsgFoundError(status, &
@@ -771,15 +813,17 @@
         ! (or internal to routehandle a list of routehandles) for each field
         do i=1, stypep%field_count
  
-      !  call ESMF_ArrayRedistStore(stypep%flist(i)%ftypep%localfield%localdata, &
-      !                           stypep%grid, &
-      !                           stypep%flist(i)%ftypep%mapping, &
-      !                           dtypep%flist(i)%ftypep%localfield%localdata, &
-      !                           dtypep%grid, &
-      !                           dtypep%flist(i)%ftypep%mapping, &
-      !                           parentVM, &
-      !                           routeOptions, routehandle(i), status)
-          status = ESMF_RC_NOT_IMPL
+           call ESMF_ArrayRedistStore( &
+                               stypep%flist(i)%ftypep%localfield%localdata, &
+                               stypep%grid, &
+                               stypep%flist(i)%ftypep%mapping, &
+                               dtypep%flist(i)%ftypep%localfield%localdata, &
+                               dtypep%grid, &
+                               dtypep%flist(i)%ftypep%mapping, &
+                               i, ESMF_1TO1HANDLEMAP, stypep%field_count, &
+                               parentVM, &
+                               routeOptions, routehandle, status)
+          !status = ESMF_RC_NOT_IMPL
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -937,6 +981,7 @@
       integer :: i                                 ! loop counter
       type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
       type(ESMF_Array), allocatable :: srcArrayList(:), dstArrayList(:)
+      logical :: hasSrcData, hasDstData
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -951,6 +996,7 @@
                                     ESMF_CONTEXT, rc)) return
       endif
 
+      
       ! If the bundle consists of identical fields - in every way: data type,
       ! relloc, index order, the works -- then pass in a list of all arrays
       ! and RouteRun will have the option of looping over the arrays and 
@@ -972,12 +1018,17 @@
               dstArrayList(i) = dtypep%flist(i)%ftypep%localfield%localdata
           enddo
     
+          hasSrcData = ESMF_RegridHasData(stypep%grid, &
+                                          stypep%flist(1)%ftypep%mapping)
+          hasDstData = ESMF_RegridHasData(dtypep%grid, &
+                                          dtypep%flist(1)%ftypep%mapping)
+
           ! TODO: do the datamaps have to go in as lists as well?
           call ESMF_ArrayRegrid(srcArrayList, & 
-                                stypep%flist(1)%ftypep%mapping, .true., &
+                                stypep%flist(1)%ftypep%mapping, hasSrcData, &
                                 dstArrayList, &
-                                dtypep%flist(1)%ftypep%mapping, .true., &
-                                routehandle, srcmask, dstmask, &
+                                dtypep%flist(1)%ftypep%mapping, hasDstData, &
+                                routehandle, 1, srcmask, dstmask, &
                                 blocking, commhandle, routeOptions, status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
@@ -989,12 +1040,17 @@
           deallocate(srcArrayList, dstArrayList, stat=status) 
       else
         do i = 1, stypep%field_count
-            ! TODO: add hasSrcData and hasDstData logic
+            hasSrcData = ESMF_RegridHasData(stypep%grid, &
+                                          stypep%flist(i)%ftypep%mapping)
+            hasDstData = ESMF_RegridHasData(dtypep%grid, &
+                                          dtypep%flist(i)%ftypep%mapping)
+
             call ESMF_ArrayRegrid(stypep%flist(i)%ftypep%localfield%localdata, &
-                                  stypep%flist(i)%ftypep%mapping, .true., &
+                                  stypep%flist(i)%ftypep%mapping, hasSrcData, &
                                   dtypep%flist(i)%ftypep%localfield%localdata, &
-                                  dtypep%flist(i)%ftypep%mapping, .true., &
-                                  routehandle, srcmask, dstmask, &
+                                  dtypep%flist(i)%ftypep%mapping, hasDstData, &
+                                  routehandle, i, &
+                                  srcmask, dstmask, &
                                   blocking, commhandle, routeOptions, status)
             if (ESMF_LogMsgFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
@@ -1089,7 +1145,7 @@
 !           regridding is intra-component.  
 !     \item [routehandle]
 !           Output from this call, identifies the precomputed work which
-!           will be executed when {\tt ESMF\_FieldRegrid} is called.
+!           will be executed when {\tt ESMF\_BundleRegrid} is called.
 !     \item [regridmethod]
 !           Type of regridding to do.  A set of predefined methods are
 !           supplied.
@@ -1138,10 +1194,17 @@
 
       if (ESMF_BundleIsCongruent(srcBundle, rc=status) .and. &
           ESMF_BundleIsCongruent(dstBundle, rc=status)) then
-               call ESMF_FieldRegridStore(stypep%flist(1), dtypep%flist(1), &
-                                         parentVM, routehandle, regridmethod, &
-                                         regridnorm, srcMask, dstMask, &
-                                         routeOptions, status)
+               call ESMF_ArrayRegridStore( &
+                                 stypep%flist(1)%ftypep%localfield%localdata, &
+                                 stypep%grid, &
+                                 stypep%flist(1)%ftypep%mapping, &
+                                 dtypep%flist(1)%ftypep%localfield%localdata, &
+                                 dtypep%grid, &
+                                 dtypep%flist(1)%ftypep%mapping, &
+                                 parentVM, routehandle, &
+                                 1, ESMF_ALLTO1HANDLEMAP, 1, &
+                                 regridmethod, regridnorm, srcMask, dstMask, &
+                                 routeOptions, status)
                 if (ESMF_LogMsgFoundError(status, &
                                           ESMF_ERR_PASSTHRU, &
                                           ESMF_CONTEXT, rc)) return
@@ -1150,11 +1213,18 @@
         ! (or internal to routehandle a list of routehandles) for each field
         do i=1, stypep%field_count
  
-          ! call ESMF_FieldRegridStore(stypep%flist(i), dtypep%flist(i), &
-          !                           parentVM, routehandle(i), regridmethod, &
-          !                           regridnorm, srcMask, dstMask, &
-          !                           routeOptions, status)
-            status = ESMF_RC_NOT_IMPL
+            call ESMF_ArrayRegridStore( &
+                                 stypep%flist(i)%ftypep%localfield%localdata, &
+                                 stypep%grid, &
+                                 stypep%flist(i)%ftypep%mapping, &
+                                 dtypep%flist(i)%ftypep%localfield%localdata, &
+                                 dtypep%grid, &
+                                 dtypep%flist(i)%ftypep%mapping, &
+                                 parentVM, routehandle, &
+                                 i, ESMF_1TO1HANDLEMAP, stypep%field_count, &
+                                 regridmethod, regridnorm, srcMask, dstMask, &
+                                 routeOptions, status)
+            !!status = ESMF_RC_NOT_IMPL
             if (ESMF_LogMsgFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
@@ -1162,7 +1232,7 @@
       endif
 
       ! Set return values.
-      !if (present(rc)) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleRegridStore
 

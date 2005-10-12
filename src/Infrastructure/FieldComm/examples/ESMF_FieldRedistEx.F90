@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.2 2005/04/25 22:44:06 jwolfe Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.3 2005/10/12 19:06:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -176,10 +176,9 @@
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-     ! Then create the RouteHandle and precompute the communication pattern to
-     ! move data from the regularly distributed Field1 to the arbitrarily stored
-     ! Field2:
-     rh12 = ESMF_RouteHandleCreate(rc)
+     ! Then precompute the communication pattern to
+     ! move data from the regularly distributed Field1 
+     ! to the arbitrarily stored Field2:
      call ESMF_FieldRedistStore(field1, field2, vm, routehandle=rh12, rc=rc)
 !EOC
 
@@ -233,7 +232,7 @@
      deallocate(myIndices)
 
 !BOC
-     ! Once the RouteHandle is no longer needed, it is up to the user to release
+     ! Once the Route is no longer needed, it is up to the user to release
      ! it, since the user created it:
      call ESMF_FieldRedistRelease(rh12, rc)
 !EOC

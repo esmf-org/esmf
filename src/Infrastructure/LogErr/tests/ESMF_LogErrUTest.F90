@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.25 2005/09/21 20:20:50 nscollins Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.26 2005/10/12 19:06:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.25 2005/09/21 20:20:50 nscollins Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.26 2005/10/12 19:06:16 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -61,7 +61,7 @@
       character (5) :: random_chars
 
 !     !LOCAL VARIABLES:
-      integer :: rc2, ran_num, i, j, input_status, my_pet
+      integer :: rc2, ran_num, i, input_status, my_pet
       real :: r1
       logical :: is_error
       type(ESMF_Log) :: log1, log2

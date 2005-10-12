@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.23 2004/12/22 00:28:08 nscollins Exp $
+// $Id: ESMC_RTable.C,v 1.24 2005/10/12 19:06:17 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_RTable.C,v 1.23 2004/12/22 00:28:08 nscollins Exp $";
+            "$Id: ESMC_RTable.C,v 1.24 2005/10/12 19:06:17 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -144,7 +144,7 @@
     int i;
 
     entrycount = decount;
-    my_deid = myde;
+    my_vmid = myde;
     entry = new struct rtableentry[decount];
 
     // TODO: this is a fully instantiated table, one slot per possible
@@ -154,7 +154,7 @@
     // implemented to get feedback about how well it works.
 
     for (i=0; i<entrycount; i++) {
-        entry[i].deid = i;
+        entry[i].vmid = i;
         entry[i].xpcount = 0;
         entry[i].xp = ESMC_NULL_POINTER;
         entry[i].alloccount = 0;
@@ -241,7 +241,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-       int ndeid,          // in  -
+       int nvmid,          // in  -
        ESMC_XPacket *xp) { // in -
 //
 // !DESCRIPTION:
@@ -254,16 +254,16 @@
 // TODO  SetEntry will append an xp to the current table.
 //       Do we want to add the ability to replace an entry?
 
-    entry[ndeid].deid = ndeid;
-    entry[ndeid].xpcount++;
+    entry[nvmid].vmid = nvmid;
+    entry[nvmid].xpcount++;
 
 //  If not enough space allocated, allocate more.
-//  If entry[ndeid].xp is NULL, then this will simply allocate
-    if(entry[ndeid].alloccount < entry[ndeid].xpcount) {
-      entry[ndeid].alloccount += ALLOCCHUNK;
-      entry[ndeid].xp = (ESMC_XPacket *)realloc(entry[ndeid].xp, 
-                                          entry[ndeid].alloccount * sizeof(ESMC_XPacket));
-      if (entry[ndeid].xp == NULL) {
+//  If entry[nvmid].xp is NULL, then this will simply allocate
+    if(entry[nvmid].alloccount < entry[nvmid].xpcount) {
+      entry[nvmid].alloccount += ALLOCCHUNK;
+      entry[nvmid].xp = (ESMC_XPacket *)realloc(entry[nvmid].xp, 
+                                          entry[nvmid].alloccount * sizeof(ESMC_XPacket));
+      if (entry[nvmid].xp == NULL) {
 	!printf("Not enough memory to add more XPackets!?\n");
         ESMC_LogDefault.ESMC_LogAllocError(&rc);
         return(rc);
@@ -272,7 +272,7 @@
 
     // This is a contents copy; when this routine returns
     // the caller is free to reuse the packet.
-    entry[ndeid].xp[ entry[ndeid].xpcount - 1 ] = *xp;
+    entry[nvmid].xp[ entry[nvmid].xpcount - 1 ] = *xp;
 
     return ESMF_SUCCESS;
 
@@ -291,7 +291,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-       int ndeid,             // in  -
+       int nvmid,             // in  -
        int xpcount,           // in
        ESMC_XPacket **xp) {   // out
 //
@@ -303,15 +303,15 @@
     int rc;
     char msgbuf[ESMF_MAXSTR];
 
-    if (ndeid < 0 || ndeid > entrycount) {
-        sprintf(msgbuf, "ndeid out of range, %d must be between 0 and %d\n", 
-		                                	ndeid, entrycount);
+    if (nvmid < 0 || nvmid > entrycount) {
+        sprintf(msgbuf, "nvmid out of range, %d must be between 0 and %d\n", 
+		                                	nvmid, entrycount);
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
 
         return(rc);
     }
 
-    *xp = &(entry[ndeid].xp[ xpcount ]);
+    *xp = &(entry[nvmid].xp[ xpcount ]);
 
     return ESMF_SUCCESS;
 
@@ -330,7 +330,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-       int ndeid,             // in  -
+       int nvmid,             // in  -
        int *xpcount) {        // out
 //
 // !DESCRIPTION:
@@ -341,15 +341,15 @@
     int rc;
     char msgbuf[ESMF_MAXSTR];
 
-    if (ndeid < 0 || ndeid > entrycount) {
-        sprintf(msgbuf, "ndeid out of range, %d must be between 0 and %d\n", 
-		                                	ndeid, entrycount);
+    if (nvmid < 0 || nvmid > entrycount) {
+        sprintf(msgbuf, "nvmid out of range, %d must be between 0 and %d\n", 
+		                                	nvmid, entrycount);
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
 
         return(rc);
     }
 
-    *xpcount = entry[ndeid].xpcount;
+    *xpcount = entry[nvmid].xpcount;
 
     return ESMF_SUCCESS;
 
@@ -482,13 +482,13 @@
 
     if ((entrycount == 0) && brief) return ESMF_SUCCESS;
 
-    sprintf(msgbuf, " entrycount=%d, my_deid=%d\n", entrycount, my_deid);
+    sprintf(msgbuf, " entrycount=%d, my_vmid=%d\n", entrycount, my_vmid);
     //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
       
     for(i=0; i<entrycount; i++) {
-        sprintf(msgbuf, "%2d: deid=%2d, xpcount=%2d, xpaddr=0x%08lx\n",
-                 i, entry[i].deid, entry[i].xpcount, (long int)(entry[i].xp)); 
+        sprintf(msgbuf, "%2d: vmid=%2d, xpcount=%2d, xpaddr=0x%08lx\n",
+                 i, entry[i].vmid, entry[i].xpcount, (long int)(entry[i].xp)); 
         //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
         printf(msgbuf);
         for (j=0, xptr=&(entry[i].xp[0]); j<entry[i].xpcount; j++, xptr++)

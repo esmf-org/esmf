@@ -374,7 +374,7 @@ end interface
     integer :: ier
     integer, dimension(nOptions) ::  choiceIndex
     logical, dimension(nOptions) ::  maskName
-    integer :: nChoices
+   ! integer :: nChoices
     integer :: nSelected
     integer :: iSrcRelLoc, iDstRelLoc
     integer :: iSrcHalo, iDstHalo
@@ -512,16 +512,18 @@ end interface
     integer ::  n_cells(2)
     type(ESMF_ArraySpec) :: arrayspec
     real(ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
-    type(ESMF_Array), dimension(2) :: ESMF_coords, ESMF_coords2
+    type(ESMF_Array), dimension(2) :: ESMF_coords
+    ! type(ESMF_Array), dimension(2) :: ESMF_coords2
     real(ESMF_KIND_R8), dimension(:,:), pointer :: x_coords,y_coords
     real(ESMF_KIND_R8), dimension(:,:), pointer :: x_coords2,y_coords2
     real(ESMF_KIND_R8), dimension(:,:), pointer :: Phi, Theta
     real(ESMF_KIND_R8), dimension(:,:), pointer     :: SolnOnTarget
     real(ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
-    real(ESMF_KIND_R8) ::  length_scale, radius, RelativeError
-    real(ESMF_KIND_R8) :: epsil,max_error, avg_error
-    real(ESMF_KIND_R8) :: xmin, ymin, xmax, ymax
-    real(ESMF_KIND_R8) :: crop_factor
+    real(ESMF_KIND_R8) :: RelativeError
+    ! real(ESMF_KIND_R8) ::  length_scale, radius
+    real(ESMF_KIND_R8) :: epsil, max_error, avg_error
+    real(ESMF_KIND_R8) :: xmin=0.0, ymin=0.0, xmax=1.0, ymax=1.0
+    real(ESMF_KIND_R8) :: crop_factor = 1.0
     real(ESMF_KIND_R8), parameter ::  pi            = 3.1416d0
 
 
@@ -611,10 +613,6 @@ end interface
 !  To actually execute the operation, the source and destination data
 !  objects must be supplied, along with the same {\tt ESMF\_RouteHandle}.
       
-
-   !Create a Route Handle
-   !=====================
-    regrid_rh = ESMF_RouteHandleCreate(rc)
 
 
    !Do all the calculations in preparation for the actual re-gridding
@@ -706,8 +704,6 @@ end interface
          '  local avg norm error=',avg_error
 
     call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
-
-    call ESMF_RouteHandleDestroy(regrid_rh)
 
 
 !-------------------------------------------------------------------------
@@ -995,8 +991,9 @@ logical, intent(out), dimension(:) :: maskName
 integer, intent(out) :: nSelected, ier
 
 character(len=25), dimension(15,2) :: StringPairs
-logical :: iguales
-integer :: i, j, nChoicesJ
+!logical :: iguales
+integer :: i
+!integer :: j, nChoicesJ
 integer :: i_name, i_choice
 logical :: found_name, found_choice
 

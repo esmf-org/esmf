@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.h,v 1.9 2003/07/02 17:14:55 nscollins Exp $
+// $Id: ESMC_CommTable.h,v 1.10 2005/10/12 19:06:17 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -67,7 +67,7 @@
  // the following methods apply to deep classes only
  // ESMC_CommTableCreate and ESMC_CommTableDestroy are declared below,
  // outside the ESMC_CommTable declaration
-    int ESMC_CommTableConstruct(int mydeid, int partnercount);
+    int ESMC_CommTableConstruct(int myvmid, int partnercount);
     int ESMC_CommTableDestruct(void); 
 
  // accessor methods for class members

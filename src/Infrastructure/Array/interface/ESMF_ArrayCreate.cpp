@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cpp,v 1.7 2005/05/31 17:39:49 nscollins Exp $
+! $Id: ESMF_ArrayCreate.cpp,v 1.8 2005/10/12 19:06:15 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayCreate.cpp,v 1.7 2005/05/31 17:39:49 nscollins Exp $'
+      '$Id: ESMF_ArrayCreate.cpp,v 1.8 2005/10/12 19:06:15 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -554,9 +554,11 @@ DeclarationMacro(ArrayDeallocate)
             select case (rank)
               case (1)
                 select case (localkind)
+#ifndef ESMF_NO_INTEGER_1_BYTE
                   case (ESMF_I1%dkind)
                     call ESMF_ArrayConstructF90Ptr1DI1(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
+#endif
                   case (ESMF_I2%dkind)
                     call ESMF_ArrayConstructF90Ptr1DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
@@ -574,9 +576,11 @@ DeclarationMacro(ArrayDeallocate)
     
               case (2)
                 select case (localkind)
+#ifndef ESMF_NO_INTEGER_1_BYTE
                   case (ESMF_I1%dkind)
                     call ESMF_ArrayConstructF90Ptr2DI1(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
+#endif
                   case (ESMF_I2%dkind)
                     call ESMF_ArrayConstructF90Ptr2DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
@@ -594,9 +598,11 @@ DeclarationMacro(ArrayDeallocate)
     
               case (3)
                 select case (localkind)
+#ifndef ESMF_NO_INTEGER_1_BYTE
                   case (ESMF_I1%dkind)
                     call ESMF_ArrayConstructF90Ptr3DI1(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
+#endif
                   case (ESMF_I2%dkind)
                     call ESMF_ArrayConstructF90Ptr3DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
@@ -614,9 +620,11 @@ DeclarationMacro(ArrayDeallocate)
     
               case (4)
                 select case (localkind)
+#ifndef ESMF_NO_INTEGER_1_BYTE
                   case (ESMF_I1%dkind)
                     call ESMF_ArrayConstructF90Ptr4DI1(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
+#endif
                   case (ESMF_I2%dkind)
                     call ESMF_ArrayConstructF90Ptr4DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
@@ -634,9 +642,11 @@ DeclarationMacro(ArrayDeallocate)
     
               case (5)
                 select case (localkind)
+#ifndef ESMF_NO_INTEGER_1_BYTE
                   case (ESMF_I1%dkind)
                     call ESMF_ArrayConstructF90Ptr5DI1(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
+#endif
                   case (ESMF_I2%dkind)
                     call ESMF_ArrayConstructF90Ptr5DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
@@ -654,9 +664,11 @@ DeclarationMacro(ArrayDeallocate)
     
               case (6)
                 select case (localkind)
+#ifndef ESMF_NO_INTEGER_1_BYTE
                   case (ESMF_I1%dkind)
                     call ESMF_ArrayConstructF90Ptr6DI1(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
+#endif
                   case (ESMF_I2%dkind)
                     call ESMF_ArrayConstructF90Ptr6DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
@@ -674,9 +686,11 @@ DeclarationMacro(ArrayDeallocate)
     
               case (7)
                 select case (localkind)
+#ifndef ESMF_NO_INTEGER_1_BYTE
                   case (ESMF_I1%dkind)
                     call ESMF_ArrayConstructF90Ptr7DI1(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
+#endif
                   case (ESMF_I2%dkind)
                     call ESMF_ArrayConstructF90Ptr7DI2(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)

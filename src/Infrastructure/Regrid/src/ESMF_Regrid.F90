@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.98 2005/10/06 17:07:39 svasquez Exp $
+! $Id: ESMF_Regrid.F90,v 1.99 2005/10/12 19:06:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -88,13 +88,14 @@
     public ESMF_RegridDestroy    ! deallocate memory associated with a regrid
     public ESMF_RegridValidate   ! Error checking and validation
     public ESMF_RegridPrint      ! Prints various regrid info
+    public ESMF_RegridHasData    ! framework internal use only
 
 !
 !EOPI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.98 2005/10/06 17:07:39 svasquez Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.99 2005/10/12 19:06:16 nscollins Exp $'
 
 !==============================================================================
 !
@@ -199,8 +200,9 @@
 ! !INTERFACE:
       subroutine ESMF_RegridCreate(srcArray, srcGrid, srcDatamap, hasSrcData, &
                                    dstArray, dstGrid, dstDatamap, hasDstData, &
-                                   parentVM, routehandle, regridmethod, &
-                                   regridNorm, srcMask, dstMask, rc)
+                                   parentVM, routehandle, routeIndex, &
+                                   regridmethod, regridNorm, srcMask, dstMask, &
+                                   rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array),         intent(in   ) :: srcArray
@@ -213,6 +215,7 @@
       logical,                  intent(in   ) :: hasDstData
       type(ESMF_VM),            intent(in   ) :: parentVM
       type(ESMF_RouteHandle),   intent(inout) :: routehandle
+      integer,                  intent(in   ) :: routeIndex
       type(ESMF_RegridMethod),  intent(in   ) :: regridmethod
       type(ESMF_RegridNormOpt), intent(in   ), optional :: regridNorm
       type(ESMF_Mask),          intent(in   ), optional :: srcMask
@@ -256,6 +259,8 @@
 !     \item [routehandle]
 !           Returned value which identifies the precomputed Route and other
 !           necessary information.
+!     \item [routeIndex]
+!           Which route (and transform values) inside a routehandle to set.
 !     \item [regridmethod]
 !           Type of regridding to do.  A set of predefined methods are
 !           supplied.
@@ -301,17 +306,33 @@
 
       ! TODO: error check for regridnormOpt only for conservative methods
       
-      ! Call the appropriate create routine based on method choice
+      ! Interface change:  the subroutines below used to be functions which
+      ! returned a new routehandle.  but now you can add multiple routes to
+      ! an existing handle, so the already-created routehandle must be passed
+      ! into this routine and down into the method-specific construct code.
+      ! it is now an error to pass in an uninitialized routehandle here.
+      call ESMF_RouteHandleValidate(routehandle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      
+      ! Before going further down into the method-specific code, make sure
+      ! that this DE has at least src or dst data.   If neither, return now.
+      if ((.not.hasSrcData) .and. (.not.hasDstData)) then
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+      endif
 
+      ! Call the appropriate create routine based on method choice
       select case(regridmethod%regridMethod)
 
       !-------------
       ! ESMF_REGRID_METHOD_BILINEAR
       case(1)
-        routehandle = ESMF_RegridConstructBilinear( &
-                                 srcArray, srcGrid, srcDatamap, hasSrcData, &
-                                 dstArray, dstGrid, dstDatamap, hasDstData, &
-                                 parentVM, srcMask, dstMask, rc=localrc)
+        call ESMF_RegridConstructBilinear( routehandle,  &
+                           srcArray, srcGrid, srcDatamap, hasSrcData, &
+                           dstArray, dstGrid, dstDatamap, hasDstData, &
+                           parentVM, routeIndex, srcMask, dstMask, rc=localrc)
 
       !-------------
       ! ESMF_REGRID_METHOD_BICUBIC
@@ -324,10 +345,10 @@
       !-------------
       ! ESMF_REGRID_METHOD_CONSERV1
       case(3)
-        routehandle = ESMF_RegridConstructConserv( &
+        call ESMF_RegridConstructConserv( routehandle, &
                                  srcArray, srcGrid, srcDatamap, hasSrcData, &
                                  dstArray, dstGrid, dstDatamap, hasDstData, &
-                                 parentVM, srcMask, dstMask, &
+                                 parentVM, routeIndex, srcMask, dstMask, &
                                  regridnorm=regridNorm, order=1, rc=localrc)
 
       !-------------
@@ -337,8 +358,11 @@
                    "Second-order conservative method not yet supported", &
                    ESMF_CONTEXT, rc)
         return
-      !   routehandle = ESMF_RegridConstructConserv(srcArray, dstArray, &
-      !                                        regridName, order=2, rc=localrc)
+      !   call ESMF_RegridConstructConserv(routehandle, &
+      !                          srcArray, srcGrid, srcDatamap, hasSrcData, &
+      !                          dstArray, dstGrid, dstDatamap, hasDstData, &
+      !                          parentVM, routeIndex, srcMask, dstMask, &
+      !                          regridnorm=regridNorm, order=2, rc=localrc)
 
       !-------------
       ! ESMF_REGRID_METHOD_RASTER
@@ -355,8 +379,11 @@
                    "Nearest neighbor method not yet supported", &
                    ESMF_CONTEXT, rc)
         return
-      !   routehandle = ESMF_RegridConstructNearNbr(srcArray, dstArray, &
-      !                                        regridName, rc=localrc)
+      !   call ESMF_RegridConstructNearNbr(routehandle, &
+      !                          srcArray, srcGrid, srcDatamap, hasSrcData, &
+      !                          dstArray, dstGrid, dstDatamap, hasDstData, &
+      !                          parentVM, routeIndex, srcMask, dstMask, &
+      !                          rc=localrc)
 
       !-------------
       ! ESMF_REGRID_METHOD_FOURIER
@@ -385,10 +412,10 @@
       !-------------
       ! ESMF_REGRID_METHOD_LINEAR
       case(10)
-        routehandle = ESMF_RegridConstructLinear( &
-                                 srcArray, srcGrid, srcDatamap, hasSrcData, &
-                                 dstArray, dstGrid, dstDatamap, hasDstData, &
-                                 parentVM, srcMask, dstMask, rc=localrc)
+        call ESMF_RegridConstructLinear( routehandle,  &
+                            srcArray, srcGrid, srcDatamap, hasSrcData, &
+                            dstArray, dstGrid, dstDatamap, hasDstData, &
+                            parentVM, routeIndex, srcMask, dstMask, rc=localrc)
 
       !-------------
       ! ESMF_REGRID_METHOD_SPLINE
@@ -461,20 +488,24 @@
 ! !IROUTINE: ESMF_RegridRunR4 - Performs a regridding between two arrays of type R4
 
 ! !INTERFACE:
-      subroutine ESMF_RegridRunR4(srcArrayList, dstArrayList, &
-                                  srcDataMap, dstDataMap, &
-                                  routehandle, rc)
+      subroutine ESMF_RegridRunR4(srcArrayList, srcDataMap, hasSrcData, &
+                                  dstArrayList, dstDataMap, hasDstData, &
+                                  routehandle, routeIndex, rc)
 !
 ! !ARGUMENTS:
 
       type(ESMF_Array), intent(in) :: srcArrayList(:)
-      type(ESMF_Array), intent(inout) :: dstArrayList(:)
       type (ESMF_FieldDataMap), intent(in) :: srcDatamap
+      logical, intent(in) :: hasSrcData
+      type(ESMF_Array), intent(inout) :: dstArrayList(:)
       type (ESMF_FieldDataMap), intent(in) :: dstDatamap
+      logical, intent(in) :: hasDstData
       type(ESMF_RouteHandle), intent(in) :: routehandle 
                                                  ! precomputed regrid structure
                                                  ! with regridding info
+      integer, intent(in) :: routeIndex
       integer, intent(out), optional :: rc
+ 
 !
 ! !DESCRIPTION:
 !   Given a list of source arrays and precomputed regridding information, 
@@ -513,32 +544,46 @@
 
       zero = 0.0
 
-      ! get the first route from the table and run it to gather the
+      ! Before going further down into this code, make sure
+      ! that this DE has at least src or dst data.   If neither, return now.
+      if ((.not.hasSrcData) .and. (.not.hasDstData)) then
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+      endif
+
+      ! get the right route from the table and run it to gather the
       ! data values which overlap this bounding box.
  
-      call ESMF_RouteHandleGet(routehandle, route1=rh, rc=localrc)
-
-      ! get the indirect indices and weights from the routehandle
-      call ESMF_RouteHandleGet(routehandle, tdata=tv, rc=localrc)
-
-      ! get a real f90 pointer from all the arrays
-      ! srcIndex, dstIndex and weights TKR can be fixed, but unfortunately the
-      ! gatheredData and dstData can be whatever the user wants - so this code
-      ! might need to move into another file and be macroized heavily for TKR.
-      call ESMF_TransformValuesGet(tv, numlist=numlinks, srcindex=srcindexarr, &
-                                   dstindex=dstindexarr, weights=weightsarr, rc=rc)
-      call ESMF_LocalArrayGetData(srcindexarr, srcIndex, ESMF_DATA_REF, rc)
-      call ESMF_LocalArrayGetData(dstindexarr, dstIndex, ESMF_DATA_REF, rc)
-      call ESMF_LocalArrayGetData(weightsarr, weights, ESMF_DATA_REF, rc)
-
-      ! from the domain or from someplace, get the counts of how many data points
-      ! we are expecting from other DEs.  we might also need to know what
-      ! data type is coming since this is user data and not coordinates at 
-      ! execution time.  or does the incoming data have to match the type
-      ! of the outgoing array?  so we can get the data type and shape from
-      ! the dstarray argument to this function.  and what about halo widths?
-
-      call ESMF_RouteGetRecvItems(rh, asize, localrc)
+      asize = 1
+      if (hasDstData) then
+        call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
+                                 route=rh, rc=localrc)
+  
+        ! get corresponding indirect indices and weights from the routehandle
+        call ESMF_RouteHandleGet(routehandle, which_tv=routeIndex, &
+                                 tdata=tv, rc=localrc)
+  
+        ! get a real f90 pointer from all the arrays
+        ! srcIndex, dstIndex and weights TKR can be fixed, but unfortunately the
+        ! gatheredData and dstData can be whatever the user wants - so this code
+        ! might need to move into another file and be macroized heavily for TKR.
+        call ESMF_TransformValuesGet(tv, numlist=numlinks, &
+                                     srcindex=srcindexarr, &
+                                     dstindex=dstindexarr, &
+                                     weights=weightsarr, rc=rc)
+        call ESMF_LocalArrayGetData(srcindexarr, srcIndex, ESMF_DATA_REF, rc)
+        call ESMF_LocalArrayGetData(dstindexarr, dstIndex, ESMF_DATA_REF, rc)
+        call ESMF_LocalArrayGetData(weightsarr, weights, ESMF_DATA_REF, rc)
+  
+        ! from the domain or from someplace, get count of how many data points
+        ! we are expecting from other DEs.  we might also need to know what
+        ! data type is coming since this is user data and not coordinates at 
+        ! execution time.  or does the incoming data have to match the type
+        ! of the outgoing array?  so we can get the data type and shape from
+        ! the dstarray argument to this function.  and what about halo widths?
+  
+        call ESMF_RouteGetRecvItems(rh, asize, localrc)
+      endif
 
       ! up to here the code is common for all input arrays
       ! loop starts below here.
@@ -564,6 +609,7 @@
         call ESMF_FieldDataMapGet(srcDataMap, dataIndexList=srcDimOrder, &
                                   rc=localrc)
   
+      if (hasDstData) then
         ! break out here by rank   TODO: compare datarank to regridrank (or
         !                                compare datamaps)
         select case(rank)
@@ -752,6 +798,8 @@
                                       ESMF_CONTEXT, rc)
           return
         end select
+ 
+        endif  ! hasDstData
   
         ! nuke temp arrays
         deallocate(dstDimOrder, &
@@ -775,7 +823,7 @@
 ! !INTERFACE:
       subroutine ESMF_RegridRunR8(srcArrayList, srcDataMap, hasSrcData, &
                                   dstArrayList, dstDataMap, hasDstData, &
-                                  routehandle, rc)
+                                  routehandle, routeIndex, rc)
 !
 ! !ARGUMENTS:
 
@@ -788,6 +836,7 @@
       type(ESMF_RouteHandle),  intent(in   ) :: routehandle 
                                                   ! precomputed regrid structure
                                                   ! with regridding info
+      integer,                 intent(in   ) :: routeIndex
       integer,                 intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -824,17 +873,26 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! Before going further down into this code, make sure
+      ! that this DE has at least src or dst data.   If neither, return now.
+      if ((.not.hasSrcData) .and. (.not.hasDstData)) then
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+      endif
+
       zero = 0.0
       nullify(gatheredData)
 
       ! get the first route from the table and run it to gather the
       ! data values which overlap this bounding box.
-      call ESMF_RouteHandleGet(routehandle, route1=rh, rc=localrc)
+      call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
+                               route=rh, rc=localrc)
 
       ! get the indirect indices and weights from the routehandle
       asize = 1
       if (hasDstData) then
-        call ESMF_RouteHandleGet(routehandle, tdata=tv, rc=localrc)
+        call ESMF_RouteHandleGet(routehandle, which_tv=routeIndex, &
+                                 tdata=tv, rc=localrc)
 
         ! get a real f90 pointer from all the arrays
         ! srcIndex, dstIndex and weights TKR can be fixed, but unfortunately the
@@ -1101,28 +1159,33 @@
 ! !REQUIREMENTS: TODO
 !EOPI
 
-      integer :: localrc            ! Error status
-      !type(ESMF_RouteHandle) :: rhandle1
-      type(ESMF_Route) :: route
-      type(ESMF_TransformValues) :: tv
+!      integer :: localrc            ! Error status
+!      !type(ESMF_RouteHandle) :: rhandle1
+!      type(ESMF_Route) :: route
+!      type(ESMF_TransformValues) :: tv
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! Does this destroy each of the routes?  it certainly needs to
-      !  destroy the arrays in the TransformValues object.  (i think the
-      !  answer is yes - this code should call route delete here.)
+      !TODO: IS THIS CODE EVEN CALLED ANYMORE?   now that we don't have
+      ! a regrid object, the ESMF_RegridRelease() code calls routehandle
+      ! destroy, which frees the internal objects.   this code should be
+      ! removed, i believe.   nsc 10/2005
 
-      call ESMF_RouteHandleGet(routehandle, route1=route, tdata=tv, &
-                               rc=localrc)
-      call ESMF_RouteDestroy(route, localrc)
-      call ESMF_TransformValuesDestroy(tv, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      ! Set return values.
-      if (present(rc)) rc = ESMF_SUCCESS
+!!     ! ! Does this destroy each of the routes?  it certainly needs to
+!!     ! !  destroy the arrays in the TransformValues object.  (i think the
+!!     ! !  answer is yes - this code should call route delete here.)
+!!
+!!      call ESMF_RouteHandleGet(routehandle, which_route=1, route=route, &
+!!                                            which_tv=1, tdata=tv, rc=localrc)
+!!      call ESMF_RouteDestroy(route, localrc)
+!!      call ESMF_TransformValuesDestroy(tv, localrc)
+!!      if (ESMF_LogMsgFoundError(localrc, &
+!!                                ESMF_ERR_PASSTHRU, &
+!!                                ESMF_CONTEXT, rc)) return
+!!
+!!      ! Set return values.
+!!      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridDestroy
 
@@ -1237,9 +1300,7 @@
 ! !INTERFACE:
       ! Private interface; call using ESMF_ArrayRegridStore()
       subroutine ESMF_ArrayRegridStoreOne(srcArray, srcGrid, srcDatamap, &
-                                          hasSrcData, &
                                           dstArray, dstGrid, dstDatamap, &
-                                          hasDstData, &
                                           parentVM, routehandle, &
                                           regridmethod, regridnorm, &
                                           srcmask, dstmask, routeOptions, rc) 
@@ -1248,13 +1309,11 @@
       type(ESMF_Array),         intent(in   ) :: srcArray
       type(ESMF_Grid),          intent(in   ) :: srcGrid
       type(ESMF_FieldDataMap),  intent(in   ) :: srcDatamap
-      logical,                  intent(in   ) :: hasSrcData
       type(ESMF_Array),         intent(in   ) :: dstArray
       type(ESMF_Grid),          intent(in   ) :: dstGrid
       type(ESMF_FieldDataMap),  intent(in   ) :: dstDatamap
-      logical,                  intent(in   ) :: hasDstData
       type(ESMF_VM),            intent(in   ) :: parentVM
-      type(ESMF_RouteHandle),   intent(inout) :: routehandle
+      type(ESMF_RouteHandle),   intent(out  ) :: routehandle
       type(ESMF_RegridMethod),  intent(in   ) :: regridmethod
       type(ESMF_RegridNormOpt), intent(in   ), optional :: regridnorm
       type(ESMF_Mask),          intent(in   ), optional :: srcmask
@@ -1274,8 +1333,6 @@
 !     \item [srcDatamap]
 !           {\tt ESMF\_FieldDataMap} which describes how the array maps to
 !           the specified source grid.
-!     \item [hasSrcData]
-!           Logical specifier for whether or not this DE has source data.
 !     \item [dstArray]
 !           {\tt ESMF\_Array} containing destination data.
 !     \item [dstGrid]
@@ -1284,8 +1341,6 @@
 !     \item [dstDatamap]
 !           {\tt ESMF\_FieldDataMap} which describes how the array should map to
 !           the specified destination grid.
-!     \item [hasDstData]
-!           Logical specifier for whether or not this DE has destination data.
 !     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s,
 !           most commonly the vm of the Coupler if the regridding is
@@ -1293,7 +1348,9 @@
 !           component if the regridding is intra-component.
 !     \item [routehandle]
 !           Returned value which identifies the precomputed Route and other
-!           necessary information.
+!           necessary information.  This routine creates the handle, so it
+!           should not have a previous value or be created before calling
+!           this routine.
 !     \item [regridmethod]
 !           Type of regridding to do.  A set of predefined methods are
 !           supplied.
@@ -1316,6 +1373,7 @@
 
       integer :: localrc        ! local error status
       type(ESMF_Route) :: route
+      logical :: hasSrcData, hasDstData
 
       ! assume failure until success certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -1326,10 +1384,22 @@
       !  public interface to the Regrid code, so anything we do below
       !  here will be internal interfaces and not public.  The interfaces
       !  need to be as useful to the regrid code as possible.
+      routehandle = ESMF_RouteHandleCreate(rc=rc)
+      call ESMF_RouteHandleSet(routehandle, route_count=1, tv_count=1, rc=rc)
+
+      hasSrcData = ESMF_RegridHasData(srcGrid, srcDatamap)
+      hasDstData = ESMF_RegridHasData(dstGrid, dstDatamap)
+
+      ! Before going further down into this code, make sure
+      ! that this DE has at least src or dst data.   If neither, return now.
+      if ((.not.hasSrcData) .and. (.not.hasDstData)) then
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+      endif
 
       call ESMF_RegridCreate(srcArray, srcGrid, srcDatamap, hasSrcData, &   
                              dstArray, dstGrid, dstDatamap, hasDstData, &
-                             parentVM, routehandle, regridmethod, &
+                             parentVM, routehandle, 1, regridmethod, &
                              regridnorm=regridnorm, &
                              srcmask=srcmask, dstmask=dstmask, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1338,7 +1408,8 @@
 
       ! control over internal communications strategy
       if (present(routeOptions)) then
-          call ESMF_RouteHandleGet(routehandle, route1=route, rc=localrc)
+          call ESMF_RouteHandleGet(routehandle, which_route=1, &
+                                   route=route, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -1364,25 +1435,25 @@
 !BOP
 ! !INTERFACE:
       ! Private interface; call using ESMF_ArrayRegridStore()
-      subroutine ESMF_ArrayRegridStoreList(srcArrayList, srcGrid, srcDatamap, &
-                                           hasSrcData, &
-                                           dstArrayList, dstGrid, dstDatamap, &
-                                           hasDstData, &
-                                           parentVM, routehandle, &
+      subroutine ESMF_ArrayRegridStoreList(srcArray, srcGrid, srcDatamap, &
+                                           dstArray, dstGrid, dstDatamap, &
+                                           parentVM, routehandle, routeIndex, &
+                                           handleMaptype, routeCount, &
                                            regridmethod, regridnorm, &
                                            srcmask, dstmask, routeOptions, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_Array),         intent(in   ) :: srcArrayList(:)
+      type(ESMF_Array),         intent(in   ) :: srcArray
       type(ESMF_Grid),          intent(in   ) :: srcGrid
       type(ESMF_FieldDataMap),  intent(in   ) :: srcDatamap
-      logical,                  intent(in   ) :: hasSrcData
-      type(ESMF_Array),         intent(in   ) :: dstArrayList(:)
+      type(ESMF_Array),         intent(in   ) :: dstArray
       type(ESMF_Grid),          intent(in   ) :: dstGrid
       type(ESMF_FieldDataMap),  intent(in   ) :: dstDatamap
-      logical,                  intent(in   ) :: hasDstData
       type(ESMF_VM),            intent(in   ) :: parentVM
       type(ESMF_RouteHandle),   intent(inout) :: routehandle
+      integer,                  intent(in   ) :: routeIndex
+      integer,                  intent(in   ) :: handleMaptype
+      integer,                  intent(in   ) :: routeCount
       type(ESMF_RegridMethod),  intent(in   ) :: regridmethod
       type(ESMF_RegridNormOpt), intent(in   ), optional :: regridnorm
       type(ESMF_Mask),          intent(in   ), optional :: srcmask
@@ -1394,26 +1465,22 @@
 ! Used to Regrid data in an Array.
 !
 !     \begin{description}
-!     \item [srcArrayList]
-!           List of {\tt ESMF\_Array}s containing source data.
+!     \item [srcArray]
+!           Representative {\tt ESMF\_Array} containing source data.
 !     \item [srcGrid]
 !           {\tt ESMF\_Grid} which corresponds to how the data in the
 !           source array has been decomposed.  
 !     \item [srcDatamap]
 !           {\tt ESMF\_FieldDataMap} which describes how the array maps to
 !           the specified source grid.
-!     \item [hasSrcData]
-!           Logical specifier for whether or not this DE has source data.
-!     \item [dstArrayList]
-!           List of {\tt ESMF\_Array}s containing destination data.
+!     \item [dstArray]
+!           Representative {\tt ESMF\_Array} containing destination data. 
 !     \item [dstGrid]
 !           {\tt ESMF\_Grid} which corresponds to how the data in the
 !           destination array should be decomposed.  
 !     \item [dstDatamap]
 !           {\tt ESMF\_FieldDataMap} which describes how the array should map to
 !           the specified destination grid.
-!     \item [hasDstData]
-!           Logical specifier for whether or not this DE has destination data.
 !     \item [parentVM]
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s,
 !           most commonly the vm of the Coupler if the regridding is
@@ -1421,7 +1488,16 @@
 !           component if the regridding is intra-component.
 !     \item [routehandle]
 !           Returned value which identifies the precomputed Route and other
-!           necessary information.
+!           necessary information.  If {\tt routeIndex} is 1, the routehandle
+!           is created for the first time.  Otherwise it should be a valid
+!           handle and new routes will be added to it.
+!     \item [routeIndex]
+!           Which route inside a route handle is to be computed.
+!     \item [routeCount]
+!           If {\tt routeIndex} is 1, this is the first route being created,
+!           and the routehandle should be created.  The {\tt routeCount} helps
+!           allocate the right amount of space for routes and transform values.
+!           For all other values of {\tt routeIndex}, this is ignored.
 !     \item [regridmethod]
 !           Type of regridding to do.  A set of predefined methods are
 !           supplied.
@@ -1444,6 +1520,8 @@
 
     integer :: localrc        ! local error status
     type(ESMF_Route) :: route
+    logical :: hasSrcData           ! does this DE contain localdata from src?
+    logical :: hasDstData           ! does this DE contain localdata from dst?
 
     ! assume failure until success certain
     if (present(rc)) rc = ESMF_FAILURE
@@ -1455,9 +1533,44 @@
     !  here will be internal interfaces and not public.  The interfaces
     !  need to be as useful to the regrid code as possible.
 
-    call ESMF_RegridCreate(srcArrayList(1), srcGrid, srcDatamap, hasSrcData, & 
-                           dstArrayList(1), dstGrid, dstDatamap, hasDstData, &
-                           parentVM, routehandle, regridmethod, &
+    if (routeIndex .eq. 1) then
+        routehandle = ESMF_RouteHandleCreate(rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        ! set the type and the eventual number of routes this handle will have
+        call ESMF_RouteHandleSet(routehandle, htype=ESMF_REGRIDHANDLE, &
+                                 route_count=routeCount, &
+                                 rmaptype=handleMaptype, &
+                                 tv_count=routeCount, &
+                                 tvmaptype=handleMaptype, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+    else
+       ! make sure it is a valid handle before going on
+       call ESMF_RouteHandleValidate(routehandle, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+    endif
+
+    ! determine if this local DE either src and/or dst data
+    hasSrcData = ESMF_RegridHasData(srcGrid, srcDatamap)
+    hasDstData = ESMF_RegridHasData(dstGrid, dstDatamap)
+
+    ! Before going further down into this code, make sure
+    ! that this DE has at least src or dst data.   If neither, return now.
+    if ((.not.hasSrcData) .and. (.not.hasDstData)) then
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+    endif
+
+
+    call ESMF_RegridCreate(srcArray, srcGrid, srcDatamap, hasSrcData, & 
+                           dstArray, dstGrid, dstDatamap, hasDstData, &
+                           parentVM, routehandle, routeIndex, regridmethod, &
                            regridnorm=regridnorm, &
                            srcmask=srcmask, dstmask=dstmask, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
@@ -1466,7 +1579,8 @@
 
     ! control over internal communications strategy
     if (present(routeOptions)) then
-        call ESMF_RouteHandleGet(routehandle, route1=route, rc=localrc)
+        call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
+                                 route=route, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1477,9 +1591,6 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
     endif
-
-    ! set successful routehandle to type regrid
-    call ESMF_RouteHandleSet(routehandle, htype=ESMF_REGRIDHANDLE, rc=localrc)
 
     ! set return code if user specified it
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1494,7 +1605,8 @@
       ! Private interface; call using ESMF_ArrayRegrid()
       subroutine ESMF_ArrayRegridRunOne(srcArray, srcDataMap, hasSrcData, &
                                         dstArray, dstDataMap, hasDstData, &
-                                        routehandle, srcmask, dstmask, &
+                                        routehandle, routeIndex, &
+                                        srcmask, dstmask, &
                                         blocking, commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
@@ -1505,6 +1617,7 @@
       type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
       logical,                 intent(in   ) :: hasDstData
       type(ESMF_RouteHandle),  intent(in   ) :: routehandle
+      integer,                 intent(in   ), optional :: routeIndex
       type(ESMF_Mask),         intent(in   ), optional :: srcmask
       type(ESMF_Mask),         intent(in   ), optional :: dstmask
       type(ESMF_BlockingFlag), intent(in   ), optional :: blocking
@@ -1535,6 +1648,9 @@
 !           Logical specifier for whether or not this DE has destination data.
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} has been precomputed.
+!     \item [{[routeIndex]}]
+!           If specified, which route inside the handle to execute.  The
+!           default value is 1.
 !     \item [{[srcmask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
 !     \item [{[dstmask]}]
@@ -1568,10 +1684,18 @@
       type(ESMF_DataKind) :: srcKind, dstKind
       type(ESMF_Route) :: route
       type(ESMF_Array) :: srcArrayList(1), dstArrayList(1)
+      integer :: routenum
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
  
+      ! Before going further down into this code, make sure
+      ! that this DE has at least src or dst data.   If neither, return now.
+      if ((.not.hasSrcData) .and. (.not.hasDstData)) then
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+      endif
+
       ! get datakinds from the two arrays
       call ESMF_ArrayGet(srcArray, kind=srcKind, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1582,9 +1706,17 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+      ! default to 1 if routeIndex not specified
+      if (present(routeIndex)) then
+          routenum = routeIndex
+      else
+          routenum = 1
+      endif
+
       ! control over internal communications strategy
       if (present(routeOptions)) then
-          call ESMF_RouteHandleGet(routehandle, route1=route, rc=localrc)
+          call ESMF_RouteHandleGet(routehandle, which_route=routenum, &
+                                   route=route, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -1604,13 +1736,13 @@
 
       ! Execute the communications call based on datakinds
       if (srcKind.eq.ESMF_R4 .AND. dstKind.eq.ESMF_R4) then
-        call ESMF_RegridRunR4(srcArrayList, dstArrayList, &
-                              srcDataMap, dstDataMap, &
-                              routehandle, localrc)
+        call ESMF_RegridRunR4(srcArrayList, srcDataMap, hasSrcData, &
+                              dstArrayList, dstDataMap, hasDstData, &
+                              routehandle, routenum, localrc)
       elseif (srcKind.eq.ESMF_R8 .AND. dstKind.eq.ESMF_R8) then
         call ESMF_RegridRunR8(srcArrayList, srcDataMap, hasSrcData, &
                               dstArrayList, dstDataMap, hasDstData, &
-                              routehandle, localrc)
+                              routehandle, routenum, localrc)
       else
         dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                 "arrays of differing types or this type not yet supported", &
@@ -1633,9 +1765,10 @@
 ! !INTERFACE:
       ! Private interface; call using ESMF_ArrayRegrid()
       subroutine ESMF_ArrayRegridRunList(srcArrayList, srcDataMap, hasSrcData, &
-                                        dstArrayList, dstDataMap, hasDstData, &
-                                        routehandle, srcmask, dstmask, &
-                                        blocking, commhandle, routeOptions, rc)
+                                         dstArrayList, dstDataMap, hasDstData, &
+                                         routehandle, routeIndex, &
+                                         srcmask, dstmask, &
+                                         blocking, commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array),        intent(inout) :: srcArrayList(:)
@@ -1645,6 +1778,7 @@
       type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
       logical,                 intent(in   ) :: hasDstData
       type(ESMF_RouteHandle),  intent(in   ) :: routehandle
+      integer,                 intent(in   ), optional :: routeIndex
       type(ESMF_Mask),         intent(in   ), optional :: srcmask
       type(ESMF_Mask),         intent(in   ), optional :: dstmask
       type(ESMF_BlockingFlag), intent(in   ), optional :: blocking
@@ -1676,6 +1810,9 @@
 !           Logical specifier for whether or not this DE has destination data.
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} has been precomputed.
+!     \item [{[routeIndex]}]
+!           If specified, which route inside the handle to execute.  The
+!           default value is 1.
 !     \item [{[srcmask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
 !     \item [{[dstmask]}]
@@ -1708,10 +1845,18 @@
       logical :: dummy
       type(ESMF_DataKind) :: srcKind, dstKind
       type(ESMF_Route) :: route
+      integer :: routenum
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
  
+      ! Before going further down into this code, make sure
+      ! that this DE has at least src or dst data.   If neither, return now.
+      if ((.not.hasSrcData) .and. (.not.hasDstData)) then
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+      endif
+
       ! get datakinds from the two arrays
       call ESMF_ArrayGet(srcArrayList(1), kind=srcKind, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1722,9 +1867,17 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+      ! default to 1 if routeIndex not specified
+      if (present(routeIndex)) then
+          routenum = routeIndex
+      else
+          routenum = 1
+      endif
+
       ! control over internal communications strategy
       if (present(routeOptions)) then
-          call ESMF_RouteHandleGet(routehandle, route1=route, rc=localrc)
+          call ESMF_RouteHandleGet(routehandle, which_route=routenum, &
+                                   route=route, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -1741,13 +1894,13 @@
 
       ! Execute the communications call based on datakinds
       if (srcKind.eq.ESMF_R4 .AND. dstKind.eq.ESMF_R4) then
-        call ESMF_RegridRunR4(srcArrayList, dstArrayList, &
-                              srcDataMap, dstDataMap, &
-                              routehandle, localrc)
+        call ESMF_RegridRunR4(srcArrayList, srcDataMap, hasSrcData,  &
+                              dstArrayList, dstDataMap, hasDstData, &
+                              routehandle, routenum, localrc)
       elseif (srcKind.eq.ESMF_R8 .AND. dstKind.eq.ESMF_R8) then
         call ESMF_RegridRunR8(srcArrayList, srcDataMap, hasSrcData, &
                               dstArrayList, dstDataMap, hasDstData, &
-                              routehandle, localrc)
+                              routehandle, routenum, localrc)
       else
         dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                 "arrays of differing types or this type not yet supported", &
@@ -1802,6 +1955,78 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayRegridRelease
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridHasData"
+!BOPI
+! !INTERFACE:
+      function ESMF_RegridHasData(grid, datamap, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_RegridHasData
+
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_FieldDatamap), intent(in) :: datamap
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return whether this local DE contains any data values or not.
+!
+!     \begin{description}
+!     \item [grid]
+!           {\tt ESMF\_Grid}.
+!     \item [datamap]
+!           {\tt ESMF\_FieldDataMap}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!
+!EOPI
+
+      integer :: localrc        ! local error status
+      type(ESMF_Relloc) :: relloc
+      integer :: itemcount
+
+      ! initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ESMF_RegridHasData = .false.
+
+      call ESMF_GridValidate(grid, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_FieldDataMapValidate(datamap, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! determine if this local DE either src and/or dst data
+      call ESMF_FieldDataMapGet(datamap, horzRelloc=relloc, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_GridGetDELocalInfo(grid, horzRelLoc=relloc, &
+                                   localCellCount=itemcount, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! hasdata is false, only set it to true if
+      ! this DE has more than 0 cells
+      if (itemcount.gt.0) ESMF_RegridHasData = .true.
+
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_RegridHasData
 
 
    end module ESMF_RegridMod

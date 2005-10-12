@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.h,v 1.11 2004/12/20 18:46:14 nscollins Exp $
+// $Id: ESMC_RTable.h,v 1.12 2005/10/12 19:06:17 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,9 +59,9 @@
 
    private:
      int entrycount;
-     int my_deid;
+     int my_vmid;
      struct rtableentry {
-        int deid;
+        int vmid;
         int xpcount;         // this is how many are currently active
         ESMC_XPacket *xp;    // this needs to be an array of xp's
         int alloccount;      // and this can keep track of how many are allocd
@@ -74,15 +74,15 @@
  // the following methods apply to deep classes only
  // ESMC_RTableCreate and ESMC_RTableDestroy are declared below,
  // outside the ESMC_RTable declaration
-    int ESMC_RTableConstruct(int mydeid, int decount);
+    int ESMC_RTableConstruct(int myvmid, int decount);
     int ESMC_RTableDestruct(void);    
 
  // accessor methods for class members
     //int ESMC_RTableGet<Value>(<value type> *value) const;
     //int ESMC_RTableSet<Value>(<value type>  value);
-    int ESMC_RTableSetEntry(int deid, ESMC_XPacket *xp); 
-    int ESMC_RTableGetEntry(int deid, int xpcount, ESMC_XPacket **xp); 
-    int ESMC_RTableGetCount(int deid, int *xpcount);
+    int ESMC_RTableSetEntry(int vmid, ESMC_XPacket *xp); 
+    int ESMC_RTableGetEntry(int vmid, int xpcount, ESMC_XPacket **xp); 
+    int ESMC_RTableGetCount(int vmid, int *xpcount);
     int ESMC_RTableGetTotalCount(int *xpcount);
     
  // required methods inherited and overridden from the ESMC_Base class
@@ -112,7 +112,7 @@
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_RTable object.
 
- ESMC_RTable *ESMC_RTableCreate(int mydeid, int decount, int *rc);
+ ESMC_RTable *ESMC_RTableCreate(int myvmid, int decount, int *rc);
  int ESMC_RTableDestroy(ESMC_RTable *rtable);
 
  #endif  // ESMC_RTable_H

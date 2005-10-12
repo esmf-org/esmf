@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.3 2005/02/28 21:59:58 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.4 2005/10/12 19:06:22 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -137,7 +137,6 @@
       call ESMF_StateSetNeeded(importState, "RHO", ESMF_NEEDED, rc)
       call ESMF_StateSetNeeded(importState, "FLAG", ESMF_NEEDED, rc)
 
-      fromFlow_rh = ESMF_RouteHandleCreate(rc)
       call ESMF_FieldRedistStore(src_field, dst_field, vm, &
                                  routehandle=fromFlow_rh, rc=rc)
       
@@ -149,7 +148,6 @@
       call ESMF_StateSetNeeded(importState, "RHO", ESMF_NEEDED, rc)
       call ESMF_StateSetNeeded(importState, "FLAG", ESMF_NEEDED, rc)
 
-      fromInject_rh = ESMF_RouteHandleCreate(rc)
       call ESMF_FieldRedistStore(src_field, dst_field, vm, &
                                  routehandle=fromInject_rh, rc=rc)
 
@@ -315,10 +313,8 @@
 
         ! Only thing to do here is release redist and route handles
         call ESMF_FieldRedistRelease(fromFlow_rh, rc)
-        call ESMF_RouteHandleDestroy(fromFlow_rh, rc)
 
         call ESMF_FieldRedistRelease(fromInject_rh, rc)
-        call ESMF_RouteHandleDestroy(fromInject_rh, rc)
 
         rc = ESMF_SUCCESS
     

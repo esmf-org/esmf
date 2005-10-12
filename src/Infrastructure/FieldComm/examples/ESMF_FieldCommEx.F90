@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.11 2005/02/28 16:22:16 nscollins Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.12 2005/10/12 19:06:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -126,11 +126,6 @@
 
 
 !BOC
-    halo_rh = ESMF_RouteHandleCreate(rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
     call ESMF_FieldHaloStore(field1, routehandle=halo_rh, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -142,11 +137,6 @@
 
 !BOC
     call ESMF_FieldHaloRelease(halo_rh, rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-    call ESMF_RouteHandleDestroy(halo_rh)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -168,10 +158,6 @@
 !  call to {\tt ESMF\_FieldRedist()} will perform the actual movement.
 !EOE
 
-!BOC
-    redist_rh = ESMF_RouteHandleCreate(rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
     call ESMF_FieldRedistStore(field1, field2, vm, &
@@ -189,10 +175,6 @@
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-!BOC
-    call ESMF_RouteHandleDestroy(redist_rh)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     print *, "Redist example 2 returned"
 
@@ -211,10 +193,6 @@
 !EOE
 
 
-!BOC
-    regrid_rh = ESMF_RouteHandleCreate(rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
     call ESMF_FieldRegridStore(field1, field2, vm, &
@@ -230,11 +208,6 @@
 
 !BOC
     call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-    call ESMF_RouteHandleDestroy(regrid_rh)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

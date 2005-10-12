@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.38 2005/06/30 21:05:26 nscollins Exp $
+// $Id: ESMC_Route_F.C,v 1.39 2005/10/12 19:06:17 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -130,10 +130,12 @@ extern "C" {
            void **src_base_addr = NULL;
            void **dst_base_addr = NULL;
            ESMC_DataKind sdk, ddk;
+           bool nodst;
            int n;
 
            sdk = ESMF_NOKIND;
            ddk = ESMF_NOKIND;
+           nodst = false;
 
            if (*srcCount > 0) 
  	       src_base_addr = new void*[*srcCount];
@@ -165,10 +167,6 @@ extern "C" {
                        }
                    }
                }
-               // allow destination to be optional; if not specified, use the
-               // src as both src and dst.
-               dst_base_addr = src_base_addr;
-               ddk = sdk;
            }
 
 	   if (((long int)dst != 0) && ((long int)dst != -1)
@@ -179,26 +177,43 @@ extern "C" {
                    (dst[n])->ESMC_LocalArrayGetBaseAddr(dst_base_addr+n);
                    // TODO: ditto comment above about lists of ddks
                    if (n==0)
-                       sdk = (dst[n])->ESMC_LocalArrayGetKind();
+                       ddk = (dst[n])->ESMC_LocalArrayGetKind();
                    else {
-                       if (sdk != (dst[n])->ESMC_LocalArrayGetKind()) {
+                       if (ddk != (dst[n])->ESMC_LocalArrayGetKind()) {
                            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
                         "; all destination datatypes must be the same", status);
                            return;
                        }
                    }
                }
-           }
 
-           if (sdk != ddk) {
-               ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
+               if (sdk != ddk) {
+                   ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
                      "; source & destination datatypes not the same", status);
-               return;
-           }
-           *status = (*ptr)->ESMC_RouteRun(src_base_addr, dst_base_addr, 
-                                           sdk, *srcCount, *dstCount);
+                   return;
+               }
 
-           if (dst_base_addr != src_base_addr) delete [] dst_base_addr;
+               // TODO: compare srcCount and dstCount - if specified, they must 
+               //  be the same.
+           } else
+               nodst = true;
+
+           // if destination not specified, replicate source and pass that
+           // down.  halo needs this, for example - and the problem is that
+           // fortran does not allow the same variable to be specified
+           // as more than 1 argument to a subroutine call.  since we cannot
+           // do this at the fortran level, do it here.
+
+           if (nodst)
+               *status = (*ptr)->ESMC_RouteRun(src_base_addr, src_base_addr, 
+                                               sdk, *srcCount);
+           else {
+               *status = (*ptr)->ESMC_RouteRun(src_base_addr, dst_base_addr, 
+                                               sdk, *srcCount);
+
+               delete [] dst_base_addr;
+           }
+
            delete [] src_base_addr;
 
            return;
@@ -305,8 +320,9 @@ extern "C" {
        }
 
 
-       void FTN(c_esmc_routevalidate)(ESMC_Route **ptr, char *opts, int *status) {
-           *status = (*ptr)->ESMC_RouteValidate(opts);
+       void FTN(c_esmc_routevalidate)(ESMC_Route **ptr, int *bufcount, 
+                  int *bufsizes, char *opts, int *status) {
+           *status = (*ptr)->ESMC_RouteValidate(*bufcount, bufsizes, opts);
        }
 
        void FTN(c_esmc_routeprint)(ESMC_Route **ptr, char *opts, int *status) {

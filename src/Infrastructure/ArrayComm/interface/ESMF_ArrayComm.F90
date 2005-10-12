@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.71 2005/07/01 16:20:20 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.72 2005/10/12 19:06:15 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.71 2005/07/01 16:20:20 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.72 2005/10/12 19:06:15 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -86,20 +86,66 @@
 !
 !==============================================================================
 !BOPI
+! !IROUTINE: ESMF_ArrayHaloStore - Compute info to Halo a distributed array
+!
+! !INTERFACE:
+      interface ESMF_ArrayHaloStore
+
+! !PRIVATE MEMBER FUNCTIONS:
+          module procedure ESMF_ArrayHaloStoreOne
+          module procedure ESMF_ArrayHaloStoreList
+#if 0
+          module procedure ESMF_ArrayHaloDeprecated
+#endif
+
+! !DESCRIPTION:
+!     This interface provides both the revised entry point for
+!      calling Halo on an {\tt ESMF\_Array} object, or a list of
+!      compatible array objects.
+
+!EOPI
+      end interface
+
+!------------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE: ESMF_ArrayHalo - Halo a distributed array
 !
 ! !INTERFACE:
       interface ESMF_ArrayHalo
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_ArrayHaloNew
+          module procedure ESMF_ArrayHaloOne
           module procedure ESMF_ArrayHaloList
+#if 0
           module procedure ESMF_ArrayHaloDeprecated
+#endif
 
 ! !DESCRIPTION:
 !     This interface provides both the revised entry point for
 !      calling Halo on an {\tt ESMF\_Array} object, and temporarily
 !      for backwards compatibility an older interface into the same code.
+
+!EOPI
+      end interface
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArrayRedistStore - Compute info to Redistribute an Array
+!
+! !INTERFACE:
+      interface ESMF_ArrayRedistStore
+
+! !PRIVATE MEMBER FUNCTIONS:
+          module procedure ESMF_ArrayRedistStoreOne
+          module procedure ESMF_ArrayRedistStoreList
+#if 0
+          module procedure ESMF_ArrayRedistDeprecated
+#endif
+
+! !DESCRIPTION:
+!     This interface provides both the revised entry point for
+!      calling redistribute store on an {\tt ESMF\_Array} object, or a
+!      list of compatible array objects.
 
 !EOPI
       end interface
@@ -112,9 +158,11 @@
       interface ESMF_ArrayRedist
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_ArrayRedistNew
+          module procedure ESMF_ArrayRedistOne
           module procedure ESMF_ArrayRedistList
+#if 0
           module procedure ESMF_ArrayRedistDeprecated
+#endif
 
 ! !DESCRIPTION:
 !     This interface provides both the revised entry point for
@@ -555,6 +603,9 @@
       end subroutine ESMF_ArrayGetAllAxisIndices
 
 !------------------------------------------------------------------------------
+#if 0
+!! try to compile without this code - if all our system tests compile,
+!! take this out.
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayHaloDeprecated"
 !BOPI
@@ -601,6 +652,7 @@
         ! logerr routine sets rc based on return from C call.
 
         end subroutine ESMF_ArrayHaloDeprecated
+#endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -610,12 +662,13 @@
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayHalo()
-    subroutine ESMF_ArrayHaloList(arrayList, routehandle, blocking, &
-                                   commhandle, routeOptions, rc)
+    subroutine ESMF_ArrayHaloList(arrayList, routehandle, routeIndex, &
+                                  blocking, commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array), intent(inout) :: arrayList(:)
     type(ESMF_RouteHandle), intent(in) :: routehandle
+    integer, intent(in), optional :: routeIndex
     type(ESMF_BlockingFlag), intent(in), optional :: blocking
     type(ESMF_CommHandle), intent(inout), optional :: commhandle
     type(ESMF_RouteOptions), intent(in), optional :: routeOptions
@@ -634,6 +687,9 @@
 !   \item [routehandle]
 !         {\tt ESMF\_RouteHandle} which was returned from an
 !         {\tt ESMF\_ArrayHaloPrecompute()} call.
+!   \item [{[routeIndex]}]
+!         If specified, select which of possibly multiple routes to execute
+!         from this route handle.  Default value is 1.
 !   \item [{[blocking]}]
 !         Optional argument which specifies whether the operation should
 !         wait until complete before returning or return as soon
@@ -666,7 +722,13 @@
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
  
-      call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
+      if (present(routeIndex)) then
+          call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
+                                        route=route, rc=status)
+      else
+          call ESMF_RouteHandleGet(routehandle, which_route=1, &
+                                        route=route, rc=status)
+      endif
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -682,12 +744,13 @@
         local_arrayList(i)%this%ptr = arrayList(i)%this%ptr
       enddo
 
-      ! Execute the communications call.
-      if (present(routeOptions)) &
-                         call c_ESMC_RouteSet(route, routeOptions, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      ! Set the route options if given, then execute.
+      if (present(routeOptions)) then
+          call c_ESMC_RouteSet(route, routeOptions, status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      endif
 
       call ESMF_RouteRunList(route, local_arrayList, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -705,18 +768,19 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayHaloNew"
+#define ESMF_METHOD "ESMF_ArrayHaloOne"
 !BOP
 ! !IROUTINE: ESMF_ArrayHalo - Halo an Array
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayHalo()
-    subroutine ESMF_ArrayHaloNew(array, routehandle, blocking, commhandle, &
-                                 routeOptions, rc)
+    subroutine ESMF_ArrayHaloOne(array, routehandle, routeIndex, &
+                                 blocking, commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array), intent(inout) :: array
     type(ESMF_RouteHandle), intent(in) :: routehandle
+    integer, intent(in), optional :: routeIndex
     type(ESMF_BlockingFlag), intent(in), optional :: blocking
     type(ESMF_CommHandle), intent(inout), optional :: commhandle
     type(ESMF_RouteOptions), intent(in), optional :: routeOptions
@@ -766,7 +830,13 @@
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
  
-      call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
+      if (present(routeIndex)) then
+          call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
+                                   route=route, rc=status)
+      else
+          call ESMF_RouteHandleGet(routehandle, which_route=1, &
+                                   route=route, rc=status)
+      endif
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -774,12 +844,13 @@
       ! fortran equivalent of a cast - routerun wants a local array 
       local_array%this%ptr = array%this%ptr
 
-      ! Execute the communications call.
-      if (present(routeOptions)) &
-                         call c_ESMC_RouteSet(route, routeOptions, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      ! Set the route options if given, then execute the route.
+      if (present(routeOptions)) then
+          call c_ESMC_RouteSet(route, routeOptions, status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      endif
 
       call ESMF_RouteRun(route, local_array, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -788,7 +859,7 @@
 
       ! last call to logerr already set rc
 
-      end subroutine ESMF_ArrayHaloNew
+      end subroutine ESMF_ArrayHaloOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -823,12 +894,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayHaloStore"
+#define ESMF_METHOD "ESMF_ArrayHaloStoreOne"
 !BOP
 ! !IROUTINE: ESMF_ArrayHaloStore - Store resources for a halo operation
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayHaloStore(array, grid, datamap, routehandle, &
+      ! Private interface; call using ESMF_ArrayHaloStore()
+      subroutine ESMF_ArrayHaloStoreOne(array, grid, datamap, routehandle, &
                                      halodirection, routeOptions, rc)
 !
 ! !ARGUMENTS:
@@ -872,6 +944,96 @@
 !     \end{description}
 !
 !EOP
+      ! note that the routehandle coming in here is intent(out) because
+      ! it is going to be created from scratch in the subsequent call.
+      ! however, the StoreList() call has to have the routehandle intent
+      ! as (inout) because setting any index > 1 will add a route to
+      ! an existing routehandle and *not* call the create code.
+  
+      ! TODO: i have a feeling that some compilers will not like this
+      ! arrangement.  solutions might be to either make the intent at
+      ! this level (inout) as well, even though that is confusing to users,
+      ! or make a temporary here and do an assignment before returning.
+
+      ! passthru call, setting index to 1 and type 1-to-1
+      call ESMF_ArrayHaloStoreList(array, 1, ESMF_1TO1HANDLEMAP, 1, &
+                                grid, datamap, &
+                                routehandle, halodirection, routeOptions, rc)
+
+      end subroutine ESMF_ArrayHaloStoreOne
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayHaloStoreList"
+!BOPI
+! !IROUTINE: ESMF_ArrayHaloStoreList - Store resources for a halo operation
+!
+! !INTERFACE:
+      ! Internal routine, intended to be called directly by Bundle code only
+      subroutine ESMF_ArrayHaloStoreList(array, index, rmaptype, maxindex, &
+                                      grid, datamap, routehandle, &
+                                      halodirection, routeOptions, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array
+      integer, intent(in) :: index
+      integer, intent(in) :: rmaptype
+      integer, intent(in) :: maxindex
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_FieldDataMap), intent(in) :: datamap
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_HaloDirection), intent(in), optional :: halodirection
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Precompute the data movements needed to 
+!     perform a halo operation over the data in an {\tt ESMF\_Array}.  
+!     It associates this information with the {\tt routehandle}, which 
+!     should then provided to {\tt ESMF\_ArrayHalo()} at execution time.
+!     The {\tt ESMF\_Grid} and {\tt ESMF\_FieldDataMap} are used as
+!     templates to understand how this {\tt ESMF\_Array} relates 
+!     to {\tt ESMF\_Array}s on other DEs.
+!
+!     \begin{description}
+!     \item [array]
+!           {\tt ESMF\_Array} containing data to be haloed.
+!     \item [index]
+!           Integer specifying which route number this is to be inside
+!           the {\tt routehandle}.  Route handles for bundles can contain
+!           either a single route which applies to all fields in the bundle,
+!           or multiple routes which correspond to the differences in
+!           data motion for different array sizes, ranks, relative locations,
+!           data types, etc.  Since this is Fortran, index 1 is the first
+!           route number.
+!     \item [rmaptype]
+!           Integer parameter value used if the index number is 1.
+!           Controls whether the route handle will contain a separate route
+!           for each index, or if all indices map to the same route.
+!     \item [maxindex]
+!           If {\tt index} is 1, set the maximum number of routes which
+!           will eventually be set.  If not known, use 1.  The list of
+!           routes can be reallocated and expanded later.
+!     \item [grid]
+!           {\tt ESMF\_Grid} which matches how this data was decomposed.
+!     \item [datamap]
+!           {\tt ESMF\_FieldDataMap} which matches how the data in the
+!           {\tt ESMF\_Array} relates to the given {\tt ESMF\_Grid}.
+!     \item [routehandle]
+!           {\tt ESMF\_RouteHandle} is returned to be used during the
+!           execution of the halo operation.
+!     \item [{[halodirection]}]
+!           {\tt ESMF\_HaloDirection} to indicate which of the boundaries
+!           should be updated.  If not specified, all boundaries are updated.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to execute the halo.
+!           See Section~\ref{opt:routeopt} for possible values.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
 
       integer :: status         ! local error status
       type(ESMF_DELayout) :: delayout
@@ -893,9 +1055,17 @@
       ! TODO: all this code could be moved to the C++ side once Grid has
       !       an interface
 
-      ! create the routehandle
-     
-      routehandle = ESMF_RouteHandleCreate(status)
+      ! create the routehandle if this is the first route.  otherwise
+      ! we are adding a route to an existing handle and we do not want
+      ! to overwrite it.
+      if (index .eq. 1) then
+          routehandle = ESMF_RouteHandleCreate(status)
+          ! set the type and mapping
+          call ESMF_RouteHandleSet(routehandle, htype=ESMF_HALOHANDLE, &
+                                   route_count=maxindex, rmaptype=rmaptype, &
+                                   tv_count=0, tvmaptype=ESMF_NOHANDLEMAP, &
+                                   rc=status)
+      endif
     
       ! Extract layout information from the Grid
       call ESMF_GridGet(grid, delayout=delayout, rc=status)
@@ -1007,15 +1177,16 @@
       endif
 
       ! Set the route options if given.
-      if (present(routeOptions)) &
-                         call c_ESMC_RouteSet(route, routeOptions, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      if (present(routeOptions)) then
+          call c_ESMC_RouteSet(route, routeOptions, status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      endif
 
       ! and set route into routehandle object
-      call ESMF_RouteHandleSet(routehandle, route1=route, &
-                               htype=ESMF_HALOHANDLE, rc=status)
+      call ESMF_RouteHandleSet(routehandle, which_route=index, route=route, &
+                               rc=status)
 
       ! clean up
 10  continue
@@ -1051,9 +1222,11 @@
       ! set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_ArrayHaloStore
+      end subroutine ESMF_ArrayHaloStoreList
 
 !------------------------------------------------------------------------------
+!! same comment as above halo.
+#if 0
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayRedistDeprecated"
 !BOPI
@@ -1105,6 +1278,7 @@
         if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_ArrayRedistDeprecated
+#endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1115,12 +1289,14 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayRedist()
       subroutine ESMF_ArrayRedistList(srcArrayList, dstArrayList, routehandle, &
-                                       blocking, commhandle, routeOptions, rc) 
+                                      routeIndex, blocking, &
+                                      commhandle, routeOptions, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: srcArrayList(:)
       type(ESMF_Array), intent(inout) :: dstArrayList(:)
       type(ESMF_RouteHandle), intent(in) :: routehandle
+      integer, intent(in), optional :: routeIndex
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       type(ESMF_RouteOptions), intent(in), optional :: routeOptions
@@ -1148,6 +1324,9 @@
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} precomputed by 
 !           {\tt ESMF\_ArrayRedistPrecompute()}.
+!   \item [{[routeIndex]}]
+!         If specified, select which of possibly multiple routes to execute
+!         from this route handle.  Default value is 1.
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
@@ -1181,7 +1360,13 @@
       ! initialize return code; assume failure until success certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
+      if (present(routeIndex)) then
+          call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
+                                        route=route, rc=status)
+      else
+          call ESMF_RouteHandleGet(routehandle, which_route=1, &
+                                        route=route, rc=status)
+      endif
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1210,11 +1395,12 @@
       enddo
 
       ! Set the route options if given.
-      if (present(routeOptions)) &
-                         call c_ESMC_RouteSet(route, routeOptions, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) goto 10
+      if (present(routeOptions)) then
+          call c_ESMC_RouteSet(route, routeOptions, status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      endif
 
       ! Execute the communications call.
       call ESMF_RouteRunList(route, srcLocalArrayList, dstLocalArrayList, status)
@@ -1237,19 +1423,21 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedistNew"
+#define ESMF_METHOD "ESMF_ArrayRedistOne"
 !BOP
 ! !IROUTINE: ESMF_ArrayRedist - Redistribute an Array
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayRedist()
-      subroutine ESMF_ArrayRedistNew(srcArray, dstArray, routehandle, &
-                                     blocking, commhandle, routeOptions, rc) 
+      subroutine ESMF_ArrayRedistOne(srcArray, dstArray, routehandle, &
+                                     routeIndex, blocking, &
+                                     commhandle, routeOptions, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcArray
       type(ESMF_Array), intent(inout) :: dstArray
       type(ESMF_RouteHandle), intent(in) :: routehandle
+      integer, intent(in), optional :: routeIndex
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       type(ESMF_RouteOptions), intent(in), optional :: routeOptions
@@ -1277,6 +1465,9 @@
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} precomputed by 
 !           {\tt ESMF\_ArrayRedistPrecompute()}.
+!   \item [{[routeIndex]}]
+!         If specified, select which of possibly multiple routes to execute
+!         from this route handle.  Default value is 1.
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
@@ -1308,17 +1499,25 @@
       ! initialize return code; assume failure until success certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
+      if (present(routeIndex)) then
+          call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
+                                        route=route, rc=status)
+      else
+          call ESMF_RouteHandleGet(routehandle, which_route=1, &
+                                        route=route, rc=status)
+      endif
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       ! Set the route options if given.
-      if (present(routeOptions)) &
-                         call c_ESMC_RouteSet(route, routeOptions, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      if (present(routeOptions)) then
+          call c_ESMC_RouteSet(route, routeOptions, status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      endif
+
 
       ! Execute the communications call.
       dstLocalArray = dstArray
@@ -1331,7 +1530,7 @@
       ! set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_ArrayRedistNew
+      end subroutine ESMF_ArrayRedistOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1367,12 +1566,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedistStore"
+#define ESMF_METHOD "ESMF_ArrayRedistStoreOne"
 !BOP
 ! !IROUTINE: ESMF_ArrayRedistStore - Store resources for a redist operation
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayRedistStore(srcArray, srcGrid, srcDataMap, &
+      ! Private name; call using ESMF_ArrayRedistStore()
+      subroutine ESMF_ArrayRedistStoreOne(srcArray, srcGrid, srcDataMap, &
                                        dstArray, dstGrid, dstDataMap, &
                                        parentVM, routeOptions, routehandle, rc)
 !
@@ -1432,6 +1632,105 @@
 !
 !EOP
 
+    ! if problems compiling, see the comment in HaloStore() for
+    ! suggestions regarding intent(out) vs intent(inout).
+
+    call ESMF_ArrayRedistStoreList(srcArray, srcGrid, srcDataMap, &
+                               dstArray, dstGrid, dstDataMap, &
+                               1, ESMF_1TO1HANDLEMAP, 1, &
+                               parentVM, routeOptions, routehandle, rc)
+
+
+    end subroutine ESMF_ArrayRedistStoreOne
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedistStoreList"
+!BOPI
+! !IROUTINE: ESMF_ArrayRedistStoreList - Store resources for a redist operation
+!
+! !INTERFACE:
+      ! internal use only; called by Bundle code for multi-fields
+      subroutine ESMF_ArrayRedistStoreList(srcArray, srcGrid, srcDataMap, &
+                                       dstArray, dstGrid, dstDataMap, &
+                                       index, rmaptype, maxindex, &
+                                       parentVM, routeOptions, routehandle, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(in) :: srcArray
+      type(ESMF_Grid), intent(in) :: srcGrid
+      type(ESMF_FieldDataMap), intent(in) :: srcDataMap
+      type(ESMF_Array), intent(inout) :: dstArray
+      type(ESMF_Grid), intent(in) :: dstGrid
+      type(ESMF_FieldDataMap), intent(in) :: dstDataMap
+      integer, intent(in) :: index
+      integer, intent(in) :: rmaptype
+      integer, intent(in) :: maxindex
+      type(ESMF_VM), intent(in) :: parentVM
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!  Precompute and associate the required data movements to redistribute
+!  data over one set of {\tt ESMF\_Array}s to another
+!  set of {\tt ESMF\_Array}s.  Data redistribution does no interpolation,
+!  so both {\tt ESMF\_Grid}s must have identical coordinates.
+!  The distribution of the {\tt ESMF\_Grid}s can be over different
+!  {\tt ESMF\_DELayout}s, or the {\tt ESMF\_FieldDataMap}s can differ.
+!  The {\tt routehandle} argument is associated with the stored information
+!  and must be supplied to {\tt ESMF\_ArrayRedist()} to execute the
+!  operation.  Call {\tt ESMF\_ArrayRedistRelease()} when this information
+!  is no longer required.
+!
+!  The arguments are:
+!   \begin{description}
+!   \item[srcArray]
+!    {\tt ESMF\_Array} containing the data source.
+!   \item[srcGrid]
+!    {\tt ESMF\_Grid} describing the grid on which the source data is arranged.
+!   \item[srcDataMap]
+!    {\tt ESMF\_FieldDataMap} describing how the source data maps onto the grid.
+!   \item[dstArray]
+!    {\tt ESMF\_Array} where the destination data will be put.
+!   \item[dstGrid]
+!    {\tt ESMF\_Grid} describing the grid on which the destination data is 
+!    arranged.
+!   \item[dstDataMap]
+!    {\tt ESMF\_FieldDataMap} describing how the destination data maps 
+!    onto the grid.
+!     \item [index]
+!           Integer specifying which route number this is to be inside
+!           the {\tt routehandle}.  Route handles for bundles can contain
+!           either a single route which applies to all fields in the bundle,
+!           or multiple routes which correspond to the differences in
+!           data motion for different array sizes, ranks, relative locations,
+!           data types, etc.  Since this is Fortran, index 1 is the first
+!           route number.
+!     \item [rmaptype]
+!           Integer parameter value used if the index number is 1.
+!           Controls whether the route handle will contain a separate route
+!           for each index, or if all indices map to the same route.
+!     \item [maxindex]
+!           If {\tt index} is 1, set the maximum number of routes which
+!           will eventually be set.  If not known, use 1.  The list of
+!           routes can be reallocated and expanded later.
+!   \item[parentVM]
+!    {\tt ESMF\_VM} object which includes all PETs in both the
+!    source and destination grids.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to execute the
+!           See Section~\ref{opt:routeopt} for possible values.
+!   \item [routehandle]
+!    Returned {\tt ESMF\_RouteHandle} which identifies this 
+!    communication pattern.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
       integer :: status         ! local error status
       integer :: dstAICount, srcAICount
       integer :: dstDEs, srcDEs, dstMyDE, srcMyDE
@@ -1471,8 +1770,18 @@
       nullify(dstTLocalAI)
       nullify(srcTLocalAI)
 
-      ! create the routehandle
-      routehandle = ESMF_RouteHandleCreate(status)
+      ! create the routehandle if this is the first route.  otherwise
+      ! we are adding a route to an existing handle and we do not want
+      ! to overwrite it.
+      if (index .eq. 1) then
+          routehandle = ESMF_RouteHandleCreate(status)
+          ! set the type and mapping
+          call ESMF_RouteHandleSet(routehandle, htype=ESMF_REDISTHANDLE, &
+                                   route_count=maxindex, rmaptype=rmaptype, &
+                                   tv_count=0, tvmaptype=ESMF_NOHANDLEMAP, &
+                                   rc=status)
+      endif
+    
 
       ! Query the datamap and set info for grid so it knows how to
       ! match up the array indices and the grid indices.
@@ -1716,15 +2025,16 @@
       endif
 
       ! Set the route options if given.
-      if (present(routeOptions)) &
-                         call c_ESMC_RouteSet(route, routeOptions, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      if (present(routeOptions)) then
+          call c_ESMC_RouteSet(route, routeOptions, status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      endif
 
       ! and set route into routehandle object
-      call ESMF_RouteHandleSet(routehandle, route1=route, &
-                               htype=ESMF_REDISTHANDLE, rc=status)
+      call ESMF_RouteHandleSet(routehandle,  which_route=index, route=route, &
+                               rc=status)
 
       ! get rid of temporary arrays
       if (allocated(           periodic)) deallocate(periodic, stat=status)
@@ -1747,7 +2057,7 @@
       ! set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_ArrayRedistStore
+      end subroutine ESMF_ArrayRedistStoreList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.26 2005/02/28 16:22:34 nscollins Exp $
+! $Id: ESMF_RouteEx.F90,v 1.27 2005/10/12 19:06:17 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -118,8 +118,6 @@
 !   !  Calling Field Halo
 
 
-    halo_rh = ESMF_RouteHandleCreate(rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldHaloStore(field1, routehandle=halo_rh, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -130,8 +128,6 @@
     call ESMF_FieldHaloRelease(halo_rh, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_RouteHandleDestroy(halo_rh)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     print *, "Halo example 1 returned"
 
@@ -141,8 +137,6 @@
 !   !  Calling Field Redist
 
 
-    redist_rh = ESMF_RouteHandleCreate(rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldRedistStore(field1, field2, vm, &
                                                 routehandle=redist_rh, rc=rc)
@@ -154,8 +148,6 @@
     call ESMF_FieldRedistRelease(redist_rh, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_RouteHandleDestroy(redist_rh)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     print *, "Redist example 2 returned"
 
@@ -165,8 +157,6 @@
 !   !  Calling Field Regrid
 
 
-    regrid_rh = ESMF_RouteHandleCreate(rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldRegridStore(field1, field2, vm, &
                                routehandle=regrid_rh, &
@@ -179,8 +169,6 @@
     call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_RouteHandleDestroy(regrid_rh)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     print *, "Regrid example 3 returned"
 

@@ -1,7 +1,7 @@
-# $Id: makefile,v 1.27 2005/07/15 03:41:47 nscollins Exp $
+# $Id: makefile,v 1.28 2005/10/12 19:06:17 nscollins Exp $
 
 ALL:  build_unit_tests
-run:  tree_run_unit_tests
+run:  run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -48,6 +48,9 @@ CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
 
+#
+# Regrid Unit Test
+#
 RUN_ESMF_RegridUTest:
 	$(MAKE) TNAME=Regrid NP=8 ftest
 
@@ -55,6 +58,9 @@ RUN_ESMF_RegridUTestUNI:
 	$(MAKE) TNAME=Regrid NP=1 ftest
 
 
+#
+# RegridOptions Unit Test
+#
 RUN_ESMF_RegridOptionsUTest:
 	$(MAKE) TNAME=RegridOptions NP=8 ftest
 
@@ -62,6 +68,9 @@ RUN_ESMF_RegridOptionsUTestUNI:
 	$(MAKE) TNAME=RegridOptions NP=1 ftest
 
 
+#
+# Regrid 1 Unit Test
+#
 RUN_ESMF_Regrid1UTest:
 	$(MAKE) TNAME=Regrid1 NP=8 ftest
 
@@ -69,6 +78,9 @@ RUN_ESMF_Regrid1UTestUNI:
 	$(MAKE) TNAME=Regrid1 NP=1 ftest
 
 
+#
+# Regrid 2 Unit Test
+#
 RUN_ESMF_Regrid2UTest:
 	$(MAKE) TNAME=Regrid2 NP=8 ftest
 
@@ -76,6 +88,9 @@ RUN_ESMF_Regrid2UTestUNI:
 	$(MAKE) TNAME=Regrid2 NP=1 ftest
 
 
+#
+# Regrid_b Unit Test
+#
 RUN_ESMF_Regrid_bUTest:
 	$(MAKE) TNAME=Regrid_b NP=8 ftest
 
@@ -83,6 +98,9 @@ RUN_ESMF_Regrid_bUTestUNI:
 	$(MAKE) TNAME=Regrid_b NP=1 ftest
 
 
+#
+# RegridSample Unit Test
+#
 RUN_ESMF_RegridSampleUTest:
 	$(MAKE) TNAME=RegridSample NP=8 ftest
 

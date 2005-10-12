@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridUTest.F90,v 1.14 2005/02/28 16:30:58 nscollins Exp $
+! $Id: ESMF_RegridUTest.F90,v 1.15 2005/10/12 19:06:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridUTest.F90,v 1.14 2005/02/28 16:30:58 nscollins Exp $'
+      '$Id: ESMF_RegridUTest.F90,v 1.15 2005/10/12 19:06:17 nscollins Exp $'
 !------------------------------------------------------------------------------
       type(ESMF_VM):: vm
 
@@ -184,8 +184,8 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 
-      call ESMF_FieldPrint(humidity1, rc=rc)
-      call ESMF_FieldPrint(humidity2, rc=rc)
+      !call ESMF_FieldPrint(humidity1, rc=rc)
+      !call ESMF_FieldPrint(humidity2, rc=rc)
       !------------------------------------------------------------------------
       ! Up to here the tests are all part of the set up.  From here on,
       ! the tests are really regrid tests.
@@ -197,26 +197,32 @@
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
+      print *, "ready to call regrid store"
       call ESMF_FieldRegridStore(humidity1, humidity2, vm, &
                                  routehandle, &
                                  regridmethod=ESMF_REGRID_METHOD_BILINEAR, &
                                  rc=rc)
+      print *, "back from regrid store"
       write(failMsg, *) "regrid store rc =", rc
       write(name, *) "regrid store rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
+      print *, "ready to call regrid run"
       call ESMF_FieldRegrid(humidity1, humidity2, routehandle, rc=rc)
+      print *, "back from regrid run"
       write(failMsg, *) "regrid run rc =", rc
       write(name, *) "regrid run rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      call ESMF_FieldPrint(humidity1, rc=rc)
-      call ESMF_FieldPrint(humidity2, rc=rc)
+      !call ESMF_FieldPrint(humidity1, rc=rc)
+      !call ESMF_FieldPrint(humidity2, rc=rc)
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
+      print *, "ready to call regrid release"
       call ESMF_FieldRegridRelease(routehandle, rc=rc)
+      print *, "back from regrid release"
       write(failMsg, *) "regrid release rc =", rc
       write(name, *) "regrid release rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

@@ -1,4 +1,4 @@
-! $Id: ESMF_RedistUTest.F90,v 1.6 2005/10/12 19:06:21 nscollins Exp $
+! $Id: ESMF_HaloUTest.F90,v 1.1 2005/10/12 19:06:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      program ESMF_RedistUTest
+      program ESMF_HaloUTest
 
 #include "ESMF_Macros.inc"
 
@@ -18,29 +18,28 @@
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_RedistUTest - Data redistribution tests
+! !PROGRAM: ESMF_HaloUTest - Data halo tests
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives F90 Redist unit tests, using the Route code.
+! The code in this file drives F90 Halo unit tests, using the Route code.
 !
-!  "Redist" is sending data from one field to another, where the grids 
-!   themselves are identical, but the decompositions (which subsets of the
-!   grid are located on each processor) are different.  Redist sends data
-!   from one processor to another with no interpolation.  See Regrid for
-!   routines which do data interpolation from one grid to another.
+!  "Halo" is sending boundary data from one field to another, where the 
+!   overlapping cells are treated as read-only by the receiver, and are
+!   then available for computations involving boundary cells in the receiver.
+!   These cells are known variously as ghost zones or halo regions.
 !
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_TestMod     ! test methods
       use ESMF_Mod
-      use ESMF_RedistHelpers   ! helper subroutines
+      use ESMF_HaloHelpers
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RedistUTest.F90,v 1.6 2005/10/12 19:06:21 nscollins Exp $'
+      '$Id: ESMF_HaloUTest.F90,v 1.1 2005/10/12 19:06:21 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -58,9 +57,8 @@
       character(ESMF_MAXSTR) :: print_options = "all"
 
       ! local args needed to create/construct objects
-      type(ESMF_RouteHandle) :: redist_rh
+      type(ESMF_RouteHandle) :: halo_rh
       type(ESMF_Field) :: field1, field2
-      type(ESMF_VM) :: vm
       real(ESMF_KIND_R8) :: val1, val2
 
 
@@ -78,44 +76,46 @@
 
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! fill source field with known data
+      ! fill data region of source field with known data
       val1 = 1.0
       call FillConstantField(field1, val1, rc)
-      write(name, *) "Filling src field with constant data values"
-      write(failMsg, *) "Filling src field with constant data values"
+      write(name, *) "Filling field with constant data values"
+      write(failMsg, *) "Filling field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! fill destination field with known data
+      ! fill halo region of source field with known data
       val2 = -1.0
-      call FillConstantField(field2, val2, rc)
-      write(name, *) "Filling dst field with constant data values"
-      write(failMsg, *) "Filling dst field with constant data values"
+      call FillConstantHalo(field1, val2, rc)
+      write(name, *) "Filling halo with constant data values"
+      write(failMsg, *) "Filling halo with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
       ! store
-      call ESMF_VMGetGlobal(vm, rc=rc)
-      call ESMF_FieldRedistStore(field1, field2, vm, &
-                                                routehandle=redist_rh, rc=rc)
-      write(name, *) "Computing route for redist"
-      write(failMsg, *) "Computing route for redist"
+      call ESMF_FieldHaloStore(field1, routehandle=halo_rh, rc=rc)
+      write(name, *) "Computing route for halo"
+      write(failMsg, *) "Computing route for halo"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
       ! run
-      call ESMF_FieldRedist(field1, field2, routehandle=redist_rh, rc=rc)
-      write(name, *) "Executing redist"
-      write(failMsg, *) "Executing redist"
+      call ESMF_FieldHalo(field1, routehandle=halo_rh, rc=rc)
+      write(name, *) "Executing halo"
+      write(failMsg, *) "Executing halo"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
+      call ESMF_FieldPrint(field1, rc=rc)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
       !NEX_UTest
-      ! validate destination field
-      call ValidateConstantField(field2, val1, rc)
+      ! validate resulting field
+      call ValidateConstantField(field1, val1, rc)
       write(name, *) "Validating constant data in dest fields"
       write(failMsg, *) "Validating constant data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -123,7 +123,7 @@
 #if ESMF_EXHAUSTIVE
       !------------------------------------------------------------------------
       !EX_UTest
-      ! fill source field with known data
+      ! fill computational area of field with known data
       call FillIndexField(field1, rc)
       write(name, *) "Filling src field with indexed data values"
       write(failMsg, *) "Filling src field with indexed data values"
@@ -131,33 +131,36 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! fill destination field with known data
+      ! fill halo region with constant value
       val2 = -1.0
-      call FillConstantField(field2, val2, rc)
-      write(name, *) "Filling dst field with constant data values"
-      write(failMsg, *) "Filling dst field with constant data values"
+      call FillConstantHalo(field1, val2, rc)
+      write(name, *) "Filling halo with constant data values"
+      write(failMsg, *) "Filling halo with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
       ! run
-      call ESMF_FieldRedist(field1, field2, routehandle=redist_rh, rc=rc)
-      write(name, *) "Executing redist 2"
-      write(failMsg, *) "Executing redist 2"
+      call ESMF_FieldHalo(field1, routehandle=halo_rh, rc=rc)
+      write(name, *) "Executing halo 2"
+      write(failMsg, *) "Executing halo 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
+      call ESMF_FieldPrint(field1, rc=rc)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
       !EX_UTest
-      ! validate destination field, data regions only
-      call ValidateIndexField(field2, rc)
+      ! validate field, data regions only
+      call ValidateIndexField(field1, rc)
       write(name, *) "Validating indexed data in dest fields"
       write(failMsg, *) "Validating indexed data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! validate halo regions in destination field - should be unchanged
-      call ValidateConstantHalo(field2, val2, rc)
+      call ValidateIndexHalo(field1, rc)
       write(name, *) "Validating halo area in dest fields"
       write(failMsg, *) "Validating indexed data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -165,7 +168,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! release first route handle, compute another below
-      call ESMF_FieldRedistRelease(redist_rh, rc=rc)
+      call ESMF_FieldHaloRelease(halo_rh, rc=rc)
       write(name, *) "Releasing route"
       write(failMsg, *) "Releasing route"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -183,33 +186,35 @@
       !EX_UTest
       ! fill destination field with known data
       val2 = -1.0
-      call FillConstantField(field1, val2, rc)
-      write(name, *) "Filling dst field with constant data values"
-      write(failMsg, *) "Filling dst field with constant data values"
+      call FillConstantHalo(field2, val2, rc)
+      write(name, *) "Filling halo with constant data values"
+      write(failMsg, *) "Filling halo with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
       ! store
-      call ESMF_VMGetGlobal(vm, rc=rc)
-      call ESMF_FieldRedistStore(field2, field1, vm, &
-                                                routehandle=redist_rh, rc=rc)
-      write(name, *) "Computing route for redist, 2 to 1"
-      write(failMsg, *) "Computing route for redist, 2 to 1"
+      call ESMF_FieldHaloStore(field2, routehandle=halo_rh, rc=rc)
+      write(name, *) "Computing route for halo, 2 to 1"
+      write(failMsg, *) "Computing route for halo, 2 to 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
       ! run
-      call ESMF_FieldRedist(field2, field1, routehandle=redist_rh, rc=rc)
-      write(name, *) "Executing redist"
-      write(failMsg, *) "Executing redist"
+      call ESMF_FieldHalo(field2, routehandle=halo_rh, rc=rc)
+      write(name, *) "Executing halo"
+      write(failMsg, *) "Executing halo"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      call ESMF_FieldPrint(field2, rc=rc)
+      !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
       !EX_UTest
       ! validate destination field
-      call ValidateConstantField(field1, val1, rc)
+      call ValidateConstantField(field2, val1, rc)
       write(name, *) "Validating constant data in dest fields"
       write(failMsg, *) "Validating constant data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -224,9 +229,9 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! fill destination field with known data
+      ! fill halo area with known data
       val2 = -1.0
-      call FillConstantField(field1, val2, rc)
+      call FillConstantHalo(field2, val2, rc)
       write(name, *) "Filling dst field with constant data values"
       write(failMsg, *) "Filling dst field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -234,23 +239,26 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! run
-      call ESMF_FieldRedist(field2, field1, routehandle=redist_rh, rc=rc)
-      write(name, *) "Executing redist 2 -> 1"
-      write(failMsg, *) "Executing redist 2 -> 1"
+      call ESMF_FieldHalo(field2, routehandle=halo_rh, rc=rc)
+      write(name, *) "Executing halo 2 -> 1"
+      write(failMsg, *) "Executing halo 2 -> 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      call ESMF_FieldPrint(field2, rc=rc)
+      !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
       !EX_UTest
       ! validate destination field
-      call ValidateIndexField(field1, rc)
+      call ValidateIndexField(field2, rc)
       write(name, *) "Validating indexed data in dest fields"
       write(failMsg, *) "Validating indexed data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! validate halo regions in destination field - should be unchanged
-      call ValidateConstantHalo(field1, val2, rc)
+      call ValidateIndexHalo(field2, rc)
       write(name, *) "Validating halo area in dest fields"
       write(failMsg, *) "Validating indexed data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -260,7 +268,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! release
-      call ESMF_FieldRedistRelease(redist_rh, rc=rc)
+      call ESMF_FieldHaloRelease(halo_rh, rc=rc)
       write(name, *) "Releasing route"
       write(failMsg, *) "Releasing route"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -280,7 +288,4 @@
   
       ! -------- end of unit test code ------------------------
 
-      end program ESMF_RedistUTest
-
-
-
+      end program ESMF_HaloUTest

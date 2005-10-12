@@ -1,4 +1,4 @@
-! $Id: ESMF_RedistUTest.F90,v 1.6 2005/10/12 19:06:21 nscollins Exp $
+! $Id: ESMF_BundleRedistUTest.F90,v 1.1 2005/10/12 19:06:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -34,13 +34,13 @@
 ! !USES:
       use ESMF_TestMod     ! test methods
       use ESMF_Mod
-      use ESMF_RedistHelpers   ! helper subroutines
+      use ESMF_BundleRedistHelpers
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RedistUTest.F90,v 1.6 2005/10/12 19:06:21 nscollins Exp $'
+      '$Id: ESMF_BundleRedistUTest.F90,v 1.1 2005/10/12 19:06:16 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -59,9 +59,16 @@
 
       ! local args needed to create/construct objects
       type(ESMF_RouteHandle) :: redist_rh
-      type(ESMF_Field) :: field1, field2
+      type(ESMF_Grid) :: grid1, grid2
+      type(ESMF_Field) :: field1, field2, field3, field4
+      type(ESMF_Bundle) :: bundle1, bundle2
       type(ESMF_VM) :: vm
-      real(ESMF_KIND_R8) :: val1, val2
+
+      integer :: combined_rc
+      real(ESMF_KIND_R8), parameter :: val_one = 1.0
+      real(ESMF_KIND_R8), parameter :: val_two = 2.0
+      real(ESMF_KIND_R8), parameter :: val_neg_one = -1.0
+      real(ESMF_KIND_R8), parameter :: val_neg_two = -2.0
 
 
       ! -------- beginning of executable code below here -------
@@ -70,17 +77,56 @@
 
       !------------------------------------------------------------------------
       !NEX_UTest
+      ! create grids for later on
+      call CreateGrids(grid1, grid2, rc=rc)
+      write(name, *) "Creating src and dest grids"
+      write(failMsg, *) "Unable to create src and/or dst grids"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
       ! create fields for later on
-      call CreateFields(field1, field2, rc)
+      call CreateFields(grid1, field1, field3, rc=rc)
       write(name, *) "Creating src and dest fields"
       write(failMsg, *) "Unable to create src and/or dst fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
+      ! create fields for later on
+      call CreateFields(grid2, field2, field4, rc=rc)
+      write(name, *) "Creating second src and dest fields"
+      write(failMsg, *) "Unable to create second src and/or dst fields"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! create src bundle
+      call CreateBundle(bundle1, field1, field3, rc=rc)
+      write(name, *) "Creating src bundle"
+      write(failMsg, *) "Unable to create src bundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! create dst bundle
+      call CreateBundle(bundle2, field2, field4, rc=rc)
+      write(name, *) "Creating dst bundle"
+      write(failMsg, *) "Unable to create dstsrc bundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
       ! fill source field with known data
-      val1 = 1.0
-      call FillConstantField(field1, val1, rc)
+      call FillConstantField(field1, val_one, rc)
+      write(name, *) "Filling src field with constant data values"
+      write(failMsg, *) "Filling src field with constant data values"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! fill source field with known data
+      call FillConstantField(field3, val_two, rc)
       write(name, *) "Filling src field with constant data values"
       write(failMsg, *) "Filling src field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -88,8 +134,15 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! fill destination field with known data
-      val2 = -1.0
-      call FillConstantField(field2, val2, rc)
+      call FillConstantField(field2, val_neg_one, rc)
+      write(name, *) "Filling dst field with constant data values"
+      write(failMsg, *) "Filling dst field with constant data values"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! fill destination field with known data
+      call FillConstantField(field4, val_neg_two, rc)
       write(name, *) "Filling dst field with constant data values"
       write(failMsg, *) "Filling dst field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -98,7 +151,7 @@
       !NEX_UTest
       ! store
       call ESMF_VMGetGlobal(vm, rc=rc)
-      call ESMF_FieldRedistStore(field1, field2, vm, &
+      call ESMF_BundleRedistStore(bundle1, bundle2, vm, &
                                                 routehandle=redist_rh, rc=rc)
       write(name, *) "Computing route for redist"
       write(failMsg, *) "Computing route for redist"
@@ -107,7 +160,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! run
-      call ESMF_FieldRedist(field1, field2, routehandle=redist_rh, rc=rc)
+      call ESMF_BundleRedist(bundle1, bundle2, routehandle=redist_rh, rc=rc)
       write(name, *) "Executing redist"
       write(failMsg, *) "Executing redist"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -115,7 +168,15 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! validate destination field
-      call ValidateConstantField(field2, val1, rc)
+      call ValidateConstantField(field2, val_one, rc=rc)
+      write(name, *) "Validating constant data in dest fields"
+      write(failMsg, *) "Validating constant data in dest fields"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! validate destination field
+      call ValidateConstantField(field4, val_two, rc=rc)
       write(name, *) "Validating constant data in dest fields"
       write(failMsg, *) "Validating constant data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -131,9 +192,24 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
+      ! fill source field with known data
+      call FillIndexField(field3, rc)
+      write(name, *) "Filling src field with indexed data values"
+      write(failMsg, *) "Filling src field with indexed data values"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
       ! fill destination field with known data
-      val2 = -1.0
-      call FillConstantField(field2, val2, rc)
+      call FillConstantField(field2, val_neg_one, rc)
+      write(name, *) "Filling dst field with constant data values"
+      write(failMsg, *) "Filling dst field with constant data values"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! fill destination field with known data
+      call FillConstantField(field4, val_neg_one, rc)
       write(name, *) "Filling dst field with constant data values"
       write(failMsg, *) "Filling dst field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -141,7 +217,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! run
-      call ESMF_FieldRedist(field1, field2, routehandle=redist_rh, rc=rc)
+      call ESMF_BundleRedist(bundle1, bundle2, routehandle=redist_rh, rc=rc)
       write(name, *) "Executing redist 2"
       write(failMsg, *) "Executing redist 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -156,8 +232,24 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
+      ! validate destination field, data regions only
+      call ValidateIndexField(field4, rc)
+      write(name, *) "Validating indexed data in dest fields"
+      write(failMsg, *) "Validating indexed data in dest fields"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
       ! validate halo regions in destination field - should be unchanged
-      call ValidateConstantHalo(field2, val2, rc)
+      call ValidateConstantHalo(field2, val_neg_one, rc=rc)
+      write(name, *) "Validating halo area in dest fields"
+      write(failMsg, *) "Validating indexed data in dest fields"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! validate halo regions in destination field - should be unchanged
+      call ValidateConstantHalo(field4, val_neg_one, rc=rc)
       write(name, *) "Validating halo area in dest fields"
       write(failMsg, *) "Validating indexed data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -165,7 +257,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! release first route handle, compute another below
-      call ESMF_FieldRedistRelease(redist_rh, rc=rc)
+      call ESMF_BundleRedistRelease(redist_rh, rc=rc)
       write(name, *) "Releasing route"
       write(failMsg, *) "Releasing route"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -173,8 +265,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! fill source field with known data
-      val1 = 1.0
-      call FillConstantField(field2, val1, rc)
+      call FillConstantField(field2, val_one, rc)
       write(name, *) "Filling src field with constant data values"
       write(failMsg, *) "Filling src field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -182,8 +273,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! fill destination field with known data
-      val2 = -1.0
-      call FillConstantField(field1, val2, rc)
+      call FillConstantField(field1, val_neg_one, rc)
       write(name, *) "Filling dst field with constant data values"
       write(failMsg, *) "Filling dst field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -192,7 +282,7 @@
       !EX_UTest
       ! store
       call ESMF_VMGetGlobal(vm, rc=rc)
-      call ESMF_FieldRedistStore(field2, field1, vm, &
+      call ESMF_BundleRedistStore(bundle2, bundle1, vm, &
                                                 routehandle=redist_rh, rc=rc)
       write(name, *) "Computing route for redist, 2 to 1"
       write(failMsg, *) "Computing route for redist, 2 to 1"
@@ -201,7 +291,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! run
-      call ESMF_FieldRedist(field2, field1, routehandle=redist_rh, rc=rc)
+      call ESMF_BundleRedist(bundle2, bundle1, routehandle=redist_rh, rc=rc)
       write(name, *) "Executing redist"
       write(failMsg, *) "Executing redist"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -209,7 +299,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! validate destination field
-      call ValidateConstantField(field1, val1, rc)
+      call ValidateConstantField(field1, val_one, rc=rc)
       write(name, *) "Validating constant data in dest fields"
       write(failMsg, *) "Validating constant data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -225,8 +315,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! fill destination field with known data
-      val2 = -1.0
-      call FillConstantField(field1, val2, rc)
+      call FillConstantField(field3, val_neg_one, rc)
       write(name, *) "Filling dst field with constant data values"
       write(failMsg, *) "Filling dst field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -234,7 +323,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! run
-      call ESMF_FieldRedist(field2, field1, routehandle=redist_rh, rc=rc)
+      call ESMF_BundleRedist(bundle2, bundle1, routehandle=redist_rh, rc=rc)
       write(name, *) "Executing redist 2 -> 1"
       write(failMsg, *) "Executing redist 2 -> 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -242,7 +331,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! validate destination field
-      call ValidateIndexField(field1, rc)
+      call ValidateIndexField(field3, rc)
       write(name, *) "Validating indexed data in dest fields"
       write(failMsg, *) "Validating indexed data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -250,7 +339,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! validate halo regions in destination field - should be unchanged
-      call ValidateConstantHalo(field1, val2, rc)
+      call ValidateConstantHalo(field3, val_neg_one, rc=rc)
       write(name, *) "Validating halo area in dest fields"
       write(failMsg, *) "Validating indexed data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -260,7 +349,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! release
-      call ESMF_FieldRedistRelease(redist_rh, rc=rc)
+      call ESMF_BundleRedistRelease(redist_rh, rc=rc)
       write(name, *) "Releasing route"
       write(failMsg, *) "Releasing route"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -268,10 +357,27 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! cleanup
-      call Cleanup(field1, field2, rc)
+      combined_rc = ESMF_SUCCESS
+      call BundleCleanup(bundle1, rc)
+      if (rc .ne. ESMF_SUCCESS) combined_rc = rc
+      call BundleCleanup(bundle2, rc)
+      if (rc .ne. ESMF_SUCCESS) combined_rc = rc
+
+      write(name, *) "Deleting bundles at cleanup time"
+      write(failMsg, *) "Deleting bundles at cleanup time"
+      call ESMF_Test((combined_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! cleanup
+      combined_rc = ESMF_SUCCESS
+      call FieldCleanup(field1, field3, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) combined_rc = rc
+      call FieldCleanup(field2, field4, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) combined_rc = rc
       write(name, *) "Deleting fields at cleanup time"
       write(failMsg, *) "Deleting fields at cleanup time"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((combined_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
 10    continue

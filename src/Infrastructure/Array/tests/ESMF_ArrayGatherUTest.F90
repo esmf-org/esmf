@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGatherUTest.F90,v 1.1 2005/10/11 21:56:39 svasquez Exp $
+! $Id: ESMF_ArrayGatherUTest.F90,v 1.2 2005/10/12 19:06:15 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArrayGatherUTest.F90,v 1.1 2005/10/11 21:56:39 svasquez Exp $'
+      '$Id: ESMF_ArrayGatherUTest.F90,v 1.2 2005/10/12 19:06:15 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -55,7 +55,7 @@
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
-    integer :: rc, status, result = 0
+    integer :: rc, result = 0
 
     
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)

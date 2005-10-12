@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridEx.F90,v 1.6 2005/02/28 16:22:29 nscollins Exp $
+! $Id: ESMF_RegridEx.F90,v 1.7 2005/10/12 19:06:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -122,16 +122,13 @@
       
 !  The user has already created an {\tt ESMF\_Grid}, an
 !  {\tt ESMF\_Array} with data, and put them together in an {\tt ESMF\_Field}.
-!  An {\tt ESMF\_RouteHandle} is created and the data movement needed to
+!  An {\tt ESMF\_RouteHandle} is created by the regrid store call 
+!  and the data movement needed to
 !  execute the regrid is stored with that handle by the store method. 
 !  To actually execute the operation, the source and destination data
 !  objects must be supplied, along with the same {\tt ESMF\_RouteHandle}.
 !EOE
       
-!BOC
-    regrid_rh = ESMF_RouteHandleCreate(rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
     call ESMF_FieldRegridStore(field1, field2, vm, &
@@ -147,11 +144,6 @@
 
 !BOC
     call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-    call ESMF_RouteHandleDestroy(regrid_rh)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

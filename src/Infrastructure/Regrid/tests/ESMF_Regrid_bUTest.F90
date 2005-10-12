@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_Regrid_bUTest.F90,v 1.10 2005/07/06 21:09:40 nscollins Exp $'
+      '$Id: ESMF_Regrid_bUTest.F90,v 1.11 2005/10/12 19:06:17 nscollins Exp $'
 !------------------------------------------------------------------------------
 
     integer :: lrc,iFunction
@@ -46,7 +46,10 @@
     integer :: sub_rc    !Subroutine return call
     integer :: iDistr, nXY(2,2)
     integer :: TwoOrOne, rc
+    integer :: i, numloops, idummy
     real(ESMF_KIND_R8) :: startTime, endTime, testTime
+    real(ESMF_KIND_R8) :: calibrationTime, dummy
+    logical :: notdone
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
@@ -72,7 +75,6 @@
 
     sub_rc=ESMF_SUCCESS
 
-
    !--------------------------------
    !NEX_UTest
    !Test for function, f=x, decomp = (npets,1) regrid_method = ESMF_REGRID_METHOD_BILINEAR
@@ -85,6 +87,36 @@
     call ESMF_Test((sub_rc.eq.ESMF_SUCCESS),name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
+   !--------------------------------
+   !EX_UTest
+   ! Verify that ESMF_VMWtime works (we are going to use it to verify that
+   ! the conservative regrid algorithm does not run too slowly.)
+    call ESMF_VMWtime(startTime,rc=rc)
+    write(failMsg, *) "ESMF_VMWtime returns zero"
+    write(name, *) " Verify ESMF_VMWtime returns non-zero"
+    call ESMF_Test((startTime.ne.0),name, failMsg, result, ESMF_SRCLINE)
+
+   !--------------------------------
+   ! do a fixed calculation to try to calibrate what the basic speed of
+   ! this machine is.  the regridding should be within some percentage of
+   ! this calibration.  (e.g. regrid on slow machines shouldn't be penalized 
+   ! for not running as fast as it does on fast machines). 
+   notdone = .true.
+   numloops = 100000
+   idummy = 0
+   print *, "Starting calibration"
+
+   call ESMF_VMWtime(startTime,rc=rc)
+   ! do something which takes computational time
+   do i=1, numloops
+       dummy = modulo(i * 3.14159, 2.718)
+       if (dummy .ge. 0.5) idummy = idummy + 1
+   enddo
+   call ESMF_VMWtime(endTime,rc=rc)
+   calibrationTime = endTime - startTime
+   print *, "Calibration factor = ", calibrationTime
+   !--------------------------------
+
    !--------------------------------
    !EX_UTest
    !Test for function, f=x, decomp = (npets) regrid_method = ESMF_REGRID_METHOD_BILINEAR
@@ -193,21 +225,12 @@
    !EX_UTest
    ! Verify that the regrid does not take too long
     write(failMsg, *) "Regrid took too long"
-    write(name, *) " Verify Conserv Regrid takes no longer than 30 seconds"
-    print *, "Start Time is:"
-    print *, startTime
-    print *, "End Time is:"
-    print *, endTime
-    print *, "Test Duration Time is:"
-    print *, testTime
-    call ESMF_Test((testTime.lt.30),name, failMsg, result, ESMF_SRCLINE)
+    write(name, *) " Verify Conserv Regrid takes no longer than 60 seconds"
+    print *, "Test Duration Time:", testTime
+    print *, "Calibrated Test Duration Time:", testTime/calibrationTime
+    print *, "(Raw start, end time:", startTime, endTime, ")"
+    call ESMF_Test((testTime.lt.60),name, failMsg, result, ESMF_SRCLINE)
 
-   !--------------------------------
-   !EX_UTest
-   ! Verify that ESMF_VMWtime works
-    write(failMsg, *) "ESMF_VMWtime returns zero"
-    write(name, *) " Verify ESMF_VMWtime returns non-zero"
-    call ESMF_Test((startTime.ne.0),name, failMsg, result, ESMF_SRCLINE)
 #endif
 
 
@@ -233,11 +256,9 @@
     type(ESMF_Field) :: field1, field2
     type(ESMF_Grid) :: srcgrid, dstgrid
     type(ESMF_RouteHandle) :: regrid_rh
-    type(ESMF_Array) :: arraya, arrayb
     type(ESMF_DELayout) :: layout1, layout2, layout3
     integer :: rc
 
-    integer :: x, y
     integer :: i, j, lb(2), ub(2), halo
     integer :: TwoOrOne
     integer :: npetsXY(2)
@@ -382,9 +403,6 @@
 !  objects must be supplied, along with the same {\tt ESMF\_RouteHandle}.
       
 
-   !Create a Route Handle
-   !=====================
-    regrid_rh = ESMF_RouteHandleCreate(rc)
 
    !Do all the calculations in preparation for the actual re-gridding
    !=================================================================
@@ -479,7 +497,6 @@
 
     call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
 
-    call ESMF_RouteHandleDestroy(regrid_rh)
 
 
 !-------------------------------------------------------------------------

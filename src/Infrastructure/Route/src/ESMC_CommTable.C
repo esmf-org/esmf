@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.26 2004/12/22 00:28:08 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.27 2005/10/12 19:06:17 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.26 2004/12/22 00:28:08 nscollins Exp $";
+            "$Id: ESMC_CommTable.C,v 1.27 2005/10/12 19:06:17 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -60,7 +60,7 @@
 //     pointer to newly allocated ESMC_CommTable
 //
 // !ARGUMENTS:
-      int mydeid,               // in
+      int myvmid,               // in
       int partnercount,         // in
       int *rc) {                // out - return code
 //
@@ -77,7 +77,7 @@
 
     ESMC_CommTable *newc = new ESMC_CommTable;
 
-    *rc = newc->ESMC_CommTableConstruct(mydeid, partnercount);
+    *rc = newc->ESMC_CommTableConstruct(myvmid, partnercount);
 
     return newc;
 
@@ -125,7 +125,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int mydeid,
+      int myvmid,
       int partnercount) {
 //
 // !DESCRIPTION:
@@ -140,7 +140,7 @@
 // !REQUIREMENTS:  
     int i, *ip, rc;
 
-    myid = mydeid;
+    myid = myvmid;
     decount = partnercount;
     commcount = partnercount;
     commpartner = new int[commcount];
@@ -155,7 +155,7 @@
                             { 0,1 } };
 
           for (i=0; i<partnercount; i++)
-              commpartner[i] = ids[mydeid][i];
+              commpartner[i] = ids[myvmid][i];
         }
         break;
       case 4:
@@ -165,7 +165,7 @@
                             { 2,1,0,3 } };
 
           for (i=0; i<partnercount; i++)
-              commpartner[i] = ids[mydeid][i];
+              commpartner[i] = ids[myvmid][i];
         }
         break;
       case 6:
@@ -177,7 +177,7 @@
                             { 4,3,1,2,0,5 } };
 
           for (i=0; i<partnercount; i++)
-              commpartner[i] = ids[mydeid][i];
+              commpartner[i] = ids[myvmid][i];
         }
         break;
       case 8:
@@ -191,7 +191,7 @@
                             { 2,1,4,3,6,5,0,7 } };
 
           for (i=0; i<partnercount; i++)
-              commpartner[i] = ids[mydeid][i];
+              commpartner[i] = ids[myvmid][i];
         }
         break;
       case 12:
@@ -209,7 +209,7 @@
                               {  3, 5, 1, 6, 2, 4, 8, 7,10, 9, 0,11 } };
 
           for (i=0; i<partnercount; i++)
-              commpartner[i] = ids[mydeid][i];
+              commpartner[i] = ids[myvmid][i];
         }
         break;
       default:
@@ -503,7 +503,7 @@ fill(int max, int size, int xpos, int ypos, int base, int *results)
     // call the recursive routine to fill the table
     fill(npow2, npow2, 0, 0, 0, results);
 
-    // copy appropriate line back for this deid
+    // copy appropriate line back for this vmid
     for (i=0; i<npow2; i++) {
         if (results[myid * npow2 + i] < decount)
             commpartner[i] = results[myid * npow2 + i];

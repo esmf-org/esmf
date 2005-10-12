@@ -1,4 +1,4 @@
-! $Id: ESMF_RTable.F90,v 1.8 2005/05/31 17:39:59 nscollins Exp $
+! $Id: ESMF_RTable.F90,v 1.9 2005/10/12 19:06:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -79,7 +79,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RTable.F90,v 1.8 2005/05/31 17:39:59 nscollins Exp $'
+      '$Id: ESMF_RTable.F90,v 1.9 2005/10/12 19:06:17 nscollins Exp $'
 
 !==============================================================================
 !
@@ -115,13 +115,13 @@
 ! !IROUTINE: ESMF_RTableCreateNew - Create a new RTable
 
 ! !INTERFACE:
-      function ESMF_RTableCreateNew(mydeid, decount, rc)
+      function ESMF_RTableCreateNew(myvmid, decount, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_RTable) :: ESMF_RTableCreateNew
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: mydeid
+      integer, intent(in) :: myvmid
       integer, intent(in) :: decount
       integer, intent(out), optional :: rc               
 !
@@ -131,7 +131,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[mydeid] 
+!     \item[myvmid] 
 !         The local DE number.
 !     \item[decount]
 !         Total number of DE slots to create in the table.
@@ -158,7 +158,7 @@
         endif
 
         ! Call C++ create code
-        call c_ESMC_RTableCreate(mydeid, decount, status)
+        call c_ESMC_RTableCreate(myvmid, decount, status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return

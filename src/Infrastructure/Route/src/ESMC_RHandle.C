@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.C,v 1.9 2004/11/04 21:44:18 nscollins Exp $
+// $Id: ESMC_RHandle.C,v 1.10 2005/10/12 19:06:17 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-       "$Id: ESMC_RHandle.C,v 1.9 2004/11/04 21:44:18 nscollins Exp $";
+       "$Id: ESMC_RHandle.C,v 1.10 2005/10/12 19:06:17 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -131,9 +131,14 @@
 //EOP
 
     htype = ESMC_UNINITIALIZEDHANDLE;
-    rhandle1 = NULL;
-    rhandle2 = NULL;
+    nroutes = 0;
+    rmapping = ESMC_UNKNOWNHANDLEMAP;
+    routes = NULL;
+    rmap = NULL;
+    ntvalues = 0;
+    tvmapping = ESMC_UNKNOWNHANDLEMAP;
     tvalues = NULL;
+    tvmap = NULL;
     label = NULL;
 
     return ESMF_SUCCESS;
@@ -164,7 +169,8 @@
 //
 //EOP
 
-    //if (tvalues != NULL) delete [] tvalues;
+    if (routes != NULL) delete [] routes;
+    if (tvalues != NULL) delete [] tvalues;
 
     return ESMF_SUCCESS;
 
@@ -185,9 +191,12 @@
 //
 // !ARGUMENTS:
       ESMC_HandleType *h,            // out - handle type
-      ESMC_Route **rh1,              // out - first route table
-      ESMC_Route **rh2,              // out - optional second route table
-      ESMC_TransformValues **td,     // out - weights, whatever
+      int *rt_count,                 // out - count of route tables
+      int which_rt,                  // in - which route table to return
+      ESMC_Route **rh,               // out - route table
+      int *tv_count,                 // out - count of trans vals
+      int which_tv,                  // in - which transform values to return
+      ESMC_TransformValues **td,     // out - regrid weight info
       char **l) const {              // out - additional name/label
 
 //
@@ -198,9 +207,16 @@
 //EOP
 
     if (h) *h = htype;
-    if (rh1) *rh1 = rhandle1;
-    if (rh2) *rh2 = rhandle2;
-    if (td) *td = tvalues;
+    if (rt_count) *rt_count = nroutes;
+    if (rh) {
+        if (which_rt >= nroutes) *rh = NULL;
+        else *rh = &routes[which_rt];
+    }
+    if (tv_count) *tv_count = ntvalues;
+    if (td) {
+        if (which_tv >= ntvalues) *td = NULL;
+        else *td = &tvalues[which_tv];
+    }
     if (l) *l = label;
 
     return ESMF_SUCCESS;
@@ -221,23 +237,44 @@
 //
 // !ARGUMENTS:
       ESMC_HandleType h,            // in - handle type
-      ESMC_Route *rh1,              // in - first route table
-      ESMC_Route *rh2,              // in - optional second route table
+      int rt_count,                 // in - how many rtables to allocate
+      ESMC_HandleMapping rmaptype,  // in - kind of route map
+      int which_rt,                 // in - which route to set
+      ESMC_Route *rh,               // in - route table list
+      int tv_count,                 // in - how many tvs to allocate
+      ESMC_HandleMapping tvmaptype, // in - kind of tv map
+      int which_tv,                 // in - which tv to set
       ESMC_TransformValues *td,     // in - weights, whatever
       char *l) {                    // in - additional name/label
 
 //
 // !DESCRIPTION:
-//    Query for multiple values in a single call.  (Inline calls exist
-//    to return individual items.)
+//    Set multiple values in a single call.  (Inline calls exist
+//    to set individual items.)   For this version of the call, all
+//    values must be set except for the route and td values themselves.
 //
 //EOP
-    int len;
+    int i, len;
 
-    if (h) htype = h;
-    if (rh1) rhandle1 = rh1;
-    if (rh2) rhandle2 = rh2;
-    if (td) tvalues = td;
+    htype = h;
+    nroutes = rt_count;
+    rmapping = rmaptype;
+    if (rt_count > 0) {
+        if (routes) delete [] routes;
+        routes = new ESMC_Route[rt_count];
+        if (rh) 
+            for (i=0; i<rt_count; i++)
+                routes[i] = rh[i];
+    }
+    ntvalues = tv_count;
+    tvmapping = tvmaptype;
+    if (tv_count > 0) {
+	if (tvalues) delete [] tvalues;
+        tvalues = new ESMC_TransformValues[tv_count]; 
+        if (td)
+            for (i=0; i<tv_count; i++)
+                tvalues[i] = td[i];
+    }
     if (l) {
         len = strlen(l) + 1; 
         if (label) delete [] label;
@@ -248,6 +285,76 @@
     return ESMF_SUCCESS;
 
 } // end ESMC_RouteHandleSet
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteHandleSetRouteCount"
+//BOP
+// !IROUTINE:  ESMC_RouteHandleSetRouteCount - Set number of routes
+//
+// !INTERFACE:
+    int ESMC_RouteHandle::ESMC_RouteHandleSetRouteCount(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int rtcount) {                // in - how many rtables to allocate
+
+//
+// !DESCRIPTION:
+//    Set number of routes to allocate.
+//
+//EOP
+    int i;
+
+    nroutes = rtcount;
+    if (nroutes > 0) {
+        if (routes) delete [] routes;
+        routes = new ESMC_Route[nroutes];
+    } else {
+        if (routes) delete [] routes;
+        routes = NULL;
+    }
+
+    return ESMF_SUCCESS;
+
+} // end ESMC_RouteHandleSetRouteCount
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteHandleSetTVCount"
+//BOP
+// !IROUTINE:  ESMC_RouteHandleSetTVCount - Set number of transform vals
+//
+// !INTERFACE:
+    int ESMC_RouteHandle::ESMC_RouteHandleSetTVCount(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int tvcount) {                // in - how many TVs to allocate
+
+//
+// !DESCRIPTION:
+//    Set number of transform value tables to allocate.
+//
+//EOP
+    int i;
+
+    ntvalues = tvcount;
+    if (ntvalues > 0) {
+	if (tvalues) delete [] tvalues;
+        tvalues = new ESMC_TransformValues[ntvalues]; 
+    } else {
+	if (tvalues) delete [] tvalues;
+        tvalues = NULL;
+    }
+
+    return ESMF_SUCCESS;
+
+} // end ESMC_RouteHandleSetTVCount
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -295,19 +402,20 @@
 //      type of information and level of detail.  ESMC_Base class method.
 //
 //EOP
+    int i;
     char msgbuf[ESMF_MAXSTR];
   
     sprintf(msgbuf, "RouteHandle: '%s'\n", label ? label : "(no name)");
     //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
-    if (rhandle1) 
-	rhandle1->ESMC_RoutePrint(options);
-    if (rhandle2) 
-	rhandle2->ESMC_RoutePrint(options);
+    printf(" number of routes = %d\n", nroutes);
+    for (i=0; i<nroutes; i++)
+	routes[i].ESMC_RoutePrint(options);
+    printf(" number of transform values = %d\n", ntvalues);
+    for (i=0; i<ntvalues; i++)
+        ; // tvalues[i].ESMC_TransformValuesPrint(options);
     // TODO: this is commented out because TVPrint does not seem to be
     // working.
-    //if (tvalues)
-    //    tvalues->ESMC_TransformValuesPrint(options);
 
     return ESMF_SUCCESS;
 

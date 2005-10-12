@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.88 2005/09/12 20:49:52 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.89 2005/10/12 19:06:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.88 2005/09/12 20:49:52 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.89 2005/10/12 19:06:16 nscollins Exp $'
 
 !==============================================================================
 
@@ -80,14 +80,16 @@
 ! !IROUTINE: ESMF_RegridConstructBilinear - Constructs bilinear Regrid structure 
 
 ! !INTERFACE:
-      function ESMF_RegridConstructBilinear(srcArray, srcGrid, srcDataMap, hasSrcData, &
-                                            dstArray, dstGrid, dstDataMap, hasDstData, &
-                                            parentVM, srcMask, dstMask, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_RouteHandle) :: ESMF_RegridConstructBilinear
+     subroutine ESMF_RegridConstructBilinear(rh, &
+                                             srcArray, srcGrid, srcDataMap, &
+                                             hasSrcData, &
+                                             dstArray, dstGrid, dstDataMap, &
+                                             hasDstData, &
+                                             parentVM, routeIndex, &
+                                             srcMask, dstMask, rc)
 !
 ! !ARGUMENTS:
+      type(ESMF_Routehandle),  intent(inout) :: rh
       type(ESMF_Array),        intent(in   ) :: srcArray
       type(ESMF_Grid),         intent(in   ) :: srcGrid
       type(ESMF_FieldDataMap), intent(in   ) :: srcDataMap
@@ -97,6 +99,7 @@
       type(ESMF_FieldDataMap), intent(in   ) :: dstDataMap
       logical,                 intent(in   ) :: hasDstData
       type(ESMF_VM),           intent(in   ) :: parentVM
+      integer,                 intent(in   ) :: routeIndex
       type(ESMF_Mask),         intent(in   ), optional :: srcMask
       type(ESMF_Mask),         intent(in   ), optional :: dstMask
       integer,                 intent(  out), optional :: rc
@@ -152,9 +155,8 @@
       type(ESMF_DomainList) :: recvDomainList, recvDomainListTot
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
       type(ESMF_Route) :: route, tempRoute
-      type(ESMF_RouteHandle) :: rh
 ! TODO: currently the ESMF_Regrid object is not used anywhere, so all references
-!       are commented out
+!       are commented out.  
 !     type(ESMF_Regrid) :: tempRegrid
       type(ESMF_TransformValues) :: tv
 
@@ -169,11 +171,15 @@
       nullify(dstLocalCoordX, dstLocalCoordY)
       nullify(dstLocalCoordArray, srcLocalCoordArray)
 
-      ! Construct an empty regrid structure
-      rh = ESMF_RouteHandleCreate(rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+! TODO: the route handle needs to be created outside, so if there are 
+! more than 1 route/transform values in it, they can be added to an
+! existing handle instead of creating a new one here.
+
+      !! Construct an empty regrid structure
+      !rh = ESMF_RouteHandleCreate(rc=localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                          ESMF_ERR_PASSTHRU, &
+      !                          ESMF_CONTEXT, rc)) return
 
 ! TODO: currently the ESMF_Regrid object is not used anywhere, so all references
 !       are commented out
@@ -294,7 +300,8 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_RouteHandleSet(rh, route1=route, rc=localrc)
+      call ESMF_RouteHandleSet(rh, which_route=routeIndex, &
+                               route=route, rc=localrc)
 
       ! just do this to get a recDomainList with the right rank -- could be
       ! different using arrays
@@ -446,7 +453,7 @@
 
       endif
 
-      call ESMF_RouteHandleSet(rh, tdata=tv, rc=localrc)
+      call ESMF_RouteHandleSet(rh, which_tv=routeIndex, tdata=tv, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -491,11 +498,9 @@
                                        ESMF_CONTEXT, rc)) return
       endif
       
-      ESMF_RegridConstructBilinear = rh
-
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_RegridConstructBilinear
+      end subroutine ESMF_RegridConstructBilinear
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

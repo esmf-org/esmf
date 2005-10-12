@@ -1,4 +1,4 @@
-! $Id: ESMF_WordsizeUTest.F90,v 1.2 2005/08/30 22:21:32 nscollins Exp $
+! $Id: ESMF_WordsizeUTest.F90,v 1.3 2005/10/12 19:06:22 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -13,6 +13,7 @@
     program WordsizeTest
     
 #include "ESMF.h"
+#include "ESMC_Conf.h"
 
     use ESMF_Mod
     use ESMF_TestMod
@@ -78,38 +79,38 @@
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
     ! not a test - informational messages only.
-    call ESMF_PointerToInt(vi(1), i1)
-    call ESMF_PointerToInt(vi(2), i2)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vi(1), i1)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vi(2), i2)
     diff = i2 - i1
     print *, "F90: Default Integer size = ", diff
 
-    call ESMF_PointerToInt(vr(1), i1)
-    call ESMF_PointerToInt(vr(2), i2)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vr(1), i1)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vr(2), i2)
     diff = i2 - i1
     print *, "F90: Default Real size = ", diff
 
-    call ESMF_PointerToInt(vip(1), i1)
-    call ESMF_PointerToInt(vip(2), i2)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vip(1), i1)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vip(2), i2)
     diff = i2 - i1
     print *, "F90: Pointer size = ", diff
 
-    call ESMF_PointerToInt(vi4(1), i1)
-    call ESMF_PointerToInt(vi4(2), i2)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vi4(1), i1)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vi4(2), i2)
     diff = i2 - i1
     print *, "F90: Explicit Integer I4 size = ", diff
 
-    call ESMF_PointerToInt(vi8(1), i1)
-    call ESMF_PointerToInt(vi8(2), i2)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vi8(1), i1)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vi8(2), i2)
     diff = i2 - i1
     print *, "F90: Explicit Integer I8 size = ", diff
 
-    call ESMF_PointerToInt(vr4(1), i1)
-    call ESMF_PointerToInt(vr4(2), i2)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vr4(1), i1)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vr4(2), i2)
     diff = i2 - i1
     print *, "F90: Explicit Integer R4 size = ", diff
 
-    call ESMF_PointerToInt(vr8(1), i1)
-    call ESMF_PointerToInt(vr8(2), i2)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vr8(1), i1)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vr8(2), i2)
     diff = i2 - i1
     print *, "F90: Explicit Integer R8 size = ", diff
 
@@ -118,8 +119,8 @@
     !NEX_UTest
     write(failMsg,*) "Bad size for I4 variable"
     write(name, *) "Verifying I4 is 4 bytes"
-    call ESMF_PointerToInt(vi4(1), i1)
-    call ESMF_PointerToInt(vi4(2), i2)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vi4(1), i1)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vi4(2), i2)
     diff = i2 - i1
     call ESMF_Test((diff .eq. 4), name, failMsg, result, ESMF_SRCLINE) 
 
@@ -127,8 +128,8 @@
     !NEX_UTest
     write(failMsg,*) "Bad size for R4 variable"
     write(name, *) "Verifying R4 is 4 bytes"
-    call ESMF_PointerToInt(vr4(1), i1)
-    call ESMF_PointerToInt(vr4(2), i2)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vr4(1), i1)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vr4(2), i2)
     diff = i2 - i1
     call ESMF_Test((diff .eq. 4), name, failMsg, result, ESMF_SRCLINE) 
 
@@ -137,8 +138,8 @@
     !NEX_UTest
     write(failMsg,*) "Bad size for I8 variable"
     write(name, *) "Verifying I8 is 8 bytes"
-    call ESMF_PointerToInt(vi8(1), i1)
-    call ESMF_PointerToInt(vi8(2), i2)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vi8(1), i1)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vi8(2), i2)
     diff = i2 - i1
     call ESMF_Test((diff .eq. 8), name, failMsg, result, ESMF_SRCLINE) 
 
@@ -146,8 +147,8 @@
     !NEX_UTest
     write(failMsg,*) "Bad size for R8 variable"
     write(name, *) "Verifying R8 is 8 bytes"
-    call ESMF_PointerToInt(vr8(1), i1)
-    call ESMF_PointerToInt(vr8(2), i2)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vr8(1), i1)
+    call ESMF_PointerToInt(ESMC_POINTER_SIZE, vr8(2), i2)
     diff = i2 - i1
     call ESMF_Test((diff .eq. 8), name, failMsg, result, ESMF_SRCLINE) 
 

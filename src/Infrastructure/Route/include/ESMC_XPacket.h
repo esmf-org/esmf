@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.32 2005/06/09 16:39:53 nscollins Exp $
+// $Id: ESMC_XPacket.h,v 1.33 2005/10/12 19:06:17 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@
      // identical index orders, or ranks, or whatever, we may have to
      // compute a separate xpacket per block.)
   
-   // int block_index;               // if multiple addrs, which address
+     int block_index;               // if multiple addrs, which address
 
      // TODO: there exists the case in loose bundles where all the fields
      // contain identical data layouts, in all aspects:  scalar/vector,
@@ -84,7 +84,7 @@
      // and then at run time apply it to all fields/blocks sequentially.  
      // proposed new member of the xpacket would be 'congruent'. 
 
-   // bool congruent;                // if true, xpackets apply to all addrs
+     bool congruent;                // if true, xpackets apply to all addrs
 
      // TODO: stride and rep_count are really only ESMF_MAXDIM-1 because
      // contig_length implicitly stores the first rep_count, and the first
@@ -104,7 +104,7 @@
 
  // accessor methods for class members
     int ESMC_XPacketGet(int *nrank, int *noffset, int *ncontig_length, 
-                        int *nstride, int *nrep_count);
+                        int *nstride, int *nrep_count, int *bufindex);
     //int ESMC_XPacketSet(<value type>  value);
 
  // get/set methods for internal data
@@ -148,22 +148,22 @@
                                          ESMC_Logical (*boundary)[2],
                                          ESMC_XPacket **xp_list, int *xp_count);
     friend int ESMC_XPacketMakeBuffer(int xpCount, ESMC_XPacket **xpList,
-                                      int VMType, int nbytes, char **buffer,
+                                      int nbytes, int numAddrs, char **buffer,
                                       int *bufferSize);
     friend int ESMC_XPacketPackBuffer(int xpCount, ESMC_XPacket **xpList,
-                                      int VMType, int nbytes, void *dataAddr,
+                                      int nbytes, int numAddrs, void **dataAddr,
                                       char *buffer);
     friend int ESMC_XPacketUnpackBuffer(int xpCount, ESMC_XPacket **xpList,
-                                      int VMType, int nbytes, char *buffer,
-                                      void *dataAddr);
+                                      int nbytes, char *buffer,
+                                      int numAddrs, void **dataAddr);
     friend int ESMC_XPacketDoBuffer(ESMC_PackUnpackFlag packflag, 
                                     int xpCount, ESMC_XPacket **xpList,
-                                    int VMType, int nbytes, void *dataAddr,
+                                    int nbytes, int numAddrs, void **dataAddr,
                                     char *buffer);
 
     friend int ESMC_XPacketGetEmpty(int *nrank, int *noffset, 
-                                    int *ncontig_length, 
-                                    int *nstride, int *nrep_count);
+                                    int *ncontig_length, int *nstride, 
+                                    int *nrep_count, int *bufindex);
 
 // !PRIVATE MEMBER FUNCTIONS:
 //
@@ -182,18 +182,18 @@
                                   ESMC_XPacket **xp_list, int *xp_count);
 
     int ESMC_XPacketMakeBuffer(int xpCount, ESMC_XPacket **xpList,
-                               int VMType, int nbytes, char **buffer,
-                               int *bufferSize);
+                               int nbytes, int numAddrs, 
+                               char **buffer, int *bufferSize);
     int ESMC_XPacketPackBuffer(int xpCount, ESMC_XPacket **xpList,
-                               int VMType, int nbytes, void *dataAddr,
-                               char *buffer);
+                               int nbytes, int numAddrs, 
+                               void **dataAddr, char *buffer);
     int ESMC_XPacketUnpackBuffer(int xpCount, ESMC_XPacket **xpList,
-                                 int VMType, int nbytes, char *buffer,
-                                 void *dataAddr);
+                                 int nbytes, int numAddrs, 
+                                 char *buffer, void **dataAddr);
     int ESMC_XPacketDoBuffer(ESMC_PackUnpackFlag packflag, 
                              int xpCount, ESMC_XPacket **xpList,
-                             int VMType, int nbytes, void *dataAddr,
-                             char *buffer);
+                             int nbytes, int numAddrs, 
+                             void **dataAddr, char *buffer);
     int ESMC_XPacketGetEmpty(int *nrank, int *noffset, int *ncontig_length, 
                              int *nstride, int *nrep_count);
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArbitraryDistSTest.F90,v 1.1 2005/07/01 17:26:36 jwolfe Exp $
+! $Id: ESMF_ArbitraryDistSTest.F90,v 1.2 2005/10/12 19:06:22 nscollins Exp $
 !
 ! System test ArbitraryDistribution
 !  Description on Sourceforge under System Test #XXXXX
@@ -188,8 +188,6 @@
      ! distributed Field to the arbitrarily distributed Field and the second
      ! from the arbitrarily distributed Field back to a different regularly
      ! distributed Field
-     rh12 = ESMF_RouteHandleCreate(status)
-     rh23 = ESMF_RouteHandleCreate(status)
      call ESMF_FieldRedistStore(humidity1, humidity2, vm, &
                                 routehandle=rh12, rc=status)
      call ESMF_FieldRedistStore(humidity2, humidity3, vm, &

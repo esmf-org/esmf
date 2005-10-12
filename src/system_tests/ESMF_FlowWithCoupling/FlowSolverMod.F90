@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.22 2005/05/17 18:22:06 theurich Exp $
+! $Id: FlowSolverMod.F90,v 1.23 2005/10/12 19:06:23 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -236,7 +236,6 @@
 
 ! and precompute the halo for one variable - the others can reuse the same
 ! route handle because they have identical distributions.
-      precomputed_halo = ESMF_RouteHandleCreate(rc=rc)
       call ESMF_FieldHaloStore(field_sie, precomputed_halo, rc=rc)
 
       end subroutine Flow_Init

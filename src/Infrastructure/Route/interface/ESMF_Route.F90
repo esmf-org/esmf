@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.71 2005/06/30 21:05:43 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.72 2005/10/12 19:06:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -132,7 +132,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.71 2005/06/30 21:05:43 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.72 2005/10/12 19:06:17 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1457,7 +1457,16 @@ end function radd
           rc = ESMF_FAILURE
         endif
 
-        call c_ESMC_RouteRunLA(route, srcarray, dstarray, status)
+        if ((.not.present(srcarray)) .and. (.not.present(dstarray))) then
+            ! nothing to do here
+            status = ESMF_SUCCESS
+        else if (.not.present(srcarray)) then
+            call c_ESMC_RouteRunLA(route, 0, dstarray, status)
+        else if (.not.present(dstarray)) then
+            call c_ESMC_RouteRunLA(route, srcarray, 0, status)
+        else  ! both srcarray and dstarray are specified
+            call c_ESMC_RouteRunLA(route, srcarray, dstarray, status)
+        endif
 
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1527,8 +1536,19 @@ end function radd
           dstCount = size(srcArrayList)
         endif
 
-        call c_ESMC_RouteRunLAL(route, srcArrayList, dstArrayList, &
-                                srcCount, dstCount, status)
+        if ((srcCount .eq. 0) .and. (dstCount .eq. 0)) then
+            ! nothing to do here
+            status = ESMF_SUCCESS
+        else if (srcCount .eq. 0) then
+            call c_ESMC_RouteRunLAL(route, 0, dstArrayList, &
+                                    srcCount, dstCount, status)
+        else if (dstCount .eq. 0) then
+            call c_ESMC_RouteRunLAL(route, srcArrayList, 0, &
+                                    srcCount, dstCount, status)
+        else  ! both srcCount and dstCount is > 0
+            call c_ESMC_RouteRunLAL(route, srcArrayList, dstArrayList, &
+                                    srcCount, dstCount, status)
+        endif
 
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1890,10 +1910,12 @@ end function radd
 ! !IROUTINE: ESMF_RouteValidate - Check internal consistency of a Route
 
 ! !INTERFACE:
-      subroutine ESMF_RouteValidate(route, options, rc)
+      subroutine ESMF_RouteValidate(route, bufcount, bufsizes, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route       
+      integer, intent(in), optional :: bufcount            
+      integer, intent(in), optional :: bufsizes(:)
       character (len=*), intent(in), optional :: options    
       integer, intent(out), optional :: rc            
 !
@@ -1904,6 +1926,13 @@ end function radd
 !     \begin{description}
 !     \item[route] 
 !          {\tt ESMF\_Route} to be verified.
+!     \item[{[bufcount]}]
+!          Integer count of local buffers on this DE to do more advanced
+!          error checking.  Defaults to 1.
+!     \item[{[bufsizes]}]
+!          Integer array of buffer item sizes, for more advanced error checking.
+!          No default; if not specified, the advanced error checking will
+!          be skipped.
 !     \item[{[options]}]
 !          Validation options.
 !     \item[{[rc]}] 
@@ -1912,32 +1941,46 @@ end function radd
 !
 !EOPI
 
-       character (len=6) :: defaultopts      ! default validate options
-       integer :: status                     ! local error status
-       logical :: rcpresent
+       character (len=ESMF_MAXSTR) :: optstring
+       integer :: numbufs 
+       ! TODO: this needs to be allocatable.  use fixed value for now.
+       !integer, allocatable :: itemcounts(:)
+       integer :: itemcounts(1)
+       integer :: status
 
        ! Initialize return code; assume failure until success is certain       
-       status = ESMF_FAILURE
-       rcpresent = .FALSE.
-       if (present(rc)) then
-         rcpresent = .TRUE.  
-         rc = ESMF_FAILURE
-       endif
+       if (present(rc)) rc = ESMF_FAILURE
 
-       defaultopts = "quick"
-
-       if(present(options)) then
-           call c_ESMC_RouteValidate(route, options, status)   
+       ! Set the defaults if not specified
+       if (present(bufcount)) then
+           numbufs = bufcount
        else
-           call c_ESMC_RouteValidate(route, defaultopts, status)
+           numbufs = 1
        endif
+      
+       if (present(bufsizes)) then
+           itemcounts(1) = bufsizes(1)
+       else
+           itemcounts(1) = 0
+       endif
+
+       if (present(options)) then
+           optstring = options
+       else
+           optstring = "quick"
+       endif
+
+
+       ! now make the call
+       call c_ESMC_RouteValidate(route, numbufs, itemcounts, optstring, status)
+
 
        if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
        ! Set return values
-       if (rcpresent) rc = ESMF_SUCCESS
+       if (present(rc)) rc = ESMF_SUCCESS
 
        end subroutine ESMF_RouteValidate
 

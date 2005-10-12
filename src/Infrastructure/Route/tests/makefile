@@ -1,7 +1,7 @@
-# $Id: makefile,v 1.24 2005/09/22 22:26:57 nscollins Exp $
+# $Id: makefile,v 1.25 2005/10/12 19:06:21 nscollins Exp $
 
 ALL:  build_unit_tests
-run:  tree_run_unit_tests
+run:  run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -18,14 +18,17 @@ LOCDIR	  = src/Infrastructure/Route/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_RouteUTest \
                 $(ESMF_TESTDIR)/ESMF_CommTableUTest \
+                $(ESMF_TESTDIR)/ESMF_HaloUTest \
                 $(ESMF_TESTDIR)/ESMF_RedistUTest
 
 TESTS_RUN     = RUN_ESMF_RouteUTest \
                 RUN_ESMF_CommTableUTest \
+                RUN_ESMF_HaloUTest \
                 RUN_ESMF_RedistUTest
 
 TESTS_RUN_UNI = RUN_ESMF_RouteUTestUNI \
                 RUN_ESMF_CommTableUTestUNI \
+                RUN_ESMF_HaloUTestUNI \
                 RUN_ESMF_RedistUTestUNI
 
 
@@ -122,13 +125,32 @@ RUN_ESMC_RTableUTestUNI:
 	echo "PASS: ESMC_RTableUTest not set up to run on one processor." > $(ESMF_TESTDIR)/ESMC_RTableUTest.stdout
 
 
+
 #
 #  F90 Redist
 #
+UTEST_Redist_OBJS =  ESMF_RedistHelpers.o
+
+ESMF_RedistUTest.o: ESMF_RedistHelpers.o
+
 RUN_ESMF_RedistUTest:
 	$(MAKE) TNAME=Redist NP=4 ftest
 
 RUN_ESMF_RedistUTestUNI:
 	$(MAKE) TNAME=Redist NP=1 ftest
+
+
+#
+#  F90 Halo
+#
+UTEST_Halo_OBJS =  ESMF_HaloHelpers.o
+
+ESMF_HaloUTest.o: ESMF_HaloHelpers.o
+
+RUN_ESMF_HaloUTest:
+	$(MAKE) TNAME=Halo NP=4 ftest
+
+RUN_ESMF_HaloUTestUNI:
+	$(MAKE) TNAME=Halo NP=1 ftest
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.55 2005/09/12 20:50:15 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.56 2005/10/12 19:06:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.55 2005/09/12 20:50:15 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.56 2005/10/12 19:06:16 nscollins Exp $'
 
 !==============================================================================
 
@@ -98,15 +98,17 @@
 ! !IROUTINE: ESMF_RegridConstructConserv - Constructs conservative Regrid structure 
 
 ! !INTERFACE:
-      function ESMF_RegridConstructConserv(srcArray, srcGrid, srcDataMap, hasSrcData, &
-                                           dstArray, dstGrid, dstDataMap, hasDstData, &
-                                           parentVM, srcMask, dstMask, &
-                                           regridnorm, order, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_RouteHandle) :: ESMF_RegridConstructConserv
+     subroutine ESMF_RegridConstructConserv(rh, &
+                                            srcArray, srcGrid, srcDataMap, &
+                                            hasSrcData, &
+                                            dstArray, dstGrid, dstDataMap, &
+                                            hasDstData, &
+                                            parentVM, routeIndex, &
+                                            srcMask, dstMask, &
+                                            regridnorm, order, rc)
 !
 ! !ARGUMENTS:
+      type(ESMF_Routehandle),  intent(inout) :: rh
       type(ESMF_Array),        intent(in ) :: srcArray
       type(ESMF_Grid),         intent(in ) :: srcGrid
       type(ESMF_FieldDataMap), intent(in ) :: srcDataMap
@@ -116,6 +118,7 @@
       type(ESMF_FieldDataMap), intent(in ) :: dstDataMap
       logical,                 intent(in ) :: hasDstData
       type(ESMF_VM),           intent(in ) :: parentVM
+      integer,                 intent(in ) :: routeIndex
       type(ESMF_Mask),         intent(in ), optional :: srcMask
       type(ESMF_Mask),         intent(in ), optional :: dstMask
       type(ESMF_RegridNormOpt),intent(in ), optional :: regridnorm
@@ -238,7 +241,6 @@
            srcRelLoc, dstRelLoc    !
       type(ESMF_Route) :: &
            route, tempRoute        !
-      type(ESMF_RouteHandle) :: rh
       type(ESMF_TransformValues) :: tv
       type(ESMF_Array), dimension(:), pointer :: &
            dstLocalCoordArray,    &!
@@ -256,11 +258,12 @@
       if (present(order     )) orderUse      = order
       if (present(regridnorm)) regridNormUse = regridnorm
 
-      ! Construct an empty routehandle structure
-      rh = ESMF_RouteHandleCreate(rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+! TODO: remove this code.  rh is created above and passed down now.
+      !! Construct an empty routehandle structure
+      !rh = ESMF_RouteHandleCreate(rc=localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                          ESMF_ERR_PASSTHRU, &
+      !                          ESMF_CONTEXT, rc)) return
 
 ! TODO: currently the ESMF_Regrid object is not used anywhere, so all references
 !       are commented out
@@ -395,7 +398,8 @@
                          dstArray=dstArray, dstDataMap=dstDataMap, &
                          hasSrcData=hasSrcData, hasDstData=hasDstData, &
                          total=.false., rc=localrc)
-      call ESMF_RouteHandleSet(rh, route1=route, rc=localrc)
+      call ESMF_RouteHandleSet(rh, which_route=routeIndex, &
+                               route=route, rc=localrc)
 
       tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
                              recvDomainList, parentVM, &
@@ -450,7 +454,7 @@
       !  for conservative interpolation.  eventually the addlinks routine should
       !  grow the arrays internally.
       if (hasDstData) then
-        aSize = ((dstCounts(1)*dstCounts(2)) + 1) * 6
+        aSize = ((dstCounts(1)*dstCounts(2)) + 1) * 10
         ! Create a Transform Values object
         tv = ESMF_TransformValuesCreate(aSize, rc)
 
@@ -602,7 +606,7 @@
       endif   ! hasDstData
 
       ! Set the routehandle
-      call ESMF_RouteHandleSet(rh, tdata=tv, rc=localrc)
+      call ESMF_RouteHandleSet(rh, which_tv=routeIndex, tdata=tv, rc=localrc)
 
       ! Clean up some allocatables and return
       call ESMF_RouteDestroy(tempRoute, localrc)
@@ -682,11 +686,9 @@
         endif
       endif
       
-      ESMF_RegridConstructConserv = rh
-
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_RegridConstructConserv
+      end subroutine ESMF_RegridConstructConserv
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

@@ -1,12 +1,13 @@
-# $Id: makefile,v 1.13 2005/07/15 03:41:46 nscollins Exp $ 
+# $Id: makefile,v 1.14 2005/10/12 19:06:16 nscollins Exp $ 
 
 ALL:  build_unit_tests
-run:  tree_run_unit_tests
+run:  run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 
 SOURCEF	  =
+CPPFILES  = ESMF_BundleCommHelpers.F90
 
 SOURCEH	  = 
 OBJSC	  =  
@@ -17,32 +18,46 @@ DIRS	  =
 LOCDIR	  = src/Infrastructure/BundleComm/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_BundleCommUTest \
-                $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest
+                $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest \
+                $(ESMF_TESTDIR)/ESMF_BundleRedistUTest
 
 TESTS_RUN     = RUN_ESMF_BundleCommUTest \
-                RUN_ESMF_BundleCommOptionsUTest 
+                RUN_ESMF_BundleCommOptionsUTest \
+                RUN_ESMF_BundleRedistUTest 
 
 TESTS_RUN_UNI = RUN_ESMF_BundleCommUTestUNI \
-                RUN_ESMF_BundleCommOptionsUTestUNI 
+                RUN_ESMF_BundleCommOptionsUTestUNI \
+                RUN_ESMF_BundleRedistUTestUNI 
 
 include ${ESMF_DIR}/makefile
 
 DIRS      =
 
 CLEANDIRS   = 
-CLEANFILES  = $(TESTS_BUILD)
+CLEANFILES  = $(TESTS_BUILD) $(CPPFILES)
 CLOBBERDIRS =
 
 
 #
 #  BundleComms
 #
+
+# redisthelpers is the real code, but after building it, it deletes
+# both the .o and the .mod file.  so make a copy of it for the
+# bundlecomm tests as well. 
+ESMF_BundleCommHelpers.F90:  ESMF_BundleRedistHelpers.F90
+	cp -f ESMF_BundleRedistHelpers.F90 ESMF_BundleCommHelpers.F90
+
+
+UTEST_BundleComm_OBJS =  ESMF_BundleCommHelpers.o
+
+ESMF_BundleCommUTest.o: ESMF_BundleCommHelpers.o
+
 RUN_ESMF_BundleCommUTest:
 	$(MAKE) TNAME=BundleComm NP=4 ftest
 
 RUN_ESMF_BundleCommUTestUNI:
 	$(MAKE) TNAME=BundleComm NP=1 ftest
-
 
 #
 #  BundleCommOptions
@@ -53,5 +68,18 @@ RUN_ESMF_BundleCommOptionsUTest:
 RUN_ESMF_BundleCommOptionsUTestUNI:
 	$(MAKE) TNAME=BundleCommOptions NP=1 ftest
 
+
+#
+#  BundleRedist
+#
+UTEST_BundleRedist_OBJS =  ESMF_BundleRedistHelpers.o
+
+ESMF_BundleRedistUTest.o: ESMF_BundleRedistHelpers.o
+
+RUN_ESMF_BundleRedistUTest:
+	$(MAKE) TNAME=BundleRedist NP=4 ftest
+
+RUN_ESMF_BundleRedistUTestUNI:
+	$(MAKE) TNAME=BundleRedist NP=1 ftest
 
 

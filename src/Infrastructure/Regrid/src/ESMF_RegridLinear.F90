@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.32 2005/09/12 20:50:33 jwolfe Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.33 2005/10/12 19:06:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.32 2005/09/12 20:50:33 jwolfe Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.33 2005/10/12 19:06:16 nscollins Exp $'
 
 !==============================================================================
 
@@ -80,14 +80,15 @@
 ! !IROUTINE: ESMF_RegridConstructLinear - Constructs linear Regrid structure 
 
 ! !INTERFACE:
-      function ESMF_RegridConstructLinear(srcArray, srcGrid, srcDataMap, hasSrcData, &
-                                          dstArray, dstGrid, dstDataMap, hasDstData, &
-                                          parentVM, srcMask, dstMask, rc) 
-!
-! !RETURN VALUE:
-      type(ESMF_RouteHandle) :: ESMF_RegridConstructLinear
-!
+    subroutine ESMF_RegridConstructLinear(rh, &
+                                          srcArray, srcGrid, srcDataMap, &
+                                          hasSrcData, &
+                                          dstArray, dstGrid, dstDataMap, &
+                                          hasDstData, &
+                                          parentVM, routeIndex, &
+                                          srcMask, dstMask, rc) 
 ! !ARGUMENTS:
+      type(ESMF_RouteHandle),  intent(inout) :: rh
       type(ESMF_Array),        intent(in ) :: srcArray
       type(ESMF_Grid),         intent(in ) :: srcGrid
       type(ESMF_FieldDataMap), intent(in ) :: srcDataMap
@@ -97,6 +98,7 @@
       type(ESMF_FieldDataMap), intent(in ) :: dstDataMap
       logical,                 intent(in ) :: hasDstData
       type(ESMF_VM),           intent(in ) :: parentVM
+      integer,                 intent(in ) :: routeIndex
       type(ESMF_Mask),         intent(in ), optional :: srcMask
       type(ESMF_Mask),         intent(in ), optional :: dstMask
       integer,                 intent(out), optional :: rc
@@ -150,7 +152,6 @@
       !type(ESMF_DomainList) :: recvDomainListTot
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
       type(ESMF_Route) :: route, tempRoute
-      type(ESMF_RouteHandle) :: rh
 ! TODO: currently the ESMF_Regrid object is not used anywhere, so all references
 !       are commented out
 !     type(ESMF_Regrid) :: tempRegrid
@@ -160,11 +161,12 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! Construct an empty regrid structure
-      rh = ESMF_RouteHandleCreate(rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+! TODO: passed in now, not constructed here.
+      !! Construct an empty regrid structure
+      !rh = ESMF_RouteHandleCreate(rc=localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                          ESMF_ERR_PASSTHRU, &
+      !                          ESMF_CONTEXT, rc)) return
 
 ! TODO: currently the ESMF_Regrid object is not used anywhere, so all references
 !       are commented out
@@ -253,7 +255,8 @@
                                         srcDataMap=srcDataMap, &
                                         dstDataMap=dstDataMap, &
                                         total=.false., rc=localrc)
-      call ESMF_RouteHandleSet(rh, route1=route, rc=localrc)
+      call ESMF_RouteHandleSet(rh, which_route=routeIndex, &
+                               route=route, rc=localrc)
 
 !      tempRoute = ESMF_RegridRouteConstruct(srcGrid, dstGrid, &
 !                                            recvDomainListTot, parentVM, &
@@ -335,7 +338,7 @@
         startComp = stopComp + 1 
       enddo 
 
-      call ESMF_RouteHandleSet(rh, tdata=tv, rc=localrc)
+      call ESMF_RouteHandleSet(rh, which_tv=routeIndex, tdata=tv, rc=localrc)
 
       ! clean up
       call ESMF_RouteDestroy(tempRoute, localrc)
@@ -348,11 +351,9 @@
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
                                      ESMF_CONTEXT, rc)) return
       
-      ESMF_RegridConstructLinear = rh
-
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_RegridConstructLinear
+      end subroutine ESMF_RegridConstructLinear
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

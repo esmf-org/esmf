@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiInitUTest.F90,v 1.1 2005/08/17 22:38:37 theurich Exp $
+! $Id: ESMF_VMUserMpiInitUTest.F90,v 1.2 2005/10/12 19:06:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -519,12 +519,12 @@
 
       implicit none
       
-      integer:: ierr, rank
+      integer:: ierr
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUserMpiInitUTest.F90,v 1.1 2005/08/17 22:38:37 theurich Exp $'
+      '$Id: ESMF_VMUserMpiInitUTest.F90,v 1.2 2005/10/12 19:06:21 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
