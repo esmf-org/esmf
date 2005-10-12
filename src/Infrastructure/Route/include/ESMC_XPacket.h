@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.33 2005/10/12 19:06:17 nscollins Exp $
+// $Id: ESMC_XPacket.h,v 1.34 2005/10/12 19:34:01 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -195,6 +195,6 @@
                              int nbytes, int numAddrs, 
                              void **dataAddr, char *buffer);
     int ESMC_XPacketGetEmpty(int *nrank, int *noffset, int *ncontig_length, 
-                             int *nstride, int *nrep_count);
+                             int *nstride, int *nrep_count, int *bufindex);
 
  #endif  // ESMC_XPacket_H
