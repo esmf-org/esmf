@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.140 2005/10/12 20:10:49 nscollins Exp $
+#  $Id: common.mk,v 1.141 2005/10/12 20:13:31 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1226,7 +1226,7 @@ tree_build_system_tests:  $(SYSTEM_TESTS_BUILD)
 $(ESMF_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
 	$(FLINKER) $(LINKOPTS) -o $@ $(SYSTEM_TESTS_OBJ) $< $(FLINKLIBS)
 	$(RM) -f *.o *.mod
-	if [ "$(ESMF_SYSTEST_SYMLINKS)" == "true" ] ; then \
+	if [ "$(ESMF_SYSTEST_SYMLINKS)" = "true" ] ; then \
 		$(RM) t s l ; \
 		ln -s $@ t ; \
 		ln -s $@.Log l ; \
