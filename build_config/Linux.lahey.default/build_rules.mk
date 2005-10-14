@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.17 2005/09/02 21:00:41 nscollins Exp $
+# $Id: build_rules.mk,v 1.18 2005/10/14 16:44:28 nscollins Exp $
 #
 # Linux.lahey.default
 #
@@ -84,10 +84,12 @@ C_LIB_PATHS  += $(ENV_LIB_PATHS)
 C_LD_PATHS   += $(ENV_LD_PATHS)
 
 C_F90CXXLIBS       = $(LIB_PATHS) $(LD_PATHS) \
+                     -Wl,-rpath $(ESMF_LIBDIR) \
                      -lstdc++ -lgcc -lg2c -lrt
 
-C_CXXF90LIBS       = $(LIB_PATHS) $(LD_PATHS) -lfj9i6 -lfj9ipp -lfj9f6 \
-                      -lfj9fpp -lfj9e6 -lfccx86_6a -lrt
+C_CXXF90LIBS       = $(LIB_PATHS) $(LD_PATHS) \
+                     -Wl,-rpath $(ESMF_LIBDIR) \
+	  	     -lfj9i6 -lfj9ipp -lfj9f6 -lfj9fpp -lfj9e6 -lfccx86_6a -lrt
 else
 C_F90CXXLIBS       = -Wl,-rpath /usr/lib/gcc-lib/i386-redhat-linux/3.2.2 \
                      -Wl,-rpath /usr/local/lf9560/lib \
