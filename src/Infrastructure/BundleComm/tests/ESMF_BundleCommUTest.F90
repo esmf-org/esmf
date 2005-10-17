@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommUTest.F90,v 1.8 2005/10/12 19:06:16 nscollins Exp $
+! $Id: ESMF_BundleCommUTest.F90,v 1.9 2005/10/17 20:51:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommUTest.F90,v 1.8 2005/10/12 19:06:16 nscollins Exp $'
+      '$Id: ESMF_BundleCommUTest.F90,v 1.9 2005/10/17 20:51:07 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -999,6 +999,167 @@
       ! Clean up by deleting the Fields.
       call FieldCleanup(fields(3), fields(4), rc=rc)
       write(name, *) "Field Destroy 3,4"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+      ! Test redistribution of bundles when things should *not* succeed:
+      !  number of fields do not match; corresponding fields are incompatible
+      !  data types, fields are empty (no data), and source == destination.
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+      !EX_UTest
+      !  Create 5 data field for use below. fields 1, 2, and 3 share a grid, 
+      !  fields 4 and 5 share a different grid.  fields 1, 2 and 3 go into 
+      !  bundle 1; fields 4 and 5 go into bundle 2.
+      fields(1) = CreateDataField("humidity", r8value=1.1_ESMF_KIND_R8, rc=rc)
+      write(name, *) "Creating Data Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      !  Get grid from previous field and reuse it below.
+      call ESMF_FieldGet(fields(1), grid=grid, rc=rc)
+      write(name, *) "Getting Grid from Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      fields(2) = CreateDataField("pressure", grid=grid, &
+                                   r4value=2.2_ESMF_KIND_R4, rc=rc)
+      write(name, *) "Creating Data Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      fields(3) = CreateDataField("density", grid=grid, &
+                                   r8value=4.4_ESMF_KIND_R8, rc=rc)
+      write(name, *) "Creating Data Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Create a non-default layout of type "2".  See the helper routines
+      ! for the various options in layout types.
+      layout = CreateLayout(2, rc)
+      write(name, *) "Creating non-default layout"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      fields(4) = CreateDataField("humidity", r8value=-88.88_ESMF_KIND_R8, &
+                                   layout=layout, rc=rc)
+      write(name, *) "Creating Data Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      !  Get grid from previous field and reuse it below.
+      call ESMF_FieldGet(fields(4), grid=grid, rc=rc)
+      write(name, *) "Getting Grid from Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      fields(5) = CreateDataField("pressure", grid=grid, &
+                                  r4value=-99.99_ESMF_KIND_R4, rc=rc)
+      write(name, *) "Creating Data Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      !  Create 2 bundles with the already created fields.
+      bundle1 = ESMF_BundleCreate(3, fields(1:3), name="ocn export", rc=rc)
+      write(name, *) "Creating source Bundle with 3 fields"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+     
+      !------------------------------------------------------------------------
+      !EX_UTest
+      bundle2 = ESMF_BundleCreate(2, fields(4:5), name="atm import", rc=rc)
+      write(name, *) "Creating destination Bundle with 2 fields"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+     
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! redistribute data from bundle1 to bundle2 - this *should* fail
+      ! because count of fields in source and dest bundles not same.
+      call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
+      write(name, *) "Precompute Redist with mismatching field counts"
+      write(failMsg, *) "rc should not be ESMF_SUCCESS"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !!E-X_UTest
+      !! redistribute data from bundle1 to bundle2 - this *should* fail
+      !! because data types do not line up between src and dst bundles.
+      !call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
+      !write(name, *) "Precompute Redist with mismatched data types"
+      !write(failMsg, *) "rc should not be ESMF_SUCCESS"
+      !call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !!E-X_UTest
+      !! redistribute data from bundle1 to bundle2 - this *should* fail
+      !! because empty fields do not line up.
+      !call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
+      !write(name, *) "Precompute Redist with mismatched empty fields"
+      !write(failMsg, *) "rc should not be ESMF_SUCCESS"
+      !call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !!E-X_UTest
+      !! redistribute data from bundle1 to bundle2 - this *should* fail
+      !! because both bundles have no fields.
+      !call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
+      !write(name, *) "Precompute Redist with empty bundles"
+      !write(failMsg, *) "rc should not be ESMF_SUCCESS"
+      !call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !!E-X_UTest
+      !! redistribute data from bundle1 to bundle2 - this *should* fail
+      !! because both bundles have fields but the fields have no data.
+      !call ESMF_BundleRedistStore(bundle1, bundle2, vm, rh, rc=rc)
+      !write(name, *) "Precompute Redist with only empty fields"
+      !write(failMsg, *) "rc should not be ESMF_SUCCESS"
+      !call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      
+      !------------------------------------------------------------------------
+      ! put default fail message back back.
+      write(failMsg, *) "rc not ESMF_SUCCESS"
+      !------------------------------------------------------------------------
+      
+      !------------------------------------------------------------------------
+      ! clean up the objects
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Clean up by deleting the Bundles.
+      call ESMF_BundleDestroy(bundle1, rc=rc)
+      write(name, *) "Bundle Destroy 1"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      call ESMF_BundleDestroy(bundle2, rc=rc)
+      write(name, *) "Bundle Destroy 2"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Clean up by deleting the Fields.
+      call FieldCleanup(fields(1), fields(2), fields(3), rc=rc)
+      write(name, *) "Field Destroy 1,2,3"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Clean up by deleting the Fields.
+      call FieldCleanup(fields(4), fields(5), rc=rc)
+      write(name, *) "Field Destroy 4,5"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
