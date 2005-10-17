@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.50 2005/10/12 19:06:16 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.51 2005/10/17 20:00:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -64,7 +64,13 @@
 ! !PRIVATE TYPES:
        private
 
-!  <none>
+       ! private flag - validate the inputs, and compare 2 bundles to be
+       ! sure they have the same structure so we can call the comm routines.
+       integer, parameter :: ESMF_BUNDLECOMM_NOMATCH = -1
+       integer, parameter :: ESMF_BUNDLECOMM_CONGRUENT = 1
+       integer, parameter :: ESMF_BUNDLECOMM_NONCONGRUENT = 2
+
+! 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 !  <none>
@@ -101,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.50 2005/10/12 19:06:16 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.51 2005/10/17 20:00:18 nscollins Exp $'
 
 !==============================================================================
 !
@@ -518,9 +524,6 @@
                                   routehandle, &
                                   halodirection, routeOptions, rc=status)
   
-        ! TODO: when this works, remove this next line completely.
-        ! for now, toggle it in and out as we test the new store code.
-        !status = ESMF_RC_NOT_IMPL
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -771,6 +774,7 @@
 
       integer :: status                           ! Error status
       integer :: i
+      integer :: condition
       type(ESMF_BundleType), pointer :: stypep, dtypep
    
       ! Initialize return code   
@@ -788,13 +792,22 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+ 
+      ! validate both bundles, make sure they have the same number
+      ! of fields, make sure the data types are consistent, etc.
+
+      condition = ESMF_BundleCommPrepCheck(srcBundle, dstBundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+     
+      if (condition .eq. ESMF_BUNDLECOMM_NOMATCH) return
+
       dtypep => dstBundle%btypep
       stypep => srcBundle%btypep
- 
 
       ! if all fields are identical, they can share a route
-      if (ESMF_BundleIsCongruent(srcBundle, rc=status) .and. &
-          ESMF_BundleIsCongruent(dstBundle, rc=status)) then
+      if (condition .eq. ESMF_BUNDLECOMM_CONGRUENT) then 
              call ESMF_ArrayRedistStore( &
                                  stypep%flist(1)%ftypep%localfield%localdata, &
                                  stypep%grid, &
@@ -809,8 +822,8 @@
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc)) return
       else
-        ! TODO: this needs to be in a loop, with a separate routehandle
-        ! (or internal to routehandle a list of routehandles) for each field
+        ! the prepcheck call above has verified that the number of fields
+        ! match, so we can use either one safely here.
         do i=1, stypep%field_count
  
            call ESMF_ArrayRedistStore( &
@@ -823,7 +836,6 @@
                                i, ESMF_1TO1HANDLEMAP, stypep%field_count, &
                                parentVM, &
                                routeOptions, routehandle, status)
-          !status = ESMF_RC_NOT_IMPL
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -1169,21 +1181,19 @@
       integer :: status                           ! Error status
       integer :: i
       type(ESMF_BundleType), pointer :: stypep, dtypep
+      integer :: condition
    
       ! Initialize return code   
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! Validate bundle before going further
-      call ESMF_BundleValidate(srcBundle, rc=status)
+      ! Does validate of both bundles and checks for consistent types.
+      condition = ESMF_BundleCommPrepCheck(srcBundle, dstBundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-
-      call ESMF_BundleValidate(dstBundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+     
+      if (condition .eq. ESMF_BUNDLECOMM_NOMATCH) return
 
       dtypep => dstBundle%btypep
       stypep => srcBundle%btypep
@@ -1192,9 +1202,8 @@
       ! including relloc.  if that is not true, we have to compute different
       ! weights for each field. 
 
-      if (ESMF_BundleIsCongruent(srcBundle, rc=status) .and. &
-          ESMF_BundleIsCongruent(dstBundle, rc=status)) then
-               call ESMF_ArrayRegridStore( &
+      if (condition .eq. ESMF_BUNDLECOMM_CONGRUENT) then
+          call ESMF_ArrayRegridStore( &
                                  stypep%flist(1)%ftypep%localfield%localdata, &
                                  stypep%grid, &
                                  stypep%flist(1)%ftypep%mapping, &
@@ -1205,14 +1214,12 @@
                                  1, ESMF_ALLTO1HANDLEMAP, 1, &
                                  regridmethod, regridnorm, srcMask, dstMask, &
                                  routeOptions, status)
-                if (ESMF_LogMsgFoundError(status, &
-                                          ESMF_ERR_PASSTHRU, &
-                                          ESMF_CONTEXT, rc)) return
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
       else
-        ! TODO: this needs to be in a loop, with a separate routehandle
-        ! (or internal to routehandle a list of routehandles) for each field
+        ! each field must be treated separately.
         do i=1, stypep%field_count
- 
             call ESMF_ArrayRegridStore( &
                                  stypep%flist(i)%ftypep%localfield%localdata, &
                                  stypep%grid, &
@@ -1224,7 +1231,6 @@
                                  i, ESMF_1TO1HANDLEMAP, stypep%field_count, &
                                  regridmethod, regridnorm, srcMask, dstMask, &
                                  routeOptions, status)
-            !!status = ESMF_RC_NOT_IMPL
             if (ESMF_LogMsgFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
@@ -1363,6 +1369,146 @@
       end subroutine ESMF_BundleScatter
 
 
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleCommPrepCheck"
+!BOPI
+! !IROUTINE: ESMF_BundleCommPrepCheck - Validate 2 Bundles before Store call
+
+! !INTERFACE:
+      function ESMF_BundleCommPrepCheck(srcBundle, dstBundle, rc)
+!
+! !RETURN VALUE:
+      integer :: ESMF_BundleCommPrepCheck
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: srcBundle                 
+      type(ESMF_Bundle), intent(inout) :: dstBundle                 
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!   Internal function, called by RedistStore() and RegridStore() before
+!   proceeding.  Validate both source and destination bundles, then
+!   compare them to be sure they have the same number of fields, that the
+!   fields line up (same data types, etc).  Return error condition if the
+!   store operation cannot proceed;  otherwise return a code to indicate
+!   either that the bundles are congruent (a single route table can apply
+!   to all fields in the bundles) or that there are different types of
+!   fields and each needs a separate route table.
+!
+!  Note: the arguments are intent(inout) only because the call to test
+!   whether a bundle is congruent can actually set the internal flag as
+!   a side-effect if the state isn't already known.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [srcBundle] 
+!         {\tt ESMF\_Bundle} to be validated and compared to destination.
+!   \item [dstBundle] 
+!         {\tt ESMF\_Bundle} to be validated and compared to source.
+!   \item [{[rc]}] 
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      integer :: i
+      type(ESMF_BundleType), pointer :: stypep, dtypep
+      integer :: srank, drank
+      type(ESMF_DataType) :: stype, dtype
+      type(ESMF_DataKind) :: skind, dkind
+   
+      ! Initialize return code   
+      ESMF_BundleCommPrepCheck = ESMF_BUNDLECOMM_NOMATCH
+      status = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate bundles before going further
+      call ESMF_BundleValidate(srcBundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_BundleValidate(dstBundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      stypep => srcBundle%btypep
+      dtypep => dstBundle%btypep
+
+      ! Make sure both bundles have the same number of fields.
+      if (stypep%field_count .ne. dtypep%field_count) then
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                 "Bundles must contain same number of Fields", &
+                                 ESMF_CONTEXT, rc)
+        return
+
+      endif
+
+      ! For now, make sure that none of the fields are empty.
+      if ((stypep%field_count .le. 0) .or. (dtypep%field_count .le. 0)) then
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                 "Bundles must not be empty", &
+                                  ESMF_CONTEXT, rc)
+        return
+
+      endif
+
+      ! (TODO: we could put in some more code to handle empty fields but it
+      ! probably would force us into the non-packing loop for sanity's sake).
+
+      ! Make sure the data types are consistent. 
+      do i=1, stypep%field_count
+          call ESMF_ArrayGet(stypep%flist(1)%ftypep%localfield%localdata, &
+                             rank=srank, type=stype, kind=skind, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          call ESMF_ArrayGet(dtypep%flist(1)%ftypep%localfield%localdata, &
+                             rank=drank, type=dtype, kind=dkind, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
+          if (srank .ne. drank) then
+              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                  "Corresponding Fields in Bundles must have same data rank", &
+                                       ESMF_CONTEXT, rc)
+              return
+          endif
+
+          if (stype .ne. dtype) then
+              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                  "Corresponding Fields in Bundles must have same data type", &
+                                       ESMF_CONTEXT, rc)
+              return
+          endif
+
+          if (skind .ne. dkind) then
+              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                  "Corresponding Fields in Bundles must have same data kind", &
+                                       ESMF_CONTEXT, rc)
+              return
+          endif
+
+      enddo
+
+      ! Set return value based on whether both bundles are congruent or not.
+      if (ESMF_BundleIsCongruent(srcBundle, rc=status) .and. &
+          ESMF_BundleIsCongruent(dstBundle, rc=status)) then
+              ESMF_BundleCommPrepCheck = ESMF_BUNDLECOMM_CONGRUENT
+      else
+              ESMF_BundleCommPrepCheck = ESMF_BUNDLECOMM_NONCONGRUENT
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_BundleCommPrepCheck
 !------------------------------------------------------------------------------
 
       end module ESMF_BundleCommMod
