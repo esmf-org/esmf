@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 2005/10/18 15:49:41 svasquez Exp $ 
+# $Id: makefile,v 1.25 2005/10/18 17:53:55 svasquez Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -24,7 +24,6 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_VMUTest \
 		$(ESMF_TESTDIR)/ESMF_VMGatherUTest \
 		$(ESMF_TESTDIR)/ESMF_VMAllGatherUTest \
 		$(ESMF_TESTDIR)/ESMF_VMBroadcastUTest \
-		$(ESMF_TESTDIR)/ESMF_VMWaitQueueUTest \
 		$(ESMF_TESTDIR)/ESMF_VMBarrierUTest
 
 TESTS_RUN     = RUN_ESMF_VMUTest \
@@ -35,7 +34,6 @@ TESTS_RUN     = RUN_ESMF_VMUTest \
                 RUN_ESMF_VMGatherUTest \
                 RUN_ESMF_VMAllGatherUTest \
 		RUN_ESMF_VMBroadcastUTest \
-		RUN_ESMF_VMWaitQueueUTest \
 		RUN_ESMF_VMBarrierUTest
 
 TESTS_RUN_UNI = RUN_ESMF_VMUTestUNI \
@@ -140,12 +138,4 @@ RUN_ESMF_VMBarrierUTest:
 RUN_ESMF_VMBarrierUTestUNI:
 	$(MAKE) TNAME=VMBarrier NP=1 ftest
 
-#
-# VM WaitQueue
-#
-RUN_ESMF_VMWaitQueueUTest:
-	$(MAKE) TNAME=VMWaitQueue NP=4 ftest
-
-RUN_ESMF_VMWaitQueueUTestUNI:
-	$(MAKE) TNAME=VMWaitQueue NP=1 ftest
 
