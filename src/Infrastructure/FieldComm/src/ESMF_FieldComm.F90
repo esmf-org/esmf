@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.73 2005/10/12 19:06:16 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.74 2005/10/19 17:26:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.73 2005/10/12 19:06:16 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.74 2005/10/19 17:26:31 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -393,7 +393,7 @@
 !     \item [{[routeOptions]}]
 !           Not normally specified.  Specify which internal strategy to select
 !           when executing the communication needed to update the halo.
-!           See Section~\ref{opt:routeopt} for possible values.
+!           See Section~\ref{sec:routeoptions} for possible values.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -539,7 +539,7 @@
 !     \item [{[routeOptions]}]
 !           Not normally specified.  Specify which internal strategy to select
 !           when executing the communication needed to update the halo.
-!           See Section~\ref{opt:routeopt} for possible values.
+!           See Section~\ref{sec:routeoptions} for possible values.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -655,7 +655,7 @@
 !     \item [{[routeOptions]}]
 !           Not normally specified.  Specify which internal strategy to select
 !           when executing the communication needed to redistribute the data.
-!           See Section~\ref{opt:routeopt} for possible values.
+!           See Section~\ref{sec:routeoptions} for possible values.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -817,7 +817,7 @@
 !     \item [{[routeOptions]}]
 !           Not normally specified.  Specify which internal strategy to select
 !           when executing the communication needed to execute the
-!           See Section~\ref{opt:routeopt} for possible values.
+!           See Section~\ref{sec:routeoptions} for possible values.
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} which will be used to execute the
 !           redistribution when {\tt ESMF\_FieldRedist} is called.
@@ -936,7 +936,7 @@
 !     \item [{[routeOptions]}]
 !           Not normally specified.  Specify which internal strategy to select
 !           when executing the communication needed to execute the
-!           See Section~\ref{opt:routeopt} for possible values.
+!           See Section~\ref{sec:routeoptions} for possible values.
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} which will be used to execute the
 !           redistribution when {\tt ESMF\_FieldRedist} is called.
@@ -1155,7 +1155,7 @@
 !     \item [{[routeOptions]}]
 !           Not normally specified.  Specify which internal strategy to select
 !           when executing the communication needed to execute the regrid.
-!           See Section~\ref{opt:routeopt} for possible values.
+!           See Section~\ref{sec:routeoptions} for possible values.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1263,7 +1263,7 @@
 !     \item [{[routeOptions]}]
 !           Not normally specified.  Specify which internal strategy to select
 !           when executing the communication needed to execute the regrid.
-!           See Section~\ref{opt:routeopt} for possible values.
+!           See Section~\ref{sec:routeoptions} for possible values.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1427,7 +1427,7 @@
 !     \item [{[routeOptions]}]
 !           Not normally specified.  Specify which internal strategy to select
 !           when executing the communication needed to execute the regrid.
-!           See Section~\ref{opt:routeopt} for possible values.
+!           See Section~\ref{sec:routeoptions} for possible values.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
