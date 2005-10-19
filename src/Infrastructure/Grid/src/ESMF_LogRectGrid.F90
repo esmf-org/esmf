@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.141 2005/09/09 17:51:34 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.142 2005/10/19 23:33:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.141 2005/09/09 17:51:34 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.142 2005/10/19 23:33:49 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3498,22 +3498,8 @@
         return
       endif
 
-      !TODO: destruct these
-      !  type (ESMF_Base) :: base
-      !  type (ESMF_Status) :: gridStatus
-      grid%horzGridType    = ESMF_GRID_TYPE_UNKNOWN
-      grid%vertGridType    = ESMF_GRID_VERT_TYPE_UNKNOWN
-      grid%horzStagger     = ESMF_GRID_HORZ_STAGGER_UNKNOWN
-      grid%vertStagger     = ESMF_GRID_VERT_STAGGER_UNKNOWN
-      grid%horzCoordSystem = ESMF_COORD_SYSTEM_UNKNOWN
-      grid%vertCoordSystem = ESMF_COORD_SYSTEM_UNKNOWN
-      grid%coordOrder      = ESMF_COORD_ORDER_UNKNOWN
-      grid%periodic        = ESMF_FALSE
-      grid%numPhysGrids    = 0
-      grid%numDistGrids    = 0
-
       if (grid%gridStatus.eq.ESMF_GRID_STATUS_READY) then
-        do n = 1,grid%numPhysGridsAlloc
+        do n = 1,grid%numPhysGrids
           call ESMF_PhysGridDestroy(grid%physgrids(n), rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -3525,7 +3511,7 @@
         if (ESMF_LogMsgFoundAllocError(localrc, "deallocating physgrids", &
                                        ESMF_CONTEXT, rc)) return
 
-        do n = 1,grid%numDistGridsAlloc
+        do n = 1,grid%numDistGrids
           call ESMF_DistGridDestroy(grid%distgrids(n), rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -3544,6 +3530,20 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       endif
+
+      !TODO: destruct these?
+      !  type (ESMF_Base) :: base
+      !  type (ESMF_Status) :: gridStatus
+      grid%horzGridType    = ESMF_GRID_TYPE_UNKNOWN
+      grid%vertGridType    = ESMF_GRID_VERT_TYPE_UNKNOWN
+      grid%horzStagger     = ESMF_GRID_HORZ_STAGGER_UNKNOWN
+      grid%vertStagger     = ESMF_GRID_VERT_STAGGER_UNKNOWN
+      grid%horzCoordSystem = ESMF_COORD_SYSTEM_UNKNOWN
+      grid%vertCoordSystem = ESMF_COORD_SYSTEM_UNKNOWN
+      grid%coordOrder      = ESMF_COORD_ORDER_UNKNOWN
+      grid%periodic        = ESMF_FALSE
+      grid%numPhysGrids    = 0
+      grid%numDistGrids    = 0
 
       if (present(rc)) rc = ESMF_SUCCESS
 
