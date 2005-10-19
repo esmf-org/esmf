@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.16 2005/05/31 17:39:57 nscollins Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.17 2005/10/19 23:32:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -230,7 +230,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.16 2005/05/31 17:39:57 nscollins Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.17 2005/10/19 23:32:09 nscollins Exp $'
 
 !==============================================================================
 !
@@ -452,6 +452,12 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! release base object
+      call ESMF_BaseDestroy(physCoord%ptr%base, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Deallocate physcoord
       deallocate(physCoord%ptr, stat=localrc)
