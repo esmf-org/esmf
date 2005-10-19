@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.37 2005/10/12 19:06:16 nscollins Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.38 2005/10/19 23:31:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.37 2005/10/12 19:06:16 nscollins Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.38 2005/10/19 23:31:21 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -588,6 +588,54 @@
       print *, "rc = ", (rc)
       !------------------------------------------------------------------------
 
+      !EX_UTest
+      ! Destroying fields
+      call ESMF_FieldDestroy(fields(1), rc=rc)
+      write(failMsg, *) "Destroying a Field"
+      write(name, *) "Destroying a Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Destroying fields
+      call ESMF_FieldDestroy(fields(2), rc=rc)
+      write(failMsg, *) "Destroying a Field"
+      write(name, *) "Destroying a Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Destroying fields
+      call ESMF_FieldDestroy(fields(3), rc=rc)
+      write(failMsg, *) "Destroying a Field"
+      write(name, *) "Destroying a Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Destroying fields
+      call ESMF_FieldDestroy(simplefield, rc=rc)
+      write(failMsg, *) "Destroying a Field"
+      write(name, *) "Destroying a Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Destroying a grid
+      call ESMF_GridDestroy(grid, rc=rc)
+      write(failMsg, *) "Destroying a Grid"
+      write(name, *) "Destroying a Grid"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Destroying a layout
+      call ESMF_DELayoutDestroy(layout, rc=rc)
+      write(failMsg, *) "Destroying a Layout"
+      write(name, *) "Destroying a Layout"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
       ! Requirement 2.5.2 Insert and remove Field
       ! A Field can be inserted into or removed from a Bundle
       ! The remove portion of this requirement cannot be tested until Bug 705849
