@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.80 2005/10/12 19:06:16 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.81 2005/10/19 23:33:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research, 
@@ -1935,6 +1935,8 @@ end function
 
       btype => bundle%btypep
 
+      newstart = 1
+
       ! find the first field with data and set the pattern to be matched
       do i=1, btype%field_count
        
@@ -1962,6 +1964,12 @@ end function
 
       enddo
   
+      ! if no fields had data, return now.
+      if (newstart .le. 1) then
+          rc = ESMF_SUCCESS
+          return
+      endif
+
       ! now starting from the pattern field, compare the rest to see if they
       ! match.  first nonmatch we can exit with return .FALSE.
 
