@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.89 2005/10/12 19:06:16 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.90 2005/10/19 23:18:09 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.89 2005/10/12 19:06:16 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.90 2005/10/19 23:18:09 jwolfe Exp $'
 
 !==============================================================================
 
@@ -365,17 +365,18 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! now all necessary data is local
-      ! only DEs with destination data need to calculate the regrid
-      if (hasDstData) then
-
+      size = 0
+      if (hasDstData) size = ((dstCounts(1)*dstCounts(2)) + 1) * 4
       ! TODO: the *4 is to guarantee the max allocation possible is enough
       !  for bilinear interpolation.  eventually the addlinks routine should
       !  grow the arrays internally.
-      size = ((dstCounts(1)*dstCounts(2)) + 1) * 4
 
       ! Create a Transform Values object
       tv = ESMF_TransformValuesCreate(size, rc)
+
+      ! now all necessary data is local
+      ! only DEs with destination data need to calculate the regrid
+      if (hasDstData) then
 
       ! set up user masks and logical found arrays for search
       allocate(     found(dstCounts(1),dstCounts(2)), &
