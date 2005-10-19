@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.94 2005/05/31 17:39:57 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.95 2005/10/19 23:32:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -42,6 +42,7 @@
       use ESMF_LocalArrayMod
       use ESMF_ArrayDataMapMod
       use ESMF_ArrayMod
+      use ESMF_ArrayCreateMod
       use ESMF_ArrayGetMod
       use ESMF_PhysCoordMod
 
@@ -323,7 +324,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.94 2005/05/31 17:39:57 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.95 2005/10/19 23:32:37 nscollins Exp $'
 
 !==============================================================================
 !
@@ -592,12 +593,153 @@
 ! !REQUIREMENTS: 
 
       ! local variables
-      !integer :: localrc                             ! Error status
+      integer :: localrc                             ! Error status
+      integer :: i
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! Destroy all components of physgrid
+      ! if already destroyed, fine.
+      if (.not.associated(physgrid%ptr)) then 
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+      endif
+
+
+      ! release coordinate information
+      if (associated(physgrid%ptr%coords)) then
+          do i = 1, physgrid%ptr%numDims
+              if (associated(physgrid%ptr%coords(i)%ptr)) then
+                  call ESMF_PhysCoordDestroy(physgrid%ptr%coords(i), rc=localrc)
+                  if (ESMF_LogMsgFoundError(localrc, &
+                                            ESMF_ERR_PASSTHRU, &
+                                            ESMF_CONTEXT, rc)) return
+              endif
+          enddo
+
+          deallocate(physgrid%ptr%coords, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "PhysGrid coords", &
+                                         ESMF_CONTEXT, rc)) return
+      endif
+
+      ! release all storage associated with masks
+      if (physgrid%ptr%numMasks .gt. 0) then
+          do i=1, physgrid%ptr%numMasks
+
+              call ESMF_BaseDestroy(physgrid%ptr%masks(i)%base, rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) return
+        
+              call ESMF_ArrayDestroy(physgrid%ptr%masks(i)%data, rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) return
+        
+          enddo
+     
+          deallocate(physgrid%ptr%masks, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "PhysGrid masks", &
+                                         ESMF_CONTEXT, rc)) return
+      endif
+
+      ! release all storage associated with metrics
+      if (physgrid%ptr%numMetrics .gt. 0) then
+          do i=1, physgrid%ptr%numMetrics
+
+              call ESMF_ArrayDestroy(physgrid%ptr%metrics(i), rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) return
+          enddo
+    
+          if (associated(physgrid%ptr%metrics)) then
+              deallocate(physgrid%ptr%metrics, stat=localrc)
+              if (ESMF_LogMsgFoundAllocError(localrc, "PhysGrid metrics", &
+                                             ESMF_CONTEXT, rc)) return
+          endif
+      endif
+
+
+      ! clean up location related storage
+      if (associated(physgrid%ptr%locations%compLocations)) then
+          do i=1, size(physgrid%ptr%locations%compLocations)
+              call ESMF_ArrayDestroy(physgrid%ptr%locations%compLocations(i), rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) return
+          enddo
+
+          deallocate(physgrid%ptr%locations%compLocations, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "PhysGrid compLocations", &
+                                         ESMF_CONTEXT, rc)) return
+      endif
+
+      if (associated(physgrid%ptr%locations%totalLocations)) then
+          do i=1, size(physgrid%ptr%locations%totalLocations)
+              call ESMF_ArrayDestroy(physgrid%ptr%locations%totalLocations(i), rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) return
+          enddo
+
+          deallocate(physgrid%ptr%locations%totalLocations, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "PhysGrid totalLocations", &
+                                         ESMF_CONTEXT, rc)) return
+      endif
+
+      call ESMF_BaseDestroy(physgrid%ptr%locations%base, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! clean up region related storage
+      if (associated(physgrid%ptr%regions%vertices)) then
+          do i=1, size(physgrid%ptr%regions%vertices)
+              call ESMF_ArrayDestroy(physgrid%ptr%regions%vertices(i), rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) return
+          enddo
+
+          deallocate(physgrid%ptr%regions%vertices, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "PhysGrid vertices", &
+                                         ESMF_CONTEXT, rc)) return
+      endif
+
+      if (associated(physgrid%ptr%regions%bbox)) then
+          do i=1, size(physgrid%ptr%regions%bbox)
+              call ESMF_ArrayDestroy(physgrid%ptr%regions%bbox(i), rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) return
+          enddo
+
+          deallocate(physgrid%ptr%regions%bbox, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "PhysGrid bbox", &
+                                         ESMF_CONTEXT, rc)) return
+      endif
+
+      ! TODO: delete 2 elipse arrays if defined
+
+      call ESMF_BaseDestroy(physgrid%ptr%regions%base, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+
+      ! free main base object
+      call ESMF_BaseDestroy(physgrid%ptr%base, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! and finally, get rid of physgrid derived type itself and
+      ! mark the pointer as null
+      deallocate(physgrid%ptr, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "PhysGrid type", &
+                                     ESMF_CONTEXT, rc)) return
+
       nullify(physgrid%ptr)
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1753,6 +1895,7 @@
 !
 !  code goes here
 !
+      rc = ESMF_SUCCESS
       end subroutine ESMF_PhysGridValidate
 
 !------------------------------------------------------------------------------
