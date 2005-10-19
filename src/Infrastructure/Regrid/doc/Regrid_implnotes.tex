@@ -746,19 +746,19 @@ local list of links (described previously) in an object called an
          size of the corresponding arrays.
    \item [srcindex]
          An array of indices into the local array of source data.
-         This array is of size [numlist] and kind ESMF_KIND_I4.  Only a single
+         This array is of size [numlist] and kind ESMF\_KIND\_I4.  Only a single
          integer is required to identify the source index because the source data
          has been gathered as a vector.
    \item [dstindex]
          An array of indices into the local array of destination data.
-         This array is of size [2*numlist] and kind ESMF_KIND_I4.  Each
+         This array is of size [2*numlist] and kind ESMF\_KIND\_I4.  Each
          destination index address requires two integers, one for each rank
          of the data array that corresponds to a Grid axis.  However, rather
          than being an array of rank 2, the index pairs are stored sequentially
          in the [dstindex] array.
    \item [weights]
          An array of interpolation weights.  This array is of size [numlist] and
-         kind ESMF_KIND_R8.
+         kind ESMF\_KIND\_R8.
 \end{description}
 Each link is represented by an entry in this set of arrays.  Also note that there
 is a single link for each unique combination of source and destination indices.
