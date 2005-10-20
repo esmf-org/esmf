@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.1 2005/10/20 20:20:52 svasquez Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.2 2005/10/20 22:25:42 svasquez Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -23,45 +23,6 @@ contains
 
     subroutine setupRegridUTest(longString,ier)
 
-#if 0
-
-    use ESMF_Mod
-    use ESMF_RegridArgs
-    implicit none
-
-
-interface
-  subroutine find_indices( longString, maskName, choiceIndex, nOptions, &
-                           nSelected, ier)
-   integer, intent(in) :: nOptions
-   character(len=*), intent(in) :: longString
-   integer, intent(out), dimension(:) ::  choiceIndex
-   logical, intent(out), dimension(:) ::  maskName
-   integer, intent(out) :: ier, nSelected
-  end subroutine find_indices
-end interface
-
-interface
-    subroutine Regrid(FieldChoice, nSrcPetsXY, npetsXY, MethodChoice, &
-                           SrcGridChoice,DstGridChoice, &
-                           SrcLocChoice, DstLocChoice, &
-                           SrcHalo, DstHalo, &
-                           domainType, error_threshold, ier )
-    use ESMF_RegridArgs
-    implicit none
-      integer, intent(in) :: FieldChoice
-      type(ESMF_RegridMethod), intent(in) :: MethodChoice
-      type(ESMF_GridHorzStagger), intent(in) :: SrcGridChoice, DstGridChoice
-      integer, intent(in) :: SrcHalo, DstHalo
-      type(ESMF_RelLoc), intent(in) :: SrcLocChoice, DstLocChoice
-      real(ESMF_KIND_R8), optional :: error_threshold
-      integer, intent(in) :: npetsXY(2)
-      integer, intent(in) :: nSrcPetsXY(2)
-      integer, intent(in) :: domainType
-      integer, optional, intent(out) :: ier
-    end subroutine Regrid
-end interface
-#endif
 
     character(len=*), intent(in) :: longString
 
