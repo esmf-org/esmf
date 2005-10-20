@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSampleUTest.F90,v 1.9 2005/10/20 20:23:02 svasquez Exp $
+! $Id: ESMF_RegridSampleUTest.F90,v 1.10 2005/10/20 22:09:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@
   !   DSTDELAYOUT: 1DX, 1DY, 2D
 
     longString='FUNCTION:C:REGSCHEME:1CONSERV' &
-             ! //':SRCGRID:D_NE:DSTGRID:A:SRCDELAYOUT:1DY:DSTDELAYOUT:1DX' &
+               //':SRCGRID:A:DSTGRID:A:SRCDELAYOUT:1DY:DSTDELAYOUT:1DY' &
                //':DOMAIN:WHOLEGLOBE:SRCHALO:3:DSTHALO:0'
 
     call setupRegridUTest(longString,ier)
