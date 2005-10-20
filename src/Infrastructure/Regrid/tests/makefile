@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2005/10/12 19:06:17 nscollins Exp $
+# $Id: makefile,v 1.29 2005/10/20 20:42:52 svasquez Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -101,6 +101,18 @@ RUN_ESMF_Regrid_bUTestUNI:
 #
 # RegridSample Unit Test
 #
+
+
+UTEST_RegridSample_OBJS = ESMF_OptionsTable.o \
+			  ESMF_Unit_Tests.o \
+                          ESMF_RegridArgs.o \
+			  ESMF_RegridSubroutines.o
+
+ESMF_RegridSampleUTest.o: ESMF_OptionsTable.o \
+                          ESMF_Unit_Tests.o \
+                          ESMF_RegridArgs.o \
+                          ESMF_RegridSubroutines.o
+
 RUN_ESMF_RegridSampleUTest:
 	$(MAKE) TNAME=RegridSample NP=8 ftest
 
