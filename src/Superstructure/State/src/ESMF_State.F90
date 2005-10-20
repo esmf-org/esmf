@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.88 2005/06/21 22:51:34 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.89 2005/10/20 17:11:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.88 2005/06/21 22:51:34 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.89 2005/10/20 17:11:32 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -957,7 +957,11 @@ end interface
                    neededflag, readyflag, validflag, reqforrestartflag, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rc)) then 
+            ! do not overwrite the rc from the real error
+            deallocate(stypep, stat=localrc)
+            return
+        endif
 
         ! Set return values
         ESMF_StateCreate%statep => stypep 
@@ -2791,6 +2795,7 @@ end interface
         nullify(a%statep)
 
         ESMF_StateReadRestart = a 
+        if (present(rc)) rc = ESMF_FAILURE
  
         end function ESMF_StateReadRestart
 
@@ -3655,6 +3660,8 @@ end interface
         ! This is a wrapper which turns around and calls into the
         ! transform code to execute the callback.
 
+        if (present(rc)) rc = ESMF_FAILURE
+
         end subroutine ESMF_StateTransform
 
 !------------------------------------------------------------------------------
@@ -3692,10 +3699,16 @@ end interface
         type(ESMF_Field) :: fred
         integer :: localrc
 
+        localrc = ESMF_FAILURE
+
         if (present(itemname)) then
             call ESMF_StateGetField(state, fieldname=itemname, field=fred, rc=localrc)
             call ESMF_FieldWrite(fred, iospec=iospec, rc=localrc) 
         endif
+
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
   
 
         end subroutine ESMF_StateWrite
@@ -3740,6 +3753,7 @@ end interface
 ! the subroutine has not been implemented. When the code is
 ! completed change back to BOP/EOP.
 !
+        if (present(rc)) rc = ESMF_FAILURE
         end subroutine ESMF_StateWriteRestart
 
 
