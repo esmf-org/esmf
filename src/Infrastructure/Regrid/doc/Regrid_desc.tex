@@ -1,4 +1,4 @@
-% $Id: Regrid_desc.tex,v 1.6 2005/08/19 23:20:07 jwolfe Exp $
+% $Id: Regrid_desc.tex,v 1.7 2005/10/20 17:45:46 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,17 +23,3 @@ called SCRIP that was developed at the Los Alamos National Laboratory by Phil
 Jones.  However, SCRIP is a serial code and the ESMF regridding routines have
 been parallelized.
 
-\subsubsection{Terminology}
-
-\begin{description}
-\item[search]
-     {\tt Search} refers to the process of determining which processors must
-     exchange data (and how much) when regridding between decomposed grids. 
-\item[sweep]
-     {\tt Sweep} refers to the process of looping through lists of cells from
-     one grid, hunting for interactions with a specified point or subsegment
-     from the other grid.  The type of interaction depends on the regrid method
-     and is either an intersection with an identified subsegment or containment
-     of an identified point.  The limitation of the range of cells that must be
-     examined is also considered part of the sweep algorithm.
-\end{description}
