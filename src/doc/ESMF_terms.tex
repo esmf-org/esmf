@@ -461,6 +461,12 @@ Short for \htmlref{Processing Element}{glos:Processing_Element}.
   that assigns system resources (processors, memory, CPU time, 
   I/O channels, etc.) to executables.
 
+\label{glos:Search} 
+\item[Search]
+  {\tt Search} refers to the process of determining which processors must
+  exchange data (and how much) when regridding between decomposed grids.
+  See also \htmlref{sweep}{glos:Sweep}.
+
 \label{glos:SequentialExecution}
 \item[Sequential execution] 
   Sequential execution of model components describes the case in which 
@@ -495,6 +501,16 @@ Short for \htmlref{Processing Element}{glos:Processing_Element}.
   contain Arrays, Bundles, Fields, or other States.  It is used to 
   transfer data between components.  See also \htmlref{import State}
   {glos:ImportState}, \htmlref{export State}{glos:ExportState}.
+
+\label{glos:Sweep} 
+\item[Sweep]
+  {\tt Sweep} refers to the regridding process of looping through lists of cells
+  from one grid, hunting for interactions with a specified point or subsegment
+  from the other grid.  The type of interaction depends on the regrid method
+  and is either an intersection with an identified subsegment or containment
+  of an identified point.  The limitation of the range of cells that must be
+  examined is also considered part of the sweep algorithm.
+  See also \htmlref{search}{glos:Search}.
 
 \label{glos:SysTime} 
 \item [System time] 
