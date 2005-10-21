@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.63 2005/10/20 16:42:50 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.64 2005/10/21 22:32:03 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.63 2005/10/20 16:42:50 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.64 2005/10/21 22:32:03 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -3112,6 +3112,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       delete attrList[i];
                          
   if (attrList) delete [] attrList;
+
+  // if a vmID was allocated, free it here.
+  if (vmID) delete vmID;
 
   // if we have to support reference counts someday,
   // test if (refCount > 0) and do something if true;
