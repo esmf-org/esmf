@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.31 2005/10/21 17:26:27 svasquez Exp $
+# $Id: makefile,v 1.32 2005/10/21 19:11:29 svasquez Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -20,19 +20,19 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_RegridUTest \
 		$(ESMF_TESTDIR)/ESMF_RegridOptionsUTest \
 		$(ESMF_TESTDIR)/ESMF_RegridBandingUTest \
 		$(ESMF_TESTDIR)/ESMF_RegridFunctionUTest \
-		$(ESMF_TESTDIR)/ESMF_RegridSampleUTest
+		$(ESMF_TESTDIR)/ESMF_RegridToolUTest
 
 TESTS_RUN     = RUN_ESMF_RegridUTest \
 		RUN_ESMF_RegridOptionsUTest \
 		RUN_ESMF_RegridBandingUTest \
 		RUN_ESMF_RegridFunctionUTest \
-		RUN_ESMF_RegridSampleUTest
+		RUN_ESMF_RegridToolUTest
 
 TESTS_RUN_UNI = RUN_ESMF_RegridUTestUNI \
 	        RUN_ESMF_RegridOptionsUTestUNI \
 	        RUN_ESMF_RegridBandingUTestUNI \
 		RUN_ESMF_RegridFunctionUTestUNI \
-		RUN_ESMF_RegridSampleUTestUNI
+		RUN_ESMF_RegridToolUTestUNI
 
 
 include $(ESMF_DIR)/makefile
@@ -87,24 +87,24 @@ RUN_ESMF_RegridFunctionUTestUNI:
 
 
 #
-# RegridSample Unit Test
+# RegridTool Unit Test
 #
 
 
-UTEST_RegridSample_OBJS = ESMF_OptionsTable.o \
+UTEST_RegridTool_OBJS = ESMF_OptionsTable.o \
 			  ESMF_Unit_Tests.o \
                           ESMF_RegridArgs.o \
 			  ESMF_RegridSubroutines.o
 
-ESMF_RegridSampleUTest.o: ESMF_OptionsTable.o \
+ESMF_RegridToolUTest.o: ESMF_OptionsTable.o \
                           ESMF_Unit_Tests.o \
                           ESMF_RegridArgs.o \
                           ESMF_RegridSubroutines.o
 
-RUN_ESMF_RegridSampleUTest:
-	$(MAKE) TNAME=RegridSample NP=8 ftest
+RUN_ESMF_RegridToolUTest:
+	$(MAKE) TNAME=RegridTool NP=8 ftest
 
-RUN_ESMF_RegridSampleUTestUNI:
-	$(MAKE) TNAME=RegridSample NP=1 ftest
+RUN_ESMF_RegridToolUTestUNI:
+	$(MAKE) TNAME=RegridTool NP=1 ftest
 
 
