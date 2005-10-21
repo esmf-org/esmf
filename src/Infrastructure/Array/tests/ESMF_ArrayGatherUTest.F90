@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGatherUTest.F90,v 1.5 2005/10/21 16:04:47 svasquez Exp $
+! $Id: ESMF_ArrayGatherUTest.F90,v 1.6 2005/10/21 16:12:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArrayGatherUTest.F90,v 1.5 2005/10/21 16:04:47 svasquez Exp $'
+      '$Id: ESMF_ArrayGatherUTest.F90,v 1.6 2005/10/21 16:12:11 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -205,7 +205,7 @@
        call ESMF_ArrayDestroy(array1, rc)
       ! if (localPet==rootDE) then
        	!call ESMF_ArrayDestroy(array2, rc)
-       endif
+       !endif
        call ESMF_FieldDestroy(field, rc)
        call ESMF_GridDestroy(grid, rc)
        call ESMF_DELayoutDestroy(layout, rc)
