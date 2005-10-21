@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.18 2005/07/20 19:11:12 nscollins Exp $
+// $Id: ESMC_FTable.C,v 1.19 2005/10/21 22:33:13 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.18 2005/07/20 19:11:12 nscollins Exp $";
+           "$Id: ESMC_FTable.C,v 1.19 2005/10/21 22:33:13 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -85,13 +85,11 @@
 
     // TODO: allocate space for N items, rounded up?
     if (nfuncp > funcalloc) {
-        funcs = (struct funcinfo *)realloc((void *)funcs, 
-                                                  nfuncp * sizeof(funcinfo));
+        funcs = (funcinfo *)realloc((void *)funcs, nfuncp * sizeof(funcinfo));
         funcalloc = nfuncp; 
     }
     if (ndatap > dataalloc) {
-        data = (struct datainfo *)realloc((void *)data, 
-                                                 ndatap * sizeof(datainfo));
+        data = (datainfo *)realloc((void *)data, ndatap * sizeof(datainfo));
         dataalloc = ndatap;
     }
 
@@ -161,7 +159,7 @@
     // replace it.  otherwise add it to the end.
     for (i=0; i<funccount; i++) {
         if (!strcmp(name, funcs[i].funcname))
-	   break;
+           break;
     }
 
     // we found the function, or we got to the end of the table.
@@ -171,7 +169,7 @@
 
     // extend the table if needed
     if (thisfunc >= funcalloc) {
- 	funcs = (struct funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(struct funcinfo));
+        funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
         funcalloc = thisfunc+4;
     }
     funcs[thisfunc].funcptr = func;
@@ -220,7 +218,7 @@
     // replace it.  otherwise add it to the end.
     for (i=0; i<funccount; i++) {
         if (!strcmp(name, funcs[i].funcname))
-	   break;
+           break;
     }
 
     // we found the function, or we got to the end of the table.
@@ -230,7 +228,7 @@
 
     // extend the table if needed
     if (thisfunc >= funcalloc) {
- 	funcs = (struct funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(struct funcinfo));
+        funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
         funcalloc = thisfunc+4;
     }
     funcs[thisfunc].funcptr = func;
@@ -279,7 +277,7 @@
     // replace it.  otherwise add it to the end.
     for (i=0; i<funccount; i++) {
         if (!strcmp(name, funcs[i].funcname))
-	   break;
+           break;
     }
 
     // we found the function, or we got to the end of the table.
@@ -289,7 +287,7 @@
 
     // extend the table if needed
     if (thisfunc >= funcalloc) {
- 	funcs = (struct funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(struct funcinfo));
+        funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
         funcalloc = thisfunc+4;
     }
     funcs[thisfunc].funcptr = func;
@@ -340,7 +338,7 @@
     // replace it.  otherwise add it to the end.
     for (i=0; i<funccount; i++) {
         if (!strcmp(name, funcs[i].funcname))
-	   break;
+           break;
     }
 
     // we found the function, or we got to the end of the table.
@@ -350,7 +348,7 @@
 
     // extend the table if needed
     if (thisfunc >= funcalloc) {
- 	funcs = (struct funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(struct funcinfo));
+        funcs = (funcinfo *)realloc((void *)funcs, (thisfunc+4) * sizeof(funcinfo));
         funcalloc = thisfunc+4;
     }
     funcs[thisfunc].funcptr = func;
@@ -397,7 +395,7 @@
 
     for (i=0; i<funccount; i++) {
         if (strcmp(name, funcs[i].funcname))
-	   continue;
+           continue;
    
         for(j=0; j<acount; j++)
             funcs[i].funcarg[j] = arglist[j];
@@ -438,7 +436,7 @@
 
  // TODO: test this code
     if (datacount >= dataalloc) {
- 	data = (struct datainfo *)realloc((void *)data, (datacount+4) * sizeof(struct datainfo));
+        data = (datainfo *)realloc((void *)data, (datacount+4) * sizeof(datainfo));
         dataalloc = datacount+4;
     }
     data[datacount].dataptr = datap;
@@ -480,7 +478,7 @@
 
     for (i=0; i<funccount; i++) {
         if (strcmp(name, funcs[i].funcname))
-	   continue;
+           continue;
    
         *func = funcs[i].funcptr;
         *ftype = funcs[i].ftype;
@@ -519,7 +517,7 @@
 
     for (i=0; i<datacount; i++) {
         if (strcmp(namep, data[i].dataname))
-	   continue;
+           continue;
 
         *datap = data[i].dataptr;
         *dtype = data[i].dtype;
@@ -560,7 +558,7 @@
     *rc = ESMF_FAILURE;
     for (i=0; i<funccount; i++) {
         if (strcmp(name, funcs[i].funcname))
-	   continue;
+           continue;
    
         switch (funcs[i].ftype) {
           case FT_VOID: {
@@ -678,7 +676,7 @@
     *rc = ESMF_FAILURE;
     for (i=0; i<funccount; i++) {
         if (strcmp(name, funcs[i].funcname))
-	   continue;
+           continue;
    
         switch (funcs[i].ftype) {
           case FT_VOID: {
@@ -923,16 +921,13 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-//
-//  code goes here
-//
     //printf("in ftable constructor\n");
     funccount = 0;
     funcalloc = 0;
-    funcs = 0;
+    funcs = NULL;
     datacount = 0;
     dataalloc = 0; 
-    data = 0;
+    data = NULL;
 
  } // end ESMC_FTable
 
@@ -956,16 +951,21 @@
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
+  
+    int i;
 
-//
-//  code goes here
-//
     //printf("in ftable destructor\n");
-    if (funcs)
-        delete[] funcs;
+    //if (funcs) delete[] funcs;
+    //if (data) delete[] data;
 
-    if (data)
-	delete[] data;
+    for (i=0; i<funccount; i++)
+        funcs[i].~funcinfo();
+        
+    for (i=0; i<datacount; i++)
+        data[i].~datainfo();
+
+    if (funcs) free(funcs);
+    if (data) free(data);
 
     funccount = 0;
     funcalloc = 0;

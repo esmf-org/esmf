@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.h,v 1.13 2004/04/23 13:29:25 theurich Exp $
+// $Id: ESMC_FTable.h,v 1.14 2005/10/21 22:33:13 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,18 +80,40 @@ typedef void (*C1SFuncVM)(void *, void *, void *, int *, void *);
 typedef void (*C2SFuncVM)(void *, void *, void *, void *, int *, void *);
 typedef void (*CSLFuncVM)(void *, void *, void *, int *, void *);
 
-struct funcinfo {
+class funcinfo {
+ private:
+   static const int numargs = 16;
+ protected:
    char *funcname;
    void *funcptr;
-   void *funcarg[16];
+   void *funcarg[numargs];
    enum ftype ftype;
+ public:
+   funcinfo() { funcname = NULL;
+                funcptr = NULL;
+                for (int i=0; i<numargs; i++) funcarg[i] = NULL; 
+                ftype = FT_VOID; }
+  ~funcinfo() { if (funcname != NULL) delete[] funcname; }
+               
+   // assignment and copy
+   //funcinfo(const funcinfo& rhs) { }  // copy strings and args, not ptr
+   //funcinfo& operator=(const funcinfo& rhs) { }
+ friend class ESMC_FTable;
 };
 
 enum dtype { DT_VOIDP=1 };
-struct datainfo {
+class datainfo {
+ private:
+ protected:
    char *dataname;
    void *dataptr;
    enum dtype dtype;
+ public:
+   datainfo() { dataname = NULL; dataptr = NULL; dtype=DT_VOIDP; }
+  ~datainfo() { if (dataname != NULL) delete[] dataname; } 
+   //datainfo(const datainfo& rhs) { }  // copy strings and type, not ptr
+   //datainfo& operator=(const datainfo& rhs) { }
+ friend class ESMC_FTable;
 };
 
  // class declaration type
@@ -100,10 +122,10 @@ class ESMC_FTable {
    private:
     int funccount;
     int funcalloc;
-    struct funcinfo *funcs;
+    funcinfo *funcs;
     int datacount;
     int dataalloc;
-    struct datainfo *data;
+    datainfo *data;
 
    public:
 
@@ -150,3 +172,4 @@ typedef struct{
 } cargotype;
 
  #endif  // ESMC_FTable_H
+

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.34 2005/02/11 16:19:36 theurich Exp $
+// $Id: ESMC_Comp_F.C,v 1.35 2005/10/21 22:33:13 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -149,6 +149,15 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
 
      localrc = (tabptr)->ESMC_FTableSetFuncPtr("register", (void *)func, 
                                                            f90comp, tablerc);
+
+     // TODO: decide what to do if tablerc comes back
+     // with an error.  for now, ignore it and look at localrc only.
+     // but be sure to delete it to avoid a mem leak.  (i'm assuming it
+     // is allocated so that each thread gets a different one?  otherwise
+     // we could pass &tablerc down and not do an alloc or free.)
+
+     delete tablerc;
+
      if (localrc != ESMF_SUCCESS) {
          if (status) *status = localrc;
          return;
