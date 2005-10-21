@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.78 2005/09/12 19:14:09 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.79 2005/10/21 22:17:32 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -123,6 +123,13 @@
 !     !  ESMF_RegridType
 !
 !     ! Description of ESMF_RegridType.
+!     ! TODO: the regrid type is not currently used -- as documented in 
+!     !       ESMF_Regrid.F90, regrid currently returns a RouteHandle in order
+!     !       to leverage that code.  This regrid object is left here as a
+!     !       placeholder in case users ever request the capability to access
+!     !       a regrid object that would allow them to query some of its
+!     !       settings.  However, the RouteHandle contains all information
+!     !       necessary for actually applying a regrid.
 
       type ESMF_RegridType
       sequence
@@ -257,7 +264,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.78 2005/09/12 19:14:09 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.79 2005/10/21 22:17:32 jwolfe Exp $'
 
 !==============================================================================
 !
