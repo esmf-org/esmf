@@ -1,4 +1,4 @@
-% $Id: PhysGrid_implnotes.tex,v 1.6 2005/01/12 22:32:02 jwolfe Exp $
+% $Id: PhysGrid_implnotes.tex,v 1.7 2005/10/21 20:59:58 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 % Licensed under the GPL.
 
 % <Describe class function and relation to other classes.>
+\label{sec:PhysGridClasses}
 
 
 The PhysGrid class is itself private and is part of the Grid
@@ -19,9 +20,10 @@ calculate user-requested metrics.
 The PhysGrid class contains the following private classes:
 \begin{itemize}
 
-\item {\bf ESMF\_GridMask} Data type describing masks for a PhysGrid.  Masks
-are named and can be of different types, including logical masks,
-multiplicative masks, and integer region identifiers.
+\item {\bf ESMF\_GridMask} Data type describing masks for a PhysGrid. 
+GridMasks are named and can be of different types, including logical masks,
+multiplicative masks, and integer region identifiers.  This private class
+will be replaced by the ESMF_Mask class once it has been implemented.
 
 \item {\bf ESMF\_PhysCoord} Data type describing a coordinate axis in the
 physical domain, including attributes like names and flags for special
