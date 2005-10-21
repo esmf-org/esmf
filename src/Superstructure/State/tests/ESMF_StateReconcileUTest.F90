@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.1 2005/02/28 19:53:15 nscollins Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.2 2005/10/21 22:32:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -211,7 +211,7 @@
   
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateDestroy(state1, rc=rc)
+    call StateDestroyAll(state1, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -335,7 +335,7 @@
   
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateDestroy(state1, rc=rc)
+    call StateDestroyAll(state1, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -462,7 +462,7 @@
   
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateDestroy(state1, rc=rc)
+    call StateDestroyAll(state1, rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -521,10 +521,41 @@ subroutine comp2_init(gcomp, istate, ostate, clock, rc)
 end subroutine comp2_init
 
 subroutine comp_dummy(gcomp, rc)
-   use ESMF_MOd
+   use ESMF_Mod
    type(ESMF_GridComp), intent(inout) :: gcomp
    integer, intent(out) :: rc
 
    rc = ESMF_SUCCESS
 end subroutine comp_dummy
     
+subroutine StateDestroyAll(state, rc)
+   use ESMF_Mod
+   type(ESMF_State), intent(inout) :: state
+   integer, intent(out) :: rc
+
+   type(ESMF_Field) :: field(100)
+   integer :: i, itemCount
+   character(len=ESMF_MAXSTR) :: nameList(100)
+
+   ! assumes all items are empty fields.  if that changes, this code has
+   ! to get the grid and delete that as well (after deleting the field) and
+   ! get and delete the array after, too.
+   call ESMF_StateGet(state, itemCount=itemCount, itemNameList=nameList, rc=rc)
+   if (rc .ne. ESMF_SUCCESS) return
+
+   do i=1, itemCount
+       call ESMF_StateGetField(state, nameList(i), field(i),  rc=rc)
+       if (rc .ne. ESMF_SUCCESS) return
+   enddo
+
+   call ESMF_StateDestroy(state, rc=rc)
+   if (rc .ne. ESMF_SUCCESS) return
+  
+   do i=1, itemCount
+       call ESMF_FieldDestroy(field(i),  rc=rc)
+       if (rc .ne. ESMF_SUCCESS) return
+   enddo
+
+   rc = ESMF_SUCCESS
+   return
+end subroutine StateDestroyAll
