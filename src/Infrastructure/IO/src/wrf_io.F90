@@ -99,6 +99,8 @@ module wrf_data
   type(wrf_data_handle),target            :: WrfDataHandles(WrfDataHandleMax)
 end module wrf_data
 
+#if !(ESMF_NO_IOCODE)
+
 module ext_ncd_support_routines
 
   implicit none
@@ -8041,3 +8043,4 @@ subroutine ext_ncd_error_str( Code, ReturnString, Status)
 
   return
 end subroutine ext_ncd_error_str
+#endif
