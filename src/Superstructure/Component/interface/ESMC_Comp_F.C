@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.35 2005/10/21 22:33:13 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.36 2005/10/25 19:03:18 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
 static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase, 
                         int nstate, enum ftype ftype, void *func, int *status) {
      char *name;
-     int *tablerc = new int;
+     int *tablerc;
      int localrc;
      void *f90comp = ptr;
      ESMC_FTable *tabptr;
@@ -65,14 +65,19 @@ static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase,
      newtrim(tname, slen, phase, &nstate, &name);
          
      //printf("SetTypedEP: setting function name = '%s'\n", name);
-     if (ftype == FT_VOIDPINTP)
+     if (ftype == FT_VOIDPINTP) {
+         // TODO: same as the register routine - you cannot delete tablerc
+         // yet - you have to wait until the table is deleted, and then the
+         // table does not know which of the stored args can be deleted and
+         // which cannot.  maybe the args need to all be allocated and all
+         // nuked at table destroy time.
+         tablerc = new int;
          localrc = (tabptr)->ESMC_FTableSetFuncPtr(name, func, f90comp, tablerc);
-     else
+     } else
          localrc = (tabptr)->ESMC_FTableSetFuncPtr(name, func, ftype);
 
      if (status) *status = localrc;
      delete[] name;
-     delete tablerc;
 }
 
 #undef  ESMC_METHOD
@@ -122,7 +127,7 @@ static void *ESMC_FTableCallEntryPointVMHop(void *vm, void *cargo);
 #define ESMC_METHOD "ESMC_SetServ"
 extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
      int localrc, funcrc;
-     int *tablerc = new int;
+     int *tablerc;
      ESMC_Comp *f90comp = (ESMC_Comp *)ptr;
      ESMC_FTable *tabptr;
      
@@ -147,17 +152,20 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
          return;
      }
 
+     // TODO: this is going to cause a memory leak, because the 'tablerc'
+     // variable is actually stored in the jump table as one of the arguments.
+     // i believe it is used to call a subroutine which has a return code,
+     // but then that code is ignored.  so there are two problems here:
+     // how to return the error(s), and how to delete the integer when the
+     // table is destroyed.  for now, it is a leak; small, and only shows up
+     // when you delete a component which does not happen often, thankfully.
+     tablerc = new int;
      localrc = (tabptr)->ESMC_FTableSetFuncPtr("register", (void *)func, 
                                                            f90comp, tablerc);
 
      // TODO: decide what to do if tablerc comes back
      // with an error.  for now, ignore it and look at localrc only.
-     // but be sure to delete it to avoid a mem leak.  (i'm assuming it
-     // is allocated so that each thread gets a different one?  otherwise
-     // we could pass &tablerc down and not do an alloc or free.)
-
-     delete tablerc;
-
+   
      if (localrc != ESMF_SUCCESS) {
          if (status) *status = localrc;
          return;
