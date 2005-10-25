@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.59 2005/05/31 17:32:24 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.59.2.1 2005/10/25 21:55:13 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.59 2005/05/31 17:32:24 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.59.2.1 2005/10/25 21:55:13 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -593,6 +593,10 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     attrCount = *ip++;
     attrAlloc = *ip++;
     cp = (char *)ip;
+
+    // update offset to point to past the current obj
+    *offset = (cp - buffer);
+
     if (attrAlloc > 0) {
          nbytes = attrAlloc * sizeof(ESMC_Attribute *);
          attrList = (ESMC_Attribute **)malloc(nbytes);
@@ -601,11 +605,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
             attrList[i]->ESMC_Attribute::ESMC_Deserialize(buffer, offset);
             //attrList[i] = NULL;
          }
-         cp = (char *)(buffer + *offset);
     }
-
-    // update offset to point to past the current obj
-    *offset = (cp - buffer);
    
     
   return ESMF_SUCCESS;
@@ -731,15 +731,15 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     *ip++ = attrCount;
     *ip++ = attrAlloc;
     cp = (char *)ip;
+
+    // update the offset before calling AttributeSerialize
+    *offset = (cp - buffer);
+
     if (attrCount > 0) {
          for (i=0; i<attrCount; i++)
              attrList[i]->ESMC_Attribute::ESMC_Serialize(buffer, length, offset);
-         cp = (char *)(buffer + *offset);
     }
 
-    *offset = (cp - buffer);
-   
-    
   return ESMF_SUCCESS;
 
  } // end ESMC_Serialize
