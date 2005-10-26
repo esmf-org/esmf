@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.206 2005/06/24 21:01:58 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.206.2.1 2005/10/26 21:40:55 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -236,6 +236,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
 
    private ESMF_FieldWriteFileASCII
+#if !(ESMF_NO_IOCODE)
 !!$   private ESMF_FieldWriteFileNetCDF
 !!$        private ESMF_FieldWriteFileNetCDF1DI1
 !!$        private ESMF_FieldWriteFileNetCDF2DI1
@@ -279,11 +280,12 @@
 !!$        private ESMF_FieldWriteFileNetCDF5DR8
 !!$        private ESMF_FieldWriteFileNetCDF6DR8
 !!$        private ESMF_FieldWriteFileNetCDF7DR8
+#endif
    
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.206 2005/06/24 21:01:58 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.206.2.1 2005/10/26 21:40:55 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3377,6 +3379,7 @@
         out_type = arr_type%dtype
         out_kind = arr_kind%dkind
 
+#if !(ESMF_NO_IOCODE)
         select case (out_type)
           case (ESMF_DATA_INTEGER%dtype)
             select case (out_rank)
@@ -3603,6 +3606,8 @@
             print *, "unsupported type"
          end select
 
+#endif
+
       endif ! (de_id .eq. 0) then  
 
         call ESMF_ArrayDestroy(out_array, status)
@@ -3610,6 +3615,8 @@
         
       end subroutine ESMF_FieldWrite
 
+
+#if !(ESMF_NO_IOCODE)
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -4141,7 +4148,8 @@
            call ext_ncd_ioexit(Status)
 
          end subroutine ESMF_FieldWriteFileNetCDF3DR8
-        
+
+#endif
 
 !------------------------------------------------------------------------------
 !BOPI
