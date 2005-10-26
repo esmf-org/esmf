@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.130.2.1 2005/07/06 22:45:52 nscollins Exp $
+#  $Id: common.mk,v 1.130.2.2 2005/10/26 22:29:03 jwolfe Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -440,24 +440,27 @@ EXTRA_INCLUDES += $(HDF_INCLUDE)
 EXTRA_LIBS += $(HDF_LIB)
 endif
 
-# netcdf calls are always referenced from the esmf library, so if the user
-# does not have them, we supply a stub library which simply prints an error
-# if they are called.  plus, we need to compile out some of the calls to
-# the I/O code - so define this badly named symbol.  The FPP line is
-# commented out because i am experimenting with passing all CPP symbols
-# to FPP so we do not have to set them both places.
+# if ESMF_NO_IOCODE is set to true, then there is no reference to any
+# netcdf calls from the esmf library.  Otherwise, there are references
+# to netcdf routines, so if the user does not have them, we supply a
+# stub library which simply prints an error if they are called. 
+
+# The FPP line is commented out because i am experimenting with passing
+# all CPP symbols to FPP so we do not have to set them both places.
+
+ifeq ($(ESMF_NO_IOCODE),true)
+# FPPFLAGS       += $(FPP_PREFIX)-DESMF_NO_IOCODE
+CPPFLAGS       += -DESMF_NO_IOCODE
+else
 ifndef NETCDF_LIB
 NETCDF_INCLUDE   = -I$(ESMF_DIR)/src/Infrastructure/stubs/netcdf_stubs
 NETCDF_LIB       = -lnetcdf_stubs
-##FPPFLAGS       += $(FPP_PREFIX)-DESMF_NO_IOCODE
-CPPFLAGS       += -DESMF_NO_IOCODE
-export ESMF_NO_IOCODE = true
 endif
-
 # at this point netcdf always has a value - either from the user pointing
 # to the real lib location, or our stub lib.
 EXTRA_INCLUDES += $(NETCDF_INCLUDE)
 EXTRA_LIBS += $(NETCDF_LIB)
+endif
 
 
 ifeq ($(ESMF_PTHREADS),OFF)
