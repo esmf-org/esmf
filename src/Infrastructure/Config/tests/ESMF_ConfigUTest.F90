@@ -30,13 +30,15 @@
 !      27apr2003 Leonid Zaslavsky Further corrected and debugged.
 !------------------------------------------------------------------------
 
-#include <ESMF_Macros.inc>
+#include <ESMF.h>
 
 
 module config_subrs
 
         use ESMF_TestMod
         use ESMF_Mod
+        implicit none
+
         public
 
       type (ESMF_Config) :: cf 
@@ -101,26 +103,24 @@ module config_subrs
         !------------------------------------------------------------------------
         !EX_UTest
         ! Config Load File Test
-        write(failMsg, *) "Did not return ESMF_SUCCESS"
+        write(failMsg, *) "Did not return ESMF_RC_DUP_NAME"
         write(name, *) "Config Load File Test"
-        call ESMF_ConfigLoadFile( cf, fname, rc = rc)
-	call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        call ESMF_ConfigLoadFile( cf, fname, unique = .true., rc = rc)
+	call ESMF_Test((rc.eq.ESMF_RC_DUP_NAME), name, failMsg, result, ESMF_SRCLINE)
 
         if (rc == -99) then 
            print *,' ESMF_ConfigLoadFile: Out of memory: exceeded NBUF_MAX'
         endif
-        if ( rc /= 0 ) then      
+        if ( rc /= ESMF_RC_DUP_NAME ) then      
            print *,' ESMF_ConfigLoadFile:  loaded file ', fname, &
                 ' catastrophic error, rc = ', rc
            return
         else
            counter_total =counter_total + 1
            counter_success =counter_success + 1         
+           print *,' File contains duplicate labels - check logfile.' 
         endif
-      
-!!      if ( .NOT. unique ) then
-!!         print *,' File contains multiple copies of a label' 
-!!      end if
+
 
         return
         
@@ -1199,6 +1199,23 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
       !------------------------------------------------------------------------
       !EX_UTest
+      ! Test Config Validate
+      write(failMsg, *) "Did not return ESMF_RC_ATTR_UNUSED"
+      write(name, *) "Config Validate Test"
+      call ESMF_ConfigValidate( cf, "unusedAttributes", rc)
+      call ESMF_Test((rc.eq.ESMF_RC_ATTR_UNUSED), name, failMsg, result, ESMF_SRCLINE)
+!''''''''''''''''''''''''''''
+
+      counter_total =counter_total + 1
+      if (rc == ESMF_RC_ATTR_UNUSED) then
+         counter_success =counter_success + 1
+      else
+         print *,'ESMF_ConfigValidate failed, rc =', rc 
+      endif
+
+!''''''''''''''''''''''''''''
+      !------------------------------------------------------------------------
+      !EX_UTest
       ! Test Config Destroy
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Destroy Test"
@@ -1232,7 +1249,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.18 2005/09/16 22:05:04 eschwab Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.19 2005/10/27 22:44:35 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0
@@ -1272,8 +1289,10 @@ end module config_subrs
 ! Initialization:
 !----------------
       call Initialization()
-      if (rc /=0) STOP            ! Catastropic Error
-
+      if (rc /= ESMF_RC_DUP_NAME) then
+        call ESMF_TestEnd(result, ESMF_SRCLINE)
+        STOP            ! Catastropic Error
+      endif
 
 ! Retrieval of single parameters
 !--------------------------------
