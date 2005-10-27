@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_ErrReturnCodes.inc,v 1.1 2005/05/31 17:27:19 nscollins Exp $
+$Id: ESMF_ErrReturnCodes.inc,v 1.2 2005/10/27 22:36:19 eschwab Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -90,6 +90,8 @@ F90 Return codes 1-500
 #define  ESMF_RC_BUSY            45
 #define  ESMF_RC_LIB             46
 
+#define  ESMF_RC_ATTR_UNUSED     47
+
 #if 0
 =========================
 C++ Return codes 501-1000
@@ -149,5 +151,7 @@ C++ Return codes 501-1000
 #define  ESMC_RC_SYS             544
 #define  ESMC_RC_BUSY            545
 #define  ESMC_RC_LIB             546
+
+#define  ESMC_RC_ATTR_UNUSED     547
 
 #endif
