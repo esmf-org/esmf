@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.24 2005/09/16 21:10:14 eschwab Exp $
+! $Id: ESMF_Config.F90,v 1.25 2005/10/27 22:42:58 eschwab Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -54,7 +54,8 @@
        public :: ESMF_ConfigGetLen ! gets number of words in the line(function)
        public :: ESMF_ConfigGetDim ! gets number of lines in the table
                                    ! and max number of columns by word 
-!                                  ! counting disregarding type (function)
+                                   ! counting disregarding type (function)
+       public :: ESMF_ConfigValidate   ! validates config object
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 !------------------------------------------------------------------------------
@@ -114,8 +115,6 @@
        character, parameter :: EOB = achar(00)   ! end of buffer mark (null)
        character, parameter :: NUL = achar(00)   ! what it says
        
-       character(len=*), parameter :: myname='ESMF_ConfigMod'
-
 
 !    Defines standard i/o units.
 
@@ -137,6 +136,13 @@
 !------------------------------------------------------------------------------
 ! !OPAQUE TYPES:
 !------------------------------------------------------------------------------
+       type ESMF_ConfigAttrUsed
+          sequence
+          private              
+          character(len=LSZ)      :: label  ! attribute label
+          logical                 :: used   ! attribute used (retrieved) or not
+       end type ESMF_ConfigAttrUsed
+
        type ESMF_Config
           sequence
           private              
@@ -144,7 +150,13 @@
           character(len=LSZ),     pointer :: this_line ! the current line
           integer :: nbuf                              ! actual size of buffer 
           integer :: next_line                         ! index_ for next line 
-                                                       ! on buffer
+                                                       !   on buffer
+          type(ESMF_ConfigAttrUsed), dimension(:), &
+                                  pointer :: attr_used ! used attributes table
+          integer :: nattr                             ! number of attributes
+                                                       !   in the "used" table
+          character(len=LSZ)          :: current_attr  ! the current attr label
+          integer :: pad                             ! to satisfy halem compiler
        end type ESMF_Config
 
      contains
@@ -173,24 +185,21 @@
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      character(len=*),parameter :: myname_=myname//'::ESMF_ConfigCreate'
-      integer iret
+      integer :: iret
       type(ESMF_Config) :: config_local
 
       iret = 0
  
 ! Initialization
 
-      allocate(config_local%buffer, config_local%this_line, stat = iret)
+      allocate(config_local%buffer, config_local%this_line, &
+               config_local%attr_used(MSZ), stat = iret)
       if (ESMF_LogMsgFoundAllocError(iret, "Allocating local buffer", &
                                        ESMF_CONTEXT, rc)) return
-      !if(iret /= 0) then
-      !   ! TODO:   call perr(myname_,'allocate(...%..)', iret)
-      !   print *, myname_,'allocate(...%..)', iret
-      !endif
-
       ESMF_ConfigCreate = config_local
-      if (present( rc )) rc = iret
+      if (present( rc )) then
+        rc = iret
+      endif
 
       return
     end function ESMF_ConfigCreate
@@ -223,21 +232,19 @@
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      character(len=*),parameter :: myname_=myname//'::ESMF_ConfigDestroy'
       integer :: iret
 
       iret = 0
 
-      deallocate(config%buffer, config%this_line, stat = iret)
+      deallocate(config%buffer, config%this_line, &
+                 config%attr_used, stat = iret)
       if (ESMF_LogMsgFoundAllocError(iret, "Deallocating local buffer", &
                                        ESMF_CONTEXT, rc)) return
-      !if(iret /= 0) then
-      ! SUBSTITUTE:  call perr(myname_,'deallocate(...%..)', iret)
-      !   print *, myname_,'deallocate(...%..)', iret
-      !endif
 
+      if (present( rc )) then
+        rc = iret
+      endif
 
-      if (present( rc )) rc = iret
       return
 
      end subroutine ESMF_ConfigDestroy
@@ -281,9 +288,8 @@
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-	character(len=*),parameter :: myname_=myname//'ESMF_ConfigFindLabel'
 
-      integer i, j, iret
+      integer :: i, j, iret
 
       iret = 0
 
@@ -296,19 +302,17 @@
          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, &
                                 "label not found", &
                                  ESMF_CONTEXT, rc)) return
-         !iret = -2
-         !if ( present (rc )) rc = iret
-         !return
       elseif(i.le.0) then
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                 "invalid operation with index", &
                                  ESMF_CONTEXT, rc)) return
-         ! SUBSTITUTE:	   call die(myname_,'invalid index_() return',i)
-         !print *, myname_,'invalid index_() return',i
-         !iret = -3
-         !if ( present (rc )) rc = iret
-         !return
       end if
+
+!     Save current attribute label without colon,
+!       to associate with subsequent GetAttribute() or GetChar()
+!     -------------------------------------------
+       config%current_attr = label(1:(index_(label, ":") - 1))
+
 
 !     Extract the line associated with this label
 !     -------------------------------------------
@@ -319,7 +323,9 @@
       config%next_line = j + 2
       
       iret = 0
-      if ( present (rc )) rc = iret
+      if ( present (rc )) then
+        rc = iret
+      endif
       
       return
     end subroutine ESMF_ConfigFindLabel
@@ -363,8 +369,8 @@
 !   \end{description}
 
 !EOP -------------------------------------------------------------------
-      character*1   ch
-      integer       ib, ie, iret
+      character(len=1) :: ch
+      integer :: ib, ie, iret
       
       iret = 0
 
@@ -382,7 +388,9 @@
             if (present(default)) then
                iret = ESMF_SUCCESS
             end if
-            if ( present (rc )) rc = iret
+            if ( present (rc )) then
+              rc = iret
+            endif
             return
          endif
       endif
@@ -401,9 +409,13 @@
       
       if ( ie .lt. ib ) then
          value = BLK
-         if ( present ( default )) value = default
+         if ( present ( default )) then
+           value = default
+         endif
          iret = -1
-         if ( present (rc )) rc = iret
+         if ( present (rc )) then
+           rc = iret
+         endif
          return
       else
          ! Get the string, and shift the rest of %this_line to
@@ -411,10 +423,13 @@
          
          value = config%this_line(ib:ie) 
          config%this_line = config%this_line(ie+2:)
+         call ESMF_ConfigSetCurrentAttrUsed(config, .true.)
          iret = 0
       end if
 
-      if ( present (rc )) rc = iret
+      if ( present (rc )) then
+        rc = iret
+      endif
       return
       
       
@@ -462,9 +477,9 @@
 
 !EOP -------------------------------------------------------------------
 !
-      integer:: iret
-      character*256 :: string
-      real(ESMF_KIND_R4) ::     x
+      integer :: iret
+      character(len=LSZ) :: string
+      real(ESMF_KIND_R4) :: x
       
       iret = 0
 
@@ -485,6 +500,12 @@
       if ( iret .eq. 0 ) then
            read(string,*,iostat=iret) x
            if ( iret .ne. 0 ) iret = -2
+           if ( iret .eq. 0) then
+             call ESMF_ConfigSetCurrentAttrUsed(config, .true.)
+           else
+             ! undo what GetSring() did
+             call ESMF_ConfigSetCurrentAttrUsed(config, .false.)
+           endif
       else
          if( present( default )) then
             x = default
@@ -496,7 +517,10 @@
          value = x
       endif
 
-      if( present( rc )) rc = iret 
+      if( present( rc )) then
+        rc = iret 
+      endif
+
       return
 
     end subroutine ESMF_ConfigGetFloatR4
@@ -543,9 +567,9 @@
 
 !EOP -------------------------------------------------------------------
 !
-      integer:: iret
-      character*256 :: string
-      real(ESMF_KIND_R8) ::     x
+      integer :: iret
+      character(len=LSZ) :: string
+      real(ESMF_KIND_R8) :: x
       
       iret = 0
 
@@ -566,6 +590,12 @@
       if ( iret .eq. 0 ) then
            read(string,*,iostat=iret) x
            if ( iret .ne. 0 ) iret = -2
+           if ( iret .eq. 0) then
+             call ESMF_ConfigSetCurrentAttrUsed(config, .true.)
+           else
+             ! undo what GetSring() did
+             call ESMF_ConfigSetCurrentAttrUsed(config, .false.)
+           endif
       else
          if( present( default )) then
             x = default
@@ -577,7 +607,10 @@
          value = x
       endif
 
-      if( present( rc )) rc = iret 
+      if( present( rc )) then
+        rc = iret 
+      endif
+
       return
 
     end subroutine ESMF_ConfigGetFloatR8
@@ -627,8 +660,7 @@
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetFloat_array'
-      integer iret, i 
+      integer :: iret, i 
       
       iret = 0
 
@@ -637,10 +669,6 @@
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "invalid SIZE", &
                                  ESMF_CONTEXT, rc)) return
-         !print *,myname_,' invalid SIZE =', count
-         !iret = -1
-         !if(present( rc )) rc = iret
-         !return
       endif
        
 ! Default setting
@@ -664,7 +692,10 @@
          endif
       enddo
 
-      if(present( rc )) rc = iret
+      if(present( rc )) then
+        rc = iret
+      endif
+
       return
     end subroutine ESMF_ConfigGetFloatsR4
 
@@ -711,20 +742,14 @@
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetFloat_array'
-      integer iret, i 
+      integer :: iret, i 
       
       iret = 0
-
 
       if (count.le.0) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "invalid SIZE", &
                                  ESMF_CONTEXT, rc)) return
-         !print *,myname_,' invalid SIZE =', count
-         !iret = -1
-         !if(present( rc )) rc = iret
-         !return
       endif
        
 ! Default setting
@@ -748,7 +773,10 @@
          endif
       enddo
 
-      if(present( rc )) rc = iret
+      if(present( rc )) then
+        rc = iret
+      endif
+
       return
     end subroutine ESMF_ConfigGetFloatsR8
 
@@ -791,10 +819,10 @@
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      character*256 string
-      real*8        x
-      integer(ESMF_KIND_I4)  n
-      integer       iret
+      character(len=LSZ) :: string
+      real(ESMF_KIND_R8) :: x
+      integer(ESMF_KIND_I4) ::  n
+      integer :: iret
 
       iret = 0
 
@@ -815,6 +843,12 @@
       if ( iret .eq. 0 ) then
            read(string,*,iostat=iret) x
            if ( iret .ne. 0 ) iret = -2
+           if ( iret .eq. 0) then
+             call ESMF_ConfigSetCurrentAttrUsed(config, .true.)
+           else
+             ! undo what GetSring() did
+             call ESMF_ConfigSetCurrentAttrUsed(config, .false.)
+           endif
       end if
       if ( iret .eq. 0 ) then
          n = nint(x)
@@ -831,7 +865,9 @@
          value = n
       endif
 
-      if( present( rc )) rc = iret
+      if( present( rc )) then
+        rc = iret
+      endif
       
       return
     end subroutine ESMF_ConfigGetIntI4
@@ -875,10 +911,10 @@
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      character*256 string
-      real*8        x
-      integer(ESMF_KIND_I8)  n
-      integer       iret
+      character(len=LSZ) :: string
+      real(ESMF_KIND_R8) :: x
+      integer(ESMF_KIND_I8) :: n
+      integer :: iret
 
       iret = 0
 
@@ -899,6 +935,12 @@
       if ( iret .eq. 0 ) then
            read(string,*,iostat=iret) x
            if ( iret .ne. 0 ) iret = -2
+           if ( iret .eq. 0) then
+             call ESMF_ConfigSetCurrentAttrUsed(config, .true.)
+           else
+             ! undo what GetSring() did
+             call ESMF_ConfigSetCurrentAttrUsed(config, .false.)
+           endif
       end if
       if ( iret .eq. 0 ) then
          n = nint(x)
@@ -915,7 +957,9 @@
          value = n
       endif
 
-      if( present( rc )) rc = iret
+      if( present( rc )) then
+        rc = iret
+      endif
       
       return
     end subroutine ESMF_ConfigGetIntI8
@@ -963,8 +1007,7 @@
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetInt_array'
-      integer iret, i 
+      integer :: iret, i 
       
       iret = 0
 
@@ -972,10 +1015,6 @@
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "invalid SIZE", &
                                  ESMF_CONTEXT, rc)) return
-         !print *,myname_,' invalid SIZE =', count
-         !iret = -1
-         !if(present( rc )) rc = iret
-         !return
       endif
        
  ! Default setting
@@ -999,7 +1038,10 @@
          endif
       enddo
 
-      if(present( rc )) rc = iret
+      if(present( rc )) then
+        rc = iret
+      endif
+
       return
     end subroutine ESMF_ConfigGetIntsI4
 
@@ -1047,8 +1089,7 @@
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetInt_array'
-      integer iret, i 
+      integer :: iret, i 
       
       iret = 0
 
@@ -1056,10 +1097,6 @@
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "invalid SIZE", &
                                  ESMF_CONTEXT, rc)) return
-         !print *,myname_,' invalid SIZE =', count
-         !iret = -1
-         !if(present( rc )) rc = iret
-         !return
       endif
        
  ! Default setting
@@ -1083,7 +1120,10 @@
          endif
       enddo
 
-      if(present( rc )) rc = iret
+      if(present( rc )) then
+        rc = iret
+      endif
+
       return
     end subroutine ESMF_ConfigGetIntsI8
 
@@ -1133,19 +1173,19 @@
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      character*256 string
-      integer       iret
+      character(len=LSZ) :: string
+      integer :: iret
 
       iret = 0
 
-! Default setting
+      ! Default setting
       if( present( default ) ) then 
          value = default
       else
          value = .false.
       endif
 
-! Processing
+      ! Processing
       if (present (label ) ) then
          call ESMF_ConfigGetString( config, string, label, rc = iret )
       else
@@ -1154,21 +1194,31 @@
 
       if ( iret .eq. ESMF_SUCCESS ) then
 
-! Convert string to lower case
+        ! Convert string to lower case
          call ESMF_StringLowerCase(string, iret)
 
-! Check if valid true/false keyword
+         ! Check if valid true/false keyword
          if (string == 't'      .or. string == 'true' .or. &
              string == '.true.' .or. string == '.t.'  .or. &
              string == 'y'      .or. string == 'yes'  .or. &
              string == 'on') then
            value = .true.
+           call ESMF_ConfigSetCurrentAttrUsed(config, .true.)
          else
             if (string == 'f'       .or. string == 'false' .or. &
                 string == '.false.' .or. string == '.f.'   .or. &
                 string == 'n'       .or. string == 'no'    .or. &
                 string == 'off') then
               value = .false.
+              call ESMF_ConfigSetCurrentAttrUsed(config, .true.)
+            else
+              ! undo what GetSring() did
+              call ESMF_ConfigSetCurrentAttrUsed(config, .false.)
+
+              if (ESMF_LogMsgFoundError(ESMF_RC_CANNOT_GET, &
+                                "bad boolean value '" // string // &
+                                "' in configuration file.", &
+                                 ESMF_CONTEXT, rc)) return
             endif
          endif
       else
@@ -1177,7 +1227,9 @@
          endif
       end if
 
-      if( present( rc )) rc = iret
+      if( present( rc )) then
+        rc = iret
+      endif
       
       return
     end subroutine ESMF_ConfigGetLogical
@@ -1226,8 +1278,7 @@
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetLogical_array'
-      integer iret, i 
+      integer :: iret, i 
       
       iret = 0
 
@@ -1235,20 +1286,16 @@
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "invalid SIZE", &
                                  ESMF_CONTEXT, rc)) return
-         !print *,myname_,' invalid SIZE =', count
-         !iret = -1
-         !if(present( rc )) rc = iret
-         !return
       endif
        
- ! Default setting
+      ! Default setting
       if( present( default ) ) then 
          valueList(1:count) = default
       else
          valueList(1:count) = .false.
       endif
 
-! Processing 
+      ! Processing 
       if (present( label )) then
          call ESMF_ConfigFindLabel( config, label, rc = iret )
       end if
@@ -1263,7 +1310,10 @@
          endif
       enddo
 
-      if(present( rc )) rc = iret
+      if(present( rc )) then
+        rc = iret
+      endif
+
       return
     end subroutine ESMF_ConfigGetLogicals
 
@@ -1306,8 +1356,8 @@
 !
 !
 !EOP -------------------------------------------------------------------
-      character*256 string
-      integer       iret
+      character(len=LSZ) :: string
+      integer :: iret
 
       iret = 0
 
@@ -1327,13 +1377,16 @@
 
       if ( iret .eq. 0 ) then
          value = string(1:1)
+         call ESMF_ConfigSetCurrentAttrUsed(config, .true.)
       else
          if( present( default )) then
             iret = ESMF_SUCCESS
          endif
       end if
 
-      if (present( rc )) rc = iret
+      if (present( rc )) then
+        rc = iret
+      endif
 
       return
 
@@ -1384,8 +1437,8 @@
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      integer n, iret
-      logical tend
+      integer :: n, iret
+      logical :: tend
 
       lineCount = 0
       columnCount = 0
@@ -1393,7 +1446,9 @@
 
       call ESMF_ConfigFindLabel(config, label = label, rc = iret )
       if ( iret /= 0 ) then
-         if ( present( rc )) rc = iret
+         if ( present( rc )) then
+           rc = iret
+         endif
          return
       endif
 
@@ -1412,7 +1467,9 @@
             if ( iret /= 0 ) then
                lineCount = 0
                columnCount = 0
-               if ( present( rc )) rc = iret
+               if ( present( rc )) then
+                 rc = iret
+               endif
                return
             else
                columnCount = max(columnCount, n)
@@ -1420,7 +1477,10 @@
          endif 
       enddo
       
-      if ( present( rc )) rc = iret
+      if ( present( rc )) then
+        rc = iret
+      endif
+
       return
 
     end subroutine ESMF_ConfigGetDim
@@ -1455,9 +1515,9 @@
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      character*256 string
-      integer iret
-      integer count 
+      character(len=LSZ) :: string
+      integer :: iret
+      integer :: count 
 
       iret = 0
       count = 0
@@ -1466,7 +1526,9 @@
       if( present( label )) then
          call ESMF_ConfigFindLabel(config, label = label, rc = iret )
          if( iret /= 0) then
-            if (present( rc )) rc = iret
+            if (present( rc )) then
+              rc = iret
+            endif
             return
          endif
       endif
@@ -1484,7 +1546,10 @@
 
       ESMF_ConfigGetLen = count
 
-      if( present ( rc )) rc = iret
+      if( present ( rc )) then
+        rc = iret
+      endif
+
       return
     end function ESMF_ConfigGetLen
 
@@ -1527,35 +1592,32 @@
 !
 !EOP -------------------------------------------------------------------
 
-      character(len=*),parameter :: myname_='ESMF_ConfigLoadFile'
       integer :: iret
 
       iret = 0
 
-      if( present ( unique )) then
-         call ESMF_ConfigLoadFile_1proc_( config, filename, unique, iret )
-      else
-         call ESMF_ConfigLoadFile_1proc_( config, filename, rc = iret )
-      endif
+      call ESMF_ConfigLoadFile_1proc_( config, filename, iret )
       if(iret /= 0) then
            if (ESMF_LogMsgFoundError(ESMF_RC_FILE_OPEN, &
                                 "unable to load file", &
                                  ESMF_CONTEXT, rc)) return
-      !if(iret /= 0) then
-! SUBSITUTE call perr(myname_,'ESMF_ConfigLoadFile("'//trim(filename)//'")', iret)
-      !   print *, myname_,'ESMF_ConfigLoadFile("'//trim(filename)//'")', iret
-      !
-      !   if (present( rc )) rc = iret
-      !   return
+      endif
+
+      call ESMF_ConfigParseAttributes( config, unique, iret )
+      if(iret /= 0) then
+           if (ESMF_LogMsgFoundError(iret, ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
       endif
 
       if ( present (delayout) ) then
          call ESMF_LogWrite("DELayout not used yet", ESMF_LOG_WARNING, &
                            ESMF_CONTEXT)
-         !print *, myname_, ' DE layout is not used yet '
       endif
 
-      if (present( rc )) rc = iret
+      if (present( rc )) then
+        rc = iret
+      endif
+
       return
 
     end subroutine ESMF_ConfigLoadFile
@@ -1573,17 +1635,13 @@
 
 ! !INTERFACE:
 
-    subroutine ESMF_ConfigLoadFile_1proc_( config, filename, unique, rc )
+    subroutine ESMF_ConfigLoadFile_1proc_( config, filename, rc )
 
 
       implicit none
 
       type(ESMF_Config), intent(inout) :: config     ! ESMF Configuration
       character(len=*), intent(in)  :: filename     ! file name
-      logical, intent(in), optional :: unique    ! if unique is present, 
-                                                 ! uniqueness of labels
-                                                 ! is checked and error
-                                                 ! code is set
       integer, intent(out), optional :: rc       ! Error code
                                                  !   0 no error
                                                  ! -98 coult not get unit 
@@ -1594,28 +1652,22 @@
                                                  !     other iostat from open 
                                                  !     statement.
 !
-! !DESCRIPTION: Resource file filename is loaded is loaded into memory
+! !DESCRIPTION: Resource file filename is loaded into memory
 !
 !EOPI -------------------------------------------------------------------
-      integer         lu, ios, loop, ls, ptr, iret
-      character*256   line
-      character(len=*), parameter :: myname_= 'ESMF_ConfigLoadFile_1proc'
+      integer :: lu, ios, loop, ls, ptr, iret
+      character(len=LSZ) :: line
 
       iret = 0
-
-      if ( present( unique ) ) then
-         call ESMF_LogWrite("uniqueness of labels not checked yet", &
-                           ESMF_LOG_WARNING, &
-                           ESMF_CONTEXT)
-         !print *, myname_, ' Uniqueness of labels is not checked yet '
-      endif
 
 !     Open file
 !     ---------     
       lu = luavail()	! a more portable version
       if ( lu .lt. 0 ) then
          iret = -97
-        if ( present (rc )) rc = iret
+         if ( present (rc )) then
+           rc = iret
+         endif
          return
       end if
 
@@ -1624,10 +1676,9 @@
 
       call opntext(lu,filename,'old',ios)
       if ( ios .ne. 0 ) then
-	 write(*,'(2a,i5)') myname_,': opntext() error, ios =',ios
-         iret = ios
-         if ( present (rc )) rc = iret
-         return
+         if (ESMF_LogMsgFoundError(ESMF_RC_FILE_OPEN, &
+                              "opntext() error", &
+                               ESMF_CONTEXT, rc)) return
       end if
 
 !     Read to end of file
@@ -1648,7 +1699,9 @@
          if ( ls .gt. 0 ) then
             if ( (ptr+ls) .gt. NBUF_MAX ) then
                iret = -99
-               if ( present (rc )) rc = iret
+               if ( present (rc )) then
+                 rc = iret
+               endif
                return
             end if
             config%buffer(ptr:ptr+ls) = line(1:ls) // EOL
@@ -1658,7 +1711,10 @@
       end do
       
       iret = -98 ! good chance config%buffer is not big enough 
-      if ( present (rc )) rc = iret
+      if ( present (rc )) then
+        rc = iret
+      endif
+
       return
       
 11    continue
@@ -1669,7 +1725,9 @@
       call clstext(lu,ios)
       if(ios /= 0) then
          iret = -99
-         if ( present (rc )) rc = iret
+         if ( present (rc )) then
+           rc = iret
+         endif
          return
       endif
       config%buffer(ptr:ptr) = EOB
@@ -1678,7 +1736,9 @@
       config%next_line=0
 
       iret = 0
-      if ( present (rc )) rc = iret
+      if ( present (rc )) then
+        rc = iret
+      endif
 
       return
     end subroutine ESMF_ConfigLoadFile_1proc_
@@ -1721,7 +1781,9 @@
 
       if ( config%next_line .ge. config%nbuf ) then
          iret = -1
-           if ( present (rc )) rc = iret
+           if ( present (rc )) then
+             rc = iret
+           endif
          return
       end if
 
@@ -1731,25 +1793,264 @@
       
       if ( config%this_line(1:2) .eq. '::' ) then
          iret = 0                    ! end of table. We set iret = 0
-         local_tend = .true.         ! and end = .true. Used to be
-      ! iret = 1  
+         local_tend = .true.         ! and end = .true. Used to be iret = 1  
          config%next_line = config%nbuf + 1
-         if ( present (tableEnd )) tableEnd = local_tend
-         if ( present (rc )) rc = iret
+         if ( present (tableEnd )) then
+           tableEnd = local_tend
+         endif
+         if ( present (rc )) then
+           rc = iret
+         endif
          return
       end if
 
       config%next_line = j + 2
       iret = 0
-      if ( present (tableEnd )) tableEnd = local_tend
-      if ( present (rc )) rc = iret
+      if ( present (tableEnd )) then
+        tableEnd = local_tend
+      endif
+      if ( present (rc )) then
+        rc = iret
+      endif
       return
 
     end subroutine ESMF_ConfigNextLine
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigParseAttributes"
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOPI -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigParseAttributes - Parse all attribute labels
+!
+! !INTERFACE:
+
+    subroutine ESMF_ConfigParseAttributes( config, unique, rc )
+
+
+      implicit none
+
+      type(ESMF_Config), intent(inout) :: config    ! ESMF Configuration
+      logical, intent(in), optional :: unique    ! if unique is present & true, 
+                                                 !  uniqueness of labels
+                                                 !  is checked and error
+                                                 !  code is set
+      integer, intent(out), optional :: rc       ! Error return code
+!
+! !DESCRIPTION: Parse all attribute labels in given config object and place
+!               into attributes table to track user retrieval
+!
+!EOPI -------------------------------------------------------------------
+      integer :: i, j, k, a, b
+      character(len=LSZ) :: this_line, label
+      character(len=ESMF_MAXSTR) :: logmsg
+      logical :: duplicate
+
+      ! successful until proven otherwise
+      if ( present (rc) ) then
+        rc = ESMF_SUCCESS
+      endif
+
+      ! initialize this config's attributes table "used" flags to "not used"
+      do a = 1, MSZ
+        config%attr_used(a)%used = .false.
+      enddo
+
+      i = 1  ! start of buffer
+      a = 1  ! first slot in attributes table
+      do while ( i .lt. config%nbuf )
+
+        ! get next line from buffer
+        j = i + index_(config%buffer(i:config%nbuf), EOL) - 1
+        this_line = config%buffer(i:j)
+
+        ! look for label in this_line; non-blank characters followed by a colon
+        if (this_line(1:2) .ne. '::' ) then  ! skip end-of-table mark
+          k = index_(this_line, ':') - 1     ! label sans colon
+          if (k .ge. 1) then  ! non-blank match
+
+            ! found a label, trim it, 
+            label = trim(adjustl(this_line(1:k)))
+
+            ! ... check it for uniqueness if requested,
+            duplicate = .false.
+            if ( present( unique ) ) then
+              if (unique) then
+                !  TODO:  pre-sort and use binary search, or use hash function
+                do b = 1, a-1
+                  if (trim(label) .eq. trim(config%attr_used(b)%label)) then
+                    duplicate = .true.
+                    logmsg = "Duplicate label '" // trim(label) // &
+                                  "' found in attributes file"
+                    call ESMF_LogMsgSetError(ESMF_RC_DUP_NAME, logmsg, &
+                                             ESMF_CONTEXT, rc)
+                  endif
+                enddo
+              endif
+            endif
+
+            ! ... and place it into attributes table
+            if (.not.duplicate) then
+              config%attr_used(a)%label = label
+              a = a + 1
+            endif
+          endif
+        endif
+
+        ! set index to beginning of next line
+        i = j + 1
+
+      enddo
+
+      ! remember number of labels found
+      config%nattr = a-1
+
+      ! if no labels found, report it
+      if (config%nattr .eq. 0) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, &
+                                  "No labels found in attributes file", &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      return
+
+    end subroutine ESMF_ConfigParseAttributes
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigSetCurrentAttrUsed"
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOPI -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigSetCurrentAttrUsed - Set Current Attribute "Used" flag
+!
+! !INTERFACE:
+
+    subroutine ESMF_ConfigSetCurrentAttrUsed( config, used, rc )
+
+
+      implicit none
+
+      type(ESMF_Config), intent(inout) :: config ! ESMF Configuration
+      logical, intent(in)            :: used     ! used flag
+      integer, intent(out), optional :: rc       ! Error return code
+!
+! !DESCRIPTION: Set the given config's current attribute's used flag
+!
+!EOPI -------------------------------------------------------------------
+      integer :: i
+
+      ! successful until proven otherwise
+      if ( present (rc) ) then
+        rc = ESMF_SUCCESS
+      endif
+
+      ! find attr label and set its used flag to given value
+      !  TODO:  pre-sort and use binary search, or use hash function
+      do i = 1, MSZ
+        if (trim(config%current_attr) == trim(config%attr_used(i)%label)) then
+          config%attr_used(i)%used = used
+          exit
+        endif
+      enddo
+
+      return
+
+    end subroutine ESMF_ConfigSetCurrentAttrUsed
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigValidate"
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigValidate - Validate a Config object
+!
+! !INTERFACE:
+    subroutine ESMF_ConfigValidate(config, options, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Config), intent(in)            :: config 
+      character (len=*), intent(in),  optional :: options
+      integer, intent(out), optional           :: rc 
+!
+! !DESCRIPTION: 
+!   Checks whether a {\tt config} object is valid.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [config]
+!     {\tt ESMF\_Config} object to be validated.
+!   \item[{[options]}]
+!     If none specified:  simply check that the buffer is not full and the
+!       pointers are within range.
+!     "unusedAttributes" - Report to the default logfile all attributes not
+!       retrieved via a call to {\tt ESMF\_ConfigGetAttribute()} or
+!       {\tt ESMF\_ConfigGetChar()}.  The attribute name (label) will be
+!       logged via {\tt ESMF\_LogErr} with the WARNING log message type.
+!       For an array-valued attribute, retrieving at least one value via
+!       {\tt ESMF\_ConfigGetAttribute()} or {\tt ESMF\_ConfigGetChar()}
+!       constitutes being "used."
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     Equals {\tt ESMF\_RC\_ATTR\_UNUSED} if any unused attributes are found
+!     with option "unusedAttributes" above.
+!   \end{description}
+
+!EOP -------------------------------------------------------------------
+      character(len=ESMF_MAXSTR) :: logmsg
+      integer :: i
+
+      if (present(rc)) then
+        rc = ESMF_SUCCESS
+      endif
+
+      ! validate internal buffer indices
+
+      if (config%nbuf < 0 .or. config%nbuf > NBUF_MAX) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_INTNRL_LIST, &
+                                  "config%nbuf out-of-range.", &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      if (config%next_line < 0 .or. config%next_line >= config%nbuf) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_INTNRL_LIST, &
+                                  "config%next_line out-of-range.", &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      if (config%nattr < 0 .or. config%nattr > MSZ) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_INTNRL_LIST, &
+                                  "config%nattr out-of-range.", &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      ! optional validations
+
+      if (present(options)) then
+        if (options == "unusedAttributes") then
+          do i = 1, config%nattr
+            if (.not.(config%attr_used(i)%used)) then
+              logmsg = "Config attribute label '" // &
+                  trim(config%attr_used(i)%label) // &
+                  "' unused (not retrieved via ESMF_ConfigGetAttribute() " // &
+                  "or ESMF_ConfigGetChar())."
+              call ESMF_LogWrite(logmsg, ESMF_LOG_WARNING, ESMF_CONTEXT)
+              if (present(rc)) then
+                rc = ESMF_RC_ATTR_UNUSED
+              endif
+            endif
+          enddo
+        endif
+      endif
+
+      return
+
+    end subroutine ESMF_ConfigValidate
+
 
 !-----------------------------------------------------------------------
-
 
 
       integer function index_ (string,tok)
@@ -1773,7 +2074,7 @@
       character(len=*), intent(in) :: string, tok
 !
 !-------------------------------------------------------------------------
-      integer idx, i, n, nlen, lt, ibot, itop
+      integer :: idx, i, n, nlen, lt, ibot, itop
       integer, parameter :: MAXLEN = 32767   ! max size of signed 2-byte integer
       n = len(string)         ! length of string
       lt = len(tok)           ! length of token tok
@@ -1822,7 +2123,7 @@
 !
 !-------------------------------------------------------------------------
 
-      integer     ib, i
+      integer :: ib, i
 
 !     Get rid of leading blanks
 !     -------------------------
@@ -1878,7 +2179,7 @@
 !  19Jun96   da Silva   Original code.
 !-------------------------------------------------------------------------
 
-      integer i
+      integer :: i
 
 !     Pad end of string with #
 !     ------------------------
@@ -1923,12 +2224,10 @@
 
 !-----------------------------------------------------------------------
 
-  character(len=*),parameter :: myname_=myname//'::luavail'
-
-	integer lu,ios
-	logical inuse
+	integer :: lu,ios
+	logical :: inuse
 #ifdef _UNICOS
-	character*8 attr
+	character(len=8) :: attr
 #endif
 
 	lu=-1
@@ -2000,7 +2299,6 @@ end function luavail
 !
 
 		! local parameter
-	character(len=*),parameter :: myname_=myname//'::opntext'
 
 	integer,parameter :: iA=ichar('a')
 	integer,parameter :: mA=ichar('A')
@@ -2067,8 +2365,7 @@ end function luavail
       Character(len=*), optional, intent(In)  :: status ! keep/delete
 
 !-----------------------------------------------------------------------
-          character(len=*), parameter :: myname_ = myname//'::clsitext'
-          Character(Len=6) :: status_
+          character(len=6) :: status_
 
           status_ = 'KEEP'
           If (Present(status)) Then
@@ -2091,4 +2388,5 @@ end function luavail
 	end subroutine clstext
 
 
+!-----------------------------------------------------------------------
     end module ESMF_ConfigMod
