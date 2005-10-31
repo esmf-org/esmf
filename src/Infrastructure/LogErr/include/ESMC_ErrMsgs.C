@@ -1,4 +1,4 @@
-//$Id: ESMC_ErrMsgs.C,v 1.3 2004/05/18 19:52:19 eschwab Exp $
+//$Id: ESMC_ErrMsgs.C,v 1.4 2005/10/31 18:34:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -73,7 +73,9 @@ static const char *errMsg[] = {
   "Resource is busy ",                                // ESMF_RC_BUSY
   "Error in library called by ESMF ",                 // ESMF_RC_LIB
 
-// 47-500 reserved for future F90 return code definitions
+  "Attribute unused ",                                // ESMF_RC_ATTR_UNUSED
+
+// 48-500 reserved for future F90 return code definitions
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
@@ -92,7 +94,7 @@ static const char *errMsg[] = {
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
-  "","","","",
+  "","","",
 
 // C++ Error message                                     Return Code (501-1000)
 // -----------------------------------------------       -----------------------
@@ -150,7 +152,9 @@ static const char *errMsg[] = {
   "Resource is busy ",                                // ESMC_RC_BUSY
   "Error in library called by ESMF ",                 // ESMC_RC_LIB
 
-// 547-1000 reserved for future C++ return code definitions
+  "Attribute unused ",                                // ESMC_RC_ATTR_UNUSED
+
+// 548-1000 reserved for future C++ return code definitions
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
@@ -169,6 +173,6 @@ static const char *errMsg[] = {
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
-  "","","",""
+  "","",""
 
 };
