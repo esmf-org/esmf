@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.44.2.1 2005/07/11 16:58:56 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.44.2.2 2005/11/01 19:17:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -158,7 +158,8 @@ void ESMC_VMK::vmk_obtain_args(void){
   sprintf(fname, ".uname.%d", mypid);
   FILE *fp=fopen(fname, "r");
   if (fp){
-    fgets(uname, 80, fp);
+//    fgets(uname, 80, fp); // this changes dir on Linux/MPICH
+    fscanf(fp, "%[^\n]", uname);
     fclose(fp);
   }else{
     uname[0]='\0';  // empty uname string
@@ -182,14 +183,17 @@ void ESMC_VMK::vmk_obtain_args(void){
     sprintf(command, "env COLUMNS=8000 ps -p %d -o command > .args.%d", mypid,
       mypid);
   else
-    sprintf(command, "env COLUMNS=8000 ps -p %d -o args > .args.%d", mypid,
+    sprintf(command, "env COLUMNS=8000 ps -p %d -o args= > .args.%d", mypid,
       mypid);
   system(command);
   sprintf(fname, ".args.%d", mypid);
   fp=fopen(fname, "r");
   if (fp){
-    fgets(args, 8000, fp);  // scan off header line of ps output
-    fgets(args, 8000, fp);
+//    fgets(args, 8000, fp);  // scan off header line of ps output
+//    fgets(args, 8000, fp);
+    // fgets() changes dir on Linux/MPICH
+//    fscanf(fp, "%[^\n]", args);
+    fscanf(fp, "%[^\n]", args);
     fclose(fp);
   }else{
     args[0]='\0'; // empty args string
