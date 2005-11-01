@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.1.2.1 2005/10/28 18:29:04 svasquez Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.1.2.2 2005/11/01 21:46:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -484,19 +484,20 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
     type(ESMF_GridComp), intent(inout) :: gcomp
     type(ESMF_State), intent(inout) :: istate, ostate
     type(ESMF_Clock), intent(in) :: clock
-    integer, dimension(2) :: cellCounts
-    type(ESMF_Array) :: array1
-    real, dimension(:,:), pointer :: f90ptr1
     integer, intent(out) :: rc
 
-    type(ESMF_Field) :: field1
     integer :: localrc
+    integer, dimension(2) :: cellCounts
+    real, dimension(:,:), pointer :: f90ptr1
+    type(ESMF_Array) :: array1
+    type(ESMF_Field) :: field1
 
     print *, "i am comp1_init"
 
     field1 = ESMF_FieldCreateNoData(name="Comp1 Field", rc=localrc)
 
    ! Add attributes to Fileld to test for Reconcile bug 1338786
+    cellCounts = (/ 10, 12 /)
     call ESMF_FieldSetAttribute(field1, "test_num",5 , rc)
     allocate(f90ptr1(cellCounts(1),cellCounts(2)))
     array1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
