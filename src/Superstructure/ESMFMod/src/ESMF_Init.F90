@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.31.2.1 2005/11/01 18:46:54 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.31.2.2 2005/11/01 21:08:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -119,7 +119,7 @@
 !     dependent limitations of what may or may not be done before 
 !     {\tt MPI\_Init()}. For instance, it is unsafe for some MPI implementations,
 !     such as MPICH, to do IO before the MPI environment is initialized. Please
-!     consult the documentation of the your MPI implementation for details.
+!     consult the documentation of your MPI implementation for details.
 !
 !     Before exiting the application
 !     the user must call {\tt ESMF\_Finalize()} to release resources 
