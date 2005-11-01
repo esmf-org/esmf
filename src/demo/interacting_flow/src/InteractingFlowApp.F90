@@ -1,4 +1,4 @@
-! $Id: InteractingFlowApp.F90,v 1.3 2005/02/14 04:36:25 theurich Exp $
+! $Id: InteractingFlowApp.F90,v 1.3.2.1 2005/11/01 19:26:44 theurich Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -101,6 +101,13 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
+    ! Initialize the ESMF Framework, get the default Global VM, and set
+    ! the default calendar to be Gregorian.
+    call ESMF_Initialize(vm=vm, defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
     print *, "Coupled Flow Demo Application Start"
 
 !------------------------------------------------------------------------------
@@ -119,6 +126,7 @@
       endif
       read(9, input, end=20)
    20 continue
+      close(9)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -126,10 +134,6 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
-
-    ! Initialize the ESMF Framework, get the default Global VM, and set
-    ! the default calendar to be Gregorian.
-    call ESMF_Initialize(vm=vm, defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
 
     ! Create the Gridded component, passing in the default VM.
     compGridded = ESMF_GridCompCreate(vm, "Coupled Flow Demo", rc=rc)
