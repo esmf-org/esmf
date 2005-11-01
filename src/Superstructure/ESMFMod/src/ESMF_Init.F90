@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.33 2005/08/19 19:49:03 jwolfe Exp $
+! $Id: ESMF_Init.F90,v 1.34 2005/11/01 18:43:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -111,6 +111,16 @@
 !     any other ESMF methods are used.  The method contains a
 !     barrier before returning, ensuring that all processes
 !     made it successfully through initialization.
+!
+!     Typically {\tt ESMF\_Initialize()} will call {\tt MPI\_Init()} 
+!     internally unless MPI has been initialized by the user code before
+!     initializing the framework. If the MPI initialization is left to
+!     {\tt ESMF\_Initialize()} it inherits all of the MPI implementation 
+!     dependent limitations of what may or may not be done before 
+!     {\tt MPI\_Init()}. For instance, it is unsafe for some MPI implementations,
+!     such as MPICH, to do IO before the MPI environment is initialized. Please
+!     consult the documentation of the your MPI implementation for details.
+!
 !     Before exiting the application
 !     the user must call {\tt ESMF\_Finalize()} to release resources 
 !     and clean up the ESMF gracefully.
