@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.25 2005/10/27 22:42:58 eschwab Exp $
+! $Id: ESMF_Config.F90,v 1.26 2005/11/02 21:01:24 svasquez Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -121,8 +121,9 @@
         integer, parameter :: stdin  = 5
         integer, parameter :: stdout = 6
 
-#ifdef  sysHP-UX
-        ! Special setting for HP-UX
+#ifdef sysHP_UX
+
+        ! Special setting for HP_UX
 
         integer, parameter :: stderr = 7
 #else
