@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.3.2.2 2005/10/25 22:47:32 jwolfe Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.3.2.3 2005/11/02 21:20:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -445,7 +445,7 @@ interface operator (.eq.)
  module procedure ESMF_tfeq
  module procedure ESMF_aieq
  module procedure ESMF_bfeq
- module procedure ESMF_cfeq
+ module procedure ESMF_ctfeq
  module procedure ESMF_tnfeq
  module procedure ESMF_freq
 end interface
@@ -458,7 +458,7 @@ interface operator (.ne.)
  module procedure ESMF_tfne
  module procedure ESMF_aine
  module procedure ESMF_bfne
- module procedure ESMF_cfne
+ module procedure ESMF_ctfne
  module procedure ESMF_tnfne
  module procedure ESMF_frne
 end interface
@@ -566,18 +566,18 @@ end function
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_ContextFlags
 
-function ESMF_cfeq(cf1, cf2)
- logical ESMF_cfeq
- type(ESMF_ContextFlag), intent(in) :: cf1, cf2
+function ESMF_ctfeq(ctf1, ctf2)
+ logical ESMF_ctfeq
+ type(ESMF_ContextFlag), intent(in) :: ctf1, ctf2
 
- ESMF_cfeq = (cf1%value .eq. cf2%value)
+ ESMF_ctfeq = (ctf1%value .eq. ctf2%value)
 end function
 
-function ESMF_cfne(cf1, cf2)
- logical ESMF_cfne
- type(ESMF_ContextFlag), intent(in) :: cf1, cf2
+function ESMF_ctfne(ctf1, ctf2)
+ logical ESMF_ctfne
+ type(ESMF_ContextFlag), intent(in) :: ctf1, ctf2
 
- ESMF_cfne = (cf1%value .ne. cf2%value)
+ ESMF_ctfne = (ctf1%value .ne. ctf2%value)
 end function
 
 !------------------------------------------------------------------------------
