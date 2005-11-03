@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.207 2005/07/15 21:25:58 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.208 2005/11/03 20:21:22 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -285,7 +285,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.207 2005/07/15 21:25:58 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.208 2005/11/03 20:21:22 svasquez Exp $'
 
 !==============================================================================
 !
@@ -4984,6 +4984,7 @@
       !  we do not go lower than this on the processors which are uninvolved
       !  in this communication.
 
+      hasdata = ESMF_TRUE   ! temp for now to get rid of warning
       hassrcdata = (hasdata .eq. ESMF_TRUE)
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
