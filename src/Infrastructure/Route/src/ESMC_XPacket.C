@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.52 2005/10/12 19:06:17 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.53 2005/11/04 22:14:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.52 2005/10/12 19:06:17 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.53 2005/11/04 22:14:28 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -746,6 +746,9 @@
       int *xp_count) {            // out - count of xp's created
 //
 // !DESCRIPTION:
+// WARNING: 
+//  Older routine; slowly being replaced by the one directly below.
+//
 //      Translates a set of AxisIndices into one or more XPackets.
 //      If internal or non-periodic boundary, will only return 1 xp.
 //      If external along a periodic boundary, may return multiple xp's.
@@ -936,6 +939,89 @@
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketFromAxisIndex"
+//BOP
+// !IROUTINE:  ESMC_XPacketFromAxisIndex - calculate XPacket from AxisIndexList
+//
+// !INTERFACE:
+      int ESMC_XPacket::ESMC_XPacketFromAxisIndex(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int AIrank,                             // in - data rank
+      ESMC_AxisIndex *localTotalAIPerRank) {  // in - local AI, rank long
+//
+// !DESCRIPTION:
+//      Translates a list of AxisIndex types, one per rank, into a single
+//      XPacket. The strides must be input as the total / allocate size
+//      for this local array. 
+//
+//EOP
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    int i;
+    int rc = ESMF_FAILURE;
+    char msgbuf[ESMF_MAXSTR];
+    ESMC_AxisIndex *aip;  // shorter alias
+
+#if 0
+          this->rank = 2;
+          this->offset  = 
+                  indexlist[1].min * indexlist[0].stride
+                + indexlist[0].min;
+
+          this->contig_length = indexlist[0].max - indexlist[0].min + 1;
+
+          this->stride[0] = indexlist[0].stride;
+
+          this->rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+
+
+          this->rank = 3;
+          this->offset  = 
+                  indexlist[2].min * indexlist[1].stride * indexlist[0].stride
+                + indexlist[1].min * indexlist[0].stride
+                + indexlist[0].min;
+
+          this->contig_length = indexlist[0].max - indexlist[0].min + 1;
+
+          this->stride[0] = indexlist[0].stride;
+
+          this->rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+
+          this->stride[1] = indexlist[1].stride * indexlist[0].stride;
+
+          this->rep_count[1] = indexlist[2].max - indexlist[2].min + 1;
+#endif
+
+
+    aip = localTotalAIPerRank;
+
+    this->rank = AIrank;
+    this->contig_length = aip[0].max - aip[0].min + 1;
+
+    this->stride[0] = aip[0].stride;
+    for (i=1; i<rank-1; i++)
+          this->stride[i] *= aip[i-1].stride;
+
+    for (i=0; i<rank-1; i++)
+          this->rep_count[i] = aip[i+1].max - aip[i+1].min + 1;
+
+    this->offset = aip[0].min;
+    for (i=1; i<rank; i++)
+          this->offset += aip[i].min * this->stride[i-1];
+
+    this->ESMC_XPacketSetContig();
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_XPacketFromAxisIndex
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_XPacketGlobalToLocal"
 //BOP
 // !IROUTINE:  ESMC_XPacketGlobalToLocal - get a local XPacket from a global one
@@ -1014,6 +1100,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
+      int indent,                // how far to indent
       const char *options) {     // print options
 //
 // !DESCRIPTION:
@@ -1026,7 +1113,63 @@
     char msgbuf[ESMF_MAXSTR];
     char tempbuf[ESMF_MAXSTR];
 
-    sprintf(msgbuf, "XPacket: rank=%d, offset=%d, contigrank=%d, contig_length=%d, ", 
+    if (indent > 0)  
+        sprintf(msgbuf, "XPacket: rank=%d, offset=%d, crank=%d, clen=%d, ", 
+                         rank, offset, contigrank, contig_length);
+    else
+        sprintf(msgbuf, "   XPacket: rank=%d, offset=%d, crank=%d, clen=%d, ", 
+                             rank, offset, contigrank, contig_length);
+
+    printf(msgbuf);
+ 
+    sprintf(tempbuf,"strides=(");
+    strcpy(msgbuf, tempbuf);
+    for (i=0; i<rank-2; i++) {
+      sprintf(tempbuf,"%d,", stride[i]);
+      strcat(msgbuf, tempbuf);
+    }
+    sprintf(tempbuf,"%d), reps=(", stride[i]);
+    strcat(msgbuf, tempbuf);
+    for (i=0; i<rank-2; i++) {
+      sprintf(tempbuf,"%d,", rep_count[i]);
+      strcat(msgbuf, tempbuf);
+    }
+    sprintf(tempbuf,"%d)\n", rep_count[i]); 
+    strcat(msgbuf, tempbuf);
+    
+    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    printf(msgbuf);
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_XPacketPrint
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketPrint"
+//BOP
+// !IROUTINE:  ESMC_XPacketPrint - Print an XPacket
+//
+// !INTERFACE:
+      int ESMC_XPacket::ESMC_XPacketPrint(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *options) {     // print options
+//
+// !DESCRIPTION:
+//     Print the contents of an XPacket
+//
+//EOP
+// !REQUIREMENTS:  
+
+    int i;
+    char msgbuf[ESMF_MAXSTR];
+    char tempbuf[ESMF_MAXSTR];
+
+    sprintf(msgbuf, "XPacket: rank=%d, offset=%d, crank=%d, clen=%d, ", 
                          rank, offset, contigrank, contig_length);
     printf(msgbuf);
  
@@ -1036,7 +1179,7 @@
       sprintf(tempbuf,"%d,", stride[i]);
       strcat(msgbuf, tempbuf);
     }
-    sprintf(tempbuf,"%d), rep_count=(", stride[i]);
+    sprintf(tempbuf,"%d), reps=(", stride[i]);
     strcat(msgbuf, tempbuf);
     for (i=0; i<rank-2; i++) {
       sprintf(tempbuf,"%d,", rep_count[i]);
