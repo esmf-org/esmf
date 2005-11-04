@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.36 2004/12/07 17:14:10 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.37 2005/11/04 22:05:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,10 +51,12 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
 
    private:
 
+    struct ESMC_AxisIndex ai_alloc[ESMF_MAXDIM]; // allocated space
     struct ESMC_AxisIndex ai_total[ESMF_MAXDIM]; // limits for whole array
     struct ESMC_AxisIndex ai_comp[ESMF_MAXDIM];  // for computational region
-    struct ESMC_AxisIndex ai_excl[ESMF_MAXDIM];  // never is sent or received
-    int hwidth[ESMF_MAXGRIDDIM][2];              // lower and upper halo widths
+    struct ESMC_AxisIndex ai_excl[ESMF_MAXDIM];  // data never sent or received
+    int hwidth[ESMF_MAXDIM][2];            // lower/upper halo widths / rank
+    int awidth[ESMF_MAXDIM][2];            // lower/upper alloc widths / rank
     
 // !PUBLIC MEMBER FUNCTIONS:
 //
@@ -69,13 +71,21 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
     int ESMC_ArrayDestruct(void);
 
  // optional index values for subsetting and handling arrays standalone
-    int ESMC_ArrayGetAxisIndex(ESMC_DomainType dt, struct ESMC_AxisIndex *index) const;
-    int ESMC_ArraySetAxisIndex(ESMC_DomainType dt, struct ESMC_AxisIndex *index);
-    int ESMC_ArrayComputeAxisIndex(struct ESMC_DELayout *delayout, int *decompids,
-                 int dlen);
+    int ESMC_ArrayGetAxisIndex(ESMC_DomainType dt, 
+                               struct ESMC_AxisIndex *index) const;
+    int ESMC_ArraySetAxisIndex(ESMC_DomainType dt, 
+                               struct ESMC_AxisIndex *index);
+
+// obsolete?
+//    int ESMC_ArrayComputeAxisIndex(struct ESMC_DELayout *delayout, 
+//                                   int *decompids, int dlen);
+
+// not at right level; should move to arraycomm
+// (still used by arb distribution code for now; but remove it asap)
+
     int ESMC_ArrayGetAllAxisIndices(struct ESMC_AxisIndex *global, int nDEs,
-                 int rank, struct ESMC_AxisIndex *total,
-                 struct ESMC_AxisIndex *comp, struct ESMC_AxisIndex *excl) const; 
+             int rank, struct ESMC_AxisIndex *total,
+             struct ESMC_AxisIndex *comp, struct ESMC_AxisIndex *excl) const; 
 
     
  // accessor methods for class members
@@ -109,6 +119,11 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
 
     int ESMC_ArrayGetHWidth(int *hw) { *hw = this->hwidth[0][0]; 
                                                      return ESMF_SUCCESS; }
+    int ESMC_ArrayGetHWidthList(int *hw) { int *ip = hw;
+                                           for (int i = 0; i < rank; i++) 
+                                           {  *ip++ = this->hwidth[i][0]; 
+                                              *ip++ = this->hwidth[i][1]; }
+                                           return ESMF_SUCCESS;}
 
     int ESMC_ArraySetLengths(int n, int *l) { for (int i = 0; i < n; i++)
                                                   this->counts[i] = l[i]; 
@@ -246,6 +261,7 @@ extern "C" {
   void FTN(c_esmc_arraygetlbounds)(ESMC_Array **ptr, int *rank, int *lbounds, int *status);
   void FTN(c_esmc_arraygetubounds)(ESMC_Array **ptr, int *rank, int *ubounds, int *status);
   void FTN(c_esmc_arraygethwidth)(ESMC_Array **ptr, int *hwidth, int *status);
+  void FTN(c_esmc_arraygethwidthlist)(ESMC_Array **ptr, int *hwidth, int *status);
   void FTN(c_esmc_arraygetrank)(ESMC_Array **ptr, int *rank, int *status);
   void FTN(c_esmc_arraygettype)(ESMC_Array **ptr, int *type, int *status);
   void FTN(c_esmc_arraygetkind)(ESMC_Array **ptr, int *kind, int *status);
