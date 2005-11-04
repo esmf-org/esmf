@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.cpp,v 1.20 2005/10/12 19:06:16 nscollins Exp $
+! $Id: ESMF_LocalArray.cpp,v 1.21 2005/11/04 22:11:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -94,24 +94,6 @@
                             ESMF_FROM_CPLUSPLUS = ESMF_LocalArrayOrigin(2)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_DomainType
-!
-!     ! Indicates whether a data array should be copied or referenced. 
-!     !  This matches an enum on the C++ side and the values must match.
-!     !  Update ../include/ESMC_LocalArray.h if you change these values.
-
-      type ESMF_DomainType
-      sequence
-      private
-        integer :: dt
-      end type
-
-      type(ESMF_DomainType), parameter :: & 
-                            ESMF_DOMAIN_TOTAL         = ESMF_DomainType(1), &
-                            ESMF_DOMAIN_COMPUTATIONAL = ESMF_DomainType(2), &
-                            ESMF_DOMAIN_EXCLUSIVE     = ESMF_DomainType(3)
-
-!------------------------------------------------------------------------------
 !     ! ESMF_LocalArray
 !
 !     ! LocalArray data type.  All information is kept on the C++ side inside
@@ -142,8 +124,6 @@ AllTypesMacro(LocalArrayType)
 ! !PUBLIC TYPES:
       public ESMF_CopyFlag, ESMF_DATA_COPY, ESMF_DATA_REF, ESMF_DATA_SPACE
       public ESMF_LocalArray
-      public ESMF_DomainType
-      public ESMF_DOMAIN_TOTAL, ESMF_DOMAIN_COMPUTATIONAL, ESMF_DOMAIN_EXCLUSIVE
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -178,7 +158,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.cpp,v 1.20 2005/10/12 19:06:16 nscollins Exp $'
+      '$Id: ESMF_LocalArray.cpp,v 1.21 2005/11/04 22:11:11 nscollins Exp $'
 
 !==============================================================================
 ! 
