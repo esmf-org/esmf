@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.6 2005/10/12 19:06:21 nscollins Exp $
+// $Id: ESMC_Util.C,v 1.7 2005/11/04 22:17:51 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.6 2005/10/12 19:06:21 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.7 2005/11/04 22:17:51 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -113,6 +113,39 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
      ai->min = min;
      ai->max = max;
      ai->stride = stride;
+
+     return ESMF_SUCCESS;
+};
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AxisIndexSet"
+//BOPI
+// !IROUTINE:  ESMC_AxisIndexSet - Initialize an AxisIndex object
+//
+// !INTERFACE:
+    int ESMC_AxisIndexSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+     ESMC_AxisIndex *ai,
+     int min,
+     int max) {
+// 
+// !DESCRIPTION:
+//     Initialize/set an AxisIndex object.  This one does not take a stride
+//     and sets it to (max-min)+1.
+//
+//EOPI
+
+     if (ai == NULL) 
+         return ESMF_FAILURE;
+
+     ai->min = min;
+     ai->max = max;
+     ai->stride = (max-min) + 1;
 
      return ESMF_SUCCESS;
 };
@@ -216,15 +249,15 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 // !IROUTINE:  ESMC_AxisIndexIntersect - return the intersection of 2 AIs
 //
 // !INTERFACE:
-      ESMC_Logical ESMC_AxisIndexIntersect(
+      bool ESMC_AxisIndexIntersect(
 //
 // !RETURN VALUE:
-//    error code 
+//    boolean: true means there is an intersect; false for none.
 //
 // !ARGUMENTS:
+        int ndims,                     // in - number of dimensions
         ESMC_AxisIndex *src1,          // in - ESMC_AxisIndex
         ESMC_AxisIndex *src2,          // in - ESMC_AxisIndex
-        int ndims,                     // in - number of dimensions
         ESMC_AxisIndex *dst) {         // out - ESMC_AxisIndex
 //
 // !DESCRIPTION:
@@ -263,7 +296,7 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
       dst[i].min = 0;
       dst[i].max = 0;
       dst[i].stride = 0;
-      return ESMF_FALSE;
+      return false;
     }
   
     // there is an overlap in this dim - figure out what it is.
@@ -288,7 +321,7 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 
 
   // if we have not returned yet, they overlap.
-  return ESMF_TRUE;
+  return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -351,10 +384,9 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 //    error code 
 //
 // !ARGUMENTS:
-        ESMC_AxisIndex *srcglobal,     // in - global AI extents
-        ESMC_AxisIndex *local,         // in - the original local AI
-        int *globalStarts,             // in - array of global offsets
         int ndims,                     // in - number of dimensions
+        ESMC_AxisIndex *srcglobal,     // in - global AI extents
+        ESMC_AxisIndex *globaltotal,   // in - global total counts
         ESMC_AxisIndex *dstlocal) {    // out - AIs translated to local space
 //
 // !DESCRIPTION:
@@ -369,9 +401,9 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 
   for (i=0; i<ndims; i++) {
 
-    dstlocal[i].min = srcglobal[i].min - globalStarts[i];
-    dstlocal[i].max = srcglobal[i].max - globalStarts[i];
-    dstlocal[i].stride = local[i].stride;
+    dstlocal[i].min = srcglobal[i].min - globaltotal[i].min;
+    dstlocal[i].max = srcglobal[i].max - globaltotal[i].min;
+    dstlocal[i].stride = dstlocal[i].max - dstlocal[i].min + 1;
 
   }
   
