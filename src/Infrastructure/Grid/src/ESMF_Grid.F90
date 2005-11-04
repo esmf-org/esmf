@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.224 2005/11/04 21:51:54 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.225 2005/11/04 22:10:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -110,7 +110,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.224 2005/11/04 21:51:54 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.225 2005/11/04 22:10:29 nscollins Exp $'
 
 !==============================================================================
 !
@@ -5087,21 +5087,31 @@
 ! !DESCRIPTION:
 !     Get an {\tt ESMF\_DistGrid} attribute with the given value.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Class to be queried.
-!     \item[globalAI]
-!          Global axis indices on all DE's.
-!     \item[{[AICountPerDE]}]
-!     \item[{[total]}]
-!          If TRUE, return queries based on the total coordinates including
-!          internally generated boundary cells. If FALSE, return queries based
-!          on the computational cells (which is what the user will be expecting).
-!          The default value is FALSE.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[grid]
+!        Grid to be queried.
+!   \item[globalAI]
+!        2D Array of AxisIndex types, must be (number of DEs, grid rank) long,
+!        intent(out) for this routine.
+!   \item[horzrelloc]
+!        Required for a 2D grid; controls which of the DistGrids will be
+!        used to answer the query.  (e.g. Cell-centered data will return
+!        different counts than vertex-based data.)
+!   \item[{[vertrelloc]}]
+!        Not required by the fortran interface, but required if the Grid
+!        is 3D.
+!   \item[{[AICountPerDE]}]
+!        Required if the Grid has an ARBITRARY distribution; ignored if it
+!        does not.
+!   \item[{[total]}]
+!        If TRUE, return queries based on the total coordinates including
+!        internally generated boundary cells. If FALSE, return queries based
+!        on the computational cells (which is what the user will be expecting).
+!        The default value is FALSE.
+!   \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
 ! !REQUIREMENTS:
