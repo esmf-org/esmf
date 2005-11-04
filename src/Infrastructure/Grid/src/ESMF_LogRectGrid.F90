@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.142 2005/10/19 23:33:49 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.143 2005/11/04 21:52:19 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -96,6 +96,7 @@
     public ESMF_LRGridSetCoord
     public ESMF_LRGridGetDELocalInfo   ! access DistGrid from above
     public ESMF_LRGridGetAllAxisIndex  ! access DistGrid from above
+    public ESMF_LRGridGetAIsAllDEs     ! access DistGrid from above
     public ESMF_LRGridGlobalToDELocalIndex
     public ESMF_LRGridDELocalToGlobalIndex
     public ESMF_LRGridGlobalToDELocalAI
@@ -127,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.142 2005/10/19 23:33:49 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.143 2005/11/04 21:52:19 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1074,6 +1075,9 @@
       real(ESMF_KIND_R8), dimension(:), pointer :: coordsUse
       type(ESMF_LogRectGrid), pointer :: lrgrid
       type(ESMF_LocalArray), dimension(:), pointer :: coords
+      type(ESMF_GridVertType) :: vertGridTypeUse
+      type(ESMF_GridVertStagger) :: vertStaggerUse
+      type(ESMF_CoordSystem) :: vertCoordSystemUse
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -5312,6 +5316,216 @@
                  vertAI, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocating AI arrays", &
                                      ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_LRGridGetAllAxisIndex
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LRGridGetAIsAllDEs"
+!BOPI
+! !IROUTINE: ESMF_LRGridGetAIsAllDEs - Get all axis indices for a DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_LRGridGetAIsAllDEs(grid, horzrelloc, localGlobalFlag, &
+                                         AIListPerDEPerRank, vertrelloc, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      type(ESMF_RelLoc), intent(in) :: horzRelLoc
+      type(ESMF_LocalGlobalFlag), intent(in) :: localGlobalFlag
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AIListPerDEPerRank
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be queried.
+!     \item[horzrelloc]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
+!          grid.
+!     \item[localGlobalFlag]
+!          {\tt ESMF\_LocalGlobalFlag] identifier indicating whether the returned
+!          array of {\tt ESMF\_AxisIndex} types should be in local or global
+!          index space.
+!     \item[AIListPerDEPerRank]
+!          2D array of {\tt ESMF\_AxisIndex} types containing results.  If
+!          allocated, it must be of size (nDEs,gridrank).
+!     \item[{[vertrelloc]}]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
+!          grid.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!EOPI
+
+      integer :: localrc                          ! Error status
+      integer :: AIrank, gridRank, nDEs
+      integer :: horzDistIdUse, vertDistIdUse
+      integer :: horzPhysIdUse, vertPhysIdUse
+      integer, dimension(ESMF_MAXGRIDDIM) :: order
+      logical :: dummy, horz, vert
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: horzAI, vertAI
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Initialize other variables
+      horzDistIdUse = -1
+      vertDistIdUse = -1
+      horzPhysIdUse = -1
+      vertPhysIdUse = -1
+      AIrank        =  0
+      horz          = .false.
+      vert          = .false.
+
+      ! some basic error checking    TODO: more
+      if (.not.associated(grid%ptr)) then
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                   "Invalid Grid object", &
+                                   ESMF_CONTEXT, rc)) return
+      endif
+
+      gridRank = grid%ptr%dimCount
+      nDEs = TODO
+
+      ! check for validity of horizontal and vertical rellocs and determine the
+      ! required size of the AI array
+      if (present(horzRelLoc)) then
+ 
+        ! get the physgrid/distgrid identifier from the horizontal relLoc.  If it
+        ! is not valid return an error.
+        if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
+          call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+          AIrank = AIrank + 2
+          horz   = .true.
+        else
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                        "undefined horizontal relloc", &
+                                        ESMF_CONTEXT, rc)
+          return
+        endif
+      endif
+
+      if (present(vertRelLoc)) then
+
+        ! first check and make sure this Grid has vertical subGrids,  If not, issue
+        ! a warning and ignore the vertical AIs
+        if (gridRank.le.2) then
+          call ESMF_LogWrite("vertical relloc defined on a 2D grid", &
+                             ESMF_LOG_WARNING, ESMF_CONTEXT)
+        else
+
+          ! get the physgrid/distgrid identifier from the vertical relLoc.  If it
+          ! is not valid return an error.
+          if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
+            call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, vertPhysIdUse, localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+            vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+            AIrank = AIrank + 1
+            vert   = .true.
+          else
+            dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                          "undefined vertical relloc", &
+                                          ESMF_CONTEXT, rc)
+            return
+          endif
+        endif
+      endif
+
+      ! check if the AI array pointer is associated 
+      !  -  If it is, check that it is large enough to hold the requested data.
+      !  -  If it is not, allocate it here
+      if (associated(AIListPerDEPerRank)) then
+        if (size(AIListPerDEPerRank,1).le.nDEs .OR. &
+            size(AIListPerDEPerRank,2).le.AIrank) then
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                             "array not large enough for requested data", &
+                             ESMF_CONTEXT, rc)
+          return
+        endif
+      else
+        allocate(AIListPerDEPerRank(nDEs,AIrank), stat=localrc
+        if (ESMF_LogMsgFoundAllocError(localrc, "allocating AIList array", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
+
+      ! first get the horizontal subGrid AIs, if requested and identified with
+      ! a proper distGridID
+      if (horz) then
+ 
+        ! allocate horz temp AI array
+        allocate(horzAI(nDEs,2), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "allocating horz AI array", &
+                                       ESMF_CONTEXT, rc)) return
+
+        ! call the proper distgrid to retrieve the horizontal AIs
+        call ESMF_DistGridGetAIsAllDEs(grid%ptr%distgrids(horzDistIdUse)%ptr, &
+                                       horzAI, localGlobalFlag, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      endif
+
+      ! next get the vertical subGrid AIs, if requested and identified with
+      ! a proper distGridID
+      if (vert) then
+ 
+        ! allocate vert temp AI array
+        allocate(vertAI(nDEs,1), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "allocating vert AI array", &
+                                       ESMF_CONTEXT, rc)) return
+
+        ! call the proper distgrid to retrieve the vertical AIs
+        call ESMF_DistGridGetAIsAllDEs(grid%ptr%distgrids(vertDistIdUse)%ptr, &
+                                       vertAI, localGlobalFlag, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      endif
+
+      ! Load temp values into return array
+      order(:) = gridOrder(:,grid%ptr%coordOrder%order,gridRank)
+      ! TODO: logic for a 3D grid and a request for the horizontal AIs,
+      !       where the order array could reference outside of the AIList
+      if (horz) then
+        AIListPerDEPerRank(:,order(1)) = horzAI(:,1)
+        AIListPerDEPerRank(:,order(2)) = horzAI(:,2)
+      endif
+      if (vert) then
+        if (AIrank.ge.3) then
+          AIListPerDEPerRank(:,order(3)) = vertAI(:,1)
+        else
+          AIListPerDEPerRank(:,1) = vertAI(:,1)
+        endif
+      endif
+
+      ! clean up
+      if (horz) then
+        deallocate(horzAI, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating horz AI array", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
+      if (vert) then
+        deallocate(vertAI, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating vert AI array", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
