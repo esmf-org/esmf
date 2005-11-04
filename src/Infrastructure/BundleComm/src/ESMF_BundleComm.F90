@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.51 2005/10/17 20:00:18 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.52 2005/11/04 23:40:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.51 2005/10/17 20:00:18 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.52 2005/11/04 23:40:40 nscollins Exp $'
 
 !==============================================================================
 !
@@ -296,7 +296,8 @@
 ! !IROUTINE: ESMF_BundleHalo - Execute a halo operation on each Field in a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleHalo(bundle, routehandle, blocking, commhandle, rc)
+      subroutine ESMF_BundleHalo(bundle, routehandle, blocking, &
+                                 commhandle, routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
@@ -304,6 +305,7 @@
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_BlockingFlag), intent(in) , optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -334,6 +336,10 @@
 !           argument is required.  Information about the pending operation
 !           will be stored in the {\tt ESMF\_CommHandle} and can be queried
 !           or waited for later.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to 
+!           select when executing the communication needed to update the halo.
+!           See Section~\ref{opt:routeopt} for possible values.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -346,6 +352,9 @@
       integer :: nitems
       type(ESMF_BundleType), pointer :: btypep    ! bundle type info
       type(ESMF_Array), allocatable :: arrayList(:)
+      integer :: maptype
+      logical :: bundlepack
+      integer :: bopt, bflag, rcount
 
    
       ! Initialize return code   
@@ -360,24 +369,38 @@
 
       btypep => bundle%btypep
 
-      ! if all fields are identical, they can share a route
-      if (ESMF_BundleIsCongruent(bundle, rc=status)) then
+      ! before looking a bundle, see what kind of mapping is in this handle.
+      ! and if the route options request no packing by bundle.
+      call ESMF_RouteHandleGet(routehandle, rmaptype=maptype, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-          nitems = btypep%field_count
-          allocate(arrayList(nitems), stat=status)
-          if (ESMF_LogMsgFoundAllocError(status, & 
-                                         "Allocating arraylist information", &
-                                          ESMF_CONTEXT, rc)) return
-          ! make a list of arrays
-          do i=1, nitems
-            arrayList(i) = btypep%flist(i)%ftypep%localfield%localdata
-          enddo
+      bundlepack = .true.
+      if (present(routeOptions)) then
+          bopt = routeOptions    ! turn into ints
+          bflag = ESMF_ROUTE_OPTION_PACK_BUFFER
+          if (iand(bopt, bflag) .eq. 0) bundlepack = .false.  ! bitwise and
 
+          ! TODO: sort out options at the rhandle vs route level.
+          ! call ESMF_RouteSet(route, routeOptions, rc=status)
+      endif
+   
+      ! if the map was computed one per input, then call it here.
+      if (maptype .eq. ESMF_1TO1HANDLEMAP) then
+          ! make sure things match
+          call ESMF_RouteHandleGet(routehandle, route_count=rcount, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          if (rcount .ne. btypep%field_count) then
+              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                  "Bundles do not match Bundles used in BundleHaloStore", &
+                   ESMF_CONTEXT, rc)
+              return
+          endif
 
-          call ESMF_ArrayHalo(arrayList, routehandle, 1,  &
-                              blocking, commhandle, rc=status)
-
-      else 
+          ! one route per source field; loop here.
           do i=1, btypep%field_count
 
             call ESMF_ArrayHalo(btypep%flist(i)%ftypep%localfield%localdata, &
@@ -386,6 +409,50 @@
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
           enddo
+
+      else
+        ! a single route applies to all fields.  requires a congruent bundle.
+        if (.not. ESMF_BundleIsCongruent(bundle, rc=status)) then
+          ! problem - the map was computed with a congruent bundle
+          ! and this one is not.  error out and return. 
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                  "BundleHaloStore() was called with an incompatible Bundle", &
+                   ESMF_CONTEXT, rc)
+          return
+        else
+          ! the default is to loop inside the route and pack fields, but
+          ! the options can prevent that from happening.
+          if (bundlepack) then
+
+            ! bundle fields are all the same, and routehandle has only
+            ! one shared route in it.
+            nitems = btypep%field_count
+            allocate(arrayList(nitems), stat=status)
+            if (ESMF_LogMsgFoundAllocError(status, & 
+                                          "Allocating arraylist information", &
+                                           ESMF_CONTEXT, rc)) return
+            ! make a list of arrays
+            do i=1, nitems
+              arrayList(i) = btypep%flist(i)%ftypep%localfield%localdata
+            enddo
+    
+    
+            call ESMF_ArrayHalo(arrayList, routehandle, 1,  &
+                                  blocking, commhandle, rc=status)
+    
+          else
+            ! multiple congruent fields but single route.   
+            ! loop here.
+            do i=1, btypep%field_count
+  
+              call ESMF_ArrayHalo(btypep%flist(i)%ftypep%localfield%localdata, &
+                                routehandle, 1, blocking, commhandle, rc=status)
+              if (ESMF_LogMsgFoundError(status, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) return
+            enddo
+          endif
+        endif
       endif
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -487,6 +554,8 @@
       integer :: status                           ! Error status
       integer :: i
       type(ESMF_BundleType), pointer :: btypep     ! bundle type info
+      logical :: bundlepack
+      integer :: bopt, bflag
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -500,8 +569,17 @@
 
       btypep => bundle%btypep
 
+      ! if specified, make sure routeoptions do not disable the
+      ! field-level packing option.
+      bundlepack = .true.
+      if (present(routeOptions)) then
+          bopt = routeOptions    ! turn into ints
+          bflag = ESMF_ROUTE_OPTION_PACK_BUFFER
+          if (iand(bopt, bflag) .eq. 0) bundlepack = .false.  ! bitwise and
+      endif
+
       ! if all fields are identical, they can share a route
-      if (ESMF_BundleIsCongruent(bundle, rc=status)) then
+      if (ESMF_BundleIsCongruent(bundle, rc=status) .and. bundlepack) then
         call ESMF_ArrayHaloStore( &
                                   btypep%flist(1)%ftypep%localfield%localdata, &
                                   1, ESMF_ALLTO1HANDLEMAP, 1, &
@@ -516,7 +594,7 @@
         ! routes inside a single handle.  set the map to be 1 to 1.
         do i=1, btypep%field_count
  
-        call ESMF_ArrayHaloStore( &
+          call ESMF_ArrayHaloStore( &
                                   btypep%flist(i)%ftypep%localfield%localdata, &
                                   i, ESMF_1TO1HANDLEMAP, btypep%field_count, &
                                   btypep%grid, &
@@ -524,7 +602,7 @@
                                   routehandle, &
                                   halodirection, routeOptions, rc=status)
   
-        if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -552,7 +630,7 @@
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: srcBundle
+      type(ESMF_Bundle), intent(inout) :: srcBundle
       type(ESMF_Bundle), intent(inout) :: dstBundle
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_BlockingFlag), intent(in) , optional :: blocking
@@ -612,6 +690,10 @@
       integer :: i                                 ! loop counter
       type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
       type(ESMF_Array), allocatable :: srcArrayList(:), dstArrayList(:)
+      integer :: condition
+      integer :: maptype
+      logical :: bundlepack
+      integer :: bopt, bflag, rcount
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -620,13 +702,15 @@
       stypep = srcBundle%btypep
       dtypep = dstBundle%btypep
 
-      if (stypep%field_count .ne. dtypep%field_count) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-           "Source and destination Bundles must have same numbers of Fields", &
-                                    ESMF_CONTEXT, rc)) return
-      endif
+      ! Does validate of both bundles and checks for consistent types.
+      condition = ESMF_BundleCommPrepCheck(srcBundle, dstBundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+     
+      if (condition .eq. ESMF_BUNDLECOMM_NOMATCH) return
 
-      
+
       ! If the bundle consists of identical fields - in every way: data type,
       ! relloc, index order, the works -- then pass in a list of all arrays
       ! and RouteRun will have the option of looping over the arrays and 
@@ -635,46 +719,109 @@
       ! instead of having to be done by the user outside; but there is no
       ! additional optimization possible other than reusing the same route
       ! table each time.
-      if ((stypep%isCongruent) .and. (dtypep%isCongruent)) then
+      
+      ! if specified, make sure routeoptions do not disable the
+      ! field-level packing option.
+      bundlepack = .true.
+      if (present(routeOptions)) then
+          bopt = routeOptions    ! turn into int
+          bflag = ESMF_ROUTE_OPTION_PACK_BUFFER
+          if (iand(bopt, bflag) .eq. 0) bundlepack = .false.
+      endif
 
-          allocate(srcArrayList(stypep%field_count), stat=status)
-          allocate(dstArrayList(dtypep%field_count), stat=status)
+      ! before looking a bundle, see what kind of mapping is in this handle.
+      ! and if the route options request no packing by bundle.
+      call ESMF_RouteHandleGet(routehandle, rmaptype=maptype, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! based on the handle type, see if we are sharing a route table (and
+      ! if that's permitted) or if we are looping internally.
+
+      ! if the map was computed one route per field, loop here.
+      if (maptype .eq. ESMF_1TO1HANDLEMAP) then
+
+        ! some simple error checks here
+        call ESMF_RouteHandleGet(routehandle, route_count=rcount, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
    
-          do i=1, stypep%field_count
-              srcArrayList(i) = stypep%flist(i)%ftypep%localfield%localdata
-          enddo
-    
-          do i=1, dtypep%field_count
-              dstArrayList(i) = dtypep%flist(i)%ftypep%localfield%localdata
-          enddo
-    
-          call ESMF_ArrayRedist(srcArrayList, dstArrayList, &
-                                routehandle, 1, blocking, commhandle, &
-                                routeOptions, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) then
-              deallocate(srcArrayList, dstArrayList, stat=status) 
-              return
-          endif
+        ! we have already verified that source count == dest count, so either
+        ! can be compared against the number of routes in this handle.
+        if (rcount .ne. stypep%field_count) then
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                "RouteHandle and Bundles do not have matching Field counts", &
+                                     ESMF_CONTEXT, rc)
+            return
+        endif
 
-          deallocate(srcArrayList, dstArrayList, stat=status) 
+        do i = 1, stypep%field_count
+
+         ! routehandle now internally stores multiple routes
+         call ESMF_ArrayRedist(stypep%flist(i)%ftypep%localfield%localdata, &
+                               dtypep%flist(i)%ftypep%localfield%localdata, &
+                               routehandle, i, blocking, commhandle, &
+                               routeOptions, status)
+         if (ESMF_LogMsgFoundError(status, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rc)) return
+        enddo
+
       else
-          !  loop and do each field separately; no internal optimization 
-          !  possible with this path, but most general -- does not require
-          !  the datamaps of all fields to be identical.
-          do i = 1, stypep%field_count
+        ! a single route was computed for all fields.  requires congruent
+        ! bundles as inputs.
+        if (condition .eq. ESMF_BUNDLECOMM_NONCONGRUENT) then
+          ! problem.  routehandle thinks they are.
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                  "Bundles do not match Bundles used in BundleRedistStore()", &
+                   ESMF_CONTEXT, rc)
+          return
+        else
+          ! this case can loop inside routerun but the options may prevent
+          ! that from happining.
+          if (bundlepack) then
 
-           ! routehandle now internally stores multiple routes
-           call ESMF_ArrayRedist(stypep%flist(i)%ftypep%localfield%localdata, &
+            allocate(srcArrayList(stypep%field_count), stat=status)
+            allocate(dstArrayList(dtypep%field_count), stat=status)
+     
+            do i=1, stypep%field_count
+                srcArrayList(i) = stypep%flist(i)%ftypep%localfield%localdata
+            enddo
+      
+            do i=1, dtypep%field_count
+                dstArrayList(i) = dtypep%flist(i)%ftypep%localfield%localdata
+            enddo
+      
+            call ESMF_ArrayRedist(srcArrayList, dstArrayList, &
+                                  routehandle, 1, blocking, commhandle, &
+                                  routeOptions, status)
+            if (ESMF_LogMsgFoundError(status, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) then
+                deallocate(srcArrayList, dstArrayList, stat=status) 
+                return
+            endif
+  
+            deallocate(srcArrayList, dstArrayList, stat=status) 
+          else
+            ! multiple congruent fields in the bundles but loop over the
+            ! single route.
+            do i=1, stypep%field_count
+  
+              call ESMF_ArrayRedist( &
+                                 stypep%flist(i)%ftypep%localfield%localdata, &
                                  dtypep%flist(i)%ftypep%localfield%localdata, &
-                                 routehandle, i, blocking, commhandle, &
+                                 routehandle, 1, blocking, commhandle, &
                                  routeOptions, status)
-           !status = ESMF_RC_NOT_IMPL
-           if (ESMF_LogMsgFoundError(status, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
-          enddo
+              if (ESMF_LogMsgFoundError(status, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) return
+             enddo
+  
+          endif
+        endif
       endif
 
       ! Set return values.
@@ -776,6 +923,8 @@
       integer :: i
       integer :: condition
       type(ESMF_BundleType), pointer :: stypep, dtypep
+      logical :: bundlepack
+      integer :: bopt, bflag
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -803,12 +952,21 @@
      
       if (condition .eq. ESMF_BUNDLECOMM_NOMATCH) return
 
+      ! if specified, make sure routeoptions do not disable the
+      ! field-level packing option.
+      bundlepack = .true.
+      if (present(routeOptions)) then
+          bopt = routeOptions    ! turn into int
+          bflag = ESMF_ROUTE_OPTION_PACK_BUFFER
+          if (iand(bopt, bflag) .eq. 0) bundlepack = .false.
+      endif
+
       dtypep => dstBundle%btypep
       stypep => srcBundle%btypep
 
       ! if all fields are identical, they can share a route
-      if (condition .eq. ESMF_BUNDLECOMM_CONGRUENT) then 
-             call ESMF_ArrayRedistStore( &
+      if ((condition .eq. ESMF_BUNDLECOMM_CONGRUENT) .and. bundlepack) then 
+         call ESMF_ArrayRedistStore( &
                                  stypep%flist(1)%ftypep%localfield%localdata, &
                                  stypep%grid, &
                                  stypep%flist(1)%ftypep%mapping, &
@@ -818,12 +976,12 @@
                                  1, ESMF_ALLTO1HANDLEMAP, 1, &
                                  parentVM, &
                                  routeOptions, routehandle, status)
-              if (ESMF_LogMsgFoundError(status, &
-                                        ESMF_ERR_PASSTHRU, &
-                                        ESMF_CONTEXT, rc)) return
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
       else
         ! the prepcheck call above has verified that the number of fields
-        ! match, so we can use either one safely here.
+        ! match, so we can use either field count safely here.
         do i=1, stypep%field_count
  
            call ESMF_ArrayRedistStore( &
@@ -924,14 +1082,14 @@
 ! !IROUTINE: ESMF_BundleRegrid - Execute a regrid operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRegrid(srcbundle, dstbundle, routehandle, &
+      subroutine ESMF_BundleRegrid(srcBundle, dstBundle, routehandle, &
                                    srcmask, dstmask, blocking, commhandle, &
                                    routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: srcbundle
-      type(ESMF_Bundle), intent(inout) :: dstbundle
+      type(ESMF_Bundle), intent(inout) :: srcBundle
+      type(ESMF_Bundle), intent(inout) :: dstBundle
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_Mask), intent(in), optional :: srcmask
       type(ESMF_Mask), intent(in), optional :: dstmask
@@ -993,20 +1151,43 @@
       integer :: i                                 ! loop counter
       type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
       type(ESMF_Array), allocatable :: srcArrayList(:), dstArrayList(:)
+      integer :: condition
       logical :: hasSrcData, hasDstData
+      integer :: maptype
+      logical :: bundlepack
+      integer :: bopt, bflag, rcount
    
       ! Initialize return code   
       status = ESMF_FAILURE
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! Does validate of both bundles and checks for consistent types.
+      condition = ESMF_BundleCommPrepCheck(srcBundle, dstBundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+     
+      if (condition .eq. ESMF_BUNDLECOMM_NOMATCH) return
+
+      ! before looking a bundle, see what kind of mapping is in this handle.
+      ! and if the route options request no packing by bundle.
+      call ESMF_RouteHandleGet(routehandle, rmaptype=maptype, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      bundlepack = .true.
+      if (present(routeOptions)) then
+          bopt = routeOptions    ! turn into ints
+          bflag = ESMF_ROUTE_OPTION_PACK_BUFFER
+          if (iand(bopt, bflag) .eq. 0) bundlepack = .false.  ! bitwise and
+
+          ! TODO: sort out options at the rhandle vs route level.
+          ! call ESMF_RouteSet(route, routeOptions, rc=status)
+      endif
+   
       stypep = srcBundle%btypep
       dtypep = dstBundle%btypep
-
-      if (stypep%field_count .ne. dtypep%field_count) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-           "Source and destination Bundles must have same numbers of Fields", &
-                                    ESMF_CONTEXT, rc)) return
-      endif
 
       
       ! If the bundle consists of identical fields - in every way: data type,
@@ -1017,41 +1198,22 @@
       ! instead of having to be done by the user outside; but there is no
       ! additional optimization possible other than reusing the same route
       ! table each time.
-      if ((stypep%isCongruent) .and. (dtypep%isCongruent)) then
-
-          allocate(srcArrayList(stypep%field_count), stat=status)
-          allocate(dstArrayList(dtypep%field_count), stat=status)
-   
-          do i=1, stypep%field_count
-              srcArrayList(i) = stypep%flist(i)%ftypep%localfield%localdata
-          enddo
-    
-          do i=1, dtypep%field_count
-              dstArrayList(i) = dtypep%flist(i)%ftypep%localfield%localdata
-          enddo
-    
-          hasSrcData = ESMF_RegridHasData(stypep%grid, &
-                                          stypep%flist(1)%ftypep%mapping)
-          hasDstData = ESMF_RegridHasData(dtypep%grid, &
-                                          dtypep%flist(1)%ftypep%mapping)
-
-          ! TODO: do the datamaps have to go in as lists as well?
-          call ESMF_ArrayRegrid(srcArrayList, & 
-                                stypep%flist(1)%ftypep%mapping, hasSrcData, &
-                                dstArrayList, &
-                                dtypep%flist(1)%ftypep%mapping, hasDstData, &
-                                routehandle, 1, srcmask, dstmask, &
-                                blocking, commhandle, routeOptions, status)
+     
+      ! if the map was computed one per input, then call it here.
+      if (maptype .eq. ESMF_1TO1HANDLEMAP) then
+          ! make sure things match
+          call ESMF_RouteHandleGet(routehandle, route_count=rcount, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) then
-              deallocate(srcArrayList, dstArrayList, stat=status) 
+                                    ESMF_CONTEXT, rc)) return
+          if (rcount .ne. stypep%field_count) then
+              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                  "Bundles do not match Bundles used in BundleRegridStore", &
+                   ESMF_CONTEXT, rc)
               return
           endif
 
-          deallocate(srcArrayList, dstArrayList, stat=status) 
-      else
-        do i = 1, stypep%field_count
+          do i = 1, stypep%field_count
             hasSrcData = ESMF_RegridHasData(stypep%grid, &
                                           stypep%flist(i)%ftypep%mapping)
             hasDstData = ESMF_RegridHasData(dtypep%grid, &
@@ -1067,7 +1229,75 @@
             if (ESMF_LogMsgFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
-        enddo
+          enddo
+
+      else
+          ! a single route applies to all fields.  requires a pair of 
+          ! congruent bundles.
+          if (condition .eq. ESMF_BUNDLECOMM_NONCONGRUENT) then
+            ! problem.  routehandle thinks they are.
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                  "Bundles do not match Bundles used in BundleRegridStore()", &
+                   ESMF_CONTEXT, rc)
+            return
+          endif
+
+          if (bundlepack) then
+              ! bundle fields all the same, and routehandle ahs only 
+              ! one shared route in it.
+              allocate(srcArrayList(stypep%field_count), stat=status)
+              allocate(dstArrayList(dtypep%field_count), stat=status)
+       
+              do i=1, stypep%field_count
+                  srcArrayList(i) = stypep%flist(i)%ftypep%localfield%localdata
+              enddo
+        
+              do i=1, dtypep%field_count
+                  dstArrayList(i) = dtypep%flist(i)%ftypep%localfield%localdata
+              enddo
+        
+              hasSrcData = ESMF_RegridHasData(stypep%grid, &
+                                              stypep%flist(1)%ftypep%mapping)
+              hasDstData = ESMF_RegridHasData(dtypep%grid, &
+                                              dtypep%flist(1)%ftypep%mapping)
+    
+              ! TODO: do the datamaps have to go in as lists as well?
+              call ESMF_ArrayRegrid(srcArrayList, & 
+                                 stypep%flist(1)%ftypep%mapping, hasSrcData, &
+                                 dstArrayList, &
+                                 dtypep%flist(1)%ftypep%mapping, hasDstData, &
+                                 routehandle, 1, srcmask, dstmask, &
+                                 blocking, commhandle, routeOptions, status)
+              if (ESMF_LogMsgFoundError(status, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) then
+                  deallocate(srcArrayList, dstArrayList, stat=status) 
+                  return
+              endif
+    
+              deallocate(srcArrayList, dstArrayList, stat=status) 
+          else
+              ! multiple congruent fields, but a single route
+              do i = 1, stypep%field_count
+                hasSrcData = ESMF_RegridHasData(stypep%grid, &
+                                              stypep%flist(i)%ftypep%mapping)
+                hasDstData = ESMF_RegridHasData(dtypep%grid, &
+                                              dtypep%flist(i)%ftypep%mapping)
+
+                call ESMF_ArrayRegrid( &
+                                  stypep%flist(i)%ftypep%localfield%localdata, &
+                                  stypep%flist(i)%ftypep%mapping, hasSrcData, &
+                                  dtypep%flist(i)%ftypep%localfield%localdata, &
+                                  dtypep%flist(i)%ftypep%mapping, hasDstData, &
+                                  routehandle, 1, &
+                                  srcmask, dstmask, &
+                                  blocking, commhandle, routeOptions, status)
+                if (ESMF_LogMsgFoundError(status, &
+                                          ESMF_ERR_PASSTHRU, &
+                                          ESMF_CONTEXT, rc)) return
+              enddo
+        
+          endif
       endif
 
       ! Set return values.
@@ -1182,6 +1412,8 @@
       integer :: i
       type(ESMF_BundleType), pointer :: stypep, dtypep
       integer :: condition
+      logical :: bundlepack
+      integer :: bopt, bflag
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -1195,6 +1427,15 @@
      
       if (condition .eq. ESMF_BUNDLECOMM_NOMATCH) return
 
+      ! if specified, make sure routeoptions do not disable the
+      ! field-level packing option.
+      bundlepack = .true.
+      if (present(routeOptions)) then
+          bopt = routeOptions    ! turn into ints
+          bflag = ESMF_ROUTE_OPTION_PACK_BUFFER
+          if (iand(bopt, bflag) .eq. 0) bundlepack = .false.  ! bitwise and
+      endif
+
       dtypep => dstBundle%btypep
       stypep => srcBundle%btypep
 
@@ -1202,7 +1443,7 @@
       ! including relloc.  if that is not true, we have to compute different
       ! weights for each field. 
 
-      if (condition .eq. ESMF_BUNDLECOMM_CONGRUENT) then
+      if ((condition .eq. ESMF_BUNDLECOMM_CONGRUENT) .and. bundlepack) then
           call ESMF_ArrayRegridStore( &
                                  stypep%flist(1)%ftypep%localfield%localdata, &
                                  stypep%grid, &
