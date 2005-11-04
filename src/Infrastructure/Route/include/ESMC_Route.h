@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.57 2005/10/19 22:25:46 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.58 2005/11/04 22:11:32 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -112,15 +112,18 @@
                        int *global_start, int *global_count,
                        ESMC_DELayout *delayout,
                        ESMC_Logical *periodic = NULL);
-    int ESMC_RoutePrecomputeRedist(int rank, ESMC_Logical hasDstData, 
-                       int dstMyDE,
-                       ESMC_AxisIndex *dstCompAI, ESMC_AxisIndex *dstTotalAI,
-                       int dstAICount, int *dstGlobalStart, int *dstGlobalCount,
-                       ESMC_DELayout *dstdeLayout, 
-                       ESMC_Logical hasSrcData, int srcMyDE, 
-                       ESMC_AxisIndex *srcCompAI, ESMC_AxisIndex *srcTotalAI,
-                       int srcAICount, int *srcGlobalStart, int *srcGlobalCount,
-                       ESMC_DELayout *srcdeLayout);
+
+    int ESMC_RoutePrecomputeRedist(int rank, ESMC_Logical hasSrcData, 
+                                   ESMC_DELayout *srcDELayout,
+                                   int mySrcDE, int srcDECount,
+                                   ESMC_AxisIndex *srcGlobalCompAIperDEperRank,
+                                   ESMC_AxisIndex *mySrcGlobalTotalAIperRank,
+                                   ESMC_Logical  hasDstData,
+                                   ESMC_DELayout *dstDELayout,
+                                   int myDstDE, int dstDECount,
+                                   ESMC_AxisIndex *dstGlobalCompAIperDEperRank,
+                                   ESMC_AxisIndex *myDstGlobalTotalAIperRank);
+
     int ESMC_RoutePrecomputeRedistV(int rank, ESMC_Logical hasDstData, 
                        int dstMyDE, ESMC_Logical dstVector,
                        ESMC_AxisIndex *dstCompAI, ESMC_AxisIndex *dstTotalAI,
