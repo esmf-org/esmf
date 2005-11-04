@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.75 2005/11/04 22:12:32 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.76 2005/11/04 23:42:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,8 +76,10 @@
                                               ESMF_RouteOptions(16)
       type(ESMF_RouteOptions), parameter :: ESMF_ROUTE_OPTION_PACK_VECTOR = &
                                               ESMF_RouteOptions(32)
+      type(ESMF_RouteOptions), parameter :: ESMF_ROUTE_OPTION_PACK_BUFFER = &
+                                              ESMF_RouteOptions(64)
       type(ESMF_RouteOptions), parameter :: ESMF_ROUTE_OPTION_DEFAULT = &
-                                              ESMF_RouteOptions(1+8)
+                                              ESMF_RouteOptions(64+4+1)
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
@@ -85,7 +87,7 @@
       public ESMF_ROUTE_OPTION_ASYNC,       ESMF_ROUTE_OPTION_SYNC, &
              ESMF_ROUTE_OPTION_PACK_PET,    ESMF_ROUTE_OPTION_PACK_XP, &
              ESMF_ROUTE_OPTION_PACK_NOPACK, ESMF_ROUTE_OPTION_PACK_VECTOR, &
-             ESMF_ROUTE_OPTION_DEFAULT
+             ESMF_ROUTE_OPTION_PACK_BUFFER, ESMF_ROUTE_OPTION_DEFAULT
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -138,7 +140,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.75 2005/11/04 22:12:32 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.76 2005/11/04 23:42:02 nscollins Exp $'
 
 !==============================================================================
 !

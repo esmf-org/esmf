@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.143 2005/11/04 22:13:52 nscollins Exp $
+//$Id: ESMC_Route.C,v 1.144 2005/11/04 23:42:02 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.143 2005/11/04 22:13:52 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.144 2005/11/04 23:42:02 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -606,7 +606,7 @@
     vmk_commhandle **handle;
 
     // debug
-    // ESMC_RoutePrint("");
+    ESMC_RoutePrint();
 
     VMType = 0;   // TODO: unused so far, here for future use
     nbytes = ESMC_DataKindSize(dk);
@@ -1962,7 +1962,7 @@
       // free their_XP allocated in XPacketFromAxisIndex above.
       delete [] their_XP;
     }
-    //ESMC_RoutePrint("");
+    //ESMC_RoutePrint();
  
     // and delete the total my_XP
     delete [] my_XP;  
@@ -2169,7 +2169,7 @@
     }
 
     //printf("end of RoutePrecomputeRedist:\n");
-    //this->ESMC_RoutePrint("");
+    //this->ESMC_RoutePrint();
 
     return rc;
 
@@ -2669,7 +2669,7 @@
     }
 
     //printf("end of RoutePrecomputeRegrid:\n");
-    //this->ESMC_RoutePrint("");
+    //this->ESMC_RoutePrint();
 
     return rc;
 
@@ -2787,7 +2787,7 @@
       }
     }
  
-    //ESMC_RoutePrint("");
+    //ESMC_RoutePrint();
  
     return rc;
 
@@ -2873,21 +2873,37 @@
     sprintf(msgbuf,"Route print:\n");
     //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
+
     sprintf(msgbuf," Routeid = %d\n", routeid);
     //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
+
+    sprintf(msgbuf," Route Options = %d\n", this->options);
+    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    printf(msgbuf);
+
+    sprintf(msgbuf," Recv item count: %d\n", recvitems);
+    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    printf(msgbuf);
+
+    if (options == NULL) return ESMF_SUCCESS;
+
     // TODO: print something about the attached VM?
+    //sprintf(msgbuf," VM =\n");
+    ////ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //printf(msgbuf);
+    //vm->VMPrint("");
+
     sprintf(msgbuf," Send table:\n");
     //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
     rc = sendRT->ESMC_RTablePrint(options);
+
     sprintf(msgbuf," Recv table:\n");
     //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
     rc = recvRT->ESMC_RTablePrint(options);
-    sprintf(msgbuf," Recv items: %d\n", recvitems);
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-    printf(msgbuf);
+
     sprintf(msgbuf," Comm table:\n");
     //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);

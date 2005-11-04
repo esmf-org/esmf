@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.58 2005/11/04 22:11:32 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.59 2005/11/04 23:42:02 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -61,7 +61,8 @@
          ESMC_ROUTE_OPTION_PACK_XP     = 0x008,
          ESMC_ROUTE_OPTION_PACK_NOPACK = 0x010,
          ESMC_ROUTE_OPTION_PACK_VECTOR = 0x020,
-         ESMC_ROUTE_OPTION_DEFAULT     = 0x009,
+         ESMC_ROUTE_OPTION_PACK_BUFFER = 0x040,
+         ESMC_ROUTE_OPTION_DEFAULT     = 0x045,
  };
 
 // !PRIVATE TYPES:
