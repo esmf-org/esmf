@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.22 2005/05/31 17:39:48 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.23 2005/11/04 22:07:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
       public ESMF_ArrayGetAttributeInfo
 
       public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex  
-      public ESMF_ArrayComputeAxisIndex
+      !public ESMF_ArrayComputeAxisIndex
 
       public ESMF_ArrayWriteRestart
       public ESMF_ArrayReadRestart
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.22 2005/05/31 17:39:48 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.23 2005/11/04 22:07:05 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -2154,54 +2154,55 @@ end subroutine
         end subroutine ESMF_ArraySetAxisIndex
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayComputeAxisIndex"
-!BOPI
-! !IROUTINE: ESMF_ArrayComputeAxisIndex
+! obsolete.  nsc 03nov05
+!#undef  ESMF_METHOD
+!#define ESMF_METHOD "ESMF_ArrayComputeAxisIndex"
+!!BOPI
+!! !IROUTINE: ESMF_ArrayComputeAxisIndex
+!!
+!! !INTERFACE:
+!      subroutine ESMF_ArrayComputeAxisIndex(array, delayout, decompids, rc)
+!!
+!! !ARGUMENTS:
+!      type(ESMF_Array), intent(inout) :: array 
+!      type(ESMF_DELayout), intent(in) :: delayout
+!      integer, dimension(:), intent(in) :: decompids
+!      integer, intent(out), optional :: rc     
+!!
+!! !DESCRIPTION:
+!!      Used to annotate an {\tt ESMF\_Array} with information 
+!!      used to manage halo regions.
+!!           
+!!     The arguments are:
+!!     \begin{description}
+!!     \item [array]
+!!           An {\tt ESMF\_Array}.
+!!     \item [delayout]
+!!           The {\tt ESMF\_DELayout} over which this {\tt ESMF\_Array}
+!!           is decomposed.
+!!     \item [decompids]
+!!           An integer array, one index per dimension, identifying
+!!           which axes are decomposed and in which order.
+!!     \item [{[rc]}]
+!!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!!     \end{description}
+!!       
+!!
+!!EOPI
 !
-! !INTERFACE:
-      subroutine ESMF_ArrayComputeAxisIndex(array, delayout, decompids, rc)
+!        integer :: status
+!        integer :: dlength
 !
-! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: array 
-      type(ESMF_DELayout), intent(in) :: delayout
-      integer, dimension(:), intent(in) :: decompids
-      integer, intent(out), optional :: rc     
+!        ! call c routine to do work
+!        dlength = size(decompids)
+!   !     call c_ESMC_ArrayComputeAxisIndex(array, delayout, decompids, &
+!   !                                       dlength, status)
+!        status = ESMF_FAILURE
 !
-! !DESCRIPTION:
-!      Used to annotate an {\tt ESMF\_Array} with information 
-!      used to manage halo regions.
-!           
-!     The arguments are:
-!     \begin{description}
-!     \item [array]
-!           An {\tt ESMF\_Array}.
-!     \item [delayout]
-!           The {\tt ESMF\_DELayout} over which this {\tt ESMF\_Array}
-!           is decomposed.
-!     \item [decompids]
-!           An integer array, one index per dimension, identifying
-!           which axes are decomposed and in which order.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!       
+!        if (present(rc)) rc = status
 !
-!EOPI
-
-        integer :: status
-        integer :: dlength
-
-        ! call c routine to do work
-        dlength = size(decompids)
-   !     call c_ESMC_ArrayComputeAxisIndex(array, delayout, decompids, &
-   !                                       dlength, status)
-        status = ESMF_FAILURE
-
-        if (present(rc)) rc = status
-
-        end subroutine ESMF_ArrayComputeAxisIndex
-
+!        end subroutine ESMF_ArrayComputeAxisIndex
+!
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySet"
