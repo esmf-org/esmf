@@ -1,4 +1,4 @@
-! $Id: ESMF_Xform.F90,v 1.9 2005/05/31 17:40:03 nscollins Exp $
+! $Id: ESMF_Xform.F90,v 1.10 2005/11/04 21:01:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -79,7 +79,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Xform.F90,v 1.9 2005/05/31 17:40:03 nscollins Exp $'
+      '$Id: ESMF_Xform.F90,v 1.10 2005/11/04 21:01:49 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -291,15 +291,11 @@
 !
         type (ESMF_Xform) :: a 
 
-!       this is just to shut the compiler up
-        !type (ESMF_XformType), target :: b 
-        !a%xformp => b
-        !nullify(a%xformp)
-
 !
 ! TODO: add code here
 !
-
+        a%name = "undefined"
+	a%subrptr = ESMF_NULL_POINTER
         ESMF_XformReadRestart = a 
         if (present(rc)) rc = ESMF_FAILURE
  
