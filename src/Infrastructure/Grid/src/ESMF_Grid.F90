@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.223 2005/08/05 19:53:59 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.224 2005/11/04 21:51:54 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -92,6 +92,7 @@
     public ESMF_GridBoxIntersectSend
     public ESMF_GridComputeDistance
     public ESMF_GridGetAllAxisIndex
+    public ESMF_GridGetAIsAllDEs
     public ESMF_GridGetCellMask
     public ESMF_GridGetDELocalAI
     public ESMF_GridGlobalToDELocalAI
@@ -109,7 +110,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.223 2005/08/05 19:53:59 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.224 2005/11/04 21:51:54 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -5162,6 +5163,109 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetAllAxisIndex
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetAIsAllDEs"
+!BOPI
+! !IROUTINE: ESMF_GridGetAIsAllDEs - Get a Grid's AIs for all DEs
+
+! !INTERFACE:
+      subroutine ESMF_GridGetAIsAllDEs(grid, horzrelloc, localGlobalFlag, &
+                                       AIListPerDEPerRank, vertrelloc, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      type(ESMF_RelLoc), intent(in) :: horzrelloc
+      type(ESMF_LocalGlobalFlag), intent(in) :: localGlobalFlag
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AIListPerDEPerRank
+      type(ESMF_RelLoc), intent(in), optional :: vertrelloc
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get an {\tt ESMF\_DistGrid} attribute with the given value.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be queried.
+!     \item[horzrelloc]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
+!          grid.
+!     \item[localGlobalFlag]
+!          {\tt ESMF\_LocalGlobalFlag] identifier indicating whether the returned
+!          array of {\tt ESMF\_AxisIndex} types should be in local or global
+!          index space.
+!     \item[AIListPerDEPerRank]
+!          2D array of {\tt ESMF\_AxisIndex} types containing results.  If
+!          allocated, it must be of size (nDEs,gridrank).
+!     \item[{[vertrelloc]}]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
+!          grid.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:
+
+      integer :: localrc                          ! local error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Call GridGetAllAxisIndex routines based on GridStructure
+
+      select case(grid%ptr%gridStructure%gridStructure)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
+      case(0)
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                   "Unknown grid structure", &
+                                   ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT
+      case(1)
+        call ESMF_LRGridGetAIsAllDEs(grid, horzrelloc, localGlobalFlag, &
+                                     AIListPerDEPerRank, vertrelloc, localrc)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
+      case(2)
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                   "Grid structure Log Rect Block", &
+                                   ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
+      case(3)
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                   "Grid structure Unstructured", &
+                                   ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_USER
+      case(4)
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                   "Grid structure User", &
+                                   ESMF_CONTEXT, rc)) return
+
+      !-------------
+      case default
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                   "Invalid Grid structure", &
+                                   ESMF_CONTEXT, rc)) return
+      end select
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetAIsAllDEs
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
