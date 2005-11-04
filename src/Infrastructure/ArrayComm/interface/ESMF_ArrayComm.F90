@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.72 2005/10/12 19:06:15 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.73 2005/11/04 22:09:54 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.72 2005/10/12 19:06:15 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.73 2005/11/04 22:09:54 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -94,9 +94,6 @@
 ! !PRIVATE MEMBER FUNCTIONS:
           module procedure ESMF_ArrayHaloStoreOne
           module procedure ESMF_ArrayHaloStoreList
-#if 0
-          module procedure ESMF_ArrayHaloDeprecated
-#endif
 
 ! !DESCRIPTION:
 !     This interface provides both the revised entry point for
@@ -116,9 +113,6 @@
 ! !PRIVATE MEMBER FUNCTIONS:
           module procedure ESMF_ArrayHaloOne
           module procedure ESMF_ArrayHaloList
-#if 0
-          module procedure ESMF_ArrayHaloDeprecated
-#endif
 
 ! !DESCRIPTION:
 !     This interface provides both the revised entry point for
@@ -138,9 +132,6 @@
 ! !PRIVATE MEMBER FUNCTIONS:
           module procedure ESMF_ArrayRedistStoreOne
           module procedure ESMF_ArrayRedistStoreList
-#if 0
-          module procedure ESMF_ArrayRedistDeprecated
-#endif
 
 ! !DESCRIPTION:
 !     This interface provides both the revised entry point for
@@ -160,9 +151,6 @@
 ! !PRIVATE MEMBER FUNCTIONS:
           module procedure ESMF_ArrayRedistOne
           module procedure ESMF_ArrayRedistList
-#if 0
-          module procedure ESMF_ArrayRedistDeprecated
-#endif
 
 ! !DESCRIPTION:
 !     This interface provides both the revised entry point for
@@ -439,6 +427,228 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetAIsAllDEs"
+! TODO: the companion routine is ESMF_ArrayGetAIsMyDE
+!BOPI
+! !IROUTINE: ESMF_ArrayGetAIsAllDEs - Get AxisIndex list for all DEs in a distributed Array
+!
+! !INTERFACE:
+    subroutine ESMF_ArrayGetAIsAllDEs(array, grid, datamap, &
+                                      localGlobalFlag, domainTypeFlag, &
+                                      AIListPerDEPerRank, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array), intent(in) :: array
+    type(ESMF_Grid), intent(in) :: grid
+    type(ESMF_FieldDataMap), intent(in) :: datamap
+    type(ESMF_LocalGlobalFlag), intent(in) :: localGlobalFlag
+    type(ESMF_DomainTypeFlag), intent(in) :: domainTypeFlag
+    type(ESMF_AxisIndex), dimension(:,:), pointer :: AIListPerDEPerRank
+    integer, intent(out), optional :: rc
+! 
+! !DESCRIPTION:
+!   
+!   Used to retrieve the AxisIndex lists from all {\tt ESMF\_Array}s         
+!   associated with a {\tt ESMF\_Grid}.  
+!   The axes associated with the Grid need halo widths added to the numbers
+!   coming back from the GridGet routines; the axes which are non-grid
+!   associated need to get the sizes from the array itself, and must be
+!   the same across all DEs.  The DataMap is needed to query the mapping
+!   between the axes order in the array and the axes order in the Grid.
+!
+!   If the AIListPerDEPerRank is unallocated, this routine will query
+!   for the right sizes, allocate the space, and fill it in.  In that case
+!   the calling code *must* deallocate the space when done.  
+!
+!   If the AIListPerDEPerRank is already allocated, it must be (nDES, rank)
+!   where rank is the *datarank* from the array and not the grid rank.
+!
+!  The arguments are:
+!     \begin{description}
+!     \item [array]
+!           {\tt ESMF\_Array} containing data.  Needed here not for the data
+!           contents but to read the sizes of the non-grid indices and to
+!           look up the halo widths for the grid-based indices.
+!     \item [grid]
+!           {\tt ESMF\_Grid} which corresponds to the array data.
+!     \item [datamap]
+!           {\tt ESMF\_FieldDataMap} which describes the mapping of the
+!           data onto the cells in the {\tt ESMF\_Grid}.  Needed to match up
+!           the array axes and the grid axes.
+!     \item [localGlobalFlag]
+!           Return sizes and offsets either relative to this chunk (local)
+!           or relative to the entire undecomposed grid (global).
+!           Valid values are {\tt ESMF\_LOCAL} or {\tt ESMF\_GLOBAL}.
+!     \item [domainTypeFlag]
+!           Kind of counts you want back.  Valid values are:
+!           {\tt ESMF\_DOMAIN\_EXCLUSIVE}, 
+!           {\tt ESMF\_DOMAIN\_COMPUTATIONAL},
+!           {\tt ESMF\_DOMAIN\_TOTAL} or {\tt ESMF\_DOMAIN\_ALLOCATED}.
+!     \item [AIListPerDEPerRank]
+!           This is why you called this routine.  (Ok, there's more.)
+!           This must either be a 2d unallocated array or pointer of 
+!           {\tt ESMF\_AxisIndex} derived types, or an array of them which
+!           is *exactly* (nDEs, datarank) long.  This routine fills in these
+!           values.  Presto.  
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status, nDEs, nAIs, i, j
+      integer :: gridrank, datarank, maxrank
+      integer, dimension(:), allocatable :: dimOrder, countPerDim
+      type(ESMF_AxisIndex), dimension(:), pointer :: arrayindex
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: gridindex, globalindex
+      type(ESMF_DELayout) :: delayout
+      type(ESMF_GridStorage) :: gridStorage
+      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
+
+
+      ! TODO: new world order
+ 
+#if 0
+      get computational AIs from a new grid routine which takes global/local
+      flag.  this is (nDEs, gridrank) in size.  it's in grid order.
+  
+      get computational AIs from local data array.  this is local by definition
+      and is (datarank) long.   this is in data order.
+
+      combine grid AIs and array AIs, based on what's in the data map
+      dimOrder.  now we have AIs (nDEs, arrayrank).  
+
+      if the request was for computational domain, we're done now.
+  
+      if the request was for anything else, we have to query for the halo
+      widths.  they should come back (datarank, 2).  (see note 1).  
+      then we make a new AI modify routine which takes this halo array, 
+      plus a domain type, and either adds or subtracts to get the right
+      values.  (you cannot ask for allocate here because you can't.)  (see
+      note 2.)   the input here will be (nDEs, datarank) long, and this
+      new routine just computes over all of them.
+
+      now we're really done.
+
+note 1:
+      this may involve changing the array defn to
+      keep hwidth for MAXDIM by 2 instead of MAXGRIDDIM, and making sure
+      all the values are initialized (for now) to the same values.  later on
+      somehow the array may need to be told which axes have halos and which
+      are 0.  this one is in data order.
+
+note 2:
+      there is no way to know the allocate size for all nDEs in a
+      distributed array without a broadcast.
+
+#endif
+
+      ! TODO: old world order resumes
+
+      ! get layout from the grid in order to get the number of DEs
+      call ESMF_ArrayGet(array, rank=datarank, rc=status)
+      call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, &
+                        gridStorage=gridStorage, rc=status)
+      call ESMF_DELayoutGet(delayout, nDEs, rc=status)
+
+      ! allocate dimOrder array and get from datamap
+      maxrank = max(datarank, gridrank)
+      allocate(dimOrder(maxrank), stat=status)
+      call ESMF_FieldDataMapGet(datamap, dataIndexList=dimOrder, &
+                           horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                           rc=status)
+    
+      ! set the number of AIs based on the grid storage
+      nAIs = nDEs
+
+! allocate arrayindex array; get all types (excl, comp, total?) from the array
+      allocate(arrayindex(datarank), stat=status)
+      call ESMF_ArrayGetAxisIndex(array, arrayindex, rc=status)
+
+      ! TODO: in the new world, this GridGetAll routine needs a global/local
+      ! flag.  this needs an array of AIs which is (nDEs, gridrank) in size.
+
+      ! allocate gridindex array and get all of them from the grid
+      allocate(gridindex(nAIs,gridrank), stat=status)
+      call ESMF_GridGetAllAxisIndex(grid, gridindex, &
+                                    horzRelLoc=horzRelLoc, &
+                                    vertRelLoc=vertRelLoc, &
+                                    rc=status)
+
+#if 0
+     ! this is the combine
+      ! load globalindex with arrayindex and gridindex
+      allocate(globalindex(nAIs, maxrank), stat=status)
+      do i = 1,maxrank
+        if (dimOrder(i).eq.0) then
+          globalindex(:,i) = arrayindex(i)
+        else
+          globalindex(:,i) = gridindex(:,dimOrder(i))
+        endif
+      enddo
+
+
+       ! this is the modify
+        if (present(totalindex)) then
+          call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_TOTAL, &
+                                           globalindex, nAIs, datarank, &
+                                           totalindex, status)
+          if (status .ne. ESMF_SUCCESS) goto 10
+          ! translate from C++ to F90
+          do j=1,size(totalindex, 2)
+            do i=1, nDEs
+              totalindex(i,j)%min = totalindex(i,j)%min + 1
+              totalindex(i,j)%max = totalindex(i,j)%max + 1
+            enddo
+          enddo
+        endif
+
+        if (present(compindex)) then
+          call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
+                                           globalindex, nAIs, datarank, &
+                                           compindex, status)
+          if (status .ne. ESMF_SUCCESS) goto 10
+          ! translate from C++ to F90
+          do j=1,size(compindex, 2)
+            do i=1, nDEs
+              compindex(i,j)%min = compindex(i,j)%min + 1
+              compindex(i,j)%max = compindex(i,j)%max + 1
+            enddo
+          enddo
+        endif
+
+        if (present(exclindex)) then
+          call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_EXCLUSIVE, &
+                                           globalindex, nAIs, datarank, &
+                                           exclindex, status)
+          if (status .ne. ESMF_SUCCESS) goto 10
+          ! translate from C++ to F90
+          do j=1,size(exclindex, 2)
+            do i=1, nDEs
+              exclindex(i,j)%min = exclindex(i,j)%min + 1
+              exclindex(i,j)%max = exclindex(i,j)%max + 1
+            enddo
+          enddo
+        endif
+#endif
+
+      status = ESMF_SUCCESS
+
+ 10   continue
+
+      ! Clean up
+      deallocate(dimOrder,    stat=status)
+      deallocate(arrayindex,  stat=status)
+      deallocate(gridindex,   stat=status)
+      deallocate(globalindex, stat=status)
+
+      if (present(rc)) rc = status 
+
+      end subroutine ESMF_ArrayGetAIsAllDEs
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayGetAllAxisIndices"
 !BOPI
 ! !IROUTINE: ESMF_ArrayGetAllAxisIndices - Get all AIs associated with a Grid
@@ -457,14 +667,11 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: exclindex
       integer, dimension(:), pointer, optional :: AIcountPerDE
       integer, intent(out), optional :: rc
-! 
+!
 ! !DESCRIPTION:
-!   Used to retrieve the index annotations from all {\tt ESMF\_Array}s         
+!   Used to retrieve the index annotations from all {\tt ESMF\_Array}s
 !    associated with a {\tt ESMF\_Grid}.  This computes the values
 !    instead of broadcasting them.
-!
-! %TODO: add missing description section here
-!
 !EOPI
 
       integer :: status, nDEs, nAIs, i, j
@@ -601,58 +808,6 @@
       if (present(rc)) rc = status 
 
       end subroutine ESMF_ArrayGetAllAxisIndices
-
-!------------------------------------------------------------------------------
-#if 0
-!! try to compile without this code - if all our system tests compile,
-!! take this out.
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayHaloDeprecated"
-!BOPI
-! !IROUTINE: ESMF_ArrayHalo - Halo an Array
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_ArrayHalo()
-      subroutine ESMF_ArrayHaloDeprecated(array, delayout, &
-                                          AI_global, global_dimlens, &
-                                          decompids, periodic, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array) :: array
-      type(ESMF_DELayout) :: delayout
-      type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_global
-      integer, dimension(:), intent(in) :: global_dimlens
-      integer, dimension(:), intent(in) :: decompids
-      type(ESMF_Logical), dimension(:), intent(in) :: periodic
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used to halo an Array.
-!
-!  % OLD interface - replaced by ArrayHaloRun, but may still be used
-!  %  by some code or tests.  Verify (also with users) before removing.
-!
-!EOPI
-
-        integer :: status         ! local error status
-        integer :: size_decomp
-
-        ! initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        if (present(rc)) rc = ESMF_FAILURE
- 
-        ! call c routine to execute halo
-        size_decomp = size(decompids)
-        call c_ESMC_ArrayHalo(array, delayout, AI_global, global_dimlens, &
-                              decompids, size_decomp, periodic, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        ! logerr routine sets rc based on return from C call.
-
-        end subroutine ESMF_ArrayHaloDeprecated
-#endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1225,62 +1380,6 @@
       end subroutine ESMF_ArrayHaloStoreList
 
 !------------------------------------------------------------------------------
-!! same comment as above halo.
-#if 0
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedistDeprecated"
-!BOPI
-! !IROUTINE: ESMF_ArrayRedist - Redistribute an Array
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_ArrayRedist()
-      subroutine ESMF_ArrayRedistDeprecated(array, delayout, globalStart, &
-                                  global_dimlengths, rank_trans, olddecompids, &
-                                  decompids, redistarray, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array) :: array
-      type(ESMF_DELayout) :: delayout
-      integer, dimension(:), intent(in) :: globalStart
-      integer, dimension(:), intent(in) :: global_dimlengths
-      integer, dimension(:), intent(in) :: rank_trans
-      integer, dimension(:), intent(in) :: olddecompids
-      integer, dimension(:), intent(in) :: decompids
-      type(ESMF_Array), intent(in) :: redistarray
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used to redistribute an Array.
-!
-!  % TODO: verify that all calls to this version have been removed
-!  % and are not being used by user code, and remove this routine.
-!
-!EOPI
-
-        integer :: status         ! local error status
-        integer :: size_rank_trans
-        integer :: size_decomp
-
-        ! initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
-
-        ! call c routine to query index
-        size_rank_trans = size(rank_trans)
-        size_decomp = size(decompids)
-        call c_ESMC_ArrayRedist(array, delayout, globalStart, global_dimlengths, &
-                                rank_trans, size_rank_trans, olddecompids, &
-                                decompids, size_decomp, redistarray, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        ! set return code if user specified it
-        if (present(rc)) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArrayRedistDeprecated
-#endif
-
-!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayRedistList"
 !BOP
@@ -1733,6 +1832,352 @@
 
       integer :: status         ! local error status
       integer :: dstAICount, srcAICount
+      integer :: dstDEs, srcDEs, myDstDE, MySrcDE
+      integer :: srcCount, dstCount
+      integer :: gridrank, datarank
+      integer, dimension(ESMF_MAXDIM) :: dstDimOrder, srcDimOrder, dimlengths
+      integer, dimension(:), allocatable :: dstCellCountPerDim, decompids, &
+                                            srcCellCountPerDim
+      integer, dimension(:), pointer :: dstAICountPerDE, srcAICountPerDE
+      integer, dimension(:,:), allocatable :: dstStartPerDEPerDim, &
+                                              srcStartPerDEPerDim
+      type(ESMF_AxisIndex), dimension(:), pointer :: &
+		mySrcGlobalTotalAIperRank, myDstGlobalTotalAIperRank
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: &
+		srcGlobalCompAIperDEperRank, dstGlobalCompAIperDEperRank
+      type(ESMF_DELayout) :: dstDElayout, srcDElayout
+      type(ESMF_GridStorage) :: dstStorage, srcStorage
+      type(ESMF_Logical) :: hasSrcData, hasDstData
+      type(ESMF_RelLoc) :: dstHorzRelLoc, srcHorzRelLoc, &
+                           dstVertRelLoc, srcVertRelLoc
+      type(ESMF_Route) :: route
+
+      ! initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! start with a very clean slate...
+      nullify(dstAICountPerDE)
+      nullify(srcAICountPerDE)
+      nullify(mySrcGlobalTotalAIperRank)
+      nullify(myDstGlobalTotalAIperRank)
+      nullify(srcGlobalCompAIperDEperRank)
+      nullify(dstGlobalCompAIperDEperRank)
+
+      ! create the routehandle if this is the first route.  otherwise
+      ! we are adding a route to an existing handle and we do not want
+      ! to overwrite it.
+      if (index .eq. 1) then
+          routehandle = ESMF_RouteHandleCreate(status)
+          ! set the type and mapping
+          call ESMF_RouteHandleSet(routehandle, htype=ESMF_REDISTHANDLE, &
+                                   route_count=maxindex, rmaptype=rmaptype, &
+                                   tv_count=0, tvmaptype=ESMF_NOHANDLEMAP, &
+                                   rc=status)
+      endif
+    
+
+      ! Query the datamap and set info for grid so it knows how to
+      ! match up the array indices and the grid indices.
+      call ESMF_FieldDataMapGet(dstDataMap, horzRelLoc=dstHorzRelLoc, &
+                                vertRelLoc=dstVertRelLoc, &
+                                dataIndexList=dstDimOrder, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_FieldDataMapGet(srcDataMap, horzRelLoc=srcHorzRelLoc, &
+                                vertRelLoc=srcVertRelLoc, &
+                                dataIndexList=srcDimOrder, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! TODO: move storage to the GridGet that does not require RelLocs
+
+      ! Extract information from the Grids
+      call ESMF_GridGet(dstGrid, delayout=dstDElayout, &
+                        gridStorage=dstStorage, &
+                        horzRelLoc=dstHorzRelLoc, vertRelLoc=dstVertRelLoc, &
+                        rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_GridGetDELocalInfo(dstGrid, &
+                        horzRelLoc=dstHorzRelLoc, vertRelLoc=dstVertRelLoc, &
+                        localCellCount=dstCount, &
+                        rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_GridGet(srcGrid, delayout=srcDElayout, &
+                        gridStorage=srcStorage, dimCount=gridrank, &
+                        horzRelLoc=srcHorzRelLoc, vertRelLoc=srcVertRelLoc, &
+                        rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_GridGetDELocalInfo(srcGrid, &
+                        horzRelLoc=srcHorzRelLoc, vertRelLoc=srcVertRelLoc, &
+                        localCellCount=srcCount, &
+                        rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (dstCount .gt. 0) then
+          hasDstData = ESMF_TRUE
+      else
+          hasDstData = ESMF_FALSE
+      endif
+      if (srcCount .gt. 0) then
+          hasSrcData = ESMF_TRUE
+      else
+          hasSrcData = ESMF_FALSE
+      endif
+
+      ! TODO: if I don't have any data then return here 
+
+      ! for now, branch out if arbitrary storage
+      if (dstStorage.eq.ESMF_GRID_STORAGE_ARBITRARY .OR. &
+          srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
+        call ESMF_ArrayRedistStoreListArb(srcArray, srcGrid, srcDataMap, &
+                                          dstArray, dstGrid, dstDataMap, &
+                                          index, rmaptype, maxindex, &
+                                          parentVM, routeOptions, &
+                                          routehandle, rc)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        return
+      endif
+
+      ! Our DE number in the layout and the total number of DEs
+      call ESMF_DELayoutGet(dstDElayout, deCount=dstDEs,  &
+                            localDE=myDstDE, rc=status)
+      call ESMF_DELayoutGet(srcDElayout, deCount=srcDEs, &
+                            localDE=mySrcDE, rc=status)
+
+      ! TODO: error check/validation code needs to be added here.
+      ! these things must be true (or equal):
+      !  grid ranks equal
+      !  data ranks equal
+      !  computational global grid sizes equal
+      !  (halo sizes should *not* need to match anymore)
+      !  non-grid axes lengths must match
+      !  (should we call validate on the objects?)
+      !
+
+      ! Allocate temporary arrays
+      allocate(srcGlobalCompAIperDEperRank(srcDEs, datarank), &
+               dstGlobalCompAIperDEperRank(dstDEs, datarank), stat=status)
+      allocate(mySrcGlobalTotalAIperRank(datarank), &
+               myDstGlobalTotalAIperRank(datarank), stat=status)
+
+
+      ! get more grid information
+      !call ESMF_GridGet(dstGrid, &
+      !                  horzRelLoc=dstHorzRelLoc, vertRelLoc=dstVertRelLoc, &
+      !                  globalCellCountPerDim=dstCellCountPerDim, &
+      !                  globalStartPerDEPerDim=dstStartPerDEPerDim, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      !call ESMF_GridGet(srcGrid, &
+      !                  horzRelLoc=srcHorzRelLoc, vertRelLoc=srcVertRelLoc, &
+      !                  globalCellCountPerDim=srcCellCountPerDim, &
+      !                  globalStartPerDEPerDim=srcStartPerDEPerDim, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! And get the Array sizes
+      call ESMF_ArrayGet(srcArray, rank=datarank, counts=dimlengths, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! TODO: apply dimorder and decompids to get mapping of array to data
+
+      ! set up things we need to precompute a route
+      !call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+      !                                 compindex =dstCLocalAI, &
+      !                                 totalindex=dstTLocalAI, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! translate AI's into global numbering
+      !call ESMF_GridDELocalToGlobalAI(dstGrid, &
+      !                                horzRelLoc=dstHorzRelLoc, &
+      !                                vertRelLoc=dstVertRelLoc, &
+      !                                localAI2D=dstCLocalAI, &
+      !                                globalAI2D=dstCompAI, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      !call ESMF_GridDELocalToGlobalAI(dstGrid, &
+      !                                horzRelLoc=dstHorzRelLoc, &
+      !                                vertRelLoc=dstVertRelLoc, &
+      !                                localAI2D=dstTLocalAI, &
+      !                                globalAI2D=dstTotalAI, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! now the source grid
+      !call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+      !                                 compindex =srcCLocalAI, &
+      !                                 totalindex=srcTLocalAI, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      !call ESMF_GridDELocalToGlobalAI(srcGrid, &
+      !                                horzRelLoc=srcHorzRelLoc, &
+      !                                vertRelLoc=srcVertRelLoc, &
+      !                                localAI2D=srcCLocalAI, &
+      !                                globalAI2D=srcCompAI, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      !call ESMF_GridDELocalToGlobalAI(srcGrid, &
+      !                                horzRelLoc=srcHorzRelLoc, &
+      !                                vertRelLoc=srcVertRelLoc, &
+      !                                localAI2D=srcTLocalAI, &
+      !                                globalAI2D=srcTotalAI, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! Create the route object.
+      route = ESMF_RouteCreate(parentVM, rc)
+
+      call ESMF_RoutePrecomputeRedist(route, datarank, &
+                                      hasSrcData, srcDELayout, mySrcDE, &
+                                      srcGlobalCompAIperDEperRank, &
+                                      mySrcGlobalTotalAIperRank, &
+                                      hasDstData, dstDELayout, myDstDE, &
+                                      dstGlobalCompAIperDEperRank, &
+                                      myDstGlobalTotalAIperRank, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! Set the route options if given.
+      if (present(routeOptions)) then
+          call c_ESMC_RouteSet(route, routeOptions, status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      endif
+
+      ! and set route into routehandle object
+      call ESMF_RouteHandleSet(routehandle,  which_route=index, route=route, &
+                               rc=status)
+
+      ! get rid of temporary arrays
+      if (associated(mySrcGlobalTotalAIperRank)) &
+                          deallocate(mySrcGlobalTotalAIperRank, stat=status)
+      if (associated(myDstGlobalTotalAIperRank)) &
+                          deallocate(myDstGlobalTotalAIperRank, stat=status)
+      if (associated(srcGlobalCompAIperDEperRank)) &
+                          deallocate(srcGlobalCompAIperDEperRank, stat=status)
+      if (associated(dstGlobalCompAIperDEperRank)) &
+                          deallocate(dstGlobalCompAIperDEperRank, stat=status)
+
+      ! set return code if user specified it
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayRedistStoreList
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedistStoreListArb"
+!BOPI
+! !IROUTINE: ESMF_ArrayRedistStoreListArb - Store resources for a redist operation
+!
+! !INTERFACE:
+      ! internal use only; called by Bundle code for multi-fields
+      subroutine ESMF_ArrayRedistStoreListArb(srcArray, srcGrid, srcDataMap, &
+                                       dstArray, dstGrid, dstDataMap, &
+                                       index, rmaptype, maxindex, &
+                                       parentVM, routeOptions, routehandle, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(in) :: srcArray
+      type(ESMF_Grid), intent(in) :: srcGrid
+      type(ESMF_FieldDataMap), intent(in) :: srcDataMap
+      type(ESMF_Array), intent(inout) :: dstArray
+      type(ESMF_Grid), intent(in) :: dstGrid
+      type(ESMF_FieldDataMap), intent(in) :: dstDataMap
+      integer, intent(in) :: index
+      integer, intent(in) :: rmaptype
+      integer, intent(in) :: maxindex
+      type(ESMF_VM), intent(in) :: parentVM
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!  Precompute and associate the required data movements to redistribute
+!  data over one set of {\tt ESMF\_Array}s to another
+!  set of {\tt ESMF\_Array}s.  Data redistribution does no interpolation,
+!  so both {\tt ESMF\_Grid}s must have identical coordinates.
+!  The distribution of the {\tt ESMF\_Grid}s can be over different
+!  {\tt ESMF\_DELayout}s, or the {\tt ESMF\_FieldDataMap}s can differ.
+!  The {\tt routehandle} argument is associated with the stored information
+!  and must be supplied to {\tt ESMF\_ArrayRedist()} to execute the
+!  operation.  Call {\tt ESMF\_ArrayRedistRelease()} when this information
+!  is no longer required.
+!
+!  The arguments are:
+!   \begin{description}
+!   \item[srcArray]
+!    {\tt ESMF\_Array} containing the data source.
+!   \item[srcGrid]
+!    {\tt ESMF\_Grid} describing the grid on which the source data is arranged.
+!   \item[srcDataMap]
+!    {\tt ESMF\_FieldDataMap} describing how the source data maps onto the grid.
+!   \item[dstArray]
+!    {\tt ESMF\_Array} where the destination data will be put.
+!   \item[dstGrid]
+!    {\tt ESMF\_Grid} describing the grid on which the destination data is 
+!    arranged.
+!   \item[dstDataMap]
+!    {\tt ESMF\_FieldDataMap} describing how the destination data maps 
+!    onto the grid.
+!     \item [index]
+!           Integer specifying which route number this is to be inside
+!           the {\tt routehandle}.  Route handles for bundles can contain
+!           either a single route which applies to all fields in the bundle,
+!           or multiple routes which correspond to the differences in
+!           data motion for different array sizes, ranks, relative locations,
+!           data types, etc.  Since this is Fortran, index 1 is the first
+!           route number.
+!     \item [rmaptype]
+!           Integer parameter value used if the index number is 1.
+!           Controls whether the route handle will contain a separate route
+!           for each index, or if all indices map to the same route.
+!     \item [maxindex]
+!           If {\tt index} is 1, set the maximum number of routes which
+!           will eventually be set.  If not known, use 1.  The list of
+!           routes can be reallocated and expanded later.
+!   \item[parentVM]
+!    {\tt ESMF\_VM} object which includes all PETs in both the
+!    source and destination grids.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to execute the
+!           See Section~\ref{opt:routeopt} for possible values.
+!   \item [routehandle]
+!    Returned {\tt ESMF\_RouteHandle} which identifies this 
+!    communication pattern.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+      integer :: status         ! local error status
+      integer :: dstAICount, srcAICount
       integer :: dstDEs, srcDEs, dstMyDE, srcMyDE
       integer :: srcCount, dstCount
       integer :: gridrank, datarank
@@ -1757,6 +2202,8 @@
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! TODO: query to get storage type and if vector, branch out.
 
       ! start with a very clean slate...
       nullify(dstAICountPerDE)
@@ -1845,6 +2292,16 @@
           hasSrcData = ESMF_FALSE
       endif
  
+      ! TODO: error check/validation code needs to be added here.
+      ! these things must be true (or equal):
+      !  grid ranks equal
+      !  data ranks equal
+      !  computational global grid sizes equal
+      !  (halo sizes should *not* need to match anymore)
+      !  non-grid axes lengths must match
+      !  (should we call validate on the objects?)
+      !
+
       ! Allocate temporary arrays
       dstVector = .false.
       srcVector = .false.
@@ -1998,31 +2455,18 @@
       ! Create the route object.
       route = ESMF_RouteCreate(parentVM, rc)
 
-      if (dstVector .OR. srcVector) then
-        call ESMF_RoutePrecomputeRedistV(route, datarank, hasDstData, &
-                                         dstMyDE, dstVector, &
-                                         dstCompAI, dstTotalAI, &
-                                         dstAICountPerDE, dstStartPerDEPerDim, &
-                                         dstCellCountPerDim, dstDElayout, &
-                                         hasSrcData, srcMyDE, srcVector, &
-                                         srcCompAI, srcTotalAI, &
-                                         srcAICountPerDE, srcStartPerDEPerDim, &
-                                         srcCellCountPerDim, srcDElayout, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-      else
-        call ESMF_RoutePrecomputeRedist(route, datarank, hasDstData, &
-                                        dstMyDE, dstCompAI, &
-                                        dstTotalAI, dstStartPerDEPerDim, &
-                                        dstCellCountPerDim, dstDElayout, &
-                                        hasSrcData, srcMyDE, srcCompAI, &
-                                        srcTotalAI, srcStartPerDEPerDim, &
-                                        srcCellCountPerDim, srcDElayout, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-      endif
+      call ESMF_RoutePrecomputeRedistV(route, datarank, hasDstData, &
+                                       dstMyDE, dstVector, &
+                                       dstCompAI, dstTotalAI, &
+                                       dstAICountPerDE, dstStartPerDEPerDim, &
+                                       dstCellCountPerDim, dstDElayout, &
+                                       hasSrcData, srcMyDE, srcVector, &
+                                       srcCompAI, srcTotalAI, &
+                                       srcAICountPerDE, srcStartPerDEPerDim, &
+                                       srcCellCountPerDim, srcDElayout, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Set the route options if given.
       if (present(routeOptions)) then
@@ -2057,7 +2501,7 @@
       ! set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_ArrayRedistStoreList
+      end subroutine ESMF_ArrayRedistStoreListArb
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
