@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.35 2005/07/08 21:06:03 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.36 2005/11/04 22:06:04 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -131,6 +131,16 @@ extern "C" {
          *status = (*ptr)->ESMC_ArrayGetHWidth(hwidth);
      }
 
+     void FTN(c_esmc_arraygethwidthlist)(ESMC_Array **ptr, int *hwidth, int *status) {
+      
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
+
+         *status = (*ptr)->ESMC_ArrayGetHWidthList(hwidth);
+     }
+
      void FTN(c_esmc_arraygetrank)(ESMC_Array **ptr, int *rank, int *status) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
@@ -222,6 +232,7 @@ extern "C" {
           *status = (*ptr)->ESMC_ArrayGetAxisIndex(*dt, ai);
      }
 
+// obsolete when arbitrary distribution stops needing this.  nsc 03nov05
      void FTN(c_esmc_arraygetallaxisindices)(ESMC_Array **ptr, 
                                      ESMC_AxisIndex *global, int *nDEs,
                                      int *rank, ESMC_AxisIndex *total,
