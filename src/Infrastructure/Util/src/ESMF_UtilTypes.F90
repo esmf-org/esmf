@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.6 2005/10/05 19:50:01 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.7 2005/11/04 22:18:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -279,6 +279,57 @@
       end type
 
 !------------------------------------------------------------------------------
+!
+      ! For logically rectangular gridded data, are the index numbers being
+      ! computed/retrieved/exchanged relative to an origin of (0,0) on our
+      ! local chunk (local), or are they global index numbers relative to 
+      ! all index numbers across the entire grid (global!). 
+      type ESMF_LocalGlobalFlag
+      sequence
+          integer :: value
+      end type
+   
+      type(ESMF_LocalGlobalFlag), parameter :: &
+                                    ESMF_LOCAL  = ESMF_LocalGlobalFlag(1), &
+                                    ESMF_GLOBAL = ESMF_LocalGlobalFlag(2)
+
+!------------------------------------------------------------------------------
+!
+      ! Once a large grid of data is decomposed into various local chunks
+      ! there are several different "item counts" or "domains" of interest.  
+      ! They include:
+      !
+      ! exclusive - cells which are far enough inside the local chunks that
+      !  their values are never sent to other chunks as part of a halo update.
+      !
+      ! computational - cells which are the responsibility of the local 
+      !  processor to update.
+      !
+      ! total - computational plus the halo region; all cells which can be
+      !  read by the local processor.
+      !
+      ! allocated - total plus cells which are never read or written, but 
+      !  may be allocated to ensure memory address alignment or even memory 
+      !  block allocations even when the number of cells differs per chunk.
+      !
+      ! (TODO: allocated is not currently supported but has been requested.)
+      !
+      ! (See the ESMF Reference Manual Glossary if you want the precise
+      !  definitions of what these are.  This is not the official blessed
+      !  legal guide...)
+      !
+      type ESMF_DomainTypeFlag
+      sequence
+          integer :: value
+      end type
+   
+      type(ESMF_DomainTypeFlag), parameter :: &
+                        ESMF_DOMAIN_EXCLUSIVE     = ESMF_DomainTypeFlag(1), &
+                        ESMF_DOMAIN_COMPUTATIONAL = ESMF_DomainTypeFlag(2), &
+                        ESMF_DOMAIN_TOTAL         = ESMF_DomainTypeFlag(3), &
+                        ESMF_DOMAIN_ALLOCATED     = ESMF_DomainTypeFlag(4)
+
+!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
 !     ! Typed true/false values which are not compiler dependent, so that
@@ -422,10 +473,14 @@
       public ESMF_ID_REGRID, ESMF_ID_TRANSFORM, ESMF_ID_STATE
       public ESMF_ID_GRIDCOMPONENT, ESMF_ID_CPLCOMPONENT, ESMF_ID_COMPONENT
 
+      public ESMF_DOMAIN_EXCLUSIVE, ESMF_DOMAIN_COMPUTATIONAL
+      public ESMF_DOMAIN_TOTAL, ESMF_DOMAIN_ALLOCATED
+
       public ESMF_Status, ESMF_Pointer, ESMF_DataType, ESMF_DataKind
       public ESMF_DataValue
       public ESMF_Domain, ESMF_DomainList
       public ESMF_AxisIndex
+      public ESMF_LocalGlobalFlag, ESMF_DomainTypeFlag
 
       public ESMF_PointerPrint
       
@@ -450,6 +505,8 @@ interface operator (.eq.)
  module procedure ESMF_ctfeq
  module procedure ESMF_tnfeq
  module procedure ESMF_freq
+ module procedure ESMF_lgeq
+ module procedure ESMF_dmeq
 end interface
 
 interface operator (.ne.)
@@ -463,6 +520,8 @@ interface operator (.ne.)
  module procedure ESMF_ctfne
  module procedure ESMF_tnfne
  module procedure ESMF_frne
+ module procedure ESMF_lgne
+ module procedure ESMF_dmne
 end interface
 
 interface assignment (=)
@@ -698,6 +757,41 @@ function ESMF_frne(fr1, fr2)
  ESMF_frne = (fr1%value .ne. fr2%value)
 end function
 
+!------------------------------------------------------------------------------
+! function to compare two ESMF_LocalGlobalFlag types
+
+function ESMF_lgeq(lg1, lg2)
+ logical ESMF_lgeq
+ type(ESMF_LocalGlobalFlag), intent(in) :: lg1, lg2
+
+ ESMF_lgeq = (lg1%value .eq. lg2%value)
+end function
+
+function ESMF_lgne(lg1, lg2)
+ logical ESMF_lgne
+ type(ESMF_LocalGlobalFlag), intent(in) :: lg1, lg2
+
+ ESMF_lgne = (lg1%value .ne. lg2%value)
+end function
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_DomainTypeFlag types
+
+function ESMF_dmeq(dm1, dm2)
+ logical ESMF_dmeq
+ type(ESMF_DomainTypeFlag), intent(in) :: dm1, dm2
+
+ ESMF_dmeq = (dm1%value .eq. dm2%value)
+end function
+
+function ESMF_dmne(dm1, dm2)
+ logical ESMF_dmne
+ type(ESMF_DomainTypeFlag), intent(in) :: dm1, dm2
+
+ ESMF_dmne = (dm1%value .ne. dm2%value)
+end function
+
+!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 ! subroutine to print the corresponding C pointer of ESMF_Pointer object
 
