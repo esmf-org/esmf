@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.40 2004/12/07 17:14:11 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.41 2005/11/04 22:08:39 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.40 2004/12/07 17:14:11 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.41 2005/11/04 22:08:39 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -361,50 +361,67 @@
 // !REQUIREMENTS:  
     int i, status;
     ESMC_Array *aptr;
-    int total_stride, comp_stride, excl_stride;
+    int alloc_stride;
 
     rank = irank;
     type = dt;
     kind = dk;
 
     base_addr = base;
-    total_stride = 1;
-    comp_stride = 1;
-    excl_stride = 1;
+    alloc_stride = 1;
     for (i=0; i<rank; i++) {
         counts[i]   = icounts ? icounts[i] : 1;        
         lbound[i]   = lbounds ? lbounds[i] : 1;
         ubound[i]   = ubounds ? ubounds[i] : counts[i];
-        bytestride[i] = 1;
         offset[i]    = offsets ? offsets[i] : 0;
+        bytestride[i] = alloc_stride;
+        alloc_stride *= counts[i];
 
-        if (halo_width == 0) {
-            total_stride *= counts[i];
-            ESMC_AxisIndexSet(ai_total+i, 0, counts[i]-1, total_stride);
-            ESMC_AxisIndexSet(ai_comp+i, 0, counts[i]-1, total_stride);
-            ESMC_AxisIndexSet(ai_excl+i, 0, counts[i]-1, total_stride);
-            hwidth[0][0] = 0;
-        } else {
-            total_stride *= counts[i];
-            comp_stride *= counts[i] - 2*halo_width;
-            excl_stride *= counts[i] - 4*halo_width;
-            ESMC_AxisIndexSet(ai_total+i, 0, counts[i]-1, total_stride);
-            ESMC_AxisIndexSet(ai_comp+i, halo_width, counts[i]-halo_width-1,
-                              comp_stride);
-            ESMC_AxisIndexSet(ai_excl+i, halo_width*2, 
-                              counts[i]-2*halo_width-1, excl_stride);
-            hwidth[0][0] = halo_width;
-        }
+        // TODO: the allocation space has no interfaces to set it yet,
+        // and no code knows about it.  but it has been requested by users.
+        // for now set it to 0 so alloc == total always, and slowly start 
+        // adding support for it.
+        awidth[i][0] = 0;
+        awidth[i][1] = 0;
+
+        // TODO: this needs a way to say either which axes are associated
+        // with the grid, since those are the only ones which need halo space,
+        // or require halo widths come in for all data axes and they have
+        // already been adjusted to match which are grid and non-grid axes.
+        hwidth[i][0] = halo_width;
+        hwidth[i][1] = halo_width;
+  
+        // there is an important change here.   the origin, both for local
+        // and for global, is now the min of the computational area.  if there
+        // are halo widths, those will be negative on the lower side, above
+        // counts on the upper side.  if there are allocation widths, those 
+        // min and maxs will be even more negative and positive.
+
+        ESMC_AxisIndexSet(ai_alloc+i, -awidth[i][0]-hwidth[i][0], 
+                          counts[i]+hwidth[i][1]+awidth[i][1]-1);
+
+        ESMC_AxisIndexSet(ai_total+i, -hwidth[i][0], counts[i]+hwidth[i][1]-1);
+
+        ESMC_AxisIndexSet(ai_comp+i, 0, counts[i]-1);
+
+        ESMC_AxisIndexSet(ai_excl+i, hwidth[i][0], counts[i]-hwidth[i][1]-1);
     }
+
+    // fill out rest of space to null values.
     for (i=rank; i<ESMF_MAXDIM; i++) {
-        counts[i]     = 1;
+        counts[i] = 1;
         lbound[i] = 1;
         ubound[i] = 1;
-        bytestride[i] = 1;
-        offset[i]     = 0;
-        ESMC_AxisIndexSet(ai_total+i, 0, 0, 1);
-        ESMC_AxisIndexSet(ai_comp+i, 0, 0, 1);
-        ESMC_AxisIndexSet(ai_excl+i, 0, 0, 1);
+        offset[i] = 0;
+        bytestride[i] = alloc_stride;
+        awidth[i][0] = 0;
+        awidth[i][1] = 0;
+        hwidth[i][0] = 0;
+        hwidth[i][1] = 0;
+        ESMC_AxisIndexSet(ai_alloc+i, 0, 0);
+        ESMC_AxisIndexSet(ai_total+i, 0, 0);
+        ESMC_AxisIndexSet(ai_comp+i, 0, 0);
+        ESMC_AxisIndexSet(ai_excl+i, 0, 0);
     }
 
     origin = oflag;
@@ -569,8 +586,12 @@
 
     int i, rank = this->rank;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
-    int total_stride, comp_stride, excl_stride;
+    int alloc_stride;
   
+    // TODO: there is one compiler; linux, maybe intel maybe g95, which
+    // seems to have different sizes for even and odd ranks.  this code
+    // cannot handle this strangeness without more code.
+
     // note - starts at 1; base includes rank 1 size
     for (i=1; i<rank; i++)
 	bytes += ESMF_F90_PTR_PLUS_RANK;
@@ -581,43 +602,62 @@
     memcpy((void *)(&this->f90dopev), (void *)fptr, bytes);
 
     base_addr = base;
-    total_stride = 1;
-    comp_stride = 1;
-    excl_stride = 1;
+    alloc_stride = 1;
     for (i=0; i<rank; i++) {
-        counts[i]     = icounts ? icounts[i] : 0;
-        offset[i]     = offsets ? offsets[i] : 0;
-        bytestride[i] = 0;
+        counts[i] = icounts ? icounts[i] : 0;
+        offset[i] = offsets ? offsets[i] : 0;
         lbound[i] = lbounds ? lbounds[i] : 1;
         ubound[i] = ubounds ? ubounds[i] : counts[i];
-        if (halo_width == 0) {
-            total_stride *= counts[i];
-            ESMC_AxisIndexSet(ai_total+i, 0, counts[i]-1, total_stride);
-            ESMC_AxisIndexSet(ai_comp+i, 0, counts[i]-1, total_stride);
-            ESMC_AxisIndexSet(ai_excl+i, 0, counts[i]-1, total_stride);
-            hwidth[0][0] = 0;
-        } else {
-            total_stride *= counts[i];
-            comp_stride *= counts[i] - 2*halo_width;
-            excl_stride *= counts[i] - 4*halo_width;
-            ESMC_AxisIndexSet(ai_total+i, 0, counts[i]-1, total_stride);
-            ESMC_AxisIndexSet(ai_comp+i, halo_width, counts[i]-halo_width-1,
-                              comp_stride);
-            ESMC_AxisIndexSet(ai_excl+i, halo_width*2, 
-                              counts[i]-2*halo_width-1, excl_stride);
-            hwidth[0][0] = halo_width;
-        }
+        bytestride[i] = alloc_stride;
+        alloc_stride *= counts[i];
+
+        // TODO: the allocation space has no interfaces to set it yet,
+        // and no code knows about it.  but it has been requested by users.
+        // for now set it to 0 so alloc == total always, and slowly start 
+        // adding support for it.
+        awidth[i][0] = 0;
+        awidth[i][1] = 0;
+
+        // TODO: this needs a way to say either which axes are associated
+        // with the grid, since those are the only ones which need halo space,
+        // or require halo widths come in for all data axes and they have
+        // already been adjusted to match which are grid and non-grid axes.
+        hwidth[i][0] = halo_width;
+        hwidth[i][1] = halo_width;
+  
+        // there is an important change here.   the origin, both for local
+        // and for global, is now the min of the computational area.  if there
+        // are halo widths, those will be negative on the lower side, above
+        // counts on the upper side.  if there are allocation widths, those 
+        // min and maxs will be even more negative and positive.
+
+        ESMC_AxisIndexSet(ai_alloc+i, -awidth[i][0]-hwidth[i][0], 
+                          counts[i]+hwidth[i][1]+awidth[i][1]-1);
+
+        ESMC_AxisIndexSet(ai_total+i, -hwidth[i][0], counts[i]+hwidth[i][1]-1);
+
+        ESMC_AxisIndexSet(ai_comp+i, 0, counts[i]-1);
+
+        ESMC_AxisIndexSet(ai_excl+i, hwidth[i][0], counts[i]-hwidth[i][1]-1);
     }
+
+    // fill out rest of space to null values.
     for (i=rank; i<ESMF_MAXDIM; i++) {
-        counts[i]     = 1;
-        offset[i]     = 0;
-        bytestride[i] = 1;
+        counts[i] = 1;
         lbound[i] = 1;
         ubound[i] = 1;
-        ESMC_AxisIndexSet(ai_total+i, 0, 0, 1);
-        ESMC_AxisIndexSet(ai_comp+i, 0, 0, 1);
-        ESMC_AxisIndexSet(ai_excl+i, 0, 0, 1);
+        offset[i] = 0;
+        bytestride[i] = alloc_stride;
+        awidth[i][0] = 0;
+        awidth[i][1] = 0;
+        hwidth[i][0] = 0;
+        hwidth[i][1] = 0;
+        ESMC_AxisIndexSet(ai_alloc+i, 0, 0);
+        ESMC_AxisIndexSet(ai_total+i, 0, 0);
+        ESMC_AxisIndexSet(ai_comp+i, 0, 0);
+        ESMC_AxisIndexSet(ai_excl+i, 0, 0);
     }
+      
     iscontig = contig;
     needs_dealloc = dealloc;
 
@@ -697,89 +737,6 @@
     return ESMF_SUCCESS; 
 
  } // end ESMC_ArraySetF90Ptr
-
-//-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayComputeAxisIndex"
-//BOP
-// !IROUTINE:  ESMC_ArrayComputeAxisIndex - compute AIs for Arrays for local/global
-//
-// !INTERFACE:
-      int ESMC_Array::ESMC_ArrayComputeAxisIndex(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_DELayout *layout,    // in - layout for the distributed array
-      int decompids[],          // in  - decomposition identifier for each
-                                //       axis (array)
-      int size_decomp) {        // in  - size of decomp array
-
-//
-// !DESCRIPTION:
-//     Compute the {\tt ESMC\_Array} member {\tt ESMC\_AxisIndex} values.
-//
-//EOP
-// !REQUIREMENTS:  
-
-    int i, de_pos[ESMF_MAXDIM];
-    int global_counts[ESMF_MAXDIM], global_position[ESMF_MAXDIM], rc;
-    ESMC_AxisIndex *AIPtr;
-
-    for (i=0; i < ESMF_MAXDIM; i++)
-      de_pos[i] = 1;
-
-    rc = layout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, 0, NULL, 
-                                  NULL, NULL, de_pos, size_decomp);
-
-    // Calculate global_positions 
-    for (i=0; i < size_decomp; i++) {
-      global_counts[i] = counts[i] + 1;
-      if (decompids[i] != 0) 
-         global_counts[i] *= de_pos[decompids[i]];
-    }
-
-
-    // loop to set AxisIndex array
-    AIPtr=ai_total;
-    for (i=0; i<size_decomp; i++, AIPtr++) {
-      // check if decomp is out of bounds
-      if ((decompids[i] < 0) || (decompids[i] > size_decomp)) 
-        return(ESMF_FAILURE);
-
-      // if decomp is 0, no decomposition of the axis
-      if (decompids[i] == 0) {
-        AIPtr->min = 0;
-        AIPtr->max = global_counts[i]-1;
-        AIPtr->stride = global_counts[i]; // jw?
-      }
-      // if decomp is 1, use nxDELayout
-      if (decompids[i] == 1) {    
-        int n1 = (global_counts[i]+de_pos[0]-1)/de_pos[0]; // round to nearest
-        AIPtr->min = 0;
-        AIPtr->max = n1-1;        
-        AIPtr->stride = n1;    // jw?      
-      } 
-      // if decomp is 2, use nyDELayout
-      if (decompids[i] == 2) {    
-        int n2 = (global_counts[i]+de_pos[1]-1)/de_pos[1]; // round to nearest
-        AIPtr->min = 0;
-        AIPtr->max = n2-1;
-        AIPtr->stride = n2;   // jw?
-      }
-    }
-     
-    for (i=0; i<this->rank; i++) {
-        ai_comp[i].min = ai_total[i].min + hwidth[0][0];
-        ai_comp[i].max = ai_total[i].max - hwidth[0][0];
-        ai_excl[i].min = ai_comp[i].min + hwidth[0][0];
-        ai_excl[i].max = ai_comp[i].max - hwidth[0][0];
-    }
-
-    return ESMF_SUCCESS;
-
- } // end ESMC_ArrayComputeAxisIndex
 
 //-----------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -881,10 +838,16 @@
 
  } // end ESMC_ArrayGetAxisIndex
 
-//-----------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+ // "All" in this routine means all DEs and all ranks, and it assumes
+ // that halo widths are applied equally to all ranks, even non-grid ranks.
+ // We are trying to fix this so halos are only defined for grid ranks.
+ // So this needs to be defined in the ArrayComm file, where it can access
+ // the Grid, the DataMap, and the Array so it pulls the right things from
+ // the right places.  
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayGetAllAxisIndex"
-//BOP
+#define ESMF_METHOD "ESMC_ArrayGetAllAxisIndices"
+//BOPI
 // !IROUTINE:  ESMC_ArrayGetAllAxisIndices - get all AIs for local/global
 //
 // !INTERFACE:
@@ -909,7 +872,7 @@
 //  a grid have the same halo widths (but they can be different sizes
 //  on different sides).
 //
-//EOP
+//EOPI
 
      int i, j, ij, count;
      int halo_widths[ESMF_MAXGRIDDIM][2];
