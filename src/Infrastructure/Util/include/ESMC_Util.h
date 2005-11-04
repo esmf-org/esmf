@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.7 2005/10/12 19:06:21 nscollins Exp $
+// $Id: ESMC_Util.h,v 1.8 2005/11/04 22:15:30 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -110,6 +110,21 @@ enum ESMC_DataKind { ESMF_I1=1,
   typedef float     ESMF_KIND_R4;
 #endif
 
+// are the index numbers relative to a local chunk or the overall
+// combined grid?
+typedef enum {
+    ESMF_LOCAL  = 1, 
+    ESMF_GLOBAL
+} ESMC_LocalGlobalFlag;
+
+// what kind of data chunk are the index numbers describing?
+typedef enum {
+    ESMC_DOMAIN_EXCLUSIVE = 1,
+    ESMC_DOMAIN_COMPUTATIONAL,
+    ESMC_DOMAIN_TOTAL,
+    ESMC_DOMAIN_ALLOCATED
+} ESMC_DomainType;
+
 // max/min macros if they don't already exist
 #ifndef MAX
 #define MAX(a,b)  (((a)>(b))?(a):(b))
@@ -124,6 +139,11 @@ typedef struct ESMC_ObjectID {
    char objectName[32]; 
 } ESMC_ObjectID;
 
+
+// TODO:
+// the domain below should be renamed AxisIndexList
+// or the AxisIndex itself could morph into a rank and
+// a list of mins, maxs and lengths.
 
 // elemental index for axis decompositions
 class ESMC_AxisIndex {
@@ -140,6 +160,7 @@ struct ESMC_Domain {
     ESMC_AxisIndex ai_list[ESMF_MAXDIM];
 };
 
+
 // collection of AxisIndices per axis, to describe an n-dim cube
 class ESMC_DomainList {
   public:   // TODO: fix this to be private?
@@ -155,20 +176,21 @@ class ESMC_DomainList {
 };
 
 // these should all become class methods
+int ESMC_AxisIndexSet(ESMC_AxisIndex *ai, int min, int max);
 int ESMC_AxisIndexSet(ESMC_AxisIndex *ai, int min, int max, int stride);
 int ESMC_AxisIndexGet(ESMC_AxisIndex *ai, int *min, int *max, int *stride);
 int ESMC_AxisIndexCopy(ESMC_AxisIndex *src, ESMC_AxisIndex *dst);
-ESMC_Logical ESMC_AxisIndexIntersect(ESMC_AxisIndex *src1, 
-                                     ESMC_AxisIndex *src2, int ndims, 
-                                     ESMC_AxisIndex *dst);
+bool ESMC_AxisIndexIntersect(int ndims, 
+                             ESMC_AxisIndex *src1, ESMC_AxisIndex *src2, 
+                             ESMC_AxisIndex *dst);
 int ESMC_AxisIndexLocalToGlobal(ESMC_AxisIndex *srclocal, 
                                      ESMC_AxisIndex *global, 
                                      int *globalStarts, int ndims, 
                                      ESMC_AxisIndex *dstglobal);
-int ESMC_AxisIndexGlobalToLocal(ESMC_AxisIndex *srcglobal, 
-                                     ESMC_AxisIndex *local, 
-                                     int *globalStarts, int ndims, 
-                                     ESMC_AxisIndex *dstlocal);
+int ESMC_AxisIndexGlobalToLocal(int ndims, 
+                                ESMC_AxisIndex *srcglobal, 
+                                ESMC_AxisIndex *globaltotal, 
+                                ESMC_AxisIndex *dstlocal);
 int ESMC_AxisIndexPrint(ESMC_AxisIndex *ai);
 ESMC_Logical ESMC_AxisIndexEqual(ESMC_AxisIndex *ai1, ESMC_AxisIndex *ai2);
 
