@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.56 2005/09/21 17:27:53 nscollins Exp $
+// $Id: ESMC_LogErr.h,v 1.57 2005/11/04 19:54:29 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -109,13 +109,11 @@ private:
 // the default global log object
 extern ESMC_Log ESMC_LogDefault;
 extern "C" {
- void FTN(f_esmf_logwrite)(char *msg, int *msgtype, int *line,
-                           char *file, char *method, ESMC_Log *log, int *rc,
-                           int mlen, int flen, int mdlen);
-
- void FTN(f_esmf_logwritenoform)(char *msg, int *msgtype, int *rc, int mlen);
+ void FTN(f_esmf_logwrite0)(char *msg, int *msgtype, int *rc, int mlen);
+ void FTN(f_esmf_logwrite1)(char *msg, int *msgtype,
+                            int *line, char *file, char *method, int *rc,
+                            int mlen, int flen, int mdlen);
 }
-
 
 //EOP
 

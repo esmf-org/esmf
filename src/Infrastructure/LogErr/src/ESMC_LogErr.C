@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.71 2005/09/21 17:27:17 nscollins Exp $
+// $Id: ESMC_LogErr.C,v 1.72 2005/11/04 19:54:29 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.71 2005/09/21 17:27:17 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.72 2005/11/04 19:54:29 eschwab Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -297,15 +297,14 @@ bool ESMC_Log::ESMC_LogWrite(
 {
     int rc;
 	
-    FTN(f_esmf_logwrite)(msg, &msgtype, 0, NULL, NULL, &ESMC_LogDefault, &rc,
-                           strlen(msg), 0, 0);
+    FTN(f_esmf_logwrite0)(msg, &msgtype, &rc, strlen(msg));
 
     return (rc == ESMF_SUCCESS) ? true : false;
 }
 
 //----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_logWrite - write to log file
+// !IROUTINE: ESMC_LogWrite - write to log file
 //
 // !INTERFACE:
 
@@ -328,11 +327,10 @@ bool ESMC_Log::ESMC_LogWrite(
 {
     int rc;
     
-    FTN(f_esmf_logwrite)(msg, &msgtype, &LINE, FILE, method, 
-                         &ESMC_LogDefault, &rc, strlen(msg), strlen(FILE), 
-                         strlen(method));
+    FTN(f_esmf_logwrite1)(msg, &msgtype, &LINE, FILE, method, &rc,
+                          strlen(msg), strlen(FILE), strlen(method));
 
-    return true;
+    return (rc == ESMF_SUCCESS) ? true : false;
 }
 
 //----------------------------------------------------------------------------
