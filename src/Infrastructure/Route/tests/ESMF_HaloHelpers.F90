@@ -1,4 +1,4 @@
-! $Id: ESMF_HaloHelpers.F90,v 1.1 2005/10/12 19:06:21 nscollins Exp $
+! $Id: ESMF_HaloHelpers.F90,v 1.2 2005/11/04 18:04:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -489,7 +489,7 @@ subroutine ValidateIndexHalo(field, rc)
     rc = ESMF_SUCCESS
 
     ! bottom / south
-    do j=lb(2), lb(2)+halo-1
+    do j=lb(2), lb(2)+haloWidth-1
       rownum = j - halowidth - 1
       cellNum = (gridOffsets(1) + 1) + &
                 ((gridOffsets(2)+rownum) * globalCellCounts(1)) 
@@ -510,7 +510,7 @@ subroutine ValidateIndexHalo(field, rc)
       rownum = j - halowidth - 1
       cellNum = (gridOffsets(1) + 1) + &
                 ((gridOffsets(2)+rownum) * globalCellCounts(1)) 
-      do i=lb(1), lb(1)+halo-1
+      do i=lb(1), lb(1)+haloWidth-1
         colnum = i - haloWidth - 1
         val = cellNum + colnum
         if (f90ptr(i, j) .ne. val) then
@@ -524,10 +524,10 @@ subroutine ValidateIndexHalo(field, rc)
 
     ! east edge
     do j=lb(2), ub(2)
-      rownum = j - halowidth - 1
+      rownum = j - haloWidth - 1
       cellNum = (gridOffsets(1) + 1) + &
                 ((gridOffsets(2)+rownum) * globalCellCounts(1)) 
-      do i=ub(1)-halo+1, ub(1)
+      do i=ub(1)-haloWidth+1, ub(1)
         colnum = i - haloWidth - 1
         val = cellNum + colnum
         if (f90ptr(i, j) .ne. val) then
@@ -540,8 +540,8 @@ subroutine ValidateIndexHalo(field, rc)
     enddo
 
     ! top / north
-    do j=ub(2)-halo+1, ub(2)
-      rownum = j - halowidth - 1
+    do j=ub(2)-haloWidth+1, ub(2)
+      rownum = j - haloWidth - 1
       cellNum = (gridOffsets(1) + 1) + &
                 ((gridOffsets(2)+rownum) * globalCellCounts(1)) 
       do i=lb(1), ub(1)
