@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.34 2005/10/12 19:34:01 nscollins Exp $
+// $Id: ESMC_XPacket.h,v 1.35 2005/11/04 22:11:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -65,8 +65,8 @@
      int contig_length;              // #contig items in fastest varying dim
      int contigrank;                 // highest rank for which block is contig
 
-     // TODO: are we going to need an index number for the case where
-     // multiple addresses are passed into each call to the run routine?
+     // TODO: we are going to need an index number for the case where
+     // multiple addresses are passed into each call to the run routine.
      // (for example, loose bundles with multiple fields, or fields
      // with multiple logical blocks)?  if multiple addresses are passed in,
      // the list must be in the same order at Store() time as at Run() time.
@@ -135,8 +135,10 @@
     int ESMC_XPacketGlobalToLocal(ESMC_XPacket *global_XP,
                                   ESMC_AxisIndex *indexlist, int rank,
                                   int *global_start);
-                         
+    int ESMC_XPacketFromAxisIndex(int AIrank, 
+                                  ESMC_AxisIndex *localTotalAIPerRank);
     int ESMC_XPacketPrint(const char *options);
+    int ESMC_XPacketPrint(int indent=0, const char *options="");
 
  // native C++ constructors/destructors
 	ESMC_XPacket(void);
@@ -180,7 +182,6 @@
                                   int size_axisindex, int *global_count,
                                   ESMC_Logical (*boundary)[2],
                                   ESMC_XPacket **xp_list, int *xp_count);
-
     int ESMC_XPacketMakeBuffer(int xpCount, ESMC_XPacket **xpList,
                                int nbytes, int numAddrs, 
                                char **buffer, int *bufferSize);
