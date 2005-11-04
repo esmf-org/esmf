@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.143 2005/09/15 20:58:24 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.144 2005/11/04 21:52:52 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -204,6 +204,7 @@
     public ESMF_DistGridGetDE
     public ESMF_DistGridSetDE
     public ESMF_DistGridGetAllAxisIndex
+    public ESMF_DistGridGetAIsAllDEs
     public ESMF_DistGridGetAllCounts
     public ESMF_DistGridGetDELayout
     ! TODO:  combine all the get subroutines into one
@@ -219,7 +220,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.143 2005/09/15 20:58:24 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.144 2005/11/04 21:52:52 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2151,6 +2152,87 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridGetAIsAllDEs"
+!BOPI
+! !IROUTINE: ESMF_DistGridGetAIsAllDEs - Get array of AxisIndices for DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridGetAIsAllDEs(dgtype, AIList, localGlobalFlag, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType), pointer :: dgtype
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AIList
+      type(ESMF_LocalGlobalFlag), intent(in) :: localGlobalFlag
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[dgtype]
+!          Class to be modified.
+!     \item[AI]
+!          Array of {\tt AxisIndices} corresponding to the {\tt DistGrid}.
+!     \item[localGlobalFlag]
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS: 
+
+      integer :: localrc
+      integer :: i, j, nDEs, rank
+      type(ESMF_DistGridGlobal), pointer :: glob
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! For now, assume the return AIs are from the computational domain
+      ! TODO: add a flag for toal?
+      glob => dgtype%globalComp
+
+      ! Get information from distgrid derived type
+      call ESMF_DELayoutGet(dgtype%delayout, deCount=nDEs, rc=localrc)
+      rank = dgtype%dimCount
+
+      ! check on AIList sizes
+      if (size(AIList,1).lt.nDEs .OR. size(AIList,2).lt.rank) then
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                 "AIList array lengths not sufficient", &
+                                 ESMF_CONTEXT, rc)
+        return
+      endif
+
+      ! load return array
+      do j   = 1, rank
+        do i = 1, nDEs
+          AIList(i,j)%min    = glob%AIPerDEPerDim(i,j)%min
+          AIList(i,j)%max    = glob%AIPerDEPerDim(i,j)%max
+          AIList(i,j)%stride = glob%AIPerDEPerDim(i,j)%stride
+        enddo
+      enddo
+
+      ! if local indexing is requested, then modify the AIList array
+      ! if it's global, we're done
+      if (localGlobalFlag.eq.ESMF_LOCAL) then
+        do j   = 1, rank
+          do i = 1, nDEs
+            AIList(i,j)%stride = AIList(i,j)%max - AIList(i,j)%min +1
+            AIList(i,j)%max    = AIList(i,j)%stride
+            AIList(i,j)%min    = 1
+          enddo
+        enddo
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridGetAIsAllDEs
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridGetAllAIBlock"
 !BOPI
 ! !IROUTINE: ESMF_DistGridGetAllAIBlock - Get array of AxisIndices for DistGrid
@@ -2508,15 +2590,15 @@
       !make sure local array is present as well
         if (.not. present(local1D)) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
-                                     "local array not present", &
-                                     ESMF_CONTEXT, rc)
+                                   "local array not present", &
+                                   ESMF_CONTEXT, rc)
           return
         endif
       !make sure array lengths are the same
         if (size(global1D) .NE. size(local1D)) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
-                                     "array lengths not equal", &
-                                     ESMF_CONTEXT, rc)
+                                   "array lengths not equal", &
+                                   ESMF_CONTEXT, rc)
           return
         endif
 
