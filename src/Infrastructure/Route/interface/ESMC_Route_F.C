@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.39 2005/10/12 19:06:17 nscollins Exp $
+// $Id: ESMC_Route_F.C,v 1.40 2005/11/04 22:12:32 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -249,24 +249,25 @@ extern "C" {
        }
 
        void FTN(c_esmc_routeprecomputeredist)(ESMC_Route **ptr, int *rank, 
-                     ESMC_Logical *hasDstData, 
-                     int *dstMyDE, ESMC_AxisIndex *dstCompAI,
-                     ESMC_AxisIndex *dstTotalAI, int *dstAICount,
-                     int *dstGlobalStart, int *dstGlobalCount,
-                     ESMC_DELayout **dstLayout,
-                     ESMC_Logical *hasSrcData, 
-                     int *srcMyDE, ESMC_AxisIndex *srcCompAI,
-                     ESMC_AxisIndex *srcTotalAI, int *srcAICount,
-                     int *srcGlobalStart, int *srcGlobalCount,
-                     ESMC_DELayout **srcLayout, 
+                     ESMC_Logical *hasSrcData,
+                     ESMC_DELayout **srcDELayout,
+                     int *mySrcDE, int *srcDECount,
+                     ESMC_AxisIndex *srcGlobalCompAIperDEperRank,
+                     ESMC_AxisIndex *mySrcGlobalTotalAIperRank,
+                     ESMC_Logical *hasDstData,
+                     ESMC_DELayout **dstDELayout,
+                     int *myDstDE, int *dstDECount,
+                     ESMC_AxisIndex *dstGlobalCompAIperDEperRank,
+                     ESMC_AxisIndex *myDstGlobalTotalAIperRank,
                      int *status) {
 
-           *status = (*ptr)->ESMC_RoutePrecomputeRedist(*rank, *hasDstData,
-                             *dstMyDE, dstCompAI, dstTotalAI, *dstAICount,
-                             dstGlobalStart, dstGlobalCount, *dstLayout,
-                             *hasSrcData,
-                             *srcMyDE, srcCompAI, srcTotalAI, *srcAICount,
-                             srcGlobalStart, srcGlobalCount, *srcLayout);
+           *status = (*ptr)->ESMC_RoutePrecomputeRedist(*rank, *hasSrcData,
+                                   *srcDELayout, *mySrcDE, *srcDECount,
+                                   srcGlobalCompAIperDEperRank,
+                                   mySrcGlobalTotalAIperRank,
+                                   *hasDstData, *dstDELayout, *myDstDE,
+                                   *dstDECount, dstGlobalCompAIperDEperRank,
+                                   myDstGlobalTotalAIperRank);
        }
 
        void FTN(c_esmc_routeprecomputeredistv)(ESMC_Route **ptr, int *rank, 

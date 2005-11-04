@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.74 2005/10/19 22:27:29 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.75 2005/11/04 22:12:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -138,7 +138,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.74 2005/10/19 22:27:29 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.75 2005/11/04 22:12:32 nscollins Exp $'
 
 !==============================================================================
 !
@@ -654,34 +654,32 @@ end subroutine rias
 ! !IROUTINE: ESMF_RoutePrecomputeRedist - Precompute communication paths
 
 ! !INTERFACE:
-      subroutine ESMF_RoutePrecomputeRedist(route, rank, hasDstData, &
-                                            dstMyDE, dstCompAI, &
-                                            dstTotalAI, dstGlobalStart, &
-                                            dstGlobalCount, dstDElayout, &
-                                            hasSrcData, &
-                                            srcMyDE, srcCompAI, &
-                                            srcTotalAI, srcGlobalStart, &
-                                            srcGlobalCount, srcDElayout, rc)
+      subroutine ESMF_RoutePrecomputeRedist(route, rank, &
+                                            hasSrcData, srcDELayout, mySrcDE, &
+                                            srcGlobalCompAIperDEperRank, &
+                                            mySrcGlobalTotalAIperRank, &
+                                            hasDstData, dstDELayout, myDstDE, &
+                                            dstGlobalCompAIperDEperRank, &
+                                            myDstGlobalTotalAIperRank, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
       integer, intent(in) :: rank
-      type(ESMF_Logical), intent(in) :: hasDstData
-      integer, intent(in) :: dstMyDE
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: dstCompAI
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: dstTotalAI
-      integer, dimension(:,:), intent(in) :: dstGlobalStart
-      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dstGlobalCount
-      type(ESMF_DELayout), intent(in) :: dstDElayout
       type(ESMF_Logical), intent(in) :: hasSrcData
-      integer, intent(in) :: srcMyDE
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: srcCompAI
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: srcTotalAI
-      integer, dimension(:,:), intent(in) :: srcGlobalStart
-      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: srcGlobalCount
       type(ESMF_DELayout), intent(in) :: srcDElayout
+      integer, intent(in) :: mySrcDE
+      type(ESMF_AxisIndex), dimension(:), pointer :: mySrcGlobalTotalAIperRank
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: &
+                                                     srcGlobalCompAIperDEperRank
+      type(ESMF_Logical), intent(in) :: hasDstData
+      type(ESMF_DELayout), intent(in) :: dstDElayout
+      integer, intent(in) :: myDstDE
+      type(ESMF_AxisIndex), dimension(:), pointer :: myDstGlobalTotalAIperRank
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: &
+                                                     dstGlobalCompAIperDEperRank
       integer, intent(out), optional :: rc
 
+! TODO: do we need to pass myDEs in?
 !
 ! !DESCRIPTION:
 !     Precompute the data movement needed to execute a 
@@ -694,42 +692,34 @@ end subroutine rias
 !          {\tt ESMF\_Route} to associate this information with.
 !     \item[rank]
 !          Data rank.
-!     \item[hasDstData]
-!          ESMF logical for whether this PET contains valid data.
-!     \item[dstMyDE]
-!          The ID of the destination DE.
-!     \item[dstCompAI]
-!          A 2D array of {\tt ESMF\_AxisIndex}s, describing the
-!          computational region of the data for each DE in the destination.
-!     \item[dstTotalAI]
-!          A 2D array of {\tt ESMF\_AxisIndex}s, describing the
-!          total region of the data for each DE in the destination.
-!     \item[dstGlobalStart]
-!          Array of integer offsets for the corner of each DE relative to
-!          the undecomposed destination object.
-!     \item[dstGlobalCount]
-!          Array of integers, one per dimension, for the total count
-!          of items for the undecomposed destination object.
-!     \item[dstDELayout]
-!          {\tt ESMF\_DELayout} for the destination data decomposition.
 !     \item[hasSrcData]
 !          ESMF logical for whether this PET contains valid data.
-!     \item[srcMyDE]
-!          The ID of the source DE.
-!     \item[srcCompAI]
-!          A 2D array of {\tt ESMF\_AxisIndex}s, describing the
-!          computational region of the data for each DE in the source.
-!     \item[srcTotalAI]
-!          A 2D array of {\tt ESMF\_AxisIndex}s, describing the
-!          total region of the data for each DE in the source.
-!     \item[srcGlobalStart]
-!          Array of integer offsets for the corner of each DE relative to
-!          the undecomposed source object.
-!     \item[srcGlobalCount]
-!          Array of integers, one per dimension, for the total count
-!          of items for the undecomposed source object.
 !     \item[srcDELayout]
 !          {\tt ESMF\_DELayout} for the source data decomposition.
+!     \item[srcMyDE]
+!          The ID of the source DE.
+!     \item[mySrcGlobalTotalAIperRank]
+!          A 1D array of {\tt ESMF\_AxisIndex}s, describing the
+!          total region in global index space of the data on this DE
+!          in the source.
+!     \item[srcGlobalCompAIperDEperRank]
+!          A 2D array of {\tt ESMF\_AxisIndex}s, describing the
+!          computational region in global index space of the data for
+!          each DE in the source.
+!     \item[hasDstData]
+!          ESMF logical for whether this PET contains valid data.
+!     \item[dstDELayout]
+!          {\tt ESMF\_DELayout} for the destination data decomposition.
+!     \item[dstMyDE]
+!          The ID of the destination DE.
+!     \item[myDstGlobalTotalAIperRank]
+!          A 1D array of {\tt ESMF\_AxisIndex}s, describing the
+!          total region in global index space of the data on this DE
+!          in the destination.
+!     \item[dstGlobalCompAIperDEperRank]
+!          A 2D array of {\tt ESMF\_AxisIndex}s, describing the
+!          computational region in global index space of the data for
+!          each DE in the destination.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -740,7 +730,7 @@ end subroutine rias
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
         integer :: i,j                     ! counters
-        integer :: dstAICount, srcAICount
+        integer :: dstDECount, srcDECount
 
         ! Set initial values
         status = ESMF_FAILURE
@@ -752,35 +742,47 @@ end subroutine rias
           rc = ESMF_FAILURE
         endif
 
+        ! TODO get DE counts from layouts
+        ! TODO make sure DE counts are the same as the first rank 
+        !      sizes of the AIs and the rank should match the second
         ! set some sizes to pass to C++ code
-        dstAICount = size(dstCompAI,1)
-        srcAICount = size(srcCompAI,1)
+        srcDECount = size(srcGlobalCompAIperDEperRank, 1)
+        dstDECount = size(dstGlobalCompAIperDEperRank, 1)
 
         ! Translate AxisIndices from F90 to C++
         do j   = 1,rank
-          do i = 1,dstAICount
-            dstCompAI(i,j)%min  =  dstCompAI(i,j)%min - 1
-            dstCompAI(i,j)%max  =  dstCompAI(i,j)%max - 1
-            dstTotalAI(i,j)%min = dstTotalAI(i,j)%min - 1
-            dstTotalAI(i,j)%max = dstTotalAI(i,j)%max - 1
+          mySrcGlobalTotalAIperRank(j)%min = &
+                                    mySrcGlobalTotalAIperRank(j)%min - 1
+          mySrcGlobalTotalAIperRank(j)%max = &
+                                    mySrcGlobalTotalAIperRank(j)%max - 1
+          myDstGlobalTotalAIperRank(j)%min = &
+                                    myDstGlobalTotalAIperRank(j)%min - 1
+          myDstGlobalTotalAIperRank(j)%max = &
+                                    myDstGlobalTotalAIperRank(j)%max - 1
+          do i = 1,dstDECount
+            dstGlobalCompAIperDEperRank(i,j)%min = &
+                                    dstGlobalCompAIperDEperRank(i,j)%min - 1
+            dstGlobalCompAIperDEperRank(i,j)%max = &
+                                    dstGlobalCompAIperDEperRank(i,j)%max - 1
           enddo
-          do i = 1,srcAICount
-            srcCompAI(i,j)%min  =  srcCompAI(i,j)%min - 1
-            srcCompAI(i,j)%max  =  srcCompAI(i,j)%max - 1
-            srcTotalAI(i,j)%min = srcTotalAI(i,j)%min - 1
-            srcTotalAI(i,j)%max = srcTotalAI(i,j)%max - 1
+          do i = 1,srcDECount
+            srcGlobalCompAIperDEperRank(i,j)%min = &
+                                    srcGlobalCompAIperDEperRank(i,j)%min - 1
+            srcGlobalCompAIperDEperRank(i,j)%max = &
+                                    srcGlobalCompAIperDEperRank(i,j)%max - 1
           enddo
         enddo
 
         ! Call C++  code
-        call c_ESMC_RoutePrecomputeRedist(route, rank, hasDstData, &
-                                          dstMyDE, dstCompAI, dstTotalAI, &
-                                          dstAICount, dstGlobalStart, &
-                                          dstGlobalCount, dstDElayout, &
-                                          hasSrcData, &
-                                          srcMyDE, srcCompAI, srcTotalAI, &
-                                          srcAICount, srcGlobalStart, &
-                                          srcGlobalCount, srcDElayout, status)
+        call c_ESMC_RoutePrecomputeRedist(route, rank, &
+                                          hasSrcData, srcDELayout, &
+                                          mySrcDE, srcDECount, &
+                                          srcGlobalCompAIperDEperRank, &
+                                          mySrcGlobalTotalAIperRank, &
+                                          hasDstData, dstDELayout, &
+                                          myDstDE, dstDECount, &
+                                          dstGlobalCompAIperDEperRank, &
+                                          myDstGlobalTotalAIperRank, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route PrecomputeRedist error"
           ! don't return before adding 1 back to AIs
@@ -788,17 +790,25 @@ end subroutine rias
 
         ! Translate AxisIndices back to  F90 from C++
         do j   = 1,rank
-          do i = 1,dstAICount
-            dstCompAI(i,j)%min  =  dstCompAI(i,j)%min + 1
-            dstCompAI(i,j)%max  =  dstCompAI(i,j)%max + 1
-            dstTotalAI(i,j)%min = dstTotalAI(i,j)%min + 1
-            dstTotalAI(i,j)%max = dstTotalAI(i,j)%max + 1
+	    mySrcGlobalTotalAIperRank(j)%min = &
+                                         mySrcGlobalTotalAIperRank(j)%min  + 1
+	    mySrcGlobalTotalAIperRank(j)%max = &
+                                         mySrcGlobalTotalAIperRank(j)%max  + 1
+	    myDstGlobalTotalAIperRank(j)%min = &
+                                         myDstGlobalTotalAIperRank(j)%min  + 1
+	    myDstGlobalTotalAIperRank(j)%max = &
+                                         myDstGlobalTotalAIperRank(j)%max  + 1
+          do i = 1,srcDECount
+	    srcGlobalCompAIperDEperRank(i,j)%min = &
+	                              srcGlobalCompAIperDEperRank(i,j)%min + 1
+	    srcGlobalCompAIperDEperRank(i,j)%max = &
+	                              srcGlobalCompAIperDEperRank(i,j)%max + 1
           enddo
-          do i = 1,srcAICount
-            srcCompAI(i,j)%min  =  srcCompAI(i,j)%min + 1
-            srcCompAI(i,j)%max  =  srcCompAI(i,j)%max + 1
-            srcTotalAI(i,j)%min = srcTotalAI(i,j)%min + 1
-            srcTotalAI(i,j)%max = srcTotalAI(i,j)%max + 1
+          do i = 1,dstDECount
+	    dstGlobalCompAIperDEperRank(i,j)%min = &
+	                              dstGlobalCompAIperDEperRank(i,j)%min + 1
+	    dstGlobalCompAIperDEperRank(i,j)%max = &
+	                              dstGlobalCompAIperDEperRank(i,j)%max + 1
           enddo
         enddo
 
