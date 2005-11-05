@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.143 2005/11/04 21:52:19 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.144 2005/11/05 00:12:06 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.143 2005/11/04 21:52:19 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.144 2005/11/05 00:12:06 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -5328,14 +5328,15 @@
 ! !IROUTINE: ESMF_LRGridGetAIsAllDEs - Get all axis indices for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridGetAIsAllDEs(grid, horzrelloc, localGlobalFlag, &
-                                         AIListPerDEPerRank, vertrelloc, rc)
+      subroutine ESMF_LRGridGetAIsAllDEs(grid, localGlobalFlag, &
+                                         AIListPerDEPerRank, &
+                                         horzRelLoc, vertRelLoc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      type(ESMF_RelLoc), intent(in) :: horzRelLoc
       type(ESMF_LocalGlobalFlag), intent(in) :: localGlobalFlag
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AIListPerDEPerRank
+      type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       integer, intent(out), optional :: rc
 
@@ -5346,9 +5347,6 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[horzrelloc]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
-!          grid.
 !     \item[localGlobalFlag]
 !          {\tt ESMF\_LocalGlobalFlag] identifier indicating whether the returned
 !          array of {\tt ESMF\_AxisIndex} types should be in local or global
@@ -5356,6 +5354,9 @@
 !     \item[AIListPerDEPerRank]
 !          2D array of {\tt ESMF\_AxisIndex} types containing results.  If
 !          allocated, it must be of size (nDEs,gridrank).
+!     \item[{[horzrelloc]}]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
+!          grid.
 !     \item[{[vertrelloc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
 !          grid.
@@ -5373,6 +5374,7 @@
       integer, dimension(ESMF_MAXGRIDDIM) :: order
       logical :: dummy, horz, vert
       type(ESMF_AxisIndex), dimension(:,:), pointer :: horzAI, vertAI
+      type(ESMF_DELayout) :: delayout
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -5394,7 +5396,8 @@
       endif
 
       gridRank = grid%ptr%dimCount
-      nDEs = TODO
+      call ESMF_LRGridGet(grid, delayout=delayout, rc=localrc)
+      call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=localrc)
 
       ! check for validity of horizontal and vertical rellocs and determine the
       ! required size of the AI array
@@ -5458,7 +5461,7 @@
           return
         endif
       else
-        allocate(AIListPerDEPerRank(nDEs,AIrank), stat=localrc
+        allocate(AIListPerDEPerRank(nDEs,AIrank), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "allocating AIList array", &
                                        ESMF_CONTEXT, rc)) return
       endif
@@ -5529,7 +5532,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridGetAllAxisIndex
+      end subroutine ESMF_LRGridGetAIsAllDEs
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.225 2005/11/04 22:10:29 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.226 2005/11/05 00:12:32 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -110,7 +110,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.225 2005/11/04 22:10:29 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.226 2005/11/05 00:12:32 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -5181,15 +5181,16 @@
 ! !IROUTINE: ESMF_GridGetAIsAllDEs - Get a Grid's AIs for all DEs
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetAIsAllDEs(grid, horzrelloc, localGlobalFlag, &
-                                       AIListPerDEPerRank, vertrelloc, rc)
+      subroutine ESMF_GridGetAIsAllDEs(grid, localGlobalFlag, &
+                                       AIListPerDEPerRank, &
+                                       horzRelLoc, vertRelLoc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      type(ESMF_RelLoc), intent(in) :: horzrelloc
       type(ESMF_LocalGlobalFlag), intent(in) :: localGlobalFlag
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AIListPerDEPerRank
-      type(ESMF_RelLoc), intent(in), optional :: vertrelloc
+      type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -5238,8 +5239,8 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridGetAIsAllDEs(grid, horzrelloc, localGlobalFlag, &
-                                     AIListPerDEPerRank, vertrelloc, localrc)
+        call ESMF_LRGridGetAIsAllDEs(grid, localGlobalFlag, AIListPerDEPerRank, &
+                                     horzRelLoc, vertRelLoc, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
