@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.7 2005/11/04 22:18:42 nscollins Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.8 2005/11/05 00:09:50 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -472,6 +472,8 @@
       public ESMF_ID_BUNDLEDATAMAP, ESMF_ID_BUNDLE, ESMF_ID_TRANSFORMVALUES
       public ESMF_ID_REGRID, ESMF_ID_TRANSFORM, ESMF_ID_STATE
       public ESMF_ID_GRIDCOMPONENT, ESMF_ID_CPLCOMPONENT, ESMF_ID_COMPONENT
+
+      public ESMF_LOCAL, ESMF_GLOBAL
 
       public ESMF_DOMAIN_EXCLUSIVE, ESMF_DOMAIN_COMPUTATIONAL
       public ESMF_DOMAIN_TOTAL, ESMF_DOMAIN_ALLOCATED
