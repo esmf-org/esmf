@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.74 2005/11/07 22:35:00 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.75 2005/11/07 23:57:34 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.74 2005/11/07 22:35:00 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.75 2005/11/07 23:57:34 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -497,153 +497,91 @@
 !
 !EOPI
 
-      integer :: status, nDEs, nAIs, i, j
-      integer :: gridrank, datarank, maxrank
-      integer, dimension(:), allocatable :: dimOrder, countPerDim
-      type(ESMF_AxisIndex), dimension(:), pointer :: arrayindex
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: gridindex, globalindex
+      integer :: localrc, nDEs, i
+      integer :: gridrank, datarank
+      integer, dimension(:), allocatable :: dimOrder
+      type(ESMF_AxisIndex), dimension(:), pointer :: myArrayAIsPerRank
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: gridAIsPerDEPerRank
       type(ESMF_DELayout) :: delayout
-      type(ESMF_GridStorage) :: gridStorage
       type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
-
-      ! TODO: new world order
- 
-#if 0
-      get computational AIs from a new grid routine which takes global/local
-      flag.  this is (nDEs, gridrank) in size.  it's in grid order.
-  
-      get computational AIs from local data array.  this is local by definition
-      and is (datarank) long.   this is in data order.
-
-      combine grid AIs and array AIs, based on what's in the data map
-      dimOrder.  now we have AIs (nDEs, arrayrank).  
-
-      if the request was for computational domain, we're done now.
-  
-      if the request was for anything else, we have to query for the halo
-      widths.  they should come back (datarank, 2).  (see note 1).  
-      then we make a new AI modify routine which takes this halo array, 
-      plus a domain type, and either adds or subtracts to get the right
-      values.  (you cannot ask for allocate here because you can't.)  (see
-      note 2.)   the input here will be (nDEs, datarank) long, and this
-      new routine just computes over all of them.
-
-      now we're really done.
-
-note 1:
-      this may involve changing the array defn to
-      keep hwidth for MAXDIM by 2 instead of MAXGRIDDIM, and making sure
-      all the values are initialized (for now) to the same values.  later on
-      somehow the array may need to be told which axes have halos and which
-      are 0.  this one is in data order.
-
-note 2:
-      there is no way to know the allocate size for all nDEs in a
-      distributed array without a broadcast.
-
-#endif
-
-      ! TODO: old world order resumes
-
       ! get layout from the grid in order to get the number of DEs
-      call ESMF_ArrayGet(array, rank=datarank, rc=status)
+      call ESMF_ArrayGet(array, rank=datarank, rc=localrc)
       call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, &
-                        gridStorage=gridStorage, rc=status)
-      call ESMF_DELayoutGet(delayout, nDEs, rc=status)
+                        rc=localrc)
+      call ESMF_DELayoutGet(delayout, nDEs, rc=localrc)
 
-      ! allocate dimOrder array and get from datamap
-      maxrank = max(datarank, gridrank)
-      allocate(dimOrder(maxrank), stat=status)
+      ! check if the AI array pointer is associated
+      !  -  If it is, check that it is large enough to hold the requested data.
+      !  -  If it is not, allocate it here
+      if (associated(AIListPerDEPerRank)) then
+        if (size(AIListPerDEPerRank,1).ne.nDEs .OR. &
+            size(AIListPerDEPerRank,2).ne.datarank) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                             "AIList array not correct size for requested data", &
+                             ESMF_CONTEXT, rc)
+          return
+        endif
+      else
+        allocate(AIListPerDEPerRank(nDEs,datarank), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "allocating AIList array", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
+
+      ! get information from the datamap
+      allocate(dimOrder(datarank), stat=localrc)
       call ESMF_FieldDataMapGet(datamap, dataIndexList=dimOrder, &
-                           horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
-                           rc=status)
-    
-      ! set the number of AIs based on the grid storage
-      nAIs = nDEs
+                                horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                                rc=localrc)
 
-! allocate arrayindex array; get all types (excl, comp, total?) from the array
-      allocate(arrayindex(datarank), stat=status)
-      call ESMF_ArrayGetAxisIndex(array, arrayindex, rc=status)
+      ! call grid to access AIs for all DEs
+      call ESMF_GridGetAIsAllDEs(grid, localGlobalFlag, &
+                                 gridAIsPerDEPerRank, &
+                                 horzRelLoc, vertRelLoc, rc=localrc)
 
-      ! TODO: in the new world, this GridGetAll routine needs a global/local
-      ! flag.  this needs an array of AIs which is (nDEs, gridrank) in size.
+      ! allocate arrayindex array; get all types (excl, comp, total?) from the array
+      allocate(myArrayAIsPerRank(datarank), stat=localrc)
+      call ESMF_ArrayGetAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
+                                  myArrayAIsPerRank, rc=localrc)
 
-      ! allocate gridindex array and get all of them from the grid
-      allocate(gridindex(nAIs,gridrank), stat=status)
-      call ESMF_GridGetAllAxisIndex(grid, gridindex, &
-                                    horzRelLoc=horzRelLoc, &
-                                    vertRelLoc=vertRelLoc, &
-                                    rc=status)
-
-#if 0
-     ! this is the combine
-      ! load globalindex with arrayindex and gridindex
-      allocate(globalindex(nAIs, maxrank), stat=status)
-      do i = 1,maxrank
+      ! load AIListPerDEPerRank with array AIs and grid AIs
+      do i = 1,datarank
         if (dimOrder(i).eq.0) then
-          globalindex(:,i) = arrayindex(i)
+          AIListPerDEPerRank(:,i) = myArrayAIsPerRank(i)
         else
-          globalindex(:,i) = gridindex(:,dimOrder(i))
+          AIListPerDEPerRank(:,i) = gridAIsPerDEPerRank(:,dimOrder(i))
         endif
       enddo
 
+      ! if the request was for computational domain, we're done now
+      ! TODO: case statement on domainTypeFlag -- nothing to do for comp
 
-       ! this is the modify
-        if (present(totalindex)) then
-          call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_TOTAL, &
-                                           globalindex, nAIs, datarank, &
-                                           totalindex, status)
-          if (status .ne. ESMF_SUCCESS) goto 10
-          ! translate from C++ to F90
-          do j=1,size(totalindex, 2)
-            do i=1, nDEs
-              totalindex(i,j)%min = totalindex(i,j)%min + 1
-              totalindex(i,j)%max = totalindex(i,j)%max + 1
-            enddo
-          enddo
-        endif
+      ! TODO: modify if not computational
+      ! if the request was for anything else, we have to query for the halo
+      ! widths.  they should come back (datarank, 2).  (see note 1).
+      ! then we make a new AI modify routine which takes this halo array,
+      ! plus a domain type, and either adds or subtracts to get the right
+      ! values.  (you cannot ask for allocate here because you can't.)  (see
+      ! note 2.)   the input here will be (nDEs, datarank) long, and this
+      ! new routine just computes over all of them.
 
-        if (present(compindex)) then
-          call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
-                                           globalindex, nAIs, datarank, &
-                                           compindex, status)
-          if (status .ne. ESMF_SUCCESS) goto 10
-          ! translate from C++ to F90
-          do j=1,size(compindex, 2)
-            do i=1, nDEs
-              compindex(i,j)%min = compindex(i,j)%min + 1
-              compindex(i,j)%max = compindex(i,j)%max + 1
-            enddo
-          enddo
-        endif
+      ! note 1:
+      ! this may involve changing the array defn to
+      ! keep hwidth for MAXDIM by 2 instead of MAXGRIDDIM, and making sure
+      ! all the values are initialized (for now) to the same values.  later on
+      ! somehow the array may need to be told which axes have halos and which
+      ! are 0.  this one is in data order.
 
-        if (present(exclindex)) then
-          call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_EXCLUSIVE, &
-                                           globalindex, nAIs, datarank, &
-                                           exclindex, status)
-          if (status .ne. ESMF_SUCCESS) goto 10
-          ! translate from C++ to F90
-          do j=1,size(exclindex, 2)
-            do i=1, nDEs
-              exclindex(i,j)%min = exclindex(i,j)%min + 1
-              exclindex(i,j)%max = exclindex(i,j)%max + 1
-            enddo
-          enddo
-        endif
-#endif
-
-      status = ESMF_SUCCESS
-
- 10   continue
+      ! note 2:
+      ! there is no way to know the allocate size for all nDEs in a
+      ! distributed array without a broadcast.
 
       ! Clean up
-      deallocate(dimOrder,    stat=status)
-      deallocate(arrayindex,  stat=status)
-      deallocate(gridindex,   stat=status)
-      deallocate(globalindex, stat=status)
+      deallocate(dimOrder,            stat=localrc)
+      deallocate(myArrayAIsPerRank,   stat=localrc)
+      deallocate(gridAIsPerDEPerRank, stat=localrc)
 
-      if (present(rc)) rc = status 
+      if (present(rc)) rc = localrc
 
       end subroutine ESMF_ArrayGetAIsAllDEs
 
@@ -1997,55 +1935,24 @@ note 2:
 
       ! TODO: apply dimorder and decompids to get mapping of array to data
 
-      ! set up things we need to precompute a route
-      !call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
-      !                                 compindex =dstCLocalAI, &
-      !                                 totalindex=dstTLocalAI, rc=status)
+      ! get all of the AIs -- that mean for all of the DEs
+      call ESMF_ArrayGetAIsAllDEs(dstArray, dstGrid, dstDataMap, &
+                                  ESMF_GLOBAL, ESMF_DOMAIN_COMPUTATIONAL, &
+                                  dstGlobalCompAIperDEperRank, &
+                                  rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! translate AI's into global numbering
-      !call ESMF_GridDELocalToGlobalAI(dstGrid, &
-      !                                horzRelLoc=dstHorzRelLoc, &
-      !                                vertRelLoc=dstVertRelLoc, &
-      !                                localAI2D=dstCLocalAI, &
-      !                                globalAI2D=dstCompAI, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      !call ESMF_GridDELocalToGlobalAI(dstGrid, &
-      !                                horzRelLoc=dstHorzRelLoc, &
-      !                                vertRelLoc=dstVertRelLoc, &
-      !                                localAI2D=dstTLocalAI, &
-      !                                globalAI2D=dstTotalAI, rc=status)
+      call ESMF_ArrayGetAIsAllDEs(srcArray, srcGrid, srcDataMap, &
+                                  ESMF_GLOBAL, ESMF_DOMAIN_COMPUTATIONAL, &
+                                  srcGlobalCompAIperDEperRank, &
+                                  rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! now the source grid
-      !call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
-      !                                 compindex =srcCLocalAI, &
-      !                                 totalindex=srcTLocalAI, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      !call ESMF_GridDELocalToGlobalAI(srcGrid, &
-      !                                horzRelLoc=srcHorzRelLoc, &
-      !                                vertRelLoc=srcVertRelLoc, &
-      !                                localAI2D=srcCLocalAI, &
-      !                                globalAI2D=srcCompAI, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      !call ESMF_GridDELocalToGlobalAI(srcGrid, &
-      !                                horzRelLoc=srcHorzRelLoc, &
-      !                                vertRelLoc=srcVertRelLoc, &
-      !                                localAI2D=srcTLocalAI, &
-      !                                globalAI2D=srcTotalAI, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+      ! TODO: make myGlobalTotalAI arrays
 
       ! Create the route object.
       route = ESMF_RouteCreate(parentVM, rc)
