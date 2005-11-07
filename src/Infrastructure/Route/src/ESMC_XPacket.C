@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.53 2005/11/04 22:14:28 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.54 2005/11/07 22:34:13 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.53 2005/11/04 22:14:28 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.54 2005/11/07 22:34:13 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -939,19 +939,22 @@
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_XPacketFromAxisIndex"
+#define ESMC_METHOD "ESMC_XPacketFromCompAIs"
 //BOP
 // !IROUTINE:  ESMC_XPacketFromAxisIndex - calculate XPacket from AxisIndexList
 //
 // !INTERFACE:
-      int ESMC_XPacket::ESMC_XPacketFromAxisIndex(
+      int ESMC_XPacket::ESMC_XPacketFromCompAIs(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
       int AIrank,                             // in - data rank
-      ESMC_AxisIndex *localTotalAIPerRank) {  // in - local AI, rank long
+      ESMC_AxisIndex *intersectLocalCompAIperRank,
+      ESMC_AxisIndex *srcGlobalCompAIperRank,
+      ESMC_AxisIndex *srcGlobalTotalAIperRank) {
+      // TODO: change this GlobalAllocAI
 //
 // !DESCRIPTION:
 //      Translates a list of AxisIndex types, one per rank, into a single
@@ -965,6 +968,25 @@
     int rc = ESMF_FAILURE;
     char msgbuf[ESMF_MAXSTR];
     ESMC_AxisIndex *aip;  // shorter alias
+    int diffs[ESMF_MAXDIM][2];
+    ESMC_AxisIndex memspace[ESMF_MAXDIM];
+
+    // compute the lower halo widths for each axis the hard way: 
+    for (i=0; i<AIrank; i++) {
+       diffs[i][0] = srcGlobalCompAIperRank[i].min - 
+                     srcGlobalTotalAIperRank[i].min; 
+    }
+
+    // shift the origin that these numbers are relative to; it was (0,0)
+    // was the corner of the computational area; now (0,0) is the corner of
+    // memory/allocation area. 
+    for (i=0; i<AIrank; i++) {
+      memspace[i].min = intersectLocalCompAIperRank[i].min + diffs[i][0];
+      memspace[i].max = intersectLocalCompAIperRank[i].max + diffs[i][0];
+
+      memspace[i].stride = srcGlobalTotalAIperRank[i].max -
+                           srcGlobalTotalAIperRank[i].min + 1;
+    }
 
 #if 0
           this->rank = 2;
@@ -997,21 +1019,19 @@
 #endif
 
 
-    aip = localTotalAIPerRank;
-
     this->rank = AIrank;
-    this->contig_length = aip[0].max - aip[0].min + 1;
+    this->contig_length = memspace[0].max - memspace[0].min + 1;
 
-    this->stride[0] = aip[0].stride;
+    this->stride[0] = memspace[0].stride;
     for (i=1; i<rank-1; i++)
-          this->stride[i] *= aip[i-1].stride;
+          this->stride[i] *= memspace[i-1].stride;
 
     for (i=0; i<rank-1; i++)
-          this->rep_count[i] = aip[i+1].max - aip[i+1].min + 1;
+          this->rep_count[i] = memspace[i+1].max - memspace[i+1].min + 1;
 
-    this->offset = aip[0].min;
+    this->offset = memspace[0].min;
     for (i=1; i<rank; i++)
-          this->offset += aip[i].min * this->stride[i-1];
+          this->offset += memspace[i].min * this->stride[i-1];
 
     this->ESMC_XPacketSetContig();
 

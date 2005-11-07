@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.144 2005/11/04 23:42:02 nscollins Exp $
+//$Id: ESMC_Route.C,v 1.145 2005/11/07 22:34:13 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.144 2005/11/04 23:42:02 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.145 2005/11/07 22:34:13 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1995,6 +1995,7 @@
     int srcDECount,             // in  - number of DEs in source
     ESMC_AxisIndex *srcGlobalCompAIperDEperRank,  // in  - per DE, per rank
     ESMC_AxisIndex *mySrcGlobalTotalAIperRank,    // in - 1 AI list for src
+    //! TODO: this must be mySrcGlobalAllocAIperRank!!
 
     ESMC_Logical  hasDstData,   // in  - has destination data on this DE?
     ESMC_DELayout *dstDELayout, // in  - pointer to the receive DELayout
@@ -2002,6 +2003,7 @@
     int dstDECount,             // in  - number of DEs in destination
     ESMC_AxisIndex *dstGlobalCompAIperDEperRank,  // in  - per DE, per rank
     ESMC_AxisIndex *myDstGlobalTotalAIperRank) {  // in  - 1 AI list for dst
+    //! TODO: ditto
 
 //
 // !DESCRIPTION:
@@ -2011,12 +2013,16 @@
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    ESMC_AxisIndex intersectLocalTotalAIperRank[ESMF_MAXDIM];
+    //! TODO:  this needs to be intersectLocalAllocAIperRank!!!
     ESMC_AxisIndex intersectGlobalCompAIperRank[ESMF_MAXDIM];
-    ESMC_AxisIndex myDstGlobalCompAIperRank[ESMF_MAXDIM];
+    ESMC_AxisIndex intersectLocalCompAIperRank[ESMF_MAXDIM];
+    ESMC_AxisIndex intersectLocalTotalAIperRank[ESMF_MAXDIM];
+
     ESMC_AxisIndex mySrcGlobalCompAIperRank[ESMF_MAXDIM];
-    ESMC_AxisIndex theirDstGlobalCompAIperRank[ESMF_MAXDIM];
+    ESMC_AxisIndex myDstGlobalCompAIperRank[ESMF_MAXDIM];
     ESMC_AxisIndex theirSrcGlobalCompAIperRank[ESMF_MAXDIM];
+    ESMC_AxisIndex theirDstGlobalCompAIperRank[ESMF_MAXDIM];
+
     ESMC_XPacket intersectXP;
     int i, k, rc;
     int didsomething;
@@ -2091,18 +2097,32 @@
                                          intersectGlobalCompAIperRank))
                 continue;
   
-            // translate intersect global AIs to intersect local AIs
+            // TODO:  Total now bad; Alloc good
+            //   This needs to be 2 parts:  part 1 is GlobalComp to LocalComp
+            //   part 2 is LocalComp to LocalAlloc.
+
+            // translate global comp AIs to local comp AIs
             rc = ESMC_AxisIndexGlobalToLocal(rank, 
                                              intersectGlobalCompAIperRank,
-                                             mySrcGlobalTotalAIperRank,
-                                             intersectLocalTotalAIperRank);
+                                             mySrcGlobalCompAIperRank,
+                                             intersectLocalCompAIperRank);
+      
+            // TODO: we think we don't need this now.
+            //// translate local comp AIs to local total AIs
+            //rc = ESMC_AxisIndexCompToTotal(rank, 
+            //                               intersectLocalCompAIperRank, 
+            //                               mySrcGlobalCompAIperRank,
+            //                               mySrcGlobalTotalAIperRank,
+            //                               intersectLocalTotalAIperRank);
       
             // then:
             // (assumes strides are set to the local total counts in each dim;
             //  otherwise need the local total counts as either an int array or
             //  in another AI list)
-            rc = intersectXP.ESMC_XPacketFromAxisIndex(rank, 
-                                               intersectLocalTotalAIperRank);
+            rc = intersectXP.ESMC_XPacketFromCompAIs(rank, 
+                                           intersectLocalCompAIperRank, 
+                                           mySrcGlobalCompAIperRank,
+                                           mySrcGlobalTotalAIperRank);
 
             // load the intersecting XPacket into the sending RTable
             sendRT->ESMC_RTableSetEntry(theirMatchingPET, &intersectXP);
@@ -2148,18 +2168,22 @@
                                          intersectGlobalCompAIperRank))
                 continue;
 
-            // translate intersect global AIs to intersect local AIs
+            // TODO:  Total now bad; Alloc good
+            //   This needs to be 2 parts:  part 1 is GlobalComp to LocalComp
+            //   part 2 is LocalComp to LocalAlloc.
+
+            // translate global comp AIs to local comp AIs
             rc = ESMC_AxisIndexGlobalToLocal(rank, 
                                              intersectGlobalCompAIperRank,
-                                             myDstGlobalTotalAIperRank,
-                                             intersectLocalTotalAIperRank);
+                                             myDstGlobalCompAIperRank,
+                                             intersectLocalCompAIperRank);
       
-            // then:
-            // (assumes strides are set to the local total counts in each dim;
-            //  otherwise need the local total counts as either an int array or
-            //   in another AI list)
-            rc = intersectXP.ESMC_XPacketFromAxisIndex(rank, 
-                                                intersectLocalTotalAIperRank);
+            // create a memory-relative xpacket from the comp AIs
+            rc = intersectXP.ESMC_XPacketFromCompAIs(rank, 
+                                           intersectLocalCompAIperRank, 
+                                           myDstGlobalCompAIperRank,
+                                           myDstGlobalTotalAIperRank);
+
 
             // load the intersecting XPacket into the receiving RTable
             recvRT->ESMC_RTableSetEntry(theirMatchingPET, &intersectXP);
