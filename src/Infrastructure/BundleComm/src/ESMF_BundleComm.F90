@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.52 2005/11/04 23:40:40 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.53 2005/11/07 22:46:07 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.52 2005/11/04 23:40:40 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.53 2005/11/07 22:46:07 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -975,7 +975,7 @@
                                  dtypep%flist(1)%ftypep%mapping, &
                                  1, ESMF_ALLTO1HANDLEMAP, 1, &
                                  parentVM, &
-                                 routeOptions, routehandle, status)
+                                 routehandle, routeOptions, status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -993,7 +993,7 @@
                                dtypep%flist(i)%ftypep%mapping, &
                                i, ESMF_1TO1HANDLEMAP, stypep%field_count, &
                                parentVM, &
-                               routeOptions, routehandle, status)
+                               routehandle, routeOptions, status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
