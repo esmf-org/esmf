@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.23 2005/11/04 22:07:05 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.24 2005/11/07 23:59:23 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.23 2005/11/04 22:07:05 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.24 2005/11/07 23:59:23 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -137,6 +137,24 @@
 !
 !==============================================================================
 
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArrayGetAxisIndex  - Set Array attributes
+!
+! !INTERFACE:
+      interface ESMF_ArrayGetAxisIndex 
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_ArrayGetAxisIndex
+        module procedure ESMF_ArrayGetAxisIndexOld
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that get
+!     AxisIndex derived types from an {\tt ESMF\_Array}.
+ 
+!EOPI
+      end interface
+!
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_ArraySetAttribute  - Set Array attributes
@@ -1175,8 +1193,61 @@ end subroutine
 ! !IROUTINE: ESMF_ArrayGetAxisIndex
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayGetAxisIndex(array, totalindex, compindex, &
-                                        exclindex, rc)
+      subroutine ESMF_ArrayGetAxisIndex(array, domainTypeFlag, AIPerRank, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(in) :: array 
+      type(ESMF_DomainTypeFlag), intent(in) :: domainTypeFlag
+      type(ESMF_AxisIndex), intent(inout) :: AIPerRank(:)
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Used to retrieve the index annotation from an {\tt ESMF\_Array}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array}.
+!     \item [domainTypeFlag]
+!     \item [AIPerRank]
+!           An array of index spaces.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+        integer :: status, i
+
+        ! call c routine to get index
+        call c_ESMC_ArrayGetAxisIndex(array, domainTypeFlag, AIPerRank,&
+                                      status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+
+        ! translate from C++ to Fortran
+        do i=1,size(AIPerRank)
+          AIPerRank(i)%min = AIPerRank(i)%min + 1
+          AIPerRank(i)%max = AIPerRank(i)%max + 1
+        enddo
+
+        status = ESMF_SUCCESS
+
+ 10     continue
+
+        if (present(rc)) rc = status
+
+        end subroutine ESMF_ArrayGetAxisIndex
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetAxisIndex"
+!BOPI
+! !IROUTINE: ESMF_ArrayGetAxisIndex
+!
+! !INTERFACE:
+      subroutine ESMF_ArrayGetAxisIndexOld(array, totalindex, compindex, &
+                                           exclindex, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: array 
@@ -1243,7 +1314,7 @@ end subroutine
  10   continue
         if (present(rc)) rc = status
 
-        end subroutine ESMF_ArrayGetAxisIndex
+        end subroutine ESMF_ArrayGetAxisIndexOld
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
