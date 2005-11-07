@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.25 2004/12/29 20:56:32 nscollins Exp $
+! $Id: ESMF_CplEx.F90,v 1.26 2005/11/07 19:48:20 theurich Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -24,8 +24,13 @@
 ! follow the declaration below: a subroutine which takes an 
 ! {\tt ESMF\_CplComp} as the first argument, and 
 ! an integer return code as the second.
+! Both arguments are required and must {\em not} be declared as 
+! {\tt optional}. If an intent is specified in the interface it must be 
+! {\tt intent(inout)} for the first and {\tt intent(out)} for the 
+! second argument.
 !
-! It must call the ESMF method {\tt ESMF\_CplCompSetEntryPoint()} to
+! The set services routine must call the ESMF method 
+! {\tt ESMF\_CplCompSetEntryPoint()} to
 ! register with the framework what user-code subroutines should be called
 ! to initialize, run, and finalize the component.  There are
 ! additional routines which can be registered as well, for checkpoint
