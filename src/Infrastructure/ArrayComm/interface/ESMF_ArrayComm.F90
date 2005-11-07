@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.73 2005/11/04 22:09:54 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.74 2005/11/07 22:35:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.73 2005/11/04 22:09:54 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.74 2005/11/07 22:35:00 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -1534,7 +1534,7 @@ note 2:
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcArray
-      type(ESMF_Array), intent(inout) :: dstArray
+      type(ESMF_Array), intent(in) :: dstArray
       type(ESMF_RouteHandle), intent(in) :: routehandle
       integer, intent(in), optional :: routeIndex
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
@@ -1679,7 +1679,7 @@ note 2:
       type(ESMF_Array), intent(in) :: srcArray
       type(ESMF_Grid), intent(in) :: srcGrid
       type(ESMF_FieldDataMap), intent(in) :: srcDataMap
-      type(ESMF_Array), intent(inout) :: dstArray
+      type(ESMF_Array), intent(in) :: dstArray
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_FieldDataMap), intent(in) :: dstDataMap
       type(ESMF_VM), intent(in) :: parentVM
@@ -1737,7 +1737,7 @@ note 2:
     call ESMF_ArrayRedistStoreList(srcArray, srcGrid, srcDataMap, &
                                dstArray, dstGrid, dstDataMap, &
                                1, ESMF_1TO1HANDLEMAP, 1, &
-                               parentVM, routeOptions, routehandle, rc)
+                               parentVM, routehandle, routeOptions, rc)
 
 
     end subroutine ESMF_ArrayRedistStoreOne
@@ -1753,21 +1753,21 @@ note 2:
       subroutine ESMF_ArrayRedistStoreList(srcArray, srcGrid, srcDataMap, &
                                        dstArray, dstGrid, dstDataMap, &
                                        index, rmaptype, maxindex, &
-                                       parentVM, routeOptions, routehandle, rc)
+                                       parentVM, routehandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcArray
       type(ESMF_Grid), intent(in) :: srcGrid
       type(ESMF_FieldDataMap), intent(in) :: srcDataMap
-      type(ESMF_Array), intent(inout) :: dstArray
+      type(ESMF_Array), intent(in) :: dstArray
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_FieldDataMap), intent(in) :: dstDataMap
       integer, intent(in) :: index
       integer, intent(in) :: rmaptype
       integer, intent(in) :: maxindex
       type(ESMF_VM), intent(in) :: parentVM
-      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1817,13 +1817,13 @@ note 2:
 !   \item[parentVM]
 !    {\tt ESMF\_VM} object which includes all PETs in both the
 !    source and destination grids.
-!     \item [{[routeOptions]}]
-!           Not normally specified.  Specify which internal strategy to select
-!           when executing the communication needed to execute the
-!           See Section~\ref{opt:routeopt} for possible values.
 !   \item [routehandle]
 !    Returned {\tt ESMF\_RouteHandle} which identifies this 
 !    communication pattern.
+!   \item [{[routeOptions]}]
+!    Not normally specified.  Specify which internal strategy to select
+!    when executing the communication needed to execute the
+!    See Section~\ref{opt:routeopt} for possible values.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1942,8 +1942,8 @@ note 2:
         call ESMF_ArrayRedistStoreListArb(srcArray, srcGrid, srcDataMap, &
                                           dstArray, dstGrid, dstDataMap, &
                                           index, rmaptype, maxindex, &
-                                          parentVM, routeOptions, &
-                                          routehandle, rc)
+                                          parentVM, routehandle, &
+                                          routeOptions, rc)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1955,6 +1955,12 @@ note 2:
                             localDE=myDstDE, rc=status)
       call ESMF_DELayoutGet(srcDElayout, deCount=srcDEs, &
                             localDE=mySrcDE, rc=status)
+
+      ! And get the Array sizes
+      call ESMF_ArrayGet(srcArray, rank=datarank, counts=dimlengths, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! TODO: error check/validation code needs to be added here.
       ! these things must be true (or equal):
@@ -1985,12 +1991,6 @@ note 2:
       !                  horzRelLoc=srcHorzRelLoc, vertRelLoc=srcVertRelLoc, &
       !                  globalCellCountPerDim=srcCellCountPerDim, &
       !                  globalStartPerDEPerDim=srcStartPerDEPerDim, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      ! And get the Array sizes
-      call ESMF_ArrayGet(srcArray, rank=datarank, counts=dimlengths, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2099,21 +2099,21 @@ note 2:
       subroutine ESMF_ArrayRedistStoreListArb(srcArray, srcGrid, srcDataMap, &
                                        dstArray, dstGrid, dstDataMap, &
                                        index, rmaptype, maxindex, &
-                                       parentVM, routeOptions, routehandle, rc)
+                                       parentVM, routehandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcArray
       type(ESMF_Grid), intent(in) :: srcGrid
       type(ESMF_FieldDataMap), intent(in) :: srcDataMap
-      type(ESMF_Array), intent(inout) :: dstArray
+      type(ESMF_Array), intent(in) :: dstArray
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_FieldDataMap), intent(in) :: dstDataMap
       integer, intent(in) :: index
       integer, intent(in) :: rmaptype
       integer, intent(in) :: maxindex
       type(ESMF_VM), intent(in) :: parentVM
-      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2163,13 +2163,13 @@ note 2:
 !   \item[parentVM]
 !    {\tt ESMF\_VM} object which includes all PETs in both the
 !    source and destination grids.
-!     \item [{[routeOptions]}]
-!           Not normally specified.  Specify which internal strategy to select
-!           when executing the communication needed to execute the
-!           See Section~\ref{opt:routeopt} for possible values.
 !   \item [routehandle]
 !    Returned {\tt ESMF\_RouteHandle} which identifies this 
 !    communication pattern.
+!   \item [{[routeOptions]}]
+!    Not normally specified.  Specify which internal strategy to select
+!    when executing the communication needed to execute the
+!    See Section~\ref{opt:routeopt} for possible values.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
