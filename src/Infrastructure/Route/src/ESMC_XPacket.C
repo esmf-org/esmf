@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.54 2005/11/07 22:34:13 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.55 2005/11/08 19:26:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.54 2005/11/07 22:34:13 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.55 2005/11/08 19:26:31 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -941,7 +941,7 @@
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_XPacketFromCompAIs"
 //BOP
-// !IROUTINE:  ESMC_XPacketFromAxisIndex - calculate XPacket from AxisIndexList
+// !IROUTINE:  ESMC_XPacketFromCompAIs - calculate XPacket from AxisIndexList
 //
 // !INTERFACE:
       int ESMC_XPacket::ESMC_XPacketFromCompAIs(
