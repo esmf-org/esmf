@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.36 2005/11/07 22:34:13 nscollins Exp $
+// $Id: ESMC_XPacket.h,v 1.37 2005/11/08 22:41:52 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -135,11 +135,11 @@
     int ESMC_XPacketGlobalToLocal(ESMC_XPacket *global_XP,
                                   ESMC_AxisIndex *indexlist, int rank,
                                   int *global_start);
-    int ESMC_XPacket::ESMC_XPacketFromCompAIs(int AIrank,
-                                  ESMC_AxisIndex *intersectLocalCompAIperRank,
-                                  ESMC_AxisIndex *srcGlobalCompAIperRank,
-                                  ESMC_AxisIndex *srcGlobalTotalAIperRank);
-                                  // TODO: change this GlobalAllocAI
+    int ESMC_XPacketFromCompAIs(int AIrank,
+                                ESMC_AxisIndex *intersectLocalCompAIperRank,
+                                ESMC_AxisIndex *srcGlobalCompAIperRank,
+                                ESMC_AxisIndex *srcGlobalTotalAIperRank);
+                                // TODO: change name here Total->Alloc
 
     int ESMC_XPacketPrint(const char *options);
     int ESMC_XPacketPrint(int indent=0, const char *options="");
