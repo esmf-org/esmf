@@ -1,4 +1,4 @@
-! $Id: InjectArraysMod.F90,v 1.6 2004/03/18 18:40:24 nscollins Exp $
+! $Id: InjectArraysMod.F90,v 1.7 2005/11/08 21:11:45 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -84,8 +84,8 @@
       integer :: haloWidth
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Array) :: array_temp
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: indexe
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: indext
+      integer :: lowerindex(2), upperindex(2)
+
 !
 ! Set initial values
 !
@@ -162,16 +162,18 @@
 !
 ! set some of the scalars from array information
 !
-      call ESMF_ArrayGetAxisIndex(array_temp, totalindex=indext, &
-                                  compindex=indexe, rc=status)
-      imin = indexe(1)%min
-      imax = indexe(1)%max
-      jmin = indexe(2)%min
-      jmax = indexe(2)%max
-      imin_t = indext(1)%min
-      imax_t = indext(1)%max
-      jmin_t = indext(2)%min
-      jmax_t = indext(2)%max
+
+      lowerindex = lbound(flag)
+      upperindex = ubound(flag)
+
+      imin_t = lowerindex(1)
+      imax_t = upperindex(1)
+      jmin_t = lowerindex(2)
+      jmax_t = upperindex(2)
+      imin = imin_t + haloWidth
+      imax = imax_t - haloWidth
+      jmin = jmin_t + haloWidth
+      jmax = jmax_t - haloWidth
 
       if(rcpresent) rc = ESMF_SUCCESS
 
