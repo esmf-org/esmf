@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.42 2005/11/08 19:24:52 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.43 2005/11/08 20:10:14 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.42 2005/11/08 19:24:52 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.43 2005/11/08 20:10:14 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -362,6 +362,7 @@
     int i, status;
     ESMC_Array *aptr;
     int alloc_stride;
+    int C, twidth;
 
     rank = irank;
     type = dt;
@@ -412,18 +413,26 @@
 
         ESMC_AxisIndexSet(ai_excl+i, hwidth[i][0], counts[i]-hwidth[i][1]-1);
 #else
+        // use temp vars to try to make this more readable. 
+        // C = counts-1, twidth = alloc width plus halo width
+
+        C = counts[i]-1;
+        twidth = awidth[i][0] + hwidth[i][0];   // need min sides only
+
         // allocation/memory space
-        ESMC_AxisIndexSet(ai_alloc+i, -awidth[i][0]-hwidth[i][0], counts[i]-1);
+        ESMC_AxisIndexSet(ai_alloc+i, -twidth, C - twidth);
 
         // total data area
-        ESMC_AxisIndexSet(ai_total+i, -hwidth[i][0], counts[i]-awidth[i][1]-1);
+        ESMC_AxisIndexSet(ai_total+i, awidth[i][0] - twidth, 
+                                      C - awidth[i][1] - twidth);
 
-        // total computational area
-        ESMC_AxisIndexSet(ai_comp+i, 0, counts[i]-hwidth[i][1]-awidth[i][1]-1);
+        // computational area
+        ESMC_AxisIndexSet(ai_comp+i, awidth[i][0] + hwidth[i][0] - twidth, 
+                                     C - awidth[i][1] - hwidth[i][1] - twidth);
 
         // exclusive area
-        ESMC_AxisIndexSet(ai_excl+i, hwidth[i][0], 
-                                     counts[i]-2*hwidth[i][1]-awidth[i][1]-1);
+        ESMC_AxisIndexSet(ai_excl+i, awidth[i][0] + 2*hwidth[i][0] - twidth, 
+                                    C - awidth[i][1] - 2*hwidth[i][1] - twidth);
 #endif
     }
 
@@ -607,6 +616,7 @@
     int i, rank = this->rank;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
     int alloc_stride;
+    int C, twidth;
   
     // TODO: there is one compiler; linux, maybe intel maybe g95, which
     // seems to have different sizes for even and odd ranks.  this code
@@ -666,18 +676,26 @@
 
         ESMC_AxisIndexSet(ai_excl+i, hwidth[i][0], counts[i]-hwidth[i][1]-1);
 #else
+        // use temp vars to try to make this more readable. 
+        // C = counts-1, twidth = alloc width plus halo width
+
+        C = counts[i]-1;
+        twidth = awidth[i][0] + hwidth[i][0];   // need min sides only
+
         // allocation/memory space
-        ESMC_AxisIndexSet(ai_alloc+i, -awidth[i][0]-hwidth[i][0], counts[i]-1);
+        ESMC_AxisIndexSet(ai_alloc+i, -twidth, C - twidth);
 
         // total data area
-        ESMC_AxisIndexSet(ai_total+i, -hwidth[i][0], counts[i]-awidth[i][1]-1);
+        ESMC_AxisIndexSet(ai_total+i, awidth[i][0] - twidth, 
+                                      C - awidth[i][1] - twidth);
 
-        // total computational area
-        ESMC_AxisIndexSet(ai_comp+i, 0, counts[i]-hwidth[i][1]-awidth[i][1]-1);
+        // computational area
+        ESMC_AxisIndexSet(ai_comp+i, awidth[i][0] + hwidth[i][0] - twidth, 
+                                     C - awidth[i][1] - hwidth[i][1] - twidth);
 
         // exclusive area
-        ESMC_AxisIndexSet(ai_excl+i, hwidth[i][0], 
-                                     counts[i]-2*hwidth[i][1]-awidth[i][1]-1);
+        ESMC_AxisIndexSet(ai_excl+i, awidth[i][0] + 2*hwidth[i][0] - twidth, 
+                                    C - awidth[i][1] - 2*hwidth[i][1] - twidth);
 #endif
     }
 
@@ -803,6 +821,11 @@
      int i, rc;
 
      switch(dt) {
+       case ESMC_DOMAIN_ALLOCATED:
+         for (i=0; i<this->rank; i++) 
+             ai_alloc[i] = ai[i];
+         break;
+
        case ESMC_DOMAIN_TOTAL:
          for (i=0; i<this->rank; i++) 
              ai_total[i] = ai[i];
@@ -853,6 +876,11 @@
      int i, rc;
 
      switch(dt) {
+       case ESMC_DOMAIN_ALLOCATED:
+         for (i=0; i<this->rank; i++) 
+             ai[i] = ai_alloc[i];
+         break;
+     
        case ESMC_DOMAIN_TOTAL:
          for (i=0; i<this->rank; i++) 
              ai[i] = ai_total[i];
@@ -915,7 +943,7 @@
 //EOPI
 
      int i, j, ij, count;
-     int halo_widths[ESMF_MAXGRIDDIM][2];
+     int halo_widths[ESMF_MAXDIM][2];
 
      // TODO: when widths are 2*Ndim, compute all of them.
      for (i=0; i<rank; i++) {
@@ -1953,13 +1981,14 @@
     ap = (struct ESMC_AxisIndex *)(buffer + *offset);
   
     for (i=0; i<ESMF_MAXDIM; i++) {
+        ESMC_AxisIndexCopy((ESMC_AxisIndex *)ai_alloc+i, ap); ap++;
         ESMC_AxisIndexCopy((ESMC_AxisIndex *)ai_total+i, ap); ap++;
         ESMC_AxisIndexCopy((ESMC_AxisIndex *)ai_comp+i, ap);  ap++;
         ESMC_AxisIndexCopy((ESMC_AxisIndex *)ai_excl+i, ap);  ap++;
     }
 
     ip = (int *)ap;
-    for (i=0; i<ESMF_MAXGRIDDIM; i++) {
+    for (i=0; i<ESMF_MAXDIM; i++) {
         *ip++ = hwidth[i][0];
         *ip++ = hwidth[i][1];
     }
@@ -2010,13 +2039,14 @@
   
     ap = (struct ESMC_AxisIndex *)ip;
     for (i=0; i<ESMF_MAXDIM; i++) {
+        ESMC_AxisIndexCopy(ap, ai_alloc+i); ap++;
         ESMC_AxisIndexCopy(ap, ai_total+i); ap++;
         ESMC_AxisIndexCopy(ap, ai_comp+i);  ap++;
         ESMC_AxisIndexCopy(ap, ai_excl+i);  ap++;
     }
 
     ip = (int *)ap;
-    for (i=0; i<ESMF_MAXGRIDDIM; i++) {
+    for (i=0; i<ESMF_MAXDIM; i++) {
         hwidth[i][0] = *ip++;
         hwidth[i][1] = *ip++;
     }
@@ -2075,13 +2105,14 @@
   
     ap = (struct ESMC_AxisIndex *)ip;
     for (i=0; i<ESMF_MAXDIM; i++) {
+        ESMC_AxisIndexCopy((ESMC_AxisIndex *)ai_alloc+i, ap); ap++;
         ESMC_AxisIndexCopy((ESMC_AxisIndex *)ai_total+i, ap); ap++;
         ESMC_AxisIndexCopy((ESMC_AxisIndex *)ai_comp+i, ap);  ap++;
         ESMC_AxisIndexCopy((ESMC_AxisIndex *)ai_excl+i, ap);  ap++;
     }
 
     ip = (int *)ap;
-    for (i=0; i<ESMF_MAXGRIDDIM; i++) {
+    for (i=0; i<ESMF_MAXDIM; i++) {
         *ip++ = hwidth[i][0];
         *ip++ = hwidth[i][1];
     }
@@ -2131,13 +2162,14 @@
   
     ap = (struct ESMC_AxisIndex *)ip;
     for (i=0; i<ESMF_MAXDIM; i++) {
+        ESMC_AxisIndexCopy(ap, ai_alloc+i); ap++;
         ESMC_AxisIndexCopy(ap, ai_total+i); ap++;
         ESMC_AxisIndexCopy(ap, ai_comp+i);  ap++;
         ESMC_AxisIndexCopy(ap, ai_excl+i);  ap++;
     }
 
     ip = (int *)ap;
-    for (i=0; i<ESMF_MAXGRIDDIM; i++) {
+    for (i=0; i<ESMF_MAXDIM; i++) {
         hwidth[i][0] = *ip++;
         hwidth[i][1] = *ip++;
     }
