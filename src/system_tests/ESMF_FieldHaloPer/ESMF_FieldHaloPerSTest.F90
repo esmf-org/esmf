@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.34 2005/10/12 19:06:23 nscollins Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.35 2005/11/08 20:55:07 nscollins Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -233,7 +233,7 @@
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Array) :: array1
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
+      integer :: lowerindex(2), upperindex(2)
       integer :: pe_id
       type(ESMF_VM) :: vm
       type(ESMF_DELayout) :: layout1
@@ -442,21 +442,19 @@
           call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
     
           ! Set initial data values over whole array to -1
-          call ESMF_ArrayGetAxisIndex(array1, totalindex=index, rc=rc)
-          if (rc .ne. ESMF_SUCCESS) goto 30
-          do j=index(2)%min,index(2)%max
-            do i=index(1)%min,index(1)%max
+          lowerindex = lbound(ldata)
+          upperindex = ubound(ldata)
+          do j=lowerindex(2),upperindex(2)
+            do i=lowerindex(1),upperindex(1)
               ldata(i,j) = -1
             enddo
           enddo
     
-          ! Set initial data values over computational domain to the de identifier
-         call ESMF_ArrayGetAxisIndex(array1, compindex=index, rc=rc)
-         if (rc .ne. ESMF_SUCCESS) goto 30
-          do j=index(2)%min,index(2)%max
-            do i=index(1)%min,index(1)%max
-              ldata(i,j) =pe_id
-            enddo
+          ! Set initial data values over computational domain to the pet num
+          do j=lowerindex(2)+halo_width,upperindex(2)-halo_width
+            do i=lowerindex(1)+halo_width,upperindex(1)-halo_width
+               ldata(i,j) =pe_id
+             enddo
           enddo
 
       enddo
@@ -647,7 +645,7 @@
       integer :: pattern(3,3)
       type(ESMF_Logical) :: pflags(2)
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
+      integer :: lowerindex(2), upperindex(2)
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid1
       type(ESMF_Array) :: array1
@@ -679,12 +677,11 @@
       if (rc .ne. ESMF_SUCCESS) goto 40
       if (verbose) print *, "data back from array"
 
-
       ! Get size of local array
-      call ESMF_ArrayGetAxisIndex(array1, totalindex=index, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 40
-      ni = index(1)%max - index(1)%min + 1
-      nj = index(2)%max - index(2)%min + 1
+      lowerindex = lbound(ldata)
+      upperindex = ubound(ldata)
+      ni = upperindex(1) - lowerindex(1) + 1
+      nj = upperindex(2) - lowerindex(2) + 1
 
       ! get info about total number of DEs in each dim and which one
       ! we are.  then use them to compute the values in the halo.

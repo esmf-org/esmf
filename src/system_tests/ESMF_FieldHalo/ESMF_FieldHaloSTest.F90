@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.37 2005/05/17 18:22:03 theurich Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.38 2005/11/08 20:50:58 nscollins Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -224,12 +224,12 @@
       integer :: i, j
       type(ESMF_VM) :: vm
       type(ESMF_DELayout) :: delayout1 
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       type(ESMF_Grid) :: grid1
       type(ESMF_Field) :: field1
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Array) :: array1
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
+      integer :: lowerindex(2), upperindex(2)
       integer :: de_id
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
       type(ESMF_GridHorzStagger) :: horz_stagger
@@ -309,19 +309,17 @@
       call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
 
       ! Set initial data values over whole array to -1
-      call ESMF_ArrayGetAxisIndex(array1, totalindex=index, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
-      do j=index(2)%min,index(2)%max
-        do i=index(1)%min,index(1)%max
+      lowerindex = lbound(ldata)
+      upperindex = ubound(ldata)
+      do j=lowerindex(2),upperindex(2)
+        do i=lowerindex(1),upperindex(1)
           ldata(i,j) = -1
         enddo
       enddo
 
       ! Set initial data values over computational domain to the de identifier
-      call ESMF_ArrayGetAxisIndex(array1, compindex=index, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
-       do j=index(2)%min,index(2)%max
-         do i=index(1)%min,index(1)%max
+      do j=lowerindex(2)+halo_width,upperindex(2)-halo_width
+        do i=lowerindex(1)+halo_width,upperindex(1)-halo_width
            ldata(i,j) =de_id
          enddo
       enddo
@@ -408,7 +406,7 @@
       integer :: de_id, mismatch, target
       integer :: pattern(3,3), nDE(2), myDE(2)
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
+      integer :: lowerindex(2), upperindex(2)
       type(ESMF_DELayout) :: delayout
       type(ESMF_Field) :: field1
       type(ESMF_Grid) :: grid1
@@ -444,10 +442,11 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get size of local array
-      call ESMF_ArrayGetAxisIndex(array1, totalindex=index, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
-      ni = index(1)%max - index(1)%min + 1
-      nj = index(2)%max - index(2)%min + 1
+      lowerindex = lbound(ldata)
+      upperindex = ubound(ldata)
+
+      ni = upperindex(1) - lowerindex(1) + 1
+      nj = upperindex(2) - lowerindex(2) + 1
 
       ! Validity check for results - return error if results do not match
 
