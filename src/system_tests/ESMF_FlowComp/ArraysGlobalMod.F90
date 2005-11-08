@@ -1,4 +1,4 @@
-! $Id: ArraysGlobalMod.F90,v 1.6 2004/03/18 18:40:24 nscollins Exp $
+! $Id: ArraysGlobalMod.F90,v 1.7 2005/11/08 21:01:52 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -69,8 +69,7 @@
       integer :: halo_width
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Array) :: array_temp
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: indexe
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: indext
+      integer :: lowerindex(2), upperindex(2)
 !
 ! Set initial values
 !
@@ -147,17 +146,19 @@
 !
 ! set some of the scalars from grid information
 !
-      call ESMF_ArrayGetAxisIndex(array_temp, totalindex=indext, &
-                                  compindex=indexe, rc=status)
-      imin = indexe(1)%min
-      imax = indexe(1)%max
-      jmin = indexe(2)%min
-      jmax = indexe(2)%max
-      imin_t = indext(1)%min
-      imax_t = indext(1)%max
-      jmin_t = indext(2)%min
-      jmax_t = indext(2)%max
-! TODO  need to add calls to get dx and dy from physgrid -- just set for today
+      lowerindex = lbound(flag)
+      upperindex = ubound(flag)
+
+      imin_t = lowerindex(1)
+      imax_t = upperindex(1)
+      jmin_t = lowerindex(2)
+      jmax_t = upperindex(2)
+      imin = imin_t + halo_width
+      imax = imax_t - halo_width
+      jmin = jmin_t + halo_width
+      jmax = jmax_t - halo_width
+
+! TODO  need to add calls to get dx and dy from physgrid -- hardcode for now.
       dx = 5.0
       dy = 2.50
 
