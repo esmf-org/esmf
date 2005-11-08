@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.208 2005/11/03 20:21:22 svasquez Exp $
+! $Id: ESMF_Field.F90,v 1.209 2005/11/08 19:26:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -285,7 +285,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.208 2005/11/03 20:21:22 svasquez Exp $'
+      '$Id: ESMF_Field.F90,v 1.209 2005/11/08 19:26:04 nscollins Exp $'
 
 !==============================================================================
 !
@@ -4454,6 +4454,10 @@
             arraycounts(i) = counts(j) 
             j = j + 1
          else
+            !! TODO: decide if the counts going into ArrayCreate do or do not
+            !! include either halo widths or allocation widths.  If so, this
+            !! is the right count.  If not, then add hwidths plus awidths.
+            !!arraycounts(i) = gridcounts(dimorder(i))
             arraycounts(i) = gridcounts(dimorder(i)) + (2 * hwidth)
          endif
       enddo
