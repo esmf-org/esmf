@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.41 2005/11/04 22:08:39 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.42 2005/11/08 19:24:52 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.41 2005/11/04 22:08:39 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.42 2005/11/08 19:24:52 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -391,12 +391,18 @@
         hwidth[i][0] = halo_width;
         hwidth[i][1] = halo_width;
   
+        // TODO: decide what counts really means.  right now, it means
+        // allocation space, so halo is subtracted from it to give comp area.
+ 
         // there is an important change here.   the origin, both for local
         // and for global, is now the min of the computational area.  if there
         // are halo widths, those will be negative on the lower side, above
         // counts on the upper side.  if there are allocation widths, those 
         // min and maxs will be even more negative and positive.
 
+#if 0
+        // these are right if counts comes in as the computation area, but
+        // then the other things (lbound, ubound, stride, etc) are NOT right.
         ESMC_AxisIndexSet(ai_alloc+i, -awidth[i][0]-hwidth[i][0], 
                           counts[i]+hwidth[i][1]+awidth[i][1]-1);
 
@@ -405,6 +411,20 @@
         ESMC_AxisIndexSet(ai_comp+i, 0, counts[i]-1);
 
         ESMC_AxisIndexSet(ai_excl+i, hwidth[i][0], counts[i]-hwidth[i][1]-1);
+#else
+        // allocation/memory space
+        ESMC_AxisIndexSet(ai_alloc+i, -awidth[i][0]-hwidth[i][0], counts[i]-1);
+
+        // total data area
+        ESMC_AxisIndexSet(ai_total+i, -hwidth[i][0], counts[i]-awidth[i][1]-1);
+
+        // total computational area
+        ESMC_AxisIndexSet(ai_comp+i, 0, counts[i]-hwidth[i][1]-awidth[i][1]-1);
+
+        // exclusive area
+        ESMC_AxisIndexSet(ai_excl+i, hwidth[i][0], 
+                                     counts[i]-2*hwidth[i][1]-awidth[i][1]-1);
+#endif
     }
 
     // fill out rest of space to null values.
@@ -625,12 +645,18 @@
         hwidth[i][0] = halo_width;
         hwidth[i][1] = halo_width;
   
+        // TODO: decide what counts really means.  right now, it means
+        // allocation space, so halo is subtracted from it to give comp area.
+ 
         // there is an important change here.   the origin, both for local
         // and for global, is now the min of the computational area.  if there
         // are halo widths, those will be negative on the lower side, above
         // counts on the upper side.  if there are allocation widths, those 
         // min and maxs will be even more negative and positive.
 
+#if 0
+        // these are right if counts comes in as the computation area, but
+        // then the other things (lbound, ubound, stride, etc) are NOT right.
         ESMC_AxisIndexSet(ai_alloc+i, -awidth[i][0]-hwidth[i][0], 
                           counts[i]+hwidth[i][1]+awidth[i][1]-1);
 
@@ -639,6 +665,20 @@
         ESMC_AxisIndexSet(ai_comp+i, 0, counts[i]-1);
 
         ESMC_AxisIndexSet(ai_excl+i, hwidth[i][0], counts[i]-hwidth[i][1]-1);
+#else
+        // allocation/memory space
+        ESMC_AxisIndexSet(ai_alloc+i, -awidth[i][0]-hwidth[i][0], counts[i]-1);
+
+        // total data area
+        ESMC_AxisIndexSet(ai_total+i, -hwidth[i][0], counts[i]-awidth[i][1]-1);
+
+        // total computational area
+        ESMC_AxisIndexSet(ai_comp+i, 0, counts[i]-hwidth[i][1]-awidth[i][1]-1);
+
+        // exclusive area
+        ESMC_AxisIndexSet(ai_excl+i, hwidth[i][0], 
+                                     counts[i]-2*hwidth[i][1]-awidth[i][1]-1);
+#endif
     }
 
     // fill out rest of space to null values.
