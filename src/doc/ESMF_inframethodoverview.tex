@@ -1,4 +1,4 @@
-% $Id: ESMF_inframethodoverview.tex,v 1.8 2005/08/26 20:26:19 nscollins Exp $
+% $Id: ESMF_inframethodoverview.tex,v 1.9 2005/11/08 23:03:45 nscollins Exp $
 
 \section{Overview of Distributed Data Methods}
 
@@ -271,12 +271,20 @@ code, and can be changed each time the Route is run.
 Packing options:
 \begin{enumerate}
 \item[By MultiBlock]
-If multiple memory addresses are provided to the Route (from
+If multiple memory addresses are provided to RouteRun (from
 bundle-level communications, for example), then this option
-packs data from all blocks communicated to and from each
-remote PET into a single buffer before sending or receiving.
-Other than handling multiple base addresses, this is the
-same type of packing as {\t By PET}, see \ref{fig:routepackall}.
+packs data across all blocks as specified by the other
+packing flags before sending or receiving.
+Note: unlike the other packing flags, this is handled in the
+code at a higher level by either passing down multiple addresses
+into the route run routine or not.  If multiple addresses are
+passed into the run routine, they will be packed.  The "no-packing"
+option at this level would be identical to looping at the outermost
+level in the RouteRun code and therefore there is no disadvantage
+to calling this routine once per address (and the advantage is
+not adding yet another coding loop inside the already complex
+RouteRun code).  The higher level list-of-address code can be
+disabled by clearing this flag (which is on by default).
 \item[By PET]
 All data from a single block
 intended for a remote PET is packed into a single send
@@ -296,9 +304,9 @@ A VM communication call is made for each single contiguous strip
 of memory, regardless of how long or short.
 \item[MPI Vector]
 MPI implements a set of interfaces for sending and receiving which
-allows certain strided memory patters to be sent in a single call.
+allows certain strided memory patterns to be sent in a single call.
 The actual implementation is up to the MPI library itself.  But no
-user-level data copy is needed in this case.
+user-level data copy is needed in this case. (Not implemented yet.)
 \end{enumerate}
 Note that in all packing options, if the XPacket describes a
 chunk of memory which is completely contiguous, then the code
@@ -389,6 +397,42 @@ call is waited for in turn and when all outstanding communication
 calls have completed, then the API call returns to the user.
 
 \end{enumerate}
+
+\item
+
+Bundle-level communication calls have additional packing options
+under certain circumstances.  Bundles are groups of Fields which
+share the same Grid, but they are not required to share the same
+data types, data ranks, nor relative data locations.  Bundles
+in which these things are the same in all Fields are marked inside the
+bundle code as being "congruent".  At communication store time,
+bundles which have congruent data in all the Fields have the option
+of packing all Field data together into fewer communication calls
+which generally is expected to give better performance.   
+Fields where the data is not of the same type or perhaps not
+the same number of items (e.g. different rank, vertex-centered data
+vs cell centered data) can in theory also be packed but in fact
+the code becomes more complicated, and in the case of differing
+data types may cause system errors because of accessing data
+on non-standard byte offsets or putting mixing integer data
+with floating data and causing NaN (not a number) exceptions.
+In this case, the conservative thing to do is to construct a
+separate Route object for each Field, all enclosed in the same
+RouteHandle.  Inside the Bundle communication code the execution
+for both types of Bundles is identical for the caller, but inside
+the congruent Bundle code calls the {\tt ESMF\_RouteRun()} code
+once and all communication for all Fields in the Bundle is done
+when it returns.  The non-congruent Bundles execute a separate
+run call for each Field and return to the user when all Fields
+have been sent/received.
+
+There are comments in the code for an intermediate level of
+optimization in which the Bundle code determines the smallest
+number of unique types of Fields in the Bundle, and all types
+share the same Route object, but this has not been implemented
+at this time.  Once the existing code has been in use for a while,
+whether this is useful or needed may become more clear.
+
 
 \item
 
