@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.24 2005/11/07 23:59:23 jwolfe Exp $
+! $Id: ESMF_Array.F90,v 1.25 2005/11/08 20:36:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.24 2005/11/07 23:59:23 jwolfe Exp $'
+      '$Id: ESMF_Array.F90,v 1.25 2005/11/08 20:36:17 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -139,7 +139,7 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayGetAxisIndex  - Set Array attributes
+! !IROUTINE: ESMF_ArrayGetAxisIndex  - Get Array attributes
 !
 ! !INTERFACE:
       interface ESMF_ArrayGetAxisIndex 
