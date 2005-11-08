@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle_F.C,v 1.13 2005/10/12 19:06:17 nscollins Exp $
+// $Id: ESMC_RHandle_F.C,v 1.14 2005/11/08 22:44:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -127,21 +127,20 @@ extern "C" {
 
 
        // the int needs to be an enum, the label needs to be added and handled
-       void FTN(c_esmc_routehandleget)(ESMC_RouteHandle **ptr, 
-                                       int *htype, 
-                                       int *rt_count,  int *which_rt,
-                                       ESMC_Route **r, int *tv_count, 
-				       int *which_tv, ESMC_TransformValues **tv,
-                                       char *label, 
-                                       int *status, int labellen) {
+       void FTN(c_esmc_routehandleget)(ESMC_RouteHandle **ptr, int *htype, 
+                               int *rt_count,  ESMC_HandleMapping *rmaptype,
+                               int *which_rt, ESMC_Route **r, 
+                               int *tv_count, ESMC_HandleMapping *tvmaptype,
+			       int *which_tv, ESMC_TransformValues **tv,
+                               char *label, int *status, int labellen) {
            if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
            }
            *status = (*ptr)->ESMC_RouteHandleGet((ESMC_HandleType *)htype, 
-                                                 rt_count, *which_rt, r, 
-                                                 tv_count, *which_tv, tv, 
-                                                 (char **)(NULL));
+                                       rt_count, rmaptype, *which_rt, r, 
+                                       tv_count, tvmaptype, *which_tv, tv, 
+                                       (char **)(NULL));
        }
 
        // get a specific route
@@ -170,17 +169,17 @@ extern "C" {
        }
 
        // get just interesting numbers
-       void FTN(c_esmc_routehandlegetinfo)(ESMC_RouteHandle **ptr, 
-                                           int *htype, 
-                                           int *rt_count, int *tv_count, 
-                                           int *status) {
+       void FTN(c_esmc_routehandlegetinfo)(ESMC_RouteHandle **ptr, int *htype, 
+                                 int *rt_count, ESMC_HandleMapping *rmaptype,
+                                 int *tv_count, ESMC_HandleMapping *tvmaptype,
+                                 int *status) {
            if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
            }
            *status = (*ptr)->ESMC_RouteHandleGet((ESMC_HandleType *)htype, 
-                                                 rt_count, 0, NULL,
-                                                 tv_count, 0, NULL,
+                                                 rt_count, rmaptype, 0, NULL,
+                                                 tv_count, tvmaptype, 0, NULL,
                                                  (char **)(NULL));
        }
 

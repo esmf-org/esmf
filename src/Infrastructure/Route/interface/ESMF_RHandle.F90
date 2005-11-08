@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.25 2005/10/12 19:06:17 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.26 2005/11/08 22:44:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.25 2005/10/12 19:06:17 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.26 2005/11/08 22:44:05 nscollins Exp $'
 
 !==============================================================================
 
@@ -831,15 +831,14 @@
         ! Call C++  code
         ! TODO: handle label string going through the interface
         call c_ESMC_RouteHandleGetInfo(rhandle, myhtype, &
-                                       myrcount, mytvcount, status)
+                                       myrcount, myrmaptype, &
+                                       mytvcount, mytvmaptype, status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
         ! TODO: need to handle all 3 of these across the interface
         mylabel = "NONE"
-        myrmaptype = ESMF_UNKNOWNHANDLEMAP
-        mytvmaptype = ESMF_UNKNOWNHANDLEMAP
 
         ! query for route type
         if (present(htype)) then

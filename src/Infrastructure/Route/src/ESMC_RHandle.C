@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.C,v 1.10 2005/10/12 19:06:17 nscollins Exp $
+// $Id: ESMC_RHandle.C,v 1.11 2005/11/08 22:44:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-       "$Id: ESMC_RHandle.C,v 1.10 2005/10/12 19:06:17 nscollins Exp $";
+       "$Id: ESMC_RHandle.C,v 1.11 2005/11/08 22:44:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -192,9 +192,11 @@
 // !ARGUMENTS:
       ESMC_HandleType *h,            // out - handle type
       int *rt_count,                 // out - count of route tables
+      ESMC_HandleMapping *rmaptype,  // out - type of route map
       int which_rt,                  // in - which route table to return
       ESMC_Route **rh,               // out - route table
       int *tv_count,                 // out - count of trans vals
+      ESMC_HandleMapping *tvmaptype, // out - type of trans vals map
       int which_tv,                  // in - which transform values to return
       ESMC_TransformValues **td,     // out - regrid weight info
       char **l) const {              // out - additional name/label
@@ -208,11 +210,13 @@
 
     if (h) *h = htype;
     if (rt_count) *rt_count = nroutes;
+    if (rmaptype) *rmaptype = rmapping;
     if (rh) {
         if (which_rt >= nroutes) *rh = NULL;
         else *rh = &routes[which_rt];
     }
     if (tv_count) *tv_count = ntvalues;
+    if (tvmaptype) *tvmaptype = tvmapping;
     if (td) {
         if (which_tv >= ntvalues) *td = NULL;
         else *td = &tvalues[which_tv];

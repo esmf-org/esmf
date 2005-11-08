@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.h,v 1.5 2005/10/12 19:06:17 nscollins Exp $
+// $Id: ESMC_RHandle.h,v 1.6 2005/11/08 22:44:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -105,15 +105,16 @@ typedef enum {
     int ESMC_RouteHandleDestruct(void);    
 
  // general get/set routines
-    int ESMC_RouteHandleGet(ESMC_HandleType *h, int *rt_count, 
-                            int which_rt, ESMC_Route **rh, int *tv_count, 
+    int ESMC_RouteHandleGet(ESMC_HandleType *h, 
+                            int *rt_count, ESMC_HandleMapping *rmaptype,
+                            int which_rt, ESMC_Route **rh, 
+                            int *tv_count, ESMC_HandleMapping *tvmaptype,
                             int which_tv, ESMC_TransformValues **td, 
                             char **l) const;
-    int ESMC_RouteHandleSet(ESMC_HandleType h, int rt_count, 
-                            ESMC_HandleMapping rmaptype, 
+    int ESMC_RouteHandleSet(ESMC_HandleType h, 
+                            int rt_count, ESMC_HandleMapping rmaptype, 
                             int which_rt, ESMC_Route *rh,
-                            int tv_count, 
-                            ESMC_HandleMapping tvmaptype, 
+                            int tv_count, ESMC_HandleMapping tvmaptype, 
                             int which_tv, ESMC_TransformValues *td, char *l);
 
  // accessor methods for individual class members
@@ -213,10 +214,12 @@ extern "C" {
 
 
  // the int needs to be an enum, the label needs to be added and handled
-  void FTN(c_esmc_routehandleget)(ESMC_RouteHandle **ptr, 
-           int *htype, int *rt_count,  int *which_rt,
-           ESMC_Route **r, int *tv_count, int *which_tv, 
-           ESMC_TransformValues **tv, char *label, int *status, int labellen);
+  void FTN(c_esmc_routehandleget)(ESMC_RouteHandle **ptr, int *htype, 
+                          int *rt_count, ESMC_HandleMapping *rmaptype, 
+                          int *which_rt, ESMC_Route **r,
+                          int *tv_count, ESMC_HandleMapping *tvmaptype, 
+                          int *which_tv, ESMC_TransformValues **tv, 
+                          char *label, int *status, int labellen);
 
   // get a specific route
   void FTN(c_esmc_routehandlegetroute)(ESMC_RouteHandle **ptr, 
@@ -227,8 +230,9 @@ extern "C" {
                                     ESMC_TransformValues **tv, int *status);
 
  // get just interesting numbers
-  void FTN(c_esmc_routehandlegetinfo)(ESMC_RouteHandle **ptr, 
-           int *htype, int *rt_count, int *tv_count, int *status);
+  void FTN(c_esmc_routehandlegetinfo)(ESMC_RouteHandle **ptr, int *htype, 
+                    int *rt_count, ESMC_HandleMapping *rmaptype,
+                    int *tv_count, ESMC_HandleMapping *tvmaptype, int *status);
 
  void FTN(c_esmc_routehandleset)(ESMC_RouteHandle **ptr, 
       int *htype, int *rt_count, ESMC_HandleMapping *rmaptype, 
