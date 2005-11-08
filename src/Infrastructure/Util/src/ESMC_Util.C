@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.8 2005/11/07 22:34:53 nscollins Exp $
+// $Id: ESMC_Util.C,v 1.9 2005/11/08 19:27:13 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.8 2005/11/07 22:34:53 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.9 2005/11/08 19:27:13 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -404,53 +404,6 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
     dstlocal[i].min = srcglobal[i].min - globalref[i].min;
     dstlocal[i].max = srcglobal[i].max - globalref[i].min;
     dstlocal[i].stride = srcglobal[i].stride;
-
-  }
-  
-  return ESMF_SUCCESS;
-}
-
-//-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AxisIndexCompToTotal"
-//BOP
-// !IROUTINE:  ESMC_AxisIndexCompToTotal - translate computational AI to total
-//
-// !INTERFACE:
-      int ESMC_AxisIndexCompToTotal(
-//
-// !RETURN VALUE:
-//    error code 
-//
-// !ARGUMENTS:
-        int ndims,                       // in - number of dimensions
-        ESMC_AxisIndex *srclocalcomp,    // in - global AI extents to transform
-        ESMC_AxisIndex *globalcomp,      // in - global comp counts
-        ESMC_AxisIndex *globaltotal,     // in - global total counts
-        ESMC_AxisIndex *dstlocaltotal) { // out - AIs translated to local space
-//
-// !DESCRIPTION:
-//   take a list of ndims AIs that describe a computational area and translate
-//   them into total area.
-//
-//EOP
-  int i;
-  int diffs[ESMF_MAXDIM][2];
-
-  // TODO: this may not be the right thang; needs AIs which have
-  // both the local min/max and the global min/max, or an offset/lengths,
-  // or offset/stride, or origin/stride, etc.
-
-  for (i=0; i<ndims; i++) {
-     diffs[i][0] = globalcomp[i].min - globaltotal[i].min;
-     diffs[i][1] = globaltotal[i].max - globalcomp[i].max;
-  }
-  for (i=0; i<ndims; i++) {
-
-    dstlocaltotal[i].min = srclocalcomp[i].min - diffs[i][0];
-    dstlocaltotal[i].max = srclocalcomp[i].max + diffs[i][1];
-
-    dstlocaltotal[i].stride = globaltotal[i].stride;
 
   }
   

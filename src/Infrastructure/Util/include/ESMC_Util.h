@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.9 2005/11/07 22:34:53 nscollins Exp $
+// $Id: ESMC_Util.h,v 1.10 2005/11/08 19:27:12 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -191,11 +191,6 @@ int ESMC_AxisIndexGlobalToLocal(int ndims,
                                 ESMC_AxisIndex *srcglobal, 
                                 ESMC_AxisIndex *globalref, 
                                 ESMC_AxisIndex *dstlocal);
-int ESMC_AxisIndexCompToTotal(int ndims, 
-                              ESMC_AxisIndex *srclocalcomp, 
-                              ESMC_AxisIndex *globalcomp, 
-                              ESMC_AxisIndex *globaltotal, 
-                              ESMC_AxisIndex *dstlocaltotal);
 int ESMC_AxisIndexPrint(ESMC_AxisIndex *ai);
 ESMC_Logical ESMC_AxisIndexEqual(ESMC_AxisIndex *ai1, ESMC_AxisIndex *ai2);
 
