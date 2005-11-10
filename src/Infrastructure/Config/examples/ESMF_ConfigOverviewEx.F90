@@ -23,7 +23,7 @@
       implicit none
 
       ! Local variables
-      integer             :: status, petcount, i, j
+      integer             :: i, j
       type(ESMF_VM)       :: vm
 
 !BOE
