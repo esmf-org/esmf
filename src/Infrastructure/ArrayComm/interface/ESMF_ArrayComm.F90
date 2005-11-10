@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.76 2005/11/08 17:51:56 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.77 2005/11/10 17:49:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.76 2005/11/08 17:51:56 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.77 2005/11/10 17:49:44 svasquez Exp $'
 !
 !==============================================================================
 !
@@ -1857,16 +1857,11 @@
 !EOPI
 
       integer :: status         ! local error status
-      integer :: dstAICount, srcAICount
       integer :: dstDEs, srcDEs, myDstDE, MySrcDE
       integer :: srcCount, dstCount
       integer :: gridrank, datarank
       integer, dimension(ESMF_MAXDIM) :: dstDimOrder, srcDimOrder, dimlengths
-      integer, dimension(:), allocatable :: dstCellCountPerDim, decompids, &
-                                            srcCellCountPerDim
       integer, dimension(:), pointer :: dstAICountPerDE, srcAICountPerDE
-      integer, dimension(:,:), allocatable :: dstStartPerDEPerDim, &
-                                              srcStartPerDEPerDim
       type(ESMF_AxisIndex), dimension(:), pointer :: &
 		mySrcGlobalTotalAIperRank, myDstGlobalTotalAIperRank
       type(ESMF_AxisIndex), dimension(:,:), pointer :: &
