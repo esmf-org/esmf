@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGatherUTest.F90,v 1.6 2005/10/21 16:12:11 svasquez Exp $
+! $Id: ESMF_ArrayGatherUTest.F90,v 1.7 2005/11/10 20:24:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,15 +35,17 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArrayGatherUTest.F90,v 1.6 2005/10/21 16:12:11 svasquez Exp $'
+      '$Id: ESMF_ArrayGatherUTest.F90,v 1.7 2005/11/10 20:24:15 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
     type(ESMF_VM):: vm
     integer:: localPet, petCount
     integer:: nlen, nsize, i, rootDE
-    type(ESMF_Array) :: array1, array2
-    integer(ESMF_KIND_I4), dimension(:), pointer :: f90ptr1, f90ptr2
+    type(ESMF_Array) :: array1
+    ! type(ESMF_Array) ::  array2
+    integer(ESMF_KIND_I4), dimension(:), pointer :: f90ptr1
+    ! integer(ESMF_KIND_I4), dimension(:), pointer :: f90ptr2
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_DELayout) :: layout
     real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
