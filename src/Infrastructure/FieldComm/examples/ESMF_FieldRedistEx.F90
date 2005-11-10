@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.3 2005/10/12 19:06:16 nscollins Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.4 2005/11/10 20:36:22 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
      ! instantiate two grids, two fields, and two arrays
      type(ESMF_Grid)  ::  grid1,  grid2
      type(ESMF_Field) :: field1, field2
-     type(ESMF_Array) :: array1, array2
+     type(ESMF_Array) :: array1
 
      ! Local variables
      integer :: finalrc, rc
