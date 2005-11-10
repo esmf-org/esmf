@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.118 2005/05/31 17:31:12 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.119 2005/11/10 21:14:13 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -145,7 +145,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.118 2005/05/31 17:31:12 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.119 2005/11/10 21:14:13 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -269,10 +269,10 @@
       subroutine ESMF_AttributeSet(base, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: base
-      character (len = *), intent(in) :: name 
-      type(ESMF_DataValue), intent(in) :: value 
-      integer, intent(out), optional :: rc  
+!      type(ESMF_Base), intent(in) :: base
+!      character (len = *), intent(in) :: name 
+!      type(ESMF_DataValue), intent(in) :: value 
+!      integer, intent(out), optional :: rc  
 
 !
 ! !DESCRIPTION:
@@ -312,9 +312,9 @@
       subroutine ESMF_AttributeGet(base, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: base 
-      character (len = *), intent(in) :: name 
-      type(ESMF_DataValue), intent(out) :: value 
+!      type(ESMF_Base), intent(in) :: base 
+!      character (len = *), intent(in) :: name 
+!      type(ESMF_DataValue), intent(out) :: value 
       integer, intent(out), optional :: rc 
 
 !
@@ -355,8 +355,8 @@
       subroutine ESMF_AttributeGetCount(anytype, count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: anytype             ! any ESMF type
-      integer, intent(out) :: count                      ! attribute count
+!      type(ESMF_Base), intent(in) :: anytype             ! any ESMF type
+!      integer, intent(out) :: count                      ! attribute count
       integer, intent(out), optional :: rc               ! return code
 
 !
@@ -394,11 +394,11 @@
       subroutine ESMF_AttributeGetbyNumber(anytype, number, name, type, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: anytype
-      integer, intent(in) :: number
-      character (len = *), intent(in) :: name
-      type(ESMF_DataType), intent(out) :: type
-      type(ESMF_DataValue), intent(out) :: value
+!      type(ESMF_Base), intent(in) :: anytype
+!      integer, intent(in) :: number
+!      character (len = *), intent(in) :: name
+!      type(ESMF_DataType), intent(out) :: type
+!      type(ESMF_DataValue), intent(out) :: value
       integer, intent(out), optional :: rc
 
 !
@@ -444,10 +444,10 @@
       subroutine ESMF_AttributeGetNameList(anytype, count, namelist, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: anytype
-      integer, intent(out) :: count
-      character (len = *), dimension (:), intent(inout) :: namelist
-      integer, intent(out), optional :: rc
+!      type(ESMF_Base), intent(in) :: anytype
+!      integer, intent(out) :: count
+!      character (len = *), dimension (:), intent(inout) :: namelist
+!      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -483,10 +483,10 @@
       subroutine ESMF_AttributeSetList(anytype, namelist, valuelist, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: anytype
-      character (len = *), dimension (:), intent(in) :: namelist
-      type(ESMF_DataValue), dimension (:), intent(in) :: valuelist
-      integer, intent(out), optional :: rc
+!      type(ESMF_Base), intent(in) :: anytype
+!      character (len = *), dimension (:), intent(in) :: namelist
+!      type(ESMF_DataValue), dimension (:), intent(in) :: valuelist
+!      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -521,11 +521,11 @@
       subroutine ESMF_AttributeGetList(anytype, namelist, typelist, valuelist, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: anytype
-      character (len = *), dimension (:), intent(in) :: namelist
-      type(ESMF_DataType), dimension (:), intent(out) :: typelist
-      type(ESMF_DataValue), dimension (:), intent(out) :: valuelist
-      integer, intent(out), optional :: rc
+!      type(ESMF_Base), intent(in) :: anytype
+!      character (len = *), dimension (:), intent(in) :: namelist
+!      type(ESMF_DataType), dimension (:), intent(out) :: typelist
+!      type(ESMF_DataValue), dimension (:), intent(out) :: valuelist
+!      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -561,10 +561,10 @@
       subroutine ESMF_AttributeSetObjectList(anytypelist, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), dimension (:), intent(in) :: anytypelist
-      character (len = *), intent(in) :: name
-      type(ESMF_DataValue), dimension (:), intent(in) :: value
-      integer, intent(out), optional :: rc
+!      type(ESMF_Base), dimension (:), intent(in) :: anytypelist
+!      character (len = *), intent(in) :: name
+!      type(ESMF_DataValue), dimension (:), intent(in) :: value
+!      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -597,11 +597,11 @@
       subroutine ESMF_AttributeGetObjectList(anytypelist, name, typelist, valuelist, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), dimension (:), intent(in) :: anytypelist
-      character (len = *), intent(in) :: name
-      type(ESMF_DataType), dimension (:), intent(out) :: typelist
-      type(ESMF_DataValue), dimension (:), intent(out) :: valuelist
-      integer, intent(out), optional :: rc
+!      type(ESMF_Base), dimension (:), intent(in) :: anytypelist
+!      character (len = *), intent(in) :: name
+!      type(ESMF_DataType), dimension (:), intent(out) :: typelist
+!      type(ESMF_DataValue), dimension (:), intent(out) :: valuelist
+!      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -636,10 +636,10 @@
       subroutine ESMF_AttributeCopy(name, source, destination, rc)
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: name
-      type(ESMF_Base), intent(in) :: source
-      type(ESMF_Base), intent(in) :: destination
-      integer, intent(out), optional :: rc
+!      character (len = *), intent(in) :: name
+!      type(ESMF_Base), intent(in) :: source
+!      type(ESMF_Base), intent(in) :: destination
+!      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -675,9 +675,9 @@
       subroutine ESMF_AttributeCopyAll(source, destination, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: source
-      type(ESMF_Base), intent(in) :: destination
-      integer, intent(out), optional :: rc
+!      type(ESMF_Base), intent(in) :: source
+!      type(ESMF_Base), intent(in) :: destination
+!      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
