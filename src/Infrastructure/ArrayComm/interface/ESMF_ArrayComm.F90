@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.77 2005/11/10 17:49:44 svasquez Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.78 2005/11/10 18:42:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.77 2005/11/10 17:49:44 svasquez Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.78 2005/11/10 18:42:55 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -662,9 +662,9 @@
           globalAIPerRank(i) = localAIsPerRank(i)
         else
           globalAIPerRank(i) = localAIsPerRank(i)
-          globalAIPerRank(i).min = globalAIPerRank(i).min + &
+          globalAIPerRank(i)%min = globalAIPerRank(i)%min + &
                                                       gridOffsets(dimOrder(i))
-          globalAIPerRank(i).max = globalAIPerRank(i).max + &
+          globalAIPerRank(i)%max = globalAIPerRank(i)%max + &
                                                       gridOffsets(dimOrder(i))
         endif
       enddo
