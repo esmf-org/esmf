@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.120 2005/11/10 21:37:47 svasquez Exp $
+! $Id: ESMF_Base.F90,v 1.121 2005/11/10 22:31:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -145,7 +145,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.120 2005/11/10 21:37:47 svasquez Exp $'
+               '$Id: ESMF_Base.F90,v 1.121 2005/11/10 22:31:55 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -521,11 +521,11 @@
       subroutine ESMF_AttributeGetList(anytype, namelist, typelist, valuelist, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_Base), intent(in) :: anytype
-!      character (len = *), dimension (:), intent(in) :: namelist
-!      type(ESMF_DataType), dimension (:), intent(out) :: typelist
-!      type(ESMF_DataValue), dimension (:), intent(out) :: valuelist
-!      integer, intent(out), optional :: rc
+      type(ESMF_Base), intent(in) :: anytype
+      character (len = *), dimension (:), intent(in) :: namelist
+      type(ESMF_DataType), dimension (:), intent(out) :: typelist
+      type(ESMF_DataValue), dimension (:), intent(out) :: valuelist
+      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
