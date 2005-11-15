@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2005/10/18 17:53:55 svasquez Exp $ 
+# $Id: makefile,v 1.26 2005/11/15 17:06:48 svasquez Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -44,7 +44,6 @@ TESTS_RUN_UNI = RUN_ESMF_VMUTestUNI \
                 RUN_ESMF_VMGatherUTestUNI \
                 RUN_ESMF_VMAllGatherUTestUNI \
                 RUN_ESMF_VMBroadcastUTestUNI \
-		RUN_ESMF_VMWaitQueueUTestUNI \
                 RUN_ESMF_VMBarrierUTestUNI
 
 
