@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.10 2005/11/08 19:27:12 nscollins Exp $
+// $Id: ESMC_Util.h,v 1.11 2005/11/16 18:44:32 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -122,7 +122,10 @@ typedef enum {
     ESMC_DOMAIN_EXCLUSIVE = 1,
     ESMC_DOMAIN_COMPUTATIONAL,
     ESMC_DOMAIN_TOTAL,
-    ESMC_DOMAIN_ALLOCATED
+    ESMC_DOMAIN_ALLOCATED,
+    ESMC_DOMAIN_OLDEXCLUSIVE,
+    ESMC_DOMAIN_OLDCOMPUTATIONAL,
+    ESMC_DOMAIN_OLDTOTAL,
 } ESMC_DomainType;
 
 // max/min macros if they don't already exist

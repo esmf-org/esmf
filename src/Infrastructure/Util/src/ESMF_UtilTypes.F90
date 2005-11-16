@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.8 2005/11/05 00:09:50 jwolfe Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.9 2005/11/16 18:43:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -324,10 +324,13 @@
       end type
    
       type(ESMF_DomainTypeFlag), parameter :: &
-                        ESMF_DOMAIN_EXCLUSIVE     = ESMF_DomainTypeFlag(1), &
-                        ESMF_DOMAIN_COMPUTATIONAL = ESMF_DomainTypeFlag(2), &
-                        ESMF_DOMAIN_TOTAL         = ESMF_DomainTypeFlag(3), &
-                        ESMF_DOMAIN_ALLOCATED     = ESMF_DomainTypeFlag(4)
+                     ESMF_DOMAIN_EXCLUSIVE        = ESMF_DomainTypeFlag(1), &
+                     ESMF_DOMAIN_COMPUTATIONAL    = ESMF_DomainTypeFlag(2), &
+                     ESMF_DOMAIN_TOTAL            = ESMF_DomainTypeFlag(3), &
+                     ESMF_DOMAIN_ALLOCATED        = ESMF_DomainTypeFlag(4), &
+                     ESMF_DOMAIN_OLDEXCLUSIVE     = ESMF_DomainTypeFlag(5), &
+                     ESMF_DOMAIN_OLDCOMPUTATIONAL = ESMF_DomainTypeFlag(6), &
+                     ESMF_DOMAIN_OLDTOTAL         = ESMF_DomainTypeFlag(7)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -477,6 +480,8 @@
 
       public ESMF_DOMAIN_EXCLUSIVE, ESMF_DOMAIN_COMPUTATIONAL
       public ESMF_DOMAIN_TOTAL, ESMF_DOMAIN_ALLOCATED
+      public ESMF_DOMAIN_OLDEXCLUSIVE, ESMF_DOMAIN_OLDCOMPUTATIONAL
+      public ESMF_DOMAIN_OLDTOTAL
 
       public ESMF_Status, ESMF_Pointer, ESMF_DataType, ESMF_DataKind
       public ESMF_DataValue
