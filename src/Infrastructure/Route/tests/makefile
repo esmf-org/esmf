@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2005/10/12 19:06:21 nscollins Exp $
+# $Id: makefile,v 1.26 2005/11/17 23:00:24 svasquez Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -23,13 +23,13 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_RouteUTest \
 
 TESTS_RUN     = RUN_ESMF_RouteUTest \
                 RUN_ESMF_CommTableUTest \
-                RUN_ESMF_HaloUTest \
                 RUN_ESMF_RedistUTest
+                #RUN_ESMF_HaloUTest 
 
 TESTS_RUN_UNI = RUN_ESMF_RouteUTestUNI \
                 RUN_ESMF_CommTableUTestUNI \
-                RUN_ESMF_HaloUTestUNI \
                 RUN_ESMF_RedistUTestUNI
+                #RUN_ESMF_HaloUTestUNI
 
 
 
