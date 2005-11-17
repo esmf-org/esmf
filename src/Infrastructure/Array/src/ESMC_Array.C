@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.43 2005/11/08 20:10:14 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.44 2005/11/17 01:22:54 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.43 2005/11/08 20:10:14 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.44 2005/11/17 01:22:54 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -894,6 +894,30 @@
        case ESMC_DOMAIN_EXCLUSIVE:
          for (i=0; i<this->rank; i++) 
              ai[i] = ai_excl[i];
+         break;
+
+       case ESMC_DOMAIN_OLDTOTAL:
+         for (i=0; i<this->rank; i++) {
+             ai[i].min = 0;
+             ai[i].max = counts[i]-1;
+             ai[i].stride = ai_total[i].stride;
+         }
+         break;
+     
+       case ESMC_DOMAIN_OLDCOMPUTATIONAL:
+         for (i=0; i<this->rank; i++) {
+             ai[i].min = hwidth[i][0];
+             ai[i].max = counts[i]-1-hwidth[i][1];
+             ai[i].stride = ai_comp[i].stride;
+         }
+         break;
+
+       case ESMC_DOMAIN_OLDEXCLUSIVE:
+         for (i=0; i<this->rank; i++) {
+             ai[i].min = 2*hwidth[i][0];
+             ai[i].max = counts[i]-1-(2*hwidth[i][1]);
+             ai[i].stride = ai_excl[i].stride;
+         }
          break;
 
        default:
