@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.26 2005/11/17 17:27:50 jwolfe Exp $
+#  $Id: build_rules.mk,v 1.27 2005/11/17 21:19:03 jwolfe Exp $
 #
 #  Linux.nag.default.mk
 #
@@ -65,7 +65,6 @@ C_FC		   = mpif90
 C_CCV		   = ${C_CC} -v 2>&1 | head -3
 C_CXXV		   = ${C_CXX} -V 2>&1 | head -3
 C_FCV              = ${C_FC} -V 2>&1 | head -2
-EXTRALIBS          =
 else
 C_CC		   = gcc
 C_CXX		   = g++ -fPIC
@@ -73,7 +72,6 @@ C_FC		   = f95
 C_CCV		   = ${C_CC} -v 
 C_CXXV		   = ${C_CXX} -v 2>&1 | head -2
 C_FCV              = ${C_FC} -V 
-EXTRALIBS          = ${F90LIBBASE}/safefit.o
 endif
 
 # fortran flags
@@ -87,28 +85,19 @@ F_FIXNOCPP      = -fixed
 # turn off -rpath share lib flag
 C_SLFLAG =
 
+# set plausible default location of NAG home
+NAG_HOME_PATH = /soft/com/packages/nag-f95-5.0
+
 # use LD_LIBRARY_PATH, but if not set, put in some plausible defaults
 ifneq ($(origin LD_LIBRARY_PATH), environment)
-CXXLIB_PATHS   = -L/soft/com/packages/intel-8.1/lib
-F90LIB_PATHS   = -L/soft/com/packages/nag-f95-5.0/lib
+F90LIB_PATHS   = -L$(NAG_HOME_PATH)/lib
 else
 C_LIB_PATHS += $(ENV_LIB_PATHS)
 endif
 
-# include the lib which defines a fast intel memcpy if compiling optimized.
-ifeq ($(ESMF_BOPT),O)
-EXTRALIBS         += -lifcoremt
-endif
-
-C_F90CXXLIBS       = ${F90LIB_PATHS} -lrt -lf96 \
-                     ${CXXLIB_PATHS} -lcxa -lunwind -lstdc++ ${EXTRALIBS}
-C_CXXF90LIBS       = ${F90LIB_PATHS} -lrt -lf96 ${EXTRALIBS} \
-                     /soft/com/packages/nag-f95-5.0/lib/quickfit.o
+C_F90CXXLIBS       = ${F90LIB_PATHS} -lrt -lf96 -lstdc++
+C_CXXF90LIBS       = ${F90LIB_PATHS} -lrt -lf96 $(NAG_HOME_PATH)/lib/quickfit.o
 	             
-# TODO: this last .o file should be in an ESMF_SITE file, += to C_CXXF90FLIBS,
-# but for now hardcode it into the default file.  (this works on Jazz).
-
-
 ###########
 
 PARCH		   = linux
