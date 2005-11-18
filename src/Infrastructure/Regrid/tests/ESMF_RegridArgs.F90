@@ -1,5 +1,5 @@
 
-! $Id: ESMF_RegridArgs.F90,v 1.2 2005/11/18 21:41:03 svasquez Exp $
+! $Id: ESMF_RegridArgs.F90,v 1.3 2005/11/18 22:49:44 svasquez Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -50,9 +50,10 @@
    !--- Domain Decompositions used
     nXY(1,:)=(/ npets, 1 /)                       !1DX
     nXY(2,:)=(/ 1, npets /)                       !1DY
-    nXY(3,:)=(/ npets/2,2 /)       !2D
+    nXY(3,:)=(/ npets/(1 + mod(npets+1,2)), (1 + mod(npets+1,2)) /)       !2D
+    !nXY(3,:)=(/ npets/2,2 /)       !2D
     !TwoOrOne= 1 + mod(npets+1,2)
-    !nXY(3,:)=(/ npets/TwoOrOne, TwoOrOne /)       !2D
+    !nXY(3,:)=(/ npets/(1 + mod(npets+1,2)), (1 + mod(npets+1,2)) /)       !2D
 
     regrid_rc=ESMF_SUCCESS
 
