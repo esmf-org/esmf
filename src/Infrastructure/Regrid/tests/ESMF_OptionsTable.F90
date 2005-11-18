@@ -1,4 +1,4 @@
-! $Id: ESMF_OptionsTable.F90,v 1.1 2005/10/20 20:18:52 svasquez Exp $
+! $Id: ESMF_OptionsTable.F90,v 1.2 2005/11/18 21:38:02 svasquez Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -13,7 +13,7 @@ module ESMF_OptionsTable
 
 
 integer, parameter :: nOptions=9
-integer, parameter, dimension(1:nOptions) :: nChoices=(/ 2,2,4,2,3,3,2,4,4 /)
+integer, parameter, dimension(1:nOptions) :: nChoices=(/ 3,3,4,2,3,3,2,4,4 /)
 
 character(len=25),parameter, dimension(1:nOptions) :: Option_name= &
        (/ 'SRCDELAYOUT'  &   ! (1)
