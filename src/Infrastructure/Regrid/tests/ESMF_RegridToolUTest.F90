@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridToolUTest.F90,v 1.1 2005/10/21 19:10:26 svasquez Exp $
+! $Id: ESMF_RegridToolUTest.F90,v 1.2 2005/11/18 21:35:34 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -54,6 +54,104 @@
 #ifdef ESMF_EXHAUSTIVE
    !Test for "success" of regridding
    !--------------------------------
+   !EX_UTest
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid test: "//longString
+    call ESMF_Test((regrid_rc.eq.ESMF_SUCCESS),name, failMsg, result, &
+                    ESMF_SRCLINE)
+
+   !Test for "success" of regridding
+   !--------------------------------
+    longString='FUNCTION:A:REGSCHEME:BILINEAR' &
+               //':SRCGRID:A:DSTGRID:A:SRCDELAYOUT:1DY:DSTDELAYOUT:1DY' &
+               //':DOMAIN:REGIONAL:SRCHALO:3:DSTHALO:0'
+
+    call setupRegridUTest(longString,ier)
+
+   !EX_UTest
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid test: "//longString
+    call ESMF_Test((regrid_rc.eq.ESMF_SUCCESS),name, failMsg, result, &
+                    ESMF_SRCLINE)
+
+   !Test for "success" of regridding
+   !--------------------------------
+    longString='FUNCTION:A:REGSCHEME:BILINEAR' &
+               //':SRCGRID:A:DSTGRID:A:SRCDELAYOUT:2D:DSTDELAYOUT:2D' &
+               //':DOMAIN:REGIONAL:SRCHALO:3:DSTHALO:0'
+
+    call setupRegridUTest(longString,ier)
+
+   !EX_UTest
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid test: "//longString
+    call ESMF_Test((regrid_rc.eq.ESMF_SUCCESS),name, failMsg, result, &
+                    ESMF_SRCLINE)
+
+   !Test for "success" of regridding
+   !--------------------------------
+    longString='FUNCTION:B:REGSCHEME:BILINEAR' &
+               //':SRCGRID:A:DSTGRID:A:SRCDELAYOUT:1DX:DSTDELAYOUT:1DX' &
+               //':DOMAIN:REGIONAL:SRCHALO:3:DSTHALO:0'
+
+    call setupRegridUTest(longString,ier)
+
+   !EX_UTest
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid test: "//longString
+    call ESMF_Test((regrid_rc.eq.ESMF_SUCCESS),name, failMsg, result, &
+                    ESMF_SRCLINE)
+
+   !Test for "success" of regridding
+   !--------------------------------
+    longString='FUNCTION:C:REGSCHEME:BILINEAR' &
+               //':SRCGRID:A:DSTGRID:A:SRCDELAYOUT:2D:DSTDELAYOUT:2D' &
+               //':DOMAIN:WHOLEGLOBE:SRCHALO:3:DSTHALO:0'
+
+    call setupRegridUTest(longString,ier)
+
+   !EX_UTest
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid test: "//longString
+    call ESMF_Test((regrid_rc.eq.ESMF_SUCCESS),name, failMsg, result, &
+                    ESMF_SRCLINE)
+
+   !Test for "success" of regridding
+   !--------------------------------
+    longString='FUNCTION:D:REGSCHEME:BILINEAR' &
+               //':SRCGRID:A:DSTGRID:A:SRCDELAYOUT:1DX:DSTDELAYOUT:1DX' &
+               //':DOMAIN:WHOLEGLOBE:SRCHALO:3:DSTHALO:0'
+
+    call setupRegridUTest(longString,ier)
+
+   !EX_UTest
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid test: "//longString
+    call ESMF_Test((regrid_rc.eq.ESMF_SUCCESS),name, failMsg, result, &
+                    ESMF_SRCLINE)
+
+   !Test for "success" of regridding
+   !--------------------------------
+    longString='FUNCTION:D:REGSCHEME:BILINEAR' &
+               //':SRCGRID:A:DSTGRID:A:SRCDELAYOUT:2D:DSTDELAYOUT:2D' &
+               //':DOMAIN:WHOLEGLOBE:SRCHALO:3:DSTHALO:0'
+
+    call setupRegridUTest(longString,ier)
+
+   !EX_UTest
+    write(failMsg, *) "Error in regrid"
+    write(name, *) "Regrid test: "//longString
+    call ESMF_Test((regrid_rc.eq.ESMF_SUCCESS),name, failMsg, result, &
+                    ESMF_SRCLINE)
+
+   !Test for "success" of regridding
+   !--------------------------------
+    longString='FUNCTION:D:REGSCHEME:1CONSERV' &
+               //':SRCGRID:A:DSTGRID:A:SRCDELAYOUT:2D:DSTDELAYOUT:2D' &
+               //':DOMAIN:WHOLEGLOBE:SRCHALO:3:DSTHALO:0'
+
+    call setupRegridUTest(longString,ier)
+
    !EX_UTest
     write(failMsg, *) "Error in regrid"
     write(name, *) "Regrid test: "//longString
