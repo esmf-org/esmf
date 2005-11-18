@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridToolUTest.F90,v 1.2 2005/11/18 21:35:34 svasquez Exp $
+! $Id: ESMF_RegridToolUTest.F90,v 1.3 2005/11/18 22:13:27 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -77,7 +77,7 @@
    !Test for "success" of regridding
    !--------------------------------
     longString='FUNCTION:A:REGSCHEME:BILINEAR' &
-               //':SRCGRID:A:DSTGRID:A:SRCDELAYOUT:2D:DSTDELAYOUT:2D' &
+               //':SRCGRID:A:DSTGRID:A:SRCDELAYOUT:1DX:DSTDELAYOUT:1DX' &
                //':DOMAIN:REGIONAL:SRCHALO:3:DSTHALO:0'
 
     call setupRegridUTest(longString,ier)
@@ -105,7 +105,7 @@
    !Test for "success" of regridding
    !--------------------------------
     longString='FUNCTION:C:REGSCHEME:BILINEAR' &
-               //':SRCGRID:A:DSTGRID:A:SRCDELAYOUT:2D:DSTDELAYOUT:2D' &
+               //':SRCGRID:A:DSTGRID:A:SRCDELAYOUT:1DY:DSTDELAYOUT:1DY' &
                //':DOMAIN:WHOLEGLOBE:SRCHALO:3:DSTHALO:0'
 
     call setupRegridUTest(longString,ier)
@@ -133,7 +133,7 @@
    !Test for "success" of regridding
    !--------------------------------
     longString='FUNCTION:D:REGSCHEME:BILINEAR' &
-               //':SRCGRID:A:DSTGRID:A:SRCDELAYOUT:2D:DSTDELAYOUT:2D' &
+               //':SRCGRID:A:DSTGRID:A:SRCDELAYOUT:1DY:DSTDELAYOUT:1DY' &
                //':DOMAIN:WHOLEGLOBE:SRCHALO:3:DSTHALO:0'
 
     call setupRegridUTest(longString,ier)
@@ -147,7 +147,7 @@
    !Test for "success" of regridding
    !--------------------------------
     longString='FUNCTION:D:REGSCHEME:1CONSERV' &
-               //':SRCGRID:A:DSTGRID:A:SRCDELAYOUT:2D:DSTDELAYOUT:2D' &
+               //':SRCGRID:A:DSTGRID:A:SRCDELAYOUT:1DY:DSTDELAYOUT:1DY' &
                //':DOMAIN:WHOLEGLOBE:SRCHALO:3:DSTHALO:0'
 
     call setupRegridUTest(longString,ier)
