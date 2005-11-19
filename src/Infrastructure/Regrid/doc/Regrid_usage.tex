@@ -1,4 +1,4 @@
-% $Id: Regrid_usage.tex,v 1.7 2005/09/06 22:52:20 jwolfe Exp $
+% $Id: Regrid_usage.tex,v 1.8 2005/11/19 00:30:16 jwolfe Exp $
 
 
 Regrid is designed to be called with Field or Bundle
@@ -32,5 +32,67 @@ these regrid methods are in a separate module to
 prevent the main Regrid module from becoming too
 large.  The user is unaware of this hierarchy as the
 top-level module provides a unified API.
+
+\subsubsection{Regrid and Grid Overlap}
+
+Regrid assumes both the source and destination Grids share the same coordinate
+system and units.  Although 3D regridding is not yet available, this rule is
+also expected to be valid for vertical grids as well.  Users are responsible
+for any necessary conversion or translation.
+
+There are five possible physical overlap situations between the source and
+destination Grids, illustrated in Figure \ref{fig:RegridGridOverlap}.
+
+\begin{center}
+\begin{figure}
+\caption{Possible Relationships between Grids in Physical (Coordinate) Space. }
+\label{fig:RegridGridOverlap}
+\resizebox{\textwidth}{!}
+  {\includegraphics{RegridGridOverlap}}
+\end{figure}
+\end{center}
+
+Regrid can provide complete interpolation weights for the destination Field
+only for those situations where there is source data covering the entire physical
+domain of the destination Grid (cases (b) and (e) above).  In all the other
+cases, there are parts of the destination Grid for which there is no source. 
+When source data is not available, Regrid routines will not extrapolate data
+values and the destination Field may contain data points that have not been
+calculated or filled.  Currently, regrid routines initialize the destination
+Field to a value of zero prior to regridding, so unfilled destination data points
+will have that value.  In the future, regrid routines will have an optional
+argument allowing users to specify a fill value besides zero.  
+
+
+\subsubsection{Regrid and Data Location}
+
+There is no restriction in Regrid that the source and destination Fields
+define their data in the same relative location (RelLoc).  However, regridding
+between Fields with different RelLocs can have unintended consequences if the
+related Grids cover exactly the same physical domain.  The RelLocs represent
+different subGrids, which can shift the represented physical domain by plus or
+minus one-half of a cell width.  This is illustrated below in Figure 
+\ref{fig:RegridRelLocEffect}, which shows the physical areas described by two
+
+\begin{center}
+\begin{figure}
+\caption{Illustration of Grid areas represented by differing RelLocs. }
+\label{fig:RegridRelLocEffect}
+\resizebox{\textwidth}{!}
+  {\includegraphics{RegridRelLocEffect}}
+\end{figure}
+\end{center}
+
+sample RelLocs and the effect on the overlap of the global Grids.  In this
+situation, there may be some unfilled or less accurate data at some of the
+Grid boundaries.
+
+Different refinement or cell sizes between the source and destination Grids
+may also have a similar effect, even if their corresponding Fields have the
+same RelLocs.  This is illustrated below...
+
+
+\subsubsection{Regrid and Periodicity}
+
 
 
