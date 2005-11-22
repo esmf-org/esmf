@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.55 2005/11/08 19:26:31 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.56 2005/11/22 00:27:38 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.55 2005/11/08 19:26:31 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.56 2005/11/22 00:27:38 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -437,12 +437,15 @@
     int xpItemCount, totalRepCount;
     int rank, offset, contigLength, stride[ESMF_MAXDIM], repCount[ESMF_MAXDIM];
     int itemPtr, contigBytes, index[ESMF_MAXDIM], bufindex;
-    char *dataPtr;
+    char *dataPtr, *bufPtr;
     char msgbuf[ESMF_MAXSTR];
 
     // make it a no-op to ask to pack an empty xp list
     if ((xpCount == 0) || (xpList == NULL))
         return ESMF_SUCCESS;
+
+    // make a local pointer we can increment without affecting the original.
+    bufPtr = buffer;
 
     // outer loop:  does nothing if there is only 1 address.  however
     // if you want to pack all the xpackets for one address together before
@@ -497,10 +500,10 @@
                 // move data into the buffer or out of the buffer
                 dataPtr = (char *)dataAddr[l] + (itemPtr*nbytes);
                 if (packflag == ESMC_BUFFER_PACK)
-                    memcpy(buffer, dataPtr, contigBytes);
+                    memcpy(bufPtr, dataPtr, contigBytes);
                 else
-                    memcpy(dataPtr, buffer, contigBytes);
-                buffer += contigBytes;
+                    memcpy(dataPtr, bufPtr, contigBytes);
+                bufPtr += contigBytes;
             }
   
             // increment the innermost counter 

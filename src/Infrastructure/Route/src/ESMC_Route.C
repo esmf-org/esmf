@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.145 2005/11/07 22:34:13 nscollins Exp $
+//$Id: ESMC_Route.C,v 1.146 2005/11/22 00:27:35 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.145 2005/11/07 22:34:13 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.146 2005/11/22 00:27:35 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1517,6 +1517,10 @@
           }        // XP loop
          }         // address loop
         }          // packing branch
+
+        // reset the useOptions to the default in case it has been overwritten
+        useOptions = options;
+
       }            // communication (PET) loop, variable i
 
 // -----------------------------------------------------------------------
@@ -1610,7 +1614,7 @@
               // if no, then we have made a separate buffer, transferred
               // the data there, and we need to copy it where it needs to go.
               rc = recvRT->ESMC_RTableGetEntry(theirPET, ixr, &recvXP);
-              recvContig = recvXP->ESMC_XPacketIsContig();
+              recvContig = recvXP->ESMC_XPacketIsContig() && (numAddrs == 1);
 
             } else {
               // in this case we do not want have a buffer to be unpacked, so
@@ -1722,6 +1726,10 @@
           }        // XP loop
          }         // address loop
         }          // packing branch
+
+        // reset the useOptions to the default in case it has been overwritten
+        useOptions = options;
+
       }            // communication (PET) loop, variable i
 
       // if we are not using the local stack buffers, free these. 

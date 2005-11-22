@@ -1,4 +1,4 @@
-! $Id: ESMF_HaloUTest.F90,v 1.1 2005/10/12 19:06:21 nscollins Exp $
+! $Id: ESMF_HaloUTest.F90,v 1.2 2005/11/22 00:27:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_HaloUTest.F90,v 1.1 2005/10/12 19:06:21 nscollins Exp $'
+      '$Id: ESMF_HaloUTest.F90,v 1.2 2005/11/22 00:27:38 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -160,7 +160,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      call ValidateIndexHalo(field1, rc)
+      call ValidateIndexHalo(field1, val2, rc)
       write(name, *) "Validating halo area in dest fields"
       write(failMsg, *) "Validating indexed data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -258,7 +258,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      call ValidateIndexHalo(field2, rc)
+      call ValidateIndexHalo(field2, val2, rc)
       write(name, *) "Validating halo area in dest fields"
       write(failMsg, *) "Validating indexed data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

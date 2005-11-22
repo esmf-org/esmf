@@ -1,4 +1,4 @@
-! $Id: ESMF_HaloHelpers.F90,v 1.3 2005/11/10 21:56:05 nscollins Exp $
+! $Id: ESMF_HaloHelpers.F90,v 1.4 2005/11/22 00:27:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -67,7 +67,8 @@ subroutine CreateFields(field1, field2, rc)
 
     mincoords = (/  0.0,  0.0 /)
     maxcoords = (/ 20.0, 30.0 /)
-    srcgrid = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
+    !srcgrid = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
+    srcgrid = ESMF_GridCreateHorzXYUni((/ 40, 60 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
                    periodic=wrap,  &
@@ -77,7 +78,8 @@ subroutine CreateFields(field1, field2, rc)
     if (rc.NE.ESMF_SUCCESS) return
 
     ! same grid coordinates, but different layout
-    dstgrid = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
+    !dstgrid = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
+    dstgrid = ESMF_GridCreateHorzXYUni((/ 40, 60 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
                    periodic=wrap,  &
@@ -203,8 +205,8 @@ subroutine FillIndexField(field, rc)
     
     ! Local variables
     integer :: i, j
-    integer :: lb(2), ub(2), haloWidth, cellNum, rownum, colnum
-    integer :: localCellCounts(2), globalCellCounts(2), gridOffsets(2)
+    integer :: lb(2), ub(2), haloWidth, localRownum, localColnum
+    integer :: globalCellCounts(2), globalOffsets(2), globalRowstart
     real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
     type(ESMF_Grid) :: grid
 
@@ -220,8 +222,7 @@ subroutine FillIndexField(field, rc)
 
     ! get grid information used to calculate global indices
     call ESMF_GridGetDELocalInfo(grid, horzrelloc=ESMF_CELL_CENTER, &
-                                 localCellCountPerDim=localCellCounts, &
-                                 globalStartPerDim=gridOffsets, rc=rc)
+                                 globalStartPerDim=globalOffsets, rc=rc)
 
     ! get a Fortran 90 pointer back to the data
     call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
@@ -232,12 +233,12 @@ subroutine FillIndexField(field, rc)
 
     ! Set the data values to the global cell index number.
     do j=lb(2)+haloWidth, ub(2)-haloWidth
-      rownum = j - haloWidth - 1
-      cellNum = (gridOffsets(1) + 1) + &
-                ((gridOffsets(2)+rownum) * globalCellCounts(1)) 
+      localRownum = j - haloWidth 
+      globalRowstart = ((localRownum + globalOffsets(2) - 1) &
+                     *   globalCellCounts(1))  + globalOffsets(1)
       do i=lb(1)+haloWidth, ub(1)-haloWidth
-        colnum = i - haloWidth - 1
-        f90ptr(i, j) = cellNum + colnum
+        localColnum = i - haloWidth 
+        f90ptr(i, j) = globalRowstart + localColnum
       enddo
     enddo
 
@@ -280,7 +281,7 @@ subroutine ValidateConstantField(field, val, rc)
       do i=lb(1)+halo, ub(1)-halo
         if (f90ptr(i, j) .ne. val) then
             print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
-            !rc = ESMF_FAILURE
+            rc = ESMF_FAILURE
             !print *, "(bailing on first error - may be others)"
             !return 
         endif
@@ -333,7 +334,7 @@ subroutine ValidateConstantHalo(field, val, rc)
       do i=lb(1), ub(1)
         if (f90ptr(i, j) .ne. val) then
             print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
-            !rc = ESMF_FAILURE
+            rc = ESMF_FAILURE
             !print *, "(bailing on first error - may be others)"
             !return 
         endif
@@ -345,7 +346,7 @@ subroutine ValidateConstantHalo(field, val, rc)
       do i=lb(1), lb(1)+halo-1
         if (f90ptr(i, j) .ne. val) then
             print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
-            !rc = ESMF_FAILURE
+            rc = ESMF_FAILURE
             !print *, "(bailing on first error - may be others)"
             !return 
         endif
@@ -357,7 +358,7 @@ subroutine ValidateConstantHalo(field, val, rc)
       do i=ub(1)-halo+1, ub(1)
         if (f90ptr(i, j) .ne. val) then
             print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
-            !rc = ESMF_FAILURE
+            rc = ESMF_FAILURE
             !print *, "(bailing on first error - may be others)"
             !return 
         endif
@@ -369,7 +370,7 @@ subroutine ValidateConstantHalo(field, val, rc)
       do i=lb(1), ub(1)
         if (f90ptr(i, j) .ne. val) then
             print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
-            !rc = ESMF_FAILURE
+            rc = ESMF_FAILURE
             !print *, "(bailing on first error - may be others)"
             !return 
         endif
@@ -393,71 +394,8 @@ subroutine ValidateIndexField(field, rc)
     
     ! Local variables
     integer :: i, j
-    integer :: lb(2), ub(2), haloWidth, cellNum, rownum, colnum
-    integer :: localCellCounts(2), globalCellCounts(2), gridOffsets(2)
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
-    type(ESMF_Grid) :: grid
-
-    rc = ESMF_FAILURE
-        
-    ! need a query here to be sure our data pointer is the same t/k/r
-    ! as what is in the field.
-
-    call ESMF_FieldGet(field, haloWidth=haloWidth, grid=grid, rc=rc)
-
-    call ESMF_GridGet(grid, horzrelloc=ESMF_CELL_CENTER, &
-                      globalCellCountPerDim=globalCellCounts, rc=rc)
-
-    ! get grid information used to calculate global indices
-    call ESMF_GridGetDELocalInfo(grid, horzrelloc=ESMF_CELL_CENTER, &
-                                 localCellCountPerDim=localCellCounts, &
-                                 globalStartPerDim=gridOffsets, rc=rc)
-
-    ! get a Fortran 90 pointer back to the data
-    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
-    
-    lb(:) = lbound(f90ptr)
-    ub(:) = ubound(f90ptr)
-
-    ! start with success, and any mismatch sets error
-    rc = ESMF_SUCCESS
-
-    ! Check the data values against the global cell index number.
-    do j=lb(2)+haloWidth, ub(2)-haloWidth
-      rownum = j - halowidth - 1
-      cellNum = (gridOffsets(1) + 1) + &
-                ((gridOffsets(2)+rownum) * globalCellCounts(1)) 
-      do i=lb(1)+haloWidth, ub(1)-haloWidth
-        colnum = i - haloWidth - 1
-        if (f90ptr(i, j) .ne. cellNum + colnum) then
-            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", &
-                        cellNum + colnum
-            !rc = ESMF_FAILURE
-            !print *, "(bailing on first error - may be others)"
-            !return 
-        endif
-      enddo
-    enddo
-
-    ! rc set above, leave it as is
-
-    return
-
-end subroutine ValidateIndexField
-
-
-!
-! Validate the halo region
-!
-subroutine ValidateIndexHalo(field, rc)
-    type(ESMF_Field), intent(inout) :: field
-    integer, intent(out) :: rc
-    
-    ! Local variables
-    integer :: i, j
-    integer :: lb(2), ub(2), haloWidth, cellNum, rownum, colnum
-    integer :: localCellCounts(2), globalCellCounts(2), gridOffsets(2)
+    integer :: lb(2), ub(2), haloWidth, localRownum, localColnum
+    integer :: globalCellCounts(2), globalOffsets(2), globalRowstart
     real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
     type(ESMF_Grid) :: grid
 
@@ -473,8 +411,7 @@ subroutine ValidateIndexHalo(field, rc)
 
     ! get grid information used to calculate global indices
     call ESMF_GridGetDELocalInfo(grid, horzrelloc=ESMF_CELL_CENTER, &
-                                 localCellCountPerDim=localCellCounts, &
-                                 globalStartPerDim=gridOffsets, rc=rc)
+                                 globalStartPerDim=globalOffsets, rc=rc)
 
     ! get a Fortran 90 pointer back to the data
     call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
@@ -483,74 +420,346 @@ subroutine ValidateIndexHalo(field, rc)
     lb(:) = lbound(f90ptr)
     ub(:) = ubound(f90ptr)
 
-    ! TODO: add the 4 tests here.
-    ! now check the chunks, one at a time.  this duplicates the overlaps
-    ! at the corners, but it is the simplest to program.
+    ! start with success, and any mismatch sets error
+    rc = ESMF_SUCCESS
+
+    ! Check the data values against the global cell index number.
+    do j=lb(2)+haloWidth, ub(2)-haloWidth
+      localRownum = j - haloWidth 
+      globalRowstart = ((localRownum + globalOffsets(2) - 1) &
+                     *   globalCellCounts(1))  + globalOffsets(1)
+      do i=lb(1)+haloWidth, ub(1)-haloWidth
+        localColnum = i - haloWidth 
+        if (f90ptr(i, j) .ne. (globalRowstart + localColnum)) then
+            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", &
+                        globalRowstart + localColnum
+            rc = ESMF_FAILURE
+            !print *, "(bailing on first error - may be others)"
+            !return 
+        endif
+      enddo
+    enddo
+! rc set above, leave it as is
+
+    return
+
+end subroutine ValidateIndexField
+
+
+!
+! Validate the halo region
+!
+subroutine ValidateIndexHalo(field, originalval, rc)
+    type(ESMF_Field), intent(inout) :: field
+    real (ESMF_KIND_R8), intent(in) :: originalval
+    integer, intent(out) :: rc
+    
+    ! Local variables
+    integer :: i, j
+    integer :: lb(2), ub(2), haloWidth, localRownum, localColnum
+    integer :: globalCellCounts(2), globalOffsets(2), globalRowstart
+    integer :: deid, ncount(2), pos(2)
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
+    type(ESMF_DELayout) :: delayout
+    type(ESMF_Logical) :: periodic(2)
+    type(ESMF_Grid) :: grid
+    logical :: top, bottom, right, left
+    logical :: xperiodic, yperiodic
+
+    rc = ESMF_FAILURE
+          
+    ! need a query here to be sure our data pointer is the same t/k/r
+    ! as what is in the field.
+
+    call ESMF_FieldGet(field, haloWidth=haloWidth, grid=grid, rc=rc)
+
+    call ESMF_GridGet(grid, horzrelloc=ESMF_CELL_CENTER, &
+                      globalCellCountPerDim=globalCellCounts, rc=rc)
+
+    ! get grid information used to calculate global indices
+    call ESMF_GridGetDELocalInfo(grid, horzrelloc=ESMF_CELL_CENTER, &
+                                 globalStartPerDim=globalOffsets, rc=rc)
+
+    ! figure out where we are in the overall layout, and set flags in case
+    ! we are on the boundaries relative to the entire grid.
+    call ESMF_GridGet(grid, delayout=delayout, periodic=periodic, rc=rc)
+    call ESMF_DELayoutGet(delayout, deCountPerDim=ncount, localDE=deid, rc=rc)
+    call ESMF_DELayoutGetDELocalInfo(delayout, deid, coord=pos, rc=rc)
+   
+    xperiodic = (periodic(1) .eq. ESMF_TRUE)
+    yperiodic = (periodic(2) .eq. ESMF_TRUE)
+
+    top = .FALSE.
+    bottom = .FALSE.
+    right = .FALSE.
+    left = .FALSE.
+
+    ! is our chunk of the data on any of the overall grid boundaries?
+    if (pos(1) .eq. ncount(1)) right = .TRUE.
+    if (pos(1) .eq. 1)         left = .TRUE.    ! this might be 0
+    if (pos(2) .eq. ncount(2)) top = .TRUE.
+    if (pos(2) .eq. 1)         bottom = .TRUE.
+
+
+    ! get a Fortran 90 pointer back to the data
+    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+    
+    lb(:) = lbound(f90ptr)
+    ub(:) = ubound(f90ptr)
+
+    ! TODO: add the 8 tests here.
+    ! now check the chunks, one at a time.  if we are on the boundary of
+    ! the entire grid, treat the external boundaries separately.
  
     rc = ESMF_SUCCESS
 
-    ! bottom / south
+    ! bottom left corner:
     do j=lb(2), lb(2)+haloWidth-1
-      rownum = j - haloWidth - 1
-      cellNum = (gridOffsets(1) + 1) + &
-                ((gridOffsets(2)+rownum) * globalCellCounts(1)) 
-      do i=lb(1), ub(1)
-        colnum = i - haloWidth - 1
-        val = cellNum + colnum
-        if (f90ptr(i, j) .ne. val) then
-            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
-            !rc = ESMF_FAILURE
-            !print *, "(bailing on first error - may be others)"
-            !return 
-        endif
-      enddo
-    enddo
-
-    ! west edge
-    do j=lb(2), ub(2)
-      rownum = j - halowidth - 1
-      cellNum = (gridOffsets(1) + 1) + &
-                ((gridOffsets(2)+rownum) * globalCellCounts(1)) 
+      localRownum = j - haloWidth 
+      if (bottom .and. yperiodic) then
+          localRownum = localRownum + globalCellCounts(2) 
+      endif
+      globalRowstart = ((localRownum + globalOffsets(2) - 1) &
+                     *   globalCellCounts(1))  + globalOffsets(1)
       do i=lb(1), lb(1)+haloWidth-1
-        colnum = i - haloWidth - 1
-        val = cellNum + colnum
+        localColnum = i - haloWidth 
+        if (left .and. xperiodic) then
+            localColnum = localColnum + globalCellCounts(1)
+        endif
+
+        ! for those edges where halo should not have been updated, make sure
+        ! the original value remained.  otherwise, compute the index value.
+        ! the row and col numbers have already been updated for periodic cases.
+        if ((left .and. bottom) .or. &
+            (left .and. (.not. xperiodic)) .or. &
+            (bottom .and. (.not. yperiodic))) then
+            val = originalval
+        else
+            val = globalRowstart + localColnum
+        endif
+
         if (f90ptr(i, j) .ne. val) then
             print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
-            !rc = ESMF_FAILURE
+            rc = ESMF_FAILURE
             !print *, "(bailing on first error - may be others)"
             !return 
         endif
       enddo
     enddo
 
-    ! east edge
-    do j=lb(2), ub(2)
-      rownum = j - haloWidth - 1
-      cellNum = (gridOffsets(1) + 1) + &
-                ((gridOffsets(2)+rownum) * globalCellCounts(1)) 
+    ! bottom (without corners):
+    do j=lb(2), lb(2)+haloWidth-1
+      localRownum = j - haloWidth 
+      if (bottom .and. yperiodic) then
+          localRownum = localRownum + globalCellCounts(2) 
+      endif
+      globalRowstart = ((localRownum + globalOffsets(2) - 1) &
+                     *   globalCellCounts(1))  + globalOffsets(1)
+      do i=lb(1)+haloWidth, ub(1)-haloWidth
+        localColnum = i - haloWidth 
+
+        ! for those edges where halo should not have been updated, make sure
+        ! the original value remained.  otherwise, compute the index value.
+        ! the row and col numbers have already been updated for periodic cases.
+        if (bottom .and. (.not. yperiodic)) then
+            val = originalval
+        else
+            val = globalRowstart + localColnum
+        endif
+
+        if (f90ptr(i, j) .ne. val) then
+            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+            rc = ESMF_FAILURE
+            !print *, "(bailing on first error - may be others)"
+            !return 
+        endif
+      enddo
+    enddo
+
+    ! bottom right corner:
+    do j=lb(2), lb(2)+haloWidth-1
+      localRownum = j - haloWidth 
+      if (bottom .and. yperiodic) then
+          localRownum = localRownum + globalCellCounts(2) 
+      endif
+      globalRowstart = ((localRownum + globalOffsets(2) - 1) &
+                     *   globalCellCounts(1))  + globalOffsets(1)
       do i=ub(1)-haloWidth+1, ub(1)
-        colnum = i - haloWidth - 1
-        val = cellNum + colnum
+        localColnum = i - haloWidth 
+        if (right .and. xperiodic) then
+            localColnum = localColnum - globalCellCounts(1)
+        endif
+
+        ! for those edges where halo should not have been updated, make sure
+        ! the original value remained.  otherwise, compute the index value.
+        ! the row and col numbers have already been updated for periodic cases.
+        if ((right .and. bottom) .or. &
+            (right .and. (.not. xperiodic)) .or. &
+            (bottom .and. (.not. yperiodic))) then
+            val = originalval
+        else
+            val = globalRowstart + localColnum
+        endif
+
         if (f90ptr(i, j) .ne. val) then
             print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
-            !rc = ESMF_FAILURE
+            rc = ESMF_FAILURE
             !print *, "(bailing on first error - may be others)"
             !return 
         endif
       enddo
     enddo
 
-    ! top / north
-    do j=ub(2)-haloWidth+1, ub(2)
-      rownum = j - haloWidth - 1
-      cellNum = (gridOffsets(1) + 1) + &
-                ((gridOffsets(2)+rownum) * globalCellCounts(1)) 
-      do i=lb(1), ub(1)
-        colnum = i - haloWidth - 1
-        val = cellNum + colnum
+    ! left (without corners):
+    do j=lb(2)+haloWidth, ub(2)-haloWidth
+      localRownum = j - haloWidth 
+      globalRowstart = ((localRownum + globalOffsets(2) - 1) &
+                     *   globalCellCounts(1))  + globalOffsets(1)
+      do i=lb(1), lb(1)+haloWidth-1
+        localColnum = i - haloWidth 
+        if (left .and. xperiodic) then
+            localColnum = localColnum + globalCellCounts(1)
+        endif
+
+        ! for those edges where halo should not have been updated, make sure
+        ! the original value remained.  otherwise, compute the index value.
+        ! the row and col numbers have already been updated for periodic cases.
+        if (left .and. (.not. xperiodic)) then
+            val = originalval
+        else
+            val = globalRowstart + localColnum
+        endif
+
         if (f90ptr(i, j) .ne. val) then
             print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
-            !rc = ESMF_FAILURE
+            rc = ESMF_FAILURE
+            !print *, "(bailing on first error - may be others)"
+            !return 
+        endif
+      enddo
+    enddo
+
+    ! right (without corners):
+    do j=lb(2)+haloWidth, ub(2)-haloWidth
+      localRownum = j - haloWidth 
+      globalRowstart = ((localRownum + globalOffsets(2) - 1) &
+                     *   globalCellCounts(1))  + globalOffsets(1)
+      do i=ub(1)-haloWidth+1, ub(1)
+        localColnum = i - haloWidth 
+        if (right .and. xperiodic) then
+            localColnum = localColnum - globalCellCounts(1)
+        endif
+
+        ! for those edges where halo should not have been updated, make sure
+        ! the original value remained.  otherwise, compute the index value.
+        ! the row and col numbers have already been updated for periodic cases.
+        if (right .and. (.not. xperiodic)) then
+            val = originalval
+        else
+            val = globalRowstart + localColnum
+        endif
+
+        if (f90ptr(i, j) .ne. val) then
+            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+            rc = ESMF_FAILURE
+            !print *, "(bailing on first error - may be others)"
+            !return 
+        endif
+      enddo
+    enddo
+
+    ! top left corner:
+    do j=ub(2)-haloWidth+1, ub(2)
+      localRownum = j - haloWidth 
+      if (top .and. yperiodic) then
+          localRownum = localRownum - globalCellCounts(2) 
+      endif
+      globalRowstart = ((localRownum + globalOffsets(2) - 1) &
+                     *   globalCellCounts(1))  + globalOffsets(1)
+      do i=lb(1), lb(1)+haloWidth-1
+        localColnum = i - haloWidth 
+        if (left .and. xperiodic) then
+            localColnum = localColnum + globalCellCounts(1)
+        endif
+
+        ! for those edges where halo should not have been updated, make sure
+        ! the original value remained.  otherwise, compute the index value.
+        ! the row and col numbers have already been updated for periodic cases.
+        if ((left .and. top) .or. &
+            (left .and. (.not. xperiodic)) .or. &
+            (top .and. (.not. yperiodic))) then
+            val = originalval
+        else
+            val = globalRowstart + localColnum
+        endif
+
+        if (f90ptr(i, j) .ne. val) then
+            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+            rc = ESMF_FAILURE
+            !print *, "(bailing on first error - may be others)"
+            !return 
+        endif
+      enddo
+    enddo
+
+    ! top (without corners):
+    do j=ub(2)-haloWidth+1, ub(2)
+      localRownum = j - haloWidth 
+      if (top .and. yperiodic) then
+          localRownum = localRownum - globalCellCounts(2) 
+      endif
+      globalRowstart = ((localRownum + globalOffsets(2) - 1) &
+                     *   globalCellCounts(1))  + globalOffsets(1)
+      do i=lb(1)+haloWidth, ub(1)-haloWidth
+        localColnum = i - haloWidth 
+
+        ! for those edges where halo should not have been updated, make sure
+        ! the original value remained.  otherwise, compute the index value.
+        ! the row and col numbers have already been updated for periodic cases.
+        if (top .and. (.not. yperiodic)) then
+            val = originalval
+        else
+            val = globalRowstart + localColnum
+        endif
+
+        if (f90ptr(i, j) .ne. val) then
+            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+            rc = ESMF_FAILURE
+            !print *, "(bailing on first error - may be others)"
+            !return 
+        endif
+      enddo
+    enddo
+
+    ! top right corner:
+    do j=ub(2)-haloWidth+1, ub(2)
+      localRownum = j - haloWidth 
+      if (top .and. yperiodic) then
+          localRownum = localRownum - globalCellCounts(2) 
+      endif
+      globalRowstart = ((localRownum + globalOffsets(2) - 1) &
+                     *   globalCellCounts(1))  + globalOffsets(1)
+      do i=ub(1)-haloWidth+1, ub(1)
+        localColnum = i - haloWidth 
+        if (right .and. xperiodic) then
+            localColnum = localColnum - globalCellCounts(1)
+        endif
+
+        ! for those edges where halo should not have been updated, make sure
+        ! the original value remained.  otherwise, compute the index value.
+        ! the row and col numbers have already been updated for periodic cases.
+        if ((right .and. top) .or. &
+            (right .and. (.not. xperiodic)) .or. &
+            (top .and. (.not. yperiodic))) then
+            val = originalval
+        else
+            val = globalRowstart + localColnum
+        endif
+
+        if (f90ptr(i, j) .ne. val) then
+            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+            rc = ESMF_FAILURE
             !print *, "(bailing on first error - may be others)"
             !return 
         endif
