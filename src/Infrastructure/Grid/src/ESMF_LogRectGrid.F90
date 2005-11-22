@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.145 2005/11/10 18:06:12 svasquez Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.146 2005/11/22 21:00:11 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.145 2005/11/10 18:06:12 svasquez Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.146 2005/11/22 21:00:11 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -8430,9 +8430,9 @@
         do i = 1,numDE1
           DE = (j-1)*numDE1 + i
           boxes(DE,1,2) = start
-          boxes(DE,2,2) = stop
+          boxes(DE,2,2) = start
           boxes(DE,3,2) = stop
-          boxes(DE,4,2) = start
+          boxes(DE,4,2) = stop
         enddo
         start = stop
         i1    = i1 + countsPerDEDim2(j)
