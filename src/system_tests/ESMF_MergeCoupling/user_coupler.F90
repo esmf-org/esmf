@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.9 2005/05/17 18:22:07 theurich Exp $
+! $Id: user_coupler.F90,v 1.9.2.1 2005/11/23 20:07:55 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -75,59 +75,75 @@
 
         ! Local variables
         type(ESMF_Field) :: humidity1, humidity2, humidity3
-        type(ESMF_DELayout) :: cpllayout
+        type(ESMF_VM) :: vm
         type(ESMF_Grid) :: grid1
         type(ESMF_Array) :: array1
         type(ESMF_FieldDataMap) :: datamap1
         type(ESMF_ArraySpec) :: arrayspec1
-        integer :: rank1, counts(2)
+        integer :: rank1
         type(ESMF_DataKind) :: dk1
         type(ESMF_DataType) :: dt1
+        integer :: status
      
-
         print *, "User Coupler Init starting"
+
         call ESMF_StateGetField(importState, "humidity", humidity1, &
                                 "comp1 export", rc)
+        if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_FieldPrint(humidity1, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 10
   
         call ESMF_StateGetField(importstate, "humidity", humidity2, &
                                 "comp1 export", rc)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         ! one route from h1, one from h2
 
         call ESMF_StateGetField(exportState, "humidity", humidity3, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_FieldPrint(humidity3, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
-        ! Get layout from coupler component
-        call ESMF_CplCompGet(comp, delayout=cpllayout, rc=rc)
+        ! Get VM from coupler component to use in computing the redist
+        call ESMF_CplCompGet(comp, vm=vm, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Precompute communication patterns
-        call ESMF_FieldRedistStore(humidity1, humidity3, cpllayout, &
-                                   routehandle1, rc=rc)
+        call ESMF_FieldRedistStore(humidity1, humidity3, vm, &
+                                   routehandle=routehandle1, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
-        call ESMF_FieldRedistStore(humidity2, humidity3, cpllayout, &
-                                   routehandle2, rc=rc)
+        call ESMF_FieldRedistStore(humidity2, humidity3, vm, &
+                                   routehandle=routehandle2, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         ! TODO: make this work: field create from field
         !humidityM = ESMF_FieldCreateFromField(humidity1, rc=rc)
 
         call ESMF_FieldGet(humidity1, grid=grid1, datamap=datamap1, &
                            array=array1, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_ArrayGet(array1, rank=rank1, type=dt1, kind=dk1, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_ArraySpecSet(arrayspec1, rank1, dt1, dk1, rc)
+        if (status .ne. ESMF_SUCCESS) goto 10
  
         h1a = ESMF_FieldCreate(grid=grid1, arrayspec=arrayspec1, &
-                                     datamap=datamap1, rc=rc)
+                               datamap=datamap1, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         h2a = ESMF_FieldCreate(grid=grid1, arrayspec=arrayspec1, &
-                                     datamap=datamap1, rc=rc)
+                               datamap=datamap1, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         humidityM = ESMF_FieldCreate(grid=grid1, arrayspec=arrayspec1, &
                                      datamap=datamap1, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         print *, "User Coupler Init returning"
-   
-        rc = ESMF_SUCCESS
+
+10 continue
+        rc = status
 
     end subroutine user_init
 
