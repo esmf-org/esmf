@@ -1,4 +1,4 @@
-! $Id: ESMF_MergeCouplingSTest.F90,v 1.13 2005/02/14 04:07:16 theurich Exp $
+! $Id: ESMF_MergeCouplingSTest.F90,v 1.14 2005/11/23 20:03:37 jwolfe Exp $
 !
 ! System test code MergeCoupling
 !  Description on Sourceforge under System Test #62502
@@ -73,7 +73,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Query for the number of PETs we were started with
-    call ESMF_VMGet(vm, petCount=npets, rc)
+    call ESMF_VMGet(vm, petCount=npets, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     if (npets .lt. 4) then
@@ -85,53 +85,19 @@
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-<<<<<<< ESMF_MergeCouplingSTest.F90
     comp1 = ESMF_GridCompCreate(vm, cname1, rc=rc)
-=======
-    !delist = (/ 0, 1, 2, 3 /)
-    layout2 = ESMF_DELayoutCreate(vm, (/ 4, 1 /), rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    comp1 = ESMF_GridCompCreate(cname1, delayout=layout2, rc=rc)
->>>>>>> 1.9
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname1), "rc =", rc
-<<<<<<< ESMF_MergeCouplingSTest.F90
-=======
-    call ESMF_DELayoutPrint(layout2, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
->>>>>>> 1.9
 
     cname2 = "user model 2"
-<<<<<<< ESMF_MergeCouplingSTest.F90
     comp2 = ESMF_GridCompCreate(vm, cname2, rc=rc)
-=======
-    layout3 = ESMF_DELayoutCreate(vm, (/ 2, 2 /), rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    comp2 = ESMF_GridCompCreate(cname2, delayout=layout3, rc=rc)
->>>>>>> 1.9
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname2), "rc =", rc
-<<<<<<< ESMF_MergeCouplingSTest.F90
-=======
-    call ESMF_DELayoutPrint(layout3, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
->>>>>>> 1.9
 
     cname3 = "user model 3"
-<<<<<<< ESMF_MergeCouplingSTest.F90
     comp3 = ESMF_GridCompCreate(vm, cname3, rc=rc)
-=======
-    layout3 = ESMF_DELayoutCreate(vm, (/ 1, 4 /), rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    comp3 = ESMF_GridCompCreate(cname3, delayout=layout3, rc=rc)
->>>>>>> 1.9
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname3), "rc =", rc
-<<<<<<< ESMF_MergeCouplingSTest.F90
-=======
-    call ESMF_DELayoutPrint(layout3, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
->>>>>>> 1.9
 
     cplname = "user one-way coupler"
     cpl = ESMF_CplCompCreate(vm, cplname, rc=rc)
@@ -323,14 +289,6 @@
       call ESMF_CplCompDestroy(cpl, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-<<<<<<< ESMF_MergeCouplingSTest.F90
-=======
-      call ESMF_DELayoutDestroy(layout2, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_DELayoutDestroy(layout3, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-
->>>>>>> 1.9
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 10    print *, "System Test MergeCoupling complete."
