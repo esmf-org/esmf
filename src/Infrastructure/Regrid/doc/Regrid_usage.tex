@@ -1,4 +1,4 @@
-% $Id: Regrid_usage.tex,v 1.8 2005/11/19 00:30:16 jwolfe Exp $
+% $Id: Regrid_usage.tex,v 1.9 2005/11/23 22:43:51 jwolfe Exp $
 
 
 Regrid is designed to be called with Field or Bundle
@@ -37,8 +37,12 @@ top-level module provides a unified API.
 
 Regrid assumes both the source and destination Grids share the same coordinate
 system and units.  Although 3D regridding is not yet available, this rule is
-also expected to be valid for vertical grids as well.  Users are responsible
-for any necessary conversion or translation.
+also expected to be valid for vertical grids as well.  At this point, the ESMF
+definition of a common coordinate system includes the extents used to define
+a domain.  For example, Regrid routines do not understand that latitudes from
+-180 to +180 degrees and latitudes from 0 to 360 degrees are describing the
+same domain with a different range.  Currently, users are responsible for any
+necessary conversion or translation.  
 
 There are five possible physical overlap situations between the source and
 destination Grids, illustrated in Figure \ref{fig:RegridGridOverlap}.
@@ -84,15 +88,54 @@ minus one-half of a cell width.  This is illustrated below in Figure
 \end{center}
 
 sample RelLocs and the effect on the overlap of the global Grids.  In this
-situation, there may be some unfilled or less accurate data at some of the
+situation, there may be some unfilled or less accurate Field data at some of the
 Grid boundaries.
 
-Different refinement or cell sizes between the source and destination Grids
-may also have a similar effect, even if their corresponding Fields have the
-same RelLocs.  This is illustrated below...
+
+\subsubsection{Regrid and Grid Refinement}
+
+Different refinement or cell sizes (also called resolution) between the source
+and destination Grids may have a similar effect on regridding as does different
+data locations. This can be true even if the source and destination Fields have
+the same RelLoc, as illustrated in Figure \ref{fig:RegridRefinementEffect}.  In
+this diagram,
+
+\begin{center}
+\begin{figure}
+\caption{Illustration of areas represented by the same RelLoc on Grids with
+         different refinement. }
+\label{fig:RegridRefinementEffect}
+\resizebox{\textwidth}{!}
+  {\includegraphics{RegridRefinementEffect}}
+\end{figure}
+\end{center}
+
+the areas of the two grids represented by the corresponding Fields do not overlap
+exactly despite sharing identical physical extents and relative data locations.
+Again, this situation may cause some inaccuracy in the regridded Field data at
+the Grid boundaries.
 
 
 \subsubsection{Regrid and Periodicity}
 
+Some of the Regrid issues raised in the previous sections concerning the effect
+of data locations and Grid refinement are negated by the integration of
+periodic boundary conditions into Regrid routines.  As illustrated in
+Figure \ref{fig:RegridPeriodicity}, areas represented by Field data that
+would otherwise extend beyond the nominal Grid boundaries are mapped or "wrapped"
+back onto the Grid at the corresponding periodic boundary.  This effectively 
 
+\begin{center}
+\begin{figure}
+\caption{Illustration of Regrid Overlap issues solved by the implementation
+         of periodic boundary conditions. }
+\label{fig:RegridPeriodicity}
+\resizebox{\textwidth}{!}
+  {\includegraphics{RegridPeriodicity}}
+\end{figure}
+\end{center}
 
+ensures complete overlap for Grids that share identical physical extents.
+
+Unfortunately, the Regrid routines in ESMF do not currently include periodic
+boundary effects, so users must be aware of possible problems.
