@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.89 2005/10/20 17:11:32 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.90 2005/11/28 15:16:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.89 2005/10/20 17:11:32 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.90 2005/11/28 15:16:55 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -4726,7 +4726,7 @@ end interface
             nextitem%otype = ESMF_STATEITEM_INDIRECT
     
             ! get next field and query name
-            call ESMF_BundleGetField(bundles(i), i, field, localrc)
+            call ESMF_BundleGetField(bundles(i), j, field, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
