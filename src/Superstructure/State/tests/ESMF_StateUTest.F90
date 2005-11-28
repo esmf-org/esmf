@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.36 2005/03/23 22:49:51 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.37 2005/11/28 15:28:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.36 2005/03/23 22:49:51 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.37 2005/11/28 15:28:08 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -42,8 +42,8 @@
       logical :: IsNeeded
       character(ESMF_MAXSTR) :: statename, bundlename, bname
       character(ESMF_MAXSTR) :: fieldname, fname, aname, arrayname
-      type(ESMF_Field) :: field1, field2, field3(3), field4, nofield
-      type(ESMF_Bundle) :: bundle1, bundle2(1), bundle5, nobundle
+      type(ESMF_Field) :: field1, field2, field3(3), field4, field5(3), nofield
+      type(ESMF_Bundle) :: bundle1, bundle2(1), bundle3, bundle5, nobundle
       type(ESMF_State) :: state1, state2, state3, nostate
       type(ESMF_Array) :: array1, array2(2), array3, array3a, noarray
       type(ESMF_StateItemType) :: stateItemType
@@ -202,6 +202,51 @@
       !EX_UTest
       call ESMF_StateAddBundle(state1, bundle1, rc)
       write(name, *) "Adding a second Bundle to a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      call  ESMF_StatePrint(state1, rc=rc)
+
+
+      !EX_UTest
+      ! Test adding a Bundle with Fields to a State
+      bundle3 = ESMF_BundleCreate(name="Atmosphere", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      field5(1) = ESMF_FieldCreateNoData("heat flux", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating a Field Test 1"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      field5(2) = ESMF_FieldCreateNoData("density", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating a Field Test 2"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      field5(3) = ESMF_FieldCreateNoData("sea surface temperature", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating a Field Test 3"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      call ESMF_BundleAddField(bundle3, 3, field5, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Adding 3 Fields to a Bundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      call ESMF_StateAddBundle(state1, bundle3, rc)
+      write(name, *) "Adding a Bundle with Fields to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
