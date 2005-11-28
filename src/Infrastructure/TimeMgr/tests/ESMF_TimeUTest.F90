@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.18 2005/04/02 00:27:17 eschwab Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.19 2005/11/28 21:14:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.18 2005/04/02 00:27:17 eschwab Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.19 2005/11/28 21:14:14 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -533,11 +533,27 @@
 
       !EX_UTest
       ! Test Setting Stop Time, relying on defaults 5
-      write(failMsg, *) " Did not return 1/1/0 and ESMF_SUCCESS"
+      write(failMsg, *) " Default NOLEAP Did not return 1/1/0 and ESMF_SUCCESS"
       call ESMF_CalendarSetDefault(ESMF_CAL_NOLEAP)
       call ESMF_TimeSet(stopTime, rc=rc)
       call ESMF_TimeGet(stopTime, yy=YY, mm=MM, dd=DD)
       write(name, *) "Set Time Initialization Test w/Defaults 5"
+      call ESMF_Test((YY.eq.0.and.mm.eq.1.and.dd.eq.1.and. &
+                      rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_CalendarSetDefault(ESMF_CAL_NOCALENDAR)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! This test verifies the fix to bug #1306230, support #1305193, reported
+      !   by Giang Nong/GFDL
+      ! Test Setting Stop Time, relying on defaults 6
+      write(failMsg, *) " Default JULIAN Did not return 1/1/0 and ESMF_SUCCESS"
+      call ESMF_CalendarSetDefault(ESMF_CAL_JULIAN)
+      call ESMF_TimeSet(stopTime, rc=rc)
+      call ESMF_TimeGet(stopTime, yy=YY, mm=MM, dd=DD)
+      write(name, *) "Set Time Initialization Test w/Defaults 6"
       call ESMF_Test((YY.eq.0.and.mm.eq.1.and.dd.eq.1.and. &
                       rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
