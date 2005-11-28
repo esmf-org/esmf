@@ -1,26 +1,64 @@
-% $Id: DELayout_desc.tex,v 1.7 2004/06/22 23:13:44 cdeluca Exp $
+% $Id: DELayout_desc.tex,v 1.8 2005/11/28 18:56:12 jwolfe Exp $
 
-The DELayout class provides an additional layer of abstraction on top of the Virtual Machine (VM) layer. There are three key aspects the DELayout class deals with.
+The DELayout class provides an additional layer of abstraction on top of the
+Virtual Machine (VM) layer. There are three key aspects the DELayout class deals
+with.
 
 \begin{enumerate}
 
 \item Problem decomposition via logical Decomposition Elements (DEs).
 
-\item Support of load balancing in terms of computational and connection weights on and between the DEs. 
+\item Support of load balancing in terms of computational and connection weights
+on and between the DEs. 
 
 \item Mapping of the logical problem decomposition onto an ESMF Virtual Machine.
 
 \end{enumerate}
 
-It is critical to understand that {\it no} user data is associated with DELayout objects! DELayouts are {\it control} objects which store important decomposition information and provide crucial functionality to ESMF applications with respect to various aspects of logical problem decomposition. Data objects, such as Arrays and Fields, which hold user data, rely in the implementation of their methods on the DELayout class to provide this decomposition functionality.
+It is critical to understand that {\it no} user data is associated with DELayout
+objects! DELayouts are {\it control} objects which store important decomposition
+information and provide crucial functionality to ESMF applications with respect
+to various aspects of logical problem decomposition. Data objects, such as Arrays
+and Fields, which hold user data, rely in the implementation of their methods on
+the DELayout class to provide this decomposition functionality.
 
-The application writer uses the DELayout to specify the decomposition of the computational problem in terms of logical Decomposition Elements (DEs). From an ESMF perspective the DEs are the smallest units of decomposition. DEs are logical units, not necessarily having a 1-to-1 correspondence to the Persistent Execution threads (PETs) of a VM or their physical Processing Elements (PEs) in the underlying physical machine. Consequently there are no restrictions on the number of DEs possed by the VM or the available physical machine resources. Hence, the application writer may chose the number of DEs to best match the computational problem and the employed algorithm.
+The application writer uses the DELayout to specify the decomposition of the
+computational problem in terms of logical Decomposition Elements (DEs). From an
+ESMF perspective the DEs are the smallest units of decomposition. DEs are logical
+units, not necessarily having a 1-to-1 correspondence to the Persistent Execution
+threads (PETs) of a VM or their physical Processing Elements (PEs) in the
+underlying physical machine. Consequently there are no restrictions on the number
+of DEs possed by the VM or the available physical machine resources. Hence,
+the application writer may chose the number of DEs to best match the
+computational problem and the employed algorithm.
 
-A DELayout object not only keeps track of the number of DEs into which a problem is decomposed, but furthermore allows the user to specify a problem topology by means of computational weights on each DE and connection weights between DEs. Both types of weights are relative measures, meaningful only for comparison {\it within} the same DELayout object. The purpose of these weights is to provide load balancing information and to allow for a best possible DE-to-PET mapping of a DELayout onto the component's VM.
+A DELayout object not only keeps track of the number of DEs into which a problem
+is decomposed, but furthermore allows the user to specify a problem topology by
+means of computational weights on each DE and connection weights between DEs.
+Both types of weights are relative measures, meaningful only for comparison
+{\it within} the same DELayout object. The purpose of these weights is to provide
+load balancing information and to allow for a best possible DE-to-PET mapping of
+a DELayout onto the component's VM.
 
-It is possible for the application writer to overwrite the framework's DE-to-PET mapping. This allows for user level load balancing schemes and offers an entry point for user codes that already deal with the issue of mapping the {\em computational problem topology} onto the {\em resource topology}.
+It is possible for the application writer to overwrite the framework's DE-to-PET
+mapping. This allows for user level load balancing schemes and offers an entry
+point for user codes that already deal with the issue of mapping the
+{\em computational problem topology} onto the {\em resource topology}.
 
-In a typical ESMF application direct interaction with the DELayout class is minimal. This is reflected by the small number of methods in the DELayout API. Besides the {\tt ESMF\_DELayoutCreate()} and {\tt ESMF\_DELayoutDestroy()} methods there are three types of {\tt ESMF\_DELayoutGet} methods. After creating a DELayout the application writer will use the get methods to find out general information, such as number of DEs and dimensionality of the decomposition. More importantly though, because it is unknown until the DELayout has been created, is the {\it PET-local} information that is provided by the DELayout Get methods. Having obtained PET specific information about the decomposition each running user thread can take appropriate steps in facilitating the decomposition within its local PET.
+In a typical ESMF application direct interaction with the DELayout class is
+minimal. This is reflected by the small number of methods in the DELayout API.
+Besides the {\tt ESMF\_DELayoutCreate()} and {\tt ESMF\_DELayoutDestroy()}
+methods there are three types of {\tt ESMF\_DELayoutGet} methods. After creating
+a DELayout the application writer will use the get methods to find out general
+information, such as number of DEs and dimensionality of the decomposition. More
+importantly though, because it is unknown until the DELayout has been created, is
+the {\it PET-local} information that is provided by the DELayout Get methods.
+Having obtained PET specific information about the decomposition each running
+user thread can take appropriate steps in facilitating the decomposition within
+its local PET.
 
-Notice that a single ESMF component may contain multiple DELayouts, all of which may describe the decomposition of different computational problems or different compositions of the same computational problem. However, all DELayouts within a component map onto the same VM instance of the component.
+Notice that a single ESMF component may contain multiple DELayouts, all of which
+may describe the decomposition of different computational problems or different
+compositions of the same computational problem. However, all DELayouts within a
+component map onto the same VM instance of the component.
 
