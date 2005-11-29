@@ -1,4 +1,4 @@
-% $Id: ESMF_inframethodoverview.tex,v 1.9 2005/11/08 23:03:45 nscollins Exp $
+% $Id: ESMF_inframethodoverview.tex,v 1.10 2005/11/29 20:57:09 nscollins Exp $
 
 \section{Overview of Distributed Data Methods}
 
@@ -6,14 +6,19 @@ Bundles, Fields, and Arrays all have versions of the following
 data communication methods.  In ESMF, data is communicated 
 between DEs.  Depending on the underlying communication 
 mechanism, this may translate within the framework to a data 
-copy, an MPI call, or something else.
+copy, an MPI call, or something else.  The ESMF goal of providing
+performance portability means the Framework will select the
+fastest communication strategy on each hardware platform transparently 
+to the user code.
 
+Communication patterns, meaning exactly which bytes need to be copied 
+or sent from one PET to another to perform the requested operation,
+can be precomputed during an initialization phase and then later 
+executed repeatedly.
 There is a common object handle, an {\tt ESMF\_RouteHandle}, which
-allows communication patterns to be precomputed during 
-initialization and the information stored in that RouteHandle.
-By specifying a RouteHandle at execution time, only
-the source and destination data pointers must be supplied and the
-runtime overhead is minimized.
+identifies these stored communication patterns. 
+Only the {\tt ESMF\_RouteHandle} and the source and destination 
+data pointers must be supplied at runtime to minimize execution overhead.
 
 \subsection{Higher Level Functions}
 The following three methods are intended to map closely to 
@@ -24,13 +29,14 @@ sections.  They are:
 \begin{itemize}
 
 \item {\bf Halo}
-Halo operations update ghost-cell or halo regions at the boundaries
+Update ghost-cell or halo regions at the boundaries
 of a local data decomposition.
 \item {\bf Regrid}
-Regrid methods transform data from one Grid to another.
+Transform data from one Grid to another, performing
+any necessary data interpolation.
 \item {\bf Redist}
-Redistribution methods move data associated with a single Grid but
-with different decompositions.
+Copy data associated with a single Grid from
+one decomposition to another.  No data interpolation is necessary.
 
 \end{itemize}
 
@@ -85,11 +91,12 @@ to the user by specifying the following route options.
 
 \item
 
-There is an internal Route class which supports the distributed
-communication methods.  There are 4 additional internal-only
-classes which are related: AxisIndex, XPacket, CommTable, and RTable;
-and one public RouteHandle class which is what the user sets and gets.
-The implementation is in C++, with interfaces in Fortran 90.
+There is an internal {\tt ESMC\_Route} class which supports the 
+distributed communication methods.  There are 4 additional internal-only
+classes which support {\tt ESMC\_Route}: {\tt ESMC\_AxisIndex}, 
+{\tt ESMC\_XPacket}, {\tt ESMC\_CommTable}, and {\tt ESMC_RTable};
+and a public {\tt ESMF\_RouteHandle} class which is what the user 
+sets and gets.  The implementation is in C++, with interfaces in Fortran 90.
 
 The general communication strategy is that each
 DE computes its own communication information independently,
@@ -99,7 +106,7 @@ stored in terms relative to itself.  (Implementation note: this
 code will need to be made thread-safe if multiple threads are
 trying to add information to the same route table.)
 
-An AxisIndex is a small helper class which contains an index minimum
+AxisIndex is a small helper class which contains an index minimum
 and maximum for each dimension and is used to describe an n-dimensional
 hypercube of information in index space.  These are associated with 
 logically rectangular grids and local data arrays.  
@@ -107,11 +114,17 @@ There are usually multiple instances of them, for example the local
 data chunk, and the overall global index-space grid this data is
 a subset of.  Within each of the local or global categories, there are
 also multiple instances to describe: 
-the total allocated space (which includes halo regions), the computational
-space, and the exclusive space (data which is not read during a halo update).
-(Implementation note: there is an outstanding request to separate total
-space from allocated space, to allow the halo area of an array to live
-inside a larger space which has unused padding areas.)
+\begin{description}
+\item [allocated space] all memory associated with this data block
+\item [total area] subset of allocated area which includes halo regions 
+but not unused space allocated simply for padding or alignment reasons
+\item [computational area] subset of total area which includes all data 
+which is computed, excludes halo regions 
+\item [exclusive area] subset of computational area data which is not 
+read for halo updates
+\end{description}
+(Implementation note: the allocated space is only partially implemented
+internally and has no external user API yet.)
 
 An Exchange Packet (XPacket) describes groups of memory addresses
 which constitute an n-dimensional hypercube of data.
@@ -174,7 +187,12 @@ through the API to select which precomputed Route is to be executed.
 A RouteHandle contains a handle type and a pointer to a Route object.
 In addition, for use only by the Regrid code, there is an additional Route
 pointer and a TransformValues pointer.  (TransformValues is an internal
-class only used by the Regridding code.)
+class only used by the Regridding code.)  If the RouteHandle describes the
+Route for a Bundle, then the RouteHandle can contain a list of Routes,
+one for each Field in the Bundle, and for Regrid use, a list of additional
+Routes instead of a single Route.  There is also a flag to indicate whether
+a single Route is applicable to all Fields in a Bundle or whether there
+are multiple Routes.
 The RouteHandle methods are fairly basic; mostly accessor methods
 for getting and setting values.
 
@@ -261,19 +279,19 @@ will change the performance.  Also the size of the data blocks
 to be sent, the amount of contiguity, and limits on the number 
 of outstanding communication buffers all affect what options are best.
 
-The ESMF\_RouteOptions were listed in \ref{sec:routeoptions}; 
+The {\tt ESMF\_RouteOptions} are listed in \ref{sec:routeoptions}; 
 the following description contains more implementation detail 
 about what each of the options
 controls inside the execution of a Route.  Note that the options
 do not affect the creation of a Route, nor any of the Precompute
-code, and can be changed each time the Route is run.
+code, and can optionally be changed each time the Route is run.
 
 Packing options:
 \begin{enumerate}
-\item[By MultiBlock]
+\item[By Buffer]
 If multiple memory addresses are provided to RouteRun (from
 bundle-level communications, for example), then this option
-packs data across all blocks as specified by the other
+packs data across all buffers/blocks as specified by the other
 packing flags before sending or receiving.
 Note: unlike the other packing flags, this is handled in the
 code at a higher level by either passing down multiple addresses
@@ -314,10 +332,6 @@ does not allocate a packing or unpacking buffer but supplies the
 actual data address to the communications call so the data is
 read or written in place.
 
-< to be created here - several figures showing in pictures
-the various loops and packing options which we support,
-out of many others which are possible but not useful. >
-
 \begin{center}
 \begin{figure}
 \caption{A common XPacket pattern which generally benefits from
@@ -353,7 +367,7 @@ are contiguous.}
 
 \begin{center}
 \begin{figure}
-\caption{Generally the overhead of making multiple communication calls 
+\caption{Often the overhead of making multiple communication calls 
 outweighs the cost of copying non-contiguous data into a contiguous buffer,
 sending it in a single operation, and then copying it to the final
 memory locations on the receiving side.}
@@ -397,6 +411,12 @@ call is waited for in turn and when all outstanding communication
 calls have completed, then the API call returns to the user.
 
 \end{enumerate}
+(Note that in the Async case it makes much more sense to iterate
+throught the Route table in PET order instead of the complication
+of computing communication pairs and iterating in a non-sequential
+order.  The code is as it is now for reasons of implementation speed
+and not for any other design reason.  This would require a slightly
+simpler, but separate, version of the RouteRun() subroutine.)
 
 \item
 
@@ -405,30 +425,30 @@ under certain circumstances.  Bundles are groups of Fields which
 share the same Grid, but they are not required to share the same
 data types, data ranks, nor relative data locations.  Bundles
 in which these things are the same in all Fields are marked inside the
-bundle code as being "congruent".  At communication store time,
-bundles which have congruent data in all the Fields have the option
+bundle code as being {\bf congruent}.  At communication store time
+Bundles which have congruent data in all the Fields have the option
 of packing all Field data together into fewer communication calls
 which generally is expected to give better performance.   
 Fields where the data is not of the same type or perhaps not
 the same number of items (e.g. different rank, vertex-centered data
-vs cell centered data) can in theory also be packed but in fact
+vs. cell centered data) can in theory also be packed but in fact
 the code becomes more complicated, and in the case of differing
 data types may cause system errors because of accessing data
 on non-standard byte offsets or putting mixing integer data
 with floating data and causing NaN (not a number) exceptions.
-In this case, the conservative thing to do is to construct a
-separate Route object for each Field, all enclosed in the same
+In this case, the conservative implementation strategy is to construct 
+a separate Route object for each Field, all enclosed in the same
 RouteHandle.  Inside the Bundle communication code the execution
 for both types of Bundles is identical for the caller, but inside
 the congruent Bundle code calls the {\tt ESMF\_RouteRun()} code
 once and all communication for all Fields in the Bundle is done
 when it returns.  The non-congruent Bundles execute a separate
-run call for each Field and return to the user when all Fields
-have been sent/received.
+{\tt ESMF\_RouteRun()} call for each Field and return to the user 
+when all Field data have been sent/received.
 
 There are comments in the code for an intermediate level of
 optimization in which the Bundle code determines the smallest
-number of unique types of Fields in the Bundle, and all types
+number of unique types of Fields in the Bundle, and all same types
 share the same Route object, but this has not been implemented
 at this time.  Once the existing code has been in use for a while,
 whether this is useful or needed may become more clear.
@@ -448,8 +468,7 @@ section.  The halo and redistribution operations are described here.
 
 \begin{enumerate}
 
-\item[Halo]  <to be completed>  The total array area, which
-includes any halo regions (ghost zones),
+\item[Halo] The total array area, which includes any halo regions,
 are intersected with the computational
 area of other DEs. The overlap regions are converted from index
 space into memory space and stored as XPackets in the RTables.
@@ -459,9 +478,9 @@ which halo regions overlap at the grid edges; if the data
 is only decomposed into a single block in any dimension (which
 means it halos with itself); and if the halo region is large
 enough that a halo operation may require intersection with
-the N+1 neighbor in any dimension.
+the N+1 neighbor in any dimension.  
 
-\item[Redistribute]  <to be completed>  The DE computes the overlap
+\item[Redistribute]  Each DE computes the overlap
 between its own computational region and all DEs in the 
 remote Grid, again only working in computational area.  
 The overlap regions are converted from index
@@ -470,6 +489,14 @@ After execution a redistribution, a halo operation may be required
 to populate any halo regions with consistent data.
 
 \end{enumerate}
+(Note: the Redistribution code has been reimplemented to intersect
+the DEs in index space and then convert the overlap region to an XPacket
+representation.  Halo still converts the regions from AxisIndex to 
+XPackets and then intersects the XPackets, but this code needs to be
+changed to intersect in AxisIndex space and once the overlap is computed
+then convert to XPackets.  Intersecting AxisIndex objects is very 
+much simpler, both to understand and to execute, and more easily 
+extensible to multiple dimensions than intersecting XPackets.)
 
 \end{enumerate}
 
