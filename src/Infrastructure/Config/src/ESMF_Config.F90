@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.26 2005/11/02 21:01:24 svasquez Exp $
+! $Id: ESMF_Config.F90,v 1.27 2005/11/30 22:39:25 eschwab Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -1906,13 +1906,6 @@
 
       ! remember number of labels found
       config%nattr = a-1
-
-      ! if no labels found, report it
-      if (config%nattr .eq. 0) then
-        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, &
-                                  "No labels found in attributes file", &
-                                  ESMF_CONTEXT, rc)) return
-      endif
 
       return
 
