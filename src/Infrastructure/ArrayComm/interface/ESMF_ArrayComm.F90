@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.79 2005/11/30 22:18:27 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.80 2005/11/30 23:03:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.79 2005/11/30 22:18:27 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.80 2005/11/30 23:03:19 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -503,6 +503,10 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gridAIsPerDEPerRank
       type(ESMF_DELayout) :: delayout
       type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
+
+      ! make sure the compilers can tell these are unassociated.
+      nullify(myArrayAIsPerRank)
+      nullify(gridAIsPerDEPerRank)
 
       ! get layout from the grid in order to get the number of DEs
       call ESMF_ArrayGet(array, rank=datarank, rc=localrc)
