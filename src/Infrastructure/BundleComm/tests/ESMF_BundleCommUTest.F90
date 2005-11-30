@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommUTest.F90,v 1.9 2005/10/17 20:51:07 nscollins Exp $
+! $Id: ESMF_BundleCommUTest.F90,v 1.10 2005/11/30 22:12:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommUTest.F90,v 1.9 2005/10/17 20:51:07 nscollins Exp $'
+      '$Id: ESMF_BundleCommUTest.F90,v 1.10 2005/11/30 22:12:16 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -326,7 +326,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       !  This route table should have 2 internal routes.
       call ESMF_RouteHandleGet(rh, route_count=nroutes, rc=rc)
       write(name, *) "Multiple routes inside handle"
