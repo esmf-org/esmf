@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.78 2005/11/10 18:42:55 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.79 2005/11/30 22:18:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.78 2005/11/10 18:42:55 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.79 2005/11/30 22:18:27 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -93,7 +93,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
           module procedure ESMF_ArrayHaloStoreOne
-          module procedure ESMF_ArrayHaloStoreList
+          module procedure ESMF_ArrayHaloStoreIndex
 
 ! !DESCRIPTION:
 !     This interface provides both the revised entry point for
@@ -131,7 +131,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
           module procedure ESMF_ArrayRedistStoreOne
-          module procedure ESMF_ArrayRedistStoreList
+          module procedure ESMF_ArrayRedistStoreIndex
 
 ! !DESCRIPTION:
 !     This interface provides both the revised entry point for
@@ -1127,7 +1127,7 @@
 !EOP
       ! note that the routehandle coming in here is intent(out) because
       ! it is going to be created from scratch in the subsequent call.
-      ! however, the StoreList() call has to have the routehandle intent
+      ! however, the StoreIndex() call has to have the routehandle intent
       ! as (inout) because setting any index > 1 will add a route to
       ! an existing routehandle and *not* call the create code.
   
@@ -1137,7 +1137,7 @@
       ! or make a temporary here and do an assignment before returning.
 
       ! passthru call, setting index to 1 and type 1-to-1
-      call ESMF_ArrayHaloStoreList(array, 1, ESMF_1TO1HANDLEMAP, 1, &
+      call ESMF_ArrayHaloStoreIndex(array, 1, ESMF_1TO1HANDLEMAP, 1, &
                                 grid, datamap, &
                                 routehandle, halodirection, routeOptions, rc)
 
@@ -1145,13 +1145,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayHaloStoreList"
+#define ESMF_METHOD "ESMF_ArrayHaloStoreIndex"
 !BOPI
-! !IROUTINE: ESMF_ArrayHaloStoreList - Store resources for a halo operation
+! !IROUTINE: ESMF_ArrayHaloStoreIndex - Store resources for a halo operation
 !
 ! !INTERFACE:
       ! Internal routine, intended to be called directly by Bundle code only
-      subroutine ESMF_ArrayHaloStoreList(array, index, rmaptype, maxindex, &
+      subroutine ESMF_ArrayHaloStoreIndex(array, index, rmaptype, maxindex, &
                                       grid, datamap, routehandle, &
                                       halodirection, routeOptions, rc)
 !
@@ -1403,7 +1403,7 @@
       ! set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_ArrayHaloStoreList
+      end subroutine ESMF_ArrayHaloStoreIndex
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1760,7 +1760,7 @@
     ! if problems compiling, see the comment in HaloStore() for
     ! suggestions regarding intent(out) vs intent(inout).
 
-    call ESMF_ArrayRedistStoreList(srcArray, srcGrid, srcDataMap, &
+    call ESMF_ArrayRedistStoreIndex(srcArray, srcGrid, srcDataMap, &
                                dstArray, dstGrid, dstDataMap, &
                                1, ESMF_1TO1HANDLEMAP, 1, &
                                parentVM, routehandle, routeOptions, rc)
@@ -1770,13 +1770,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedistStoreList"
+#define ESMF_METHOD "ESMF_ArrayRedistStoreIndex"
 !BOPI
-! !IROUTINE: ESMF_ArrayRedistStoreList - Store resources for a redist operation
+! !IROUTINE: ESMF_ArrayRedistStoreIndex - Store resources for a redist operation
 !
 ! !INTERFACE:
       ! internal use only; called by Bundle code for multi-fields
-      subroutine ESMF_ArrayRedistStoreList(srcArray, srcGrid, srcDataMap, &
+      subroutine ESMF_ArrayRedistStoreIndex(srcArray, srcGrid, srcDataMap, &
                                        dstArray, dstGrid, dstDataMap, &
                                        index, rmaptype, maxindex, &
                                        parentVM, routehandle, routeOptions, rc)
@@ -1960,7 +1960,7 @@
       ! for now, branch out if arbitrary storage
       if (dstStorage.eq.ESMF_GRID_STORAGE_ARBITRARY .OR. &
           srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
-        call ESMF_ArrayRedistStoreListArb(srcArray, srcGrid, srcDataMap, &
+        call ESMF_ArrayRedistStoreIndexArb(srcArray, srcGrid, srcDataMap, &
                                           dstArray, dstGrid, dstDataMap, &
                                           index, rmaptype, maxindex, &
                                           parentVM, routehandle, &
@@ -2080,17 +2080,17 @@
       ! set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_ArrayRedistStoreList
+      end subroutine ESMF_ArrayRedistStoreIndex
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedistStoreListArb"
+#define ESMF_METHOD "ESMF_ArrayRedistStoreIndexArb"
 !BOPI
-! !IROUTINE: ESMF_ArrayRedistStoreListArb - Store resources for a redist operation
+! !IROUTINE: ESMF_ArrayRedistStoreIndexArb - Store resources for a redist operation
 !
 ! !INTERFACE:
       ! internal use only; called by Bundle code for multi-fields
-      subroutine ESMF_ArrayRedistStoreListArb(srcArray, srcGrid, srcDataMap, &
+      subroutine ESMF_ArrayRedistStoreIndexArb(srcArray, srcGrid, srcDataMap, &
                                        dstArray, dstGrid, dstDataMap, &
                                        index, rmaptype, maxindex, &
                                        parentVM, routehandle, routeOptions, rc)
@@ -2495,7 +2495,7 @@
       ! set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_ArrayRedistStoreListArb
+      end subroutine ESMF_ArrayRedistStoreIndexArb
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
