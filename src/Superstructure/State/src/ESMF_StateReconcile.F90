@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.23 2005/05/31 17:40:03 nscollins Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.24 2005/12/01 20:17:30 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.23 2005/05/31 17:40:03 nscollins Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.24 2005/12/01 20:17:30 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -255,10 +255,15 @@
     type(ESMF_State) :: wrapper
     integer(ESMF_KIND_I4), pointer, dimension(:) :: bptr
     integer :: offset, mypet
+    type(ESMF_VMId) :: VMdummyID
 
     ! get total num pets.  this is not needed by the code, just the debug
     ! messages below.
     call ESMF_VMGet(vm, localPet=mypet, rc=rc)
+
+    ! Get the VM ID of the state to use as a dummy in the code below
+    call ESMF_VMIdCreate(VMdummyID)
+    call c_ESMC_GetVMId(state, VMdummyID, localrc)
 
     ! make some initial space
     ! TODO: the current code only uses the first entry and hangs everything
@@ -341,7 +346,7 @@
            case (ESMF_STATEITEM_NAME%ot)
              si%idsend(i) = -1
              ! TODO: decide what this should be.
-             !si%vmidsend(i) = ESMF_NULL_POINTER || VMCurrentId
+             si%vmidsend(i) = VMdummyID
              si%objsend(i) = 0
              bptr => si%blindsend(:,i)
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
@@ -349,7 +354,7 @@
              localrc = ESMF_SUCCESS
            case (ESMF_STATEITEM_INDIRECT%ot)
              si%idsend(i) = -2
-             !si%vmidsend(i) = ESMF_NULL_POINTER || VMCurrentId
+             si%vmidsend(i) = VMdummyID
              si%objsend(i) = 0
              bptr => si%blindsend(:,i)
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
@@ -358,7 +363,7 @@
            case (ESMF_STATEITEM_UNKNOWN%ot)
             print *, "WARNING: unknown type"
              si%idsend(i) = -3
-             !si%vmidsend(i) = ESMF_NULL_POINTER || VMCurrentId
+             si%vmidsend(i) = VMdummyID
              si%objsend(i) = 0
              bptr => si%blindsend(:,i)
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
@@ -370,6 +375,8 @@
                                  ESMF_CONTEXT, rc)) return
     enddo
        
+    !! TODO: Is this safe?
+    !!call ESMF_VMIdDestroy(VMdummyID)
     if (present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_StateInfoBuild
