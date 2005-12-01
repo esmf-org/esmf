@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.11 2005/11/16 18:44:32 nscollins Exp $
+// $Id: ESMC_Util.h,v 1.12 2005/12/01 20:08:47 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -101,6 +101,7 @@ enum ESMC_DataKind { ESMF_I1=1,
   typedef char      ESMF_KIND_I1;
   typedef double    ESMF_KIND_R8;
   typedef float     ESMF_KIND_R4;
+  typedef long      ESMF_KIND_POINTER;
 #else // 64-bit or larger machine
   typedef long      ESMF_KIND_I8;
   typedef int       ESMF_KIND_I4;
@@ -108,6 +109,7 @@ enum ESMC_DataKind { ESMF_I1=1,
   typedef char      ESMF_KIND_I1;
   typedef double    ESMF_KIND_R8;
   typedef float     ESMF_KIND_R4;
+  typedef long long ESMF_KIND_POINTER;
 #endif
 
 // are the index numbers relative to a local chunk or the overall
@@ -234,7 +236,8 @@ extern "C" {
 void FTN(f_esmf_domainlistgetde)(ESMC_DomainList *, int *, int *, int *);
 void FTN(f_esmf_domainlistgetai)(ESMC_DomainList *, int *, int *, 
                                                     ESMC_AxisIndex *ai, int *);
-void FTN(esmf_pointertoint)(int *n, short *s, long long *len);
+void FTN(esmf_pointertoint)(int *n, short *s, ESMF_KIND_POINTER *len);
+void FTN(esmf_pointerdifference)(int *n, short *s1, short *s2, int *len);
 
 }
 
