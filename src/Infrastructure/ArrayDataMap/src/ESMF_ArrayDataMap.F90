@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.26 2005/05/31 17:39:49 nscollins Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.27 2005/12/01 22:04:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@
 
       type ESMF_RelLoc
       sequence
-      private
+      !private
         integer :: relloc
       end type
 
@@ -211,7 +211,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.26 2005/05/31 17:39:49 nscollins Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.27 2005/12/01 22:04:24 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
