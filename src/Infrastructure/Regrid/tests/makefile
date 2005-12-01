@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.34 2005/11/22 19:32:16 svasquez Exp $
+# $Id: makefile,v 1.35 2005/12/01 18:37:53 svasquez Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -19,19 +19,19 @@ LOCDIR	  = src/Infrastructure/Regrid/tests
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_RegridUTest \
 		$(ESMF_TESTDIR)/ESMF_RegridOptionsUTest \
 		$(ESMF_TESTDIR)/ESMF_RegridBandingUTest \
-		$(ESMF_TESTDIR)/ESMF_RegridFunctionUTest \
+		$(ESMF_TESTDIR)/ESMF_RegridTimeUTest \
 		$(ESMF_TESTDIR)/ESMF_RegridToolUTest
 
 TESTS_RUN     = RUN_ESMF_RegridUTest \
 		RUN_ESMF_RegridOptionsUTest \
 		RUN_ESMF_RegridBandingUTest \
-		RUN_ESMF_RegridFunctionUTest \
+		RUN_ESMF_RegridTimeUTest \
 		RUN_ESMF_RegridToolUTest
 
 TESTS_RUN_UNI = RUN_ESMF_RegridUTestUNI \
 	        RUN_ESMF_RegridOptionsUTestUNI \
 	        RUN_ESMF_RegridBandingUTestUNI \
-		RUN_ESMF_RegridFunctionUTestUNI \
+		RUN_ESMF_RegridTimeUTestUNI \
 		RUN_ESMF_RegridToolUTestUNI
 
 
@@ -77,13 +77,13 @@ RUN_ESMF_RegridBandingUTestUNI:
 
 
 #
-# RegridFunction Unit Test
+# RegridTime Unit Test
 #
-RUN_ESMF_RegridFunctionUTest:
-	$(MAKE) TNAME=RegridFunction NP=8 ftest
+RUN_ESMF_RegridTimeUTest:
+	$(MAKE) TNAME=RegridTime NP=8 ftest
 
-RUN_ESMF_RegridFunctionUTestUNI:
-	$(MAKE) TNAME=RegridFunction NP=1 ftest
+RUN_ESMF_RegridTimeUTestUNI:
+	$(MAKE) TNAME=RegridTime NP=1 ftest
 
 
 
