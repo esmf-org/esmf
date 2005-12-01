@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.4 2005/12/01 22:08:34 svasquez Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.5 2005/12/01 22:11:39 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -152,9 +152,8 @@ contains
     ! Local variables
     character(ESMF_MAXSTR) :: index, letter, delayoutconfig
     type(ESMF_RegridMethod) :: regscheme
-    type(ESMF_RelLoc) :: relloc
-    type(ESMF_GridHorzStagger) :: grid
     integer :: i, value, openStatus, readStatus, domain, halo
+    integer :: relloc, grid
     namelist /gridMethod/ index, regscheme
     namelist /gridHStagger/ index, grid, relloc
     namelist /delayout/ index, delayoutconfig
@@ -223,8 +222,8 @@ contains
                 return
         endif
         if (index.eq.letter) then
-            testArgs%srcgrid = grid
-            testArgs%srcrelloc = relloc 
+            testArgs%srcgrid = ESMF_GridHorzStagger(grid)
+            testArgs%srcrelloc = ESMF_Relloc(relloc)
 	    close ((npets+20))
             exit
         endif
@@ -247,8 +246,8 @@ contains
                 return
         endif
         if (index.eq.letter) then
-            testArgs%dstgrid = grid
-            testArgs%dstrelloc = relloc 
+            testArgs%dstgrid = ESMF_GridHorzStagger(grid)
+            testArgs%dstrelloc = ESMF_RelLoc(relloc)
 	    close ((npets+20))
             exit
         endif
