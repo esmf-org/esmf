@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.3 2005/12/01 21:01:50 svasquez Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.4 2005/12/01 22:08:34 svasquez Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -65,7 +65,7 @@ contains
 
    ! Read test list until end of tests string to count the number of tests
    do 
-	read (unit=1, * , iostat=readStatus) testString 
+	read (unit=1, fmt = * , iostat=readStatus) testString 
      	if (readStatus.ne.0 ) then
      		print *, "Cannot read file: ", testListFile
         	rc = ESMF_FAILURE
@@ -89,7 +89,7 @@ contains
 
    ! Read test list until end of tests string
    do 
-	read (unit=1, * , iostat=readStatus) testString 
+	read (unit=1, fmt = * , iostat=readStatus) testString 
      	if (readStatus.ne.0 ) then
      		print *, "Cannot read file: ", testListFile
         	rc = ESMF_FAILURE
@@ -323,7 +323,7 @@ contains
         return
     endif
     do
-	read (unit=(npets+20), '(A2, I2)', iostat=readStatus) index, value 
+	read (unit=(npets+20), fmt = '(A2, I2)', iostat=readStatus) index, value 
         if (readStatus.ne.0) then
                 print *, " Unable to read file: ESMF_RegridHalo.rc"
                 rc=ESMF_FAILURE
@@ -346,7 +346,7 @@ contains
         return
     endif
     do
-	read (unit=(npets+20), '(A2, I2)', iostat=readStatus) index, value, domain 
+	read (unit=(npets+20), fmt = '(A2, I2)', iostat=readStatus) index, value, domain 
         if (readStatus.ne.0) then
                 print *, " Unable to read file: ESMF_RegridHalo.rc"
                 rc=ESMF_FAILURE
