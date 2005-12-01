@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.2 2005/10/20 22:25:42 svasquez Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.3 2005/12/01 21:01:50 svasquez Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -9,100 +9,365 @@ module ESMF_RegridSubroutines
 #include <ESMF.h>
 	use ESMF_Mod
 	use ESMF_TestMod  ! test methods
-	use ESMF_RegridArgs
-	use ESMF_OptionsTable, only : nOptions
+
+    type testArguments
+    	integer :: function
+        type(ESMF_RegridMethod) :: regscheme
+        type(ESMF_GridHorzStagger) :: srcgrid, dstgrid
+        type(ESMF_RelLoc) :: srcrelloc, dstrelloc
+        integer :: srcdelayout(2), dstdelayout(2)
+	integer :: domain, srchalo, dsthalo
+    endtype testArguments
+    type(ESMF_VM) :: vm
+    integer ::  npets, localPet
+    integer :: regrid_rc    !single test error indicator
+    integer :: lrc,iFunction,iRegrid,ig
+
 !------------------------------------------------------------------------------
 
-public  setupRegridUTest
+public  readUnitTestList
 
 contains
 #undef  ESMF_METHOD
-#define ESMF_METHOD "setupRegridUTest"
+#define ESMF_METHOD "readUnitTestList"
 
 !============================================================================
 
-    subroutine setupRegridUTest(longString,ier)
-
-
-    character(len=*), intent(in) :: longString
-
-    integer :: ier
-    integer, dimension(nOptions) ::  choiceIndex
-    logical, dimension(nOptions) ::  maskName
-   ! integer :: nChoices
-    integer :: nSelected
-    integer :: iSrcRelLoc, iDstRelLoc
-    integer :: iSrcHalo, iDstHalo
-    integer :: iDomain
-    real(ESMF_KIND_R8) :: err_threshold=0.01
+    subroutine readTestList(testListFile, npets, rc)
     
+    character(len=*), intent(in) :: testListFile
+    integer, intent(in) :: npets
+    integer, intent(out) :: rc
 
-    !--- Initialize the error flag
-    regrid_rc=ESMF_SUCCESS
+    character(ESMF_MAXSTR) :: testString
+
+    integer :: openStatus, readStatus, startTesting, regrid_rc
+    integer :: testCount
+    character(ESMF_MAXSTR) :: failMsg, name
+    ! cumulative result: count failures; no failures equals "all pass"
+    integer :: result = 0
+    real(ESMF_KIND_R8) :: err_threshold
+
+    type(testArguments) :: testArgs
+
+    rc = ESMF_SUCCESS ! assume success
+    opensStatus = 0
+    startTesting = 1 ! Don't start reading the test list strings until the start of test string is found.
+    testCount = 0
+
+   ! Open test list file
+    open (unit=1, file = testListFile, action = "read", iostat=openStatus)
+     if (openStatus > 0 ) then
+     	print *, "Cannot open file: ", testListFile
+        rc = ESMF_FAILURE
+	return
+     endif
+
+   ! Read test list until end of tests string to count the number of tests
+   do 
+	read (unit=1, * , iostat=readStatus) testString 
+     	if (readStatus.ne.0 ) then
+     		print *, "Cannot read file: ", testListFile
+        	rc = ESMF_FAILURE
+	        return
+        	exit
+     	endif
+        if (testString.eq."end_of_tests") then
+		print *, "TEST_COUNT ", testCount
+		rewind (1)
+                startTesting = 1 ! Reset flag 
+        	exit
+        endif
+        if ( startTesting.eq.0 ) then
+		testCount = testCount + 1
+
+        endif
+        if (testString.eq."start_of_tests") then
+                startTesting = 0
+        endif 
+    enddo
+
+   ! Read test list until end of tests string
+   do 
+	read (unit=1, * , iostat=readStatus) testString 
+     	if (readStatus.ne.0 ) then
+     		print *, "Cannot read file: ", testListFile
+        	rc = ESMF_FAILURE
+	        return
+        	exit
+     	endif
+        if (testString.eq."end_of_tests") then
+        	exit
+        endif
+        if ( startTesting.eq.0 ) then
+		call getTestingArguments(string=testString, testArgs=testArgs, npets=npets, rc=rc)
+		if ( rc.ne.ESMF_SUCCESS) then
+                	rc = ESMF_FAILURE
+                	return
+		endif
+		! Run the Regrid unit test here
+		err_threshold=0.2
+		write(failMsg, *) "Error in Regrid"
+                write(name, *) "Regrid test: ", testString
+		call Regrid(FieldChoice = testArgs%function, &
+			   nSrcPetsXY= testArgs%srcdelayout, &
+                           npetsXY=testArgs%dstdelayout, &
+                           MethodChoice = testArgs%regscheme, &
+                           SrcGridChoice = testArgs%srcgrid, &
+                           DstGridChoice = testArgs%dstgrid, &
+                           SrcLocChoice = testArgs%srcrelloc, &
+                           DstLocChoice = testArgs%dstrelloc, &
+                           SrcHalo = testArgs%srchalo, &
+                           DstHalo = testArgs%dsthalo, &
+                           domainType   = testArgs%domain, &
+                           error_threshold=err_threshold, &
+			   ier=regrid_rc)
+		call ESMF_Test((regrid_rc.eq.ESMF_SUCCESS),name, failMsg, result, &
+                    ESMF_SRCLINE)
+
+        endif
+        if (testString.eq."start_of_tests") then
+                startTesting = 0
+        endif 
+    enddo
+
+    
+   close (1)
+
+  end subroutine readTestList
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "getTestingArguments"
+
+!============================================================================
+
+    subroutine getTestingArguments(string, npets, testArgs, rc)
+    
+    character(len=*), intent(in) :: string
+    integer, intent(in) :: npets
+    type(testArguments), intent(out) :: testArgs
+    integer, intent(out) :: rc
+
+    ! Local variables
+    character(ESMF_MAXSTR) :: index, letter, delayoutconfig
+    type(ESMF_RegridMethod) :: regscheme
+    type(ESMF_RelLoc) :: relloc
+    type(ESMF_GridHorzStagger) :: grid
+    integer :: i, value, openStatus, readStatus, domain, halo
+    namelist /gridMethod/ index, regscheme
+    namelist /gridHStagger/ index, grid, relloc
+    namelist /delayout/ index, delayoutconfig
+    namelist /function/ index, value, domain
+
+    rc = ESMF_SUCCESS ! assume success
+    !Read each letter of the test list and get test arguments.
+    i = 1
+    letter = string (i:i)
+    open (unit=(npets+20), file = "ESMF_RegridFunction.rc", action = "read", iostat=openStatus)
+    if (openStatus.ne.0) then
+	print *, " Unable to open file: ESMF_RegridFunction.rc"
+	rc=ESMF_FAILURE
+        return
+    endif
+    do
+	read (unit=(npets+20), nml = function , iostat=readStatus)
+    	if (readStatus.ne.0) then
+		print *, " Unable to read file: ESMF_RegridFunction.rc"
+		rc=ESMF_FAILURE
+        	return
+    	endif
+        if (index.eq.letter) then
+             testArgs%function = value
+             testArgs%domain = domain
+	     close ((npets+20))
+             exit
+        endif
+    enddo
+
+    i = 2
+    letter = string (i:i)
+    open (unit=(npets+20), file = "ESMF_RegridMethod.rc", action = "read", iostat=openStatus)
+    if (openStatus.ne.0) then
+	print *, " Unable to open file: ESMF_RegridMethod.rc"
+	rc=ESMF_FAILURE
+        return
+    endif
+    do
+	read (unit=(npets+20), nml = gridMethod, iostat=readStatus) 
+    	if (readStatus.ne.0) then
+		print *, " Unable to read file: ESMF_RegridMethod.rc"
+		rc=ESMF_FAILURE
+        	return
+    	endif
+        if (index.eq.letter) then
+             testArgs%regscheme = regscheme
+	     close ((npets+20))
+             exit
+        endif
+    enddo
+
+    i = 3
+    letter = string (i:i)
+    open (unit=(npets+20), file = "ESMF_GridHorzStagger.rc", action = "read", iostat=openStatus)
+    if (openStatus.ne.0) then
+        print *, " Unable to open file: ESMF_GridHorzStagger.rc"
+        rc=ESMF_FAILURE
+        return
+    endif
+    do
+	read (unit=(npets+20), nml = gridHStagger, iostat=readStatus) 
+        if (readStatus.ne.0) then
+                print *, " Unable to read file: ESMF_GridHorzStagger.rc"
+                rc=ESMF_FAILURE
+                return
+        endif
+        if (index.eq.letter) then
+            testArgs%srcgrid = grid
+            testArgs%srcrelloc = relloc 
+	    close ((npets+20))
+            exit
+        endif
+    enddo
 
 
-    !--Access the tables of indices corresponding to the test options available.
-    call initTables
+    i = 4
+    letter = string (i:i)
+    open (unit=(npets+20), file = "ESMF_GridHorzStagger.rc", action = "read", iostat=openStatus)
+    if (openStatus.ne.0) then
+        print *, " Unable to open file: ESMF_GridHorzStagger.rc"
+        rc=ESMF_FAILURE
+        return
+    endif
+    do
+	read (unit=(npets+20), nml = gridHStagger, iostat=readStatus) 
+        if (readStatus.ne.0) then
+                print *, " Unable to read file: ESMF_GridHorzStagger.rc"
+                rc=ESMF_FAILURE
+                return
+        endif
+        if (index.eq.letter) then
+            testArgs%dstgrid = grid
+            testArgs%dstrelloc = relloc 
+	    close ((npets+20))
+            exit
+        endif
+    enddo
 
-    !--Find the indices associated with the test options selected in longString.
-    call find_indices(longString, maskName, choiceIndex, nOptions, nSelected, &
-                      ier)
 
-    !DEBUG......
-    if (localPET == 0) then
-      print*,'longString=',trim(longString)
-      print*,' maskName=',maskName
-      print*,' choiceIndex=',choiceIndex
-      print*,' nSelected=',nSelected 
-    end if
+    i = 5
+    letter = string (i:i)
+    open (unit=(npets+20), file = "ESMF_RegridDELayout.rc", action = "read", iostat=openStatus)
+    if (openStatus.ne.0) then
+        print *, " Unable to open file: ESMF_RegridDELayout.rc"
+        rc=ESMF_FAILURE
+        return
+    endif
+    do
+	read (unit=(npets+20), nml = delayout, iostat=readStatus) 
+        if (readStatus.ne.0) then
+                print *, " Unable to read file: ESMF_RegridDELayout.rc"
+                rc=ESMF_FAILURE
+                return
+        endif
+        if (index.eq.letter) then
+            select case (delayoutconfig)
+		case ("1DX")
+                   testArgs%srcdelayout = (/ npets, 1 /)
+		case ("1DY")
+                   testArgs%srcdelayout = (/ 1, npets /)
+		case ("2D")
+                   testArgs%srcdelayout = (/ npets/(1 + mod(npets+1,2)), (1 + mod(npets+1,2)) /)
+	    end select
+	    close ((npets+20))
+            exit
+        endif
+    enddo
 
-    !--- Default settings for testing:
-     iDstDistr =1
-     iSrcDistr =2
-     iFunction =1
-     iRegrid   =2
-     iSrcRelLoc=2
-     iDstRelLoc=3
-     iDomain   =1
-     iSrcHalo  =4
-     iDstHalo  =1
-    !---Modify according to the choices in longString...
-     if (MaskName(1)) iSrcDistr=ChoiceIndex(1)
-     if (MaskName(2)) iDstDistr=ChoiceIndex(2)
-     if (MaskName(3)) iFunction=CHoiceIndex(3)
-     if (MaskName(4)) iRegrid=ChoiceIndex(4)
-     if (MaskName(5)) iSrcRelLoc=ChoiceIndex(5)
-     if (MaskName(6)) iDstRelLoc=ChoiceIndex(6)
-     if (MaskName(7)) iDomain=ChoiceIndex(7)
-     if (MaskName(8)) iSrcHalo=ChoiceIndex(8)
-     if (MaskName(9)) iSrcHalo=ChoiceIndex(9)
 
-     err_threshold=0.2
+    i = 6
+    letter = string (i:i)
+    open (unit=(npets+20), file = "ESMF_RegridDELayout.rc", action = "read", iostat=openStatus)
+    if (openStatus.ne.0) then
+        print *, " Unable to open file: ESMF_RegridDELayout.rc"
+        rc=ESMF_FAILURE
+        return
+    endif
+    do
+	read (unit=(npets+20), nml = delayout, iostat=readStatus) 
+        if (readStatus.ne.0) then
+                print *, " Unable to read file: ESMF_RegridDELayout.rc"
+                rc=ESMF_FAILURE
+                return
+        endif
+        if (index.eq.letter) then
+            select case (delayoutconfig)
+		case ("1DX")
+                   testArgs%dstdelayout = (/ npets, 1 /)
+		case ("1DY")
+                   testArgs%dstdelayout = (/ 1, npets /)
+		case ("2D")
+                   testArgs%dstdelayout = (/ npets/(1 + mod(npets+1,2)), (1 + mod(npets+1,2)) /)
+	    end select
+	    close ((npets+20))
+            exit
+        endif
+    enddo
 
-    !--Start the test..
-          call Regrid(FieldChoice = iFunction,nSrcPetsXY= nXY(iSrcDistr,:), &
-                           npetsXY=nXY(iDstDistr,:), &
-                           MethodChoice = RegridChoice(iRegrid), &
-                           SrcGridChoice = SrcGridHorzChoice(iSrcRelLoc), &
-                           DstGridChoice = DstGridHorzChoice(iDstRelLoc), &
-                           SrcLocChoice = SrcRelLocChoice(iSrcRelLoc), &
-                           DstLocChoice = DstRelLocChoice(iDstRelLoc), &
-                           SrcHalo = SrcHaloChoice(iSrcHalo), &
-                           DstHalo = DstHaloChoice(iDstHalo), &
-                           domainType   = iDomain, &
-                           error_threshold= err_threshold )
-          write(*,'(a,i2,a,i2,a,i2,a,i2,a,i2,a,i2)') &
-                  'iSrcDistr=',iSrcDistr, &
-                  ' iDstDistr=',iDstDistr, 'FieldChoice=',iFunction, &
-                  ' RegridChoice=',iRegrid,' iSrcRelLoc=',iSrcRelLoc, &
-                  ' iDstRelLoc=',iDstRelLoc,' iDomain=',iDomain, &
-                  ' COMPLETED at process ', localPet
+    i = 7
+    letter = string (i:i)
+    open (unit=(npets+20), file = "ESMF_RegridHalo.rc", action = "read", iostat=openStatus)
+    if (openStatus.ne.0) then
+        print *, " Unable to open file: ESMF_RegridHalo.rc"
+        rc=ESMF_FAILURE
+        return
+    endif
+    do
+	read (unit=(npets+20), '(A2, I2)', iostat=readStatus) index, value 
+        if (readStatus.ne.0) then
+                print *, " Unable to read file: ESMF_RegridHalo.rc"
+                rc=ESMF_FAILURE
+                return
+        endif
+        if (index.eq.letter) then
+             testArgs%srchalo = halo
+	     close ((npets+20))
+             exit
+        endif
+    enddo
 
-  end subroutine setupRegridUTest
+
+    i = 8
+    letter = string (i:i)
+    open (unit=(npets+20), file = "ESMF_RegridHalo.rc", action = "read", iostat=openStatus)
+    if (openStatus.ne.0) then
+        print *, " Unable to open file: ESMF_RegridHalo.rc"
+        rc=ESMF_FAILURE
+        return
+    endif
+    do
+	read (unit=(npets+20), '(A2, I2)', iostat=readStatus) index, value, domain 
+        if (readStatus.ne.0) then
+                print *, " Unable to read file: ESMF_RegridHalo.rc"
+                rc=ESMF_FAILURE
+                return
+        endif
+        if (index.eq.letter) then
+             testArgs%dsthalo = halo
+	     close ((npets+20))
+             exit
+        endif
+    enddo
+
+  end subroutine getTestingArguments
+
+
+!------------------------------------------------------------------------------
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "Regrid"
 
-    !-------------------------------------------------------------------
+!-------------------------------------------------------------------
     subroutine Regrid(FieldChoice, nSrcPetsXY, npetsXY, MethodChoice, &
                            SrcGridChoice,DstGridChoice, &
                            SrcLocChoice, DstLocChoice, &
@@ -119,28 +384,8 @@ contains
   !  Src(Dst)LocChoice -- In cell relative location of data (ESMF_RelLoc).
   !  error_threshold -- Normalized error threshold (int).
 
-    use ESMF_RegridArgs
     implicit none
   
-#if 0
-  
-interface
-  subroutine functionValues(Choice, xCoord, yCoord, Phi, Theta, &
-                            lb, ub, halo, maxCoor, f90ptr, ier)
-
-  use ESMF_Mod
-  integer, intent(in)                             :: Choice
-  real(ESMF_KIND_R8), dimension(:,:), pointer     :: xCoord, yCoord
-  real(ESMF_KIND_R8), dimension(:,:), pointer     :: Theta, Phi
-  integer, dimension(2), intent(in)               :: lb, ub
-  integer, intent(in)                             :: halo
-  real(ESMF_KIND_R8), dimension(2), intent(in)    :: maxCoor
-  real(ESMF_KIND_R8), dimension(:,:), pointer     :: f90ptr
-  integer :: ier
-  end subroutine functionValues
-end interface
-
-#endif
       ! Choice of test function for the field to be regridded
       ! 1 -->   f=x+y
       ! 2 -->   f=2+cos(pi*r/L)
@@ -616,154 +861,6 @@ contains
     return
     end subroutine functionValues
 #undef  ESMF_METHOD
-#define ESMF_METHOD "find_indices"
-
-
-
-!=============================================================================
-subroutine find_indices( long_string, maskName, choiceIndex, nOptions, nSelected, ier)
-
-!Find the indices in the table that correspond to the option names and choices
-! specified in the arguments concatenated in the long_string argument.
-!Fill up a mask array marking the testing options selected
-!List the indices of the test options selected (non-selected ones will have
-! index 0).
-
-! maskName -- is a mask for which options are to be tested
-! choiceIndex represents which of the available choices has been selected to 
-!             be used for a given test option.
-! nOptions -- is the total number of test options available
-! nSelected-- is the number of options selected to be tested.
-
-
-use ESMF_OptionsTable, only : option_name, Option_choice, get_table, search_table
-use ESMF_OptionsTable, only : nChoices
-
-
-!use Unit_Test, only : AssertEqual
-
-integer, intent(in) :: nOptions
-character(len=*), intent(in) :: long_String
-integer, intent(out), dimension(:) ::  choiceIndex
-logical, intent(out), dimension(:) :: maskName
-integer, intent(out) :: nSelected, ier
-
-character(len=25), dimension(15,2) :: StringPairs
-!logical :: iguales
-integer :: i
-!integer :: j, nChoicesJ
-integer :: i_name, i_choice
-logical :: found_name, found_choice
-
-!Access table
-call get_table
-
-!Parse string containing test choices into a 2D character array: StringPairs
-call parse(long_string, stringPairs, nSelected, ier)
-
-!--Represent the test options to use in the maskName array. The choice
-!  index for each options selected in ChoiceIndex.
-!Initialize
-maskName=.false.
-choiceIndex=0
-selected: do i=1,nSelected
-            call search_table(stringPairs(i,1), stringPairs(i,2), &
-                              i_name,           i_choice,         &
-                              found_name,       found_choice       )
-            if (found_name) then 
-              maskName(i_name)=.true.
-              if (found_choice) then
-                choiceIndex(i_name)=i_choice
-              else
-                print*,'ERROR!! ', trim(StringPairs(i,2)),' is not a ', &
-                    ' valid choice for option test: ',                  &
-                    trim(StringPairs(i,1)),                             &
-                    '. Valid choices are: ',                            &
-                    (trim(Option_choice(m,i_name)),'  ',                &
-                    m=1,nChoices(i_name) )
-               end if
-            else
-               print*,'ERROR!! Invalid option test name:',         &
-                       trim( StringPairs(i,1)),                    &
-                      '.  Valid names are: ',                      &
-                       (trim(Option_Name(m)),'  ', m=1,nOptions)
-
-            end if
-           end do selected  !(i)
-ier=0
-
-return
-
-end subroutine find_indices
-#undef  ESMF_METHOD
-#define ESMF_METHOD "parse"
-
-
-
-!==============================================================================
-subroutine parse( long_string, stringArray, ns, ier)
-
-    implicit none
-
-   character(len=*), intent(in) :: long_string
-   character(len=25), dimension(15,2), intent(out) :: stringArray
-   integer, intent(out) :: ns, ier
-
-   integer :: colon_location,next_colon_location
-   logical :: found_colon
-
-!--initialize
-ns=0
-found_colon=.true.
-colon_location=0
-
-do while (found_colon)
-  !Is there a delimiter ':' corresponding to another pair?
-  if ( scan(long_string(colon_location+1:),':') .ne. 0) then  !..pair found
-    ns=ns+1
-    found_colon=.true.
-    next_colon_location=colon_location + &
-                       index(long_string(colon_location+1:),':')
-   !print*,'next_colon_location=',next_colon_location
-    if (next_colon_location-1 .le.colon_location) then
-        print*,'ERROR in parse!! Null parameter name selected (::)'
-        stop
-    end if
-    stringArray(ns,1)=long_string(colon_location+1 : next_colon_location-1)
-      colon_location=next_colon_location
-    if ( scan(long_string(colon_location+1:),':') .ne. 0) then  !..not last
-      found_colon=.true.
-      next_colon_location=colon_location + &
-                          index(long_string(colon_location+1:),':')
-      if (next_colon_location-1 .le.colon_location) then
-        print*,'ERROR in parse!! no choice_value selected for ',trim(stringArray(ns,1)) 
-        stop
-      end if
-       
-      !print*,'next_colon_location=',next_colon_location
-       stringArray(ns,2)=long_string(colon_location+1 : next_colon_location-1)
-       colon_location=next_colon_location
-     else
-       found_colon=.false.
-      !print*,'last parameter in the list'
-       if (colon_location == len_trim(long_string)) then
-         print*,'ERROR in parse!! no choice_value selected for ', &
-                 trim(stringArray(ns,1))
-        stop
-      end if
-
-       stringArray(ns,2)=long_string(colon_location+1 :)
-       ier=0
-     end if
-
-   else                                       !...ERROR: single item at the end
-     print*,' Pair mismatched for ',long_string(colon_location+1 :)
-     found_colon=.false.
-     ier=1
-   end if
-end do
-end subroutine parse
-#undef ESMF_METHOD
 
 
 end module ESMF_RegridSubroutines
