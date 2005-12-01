@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.2 2005/09/16 00:06:29 eschwab Exp $
+! $Id: ESMF_Util.F90,v 1.3 2005/12/01 20:08:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -67,6 +67,7 @@
 ! AxisIndex methods
       public ESMF_AxisIndexSet
       public ESMF_AxisIndexGet
+      public ESMF_AxisIndexPrint
 
 !  Misc methods
       public ESMF_SetPointer
@@ -108,12 +109,28 @@
 !EOPI
       end interface 
 
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface ESMF_AxisIndexPrint
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_AxisIndexPrintOne
+         module procedure ESMF_AxisIndexPrintList
+!
+
+! !DESCRIPTION:
+!     Print contents of AIs.
+!
+!EOPI
+      end interface 
+
 
 !------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.2 2005/09/16 00:06:29 eschwab Exp $'
+               '$Id: ESMF_Util.F90,v 1.3 2005/12/01 20:08:34 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -505,6 +522,78 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_AxisIndexGet
+
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AxisIndexPrintOne"
+!BOPI
+! !IROUTINE:  ESMF_AxisIndexPrint - Print contents of an AxisIndex object
+!
+! !INTERFACE:
+      ! private interface; callusing ESMF_AxisIndexPrint()
+      subroutine ESMF_AxisIndexPrintOne(ai, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_AxisIndex), intent(in) :: ai
+      integer, intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+!   Print the contents of an AxisIndex type.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[ai]
+!       The {\tt ESMF\_AxisIndex} to query.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      print *, "AI: min, max, stride = ", ai%min, ai%max, ai%stride
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_AxisIndexPrintOne
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AxisIndexPrintList"
+!BOPI
+! !IROUTINE:  ESMF_AxisIndexPrint - Print contents of an AxisIndex object
+!
+! !INTERFACE:
+      ! private interface; callusing ESMF_AxisIndexPrint()
+      subroutine ESMF_AxisIndexPrintList(ai, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_AxisIndex), intent(in) :: ai(:)
+      integer, intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+!   Print the contents of an AxisIndex type.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[ai]
+!       The {\tt ESMF\_AxisIndex} to query.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+      integer :: items, i
+
+      items = size(ai) 
+      do i=1, items
+        print *, "AI num, min, max, stride = ", &
+                   i, ai(i)%min, ai(i)%max, ai(i)%stride
+      enddo
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_AxisIndexPrintList
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
