@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.9 2005/11/08 19:27:13 nscollins Exp $
+// $Id: ESMC_Util.C,v 1.10 2005/12/01 20:09:10 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.9 2005/11/08 19:27:13 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.10 2005/12/01 20:09:10 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -904,32 +904,87 @@ extern "C" {
 //  converts a F90 pointer into a normal integer.
 // 
 // !ARGUMENTS:
-    int *n,                 // in - number of bytes in a pointer
-    short *s,               // in - F90 pointer of some kind
-    long long *len) {       // out - that same value cast to an long
+    int *n,                    // in - number of expected bytes in a pointer
+    short *s,                  // in - F90 pointer of some kind
+    ESMF_KIND_POINTER *len) {  // out - that same value cast to an int/long
 //EOPI
 
     // if n does not match the actual pointer size, return an error.
     // we cannot return good values if n is not correct.
     if (sizeof(n) != *n) {
         printf("error: fortran pointer size does not match C pointer size\n");
-        printf("  fortran is sending %d bytes, C expects %d bytes\n", *n,
-                   sizeof(n));
+        printf("  fortran is sending %d bytes, C expects %d bytes\n", 
+                  *n, sizeof(n));
         *len = 0;
         return;
     }
 
-    if (sizeof(n) != sizeof(long long)) {
-        printf("error: C pointer size does not match 'long long'\n");
-        printf("  C pointer is %d bytes, long long is %d bytes\n",  
-                   sizeof(n), sizeof(long long));
+    if (sizeof(n) != sizeof(ESMF_KIND_POINTER)) {
+        printf("error: C pointer size does not match include file value\n");
+        printf("  C pointer is %d bytes, ESMF_KIND_POINTER is %d bytes\n",  
+                   sizeof(n), sizeof(ESMF_KIND_POINTER));
         *len = 0;
         return;
     }
 
     // if we passed those tests, this should give valid results.
 
-    *len = (long long)s;
+    *len = (ESMF_KIND_POINTER)s;
+    return;
+ }
+}
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "esmf_pointerdifference"
+//BOPI
+// !IROUTINE:  ESMF_PointerDifference - Fortran-callable routine which returns
+//   the difference between 2 addresses as a simple integer.
+//
+// !INTERFACE:
+extern "C" {
+    void  FTN(esmf_pointerdifference)(
+//
+// !RETURN VALUE:
+//  converts the difference between 2 F90 pointers into a normal integer.
+//  the pointers should be close enough to each other to be less than
+//  2 ^ 32 apart so the result fits in to a standard integer return val.
+// 
+// !ARGUMENTS:
+    int *n,            // in - number of expected bytes in a pointer
+    short *s1,         // in - F90 pointer of some kind
+    short *s2,         // in - F90 pointer of some kind
+    int *len) {        // out - that same value cast to an int
+//EOPI
+    ESMF_KIND_POINTER t1, t2; 
+
+    // if n does not match the actual pointer size, return an error.
+    // we cannot return good values if n is not correct.
+    if (sizeof(n) != *n) {
+        printf("error: fortran pointer size does not match C pointer size\n");
+        printf("  fortran is sending %d bytes, C expects %d bytes\n", 
+                  *n, sizeof(n));
+        *len = 0;
+        return;
+    }
+
+    if (sizeof(n) != sizeof(ESMF_KIND_POINTER)) {
+        printf("error: C pointer size does not match include file value\n");
+        printf("  C pointer is %d bytes, ESMF_KIND_POINTER is %d bytes\n",  
+                   sizeof(n), sizeof(ESMF_KIND_POINTER));
+        *len = 0;
+        return;
+    }
+
+    // if we passed those tests, this should give valid results.
+
+    t1 = (ESMF_KIND_POINTER)s1;
+    t2 = (ESMF_KIND_POINTER)s2;
+    if (t1 > t2)
+        *len = (int)(t1 - t2);
+    else
+        *len = (int)(t2 - t1);
+  
     return;
  }
 }
