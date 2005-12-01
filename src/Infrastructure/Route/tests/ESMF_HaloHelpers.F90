@@ -1,4 +1,4 @@
-! $Id: ESMF_HaloHelpers.F90,v 1.4 2005/11/22 00:27:38 nscollins Exp $
+! $Id: ESMF_HaloHelpers.F90,v 1.5 2005/12/01 20:14:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -45,8 +45,8 @@ subroutine CreateFields(field1, field2, rc)
     ! pick a default halowidth, must be same for both src and dst
     halo = 3
 
-    ! make the grids periodic both ways so we have fewer issues with
-    ! halo updates and boundary conditions.
+    ! the validate routines now account for both periodic and nonperiodic
+    ! grids, so this does not have to always be true.
     wrap(1) = ESMF_TRUE
     wrap(2) = ESMF_TRUE
 
@@ -67,8 +67,7 @@ subroutine CreateFields(field1, field2, rc)
 
     mincoords = (/  0.0,  0.0 /)
     maxcoords = (/ 20.0, 30.0 /)
-    !srcgrid = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
-    srcgrid = ESMF_GridCreateHorzXYUni((/ 40, 60 /), &
+    srcgrid = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
                    periodic=wrap,  &
@@ -78,8 +77,7 @@ subroutine CreateFields(field1, field2, rc)
     if (rc.NE.ESMF_SUCCESS) return
 
     ! same grid coordinates, but different layout
-    !dstgrid = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
-    dstgrid = ESMF_GridCreateHorzXYUni((/ 40, 60 /), &
+    dstgrid = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
                    periodic=wrap,  &
@@ -93,13 +91,13 @@ subroutine CreateFields(field1, field2, rc)
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
     if (rc.NE.ESMF_SUCCESS) return
     
-    ! specify halowidth and let the field allocate the proper space
+    ! specify halo width; let the field allocate the proper space
     field1 = ESMF_FieldCreate(srcgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo, name="src pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
                                 
  
-    ! specify halowidth and let the field allocate the proper space
+    ! specify halo width; let the field allocate the proper space
     field2 = ESMF_FieldCreate(dstgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo, name="dst pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
@@ -320,6 +318,8 @@ subroutine ValidateConstantHalo(field, val, rc)
     call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
     
+    ! TODO: need to query overall grid like the ValidateIndexHalo code
+    !  and handle the external edges and corners differently.
 
     lb(:) = lbound(f90ptr)
     ub(:) = ubound(f90ptr)
@@ -496,7 +496,7 @@ subroutine ValidateIndexHalo(field, originalval, rc)
 
     ! is our chunk of the data on any of the overall grid boundaries?
     if (pos(1) .eq. ncount(1)) right = .TRUE.
-    if (pos(1) .eq. 1)         left = .TRUE.    ! this might be 0
+    if (pos(1) .eq. 1)         left = .TRUE. 
     if (pos(2) .eq. ncount(2)) top = .TRUE.
     if (pos(2) .eq. 1)         bottom = .TRUE.
 
@@ -508,7 +508,12 @@ subroutine ValidateIndexHalo(field, originalval, rc)
     lb(:) = lbound(f90ptr)
     ub(:) = ubound(f90ptr)
 
-    ! TODO: add the 8 tests here.
+    ! Debug only.
+    !print *, "data is"
+    !do j=lb(2), ub(2)
+    !    print *, f90ptr(:,j)
+    !enddo
+
     ! now check the chunks, one at a time.  if we are on the boundary of
     ! the entire grid, treat the external boundaries separately.
  
