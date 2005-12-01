@@ -1,4 +1,4 @@
-! $Id: ESMF_HaloUTest.F90,v 1.2 2005/11/22 00:27:38 nscollins Exp $
+! $Id: ESMF_HaloUTest.F90,v 1.3 2005/12/01 20:15:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_HaloUTest.F90,v 1.2 2005/11/22 00:27:38 nscollins Exp $'
+      '$Id: ESMF_HaloUTest.F90,v 1.3 2005/12/01 20:15:59 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -109,7 +109,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      call ESMF_FieldPrint(field1, rc=rc)
+      !call ESMF_FieldPrint(field1, rc=rc)
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
@@ -147,7 +147,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      call ESMF_FieldPrint(field1, rc=rc)
+      !call ESMF_FieldPrint(field1, rc=rc)
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
@@ -208,7 +208,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      call ESMF_FieldPrint(field2, rc=rc)
+      !call ESMF_FieldPrint(field2, rc=rc)
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
@@ -245,7 +245,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      call ESMF_FieldPrint(field2, rc=rc)
+      !call ESMF_FieldPrint(field2, rc=rc)
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
