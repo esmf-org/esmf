@@ -1,0 +1,6 @@
+&delayout index = A, delayoutconfig = "1DX" /	(/ npets, 1 /)
+&delayout index = B, delayoutconfig = "1DY" /	(/ 1, npets /)
+&delayout index = C, delayoutconfig = "2D"  /	(/ npets/(1 + mod(npets+1,2)), (1 + mod(npets+1,2)) /)
+
+
+! $Id: ESMF_RegridDELayout.rc,v 1.1 2005/12/01 21:03:41 svasquez Exp $
