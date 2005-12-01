@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.146 2005/11/22 00:27:35 nscollins Exp $
+//$Id: ESMC_Route.C,v 1.147 2005/12/01 20:12:40 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.146 2005/11/22 00:27:35 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.147 2005/12/01 20:12:40 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1872,9 +1872,22 @@
           continue;
         }
 
+#if 0
+        // debug
+        printf("in halo, ready to translate global to local, AI tot:\n");
+        for (int l=0; l<ESMF_MAXDIM; l++)
+            ESMC_AxisIndexPrint(&my_AI_tot[l]);
+#endif
+  
         // translate from global to local data space
         intersect_XP.ESMC_XPacketGlobalToLocal(&intersect_XP, my_AI_tot, 
                                                rank, my_global_start);
+
+#if 0
+        // debug
+        printf("in halo, xp:\n");
+        intersect_XP.ESMC_XPacketPrint("");
+#endif
 
         // load the intersecting XPacket into the sending RTable
         sendRT->ESMC_RTableSetEntry(theirMatchingPET, &intersect_XP);
