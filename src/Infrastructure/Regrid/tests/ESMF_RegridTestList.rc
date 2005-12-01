@@ -1,0 +1,32 @@
+! $Id: ESMF_RegridTestList.rc,v 1.1 2005/12/01 20:39:05 svasquez Exp $
+This is the list of Regrid tests.
+start_of_tests
+CBAABBDA
+AAAAAADA
+BAAACCDA
+CAAAAADA
+DAAACCDA
+DBAACCDA
+BBBBBBAA
+CACCCCAA
+DBAAAAAA
+AAAAAAAA
+end_of_tests
+
+Each letter and position determines the test argument for each unit test.
+
+First - See File: ESMF_RegridFunctions.rc
+
+Second - See File: ESMF_RegridMethod.rc
+
+Third - See File: ESMF_GridHorzStagger.rc for source
+
+Fourth - See File: ESMF_GridHorzStagger.rc for destination
+
+Fifth - See File: ESMF_RegridDELayout.rc for source
+
+Sixth - See File: ESMF_RegridDELayout.rc for destination
+
+Seventh - See File: ESMF_RegridHalo.rc for source halo
+
+Eigthth - See File: ESMF_RegridHalo.rc for destination halo
