@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.35 2005/12/01 18:37:53 svasquez Exp $
+# $Id: makefile,v 1.36 2005/12/01 20:44:25 svasquez Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -22,17 +22,18 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_RegridUTest \
 		$(ESMF_TESTDIR)/ESMF_RegridTimeUTest \
 		$(ESMF_TESTDIR)/ESMF_RegridToolUTest
 
-TESTS_RUN     = RUN_ESMF_RegridUTest \
+TESTS_RUN     = RUN_ESMF_RegridToolUTest \
+		RUN_ESMF_RegridTimeUTest \
+		RUN_ESMF_RegridUTest \
 		RUN_ESMF_RegridOptionsUTest \
 		RUN_ESMF_RegridBandingUTest \
-		RUN_ESMF_RegridTimeUTest \
-		RUN_ESMF_RegridToolUTest
+		RUN_ESMF_RegridTimeUTest
 
-TESTS_RUN_UNI = RUN_ESMF_RegridUTestUNI \
-	        RUN_ESMF_RegridOptionsUTestUNI \
-	        RUN_ESMF_RegridBandingUTestUNI \
+TESTS_RUN_UNI = RUN_ESMF_RegridToolUTestUNI \
 		RUN_ESMF_RegridTimeUTestUNI \
-		RUN_ESMF_RegridToolUTestUNI
+		RUN_ESMF_RegridUTestUNI \
+	        RUN_ESMF_RegridOptionsUTestUNI \
+	        RUN_ESMF_RegridBandingUTestUNI
 
 
 include $(ESMF_DIR)/makefile
@@ -86,26 +87,32 @@ RUN_ESMF_RegridTimeUTestUNI:
 	$(MAKE) TNAME=RegridTime NP=1 ftest
 
 
-
 #
 # RegridTool Unit Test
 #
 
 
-UTEST_RegridTool_OBJS = ESMF_OptionsTable.o \
-			  ESMF_Unit_Tests.o \
-                          ESMF_RegridArgs.o \
-			  ESMF_RegridSubroutines.o
+UTEST_RegridTool_OBJS = ESMF_RegridSubroutines.o
 
-ESMF_RegridToolUTest.o: ESMF_OptionsTable.o \
-                          ESMF_Unit_Tests.o \
-                          ESMF_RegridArgs.o \
-                          ESMF_RegridSubroutines.o
+ESMF_RegridToolUTest.o: ESMF_RegridSubroutines.o
+
 
 RUN_ESMF_RegridToolUTest:
+	cp -f ESMF_RegridTestList.rc $(ESMF_TESTDIR)
+	cp -f ESMF_RegridFunction.rc $(ESMF_TESTDIR)
+	cp -f ESMF_RegridMethod.rc $(ESMF_TESTDIR)
+	cp -f ESMF_GridHorzStagger.rc $(ESMF_TESTDIR)
+	cp -f ESMF_RegridDELayout.rc $(ESMF_TESTDIR)
+	cp -f ESMF_RegridHalo.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=RegridTool NP=8 ftest
 
 RUN_ESMF_RegridToolUTestUNI:
+	cp -f ESMF_RegridTestList.rc $(ESMF_TESTDIR)
+	cp -f ESMF_RegridFunction.rc $(ESMF_TESTDIR)
+	cp -f ESMF_RegridMethod.rc $(ESMF_TESTDIR)
+	cp -f ESMF_GridHorzStagger.rc $(ESMF_TESTDIR)
+	cp -f ESMF_RegridDELayout.rc $(ESMF_TESTDIR)
+	cp -f ESMF_RegridHalo.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=RegridTool NP=1 ftest
 
 
