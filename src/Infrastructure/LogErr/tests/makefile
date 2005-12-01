@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2005/11/30 22:17:57 nscollins Exp $ 
+# $Id: makefile,v 1.13 2005/12/01 22:24:17 nscollins Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -64,9 +64,9 @@ endif
 
 # try to restart lam in a controlled way
 lamrestart:
-	lamhalt
+	-lamhalt
 	sleep 1
-	lamwipe
+	-lamwipe
 	sleep 5
-	lamboot $(LAM_ARGS)
+	-lamboot $(LAM_ARGS)
 	
