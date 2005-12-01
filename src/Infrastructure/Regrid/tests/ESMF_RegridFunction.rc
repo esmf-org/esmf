@@ -1,0 +1,6 @@
+&function index = A, value = 1, domain = 2   /  Function: f=x+y   				   Domain: Regional
+&function index = B, value = 2, domain = 2   /  Function: f=2+cos(pi*r/L)   	                   Domain: Regional
+&function index = C, value = 3, domain = 1   /  Function: f=2+(cos(theta))**2 * cos(2*phi)         Domain: WholeGlobe
+&function index = D, value = 4, domain = 1   /  Function: f=2+ (sin(2*theta))**16 * cos(16*phi)    Domain: WholeGlobe
+
+This file converts the Function option to an integer.
