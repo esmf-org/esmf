@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridEx.F90,v 1.7 2005/10/12 19:06:16 nscollins Exp $
+! $Id: ESMF_RegridEx.F90,v 1.8 2005/12/02 18:52:54 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -16,6 +16,7 @@
 !EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
+!
 ! !PROGRAM: ESMF_RegridEx - Using the Regridding methods
 !
 ! !DESCRIPTION:
@@ -28,12 +29,16 @@
 
     implicit none
     
-    ! Local variables
+    ! Local variables to be used in the Regrid method calls.
+    ! The code creating and filling these variables is not included in the
+    ! example documentation because those interfaces are not specific to
+    ! Regrid.
     type(ESMF_Field) :: field1, field2
     type(ESMF_Grid) :: srcgrid, dstgrid
     type(ESMF_RouteHandle) :: regrid_rh
     type(ESMF_DELayout) :: layout1, layout2
     integer :: rc
+
 !EOC
 
     integer :: finalrc, npets
@@ -118,7 +123,6 @@
 
 
 !BOE
-!\subsubsection{Precomputing and Executing a Regrid}
       
 !  The user has already created an {\tt ESMF\_Grid}, an
 !  {\tt ESMF\_Array} with data, and put them together in an {\tt ESMF\_Field}.
