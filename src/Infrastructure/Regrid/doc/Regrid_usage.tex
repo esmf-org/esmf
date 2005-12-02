@@ -1,4 +1,4 @@
-% $Id: Regrid_usage.tex,v 1.9 2005/11/23 22:43:51 jwolfe Exp $
+% $Id: Regrid_usage.tex,v 1.10 2005/12/02 18:55:54 jwolfe Exp $
 
 
 Regrid is designed to be called with Field or Bundle
@@ -32,6 +32,15 @@ these regrid methods are in a separate module to
 prevent the main Regrid module from becoming too
 large.  The user is unaware of this hierarchy as the
 top-level module provides a unified API.
+
+In general, Regrid interfaces are relatively simple and require little
+information directly from users.  Besides prescribing the actual Regrid method,
+they offer users few options, as shown in the example in section
+\ref{sec:RegridExamples}.  However, the simplicity of the interfaces belies the
+complicated nature of the underlying code.  ESMF endeavors to hide as much
+of this complication from its users as possible.  However, Regrid does have
+current limitations that require user awareness to successfully use its
+routines.  These issues are discussed below.
 
 \subsubsection{Regrid and Grid Overlap}
 
@@ -139,3 +148,12 @@ ensures complete overlap for Grids that share identical physical extents.
 
 Unfortunately, the Regrid routines in ESMF do not currently include periodic
 boundary effects, so users must be aware of possible problems.
+
+
+\subsubsection{Regrid Examples: Precomputing and Executing a Regrid}
+\label{sec:RegridExamples}
+
+The following code fragments show an example of the steps involved in
+computing and applying a Regrid.
+
+
