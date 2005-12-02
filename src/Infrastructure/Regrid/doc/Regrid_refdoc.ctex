@@ -66,7 +66,7 @@
 \input{../Infrastructure/Regrid/doc/ESMF_RegridEx_fapi}
 #endif
 
-\subsubsection{Restrictions and Future Work}
+\subsection{Restrictions and Future Work}
 #ifdef STANDALONE
 \input{Regrid_rest}
 #elif defined(CONSTITUENT)
