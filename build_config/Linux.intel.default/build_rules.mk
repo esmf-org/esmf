@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.46 2005/09/30 17:15:14 theurich Exp $
+# $Id: build_rules.mk,v 1.47 2005/12/05 22:43:40 jwolfe Exp $
 #
 # Linux.intel.default
 #
@@ -100,12 +100,11 @@ ifneq ($(ESMF_COMM),mpich)
 ifeq ($(ESMF_C_COMPILER),gcc)
 C_CC	   = gcc
 C_CXX      = g++
-C_FC	   = ifort
 else
 C_CC	   = icc
 C_CXX      = icpc
-C_FC	   = ifort
 endif
+C_FC	   = ifort
 endif
 
 # if you are using mpich, then however the mpich wrappers have been built
@@ -130,8 +129,14 @@ C_CXX      = mpiicpc
 C_FC       = mpiifort
 endif
 
+# not exactly sure of the correct gcc flags for 64, but this is based on the g95
+# build files
 ifeq ($(ESMF_PREC),64)
+ifeq ($(ESMF_C_COMPILER),gcc)
+CFLAGS     += -march=k8 -m64 -mcmodel=medium
+else
 CFLAGS	   += -size_lp64
+endif
 FFLAGS	   += -size_lp64
 endif
 
@@ -162,8 +167,13 @@ FFLAGS  +=  -threads
 endif
 
 # how to print versions
+ifeq ($(ESMF_C_COMPILER),gcc)
+C_CCV		   = ${C_CC} --version
+C_CXXV		   = ${C_CXX} --version
+else
 C_CCV		   = ${C_CC} -V -v
 C_CXXV		   = ${C_CXX} -V -v
+endif
 C_FCV              = ${C_FC} -V -v
 
 # fortran flags
