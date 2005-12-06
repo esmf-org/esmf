@@ -1,4 +1,4 @@
-&gridMethod index = A, regscheme = 1 /   ! ESMF_REGRID_METHOD_BILINEAR /
-&gridMethod index = B, regscheme = 3 /   ! ESMF_REGRID_METHOD_CONSERV1 /
-! $Id: ESMF_RegridMethod.rc,v 1.1 2005/12/01 20:36:19 svasquez Exp $
+&gridMethod index = "A", regscheme = 1 /   ! ESMF_REGRID_METHOD_BILINEAR /
+&gridMethod index = "B", regscheme = 3 /   ! ESMF_REGRID_METHOD_CONSERV1 /
+! $Id: ESMF_RegridMethod.rc,v 1.2 2005/12/06 22:51:11 jwolfe Exp $
 This file provides the Regrid scheme options.
