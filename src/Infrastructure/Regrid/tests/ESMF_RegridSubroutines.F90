@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.5 2005/12/01 22:11:39 nscollins Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.6 2005/12/06 22:49:35 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -108,7 +108,7 @@ contains
 		! Run the Regrid unit test here
 		err_threshold=0.2
 		write(failMsg, *) "Error in Regrid"
-                write(name, *) "Regrid test: ", testString
+                write(name, *) "Regrid test: ", trim(testString)
 		call Regrid(FieldChoice = testArgs%function, &
 			   nSrcPetsXY= testArgs%srcdelayout, &
                            npetsXY=testArgs%dstdelayout, &
@@ -270,7 +270,7 @@ contains
                 return
         endif
         if (index.eq.letter) then
-            select case (delayoutconfig)
+            select case (trim(delayoutconfig))
 		case ("1DX")
                    testArgs%srcdelayout = (/ npets, 1 /)
 		case ("1DY")
@@ -300,7 +300,7 @@ contains
                 return
         endif
         if (index.eq.letter) then
-            select case (delayoutconfig)
+            select case (trim(delayoutconfig))
 		case ("1DX")
                    testArgs%dstdelayout = (/ npets, 1 /)
 		case ("1DY")
