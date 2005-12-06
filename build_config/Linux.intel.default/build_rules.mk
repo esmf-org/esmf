@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.47 2005/12/05 22:43:40 jwolfe Exp $
+# $Id: build_rules.mk,v 1.48 2005/12/06 23:02:52 jwolfe Exp $
 #
 # Linux.intel.default
 #
@@ -129,12 +129,10 @@ C_CXX      = mpiicpc
 C_FC       = mpiifort
 endif
 
-# not exactly sure of the correct gcc flags for 64, but this is based on the g95
-# build files
+# on some architectures we may need gcc flags to set to 64 bit, but those will be
+# architecture specific and not generic -- maybe a site file?
 ifeq ($(ESMF_PREC),64)
-ifeq ($(ESMF_C_COMPILER),gcc)
-CFLAGS     += -march=k8 -m64 -mcmodel=medium
-else
+ifneq ($(ESMF_C_COMPILER),gcc)
 CFLAGS	   += -size_lp64
 endif
 FFLAGS	   += -size_lp64
