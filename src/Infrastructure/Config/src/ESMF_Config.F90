@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.27 2005/11/30 22:39:25 eschwab Exp $
+! $Id: ESMF_Config.F90,v 1.28 2005/12/12 22:00:28 eschwab Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -133,7 +133,6 @@
 #endif
 
 	integer,parameter :: MX_LU=255
-
 !------------------------------------------------------------------------------
 ! !OPAQUE TYPES:
 !------------------------------------------------------------------------------
@@ -147,13 +146,26 @@
        type ESMF_Config
           sequence
           private              
+#ifndef ESMF_NO_INITIALIZERS
+          character(len=NBUF_MAX),pointer :: buffer => Null()
+                                                       ! hold the whole file
+          character(len=LSZ),     pointer :: this_line => Null()
+                                                       ! the current line
+#else
           character(len=NBUF_MAX),pointer :: buffer    ! hold the whole file
           character(len=LSZ),     pointer :: this_line ! the current line
+#endif
           integer :: nbuf                              ! actual size of buffer 
           integer :: next_line                         ! index_ for next line 
                                                        !   on buffer
+#ifndef ESMF_NO_INITIALIZERS
+          type(ESMF_ConfigAttrUsed), dimension(:), &
+                                  pointer :: attr_used => Null()
+                                                       ! used attributes table
+#else
           type(ESMF_ConfigAttrUsed), dimension(:), &
                                   pointer :: attr_used ! used attributes table
+#endif
           integer :: nattr                             ! number of attributes
                                                        !   in the "used" table
           character(len=LSZ)          :: current_attr  ! the current attr label
@@ -188,15 +200,23 @@
 !EOP -------------------------------------------------------------------
       integer :: iret
       type(ESMF_Config) :: config_local
-
+      type(ESMF_ConfigAttrUsed), dimension(:), pointer :: attr_used_local
       iret = 0
  
 ! Initialization
 
-      allocate(config_local%buffer, config_local%this_line, &
-               config_local%attr_used(MSZ), stat = iret)
-      if (ESMF_LogMsgFoundAllocError(iret, "Allocating local buffer", &
-                                       ESMF_CONTEXT, rc)) return
+      allocate(config_local%buffer, config_local%this_line, stat = iret)
+      if (ESMF_LogMsgFoundAllocError(iret, "Allocating local buffer 1", &
+                                        ESMF_CONTEXT, rc)) return
+
+      ! TODO: Absoft 8 compiler bug necessitates allocating pointer within
+      ! derived type via local pointer first.  Absoft 9/Jazz bug necessitates
+      ! this must be a separate allocate statement.
+      allocate(attr_used_local(MSZ), stat = iret)
+      if (ESMF_LogMsgFoundAllocError(iret, "Allocating local buffer 2", &
+                                        ESMF_CONTEXT, rc)) return
+      config_local%attr_used => attr_used_local
+
       ESMF_ConfigCreate = config_local
       if (present( rc )) then
         rc = iret
@@ -237,11 +257,14 @@
 
       iret = 0
 
-      deallocate(config%buffer, config%this_line, &
-                 config%attr_used, stat = iret)
-      if (ESMF_LogMsgFoundAllocError(iret, "Deallocating local buffer", &
-                                       ESMF_CONTEXT, rc)) return
-
+      ! TODO: Absoft 9/Jazz bug necessitates this separate deallocate statement
+      ! before the other (must be in reverse order of allocation)
+      deallocate(config%attr_used, stat = iret)
+      if (ESMF_LogMsgFoundAllocError(iret, "Deallocating local buffer 2", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(config%buffer, config%this_line, stat = iret)
+      if (ESMF_LogMsgFoundAllocError(iret, "Deallocating local buffer 1", &
+                                     ESMF_CONTEXT, rc)) return
       if (present( rc )) then
         rc = iret
       endif
