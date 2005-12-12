@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.63 2005/07/07 19:46:04 nscollins Exp $
+! $Id: ESMF_VM.F90,v 1.64 2005/12/12 18:21:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -178,7 +178,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.63 2005/07/07 19:46:04 nscollins Exp $'
+      '$Id: ESMF_VM.F90,v 1.64 2005/12/12 18:21:43 theurich Exp $'
 
 !==============================================================================
 
@@ -2237,7 +2237,7 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   subroutine ESMF_VMGetPETLocalInfo(vm, pet, peCount, ssiId, threadCount, &
-    threadId, rc)
+    threadId, vas, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),  intent(in)              :: vm
@@ -2246,6 +2246,7 @@ module ESMF_VMMod
     integer,        intent(out),  optional  :: ssiId
     integer,        intent(out),  optional  :: threadCount
     integer,        intent(out),  optional  :: threadId
+    integer,        intent(out),  optional  :: vas
     integer,        intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -2270,6 +2271,8 @@ module ESMF_VMMod
 !   \item[{[threadId]}]
 !        Upon return this holds the thread id of the specified PET within the 
 !        PET's thread group.
+!   \item[{[vas]}]
+!        Virtual address space in which this PET operates.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2284,7 +2287,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGetPETLocalInfo(vm, pet, peCount, ssiId, threadCount, &
-      threadId, localrc)
+      threadId, vas, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &

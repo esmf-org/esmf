@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.41 2005/08/06 04:58:16 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.42 2005/12/12 18:22:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -155,7 +155,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_vmgetpetlocalinfo)(ESMC_VM **ptr, int *pet, int *peCount, 
-    int *ssiId, int *threadCount, int *threadId, int *rc){
+    int *ssiId, int *threadCount, int *threadId, int *vas, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmgetpetlocalinfo()"
     // Call into the actual C++ method wrapped inside LogErr handling
@@ -164,7 +164,8 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(peCount), 
       ESMC_NOT_PRESENT_FILTER(ssiId), 
       ESMC_NOT_PRESENT_FILTER(threadCount), 
-      ESMC_NOT_PRESENT_FILTER(threadId)),
+      ESMC_NOT_PRESENT_FILTER(threadId), 
+      ESMC_NOT_PRESENT_FILTER(vas)),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

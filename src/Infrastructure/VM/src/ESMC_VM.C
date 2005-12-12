@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.37 2005/04/05 23:46:00 theurich Exp $
+// $Id: ESMC_VM.C,v 1.38 2005/12/12 18:24:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.37 2005/04/05 23:46:00 theurich Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.38 2005/12/12 18:24:45 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -481,7 +481,8 @@ int ESMC_VM::ESMC_VMGetPETLocalInfo(
   int *peCount,       // out - number of PEs for specified PET
   int *ssiId,         // out - ssiid for specified PET
   int *threadCount,   // out - number of treads in thread group with PET
-  int *threadId){     // out - thread id for specified PET
+  int *threadId,      // out - thread id for specified PET
+  int *vas){          // out - virtual address space of the specified PET
 //
 // !DESCRIPTION:
 //   Get internal information about the specified PET within the {\tt ESMF\_VM}
@@ -497,6 +498,8 @@ int ESMC_VM::ESMC_VMGetPETLocalInfo(
     *threadCount = this->vmk_nthreads(pet);
   if (threadId != ESMC_NULL_POINTER)
     *threadId = this->vmk_tid(pet);
+  if (vas != ESMC_NULL_POINTER)
+    *vas = this->vmk_pid(pet);
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------

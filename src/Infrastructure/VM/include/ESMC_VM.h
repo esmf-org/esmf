@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.27 2005/04/05 23:46:50 theurich Exp $
+// $Id: ESMC_VM.h,v 1.28 2005/12/12 18:23:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,7 +81,8 @@ class ESMC_VM : public ESMC_VMK {   // inherits from ESMC_VMK class
       int *peCount,       // out - number of PEs for specified PET
       int *ssiId,         // out - ssiid for specified PET
       int *threadCount,   // out - number of treads in thread group with PET
-      int *threadId);     // out - thread id for specified PET
+      int *threadId,      // out - thread id for specified PET
+      int *vas);          // out - virtual address space of the specified PET
     int ESMC_VMGetPETMatchPET(
       // match PET in current VM against PETs of another VM
       int pet,                      // in  - id of specified PET
