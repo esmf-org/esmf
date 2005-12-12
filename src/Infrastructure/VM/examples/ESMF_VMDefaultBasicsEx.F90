@@ -1,4 +1,4 @@
-! $Id: ESMF_VMDefaultBasicsEx.F90,v 1.2 2004/06/21 18:25:17 theurich Exp $
+! $Id: ESMF_VMDefaultBasicsEx.F90,v 1.3 2005/12/12 18:59:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_VMDefaultBasicsEx
   ! local variables
   integer:: rc
   type(ESMF_VM):: vm
-  integer:: localPet, petCount, peCount, ssiId
+  integer:: localPet, petCount, peCount, ssiId, vas
 !EOC
   ! result code
   integer :: finalrc
@@ -56,15 +56,18 @@ program ESMF_VMDefaultBasicsEx
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-  print *, 'localPet is: ', localPet,' out of a total of ',petCount,' PETs.'
-  print *, 'there are ', peCount,' PEs referenced by this VM'
+  print *, "This PET is localPet: ", localPet
+  print *, "of a total of ",petCount," PETs in this VM."
+  print *, "There are ", peCount," PEs referenced by this VM"
 
-  call ESMF_VMGetPETLocalInfo(vm, localPet, peCount=peCount, ssiId=ssiId, rc=rc)
+  call ESMF_VMGetPETLocalInfo(vm, localPet, peCount=peCount, ssiId=ssiId, &
+    vas=vas, rc=rc)
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-  print *, 'localPet is: ', localPet,' and it is claiming ', peCount, &
-    ' PEs on SSI ', ssiId
+  print *, "This PET is executing in virtual address space (VAS) ", vas
+  print *, "located on single system image (SSI) ", ssiId
+  print *, "and is associated with ", peCount, " PEs."
 
   call ESMF_Finalize(rc=rc)
 !EOC
