@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: unit_tests_results.pl,v 1.6 2005/04/20 21:26:38 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.7 2005/12/12 18:17:31 svasquez Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -223,7 +223,87 @@ use File::Find
 
 			
         }
-	$total_fail_count = $total_test_count - $total_pass_count;
+	# Special code for handling the new Regrid test scheme.
+	# If running Exhaustive unit tests
+	if ($exhaustive == 1) {
+		# Determine if ESMF_RegridToolUTest is in the unit test list
+		$regrid_test_found=grep ( /ESMF_RegridToolUTest/, @ut_files);
+		if ($regrid_test_found != 0) {
+			@regrid_test=grep (/ESMF_RegridToolUTest/, @ut_files);
+			# open the ESMF_RegridToolUTest.stdout files to read number of tests
+			$ok=open(F,"$TEST_DIR/ESMF_RegridToolUTest.stdout");
+                        if (!(defined $ok)) {
+				# if the stdout file is not present put it in the crashed list
+				push(crashed_list, @regrid_test);
+			}      
+			else { # Read the number of tests from ESMF_RegridToolUTest.stdout
+				$test_string_found = -1;
+				while (<F>) { #read the file unitil "TEST_COUNT" is found
+					($test_string,$regrid_test_count) = split(/:/, $_);
+					if ($test_string eq " TEST_COUNT") {
+						$test_string_found = 1;
+						goto CONTINUE; 
+					}
+					
+				}
+			}
+		}
+		else {
+			# ESMF_RegridToolUTest file not found, therefore ignore
+			goto DONE;
+		}
+		CONTINUE: if ($test_string_found == -1) {
+			# The "TEST_COUNT" string was not found inESMF_RegridToolUTest.stdout 
+			push(crashed_list, @regrid_test);
+		}
+		else {	# Found the "TEST_count" count pass/fails
+			#open the ESMF_RegridToolUTest.Log file
+			$ok=open(F,"$TEST_DIR/ESMF_RegridToolUTest.Log");
+                        if (!(defined $ok)) {
+				# no Log file was found
+				push(crashed_list, @regrid_test);
+                        }
+			else {
+				foreach $line (<F>){
+					push(file_lines, $line);
+                               	}
+				close ("$TEST_DIR/$ESMF_RegridToolUTest.Log");
+                                $pet_count=grep ( /NUMBER_OF_PROCESSORS/, @file_lines);
+                                if ($pet_count == 0) {
+                                	$pet_count = 1;
+                               	}
+                               	$pass_count=grep( /PASS/, @file_lines);
+                               	$pass_count = int $pass_count/$pet_count;
+				if ($pass_count == $regrid_test_count){
+					push(pass_list, @regrid_test);
+				}
+				else {
+					$fail_count=grep( /FAIL/, @file_lines);
+					$fail_count = int $fail_count/$pet_count;
+					if ($fail_count !=0 ) {
+                       			push @fail_test_list, grep (/FAIL/, @file_lines);
+					}
+					if ($regrid_test_count!= $pass_count + $fail_count) {
+						push(crashed_list, @regrid_test);
+					}
+					else {
+						push(fail_list, @regrid_test);
+					}
+				}
+				$total_pass_count = $total_pass_count + $pass_count;
+				$total_fail_count = $total_fail_count + $fail_count;
+				$total_test_count = $total_test_count + $regrid_test_count;
+			}
+
+		}
+		
+	}
+	DONE: $total_fail_count = $total_test_count - $total_pass_count;
+
+	# sort all lists
+	@pass_list=sort(@pass_list);
+	@crashed_list=sort(@crashed_list);
+	@fail_list=sort(@fail_list);
 
 	# Delete ./ from all lists
         foreach ( @pass_list) {
@@ -293,7 +373,7 @@ use File::Find
 			print "NOTE: There are no executable unit tests files, either the 'gmake ESMF_BOPT=$ESMF_BOPT build_unit_tests' has \n";
 			print "not been run or the 'gmake ESMF_BOPT=$ESMF_BOPT' did not build successfully. \n\n";
 			return 0;
-		}
+		uu}
 	}
 	if (!$SUMMARY) { # Print only if full output requested
 		print "\n\nThe log and stdout files for the unit tests can be found at:\n";
