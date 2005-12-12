@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.49 2005/08/06 05:06:27 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.50 2005/12/12 22:35:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -277,6 +277,8 @@ void ESMC_VMK::vmk_init(void){
 #else
   mpionly = 1;          // normally the default VM can only be MPI-only
 #endif
+  // no threading in default global VM
+  nothreadsflag = 1;
   // set up private MPI_COMM_WORLD Group and Comm
   MPI_Comm_group(MPI_COMM_WORLD, &mpi_g);
   MPI_Comm_create(MPI_COMM_WORLD, mpi_g, &mpi_c);
@@ -1147,6 +1149,11 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
       ++lpid_list[1][j];         // increment pet count for this pid
     }
   }
+
+#if (VERBOSITY > 9)
+  printf("finished setting up lpid_list and pet_list\n");
+#endif
+  
   // now:
   //    lpid_list[0][] list of current lpids with at least one pet spawning
   //    lpid_list[1][] associated list indicating how many pets will spawn
@@ -1167,6 +1174,10 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
   MPI_Group_incl(mpi_g, num_diff_pids, lpid_list[0], &new_mpi_g);
 #endif
   
+#if (VERBOSITY > 9)
+  printf("successfully derived new_mpi_g\n");
+#endif
+
   // setting up MPI communicators is a collective MPI communication call
   // thus it requires that exactly one pet of each process running in the 
   // current ESMC_VMK makes that call, even if this process will not participate
@@ -1215,6 +1226,10 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
     }
   }
   
+#if (VERBOSITY > 9)
+  printf("now valid new_mpi_g and new_mpi_c exist\n");
+#endif
+
   // now:
   //    new_mpi_g is the valid MPI_Group for the new ESMC_VMK
   //    new_mpi_c is the valid MPI_Comm for the new ESMC_VMK
@@ -1633,16 +1648,28 @@ ESMC_VMKPlan::ESMC_VMKPlan(void){
   pref_intra_process = PREF_INTRA_PROCESS_SHMHACK;
   pref_intra_ssi = PREF_INTRA_SSI_MPI1;
   pref_inter_ssi = PREF_INTER_SSI_MPI1;
+  // invalidate members that deal with communicator of participating PETs
+  lpid_mpi_g_part_map = NULL;
+  commfreeflag = 0;
+  groupfreeflag = 0;
 }
 
 
 ESMC_VMKPlan::~ESMC_VMKPlan(void){
   // native destructor
   vmkplan_garbage();
-  delete [] lpid_mpi_g_part_map;
-  if (commfreeflag)
+  if (lpid_mpi_g_part_map != NULL){
+    delete [] lpid_mpi_g_part_map;
+    lpid_mpi_g_part_map = NULL;
+  }
+  if (commfreeflag){
     MPI_Comm_free(&mpi_c_part);
-  MPI_Group_free(&mpi_g_part);
+    commfreeflag = 0;
+  }
+  if (groupfreeflag){
+    MPI_Group_free(&mpi_g_part);
+    groupfreeflag = 0;
+  }
 }
 
   
@@ -1690,6 +1717,9 @@ void ESMC_VMKPlan::vmkplan_mpi_c_part(ESMC_VMK &vm){
       ++n;
     }
   }
+  
+  // all parent PETs create the new group of participating PETs
+  groupfreeflag = 1;
   MPI_Group_incl(vm.mpi_g, n, grouplist, &mpi_g_part);
  
   // all master PETs of the current vm must create the communicator

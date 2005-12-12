@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.23 2005/08/06 04:56:15 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.24 2005/12/12 22:35:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -259,7 +259,8 @@ class ESMC_VMKPlan{
     int *lpid_mpi_g_part_map;
     MPI_Group mpi_g_part;
     MPI_Comm mpi_c_part;
-    int commfreeflag;   // flag to indicate which PETs must free communicator
+    int commfreeflag;   // flag to indicate which PETs must free MPIcommunicator
+    int groupfreeflag;  // flag to indicate which PETs must free MPIgroup
         
   public:
     ESMC_VMKPlan(void);
