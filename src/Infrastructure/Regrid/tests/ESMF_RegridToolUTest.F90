@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridToolUTest.F90,v 1.5 2005/12/01 21:10:52 svasquez Exp $
+! $Id: ESMF_RegridToolUTest.F90,v 1.6 2005/12/12 22:35:57 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,6 +34,8 @@
     call ESMF_VMGet(vm, petCount=npets, localPET=localPet,  rc=lrc)
 
 #ifdef ESMF_EXHAUSTIVE
+    ! Must have at least one test tag for nightly build script.
+    !EX_UTest
     ! Get the test list file only if ESMF_EXHAUSTIVE = ON
     call readTestList(testListFile ="ESMF_RegridTestList.rc", npets=npets, rc=lrc)
 
