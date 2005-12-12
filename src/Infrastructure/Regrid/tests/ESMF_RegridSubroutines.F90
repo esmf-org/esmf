@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.6 2005/12/06 22:49:35 jwolfe Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.7 2005/12/12 18:15:59 svasquez Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -73,7 +73,7 @@ contains
         	exit
      	endif
         if (testString.eq."end_of_tests") then
-		print *, "TEST_COUNT ", testCount
+		print *, "TEST_COUNT:",testCount
 		rewind (1)
                 startTesting = 1 ! Reset flag 
         	exit
@@ -345,7 +345,7 @@ contains
         return
     endif
     do
-	read (unit=(npets+20), fmt = '(A2, I2)', iostat=readStatus) index, value, domain 
+	read (unit=(npets+20), fmt = '(A2, I2)', iostat=readStatus) index, value 
         if (readStatus.ne.0) then
                 print *, " Unable to read file: ESMF_RegridHalo.rc"
                 rc=ESMF_FAILURE
