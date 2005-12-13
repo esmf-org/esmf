@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.42 2005/12/12 18:22:13 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.43 2005/12/13 21:47:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -222,8 +222,7 @@ extern "C" {
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmsendrecvnb()"
-// gjt: took the following line out to use vmk's request queue
-//    *commhandle = new vmk_commhandle;
+    *commhandle = NULL; // reset the commhandle
     (*ptr)->vmk_sendrecv(sendData, *sendSize, *dst, recvData, *recvSize, *src,
       (vmk_commhandle **)commhandle);
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
@@ -233,9 +232,6 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmwait()"
     (*ptr)->vmk_wait((vmk_commhandle **)commhandle);
-// gjt: took the following twp lines out to use vmk's request queue
-//    delete (vmk_commhandle *)*commhandle;
-//    *commhandle = NULL;
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
