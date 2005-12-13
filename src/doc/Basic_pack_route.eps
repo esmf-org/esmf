@@ -1,14 +1,9 @@
 %-12345X@PJL JOB
 @PJL SET HOLD=OFF
-@PJL SET RESOLUTION = 1200
-@PJL SET BITSPERPIXEL = 2
-@PJL SET ECONOMODE = OFF
-@PJL ENTER LANGUAGE = POSTSCRIPT 
-%!PS-Adobe-3.0
+%!PS-Adobe-3.0 EPSF-3.0
 %%Title: Visio-Basic_pack_route.vsd
 %%Creator: PScript5.dll Version 5.2.2
-%%CreationDate: 8/23/2005 9:29:26
-%%BoundingBox: 0 0 612 792
+%%CreationDate: 12/13/2005 13:42:48
 %%DocumentNeededResources: (atend)
 %%DocumentSuppliedResources: (atend)
 %%DocumentData: Clean7Bit
@@ -19,7 +14,6 @@
 %%BeginDefaults
 %%ViewingOrientation: 1 0 0 1
 %%EndDefaults
-
 
 %%BeginProlog
 %%BeginResource: file Pscript_WinNT_ErrorHandler 5.0 0
@@ -73,7 +67,6 @@ userdict begin/PrtVMMsg{vmstatus exch sub exch pop gt{[
 (Print the document in parts.)115 425 12/Times-Roman showpage
 (%%[ PrinterError: Low Printer VM ]%%)= true FatalErrorIf}if}bind def end
 version cvi 2016 ge{/VM?{pop}bind def}{/VM? userdict/PrtVMMsg get def}ifelse
-105000 VM?
 %%BeginResource: file Pscript_Win_Basic 5.0 0
 /d/def load def/,/load load d/~/exch , d/?/ifelse , d/!/pop , d/`/begin , d/^
 /index , d/@/dup , d/+/translate , d/$/roll , d/U/userdict , d/M/moveto , d/-
@@ -143,187 +136,17 @@ end
 %%EndProlog
 
 %%BeginSetup
-statusdict begin (%%[ ProductName: ) print product print ( ]%%)= flush end
 [ 1 0 0 1 0 0 ] false Pscript_WinNT_Incr dup /initialize get exec
-featurebegin{
-%%BeginNonPPDFeature: JobTimeout 0
-0 /languagelevel where{pop languagelevel}{1}ifelse 2 ge{1 dict dup/JobTimeout  4 -1 roll put setuserparams}{statusdict/setjobtimeout get exec}ifelse
-%%EndNonPPDFeature
-}featurecleanup
-
-featurebegin{
-%%BeginNonPPDFeature: WaitTimeout 120
-120 /languagelevel where{pop languagelevel}{1}ifelse 2 ge{1 dict dup/WaitTimeout 4 -1 roll put setuserparams}{statusdict/waittimeout 3 -1 roll put}ifelse
-%%EndNonPPDFeature
-}featurecleanup
-
-featurebegin{
-%%BeginFeature: *HPPaperPolicy PromptUser
-
-   <</DeferredMediaSelection true>> setpagedevice
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *HPHalftone PrinterDefault
-
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *HPCollate False
-<</Collate false>> setpagedevice
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *Smoothing True
-
-  << /PostRenderingEnhance true /PostRenderingEnhanceDetails << /REValue 2 /Type 8 >>
-  >> setpagedevice
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *PageSize Letter
-
-  <</PageSize [612 792] /ImagingBBox null>> setpagedevice
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *Duplex None
-
-  <</Duplex false>> setpagedevice
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *HPwmFont HelveticaB
-
-  /Helvetica-Bold findfont dup length dict begin
-    {1 index /FID ne {def} {pop pop} ifelse} forall
-    /Encoding ISOLatin1Encoding def currentdict 
-  end
-  /HPwmFont exch definefont pop
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *HPwmTextStyle Medium
-userdict /HPwmStyle .48 put
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *HPwmText None
-
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *HPwmFontSize pt48
-userdict /HPwmSize 48 put
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *HPwmTextAngle Deg45
-userdict /HPwmAngle 45 put
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *HPwmNUP None
-userdict /HPwmNUP 1 put
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *HPwmLocation True
-
-  userdict begin
-  true setglobal /HPwm 5 dict dup begin /HPwmOn true def /HPwmOdd true def end def false setglobal
-
-  userdict /HPwmAngle known not {/HPwmAngle 45 def} if
-  userdict /HPwmSize known not {/HPwmSize 48 def} if
-  userdict /HPwmLocation known not {/HPwmLocation true def} if
-  userdict /HPwmStyle known not {/HPwmStyle .48 def} if
-  userdict /HPwmDuplex known not {/HPwmDuplex 0 def} if
-  userdict /HPwmNUP known not {/HPwmNUP 1 def} if
-
-  /HPwmEOP {HPwmDuplex 0 eq {true}{HPwmDuplex 1 eq HPwmOdd eq dup not {erasepage}if
-    true setglobal /HPwmOdd HPwmOdd not def false setglobal}ifelse} bind def
-
-  userdict /HPwmAngle userdict /HPwmNUP get userdict /HPwmAngle get mul put
-  end
-
-  <<
-  /EndPage {userdict begin
-  userdict /HPwmText known HPwm /HPwmOn get and
-    {gsave 
-     initmatrix
-     0 setgray 1 setlinewidth true setstrokeadjust 0 setlinejoin 0 setlinecap [] 0 setdash
-     currentpagedevice /PageSize get aload pop 2 div exch 2 div exch translate
-     HPwmAngle rotate /HPwmFont userdict /HPppScale known {HPwmSize HPppScale mul}{HPwmSize}ifelse selectfont
-     HPwmText stringwidth 2 div neg exch 2 div neg exch
-       userdict /HPppScale known {HPwmSize HPppScale mul}{HPwmSize}ifelse .25 mul sub moveto
-     HPwmText false charpath userdict /HPwmStyle1 known
-       {gsave 1 setgray HPwmStyle1 HPwmStyle add setlinewidth stroke grestore} if
-     0 setgray HPwmStyle setlinewidth stroke
-     HPwmLocation not {true setglobal HPwm /HPwmOn false put false setglobal} if
-    grestore} if
-    2 eq {pop false}{pop HPwm begin HPwmEOP end} ifelse
-    end } bind
-  >> setpagedevice
-  userdict /HPwmLocation true put
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *JRHDNotInstalled JRHDPrivate
-
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *JRConstraints 0
-
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *JRHDInstalled JRHDStore
-
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *OptionTrays 3Trays
-
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *Option3 True
-
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *PrinterHardDisk False
-
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *JobRetention True
-
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *Option5 False
-
-%%EndFeature
-}featurecleanup
-featurebegin{
-%%BeginFeature: *InstalledMemory 32-63MB
-
-%%EndFeature
-}featurecleanup
 1 setlinecap 1 setlinejoin
 /mysetup [ 72 1200 V 0 0 -72 1200 V 11.99905 779.0003 ] def 
 %%EndSetup
 
-userdict begin /ehsave save def end
 %%EndPageComments
 %%BeginPageSetup
 /DeviceRGB dup setcolorspace /colspABC exch def
 mysetup concat colspRefresh
 %%EndPageSetup
 
-30000 VM?
 Pscript_WinNT_Incr begin
 %%BeginResource: file Pscript_WinNT_Compat 5.0 0
 userdict/Pscript_WinNT_Compat 19 dict dup begin/bd{bind def}bind def/ld{load
@@ -378,6 +201,21 @@ Pscript_WinNT_Compat dup /initialize get exec
 } put
 {setglobal} if
 GpPBeg1
+1 1 1 SC
+NP 82 83 m 9663 83 l 9663 7283 l 82 7283 l CP 
+eofill
+GSE
+GpPBeg1
+1 setlinecap
+1 setlinejoin
+10 setmiterlimit
+12 setlinewidth
+[] 0 setdash
+0 0 0 SC
+NP 82 7283 m 9663 7283 l 9663 83 l 82 83 l 82 7283 l CP 
+stroke
+GSE
+GpPBeg1
 0.9098 0.9333 0.9686 SC
 NP 2275 571 m 2594 571 l 2594 6871 l 2275 6871 l CP 
 eofill
@@ -412,9 +250,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 44759 VM?
-Pscript_WinNT_Incr begin
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol Pscript_WinNT_Incr begin
 %%BeginResource: file Pscript_T42Hdr 5.0 0
 /asc42 0.0 d/sF42{/asc42 ~ d Ji}bind d/bS42{0 asc42 -M}bind d/eS42{0 asc42 neg
 -M}b/Is2015?{version cvi 2015 ge}bind d/AllocGlyphStorage{Is2015?{!}{{string}
@@ -454,7 +291,7 @@ cvx}if/! cvx/! cvx/! cvx/! cvx 5/^ cvx 5/^ cvx 0.0 0.0]cvx}{{! ! ! ! ! 5 ^ 5 ^
 %%EndResource
 end reinitialize
 -0.664 -0.324 2 1.004
- 256 array 0 1 255 {1 index exch /.notdef put} for  /TTE18620A0t00
+ 256 array 0 1 255 {1 index exch /.notdef put} for  /TTE17FDE28t00
 Type42DictBegin
 [<00010000000a000a000a000a63767420962ad276000000ac000006306670
 676dcc79599a000006dc0000066e676c79660ef78fec00004d1c0003e762
@@ -1136,14 +973,14 @@ ac04010900060502030905010c0201ca0a00b8ffc0400a21233430000120
 0d0f3405b8ffc0400e212334300501200540050205190bba013c01850018
 2b4e10e45d712b2b10f62b2b2b2b2b2b2b5d712b3c4dfd3c003f3f173901
 11393130015d005d2b212311060607353636373302fbb441d35497e22f74
-047b3e7c1fae47ca5f00>/TTE18620A0t00 AddT42Char 
+047b3e7c1fae47ca5f00>/TTE17FDE28t00 AddT42Char 
 1 0 0 <00020100000005000500000300070000211121112521112101000400fc20
-03c0fc400500fb002004c000>/TTE18620A0t00 AddT42Char 
-/TTE18620A0t00 findfont /CharStrings get begin
+03c0fc400500fb002004c000>/TTE17FDE28t00 AddT42Char 
+/TTE17FDE28t00 findfont /CharStrings get begin
 /one 20 def
 /.notdef 0 def
 end
-/TTE18620A0t00 findfont /Encoding get
+/TTE17FDE28t00 findfont /Encoding get
 dup 1 /one put
 pop
 Pscript_WinNT_Incr begin
@@ -1183,13 +1020,12 @@ findfont 1 ^ ~ definefont Pscript_Windows_Font 3 1 $ put}b/UmF{L2?
 get undefinefont}forall undefinefont}b
 %%EndResource
 end reinitialize
-F /F0 0 /0 F /TTE18620A0t00 mF 
+F /F0 0 /0 F /TTE17FDE28t00 mF 
 /F0S85 F0 [133 0 0 -133 0 0 ] mFS
 F0S85 Ji 
 2398 873 M <01>S 
-49739 VM?
 -0.625 -0.375 2 1.008
- 256 array 0 1 255 {1 index exch /.notdef put} for  /TTE196B940t00
+ 256 array 0 1 255 {1 index exch /.notdef put} for  /TTE1811518t00
 Type42DictBegin
 [<00010000000a000a000a000a63767420ef1f94cc000000ac0000073a6670
 676d08e8ba28000007e8000005d7676c7966c7a23d32000053000003a50e
@@ -1921,7 +1757,7 @@ Type42DictEnd
 5d71f62b714ded003f3cfd3c3f3cfd3c3130005d71015d13213217161612
 1514070607060706232101113332373e023534262627262394021db76081
 b8602d37664d8362a4fdd30128dd7c37485f3c3c6c533eb505ba1c26c2fe
-e7ceb583a0634b2a1f04c2fc350e1256c5aaaab666120e00>/TTE196B940t00 AddT42Char 
+e7ceb583a0634b2a1f04c2fc350e1256c5aaaab666120e00>/TTE1811518t00 AddT42Char 
 2 434 68 <00020049ffe8042e043e0023003201714068071a081c051d161a4a1b481c
 4925db10df11093619461957266619672686269219931aa61ab91bc71ac8
 1b0c06060d151606191627062915591977028602a606b506c6060cbf34d9
@@ -1939,7 +1775,7 @@ edf4e4fd3c003fed2b2b2b3f3c3ffd2b2b2bf45d2be412392f5d712bb106
 060106060706151416333237363736350165ff2bd2cfbcb84b031b25feea
 0b10070348a45da4bd569b92c54c506f4b54015e36ea243758444c453310
 0b02e22e9a945989b7feb88c854c1c3719084646b2885a8d4b1c25201c51
-453bfed2123218273c3b563226372465>/TTE196B940t00 AddT42Char 
+453bfed2123218273c3b563226372465>/TTE1811518t00 AddT42Char 
 2 6552 87 <0001001fffe80291059d001900cd402920002001230a290f3a0e4a0e590f
 07191500180316150017121314011712021401180309070a070c18b80101
 400f0017a017b017036017a017c0170317b80104b2150114b80274b30015
@@ -1949,9 +1785,9 @@ edf4e4fd3c003fed2b2b2b3f3c3ffd2b2b2bf45d2be412392f5d712bb106
 3c4dfc3cfd3cf45d3c10f419e400183fed3f3cfd3c10f45d71e411123911
 330f0f0f0f3130015d011523111416163332371706232226262726351123
 3533352511027ac00b271c274a18627c4c7a390b098181011a0426e0fe54
-822b1c1bda2a335145319501cfe0d3a4fe89>/TTE196B940t00 AddT42Char 
+822b1c1bda2a335145319501cfe0d3a4fe89>/TTE1811518t00 AddT42Char 
 
-1 0 3 <> /TTE196B940t00 AddT42Char 
+1 0 3 <> /TTE1811518t00 AddT42Char 
 2 5486 85 <0001008700000337043e001000a84028970501090e01530566057505032f
 12580e680e7012040a090f0c1f0c028f0cff0c023f0c4f0c020cb8027740
 29070701000a0302060a28000910093009700904091a7f129f12025f127f
@@ -1959,7 +1795,7 @@ edf4e4fd3c003fed2b2b2b3f3c3ffd2b2b2bf45d2be412392f5d712bb106
 1c00182b4e10f4713c4d10ed10fd3c4e105d71f65d194de400183f3c3f3c
 3fed5d717239323130015d005d71004bb017534bb035515a58b10a323859
 005d212111211536363332170726232206061101a0fee70105436b446059
-57473d3b522f0426976b4435f52e41aafef1>/TTE196B940t00 AddT42Char 
+57473d3b522f0426976b4435f52e41aafef1>/TTE1811518t00 AddT42Char 
 2 8496 92 <0001000efe510452042600130134b41228050113b8ffe040180c0f340816
 0d0f3407160d0f3406160d0f3405160c0f3402b8ffc0401f1a3a34050606
 040d0b0e061002001306041302040303010100061360100110b801af4012
@@ -1972,12 +1808,12 @@ edf4e4fd3c003fed2b2b2b3f3c3ffd2b2b2bf45d2be412392f5d712bb106
 013838383859435c58b90005ffe8400e0d113f131013193f131012183f05
 b8fff0b313193f05b8fff0b212183f012b2b2b2b2b59132113132101070e
 032322272716333236370e012bfef80123fe89432543577f50514e194235
-625e190426fd0e02f2fc02b95d623d2211dc0d735900>/TTE196B940t00 AddT42Char 
+625e190426fd0e02f2fc02b95d623d2211dc0d735900>/TTE1811518t00 AddT42Char 
 1 0 0 <00020100000005000500000300070042b40201fe0607b8023f4013000504
 fe03000a0704fe010019080605fe0203bc0126000901b0011800182b10f6
 3cfd3c4e10f43c4dfd3c003f3cfd3c10fc3cfd3c31302111211125211121
-01000400fc2003c0fc400500fb002004c000>/TTE196B940t00 AddT42Char 
-/TTE196B940t00 findfont /CharStrings get begin
+01000400fc2003c0fc400500fb002004c000>/TTE1811518t00 AddT42Char 
+/TTE1811518t00 findfont /CharStrings get begin
 /D 39 def
 /a 68 def
 /t 87 def
@@ -1986,7 +1822,7 @@ fe03000a0704fe010019080605fe0203bc0126000901b0011800182b10f6
 /y 92 def
 /.notdef 0 def
 end
-/TTE196B940t00 findfont /Encoding get
+/TTE1811518t00 findfont /Encoding get
 dup 1 /D put
 dup 2 /a put
 dup 3 /t put
@@ -1994,11 +1830,10 @@ dup 4 /space put
 dup 5 /r put
 dup 6 /y put
 pop
-F /F1 0 /0 F /TTE196B940t00 mF 
+F /F1 0 /0 F /TTE1811518t00 mF 
 /F1SC8 F1 [200 0 0 -200 0 0 ] mFS
 F1SC8 Ji 
 623 2849 M <01020302040205050206>[145 111 67 111 55 112 77 78 111  0]xS 
-1287 VM?
 1 11964 50 <00020059ffe705e705d3000f001b00a2405597059708980c980e04080107
 0e080f0718271878097712077711781586048908890c860e851289148815
 88178818861a0c07120814071a15121a141a18151a07132d0d09192d0703
@@ -2007,7 +1842,7 @@ F1SC8 Ji
 10f45d714ded4d105d71f65d714ded003fed3fed3130015d5d71005d1334
 3736363736332000111000212000011412333236353426232206594332ad
 6789b301440185fe7efebdfeb9fe7e0131e6b1b1e3ddb7b7e002d4e09870
-b22b3afe6efe9afe9dfe6f018f0168f9fefffffffcf8fb00>/TTE196B940t00 AddT42Char 
+b22b3afe6efe9afe9dfe6f018f0168f9fefffffffcf8fb00>/TTE1811518t00 AddT42Char 
 2 2292 73 <00010018000002e605d3001600b840323604012a04201020115904801805
 0804bf180215161102141216110e130f00100e13010010021409080f0b01
 5f0bff0b020bb80274400a0601110f1601ff160116b80274401e10000001
@@ -2016,7 +1851,7 @@ f00001000613140a09333f084f085008030828102f115f110211b8010440
 2b4e10f42b713c4dfc3cfd3cfc5d3cf45d19e400183f3c3f5d713cfd5d71
 3c3ffd5d7139320f0f0f0f313001715d005d133335343636333217072623
 2206151533152311211123189c399975787326433e3d35d2d2fee79c0426
-5086845324c41039514bddfcb7034900>/TTE196B940t00 AddT42Char 
+5086845324c41039514bddfcb7034900>/TTE1811518t00 AddT42Char 
 2 5714 86 <00010030ffe80410043e002a02c240c00611062308271711172398129814
 9727952a09071446140212bb0db90ec721e523f80df62206290d550d650d
 950b9712a722b90c07412340244426672264268712871486228324093726
@@ -2044,7 +1879,7 @@ c0b322253401b8ffc0401d1a1c3400013001400150010460018001f00103
 132516163332373635342726272427263534363332161705262623220706
 1514171604171615140623222630011a126e636d3725141549feac5b7eda
 e5dad428fef7115f586f30201c2601c15958f4efd9fd012f2b5255281c2f
-201514114b3e56998abc8e8b313e421f16231e151c664a4b8692d2b0>/TTE196B940t00 AddT42Char 
+201514114b3e56998abc8e8b313e421f16231e151c664a4b8692d2b0>/TTE1811518t00 AddT42Char 
 2 1768 72 <00020041ffe80427043e0014001c01a3b90010fff840460b3999099a0d96
 10a805a70abb09bb0db81a0808140148024706460a4f1ea80db606b61ac7
 0ac80cd60ad80cf807f70d0d1c0f1c15401b1d3415400e11340f15bf15cf
@@ -2062,14 +1897,14 @@ b3090a3e00b8ffc0b241213f2b002b2b2b59e42b1112395d435c5840140e
 722b2b3c0111333130015d71005d2b010506062320272635100033320003
 211616333236132626232207061702fa011836e9affeeb85690114d3ed01
 1206fd40038261425a270378565c3c3c0101522f9aa1b591dd0108012bfe
-c7febd7d8b48016c7a7f43437300>/TTE196B940t00 AddT42Char 
-/TTE196B940t00 findfont /CharStrings get begin
+c7febd7d8b48016c7a7f43437300>/TTE1811518t00 AddT42Char 
+/TTE1811518t00 findfont /CharStrings get begin
 /O 50 def
 /f 73 def
 /s 86 def
 /e 72 def
 end
-/TTE196B940t00 findfont /Encoding get
+/TTE1811518t00 findfont /Encoding get
 dup 7 /O put
 dup 8 /f put
 dup 9 /s put
@@ -2078,7 +1913,6 @@ pop
 /F1SA7 F1 [167 0 0 -167 0 0 ] mFS
 F1SA7 Ji 
 1175 841 M <070808090A03>[130 56 55 93 93  0]xS 
-30000 VM?
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -2102,9 +1936,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 1931 VM?
-1 8582 38 <00010061ffe7055e05d3001a00d6404e8609891489169f009806c709d403
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 1 8582 38 <00010061ffe7055e05d3001a00d6404e8609891489169f009806c709d403
 d40bf503092509280c280d29142916750575098605080713071717131717
 29022a03250507280599059709c903c50b053f014f01020152100001e000
 f0000200b8ffc0b311183400b8ffc0b30a0d3400b8015a4017182d04080e
@@ -2114,7 +1947,7 @@ b31b7e53182b4e10f45d714ded4e105df65d4dedf4ed003ffdf42b5d71e4
 2b3ffdf42b2b5d71e45d3130005d015d5d5d010506042320001110002120
 171617052626232206111016333236043f011f42fecdecfedcfe88017a01
 34010da86432fedb1aa576a3cbc8a076aa021b5bf0e9018f015a016e0195
-9f5eb0467284eafefafeeaec9600>/TTE196B940t00 AddT42Char 
+9f5eb0467284eafefafeeaec9600>/TTE1811518t00 AddT42Char 
 2 4736 82 <00020052ffe8049a043e000d001900974048e801e708f713f71504c702e8
 05021219051909025910561356165918970298069808970cb809d502db05
 dc09d50ce705e706e80d10a708cb02cc06c308c60c057508890684080311
@@ -2123,7 +1956,7 @@ b80274b20a0b17b80274401404071439071a601b701b021b0e2100191a58
 09691066126616691804015d59005d015d13341236333200151400232224
 26251416333236353426232206528afd9cf10134fec9ec92fef78a012096
 6e6e95956e6e9602228c01068afec7eff1fec384ffa89ea8a8a09ca8a800
->/TTE196B940t00 AddT42Char 
+>/TTE1811518t00 AddT42Char 
 2 4502 81 <0001009100000459043e0016009f4018071317135a08680804b804013408
 34104408440fe9100506b80274401d11070e0d060c0b0b01000a02012616
 0040202434af0001ff0001001a18b8ffc040162224349018a018027018f0
@@ -2131,13 +1964,13 @@ b80274b20a0b17b80274401404071439071a601b701b021b0e2100191a58
 0c010c19173f3c182b4e10f471722b3c4d10ed10fd3c4e105d71722bf671
 722b3c4dfd3c003f3c3c103c3f3c3fed3130005d01715d21211134262623
 2206061511211121153633321e02150459fee724513949742bfee701058b
-d35d9a4f1f021eac65385084b2fe1f04269cb44368847b00>/TTE196B940t00 AddT42Char 
+d35d9a4f1f021eac65385084b2fe1f04269cb44368847b00>/TTE1811518t00 AddT42Char 
 2 3280 76 <00020093000001ac05ba000300070077b90009ffc0403f110a3f40095009
 028009b009c009d009ef09051f0960097f09a009b0090503060700050403
 0f00014000d000e00003005d02010006050607040a0207260104b8ffc040
 092124340419083f3c182b4e10f42b3c4dfd3c003f3c3f3c3f3cfd5d713c
 0305103c3c103c3c313001715d722b1311211101112111930119fee70119
-04b60104fefcfb4a0426fbda>/TTE196B940t00 AddT42Char 
+04b60104fefcfb4a0426fbda>/TTE1811518t00 AddT42Char 
 2 2548 74 <00020054fe510460043e0023002f014e4062771d871d02120c0d7031860d
 8031042001230223033001330233034001430243035b0f59145925562956
 2b592f6b0ff811f813123b0d33163b28332c4b0d44164b28442cf00cfd17
@@ -2153,12 +1986,12 @@ b80129400919191a1a8f31013101b801b8400a00332421121930583c182b
 3635350623222726351000333217352111140e0223202635341314163332
 36353426232206790141081d28566e3725130d7ec0d67d620101bfc58001
 073e70bb8ffef2e2fc8360678e88686583462738151e211631235e9bacb5
-8fd5010b011aad95fc47bcba6a3cb98e0e0283a99da19ea5a09d>/TTE196B940t00 AddT42Char 
+8fd5010b011aad95fc47bcba6a3cb98e0e0283a99da19ea5a09d>/TTE1811518t00 AddT42Char 
 1 10766 47 <0001009d000004a505ae0005003d401a5007010201020403250500080405
 1a0702032001200030000200b8028bb30631b9182b4e10f45d3c4dfd3c4e
 10fe3c003f3c4dfd3c3f3c3130015d3311211121159d012802e005aefb49
-f700>/TTE196B940t00 AddT42Char 
-/TTE196B940t00 findfont /CharStrings get begin
+f700>/TTE1811518t00 AddT42Char 
+/TTE1811518t00 findfont /CharStrings get begin
 /C 38 def
 /o 82 def
 /n 81 def
@@ -2166,7 +1999,7 @@ f700>/TTE196B940t00 AddT42Char
 /g 74 def
 /L 47 def
 end
-/TTE196B940t00 findfont /Encoding get
+/TTE1811518t00 findfont /Encoding get
 dup 11 /C put
 dup 12 /o put
 dup 13 /n put
@@ -2175,7 +2008,6 @@ dup 15 /g put
 dup 16 /L put
 pop
 2798 890 M <0B0C0D030E0F04100A0D>[120 102 102 55 47 101 47 102 92  0]xS 
-30000 VM?
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -2194,9 +2026,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 644 VM?
-1 13202 54 <0001004affe604f205d3002c01d0403db911b81db628c62c040713071517
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 1 13202 54 <0001004affe604f205d3002c01d0403db911b81db628c62c040713071517
 131715182b650565287406780d7428d90cd6230c590a550e55225923680c
 661267216928672c771d861d96210c1223b8ffe0b31e1f3423b8ffe04065
 191a3451225123c122c123047122712381228123e122e123062b0a2a0d24
@@ -2216,7 +2047,7 @@ b31b1d3e23b8ffe3b2133922b8ffe0b2133923b8ffc9b2123922b8ffd040
 141716041616151406042320004a01201a9f878f913d4c34b9ee60877fef
 a90114011707fed8137d7d81492f2c3801b0cf758cff00bffeeafed601dd
 1c9188795134491b122e3b5679ae70c366f2ca0d716335223934252f666d
-bd8b7edc6b010100>/TTE196B940t00 AddT42Char 
+bd8b7edc6b010100>/TTE1811518t00 AddT42Char 
 2 1528 71 <00020054ffe8046105ba000f001c0090402d125906590a59125616561859
 1c98079909f80909701e801e023a03340c3a1534194a03440c4a15441999
 090914b80274b2050b1ab80274400e0b070e0f0001000a17290e0d2601b8
@@ -2225,17 +2056,16 @@ bd8b7edc6b010100>/TTE196B940t00 AddT42Char
 1266166618691c065d592121350606232200111012333217112101141716
 3332363534262322060461fefb41b15ab7fefbfec2b2820119fd122f447a
 6188846764879c5b5901270108010e0119940210fc70aa4c6ea5a4b7a19f
->/TTE196B940t00 AddT42Char 
-/TTE196B940t00 findfont /CharStrings get begin
+>/TTE1811518t00 AddT42Char 
+/TTE1811518t00 findfont /CharStrings get begin
 /S 54 def
 /d 71 def
 end
-/TTE196B940t00 findfont /Encoding get
+/TTE1811518t00 findfont /Encoding get
 dup 17 /S put
 dup 18 /d put
 pop
 2798 1194 M <1103050E120A>[112 55 65 46 102  0]xS 
-644 VM?
 1 8222 37 <000300960000056205ba00130020002c00d8403f772a01680e782ae604f6
 04040921150906282c212516121f154f15023015af150215151423222512
 13082014250100021b277006800602064b2827af0c010cb8ffc0b3090b34
@@ -2248,7 +2078,7 @@ b21d3915b8ffc0b21a3915b8ff80b113392b2b2b593cfd3c011112390011
 373636353426262396024aaeab875a6f5f86905da1764afee5fe0d0128c2
 ad2a4c574b4a2cd1aa0112a02b42534079ca05ba1d5c995f67ac2b27bc7f
 64bd710d080204c6fead0509574744550905fdb9fe78090c5d4e425c2a00
->/TTE196B940t00 AddT42Char 
+>/TTE1811518t00 AddT42Char 
 1 7844 36 <00020000000005bf05ba0007000a0141b90007ffd8400937393406283739
 3407b8ffc04009283534064028353407b8ffd84050212734062821273429
 002a042a05280a2f0c380037053f0c6a006a02650366056808670ae8030f
@@ -2261,17 +2091,16 @@ ad2a4c574b4a2cd1aa0112a02b42534079ca05ba1d5c995f67ac2b27bc7f
 3c3c87c4c4b10602435458b40934090d34002b593130014bb00b534bb01e
 515a58b90003fffeb208040abafffe0007fffcb106043838383838590171
 5d2b2b2b2b2b2b212103210321012113030305bffebe80fdb679fec6023b
-01392acac6014dfeb305bafc8a0220fde000>/TTE196B940t00 AddT42Char 
-/TTE196B940t00 findfont /CharStrings get begin
+01392acac6014dfeb305bafc8a0220fde000>/TTE1811518t00 AddT42Char 
+/TTE1811518t00 findfont /CharStrings get begin
 /B 37 def
 /A 36 def
 end
-/TTE196B940t00 findfont /Encoding get
+/TTE1811518t00 findfont /Encoding get
 dup 19 /B put
 dup 20 /A put
 pop
 3158 637 M <1302090A0414121205>[120 93 93 92 47 120 102 102  0]xS 
-30000 VM?
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -2295,9 +2124,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 965 VM?
-1 12846 53 <00020096000005bc05ba0015002100f84082390f490f57076a0b6a0caa09
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 1 12846 53 <00020096000005bc05ba0015002100f84082390f490f57076a0b6a0caa09
 a70ea023b60ed8090a0608060a1708160a360e460e460f0708100911140e
 140f1410360e360f470f750e7910d30a0b78097819761d88098819861d06
 091614090c0f0e530e750e840e940ea30e050e200d0c140d0d0c0f0c150d
@@ -2308,7 +2136,7 @@ bc4027000d100d020dd41b27a006b006c006d00604068770230120233023
 39872e2b5d0e7d10c4011139001112393130005d01715d5d331121321616
 151406071616171321032e0223231111333236363534262726232396026f
 ebd580c2c1607d6ab3fe9ed672545e663cdbd56a3c4f4824b4e705ba4fca
-82a5d71c3886abfee2013fab5921fd9c034e2458424a5b0c0500>/TTE196B940t00 AddT42Char 
+82a5d71c3886abfee2013fab5921fd9c034e2458424a5b0c0500>/TTE1811518t00 AddT42Char 
 2 4976 83 <0002008bfe6c0497043e0010001c009a402e3813481302123403390d3913
 341b4403490d4913441bf91b095606560a591256165618591cf607f91b08
 0100061ab80274b2050714b8027440160b0b100f0e1721081a701e011e11
@@ -2317,7 +2145,7 @@ ed3c10fd3c10e44e1071f64ded003f3c3fed3fed3f3c3130015d005d0143
 58400d6606660a691266166618691c065d59005d13211536363332001110
 002322262711210114163332363534262322068b010633ae6ab90102fefc
 b9588f4ffee701168e6662828663678804269c5064fedefefdfef6fed946
-55fde903b9b3ab9db3a7a29f>/TTE196B940t00 AddT42Char 
+55fde903b9b3ab9db3a7a29f>/TTE1811518t00 AddT42Char 
 2 6840 88 <0001008dffe8045304260016009c401757116711960503090619063c023c
 114b024b11e702070fb802744011040b16000a1514140a09061314261515
 00b80129400e1640202434af1601ff1601161a18b8ffc040162224349018
@@ -2325,37 +2153,35 @@ a018027018f01802ef1801180a0b260908b8ffc0400f202434a00801f008
 010819173f3c182b4e10f471722b3c4dfd3c4e105d71722bf671722b4ded
 3c10fd3c003f3c3c103c3f3c3fed3130005d015d21350606232226263511
 21111416163332363635112111034e3abd696baa4c01191f523f48722a01
-199f55625eaa9602a0fe18e0653b4f75e401c0fbda00>/TTE196B940t00 AddT42Char 
-/TTE196B940t00 findfont /CharStrings get begin
+199f55625eaa9602a0fe18e0653b4f75e401c0fbda00>/TTE1811518t00 AddT42Char 
+/TTE1811518t00 findfont /CharStrings get begin
 /R 53 def
 /p 83 def
 /u 88 def
 end
-/TTE196B940t00 findfont /Encoding get
+/TTE1811518t00 findfont /Encoding get
 dup 21 /R put
 dup 22 /p put
 dup 23 /u put
 pop
 613 1448 M <150A16040B0C170D0304>[121 92 102 47 120 102 102 101 56  0]xS 
-321 VM?
 1 6930 32 <00020055017404560432000300070056401c04050006070902073f044f04
 0204370605ae033f004f000200370201b8ffc04015222734200130014001
 030106021a090019084d43182b4e10e410e6003f5d2b3c4dfd5d3cf63cfd
 5d3c011112393912393931301311211101112111550401fbff0401033001
-02fefefe440103fefd00>/TTE196B940t00 AddT42Char 
-/TTE196B940t00 findfont /CharStrings get begin
+02fefefe440103fefd00>/TTE1811518t00 AddT42Char 
+/TTE1811518t00 findfont /CharStrings get begin
 /equal 32 def
 end
-/TTE196B940t00 findfont /Encoding get
+/TTE1811518t00 findfont /Encoding get
 dup 24 /equal put
 pop
 1502 1448 M <1804>[97  0]xS 
-644 VM?
 1 3778 20 <000100a20000032605c00009005640096b027b028b02030204b80129b35f
 050105b8025eb708090501000c0900bb015800020001025d400d0500041f
 042004b0040404190aba01a701a000182b4e10f45d3c4df63cfd3c003f3c
 3f3cf45ded393130005d212111060735362437330326fee79ad16e010230
-e404239045ff24c98600>/TTE196B940t00 AddT42Char 
+e404239045ff24c98600>/TTE1811518t00 AddT42Char 
 1 5822 27 <00030053ffe6041705c0001800240030010db530081d1f3426b8fff8406c
 1d1f34c711c713d705d707047510761484100326002a0c36003b0c46004c
 0c6e0463086711681577278727970d9818a40da918a91aa61ea727a62ca9
@@ -2369,17 +2195,16 @@ f4ed003fed2b5d3ffd5d2b1011392f5d712bed5d2b011112395d1112395d
 161615140423222726353436131416333236353426232206031416333236
 35342623220601486d63e5d3d1e76a607a7ffefdd7c8859d76b95f4f5060
 5f4e51601a775957727459676503172ea160a4d6d6a4669f2a31bc7bcbfe
-697cd877c70151545e5f544f5f60fd3d74827d76677d8e00>/TTE196B940t00 AddT42Char 
-/TTE196B940t00 findfont /CharStrings get begin
+697cd877c70151545e5f544f5f60fd3d74827d76677d8e00>/TTE1811518t00 AddT42Char 
+/TTE1811518t00 findfont /CharStrings get begin
 /one 20 def
 /eight 27 def
 end
-/TTE196B940t00 findfont /Encoding get
+/TTE1811518t00 findfont /Encoding get
 dup 25 /one put
 dup 26 /eight put
 pop
 1646 1448 M <191A>[92  0]xS 
-30000 VM?
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -2455,9 +2280,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 344 VM?
-1 4078 21 <0001003c0000040705c0001e01c7b10602435458400911100d1813130655
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 1 4078 21 <0001003c0000040705c0001e01c7b10602435458400911100d1813130655
 0db8fff4b4111106550db8ffee4009101006550d1e14051eb8ffe8401713
 1306551e1e111106551e1c0e1006551e0c0d0d06551eb802bb400c020a17
 17201f10110202201f1112392fd4cd1112392fcd002fed2b2b2b2b3fed2b
@@ -2475,16 +2299,15 @@ Pscript_WinNT_Incr dup /resume get exec
 313000383838380138383838005d015d7259592515212637363637363635
 34262322060727363633321615140606070606070407fc37021725a39aef
 a8997b829c01b913f8d1d3f648a7c2a25c1eadad413c63c07ec4e5666b93
-9c8a13cfd9eaad58aabca4886131>/TTE18620A0t00 AddT42Char 
-/TTE18620A0t00 findfont /CharStrings get begin
+9c8a13cfd9eaad58aabca4886131>/TTE17FDE28t00 AddT42Char 
+/TTE17FDE28t00 findfont /CharStrings get begin
 /two 21 def
 end
-/TTE18620A0t00 findfont /Encoding get
+/TTE17FDE28t00 findfont /Encoding get
 dup 2 /two put
 pop
 F0S85 Ji 
 2397 1475 M <02>S 
-30000 VM?
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -2509,9 +2332,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 344 VM?
-1 4632 22 <00010056ffe6041605c0002b0159b10202435458400b1918400d0d025518
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 1 4632 22 <00010056ffe6041605c0002b0159b10202435458400b1918400d0d025518
 1c0001b8ffc0402b0c0d02550129230a0d0f0c0f1e0a0a29151e1c041e29
 1c05290d230d0c181901001220100c0c0255200726b8ffe8b40c0d025526
 2f2bcd2f2bcd2fcd2fcd2f0012393f3f10ed10ed12392fedc610c6123910
@@ -2526,15 +2348,14 @@ c42b3210c42b3231301b4028050d160d450d860d0445115711761b035216
 371616333236353426232207371633323635342623220607273636333216
 1615140607161615140023222656b41f956b7fafa27d334c14120b73b886
 6a698c14b421eaae78ca6b66648290fee8d6c1ff0183189987b0827ca114
-9e02787d6382848420b5c767b2645f9c2e1ebd8ec0fef5e6>/TTE18620A0t00 AddT42Char 
-/TTE18620A0t00 findfont /CharStrings get begin
+9e02787d6382848420b5c767b2645f9c2e1ebd8ec0fef5e6>/TTE17FDE28t00 AddT42Char 
+/TTE17FDE28t00 findfont /CharStrings get begin
 /three 22 def
 end
-/TTE18620A0t00 findfont /Encoding get
+/TTE17FDE28t00 findfont /Encoding get
 dup 3 /three put
 pop
 2399 2068 M <03>S 
-30000 VM?
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -2559,9 +2380,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 344 VM?
-1 5106 23 <0002001a0000041005ba000a000d0126403612580c680c9a0ca90cc90c05
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 1 5106 23 <0002001a0000041005ba000a000d0126403612580c680c9a0ca90cc90c05
 4c034c0d94040312010208000c060307050a0b0307000c0c0d0dca030414
 030304030d00020c0d040703bb02bb0008000201a0400a000404000c0c00
 ca0a04b80266b705050a401d1f340ab8ffe0b4101002550ab8ffe6b40d0d
@@ -2572,15 +2392,14 @@ e610fd3c003f3f10f43cf63c1139390111123939872e2b047d10c40f0f0f
 313001435c58b9000dffdeb212390db8ffd4400b333903222d3903041d1d
 3c2b2b2b2b595d005d435c5840140c400b390c8050390c4026390c221c39
 0c402d392b2b2b2b2b5921112135013311331523110311010296fd84029d
-93c6c6b4fe35015fa503b6fc4aa5fea102040295fd6b>/TTE18620A0t00 AddT42Char 
-/TTE18620A0t00 findfont /CharStrings get begin
+93c6c6b4fe35015fa503b6fc4aa5fea102040295fd6b>/TTE17FDE28t00 AddT42Char 
+/TTE17FDE28t00 findfont /CharStrings get begin
 /four 23 def
 end
-/TTE18620A0t00 findfont /Encoding get
+/TTE17FDE28t00 findfont /Encoding get
 dup 4 /four put
 pop
 2398 2670 M <04>S 
-30000 VM?
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -2605,9 +2424,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 344 VM?
-1 5458 24 <00010055ffe7042105a6001e0156b10202435458b90001ffc0400d0d0d02
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 1 5458 24 <00010055ffe7042105a6001e0156b10202435458b90001ffc0400d0d0d02
 55011c0e0a1e15151c12b802bb400b0f04041e1c0d0e01000718b8ffeab4
 0f0f025518b8ffeab40d0d0255182f2b2bcd2fcd2f003fed3fed12392ffd
 c410c42b31301b4029120c0d0d06550f0c0d0d06554b1a791d8a1d9613a7
@@ -2621,15 +2439,14 @@ ed10f62b5d712bedf45d3c003fedfd5de43fed12392f5d11392f5d10ed10
 e487082e2b057d10c4001112393130013838383801715d2b2b5913371616
 33323635342623220607271321152103363332001514070623222655bd15
 996c82b4ad8c578c28a98e02d9fdb74f8491c00108748df4c8fd0180108a
-8bc4a29ab24f3f1602f1acfe765cfef6d1c791b2e000>/TTE18620A0t00 AddT42Char 
-/TTE18620A0t00 findfont /CharStrings get begin
+8bc4a29ab24f3f1602f1acfe765cfef6d1c791b2e000>/TTE17FDE28t00 AddT42Char 
+/TTE17FDE28t00 findfont /CharStrings get begin
 /five 24 def
 end
-/TTE18620A0t00 findfont /Encoding get
+/TTE17FDE28t00 findfont /Encoding get
 dup 5 /five put
 pop
 2395 3270 M <05>S 
-30000 VM?
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -2654,9 +2471,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 344 VM?
-1 5900 25 <0002004dffe7041505c0001d002a014fb10202435458401f0f011f015f01
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 1 5900 25 <0002004dffe7041505c0001d002a014fb10202435458401f0f011f015f01
 03011b281e400d010d0d14051e1b05221e140d0a1e01002510b8fff44019
 0d0d0255101e17100f0f025517100c0c0255170c0d0d0255172f2b2b2bcd
 2f2bcdd4cd10c5003fed3fed12392f5ded10c45d31301b402d6b19014407
@@ -2671,15 +2487,14 @@ d4161107200d0d065527b8ffe0b40d0d065523b8ffe0400b0d0d06552120
 060736363332121514060623220011103736333216011416163332363534
 2623220603fbb3182c496b564155620241bc67b4fd77d084e1fee49d89e8
 adddfd374f8e4e72a4a27b7aaa04530e6a304d303eeedc6360fef7d28aed
-7e014b017c01a9c1a8c2fcdd5daa59b89e98afaf>/TTE18620A0t00 AddT42Char 
-/TTE18620A0t00 findfont /CharStrings get begin
+7e014b017c01a9c1a8c2fcdd5daa59b89e98afaf>/TTE17FDE28t00 AddT42Char 
+/TTE17FDE28t00 findfont /CharStrings get begin
 /six 25 def
 end
-/TTE18620A0t00 findfont /Encoding get
+/TTE17FDE28t00 findfont /Encoding get
 dup 6 /six put
 pop
 2397 3873 M <06>S 
-30000 VM?
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -2704,22 +2519,20 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 344 VM?
-1 6370 26 <000100610000041605a7000d0070400ec40d01040d010402080409030d00
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 1 6370 26 <000100610000041605a7000d0070400ec40d01040d010402080409030d00
 b802bb4030020104090c0d73030302402123344f025f026f0203021a0f08
 7309eb004f015f015f02033f015f016f017f010401190eb80192b18b182b
 4e10f45d713c4df4ed4e10f6712b3c4d10ed003f3f3cfd3c391139011112
 39313001715d13352115060003060723361212376103b58cfeed4b360fb9
-0382f38904faad8c95fe12fefbb8dbad01ea01c79c00>/TTE18620A0t00 AddT42Char 
-/TTE18620A0t00 findfont /CharStrings get begin
+0382f38904faad8c95fe12fefbb8dbad01ea01c79c00>/TTE17FDE28t00 AddT42Char 
+/TTE17FDE28t00 findfont /CharStrings get begin
 /seven 26 def
 end
-/TTE18620A0t00 findfont /Encoding get
+/TTE17FDE28t00 findfont /Encoding get
 dup 7 /seven put
 pop
 2396 4475 M <07>S 
-30000 VM?
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -2744,9 +2557,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 344 VM?
-1 6542 27 <00030053ffe7041905c00017002300300200b10202435458b40c001b1e2e
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 1 6542 27 <00030053ffe7041905c00017002300300200b10202435458b40c001b1e2e
 b8ffc04017131302552e2e12211e0605281e120d1e090c0c0c025509b8ff
 f4b60d0d0255092b0fb8fff0b40f0f02550fb8ffe8b40b0b02550fb8ffe8
 b60d0d02550f1803b8fff0b41010025503b8fff0b40f0f025503b8fff440
@@ -2768,15 +2580,14 @@ b80267b2247315b8ffc0400e2123342015401502159031c78b182b10f65d
 333236353426232206016a706ce6bfc0ea6b6d878dfef6d9d9fef6916286
 6b6885896667883a49905381a8ad827fa7031b29986aa0dadfa06697292c
 c488bcff000101c08fc101546884835f638784fcff4d904fa68082aaa800
->/TTE18620A0t00 AddT42Char 
-/TTE18620A0t00 findfont /CharStrings get begin
+>/TTE17FDE28t00 AddT42Char 
+/TTE17FDE28t00 findfont /CharStrings get begin
 /eight 27 def
 end
-/TTE18620A0t00 findfont /Encoding get
+/TTE17FDE28t00 findfont /Encoding get
 dup 8 /eight put
 pop
 2399 5077 M <08>S 
-30000 VM?
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -2801,9 +2612,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 344 VM?
-1 7202 28 <00020055ffe7041905c0001e002a01aeb10602435458b70b1f1801002511
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 1 7202 28 <00020055ffe7041905c0001e002a01aeb10602435458b70b1f1801002511
 18b8fff6b40f0f065518b8fff4b40d0d065518b8fff040280c0c06551811
 0c0d0d065511100c0c06551118112c2b0b281e0f0e1f0e4f0e030e0e1400
 50010101b8ffc0400d1011065501041e1c0d221e1405003fed3fedc42b5d
@@ -2821,15 +2631,14 @@ Pscript_WinNT_Incr dup /resume get exec
 33323e023534270606232202353400333216121110020623222601342623
 220615141633323670ad167c61537d50360136bb6db6fc0107c68fed7b7a
 f1a2acda02cba57478b2a97c7da10153107a6e4c7fd8700c18566b0108d8
-df01109afee3fef2fee7feb3aebf03349bb6c49c8cafaf00>/TTE18620A0t00 AddT42Char 
-/TTE18620A0t00 findfont /CharStrings get begin
+df01109afee3fef2fee7feb3aebf03349bb6c49c8cafaf00>/TTE17FDE28t00 AddT42Char 
+/TTE17FDE28t00 findfont /CharStrings get begin
 /nine 28 def
 end
-/TTE18620A0t00 findfont /Encoding get
+/TTE17FDE28t00 findfont /Encoding get
 dup 9 /nine put
 pop
 2398 5670 M <09>S 
-30000 VM?
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -2912,16 +2721,15 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 7144 706 M <01>S 
-1287 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 7144 706 M <01>S 
 1 12228 51 <00020095000004f805ba000f001b007740250605b914b918034705016705
 d605021211250d0e0e001b10250201020f00081627af070107b8ffc0b309
 0b3407b8028c40161f1d301d601d701d801d051d100f2001200030000200
 b8028bb31c3153182b4e10f45d3c4dfd3c4d1071f62b714ded003f3c3f3c
 fd3c12392f3cfd3c3130005d71015d331121201716161514060607062323
 1902333236363534262726239501db010e527eaa62974e6ac9c1a2af7643
-5e4835a005ba1621ddaf87b8691115fdd704c2fe602e624150680d0a>/TTE196B940t00 AddT42Char 
+5e4835a005ba1621ddaf87b8691115fdd704c2fe602e624150680d0a>/TTE1811518t00 AddT42Char 
 2 1212 70 <00010055ffe8043f043e001900e14051580f59125916680f691269167d18
 79199702970cc610c618d710d618e906e908e913e915f80613381338154a
 124a164618590c690c073a1237163718037705770f8705860f8919a812a7
@@ -2932,7 +2740,7 @@ fd3c12392f3cfd3c3130005d71015d331121201716161514060607062323
 ed2bf4ed2b003ffdf45de42b2b3ffdf42b2be42b2b3130005d7101715d01
 052626232206151416333236370506062322001110003332160431feeb0e
 634f697d7f6b50661501142bf4cde9feeb0116edc2e502ec32535491aabd
-9c5b6f2fbec20126010401070125a700>/TTE196B940t00 AddT42Char 
+9c5b6f2fbec20126010401070125a700>/TTE1811518t00 AddT42Char 
 2 3658 78 <000100890000045f05ba000b00f3b90003ffddb30d113f03b8ffc0407d19
 2d3407031003130627096606af0abf0ac809cb0ada0a0a53036003020d07
 180946065708760605b609df04ed04fc04f506054e074e0866067d048c04
@@ -2943,7 +2751,7 @@ ed2bf4ed2b003ffdf45de42b2b3ffdf42b2be42b2b3130005d7101715d01
 3c103c3f3c3f3c12173987087d10c4083cb10602435458b90003ffc8b209
 2134002b593130015d5d5d7100725d2b2b33112111012101012101071189
 01190149015afe950185fed1fef58305bafcf60176fe7cfd5e01dd89feac
->/TTE196B940t00 AddT42Char 
+>/TTE1811518t00 AddT42Char 
 2 960 69 <00020087ffe8049405ba000f001c009db90012fff840310b39371b471b02
 125606560a56165618591cf7070635043b0d3b13351b45044b0d4b13451b
 940799090a0c0e010201001ab80274b2050714b8027440130b0b0f000a17
@@ -2952,14 +2760,14 @@ ed2bf4ed2b003ffdf45de42b2b3ffdf42b2be42b2b3130005d7101715d01
 5d015d4358400b6606660a66166618691c055d59005d2b33112111363332
 1211100023222627151314171633323635342623220687011982b2c2fefe
 fdb95bb140123449795d838467658605bafdf094fee7fef9fef0feda5b59
-9c022aa54f709fabb6a19d00>/TTE196B940t00 AddT42Char 
-/TTE196B940t00 findfont /CharStrings get begin
+9c022aa54f709fabb6a19d00>/TTE1811518t00 AddT42Char 
+/TTE1811518t00 findfont /CharStrings get begin
 /P 51 def
 /c 70 def
 /k 78 def
 /b 69 def
 end
-/TTE196B940t00 findfont /Encoding get
+/TTE1811518t00 findfont /Encoding get
 dup 27 /P put
 dup 28 /c put
 dup 29 /k put
@@ -2967,7 +2775,6 @@ dup 30 /b put
 pop
 F1SC8 Ji 
 4941 1241 M <1B021C1D0A12041E1708080A0504080C0504>[134 111 111 111 112 122 55 123 122 66 67 111 78 56 66 122 78  0]xS 
-321 VM?
 2 4066 80 <0001007e00000698043e0027013bb90029ffc0405d110a3f0506060c1506
 160c340334083418342344024508451844230c20032f295309602980299f
 29a406a707a60cb506b50cb029d029e0290e00292f2950299f29bf29df29
@@ -2982,17 +2789,16 @@ F1SC8 Ji
 211536333216173636333216171615112111342726232206061511211134
 2626232206061511217e01038bc066963046a25c75a2281dfee71d27513b
 682efee71e3f3641682dfee7042691a9545555545f5c4498fd59025f9e2e
-3c488b96fe0202469b5a2c468499fdfc>/TTE196B940t00 AddT42Char 
-/TTE196B940t00 findfont /CharStrings get begin
+3c488b96fe0202469b5a2c468499fdfc>/TTE1811518t00 AddT42Char 
+/TTE1811518t00 findfont /CharStrings get begin
 /m 80 def
 end
-/TTE196B940t00 findfont /Encoding get
+/TTE1811518t00 findfont /Encoding get
 dup 31 /m put
 pop
 4969 1481 M <1C0C1F1F170D0E1C02030E0C0D09>[111 123 177 178 122 123 55 111 112 66 56 122 122  0]xS 
 F1SA7 Ji 
 7904 658 M <1302090A0414121205>[120 93 93 92 47 120 102 102  0]xS 
-30000 VM?
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3031,10 +2837,9 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol F0S85 Ji 
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol F0S85 Ji 
 7143 859 M <02>S 
-30000 VM?
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3059,9 +2864,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 7145 1002 M <03>S 
-30000 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 7145 1002 M <03>S 
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3086,9 +2890,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 7144 1154 M <04>S 
-30000 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 7144 1154 M <04>S 
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3113,9 +2916,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 7141 1304 M <05>S 
-30000 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 7141 1304 M <05>S 
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3140,9 +2942,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 7143 1456 M <06>S 
-30000 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 7143 1456 M <06>S 
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3167,9 +2968,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 7142 1608 M <07>S 
-30000 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 7142 1608 M <07>S 
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3194,9 +2994,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 7145 1761 M <08>S 
-30000 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 7145 1761 M <08>S 
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3221,9 +3020,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 7144 1903 M <09>S 
-30000 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 7144 1903 M <09>S 
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3248,9 +3046,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 344 VM?
-1 3414 19 <00020055ffe7041105c00010001d0155b10202435458400a1a1e0405141e
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 1 3414 19 <00020055ffe7041105c00010001d0155b10202435458400a1a1e0405141e
 0d0d1709b8ffe8b40f0f025509b8ffe840190d0d02550911000c0f0f0255
 00160c0c0255000c0d0d0255002f2b2b2bcd2f2b2bcd003fed3fed31301b
 b10602435458400a1a1e0405141e0d0d1709b8fff4b40f0f065509b8ffe6
@@ -3264,15 +3061,14 @@ db0f1a1a1e0405141e0d0d17730940212334300901000910090209901f11
 712bed003fed3fed3130015d71005d003838383838013838385959131012
 363332161612151002062322272613101633323611102623220706556bd3
 a076b274426ad3a1d47991b9a97c7ca9a97e7c4a5d02d30104013dac5fb3
-feffdafefefec3ad98b7019dfe97eff00168016aee698600>/TTE18620A0t00 AddT42Char 
-/TTE18620A0t00 findfont /CharStrings get begin
+feffdafefefec3ad98b7019dfe97eff00168016aee698600>/TTE17FDE28t00 AddT42Char 
+/TTE17FDE28t00 findfont /CharStrings get begin
 /zero 19 def
 end
-/TTE18620A0t00 findfont /Encoding get
+/TTE17FDE28t00 findfont /Encoding get
 dup 10 /zero put
 pop
 7109 2056 M <010A>[74  0]xS 
-30000 VM?
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3297,9 +3093,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 7111 2208 M <0101>[74  0]xS 
-30000 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 7111 2208 M <0101>[74  0]xS 
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3324,9 +3119,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 7107 2360 M <0102>[74  0]xS 
-30000 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 7107 2360 M <0102>[74  0]xS 
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3351,9 +3145,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 7109 2512 M <0103>[74  0]xS 
-30000 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 7109 2512 M <0103>[74  0]xS 
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3378,9 +3171,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 7105 2665 M <0104>[74  0]xS 
-30000 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 7105 2665 M <0104>[74  0]xS 
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3405,9 +3197,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 7108 2817 M <0105>[74  0]xS 
-30000 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 7108 2817 M <0105>[74  0]xS 
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3432,9 +3223,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 7110 2969 M <0106>[74  0]xS 
-30000 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 7110 2969 M <0106>[74  0]xS 
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3459,9 +3249,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 7106 3121 M <0107>[74  0]xS 
-30000 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 7106 3121 M <0107>[74  0]xS 
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3486,9 +3275,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 7108 3274 M <0108>[74  0]xS 
-321 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 7108 3274 M <0108>[74  0]xS 
 1 13960 56 <00010093ffe7052405ba0019008a40380708070907101708160947084709
 07570956109610971198159b16a710b716d715e506f6060b0d0c0c010002
 072513090c0b200dcf0e010eb8028b4022401b501b601b03701b801b0220
@@ -3496,16 +3284,15 @@ Pscript_WinNT_Incr dup /resume get exec
 4e10f45d3c4dfd3c4d105d7172f65d3c4dfd3c003fed3f3c3c103c313001
 5d71132111141716163332363635112111100e0223222626272635930128
 0b138f7c7e801a01283081d8aed2d97e141d05bafce6bd385a6d6796ae03
-2bfcfefef8da9659619b557ef600>/TTE196B940t00 AddT42Char 
-/TTE196B940t00 findfont /CharStrings get begin
+2bfcfefef8da9659619b557ef600>/TTE1811518t00 AddT42Char 
+/TTE1811518t00 findfont /CharStrings get begin
 /U 56 def
 end
-/TTE196B940t00 findfont /Encoding get
+/TTE1811518t00 findfont /Encoding get
 dup 32 /U put
 pop
 F1SC8 Ji 
 4146 3022 M <200D16021C1D0E0D0F>[144 123 122 111 111 112 55 122  0]xS 
-30000 VM?
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3543,9 +3330,8 @@ GSE
 
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
-/DeviceGray dup setcolorspace /colspABC exch def
-0 0 scol 4303 2374 M <1B021C1D0E0D0F>[133 112 111 111 56 122  0]xS 
-30000 VM?
+/DeviceRGB dup setcolorspace /colspABC exch def
+0 0 0 1 scol 4303 2374 M <1B021C1D0E0D0F>[133 112 111 111 56 122  0]xS 
 Pscript_WinNT_Compat begin /$x mysetup def end
 Pscript_WinNT_Incr dup /suspend get exec
 Pscript_WinNT_Compat dup /initialize get exec
@@ -3584,7 +3370,6 @@ GSE
 Pscript_WinNT_Compat dup /suspend get exec
 Pscript_WinNT_Incr dup /resume get exec
 LH
-(%%[Page: 1]%%) = 
 %%PageTrailer
 
 %%Trailer
@@ -3598,7 +3383,4 @@ LH
 %%+ procset Pscript_T42Hdr 5.0 0
 %%+ procset Pscript_Text 5.0 0
 Pscript_WinNT_Incr dup /terminate get exec
-ehsave restore
-(%%[LastPage]%%) = 
 %%EOF
-%-12345X@PJL EOJ
