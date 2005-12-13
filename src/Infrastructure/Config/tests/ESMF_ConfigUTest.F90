@@ -41,7 +41,7 @@ module config_subrs
 
         public
 
-      type (ESMF_Config) :: cf 
+      type (ESMF_Config), save :: cf 
       
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
@@ -1249,7 +1249,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.19 2005/10/27 22:44:35 eschwab Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.20 2005/12/13 20:40:54 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0
