@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.64 2005/12/12 18:21:43 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.65 2005/12/13 22:56:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -178,7 +178,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.64 2005/12/12 18:21:43 theurich Exp $'
+      "$Id: ESMF_VM.F90,v 1.65 2005/12/13 22:56:46 theurich Exp $"
 
 !==============================================================================
 
@@ -446,7 +446,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -535,7 +535,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -624,7 +624,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -709,7 +709,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -794,7 +794,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -879,7 +879,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -964,7 +964,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -1054,7 +1054,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -1144,7 +1144,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -1234,7 +1234,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -1362,7 +1362,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -1448,7 +1448,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -1534,7 +1534,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -1619,7 +1619,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -1707,7 +1707,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -1795,7 +1795,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -1883,7 +1883,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -1971,7 +1971,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -2266,11 +2266,11 @@ module ESMF_VMMod
 !        Upon return this holds the id of the single-system image (SSI) the
 !        specified PET is running on.
 !   \item[{[threadCount]}]
-!        Upon return this holds the number of PETs in the specified PET's 
+!        Upon return this holds the number of PETs in the specified PET"s 
 !        thread group.
 !   \item[{[threadId]}]
 !        Upon return this holds the thread id of the specified PET within the 
-!        PET's thread group.
+!        PET"s thread group.
 !   \item[{[vas]}]
 !        Virtual address space in which this PET operates.
 !   \item[{[rc]}] 
@@ -2402,7 +2402,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -2482,7 +2482,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -2562,7 +2562,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -2642,7 +2642,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -2722,7 +2722,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -2810,7 +2810,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -2898,7 +2898,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -2986,7 +2986,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -3074,7 +3074,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -3154,7 +3154,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -3234,7 +3234,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -3314,7 +3314,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -3394,7 +3394,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -3474,7 +3474,7 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)
         return
@@ -3547,8 +3547,13 @@ module ESMF_VMMod
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3559,19 +3564,10 @@ module ESMF_VMMod
     integer :: localrc                        ! local return code
     integer :: sendSize, recvSize
     logical :: blocking
+    type(ESMF_CommHandle):: localcommhandle
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
-
-    ! Flag not implemented features
-!    if (present(blockingflag)) then
-!      if (blockingflag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not yet implemented', &
-!          ESMF_LOG_WARNING, &
-!          ESMF_CONTEXT)
-!        return
-!      endif
-!    endif
 
     ! decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -3579,16 +3575,6 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
-    ! check that we have a commHandle
-    if (.not.blocking) then
-      if (.not.present(commhandle)) then
-        call ESMF_LogWrite('Must provide commhandle for non-blocking call', &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        return
-      endif
-    endif
-
     sendSize = sendCount * 4 ! 4 bytes
     recvSize = recvCount * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
@@ -3597,7 +3583,11 @@ module ESMF_VMMod
         recvData, recvSize, src, localrc)
     else
       call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, &
-        recvData, recvSize, src, commhandle, localrc)
+        recvData, recvSize, src, localcommhandle, localrc)
+      ! check if we need to pass back the commhandle
+      if (present(commhandle)) then
+        commhandle = localcommhandle  ! copy the commhandle pointer back
+      endif
     endif
 
     ! Use LogErr to handle return code
@@ -3662,8 +3652,13 @@ module ESMF_VMMod
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3674,19 +3669,10 @@ module ESMF_VMMod
     integer :: localrc                        ! local return code
     integer :: sendSize, recvSize
     logical :: blocking
+    type(ESMF_CommHandle):: localcommhandle
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
-
-    ! Flag not implemented features
-!    if (present(blockingflag)) then
-!      if (blockingflag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not yet implemented', &
-!          ESMF_LOG_WARNING, &
-!          ESMF_CONTEXT)
-!        return
-!      endif
-!    endif
 
     ! decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -3694,16 +3680,6 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
-    ! check that we have a commHandle
-    if (.not.blocking) then
-      if (.not.present(commhandle)) then
-        call ESMF_LogWrite('Must provide commhandle for non-blocking call', &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        return
-      endif
-    endif
-
     sendSize = sendCount * 4 ! 4 bytes
     recvSize = recvCount * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
@@ -3712,7 +3688,11 @@ module ESMF_VMMod
         recvData, recvSize, src, localrc)
     else
       call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, &
-        recvData, recvSize, src, commhandle, localrc)
+        recvData, recvSize, src, localcommhandle, localrc)
+      ! check if we need to pass back the commhandle
+      if (present(commhandle)) then
+        commhandle = localcommhandle  ! copy the commhandle pointer back
+      endif
     endif
 
     ! Use LogErr to handle return code
@@ -3777,8 +3757,13 @@ module ESMF_VMMod
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3789,19 +3774,10 @@ module ESMF_VMMod
     integer :: localrc                        ! local return code
     integer :: sendSize, recvSize
     logical :: blocking
+    type(ESMF_CommHandle):: localcommhandle
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
-
-    ! Flag not implemented features
-!    if (present(blockingflag)) then
-!      if (blockingflag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not yet implemented', &
-!          ESMF_LOG_WARNING, &
-!          ESMF_CONTEXT)
-!        return
-!      endif
-!    endif
 
     ! decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -3809,16 +3785,6 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
-    ! check that we have a commHandle
-    if (.not.blocking) then
-      if (.not.present(commhandle)) then
-        call ESMF_LogWrite('Must provide commhandle for non-blocking call', &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        return
-      endif
-    endif
-
     sendSize = sendCount * 8 ! 8 bytes
     recvSize = recvCount * 8 ! 8 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
@@ -3827,7 +3793,11 @@ module ESMF_VMMod
         recvData, recvSize, src, localrc)
     else
       call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, &
-        recvData, recvSize, src, commhandle, localrc)
+        recvData, recvSize, src, localcommhandle, localrc)
+      ! check if we need to pass back the commhandle
+      if (present(commhandle)) then
+        commhandle = localcommhandle  ! copy the commhandle pointer back
+      endif
     endif
 
     ! Use LogErr to handle return code
@@ -3892,8 +3862,13 @@ module ESMF_VMMod
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3904,19 +3879,10 @@ module ESMF_VMMod
     integer :: localrc                        ! local return code
     integer :: sendSize, recvSize
     logical :: blocking
+    type(ESMF_CommHandle):: localcommhandle
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
-
-    ! Flag not implemented features
-!    if (present(blockingflag)) then
-!      if (blockingflag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not yet implemented', &
-!          ESMF_LOG_WARNING, &
-!          ESMF_CONTEXT)
-!        return
-!      endif
-!    endif
 
     ! decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -3924,16 +3890,6 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
-    ! check that we have a commHandle
-    if (.not.blocking) then
-      if (.not.present(commhandle)) then
-        call ESMF_LogWrite('Must provide commhandle for non-blocking call', &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        return
-      endif
-    endif
-
     sendSize = sendCount * 4 ! 4 bytes
     recvSize = recvCount * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
@@ -3942,7 +3898,11 @@ module ESMF_VMMod
         recvData, recvSize, src, localrc)
     else
       call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, &
-        recvData, recvSize, src, commhandle, localrc)
+        recvData, recvSize, src, localcommhandle, localrc)
+      ! check if we need to pass back the commhandle
+      if (present(commhandle)) then
+        commhandle = localcommhandle  ! copy the commhandle pointer back
+      endif
     endif
 
     ! Use LogErr to handle return code
@@ -4007,8 +3967,13 @@ module ESMF_VMMod
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4019,19 +3984,10 @@ module ESMF_VMMod
     integer :: localrc                        ! local return code
     integer :: sendSize, recvSize
     logical :: blocking
+    type(ESMF_CommHandle):: localcommhandle
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
-
-    ! Flag not implemented features
-!    if (present(blockingflag)) then
-!      if (blockingflag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not yet implemented', &
-!          ESMF_LOG_WARNING, &
-!          ESMF_CONTEXT)
-!        return
-!      endif
-!    endif
 
     ! decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
@@ -4039,16 +3995,6 @@ module ESMF_VMMod
       if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
-    ! check that we have a commHandle
-    if (.not.blocking) then
-      if (.not.present(commhandle)) then
-        call ESMF_LogWrite('Must provide commhandle for non-blocking call', &
-          ESMF_LOG_ERROR, &
-          ESMF_CONTEXT)
-        return
-      endif
-    endif
-
     sendSize = sendCount ! 1 byte
     recvSize = recvCount ! 1 byte
     ! Call into the C++ interface, which will sort out optional arguments.
@@ -4057,7 +4003,11 @@ module ESMF_VMMod
         recvData, recvSize, src, localrc)
     else
       call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, &
-        recvData, recvSize, src, commhandle, localrc)
+        recvData, recvSize, src, localcommhandle, localrc)
+      ! check if we need to pass back the commhandle
+      if (present(commhandle)) then
+        commhandle = localcommhandle  ! copy the commhandle pointer back
+      endif
     endif
 
     ! Use LogErr to handle return code
@@ -4155,7 +4105,7 @@ module ESMF_VMMod
     if (commhandle%this /= ESMF_NULL_POINTER) then
       call c_ESMC_VMWait(vm, commhandle, localrc)
     else
-      call ESMF_LogWrite('Must provide valid commhandle for wait call', &
+      call ESMF_LogWrite("Must provide valid commhandle for wait call", &
         ESMF_LOG_ERROR, &
         ESMF_CONTEXT)
     endif
