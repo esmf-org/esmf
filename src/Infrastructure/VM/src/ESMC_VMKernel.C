@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.50 2005/12/12 22:35:29 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.51 2005/12/14 04:52:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1272,7 +1272,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
               sync_reset(&(new_commarray[pet1][pet2].shmp->shms));
 #ifdef ESMF_MPIUNI
               // todo: check that pet1 and pet2 are both really 0
-              // todo: and that new_nptes == 1 
+              // todo: and that new_npets == 1 
               new_commarray[pet1][pet2].comm_type = VM_COMM_TYPE_MPIUNI;
 #else
               if (vmp->pref_intra_process == PREF_INTRA_PROCESS_SHMHACK){
@@ -2484,6 +2484,29 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest,
     // set flag indicating that send's memcpy() is done and buffer is valid
     sync_buffer_flag_fill(&pipcmp->shms, i);
     break;
+  case VM_COMM_TYPE_MPIUNI:
+    // Shared memory hack for mpiuni
+    // This shared memory implementation is naturally non-blocking as long as
+    // the message is smaller than the provided buffer. No need for a commhandle
+    // Of course this allows only one message per sender - receiver channel.
+    // TODO: To remove the single message per channel limitation there will need
+    // TODO: to be one shared_mp element per request.
+    (*commhandle)->type=-1; // indicate that this is a dummy commhandle
+    shmp = commarray[mypet][dest].shmp;  // shared memory mp channel
+    if (size<=SHARED_BUFFER){
+      // buffer is sufficient
+      pdest = shmp->buffer;
+      // wait until buffer is ready to be used
+      sync_buffer_wait_empty(&shmp->shms, 0);
+      // do the actual memcpy
+      memcpy(pdest, message, size);
+      // set flag indicating that send's memcpy() is done and buffer is valid
+      sync_buffer_flag_fill(&shmp->shms, 0);
+    }else{
+      // buffer is insufficient
+      // todo: need to throw error
+    }
+    break;
   default:
     break;
   }
@@ -2759,6 +2782,29 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source,
     // set flag indicating that send's memcpy() is done and buffer is valid
     sync_buffer_flag_empty(&pipcmp->shms, i);
     break;
+  case VM_COMM_TYPE_MPIUNI:
+    // Shared memory hack for mpiuni
+    // This shared memory implementation is naturally non-blocking as long as
+    // the message is smaller than the provided buffer. No need for a commhandle
+    // Of course this allows only one message per sender - receiver channel.
+    // TODO: To remove the single message per channel limitation there will need
+    // TODO: to be one shared_mp element per request.
+    (*commhandle)->type=-1; // indicate that this is a dummy commhandle
+    shmp = commarray[source][mypet].shmp;   // shared memory mp channel
+    if (size<=SHARED_BUFFER){
+      // buffer is sufficient
+      psrc = shmp->buffer;
+      // wait until buffer is ready to be used
+      sync_buffer_wait_fill(&shmp->shms, 0);
+      // do actual memcpy
+      memcpy(message, psrc, size);
+      // set flag indicating that recv's memcpy() is done and buffer is empty
+      sync_buffer_flag_empty(&shmp->shms, 0);
+    }else{
+      // buffer is insufficient
+      // todo: need to throw error
+    }
+    break;
   default:
     break;
   }
@@ -2819,7 +2865,7 @@ void ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
   }else{
     // A unique order of the send and receive is given by the PET index.
     // This very simplistic implementation establishes a unique order by
-    // first transfering data to the smallest receiver PET and then to the
+    // first transferring data to the smallest receiver PET and then to the
     // other one. A sendrecv has two receiver PETs, one is the local PET and
     // the other is rcv.
     if (mypet<dst){
@@ -2848,6 +2894,14 @@ void ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
   (*commhandle)->handles = new vmk_commhandle*[(*commhandle)->nelements];
   for (int i=0; i<(*commhandle)->nelements; i++)
     (*commhandle)->handles[i] = new vmk_commhandle;
+  // MPI does not offer a non-blocking sendrecv operation, hence there is no
+  // point in checking if the mpionly flag is set in this VM, in either case
+  // an explicit implementation based on send and recv must be used:
+  // A unique order of the send and receive is given by the PET index.
+  // This very simplistic implementation establishes a unique order by
+  // first transferring data to the smallest receiver PET and then to the
+  // other one. A sendrecv has two receiver PETs, one is the local PET and
+  // the other is rcv.
   if (mypet<dst){
     // mypet is the first receiver
     vmk_recv(recvData, recvSize, src, &((*commhandle)->handles[0]));
@@ -3328,6 +3382,8 @@ void ESMC_VMK::vmk_wait(vmk_commhandle **commhandle){
         MPI_Wait(&((*commhandle)->mpireq[i]), &mpi_s);
       }
       delete [] (*commhandle)->mpireq;
+    }else if ((*commhandle)->type==-1){
+      // this is a dummy commhandle and there is nothing to wait for...
     }else{
       printf("ESMC_VMK: only MPI non-blocking implemented\n");
     }
