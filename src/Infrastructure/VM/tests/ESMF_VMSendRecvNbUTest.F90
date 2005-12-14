@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendRecvNbUTest.F90,v 1.1 2005/12/13 22:58:16 theurich Exp $
+! $Id: ESMF_VMSendRecvNbUTest.F90,v 1.2 2005/12/14 04:48:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendRecvNbUTest.F90,v 1.1 2005/12/13 22:58:16 theurich Exp $'
+      '$Id: ESMF_VMSendRecvNbUTest.F90,v 1.2 2005/12/14 04:48:03 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -133,9 +133,13 @@
 
       ! Set src and dst for the first round
       src = localPet - 1
-      if (src < 0) src = src + petCount
+      do while (src < 0) 
+        src = src + petCount
+      enddo
       dst = localPet + 1
-      if (dst > petCount - 1) dst = dst - petCount
+      do while (dst > petCount - 1) 
+        dst = dst - petCount
+      enddo
       
       write(infostring, *) "First round: src=",src," dst=",dst
       call ESMF_LogWrite(infostring, ESMF_LOG_INFO)
@@ -302,9 +306,13 @@
 
       ! Set src and dst for the second round
       src = localPet - 2
-      if (src < 0) src = src + petCount
+      do while (src < 0) 
+        src = src + petCount
+      enddo
       dst = localPet + 2
-      if (dst > petCount - 1) dst = dst - petCount
+      do while (dst > petCount - 1) 
+        dst = dst - petCount
+      enddo
 
       write(infostring, *) "Second round: src=",src," dst=",dst
       call ESMF_LogWrite(infostring, ESMF_LOG_INFO)
