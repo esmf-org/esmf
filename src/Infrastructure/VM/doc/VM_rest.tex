@@ -1,4 +1,4 @@
-% $Id: VM_rest.tex,v 1.6 2005/12/14 22:55:26 theurich Exp $
+% $Id: VM_rest.tex,v 1.7 2005/12/14 23:38:52 theurich Exp $
 
 %\subsubsection{Restrictions and Future Work}
 
@@ -16,6 +16,8 @@
 \item {\bf ESMF-Threading not supported.} The ESMF multi-threading features of the VM are enabled but not currently supported. By default VMs run without threads. The entry points to threaded VMs are not currently advertised.
 
 \item {\bf Alternative communication paths not accessible.} All user accessible VM communication calls are currently implemented using MPI-1.2. VM's implementation of alternative communication techniques, such as shared memory between threaded PETs and POSIX IPC between PETs located on the same single system image, are currently inaccessible to the user. (One exception to this is the {\tt mpiuni} case for which the VM automatically utilizes a shared memory path.)
+
+\item {\bf Data arrays in VM comm calls are {\em assumed shape} with rank=1.} Currently all dummy arrays in VM comm calls are defined as {\em assumed shape} arrays of rank=1. While this guards against the Fortran copy in/out problem it may not be as flexible as desired. Alternatively all dummy arrays could be defined as {\em assumed size} arrays, as it is done in most MPI implementations, thus allowing arrays of various rank to be passed into the comm methods.
 
 \item {\bf None of the topology features have been implemented.}
 
