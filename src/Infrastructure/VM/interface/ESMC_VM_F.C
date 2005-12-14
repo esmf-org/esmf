@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.43 2005/12/13 21:47:54 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.44 2005/12/14 20:06:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -193,6 +193,15 @@ extern "C" {
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
+  void FTN(c_esmc_vmrecvnb)(ESMC_VM **ptr, void *message, int *size, 
+    int *source, void **commhandle, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmrecvnb()"
+    *commhandle = NULL; // reset the commhandle
+    (*ptr)->vmk_recv(message, *size, *source, (vmk_commhandle **)commhandle);
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+  }
+
   void FTN(c_esmc_vmscatter)(ESMC_VM **vm, void *input, void *output, int *size,
     int *root, int *rc){
 #undef  ESMC_METHOD
@@ -206,6 +215,15 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmsend()"
     (*ptr)->vmk_send(message, *size, *dest);
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+  }
+
+  void FTN(c_esmc_vmsendnb)(ESMC_VM **ptr, void *message, int *size, int *dest,
+    void **commhandle, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmsendnb()"
+    *commhandle = NULL; // reset the commhandle
+    (*ptr)->vmk_send(message, *size, *dest, (vmk_commhandle **)commhandle);
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
