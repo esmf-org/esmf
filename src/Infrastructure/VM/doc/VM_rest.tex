@@ -1,12 +1,21 @@
-% $Id: VM_rest.tex,v 1.5 2004/12/30 18:54:30 theurich Exp $
+% $Id: VM_rest.tex,v 1.6 2005/12/14 22:55:26 theurich Exp $
 
 %\subsubsection{Restrictions and Future Work}
 
 \begin{enumerate}
 
-\item {\bf Nonblocking option only partially implemented.} Only for the SendRecv communication methods the non-blocking option is currently implemented.
+\item {\bf Non-blocking communications only partially implemented.} Only the following communication calls implement the non-blocking option:
+\begin{itemize}
+\item {\tt ESMF\_VMRecv()},
+\item {\tt ESMF\_VMSend()},
+\item {\tt ESMF\_VMSendRecv()}.
+\end{itemize}
 
-\item {\bf ESMF-Threading not supported.} The ESMF multi-threading features of the VM are enabled but not currently supported.
+\item {\bf Limitations when using {\tt mpiuni} mode.} In {\tt mpiuni} mode non-blocking communications are limited to one outstanding message per source-destination PET pair. Furthermore, in {\tt mpiuni} mode the message length must be smaller than the internal ESMF buffer size.
+
+\item {\bf ESMF-Threading not supported.} The ESMF multi-threading features of the VM are enabled but not currently supported. By default VMs run without threads. The entry points to threaded VMs are not currently advertised.
+
+\item {\bf Alternative communication paths not accessible.} All user accessible VM communication calls are currently implemented using MPI-1.2. VM's implementation of alternative communication techniques, such as shared memory between threaded PETs and POSIX IPC between PETs located on the same single system image, are currently inaccessible to the user. (One exception to this is the {\tt mpiuni} case for which the VM automatically utilizes a shared memory path.)
 
 \item {\bf None of the topology features have been implemented.}
 
