@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2005/12/13 22:59:26 theurich Exp $ 
+# $Id: makefile,v 1.28 2005/12/14 20:01:55 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -19,6 +19,7 @@ LOCDIR	  = src/Infrastructure/VM/tests
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_VMUTest \
 		$(ESMF_TESTDIR)/ESMF_VMUserMpiInitUTest \
 		$(ESMF_TESTDIR)/ESMF_VMSendVMRecvUTest \
+		$(ESMF_TESTDIR)/ESMF_VMSendNbVMRecvNbUTest \
 		$(ESMF_TESTDIR)/ESMF_VMSendRecvUTest \
 		$(ESMF_TESTDIR)/ESMF_VMSendRecvNbUTest \
 		$(ESMF_TESTDIR)/ESMF_VMScatterUTest \
@@ -30,6 +31,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_VMUTest \
 TESTS_RUN     = RUN_ESMF_VMUTest \
                 RUN_ESMF_VMUserMpiInitUTest \
                 RUN_ESMF_VMSendVMRecvUTest \
+                RUN_ESMF_VMSendNbVMRecvNbUTest \
                 RUN_ESMF_VMSendRecvUTest \
                 RUN_ESMF_VMSendRecvNbUTest \
                 RUN_ESMF_VMScatterUTest \
@@ -41,6 +43,7 @@ TESTS_RUN     = RUN_ESMF_VMUTest \
 TESTS_RUN_UNI = RUN_ESMF_VMUTestUNI \
                 RUN_ESMF_VMUserMpiInitUTestUNI \
                 RUN_ESMF_VMSendVMRecvUTestUNI \
+                RUN_ESMF_VMSendNbVMRecvNbUTestUNI \
                 RUN_ESMF_VMSendRecvUTestUNI \
                 RUN_ESMF_VMSendRecvNbUTestUNI \
                 RUN_ESMF_VMScatterUTestUNI \
@@ -83,6 +86,15 @@ RUN_ESMF_VMSendVMRecvUTest:
 
 RUN_ESMF_VMSendVMRecvUTestUNI:
 	$(MAKE) TNAME=VMSendVMRecv NP=1 ftest
+
+#
+# VM SendNb VM RecvNb
+#
+RUN_ESMF_VMSendNbVMRecvNbUTest:
+	$(MAKE) TNAME=VMSendNbVMRecvNb NP=4 ftest
+
+RUN_ESMF_VMSendNbVMRecvNbUTestUNI:
+	$(MAKE) TNAME=VMSendNbVMRecvNb NP=1 ftest
 
 #
 # VM SendRecv
