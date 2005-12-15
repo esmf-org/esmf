@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.69 2005/12/15 17:30:53 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.70 2005/12/15 18:07:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -179,7 +179,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.69 2005/12/15 17:30:53 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.70 2005/12/15 18:07:27 theurich Exp $"
 
 !==============================================================================
 
@@ -711,8 +711,13 @@ module ESMF_VMMod
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -722,23 +727,30 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     integer :: size
+    logical :: blocking
+    type(ESMF_CommHandle):: localcommhandle
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! Flag not implemented features
+    ! decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
     if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)
-        return
-      endif
+      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
-
+    
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
+    if (blocking) then
+      call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
+    else
+      call c_ESMC_VMAllGatherNB(vm, sendData, recvData, size, localcommhandle, &
+        localrc)
+      ! check if we need to pass back the commhandle
+      if (present(commhandle)) then
+        commhandle = localcommhandle  ! copy the commhandle pointer back
+      endif
+    endif
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -796,8 +808,13 @@ module ESMF_VMMod
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -807,23 +824,30 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     integer :: size
+    logical :: blocking
+    type(ESMF_CommHandle):: localcommhandle
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! Flag not implemented features
+    ! decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
     if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)
-        return
-      endif
+      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
-
+    
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
+    if (blocking) then
+      call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
+    else
+      call c_ESMC_VMAllGatherNB(vm, sendData, recvData, size, localcommhandle, &
+        localrc)
+      ! check if we need to pass back the commhandle
+      if (present(commhandle)) then
+        commhandle = localcommhandle  ! copy the commhandle pointer back
+      endif
+    endif
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -881,8 +905,13 @@ module ESMF_VMMod
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -892,23 +921,30 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     integer :: size
+    logical :: blocking
+    type(ESMF_CommHandle):: localcommhandle
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! Flag not implemented features
+    ! decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
     if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)
-        return
-      endif
+      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
-
+    
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
+    if (blocking) then
+      call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
+    else
+      call c_ESMC_VMAllGatherNB(vm, sendData, recvData, size, localcommhandle, &
+        localrc)
+      ! check if we need to pass back the commhandle
+      if (present(commhandle)) then
+        commhandle = localcommhandle  ! copy the commhandle pointer back
+      endif
+    endif
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -966,8 +1002,13 @@ module ESMF_VMMod
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -977,23 +1018,30 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     integer :: size
+    logical :: blocking
+    type(ESMF_CommHandle):: localcommhandle
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! Flag not implemented features
+    ! decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
     if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)
-        return
-      endif
+      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
     endif
-
+    
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
+    if (blocking) then
+      call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
+    else
+      call c_ESMC_VMAllGatherNB(vm, sendData, recvData, size, localcommhandle, &
+        localrc)
+      ! check if we need to pass back the commhandle
+      if (present(commhandle)) then
+        commhandle = localcommhandle  ! copy the commhandle pointer back
+      endif
+    endif
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &

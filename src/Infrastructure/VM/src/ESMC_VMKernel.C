@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.54 2005/12/15 17:30:53 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.55 2005/12/15 18:07:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -3632,6 +3632,30 @@ void ESMC_VMK::vmk_allgather(void *in, void *out, int len){
     }
     // now broadcast root's out to all other PETs
     vmk_broadcast(out, len, root);
+  }
+}
+
+
+void ESMC_VMK::vmk_allgather(void *in, void *out, int len,
+  vmk_commhandle **commhandle){
+  // check if this needs a new entry in the request queue
+  if (*commhandle==NULL){
+    *commhandle = new vmk_commhandle;
+    vmk_commhandle_add(*commhandle);
+  }
+  // MPI does not offer a non-blocking allgather operation, hence there is no
+  // point in checking if the mpionly flag is set in this VM, in either case
+  // an explicit implementation must be used.
+  // There will be as many commhandles as there are PETs
+  (*commhandle)->nelements = npets;     // number of non-blocking gathers
+  (*commhandle)->type=0;                // these are subhandles
+  (*commhandle)->handles = new vmk_commhandle*[(*commhandle)->nelements];
+  for (int i=0; i<(*commhandle)->nelements; i++)
+    (*commhandle)->handles[i] = new vmk_commhandle; // allocate handles
+  // This is a very simplistic, probably very bad peformance implementation.
+  for (int root=0; root<npets; root++){
+    // Each PET is considered the root PET once for a non-blocking gather
+    vmk_gather(in, out, len, root, &((*commhandle)->handles[root]));
   }
 }
 
