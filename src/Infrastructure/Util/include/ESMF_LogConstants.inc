@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogConstants.inc,v 1.1 2005/05/31 17:27:19 nscollins Exp $
+ $Id: ESMF_LogConstants.inc,v 1.2 2005/12/15 05:33:40 eschwab Exp $
 
  Earth System Modeling Framework
  Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -65,7 +65,7 @@ ESMF\_LOG\_FORT\_STDOUT: standard out for Fortran
 ESMF\_LOG\_UPPER: upper bound for fortran unit number
 !EOP
 #endif
-#define ESMF_LOG_UPPER 100
+#define ESMF_LOG_UPPER 99
 
 #if 0
 !BOP
