@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.53 2005/12/15 01:02:48 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.54 2005/12/15 17:30:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -2942,6 +2942,209 @@ void ESMC_VMK::vmk_threadbarrier(void){
     // now all threads are "flip"-synced under their master thread
     sync_b_flop(&shmp->shms);
   }
+}
+
+
+void ESMC_VMK::vmk_reduce(void *in, void *out, int len, vmType type,
+  vmOp op, int root){
+  if (mpionly){
+    // Find corresponding MPI operation
+    MPI_Op mpiop;
+    switch (op){
+    case vmSUM:
+      mpiop = MPI_SUM;
+      break;
+    case vmMIN:
+      mpiop = MPI_MIN;
+      break;
+    case vmMAX:
+      mpiop = MPI_MAX;
+      break;
+    }
+    // Find corresponding MPI data type
+    MPI_Datatype mpitype;
+    switch (type){
+    case vmI4:
+      mpitype = MPI_INT;
+      break;
+    case vmR4:
+      mpitype = MPI_FLOAT;
+      break;
+    case vmR8:
+      mpitype = MPI_DOUBLE;
+      break;
+    }
+    MPI_Reduce(in, out, len, mpitype, mpiop, root, mpi_c);
+  }else{
+    // This is a very simplistic, probably very bad peformance implementation.
+    int templen = len;
+    switch (type){
+    case vmI4:
+      templen *= 4;   // 4 bytes
+      break;
+    case vmR4:
+      templen *= 4;   // 4 bytes
+      break;
+    case vmR8:
+      templen *= 8;   // 8 bytes
+      break;
+    }
+    char *temparray;
+    if (mypet==root)
+      temparray = new char[templen*npets]; // allocate temp data array
+    // gather all data onto root PET
+    vmk_gather(in, temparray, templen, root);
+    // root does the entire reduction on its local temparray data
+    if (mypet==root){
+    switch (op){
+    case vmSUM:
+      switch (type){
+      case vmI4:
+        {
+          int *tempdata = (int *)temparray;
+          int *outdata = (int *)out;
+          for (int i=0; i<len; i++){
+            *outdata = 0;
+            for (int j=0; j<npets; j++){
+              *outdata += tempdata[j*len];
+            }
+            ++tempdata;
+            ++outdata;
+          }
+        }
+        break;
+      case vmR4:
+        {
+          float *tempdata = (float *)temparray;
+          float *outdata = (float *)out;
+          for (int i=0; i<len; i++){
+            *outdata = 0;
+            for (int j=0; j<npets; j++){
+              *outdata += tempdata[j*len];
+            }
+            ++tempdata;
+            ++outdata;
+          }
+        }
+        break;
+      case vmR8:
+        {
+          double *tempdata = (double *)temparray;
+          double *outdata = (double *)out;
+          for (int i=0; i<len; i++){
+            *outdata = 0;
+            for (int j=0; j<npets; j++){
+              *outdata += tempdata[j*len];
+            }
+            ++tempdata;
+            ++outdata;
+          }
+        }
+        break;
+      }
+      break;
+    case vmMIN:
+      switch (type){
+      case vmI4:
+        {
+          int *tempdata = (int *)temparray;
+          int *outdata = (int *)out;
+          for (int i=0; i<len; i++){
+            *outdata = tempdata[0];
+            for (int j=1; j<npets; j++){
+              if (tempdata[j*len] < *outdata)
+                *outdata = tempdata[j*len];
+            }
+            ++tempdata;
+            ++outdata;
+          }
+        }
+        break;
+      case vmR4:
+        {
+          float *tempdata = (float *)temparray;
+          float *outdata = (float *)out;
+          for (int i=0; i<len; i++){
+            *outdata = tempdata[0];
+            for (int j=1; j<npets; j++){
+              if (tempdata[j*len] < *outdata)
+                *outdata = tempdata[j*len];
+            }
+            ++tempdata;
+            ++outdata;
+          }
+        }
+        break;
+      case vmR8:
+        {
+          double *tempdata = (double *)temparray;
+          double *outdata = (double *)out;
+          for (int i=0; i<len; i++){
+            *outdata = tempdata[0];
+            for (int j=1; j<npets; j++){
+              if (tempdata[j*len] < *outdata)
+                *outdata = tempdata[j*len];
+            }
+            ++tempdata;
+            ++outdata;
+          }
+        }
+        break;
+      }
+      break;
+    case vmMAX:
+      switch (type){
+      case vmI4:
+        {
+          int *tempdata = (int *)temparray;
+          int *outdata = (int *)out;
+          for (int i=0; i<len; i++){
+            *outdata = tempdata[0];
+            for (int j=1; j<npets; j++){
+              if (tempdata[j*len] > *outdata)
+                *outdata = tempdata[j*len];
+            }
+            ++tempdata;
+            ++outdata;
+          }
+        }
+        break;
+      case vmR4:
+        {
+          float *tempdata = (float *)temparray;
+          float *outdata = (float *)out;
+          for (int i=0; i<len; i++){
+            *outdata = tempdata[0];
+            for (int j=1; j<npets; j++){
+              if (tempdata[j*len] > *outdata)
+                *outdata = tempdata[j*len];
+            }
+            ++tempdata;
+            ++outdata;
+          }
+        }
+        break;
+      case vmR8:
+        {
+          double *tempdata = (double *)temparray;
+          double *outdata = (double *)out;
+          for (int i=0; i<len; i++){
+            *outdata = tempdata[0];
+            for (int j=1; j<npets; j++){
+              if (tempdata[j*len] > *outdata)
+                *outdata = tempdata[j*len];
+            }
+            ++tempdata;
+            ++outdata;
+          }
+        }
+        break;
+      }
+      break;
+    }
+    delete [] temparray;
+    }
+  }  
 }
 
 

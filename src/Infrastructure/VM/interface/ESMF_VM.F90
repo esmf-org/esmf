@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.68 2005/12/15 01:02:48 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.69 2005/12/15 17:30:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -148,6 +148,7 @@ module ESMF_VMMod
   public ESMF_VMPrint
   public ESMF_VMRecv
   public ESMF_VMRecvVMId
+  public ESMF_VMReduce
   public ESMF_VMScatter
   public ESMF_VMSend
   public ESMF_VMSendVMId
@@ -178,7 +179,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.68 2005/12/15 01:02:48 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.69 2005/12/15 17:30:53 theurich Exp $"
 
 !==============================================================================
 
@@ -304,6 +305,25 @@ module ESMF_VMMod
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMRecv} functions.   
+!EOPI 
+      end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMReduce -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMReduce
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMReduceI4
+      module procedure ESMF_VMReduceR4
+      module procedure ESMF_VMReduceR8
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMReduce} functions.   
 !EOPI 
       end interface
 
@@ -2841,6 +2861,285 @@ module ESMF_VMMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMRecvCharacter
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMReduceI4()"
+!BOP
+! !IROUTINE: ESMF_VMReduce - Reduce 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMReduce()
+  subroutine ESMF_VMReduceI4(vm, sendData, recvData, count, reduceflag, &
+    root, blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)
+    integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)
+    integer,                  intent(in)              :: count
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
+    integer,                  intent(in)              :: root
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
+!   array of kind {\tt ESMF\_KIND\_I4} across the {\tt ESMF\_VM} object 
+!   into a contiguous data array of the same type. The result array is returned 
+!   on root PET. Different reduction operations can be specified.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contiguous data arry holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[recvData] 
+!        Single data variable to be received. All PETs must specify a
+!        valid result variable.
+!   \item[count] 
+!        Number of elements in sendData and recvData. Must be the same on all
+!        PETs.
+!   \item[reduceflag] 
+!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        valid reduce operations.
+!   \item[root] 
+!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
+!   \item[{[blockingflag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             Block until local operation has completed. 
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commhandle]}]
+!        A communication handle will be returned in case of a non-blocking
+!        request (see argument {\tt blockingflag}).
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    !integer :: size
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Flag not implemented features
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMReduce(vm, sendData, recvData, count, ESMF_I4, &
+      reduceflag, root, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMReduceI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMReduceR4()"
+!BOP
+! !IROUTINE: ESMF_VMReduce - Reduce 4-byte reals
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMReduce()
+  subroutine ESMF_VMReduceR4(vm, sendData, recvData, count, reduceflag, &
+    root, blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    real(ESMF_KIND_R4),       intent(in)              :: sendData(:)
+    real(ESMF_KIND_R4),       intent(out)             :: recvData(:)
+    integer,                  intent(in)              :: count
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
+    integer,                  intent(in)              :: root
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
+!   array of kind {\tt ESMF\_KIND\_R4} across the {\tt ESMF\_VM} object 
+!   into a contiguous data array of the same type. The result array is returned 
+!   on root PET. Different reduction operations can be specified.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contiguous data arry holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[recvData] 
+!        Contiguous data array for data to be received. All PETs must specify a
+!        valid destination array.
+!   \item[count] 
+!        Number of elements in sendData and recvData. Must be the same on all
+!        PETs.
+!   \item[reduceflag] 
+!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        valid reduce operations.
+!   \item[root] 
+!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
+!   \item[{[blockingflag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             Block until local operation has completed. 
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commhandle]}]
+!        A communication handle will be returned in case of a non-blocking
+!        request (see argument {\tt blockingflag}).
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    !integer :: size
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Flag not implemented features
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMReduce(vm, sendData, recvData, count, ESMF_R4, &
+      reduceflag, root, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMReduceR4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMReduceR8()"
+!BOP
+! !IROUTINE: ESMF_VMReduce - Reduce 8-byte reals
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMReduce()
+  subroutine ESMF_VMReduceR8(vm, sendData, recvData, count, reduceflag, &
+    root, blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    real(ESMF_KIND_R8),       intent(in)              :: sendData(:)
+    real(ESMF_KIND_R8),       intent(out)             :: recvData(:)
+    integer,                  intent(in)              :: count
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
+    integer,                  intent(in)              :: root
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
+!   array of kind {\tt ESMF\_KIND\_R8} across the {\tt ESMF\_VM} object 
+!   into a contiguous data array of the same type. The result array is returned 
+!   on root PET. Different reduction operations can be specified.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contiguous data arry holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[recvData] 
+!        Contiguous data array for data to be received. All PETs must specify a
+!        valid destination array.
+!   \item[count] 
+!        Number of elements in sendData and recvData. Must be the same on all
+!        PETs.
+!   \item[reduceflag] 
+!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        valid reduce operations.
+!   \item[root] 
+!        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
+!   \item[{[blockingflag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             Block until local operation has completed. 
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commhandle]}]
+!        A communication handle will be returned in case of a non-blocking
+!        request (see argument {\tt blockingflag}).
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    !integer :: size
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Flag not implemented features
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
+        call ESMF_LogWrite("Non-blocking not yet implemented", &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMReduce(vm, sendData, recvData, count, ESMF_R8, &
+      reduceflag, root, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMReduceR8
 !------------------------------------------------------------------------------
 
 
