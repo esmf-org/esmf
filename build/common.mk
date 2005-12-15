@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.141 2005/10/12 20:13:31 nscollins Exp $
+#  $Id: common.mk,v 1.142 2005/12/15 21:13:16 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -670,29 +670,24 @@ FLINKLIBS = -lesmf $(MPI_LIB) $(EXTRA_LIBS) $(F90CXXLIBS)
 #-------------------------------------------------------------------------------
 # alias section:
 # these are here to help the link fragment files.  if users include 
-# common.mk file, then they can use these to link with.  make these 
-# variables have ESMF_ since they are seen by the user.  (it gets too
-# unwieldly here inside the makefile if esmf is prepended to everything.)
-ESMF_FC        = $(FC)
-ESMF_LINKER    = $(FLINKER)
-ESMF_LINKOPTS  = $(LINKOPTS)
-ESMF_LINKLIBS  = $(FLINKLIBS)
-ESMF_CC        = $(CC)
-ESMF_CXX       = $(CXX)
-ESMF_CLINKER   = $(CLINKER)
-ESMF_CLINKOPTS = $(LINKOPTS)
-ESMF_CLINKLIBS = $(CLINKLIBS)
+# common.mk file, then they can use these to link with.
+ESMF_FC           = $(FC)
+ESMF_COMPILEFLAGS = $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
+                    $(FCPPFLAGS) $(ESMF_INCLUDE)
+ESMF_LINKER       = $(FLINKER)
+ESMF_LINKFLAGS    = $(LINKOPTS)
+ESMF_LINKLIBS     = $(FLINKLIBS)
 
-# these seem less useful, since if the user includes this file it already
-# has a rule to make the .o files directly from the .F90 files.  but in case
-# this file causes problems - e.g. conflict with other makefiles - then
-# here are the flags - but it omits the Fixed/Free format, cpp vs not flags.
-# those have to be added explicitly if not using our rules.
+ESMF_CC            = $(CC)
+ESMF_CXX           = $(CXX)
+ESMF_CCOMPILEFLAGS = $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS) $(ESMF_INCLUDE)
+ESMF_CLINKER       = $(CLINKER)
+ESMF_CLINKFLAGS    = $(LINKOPTS)
+ESMF_CLINKLIBS     = $(CLINKLIBS)
 
-# collect all the compile flags together into single variable
-ESMF_FLAGS = $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
-              $(FCPPFLAGS) $(ESMF_INCLUDE)
-ESMF_CFLAGS = $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS) $(ESMF_INCLUDE)
+# this makefile already includes a rule to make .o files from .F90, so the
+# compile-time flags may not be needed - but if necessary the ones defined
+# above omit the Fixed/Free format flags, and the cpp vs not flags.
 
 #-------------------------------------------------------------------------------
 
