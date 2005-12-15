@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.52 2005/12/15 00:50:30 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.53 2005/12/15 01:02:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -3351,6 +3351,53 @@ void ESMC_VMK::vmk_gather(void *in, void *out, int len, int root){
       // all other PETs send their chunk
       vmk_send(in, len, root);
     }
+  }
+}
+
+
+void ESMC_VMK::vmk_gather(void *in, void *out, int len, int root,
+  vmk_commhandle **commhandle){
+  // check if this needs a new entry in the request queue
+  if (*commhandle==NULL){
+    *commhandle = new vmk_commhandle;
+    vmk_commhandle_add(*commhandle);
+  }
+  // MPI does not offer a non-blocking gather operation, hence there is no
+  // point in checking if the mpionly flag is set in this VM, in either case
+  // an explicit implementation based on send and recv must be used.
+  // The number of elements in the commhandle depends on whether the localPET
+  // is root or not.
+  // This is a very simplistic, probably very bad peformance implementation.
+  if (mypet==root){
+    // I am root -> receive chunks from all other PETs
+    // rootPET will need to issue (npets-1) recvs.
+    (*commhandle)->nelements = npets-1;   // number of non-blocking recvs
+    (*commhandle)->type=0;                // these are subhandles
+    (*commhandle)->handles = new vmk_commhandle*[(*commhandle)->nelements];
+    for (int i=0; i<(*commhandle)->nelements; i++)
+      (*commhandle)->handles[i] = new vmk_commhandle; // allocate handles
+    // get ready to receive chunks
+    char *rootout = (char *)out;
+    for (int i=0; i<root; i++){
+      vmk_recv(rootout, len, i, &((*commhandle)->handles[i]));
+      rootout += len;
+    }
+    // memcpy root's chunk
+    memcpy(rootout, in, len);
+    rootout += len;
+    // keep sending chunks
+    for (int i=root+1; i<npets; i++){
+      vmk_recv(rootout, len, i, &((*commhandle)->handles[i-1]));
+      rootout += len;
+    }
+  }else{
+    // all other PETs send their chunk
+    // there will be a single send that needs to be issued
+    (*commhandle)->nelements = 1;
+    (*commhandle)->type=0;                // these are subhandles
+    (*commhandle)->handles = new vmk_commhandle*[1];
+    (*commhandle)->handles[0] = new vmk_commhandle; // allocate handle
+    vmk_send(in, len, root, &((*commhandle)->handles[0]));
   }
 }
 
