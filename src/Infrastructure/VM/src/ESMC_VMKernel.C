@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.55 2005/12/15 18:07:27 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.56 2005/12/15 22:44:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -3662,10 +3662,7 @@ void ESMC_VMK::vmk_allgather(void *in, void *out, int len,
 
 void ESMC_VMK::vmk_broadcast(void *data, int len, int root){
   if (mpionly){
-    if (mypet==root)
-      MPI_Bcast(data, len, MPI_BYTE, root, mpi_c);
-    else
-      MPI_Bcast(data, len, MPI_BYTE, root, mpi_c);
+    MPI_Bcast(data, len, MPI_BYTE, root, mpi_c);
   }else{
     // This is a very simplistic, probably very bad peformance implementation.
     if (mypet==root){
