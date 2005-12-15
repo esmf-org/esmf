@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.48 2005/12/15 18:07:27 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.49 2005/12/15 23:09:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -128,6 +128,15 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmbroadcast()"
     (*vm)->vmk_broadcast(data, *size, *root);
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+  }
+  
+  void FTN(c_esmc_vmbroadcastnb)(ESMC_VM **vm, void *data, int *size, int *root,
+    void **commhandle, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmbroadcast()"
+    *commhandle = NULL; // reset the commhandle
+    (*vm)->vmk_broadcast(data, *size, *root, (vmk_commhandle **)commhandle);
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
   

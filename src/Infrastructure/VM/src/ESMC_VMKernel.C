@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.56 2005/12/15 22:44:37 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.57 2005/12/15 23:09:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -3668,14 +3668,52 @@ void ESMC_VMK::vmk_broadcast(void *data, int len, int root){
     if (mypet==root){
       // I am root -> send my data to all other PETs
       for (int i=0; i<npets; i++) {
-        if (i==mypet) 
-          continue;
+        if (i==mypet) continue; // skip root PET
         vmk_send(data, len, i);
       }
     }else{
       // all other PETs receive the broadcasted data
       vmk_recv(data, len, root);
     }
+  }
+}
+
+
+void ESMC_VMK::vmk_broadcast(void *data, int len, int root,
+  vmk_commhandle **commhandle){
+  // check if this needs a new entry in the request queue
+  if (*commhandle==NULL){
+    *commhandle = new vmk_commhandle;
+    vmk_commhandle_add(*commhandle);
+  }
+  // MPI does not offer a non-blocking broadcast operation, hence there is no
+  // point in checking if the mpionly flag is set in this VM, in either case
+  // an explicit implementation based on send and recv must be used.
+  // The number of elements in the commhandle depends on whether the localPET
+  // is root or not.
+  // This is a very simplistic, probably very bad peformance implementation.
+  if (mypet==root){
+    // I am root -> send my data to all other PETs
+    // rootPET will need to issue (npets-1) sends
+    (*commhandle)->nelements = npets-1;   // number of non-blocking recvs
+    (*commhandle)->type=0;                // these are subhandles
+    (*commhandle)->handles = new vmk_commhandle*[(*commhandle)->nelements];
+    for (int i=0; i<(*commhandle)->nelements; i++)
+      (*commhandle)->handles[i] = new vmk_commhandle; // allocate handles
+    // get ready to send chunks
+    for (int i=0; i<root; i++)
+      vmk_send(data, len, i, &((*commhandle)->handles[i]));
+    // skip root
+    for (int i=root+1; i<npets; i++)
+      vmk_send(data, len, i, &((*commhandle)->handles[i-1]));
+  }else{
+    // all other PETs receive the broadcasted data
+    // there will be a single receive that needs to be issued
+    (*commhandle)->nelements = 1;
+    (*commhandle)->type=0;                // these are subhandles
+    (*commhandle)->handles = new vmk_commhandle*[1];
+    (*commhandle)->handles[0] = new vmk_commhandle; // allocate handle
+    vmk_recv(data, len, root, &((*commhandle)->handles[0]));
   }
 }
 
