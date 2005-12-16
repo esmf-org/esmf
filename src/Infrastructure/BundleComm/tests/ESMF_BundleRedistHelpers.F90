@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.1 2005/10/12 19:06:16 nscollins Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.2 2005/12/16 23:16:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -17,9 +17,10 @@ module ESMF_BundleRedistHelpers
 
    use ESMF_Mod
 
-   public CreateGrids, CreateFields, CreateBundle
-   public FillConstantField, FillIndexField, FillConstantHalo
+   public Create2DGrids, Create3DGrids, CreateFields, CreateBundle
+   public FillConstantR8Field, FillIndexField, FillConstantHalo
    public FillConstantR4Field, FillConstantR4Halo
+   public FillConstantI8Field, FillConstantI4Field
    public ValidateConstantField, ValidateConstantHalo
    public ValidateConstantR4Field, ValidateConstantR4Halo
    public ValidateIndexField
@@ -39,8 +40,8 @@ contains
 !  make grid an array of grids?
 !
 #undef  ESMF_METHOD
-#define ESMF_METHOD "CreateGrids"
-subroutine CreateGrids(grid1, grid2, rc)
+#define ESMF_METHOD "Create2DGrids"
+subroutine Create2DGrids(grid1, grid2, rc)
     type(ESMF_Grid), intent(out) :: grid1, grid2
     integer, intent(out) :: rc
     
@@ -88,7 +89,68 @@ subroutine CreateGrids(grid1, grid2, rc)
     rc = ESMF_SUCCESS
     return
 
-end subroutine CreateGrids
+end subroutine Create2DGrids
+
+
+!------------------------------------------------------------------------------
+!
+! Create 2 grids which have identical numbers of cells and coordinates,
+! but are decomposed differently.
+!
+! TODO: pass in optional list of layouts, list of rellocs, and
+!  make grid an array of grids?
+!
+#undef  ESMF_METHOD
+#define ESMF_METHOD "Create3DGrids"
+subroutine Create3DGrids(grid1, grid2, rc)
+    type(ESMF_Grid), intent(out) :: grid1, grid2
+    integer, intent(out) :: rc
+    
+    ! Local variables
+    integer :: npets
+    type(ESMF_DELayout) :: layout1, layout2
+    type(ESMF_VM) :: vm
+    real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
+
+ 
+    rc = ESMF_FAILURE
+        
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+
+    ! Get number of PETs we are running with
+    call ESMF_VMGet(vm, petCount=npets, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+
+    layout1 = ESMF_DELayoutCreate(vm, (/ 1, npets /), rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+    layout2 = ESMF_DELayoutCreate(vm, (/ npets, 1 /), rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+
+    mincoords = (/  0.0,  0.0 /)
+    maxcoords = (/ 20.0, 30.0 /)
+    grid1 = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
+                   mincoords, maxcoords, &
+                   horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
+                   name="srcgrid", rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+    call ESMF_GridDistribute(grid1, delayout=layout1, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+
+    ! same grid coordinates, but different layout
+    grid2 = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
+                   mincoords, maxcoords, &
+                   horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
+                   name="dstgrid", rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+    call ESMF_GridDistribute(grid2, delayout=layout2, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+
+
+    rc = ESMF_SUCCESS
+    return
+
+end subroutine Create3DGrids
 
 
 
@@ -100,35 +162,75 @@ end subroutine CreateGrids
 !
 #undef  ESMF_METHOD
 #define ESMF_METHOD "CreateFields"
-subroutine CreateFields(grid1, field1, field2, rc)
+subroutine CreateFields(grid1, field1, field2, field3, field4, field5, &
+                        dim1, dim2, dkind1, dkind2, halo1, halo2, &
+                        relloc1, relloc2, rc)
     type(ESMF_Grid), intent(in) :: grid1
-    type(ESMF_Field), intent(out) :: field1, field2
-    integer, intent(out) :: rc
+    type(ESMF_Field), intent(out) :: field1
+    type(ESMF_Field), intent(out), optional :: field2, field3, field4, field5
+    integer, intent(in), optional :: dim1, dim2, halo1, halo2
+    type(ESMF_DataKind), intent(in), optional :: dkind1, dkind2
+    type(ESMF_RelLoc), intent(in), optional :: relloc1, relloc2
+    integer, intent(out), optional :: rc
     
     ! Local variables
-    integer :: halo
-    type(ESMF_ArraySpec) :: arrayspec
+    integer :: halof1, halof2
+    integer :: dimf1, dimf2
+    type(ESMF_DataType) :: dtypef1, dtypef2
+    type(ESMF_DataKind) :: dkindf1, dkindf2
+    type(ESMF_RelLoc) :: rellocf1, rellocf2
+    type(ESMF_ArraySpec) :: arrayspecf1, arrayspecf2
 
  
     rc = ESMF_FAILURE
-        
 
-    ! pick a default halowidth
-    halo = 3
 
-    ! Real*8, 2D data
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
+    ! set default halowidths
+    halof1 = 3
+    halof2 = 3
+    if (present(halo1)) halof1 = halo1
+    if (present(halo2)) halof2 = halo2
+
+    ! set default relative locations
+    rellocf1 = ESMF_CELL_CENTER
+    rellocf2 = ESMF_CELL_CENTER
+    if (present(relloc1)) rellocf1 = relloc1
+    if (present(relloc2)) rellocf2 = relloc2
+
+    ! set default data dimensionality
+    dimf1 = 2
+    dimf2 = 2
+    if (present(dim1)) dimf1 = dim1
+    if (present(dim2)) dimf2 = dim2
+
+    ! set default data type/size
+    dkindf1 = ESMF_R8
+    dkindf2 = ESMF_R8
+    dtypef1 = ESMF_DATA_REAL
+    dtypef2 = ESMF_DATA_REAL
+    ! todo: sort out type/kind intermingling
+    if (present(dkind1)) dkindf1 = dkind1
+    if (present(dkind2)) dkindf2 = dkind2
+   
+
+    ! set the arrayspec as requested
+    call ESMF_ArraySpecSet(arrayspecf1, dimf1, dtypef1, dkindf1, rc)
+    if (rc.NE.ESMF_SUCCESS) return
+    call ESMF_ArraySpecSet(arrayspecf2, dimf2, dtypef2, dkindf2, rc)
     if (rc.NE.ESMF_SUCCESS) return
     
+
     ! let field create call allocate the proper amount of space
-    field1 = ESMF_FieldCreate(grid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                                haloWidth=halo, name="src pressure", rc=rc)
+    field1 = ESMF_FieldCreate(grid1, arrayspecf1, horzRelloc=rellocf1, &
+                                haloWidth=halof1, name="src pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
                                 
-    ! let field create call allocate the proper amount of space
-    field2 = ESMF_FieldCreate(grid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                                haloWidth=halo, name="dst pressure", rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
+    if (present(field2)) then
+      ! let field create call allocate the proper amount of space
+      field2 = ESMF_FieldCreate(grid1, arrayspecf2, horzRelloc=rellocf2, &
+                                haloWidth=halof2, name="dst pressure", rc=rc)
+      if (rc.NE.ESMF_SUCCESS) return
+    endif
                                 
     rc = ESMF_SUCCESS
     return
@@ -191,43 +293,23 @@ end subroutine CreateBundle
 !------------------------------------------------------------------------------
 !
 ! Fill all the data associated with a field with a constant value.
-! This assumes the data is real*8, 2D.
+! This assumes the data is real*8, 2D to 5D.
 !
 #undef  ESMF_METHOD
-#define ESMF_METHOD "FillConstantField"
-subroutine FillConstantField(field, val, rc)
+#define ESMF_METHOD "FillConstantR8Field"
+subroutine FillConstantR8Field(field, val, rc)
     type(ESMF_Field), intent(inout) :: field
     real (ESMF_KIND_R8), intent(in) :: val
     integer, intent(out) :: rc
     
-    ! Local variables
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
+    call InternalFillConstantField(field, r8val=val, rc=rc)
 
-    rc = ESMF_FAILURE
-        
-    ! need a query here to be sure our data pointer is the same t/k/r
-    ! as what is in the field.
-
-    ! TODO: if it is important to set the halo to something other than the
-    ! constant value, then we will need the halo width and the grid info.
-    ! for now, simply set the entire data space to the constant value.
-    !call ESMF_FieldGet(field, haloWidth=halo, grid=grid, rc=rc)
-
-    ! get a Fortran 90 pointer back to the data block
-    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
-    
-    f90ptr(:,:) = val
-
-    rc = ESMF_SUCCESS
-    return
-
-end subroutine FillConstantField
+end subroutine FillConstantR8Field
 
 !------------------------------------------------------------------------------
 !
 ! Fill all the data associated with a field with a constant value.
-! This assumes the data is real*4, 2D.
+! This assumes the data is real*4, 2D to 5D.
 !
 #undef  ESMF_METHOD
 #define ESMF_METHOD "FillConstantR4Field"
@@ -236,30 +318,314 @@ subroutine FillConstantR4Field(field, val, rc)
     real (ESMF_KIND_R4), intent(in) :: val
     integer, intent(out) :: rc
     
+    call InternalFillConstantField(field, r4val=val, rc=rc)
+
+end subroutine FillConstantR4Field
+
+!------------------------------------------------------------------------------
+!
+! Fill all the data associated with a field with a constant value.
+! This assumes the data is integer*8, 2D to 5D.
+!
+#undef  ESMF_METHOD
+#define ESMF_METHOD "FillConstantI8Field"
+subroutine FillConstantI8Field(field, val, rc)
+    type(ESMF_Field), intent(inout) :: field
+    real (ESMF_KIND_I8), intent(in) :: val
+    integer, intent(out) :: rc
+    
+    call InternalFillConstantField(field, i8val=val, rc=rc)
+
+end subroutine FillConstantI8Field
+
+!------------------------------------------------------------------------------
+!
+! Fill all the data associated with a field with a constant value.
+! This assumes the data is integer*4, 2D to 5D.
+!
+#undef  ESMF_METHOD
+#define ESMF_METHOD "FillConstantI4Field"
+subroutine FillConstantI4Field(field, val, rc)
+    type(ESMF_Field), intent(inout) :: field
+    real (ESMF_KIND_I4), intent(in) :: val
+    integer, intent(out) :: rc
+    
+    call InternalFillConstantField(field, i4val=val, rc=rc)
+
+end subroutine FillConstantI4Field
+
+!------------------------------------------------------------------------------
+!
+! Fill all the data associated with a field with a constant value.
+!  Data must be R4, R8, I4, or I8, and 2D to 5D.
+!
+#undef  ESMF_METHOD
+#define ESMF_METHOD "InternalFillConstantField"
+subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
+    type(ESMF_Field), intent(inout) :: field
+    real (ESMF_KIND_R8), intent(in), optional :: r8val
+    real (ESMF_KIND_R4), intent(in), optional :: r4val
+    real (ESMF_KIND_I8), intent(in), optional :: i8val
+    real (ESMF_KIND_I4), intent(in), optional :: i4val
+    integer, intent(out), optional :: rc
+    
     ! Local variables
-    real (ESMF_KIND_R4), dimension(:,:), pointer :: f90ptr
+    type(ESMF_Array) :: array
+    type(ESMF_DataKind) :: dk
+    integer :: rank, kind
+
+    ! pointer zoo
+    real (ESMF_KIND_R8), dimension(:,:),       pointer :: ptr2dr8
+    real (ESMF_KIND_R8), dimension(:,:,:),     pointer :: ptr3dr8
+    real (ESMF_KIND_R8), dimension(:,:,:,:),   pointer :: ptr4dr8
+    real (ESMF_KIND_R8), dimension(:,:,:,:,:), pointer :: ptr5dr8
+    real (ESMF_KIND_R4), dimension(:,:),       pointer :: ptr2dr4
+    real (ESMF_KIND_R4), dimension(:,:,:),     pointer :: ptr3dr4
+    real (ESMF_KIND_R4), dimension(:,:,:,:),   pointer :: ptr4dr4
+    real (ESMF_KIND_R4), dimension(:,:,:,:,:), pointer :: ptr5dr4
+    real (ESMF_KIND_I8), dimension(:,:),       pointer :: ptr2di8
+    real (ESMF_KIND_I8), dimension(:,:,:),     pointer :: ptr3di8
+    real (ESMF_KIND_I8), dimension(:,:,:,:),   pointer :: ptr4di8
+    real (ESMF_KIND_I8), dimension(:,:,:,:,:), pointer :: ptr5di8
+    real (ESMF_KIND_I4), dimension(:,:),       pointer :: ptr2di4
+    real (ESMF_KIND_I4), dimension(:,:,:),     pointer :: ptr3di4
+    real (ESMF_KIND_I4), dimension(:,:,:,:),   pointer :: ptr4di4
+    real (ESMF_KIND_I4), dimension(:,:,:,:,:), pointer :: ptr5di4
 
     rc = ESMF_FAILURE
         
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
+    call ESMF_FieldGet(field, array=array, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+
+    call ESMF_ArrayGet(array, rank=rank, kind=dk, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+
+    ! force to integer so they can be used below in select cases.
+    kind = dk
 
     ! TODO: if it is important to set the halo to something other than the
     ! constant value, then we will need the halo width and the grid info.
     ! for now, simply set the entire data space to the constant value.
     !call ESMF_FieldGet(field, haloWidth=halo, grid=grid, rc=rc)
 
-    ! get a Fortran 90 pointer back to the data block
-    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
+    select case (rank)
+      case (2)
+        select case (kind)
+          case (ESMF_R8%dkind)
+            if (.not.present(r8val)) then
+                print *, "Error: data value does not match Field data type (R8)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr2dr8, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            ptr2dr8(:,:) = r8val
+
+          case (ESMF_R4%dkind)
+            if (.not.present(r4val)) then
+                print *, "Error: data value does not match Field data type (R4)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr2dr4, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            ptr2dr4(:,:) = r4val
+
+          case (ESMF_I8%dkind)
+            if (.not.present(i8val)) then
+                print *, "Error: data value does not match Field data type (I8)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr2di8, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            ptr2di8(:,:) = i8val
+
+          case (ESMF_I4%dkind)
+            if (.not.present(i4val)) then
+                print *, "Error: data value does not match Field data type (I4)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr2di4, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            ptr2di4(:,:) = i4val
+
+          case default
+            print *, "unsupported data type in Field"
+            return
+         end select
+
+      case (3)
+        select case (kind)
+          case (ESMF_R8%dkind)
+            if (.not.present(r8val)) then
+                print *, "Error: data value does not match Field data type (R8)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr3dr8, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            ptr3dr8(:,:,:) = r8val
+
+          case (ESMF_R4%dkind)
+            if (.not.present(r4val)) then
+                print *, "Error: data value does not match Field data type (R4)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr3dr4, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            ptr3dr4(:,:,:) = r4val
+
+          case (ESMF_I8%dkind)
+            if (.not.present(i8val)) then
+                print *, "Error: data value does not match Field data type (I8)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr3di8, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            ptr3di8(:,:,:) = i8val
+
+          case (ESMF_I4%dkind)
+            if (.not.present(i4val)) then
+                print *, "Error: data value does not match Field data type (I4)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr3di4, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            ptr3di4(:,:,:) = i4val
+
+          case default
+            print *, "unsupported data type in Field"
+            return
+         end select
+
+      case (4)
+        select case (kind)
+          case (ESMF_R8%dkind)
+            if (.not.present(r8val)) then
+                print *, "Error: data value does not match Field data type (R8)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr4dr8, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            ptr4dr8(:,:,:,:) = r8val
+
+          case (ESMF_R4%dkind)
+            if (.not.present(r4val)) then
+                print *, "Error: data value does not match Field data type (R4)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr4dr4, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            ptr4dr4(:,:,:,:) = r4val
+
+          case (ESMF_I8%dkind)
+            if (.not.present(i8val)) then
+                print *, "Error: data value does not match Field data type (I8)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr4di8, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            ptr4di8(:,:,:,:) = i8val
+
+          case (ESMF_I4%dkind)
+            if (.not.present(i4val)) then
+                print *, "Error: data value does not match Field data type (I4)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr4di4, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            ptr4di4(:,:,:,:) = i4val
+
+          case default
+            print *, "unsupported data type in Field"
+            return
+         end select
+
+      case (5)
+        select case (kind)
+          case (ESMF_R8%dkind)
+            if (.not.present(r8val)) then
+                print *, "Error: data value does not match Field data type (R8)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr5dr8, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            ptr5dr8(:,:,:,:,:) = r8val
+
+          case (ESMF_R4%dkind)
+            if (.not.present(r4val)) then
+                print *, "Error: data value does not match Field data type (R4)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr5dr4, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            ptr5dr4(:,:,:,:,:) = r4val
+
+          case (ESMF_I8%dkind)
+            if (.not.present(i8val)) then
+                print *, "Error: data value does not match Field data type (I8)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr5di8, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            ptr5di8(:,:,:,:,:) = i8val
+
+          case (ESMF_I4%dkind)
+            if (.not.present(i4val)) then
+                print *, "Error: data value does not match Field data type (I4)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr5di4, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            ptr5di4(:,:,:,:,:) = i4val
+
+          case default
+            print *, "unsupported data type in Field"
+            return
+         end select
+
+      case default
+        print *, "unsupported rank"
+
+    end select
+
     
-    f90ptr(:,:) = val
 
     rc = ESMF_SUCCESS
     return
 
-end subroutine FillConstantR4Field
-
+end subroutine InternalFillConstantField
 
 !------------------------------------------------------------------------------
 !
@@ -275,7 +641,7 @@ subroutine FillConstantHalo(field, val, rc)
     
     ! Local variables
     integer :: lb(2), ub(2), halo
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: ptr
 
     rc = ESMF_FAILURE
         
@@ -285,26 +651,26 @@ subroutine FillConstantHalo(field, val, rc)
     call ESMF_FieldGet(field, haloWidth=halo, rc=rc)
 
     ! get a Fortran 90 pointer back to the data
-    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
+    call ESMF_FieldGetDataPointer(field, ptr, ESMF_DATA_REF, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
-    lb(:) = lbound(f90ptr)
-    ub(:) = ubound(f90ptr)
+    lb(:) = lbound(ptr)
+    ub(:) = ubound(ptr)
     
     ! now set the chunks, one at a time.  this duplicates the overlaps
     ! at the corners, but it is the simplest to program.
  
     ! bottom / south
-    f90ptr(lb(1):ub(1), lb(2):lb(2)+halo-1) = val
+    ptr(lb(1):ub(1), lb(2):lb(2)+halo-1) = val
 
     ! left / west edge
-    f90ptr(lb(1):lb(1)+halo-1, lb(2):ub(2)) = val
+    ptr(lb(1):lb(1)+halo-1, lb(2):ub(2)) = val
 
     ! right / east edge
-    f90ptr(ub(1)-halo+1:ub(1), lb(2):ub(2)) = val
+    ptr(ub(1)-halo+1:ub(1), lb(2):ub(2)) = val
 
     ! top / north
-    f90ptr(lb(1):ub(1), ub(2)-halo+1:ub(2)) = val
+    ptr(lb(1):ub(1), ub(2)-halo+1:ub(2)) = val
 
     rc = ESMF_SUCCESS
 
@@ -327,7 +693,7 @@ subroutine FillConstantR4Halo(field, val, rc)
     
     ! Local variables
     integer :: lb(2), ub(2), halo
-    real (ESMF_KIND_R4), dimension(:,:), pointer :: f90ptr
+    real (ESMF_KIND_R4), dimension(:,:), pointer :: ptr
 
     rc = ESMF_FAILURE
         
@@ -337,26 +703,26 @@ subroutine FillConstantR4Halo(field, val, rc)
     call ESMF_FieldGet(field, haloWidth=halo, rc=rc)
 
     ! get a Fortran 90 pointer back to the data
-    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
+    call ESMF_FieldGetDataPointer(field, ptr, ESMF_DATA_REF, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
-    lb(:) = lbound(f90ptr)
-    ub(:) = ubound(f90ptr)
+    lb(:) = lbound(ptr)
+    ub(:) = ubound(ptr)
     
     ! now set the chunks, one at a time.  this duplicates the overlaps
     ! at the corners, but it is the simplest to program.
  
     ! bottom / south
-    f90ptr(lb(1):ub(1), lb(2):lb(2)+halo-1) = val
+    ptr(lb(1):ub(1), lb(2):lb(2)+halo-1) = val
 
     ! left / west edge
-    f90ptr(lb(1):lb(1)+halo-1, lb(2):ub(2)) = val
+    ptr(lb(1):lb(1)+halo-1, lb(2):ub(2)) = val
 
     ! right / east edge
-    f90ptr(ub(1)-halo+1:ub(1), lb(2):ub(2)) = val
+    ptr(ub(1)-halo+1:ub(1), lb(2):ub(2)) = val
 
     ! top / north
-    f90ptr(lb(1):ub(1), ub(2)-halo+1:ub(2)) = val
+    ptr(lb(1):ub(1), ub(2)-halo+1:ub(2)) = val
 
     rc = ESMF_SUCCESS
 
@@ -376,11 +742,13 @@ subroutine FillIndexField(field, rc)
     integer, intent(out) :: rc
     
     ! Local variables
-    integer :: i, j
-    integer :: lb(2), ub(2), haloWidth, cellNum, rownum, colnum
-    integer :: localCellCounts(2), globalCellCounts(2), gridOffsets(2)
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
+    integer :: i, j, k, l, m
+    integer :: lb(7), ub(7), haloWidth, cellNum, rownum, colnum
+    integer :: localCellCounts(3), globalCellCounts(3), gridOffsets(3)
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: ptr
     type(ESMF_Grid) :: grid
+    type(ESMF_Array) :: array
+    integer :: rank
 
     rc = ESMF_FAILURE
           
@@ -398,11 +766,11 @@ subroutine FillIndexField(field, rc)
                                  globalStartPerDim=gridOffsets, rc=rc)
 
     ! get a Fortran 90 pointer back to the data
-    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
+    call ESMF_FieldGetDataPointer(field, ptr, ESMF_DATA_REF, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
     
-    lb(:) = lbound(f90ptr)
-    ub(:) = ubound(f90ptr)
+    lb(1:2) = lbound(ptr)
+    ub(1:2) = ubound(ptr)
 
     ! Set the data values to the global cell index number.
     do j=lb(2)+haloWidth, ub(2)-haloWidth
@@ -411,7 +779,7 @@ subroutine FillIndexField(field, rc)
                 ((gridOffsets(2)+rownum) * globalCellCounts(1)) 
       do i=lb(1)+haloWidth, ub(1)-haloWidth
         colnum = i - haloWidth - 1
-        f90ptr(i, j) = cellNum + colnum
+        ptr(i, j) = cellNum + colnum
       enddo
     enddo
 
@@ -434,16 +802,25 @@ subroutine ValidateConstantField(field, val, slop, rc)
     integer, intent(out), optional  :: rc
     
     ! Local variables
-    integer :: i, j
-    integer :: lb(2), ub(2), halo
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
+    integer :: i, j, k, l, m
+    integer :: lb(7), ub(7), halo
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: ptr2d
+    real (ESMF_KIND_R8), dimension(:,:,:), pointer :: ptr3d
+    real (ESMF_KIND_R8), dimension(:,:,:,:), pointer :: ptr4d
+    real (ESMF_KIND_R8), dimension(:,:,:,:,:), pointer :: ptr5d
+    type(ESMF_Array) :: array
+    integer :: rank
 
     if (present(rc)) rc = ESMF_FAILURE
         
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
 
-    call ESMF_FieldGet(field, haloWidth=halo, rc=rc)
+    call ESMF_FieldGet(field, haloWidth=halo, array=array, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+
+    call ESMF_ArrayGet(array, rank=rank, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
 
     ! if slop specified, and true, then do not check the outer row
     ! of cells in the computational area.  this is for regrid where
@@ -453,24 +830,103 @@ subroutine ValidateConstantField(field, val, slop, rc)
     endif
 
     ! get a Fortran 90 pointer back to the data
-    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
-    
+    select case (rank)
+      case (2)
+        call ESMF_FieldGetDataPointer(field, ptr2d, ESMF_DATA_REF, rc=rc)
+        if (rc.NE.ESMF_SUCCESS) return
 
-    lb(:) = lbound(f90ptr)
-    ub(:) = ubound(f90ptr)
+        lb(1:2) = lbound(ptr2d)
+        ub(1:2) = ubound(ptr2d)
+
+        rc = ESMF_SUCCESS
+        do j=lb(2)+halo, ub(2)-halo
+          do i=lb(1)+halo, ub(1)-halo
+            if (abs(ptr2d(i, j) - val) .gt. 10E-8) then
+                print *, "data mismatch at", i, j, ptr2d(i,j), " ne ", val
+                rc = ESMF_FAILURE
+                print *, "(bailing on first error - may be others)"
+                return 
+            endif
+          enddo
+        enddo
+
+      case (3)
+        call ESMF_FieldGetDataPointer(field, ptr3d, ESMF_DATA_REF, rc=rc)
+        if (rc.NE.ESMF_SUCCESS) return
+
+        lb(1:3) = lbound(ptr3d)
+        ub(1:3) = ubound(ptr3d)
+
+        rc = ESMF_SUCCESS
+        do k=lb(3)+halo, ub(3)-halo
+          do j=lb(2)+halo, ub(2)-halo
+            do i=lb(1)+halo, ub(1)-halo
+              if (abs(ptr3d(i, j, k) - val) .gt. 10E-8) then
+                  print *, "data mismatch at", i, j, k, &
+                             ptr3d(i,j,k), " ne ", val
+                  rc = ESMF_FAILURE
+                  print *, "(bailing on first error - may be others)"
+                  return 
+              endif
+            enddo
+          enddo
+        enddo
+
+      case (4)
+        call ESMF_FieldGetDataPointer(field, ptr4d, ESMF_DATA_REF, rc=rc)
+        if (rc.NE.ESMF_SUCCESS) return
+
+        lb(1:4) = lbound(ptr4d)
+        ub(1:4) = ubound(ptr4d)
+
+        rc = ESMF_SUCCESS
+        do l=lb(4)+halo, ub(4)-halo
+          do k=lb(3)+halo, ub(3)-halo
+            do j=lb(2)+halo, ub(2)-halo
+              do i=lb(1)+halo, ub(1)-halo
+                if (abs(ptr4d(i, j, k, l) - val) .gt. 10E-8) then
+                    print *, "data mismatch at", i, j, k, l, &
+                               ptr4d(i,j,k,l), " ne ", val
+                    rc = ESMF_FAILURE
+                    print *, "(bailing on first error - may be others)"
+                    return 
+                endif
+              enddo
+            enddo
+          enddo
+        enddo
+
+      case (5)
+        call ESMF_FieldGetDataPointer(field, ptr5d, ESMF_DATA_REF, rc=rc)
+        if (rc.NE.ESMF_SUCCESS) return
+
+        lb(1:5) = lbound(ptr5d)
+        ub(1:5) = ubound(ptr5d)
+ 
+        rc = ESMF_SUCCESS
+        do m=lb(5)+halo, ub(5)-halo
+          do l=lb(4)+halo, ub(4)-halo
+            do k=lb(3)+halo, ub(3)-halo
+              do j=lb(2)+halo, ub(2)-halo
+                do i=lb(1)+halo, ub(1)-halo
+                  if (abs(ptr5d(i, j, k, l, m) - val) .gt. 10E-8) then
+                      print *, "data mismatch at", i, j, k, l, m, &
+                                 ptr5d(i,j,k,l,m), " ne ", val
+                      rc = ESMF_FAILURE
+                      print *, "(bailing on first error - may be others)"
+                      return 
+                  endif
+                enddo
+              enddo
+            enddo
+          enddo
+        enddo
+      case default
+        print *, "no code to handle data of rank", rank
+
+    end select
+
     
-    rc = ESMF_SUCCESS
-    do j=lb(2)+halo, ub(2)-halo
-      do i=lb(1)+halo, ub(1)-halo
-        if (abs(f90ptr(i, j) - val) .gt. 10E-8) then
-            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
-            rc = ESMF_FAILURE
-            print *, "(bailing on first error - may be others)"
-            return 
-        endif
-      enddo
-    enddo
 
     ! return with whatever rc value it has
 
@@ -495,7 +951,7 @@ subroutine ValidateConstantR4Field(field, val, slop, rc)
     ! Local variables
     integer :: i, j
     integer :: lb(2), ub(2), halo
-    real (ESMF_KIND_R4), dimension(:,:), pointer :: f90ptr
+    real (ESMF_KIND_R4), dimension(:,:), pointer :: ptr
 
     if (present(rc)) rc = ESMF_FAILURE
         
@@ -512,18 +968,18 @@ subroutine ValidateConstantR4Field(field, val, slop, rc)
     endif
 
     ! get a Fortran 90 pointer back to the data
-    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
+    call ESMF_FieldGetDataPointer(field, ptr, ESMF_DATA_REF, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
     
 
-    lb(:) = lbound(f90ptr)
-    ub(:) = ubound(f90ptr)
+    lb(:) = lbound(ptr)
+    ub(:) = ubound(ptr)
     
     rc = ESMF_SUCCESS
     do j=lb(2)+halo, ub(2)-halo
       do i=lb(1)+halo, ub(1)-halo
-        if (abs(f90ptr(i, j) - val) .gt. 10E-8) then
-            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+        if (abs(ptr(i, j) - val) .gt. 10E-8) then
+            print *, "data mismatch at", i, j, ptr(i,j), " ne ", val
             rc = ESMF_FAILURE
             print *, "(bailing on first error - may be others)"
             return 
@@ -553,7 +1009,7 @@ subroutine ValidateConstantHalo(field, val, rc)
     ! Local variables
     integer :: i, j
     integer :: lb(2), ub(2), halo
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: ptr
 
     rc = ESMF_FAILURE
         
@@ -563,12 +1019,12 @@ subroutine ValidateConstantHalo(field, val, rc)
     call ESMF_FieldGet(field, haloWidth=halo, rc=rc)
 
     ! get a Fortran 90 pointer back to the data
-    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
+    call ESMF_FieldGetDataPointer(field, ptr, ESMF_DATA_REF, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
     
 
-    lb(:) = lbound(f90ptr)
-    ub(:) = ubound(f90ptr)
+    lb(:) = lbound(ptr)
+    ub(:) = ubound(ptr)
     
     ! now check the chunks, one at a time.  this duplicates the overlaps
     ! at the corners, but it is the simplest to program.
@@ -578,8 +1034,8 @@ subroutine ValidateConstantHalo(field, val, rc)
     ! bottom / south
     do j=lb(2), lb(2)+halo-1
       do i=lb(1), ub(1)
-        if (abs(f90ptr(i, j) - val) .gt. 10E-8) then
-            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+        if (abs(ptr(i, j) - val) .gt. 10E-8) then
+            print *, "data mismatch at", i, j, ptr(i,j), " ne ", val
             rc = ESMF_FAILURE
             print *, "(bailing on first error - may be others)"
             return 
@@ -590,8 +1046,8 @@ subroutine ValidateConstantHalo(field, val, rc)
     ! west edge
     do j=lb(2), ub(2)
       do i=lb(1), lb(1)+halo-1
-        if (abs(f90ptr(i, j) - val) .gt. 10E-8) then
-            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+        if (abs(ptr(i, j) - val) .gt. 10E-8) then
+            print *, "data mismatch at", i, j, ptr(i,j), " ne ", val
             rc = ESMF_FAILURE
             print *, "(bailing on first error - may be others)"
             return 
@@ -602,8 +1058,8 @@ subroutine ValidateConstantHalo(field, val, rc)
     ! east edge
     do j=lb(2), ub(2)
       do i=ub(1)-halo+1, ub(1)
-        if (abs(f90ptr(i, j) - val) .gt. 10E-8) then
-            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+        if (abs(ptr(i, j) - val) .gt. 10E-8) then
+            print *, "data mismatch at", i, j, ptr(i,j), " ne ", val
             rc = ESMF_FAILURE
             print *, "(bailing on first error - may be others)"
             return 
@@ -614,8 +1070,8 @@ subroutine ValidateConstantHalo(field, val, rc)
     ! top / north
     do j=ub(2)-halo+1, ub(2)
       do i=lb(1), ub(1)
-        if (abs(f90ptr(i, j) - val) .gt. 10E-8) then
-            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+        if (abs(ptr(i, j) - val) .gt. 10E-8) then
+            print *, "data mismatch at", i, j, ptr(i,j), " ne ", val
             rc = ESMF_FAILURE
             print *, "(bailing on first error - may be others)"
             return 
@@ -645,7 +1101,7 @@ subroutine ValidateConstantR4Halo(field, val, rc)
     ! Local variables
     integer :: i, j
     integer :: lb(2), ub(2), halo
-    real (ESMF_KIND_R4), dimension(:,:), pointer :: f90ptr
+    real (ESMF_KIND_R4), dimension(:,:), pointer :: ptr
 
     rc = ESMF_FAILURE
         
@@ -655,12 +1111,12 @@ subroutine ValidateConstantR4Halo(field, val, rc)
     call ESMF_FieldGet(field, haloWidth=halo, rc=rc)
 
     ! get a Fortran 90 pointer back to the data
-    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
+    call ESMF_FieldGetDataPointer(field, ptr, ESMF_DATA_REF, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
     
 
-    lb(:) = lbound(f90ptr)
-    ub(:) = ubound(f90ptr)
+    lb(:) = lbound(ptr)
+    ub(:) = ubound(ptr)
     
     ! now check the chunks, one at a time.  this duplicates the overlaps
     ! at the corners, but it is the simplest to program.
@@ -670,8 +1126,8 @@ subroutine ValidateConstantR4Halo(field, val, rc)
     ! bottom / south
     do j=lb(2), lb(2)+halo-1
       do i=lb(1), ub(1)
-        if (abs(f90ptr(i, j) - val) .gt. 10E-8) then
-            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+        if (abs(ptr(i, j) - val) .gt. 10E-8) then
+            print *, "data mismatch at", i, j, ptr(i,j), " ne ", val
             rc = ESMF_FAILURE
             print *, "(bailing on first error - may be others)"
             return 
@@ -682,8 +1138,8 @@ subroutine ValidateConstantR4Halo(field, val, rc)
     ! west edge
     do j=lb(2), ub(2)
       do i=lb(1), lb(1)+halo-1
-        if (abs(f90ptr(i, j) - val) .gt. 10E-8) then
-            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+        if (abs(ptr(i, j) - val) .gt. 10E-8) then
+            print *, "data mismatch at", i, j, ptr(i,j), " ne ", val
             rc = ESMF_FAILURE
             print *, "(bailing on first error - may be others)"
             return 
@@ -694,8 +1150,8 @@ subroutine ValidateConstantR4Halo(field, val, rc)
     ! east edge
     do j=lb(2), ub(2)
       do i=ub(1)-halo+1, ub(1)
-        if (abs(f90ptr(i, j) - val) .gt. 10E-8) then
-            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+        if (abs(ptr(i, j) - val) .gt. 10E-8) then
+            print *, "data mismatch at", i, j, ptr(i,j), " ne ", val
             rc = ESMF_FAILURE
             print *, "(bailing on first error - may be others)"
             return 
@@ -706,8 +1162,8 @@ subroutine ValidateConstantR4Halo(field, val, rc)
     ! top / north
     do j=ub(2)-halo+1, ub(2)
       do i=lb(1), ub(1)
-        if (abs(f90ptr(i, j) - val) .gt. 10E-8) then
-            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", val
+        if (abs(ptr(i, j) - val) .gt. 10E-8) then
+            print *, "data mismatch at", i, j, ptr(i,j), " ne ", val
             rc = ESMF_FAILURE
             print *, "(bailing on first error - may be others)"
             return 
@@ -737,7 +1193,7 @@ subroutine ValidateIndexField(field, rc)
     integer :: i, j
     integer :: lb(2), ub(2), haloWidth, cellNum, rownum, colnum
     integer :: localCellCounts(2), globalCellCounts(2), gridOffsets(2)
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: ptr
     type(ESMF_Grid) :: grid
 
     rc = ESMF_FAILURE
@@ -756,11 +1212,11 @@ subroutine ValidateIndexField(field, rc)
                                  globalStartPerDim=gridOffsets, rc=rc)
 
     ! get a Fortran 90 pointer back to the data
-    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
+    call ESMF_FieldGetDataPointer(field, ptr, ESMF_DATA_REF, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
     
-    lb(:) = lbound(f90ptr)
-    ub(:) = ubound(f90ptr)
+    lb(:) = lbound(ptr)
+    ub(:) = ubound(ptr)
 
     ! start with success, and any mismatch sets error
     rc = ESMF_SUCCESS
@@ -772,8 +1228,8 @@ subroutine ValidateIndexField(field, rc)
                 ((gridOffsets(2)+rownum) * globalCellCounts(1)) 
       do i=lb(1)+haloWidth, ub(1)-haloWidth
         colnum = i - haloWidth - 1
-        if (abs(f90ptr(i, j) - (cellNum+colnum)) .gt. 10E-8) then
-            print *, "data mismatch at", i, j, f90ptr(i,j), " ne ", &
+        if (abs(ptr(i, j) - (cellNum+colnum)) .gt. 10E-8) then
+            print *, "data mismatch at", i, j, ptr(i,j), " ne ", &
                         cellNum + colnum
             rc = ESMF_FAILURE
             print *, "(bailing on first error - may be others)"

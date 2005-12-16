@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistUTest.F90,v 1.1 2005/10/12 19:06:16 nscollins Exp $
+! $Id: ESMF_BundleRedistUTest.F90,v 1.2 2005/12/16 23:16:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleRedistUTest.F90,v 1.1 2005/10/12 19:06:16 nscollins Exp $'
+      '$Id: ESMF_BundleRedistUTest.F90,v 1.2 2005/12/16 23:16:21 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -78,7 +78,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create grids for later on
-      call CreateGrids(grid1, grid2, rc=rc)
+      call Create2DGrids(grid1, grid2, rc=rc)
       write(name, *) "Creating src and dest grids"
       write(failMsg, *) "Unable to create src and/or dst grids"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -86,7 +86,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! create fields for later on
-      call CreateFields(grid1, field1, field3, rc=rc)
+      call CreateFields(grid1, field1, field3, halo1=2, halo2=4, rc=rc)
       write(name, *) "Creating src and dest fields"
       write(failMsg, *) "Unable to create src and/or dst fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -118,7 +118,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! fill source field with known data
-      call FillConstantField(field1, val_one, rc)
+      call FillConstantR8Field(field1, val_one, rc)
       write(name, *) "Filling src field with constant data values"
       write(failMsg, *) "Filling src field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -126,7 +126,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! fill source field with known data
-      call FillConstantField(field3, val_two, rc)
+      call FillConstantR8Field(field3, val_two, rc)
       write(name, *) "Filling src field with constant data values"
       write(failMsg, *) "Filling src field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -134,7 +134,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! fill destination field with known data
-      call FillConstantField(field2, val_neg_one, rc)
+      call FillConstantR8Field(field2, val_neg_one, rc)
       write(name, *) "Filling dst field with constant data values"
       write(failMsg, *) "Filling dst field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -142,7 +142,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! fill destination field with known data
-      call FillConstantField(field4, val_neg_two, rc)
+      call FillConstantR8Field(field4, val_neg_two, rc)
       write(name, *) "Filling dst field with constant data values"
       write(failMsg, *) "Filling dst field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -201,7 +201,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! fill destination field with known data
-      call FillConstantField(field2, val_neg_one, rc)
+      call FillConstantR8Field(field2, val_neg_one, rc)
       write(name, *) "Filling dst field with constant data values"
       write(failMsg, *) "Filling dst field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -209,7 +209,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! fill destination field with known data
-      call FillConstantField(field4, val_neg_one, rc)
+      call FillConstantR8Field(field4, val_neg_one, rc)
       write(name, *) "Filling dst field with constant data values"
       write(failMsg, *) "Filling dst field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -265,7 +265,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! fill source field with known data
-      call FillConstantField(field2, val_one, rc)
+      call FillConstantR8Field(field2, val_one, rc)
       write(name, *) "Filling src field with constant data values"
       write(failMsg, *) "Filling src field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -273,7 +273,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! fill destination field with known data
-      call FillConstantField(field1, val_neg_one, rc)
+      call FillConstantR8Field(field1, val_neg_one, rc)
       write(name, *) "Filling dst field with constant data values"
       write(failMsg, *) "Filling dst field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -315,7 +315,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! fill destination field with known data
-      call FillConstantField(field3, val_neg_one, rc)
+      call FillConstantR8Field(field3, val_neg_one, rc)
       write(name, *) "Filling dst field with constant data values"
       write(failMsg, *) "Filling dst field with constant data values"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
