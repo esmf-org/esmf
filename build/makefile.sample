@@ -1,11 +1,13 @@
-#  $Id: makefile.sample,v 1.2 2005/12/16 21:32:46 svasquez Exp $
+#  $Id: makefile.sample,v 1.3 2005/12/16 22:18:54 svasquez Exp $
 #
 #  Sample of a user makefile.
 #
 #
 # The following makefile fragment shows how to compile and link a 
 # Fortran90 application with the ESMF library.  In this example, 
-# the application is called "myModel".
+# the application is called "myModel". The suffix of myModel may 
+# need to be changed depending on the platform you are working on. 
+# The suffix choices are: F90, F, f90 and f.
 #
 # This file can be renamed 'makefile' and then executed by running
 #    gmake
@@ -19,7 +21,8 @@
 #
 # ESMF_ARCH, ESMF_COMPILER, ESMF_PREC, ESMF_SITE, ESMF_COMM, ESMF_BOPT
 #
-#
+# The suffix of myModel may need to be changed depending on the
+# platform. The suffix choices are: F90, F, f90 and f.
 
 
 include $(ESMF_DIR)/build/esmfuser.mk
