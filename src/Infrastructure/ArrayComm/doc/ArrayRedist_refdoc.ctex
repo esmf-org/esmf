@@ -1,4 +1,4 @@
-% $Id: ArrayRedist_refdoc.ctex,v 1.4 2005/04/26 19:58:16 jwolfe Exp $
+% $Id: ArrayRedist_refdoc.ctex,v 1.5 2005/12/16 20:50:35 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,19 +59,19 @@
 \input{../Infrastructure/FieldComm/doc/ESMF_FieldRedistEx_fapi}
 #endif
 
-%\subsection{Restrictions and Future Work}
-%#ifdef STANDALONE
-%\input{ArrayRedist_rest}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/ArrayComm/doc/ArrayRedist_rest}
-%#endif
+\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+\input{ArrayRedist_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/ArrayComm/doc/ArrayRedist_rest}
+#endif
 
-%\subsection{Design and Implementation Notes}
-%#ifdef STANDALONE
-%\input{ArrayRedist_implnotes}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/ArrayComm/doc/ArrayRedist_implnotes}
-%#endif
+\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+\input{ArrayRedist_implnotes}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/ArrayComm/doc/ArrayRedist_implnotes}
+#endif
 
 %\subsection{Object Model}
 %#ifdef STANDALONE
