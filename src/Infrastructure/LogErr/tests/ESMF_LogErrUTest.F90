@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.27 2005/12/15 05:43:20 eschwab Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.28 2005/12/16 05:41:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.27 2005/12/15 05:43:20 eschwab Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.28 2005/12/16 05:41:21 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -53,7 +53,8 @@
       character(1) :: pet_char
       character(4) :: my_pet_char
       character(8) :: my_todays_date, todays_date
-      integer :: rndseed(1), v(8)
+      integer :: v(8), k
+      integer, pointer :: rndseed(:)
       
 
       character :: random_char
@@ -93,7 +94,7 @@
       !NEX_UTest
       ! Test Log Write
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogWrite(log=log1, msg="Log Write 2",msgtype=ESMF_LOG_INFO,&
+      call ESMF_LogWrite(log=log1, msg="Log Write 2",msgtype=ESMF_LOG_INFO, &
                          rc=rc)
       write(name, *) "Use of separate log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -325,10 +326,19 @@
       print *, "Ending the no-op loop"
 
       ! Generate a random string using clock as seed and write it to log file
-      call date_and_time(values=v(:))
-      rndseed(1)=v(8)*v(7)+1
+      ! Halem (HP), k=2; Bluesky (IBM), k=2;
+      !   Jazz/PGI (Intel Linux Cluster), k=34
+      call random_seed()
+      call random_seed(size=k)
+      print *, "size of random seed = ", k
+      allocate(rndseed(k))
+      do i=1,k
+        call date_and_time(values=v(:))
+        rndseed(i)=v(8)*v(7)+k
+      end do
       print *, "generated a random seed based on current time = " , rndseed(1)
-      call random_seed(put=rndseed)
+      call random_seed(put=rndseed(1:k))
+      deallocate(rndseed)
       do i=1, 5
       	call random_number(r1)
       	ran_num = int(26.0*r1) + 65
@@ -361,7 +371,14 @@
       call ESMF_LogFlush(log2, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Log Close
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       call ESMF_LogClose(log2, rc)
+      write(name, *) "Close Log Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
 
       !------------------------------------------------------------------------
       ! Verify that the correct string was written to the file
@@ -385,8 +402,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, "rc = ", rc
       print *, "msg_string is ", msg_string
-
-      call ESMF_LogOpen(log2, "Log_Test_File_3", rc=rc)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -423,15 +438,6 @@
       call ESMF_Test((my_pet_char.eq.Pet_num), name, failMsg, result, ESMF_SRCLINE)
       print *, " My PET char is ", my_pet_char
       
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Test Log Close
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogClose(log2, rc)
-      write(name, *) "Close Log Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
-
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test LogFlush of new unopened log
