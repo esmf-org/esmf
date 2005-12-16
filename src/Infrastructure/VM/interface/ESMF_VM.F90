@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.71 2005/12/15 23:09:56 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.72 2005/12/16 20:10:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,15 +45,7 @@ module ESMF_VMMod
       
 !------------------------------------------------------------------------------
 !     ! ESMF_CommHandle
-!
-! TODO: This needs to be filled with life once we work on non-blocking 
-!     
-!     ! Shallow sync/async communications type.  Mirrored on C++ side.
-!     ! Contains a place to hold
-!     ! the MPI handle in the case of nonblocking MPI calls.  The wait
-!     ! parameter controls whether the "IsComplete" call blocks/waits
-!     ! or simply tests and returns.
-      
+!      
   type ESMF_CommHandle
   sequence
   private
@@ -62,9 +54,6 @@ module ESMF_VMMod
 #else
     type(ESMF_Pointer) :: this
 #endif
-!    integer :: dummy  !so compiler is satisfied for now...
-!    integer :: mpi_handle  ! mpi returns this for async calls
-!    integer :: wait        ! after an async call, does query block?
   end type
       
   integer, parameter :: ESMF_TEST_COMPLETE = 1, ESMF_WAIT_COMPLETE = 2
@@ -179,7 +168,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.71 2005/12/15 23:09:56 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.72 2005/12/16 20:10:57 theurich Exp $"
 
 !==============================================================================
 
@@ -422,7 +411,13 @@ module ESMF_VMMod
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
 !   array of kind {\tt ESMF\_KIND\_I4} across the {\tt ESMF\_VM} object 
 !   into a single value of the same type. The result is returned on all PETs.
-!   Different reduction operations can be specified.
+!   Different reduction operations can be specified.\newline
+!
+!   {\sc Todo:} The current version of this method does not provide an 
+!   implementation of the {\em non-blocking} feature. When calling this 
+!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
+!   logged.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -443,13 +438,18 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -467,8 +467,9 @@ module ESMF_VMMod
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_WARNING, &
+          ESMF_LOG_ERROR, &
           ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
         return
       endif
     endif
@@ -511,7 +512,13 @@ module ESMF_VMMod
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
 !   array of kind {\tt ESMF\_KIND\_R4} across the {\tt ESMF\_VM} object 
 !   into a single value of the same type. The result is returned on all PETs.
-!   Different reduction operations can be specified.
+!   Different reduction operations can be specified.\newline
+!
+!   {\sc Todo:} The current version of this method does not provide an 
+!   implementation of the {\em non-blocking} feature. When calling this 
+!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
+!   logged.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -532,13 +539,18 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -556,8 +568,9 @@ module ESMF_VMMod
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_WARNING, &
+          ESMF_LOG_ERROR, &
           ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
         return
       endif
     endif
@@ -600,7 +613,13 @@ module ESMF_VMMod
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
 !   array of kind {\tt ESMF\_KIND\_R8} across the {\tt ESMF\_VM} object 
 !   into a single value of the same type. The result is returned on all PETs.
-!   Different reduction operations can be specified.
+!   Different reduction operations can be specified.\newline
+!
+!   {\sc Todo:} The current version of this method does not provide an 
+!   implementation of the {\em non-blocking} feature. When calling this 
+!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
+!   logged.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -621,13 +640,18 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -645,8 +669,9 @@ module ESMF_VMMod
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_WARNING, &
+          ESMF_LOG_ERROR, &
           ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
         return
       endif
     endif
@@ -687,7 +712,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   of kind {\tt ESMF\_KIND\_I4} from all PETs of an {\tt ESMF\_VM} object 
-!   into an array on all PETs.
+!   into an array on all PETs.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -706,7 +731,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -716,7 +741,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -784,7 +809,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   of kind {\tt ESMF\_KIND\_R4} from all PETs of an {\tt ESMF\_VM} object 
-!   into an array on all PETs.
+!   into an array on all PETs.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -803,7 +828,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -813,7 +838,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -881,7 +906,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   of kind {\tt ESMF\_KIND\_R8} from all PETs of an {\tt ESMF\_VM} object 
-!   into an array on all PETs.
+!   into an array on all PETs.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -900,7 +925,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -910,7 +935,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -978,7 +1003,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   of kind {\tt ESMF\_Logical} from all PETs of an {\tt ESMF\_VM} object 
-!   into an array on all PETs.
+!   into an array on all PETs.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -997,7 +1022,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -1007,7 +1032,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1077,7 +1102,13 @@ module ESMF_VMMod
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
 !   array of kind {\tt ESMF\_KIND\_I4} across the {\tt ESMF\_VM} object 
 !   into a contiguous data array of the same type. The result array is returned 
-!   on all PETs. Different reduction operations can be specified.
+!   on all PETs. Different reduction operations can be specified.\newline
+!
+!   {\sc Todo:} The current version of this method does not provide an 
+!   implementation of the {\em non-blocking} feature. When calling this 
+!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
+!   logged.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -1099,13 +1130,18 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1123,8 +1159,9 @@ module ESMF_VMMod
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_WARNING, &
+          ESMF_LOG_ERROR, &
           ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
         return
       endif
     endif
@@ -1167,7 +1204,13 @@ module ESMF_VMMod
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
 !   array of kind {\tt ESMF\_KIND\_R4} across the {\tt ESMF\_VM} object 
 !   into a contiguous data array of the same type. The result array is returned 
-!   on all PETs. Different reduction operations can be specified.
+!   on all PETs. Different reduction operations can be specified.\newline
+!
+!   {\sc Todo:} The current version of this method does not provide an 
+!   implementation of the {\em non-blocking} feature. When calling this 
+!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
+!   logged.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -1189,13 +1232,18 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1213,8 +1261,9 @@ module ESMF_VMMod
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_WARNING, &
+          ESMF_LOG_ERROR, &
           ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
         return
       endif
     endif
@@ -1257,7 +1306,13 @@ module ESMF_VMMod
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
 !   array of kind {\tt ESMF\_KIND\_R8} across the {\tt ESMF\_VM} object 
 !   into a contiguous data array of the same type. The result array is returned 
-!   on all PETs. Different reduction operations can be specified.
+!   on all PETs. Different reduction operations can be specified.\newline
+!
+!   {\sc Todo:} The current version of this method does not provide an 
+!   implementation of the {\em non-blocking} feature. When calling this 
+!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
+!   logged.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -1279,13 +1334,18 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1303,8 +1363,9 @@ module ESMF_VMMod
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_WARNING, &
+          ESMF_LOG_ERROR, &
           ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
         return
       endif
     endif
@@ -1336,7 +1397,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that blocks calling PET until
-!   all PETs of the VM context have issued the call. 
+!   all PETs of the VM context have issued the call.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -1389,7 +1450,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that broadcasts a contiguous 
 !   data array of kind {\tt ESMF\_KIND\_I4} from PET {\tt root} to all 
-!   other PETs of the {\tt ESMF\_VM} object.
+!   other PETs of the {\tt ESMF\_VM} object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -1408,7 +1469,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -1418,7 +1479,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1486,8 +1547,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that broadcasts a contiguous 
 !   data array of kind {\tt ESMF\_KIND\_R4} from PET {\tt root} to all
-!   other PETs of the {\tt ESMF\_VM} object.
-!
+!   other PETs of the {\tt ESMF\_VM} object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -1506,7 +1566,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -1516,7 +1576,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1585,8 +1645,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that broadcasts a contiguous 
 !   data array of kind {\tt ESMF\_KIND\_R8} from PET {\tt root} to all
-!   other PETs of the {\tt ESMF\_VM} object.
-!
+!   other PETs of the {\tt ESMF\_VM} object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -1605,7 +1664,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -1615,7 +1674,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1683,7 +1742,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that broadcasts a contiguous 
 !   data array of kind {\tt ESMF\_Logical} from PET {\tt root} to all
-!   other PETs of the {\tt ESMF\_VM} object.
+!   other PETs of the {\tt ESMF\_VM} object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -1702,7 +1761,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -1712,7 +1771,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1781,7 +1840,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   of kind {\tt ESMF\_KIND\_I4} from all PETs of an {\tt ESMF\_VM} object 
-!   (including {\tt root}) into an array on the {\tt root} PET.
+!   (including {\tt root}) into an array on the {\tt root} PET.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -1802,7 +1861,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -1812,7 +1871,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1881,7 +1940,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   of kind {\tt ESMF\_KIND\_R4} from all PETs of an {\tt ESMF\_VM} object 
-!   (including {\tt root}) into an array on the {\tt root} PET.
+!   (including {\tt root}) into an array on the {\tt root} PET.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -1902,7 +1961,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -1912,7 +1971,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1981,7 +2040,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   of kind {\tt ESMF\_KIND\_R8} from all PETs of an {\tt ESMF\_VM} object 
-!   (including {\tt root}) into an array on the {\tt root} PET.
+!   (including {\tt root}) into an array on the {\tt root} PET.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -2002,7 +2061,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -2012,7 +2071,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2081,7 +2140,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   of kind {\tt ESMF\_Logical} from all PETs of an {\tt ESMF\_VM} object 
-!   (including {\tt root}) into an array on the {\tt root} PET.
+!   (including {\tt root}) into an array on the {\tt root} PET.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -2102,7 +2161,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -2112,7 +2171,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2176,7 +2235,7 @@ module ESMF_VMMod
     integer,            intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Get internal information about the specified {\tt ESMF\_VM} object.
+!   Get internal information about the specified {\tt ESMF\_VM} object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -2243,7 +2302,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Get the global default {\tt ESMF\_VM} object. This is the {\tt ESMF\_VM}
 !   object that is created during {\tt ESMF\_Initialize()} and is the ultimate
-!   parent of all {\tt ESMF\_VM} objects in an ESMF application.
+!   parent of all {\tt ESMF\_VM} objects in an ESMF application.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -2281,7 +2340,7 @@ module ESMF_VMMod
     integer,       intent(out), optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Get the {\tt ESMF\_VM} object of the current execution context.
+!   Get the {\tt ESMF\_VM} object of the current execution context.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -2322,7 +2381,7 @@ module ESMF_VMMod
     integer,         intent(out), optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Get the {\tt ESMF\_VMId} of the current execution context.
+!   Get the {\tt ESMF\_VMId} of the current execution context.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -2364,7 +2423,7 @@ module ESMF_VMMod
     integer,         intent(out), optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Get the {\tt ESMF\_VMId} of the {\tt ESMF}
+!   Get the {\tt ESMF\_VMId} of the {\tt ESMF\_VM} object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -2417,7 +2476,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Get internal information about a specific PET within an {\tt ESMF\_VM} 
-!   object.
+!   object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -2478,7 +2537,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Print internal information about the specified {\tt ESMF\_VM} to
-!   {\tt stdout}.
+!   {\tt stdout}.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -2529,7 +2588,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Receive contiguous data of kind {\tt ESMF\_KIND\_I4} from a PET within the
-!   same {\tt ESMF\_VM} object. 
+!   same {\tt ESMF\_VM} object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -2545,7 +2604,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -2555,7 +2614,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2620,7 +2679,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Receive contiguous data of kind {\tt ESMF\_KIND\_R4} from a PET within the
-!   same {\tt ESMF\_VM} object. 
+!   same {\tt ESMF\_VM} object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -2636,7 +2695,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -2646,7 +2705,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2711,7 +2770,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Receive contiguous data of kind {\tt ESMF\_KIND\_R8} from a PET within the
-!   same {\tt ESMF\_VM} object. 
+!   same {\tt ESMF\_VM} object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -2727,7 +2786,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -2737,7 +2796,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2802,7 +2861,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Receive contiguous data of type {\tt ESMF\_Logical} from a PET within the
-!   same {\tt ESMF\_VM} object. 
+!   same {\tt ESMF\_VM} object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -2818,7 +2877,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -2828,7 +2887,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2893,7 +2952,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Receive contiguous data of type character from a PET within the
-!   same {\tt ESMF\_VM} object. 
+!   same {\tt ESMF\_VM} object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -2909,7 +2968,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -2919,7 +2978,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2989,7 +3048,13 @@ module ESMF_VMMod
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
 !   array of kind {\tt ESMF\_KIND\_I4} across the {\tt ESMF\_VM} object 
 !   into a contiguous data array of the same type. The result array is returned 
-!   on root PET. Different reduction operations can be specified.
+!   on root PET. Different reduction operations can be specified.\newline
+!
+!   {\sc Todo:} The current version of this method does not provide an 
+!   implementation of the {\em non-blocking} feature. When calling this 
+!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
+!   logged.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -3013,13 +3078,18 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3037,8 +3107,9 @@ module ESMF_VMMod
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_WARNING, &
+          ESMF_LOG_ERROR, &
           ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
         return
       endif
     endif
@@ -3082,7 +3153,13 @@ module ESMF_VMMod
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
 !   array of kind {\tt ESMF\_KIND\_R4} across the {\tt ESMF\_VM} object 
 !   into a contiguous data array of the same type. The result array is returned 
-!   on root PET. Different reduction operations can be specified.
+!   on root PET. Different reduction operations can be specified.\newline
+!
+!   {\sc Todo:} The current version of this method does not provide an 
+!   implementation of the {\em non-blocking} feature. When calling this 
+!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
+!   logged.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -3106,13 +3183,18 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3130,8 +3212,9 @@ module ESMF_VMMod
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_WARNING, &
+          ESMF_LOG_ERROR, &
           ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
         return
       endif
     endif
@@ -3175,7 +3258,13 @@ module ESMF_VMMod
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
 !   array of kind {\tt ESMF\_KIND\_R8} across the {\tt ESMF\_VM} object 
 !   into a contiguous data array of the same type. The result array is returned 
-!   on root PET. Different reduction operations can be specified.
+!   on root PET. Different reduction operations can be specified.\newline
+!
+!   {\sc Todo:} The current version of this method does not provide an 
+!   implementation of the {\em non-blocking} feature. When calling this 
+!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
+!   logged.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -3199,13 +3288,18 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingflag}).
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt blockingflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
+!        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3223,8 +3317,9 @@ module ESMF_VMMod
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogWrite("Non-blocking not yet implemented", &
-          ESMF_LOG_WARNING, &
+          ESMF_LOG_ERROR, &
           ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
         return
       endif
     endif
@@ -3266,7 +3361,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
 !   of kind {\tt ESMF\_KIND\_I4} from the {\tt root} PET to all PETs of an 
-!   {\tt ESMF\_VM} object (including {\tt root}).
+!   {\tt ESMF\_VM} object (including {\tt root}).\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -3287,7 +3382,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -3297,7 +3392,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3366,7 +3461,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
 !   of kind {\tt ESMF\_KIND\_R4} from the {\tt root} PET to all PETs of an 
-!   {\tt ESMF\_VM} object (including {\tt root}).
+!   {\tt ESMF\_VM} object (including {\tt root}).\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -3387,7 +3482,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -3397,7 +3492,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3466,7 +3561,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
 !   of kind {\tt ESMF\_KIND\_R8} from the {\tt root} PET to all PETs of an 
-!   {\tt ESMF\_VM} object (including {\tt root}).
+!   {\tt ESMF\_VM} object (including {\tt root}).\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -3487,7 +3582,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -3497,7 +3592,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3566,7 +3661,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
 !   of kind {\tt ESMF\_Logical} from the {\tt root} PET to all PETs of an 
-!   {\tt ESMF\_VM} object (including {\tt root}).
+!   {\tt ESMF\_VM} object (including {\tt root}).\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -3587,7 +3682,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -3597,7 +3692,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3663,7 +3758,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Send contiguous data of kind {\tt ESMF\_KIND\_I4} to a PET within the same
-!   {\tt ESMF\_VM} object. 
+!   {\tt ESMF\_VM} object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -3679,7 +3774,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -3689,7 +3784,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3754,7 +3849,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Send contiguous data of kind {\tt ESMF\_KIND\_R4} to a PET within the same
-!   {\tt ESMF\_VM} object. 
+!   {\tt ESMF\_VM} object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -3770,7 +3865,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -3780,7 +3875,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3845,7 +3940,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Send contiguous data of kind {\tt ESMF\_KIND\_R8} to a PET within the same
-!   {\tt ESMF\_VM} object. 
+!   {\tt ESMF\_VM} object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -3861,7 +3956,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -3871,7 +3966,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3936,7 +4031,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Send contiguous data of type {\tt ESMF\_Logical} to a PET within the same
-!   {\tt ESMF\_VM} object. 
+!   {\tt ESMF\_VM} object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -3952,7 +4047,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -3962,7 +4057,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4027,7 +4122,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Send contiguous data of type character to a PET within the same
-!   {\tt ESMF\_VM} object. 
+!   {\tt ESMF\_VM} object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -4043,7 +4138,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -4053,7 +4148,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4123,7 +4218,7 @@ module ESMF_VMMod
 !   Send contiguous data of kind {\tt ESMF\_KIND\_I4} to a PET within the same
 !   {\tt ESMF\_VM} object while receiving contiguous data of kind 
 !   {\tt ESMF\_KIND\_I4} from a PET within the same {\tt ESMF\_VM} object.
-!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!
+!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -4145,7 +4240,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -4155,7 +4250,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4228,7 +4323,7 @@ module ESMF_VMMod
 !   Send contiguous data of kind {\tt ESMF\_KIND\_R4} to a PET within the same
 !   {\tt ESMF\_VM} object while receiving contiguous data of kind 
 !   {\tt ESMF\_KIND\_R4} from a PET within the same {\tt ESMF\_VM} object.
-!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!
+!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -4250,7 +4345,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -4260,7 +4355,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4333,7 +4428,7 @@ module ESMF_VMMod
 !   Send contiguous data of kind {\tt ESMF\_KIND\_R8} to a PET within the same
 !   {\tt ESMF\_VM} object while receiving contiguous data of kind 
 !   {\tt ESMF\_KIND\_R8} from a PET within the same {\tt ESMF\_VM} object.
-!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!
+!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -4355,7 +4450,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -4365,7 +4460,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4438,7 +4533,7 @@ module ESMF_VMMod
 !   Send contiguous data of type {\tt ESMF\_Logical} to a PET within the same
 !   {\tt ESMF\_VM} object while receiving contiguous data of kind 
 !   {\tt ESMF\_Logical} from a PET within the same {\tt ESMF\_VM} object.
-!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!
+!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -4460,7 +4555,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -4470,7 +4565,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4543,7 +4638,7 @@ module ESMF_VMMod
 !   Send contiguous data of type character to a PET within the same
 !   {\tt ESMF\_VM} object while receiving contiguous data of kind 
 !   {\tt ESMF\_Logical} from a PET within the same {\tt ESMF\_VM} object.
-!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!
+!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -4565,7 +4660,7 @@ module ESMF_VMMod
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
+!             (default) Block until local operation has completed.
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
@@ -4575,7 +4670,7 @@ module ESMF_VMMod
 !        {\tt commhandle} can be used in {\tt ESMF\_VMWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMWaitQueue()} must be used to block on all currently queued
+!        {\tt ESMF\_VMWaitQueue()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4621,7 +4716,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-public method -------------------------------
+! -------------------------- ESMF-private method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMThreadBarrier()"
 !BOPI
@@ -4637,7 +4732,7 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Partially collective {\tt ESMF\_VM} communication call that blocks calling
 !   PET until all of the PETs that are running under the same POSIX process have
-!   issued the call. 
+!   issued the call.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -4683,7 +4778,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Wait for non-blocking VM communication specified by the {\tt commhandle} to
-!   complete.
+!   complete.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -4737,7 +4832,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Wait for {\em all} pending non-blocking VM communication within the 
-!   specified VM context to complete.
+!   specified VM context to complete.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -4782,7 +4877,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Get floating-point number of seconds of elapsed wall-clock time since some
-!   time in the past.
+!   time in the past.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -4829,7 +4924,8 @@ module ESMF_VMMod
 !   Get a run-time estimate of the timer precision as floating-point number 
 !   of seconds. This is a relatively expensive call since the timer precision
 !   is measured several times before the maximum is returned as the estimate.
-!   The returned value is PET-specific and may differ across the VM context.
+!   The returned value is PET-specific and may differ across the VM 
+!   context.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -4886,7 +4982,7 @@ module ESMF_VMMod
     integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Initialize the Global VM
+!   Initialize the Global VM.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -4929,7 +5025,7 @@ module ESMF_VMMod
     integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Finalize Global VM
+!   Finalize Global VM.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -4972,7 +5068,7 @@ module ESMF_VMMod
     integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Abort Global VM
+!   Abort Global VM.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5018,7 +5114,7 @@ module ESMF_VMMod
     integer,            intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Shutdown a VM
+!   Shutdown a VM.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5069,7 +5165,7 @@ module ESMF_VMMod
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Construct a default plan
+!   Construct a default plan.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5119,7 +5215,7 @@ module ESMF_VMMod
     integer, intent(out), optional    :: rc           
 !
 ! !DESCRIPTION:
-!   Destruct a vmplan
+!   Destruct a vmplan.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5170,7 +5266,7 @@ module ESMF_VMMod
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Set up a MaxPEs vmplan
+!   Set up a MaxPEs vmplan.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5237,7 +5333,7 @@ module ESMF_VMMod
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Set up a MaxThreads vmplan
+!   Set up a MaxThreads vmplan.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5304,7 +5400,7 @@ module ESMF_VMMod
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Set up a MinThreads vmplan
+!   Set up a MinThreads vmplan.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5370,7 +5466,7 @@ module ESMF_VMMod
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Compare two ESMF_VMId objects.
+!   Compare two ESMF_VMId objects.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5415,7 +5511,7 @@ module ESMF_VMMod
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Print an ESMF_VMId object.
+!   Print an ESMF_VMId object.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5458,7 +5554,7 @@ module ESMF_VMMod
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Create an ESMF_VMId object. This allocates memory on the C side
+!   Create an ESMF_VMId object. This allocates memory on the C side.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5501,7 +5597,7 @@ module ESMF_VMMod
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Destroy an ESMF_VMId object. This frees memory on the C side
+!   Destroy an ESMF_VMId object. This frees memory on the C side.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5547,7 +5643,7 @@ module ESMF_VMMod
     integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Receive {\tt ESMF\_VMId}. 
+!   Receive {\tt ESMF\_VMId}.\newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5596,7 +5692,7 @@ module ESMF_VMMod
     integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Receive {\tt ESMF\_VMId}. 
+!   Receive {\tt ESMF\_VMId}.\newline
 !
 !   The arguments are:
 !   \begin{description}
