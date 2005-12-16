@@ -1,4 +1,4 @@
-#  $Id: makefile.sample,v 1.1 2005/12/16 21:00:20 nscollins Exp $
+#  $Id: makefile.sample,v 1.2 2005/12/16 21:32:46 svasquez Exp $
 #
 #  Sample of a user makefile.
 #
@@ -26,5 +26,8 @@ include $(ESMF_DIR)/build/esmfuser.mk
 
 
 all:
+
+	$(ESMF_FC) -c $(ESMF_COMPILEFLAGS) myModel.F -o myModel.o
+	$(ESMF_FC) $(ESMF_LINKFLAGS) myModel.o -o myModel $(ESMF_LINKLIBS)
 
 
