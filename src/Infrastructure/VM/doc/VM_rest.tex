@@ -1,14 +1,14 @@
-% $Id: VM_rest.tex,v 1.7 2005/12/14 23:38:52 theurich Exp $
+% $Id: VM_rest.tex,v 1.8 2005/12/16 20:12:35 theurich Exp $
 
 %\subsubsection{Restrictions and Future Work}
 
 \begin{enumerate}
 
-\item {\bf Non-blocking communications only partially implemented.} Only the following communication calls implement the non-blocking option:
+\item {\bf Non-blocking {\tt Reduce()} operations {\em not} implemented.} None of the reduce communication calls have an implementation for the non-blocking feature. This affects:
 \begin{itemize}
-\item {\tt ESMF\_VMRecv()},
-\item {\tt ESMF\_VMSend()},
-\item {\tt ESMF\_VMSendRecv()}.
+\item {\tt ESMF\_VMAllFullReduce()},
+\item {\tt ESMF\_VMAllReduce()},
+\item {\tt ESMF\_VMReduce()}.
 \end{itemize}
 
 \item {\bf Limitations when using {\tt mpiuni} mode.} In {\tt mpiuni} mode non-blocking communications are limited to one outstanding message per source-destination PET pair. Furthermore, in {\tt mpiuni} mode the message length must be smaller than the internal ESMF buffer size.
