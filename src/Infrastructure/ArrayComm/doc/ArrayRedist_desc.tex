@@ -1,11 +1,41 @@
-% $Id: ArrayRedist_desc.tex,v 1.5 2005/04/26 19:57:31 jwolfe Exp $
+% $Id: ArrayRedist_desc.tex,v 1.6 2005/12/16 20:51:16 jwolfe Exp $
 
 
-Redistribution operations always operate on data associated with a
-single Grid, but are either decomposed across multiple DEs
-differently, or have different index orderings, or are decomposed
-in different dimensions.  The Redistribution methods involve only
-data movement; no interpolation, data binning, or averaging is
-performed.  A typical example of redistribution is the data transpose
-associated with the translation between physical and Fourier space.
+As the name implies, Redistribution operations move data from one distribution,
+or decomposition, to another.  The distribution of the data may differ in several 
+ways:
+ \begin{description}
+
+  \item The data could be decomposed across multiple DEs differently.  In this
+        case, the source data might be decomposed by a 3 by 2 DELayout and be
+        redistributed onto a 1 by 6 DELayout.
+
+  \item The data could have different index orderings.  For example, the data
+        might be reordered from IJK to KIJ, where the source data is
+        dimensioned srcData(ni,nj,nk) and is redistributed to dstData(nk,ni,nj).
+
+  \item Different indices of the data could be decomposed.  Source data
+        decomposed only in the first index could be redistributed to being
+        only in the second or third index.
+
+ \end{description}
+
+In all of these situations, the source and destination data structures are
+required to have identical global sizes but not DE-local sizes.  Although
+illustrations of Redistribution may look very similar to Regridding (please
+see Figure \ref{fig:Redist}),
+
+\begin{center}
+\begin{figure}
+\label{fig:Redist}
+\includegraphics{Redist}
+\caption{Illustration of redistribution of data. }
+\end{figure}
+\end{center}
+
+Redistribution methods involve only data movement; no interpolation, data
+binning, or averaging is performed.  For data associated with physical locations
+on a Grid, this means the source and destination Grids must have identical
+global coordinates.  Like Haloing and other high level communication routines,
+Redistribution is supported at both the Array and Field level. 
 
