@@ -1,0 +1,30 @@
+#  $Id: makefile.sample,v 1.1 2005/12/16 21:00:20 nscollins Exp $
+#
+#  Sample of a user makefile.
+#
+#
+# The following makefile fragment shows how to compile and link a 
+# Fortran90 application with the ESMF library.  In this example, 
+# the application is called "myModel".
+#
+# This file can be renamed 'makefile' and then executed by running
+#    gmake
+# or the lines can be copied into a pre-existing makefile.   Note that
+# this makefile needs to use gmake (or gnumake).
+#
+#
+# The ESMF_DIR environment variable must be set to the root of the ESMF
+# build tree.   Some or all of the following environment variables must be
+# set to whatever values were used when building the ESMF libraries.
+#
+# ESMF_ARCH, ESMF_COMPILER, ESMF_PREC, ESMF_SITE, ESMF_COMM, ESMF_BOPT
+#
+#
+
+
+include $(ESMF_DIR)/build/esmfuser.mk
+
+
+all:
+
+
