@@ -1,0 +1,19 @@
+% $Id: ArrayRedist_rest.tex,v 1.1 2005/12/16 20:49:14 jwolfe Exp $
+
+%\subsubsection{Restrictions and Future Work}
+
+\begin{enumerate}
+
+\item {\bf Redistribution only fills computational domains.}  Currently,
+redistributed values are not automatically applied to halo or ghost
+domains.  Users must manually call Halo after redistribution in order
+to do so.  This also means that Grid periodicity will not affect
+results without manual Halo calls.
+
+\item {\bf Masks are not implemented.}  Redist methods should apply
+any Masks attached to the data objects, but they currently do not.  Redist
+interfaces should also include Masks as arguments.
+
+\end{enumerate}
+
+
