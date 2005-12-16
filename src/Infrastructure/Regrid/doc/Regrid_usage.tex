@@ -1,4 +1,4 @@
-% $Id: Regrid_usage.tex,v 1.10 2005/12/02 18:55:54 jwolfe Exp $
+% $Id: Regrid_usage.tex,v 1.11 2005/12/16 18:56:32 jwolfe Exp $
 
 
 Regrid is designed to be called with Field or Bundle
@@ -15,10 +15,11 @@ Regrid is separated into RegridStore functions, a Regrid
 function, and a RegridRelease function. The Store functions
 compute interpolation weights and initialize communication
 requirements for performing a regridding of a Field
-from one Grid to another.  The Regrid function uses
-a created Regrid object to perform the actual regridding
+from one Grid to another, returning an object called an
+{\tt ESMF\_RouteHandle}.  The Regrid function uses
+the created RouteHandle object to perform the actual regridding
 of Fields or Bundles.  The Release function deletes the
-Regrid object and frees all memory associated with a Regrid.
+RouteHandle object and frees all memory associated with a Regrid.
 The reason for the separation is that in many cases, the
 initial creation is expensive and re-used often throughout
 an application.  The Regrid and RegridRelease functions are
