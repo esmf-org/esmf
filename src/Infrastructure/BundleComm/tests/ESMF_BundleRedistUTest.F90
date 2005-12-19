@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistUTest.F90,v 1.2 2005/12/16 23:16:21 nscollins Exp $
+! $Id: ESMF_BundleRedistUTest.F90,v 1.3 2005/12/19 21:43:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleRedistUTest.F90,v 1.2 2005/12/16 23:16:21 nscollins Exp $'
+      '$Id: ESMF_BundleRedistUTest.F90,v 1.3 2005/12/19 21:43:48 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -168,7 +168,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! validate destination field
-      call ValidateConstantField(field2, val_one, rc=rc)
+      call ValidateConstantR8Field(field2, val_one, rc=rc)
       write(name, *) "Validating constant data in dest fields"
       write(failMsg, *) "Validating constant data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -176,7 +176,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! validate destination field
-      call ValidateConstantField(field4, val_two, rc=rc)
+      call ValidateConstantR8Field(field4, val_two, rc=rc)
       write(name, *) "Validating constant data in dest fields"
       write(failMsg, *) "Validating constant data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -299,7 +299,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! validate destination field
-      call ValidateConstantField(field1, val_one, rc=rc)
+      call ValidateConstantR8Field(field1, val_one, rc=rc)
       write(name, *) "Validating constant data in dest fields"
       write(failMsg, *) "Validating constant data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

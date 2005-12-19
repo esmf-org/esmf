@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.2 2005/12/16 23:16:21 nscollins Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.3 2005/12/19 21:43:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -17,12 +17,17 @@ module ESMF_BundleRedistHelpers
 
    use ESMF_Mod
 
-   public Create2DGrids, Create3DGrids, CreateFields, CreateBundle
-   public FillConstantR8Field, FillIndexField, FillConstantHalo
-   public FillConstantR4Field, FillConstantR4Halo
+   public Create2DGrids, Create3DGrids
+   public CreateFields, CreateBundle
+
+   public FillConstantR8Field, FillConstantR4Field
    public FillConstantI8Field, FillConstantI4Field
-   public ValidateConstantField, ValidateConstantHalo
-   public ValidateConstantR4Field, ValidateConstantR4Halo
+   public ValidateConstantR8Field, ValidateConstantR4Field
+   public ValidateConstantI8Field, ValidateConstantI4Field
+
+   public FillConstantHalo, FillConstantR4Halo
+   public ValidateConstantHalo, ValidateConstantR4Halo
+   public FillIndexField
    public ValidateIndexField
    public FieldCleanup, BundleCleanup
 
@@ -794,147 +799,17 @@ end subroutine FillIndexField
 ! Assumes data is real*8.  Do not check halo regions.
 !
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ValidateConstantField"
-subroutine ValidateConstantField(field, val, slop, rc)
+#define ESMF_METHOD "ValidateConstantR8Field"
+subroutine ValidateConstantR8Field(field, val, slop, rc)
     type(ESMF_Field), intent(in) :: field
     real (ESMF_KIND_R8), intent(in) :: val
     logical, intent(in), optional :: slop
     integer, intent(out), optional  :: rc
+
+    call InternalValidateConstantField(field, r8val=val, slop=slop, rc=rc)
+
+end subroutine ValidateConstantR8Field
     
-    ! Local variables
-    integer :: i, j, k, l, m
-    integer :: lb(7), ub(7), halo
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: ptr2d
-    real (ESMF_KIND_R8), dimension(:,:,:), pointer :: ptr3d
-    real (ESMF_KIND_R8), dimension(:,:,:,:), pointer :: ptr4d
-    real (ESMF_KIND_R8), dimension(:,:,:,:,:), pointer :: ptr5d
-    type(ESMF_Array) :: array
-    integer :: rank
-
-    if (present(rc)) rc = ESMF_FAILURE
-        
-    ! need a query here to be sure our data pointer is the same t/k/r
-    ! as what is in the field.
-
-    call ESMF_FieldGet(field, haloWidth=halo, array=array, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
-
-    call ESMF_ArrayGet(array, rank=rank, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
-
-    ! if slop specified, and true, then do not check the outer row
-    ! of cells in the computational area.  this is for regrid where
-    ! the boundary conditions may affect the outer rows.
-    if (present(slop)) then
-        if (slop) halo = halo + 1
-    endif
-
-    ! get a Fortran 90 pointer back to the data
-    select case (rank)
-      case (2)
-        call ESMF_FieldGetDataPointer(field, ptr2d, ESMF_DATA_REF, rc=rc)
-        if (rc.NE.ESMF_SUCCESS) return
-
-        lb(1:2) = lbound(ptr2d)
-        ub(1:2) = ubound(ptr2d)
-
-        rc = ESMF_SUCCESS
-        do j=lb(2)+halo, ub(2)-halo
-          do i=lb(1)+halo, ub(1)-halo
-            if (abs(ptr2d(i, j) - val) .gt. 10E-8) then
-                print *, "data mismatch at", i, j, ptr2d(i,j), " ne ", val
-                rc = ESMF_FAILURE
-                print *, "(bailing on first error - may be others)"
-                return 
-            endif
-          enddo
-        enddo
-
-      case (3)
-        call ESMF_FieldGetDataPointer(field, ptr3d, ESMF_DATA_REF, rc=rc)
-        if (rc.NE.ESMF_SUCCESS) return
-
-        lb(1:3) = lbound(ptr3d)
-        ub(1:3) = ubound(ptr3d)
-
-        rc = ESMF_SUCCESS
-        do k=lb(3)+halo, ub(3)-halo
-          do j=lb(2)+halo, ub(2)-halo
-            do i=lb(1)+halo, ub(1)-halo
-              if (abs(ptr3d(i, j, k) - val) .gt. 10E-8) then
-                  print *, "data mismatch at", i, j, k, &
-                             ptr3d(i,j,k), " ne ", val
-                  rc = ESMF_FAILURE
-                  print *, "(bailing on first error - may be others)"
-                  return 
-              endif
-            enddo
-          enddo
-        enddo
-
-      case (4)
-        call ESMF_FieldGetDataPointer(field, ptr4d, ESMF_DATA_REF, rc=rc)
-        if (rc.NE.ESMF_SUCCESS) return
-
-        lb(1:4) = lbound(ptr4d)
-        ub(1:4) = ubound(ptr4d)
-
-        rc = ESMF_SUCCESS
-        do l=lb(4)+halo, ub(4)-halo
-          do k=lb(3)+halo, ub(3)-halo
-            do j=lb(2)+halo, ub(2)-halo
-              do i=lb(1)+halo, ub(1)-halo
-                if (abs(ptr4d(i, j, k, l) - val) .gt. 10E-8) then
-                    print *, "data mismatch at", i, j, k, l, &
-                               ptr4d(i,j,k,l), " ne ", val
-                    rc = ESMF_FAILURE
-                    print *, "(bailing on first error - may be others)"
-                    return 
-                endif
-              enddo
-            enddo
-          enddo
-        enddo
-
-      case (5)
-        call ESMF_FieldGetDataPointer(field, ptr5d, ESMF_DATA_REF, rc=rc)
-        if (rc.NE.ESMF_SUCCESS) return
-
-        lb(1:5) = lbound(ptr5d)
-        ub(1:5) = ubound(ptr5d)
- 
-        rc = ESMF_SUCCESS
-        do m=lb(5)+halo, ub(5)-halo
-          do l=lb(4)+halo, ub(4)-halo
-            do k=lb(3)+halo, ub(3)-halo
-              do j=lb(2)+halo, ub(2)-halo
-                do i=lb(1)+halo, ub(1)-halo
-                  if (abs(ptr5d(i, j, k, l, m) - val) .gt. 10E-8) then
-                      print *, "data mismatch at", i, j, k, l, m, &
-                                 ptr5d(i,j,k,l,m), " ne ", val
-                      rc = ESMF_FAILURE
-                      print *, "(bailing on first error - may be others)"
-                      return 
-                  endif
-                enddo
-              enddo
-            enddo
-          enddo
-        enddo
-      case default
-        print *, "no code to handle data of rank", rank
-
-    end select
-
-    
-
-    ! return with whatever rc value it has
-
-    return
-
-end subroutine ValidateConstantField
-
-
 !------------------------------------------------------------------------------
 !
 ! Make sure the data in a field matches the constant value.
@@ -948,17 +823,103 @@ subroutine ValidateConstantR4Field(field, val, slop, rc)
     logical, intent(in), optional :: slop
     integer, intent(out), optional  :: rc
     
+    call InternalValidateConstantField(field, r4val=val, slop=slop, rc=rc)
+
+end subroutine ValidateConstantR4Field
+
+
+!------------------------------------------------------------------------------
+!
+! Make sure the data in a field matches the constant value.
+! Assumes data is integer*8.  Do not check halo regions.
+!
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ValidateConstantI8Field"
+subroutine ValidateConstantI8Field(field, val, slop, rc)
+    type(ESMF_Field), intent(in) :: field
+    real (ESMF_KIND_I8), intent(in) :: val
+    logical, intent(in), optional :: slop
+    integer, intent(out), optional  :: rc
+
+    call InternalValidateConstantField(field, i8val=val, slop=slop, rc=rc)
+
+end subroutine ValidateConstantI8Field
+    
+!------------------------------------------------------------------------------
+!
+! Make sure the data in a field matches the constant value.
+! Assumes data is integer*4.  Do not check halo regions.
+!
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ValidateConstantI4Field"
+subroutine ValidateConstantI4Field(field, val, slop, rc)
+    type(ESMF_Field), intent(in) :: field
+    real (ESMF_KIND_I4), intent(in) :: val
+    logical, intent(in), optional :: slop
+    integer, intent(out), optional  :: rc
+    
+    call InternalValidateConstantField(field, i4val=val, slop=slop, rc=rc)
+
+end subroutine ValidateConstantI4Field
+
+
+!------------------------------------------------------------------------------
+!
+! Make sure the data in a field matches the constant value.
+! Assumes data is R8, R4, I8, or I4, and 2D to 5D.  
+! Do not check halo regions.
+!
+#undef  ESMF_METHOD
+#define ESMF_METHOD "InternalValidateConstantField"
+subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
+                                          slop, rc)
+    type(ESMF_Field), intent(in) :: field
+    real (ESMF_KIND_R8), intent(in), optional :: r8val
+    real (ESMF_KIND_R4), intent(in), optional :: r4val
+    real (ESMF_KIND_I8), intent(in), optional :: i8val
+    real (ESMF_KIND_I4), intent(in), optional :: i4val
+    logical, intent(in), optional :: slop
+    integer, intent(out), optional  :: rc
+    
     ! Local variables
-    integer :: i, j
-    integer :: lb(2), ub(2), halo
-    real (ESMF_KIND_R4), dimension(:,:), pointer :: ptr
+    integer :: i, j, k, l, m
+    integer :: lb(7), ub(7), halo
+
+    type(ESMF_Array) :: array
+    type(ESMF_DataKind) :: dk
+    integer :: rank, kind
+
+    real (ESMF_KIND_R8), dimension(:,:),       pointer :: ptr2dr8
+    real (ESMF_KIND_R8), dimension(:,:,:),     pointer :: ptr3dr8
+    real (ESMF_KIND_R8), dimension(:,:,:,:),   pointer :: ptr4dr8
+    real (ESMF_KIND_R8), dimension(:,:,:,:,:), pointer :: ptr5dr8
+    real (ESMF_KIND_R4), dimension(:,:),       pointer :: ptr2dr4
+    real (ESMF_KIND_R4), dimension(:,:,:),     pointer :: ptr3dr4
+    real (ESMF_KIND_R4), dimension(:,:,:,:),   pointer :: ptr4dr4
+    real (ESMF_KIND_R4), dimension(:,:,:,:,:), pointer :: ptr5dr4
+    real (ESMF_KIND_I8), dimension(:,:),       pointer :: ptr2di8
+    real (ESMF_KIND_I8), dimension(:,:,:),     pointer :: ptr3di8
+    real (ESMF_KIND_I8), dimension(:,:,:,:),   pointer :: ptr4di8
+    real (ESMF_KIND_I8), dimension(:,:,:,:,:), pointer :: ptr5di8
+    real (ESMF_KIND_I4), dimension(:,:),       pointer :: ptr2di4
+    real (ESMF_KIND_I4), dimension(:,:,:),     pointer :: ptr3di4
+    real (ESMF_KIND_I4), dimension(:,:,:,:),   pointer :: ptr4di4
+    real (ESMF_KIND_I4), dimension(:,:,:,:,:), pointer :: ptr5di4
+
 
     if (present(rc)) rc = ESMF_FAILURE
         
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
 
-    call ESMF_FieldGet(field, haloWidth=halo, rc=rc)
+    call ESMF_FieldGet(field, haloWidth=halo, array=array, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+
+    call ESMF_ArrayGet(array, rank=rank, kind=dk, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) return
+
+    ! force to integer so they can be used below in select cases.
+    kind = dk
 
     ! if slop specified, and true, then do not check the outer row
     ! of cells in the computational area.  this is for regrid where
@@ -968,30 +929,499 @@ subroutine ValidateConstantR4Field(field, val, slop, rc)
     endif
 
     ! get a Fortran 90 pointer back to the data
-    call ESMF_FieldGetDataPointer(field, ptr, ESMF_DATA_REF, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
-    
+    select case (rank)
+      case (2)
+        select case (kind)
+          case (ESMF_R8%dkind)
+            if (.not.present(r8val)) then
+                print *, "Error: data value does not match Field data type (R8)"
+                return
+            endif
 
-    lb(:) = lbound(ptr)
-    ub(:) = ubound(ptr)
+            call ESMF_FieldGetDataPointer(field, ptr2dr8, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            lb(1:2) = lbound(ptr2dr8)
+            ub(1:2) = ubound(ptr2dr8)
+  
+            rc = ESMF_SUCCESS
+            do j=lb(2)+halo, ub(2)-halo
+              do i=lb(1)+halo, ub(1)-halo
+                if (abs(ptr2dr8(i, j) - r8val) .gt. 10E-8) then
+                    print *, "data mismatch at", i, j, ptr2dr8(i,j), &
+                              " ne ", r8val
+                    rc = ESMF_FAILURE
+                    print *, "(bailing on first error - may be others)"
+                    return 
+                endif
+              enddo
+            enddo
+
+          case (ESMF_R4%dkind)
+            if (.not.present(r4val)) then
+                print *, "Error: data value does not match Field data type (R4)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr2dr4, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            lb(1:2) = lbound(ptr2dr4)
+            ub(1:2) = ubound(ptr2dr4)
+  
+            rc = ESMF_SUCCESS
+            do j=lb(2)+halo, ub(2)-halo
+              do i=lb(1)+halo, ub(1)-halo
+                if (abs(ptr2dr4(i, j) - r4val) .gt. 10E-8) then
+                    print *, "data mismatch at", i, j, ptr2dr4(i,j), &
+                              " ne ", r4val
+                    rc = ESMF_FAILURE
+                    print *, "(bailing on first error - may be others)"
+                    return 
+                endif
+              enddo
+            enddo
+
+          case (ESMF_I8%dkind)
+            if (.not.present(i8val)) then
+                print *, "Error: data value does not match Field data type (I8)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr2di8, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            lb(1:2) = lbound(ptr2di8)
+            ub(1:2) = ubound(ptr2di8)
+  
+            rc = ESMF_SUCCESS
+            do j=lb(2)+halo, ub(2)-halo
+              do i=lb(1)+halo, ub(1)-halo
+                if (ptr2di8(i, j) .ne. i8val) then
+                    print *, "data mismatch at", i, j, ptr2di8(i,j), &
+                              " ne ", i8val
+                    rc = ESMF_FAILURE
+                    print *, "(bailing on first error - may be others)"
+                    return 
+                endif
+              enddo
+            enddo
+
+          case (ESMF_I4%dkind)
+            if (.not.present(i4val)) then
+                print *, "Error: data value does not match Field data type (I4)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr2di4, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            lb(1:2) = lbound(ptr2di4)
+            ub(1:2) = ubound(ptr2di4)
+  
+            rc = ESMF_SUCCESS
+            do j=lb(2)+halo, ub(2)-halo
+              do i=lb(1)+halo, ub(1)-halo
+                if (ptr2di4(i, j) .ne. i4val) then
+                    print *, "data mismatch at", i, j, ptr2di4(i,j), &
+                              " ne ", i4val
+                    rc = ESMF_FAILURE
+                    print *, "(bailing on first error - may be others)"
+                    return 
+                endif
+              enddo
+            enddo
+          
+          case default
+            print *, "unsupported data type in Field"
+            return
+
+        end select
+
+      case (3)
+        select case (kind)
+          case (ESMF_R8%dkind)
+            if (.not.present(r8val)) then
+                print *, "Error: data value does not match Field data type (R8)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr3dr8, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            lb(1:3) = lbound(ptr3dr8)
+            ub(1:3) = ubound(ptr3dr8)
+  
+            rc = ESMF_SUCCESS
+            do k=lb(3)+halo, ub(3)-halo
+              do j=lb(2)+halo, ub(2)-halo
+                do i=lb(1)+halo, ub(1)-halo
+                  if (abs(ptr3dr8(i, j, k) - r8val) .gt. 10E-8) then
+                      print *, "data mismatch at", i, j, k, &
+                                ptr3dr8(i,j,k), " ne ", r8val
+                      rc = ESMF_FAILURE
+                      print *, "(bailing on first error - may be others)"
+                      return 
+                  endif
+                enddo
+              enddo
+            enddo
+
+          case (ESMF_R4%dkind)
+            if (.not.present(r4val)) then
+                print *, "Error: data value does not match Field data type (R4)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr3dr4, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            lb(1:3) = lbound(ptr3dr4)
+            ub(1:3) = ubound(ptr3dr4)
+  
+            rc = ESMF_SUCCESS
+            do k=lb(3)+halo, ub(3)-halo
+              do j=lb(2)+halo, ub(2)-halo
+                do i=lb(1)+halo, ub(1)-halo
+                  if (abs(ptr3dr4(i, j, k) - r4val) .gt. 10E-8) then
+                      print *, "data mismatch at", i, j, k, &
+                                ptr3dr4(i,j,k), " ne ", r4val
+                      rc = ESMF_FAILURE
+                      print *, "(bailing on first error - may be others)"
+                      return 
+                  endif
+                enddo
+              enddo
+            enddo
+
+          case (ESMF_I8%dkind)
+            if (.not.present(i8val)) then
+                print *, "Error: data value does not match Field data type (I8)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr3di8, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            lb(1:3) = lbound(ptr3di8)
+            ub(1:3) = ubound(ptr3di8)
+  
+            rc = ESMF_SUCCESS
+            do k=lb(3)+halo, ub(3)-halo
+              do j=lb(2)+halo, ub(2)-halo
+                do i=lb(1)+halo, ub(1)-halo
+                  if (ptr3di8(i, j, k) .ne. i8val) then
+                      print *, "data mismatch at", i, j, k, &
+                                ptr3di8(i,j,k), " ne ", i8val
+                      rc = ESMF_FAILURE
+                      print *, "(bailing on first error - may be others)"
+                      return 
+                  endif
+                enddo
+              enddo
+            enddo
+  
+          case (ESMF_I4%dkind)
+            if (.not.present(i4val)) then
+                print *, "Error: data value does not match Field data type (I4)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr3di4, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            lb(1:3) = lbound(ptr3di4)
+            ub(1:3) = ubound(ptr3di4)
+  
+            rc = ESMF_SUCCESS
+            do k=lb(3)+halo, ub(3)-halo
+              do j=lb(2)+halo, ub(2)-halo
+                do i=lb(1)+halo, ub(1)-halo
+                  if (ptr3di4(i, j, k) .ne. i4val) then
+                      print *, "data mismatch at", i, j, k, &
+                                ptr3di4(i,j,k), " ne ", i4val
+                      rc = ESMF_FAILURE
+                      print *, "(bailing on first error - may be others)"
+                      return 
+                  endif
+                enddo
+              enddo
+            enddo
+          
+          case default
+            print *, "unsupported data type in Field"
+            return
+
+        end select
+
+      case (4)
+        select case (kind)
+          case (ESMF_R8%dkind)
+            if (.not.present(r8val)) then
+                print *, "Error: data value does not match Field data type (R8)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr4dr8, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            lb(1:4) = lbound(ptr4dr8)
+            ub(1:4) = ubound(ptr4dr8)
+  
+            rc = ESMF_SUCCESS
+            do l=lb(4)+halo, ub(4)-halo
+              do k=lb(3)+halo, ub(3)-halo
+                do j=lb(2)+halo, ub(2)-halo
+                  do i=lb(1)+halo, ub(1)-halo
+                    if (abs(ptr4dr8(i, j, k, l) - r8val) .gt. 10E-8) then
+                        print *, "data mismatch at", i, j, k, l, &
+                                  ptr4dr8(i,j,k,l), " ne ", r8val
+                        rc = ESMF_FAILURE
+                        print *, "(bailing on first error - may be others)"
+                        return 
+                    endif
+                  enddo
+                enddo
+              enddo
+            enddo
+
+          case (ESMF_R4%dkind)
+            if (.not.present(r4val)) then
+                print *, "Error: data value does not match Field data type (R4)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr4dr4, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            lb(1:4) = lbound(ptr4dr4)
+            ub(1:4) = ubound(ptr4dr4)
+  
+            rc = ESMF_SUCCESS
+            do l=lb(4)+halo, ub(4)-halo
+              do k=lb(3)+halo, ub(3)-halo
+                do j=lb(2)+halo, ub(2)-halo
+                  do i=lb(1)+halo, ub(1)-halo
+                    if (abs(ptr4dr4(i, j, k, l) - r4val) .gt. 10E-8) then
+                        print *, "data mismatch at", i, j, k, l, &
+                                  ptr4dr4(i,j,k,l), " ne ", r4val
+                        rc = ESMF_FAILURE
+                        print *, "(bailing on first error - may be others)"
+                        return 
+                    endif
+                  enddo
+                enddo
+              enddo
+            enddo
+
+          case (ESMF_I8%dkind)
+            if (.not.present(i8val)) then
+                print *, "Error: data value does not match Field data type (I8)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr4di8, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            lb(1:4) = lbound(ptr4di8)
+            ub(1:4) = ubound(ptr4di8)
+  
+            rc = ESMF_SUCCESS
+            do l=lb(4)+halo, ub(4)-halo
+              do k=lb(3)+halo, ub(3)-halo
+                do j=lb(2)+halo, ub(2)-halo
+                  do i=lb(1)+halo, ub(1)-halo
+                    if (ptr4di8(i, j, k, l) .ne. i8val) then
+                        print *, "data mismatch at", i, j, k, l, &
+                                  ptr4di8(i,j,k,l), " ne ", i8val
+                        rc = ESMF_FAILURE
+                        print *, "(bailing on first error - may be others)"
+                        return 
+                    endif
+                  enddo
+                enddo
+              enddo
+            enddo
+  
+          case (ESMF_I4%dkind)
+            if (.not.present(i4val)) then
+                print *, "Error: data value does not match Field data type (I4)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr4di4, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            lb(1:4) = lbound(ptr4di4)
+            ub(1:4) = ubound(ptr4di4)
+  
+            rc = ESMF_SUCCESS
+            do l=lb(4)+halo, ub(4)-halo
+              do k=lb(3)+halo, ub(3)-halo
+                do j=lb(2)+halo, ub(2)-halo
+                  do i=lb(1)+halo, ub(1)-halo
+                    if (ptr4di4(i, j, k, l) .ne. i4val) then
+                        print *, "data mismatch at", i, j, k, l, &
+                                  ptr4di4(i,j,k,l), " ne ", i4val
+                        rc = ESMF_FAILURE
+                        print *, "(bailing on first error - may be others)"
+                        return 
+                    endif
+                  enddo
+                enddo
+               enddo
+             enddo
+          
+          case default
+            print *, "unsupported data type in Field"
+            return
+
+        end select
+
+      case (5)
+        select case (kind)
+          case (ESMF_R8%dkind)
+            if (.not.present(r8val)) then
+                print *, "Error: data value does not match Field data type (R8)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr5dr8, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            lb(1:5) = lbound(ptr5dr8)
+            ub(1:5) = ubound(ptr5dr8)
+  
+            rc = ESMF_SUCCESS
+            do m=lb(5)+halo, ub(5)-halo
+              do l=lb(4)+halo, ub(4)-halo
+                do k=lb(3)+halo, ub(3)-halo
+                  do j=lb(2)+halo, ub(2)-halo
+                    do i=lb(1)+halo, ub(1)-halo
+                      if (abs(ptr5dr8(i, j, k, l, m) - r8val) .gt. 10E-8) then
+                          print *, "data mismatch at", i, j, k, l, m, &
+                                    ptr5dr8(i,j,k,l,m), " ne ", r8val
+                          rc = ESMF_FAILURE
+                          print *, "(bailing on first error - may be others)"
+                          return 
+                      endif
+                    enddo
+                  enddo
+                enddo
+              enddo
+            enddo
+
+          case (ESMF_R4%dkind)
+            if (.not.present(r4val)) then
+                print *, "Error: data value does not match Field data type (R4)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr5dr4, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            lb(1:5) = lbound(ptr5dr4)
+            ub(1:5) = ubound(ptr5dr4)
+  
+            rc = ESMF_SUCCESS
+            do m=lb(5)+halo, ub(5)-halo
+              do l=lb(4)+halo, ub(4)-halo
+                do k=lb(3)+halo, ub(3)-halo
+                  do j=lb(2)+halo, ub(2)-halo
+                    do i=lb(1)+halo, ub(1)-halo
+                      if (abs(ptr5dr4(i, j, k, l, m) - r4val) .gt. 10E-8) then
+                          print *, "data mismatch at", i, j, k, l, m, &
+                                    ptr5dr4(i,j,k,l,m), " ne ", r4val
+                          rc = ESMF_FAILURE
+                          print *, "(bailing on first error - may be others)"
+                          return 
+                      endif
+                    enddo
+                  enddo
+                enddo
+              enddo
+            enddo
+
+          case (ESMF_I8%dkind)
+            if (.not.present(i8val)) then
+                print *, "Error: data value does not match Field data type (I8)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr5di8, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            lb(1:5) = lbound(ptr5di8)
+            ub(1:5) = ubound(ptr5di8)
+  
+            rc = ESMF_SUCCESS
+            do m=lb(5)+halo, ub(5)-halo
+              do l=lb(4)+halo, ub(4)-halo
+                do k=lb(3)+halo, ub(3)-halo
+                  do j=lb(2)+halo, ub(2)-halo
+                    do i=lb(1)+halo, ub(1)-halo
+                      if (ptr5di8(i, j, k, l, m) .ne. i8val) then
+                          print *, "data mismatch at", i, j, k, l, m, &
+                                    ptr5di8(i,j,k,l,m), " ne ", i8val
+                          rc = ESMF_FAILURE
+                          print *, "(bailing on first error - may be others)"
+                          return 
+                      endif
+                    enddo
+                  enddo
+                enddo
+              enddo
+            enddo
+  
+          case (ESMF_I4%dkind)
+            if (.not.present(i4val)) then
+                print *, "Error: data value does not match Field data type (I4)"
+                return
+            endif
+
+            call ESMF_FieldGetDataPointer(field, ptr5di4, ESMF_DATA_REF, rc=rc)
+            if (rc.NE.ESMF_SUCCESS) return
+
+            lb(1:5) = lbound(ptr5di4)
+            ub(1:5) = ubound(ptr5di4)
+  
+            rc = ESMF_SUCCESS
+            do m=lb(5)+halo, ub(5)-halo
+              do l=lb(4)+halo, ub(4)-halo
+                do k=lb(3)+halo, ub(3)-halo
+                  do j=lb(2)+halo, ub(2)-halo
+                    do i=lb(1)+halo, ub(1)-halo
+                      if (ptr5di4(i, j, k, l, m) .ne. i4val) then
+                          print *, "data mismatch at", i, j, k, l, m, &
+                                    ptr5di4(i,j,k,l,m), " ne ", i4val
+                          rc = ESMF_FAILURE
+                          print *, "(bailing on first error - may be others)"
+                          return 
+                      endif
+                    enddo
+                  enddo
+                enddo
+              enddo
+            enddo
+          
+          case default
+            print *, "unsupported data type in Field"
+            return
+
+        end select
+
+      case default
+        print *, "no code to handle data of rank", rank
+
+    end select
+
     
-    rc = ESMF_SUCCESS
-    do j=lb(2)+halo, ub(2)-halo
-      do i=lb(1)+halo, ub(1)-halo
-        if (abs(ptr(i, j) - val) .gt. 10E-8) then
-            print *, "data mismatch at", i, j, ptr(i,j), " ne ", val
-            rc = ESMF_FAILURE
-            print *, "(bailing on first error - may be others)"
-            return 
-        endif
-      enddo
-    enddo
 
     ! return with whatever rc value it has
 
     return
 
-end subroutine ValidateConstantR4Field
+end subroutine InternalValidateConstantField
 
 
 !------------------------------------------------------------------------------
