@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.7 2005/12/20 04:55:34 eschwab Exp $
+! $Id: ESMF_LogErr.F90,v 1.8 2005/12/20 23:42:39 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,25 +105,25 @@ type(ESMF_LogType), parameter		:: &
 type ESMF_LOGENTRY
     private
     sequence  					
-    integer					h,m,s,ms
-    integer					line
-    logical                                     methodflag,lineflag,fileflag
-    character(len=64)				msg
-    character(len=32) 				file,method
-    character(len=8) 				d
-    character(len=8)				lt  			
+    integer		::  h,m,s,ms
+    integer		::  line
+    logical             ::  methodflag,lineflag,fileflag
+    character(len=64)	::  msg
+    character(len=32) 	::  file,method
+    character(len=8) 	::  d
+    character(len=8)	::  lt  			
 end type ESMF_LOGENTRY
 
 type ESMF_Log
     private
     sequence        
      
-    integer                                             maxElements
-    integer                                             stream 
-    integer                              	        fIndex
-    integer                                             unitNumber
-    integer                                             petNumber	
-    logical					        stopprogram
+    integer                                         ::  maxElements
+    integer                                         ::  stream 
+    integer                              	    ::  fIndex
+    integer                                         ::  unitNumber
+    integer                                         ::  petNumber	
+    logical					    ::  stopprogram
     type(ESMF_Logical)                              ::  flushImmediately    
     type(ESMF_Logical)                              ::  rootOnly    
     type(ESMF_Logical)                              ::  verbose  
@@ -138,7 +138,8 @@ type ESMF_Log
 #else
     type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY
 #endif                                          
-    character(len=32)                                   nameLogErrFile
+    character(len=32)                               ::  nameLogErrFile
+    character(len=ESMF_MAXSTR)                      ::  petNumLabel
     
 end type ESMF_Log
 
@@ -346,16 +347,16 @@ end subroutine ESMF_LogFinalize
     		        WRITE(alog%unitNumber,122) &
                               alog%LOG_ENTRY(j)%d     , " ", alog%LOG_ENTRY(j)%h   , &
                               alog%LOG_ENTRY(j)%m     ,      alog%LOG_ENTRY(j)%s   , ".", &
-                              alog%LOG_ENTRY(j)%ms    , " ", alog%LOG_ENTRY(j)%lt  , "  PET", &
-			      alog%petNumber, " ", &
+                              alog%LOG_ENTRY(j)%ms    , " ", alog%LOG_ENTRY(j)%lt  , "  ", &
+			      trim(adjustl(alog%petNumLabel)), " ", &
                               alog%LOG_ENTRY(j)%file  , " ", alog%LOG_ENTRY(j)%line, " ", &
                               alog%LOG_ENTRY(j)%method, " ", alog%LOG_ENTRY(j)%msg
     		    else
     		        WRITE(alog%unitNumber,123) &
                               alog%LOG_ENTRY(j)%d   , " ", alog%LOG_ENTRY(j)%h   , &
                               alog%LOG_ENTRY(j)%m   ,      alog%LOG_ENTRY(j)%s   , ".", &
-                              alog%LOG_ENTRY(j)%ms  , " ", alog%LOG_ENTRY(j)%lt  , "  PET", &
-			      alog%petNumber, " ", &
+                              alog%LOG_ENTRY(j)%ms  , " ", alog%LOG_ENTRY(j)%lt  , "  ", &
+			      trim(adjustl(alog%petNumLabel)), " ", &
                               alog%LOG_ENTRY(j)%file, " ", alog%LOG_ENTRY(j)%line, " ", &
                               alog%LOG_ENTRY(j)%msg
     		    endif
@@ -364,15 +365,15 @@ end subroutine ESMF_LogFinalize
     		        WRITE(alog%unitNumber,132) &
                               alog%LOG_ENTRY(j)%d     , " ", alog%LOG_ENTRY(j)%h  , &
                               alog%LOG_ENTRY(j)%m     ,      alog%LOG_ENTRY(j)%s  , ".", &
-                              alog%LOG_ENTRY(j)%ms    , " ", alog%LOG_ENTRY(j)%lt , "  PET", &
-		              alog%petNumber, " ", &
+                              alog%LOG_ENTRY(j)%ms    , " ", alog%LOG_ENTRY(j)%lt , "  ", &
+		              trim(adjustl(alog%petNumLabel)), " ", &
     			      alog%LOG_ENTRY(j)%method, " ", alog%LOG_ENTRY(j)%msg
     		    else
     		        WRITE(alog%unitNumber,133) &
                               alog%LOG_ENTRY(j)%d  , " ", alog%LOG_ENTRY(j)%h , &
                               alog%LOG_ENTRY(j)%m  ,      alog%LOG_ENTRY(j)%s , ".", &
-                              alog%LOG_ENTRY(j)%ms , " ", alog%LOG_ENTRY(j)%lt, "  PET", &
-			      alog%petNumber, " ", &
+                              alog%LOG_ENTRY(j)%ms , " ", alog%LOG_ENTRY(j)%lt, "  ", &
+			      trim(adjustl(alog%petNumLabel)), " ", &
                               alog%LOG_ENTRY(j)%msg
     		    endif
     	        endif
@@ -380,10 +381,10 @@ end subroutine ESMF_LogFinalize
    endif
    
    alog%fIndex = 1 
-   122  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,i0,a,a,a,i0,a,a,a,a)
-   123  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,i0,a,a,a,i0,a,a)
-   132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,i0,a,a,a,a)
-   133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,i0,a,a)
+   122  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a,i0,a,a,a,a)
+   123  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a,i0,a,a)
+   132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a,a)
+   133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a)
    
    alog%flushed = ESMF_TRUE
    alog%dirty = ESMF_FALSE
@@ -909,6 +910,7 @@ end subroutine ESMF_LogMsgSetError
     type(ESMF_LOGENTRY), dimension(:), pointer             :: localbuf
     character(len=32)                                      :: fname
     character(len=4)                                       :: fnum
+    character(ESMF_MAXSTR)                                 :: petNumChar
     logical                                                :: inuse
 
     if (present(rc)) then
@@ -918,7 +920,12 @@ end subroutine ESMF_LogMsgSetError
     log%maxElements = 10
     log%stream = 0
     log%fIndex = 1
-    call f_ESMF_VMGlobalGet(log%petNumber)    
+
+    call f_ESMF_VMGlobalGet(log%petNumber)
+    ! Convert PET to contiguous character label
+    write(petNumChar, *) log%petNumber
+    log%petNumLabel = "PET" // trim(adjustl(petNumChar))
+
     log%stopprogram = .false.
     log%flushImmediately = ESMF_TRUE
     log%rootOnly = ESMF_FALSE
