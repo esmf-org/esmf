@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.28 2005/12/16 05:41:21 eschwab Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.29 2005/12/20 23:45:31 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.28 2005/12/16 05:41:21 eschwab Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.29 2005/12/20 23:45:31 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -385,17 +385,18 @@
       !EX_UTest
       rc = ESMF_FAILURE
       input_status = 0
-      open (unit=1, file = "Log_Test_File_3", action = "read", form = "formatted")
+      open (unit=1, file = "Log_Test_File_3", action = "read", &
+            form = "formatted", iostat = input_status)
       do
-      	read (1, *) todays_date, log_time, msg_type, Pet_num, msg_string
-        if (input_status < 0) then
-		exit
-        else 
-	    if (msg_string.eq.random_string) then
-	    	rc = ESMF_SUCCESS
-		exit
-	    endif
-	endif
+          read (1, *, iostat = input_status) todays_date, log_time, &
+                                             msg_type, Pet_num, msg_string
+          if (input_status < 0) then
+              exit
+          endif 
+          if (msg_string.eq.random_string) then
+              rc = ESMF_SUCCESS
+              exit
+          endif
       end do
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) " Verify LogFlush Test"
