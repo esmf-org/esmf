@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.74 2005/10/19 17:26:31 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.75 2005/12/21 23:09:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.74 2005/10/19 17:26:31 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.75 2005/12/21 23:09:25 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -123,6 +123,28 @@
 !    
 !EOPI
       end interface
+!
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldRedist - Redist data, either with a routehandle or not
+!
+! !INTERFACE:
+      interface ESMF_FieldRedist
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_FieldRedistAllinOne
+        module procedure ESMF_FieldRedistRun
+
+! !DESCRIPTION:
+!     Allow a single call to regrid which precomputes, runs and releases
+!     the route table; also support the more commonly expected use of 
+!     executing a route handle multiple times, where the user explicitly
+!     calls store and release on the routehandle. 
+!    
+!EOPI
+      end interface
+!
 !
 !
 !------------------------------------------------------------------------------
@@ -594,9 +616,123 @@
 ! !IROUTINE: ESMF_FieldRedist - Data redistribution operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRedist(srcField, dstField, routehandle, &
-                                  blockingflag, commhandle, parentVM, &
-                                  routeOptions, rc)
+      ! Private name; call using ESMF_FieldRedist()
+      subroutine ESMF_FieldRedistAllinOne(srcField, dstField, parentVM, &
+                                  blockingflag, commhandle, routeOptions, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: srcField
+      type(ESMF_Field), intent(inout) :: dstField
+      type(ESMF_VM), intent(in) :: parentVM
+      type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Perform a redistribution operation over the data
+!     in an {\tt ESMF\_Field}.  This version does not take a {\tt routehandle}
+!     and computes, runs, and releases the communication information in a
+!     single subroutine.  It should be used when a redist operation will be
+!     done only a single time; otherwise commputing and reusing a communication
+!     pattern will be more efficient.
+!     This routine reads the source field and leaves 
+!     the data untouched.  It reads the {\t ESMF\_Grid} 
+!     and {\tt ESMF\_FieldDataMap}
+!     from the destination field and updates the array data in the destination.
+!     The {\tt ESMF\_Grid}s may have different decompositions (different
+!     {\tt ESMF\_DELayout}s) or different data maps, but the source and
+!     destination grids must describe the same set of coordinates.
+!     Unlike {\tt ESMF\_FieldRegrid} this routine does not do interpolation,
+!     only data movement.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [srcField]
+!           {\tt ESMF\_Field} containing source data.
+!     \item [dstField]
+!           {\tt ESMF\_Field} containing destination grid.
+!     \item [parentVM]
+!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s,
+!           most commonly the VM of the Coupler if the redistribution is
+!           inter-component, but could also be the individual VM for a
+!           component if the redistribution is intra-component.  This argument
+!           is only used in the situation where the routehandle has not been
+!           precomputed yet.
+!     \item [{[blockingflag]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between DEs has been scheduled.
+!           If not present, default is to do synchronous communication.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!      (This feature is not yet supported.  All operations are synchronous.)
+!     \item [{[commhandle]}]
+!           If the {\tt blockingflag} is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to redistribute the data.
+!           See Section~\ref{sec:routeoptions} for possible values.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: localrc                          ! Error status
+      type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
+      type(ESMF_RouteHandle) :: routehandle
+   
+      ! Initialize return code   
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Initialize other variables
+      dstFtypep => dstField%ftypep
+      srcFtypep => srcField%ftypep
+      routehandle = ESMF_RouteHandleCreate(localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! call FieldRedistStore
+      call ESMF_FieldRedistStore(srcField, dstField, parentVM, &
+                                 routeOptions, routehandle, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_ArrayRedist(srcFtypep%localfield%localdata, &
+                            dstFtypep%localfield%localdata, &
+                            routehandle, 1, blockingflag, commhandle, &
+                            routeOptions, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_FieldRedistRelease(routehandle, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldRedistAllinOne
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRedist"
+!BOP
+! !IROUTINE: ESMF_FieldRedist - Data redistribution operation on a Field
+
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldRedist()
+      subroutine ESMF_FieldRedistRun(srcField, dstField, routehandle, &
+                                  blockingflag, commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField
@@ -604,7 +740,6 @@
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
-      type(ESMF_VM), intent(in), optional :: parentVM
       type(ESMF_RouteOptions), intent(in), optional :: routeOptions
       integer, intent(out), optional :: rc               
 !
@@ -645,13 +780,6 @@
 !           argument is required.  Information about the pending operation
 !           will be stored in the {\tt ESMF\_CommHandle} and can be queried
 !           or waited for later.
-!     \item [{[parentVM]}]
-!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s,
-!           most commonly the VM of the Coupler if the redistribution is
-!           inter-component, but could also be the individual VM for a
-!           component if the redistribution is intra-component.  This argument
-!           is only used in the situation where the routehandle has not been
-!           precomputed yet.
 !     \item [{[routeOptions]}]
 !           Not normally specified.  Specify which internal strategy to select
 !           when executing the communication needed to redistribute the data.
@@ -663,80 +791,45 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
       integer :: htype
-      logical :: allInOne
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
    
       ! Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Initialize other variables
       dstFtypep => dstField%ftypep
       srcFtypep => srcField%ftypep
-      allInOne = .false.
 
       ! if the routehandle has not been precomputed, do so now
       ! first check if the RouteHandle is valid (constructed)
-      call ESMF_RouteHandleValidate(routehandle, rc=status)
+      call ESMF_RouteHandleValidate(routehandle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      ! if valid, check the routehandle type
-      if (status.eq.ESMF_SUCCESS) then
-        call ESMF_RouteHandleGet(routehandle, htype=htype, rc=status)
-        if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
-          allInOne = .true.
-        elseif (htype .ne. ESMF_REDISTHANDLE) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-                                   "routehandle not defined for redist", &
-                                   ESMF_CONTEXT, rc)
-          return
-        endif
-      ! if not valid, try calling RedistStore to initialize
-      else
-        allInOne = .true.
-      endif
-
-      ! if needed, call FieldRedistStore
-      if (allInOne) then
-        call ESMF_LogWrite("uninitialized routehandle: calling FieldRedistStore", &
-                              ESMF_LOG_WARNING, &
-                              ESMF_CONTEXT)
-        if (.not. present(parentVM)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-          "if parentVM not specified, routehandle must be precomputed", &
-                                   ESMF_CONTEXT, rc)
-          return
-        endif
-        call ESMF_FieldRedistStore(srcField, dstField, parentVM, &
-                                   routeOptions, routehandle, status)
-        if (ESMF_LogMsgFoundError(status, &
-              "routehandle invalid, and unable to precompute one on the fly", &
-                                  ESMF_CONTEXT, rc)) return
-        
+      ! check the routehandle type
+      call ESMF_RouteHandleGet(routehandle, htype=htype, rc=localrc)
+      if (htype .ne. ESMF_REDISTHANDLE) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                                 "routehandle not defined for redist", &
+                                 ESMF_CONTEXT, rc)
+        return
       endif
 
       call ESMF_ArrayRedist(srcFtypep%localfield%localdata, &
                             dstFtypep%localfield%localdata, &
                             routehandle, 1, blockingflag, commhandle, &
-                            routeOptions, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      ! if this is a redist call with an uninitialized routehandle, then
-      ! destroy it before returning    TODO:  is this right?
-      if (allInOne) call ESMF_FieldRedistRelease(routehandle, status)
+                            routeOptions, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldRedist
+      end subroutine ESMF_FieldRedistRun
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
