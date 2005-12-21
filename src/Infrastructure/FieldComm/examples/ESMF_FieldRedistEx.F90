@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.5 2005/12/16 21:10:31 jwolfe Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.6 2005/12/21 23:14:01 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@
      type(ESMF_ArraySpec) :: arrayspec1D, arrayspec2D
      type(ESMF_DELayout) :: delayout1, delayout2
      type(ESMF_GridHorzStagger) :: horz_stagger
-     type(ESMF_RouteHandle) :: rh12, emptyRH12
+     type(ESMF_RouteHandle) :: rh12
      type(ESMF_VM) :: vm
 
      finalrc = ESMF_SUCCESS
@@ -246,11 +246,10 @@
 ! data with a single call.  Using the data structures from the previous example,
 ! this example illustrates the capability to perform a redistribution in a single
 ! call to FieldRedist rather than the three separate calls to FieldRedistStore,
-! FieldRedist, and FieldRedistRelease.  Please note that in this case ESMF does
-! not return a valid RouteHandle to the user for reuse, since it has already
-! released it and freed its memory usage.  However, this interface can be useful
-! for some applications where there is no future use of the communication
-! patterns.
+! FieldRedist, and FieldRedistRelease.  Please note that in this case the calling
+! argument list does not include a RouteHandle and one is not returned to the
+! user for reuse.  However, this interface can be useful for some applications
+! where there is no future use of the communication patterns.
 !
 !EOE
 
@@ -259,10 +258,8 @@
      ! precomputed RouteHandle with the exception of requiring the VM in
      ! the calling list.
 
-     call ESMF_FieldRedist(field1, field2, emptyRH12, parentVM=vm, rc=rc)
+     call ESMF_FieldRedist(field1, field2, parentVM=vm, rc=rc)
 
-     ! Also note there is no need to call FieldRedistRelease with this
-     ! RouteHandle because it is done internally.
 !EOC
 
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
