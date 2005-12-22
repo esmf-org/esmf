@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.76 2005/12/22 00:08:48 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.77 2005/12/22 00:14:53 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.76 2005/12/22 00:08:48 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.77 2005/12/22 00:14:53 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -634,7 +634,7 @@
 !     in an {\tt ESMF\_Field}.  This version does not take a {\tt routehandle}
 !     and computes, runs, and releases the communication information in a
 !     single subroutine.  It should be used when a redist operation will be
-!     done only a single time; otherwise commputing and reusing a communication
+!     done only a single time; otherwise computing and reusing a communication
 !     pattern will be more efficient.
 !     This routine reads the source field and leaves 
 !     the data untouched.  It reads the {\t ESMF\_Grid} 
@@ -656,9 +656,7 @@
 !           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s,
 !           most commonly the VM of the Coupler if the redistribution is
 !           inter-component, but could also be the individual VM for a
-!           component if the redistribution is intra-component.  This argument
-!           is only used in the situation where the routehandle has not been
-!           precomputed yet.
+!           component if the redistribution is intra-component. 
 !     \item [{[blockingflag]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
@@ -1202,7 +1200,7 @@
 !     in an {\tt ESMF\_Field}.  This version does not take a {\tt routehandle}
 !     and computes, runs, and releases the communication information in a
 !     single subroutine.  It should be used when a regrid operation will be
-!     done only a single time; otherwise commputing and reusing a communication
+!     done only a single time; otherwise computing and reusing a communication
 !     pattern will be more efficient.
 !     This routine reads the source field and 
 !     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
