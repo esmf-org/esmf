@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.53 2005/11/07 22:46:07 jwolfe Exp $
+! $Id: ESMF_BundleComm.F90,v 1.54 2005/12/22 19:15:09 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -107,13 +107,55 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.53 2005/11/07 22:46:07 jwolfe Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.54 2005/12/22 19:15:09 jwolfe Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_BundleRedist - Redist data, either with a routehandle or not
+!
+! !INTERFACE:
+      interface ESMF_BundleRedist
+
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_BundleRedistAllinOne
+        module procedure ESMF_BundleRedistRun
+
+! !DESCRIPTION:
+!     Allow a single call to redist which precomputes, runs and releases
+!     the route table; also support the more commonly expected use of
+!     executing a route handle multiple times, where the user explicitly
+!     calls store and release on the routehandle.
+!
+!EOPI
+      end interface
+!
+!
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_BundleRegrid - Regrid data, either with a routehandle or not
+!
+! !INTERFACE:
+      interface ESMF_BundleRegrid
+
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_BundleRegridAllinOne
+        module procedure ESMF_BundleRegridRun
+
+! !DESCRIPTION:
+!     Allow a single call to regrid which precomputes, runs and releases
+!     the route table; also support the more commonly expected use of
+!     executing a route handle multiple times, where the user explicitly
+!     calls store and release on the routehandle.
+!
+!EOPI
+      end interface
+!
 !
 !
 !==============================================================================
@@ -195,8 +237,8 @@
       call ESMF_ArrayAllGather(btypep%flist(1)%ftypep%localfield%localdata, btypep%grid, &
                                btypep%flist(1)%ftypep%mapping, array, status)
       if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
@@ -625,7 +667,121 @@
 ! !IROUTINE: ESMF_BundleRedist - Data redistribution operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRedist(srcBundle, dstBundle, routehandle, &
+      ! Private name; call using ESMF_BundleRedist()
+      subroutine ESMF_BundleRedistAllinOne(srcBundle, dstBundle, parentVM, &
+                                   blocking, commhandle, routeOptions, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: srcBundle
+      type(ESMF_Bundle), intent(inout) :: dstBundle
+      type(ESMF_VM), intent(in) :: parentVM
+      type(ESMF_BlockingFlag), intent(in) , optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Perform a redistribution operation over the data
+!     in an {\tt ESMF\_Bundle}.  This version does not take a {\tt routehandle}
+!     and computes, runs, and releases the communication information in a
+!     single subroutine.  It should be used when a redist operation will be
+!     done only a single time; otherwise computing and reusing a communication
+!     pattern will be more efficient. 
+!     This routine reads the source bundle and leaves 
+!     the data untouched.  It reads the {\tt ESMF\_Grid} and 
+!     {\tt ESMF\_FieldDataMap}
+!     from the destination bundle and updates the array data in the destination.
+!     The {\tt ESMF\_Grid}s may have different decompositions (different
+!     {\tt ESMF\_DELayout}s) or different data maps, but the source and
+!     destination grids must describe the same set of coordinates.
+!     Unlike {\tt ESMF\_BundleRegrid} this routine does not do interpolation,
+!     only data movement.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [srcBundle] 
+!           {\tt ESMF\_Bundle} containing source data.
+!     \item [dstBundle] 
+!           {\tt ESMF\_Bundle} containing destination grid.
+!     \item [parentVM]
+!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Bundle}s,
+!           most commonly the VM of the Coupler if the redistribution is
+!           inter-component, but could also be the individual VM for a
+!           component if the redistribution is intra-component.
+!     \item [{[blocking]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between DEs has been scheduled.
+!           If not present, default is to do synchronous communication.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!      (This feature is not yet supported.  All operations are synchronous.)
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to redistribute data.
+!           See Section~\ref{opt:routeopt} for possible values.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                            ! Error status
+      type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
+      type(ESMF_RouteHandle) :: routehandle
+   
+      ! Initialize return code   
+      status = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
+
+      stypep = srcBundle%btypep
+      dtypep = dstBundle%btypep
+      routehandle = ESMF_RouteHandleCreate(status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! call BundleRedistStore
+      call ESMF_BundleRedistStore(srcBundle, dstBundle, parentVM, &
+                                  routehandle, routeOptions, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! call BundleRedistRun
+      call ESMF_BundleRedistRun(srcBundle, dstBundle, routehandle, &
+                                blocking, commhandle, routeOptions, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! call BundleRedistRelease
+      call ESMF_BundleRedistRelease(routehandle, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleRedistAllinOne
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleRedist"
+!BOP
+! !IROUTINE: ESMF_BundleRedist - Data redistribution operation on a Bundle
+
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldRedist()
+      subroutine ESMF_BundleRedistRun(srcBundle, dstBundle, routehandle, &
                                    blocking, commhandle, routeOptions, rc)
 !
 !
@@ -827,8 +983,7 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleRedist
-
+      end subroutine ESMF_BundleRedistRun
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1074,6 +1229,127 @@
 
       end subroutine ESMF_BundleReduce
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleRegrid"
+!BOP
+! !IROUTINE: ESMF_BundleRegrid - Execute a regrid operation on a Bundle
+
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleRegrid()
+      subroutine ESMF_BundleRegridAllinOne(srcBundle, dstBundle, parentVM, &
+                                   regridMethod, regridNorm, &
+                                   srcMask, dstMask, blocking, commhandle, &
+                                   routeOptions, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(inout) :: srcBundle
+      type(ESMF_Bundle), intent(inout) :: dstBundle
+      type(ESMF_VM), intent(in) :: parentVM
+      type(ESMF_RegridMethod), intent(in) :: regridMethod
+      type(ESMF_RegridNormOpt), intent(in), optional :: regridNorm
+      type(ESMF_Mask), intent(in), optional :: srcMask
+      type(ESMF_Mask), intent(in), optional :: dstMask
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
+      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Perform a regrid operation over the data
+!     in an {\tt ESMF\_Bundle}.  This routine reads the source bundle and 
+!     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
+!     {\tt ESMF\_FieldDataMap} information in the destination bundle to
+!     control the transformation of data.  The array data in the 
+!     destination bundle is overwritten by this call.
+!     This version does not take a {\tt routehandle}
+!     but computes, runs, and releases the communication information in a
+!     single subroutine.  It should be used when a redist operation will be
+!     done only a single time; otherwise computing and reusing a communication
+!     pattern will be more efficient. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [srcBundle] 
+!           {\tt ESMF\_Bundle} containing source data.
+!     \item [dstBundle] 
+!           {\tt ESMF\_Bundle} containing destination grid.
+!     \item [parentVM]
+!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Bundle}s, 
+!           most commonly the VM of the Coupler if the regridding is
+!           inter-component, but could also be the individual VM for a component
+!           if the regridding is intra-component.  
+!     \item [regridMethod]
+!           Type of regridding to do.  A set of predefined methods are
+!           supplied.
+!     \item [{[regridNorm]}]
+!           Normalization option, only for specific regrid types.
+!     \item [{[blocking]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between DEs has been scheduled.
+!           If not present, default is to do synchronous communication.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!      (This feature is not yet supported.  All operations are synchronous.)
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
+!     \item [{[routeOptions]}]
+!           Not normally specified.  Specify which internal strategy to select
+!           when executing the communication needed to redistribute data.
+!           See Section~\ref{opt:routeopt} for possible values.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: localrc                           ! Error status
+      type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
+      type(ESMF_RouteHandle) :: routehandle
+   
+      ! Initialize return code   
+      localrc = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
+
+      stypep = srcBundle%btypep
+      dtypep = dstBundle%btypep
+      routehandle = ESMF_RouteHandleCreate(localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! call BundleRegridStore
+      call ESMF_BundleRegridStore(srcBundle, dstBundle, parentVM, &
+                                  routehandle, regridMethod, regridNorm, &
+                                  srcMask, dstMask, routeOptions, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! call BundleRegridRun
+      call ESMF_BundleRegridRun(srcBundle, dstBundle, routehandle, &
+                                srcMask, dstMask, blocking, commhandle, &
+                                routeOptions, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! call BundleRegridRelease
+      call ESMF_BundleRegridRelease(routehandle, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleRegridAllinOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1082,8 +1358,9 @@
 ! !IROUTINE: ESMF_BundleRegrid - Execute a regrid operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRegrid(srcBundle, dstBundle, routehandle, &
-                                   srcmask, dstmask, blocking, commhandle, &
+      ! Private name; call using ESMF_BundleRegrid()
+      subroutine ESMF_BundleRegridRun(srcBundle, dstBundle, routehandle, &
+                                   srcMask, dstMask, blocking, commhandle, &
                                    routeOptions, rc)
 !
 !
@@ -1091,8 +1368,8 @@
       type(ESMF_Bundle), intent(inout) :: srcBundle
       type(ESMF_Bundle), intent(inout) :: dstBundle
       type(ESMF_RouteHandle), intent(inout) :: routehandle
-      type(ESMF_Mask), intent(in), optional :: srcmask
-      type(ESMF_Mask), intent(in), optional :: dstmask
+      type(ESMF_Mask), intent(in), optional :: srcMask
+      type(ESMF_Mask), intent(in), optional :: dstMask
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       type(ESMF_RouteOptions), intent(in), optional :: routeOptions
@@ -1117,10 +1394,10 @@
 !           associated with the precomputed
 !           information for a regrid operation on this {\tt ESMF\_Field}.
 !           This handle must be supplied at run time to execute the regrid.
-!     \item [{[srcmask]}]
+!     \item [{[srcMask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
 !           (Not yet implemented.)
-!     \item [{[dstmask]}]
+!     \item [{[dstMask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid destination data.
 !           (Not yet implemented.)
 !     \item [{[blocking]}]
@@ -1224,7 +1501,7 @@
                                   dtypep%flist(i)%ftypep%localfield%localdata, &
                                   dtypep%flist(i)%ftypep%mapping, hasDstData, &
                                   routehandle, i, &
-                                  srcmask, dstmask, &
+                                  srcMask, dstMask, &
                                   blocking, commhandle, routeOptions, status)
             if (ESMF_LogMsgFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
@@ -1266,7 +1543,7 @@
                                  stypep%flist(1)%ftypep%mapping, hasSrcData, &
                                  dstArrayList, &
                                  dtypep%flist(1)%ftypep%mapping, hasDstData, &
-                                 routehandle, 1, srcmask, dstmask, &
+                                 routehandle, 1, srcMask, dstMask, &
                                  blocking, commhandle, routeOptions, status)
               if (ESMF_LogMsgFoundError(status, &
                                         ESMF_ERR_PASSTHRU, &
@@ -1290,7 +1567,7 @@
                                   dtypep%flist(i)%ftypep%localfield%localdata, &
                                   dtypep%flist(i)%ftypep%mapping, hasDstData, &
                                   routehandle, 1, &
-                                  srcmask, dstmask, &
+                                  srcMask, dstMask, &
                                   blocking, commhandle, routeOptions, status)
                 if (ESMF_LogMsgFoundError(status, &
                                           ESMF_ERR_PASSTHRU, &
@@ -1303,7 +1580,7 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleRegrid
+      end subroutine ESMF_BundleRegridRun
 
 
 !------------------------------------------------------------------------------
@@ -1347,8 +1624,8 @@
 
 ! !INTERFACE:
       subroutine ESMF_BundleRegridStore(srcBundle, dstBundle, parentVM, &
-                                       routehandle, regridmethod, regridnorm, &
-                                       srcMask, dstMask, routeOptions, rc)
+                                        routehandle, regridMethod, regridNorm, &
+                                        srcMask, dstMask, routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
@@ -1356,8 +1633,8 @@
       type(ESMF_Bundle), intent(inout) :: dstBundle
       type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteHandle), intent(out) :: routehandle
-      type(ESMF_RegridMethod), intent(in) :: regridmethod
-      type(ESMF_RegridNormOpt), intent(in), optional :: regridnorm
+      type(ESMF_RegridMethod), intent(in) :: regridMethod
+      type(ESMF_RegridNormOpt), intent(in), optional :: regridNorm
       type(ESMF_Mask), intent(in), optional :: srcMask
       type(ESMF_Mask), intent(in), optional :: dstMask
       type(ESMF_RouteOptions), intent(in), optional :: routeOptions
@@ -1388,10 +1665,10 @@
 !     \item [routehandle]
 !           Output from this call, identifies the precomputed work which
 !           will be executed when {\tt ESMF\_BundleRegrid} is called.
-!     \item [regridmethod]
+!     \item [regridMethod]
 !           Type of regridding to do.  A set of predefined methods are
 !           supplied.
-!     \item [{[regridnorm]}]
+!     \item [{[regridNorm]}]
 !           Normalization option, only for specific regrid types.
 !     \item [{[srcMask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
@@ -1453,7 +1730,7 @@
                                  dtypep%flist(1)%ftypep%mapping, &
                                  parentVM, routehandle, &
                                  1, ESMF_ALLTO1HANDLEMAP, 1, &
-                                 regridmethod, regridnorm, srcMask, dstMask, &
+                                 regridMethod, regridNorm, srcMask, dstMask, &
                                  routeOptions, status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
@@ -1470,7 +1747,7 @@
                                  dtypep%flist(i)%ftypep%mapping, &
                                  parentVM, routehandle, &
                                  i, ESMF_1TO1HANDLEMAP, stypep%field_count, &
-                                 regridmethod, regridnorm, srcMask, dstMask, &
+                                 regridMethod, regridNorm, srcMask, dstMask, &
                                  routeOptions, status)
             if (ESMF_LogMsgFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
