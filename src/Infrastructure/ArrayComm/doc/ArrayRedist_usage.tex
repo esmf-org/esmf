@@ -21,10 +21,13 @@ The Redist functions use the communication patterns contained in the RouteHandle
 object to perform the actual redistribution of the ESMF data objects.  The
 Release function deletes the RouteHandle object and frees all memory associated
 with a Redist.  ESMF assumes users will call each of these functions
-sequentially, but the Redist interfaces also allow for a single call to the
-Redist functions instead.  In this case, no RouteHandle is returned to the user
-and a VM must be included in the call.  Please see the examples below for 
-representative FieldRedist usage.
+sequentially, but the Redist also has Field and Bundle interfaces that allow for
+a single call to the Redist function instead, without requiring Store and
+Release calls.  In this case, the Redist interfaces have been overloaded and
+for this version a parent VM must be included in the calling argument list.
+Also, no RouteHandle is returned to the user for possible reuse.
+
+Please see the examples below for representative FieldRedist usage.
 
 
 
