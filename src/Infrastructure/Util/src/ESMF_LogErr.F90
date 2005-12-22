@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.8 2005/12/20 23:42:39 eschwab Exp $
+! $Id: ESMF_LogErr.F90,v 1.9 2005/12/22 06:21:46 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -124,6 +124,7 @@ type ESMF_Log
     integer                                         ::  unitNumber
     integer                                         ::  petNumber	
     logical					    ::  stopprogram
+    logical					    ::  pad ! memory alignment
     type(ESMF_Logical)                              ::  flushImmediately    
     type(ESMF_Logical)                              ::  rootOnly    
     type(ESMF_Logical)                              ::  verbose  
