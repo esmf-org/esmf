@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.75 2005/12/21 23:09:25 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.76 2005/12/22 00:08:48 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.75 2005/12/21 23:09:25 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.76 2005/12/22 00:08:48 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -137,7 +137,7 @@
         module procedure ESMF_FieldRedistRun
 
 ! !DESCRIPTION:
-!     Allow a single call to regrid which precomputes, runs and releases
+!     Allow a single call to redist which precomputes, runs and releases
 !     the route table; also support the more commonly expected use of 
 !     executing a route handle multiple times, where the user explicitly
 !     calls store and release on the routehandle. 
