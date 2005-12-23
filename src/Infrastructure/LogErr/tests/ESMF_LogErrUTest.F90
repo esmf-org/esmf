@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.30 2005/12/23 06:40:15 eschwab Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.31 2005/12/23 19:04:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.30 2005/12/23 06:40:15 eschwab Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.31 2005/12/23 19:04:58 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -50,12 +50,12 @@
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name, msg_type, pet_num
       type(ESMF_Time) :: log_time, my_time
-      type(ESMF_TimeInterval) :: time_diff
+      type(ESMF_TimeInterval) :: time_diff, zero, one_sec
       character(1) :: pet_char
       character(4) :: my_pet_char
       character(8) :: todays_date
       character(10) :: todays_time
-      integer :: my_v(8), log_v(8), k, time_diff_ms
+      integer :: my_v(8), log_v(8), k
       integer, pointer :: rndseed(:)
       
 
@@ -421,8 +421,9 @@
       call ESMF_TimeSet(log_time, yy=log_v(1), mm=log_v(2), dd=log_v(3), &
                         h=log_v(5), m=log_v(6), s=log_v(7), ms=log_v(8), rc=rc)
       time_diff = log_time - my_time
-      call ESMF_TimeIntervalGet(time_diff, ms=time_diff_ms, rc=rc)
-      call ESMF_Test((time_diff_ms.ge.0 .and. time_diff_ms.le.1000), &
+      call ESMF_TimeIntervalSet(zero, s=0, rc=rc)
+      call ESMF_TimeIntervalSet(one_sec, s=1, rc=rc)
+      call ESMF_Test((time_diff.ge.zero .and. time_diff.le.one_sec), &
                       name, failMsg, result, ESMF_SRCLINE)
       print *, " my_time is "
       call ESMF_TimePrint(my_time, "string", rc)
