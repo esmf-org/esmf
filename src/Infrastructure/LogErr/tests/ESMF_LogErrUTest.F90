@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.29 2005/12/20 23:45:31 eschwab Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.30 2005/12/23 06:40:15 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.29 2005/12/20 23:45:31 eschwab Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.30 2005/12/23 06:40:15 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -48,12 +48,14 @@
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
-      character(ESMF_MAXSTR) :: name, msg_type, Pet_num
-      character(10) :: log_time, my_time
+      character(ESMF_MAXSTR) :: name, msg_type, pet_num
+      type(ESMF_Time) :: log_time, my_time
+      type(ESMF_TimeInterval) :: time_diff
       character(1) :: pet_char
       character(4) :: my_pet_char
-      character(8) :: my_todays_date, todays_date
-      integer :: v(8), k
+      character(8) :: todays_date
+      character(10) :: todays_time
+      integer :: my_v(8), log_v(8), k, time_diff_ms
       integer, pointer :: rndseed(:)
       
 
@@ -80,6 +82,7 @@
       print *, "Starting LogErr Tests"
 
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+      call ESMF_CalendarSetDefault(ESMF_CAL_GREGORIAN, rc)
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -321,7 +324,7 @@
       ! Loop according to Pet Number so each PET has a different time
       do i=1, (((my_pet+1)*7) * 116931)
          ! This call put here to waste time
-     	 call date_and_time(date=my_todays_date, time=my_time)
+     	 call date_and_time(date=todays_date, time=todays_time)
       end do
       print *, "Ending the no-op loop"
 
@@ -333,8 +336,8 @@
       print *, "size of random seed = ", k
       allocate(rndseed(k))
       do i=1,k
-        call date_and_time(values=v(:))
-        rndseed(i)=v(8)*v(7)+k
+        call date_and_time(values=my_v)
+        rndseed(i)=my_v(8)*my_v(7)+k
       end do
       print *, "generated a random seed based on current time = " , rndseed(1)
       call random_seed(put=rndseed(1:k))
@@ -357,7 +360,7 @@
       ! Test Log Write 
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       ! Get date and time to compare later in the test
-      call date_and_time(date=my_todays_date, time=my_time)
+      call date_and_time(values=my_v)
       call ESMF_LogWrite(log=log2, msg=random_string,msgtype=ESMF_LOG_INFO,rc=rc)
       write(name, *) "Write to log file Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -388,7 +391,7 @@
       open (unit=1, file = "Log_Test_File_3", action = "read", &
             form = "formatted", iostat = input_status)
       do
-          read (1, *, iostat = input_status) todays_date, log_time, &
+          read (1, *, iostat = input_status) todays_date, todays_time, &
                                              msg_type, Pet_num, msg_string
           if (input_status < 0) then
               exit
@@ -406,23 +409,25 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Verify correct date was written to log file
-      write(failMsg, *) "Date in file is wrong"
-      write(name, *) "Verify date in Log File Test"
-      call ESMF_Test((my_todays_date.eq.todays_date), name, failMsg, result, ESMF_SRCLINE)
-      print *, " my_todays_date is ", my_todays_date
-      print *, " todays_date is ", todays_date
-
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Verify correct date was written to log file
-      write(failMsg, *) "time in file is wrong"
-      write(name, *) "Verify time in Log File Test"
-      call ESMF_Test((my_time.eq.log_time), name, failMsg, result, ESMF_SRCLINE)
-      print *, " my_time = ", my_time
-      print *, " log_time = ", log_time
-      
+      ! Verify correct date and time was written to log file (within 1 second)
+      write(failMsg, *) "Date and/or Time in file is wrong"
+      write(name, *) "Verify Date and Time in Log File Test"
+      read(todays_date, 10) log_v(1), log_v(2), log_v(3)
+   10 format(i4,i2,i2)
+      read(todays_time, 20) log_v(5), log_v(6), log_v(7), log_v(8)
+   20 format(i2,i2,i2,x,i3)
+      call ESMF_TimeSet(my_time, yy=my_v(1), mm=my_v(2), dd=my_v(3), &
+                        h=my_v(5), m=my_v(6), s=my_v(7), ms=my_v(8), rc=rc)
+      call ESMF_TimeSet(log_time, yy=log_v(1), mm=log_v(2), dd=log_v(3), &
+                        h=log_v(5), m=log_v(6), s=log_v(7), ms=log_v(8), rc=rc)
+      time_diff = log_time - my_time
+      call ESMF_TimeIntervalGet(time_diff, ms=time_diff_ms, rc=rc)
+      call ESMF_Test((time_diff_ms.ge.0 .and. time_diff_ms.le.1000), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, " my_time is "
+      call ESMF_TimePrint(my_time, "string", rc)
+      print *, " log_time is "
+      call ESMF_TimePrint(log_time, "string", rc)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -436,7 +441,7 @@
       ! Verify correct PET was written into log file
       write(failMsg, *) "PET number in file is wrong"
       write(name, *) "Verify PET number in Log File Test"
-      call ESMF_Test((my_pet_char.eq.Pet_num), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((my_pet_char.eq.pet_num), name, failMsg, result, ESMF_SRCLINE)
       print *, " My PET char is ", my_pet_char
       
       !------------------------------------------------------------------------
