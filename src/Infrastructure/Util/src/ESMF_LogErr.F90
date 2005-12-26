@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.9 2005/12/22 06:21:46 eschwab Exp $
+! $Id: ESMF_LogErr.F90,v 1.10 2005/12/26 21:58:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -382,10 +382,10 @@ end subroutine ESMF_LogFinalize
    endif
    
    alog%fIndex = 1 
-   122  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a,i0,a,a,a,a)
-   123  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a,i0,a,a)
-   132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a,a)
-   133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a)
+   122  FORMAT(a8,a,3i2.2,a,i6.6,7a,i0,4a)
+   123  FORMAT(a8,a,3i2.2,a,i6.6,7a,i0,2a)
+   132  FORMAT(a8,a,3i2.2,a,i6.6,8a)
+   133  FORMAT(a8,a,3i2.2,a,i6.6,6a)
    
    alog%flushed = ESMF_TRUE
    alog%dirty = ESMF_FALSE
