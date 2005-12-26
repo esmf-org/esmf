@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.31 2005/12/23 19:04:58 eschwab Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.32 2005/12/26 22:00:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.31 2005/12/23 19:04:58 eschwab Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.32 2005/12/26 22:00:28 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -413,9 +413,9 @@
       write(failMsg, *) "Date and/or Time in file is wrong"
       write(name, *) "Verify Date and Time in Log File Test"
       read(todays_date, 10) log_v(1), log_v(2), log_v(3)
-   10 format(i4,i2,i2)
+   10 format(i4,2i2)
       read(todays_time, 20) log_v(5), log_v(6), log_v(7), log_v(8)
-   20 format(i2,i2,i2,x,i3)
+   20 format(3i2,1x,i3)
       call ESMF_TimeSet(my_time, yy=my_v(1), mm=my_v(2), dd=my_v(3), &
                         h=my_v(5), m=my_v(6), s=my_v(7), ms=my_v(8), rc=rc)
       call ESMF_TimeSet(log_time, yy=log_v(1), mm=log_v(2), dd=log_v(3), &
