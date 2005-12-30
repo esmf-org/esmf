@@ -35,7 +35,7 @@ that takes place inside Store.  In initial timings, typical RegridStore calls
 take on the order of seconds while the application routines themselves require
 more on the order of milliseconds.  Scaling on parallel architectures is
 reasonably good up until communication overhead dominates timings (see 
-Figure \ref{fig:RegridScaling} for scaling curves from an example application).
+Figure~\ref{fig:RegridScaling} for scaling curves from an example application).
 
 \begin{center}
 \begin{figure}
@@ -56,7 +56,7 @@ Figure \ref{fig:RegridScaling} for scaling curves from an example application).
      grids.  Standard bilinear interpolation schemes can be found in many textbooks.
      Here we present a more general scheme which uses a local bilinear approximation
      to interpolate to a point in a quadrilateral grid.  Consider the grid points
-     shown in Fig.~\ref{fig:quad} labelled with logically-rectangular indices
+     shown in Figure~\ref{fig:quad} labelled with logically-rectangular indices
      (e.g. $(i,j)$).
 
 \begin{figure}
@@ -168,7 +168,7 @@ A = \left[\begin{array}{cc}
      further optimized by tracking the index of the source cell containing the
      previous point and using that as the initial starting index for the next
      point's sweep, since both grids are logically ordered.  Please see
-     Figure \ref{fig:BilinearSweep} for an illustration of the sweep algorithm.
+     Figure~\ref{fig:BilinearSweep} for an illustration of the sweep algorithm.
 
 \begin{center}
 \begin{figure}
@@ -433,8 +433,8 @@ w_{3nk} & = & {1\over{A_k}}\int\int_{A_{nk}}\cos\theta(\phi-\phi_n)dA \nonumber 
      range of physical coordinates.  Each bin therefore identifies an index range
      corresponding to a physical coordinate range.  Then when the sweep begins,
      only those cells in the index range belonging to the same coordinate bin as
-     the identifed subsegment are used.  Please reference Figure 
-     \ref{fig:ConservSweep} for an illustration of binning and the sweep
+     the identifed subsegment are used.  Please reference
+     Figure~\ref{fig:ConservSweep} for an illustration of binning and the sweep
      algorithm.
 
 \begin{center}
@@ -559,7 +559,7 @@ Y &=& 2\sin\left({\pi \over 4} - {\theta \over 2}\right)\sin\phi
 \subsubsection{Overview of Parallelization of Regrid}
 On parallel processing platforms, the physical domains of the source and
 destination Grids are decomposed into logical Decomposition Elements (DEs), as
-illustrated in Figure \ref{fig:ParallelRegrid}.  In order to calculate
+illustrated in Figure~\ref{fig:ParallelRegrid}.  In order to calculate
 interpolation weights, each
 
 \begin{center}
@@ -606,7 +606,7 @@ algorithms.  It requires only a slight bit more work to identify which source DE
 intersect the the local destination DE in physical space and then transfer all
 the data from those DEs.  In some cases, this will save communication and memory
 overhead.  But in other cases, like between one Grid decomposed in rows and
-another decomposed by columns as illustrated in Figure \ref{fig:RToCRegrid}, that
+another decomposed by columns as illustrated in Figure~\ref{fig:RToCRegrid}, that
 
 \begin{center}
 \begin{figure}
@@ -636,7 +636,7 @@ for the current logically rectangular Grids each intersection is defined as the
 block of the source DE that encompasses any physical overlap with the destination
 DE's domain.  Future Grid types would need appropriate methods to identify
 intersections, based on their topologies as well as communication issues.  As
-shown in Figure \ref{fig:RegridIntersection}, 
+shown in Figure~\ref{fig:RegridIntersection}, 
 
 \begin{center}
 \begin{figure}
@@ -659,7 +659,7 @@ some global communication.
 Regridding algorithms that are point-based (as opposed to cell-based), like
 bilinear or bicubic interpolation, require an extra layer of cells around the
 identified region, because those algorithms need the location of all surrounding
-data points (see Figure \ref{fig:RegridExtraLayer}).
+data points (see Figure~\ref{fig:RegridExtraLayer}).
 
 \begin{center}
 \begin{figure} 
@@ -709,7 +709,7 @@ number of cells per bin, called {\tt targetBinSize}.  The number of bins on any
 PET is set by the local number of cells divided by the targetBinSize.  Currently
 this parameter is hard-coded in Regrid, but could be made available to users.
 It has been set to 250, based on some preliminary timings on its effect on
-Regrid Store (see Figure \ref{fig:TargetBinSize}).
+Regrid Store (see Figure~\ref{fig:TargetBinSize}).
 
 \begin{center}
 \begin{figure}
