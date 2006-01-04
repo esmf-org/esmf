@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.23 2004/10/26 21:34:33 theurich Exp $
+// $Id: ESMC_Comp.h,v 1.24 2006/01/04 22:52:58 tjcnrl Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,6 +32,7 @@
 #define ESMF_FINAL 3
 #define ESMF_WRITERESTART 4
 #define ESMF_READRESTART 5
+#define ESMF_SINGLEPHASE 0
 
 enum ESMC_CompType { ESMF_COMPTYPE_GRID=1, ESMF_COMPTYPE_CPL, 
                      ESMF_COMPTYPE_UNKNOWN };

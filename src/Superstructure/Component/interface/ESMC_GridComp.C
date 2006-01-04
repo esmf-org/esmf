@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.C,v 1.8 2004/05/26 14:23:56 nscollins Exp $
+// $Id: ESMC_GridComp.C,v 1.9 2006/01/04 22:52:58 tjcnrl Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_GridComp.C,v 1.8 2004/05/26 14:23:56 nscollins Exp $";
+           "$Id: ESMC_GridComp.C,v 1.9 2006/01/04 22:52:58 tjcnrl Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -83,6 +83,62 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
     return rc;
 
  } // end ESMC_GridCompSetServices
+
+//----------------------------------------------------------------------------- 
+//BOP
+// !IROUTINE:  ESMC_GridCompSetEntryPoint - set pointers for GridComp Functions
+//
+// !INTERFACE:
+      int ESMC_GridComp::ESMC_GridCompSetEntryPoint(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *functionType,                          // in: function type
+      void (*functionPtr)(ESMC_GridComp *, ESMC_State *,
+                          ESMC_State *, ESMC_Clock *),   // in: function pointer
+      int phase) {                                       // in: phase
+//
+// !DESCRIPTION:
+//  Intended to be invoked by an {\tt ESMC\_GridComp} during the registration process.
+//  An {\tt ESMC\_GridComp} invokes {\tt ESMC\_GridCompSetEntryPoint} for each of 
+//  the predefined init, run, and finalize functions, to assocate the internal function
+//  to be called for each function.  If multiple phases for init, run, or finalize
+//  are needed, this can be called with phase numbers.
+//
+//  After this function returns, the framework now knows how to call
+//  the initialize, run, and finalize functions for this child {\tt ESMC\_GridComp}.
+//  The return code equals {\tt ESMC\_SUCCESS} if there are no errors.
+//    
+//  The arguments are:
+//  \begin{description}
+//   \item[functionType]
+//    One of a set of predefined function types - e.g. {\tt ESMC\_SetInit}, 
+//    {\tt ESMC\_SetRun}, {\tt ESMC\_SetFinal}.
+//   \item[functionName]
+//    The name of the {\tt gridcomp} function to be associated with the
+//    {\tt functionType}.
+//   \item[{[phase]}] 
+//    For {\tt ESMC\_GridComp}s which need to initialize or run or finalize 
+//    with mutiple phases, the phase number which corresponds to this function name.
+//    For single phase function use the parameter {\tt ESMF\_SINGLEPHASE}.
+//    The {\tt ESMC\_GridComp} writer must document the requirements of the
+//    {\tt ESMC\_GridComp} for how and when the multiple phases are expected to be
+//    called.
+//  \end{description}
+//
+//EOP
+// !REQUIREMENTS:  
+
+    int rc;
+
+    FTN(esmf_gridcompsetentrypoint)(this, (char *)functionType, (void *)functionPtr,
+                                    &phase, &rc, strlen(functionType));
+
+    return rc;
+
+} // end ESMC_GridCompSetEntryPoint
 
 //----------------------------------------------------------------------------- 
 //BOP

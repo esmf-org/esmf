@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.12 2005/07/07 19:52:56 nscollins Exp $
+// $Id: ESMC_GridComp.h,v 1.13 2006/01/04 22:52:58 tjcnrl Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -67,6 +67,10 @@
   public:
   int ESMC_GridCompSetServices(void (*)(ESMC_GridComp *, int *));
 
+  int ESMC_GridCompSetEntryPoint(const char *,
+                                 void (*)(ESMC_GridComp *, ESMC_State *, ESMC_State *, ESMC_Clock *),
+                                 int);
+
   int ESMC_GridCompInitialize(ESMC_State *importState, ESMC_State *exportState, 
                               ESMC_Clock *clock, int phase,
                               ESMC_BlockingFlag blockingFlag);
@@ -121,6 +125,8 @@ extern "C" {
                          char *configFile, ESMC_Clock *clock, 
                          int *rc, int nlen, int clen);
  void FTN(f_esmf_gridcompdestroy)(ESMC_GridComp *comp, int *rc);
+ void FTN(esmf_gridcompsetentrypoint)(void *ptr, char *tname, void *func,
+		         int *phase, int *status, int slen);
  void FTN(f_esmf_gridcompinitialize)(ESMC_GridComp *gcomp, 
                          ESMC_State *importState, ESMC_State *exportState, 
                          ESMC_Clock *clock, int *phase, 
