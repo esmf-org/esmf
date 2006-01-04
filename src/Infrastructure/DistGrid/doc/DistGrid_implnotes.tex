@@ -1,6 +1,7 @@
-% $Id: DistGrid_implnotes.tex,v 1.6 2005/10/21 20:27:51 jwolfe Exp $
+% $Id: DistGrid_implnotes.tex,v 1.7 2006/01/04 18:51:57 jwolfe Exp $
 
 %\subsection{Implementation Notes}
+\label{sec:DistGridClasses}
 
 The DistGrid class contains the mapping between the DE-local grid decompositions
 and the global logical Grid.  It contains methods to synchronize data values
@@ -10,7 +11,6 @@ values.  It interacts closely with the PhysGrid object.
 \begin{enumerate}
 
 \item {\bf DistGrid Internal Classes}
-\label{sec:DistGridClasses}
 
 The DistGrid class contains the DELayout class as well as two private
 subclasses, the DistGridGlobal and DistGridLocal classes.  The separation
