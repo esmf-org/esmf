@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.3 2005/12/19 21:43:48 nscollins Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.4 2006/01/04 21:13:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -18,7 +18,7 @@ module ESMF_BundleRedistHelpers
    use ESMF_Mod
 
    public Create2DGrids, Create3DGrids
-   public CreateFields, CreateBundle
+   public CreateFields, CreateBundle, AddBundle
 
    public FillConstantR8Field, FillConstantR4Field
    public FillConstantI8Field, FillConstantI4Field
@@ -168,23 +168,29 @@ end subroutine Create3DGrids
 #undef  ESMF_METHOD
 #define ESMF_METHOD "CreateFields"
 subroutine CreateFields(grid1, field1, field2, field3, field4, field5, &
-                        dim1, dim2, dkind1, dkind2, halo1, halo2, &
-                        relloc1, relloc2, rc)
+                        dim1, dim2, dim3, dim4, dim5, &
+                        dkind1, dkind2, dkind3, dkind4, dkind5, &
+                        halo1, halo2, halo3, halo4, halo5, &
+                        relloc1, relloc2, relloc3, relloc4, relloc5, rc)
     type(ESMF_Grid), intent(in) :: grid1
     type(ESMF_Field), intent(out) :: field1
     type(ESMF_Field), intent(out), optional :: field2, field3, field4, field5
-    integer, intent(in), optional :: dim1, dim2, halo1, halo2
-    type(ESMF_DataKind), intent(in), optional :: dkind1, dkind2
+    integer, intent(in), optional :: dim1, dim2, dim3, dim4, dim5
+    integer, intent(in), optional :: halo1, halo2, halo3, halo4, halo5
+    type(ESMF_DataKind), intent(in), optional :: dkind1, dkind2 
+    type(ESMF_DataKind), intent(in), optional :: dkind3, dkind4, dkind5
     type(ESMF_RelLoc), intent(in), optional :: relloc1, relloc2
+    type(ESMF_RelLoc), intent(in), optional :: relloc3, relloc4, relloc5
     integer, intent(out), optional :: rc
     
     ! Local variables
-    integer :: halof1, halof2
-    integer :: dimf1, dimf2
-    type(ESMF_DataType) :: dtypef1, dtypef2
-    type(ESMF_DataKind) :: dkindf1, dkindf2
-    type(ESMF_RelLoc) :: rellocf1, rellocf2
+    integer :: halof1, halof2, halof3, halof4, halof5
+    integer :: dimf1, dimf2, dimf3, dimf4, dimf5
+    type(ESMF_DataType) :: dtypef1, dtypef2, dtypef3, dtypef4, dtypef5
+    type(ESMF_DataKind) :: dkindf1, dkindf2, dkindf3, dkindf4, dkindf5
+    type(ESMF_RelLoc) :: rellocf1, rellocf2, rellocf3, rellocf4, rellocf5
     type(ESMF_ArraySpec) :: arrayspecf1, arrayspecf2
+    type(ESMF_ArraySpec) :: arrayspecf3, arrayspecf4, arrayspecf5
 
  
     rc = ESMF_FAILURE
@@ -193,29 +199,56 @@ subroutine CreateFields(grid1, field1, field2, field3, field4, field5, &
     ! set default halowidths
     halof1 = 3
     halof2 = 3
+    halof3 = 3
+    halof4 = 3
+    halof5 = 3
     if (present(halo1)) halof1 = halo1
     if (present(halo2)) halof2 = halo2
+    if (present(halo3)) halof3 = halo3
+    if (present(halo4)) halof4 = halo4
+    if (present(halo5)) halof5 = halo5
 
     ! set default relative locations
     rellocf1 = ESMF_CELL_CENTER
     rellocf2 = ESMF_CELL_CENTER
+    rellocf3 = ESMF_CELL_CENTER
+    rellocf4 = ESMF_CELL_CENTER
+    rellocf5 = ESMF_CELL_CENTER
     if (present(relloc1)) rellocf1 = relloc1
     if (present(relloc2)) rellocf2 = relloc2
+    if (present(relloc3)) rellocf3 = relloc3
+    if (present(relloc4)) rellocf4 = relloc4
+    if (present(relloc5)) rellocf5 = relloc5
 
     ! set default data dimensionality
     dimf1 = 2
     dimf2 = 2
+    dimf3 = 2
+    dimf4 = 2
+    dimf5 = 2
     if (present(dim1)) dimf1 = dim1
     if (present(dim2)) dimf2 = dim2
+    if (present(dim3)) dimf3 = dim3
+    if (present(dim4)) dimf4 = dim4
+    if (present(dim5)) dimf5 = dim5
 
     ! set default data type/size
     dkindf1 = ESMF_R8
     dkindf2 = ESMF_R8
+    dkindf3 = ESMF_R8
+    dkindf4 = ESMF_R8
+    dkindf5 = ESMF_R8
     dtypef1 = ESMF_DATA_REAL
     dtypef2 = ESMF_DATA_REAL
+    dtypef3 = ESMF_DATA_REAL
+    dtypef4 = ESMF_DATA_REAL
+    dtypef5 = ESMF_DATA_REAL
     ! todo: sort out type/kind intermingling
     if (present(dkind1)) dkindf1 = dkind1
     if (present(dkind2)) dkindf2 = dkind2
+    if (present(dkind3)) dkindf3 = dkind3
+    if (present(dkind4)) dkindf4 = dkind4
+    if (present(dkind5)) dkindf5 = dkind5
    
 
     ! set the arrayspec as requested
@@ -223,17 +256,41 @@ subroutine CreateFields(grid1, field1, field2, field3, field4, field5, &
     if (rc.NE.ESMF_SUCCESS) return
     call ESMF_ArraySpecSet(arrayspecf2, dimf2, dtypef2, dkindf2, rc)
     if (rc.NE.ESMF_SUCCESS) return
+    call ESMF_ArraySpecSet(arrayspecf3, dimf3, dtypef3, dkindf3, rc)
+    if (rc.NE.ESMF_SUCCESS) return
+    call ESMF_ArraySpecSet(arrayspecf4, dimf4, dtypef4, dkindf4, rc)
+    if (rc.NE.ESMF_SUCCESS) return
+    call ESMF_ArraySpecSet(arrayspecf5, dimf5, dtypef5, dkindf5, rc)
+    if (rc.NE.ESMF_SUCCESS) return
     
 
     ! let field create call allocate the proper amount of space
     field1 = ESMF_FieldCreate(grid1, arrayspecf1, horzRelloc=rellocf1, &
-                                haloWidth=halof1, name="src pressure", rc=rc)
+                                haloWidth=halof1, name="pressure 1", rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
                                 
     if (present(field2)) then
       ! let field create call allocate the proper amount of space
       field2 = ESMF_FieldCreate(grid1, arrayspecf2, horzRelloc=rellocf2, &
-                                haloWidth=halof2, name="dst pressure", rc=rc)
+                                haloWidth=halof2, name="pressure 2", rc=rc)
+      if (rc.NE.ESMF_SUCCESS) return
+    endif
+    if (present(field3)) then
+      ! let field create call allocate the proper amount of space
+      field3 = ESMF_FieldCreate(grid1, arrayspecf3, horzRelloc=rellocf3, &
+                                haloWidth=halof3, name="pressure 3", rc=rc)
+      if (rc.NE.ESMF_SUCCESS) return
+    endif
+    if (present(field4)) then
+      ! let field create call allocate the proper amount of space
+      field4 = ESMF_FieldCreate(grid1, arrayspecf4, horzRelloc=rellocf4, &
+                                haloWidth=halof4, name="pressure 4", rc=rc)
+      if (rc.NE.ESMF_SUCCESS) return
+    endif
+    if (present(field5)) then
+      ! let field create call allocate the proper amount of space
+      field5 = ESMF_FieldCreate(grid1, arrayspecf5, horzRelloc=rellocf5, &
+                                haloWidth=halof5, name="pressure 5", rc=rc)
       if (rc.NE.ESMF_SUCCESS) return
     endif
                                 
@@ -293,6 +350,54 @@ subroutine CreateBundle(bundle, field1, field2, field3, field4, field5, rc)
     return
 
 end subroutine CreateBundle
+
+
+!------------------------------------------------------------------------------
+!
+! Add up to 5 fields to an existing bundle.
+!
+! TODO: make fields an array and add as many as are in the list
+!
+#undef  ESMF_METHOD
+#define ESMF_METHOD "AddBundle"
+subroutine AddBundle(bundle, field1, field2, field3, field4, field5, rc)
+    type(ESMF_Bundle), intent(inout) :: bundle
+    type(ESMF_Field), intent(in), optional :: field1,field2,field3,field4,field5
+    integer, intent(out), optional :: rc
+    
+    integer :: localrc
+
+    if (present(rc)) rc = ESMF_FAILURE
+        
+    if (present(field1)) then
+      call ESMF_BundleAddField(bundle, field1, rc=localrc)
+      if (localrc.NE.ESMF_SUCCESS) return
+    endif
+
+    if (present(field2)) then
+      call ESMF_BundleAddField(bundle, field2, rc=localrc)
+      if (localrc.NE.ESMF_SUCCESS) return
+    endif
+
+    if (present(field3)) then
+      call ESMF_BundleAddField(bundle, field3, rc=localrc)
+      if (localrc.NE.ESMF_SUCCESS) return
+    endif
+
+    if (present(field4)) then
+      call ESMF_BundleAddField(bundle, field4, rc=localrc)
+      if (localrc.NE.ESMF_SUCCESS) return
+    endif
+
+    if (present(field5)) then
+      call ESMF_BundleAddField(bundle, field5, rc=localrc)
+      if (localrc.NE.ESMF_SUCCESS) return
+    endif
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    return
+
+end subroutine AddBundle
 
 
 !------------------------------------------------------------------------------
@@ -747,13 +852,14 @@ subroutine FillIndexField(field, rc)
     integer, intent(out) :: rc
     
     ! Local variables
-    integer :: i, j, k, l, m
+    integer :: i, j
     integer :: lb(7), ub(7), haloWidth, cellNum, rownum, colnum
     integer :: localCellCounts(3), globalCellCounts(3), gridOffsets(3)
     real (ESMF_KIND_R8), dimension(:,:), pointer :: ptr
+    !integer :: i, j, k, l, m
     type(ESMF_Grid) :: grid
-    type(ESMF_Array) :: array
-    integer :: rank
+    !type(ESMF_Array) :: array
+    !integer :: rank
 
     rc = ESMF_FAILURE
           
@@ -1683,7 +1789,7 @@ end subroutine ValidateIndexField
 #undef  ESMF_METHOD
 #define ESMF_METHOD "FieldCleanup"
 subroutine FieldCleanup(field1, field2, field3, field4, field5, rc)
-    type(ESMF_Field), intent(inout) ::field1
+    type(ESMF_Field), intent(inout) :: field1
     type(ESMF_Field), intent(inout), optional :: field2, field3, field4, field5
     integer, intent(out), optional :: rc
     
@@ -1762,22 +1868,85 @@ subroutine FieldCleanup(field1, field2, field3, field4, field5, rc)
 end subroutine FieldCleanup
 
 !------------------------------------------------------------------------------
-! TODO: make this recurse and delete the grid, the fields, the data inside
-!  the fields - an all-in-one which assumes no sharing of any of the contents.
+!
+! delete all bundles; this code assumes that all share the identical grid
+!  and only delete it once.
 !
 #undef  ESMF_METHOD
 #define ESMF_METHOD "BundleCleanup"
-subroutine BundleCleanup(bundle, rc)
-    type(ESMF_Bundle), intent(inout) :: bundle
-    integer, intent(out) :: rc
+subroutine BundleCleanup(bundle1, bundle2, bundle3, bundle4, bundle5, rc)
+    type(ESMF_Bundle), intent(inout) :: bundle1
+    type(ESMF_Bundle), intent(inout), optional :: bundle2, bundle3
+    type(ESMF_Bundle), intent(inout), optional :: bundle4, bundle5
+    integer, intent(out), optional :: rc
     
+    ! Local variables
+    !type(ESMF_Grid) :: grid
+    !type(ESMF_Field) :: allfields(:)
 
-    rc = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
 
-    call ESMF_BundleDestroy(bundle, rc=rc)
+    ! query for grid.  bundle1 is required; all other bundles optional.
+    !call ESMF_BundleGet(bundle1, field=allfields, grid=grid, rc=rc)
+    !if (rc.NE.ESMF_SUCCESS) return
+
+    call ESMF_BundleDestroy(bundle1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
-    rc = ESMF_SUCCESS
+    !do i=1 to nfields
+
+        !call ESMF_FieldGet(allfields(i), array=array, rc=rc)
+        !if (rc.NE.ESMF_SUCCESS) return
+
+        !call ESMF_FieldDestroy(allfields(i), rc=rc)
+        !if (rc.NE.ESMF_SUCCESS) return
+   
+        !call ESMF_ArrayDestroy(array, rc=rc)
+        !if (rc.NE.ESMF_SUCCESS) return
+
+    !enddo
+
+    !call ESMF_GridDestroy(grid, rc=rc)
+    !if (rc.NE.ESMF_SUCCESS) return
+
+
+    ! if present, delete
+    if (present(bundle2)) then
+
+        call ESMF_BundleDestroy(bundle2, rc=rc)
+        if (rc.NE.ESMF_SUCCESS) return
+
+    endif
+
+    ! if present, delete
+    if (present(bundle3)) then
+
+        call ESMF_BundleDestroy(bundle3, rc=rc)
+        if (rc.NE.ESMF_SUCCESS) return
+
+    endif
+
+    ! if present, delete
+    if (present(bundle4)) then
+
+        call ESMF_BundleDestroy(bundle4, rc=rc)
+        if (rc.NE.ESMF_SUCCESS) return
+
+    endif
+
+    ! if present, delete
+    if (present(bundle5)) then
+
+        call ESMF_BundleDestroy(bundle5, rc=rc)
+        if (rc.NE.ESMF_SUCCESS) return
+
+    endif
+
+    ! do this last.
+    !call ESMF_GridDestroy(grid, rc=rc)
+    !if (rc.NE.ESMF_SUCCESS) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
     return
 
 end subroutine BundleCleanup
@@ -2137,6 +2306,96 @@ function CreateGrid(which, layout, rc)
   ! just return at this point
 
 end function CreateGrid
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "CreateLatLonGrid"
+function CreateLatLonGrid(nx, ny, nz, xde, yde, name, rc)
+  type(ESMF_Grid) :: CreateLatLonGrid
+
+  integer, intent(in) :: nx, ny, nz               ! grid size
+  integer, intent(in) :: xde, yde                 ! layout counts
+  character(len=*), intent(in), optional :: name  ! grid name
+  integer, intent(out), optional :: rc            ! return code
+
+  type(ESMF_Grid) :: grid
+  type(ESMF_VM) :: vm
+  type(ESMF_DELayout) :: thislayout
+  real (ESMF_KIND_R8), dimension(2) :: mincoords1, maxcoords1
+  real (ESMF_KIND_R8), dimension(72) :: deltas
+  integer, dimension(2) :: counts
+  integer :: npets, status
+
+
+  if (present(rc)) rc = ESMF_FAILURE
+
+  call ESMF_VMGetGlobal(vm, rc=status)
+  if (ESMF_LogMsgFoundError(status, &
+                            ESMF_ERR_PASSTHRU, &
+                            ESMF_CONTEXT, rc)) goto 10
+    
+  call ESMF_VMGet(vm, petCount=npets, rc=status)
+  if (ESMF_LogMsgFoundError(status, &
+                            ESMF_ERR_PASSTHRU, &
+                            ESMF_CONTEXT, rc)) goto 10
+    
+  if (npets .ge. (xde * yde)) then 
+    thislayout = ESMF_DELayoutCreate(vm, (/ xde, yde /), rc=status)
+  else if (npets .eq. 1) then
+    thislayout = ESMF_DELayoutCreate(vm, (/ 1, 1 /), rc=status)
+  else
+    print *, "error - cannot support requested number of DEs"
+    print *, "number of PETs = ", npets
+    print *, "xde, yde, xde*yde = ", xde, yde, xde*yde
+    !CreateLatLonGrid = ESMF_GridCreateEmpty()
+    !call ESMF_GridDestroy(CreateLatLonGrid)
+    rc = ESMF_FAILURE
+    return
+  endif
+
+  ! fixed
+  mincoords1 = (/   0.0, -90.0 /)
+  maxcoords1 = (/ 360.0,  90.0 /)
+
+  counts(1) = nx
+  counts(2) = ny
+
+  deltas(:) = 100.0
+
+  grid = ESMF_GridCreateHorzLatLonUni(counts, &
+                                      mincoords1, maxcoords1, &
+                                      horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
+                                      dimNames=(/ "lon", "lat" /), &
+                                      dimUnits=(/ "deg", "deg" /), &
+                                      periodic=(/ ESMF_TRUE, ESMF_FALSE /), &
+                                      name=name, rc=status)
+  if (ESMF_LogMsgFoundError(status, &
+                            ESMF_ERR_PASSTHRU, &
+                            ESMF_CONTEXT, rc)) goto 10
+
+
+  call ESMF_GridAddVertHeight(grid, deltas, &
+                              vertstagger=ESMF_GRID_VERT_STAGGER_CENTER, &
+                              rc=status)
+  if (ESMF_LogMsgFoundError(status, &
+                            ESMF_ERR_PASSTHRU, &
+                            ESMF_CONTEXT, rc)) goto 10
+
+
+  ! distribute the grid across the PETs
+  call ESMF_GridDistribute(grid, delayout=thislayout, rc=status)
+  if (ESMF_LogMsgFoundError(status, &
+                            ESMF_ERR_PASSTHRU, &
+                            ESMF_CONTEXT, rc)) goto 10
+   
+
+  CreateLatLonGrid = grid
+
+10 continue
+  ! rc will have been set by the call to logerr; 
+  ! just return at this point
+
+end function CreateLatLonGrid
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
