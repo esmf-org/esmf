@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.147 2006/01/05 17:25:51 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.148 2006/01/05 18:25:59 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.147 2006/01/05 17:25:51 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.148 2006/01/05 18:25:59 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -5430,7 +5430,7 @@
           ! get the physgrid/distgrid identifier from the vertical relLoc.  If it
           ! is not valid return an error.
           if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
-            call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, vertPhysIdUse, localrc)
+            call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
