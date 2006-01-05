@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.10 2005/12/26 21:58:14 eschwab Exp $
+! $Id: ESMF_LogErr.F90,v 1.11 2006/01/05 00:33:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -263,13 +263,12 @@ end function
 	    call ESMF_LogFlush(log,rc=rc2)		
     	    CLOSE(UNIT=log%unitNumber)
 	    log%FileIsOpen=ESMF_FALSE
+	    deallocate(log%LOG_ENTRY,stat=status)	
 	endif
 
 	if (present(rc)) then
             rc=ESMF_SUCCESS
         endif
-
-	deallocate(log%LOG_ENTRY,stat=status)	
 	
 end subroutine ESMF_LogClose
 
@@ -339,6 +338,11 @@ end subroutine ESMF_LogFinalize
       rc=ESMF_FAILURE 
     endif
 
+    if (alog%FileIsOpen .ne. ESMF_TRUE) then
+      print *, "ESMF_Log not open -- cannot ESMF_LogFlush()."
+      return
+    endif
+      
     if ((alog%FileIsOpen .eq. ESMF_TRUE) .AND. &
         (alog%flushed .eq. ESMF_FALSE) .AND. &
 	(alog%dirty .eq. ESMF_TRUE))  then	
@@ -661,9 +665,6 @@ end subroutine ESMF_LogGet
 	
     call ESMF_LogOpen(ESMF_LogDefault, filename, lognone, logtype, rc)
 
-    ! TODO: when implemented, ESMF_LogDefault%flushImmediately may need to be
-    ! passed to ESMF_LogOpen() as .false.
-
 end subroutine ESMF_LogInitialize
 
 !--------------------------------------------------------------------------
@@ -918,6 +919,12 @@ end subroutine ESMF_LogMsgSetError
         rc=ESMF_FAILURE
     endif
 
+    if (log%FileIsOpen .eq. ESMF_TRUE) then 
+        print *, "This ESMF_Log is already open with file '", &
+                 trim(log%nameLogErrFile), "'"
+        return
+    endif
+
     log%maxElements = 10
     log%stream = 0
     log%fIndex = 1
@@ -928,7 +935,7 @@ end subroutine ESMF_LogMsgSetError
     log%petNumLabel = "PET" // trim(adjustl(petNumChar))
 
     log%stopprogram = .false.
-    log%flushImmediately = ESMF_TRUE
+    log%flushImmediately = ESMF_FALSE
     log%rootOnly = ESMF_FALSE
     log%verbose = ESMF_FALSE
     log%logNone = ESMF_FALSE !default is to log
@@ -969,7 +976,7 @@ end subroutine ESMF_LogMsgSetError
  41     format(I4.4)
  51     format(I5.5)
     if (len(log%nameLogErrFile) .gt. 32) then
-        print *, "filename exceeded 32 characters"
+        print *, "Filename exceeded 32 characters."
         if (present(rc)) then
             rc = ESMF_FAILURE
         endif
@@ -1017,7 +1024,7 @@ end subroutine ESMF_LogMsgSetError
     
     allocate(localbuf(log%maxElements), stat=status)
     if (status .ne. 0) then
-      print *, "allocation of buffer failed"
+      print *, "Allocation of buffer failed."
       if (present(rc)) then
           rc = ESMF_FAILURE
       endif
@@ -1097,6 +1104,12 @@ end subroutine ESMF_LogOpen
     if (present(rc)) then
         rc=ESMF_FAILURE
     endif
+
+    if (alog%FileIsOpen .ne. ESMF_TRUE) then
+      print *, "ESMF_Log not open -- cannot ESMF_LogSet()."
+      return
+    endif
+    
     if (present(verbose)) then
         alog%verbose=verbose
     endif
@@ -1200,6 +1213,13 @@ end subroutine ESMF_LogSet
     else
       alog => ESMF_LogDefault
     endif
+
+    if (alog%FileIsOpen .ne. ESMF_TRUE) then
+      print *, "ESMF_Log not open -- cannot ESMF_LogWrite()."
+      rc=ESMF_FAILURE
+      return
+    endif
+
     index = alog%fIndex
     if (alog%logNone .ne. ESMF_TRUE) then
     	alog%dirty = ESMF_TRUE    
@@ -1249,7 +1269,8 @@ end subroutine ESMF_LogSet
         	alog%stopprogram=.TRUE.
         	call ESMF_LogClose(alog,rc=rc2)
     	endif
-    	if (alog%fIndex .eq. alog%maxElements) then
+    	if (alog%fIndex .eq. alog%maxElements .or. &
+            alog%flushImmediately .eq. ESMF_TRUE) then
 	        alog%fIndex = alog%fIndex + 1	
         	call ESMF_LogFlush(alog,rc=rc2) 
 		alog%fIndex = 1
