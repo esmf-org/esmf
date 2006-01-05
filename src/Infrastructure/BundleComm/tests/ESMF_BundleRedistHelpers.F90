@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.4 2006/01/04 21:13:25 nscollins Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.5 2006/01/05 18:19:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -171,7 +171,8 @@ subroutine CreateFields(grid1, field1, field2, field3, field4, field5, &
                         dim1, dim2, dim3, dim4, dim5, &
                         dkind1, dkind2, dkind3, dkind4, dkind5, &
                         halo1, halo2, halo3, halo4, halo5, &
-                        relloc1, relloc2, relloc3, relloc4, relloc5, rc)
+                        relloc1, relloc2, relloc3, relloc4, relloc5, &
+                        vrelloc1, vrelloc2, vrelloc3, vrelloc4, vrelloc5, rc)
     type(ESMF_Grid), intent(in) :: grid1
     type(ESMF_Field), intent(out) :: field1
     type(ESMF_Field), intent(out), optional :: field2, field3, field4, field5
@@ -181,6 +182,8 @@ subroutine CreateFields(grid1, field1, field2, field3, field4, field5, &
     type(ESMF_DataKind), intent(in), optional :: dkind3, dkind4, dkind5
     type(ESMF_RelLoc), intent(in), optional :: relloc1, relloc2
     type(ESMF_RelLoc), intent(in), optional :: relloc3, relloc4, relloc5
+    type(ESMF_RelLoc), intent(in), optional :: vrelloc1, vrelloc2
+    type(ESMF_RelLoc), intent(in), optional :: vrelloc3, vrelloc4, vrelloc5
     integer, intent(out), optional :: rc
     
     ! Local variables
@@ -189,6 +192,7 @@ subroutine CreateFields(grid1, field1, field2, field3, field4, field5, &
     type(ESMF_DataType) :: dtypef1, dtypef2, dtypef3, dtypef4, dtypef5
     type(ESMF_DataKind) :: dkindf1, dkindf2, dkindf3, dkindf4, dkindf5
     type(ESMF_RelLoc) :: rellocf1, rellocf2, rellocf3, rellocf4, rellocf5
+    type(ESMF_RelLoc) :: vrellocf1, vrellocf2, vrellocf3, vrellocf4, vrellocf5
     type(ESMF_ArraySpec) :: arrayspecf1, arrayspecf2
     type(ESMF_ArraySpec) :: arrayspecf3, arrayspecf4, arrayspecf5
 
@@ -219,6 +223,18 @@ subroutine CreateFields(grid1, field1, field2, field3, field4, field5, &
     if (present(relloc3)) rellocf3 = relloc3
     if (present(relloc4)) rellocf4 = relloc4
     if (present(relloc5)) rellocf5 = relloc5
+
+    ! set default vert relative locations
+    vrellocf1 = ESMF_CELL_UNDEFINED
+    vrellocf2 = ESMF_CELL_UNDEFINED
+    vrellocf3 = ESMF_CELL_UNDEFINED
+    vrellocf4 = ESMF_CELL_UNDEFINED
+    vrellocf5 = ESMF_CELL_UNDEFINED
+    if (present(vrelloc1)) vrellocf1 = vrelloc1
+    if (present(vrelloc2)) vrellocf2 = vrelloc2
+    if (present(vrelloc3)) vrellocf3 = vrelloc3
+    if (present(vrelloc4)) vrellocf4 = vrelloc4
+    if (present(vrelloc5)) vrellocf5 = vrelloc5
 
     ! set default data dimensionality
     dimf1 = 2
@@ -265,31 +281,36 @@ subroutine CreateFields(grid1, field1, field2, field3, field4, field5, &
     
 
     ! let field create call allocate the proper amount of space
-    field1 = ESMF_FieldCreate(grid1, arrayspecf1, horzRelloc=rellocf1, &
+    field1 = ESMF_FieldCreate(grid1, arrayspecf1, &
+                                horzRelloc=rellocf1, vertRelloc=vrellocf1, &
                                 haloWidth=halof1, name="pressure 1", rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
                                 
     if (present(field2)) then
       ! let field create call allocate the proper amount of space
-      field2 = ESMF_FieldCreate(grid1, arrayspecf2, horzRelloc=rellocf2, &
+      field2 = ESMF_FieldCreate(grid1, arrayspecf2, &
+                                horzRelloc=rellocf2, vertRelloc=vrellocf2, &
                                 haloWidth=halof2, name="pressure 2", rc=rc)
       if (rc.NE.ESMF_SUCCESS) return
     endif
     if (present(field3)) then
       ! let field create call allocate the proper amount of space
-      field3 = ESMF_FieldCreate(grid1, arrayspecf3, horzRelloc=rellocf3, &
+      field3 = ESMF_FieldCreate(grid1, arrayspecf3, &
+                                horzRelloc=rellocf3, vertRelloc=vrellocf3, &
                                 haloWidth=halof3, name="pressure 3", rc=rc)
       if (rc.NE.ESMF_SUCCESS) return
     endif
     if (present(field4)) then
       ! let field create call allocate the proper amount of space
-      field4 = ESMF_FieldCreate(grid1, arrayspecf4, horzRelloc=rellocf4, &
+      field4 = ESMF_FieldCreate(grid1, arrayspecf4, &
+                                horzRelloc=rellocf4, vertRelloc=vrellocf4, &
                                 haloWidth=halof4, name="pressure 4", rc=rc)
       if (rc.NE.ESMF_SUCCESS) return
     endif
     if (present(field5)) then
       ! let field create call allocate the proper amount of space
-      field5 = ESMF_FieldCreate(grid1, arrayspecf5, horzRelloc=rellocf5, &
+      field5 = ESMF_FieldCreate(grid1, arrayspecf5, &
+                                horzRelloc=rellocf5, vertRelloc=vrellocf5, &
                                 haloWidth=halof5, name="pressure 5", rc=rc)
       if (rc.NE.ESMF_SUCCESS) return
     endif
