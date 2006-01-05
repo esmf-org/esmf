@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistUseUTest.F90,v 1.1 2006/01/04 21:12:49 nscollins Exp $
+! $Id: ESMF_BundleRedistUseUTest.F90,v 1.2 2006/01/05 18:20:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleRedistUseUTest.F90,v 1.1 2006/01/04 21:12:49 nscollins Exp $'
+      '$Id: ESMF_BundleRedistUseUTest.F90,v 1.2 2006/01/05 18:20:04 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -162,6 +162,11 @@
       call CreateFields(grid(1), &
                         sfield(1), sfield(2), sfield(3), sfield(4), sfield(5), &
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
+		        vrelloc1=ESMF_CELL_CELL, &
+		        vrelloc2=ESMF_CELL_CELL, &
+		        vrelloc3=ESMF_CELL_CELL, &
+		        vrelloc4=ESMF_CELL_CELL, &
+		        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
       write(name, *) "Creating first 5 src fields"
       write(failMsg, *) "Unable to create first 5 src fields"
@@ -173,6 +178,11 @@
       call CreateFields(grid(1), &
                         sfield(6), sfield(7), sfield(8), sfield(9), sfield(10),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
+		        vrelloc1=ESMF_CELL_CELL, &
+		        vrelloc2=ESMF_CELL_CELL, &
+		        vrelloc3=ESMF_CELL_CELL, &
+		        vrelloc4=ESMF_CELL_CELL, &
+		        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
       write(name, *) "Creating last 5 src fields"
       write(failMsg, *) "Unable to create last 5 src fields"
@@ -210,6 +220,11 @@
       call CreateFields(grid(2), &
                         dfield(1), dfield(2), dfield(3), dfield(4), dfield(5),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
+		        vrelloc1=ESMF_CELL_CELL, &
+		        vrelloc2=ESMF_CELL_CELL, &
+		        vrelloc3=ESMF_CELL_CELL, &
+		        vrelloc4=ESMF_CELL_CELL, &
+		        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
       write(name, *) "Creating first 5 dst fields"
       write(failMsg, *) "Unable to create first 5 dst fields"
@@ -221,6 +236,11 @@
       call CreateFields(grid(2), &
                         dfield(6), dfield(7), dfield(8), dfield(9), dfield(10),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
+		        vrelloc1=ESMF_CELL_CELL, &
+		        vrelloc2=ESMF_CELL_CELL, &
+		        vrelloc3=ESMF_CELL_CELL, &
+		        vrelloc4=ESMF_CELL_CELL, &
+		        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
       write(name, *) "Creating last 5 dst fields"
       write(failMsg, *) "Unable to create last 5 dst fields"
@@ -518,6 +538,7 @@
       !------------------------------------------------------------------------
 
 #if ESMF_EXHAUSTIVE
+#if 0
       !------------------------------------------------------------------------
       !EX_UTest
       ! fill source field with known data
@@ -577,7 +598,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! validate halo regions in destination field - should be unchanged
-      call ValidateConstantHalo(field2, val_neg_one, rc=rc=rc)
+      call ValidateConstantHalo(field2, val_neg_one, rc=rc)
       write(name, *) "Validating halo area in dest fields"
       write(failMsg, *) "Validating indexed data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -585,7 +606,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! validate halo regions in destination field - should be unchanged
-      call ValidateConstantHalo(field4, val_neg_one, rc=rc=rc)
+      call ValidateConstantHalo(field4, val_neg_one, rc=rc)
       write(name, *) "Validating halo area in dest fields"
       write(failMsg, *) "Validating indexed data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -635,7 +656,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! validate destination field
-      call ValidateConstantR8Field(field1, val_one, rc=rc=rc)
+      call ValidateConstantR8Field(field1, val_one, rc=rc)
       write(name, *) "Validating constant data in dest fields"
       write(failMsg, *) "Validating constant data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -675,11 +696,12 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! validate halo regions in destination field - should be unchanged
-      call ValidateConstantHalo(field3, val_neg_one, rc=rc=rc)
+      call ValidateConstantHalo(field3, val_neg_one, rc=rc)
       write(name, *) "Validating halo area in dest fields"
       write(failMsg, *) "Validating indexed data in dest fields"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#endif
 #endif
 
       !------------------------------------------------------------------------
