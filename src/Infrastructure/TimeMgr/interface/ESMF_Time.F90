@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.85 2005/08/05 17:38:29 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.86 2006/01/05 22:21:04 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.85 2005/08/05 17:38:29 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.86 2006/01/05 22:21:04 eschwab Exp $'
 
 !==============================================================================
 !
@@ -946,7 +946,13 @@
 !     calendar and 1/1/-4712 in the Julian calendar.  See~\cite{Meyer2} and
 !     ~\cite{JDNcalculator}.
 !
-!     Hours, minutes, seconds, and sub-seconds can be used with any calendar.
+!     Note that d and d\_i8 are not valid for the No-Calendar.  To remain
+!     consistent with non-Earth calendars added to ESMF in the future, ESMF
+!     requires a calendar to be planet-specific.  Hence the No-Calendar does
+!     not know what a day is; it cannot assume an Earth day of 86400 seconds.
+!
+!     Hours, minutes, seconds, and sub-seconds can be used with any calendar,
+!     since they are standardized units that are the same for any planet.
 !
 !     Time manager represents and manipulates time internally with integers
 !     to maintain precision. Hence, user-specified floating point values are
