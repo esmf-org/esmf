@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.209 2005/11/08 19:26:04 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.210 2006/01/05 18:21:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -285,7 +285,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.209 2005/11/08 19:26:04 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.210 2006/01/05 18:21:08 nscollins Exp $'
 
 !==============================================================================
 !
@@ -4376,12 +4376,12 @@
 
       integer :: status                           ! Error status
       type(ESMF_Array) :: array                   ! New array
-      type(ESMF_RelLoc) :: hRelLoc
+      type(ESMF_RelLoc) :: hRelLoc, vRelLoc
       type(ESMF_FieldDataMap) :: dmap
       integer, dimension(ESMF_MAXDIM) :: gridcounts, arraycounts
       integer, dimension(ESMF_MAXDIM) :: dimorder, counts
       integer :: hwidth, minRank
-      integer :: i, j, arrayRank, gridRank
+      integer :: i, j, arrayRank, gridRank, baseGridRank
 
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -4400,7 +4400,8 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridGet(grid, distDimCount=gridRank, rc=status)
+      call ESMF_GridGet(grid, distDimCount=gridRank, dimCount=baseGridRank, &
+                        rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4435,8 +4436,23 @@
                                  ESMF_CONTEXT, rc)) return
           endif
       endif
+      if (present(vertRelLoc)) then
+          vRelLoc = vertRelloc
+      else
+          if (present(datamap)) then
+              call ESMF_FieldDataMapGet(datamap, vertRelLoc=vRelLoc, rc=status)
+          else
+              if (baseGridRank .le. 2) then
+                  vRelLoc = ESMF_CELL_UNDEFINED
+              else
+                  if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+               "no valid vertical RelLoc in either argument list or datamap", &
+                                            ESMF_CONTEXT, rc)) return
+              endif
+          endif
+      endif
       call ESMF_GridGetDELocalInfo(ftype%grid, horzRelLoc=hRelLoc, &
-                                   vertRelLoc=vertRelLoc, &
+                                   vertRelLoc=vRelLoc, &
                                    localCellCountPerDim=gridcounts(1:gridRank), &
                                    rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -4445,7 +4461,7 @@
 
       ! get information back from datamap
       call ESMF_FieldDataMapGet(ftype%mapping, dataIndexList=dimorder, &
-                                                    counts=counts, rc=status)
+                                counts=counts, rc=status)
 
       arraycounts(:) = 1
       j = 1
