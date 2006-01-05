@@ -1,4 +1,4 @@
-#  $Id: makefile.sample,v 1.5 2006/01/04 21:42:39 nscollins Exp $
+#  $Id: makefile.sample,v 1.6 2006/01/05 17:31:05 nscollins Exp $
 #
 #  Sample of a user makefile.
 #
@@ -30,5 +30,15 @@ all:
 
 	$(ESMF_FC) -c $(ESMF_COMPILEFLAGS) myModel.F -o myModel.o
 	$(ESMF_LINKER) $(ESMF_LINKFLAGS) myModel.o -o myModel $(ESMF_LINKLIBS)
+
+
+
+run:
+	$(MPIRUN) -np 1 myModel
+
+
+
+runmp:
+	$(MPIRUN) -np 4 myModel
 
 
