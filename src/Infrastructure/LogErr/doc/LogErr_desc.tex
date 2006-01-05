@@ -1,4 +1,4 @@
-% $Id: LogErr_desc.tex,v 1.19 2005/03/31 23:45:53 svasquez Exp $
+% $Id: LogErr_desc.tex,v 1.20 2006/01/05 00:38:33 eschwab Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -18,8 +18,8 @@ LogErr methods take a Log as an optional argument and apply to the default Log
 when another Log is not specified.  A set of standard return codes and
 associated messages are provided for error handling.  
 
-LogErr provides capabilities to write to a file immediately or store entries in
-a buffer for writing either when the buffer is full, or when the user calls an 
+LogErr provides capabilities to store message entries in a buffer, which is 
+flushed to a file, either when the buffer is full, or when the user calls an 
 {\tt ESMF\_LogFlush()} method.  Currently, the default is for the Log to flush
 after every ten entries.  This can easily be changed by using the 
 {\tt ESMF\_LogSet()} method and setting the {\tt maxElements} property to 
@@ -33,7 +33,7 @@ using the {\tt ESMF\_LogSet()} method with the {\tt halt} property.  When the
 stop on any and all warning or errors.  When the {\tt halt} property is set to 
 {\tt ESMF\_LOG\_HALTERROR}, the program will only halt only on errors.  Lastly,
 the user can choose to never halt by setting the {\tt halt} property to 
-{\tt ESMF\_LOG\_HALTNEVER}.
+{\tt ESMF\_LOG\_HALTNEVER}; this is the default.
 
 LogErr will automatically put the PET number into the Log.  Also, the user can 
 either specify {\tt ESMF\_LOG\_SINGLE} which writes all the entries to a single 
