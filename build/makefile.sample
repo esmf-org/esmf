@@ -1,4 +1,4 @@
-#  $Id: makefile.sample,v 1.6 2006/01/05 17:31:05 nscollins Exp $
+#  $Id: makefile.sample,v 1.7 2006/01/05 18:33:50 nscollins Exp $
 #
 #  Sample of a user makefile.
 #
@@ -34,11 +34,11 @@ all:
 
 
 run:
-	$(MPIRUN) -np 1 myModel
+	$(MPIRUN) -np 1 ./myModel
 
 
 
 runmp:
-	$(MPIRUN) -np 4 myModel
+	$(MPIRUN) -np 4 ./myModel
 
 
