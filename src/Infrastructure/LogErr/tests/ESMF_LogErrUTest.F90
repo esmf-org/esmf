@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.32 2005/12/26 22:00:28 eschwab Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.33 2006/01/05 00:35:23 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.32 2005/12/26 22:00:28 eschwab Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.33 2006/01/05 00:35:23 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -283,10 +283,10 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test LogFlush of new unopened log
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMF_FAILURE"
       write(name, *) " LogFlush of unopened log Test"
       call ESMF_LogFlush(log2, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !This test crashes, 1170027 bug open, commented out
@@ -309,10 +309,10 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test Log reopenOpen 
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMF_FAILURE"
       call ESMF_LogOpen(log2, "Log_Test_File_3", rc=rc)
       write(name, *) "Open Already Open Log Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
 
       !------------------------------------------------------------------------
@@ -388,7 +388,7 @@
       !EX_UTest
       rc = ESMF_FAILURE
       input_status = 0
-      open (unit=1, file = "Log_Test_File_3", action = "read", &
+      open (unit=1, file = "Log Test File 2", action = "read", &
             form = "formatted", iostat = input_status)
       do
           read (1, *, iostat = input_status) todays_date, todays_time, &
@@ -448,10 +448,10 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test LogFlush of new unopened log
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Did not return ESMF_FAILURE"
       write(name, *) " LogFlush of unopened log Test"
       call ESMF_LogFlush(log2, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 
