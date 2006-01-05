@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.148 2006/01/05 18:25:59 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.149 2006/01/05 22:03:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.148 2006/01/05 18:25:59 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.149 2006/01/05 22:03:51 nscollins Exp $'
 
 !==============================================================================
 !
@@ -5024,7 +5024,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
         endif
-        if (distDimCount.eq.2 .AND. horzPhysIdUse.ne.-1) then
+        if (distDimCount.ge.2 .AND. horzPhysIdUse.ne.-1) then
           index         = 3
           call ESMF_DistGridGetDE(grid%ptr%distgrids(horzDistIdUse)%ptr, &
                     localCellCountPerDim=localCellCountPerDimUse(1:2), &
