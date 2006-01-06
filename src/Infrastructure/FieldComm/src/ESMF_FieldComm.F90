@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.78 2006/01/06 19:53:52 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.79 2006/01/06 22:47:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.78 2006/01/06 19:53:52 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.79 2006/01/06 22:47:05 nscollins Exp $'
 
 !==============================================================================
 !
@@ -475,29 +475,29 @@
       endif
 
       ! debug start
-      !call ESMF_RouteHandleGet(routehandle, which_route=1, route=thisroute, &
-      !                         rc=status)
-      !if (ESMF_LogMsgFoundError(status, &
-      !                          ESMF_ERR_PASSTHRU, &
-      !                          ESMF_CONTEXT, rc)) return
-      !call ESMF_ArrayGet(ftypep%localfield%localdata, counts=counts, &
-      !                   rank=datarank, rc=status)
-      !if (ESMF_LogMsgFoundError(status, &
-      !                          ESMF_ERR_PASSTHRU, &
-      !                          ESMF_CONTEXT, rc)) return
-      !dummy = 1
-      !totalcount = 1
-      !do i=1, datarank
-      !   totalcount = totalcount * counts(i)
-      !enddo
-      !dummy2 = dummy
-      !totalcount2 = totalcount
-      ! 
-      !call ESMF_RouteValidate(thisroute, dummy, totalcount, &
-      !                                   dummy2, totalcount2, rc=status)
-      !if (ESMF_LogMsgFoundError(status, &
-      !                          ESMF_ERR_PASSTHRU, &
-      !                          ESMF_CONTEXT, rc)) return
+      call ESMF_RouteHandleGet(routehandle, which_route=1, route=thisroute, &
+                               rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_ArrayGet(ftypep%localfield%localdata, counts=counts, &
+                         rank=datarank, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      dummy = 1
+      totalcount = 1
+      do i=1, datarank
+         totalcount = totalcount * counts(i)
+      enddo
+      dummy2 = dummy
+      totalcount2 = totalcount
+       
+      call ESMF_RouteValidate(thisroute, dummy, totalcount, &
+                                         dummy2, totalcount2, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       ! debug end
 
       ! real call.
@@ -823,6 +823,10 @@
       integer :: localrc                          ! Error status
       integer :: htype
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
+      ! debug only
+      type(ESMF_Route) :: thisroute
+      integer :: i, dummy, dummy2, datarank
+      integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
    
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
@@ -846,6 +850,41 @@
                                  ESMF_CONTEXT, rc)
         return
       endif
+
+      ! debug start
+      call ESMF_RouteHandleGet(routehandle, which_route=1, route=thisroute, &
+                               rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_ArrayGet(srcFtypep%localfield%localdata, counts=counts, &
+                         rank=datarank, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      dummy = 1
+      totalcount = 1
+      do i=1, datarank
+         totalcount = totalcount * counts(i)
+      enddo
+      
+      call ESMF_ArrayGet(dstFtypep%localfield%localdata, counts=counts, &
+                         rank=datarank, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      dummy2 = 1
+      totalcount2 = 1
+      do i=1, datarank
+         totalcount2 = totalcount2 * counts(i)
+      enddo
+       
+      call ESMF_RouteValidate(thisroute, dummy, totalcount, &
+                                         dummy2, totalcount2, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      ! debug end
 
       call ESMF_ArrayRedist(srcFtypep%localfield%localdata, &
                             dstFtypep%localfield%localdata, &
@@ -1399,6 +1438,10 @@
       type(ESMF_Array) :: srcArray, dstArray
       type(ESMF_Grid) :: srcGrid, dstGrid
       type(ESMF_FieldDataMap) :: srcDatamap, dstDatamap
+      ! debug only
+      type(ESMF_Route) :: thisroute
+      integer :: i, dummy, dummy2, datarank
+      integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
    
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
@@ -1443,6 +1486,49 @@
         return
       endif
 
+      ! debug start
+      call ESMF_RouteHandleGet(routehandle, which_route=1, route=thisroute, &
+                               rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (hasSrcData) then
+        call ESMF_ArrayGet(srcArray, counts=counts, rank=datarank, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        dummy = 1
+        totalcount = 1
+        do i=1, datarank
+           totalcount = totalcount * counts(i)
+        enddo
+      else
+        dummy = 0
+        totalcount = 0
+      endif
+      
+      if (hasDstData) then
+        call ESMF_ArrayGet(dstArray, counts=counts, rank=datarank, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        dummy2 = 1
+        totalcount2 = 1
+        do i=1, datarank
+           totalcount2 = totalcount2 * counts(i)
+        enddo
+      else
+        dummy2 = 0
+        totalcount2 = 0
+      endif
+       
+      call ESMF_RouteValidate(thisroute, dummy, totalcount, &
+                                         dummy2, totalcount2, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      ! debug end
 
       call ESMF_ArrayRegrid(srcArray, srcDatamap, hasSrcData, &
                             dstArray, dstDatamap, hasDstData, &
