@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.37 2005/11/08 22:41:52 nscollins Exp $
+// $Id: ESMC_XPacket.h,v 1.38 2006/01/06 19:56:54 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -140,6 +140,8 @@
                                 ESMC_AxisIndex *srcGlobalCompAIperRank,
                                 ESMC_AxisIndex *srcGlobalTotalAIperRank);
                                 // TODO: change name here Total->Alloc
+
+    int ESMC_XPacketMinMax(int *minitems, int *maxitems);
 
     int ESMC_XPacketPrint(const char *options);
     int ESMC_XPacketPrint(int indent=0, const char *options="");

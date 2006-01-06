@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.76 2005/11/04 23:42:02 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.77 2006/01/06 19:56:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -140,7 +140,7 @@ end interface
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.76 2005/11/04 23:42:02 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.77 2006/01/06 19:56:56 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1951,12 +1951,16 @@ end subroutine rias
 ! !IROUTINE: ESMF_RouteValidate - Check internal consistency of a Route
 
 ! !INTERFACE:
-      subroutine ESMF_RouteValidate(route, bufcount, bufsizes, options, rc)
+      subroutine ESMF_RouteValidate(route, srcbufcount, srcbufsizes, &
+                                           dstbufcount, dstbufsizes, &
+                                           options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route       
-      integer, intent(in), optional :: bufcount            
-      integer, intent(in), optional :: bufsizes(:)
+      integer, intent(in), optional :: srcbufcount            
+      integer, intent(in), optional :: srcbufsizes(:)
+      integer, intent(in), optional :: dstbufcount            
+      integer, intent(in), optional :: dstbufsizes(:)
       character (len=*), intent(in), optional :: options    
       integer, intent(out), optional :: rc            
 !
@@ -1967,10 +1971,17 @@ end subroutine rias
 !     \begin{description}
 !     \item[route] 
 !          {\tt ESMF\_Route} to be verified.
-!     \item[{[bufcount]}]
+!     \item[{[srcbufcount]}]
 !          Integer count of local buffers on this DE to do more advanced
 !          error checking.  Defaults to 1.
-!     \item[{[bufsizes]}]
+!     \item[{[srcbufsizes]}]
+!          Integer array of buffer item sizes, for more advanced error checking.
+!          No default; if not specified, the advanced error checking will
+!          be skipped.
+!     \item[{[dstbufcount]}]
+!          Integer count of local buffers on this DE to do more advanced
+!          error checking.  Defaults to 1.
+!     \item[{[dstbufsizes]}]
 !          Integer array of buffer item sizes, for more advanced error checking.
 !          No default; if not specified, the advanced error checking will
 !          be skipped.
@@ -1983,26 +1994,39 @@ end subroutine rias
 !EOPI
 
        character (len=ESMF_MAXSTR) :: optstring
-       integer :: numbufs 
+       integer :: srcnumbufs, dstnumbufs
        ! TODO: this needs to be allocatable.  use fixed value for now.
-       !integer, allocatable :: itemcounts(:)
-       integer :: itemcounts(1)
+       !integer, allocatable :: srcitemcounts(:), dstitemcounts(:)
+       integer :: srcitemcounts(1), dstitemcounts(1)
        integer :: status
 
        ! Initialize return code; assume failure until success is certain       
        if (present(rc)) rc = ESMF_FAILURE
 
-       ! Set the defaults if not specified
-       if (present(bufcount)) then
-           numbufs = bufcount
+       ! Set the source defaults if not specified
+       if (present(srcbufcount)) then
+           srcnumbufs = srcbufcount
        else
-           numbufs = 1
+           srcnumbufs = 0
        endif
       
-       if (present(bufsizes)) then
-           itemcounts(1) = bufsizes(1)
+       if (present(srcbufsizes)) then
+           srcitemcounts(1) = srcbufsizes(1)
        else
-           itemcounts(1) = 0
+           srcitemcounts(1) = 0
+       endif
+
+       ! Set the defaults if not specified
+       if (present(dstbufcount)) then
+           dstnumbufs = dstbufcount
+       else
+           dstnumbufs = 0
+       endif
+      
+       if (present(dstbufsizes)) then
+           dstitemcounts(1) = dstbufsizes(1)
+       else
+           dstitemcounts(1) = 0
        endif
 
        if (present(options)) then
@@ -2013,7 +2037,8 @@ end subroutine rias
 
 
        ! now make the call
-       call c_ESMC_RouteValidate(route, numbufs, itemcounts, optstring, status)
+       call c_ESMC_RouteValidate(route, srcnumbufs, srcitemcounts, &
+                                 dstnumbufs, dstitemcounts, optstring, status)
 
 
        if (ESMF_LogMsgFoundError(status, &

@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.57 2006/01/05 23:19:41 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.58 2006/01/06 19:56:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.57 2006/01/05 23:19:41 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.58 2006/01/06 19:56:56 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1108,6 +1108,85 @@
     return ESMF_SUCCESS;
 
  } // end ESMC_XPacketGlobalToLocal
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketMinMax"
+//BOPI
+// !IROUTINE:  ESMC_XPacketMinMax - return min and max item number touched
+//
+// !INTERFACE:
+      int ESMC_XPacket :: ESMC_XPacketMinMax(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *minitem,        // out  - lowest item number referenced
+      int *maxitem) {      // out  - highest item number referenced
+//
+// !DESCRIPTION:
+//    For debugging use, to check on references beyond the range of an input.
+//
+//EOPI
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    int i, j, k, l, m;
+    int xpItemCount, totalRepCount;
+    int itemPtr, contigItems, index[ESMF_MAXDIM];
+    char *dataPtr;
+    char msgbuf[ESMF_MAXSTR];
+
+    
+    // empty xpacket
+    if (rep_count[0] == 0) {
+        if (minitem) *minitem = 0; 
+        if (maxitem) *maxitem = 0;
+        return ESMF_SUCCESS;
+    }
+
+    // min is offset, unless any of the strides are negative
+    //  (which is not expected).
+
+    if (minitem) *minitem = offset;
+ 
+    // total number of contig regions which will be moved
+    totalRepCount = 1; 
+    for (k=0; k<rank-1; k++) {
+        totalRepCount *= rep_count[k];
+        index[k] = 0;
+    }
+  
+    // initial value for item offset, plus size of contig buffer in 
+    // bytes (xp values are computed and stored as number of items)
+    itemPtr = offset;
+    contigItems = contig_length;
+  
+    // for each contig region which must be moved...
+    for (k=0; k<totalRepCount-1; k++) {
+  
+        // increment the innermost counter 
+        index[0]++;
+        itemPtr += stride[0];
+    
+        // and now roll up the index, thru all ranks
+        // at the end of a loop for one rank, roll back the pointer to
+        // the start of the previous loop and add in the next stride.
+        for (j=0; (j<rank-2) && (index[j] >= rep_count[j]); j++) {
+            index[j] = 0;
+            index[j+1]++;
+            itemPtr -= (rep_count[j]*stride[j]);
+            itemPtr += stride[j+1];
+        }   // end of j (per-rank, "odometer-rollover" or "carry-bit") loop
+    
+    }     // end of k (total rep count) loop
+
+    if (maxitem) *maxitem = itemPtr + contigItems;
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_XPacketMinMax
 
 
 //-----------------------------------------------------------------------------

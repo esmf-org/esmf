@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.147 2005/12/01 20:12:40 nscollins Exp $
+//$Id: ESMC_Route.C,v 1.148 2006/01/06 19:56:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.147 2005/12/01 20:12:40 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.148 2006/01/06 19:56:56 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2852,9 +2852,11 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int bufcount,                   // in - number of buffers, usually 1
-      int *bufsizes,                  // in - item count per buffer
-      const char *options) const {    // in - validate options
+      int srcbufcount,              // in - number of src buffers, usually 1
+      int *srcbufsizes,             // in - item count per src buffer
+      int dstbufcount,              // in - number of dst buffers, usually 1
+      int *dstbufsizes,             // in - item count per dst buffer
+      const char *options) const {  // in - validate options
 //
 // !DESCRIPTION:
 //      Validates that a Route is internally consistent.
@@ -2864,9 +2866,10 @@
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
     int rc;
-//
-//  code goes here
-//
+    int i, j, k;
+    int npets, xpcount;
+    int minitem, maxitem;
+    ESMC_XPacket *xp;
 
 // TODO:
 // ok we can still validate base object, but mostly this needs to broadcast
@@ -2885,7 +2888,60 @@
                                               &rc)) return (rc);
 
     // add more code here.
-    return rc;
+   
+    // TODO: first pass at helping find route-table-related bugs, which
+    // are pretty painful to debug at this point.
+    // 1. do what we can locally.   we have item counts and we can verify
+    // that xpackets do not reference memory outside the buffer.
+    // 2. next most common problem - mismatches between number of sends
+    // and receives or sizes of sends/receives on each PET.  for that we
+    // have to broadcast the sizes and check against what we expect to do.
+ 
+    // for now just do number 1.
+
+    // figure out how many pets total we might be sending to and receiving from
+    rc = ct->ESMC_CommTableGetCount(&npets);
+
+    // for send table:
+    for (i=0; i<npets; i++) {
+        rc = sendRT->ESMC_RTableGetCount(i, &xpcount);
+        if (xpcount == 0) continue;
+
+        for (j=0; j<xpcount; j++) {
+            rc = sendRT->ESMC_RTableGetEntry(i, j, &xp);
+            rc = xp->ESMC_XPacketMinMax(&minitem, &maxitem);
+            for (k=0; k<srcbufcount; k++) {
+                // i think this should really be >=, but try > for now.
+                if ((minitem < 0) || (maxitem > srcbufsizes[k])) {
+                    printf("ERROR: pet %d, send xp %d, item %d > size %d of buffer %d\n",
+                                        i, j, maxitem, srcbufsizes[k], k);
+                    return ESMF_FAILURE;
+                }
+            }
+        }
+    }
+
+    // for recv table:
+    for (i=0; i<npets; i++) {
+        rc = recvRT->ESMC_RTableGetCount(i, &xpcount);
+        if (xpcount == 0) continue;
+
+        for (j=0; j<xpcount; j++) {
+            rc = recvRT->ESMC_RTableGetEntry(i, j, &xp);
+            rc = xp->ESMC_XPacketMinMax(&minitem, &maxitem);
+            for (k=0; k<dstbufcount; k++) {
+                // ditto
+                if ((minitem < 0) || (maxitem > dstbufsizes[k])) {
+                    printf("ERROR: pet %d, recv xp %d, item %d > size %d of buffer %d\n",
+                                        i, j, maxitem, dstbufsizes[k], k);
+                    return ESMF_FAILURE;
+                }
+            }
+        }
+    }
+
+
+    return ESMF_SUCCESS;
 
  } // end ESMC_RouteValidate
 

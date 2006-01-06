@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.59 2005/11/04 23:42:02 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.60 2006/01/06 19:56:54 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -159,7 +159,9 @@
                            int numAddrs=1);
 
  // required methods inherited and overridden from the ESMC_Base class
-    int ESMC_RouteValidate(int bufcount, int *bufsizes, const char *options=NULL) const;
+    int ESMC_RouteValidate(int srcbufcount, int *srcbufsizes, 
+                           int dstbufcount, int *dstbufsizes,
+                           const char *options=NULL) const;
     int ESMC_RoutePrint(const char *options=NULL) const;
 
  // native C++ constructors/destructors

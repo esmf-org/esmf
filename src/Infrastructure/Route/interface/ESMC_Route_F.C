@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.40 2005/11/04 22:12:32 nscollins Exp $
+// $Id: ESMC_Route_F.C,v 1.41 2006/01/06 19:56:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -321,9 +321,13 @@ extern "C" {
        }
 
 
-       void FTN(c_esmc_routevalidate)(ESMC_Route **ptr, int *bufcount, 
-                  int *bufsizes, char *opts, int *status) {
-           *status = (*ptr)->ESMC_RouteValidate(*bufcount, bufsizes, opts);
+       void FTN(c_esmc_routevalidate)(ESMC_Route **ptr, 
+                                      int *srcbufcount, int *srcbufsizes, 
+                                      int *dstbufcount, int *dstbufsizes, 
+                                      char *opts, int *status) {
+
+           *status = (*ptr)->ESMC_RouteValidate(*srcbufcount, srcbufsizes, 
+                                              *dstbufcount, dstbufsizes, opts);
        }
 
        void FTN(c_esmc_routeprint)(ESMC_Route **ptr, char *opts, int *status) {
