@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.148 2006/01/06 19:56:56 nscollins Exp $
+//$Id: ESMC_Route.C,v 1.149 2006/01/06 23:25:50 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.148 2006/01/06 19:56:56 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.149 2006/01/06 23:25:50 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -606,7 +606,7 @@
     vmk_commhandle **handle;
 
     // debug
-    ESMC_RoutePrint();
+    //ESMC_RoutePrint();
 
     VMType = 0;   // TODO: unused so far, here for future use
     nbytes = ESMC_DataKindSize(dk);
@@ -2994,6 +2994,12 @@
     ////ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     //printf(msgbuf);
     //vm->VMPrint("");
+    { int myid, petcount;
+      vm->ESMC_VMGet(&myid, &petcount, NULL, NULL, NULL);
+      sprintf(msgbuf, "VM: my pet = %d of %d\n", myid, petcount);
+      //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      printf(msgbuf);
+    }
 
     sprintf(msgbuf," Send table:\n");
     //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
