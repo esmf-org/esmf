@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.79 2006/01/06 22:47:05 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.80 2006/01/06 23:46:01 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.79 2006/01/06 22:47:05 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.80 2006/01/06 23:46:01 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1523,11 +1523,12 @@
         totalcount2 = 0
       endif
        
-      call ESMF_RouteValidate(thisroute, dummy, totalcount, &
-                                         dummy2, totalcount2, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+      ! TODO: check to see if this is causing problems.
+      !call ESMF_RouteValidate(thisroute, dummy, totalcount, &
+      !                                   dummy2, totalcount2, rc=localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                          ESMF_ERR_PASSTHRU, &
+      !                          ESMF_CONTEXT, rc)) return
       ! debug end
 
       call ESMF_ArrayRegrid(srcArray, srcDatamap, hasSrcData, &
