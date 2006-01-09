@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2006/01/04 21:14:33 nscollins Exp $ 
+# $Id: makefile,v 1.16 2006/01/09 21:53:11 nscollins Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -19,18 +19,18 @@ LOCDIR	  = src/Infrastructure/BundleComm/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_BundleCommUTest \
                 $(ESMF_TESTDIR)/ESMF_BundleCommOptionsUTest \
-                $(ESMF_TESTDIR)/ESMF_BundleRedistUTest 
-#                $(ESMF_TESTDIR)/ESMF_BundleRedistUseUTest
+                $(ESMF_TESTDIR)/ESMF_BundleRedistUTest \
+                $(ESMF_TESTDIR)/ESMF_BundleRedistUseUTest
 
 TESTS_RUN     = RUN_ESMF_BundleCommUTest \
                 RUN_ESMF_BundleCommOptionsUTest \
-                RUN_ESMF_BundleRedistUTest 
-#                RUN_ESMF_BundleRedistUseUTest 
+                RUN_ESMF_BundleRedistUTest \
+                RUN_ESMF_BundleRedistUseUTest 
 
 TESTS_RUN_UNI = RUN_ESMF_BundleCommUTestUNI \
                 RUN_ESMF_BundleCommOptionsUTestUNI \
-                RUN_ESMF_BundleRedistUTestUNI 
-#                RUN_ESMF_BundleRedistUseUTestUNI 
+                RUN_ESMF_BundleRedistUTestUNI \
+                RUN_ESMF_BundleRedistUseUTestUNI 
 
 include ${ESMF_DIR}/makefile
 

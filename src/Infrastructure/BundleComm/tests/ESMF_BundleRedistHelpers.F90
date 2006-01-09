@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.5 2006/01/05 18:19:43 nscollins Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.6 2006/01/09 21:53:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -1809,9 +1809,10 @@ end subroutine ValidateIndexField
 !
 #undef  ESMF_METHOD
 #define ESMF_METHOD "FieldCleanup"
-subroutine FieldCleanup(field1, field2, field3, field4, field5, rc)
+subroutine FieldCleanup(field1, field2, field3, field4, field5, dogrid, rc)
     type(ESMF_Field), intent(inout) :: field1
     type(ESMF_Field), intent(inout), optional :: field2, field3, field4, field5
+    logical, optional :: dogrid
     integer, intent(out), optional :: rc
     
     ! Local variables
@@ -1879,9 +1880,14 @@ subroutine FieldCleanup(field1, field2, field3, field4, field5, rc)
         if (rc.NE.ESMF_SUCCESS) return
     endif
 
-    ! do this last.
-    call ESMF_GridDestroy(grid, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
+    ! do this last, unless requested not to.
+    if (.not. present(dogrid)) then
+      call ESMF_GridDestroy(grid, rc=rc)
+      if (rc.NE.ESMF_SUCCESS) return
+    else if (dogrid) then
+      call ESMF_GridDestroy(grid, rc=rc)
+      if (rc.NE.ESMF_SUCCESS) return
+    endif
 
     if (present(rc)) rc = ESMF_SUCCESS
     return
@@ -2343,7 +2349,7 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, rc)
   type(ESMF_VM) :: vm
   type(ESMF_DELayout) :: thislayout
   real (ESMF_KIND_R8), dimension(2) :: mincoords1, maxcoords1
-  real (ESMF_KIND_R8), dimension(72) :: deltas
+  real (ESMF_KIND_R8), dimension(:), allocatable :: deltas
   integer, dimension(2) :: counts
   integer :: npets, status
 
@@ -2381,6 +2387,10 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, rc)
   counts(1) = nx
   counts(2) = ny
 
+  allocate(deltas(nz), stat=rc)
+  if (ESMF_LogMsgFoundAllocError(status, "Allocating delta array", &
+                                       ESMF_CONTEXT, rc)) return
+
   deltas(:) = 100.0
 
   grid = ESMF_GridCreateHorzLatLonUni(counts, &
@@ -2415,6 +2425,7 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, rc)
 10 continue
   ! rc will have been set by the call to logerr; 
   ! just return at this point
+  if (allocated(deltas)) deallocate(deltas, stat=rc)
 
 end function CreateLatLonGrid
 
