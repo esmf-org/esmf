@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.142 2005/12/15 21:13:16 nscollins Exp $
+#  $Id: common.mk,v 1.143 2006/01/09 19:06:34 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1790,12 +1790,19 @@ doc:  chkdir_doc
 	$(MAKE) dvi html pdf
 	@echo "Build doc completed."
 
-alldoc: chkdir_doc include cppfiles tex
-	@echo "========================================="
-	@echo "Building All Documentation"
-	@echo "========================================="
-	@$(MAKE) dvi pdf html
-	@echo "Build alldoc completed."
+alldoc: doc
+
+# the 'doc' and 'alldoc' do identical things now.
+# in the past it used to be possible to build documents
+# for individual parts of the system, but that has not
+# been working for quite a while now.
+#
+#alldoc: chkdir_doc include cppfiles tex
+#	@echo "========================================="
+#	@echo "Building All Documentation"
+#	@echo "========================================="
+#	@$(MAKE) dvi pdf html
+#	@echo "Build alldoc completed."
 
 tex: chkdir_doc include cppfiles
 	cd $(ESMF_TOP_DIR) ;\
