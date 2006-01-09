@@ -1,4 +1,4 @@
-% $Id: ESMF_use.tex,v 1.21 2005/05/06 20:10:39 nscollins Exp $
+% $Id: ESMF_use.tex,v 1.22 2006/01/09 20:35:25 svasquez Exp $
 
 \subsection{Using the ESMF}
 \label{UsingLibrary}
@@ -60,17 +60,9 @@ When building the ESMF libraries on platforms that support both
 variable is set to match the compile option that was specified 
 to build your application.
 
-To link a Fortran application to the ESMF libraries please 
-refer to the {\tt link\_rules} files found in the following directories:
-
-\begin{verbatim}
-	$ESMF_DIR/build_config/AIX.default.default
-	$ESMF_DIR/build_config/IRIX64.default.default
-	$ESMF_DIR/build_config/Linux.intel.default
-	$ESMF_DIR/build_config/Linux.lahey.default
-	$ESMF_DIR/build_config/Linux.pgi.default
-	$ESMF_DIR/build_config/OSF1.default.default
-\end{verbatim}
+To link a Fortran application to the ESMF libraries please refer 
+to the example user makefile, makefile.sample, found in the esmf/build 
+directory. This makefile has been tested on all supported platforms. 
 
 
 \subsubsection{Customized SITE Files}
