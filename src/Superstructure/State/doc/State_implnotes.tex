@@ -1,4 +1,4 @@
-% $Id: State_implnotes.tex,v 1.4 2005/12/13 23:28:35 nscollins Exp $
+% $Id: State_implnotes.tex,v 1.5 2006/01/10 17:39:14 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,25 +55,27 @@ particular, non-monotonic PETs to DEs.  The following figures
 illustrate how the DEs are mapped in each of the gridded components
 in that test:
 
-\begin{center}
-\begin{figure}
-\caption{The mapping of PETs (processors) to DEs (data)
-in the source grid created by {\tt user\_model1.F90}
-in the FieldExcl system test.}
-\label{fig:excl_source}
-\scalebox{0.66}{\includegraphics{Excl_src_grid}}
-\end{figure}
-\end{center}
+% DIAGFIX_BASELINE1
+% \begin{center}
+% \begin{figure}
+% \caption{The mapping of PETs (processors) to DEs (data)
+% in the source grid created by {\tt user\_model1.F90}
+% in the FieldExcl system test.}
+% \label{fig:excl_source}
+% \scalebox{0.66}{\includegraphics{Excl_src_grid}}
+% \end{figure}
+% \end{center}
 
-\begin{center}
-\begin{figure}
-\caption{The mapping of PETs (processors) to DEs (data)
-in the destination grid created by {\tt user\_model2.F90}
-in the FieldExcl system test.}
-\label{fig:excl_destination}
-\scalebox{0.66}{\includegraphics{Excl_dst_grid}}
-\end{figure}
-\end{center}
+% DIAGFIX_BASELINE2
+% \begin{center}
+% \begin{figure}
+% \caption{The mapping of PETs (processors) to DEs (data)
+% in the destination grid created by {\tt user\_model2.F90}
+% in the FieldExcl system test.}
+% \label{fig:excl_destination}
+% \scalebox{0.66}{\includegraphics{Excl_dst_grid}}
+% \end{figure}
+% \end{center}
 
 
 
@@ -87,25 +89,27 @@ called a Proxy Grid. These PETs contain no local data, so the
 Array object is empty, and the DELayout for the Grid is like this:
 
 
-\begin{center}
-\begin{figure}
-\caption{The mapping of PETs (processors) to DEs (data)
-in the source grid after the reconcile call in {\tt user\_coupler.F90}
-in the FieldExcl system test.}
-\label{fig:excl_source}
-\scalebox{0.66}{\includegraphics{Excl_src_grid_cpl}}
-\end{figure}
-\end{center}
+% DIAGFIX_BASELINE3
+% \begin{center}
+% \begin{figure}
+% \caption{The mapping of PETs (processors) to DEs (data)
+% in the source grid after the reconcile call in {\tt user\_coupler.F90}
+% in the FieldExcl system test.}
+% \label{fig:excl_source}
+% \scalebox{0.66}{\includegraphics{Excl_src_grid_cpl}}
+% \end{figure}
+% \end{center}
 
-\begin{center}
-\begin{figure}
-\caption{The mapping of PETs (processors) to DEs (data)
-in the destination grid after the reconcile call in {\tt user\_coupler.F90}
-in the FieldExcl system test.}
-\label{fig:excl_destination}
-\scalebox{0.66}{\includegraphics{Excl_dst_grid_cpl}}
-\end{figure}
-\end{center}
+% DIAGFIX_BASELINE4
+% \begin{center}
+% \begin{figure}
+% \caption{The mapping of PETs (processors) to DEs (data)
+% in the destination grid after the reconcile call in {\tt user\_coupler.F90}
+% in the FieldExcl system test.}
+% \label{fig:excl_destination}
+% \scalebox{0.66}{\includegraphics{Excl_dst_grid_cpl}}
+% \end{figure}
+% \end{center}
 
 
 \end{enumerate}
