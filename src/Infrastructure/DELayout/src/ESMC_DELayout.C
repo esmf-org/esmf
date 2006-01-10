@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.36 2005/09/09 21:56:48 jwolfe Exp $
+// $Id: ESMC_DELayout.C,v 1.37 2006/01/10 07:46:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.36 2005/09/09 21:56:48 jwolfe Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.37 2006/01/10 07:46:49 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -489,15 +489,31 @@ int ESMC_DELayout::ESMC_DELayoutGet(
       myDEs[i] = mydes[i];
   if (oneToOneFlag != ESMC_NULL_POINTER)
     *oneToOneFlag = this->oneToOneFlag;
-  if (localDe != ESMC_NULL_POINTER)
-    *localDe = mydes[0];
+  if (localDe != ESMC_NULL_POINTER){
+    if (this->oneToOneFlag == ESMF_TRUE)
+      *localDe = mydes[0];
+    else{
+      *localDe = -1;    // mark invalid
+      return ESMF_RC_CANNOT_GET;
+    }
+  }
   if (logRectFlag != ESMC_NULL_POINTER)
     *logRectFlag = this->logRectFlag;
-  if ((len_deCountPerDim >= this->ndim) && (this->logRectFlag == ESMF_TRUE)) {
-    for (i=0; i<this->ndim; i++)
-      deCountPerDim[i] = dims[i];
-    for (i=this->ndim; i<len_deCountPerDim; i++)
-      deCountPerDim[i] = 1;
+  if (len_deCountPerDim >= this->ndim){
+    if (this->logRectFlag == ESMF_TRUE){
+      for (i=0; i<this->ndim; i++)
+        deCountPerDim[i] = dims[i];
+      for (i=this->ndim; i<len_deCountPerDim; i++)
+        deCountPerDim[i] = 1;
+    }else{
+      for (i=0; i<len_deCountPerDim; i++)
+        deCountPerDim[i] = -1;    // mark invalid
+      return ESMF_RC_CANNOT_GET; 
+    }
+  }else{
+    for (i=0; i<len_deCountPerDim; i++)
+      deCountPerDim[i] = -1;    // mark invalid
+    return ESMF_RC_ARG_SIZE;
   }
   return ESMF_SUCCESS;
 }
