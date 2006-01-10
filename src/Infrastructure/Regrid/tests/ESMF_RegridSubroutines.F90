@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.7 2005/12/12 18:15:59 svasquez Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.8 2006/01/10 23:48:20 svasquez Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -106,7 +106,7 @@ contains
                 	return
 		endif
 		! Run the Regrid unit test here
-		err_threshold=0.2
+		err_threshold=0.5
 		write(failMsg, *) "Error in Regrid"
                 write(name, *) "Regrid test: ", trim(testString)
 		call Regrid(FieldChoice = testArgs%function, &
@@ -329,7 +329,7 @@ contains
                 return
         endif
         if (index.eq.letter) then
-             testArgs%srchalo = halo
+             testArgs%srchalo = value
 	     close ((npets+20))
              exit
         endif
@@ -352,7 +352,7 @@ contains
                 return
         endif
         if (index.eq.letter) then
-             testArgs%dsthalo = halo
+             testArgs%dsthalo = value
 	     close ((npets+20))
              exit
         endif
@@ -396,7 +396,7 @@ contains
       type(ESMF_GridHorzStagger), intent(in) :: SrcGridChoice, DstGridChoice
       type(ESMF_RelLoc), intent(in) :: SrcLocChoice, DstLocChoice 
       integer, intent(in) :: SrcHalo, DstHalo
-      real(ESMF_KIND_R8), optional :: error_threshold
+      real(ESMF_KIND_R8), optional, intent(in) :: error_threshold
       integer, intent(in) :: npetsXY(2)
       integer, intent(in) :: nSrcPetsXY(2)
       integer, intent(in) :: domainType
@@ -413,7 +413,7 @@ contains
     integer :: lbSrc(2), ubSrc(2)
     integer :: lbDst(2), ubDst(2)
     integer :: nx_domain, ny_domain
-    integer ::  n_cells(2)
+    integer ::  n_cells(2), sub_rc
     type(ESMF_ArraySpec) :: arrayspec
     real(ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
     type(ESMF_Array), dimension(2) :: ESMF_coords
@@ -431,6 +431,7 @@ contains
     real(ESMF_KIND_R8), parameter ::  pi            = 3.1416d0
 
 
+    ier=ESMF_SUCCESS	! Assume success
 !-------------------------------------------------------------------------
 !   ! Setup:
 !   !
@@ -438,7 +439,15 @@ contains
 !   !  in the Regrid calls below.
  
     layout1 = ESMF_DELayoutCreate(vm, nSrcPetsXY    , rc=rc)
+    if (rc.ne.ESMF_SUCCESS) then
+        ier=ESMF_FAILURE
+        print *, "layout 1 failed"
+    end if
     layout2 = ESMF_DELayoutCreate(vm, npetsXY, rc=rc)
+    if (rc.ne.ESMF_SUCCESS) then
+        ier=ESMF_FAILURE
+        print *, "layout 2 failed"
+    end if
 
    !--Create and distribute the source and destination grids
    !=========================================================
@@ -450,13 +459,17 @@ contains
       call createRegionalGrids
     else                          !ERROR
       print*,'ERROR! domainType=', domainType,'  valid values= 1,2 '
+      ier=ESMF_FAILURE
       stop
     end if
 
    !Specify settings for the fields' arrays
    !=======================================
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
-
+    if (rc.ne.ESMF_SUCCESS) then
+        ier=ESMF_FAILURE
+        print *, "ESMF_ArraySpecSet failed"
+    end if
 
    !Create the source field (with halo width of 3)
    !==============================================
@@ -467,8 +480,14 @@ contains
                      field     = field1,         &
                      f90ptr    = f90ptr1,        &
                      xCoor     = x_coords,       &
-                     yCoor     = y_coords         )
+                     yCoor     = y_coords,       &
+                     arrayspec = arrayspec,      &
+                     rc        = sub_rc	)
 
+    if (sub_rc.ne.ESMF_SUCCESS) then 
+	ier = ESMF_FAILURE 
+        print *, "createField failed"
+    endif
 
     !--- Assign values to the source field data (4 case choices) via pointer
     !=======================================================================
@@ -493,7 +512,7 @@ contains
     call functionValues(FieldChoice, x_coords, y_coords, Phi, Theta, &
                         lbSrc, ubSrc, Srchalo, maxcoords, f90ptr1, ier)
 
-   !print*,'Source grid: x_coords(1,1)=',x_coords(1,1)
+   print*,'Source grid: x_coords(1,1)=',x_coords(1,1)
 
    !Create the destination field (with halo width of 0)
    !===================================================
@@ -504,8 +523,14 @@ contains
                      field     = field2,         &
                      f90ptr    = f90ptr2,        &
                      xCoor     = x_coords2,      &
-                     yCoor     = y_coords2        )
+                     yCoor     = y_coords2,      &
+                     arrayspec = arrayspec,      &
+                     rc        = sub_rc )
 
+    if (sub_rc.ne.ESMF_SUCCESS) then 
+	ier = ESMF_FAILURE
+        print *, "createField failed"
+    end if
     ! fields all ready to go
 
 !\subsubsection{Precomputing and Executing a Regrid}
@@ -524,11 +549,19 @@ contains
     call ESMF_FieldRegridStore(field1, field2, vm, &
                                routehandle=regrid_rh, &
                                regridmethod=MethodChoice, rc=rc)
+    if (rc.ne.ESMF_SUCCESS) then 
+	ier = ESMF_FAILURE
+        print *, "ESMF_FieldRegridStore failed"
+    end if
 
  
    !Regrid
    !======
     call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)
+    if (rc.ne.ESMF_SUCCESS) then 
+	ier = ESMF_FAILURE
+        print *, "ESMF_FieldRegrid failed"
+    end if
 
 
 !===============================================================
@@ -559,6 +592,7 @@ contains
       Theta = 0.5 * pi * (y_coords2+10.) / ymax
     else
       print*,'ERROR! domainType=',domainType,' valid values=1,2'
+      ier=ESMF_FAILURE
     end if
    !print*,'Destination grid: x_coords2(1,1)=',x_coords2(1,1)
 
@@ -568,6 +602,7 @@ contains
     call functionValues(FieldChoice, x_coords2, y_coords2, Phi, Theta, &
                         lbDst, ubDst, DstHalo, maxcoords, SolnOnTarget, ier)
 
+   print*,'Destination grid: x_coords(1,1)=',x_coords(1,1)
  
    !Verify success in regridding. Compute maximum and average normalized error
    !==========================================================================
@@ -580,6 +615,11 @@ contains
     else
       epsil=0.5 !threshold for normalized error
     end if
+	print *, "Before loop"
+	print *, "lbDst(2)= ", lbDst(2)
+	print *, "ubDst(2)= ", ubDst(2)
+	print *, "lbDst(1)= ", lbDst(1)
+	print *, "ubDst(1)= ", ubDst(1)
 
    do j=lbDst(2)+1,ubDst(2)
      do i=lbDst(1),ubDst(1)
@@ -589,12 +629,9 @@ contains
       !     f90ptr2(i,j)
        if (RelativeError .gt. epsil ) then
          regrid_rc=ESMF_FAILURE
+         ier=ESMF_FAILURE
+        print *, "RelativeError .gt. epsil"
      !TODO compute the global values of i,j for diagnostic printing
-         write( *, '(i3,a,i2,a,i2,a,2i2,a,2i4,a,3(1pe11.4))' )                &
-                 localPet,' ERROR! Regr= ',iRegrid,' Field=',FieldChoice, &
-                 ' npetsXY=',npetsXY, ' i,j=',i,j,             &
-                 '  exact/actual/Err',SolnOnTarget(i,j), f90ptr2(i,j),    &
-                 RelativeError
        end if
        avg_error=avg_error+RelativeError
        if(RelativeError > max_error) max_error=RelativeError
@@ -608,6 +645,10 @@ contains
          '  local avg norm error=',avg_error
 
     call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
+    if (rc.ne.ESMF_SUCCESS) then 
+	ier = ESMF_FAILURE
+        print *, "ESMF_FieldRegridRelease failed"
+    end if
 
 
 !-------------------------------------------------------------------------
@@ -743,43 +784,66 @@ contains
 !=========================================================================
 
     subroutine createField(grid, LocChoice, halo, fieldName, field, &
-                              f90ptr, xCoor,  yCoor )
+                              f90ptr, xCoor,  yCoor, arrayspec, rc )
     type(ESMF_Grid), intent(in)                 :: grid
     type(ESMF_RelLoc), intent(in)               :: LocChoice
     integer, intent(in)                         :: halo
     character (len=*), intent(in)               :: fieldName
-    type(ESMF_Field)                            :: field
+    type(ESMF_Field), intent(out)               :: field
     real(ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr
     real(ESMF_KIND_R8), dimension(:,:), pointer :: xCoor, yCoor
-    
+    type(ESMF_ArraySpec), intent(in)            :: arrayspec
+    integer, intent(out)			:: rc   
 
  !-------------------------------------------------------------------------
  !--Create a field and return a pointer to its data array, and the arrays 
  !  of coordinates --- x and y.
  !--------------------------------------------------------------------------
+  integer :: local_rc
+   rc = ESMF_SUCCESS
 
    !Create the field 
    !================
     field = ESMF_FieldCreate(grid, arrayspec, &
                               horzRelloc=LocChoice, &
-                              haloWidth=halo, name=fieldName, rc=rc)
+                              haloWidth=halo, name=fieldName, rc=local_rc)
+   if (local_rc.ne.ESMF_SUCCESS) then 
+	rc = ESMF_FAILURE
+        print *, "ESMF_FieldCreate failed"
+   end if
 
 
    !Create a pointer to the field data space
    !========================================
-    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=rc)
+    call ESMF_FieldGetDataPointer(field, f90ptr, ESMF_DATA_REF, rc=local_rc)
 
+   if (local_rc.ne.ESMF_SUCCESS) then 
+	rc = ESMF_FAILURE
+        print *, "ESMF_FieldGetDataPointer failed"
+   end if
 
    !Get the coordinates of the grid
    !===============================
     call ESMF_GridGetCoord(grid,horzRelLoc=LocChoice,  &
-           centercoord=ESMF_coords,rc=rc)
+           centercoord=ESMF_coords,rc=local_rc)
 
+   if (local_rc.ne.ESMF_SUCCESS) then 
+	rc = ESMF_FAILURE
+        print *, "ESMF_GridGetCoord failed"
+   end if
 
    !Get the actual values of the x and y coordinate arrays
    !======================================================
-    call ESMF_ArrayGetData(ESMF_coords(1), xCoor, ESMF_DATA_COPY, rc=rc)
-    call ESMF_ArrayGetData(ESMF_coords(2), yCoor, ESMF_DATA_COPY, rc=rc)
+    call ESMF_ArrayGetData(ESMF_coords(1), xCoor, ESMF_DATA_COPY, rc=local_rc)
+   if (local_rc.ne.ESMF_SUCCESS) then 
+	rc = ESMF_FAILURE
+        print *, "ESMF_ArrayGetData 1 failed"
+   end if
+    call ESMF_ArrayGetData(ESMF_coords(2), yCoor, ESMF_DATA_COPY, rc=local_rc)
+   if (local_rc.ne.ESMF_SUCCESS) then 
+	rc = ESMF_FAILURE
+        print *, "ESMF_ArrayGetData 2 failed"
+   end if
 
     return
     end subroutine createField
@@ -801,16 +865,21 @@ contains
   integer, intent(in)                             :: Choice
   real(ESMF_KIND_R8), dimension(:,:), pointer     :: xCoord, yCoord
   real(ESMF_KIND_R8), dimension(:,:), pointer     :: Theta, Phi
-  integer, dimension(2), intent(in)               :: lb, ub
+  integer, dimension(2), intent(inout)            :: lb, ub
   integer, intent(in)                             :: halo
   real(ESMF_KIND_R8), dimension(2), intent(in)    :: maxCoor
   real(ESMF_KIND_R8), dimension(:,:), pointer     :: f90ptr
-  integer :: ier
+  integer, intent (out) :: ier
 
  !--Local Variables
   integer :: i,j
   real(ESMF_KIND_R8) :: length_scale, radius
   real(ESMF_KIND_R8), parameter ::  pi            = 3.1416d0
+	print *, "lb(1)=", lb(1)
+	print *, "lb(2)=", lb(2)
+	print *, "ub(1)=", ub(1)
+	print *, "ub(2)=", ub(2)
+	print *, "run case"
 
     select case(Choice)
     case(1) !** f=x+y
@@ -856,6 +925,10 @@ contains
              ') valid range is [ 1 -> 4 ]'
       ier=1
     end select
+	print *, "lb(1)=", lb(1)
+	print *, "lb(2)=", lb(2)
+	print *, "ub(1)=", ub(1)
+	print *, "ub(2)=", ub(2)
 
     return
     end subroutine functionValues
