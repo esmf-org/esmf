@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.19 2005/12/30 22:19:48 jwolfe Exp $
+% $Id: Grid_desc.tex,v 1.20 2006/01/10 17:44:31 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -50,16 +50,17 @@ locations, defined by its staggering and following typical Arakawa nomenclature.
 In ESMF, there are nine possible relative locations for data on a typical
 horizontal Grid cell, though each staggering will use a subset of them.  These
 locations, with their corresponding {\tt ESMF\_Rellocs}, are illustrated in
-Figure~\ref{fig:GridDataLocations}.
+% Figure~\ref{fig:GridDataLocations}.
 
-\begin{center}
-\begin{figure}[h!tb]
-\caption{Possible horizontal data locations for a representative computational
-cell. }
-\label{fig:GridDataLocations}
-\scalebox{0.66}{\includegraphics{GridDataLocations}}
-\end{figure}
-\end{center}
+% DIAGFIX_BASELINE6
+% \begin{center}
+% \begin{figure}[h!tb]
+% \caption{Possible horizontal data locations for a representative computational
+% cell. }
+% \label{fig:GridDataLocations}
+% \scalebox{0.66}{\includegraphics{GridDataLocations}}
+% \end{figure}
+% \end{center}
 
 {\tt ESMF\_Grids} are created with only those underlying structures, called
 subGrids, to support data at the specific cell locations defined by its given
@@ -69,28 +70,30 @@ centers.  An {\tt ESMF\_Grid} created with Arakawa C staggering will therefore
 make subGrids at the cell centers and specified cell faces (please see
 Section~\ref{sec:GridHorzStagger} for a complete list of implemented staggerings
 and their corresponding Rellocs).  An example of the data locations for an
-Arakawa C\_SE Grid is presented in Figure~\ref{fig:ArakawaC_SE}.
+% Arakawa C\_SE Grid is presented in Figure~\ref{fig:ArakawaC_SE}.
 
-\begin{center}
-\begin{figure}[h!tb]
-\caption{Data locations for an Arakawa C\_SE Grid. }
-\label{fig:ArakawaC_SE}
-\scalebox{0.66}{\includegraphics{ArakawaC_SE}}
-\end{figure}
-\end{center}
+% DIAGFIX_BASELINE7
+% \begin{center}
+% \begin{figure}[h!tb]
+% \caption{Data locations for an Arakawa C\_SE Grid. }
+% \label{fig:ArakawaC_SE}
+% \scalebox{0.66}{\includegraphics{ArakawaC_SE}}
+% \end{figure}
+% \end{center}
 
 A vertical grid is also represented as one or more subGrids, each corresponding
 to a specific relative location along the defined vertical axis.  The possible
-vertical relative locations are shown in Figure~\ref{fig:VertGridDataLocations}.
+% vertical relative locations are shown in Figure~\ref{fig:VertGridDataLocations}.
 
-\begin{center}
-\begin{figure}[h!tb]
-\caption{Possible vertical data locations for a representative computational
-         cell. }
-\label{fig:VertGridDataLocations}
-\scalebox{0.66}{\includegraphics{VertGridDataLocations}}
-\end{figure}
-\end{center}
+% DIAGFIX_BASELINE8
+% \begin{center}
+% \begin{figure}[h!tb]
+% \caption{Possible vertical data locations for a representative computational
+%          cell. }
+% \label{fig:VertGridDataLocations}
+% \scalebox{0.66}{\includegraphics{VertGridDataLocations}}
+% \end{figure}
+% \end{center}
 
 Note that the locations in the figure are represented by horizontal planes.  The
 vertical relative location only defines the vertical coordinate of any point, and
@@ -115,29 +118,31 @@ The distribution (also referred to as decomposition) of the Grid on an
 ESMF data classes.  ESMF has currently implemented two different distribution
 strategies: block and arbitrary.  In block distribution, logically rectangular
 chunks of the global Grid are represented as local decomposition elements
-(DEs), as shown in Figure~\ref{fig:GridBlockDistribute}.
+% (DEs), as shown in Figure~\ref{fig:GridBlockDistribute}.
 
-\begin{center}
-\begin{figure}[h!tb]
-\caption{Illustration of Block Distribution of a Grid. }
-\label{fig:GridBlockDistribute}
-\scalebox{0.66}{\includegraphics{GridBlockDistribution}}
-\end{figure}
-\end{center}
+% DIAGFIX_BASELINE9
+% \begin{center}
+% \begin{figure}[h!tb]
+% \caption{Illustration of Block Distribution of a Grid. }
+% \label{fig:GridBlockDistribute}
+% \scalebox{0.66}{\includegraphics{GridBlockDistribution}}
+% \end{figure}
+% \end{center}
 
 In this distribution method, some of the geometry and connectivity of the global
 Grid are also true locally, in that most relative neighbor relationships are
 maintained.  In arbitrary distribution, on the other hand, this is not
 necessarily so, since the user specifies lists of individual points to
-be grouped as DEs, as shown in Figure~\ref{fig:GridArbitraryDistribute}.
+% be grouped as DEs, as shown in Figure~\ref{fig:GridArbitraryDistribute}.
 
-\begin{center}
-\begin{figure}[h!tb]
-\caption{Illustration of Arbitrary Distribution of a Grid. }
-\label{fig:GridArbitraryDistribute}
-\scalebox{0.66}{\includegraphics{GridArbitraryDistribution}}
-\end{figure}
-\end{center}
+% DIAGFIX_BASELINE10
+% \begin{center}
+% \begin{figure}[h!tb]
+% \caption{Illustration of Arbitrary Distribution of a Grid. }
+% \label{fig:GridArbitraryDistribute}
+% \scalebox{0.66}{\includegraphics{GridArbitraryDistribution}}
+% \end{figure}
+% \end{center}
 
 This method of distribution maintains local lists of cells without any sense
 of their relationship to one another beyond their global index.  For that
