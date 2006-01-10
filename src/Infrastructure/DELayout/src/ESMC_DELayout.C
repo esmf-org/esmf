@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.37 2006/01/10 07:46:49 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.38 2006/01/10 08:14:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.37 2006/01/10 07:46:49 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.38 2006/01/10 08:14:22 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -285,6 +285,15 @@ int ESMC_DELayout::ESMC_DELayoutConstruct1D(ESMC_VM &vm, int nDEs,
     // Use the mapper algorithm to find good DE-to-PET mapping
     ESMC_DELayoutFindDEtoPET(npets);
   }
+  // Issue warning if this is not a 1:1 layout. Do this because higher levels
+  // of ESMF are written with 1:1 in mind.
+  // TODO: remove this warning once all of ESMF accepts the more general case
+  // of multiple DEs per PET.
+  if (oneToOneFlag == ESMF_FALSE){
+    ESMC_LogDefault.ESMC_LogWrite("A layout without 1:1 DE:PET mapping was"
+      " created! This may cause problems in higher layers of ESMF!", 
+      ESMC_LOG_WARN);
+  }
   // Fill local part of layout object
   int mypet = vm.vmk_mypet();    // get my PET id
   ESMC_DELayoutFillLocal(mypet);
@@ -369,11 +378,22 @@ int ESMC_DELayout::ESMC_DELayoutConstructND(ESMC_VM &vm, int *nDEs,
       des[i].petid = DEtoPET[i];   // copy the mapping
     // nsc - if ndes is = npets, go ahead and set the 1:1 flag
     // even if the user supplied the mapping.   6dec04
+    // TODO: gjt - this is needs a bit more consideration than this, just 
+    // ndes == npets alone does not indicate 1:1!
       if (ndes==npets) // 1:1 layout
         oneToOneFlag = ESMF_TRUE;
   }else{
     // Use the mapper algorithm to find good DE-to-PET mapping
     ESMC_DELayoutFindDEtoPET(npets);
+  }
+  // Issue warning if this is not a 1:1 layout. Do this because higher levels
+  // of ESMF are written with 1:1 in mind.
+  // TODO: remove this warning once all of ESMF accepts the more general case
+  // of multiple DEs per PET.
+  if (oneToOneFlag == ESMF_FALSE){
+    ESMC_LogDefault.ESMC_LogWrite("A layout without 1:1 DE:PET mapping was"
+      " created! This may cause problems in higher layers of ESMF!", 
+      ESMC_LOG_WARN);
   }
   // Fill local part of layout object
   int mypet = vm.vmk_mypet();    // get my PET id
@@ -510,10 +530,6 @@ int ESMC_DELayout::ESMC_DELayoutGet(
         deCountPerDim[i] = -1;    // mark invalid
       return ESMF_RC_CANNOT_GET; 
     }
-  }else{
-    for (i=0; i<len_deCountPerDim; i++)
-      deCountPerDim[i] = -1;    // mark invalid
-    return ESMF_RC_ARG_SIZE;
   }
   return ESMF_SUCCESS;
 }
