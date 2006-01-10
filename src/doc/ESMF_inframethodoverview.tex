@@ -1,4 +1,4 @@
-% $Id: ESMF_inframethodoverview.tex,v 1.14 2005/12/23 17:45:24 jwolfe Exp $
+% $Id: ESMF_inframethodoverview.tex,v 1.15 2006/01/10 17:52:38 jwolfe Exp $
 
 \section{Overview of Distributed Data Methods}
 
@@ -154,14 +154,15 @@ a list of AxisIndex objects into an XPacket, compute a local XPacket from one
 in global (undecomposed grid) space, and a method to compute the intersection
 of 2 XPackets and produce a 3rd XPacket describing that region.  
 
-\begin{center}
-\begin{figure}
-\caption{How an Exchange Packet (XPacket) describes the memory
-layout for a rectangular hypercube of data.}
-\label{fig:xpacketbasic}
-\scalebox{0.5}{\includegraphics{Basic_xpacket.eps}}
-\end{figure}
-\end{center}
+% DIAGFIX_BASELINE12
+% \begin{center}
+% \begin{figure}
+% \caption{How an Exchange Packet (XPacket) describes the memory
+% layout for a rectangular hypercube of data.}
+% \label{fig:xpacketbasic}
+% \scalebox{0.5}{\includegraphics{Basic_xpacket.eps}}
+% \end{figure}
+% \end{center}
 
 The Communication Table (CommTable) class encapsulates which other PETs this
 PET needs to talk to, and in what order.  There are create and destroy
@@ -341,64 +342,69 @@ does not allocate a packing or unpacking buffer but supplies the
 actual data address to the communications call so the data is
 read or written in place.
 
-\begin{center}
-\begin{figure}
-\caption{A common XPacket pattern which generally benefits from
-packing; the overlap region between 2 DEs during a halo update
-are often short in the contiguous dimension and have a high 
-repeat count.}
-\label{fig:xpacketpack}
-\scalebox{0.5}{\includegraphics{Basic_xpacket_pack.eps}}
-\end{figure}
-\end{center}
+% DIAGFIX_BASELINE13
+% \begin{center}
+% \begin{figure}
+% \caption{A common XPacket pattern which generally benefits from
+% packing; the overlap region between 2 DEs during a halo update
+% are often short in the contiguous dimension and have a high 
+% repeat count.}
+% \label{fig:xpacketpack}
+% \scalebox{0.5}{\includegraphics{Basic_xpacket_pack.eps}}
+% \end{figure}
+% \end{center}
 
-\begin{center}
-\begin{figure}
-\caption{When there are multiple XPackets destined for the
-same remote PET there are more options for how to order the
-contiguous pieces into a packed buffer.}
-\label{fig:xpacket2up}
-\scalebox{0.5}{\includegraphics{Basic_xpacket_2up.eps}}
-\end{figure}
-\end{center}
+% DIAGFIX_BASELINE14
+% \begin{center}
+% \begin{figure}
+% \caption{When there are multiple XPackets destined for the
+% same remote PET there are more options for how to order the
+% contiguous pieces into a packed buffer.}
+% \label{fig:xpacket2up}
+% \scalebox{0.5}{\includegraphics{Basic_xpacket_2up.eps}}
+% \end{figure}
+% \end{center}
 
-\begin{center}
-\begin{figure}
-\caption{When the XPacket describes memory which is physically
-a single contiguous region, there is no need to copy the data
-into another buffer; it can be communicated inplace.  There is
-a flag in the XPacket which marks how many of the dimensions
-are contiguous.}
-\label{fig:xpacketcontig}
-\scalebox{0.5}{\includegraphics{Basic_xpacket_contig.eps}}
-\end{figure}
-\end{center}
+% DIAGFIX_BASELINE15
+% \begin{center}
+% \begin{figure}
+% \caption{When the XPacket describes memory which is physically
+% a single contiguous region, there is no need to copy the data
+% into another buffer; it can be communicated inplace.  There is
+% a flag in the XPacket which marks how many of the dimensions
+% are contiguous.}
+% \label{fig:xpacketcontig}
+% \scalebox{0.5}{\includegraphics{Basic_xpacket_contig.eps}}
+% \end{figure}
+% \end{center}
 
-\begin{center}
-\begin{figure}
-\caption{Often the overhead of making multiple communication calls 
-outweighs the cost of copying non-contiguous data into a contiguous buffer,
-sending it in a single operation, and then copying it to the final
-memory locations on the receiving side.}
-\label{fig:routepack}
-\scalebox{0.5}{\includegraphics{Basic_pack_route.eps}}
-\end{figure}
-\end{center}
+% DIAGFIX_BASELINE16
+% \begin{center}
+% \begin{figure}
+% \caption{Often the overhead of making multiple communication calls 
+% outweighs the cost of copying non-contiguous data into a contiguous buffer,
+% sending it in a single operation, and then copying it to the final
+% memory locations on the receiving side.}
+% \label{fig:routepack}
+% \scalebox{0.5}{\includegraphics{Basic_pack_route.eps}}
+% \end{figure}
+% \end{center}
 
-\begin{center}
-\begin{figure}
-\caption{Once there is more than a single XPacket to pack, there
-are many more interleave options.  For example, packing in the
-order: 1, 4, 2, 5, 3, 6 would also be possible here.  However
-the code becomes more complicated when the XPackets have different
-repeat counts, and has no real performance advantage over the
-straightforward packing of each XPacket in sequence.  Note that
-this packing is the same whether it refers to multiple XPackets
-from the same memory buffer or from multiple buffers.}
-\label{fig:routepackall}
-\scalebox{0.5}{\includegraphics{Basic_2up_route.eps}}
-\end{figure}
-\end{center}
+% DIAGFIX_BASELINE17
+% \begin{center}
+% \begin{figure}
+% \caption{Once there is more than a single XPacket to pack, there
+% are many more interleave options.  For example, packing in the
+% order: 1, 4, 2, 5, 3, 6 would also be possible here.  However
+% the code becomes more complicated when the XPackets have different
+% repeat counts, and has no real performance advantage over the
+% straightforward packing of each XPacket in sequence.  Note that
+% this packing is the same whether it refers to multiple XPackets
+% from the same memory buffer or from multiple buffers.}
+% \label{fig:routepackall}
+% \scalebox{0.5}{\includegraphics{Basic_2up_route.eps}}
+% \end{figure}
+% \end{center}
 
 The following options refer to the internal strategy for 
 executing the route and not to whether the user-level API call
@@ -515,9 +521,10 @@ The following is a simplified UML diagram showing the structure of the public
 RouteHandle class.  See Appendix A, {\it A Brief Introduction to UML}, for a
 translation table that lists the symbols in the diagram and their meaning.
 
-\begin{center}
-\includegraphics{RouteHandle_obj.eps}
-\end{center}
+% DIAGFIX_BASELINE18
+% \begin{center}
+% \includegraphics{RouteHandle_obj.eps}
+% \end{center}
 
 \newpage
 
