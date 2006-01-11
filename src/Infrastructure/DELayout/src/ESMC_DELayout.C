@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.38 2006/01/10 08:14:22 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.39 2006/01/11 18:26:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.38 2006/01/10 08:14:22 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.39 2006/01/11 18:26:07 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -378,10 +378,12 @@ int ESMC_DELayout::ESMC_DELayoutConstructND(ESMC_VM &vm, int *nDEs,
       des[i].petid = DEtoPET[i];   // copy the mapping
     // nsc - if ndes is = npets, go ahead and set the 1:1 flag
     // even if the user supplied the mapping.   6dec04
-    // TODO: gjt - this is needs a bit more consideration than this, just 
+    // TODO: gjt - this needs a bit more consideration than this, just 
     // ndes == npets alone does not indicate 1:1!
       if (ndes==npets) // 1:1 layout
         oneToOneFlag = ESMF_TRUE;
+      else
+        oneToOneFlag = ESMF_FALSE;  // if there are more DEs than PETs
   }else{
     // Use the mapper algorithm to find good DE-to-PET mapping
     ESMC_DELayoutFindDEtoPET(npets);
@@ -510,7 +512,9 @@ int ESMC_DELayout::ESMC_DELayoutGet(
   if (oneToOneFlag != ESMC_NULL_POINTER)
     *oneToOneFlag = this->oneToOneFlag;
   if (localDe != ESMC_NULL_POINTER){
-    if (this->oneToOneFlag == ESMF_TRUE)
+//    if (this->oneToOneFlag == ESMF_TRUE)
+    if (this->nmydes == 1)  // return DE if there is only one on this PET
+//    if (1==1) // revert back to original behavior
       *localDe = mydes[0];
     else{
       *localDe = -1;    // mark invalid
@@ -567,6 +571,10 @@ int ESMC_DELayout::ESMC_DELayoutGetDELocalInfo(
 //EOP
 //-----------------------------------------------------------------------------
   int i;
+  if (DEid < 0 || DEid >= ndes){
+    // DEid out of range
+    return ESMF_RC_ARG_OUTOFRANGE;
+  }
   if (len_coord >= ndim) {
     for (i=0; i<ndim; i++)
       DEcoord[i] = des[DEid].coord[i];
