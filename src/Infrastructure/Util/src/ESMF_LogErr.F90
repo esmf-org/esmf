@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.11 2006/01/05 00:33:58 eschwab Exp $
+! $Id: ESMF_LogErr.F90,v 1.12 2006/01/11 00:26:48 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@ type ESMF_LOGENTRY
     integer		::  h,m,s,ms
     integer		::  line
     logical             ::  methodflag,lineflag,fileflag
-    character(len=64)	::  msg
+    character(len=2*ESMF_MAXSTR) ::  msg
     character(len=32) 	::  file,method
     character(len=8) 	::  d
     character(len=8)	::  lt  			
@@ -350,36 +350,52 @@ end subroutine ESMF_LogFinalize
     	        if (alog%LOG_ENTRY(j)%lineflag) then
     	            if (alog%LOG_ENTRY(j)%methodflag) then
     		        WRITE(alog%unitNumber,122) &
-                              alog%LOG_ENTRY(j)%d     , " ", alog%LOG_ENTRY(j)%h   , &
-                              alog%LOG_ENTRY(j)%m     ,      alog%LOG_ENTRY(j)%s   , ".", &
-                              alog%LOG_ENTRY(j)%ms    , " ", alog%LOG_ENTRY(j)%lt  , "  ", &
-			      trim(adjustl(alog%petNumLabel)), " ", &
-                              alog%LOG_ENTRY(j)%file  , " ", alog%LOG_ENTRY(j)%line, " ", &
-                              alog%LOG_ENTRY(j)%method, " ", alog%LOG_ENTRY(j)%msg
+                              alog%LOG_ENTRY(j)%d, " ", &
+                              alog%LOG_ENTRY(j)%h, &
+                              alog%LOG_ENTRY(j)%m, &
+                              alog%LOG_ENTRY(j)%s, ".", &
+                              alog%LOG_ENTRY(j)%ms, " ", &
+                              alog%LOG_ENTRY(j)%lt, " ", &
+			      trim(alog%petNumLabel), " ", &
+                              trim(alog%LOG_ENTRY(j)%file) , " ", &
+                              alog%LOG_ENTRY(j)%line, " ", &
+                              trim(alog%LOG_ENTRY(j)%method), " ", &
+                              trim(alog%LOG_ENTRY(j)%msg)
     		    else
     		        WRITE(alog%unitNumber,123) &
-                              alog%LOG_ENTRY(j)%d   , " ", alog%LOG_ENTRY(j)%h   , &
-                              alog%LOG_ENTRY(j)%m   ,      alog%LOG_ENTRY(j)%s   , ".", &
-                              alog%LOG_ENTRY(j)%ms  , " ", alog%LOG_ENTRY(j)%lt  , "  ", &
-			      trim(adjustl(alog%petNumLabel)), " ", &
-                              alog%LOG_ENTRY(j)%file, " ", alog%LOG_ENTRY(j)%line, " ", &
-                              alog%LOG_ENTRY(j)%msg
+                              alog%LOG_ENTRY(j)%d, " ", &
+                              alog%LOG_ENTRY(j)%h, &
+                              alog%LOG_ENTRY(j)%m, &
+                              alog%LOG_ENTRY(j)%s, ".", &
+                              alog%LOG_ENTRY(j)%ms, " ", &
+                              alog%LOG_ENTRY(j)%lt, " ", &
+			      trim(alog%petNumLabel), " ", &
+                              trim(alog%LOG_ENTRY(j)%file), " ", &
+                              alog%LOG_ENTRY(j)%line, " ", &
+                              trim(alog%LOG_ENTRY(j)%msg)
     		    endif
                 else
     		    if (alog%LOG_ENTRY(j)%methodflag) then
     		        WRITE(alog%unitNumber,132) &
-                              alog%LOG_ENTRY(j)%d     , " ", alog%LOG_ENTRY(j)%h  , &
-                              alog%LOG_ENTRY(j)%m     ,      alog%LOG_ENTRY(j)%s  , ".", &
-                              alog%LOG_ENTRY(j)%ms    , " ", alog%LOG_ENTRY(j)%lt , "  ", &
-		              trim(adjustl(alog%petNumLabel)), " ", &
-    			      alog%LOG_ENTRY(j)%method, " ", alog%LOG_ENTRY(j)%msg
+                              alog%LOG_ENTRY(j)%d, " ", &
+                              alog%LOG_ENTRY(j)%h, &
+                              alog%LOG_ENTRY(j)%m, &
+                              alog%LOG_ENTRY(j)%s, ".", &
+                              alog%LOG_ENTRY(j)%ms, " ", &
+                              alog%LOG_ENTRY(j)%lt, " ", &
+		              trim(alog%petNumLabel), " ", &
+    			      trim(alog%LOG_ENTRY(j)%method), " ", &
+                              trim(alog%LOG_ENTRY(j)%msg)
     		    else
     		        WRITE(alog%unitNumber,133) &
-                              alog%LOG_ENTRY(j)%d  , " ", alog%LOG_ENTRY(j)%h , &
-                              alog%LOG_ENTRY(j)%m  ,      alog%LOG_ENTRY(j)%s , ".", &
-                              alog%LOG_ENTRY(j)%ms , " ", alog%LOG_ENTRY(j)%lt, "  ", &
-			      trim(adjustl(alog%petNumLabel)), " ", &
-                              alog%LOG_ENTRY(j)%msg
+                              alog%LOG_ENTRY(j)%d, " ", &
+                              alog%LOG_ENTRY(j)%h, &
+                              alog%LOG_ENTRY(j)%m, &
+                              alog%LOG_ENTRY(j)%s , ".", &
+                              alog%LOG_ENTRY(j)%ms , " ", &
+                              alog%LOG_ENTRY(j)%lt, " ", &
+			      trim(alog%petNumLabel), " ", &
+                              trim(alog%LOG_ENTRY(j)%msg)
     		    endif
     	        endif
 	    enddo
