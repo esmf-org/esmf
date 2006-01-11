@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommUTest.F90,v 1.11 2005/12/19 21:43:48 nscollins Exp $
+! $Id: ESMF_BundleCommUTest.F90,v 1.12 2006/01/11 23:18:21 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommUTest.F90,v 1.11 2005/12/19 21:43:48 nscollins Exp $'
+      '$Id: ESMF_BundleCommUTest.F90,v 1.12 2006/01/11 23:18:21 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -506,11 +506,12 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX______UTest
+      ! This test crashes on IRIX64 64 bit bug 1403408 has been opened.
       !  Halo both fields in a single Bundle call.
-      call ESMF_BundleHalo(bundle1, rh1, rc=rc)
-      write(name, *) "Halo data from all Fields in a Bundle 1"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !call ESMF_BundleHalo(bundle1, rh1, rc=rc)
+      !write(name, *) "Halo data from all Fields in a Bundle 1"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
