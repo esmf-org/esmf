@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.39 2006/01/11 18:26:07 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.40 2006/01/12 15:45:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.39 2006/01/11 18:26:07 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.40 2006/01/12 15:45:57 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -294,6 +294,13 @@ int ESMC_DELayout::ESMC_DELayoutConstruct1D(ESMC_VM &vm, int nDEs,
       " created! This may cause problems in higher layers of ESMF!", 
       ESMC_LOG_WARN);
   }
+  // Issue warning if this is not logically rectangular
+  // TODO: remove this warning when non logRect layouts o.k.
+  if (logRectFlag == ESMF_FALSE){
+    ESMC_LogDefault.ESMC_LogWrite("A non logRect layout was"
+      " created! This may cause problems in higher layers of ESMF!", 
+      ESMC_LOG_WARN);
+  }
   // Fill local part of layout object
   int mypet = vm.vmk_mypet();    // get my PET id
   ESMC_DELayoutFillLocal(mypet);
@@ -383,7 +390,7 @@ int ESMC_DELayout::ESMC_DELayoutConstructND(ESMC_VM &vm, int *nDEs,
       if (ndes==npets) // 1:1 layout
         oneToOneFlag = ESMF_TRUE;
       else
-        oneToOneFlag = ESMF_FALSE;  // if there are more DEs than PETs
+        oneToOneFlag = ESMF_FALSE;  // if there are more or less DEs than PETs
   }else{
     // Use the mapper algorithm to find good DE-to-PET mapping
     ESMC_DELayoutFindDEtoPET(npets);
@@ -394,6 +401,13 @@ int ESMC_DELayout::ESMC_DELayoutConstructND(ESMC_VM &vm, int *nDEs,
   // of multiple DEs per PET.
   if (oneToOneFlag == ESMF_FALSE){
     ESMC_LogDefault.ESMC_LogWrite("A layout without 1:1 DE:PET mapping was"
+      " created! This may cause problems in higher layers of ESMF!", 
+      ESMC_LOG_WARN);
+  }
+  // Issue warning if this is not logically rectangular
+  // TODO: remove this warning when non logRect layouts o.k.
+  if (logRectFlag == ESMF_FALSE){
+    ESMC_LogDefault.ESMC_LogWrite("A non logRect layout was"
       " created! This may cause problems in higher layers of ESMF!", 
       ESMC_LOG_WARN);
   }
@@ -512,9 +526,7 @@ int ESMC_DELayout::ESMC_DELayoutGet(
   if (oneToOneFlag != ESMC_NULL_POINTER)
     *oneToOneFlag = this->oneToOneFlag;
   if (localDe != ESMC_NULL_POINTER){
-//    if (this->oneToOneFlag == ESMF_TRUE)
-    if (this->nmydes == 1)  // return DE if there is only one on this PET
-//    if (1==1) // revert back to original behavior
+    if (this->nmydes >= 1)  // if there are at least 1 DE on this PET return 1st
       *localDe = mydes[0];
     else{
       *localDe = -1;    // mark invalid
@@ -851,9 +863,9 @@ class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     // this has to come before dims, since they are not allocated unless
     // logRectFlag is true.
     lp = (ESMC_Logical *)ip;
-    *lp++ = logRectFlag;
     *lp++ = oneToOneFlag;
-
+    *lp++ = logRectFlag;
+    
     ip = (int *)lp;
     if (logRectFlag == ESMF_TRUE)
         for (i=0; i<ndim; i++) 
