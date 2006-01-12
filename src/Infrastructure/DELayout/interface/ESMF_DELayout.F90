@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.49 2005/06/21 00:39:29 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.50 2006/01/12 16:06:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -150,7 +150,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.49 2005/06/21 00:39:29 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.50 2006/01/12 16:06:43 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -523,8 +523,11 @@ contains
 !     \item[{[localDeList]}]
 !        Upon return this holds the list of DEs associated with the local PET.
 !     \item[{[localDe]}]
-!        If the specified {\tt ESMF\_DELayout} object is 1-to-1 then upon 
-!        return this holds the DE associated with the local PET.
+!        Upon return this holds the DE associated with the local PET. If the
+!        specified {\tt ESMF\_DELayout} object associates more than one DE
+!        with the local PET then the first local DE is returned. If there are
+!        no PET-local DEs {\tt localDE} is set to "-1" and error code
+!        {\tt ESMF\_RC\_CANNOT\_GET} is returned in {\tt rc}.
 !     \item[{[oneToOneFlag]}]
 !        Upon return this holds {\tt ESMF\_TRUE} if the specified 
 !        {\tt ESMF\_DELayout} object is 1-to-1, {\tt ESMF\_FALSE} otherwise.
@@ -535,6 +538,8 @@ contains
 !     \item[{[deCountPerDim]}]
 !        If the specified {\tt ESMF\_DELayout} object is logically rectangular
 !        then upon return this holds the number of DEs along each dimension.
+!        Otherwise {\tt deCountPerDim} is filled with values of "-1" and
+!        error code {\tt ESMF\_RC\_CANNOT\_GET} is returned in {\tt rc}.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

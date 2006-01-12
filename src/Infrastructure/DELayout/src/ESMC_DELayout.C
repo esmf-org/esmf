@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.40 2006/01/12 15:45:57 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.41 2006/01/12 16:06:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.40 2006/01/12 15:45:57 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.41 2006/01/12 16:06:43 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -530,7 +530,7 @@ int ESMC_DELayout::ESMC_DELayoutGet(
       *localDe = mydes[0];
     else{
       *localDe = -1;    // mark invalid
-      return ESMF_RC_CANNOT_GET;
+      return ESMC_RC_CANNOT_GET;
     }
   }
   if (logRectFlag != ESMC_NULL_POINTER)
@@ -544,7 +544,7 @@ int ESMC_DELayout::ESMC_DELayoutGet(
     }else{
       for (i=0; i<len_deCountPerDim; i++)
         deCountPerDim[i] = -1;    // mark invalid
-      return ESMF_RC_CANNOT_GET; 
+      return ESMC_RC_CANNOT_GET; 
     }
   }
   return ESMF_SUCCESS;
@@ -585,7 +585,7 @@ int ESMC_DELayout::ESMC_DELayoutGetDELocalInfo(
   int i;
   if (DEid < 0 || DEid >= ndes){
     // DEid out of range
-    return ESMF_RC_ARG_OUTOFRANGE;
+    return ESMC_RC_ARG_OUTOFRANGE;
   }
   if (len_coord >= ndim) {
     for (i=0; i<ndim; i++)
