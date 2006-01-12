@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommUTest.F90,v 1.12 2006/01/11 23:18:21 svasquez Exp $
+! $Id: ESMF_BundleCommUTest.F90,v 1.13 2006/01/12 22:24:53 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommUTest.F90,v 1.12 2006/01/11 23:18:21 svasquez Exp $'
+      '$Id: ESMF_BundleCommUTest.F90,v 1.13 2006/01/12 22:24:53 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -189,13 +189,13 @@
       
       !------------------------------------------------------------------------
       !NEX_UTest
-      call ValidateConstantR8Field(fields(3), val=1.1_ESMF_KIND_R8, rc=rc)
+      call ValidateConstantField(fields(3), val=1.1_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 3 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !NEX_UTest
-      call ValidateConstantR8Field(fields(4), val=2.2_ESMF_KIND_R8, rc=rc)
+      call ValidateConstantField(fields(4), val=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 4 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
@@ -301,7 +301,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       fields(4) = CreateDataField("pressure", grid=grid, &
-                                  r4value=-99.99_ESMF_KIND_R4, rc=rc)
+                                  r8value=-99.99_ESMF_KIND_R8, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
@@ -345,7 +345,7 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      call ValidateConstantR8Field(fields(3), val=1.1_ESMF_KIND_R8, rc=rc)
+      call ValidateConstantField(fields(3), val=1.1_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 3 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
@@ -521,19 +521,19 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      call ValidateConstantR8Field(fields(1), val=1.1_ESMF_KIND_R8, rc=rc)
+      call ValidateConstantField(fields(1), val=1.1_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 1 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      call ValidateConstantR8Field(fields(2), val=2.2_ESMF_KIND_R8, rc=rc)
+      call ValidateConstantField(fields(2), val=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 2 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      call ValidateConstantR8Field(fields(3), val=8.8_ESMF_KIND_R8, rc=rc)
+      call ValidateConstantField(fields(3), val=8.8_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 3 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
@@ -674,13 +674,13 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      call ValidateConstantR8Field(fields(3), val=1.1_ESMF_KIND_R8, rc=rc)
+      call ValidateConstantField(fields(3), val=1.1_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 3 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      call ValidateConstantR8Field(fields(4), val=2.2_ESMF_KIND_R8, rc=rc)
+      call ValidateConstantField(fields(4), val=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 4 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
@@ -817,13 +817,13 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      call ValidateConstantR8Field(fields(3), val=1.1_ESMF_KIND_R8, rc=rc)
+      call ValidateConstantField(fields(3), val=1.1_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 3 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       !EX_UTest
-      call ValidateConstantR8Field(fields(4), val=2.2_ESMF_KIND_R8, rc=rc)
+      call ValidateConstantField(fields(4), val=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 4 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
@@ -962,7 +962,7 @@
       
       !------------------------------------------------------------------------
       !EX_UTest
-      call ValidateConstantR8Field(fields(4), val=2.2_ESMF_KIND_R8, rc=rc)
+      call ValidateConstantField(fields(4), val=2.2_ESMF_KIND_R8, rc=rc)
       write(name, *) "Validating field 4 results"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
