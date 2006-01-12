@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.22 2005/08/19 21:18:12 theurich Exp $
+# $Id: build_rules.mk,v 1.23 2006/01/12 23:05:25 nscollins Exp $
 # 
 # IRIX64.default.default
 #
@@ -67,11 +67,13 @@ SGI_FLAGS2          = -woff 1164
 ifeq ($(ESMF_PREC),32)
 SIZEFLAG = -n32
 SL_ABIOPTS         = -check_registry /usr/lib32/so_locations
+CXXINITFILE        = /usr/lib32/c++init_mp.o
 endif
 
 ifeq ($(ESMF_PREC),64)
 SIZEFLAG = -64
 SL_ABIOPTS         = -check_registry /usr/lib64/so_locations
+CXXINITFILE        = /usr/lib64/c++init_mp.o
 endif
 
 C_CC		   = CC $(SIZEFLAG) -mp $(SGI_FLAGS2) 
@@ -92,8 +94,8 @@ C_CCV		   = cc -version
 C_CXXV		   = CC -version
 C_FCV              = f90 -version
 
-C_CXXF90LIBS       = -rpath . -lftn -lfortran -lCio -lmpi++ -lmpi -lpthread
-C_F90CXXLIBS       = -rpath . -lC -lCio -lc -lmpi++ -lmpi -lpthread
+C_CXXF90LIBS       = -rpath . -lftn -lfortran -lCio -lmpi++ -lmpi -lpthread 
+C_F90CXXLIBS       = $(CXXINITFILE) -rpath . -lC -lCio -lc -lmpi++ -lmpi -lpthread 
 
 # fortran flags
 F_FREECPP       = -freeform -cpp
