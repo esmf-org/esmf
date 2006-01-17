@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.23 2005/05/20 16:48:24 nscollins Exp $
+# $Id: build_rules.mk,v 1.24 2006/01/17 22:15:47 jwolfe Exp $
 #
 #  Linux.pgi.default
 #
@@ -16,7 +16,7 @@ endif
 #
 # location of external libs.  if you want to use any of these,
 # define ESMF_SITE to my_site so the build system can find it,
-# copy this file into Linux.absoft.my_site, and uncomment the
+# copy this file into Linux.pgi.my_site, and uncomment the
 # libs you want included.  remove the rest of this file since
 # both this file and the site file will be included.
 
