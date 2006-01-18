@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.C,v 1.9 2006/01/04 22:52:58 tjcnrl Exp $
+// $Id: ESMC_GridComp.C,v 1.10 2006/01/18 17:17:36 tjcnrl Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_GridComp.C,v 1.9 2006/01/04 22:52:58 tjcnrl Exp $";
+           "$Id: ESMC_GridComp.C,v 1.10 2006/01/18 17:17:36 tjcnrl Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -116,8 +116,8 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //   \item[functionType]
 //    One of a set of predefined function types - e.g. {\tt ESMC\_SetInit}, 
 //    {\tt ESMC\_SetRun}, {\tt ESMC\_SetFinal}.
-//   \item[functionName]
-//    The name of the {\tt gridcomp} function to be associated with the
+//   \item[functionPtr]
+//    The pointer to the {\tt gridcomp} function to be associated with the
 //    {\tt functionType}.
 //   \item[{[phase]}] 
 //    For {\tt ESMC\_GridComp}s which need to initialize or run or finalize 

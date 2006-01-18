@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.13 2006/01/04 22:52:58 tjcnrl Exp $
+// $Id: ESMC_GridComp.h,v 1.14 2006/01/18 17:17:36 tjcnrl Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -67,19 +67,20 @@
   public:
   int ESMC_GridCompSetServices(void (*)(ESMC_GridComp *, int *));
 
-  int ESMC_GridCompSetEntryPoint(const char *,
-                                 void (*)(ESMC_GridComp *, ESMC_State *, ESMC_State *, ESMC_Clock *),
-                                 int);
+  int ESMC_GridCompSetEntryPoint(const char *functionType,
+                                 void (*)(ESMC_GridComp *, ESMC_State *,
+                                          ESMC_State *, ESMC_Clock *),
+                                 int phase=ESMF_SINGLEPHASE);
 
   int ESMC_GridCompInitialize(ESMC_State *importState, ESMC_State *exportState, 
-                              ESMC_Clock *clock, int phase,
-                              ESMC_BlockingFlag blockingFlag);
+                              ESMC_Clock *clock, int phase=ESMF_SINGLEPHASE,
+                              ESMC_BlockingFlag blockingFlag=ESMF_BLOCKING);
   int ESMC_GridCompRun(ESMC_State *importState, ESMC_State *exportState, 
-                       ESMC_Clock *clock, int phase,
-                       ESMC_BlockingFlag blockingFlag);
+                       ESMC_Clock *clock, int phase=ESMF_SINGLEPHASE,
+                       ESMC_BlockingFlag blockingFlag=ESMF_BLOCKING);
   int ESMC_GridCompFinalize(ESMC_State *importState, ESMC_State *exportState, 
-                            ESMC_Clock *clock, int phase,
-                            ESMC_BlockingFlag blockingFlag);
+                            ESMC_Clock *clock, int phase=ESMF_SINGLEPHASE,
+                            ESMC_BlockingFlag blockingFlag=ESMF_BLOCKING);
 
  // accessor methods for class members.  these need more options.
   int ESMC_GridCompGet(char *name) const;
