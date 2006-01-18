@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.8 2006/01/10 23:48:20 svasquez Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.9 2006/01/18 18:06:24 svasquez Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -17,7 +17,11 @@ module ESMF_RegridSubroutines
         type(ESMF_RelLoc) :: srcrelloc, dstrelloc
         integer :: srcdelayout(2), dstdelayout(2)
 	integer :: domain, srchalo, dsthalo
-    endtype testArguments
+        character(ESMF_MAXSTR) :: functionString, regridString
+        character(ESMF_MAXSTR) :: srcdelayoutString, dstdelayoutString
+        character(ESMF_MAXSTR) :: srcgridStaggerString, dstgridStaggerString
+        character(ESMF_MAXSTR) :: srcHaloString, dstHaloString
+    end type testArguments
     type(ESMF_VM) :: vm
     integer ::  npets, localPet
     integer :: regrid_rc    !single test error indicator
@@ -43,7 +47,7 @@ contains
 
     integer :: openStatus, readStatus, startTesting, regrid_rc
     integer :: testCount
-    character(ESMF_MAXSTR) :: failMsg, name
+    character(ESMF_MAXSTR) :: failMsg, name, testMsg, halo
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0
     real(ESMF_KIND_R8) :: err_threshold
@@ -124,6 +128,32 @@ contains
 			   ier=regrid_rc)
 		call ESMF_Test((regrid_rc.eq.ESMF_SUCCESS),name, failMsg, result, &
                     ESMF_SRCLINE)
+		testMsg = trim(" Function                  : " // testArgs%FunctionString)
+		print *, testMsg
+		call ESMF_LogWrite(testMsg, ESMF_LOG_INFO)
+		testMsg = trim(" Regrid Method             : " // testArgs%regridString)
+		print *, testMsg
+		call ESMF_LogWrite(testMsg, ESMF_LOG_INFO)
+		testMsg = trim(" Source Horiz. Stagger Pair: " // testArgs%srcgridStaggerString)
+		print *, testMsg
+		call ESMF_LogWrite(testMsg, ESMF_LOG_INFO)
+		testMsg = trim(" Dest. Horiz. Stagger Pair : " // testArgs%dstgridStaggerString)
+		print *, testMsg
+		call ESMF_LogWrite(testMsg, ESMF_LOG_INFO)
+		testMsg = trim(" Source Delayout           : " // testArgs%srcdelayoutString)
+		print *, testMsg
+		call ESMF_LogWrite(testMsg, ESMF_LOG_INFO)
+		testMsg = trim(" Destination Delayout      : " // testArgs%dstdelayoutString)
+		print *, testMsg
+		call ESMF_LogWrite(testMsg, ESMF_LOG_INFO)
+		testMsg = trim(" Source Halo               : " // testArgs%srcHaloString)
+		print *, testMsg
+		call ESMF_LogWrite(testMsg, ESMF_LOG_INFO)
+		testMsg = trim(" Dest.  Halo               : " // testArgs%srcHaloString)
+		call ESMF_LogWrite(testMsg, ESMF_LOG_INFO)
+		print *, testMsg
+		print *, ""
+		call ESMF_LogWrite("", ESMF_LOG_INFO)
 
         endif
         if (testString.eq."start_of_tests") then
@@ -150,14 +180,17 @@ contains
     integer, intent(out) :: rc
 
     ! Local variables
-    character(ESMF_MAXSTR) :: index, letter, delayoutconfig
+    character(ESMF_MAXSTR) :: index, letter, delayoutconfig, functionString
+    character(ESMF_MAXSTR) :: regridString, gridStaggerString
+    character(ESMF_MAXSTR) :: delayoutString, haloString
     type(ESMF_RegridMethod) :: regscheme
-    integer :: i, value, openStatus, readStatus, domain, halo
+    integer :: i, value, openStatus, readStatus, domain
     integer :: relloc, grid
-    namelist /gridMethod/ index, regscheme
-    namelist /gridHStagger/ index, grid, relloc
-    namelist /delayout/ index, delayoutconfig
-    namelist /function/ index, value, domain
+    namelist /gridMethod/ index, regscheme, regridString
+    namelist /gridHStagger/ index, grid, relloc, gridStaggerString
+    namelist /delayout/ index, delayoutconfig, delayoutString
+    namelist /function/ index, value, domain, functionString
+    namelist /halo/ index, value, haloString
 
     rc = ESMF_SUCCESS ! assume success
     !Read each letter of the test list and get test arguments.
@@ -179,6 +212,7 @@ contains
         if (index.eq.letter) then
              testArgs%function = value
              testArgs%domain = domain
+             testArgs%functionString = trim(functionString)
 	     close ((npets+20))
              exit
         endif
@@ -201,6 +235,7 @@ contains
     	endif
         if (index.eq.letter) then
              testArgs%regscheme = regscheme
+             testArgs%regridString = trim(regridString)
 	     close ((npets+20))
              exit
         endif
@@ -224,6 +259,7 @@ contains
         if (index.eq.letter) then
             testArgs%srcgrid = ESMF_GridHorzStagger(grid)
             testArgs%srcrelloc = ESMF_Relloc(relloc)
+            testArgs%srcgridStaggerString = trim(gridStaggerString)
 	    close ((npets+20))
             exit
         endif
@@ -248,6 +284,7 @@ contains
         if (index.eq.letter) then
             testArgs%dstgrid = ESMF_GridHorzStagger(grid)
             testArgs%dstrelloc = ESMF_RelLoc(relloc)
+            testArgs%dstgridStaggerString = trim(gridStaggerString)
 	    close ((npets+20))
             exit
         endif
@@ -270,6 +307,7 @@ contains
                 return
         endif
         if (index.eq.letter) then
+	    testArgs%srcdelayoutString = trim(delayoutString)
             select case (trim(delayoutconfig))
 		case ("1DX")
                    testArgs%srcdelayout = (/ npets, 1 /)
@@ -300,6 +338,7 @@ contains
                 return
         endif
         if (index.eq.letter) then
+	    testArgs%dstdelayoutString = trim(delayoutString)
             select case (trim(delayoutconfig))
 		case ("1DX")
                    testArgs%dstdelayout = (/ npets, 1 /)
@@ -322,7 +361,7 @@ contains
         return
     endif
     do
-	read (unit=(npets+20), fmt = '(A2, I2)', iostat=readStatus) index, value 
+	read (unit=(npets+20), nml = halo, iostat=readStatus)
         if (readStatus.ne.0) then
                 print *, " Unable to read file: ESMF_RegridHalo.rc"
                 rc=ESMF_FAILURE
@@ -330,6 +369,7 @@ contains
         endif
         if (index.eq.letter) then
              testArgs%srchalo = value
+             testArgs%srcHaloString = haloString
 	     close ((npets+20))
              exit
         endif
@@ -345,7 +385,7 @@ contains
         return
     endif
     do
-	read (unit=(npets+20), fmt = '(A2, I2)', iostat=readStatus) index, value 
+	read (unit=(npets+20), nml = halo, iostat=readStatus)
         if (readStatus.ne.0) then
                 print *, " Unable to read file: ESMF_RegridHalo.rc"
                 rc=ESMF_FAILURE
@@ -353,6 +393,7 @@ contains
         endif
         if (index.eq.letter) then
              testArgs%dsthalo = value
+             testArgs%dstHaloString = haloString
 	     close ((npets+20))
              exit
         endif
@@ -512,7 +553,6 @@ contains
     call functionValues(FieldChoice, x_coords, y_coords, Phi, Theta, &
                         lbSrc, ubSrc, Srchalo, maxcoords, f90ptr1, ier)
 
-   print*,'Source grid: x_coords(1,1)=',x_coords(1,1)
 
    !Create the destination field (with halo width of 0)
    !===================================================
@@ -594,7 +634,6 @@ contains
       print*,'ERROR! domainType=',domainType,' valid values=1,2'
       ier=ESMF_FAILURE
     end if
-   !print*,'Destination grid: x_coords2(1,1)=',x_coords2(1,1)
 
 
    !--Compute exact fcn. values at the Destination Grid 
@@ -602,7 +641,6 @@ contains
     call functionValues(FieldChoice, x_coords2, y_coords2, Phi, Theta, &
                         lbDst, ubDst, DstHalo, maxcoords, SolnOnTarget, ier)
 
-   print*,'Destination grid: x_coords(1,1)=',x_coords(1,1)
  
    !Verify success in regridding. Compute maximum and average normalized error
    !==========================================================================
@@ -615,11 +653,6 @@ contains
     else
       epsil=0.5 !threshold for normalized error
     end if
-	print *, "Before loop"
-	print *, "lbDst(2)= ", lbDst(2)
-	print *, "ubDst(2)= ", ubDst(2)
-	print *, "lbDst(1)= ", lbDst(1)
-	print *, "ubDst(1)= ", ubDst(1)
 
    do j=lbDst(2)+1,ubDst(2)
      do i=lbDst(1),ubDst(1)
@@ -875,11 +908,6 @@ contains
   integer :: i,j
   real(ESMF_KIND_R8) :: length_scale, radius
   real(ESMF_KIND_R8), parameter ::  pi            = 3.1416d0
-	print *, "lb(1)=", lb(1)
-	print *, "lb(2)=", lb(2)
-	print *, "ub(1)=", ub(1)
-	print *, "ub(2)=", ub(2)
-	print *, "run case"
 
     select case(Choice)
     case(1) !** f=x+y
@@ -925,10 +953,6 @@ contains
              ') valid range is [ 1 -> 4 ]'
       ier=1
     end select
-	print *, "lb(1)=", lb(1)
-	print *, "lb(2)=", lb(2)
-	print *, "ub(1)=", ub(1)
-	print *, "ub(2)=", ub(2)
 
     return
     end subroutine functionValues
