@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.6 2006/01/09 21:53:11 nscollins Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.7 2006/01/23 20:04:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -25,8 +25,8 @@ module ESMF_BundleRedistHelpers
    public ValidateConstantR8Field, ValidateConstantR4Field
    public ValidateConstantI8Field, ValidateConstantI4Field
 
-   public FillConstantHalo, FillConstantR4Halo
-   public ValidateConstantHalo, ValidateConstantR4Halo
+   public FillConstantR8Halo, FillConstantR4Halo
+   public ValidateConstantR8Halo, ValidateConstantR4Halo
    public FillIndexField
    public ValidateIndexField
    public FieldCleanup, BundleCleanup
@@ -764,8 +764,8 @@ end subroutine InternalFillConstantField
 ! This assumes the data is real*8, 2D.
 !
 #undef  ESMF_METHOD
-#define ESMF_METHOD "FillConstantHalo"
-subroutine FillConstantHalo(field, val, rc)
+#define ESMF_METHOD "FillConstantR8Halo"
+subroutine FillConstantR8Halo(field, val, rc)
     type(ESMF_Field), intent(inout) :: field
     real (ESMF_KIND_R8), intent(in) :: val
     integer, intent(out) :: rc
@@ -807,7 +807,7 @@ subroutine FillConstantHalo(field, val, rc)
 
     return
 
-end subroutine FillConstantHalo
+end subroutine FillConstantR8Halo
 
 
 !------------------------------------------------------------------------------
@@ -2337,12 +2337,13 @@ end function CreateGrid
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "CreateLatLonGrid"
-function CreateLatLonGrid(nx, ny, nz, xde, yde, name, rc)
+function CreateLatLonGrid(nx, ny, nz, xde, yde, name, minus1, rc)
   type(ESMF_Grid) :: CreateLatLonGrid
 
   integer, intent(in) :: nx, ny, nz               ! grid size
   integer, intent(in) :: xde, yde                 ! layout counts
   character(len=*), intent(in), optional :: name  ! grid name
+  logical, intent(in) :: minus1                   ! if true, ...
   integer, intent(out), optional :: rc            ! return code
 
   type(ESMF_Grid) :: grid
@@ -2352,6 +2353,7 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, rc)
   real (ESMF_KIND_R8), dimension(:), allocatable :: deltas
   integer, dimension(2) :: counts
   integer :: npets, status
+  integer, allocatable :: xdecounts(:), ydecounts(:)
 
 
   if (present(rc)) rc = ESMF_FAILURE
@@ -2414,18 +2416,36 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, rc)
 
 
   ! distribute the grid across the PETs
-  call ESMF_GridDistribute(grid, delayout=thislayout, rc=status)
+  if (minus1) then
+    ! require xde == 1?
+    allocate(xdecounts(xde), ydecounts(yde), stat=status)
+    ! err check here
+    xdecounts = 0
+    ydecounts = 0
+    
+    xdecounts(1) = nx
+    ydecounts(1:yde-1) = ny / (yde-1)
+
+    print *, xde, yde, nx, ny, xdecounts(1), ydecounts(1)
+    call ESMF_GridDistribute(grid, delayout=thislayout, &
+                             countsPerDEDim1=xdecounts, &
+                             countsPerDEDim2=ydecounts, &
+                             rc=status)
+  else
+    call ESMF_GridDistribute(grid, delayout=thislayout, rc=status)
+  endif 
   if (ESMF_LogMsgFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
-   
 
   CreateLatLonGrid = grid
 
 10 continue
   ! rc will have been set by the call to logerr; 
   ! just return at this point
-  if (allocated(deltas)) deallocate(deltas, stat=rc)
+  if (allocated(deltas))    deallocate(deltas,   stat=status)
+  if (allocated(xdecounts)) deallocate(xdecounts, stat=status)
+  if (allocated(ydecounts)) deallocate(ydecounts, stat=status)
 
 end function CreateLatLonGrid
 
