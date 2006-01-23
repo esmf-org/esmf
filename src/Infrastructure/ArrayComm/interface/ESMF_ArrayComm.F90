@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.81 2006/01/06 22:46:53 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.82 2006/01/23 21:31:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -66,6 +66,7 @@
 
       public ESMF_ArrayHaloStore, ESMF_ArrayHalo, ESMF_ArrayHaloRelease
       public ESMF_ArrayRedistStore, ESMF_ArrayRedist, ESMF_ArrayRedistRelease
+      public ESMF_ArrayHaloValidate, ESMF_ArrayRedistValidate
       ! Regrid methods are in ESMF_Regrid.F90
 
       public ESMF_ArrayGather, ESMF_ArrayScatter
@@ -78,7 +79,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.81 2006/01/06 22:46:53 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.82 2006/01/23 21:31:29 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -96,9 +97,8 @@
           module procedure ESMF_ArrayHaloStoreIndex
 
 ! !DESCRIPTION:
-!     This interface provides both the revised entry point for
-!      calling Halo on an {\tt ESMF\_Array} object, or a list of
-!      compatible array objects.
+!     This interface provides for calling halo on 
+!     an {\tt ESMF\_Array} object, or a list of compatible array objects.
 
 !EOPI
       end interface
@@ -115,9 +115,26 @@
           module procedure ESMF_ArrayHaloList
 
 ! !DESCRIPTION:
-!     This interface provides both the revised entry point for
-!      calling Halo on an {\tt ESMF\_Array} object, and temporarily
-!      for backwards compatibility an older interface into the same code.
+!     This interface provides for calling Halo on a 
+!     single {\tt ESMF\_Array} or a list of compatible array objects.
+
+!EOPI
+      end interface
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArrayHaloValidate - Validate a Halo
+!
+! !INTERFACE:
+      interface ESMF_ArrayHaloValidate
+
+! !PRIVATE MEMBER FUNCTIONS:
+          module procedure ESMF_ArrayHaloValidateOne
+          module procedure ESMF_ArrayHaloValidateList
+
+! !DESCRIPTION:
+!     This interface provides for calling halo validate on a 
+!     single {\tt ESMF\_Array} or a list of compatible array objects.
 
 !EOPI
       end interface
@@ -134,7 +151,7 @@
           module procedure ESMF_ArrayRedistStoreIndex
 
 ! !DESCRIPTION:
-!     This interface provides both the revised entry point for
+!     This interface provides for
 !      calling redistribute store on an {\tt ESMF\_Array} object, or a
 !      list of compatible array objects.
 
@@ -153,9 +170,28 @@
           module procedure ESMF_ArrayRedistList
 
 ! !DESCRIPTION:
-!     This interface provides both the revised entry point for
-!      calling redistribute on an {\tt ESMF\_Array} object, and temporarily
-!      for backwards compatibility an older interface into the same code.
+!     This interface provides for
+!      calling redistribute on an {\tt ESMF\_Array} object, or a
+!      list of compatible array objects.
+
+!EOPI
+      end interface
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArrayRedistValidate - Validate a Redistribution
+!
+! !INTERFACE:
+      interface ESMF_ArrayRedistValidate
+
+! !PRIVATE MEMBER FUNCTIONS:
+          module procedure ESMF_ArrayRedistValidateOne
+          module procedure ESMF_ArrayRedistValidateList
+
+! !DESCRIPTION:
+!     This interface provides for
+!      calling redistribute validate on an {\tt ESMF\_Array} object, or a
+!      list of compatible array objects.
 
 !EOPI
       end interface
@@ -902,9 +938,6 @@
       integer :: i, nitems
       type(ESMF_LocalArray), allocatable :: local_arrayList(:)
       type(ESMF_Route) :: route
-      ! debug only
-      integer :: dummy, dummy2, datarank
-      integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
 
       ! initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
@@ -940,26 +973,6 @@
                                     ESMF_CONTEXT, rc)) return
       endif
 
-      ! debug start
-      call ESMF_ArrayGet(arrayList(1), counts=counts, rank=datarank, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      dummy = 1
-      totalcount = 1
-      do i=1, datarank
-         totalcount = totalcount * counts(i)
-      enddo
-      
-      dummy2 = 1
-      totalcount2 = totalcount
-       
-      call ESMF_RouteValidate(route, dummy, totalcount, &
-                                         dummy2, totalcount2, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      ! debug end
 
       call ESMF_RouteRunList(route, local_arrayList, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -967,11 +980,9 @@
                                   ESMF_CONTEXT, rc)) return
 
       deallocate(local_arrayList, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, &
-                                    "Deallocating localarraylist information", &
-                                     ESMF_CONTEXT, rc)) return
+      ! do not error check this; preserve rc from routerun
 
-      ! last call to route run set rc
+      ! last call to routerun set rc
 
       end subroutine ESMF_ArrayHaloList
 
@@ -1008,6 +1019,9 @@
 !   \item [routehandle]
 !         {\tt ESMF\_RouteHandle} which was returned from an
 !         {\tt ESMF\_ArrayHaloPrecompute()} call.
+!   \item [{[routeIndex]}]
+!         If specified, select which of possibly multiple routes to execute
+!         from this route handle.  Default value is 1.
 !   \item [{[blocking]}]
 !         Optional argument which specifies whether the operation should
 !         wait until complete before returning or return as soon
@@ -1034,9 +1048,6 @@
       integer :: status         ! local error status
       type(ESMF_LocalArray) :: local_array
       type(ESMF_Route) :: route
-      ! debug only
-      integer :: i, dummy, dummy2, datarank
-      integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
 
       ! initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
@@ -1064,26 +1075,6 @@
                                     ESMF_CONTEXT, rc)) return
       endif
 
-      ! debug start
-      call ESMF_ArrayGet(array, counts=counts, rank=datarank, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      dummy = 1
-      totalcount = 1
-      do i=1, datarank
-         totalcount = totalcount * counts(i)
-      enddo
-
-      dummy2 = 1
-      totalcount2 = totalcount
-       
-      call ESMF_RouteValidate(route, dummy, totalcount, &
-                                     dummy2, totalcount2, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      ! debug end
 
       call ESMF_RouteRun(route, local_array, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -1459,6 +1450,189 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayHaloValidateList"
+!BOP
+! !IROUTINE: ESMF_ArrayHaloValidate - Validate a list of Arrays
+!
+! !INTERFACE:
+    ! Private name; call using ESMF_ArrayHaloValidate()
+    subroutine ESMF_ArrayHaloValidateList(arrayList, routehandle, routeIndex, &
+                                          rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array), intent(inout) :: arrayList(:)
+    type(ESMF_RouteHandle), intent(in) :: routehandle
+    integer, intent(in), optional :: routeIndex
+    integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Do extensive error checking on the incoming 
+!     {\tt ESMF\_Array} and the precomputed {\tt ESMF\_RouteHandle}
+!     which was constructed to perform the communication necessary
+!     to execute the halo operation.   If the inputs are not compatible
+!     with each other, for example if the handle was precomputed based
+!     on a different size {\tt ESMF\_Array}, an error message will be
+!     logged and an error returned from this routine.
+!
+!   \begin{description}
+!   \item [arrayList]
+!         List of {\tt ESMF\_Array}s containing data to be haloed.
+!   \item [routehandle]
+!         {\tt ESMF\_RouteHandle} which was returned from an
+!         {\tt ESMF\_ArrayHaloValidatePrecompute()} call.
+!   \item [{[routeIndex]}]
+!         If specified, select which of possibly multiple routes to execute
+!         from this route handle.  Default value is 1.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+      integer :: status         ! local error status
+      integer :: i, j, nitems
+      type(ESMF_Route) :: route
+      integer :: datarank
+      integer :: counts(ESMF_MAXDIM)
+      integer, allocatable :: srctotal(:), dsttotal(:)
+
+      ! initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
+ 
+      if (present(routeIndex)) then
+          call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
+                                        route=route, rc=status)
+      else
+          call ESMF_RouteHandleGet(routehandle, which_route=1, &
+                                        route=route, rc=status)
+      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      nitems = size(arrayList)
+      allocate(srctotal(nitems), dsttotal(nitems), stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, &
+                                    "Allocating count information", &
+                                     ESMF_CONTEXT, rc)) return
+
+
+      do j=1, nitems
+        call ESMF_ArrayGet(arrayList(j), counts=counts, &
+                          rank=datarank, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        srctotal(j) = 1
+        do i=1, datarank
+           srctotal(j) = srctotal(j) * counts(i)
+        enddo
+
+      enddo
+
+      dsttotal(:) = srctotal(:)
+         
+      call ESMF_RouteValidate(route, nitems, srctotal, &
+                                     nitems, dsttotal, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+
+      deallocate(srctotal, dsttotal, stat=status)
+      ! do NOT error check this; preserve the rc returned from validate.
+
+
+      end subroutine ESMF_ArrayHaloValidateList
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayHaloValidateOne"
+!BOP
+! !IROUTINE: ESMF_ArrayHaloValidate - Validate an Array
+!
+! !INTERFACE:
+    ! Private name; call using ESMF_ArrayHaloValidate()
+    subroutine ESMF_ArrayHaloValidateOne(array, routehandle, routeIndex, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array), intent(inout) :: array
+    type(ESMF_RouteHandle), intent(in) :: routehandle
+    integer, intent(in), optional :: routeIndex
+    integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Do extensive error checking on the incoming 
+!     {\tt ESMF\_Array} and the precomputed {\tt ESMF\_RouteHandle}
+!     which was constructed to perform the communication necessary
+!     to execute the halo operation.   If the inputs are not compatible
+!     with each other, for example if the handle was precomputed based
+!     on a different size {\tt ESMF\_Field}, an error message will be
+!     logged and an error returned from this routine.
+!
+!   \begin{description}
+!   \item [array]
+!         {\tt ESMF\_Array} containing data to be haloed.
+!   \item [routehandle]
+!         {\tt ESMF\_RouteHandle} which was returned from an
+!         {\tt ESMF\_ArrayHaloValidatePrecompute()} call.
+!   \item [{[routeIndex]}]
+!         If specified, select which of possibly multiple routes to execute
+!         from this route handle.  Default value is 1.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+      integer :: status         ! local error status
+      type(ESMF_Route) :: route
+      integer :: i, dummy, dummy2, datarank
+      integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
+
+      ! initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
+ 
+      if (present(routeIndex)) then
+          call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
+                                   route=route, rc=status)
+      else
+          call ESMF_RouteHandleGet(routehandle, which_route=1, &
+                                   route=route, rc=status)
+      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      
+      call ESMF_ArrayGet(array, counts=counts, rank=datarank, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      dummy = 1
+      totalcount = 1
+      do i=1, datarank
+         totalcount = totalcount * counts(i)
+      enddo
+
+      dummy2 = 1
+      totalcount2 = totalcount
+       
+      call ESMF_RouteValidate(route, dummy, totalcount, &
+                                     dummy2, totalcount2, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+     
+
+      ! last call to logerr already set rc
+
+      end subroutine ESMF_ArrayHaloValidateOne
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayRedistList"
 !BOP
 ! !IROUTINE: ESMF_ArrayRedist - Redistribute a list of Arrays
@@ -1533,9 +1707,6 @@
       type(ESMF_LocalArray), allocatable :: srcLocalArrayList(:)
       type(ESMF_LocalArray), allocatable :: dstLocalArrayList(:)
       type(ESMF_Route) :: route
-      ! debug only
-      integer :: dummy, dummy2, datarank
-      integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
 
       ! initialize return code; assume failure until success certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -1582,35 +1753,6 @@
                                     ESMF_CONTEXT, rc)) return
       endif
 
-      ! debug start
-      call ESMF_ArrayGet(srcArrayList(1), counts=counts, &
-                         rank=datarank, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      dummy = 1
-      totalcount = 1
-      do i=1, datarank
-         totalcount = totalcount * counts(i)
-      enddo
-      
-      call ESMF_ArrayGet(dstArrayList(1), counts=counts, &
-                         rank=datarank, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      dummy2 = 1
-      totalcount2 = 1
-      do i=1, datarank
-         totalcount2 = totalcount2 * counts(i)
-      enddo
-       
-      call ESMF_RouteValidate(route, dummy, totalcount, &
-                                     dummy2, totalcount2, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      ! debug end
 
       ! Execute the communications call.
       call ESMF_RouteRunList(route, srcLocalArrayList, dstLocalArrayList, status)
@@ -1623,11 +1765,9 @@
 
       deallocate(srcLocalArrayList, stat=status)
       deallocate(dstLocalArrayList, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "Deallocating local information", &
-                                       ESMF_CONTEXT, rc)) return
+      ! do not error check the status; preserve the rc from the actual run
 
-      ! rc has already been set, just check to see if user wants to get it.
-      if (present(rc)) rc = ESMF_SUCCESS
+      ! rc has been set from previous call
 
       end subroutine ESMF_ArrayRedistList
 
@@ -1705,9 +1845,6 @@
       integer :: status         ! local error status
       type(ESMF_LocalArray) :: dstLocalArray, srcLocalArray
       type(ESMF_Route) :: route
-      ! debug only
-      integer :: i, dummy, dummy2, datarank
-      integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
 
       ! initialize return code; assume failure until success certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -1731,33 +1868,6 @@
                                     ESMF_CONTEXT, rc)) return
       endif
 
-      ! debug start
-      call ESMF_ArrayGet(srcArray, counts=counts, rank=datarank, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      dummy = 1
-      totalcount = 1
-      do i=1, datarank
-         totalcount = totalcount * counts(i)
-      enddo
-      
-      call ESMF_ArrayGet(dstArray, counts=counts, rank=datarank, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      dummy2 = 1
-      totalcount2 = 1
-      do i=1, datarank
-         totalcount2 = totalcount2 * counts(i)
-      enddo
-       
-      call ESMF_RouteValidate(route, dummy, totalcount, &
-                                     dummy2, totalcount2, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      ! debug end
 
       ! Execute the communications call.
       dstLocalArray = dstArray
@@ -1767,8 +1877,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      ! set return code if user specified it
-      if (present(rc)) rc = ESMF_SUCCESS
+      ! rc has already been set by logerr call above
 
       end subroutine ESMF_ArrayRedistOne
 
@@ -2181,6 +2290,9 @@
       ! and set route into routehandle object
       call ESMF_RouteHandleSet(routehandle,  which_route=index, route=route, &
                                rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! get rid of temporary arrays
       if (associated(mySrcGlobalTotalAIperRank)) &
@@ -2192,8 +2304,7 @@
       if (associated(dstGlobalCompAIperDEperRank)) &
                           deallocate(dstGlobalCompAIperDEperRank, stat=status)
 
-      ! set return code if user specified it
-      if (present(rc)) rc = ESMF_SUCCESS
+      ! rc has been set by the calls above, just return here.
 
       end subroutine ESMF_ArrayRedistStoreIndex
 
@@ -2611,6 +2722,219 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayRedistStoreIndexArb
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedistValidateList"
+!BOP
+! !IROUTINE: ESMF_ArrayRedistValidate - Validate Redist for a list of Arrays
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayRedistValidate()
+      subroutine ESMF_ArrayRedistValidateList(srcArrayList, dstArrayList, &
+                                              routehandle, routeIndex, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: srcArrayList(:)
+      type(ESMF_Array), intent(inout) :: dstArrayList(:)
+      type(ESMF_RouteHandle), intent(in) :: routehandle
+      integer, intent(in), optional :: routeIndex
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Do extensive error checking on the incoming 
+!     {\tt ESMF\_Array} list and the precomputed {\tt ESMF\_RouteHandle}
+!     which was constructed to perform the communication necessary
+!     to execute the redist operation.   If the inputs are not compatible
+!     with each other, for example if the handle was precomputed based
+!     on a different size {\tt ESMF\_Array}, an error message will be
+!     logged and an error returned from this routine.
+!
+!     \begin{description}
+!     \item [srcArrayList]
+!           List of {\tt ESMF\_Array}s containing source data.
+!     \item [dstArrayList]
+!           List of {\tt ESMF\_Array}s containing results.
+!     \item [routehandle]
+!           {\tt ESMF\_RouteHandle} precomputed by 
+!           {\tt ESMF\_ArrayRedistValidatePrecompute()}.
+!     \item [{[routeIndex]}]
+!           If specified, select which of possibly multiple routes to execute
+!           from this route handle.  Default value is 1.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status         ! local error status
+      integer :: i, j, nitemsSrc, nitemsDst
+      type(ESMF_Route) :: route
+      ! debug only
+      integer :: datarank
+      integer :: counts(ESMF_MAXDIM)
+      integer, allocatable :: srctotal(:), dsttotal(:)
+
+      ! initialize return code; assume failure until success certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      if (present(routeIndex)) then
+          call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
+                                        route=route, rc=status)
+      else
+          call ESMF_RouteHandleGet(routehandle, which_route=1, &
+                                        route=route, rc=status)
+      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      nitemsSrc = size(srcArrayList)
+      nitemsDst = size(dstArrayList)
+      allocate(srctotal(nitemsSrc), dsttotal(nitemsDst), stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating count information", &
+                                       ESMF_CONTEXT, rc)) return
+
+      do j=1, nitemsSrc
+
+        call ESMF_ArrayGet(srcArrayList(j), counts=counts, &
+                           rank=datarank, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        srctotal(j) = 1
+        do i=1, datarank
+           srctotal(j) = srctotal(j) * counts(i)
+        enddo
+
+      enddo
+        
+      do j=1, nitemsDst
+        call ESMF_ArrayGet(dstArrayList(j), counts=counts, &
+                           rank=datarank, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        dsttotal(j) = 1
+        do i=1, datarank
+           dsttotal(j) = dsttotal(j) * counts(i)
+        enddo
+       
+      enddo
+
+      
+      call ESMF_RouteValidate(route, nitemsSrc, srctotal, &
+                                     nitemsDst, dsttotal, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      
+
+      ! come here on error to free the temp buffers
+ 10   continue
+
+      deallocate(srctotal, dsttotal, stat=status)
+      ! do not error check these; preserve the rc from the validate call
+
+      ! rc has already been set, just return
+
+      end subroutine ESMF_ArrayRedistValidateList
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRedistValidateOne"
+!BOP
+! !IROUTINE: ESMF_ArrayRedistValidate - Validate an Array Redist
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayRedistValidate()
+      subroutine ESMF_ArrayRedistValidateOne(srcArray, dstArray, routehandle, &
+                                             routeIndex, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(in) :: srcArray
+      type(ESMF_Array), intent(in) :: dstArray
+      type(ESMF_RouteHandle), intent(in) :: routehandle
+      integer, intent(in), optional :: routeIndex
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Do extensive error checking on the incoming 
+!     {\tt ESMF\_Array} and the precomputed {\tt ESMF\_RouteHandle}
+!     which was constructed to perform the communication necessary
+!     to execute the redist operation.   If the inputs are not compatible
+!     with each other, for example if the handle was precomputed based
+!     on a different size {\tt ESMF\_Array}, an error message will be
+!     logged and an error returned from this routine.
+!
+!     \begin{description}
+!     \item [srcArray]
+!           {\tt ESMF\_Array} containing source data.
+!     \item [dstArray]
+!           {\tt ESMF\_Array} containing results.
+!     \item [routehandle]
+!           {\tt ESMF\_RouteHandle} precomputed by 
+!           {\tt ESMF\_ArrayRedistValidatePrecompute()}.
+!     \item [{[routeIndex]}]
+!           If specified, select which of possibly multiple routes to execute
+!           from this route handle.  Default value is 1.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: status         ! local error status
+      type(ESMF_Route) :: route
+      integer :: i, nitems, nitems2, datarank
+      integer :: counts(ESMF_MAXDIM), srctotal(1), dsttotal(1)
+
+      ! initialize return code; assume failure until success certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      if (present(routeIndex)) then
+          call ESMF_RouteHandleGet(routehandle, which_route=routeIndex, &
+                                        route=route, rc=status)
+      else
+          call ESMF_RouteHandleGet(routehandle, which_route=1, &
+                                        route=route, rc=status)
+      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+
+      call ESMF_ArrayGet(srcArray, counts=counts, rank=datarank, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      nitems = 1
+      srctotal(1) = 1
+      do i=1, datarank
+         srctotal(1) = srctotal(1) * counts(i)
+      enddo
+      
+      call ESMF_ArrayGet(dstArray, counts=counts, rank=datarank, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      nitems2 = 1
+      dsttotal(1) = 1
+      do i=1, datarank
+         dsttotal(1) = dsttotal(1) * counts(i)
+      enddo
+       
+      call ESMF_RouteValidate(route, nitems, srctotal, &
+                                     nitems2, dsttotal, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! preserve the rc and return it
+
+      end subroutine ESMF_ArrayRedistValidateOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

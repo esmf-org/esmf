@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.80 2006/01/06 23:46:01 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.81 2006/01/23 21:31:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.80 2006/01/06 23:46:01 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.81 2006/01/23 21:31:49 nscollins Exp $'
 
 !==============================================================================
 !
@@ -428,10 +428,6 @@
       integer :: htype
       logical :: allInOne
       type(ESMF_FieldType), pointer :: ftypep     ! field type info
-      ! debug only
-      type(ESMF_Route) :: thisroute
-      integer :: i, dummy, dummy2, datarank
-      integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -474,31 +470,6 @@
                                   routeOptions, status)
       endif
 
-      ! debug start
-      call ESMF_RouteHandleGet(routehandle, which_route=1, route=thisroute, &
-                               rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      call ESMF_ArrayGet(ftypep%localfield%localdata, counts=counts, &
-                         rank=datarank, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      dummy = 1
-      totalcount = 1
-      do i=1, datarank
-         totalcount = totalcount * counts(i)
-      enddo
-      dummy2 = dummy
-      totalcount2 = totalcount
-       
-      call ESMF_RouteValidate(thisroute, dummy, totalcount, &
-                                         dummy2, totalcount2, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      ! debug end
 
       ! real call.
       call ESMF_ArrayHalo(ftypep%localfield%localdata, routehandle, 1, &
@@ -639,6 +610,131 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldHaloStore
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldHaloValidate"
+!BOP
+! !IROUTINE: ESMF_FieldHaloValidate - Do extensive error checking on Halo
+
+! !INTERFACE:
+      subroutine ESMF_FieldHaloValidate(field, routehandle, halodirection, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field
+      type(ESMF_RouteHandle), intent(in) :: routehandle
+      type(ESMF_HaloDirection), intent(in), optional :: halodirection
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Do extensive error checking on the incoming 
+!     {\tt ESMF\_Field} and the precomputed {\tt ESMF\_RouteHandle}
+!     which was constructed to perform the communication necessary
+!     to execute the halo operation.   If the inputs are not compatible
+!     with each other, for example if the handle was precomputed based
+!     on a different size {\tt ESMF\_Field}, an error message will be
+!     logged and an error returned from this routine.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field] 
+!           {\tt ESMF\_Field} containing data to be haloed.
+!     \item [routehandle] 
+!           {\tt ESMF\_RouteHandle} which was returned by the corresponding
+!           {\tt ESMF\_FieldHaloStore()} call. It is associated with 
+!           the precomputed data movement and communication needed to 
+!           perform the halo operation.
+!     \item [{[halodirection]}]
+!           Optional argument to restrict halo direction to a subset of the
+!           possible halo directions.  If not specified, the halo is executed
+!           along all boundaries.  This option is used only in the 
+!           situation where the halo must be precomputed at this time.
+!           (This feature is not yet supported.)
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: htype
+      type(ESMF_FieldType), pointer :: ftypep     ! field type info
+      ! debug only
+      type(ESMF_Route) :: thisroute
+      integer :: i, dummy, dummy2, datarank
+      integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
+   
+      ! Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE. 
+        rc = ESMF_FAILURE
+      endif     
+
+      ! Initialize other variables
+      ftypep => field%ftypep
+
+      ! if the routehandle has not been precomputed, do so now
+      ! first check if the RouteHandle is valid (constructed)
+      call ESMF_RouteHandleValidate(routehandle, rc=status)
+      
+      ! if valid, check the routehandle type
+      if (status.eq.ESMF_SUCCESS) then
+        call ESMF_RouteHandleGet(routehandle, htype=htype, rc=status)
+        if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                                   "routehandle not initialized for halo", &
+                                   ESMF_CONTEXT, rc)
+          return
+        elseif (htype .ne. ESMF_HALOHANDLE) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                                   "not a halo routehandle", &
+                                   ESMF_CONTEXT, rc)
+          return
+        endif
+      else
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                                   "invalid routehandle", &
+                                   ESMF_CONTEXT, rc)
+          return
+      endif
+
+
+      ! now check the handle in much more detail.
+      call ESMF_RouteHandleGet(routehandle, which_route=1, route=thisroute, &
+                               rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_ArrayGet(ftypep%localfield%localdata, counts=counts, &
+                         rank=datarank, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! for halo, the source and destination are the same field, so pass
+      ! the same sizes in for both sending and receiving buffer sizes.
+      dummy = 1
+      totalcount = 1
+      do i=1, datarank
+         totalcount = totalcount * counts(i)
+      enddo
+      dummy2 = dummy
+      totalcount2 = totalcount
+       
+      call ESMF_RouteValidate(thisroute, dummy, totalcount, &
+                                         dummy2, totalcount2, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldHaloValidate
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -823,10 +919,6 @@
       integer :: localrc                          ! Error status
       integer :: htype
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
-      ! debug only
-      type(ESMF_Route) :: thisroute
-      integer :: i, dummy, dummy2, datarank
-      integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
    
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
@@ -851,40 +943,6 @@
         return
       endif
 
-      ! debug start
-      call ESMF_RouteHandleGet(routehandle, which_route=1, route=thisroute, &
-                               rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      call ESMF_ArrayGet(srcFtypep%localfield%localdata, counts=counts, &
-                         rank=datarank, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      dummy = 1
-      totalcount = 1
-      do i=1, datarank
-         totalcount = totalcount * counts(i)
-      enddo
-      
-      call ESMF_ArrayGet(dstFtypep%localfield%localdata, counts=counts, &
-                         rank=datarank, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      dummy2 = 1
-      totalcount2 = 1
-      do i=1, datarank
-         totalcount2 = totalcount2 * counts(i)
-      enddo
-       
-      call ESMF_RouteValidate(thisroute, dummy, totalcount, &
-                                         dummy2, totalcount2, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      ! debug end
 
       call ESMF_ArrayRedist(srcFtypep%localfield%localdata, &
                             dstFtypep%localfield%localdata, &
@@ -1165,6 +1223,117 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRedistValidate"
+!BOP
+! !IROUTINE: ESMF_FieldRedistValidate - Do extensive error checking on Redist
+
+! !INTERFACE:
+      subroutine ESMF_FieldRedistValidate(srcField, dstField, routehandle, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: srcField
+      type(ESMF_Field), intent(inout) :: dstField
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Do extensive error checking on the incoming 
+!     {\tt ESMF\_Field} and the precomputed {\tt ESMF\_RouteHandle}
+!     which was constructed to perform the communication necessary
+!     to execute the redist operation.   If the inputs are not compatible
+!     with each other, for example if the handle was precomputed based
+!     on different sized {\tt ESMF\_Field}s, an error message will be
+!     logged and an error returned from this routine.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [srcField]
+!           {\tt ESMF\_Field} containing source data.
+!     \item [dstField]
+!           {\tt ESMF\_Field} containing destination grid.
+!     \item [routehandle]          
+!           {\tt ESMF\_RouteHandle} which was returned by the corresponding
+!           {\tt ESMF\_FieldRedistStore()} call. It is associated with
+!           the precomputed data movement and communication needed to
+!           perform the redistribution operation.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: localrc                          ! Error status
+      integer :: htype
+      type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
+      type(ESMF_Route) :: thisroute
+      integer :: i, dummy, dummy2, datarank
+      integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
+   
+      ! Initialize return code   
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Initialize other variables
+      dstFtypep => dstField%ftypep
+      srcFtypep => srcField%ftypep
+
+      ! if the routehandle has not been precomputed, do so now
+      ! first check if the RouteHandle is valid (constructed)
+      call ESMF_RouteHandleValidate(routehandle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! check the routehandle type
+      call ESMF_RouteHandleGet(routehandle, htype=htype, rc=localrc)
+      if (htype .ne. ESMF_REDISTHANDLE) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                                 "routehandle not defined for redist", &
+                                 ESMF_CONTEXT, rc)
+        return
+      endif
+
+      call ESMF_RouteHandleGet(routehandle, which_route=1, route=thisroute, &
+                               rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_ArrayGet(srcFtypep%localfield%localdata, counts=counts, &
+                         rank=datarank, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      dummy = 1
+      totalcount = 1
+      do i=1, datarank
+         totalcount = totalcount * counts(i)
+      enddo
+      
+      call ESMF_ArrayGet(dstFtypep%localfield%localdata, counts=counts, &
+                         rank=datarank, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      dummy2 = 1
+      totalcount2 = 1
+      do i=1, datarank
+         totalcount2 = totalcount2 * counts(i)
+      enddo
+       
+      call ESMF_RouteValidate(thisroute, dummy, totalcount, &
+                                         dummy2, totalcount2, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldRedistValidate
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldReduce"
 !BOPI
 ! !IROUTINE: ESMF_FieldReduce - Reduction operation on a Field
@@ -1398,10 +1567,10 @@
 !     \item [dstField] 
 !           {\tt ESMF\_Field} containing destination grid and data map.
 !     \item [routehandle]
-!           {\tt ESMF\_RouteHandle} which will be returned after being
-!           associated with the precomputed
-!           information for a regrid operation on this {\tt ESMF\_Field}.
-!           This handle must be supplied at run time to execute the regrid.
+!           {\tt ESMF\_RouteHandle} which was returned by the corresponding
+!           {\tt ESMF\_FieldRegridStore()} call. It is associated with 
+!           the precomputed data movement and communication needed to 
+!           perform the regrid operation.
 !     \item [{[srcMask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
 !           (Not yet implemented.)
@@ -1696,6 +1865,153 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldRegridStore
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRegridValidate"
+!BOP
+! !IROUTINE: ESMF_FieldRegridValidate - Do extensive error checking on Regrid
+
+! !INTERFACE:
+      subroutine ESMF_FieldRegridValidate(srcField, dstField, routehandle, &
+                                          srcMask, dstMask, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: srcField                 
+      type(ESMF_Field), intent(inout) :: dstField                 
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_Mask), intent(in), optional :: srcMask                 
+      type(ESMF_Mask), intent(in), optional :: dstMask                 
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Do extensive error checking on the incoming 
+!     {\tt ESMF\_Field} and the precomputed {\tt ESMF\_RouteHandle}
+!     which was constructed to perform the communication necessary
+!     to execute the regrid operation.   If the inputs are not compatible
+!     with each other, for example if the handle was precomputed based
+!     on different sized {\tt ESMF\_Field}s, an error message will be
+!     logged and an error returned from this routine.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [srcField] 
+!           {\tt ESMF\_Field} containing source data.
+!     \item [dstField] 
+!           {\tt ESMF\_Field} containing destination grid and data map.
+!     \item [routehandle]
+!           {\tt ESMF\_RouteHandle} which was returned by the corresponding
+!           {\tt ESMF\_FieldRegridStore()} call. It is associated with 
+!           the precomputed data movement and communication needed to 
+!           perform the halo operation.
+!     \item [{[srcMask]}]
+!           Optional {\tt ESMF\_Mask} identifying valid source data.
+!           (Not yet implemented.)
+!     \item [{[dstMask]}]
+!           Optional {\tt ESMF\_Mask} identifying valid destination data.
+!           (Not yet implemented.)
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: localrc                          ! Error status
+      logical :: hasSrcData        ! does this DE contain localdata from src?
+      logical :: hasDstData        ! does this DE contain localdata from dst?
+      type(ESMF_Array) :: srcArray, dstArray
+      type(ESMF_Grid) :: srcGrid, dstGrid
+      type(ESMF_FieldDataMap) :: srcDatamap, dstDatamap
+      ! debug only
+      type(ESMF_Route) :: thisroute
+      integer :: i, dummy, dummy2, datarank
+      integer :: counts(ESMF_MAXDIM), totalcount(1), totalcount2(1)
+   
+      ! Initialize return code   
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! if the routehandle has not been precomputed, do so now
+      ! first check if the RouteHandle is valid (constructed)
+      call ESMF_RouteHandleValidate(routehandle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+
+      ! TODO: we need not only to know if this DE has data in the field,
+      !   but also the de id for both src & dest fields
+
+      ! This routine is called on every processor in the parent layout.
+      !  It is quite possible that the source and destination fields do
+      !  not completely cover every processor on that layout.  Make sure
+      !  we do not go lower than this on the processors which are uninvolved
+      !  in this communication.
+
+      ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
+      call ESMF_FieldGet(srcField, array=srcArray, &
+                         datamap=srcDataMap, grid=srcGrid, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      hasSrcData = ESMF_RegridHasData(srcGrid, srcDataMap)
+
+      ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
+      call ESMF_FieldGet(dstField, array=dstArray, &
+                         datamap=dstDataMap, grid=dstGrid, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      hasDstData = ESMF_RegridHasData(dstGrid, dstDataMap)
+
+
+      call ESMF_RouteHandleGet(routehandle, which_route=1, route=thisroute, &
+                               rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (hasSrcData) then
+        call ESMF_ArrayGet(srcArray, counts=counts, rank=datarank, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        dummy = 1
+        totalcount = 1
+        do i=1, datarank
+           totalcount = totalcount * counts(i)
+        enddo
+      else
+        dummy = 0
+        totalcount = 0
+      endif
+      
+      if (hasDstData) then
+        call ESMF_ArrayGet(dstArray, counts=counts, rank=datarank, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        dummy2 = 1
+        totalcount2 = 1
+        do i=1, datarank
+           totalcount2 = totalcount2 * counts(i)
+        enddo
+      else
+        dummy2 = 0
+        totalcount2 = 0
+      endif
+       
+      call ESMF_RouteValidate(thisroute, dummy, totalcount, &
+                                         dummy2, totalcount2, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldRegridValidate
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
