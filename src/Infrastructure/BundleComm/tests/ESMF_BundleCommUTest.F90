@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommUTest.F90,v 1.14 2006/01/23 20:04:44 nscollins Exp $
+! $Id: ESMF_BundleCommUTest.F90,v 1.15 2006/01/23 22:01:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommUTest.F90,v 1.14 2006/01/23 20:04:44 nscollins Exp $'
+      '$Id: ESMF_BundleCommUTest.F90,v 1.15 2006/01/23 22:01:24 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -296,7 +296,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       fields(4) = CreateDataField("pressure", grid=grid, &
-                                  r8value=-99.99_ESMF_KIND_R8, rc=rc)
+                                  r4value=-99.99_ESMF_KIND_R4, rc=rc)
       write(name, *) "Creating Data Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
