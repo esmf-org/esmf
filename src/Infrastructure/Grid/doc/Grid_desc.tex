@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.20 2006/01/10 17:44:31 jwolfe Exp $
+% $Id: Grid_desc.tex,v 1.21 2006/01/23 23:30:00 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -50,17 +50,16 @@ locations, defined by its staggering and following typical Arakawa nomenclature.
 In ESMF, there are nine possible relative locations for data on a typical
 horizontal Grid cell, though each staggering will use a subset of them.  These
 locations, with their corresponding {\tt ESMF\_Rellocs}, are illustrated in
-% Figure~\ref{fig:GridDataLocations}.
+Figure~\ref{fig:GridDataLocations}.
 
-% DIAGFIX_BASELINE6
-% \begin{center}
-% \begin{figure}[h!tb]
-% \caption{Possible horizontal data locations for a representative computational
-% cell. }
-% \label{fig:GridDataLocations}
-% \scalebox{0.66}{\includegraphics{GridDataLocations}}
-% \end{figure}
-% \end{center}
+\begin{center}
+\begin{figure}
+\scalebox{0.66}{\includegraphics{GridDataLocations}}
+\caption{Possible horizontal data locations for a representative computational
+cell. }
+\label{fig:GridDataLocations}
+\end{figure}
+\end{center}
 
 {\tt ESMF\_Grids} are created with only those underlying structures, called
 subGrids, to support data at the specific cell locations defined by its given
