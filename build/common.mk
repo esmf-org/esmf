@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.143 2006/01/09 19:06:34 nscollins Exp $
+#  $Id: common.mk,v 1.144 2006/01/23 21:34:56 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1221,12 +1221,18 @@ tree_build_system_tests:  $(SYSTEM_TESTS_BUILD)
 $(ESMF_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
 	$(FLINKER) $(LINKOPTS) -o $@ $(SYSTEM_TESTS_OBJ) $< $(FLINKLIBS)
 	$(RM) -f *.o *.mod
-	if [ "$(ESMF_SYSTEST_SYMLINKS)" = "true" ] ; then \
-		$(RM) t s l ; \
-		ln -s $@ t ; \
-		ln -s $@.Log l ; \
-		ln -s $@.stdout s ; \
-	fi
+
+
+# debugging aid:  link the executable, standard output, and log file to
+# temporary names in the current directory (they are built in the test
+# directory which is a long ways away from the source.  debuggers work
+# better if the current directory is the source dir, not the executable dir.)
+# example use:  gmake TNAME=FieldExcl system_test_links
+system_test_links:
+	$(RM) t s l
+	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)STest t
+	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)STest.stdout s
+	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)STest.Log l
 
 #
 #  Link rule for Fortran system tests (MPMD).
@@ -1355,6 +1361,11 @@ $(ESMF_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)
 	$(CLINKER) $(LINKOPTS) -o $@  $(UTEST_$(*)_OBJS) $< $(CLINKLIBS)
 	$(RM) -f *.o *.mod
 
+# debugging aid:  link the executable, standard output, and log file to
+# temporary names in the current directory (they are built in the test
+# directory which is a long ways away from the source.  debuggers work
+# better if the current directory is the source dir, not the executable dir.)
+# example use:  gmake TNAME=Field unit_test_links
 unit_test_links:
 	rm -f t s l
 	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)UTest t
