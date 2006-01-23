@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.41 2006/01/06 19:56:55 nscollins Exp $
+// $Id: ESMC_Route_F.C,v 1.42 2006/01/23 20:03:35 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -130,12 +130,12 @@ extern "C" {
            void **src_base_addr = NULL;
            void **dst_base_addr = NULL;
            ESMC_DataKind sdk, ddk;
-           bool nodst;
+           bool hasdst;
            int n;
 
            sdk = ESMF_NOKIND;
            ddk = ESMF_NOKIND;
-           nodst = false;
+           hasdst = true;
 
            if (*srcCount > 0) 
  	       src_base_addr = new void*[*srcCount];
@@ -169,9 +169,18 @@ extern "C" {
                }
            }
 
-	   if (((long int)dst != 0) && ((long int)dst != -1)
-	       && ((long int)*dst != 0) && ((long int)*dst != -1)
-               && (*dstCount > 0)) {
+           // This used to be a one-liner, but the optimizer on one of the
+           // IRIX machines got confused.  Now check each step before going
+           // on to dereference the pointers, etc. 
+	   if (hasdst && ((long int)dst == 0)) hasdst = false;
+           if (hasdst && ((long int)dst == -1)) hasdst = false;
+	   if (hasdst && ((long int)*dst == 0))  hasdst = false;
+           if (hasdst && ((long int)*dst == -1)) hasdst = false;
+           if (hasdst && (*dstCount <= 0)) hasdst = false;
+	   //if (((long int)dst != 0) && ((long int)dst != -1)
+	   //    && ((long int)*dst != 0) && ((long int)*dst != -1)
+           //    && (*dstCount > 0)) {
+           if (hasdst) {
                for (n=0; n<*dstCount; n++) {
                    // get the data start address for each array in the list   
                    (dst[n])->ESMC_LocalArrayGetBaseAddr(dst_base_addr+n);
@@ -195,8 +204,7 @@ extern "C" {
 
                // TODO: compare srcCount and dstCount - if specified, they must 
                //  be the same.
-           } else
-               nodst = true;
+           } 
 
            // if destination not specified, replicate source and pass that
            // down.  halo needs this, for example - and the problem is that
@@ -204,14 +212,15 @@ extern "C" {
            // as more than 1 argument to a subroutine call.  since we cannot
            // do this at the fortran level, do it here.
 
-           if (nodst)
-               *status = (*ptr)->ESMC_RouteRun(src_base_addr, src_base_addr, 
-                                               sdk, *srcCount);
-           else {
+           if (hasdst) {
                *status = (*ptr)->ESMC_RouteRun(src_base_addr, dst_base_addr, 
                                                sdk, *srcCount);
 
                delete [] dst_base_addr;
+
+           } else {
+               *status = (*ptr)->ESMC_RouteRun(src_base_addr, src_base_addr, 
+                                               sdk, *srcCount);
            }
 
            delete [] src_base_addr;
