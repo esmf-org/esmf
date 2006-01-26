@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.7 2006/01/23 20:04:45 nscollins Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.8 2006/01/26 18:49:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -2337,13 +2337,14 @@ end function CreateGrid
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "CreateLatLonGrid"
-function CreateLatLonGrid(nx, ny, nz, xde, yde, name, minus1, rc)
+function CreateLatLonGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
   type(ESMF_Grid) :: CreateLatLonGrid
 
   integer, intent(in) :: nx, ny, nz               ! grid size
   integer, intent(in) :: xde, yde                 ! layout counts
   character(len=*), intent(in), optional :: name  ! grid name
-  logical, intent(in) :: minus1                   ! if true, ...
+  integer, intent(in), optional :: data_xde       ! if set, des with data
+  integer, intent(in), optional :: data_yde       ! ditto
   integer, intent(out), optional :: rc            ! return code
 
   type(ESMF_Grid) :: grid
@@ -2352,7 +2353,7 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, minus1, rc)
   real (ESMF_KIND_R8), dimension(2) :: mincoords1, maxcoords1
   real (ESMF_KIND_R8), dimension(:), allocatable :: deltas
   integer, dimension(2) :: counts
-  integer :: npets, status
+  integer :: npets, status, emptyx, emptyy, fullx, fully
   integer, allocatable :: xdecounts(:), ydecounts(:)
 
 
@@ -2415,18 +2416,60 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, minus1, rc)
                             ESMF_CONTEXT, rc)) goto 10
 
 
-  ! distribute the grid across the PETs
-  if (minus1) then
-    ! require xde == 1?
+  ! distribute the grid across the PETs.   allow the option of only
+  ! having data on a (logically rectangular) subset of the DEs.
+  if (present(data_xde) .or. present(data_yde)) then
+
+    emptyx = 0
+    emptyy = 0
+    fullx = xde
+    fully = yde
+
+    ! do some basic error checks and then figure out how many x DEs are empty
+    if (present(data_xde)) then
+       if ((data_xde .lt. 0) .or. (data_xde .ge. xde)) then
+
+         call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                               "data_xde must be >= 0 and < xde", &
+                                ESMF_CONTEXT, rc)
+       else
+        emptyx = xde - data_xde
+        fullx = data_xde
+       endif
+    endif
+
+    ! same thing for y
+    if (present(data_yde)) then
+       if ((data_yde .lt. 0) .or. (data_yde .ge. yde)) then
+
+         call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                               "data_yde must be >= 0 and < yde", &
+                                ESMF_CONTEXT, rc)
+       else
+        emptyy = yde - data_yde
+        fully = data_yde
+       endif
+    endif
+
     allocate(xdecounts(xde), ydecounts(yde), stat=status)
-    ! err check here
+    if (ESMF_LogMsgFoundAllocError(status, "Allocating decount arrays", &
+                                   ESMF_CONTEXT, rc)) return
+
+    ! default to 0 data items per DE, then divide up the data counts 
+    ! onto the requested subset.  always start at DE (1,1).
     xdecounts = 0
     ydecounts = 0
     
-    xdecounts(1) = nx
-    ydecounts(1:yde-1) = ny / (yde-1)
+    xdecounts(1:fullx) = nx / fullx
+    ydecounts(1:fully) = ny / fully
 
-    print *, xde, yde, nx, ny, xdecounts(1), ydecounts(1)
+    ! and add remainders to the last de with data.
+    xdecounts(fullx) = xdecounts(fullx) + mod(nx, fullx)
+    ydecounts(fully) = ydecounts(fully) + mod(ny, fully)
+
+
+    ! debug
+    ! print *, xde, yde, nx, ny, xdecounts, ydecounts, emptyx, emptyy
     call ESMF_GridDistribute(grid, delayout=thislayout, &
                              countsPerDEDim1=xdecounts, &
                              countsPerDEDim2=ydecounts, &
