@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.81 2005/11/23 23:48:37 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.82 2006/01/26 18:51:31 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.81 2005/11/23 23:48:37 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.82 2006/01/26 18:51:31 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -308,10 +308,12 @@
     } else {
       // no year, month or day specified; set defaults per calendar, if any
       if (this->calendar != ESMC_NULL_POINTER) {
-        // defaults:  yy=0, mm=1, dd=1 d=0
-        rc = this->calendar->ESMC_CalendarConvertToTime(0, 1, 1, 0, this);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
-          { *this = saveTime; return(rc); }
+        if (this->calendar->calendarType != ESMC_CAL_NOCALENDAR) {
+          // defaults:  yy=0, mm=1, dd=1 d=0
+          rc = this->calendar->ESMC_CalendarConvertToTime(0, 1, 1, 0, this);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+            { *this = saveTime; return(rc); }
+        }
       }
     }
     
