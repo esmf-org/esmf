@@ -1,4 +1,6 @@
-# $Id: makefile,v 1.44 2005/03/01 20:56:10 nscollins Exp $ 
+# $Id: makefile,v 1.45 2006/01/26 21:40:01 nscollins Exp $ 
+
+ALL: doc
 
 #
 #  Note that the ref doc build rules are redefined here.
