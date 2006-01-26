@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.19 2005/11/28 21:14:14 eschwab Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.20 2006/01/26 18:52:37 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.19 2005/11/28 21:14:14 eschwab Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.20 2006/01/26 18:52:37 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -561,6 +561,17 @@
 
   ! ----------------------------------------------------------------------------
       
+      !EX_UTest
+      ! This test verifies the fix to support #1415439, reported
+      !   by Tim Campbell/NRL
+      ! Test Setting Time with No Calendar, just s, ms, ns
+      write(failMsg, *) " Did not set s, ms, ns with ESMF_CAL_NOCALENDAR, and return ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, s=1, ms=2, ns=3, &
+                        calendarType=ESMF_CAL_NOCALENDAR, rc=rc)
+      write(name, *) "Set Time Initialization Test w/ESMF_CAL_NOCALENDAR"
+      call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Test Time have the same calendar
       write(failMsg, *) " Did not return ESMF_SUCCESS"
