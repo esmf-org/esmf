@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.20 2006/01/26 18:52:37 eschwab Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.21 2006/01/26 21:07:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,14 +37,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.20 2006/01/26 18:52:37 eschwab Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.21 2006/01/26 21:07:14 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, H, M, S, US, MM, DD, YY, D, dayOfYear, dayOfWeek
+      integer :: rc, H, M, S, MS, US, NS, MM, DD, YY, D, dayOfYear, dayOfWeek
       integer :: sN, sD
       integer(ESMF_KIND_I8) :: year
       logical :: bool
@@ -565,11 +565,13 @@
       ! This test verifies the fix to support #1415439, reported
       !   by Tim Campbell/NRL
       ! Test Setting Time with No Calendar, just s, ms, ns
-      write(failMsg, *) " Did not set s, ms, ns with ESMF_CAL_NOCALENDAR, and return ESMF_SUCCESS"
+      write(failMsg, *) " Did not set/get s=1, ms=2, ns=3 with ESMF_CAL_NOCALENDAR, and return ESMF_SUCCESS"
       call ESMF_TimeSet(stopTime, s=1, ms=2, ns=3, &
                         calendarType=ESMF_CAL_NOCALENDAR, rc=rc)
+      call ESMF_TimeGet(stopTime, s=S, ms=MS, ns=NS)
       write(name, *) "Set Time Initialization Test w/ESMF_CAL_NOCALENDAR"
-      call ESMF_Test(rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(S.eq.1.and.MS.eq.2.and.NS.eq.3.and. &
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
