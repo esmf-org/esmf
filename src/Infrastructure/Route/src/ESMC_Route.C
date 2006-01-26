@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.149 2006/01/06 23:25:50 nscollins Exp $
+//$Id: ESMC_Route.C,v 1.150 2006/01/26 23:10:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.149 2006/01/06 23:25:50 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.150 2006/01/26 23:10:34 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -611,6 +611,19 @@
     VMType = 0;   // TODO: unused so far, here for future use
     nbytes = ESMC_DataKindSize(dk);
     useOptions = options;
+
+// make sure at least one sync/async option set, and one
+// pack option set (if not, set sync/pack pet). 
+
+    if (((useOptions & ESMC_ROUTE_OPTION_SYNC) == 0) &&
+        ((useOptions & ESMC_ROUTE_OPTION_ASYNC) == 0))
+     useOptions = (ESMC_RouteOptions)(useOptions | ESMC_ROUTE_OPTION_SYNC);
+
+    if (((useOptions & ESMC_ROUTE_OPTION_PACK_PET) == 0) &&
+        ((useOptions & ESMC_ROUTE_OPTION_PACK_XP) == 0) &&
+        ((useOptions & ESMC_ROUTE_OPTION_PACK_NOPACK) == 0))
+     useOptions = (ESMC_RouteOptions)(useOptions | ESMC_ROUTE_OPTION_PACK_PET);
+
 
 // -----------------------------------------------------------
 // TODO:

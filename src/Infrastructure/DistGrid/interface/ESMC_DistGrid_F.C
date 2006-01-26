@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.2 2004/12/04 00:33:54 jwolfe Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.3 2006/01/26 23:10:33 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,6 +23,8 @@
 //
  // insert any higher level, 3rd party or system includes here
 #include "ESMC_Start.h"
+#include "ESMC_LogErr.h"
+
 
  // associated class definition file
 #include "ESMC_DistGrid.h"
@@ -31,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_DistGrid_F.C,v 1.2 2004/12/04 00:33:54 jwolfe Exp $";
+             "$Id: ESMC_DistGrid_F.C,v 1.3 2006/01/26 23:10:33 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -53,6 +55,18 @@ void FTN(c_esmc_distgridserialize)(int *dimCount, int *ndes,
     int *ip, i;
 
     // TODO: verify length > needed, and if not, make room.
+    int fixedpart = 40 * sizeof(int *);
+    if ((*length - *offset) < fixedpart) {
+         
+         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                             "Buffer too short to add a Grid object", localrc);
+         return;
+ 
+        //buffer = (char *)realloc((void *)buffer,
+        //                         *length + 2*fixedpart + byte_count);
+        //*length += 2 * fixedpart;
+    }
+
 
     ip = (int *)((char *)(buffer) + *offset);
     *ip++ = *dimCount;

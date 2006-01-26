@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.13 2004/12/20 02:25:50 nscollins Exp $
+// $Id: ESMC_LocalArray.C,v 1.14 2006/01/26 23:10:34 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -40,7 +40,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.13 2004/12/20 02:25:50 nscollins Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.14 2006/01/26 23:10:34 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -48,8 +48,8 @@
 //-----------------------------------------------------------------------------
 // This section includes all the Local Array create/destroy routines.
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArrayCreate"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayCreate"
 //BOP
 // !IROUTINE:  ESMC_LocalArrayCreate - Create a new Array
 //
@@ -116,8 +116,8 @@
  } // end ESMC_LocalArrayCreate
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArrayDestroy"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayDestroy"
 //BOP
 // !IROUTINE:  ESMC_LocalArrayDestroy - free a LocalArray created with Create
 //
@@ -147,8 +147,8 @@
  } // end ESMC_LocalArrayDestroy
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArrayCreateNoData"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayCreateNoData"
 //BOPI
 // !IROUTINE:  ESMC_LocalArrayCreateNoData - internal routine for fortran use
 //
@@ -193,8 +193,8 @@
  } // end ESMC_LocalArrayCreateNoData
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArrayCreate_F"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayCreate_F"
 //BOP
 // !IROUTINE:  ESMC_LocalArrayCreate_F - internal routine for fortran use
 //
@@ -276,8 +276,8 @@
  } // end ESMC_LocalArrayCreate_F
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArrayConstruct"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayConstruct"
 //BOP
 // !IROUTINE:  ESMC_LocalArrayConstruct - fill in an already allocated LocalArray
 //
@@ -365,8 +365,8 @@
  } // end ESMC_LocalArrayConstruct
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArrayDestruct"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayDestruct"
 //BOP
 // !IROUTINE:  ESMC_LocalArrayDestruct - release resources associated w/a LocalArray
 //
@@ -416,8 +416,8 @@
 // Note that most of the Get/Set routines are by value and are inline in
 //  the include file.
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArraySetInfo"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArraySetInfo"
 //BOP
 // !IROUTINE:  ESMC_LocalArraySetInfo - Set the most common F90 needs
 //
@@ -493,8 +493,8 @@
  } // end ESMC_LocalArraySetInfo
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArrayGetInfo"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayGetInfo"
 //BOP
 // !IROUTINE:  ESMC_LocalArrayGetInfo - Get the most common F90 needs
 //
@@ -553,8 +553,8 @@
  } // end ESMC_LocalArrayGetInfo
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArrayGetF90Ptr"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayGetF90Ptr"
 //BOP
 // !IROUTINE:  ESMC_LocalArrayGetF90Ptr - get F90Ptr for a LocalArray
 //
@@ -590,8 +590,8 @@
  } // end ESMC_LocalArrayGetF90Ptr
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArraySetF90Ptr"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArraySetF90Ptr"
 //BOP
 // !IROUTINE:  ESMC_LocalArraySetF90Ptr - set F90Ptr for a LocalArray
 //
@@ -633,8 +633,8 @@
 // Higher level Array functions.  Might need to move to another file if
 // there are enough of them...
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArraySlice"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArraySlice"
 //BOP
 // !IROUTINE:  ESMC_LocalArraySlice - drop an array by one dimension
 //
@@ -664,8 +664,8 @@
  } // end ESMC_LocalArraySlice
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArrayReshape"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayReshape"
 //BOP
 // !IROUTINE:  ESMC_LocalArrayReshape - change the rank or counts on an array
 //
@@ -703,8 +703,8 @@
 // Standard methods - Validate, Print, Read, Write, Serialize, Deserialize
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArraySerialize"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArraySerialize"
 //BOPI
 // !IROUTINE:  ESMC_LocalArraySerialize - Turn localarray into a byte stream
 //
@@ -730,8 +730,11 @@
 
     fixedpart = sizeof(ESMC_LocalArray);
     if ((*length - *boffset) < fixedpart) {
-        buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
-        *length += 2 * fixedpart;
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                           "Buffer too short to add a LocalArray object", &rc);
+        return ESMF_FAILURE; 
+        //buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
+        //*length += 2 * fixedpart;
     }
 
     // Serialize the Base class first.
@@ -772,8 +775,8 @@
  } // end ESMC_LocalArraySerialize
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArrayDeserialize"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayDeserialize"
 //BOPI
 // !IROUTINE:  ESMC_LocalArrayDeserialize - Turn a byte stream into an object
 //
@@ -837,8 +840,8 @@
  } // end ESMC_LocalArrayDeserialize
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArraySerializeNoData"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArraySerializeNoData"
 //BOPI
 // !IROUTINE:  ESMC_LocalArraySerializeNoData - Turn localarray into a byte stream
 //
@@ -864,8 +867,11 @@
 
     fixedpart = sizeof(ESMC_LocalArray);
     if ((*length - *boffset) < fixedpart) {
-        buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
-        *length += 2 * fixedpart;
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                           "Buffer too short to add a LocalArray object", &rc);
+        return ESMF_FAILURE; 
+        //buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
+        //*length += 2 * fixedpart;
     }
 
     // SerializeNoData the Base class first.
@@ -893,8 +899,8 @@
  } // end ESMC_LocalArraySerializeNoData
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArrayDeserializeNoData"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayDeserializeNoData"
 //BOPI
 // !IROUTINE:  ESMC_LocalArrayDeserializeNoData - Turn a byte stream into an object
 //
@@ -958,8 +964,8 @@
  } // end ESMC_LocalArrayDeserializeNoData
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArrayPrint"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayPrint"
 //BOP
 // !IROUTINE:  ESMC_LocalArrayPrint - print contents of a LocalArray
 //
@@ -1554,8 +1560,8 @@
  } // end ESMC_LocalArrayPrint
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArrayValidate"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayValidate"
 //BOP
 // !IROUTINE:  ESMC_LocalArrayValidate - internal consistency check
 //
@@ -1584,8 +1590,8 @@
  } // end ESMC_LocalArrayValidate
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArrayWrite"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayWrite"
 //BOP
 // !IROUTINE:  ESMC_LocalArrayWrite - write contents of a LocalArray
 //
@@ -1838,8 +1844,8 @@
 //-----------------------------------------------------------------------------
 // native constructor/destructors
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArray()"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArray()"
 //BOP
 // !IROUTINE:  ESMC_LocalArray - native C++ constructor
 //
@@ -1866,8 +1872,8 @@
  } // end ESMC_LocalArray
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "~ESMC_LocalArray()"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "~ESMC_LocalArray()"
 //BOP
 // !IROUTINE:  ~ESMC_LocalArray - native C++ destructor
 //
