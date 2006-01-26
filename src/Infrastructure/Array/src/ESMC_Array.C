@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.44 2005/11/17 01:22:54 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.45 2006/01/26 23:10:28 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.44 2005/11/17 01:22:54 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.45 2006/01/26 23:10:28 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -51,8 +51,8 @@
 //
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayCreate"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayCreate"
 //BOP
 // !IROUTINE:  ESMC_ArrayCreate - Create a new Array
 //
@@ -118,8 +118,8 @@
  } // end ESMC_ArrayCreate
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayCreate"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayCreate"
 //BOP
 // !IROUTINE:  ESMC_ArrayCreate - Create a new Array
 //
@@ -163,8 +163,8 @@
  } // end ESMC_ArrayCreate
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayDestroy"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayDestroy"
 //BOP
 // !IROUTINE:  ESMC_ArrayDestroy - free a Array created with Create
 //
@@ -193,8 +193,8 @@
  } // end ESMC_ArrayDestroy
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayCreateNoData"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayCreateNoData"
 //BOPI
 // !IROUTINE:  ESMC_ArrayCreateNoData - internal routine for fortran use
 //
@@ -237,8 +237,8 @@
  } // end ESMC_ArrayCreateNoData
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayCreate_F"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayCreate_F"
 //BOP
 // !IROUTINE:  ESMC_ArrayCreate_F - internal routine for fortran use
 //
@@ -322,8 +322,8 @@
  } // end ESMC_ArrayCreate_F
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayConstruct"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayConstruct"
 //BOP
 // !IROUTINE:  ESMC_ArrayConstruct - fill in an already allocated Array
 //
@@ -480,8 +480,8 @@
  } // end ESMC_ArrayConstruct
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayDestruct"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayDestruct"
 //BOP
 // !IROUTINE:  ESMC_ArrayDestruct - release resources associated w/a Array
 //
@@ -524,8 +524,8 @@
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayGet"
 //BOP
 // !IROUTINE:  ESMC_ArrayGet<Value> - get <Value> for a Array
 //
@@ -552,8 +552,8 @@
  //} // end ESMC_ArrayGet<Value>
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArraySet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArraySet"
 //BOP
 // !IROUTINE:  ESMC_ArraySet<Value> - set <Value> for a Array
 //
@@ -583,8 +583,8 @@
  //} // end ESMC_ArraySet<Value>
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArraySetInfo"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArraySetInfo"
 //BOP
 // !IROUTINE:  ESMC_ArraySetInfo - Set the most common F90 needs
 //
@@ -724,8 +724,8 @@
  } // end ESMC_ArraySetInfo
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayGetF90Ptr"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayGetF90Ptr"
 //BOP
 // !IROUTINE:  ESMC_ArrayGetF90Ptr - get F90Ptr for a Array
 //
@@ -761,8 +761,8 @@
  } // end ESMC_ArrayGetF90Ptr
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArraySetF90Ptr"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArraySetF90Ptr"
 //BOP
 // !IROUTINE:  ESMC_ArraySetF90Ptr - set F90Ptr for a Array
 //
@@ -797,8 +797,8 @@
  } // end ESMC_ArraySetF90Ptr
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArraySetAxisIndex"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArraySetAxisIndex"
 //BOP
 // !IROUTINE:  ESMC_ArraySetAxisIndex - set annotation on Arrays for local/global
 //
@@ -852,8 +852,8 @@
  } // end ESMC_ArraySetAxisIndex
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayGetAxisIndex"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayGetAxisIndex"
 //BOP
 // !IROUTINE:  ESMC_ArrayGetAxisIndex - get annotation on Arrays for local/global
 //
@@ -937,8 +937,8 @@
  // So this needs to be defined in the ArrayComm file, where it can access
  // the Grid, the DataMap, and the Array so it pulls the right things from
  // the right places.  
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayGetAllAxisIndices"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayGetAllAxisIndices"
 //BOPI
 // !IROUTINE:  ESMC_ArrayGetAllAxisIndices - get all AIs for local/global
 //
@@ -1008,8 +1008,8 @@
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayValidate"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayValidate"
 //BOP
 // !IROUTINE:  ESMC_ArrayValidate - internal consistency check for a Array
 //
@@ -1040,8 +1040,8 @@
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayPrint"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayPrint"
 //BOP
 // !IROUTINE:  ESMC_ArrayPrint - print contents of a Array
 //
@@ -1633,8 +1633,8 @@
  } // end ESMC_ArrayPrint
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayWrite"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayWrite"
 //BOP
 // !IROUTINE:  ESMC_ArrayWrite - write contents of a Array
 //
@@ -1962,8 +1962,8 @@
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArraySerialize"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArraySerialize"
 //BOPI
 // !IROUTINE:  ESMC_ArraySerialize - Turn array information into a byte stream
 //
@@ -1990,8 +1990,14 @@
 
     fixedpart = sizeof(ESMC_Array) + byte_count;
     if ((*length - *offset) < fixedpart) {
-        buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart + byte_count);
-        *length += 2 * fixedpart;
+        
+         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                               "Buffer too short to add an Array object", &rc);
+         return ESMF_FAILURE;
+
+        //buffer = (char *)realloc((void *)buffer, 
+        //                         *length + 2*fixedpart + byte_count);
+        //*length += 2 * fixedpart;
     }
 
     // First, serialize the base class, then the localarray part, then
@@ -2026,8 +2032,8 @@
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_Deserialize"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Deserialize"
 //BOPI
 // !IROUTINE:  ESMC_ArrayDeserialize - Turn a byte stream into an object
 //
@@ -2083,8 +2089,8 @@
  } // end ESMC_ArrayDeserialize
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArraySerializeNoData"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArraySerializeNoData"
 //BOPI
 // !IROUTINE:  ESMC_ArraySerializeNoData - Turn array information into a byte stream
 //
@@ -2113,8 +2119,11 @@
 
     fixedpart = sizeof(ESMC_Array);
     if ((*length - *offset) < fixedpart) {
-        buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
-        *length += 2 * fixedpart;
+         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                               "Buffer too short to add an Array object", &rc);
+         return ESMF_FAILURE;
+        //buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
+        //*length += 2 * fixedpart;
     }
 
     // First, serialize the base class, then the localarray part, then
@@ -2150,8 +2159,8 @@
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_DeserializeNoData"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DeserializeNoData"
 //BOPI
 // !IROUTINE:  ESMC_ArrayDeserializeNoData - Turn a byte stream into an object
 //
@@ -2207,8 +2216,8 @@
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_Array()"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Array()"
 //BOP
 // !IROUTINE:  ESMC_Array - native C++ constructor
 //
@@ -2235,8 +2244,8 @@
  } // end ESMC_Array
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "~ESMC_Array()"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "~ESMC_Array()"
 //BOP
 // !IROUTINE:  ~ESMC_Array - native C++ destructor
 //

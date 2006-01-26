@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.66 2005/11/08 22:27:25 theurich Exp $
+// $Id: ESMC_Base.C,v 1.67 2006/01/26 23:10:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.66 2005/11/08 22:27:25 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.67 2006/01/26 23:10:28 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -51,8 +51,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseGetClassName"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetClassName"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetClassName - Get Base class name
 //
@@ -75,8 +75,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_BaseGetClassName
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseGetF90ClassName"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetF90ClassName"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetF90ClassName - Get Base class name in Fortran format
 //
@@ -103,8 +103,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_BaseGetF90ClassName
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseGetID"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetID"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetID - Get Base class unique ID
 //  
@@ -127,8 +127,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 } // end ESMC_BaseGetID
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseGetVMId"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetVMId"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetVMId - Get Base class VMId
 //  
@@ -151,8 +151,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 } // end ESMC_BaseGetVMId
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseSetVMId"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseSetVMId"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetVMId - Set Base class VMId
 //  
@@ -176,8 +176,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 } // end ESMC_BaseSetVMId
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseGetInstCount"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetInstCount"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetInstCount - Get number of Base class instances
 //
@@ -201,8 +201,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 } // end ESMC_BaseGetInstCount
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseGetName"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetName"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetName - Get Base object name
 //
@@ -225,8 +225,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_BaseGetName
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseGetF90Name"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetF90Name"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetF90Name - Get Base object name in Fortran format
 //
@@ -250,8 +250,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_BaseGetF90Name
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseGetRefCount"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetRefCount"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetRefCount - Get Base class reference count
 //
@@ -273,8 +273,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 } // end ESMC_BaseGetRefCount
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseGetStatus"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetStatus"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetStatus - Get Base class status
 //
@@ -297,8 +297,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_BaseGetStatus
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseSetClassName"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseSetClassName"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetClassName - Set Base class name
 //
@@ -336,8 +336,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_BaseSetClassName
  
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseSetF90ClassName"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseSetF90ClassName"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetF90ClassName - Set Base class name
 //
@@ -370,8 +370,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_BaseSetF90ClassName
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseSetID"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseSetID"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetID - Set Base class unique ID
 //  
@@ -394,8 +394,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_BaseSetID
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseSetName"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseSetName"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetName - Set Base class name
 //
@@ -460,8 +460,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_BaseSetName
  
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseSetF90Name"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseSetF90Name"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetF90Name - Set Base class name
 //
@@ -500,8 +500,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseSetRefCount"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseSetRefCount"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetRefCount - Set Base class reference count
 //
@@ -524,8 +524,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 } // end ESMC_BaseSetRefCount
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_BaseSetStatus"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseSetStatus"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetStatus - Set Base class status
 //
@@ -551,8 +551,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_Deserialize"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Deserialize"
 //BOPI
 // !IROUTINE:  ESMC_Deserialize - Turn a byte stream into an object
 //
@@ -612,8 +612,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
  } // end ESMC_Deserialize
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_Print"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Print"
 //BOPI
 // !IROUTINE:  ESMC_Print - Print contents of a Base object
 //
@@ -657,8 +657,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
  } // end ESMC_Print
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_Read"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Read"
 //BOPI
 // !IROUTINE:  ESMC_Read - Read in contents of a Base object
 //
@@ -681,8 +681,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
  } // end ESMC_Read
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_Serialize"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Serialize"
 //BOPI
 // !IROUTINE:  ESMC_Serialize - Turn the object information into a byte stream
 //
@@ -703,14 +703,17 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOPI
     int fixedpart, nbytes;
-    int *ip, i;
+    int *ip, i, rc;
     ESMC_Status *sp;
     char *cp;
 
     fixedpart = sizeof(ESMC_Base);
     if ((*length - *offset) < fixedpart) {
-        buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
-        *length += 2 * fixedpart;
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                               "Buffer too short to add a Base object", &rc);
+        return ESMF_FAILURE; 
+        //buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
+        //*length += 2 * fixedpart;
     }
 
     ip = (int *)(buffer + *offset);
@@ -744,8 +747,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
  } // end ESMC_Serialize
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_Validate"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Validate"
 //BOPI
 // !IROUTINE:  ESMC_Validate - Internal consistency check for Base object
 //
@@ -773,8 +776,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_Write"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Write"
 //BOP
 // !IROUTINE:  ESMC_Write - Write out contents of a Base object
 //
@@ -804,8 +807,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeAlloc"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeAlloc"
 //BOPI
 // !IROUTINE:  ESMC_AttributeAlloc - ensure the attribute list is long enough
 //
@@ -846,8 +849,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMC_AttributeSet - set attribute on an ESMF type
 //
@@ -908,8 +911,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeSet
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMC_AttributeSet(int) - set attribute on an ESMF type
 //
@@ -942,8 +945,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeSet(int)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMC_AttributeSet(int *) - set attribute on an ESMF type
 //
@@ -977,8 +980,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeSet(int *)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMC_AttributeSet(long) - set attribute on an ESMF type
 //
@@ -1011,8 +1014,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeSet(long)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMC_AttributeSet(long *) - set attribute on an ESMF type
 //
@@ -1046,8 +1049,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeSet(long *)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
 //BOP
 // !IROUTINE:  ESMC_AttributeSet(float) - set attribute on an ESMF type
 //
@@ -1080,8 +1083,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeSet(float)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
 //BOP
 // !IROUTINE:  ESMC_AttributeSet(float *) - set attribute on an ESMF type
 //
@@ -1115,8 +1118,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeSet(float *)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
 //BOP
 // !IROUTINE:  ESMC_AttributeSet(double) - set attribute on an ESMF type
 //
@@ -1149,8 +1152,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeSet(double)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
 //BOP
 // !IROUTINE:  ESMC_AttributeSet(double *) - set attribute on an ESMF type
 //
@@ -1184,8 +1187,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeSet(double *)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
 //BOP
 // !IROUTINE:  ESMC_AttributeSet(bool) - set attribute on an ESMF type
 //
@@ -1218,8 +1221,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeSet(bool)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
 //BOP
 // !IROUTINE:  ESMC_AttributeSet(bool *) - set attribute on an ESMF type
 //
@@ -1253,8 +1256,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeSet(bool *)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
 //BOP
 // !IROUTINE:  ESMC_AttributeSet(char) - set attribute on an ESMF type
 //
@@ -1288,8 +1291,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSet"
 //BOP
 // !IROUTINE:  ESMC_AttributeSet(dt,dk,count,value) - set attribute on an ESMF type
 //
@@ -1327,8 +1330,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet - get attribute from an ESMF type
 //
@@ -1368,8 +1371,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeGet
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(int) - get attribute from an ESMF type
 //
@@ -1426,8 +1429,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeGet(int)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(int *) - get attribute from an ESMF type
 //
@@ -1489,8 +1492,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeGet(int *)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(long) - get attribute from an ESMF type
 //
@@ -1547,8 +1550,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeGet(long)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(long *) - get attribute from an ESMF type
 //
@@ -1610,8 +1613,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeGet(long *)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(float) - get attribute from an ESMF type
 //
@@ -1668,8 +1671,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeGet(float)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(float *) - get attribute from an ESMF type
 //
@@ -1731,8 +1734,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeGet(float *)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(double) - get attribute from an ESMF type
 //
@@ -1789,8 +1792,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeGet(double)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(double *) - get attribute from an ESMF type
 //
@@ -1852,8 +1855,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeGet(double *)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(bool) - get attribute from an ESMF type
 //
@@ -1906,8 +1909,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(bool *) - get attribute from an ESMF type
 //
@@ -1964,8 +1967,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeGet(bool *)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(char) - get attribute from an ESMF type
 //
@@ -2022,8 +2025,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeGet(char)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(name) - get attribute from an ESMF type
 //
@@ -2141,8 +2144,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeGet(name)
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(num) - get attribute from an ESMF type
 //
@@ -2259,8 +2262,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGetCount"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGetCount"
 //BOP
 // !IROUTINE:  ESMC_AttributeGetCount - get an ESMF object's number of attributes
 // 
@@ -2284,8 +2287,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 } // end ESMC_AttributeGetCount
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet - get an ESMF object's attribute by number
 //
@@ -2320,8 +2323,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeGet
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGetNameList"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGetNameList"
 //BOP
 // !IROUTINE:  ESMC_AttributeGetNameList - get the list of attribute names
 //
@@ -2345,8 +2348,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeGetNameList
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeSetList"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSetList"
 //BOP
 // !IROUTINE:  ESMC_AttributeSetList - set multiple attributes at once
 // 
@@ -2370,8 +2373,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeSetList
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGetList"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGetList"
 //BOP
 // !IROUTINE:  ESMC_AttributeGetList - get multiple attributes at once
 // 
@@ -2395,8 +2398,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeGetList
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeCopy"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeCopy"
 //BOP
 // !IROUTINE:  ESMC_AttributeCopy - copy an attribute between two objects
 //
@@ -2421,8 +2424,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeCopy
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeCopyAll"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeCopyAll"
 //BOP
 // !IROUTINE:  ESMC_AttributeCopyAll - copy attributes between two objects 
 //
@@ -2448,8 +2451,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_Serialize"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Serialize"
 //BOPI
 // !IROUTINE:  ESMC_Serialize - Turn the object information into a byte stream
 //
@@ -2469,7 +2472,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //    Turn info in attribute class into a stream of bytes.
 //
 //EOPI
-    int nbytes;
+    int nbytes, rc;
     char *cp;
 
     nbytes = sizeof(ESMC_Attribute);
@@ -2477,8 +2480,11 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
         nbytes += items * ESMC_DataKindSize(dk);
     
     if ((*length - *offset) < nbytes) {
-        buffer = (char *)realloc((void *)buffer, *length + nbytes);
-        *length += nbytes;
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                               "Buffer too short to add an Attr object", &rc);
+        return ESMF_FAILURE; 
+        //buffer = (char *)realloc((void *)buffer, *length + nbytes);
+        //*length += nbytes;
     }
 
     cp = (buffer + *offset);
@@ -2499,8 +2505,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
  } // end ESMC_Serialize
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_Deserialize"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Deserialize"
 //BOPI
 // !IROUTINE:  ESMC_Deserialize - Turn a byte stream into an object
 //
@@ -2539,8 +2545,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
  } // end ESMC_Deserialize
 //-----------------------------------------------------------------------------
 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_Print"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Print"
 //BOP
 // !IROUTINE:  ESMC_Attribute::ESMC_Print - print the Attribute contents
 //
@@ -2651,8 +2657,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeSetObjectList"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSetObjectList"
 //BOP
 // !IROUTINE:  ESMC_AttributeSetObjectList - set an attribute on multiple ESMF objects
 //
@@ -2676,8 +2682,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 }  // end ESMC_AttributeSetObjectList
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeGetObjectList"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGetObjectList"
 //BOP
 // !IROUTINE:  ESMC_AttributeGetObjectList - get an attribute from multiple ESMF objects 
 //
@@ -2703,8 +2709,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AttributeCopy(=)"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeCopy(=)"
 //BOP
 // !IROUTINE:  ESMC_AttributeCopy(=) - assignment operator for attributes
 //
@@ -2805,8 +2811,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_Attribute()"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Attribute()"
 //BOP
 // !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
 //
@@ -2832,8 +2838,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
  } // end ESMC_Attribute
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_Attribute()"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Attribute()"
 //BOP
 // !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
 //
@@ -2960,8 +2966,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
  } // end ESMC_Attribute
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "~ESMC_Attribute()"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "~ESMC_Attribute()"
 //BOP
 // !IROUTINE:  ~ESMC_Attribute - native C++ destructor for ESMC_Attribute class
 //
@@ -2999,8 +3005,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
  } // end ~ESMC_Attribute
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_Base()"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Base()"
 //BOPI
 // !IROUTINE:  ESMC_Base - native C++ constructor for ESMC_Base class
 //
@@ -3036,8 +3042,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
  } // end ESMC_Base
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_Base()"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Base()"
 //BOPI
 // !IROUTINE:  ESMC_Base - native C++ constructor for ESMC_Base class
 //
@@ -3085,8 +3091,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
  } // end ESMC_Base
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "~ESMC_Base()"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "~ESMC_Base()"
 //BOPI
 // !IROUTINE:  ~ESMC_Base - native C++ destructor for ESMC_Base class
 //

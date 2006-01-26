@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.10 2005/12/01 20:09:10 nscollins Exp $
+// $Id: ESMC_Util.C,v 1.11 2006/01/26 23:10:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.10 2005/12/01 20:09:10 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.11 2006/01/26 23:10:28 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -85,8 +85,8 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 //
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AxisIndexSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AxisIndexSet"
 //BOPI
 // !IROUTINE:  ESMC_AxisIndexSet - Initialize an AxisIndex object
 //
@@ -118,8 +118,8 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 };
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AxisIndexSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AxisIndexSet"
 //BOPI
 // !IROUTINE:  ESMC_AxisIndexSet - Initialize an AxisIndex object
 //
@@ -151,8 +151,8 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 };
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AxisIndexGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AxisIndexGet"
 //BOPI
 // !IROUTINE:  ESMC_AxisIndexGet - Retrieve values from an AxisIndex object
 //
@@ -184,8 +184,8 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 };
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AxisIndexPrint"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AxisIndexPrint"
 //BOPI
 // !IROUTINE:  ESMC_AxisIndexPrint - Print an AxisIndex object
 //
@@ -215,8 +215,8 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 }
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AxisIndexCopy"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AxisIndexCopy"
 //BOP
 // !IROUTINE:  ESMC_AxisIndexCopy - assignment operator for axis indices
 //
@@ -243,8 +243,8 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 }
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AxisIndexIntersect"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AxisIndexIntersect"
 //BOP
 // !IROUTINE:  ESMC_AxisIndexIntersect - return the intersection of 2 AIs
 //
@@ -325,8 +325,8 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 }
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AxisIndexLocalToGlobal"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AxisIndexLocalToGlobal"
 //BOP
 // !IROUTINE:  ESMC_AxisIndexLocalToGlobal - translate local AI to global AIs
 //
@@ -372,8 +372,8 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 }
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AxisIndexGlobalToLocal"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AxisIndexGlobalToLocal"
 //BOP
 // !IROUTINE:  ESMC_AxisIndexGlobalToLocal - translate global AI to local AI
 //
@@ -411,8 +411,8 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 }
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_AxisIndexEqual"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AxisIndexEqual"
 //BOPI
 // !IROUTINE:  ESMC_AxisIndexEqual - Compare two AxisIndex structs for equality
 //
@@ -468,8 +468,8 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_DataKindSize"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DataKindSize"
 //BOPI
 // !IROUTINE:  ESMC_DataKindSize - Return number of bytes in a DataKind
 //
@@ -502,8 +502,8 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 }
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_StatusString"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_StatusString"
 //BOPI
 // !IROUTINE:  ESMC_StatusString - Return fixed char string for printing
 //
@@ -534,8 +534,8 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 }
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_DataTypeString"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DataTypeString"
 //BOPI
 // !IROUTINE:  ESMC_DataTypeString - Return fixed char string for printing
 //
@@ -564,8 +564,8 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 }
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_DataKindString"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DataKindString"
 //BOPI
 // !IROUTINE:  ESMC_DataKindString - Return fixed char string for printing
 //
@@ -598,8 +598,8 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 }
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LogicalString"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LogicalString"
 //BOPI
 // !IROUTINE:  ESMC_LogicalString - Return fixed char string for printing
 //
@@ -627,8 +627,8 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_F90toCstring"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_F90toCstring"
 //BOPI
 // !IROUTINE:  ESMC_F90toCstring - Convert an F90 string into a C++ string
 //
@@ -668,8 +668,8 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 }
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_F90toCstring"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_F90toCstring"
 //BOPI
 // !IROUTINE:  ESMC_F90toCstring - Convert an F90 string into a C++ string
 //
@@ -721,8 +721,8 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 }
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_CtoF90string"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CtoF90string"
 //BOPI
 // !IROUTINE:  ESMC_CtoF90string - Convert a C++ string into an F90 string
 //
@@ -771,8 +771,8 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 }
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "esmf_f90tostring"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmf_f90tostring"
 //BOPI
 // !IROUTINE:  ESMF_F90toCstring - Fortran-callable conversion routine from F90 character to C++ string
 //
@@ -830,8 +830,8 @@ extern "C" {
 }
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "esmf_ctof90string"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmf_ctof90string"
 //BOPI
 // !IROUTINE:  ESMF_CtoF90string - Fortran-callable conversion routine from C++ string to F90 character 
 //
@@ -890,8 +890,8 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "esmf_pointertoint"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmf_pointertoint"
 //BOPI
 // !IROUTINE:  ESMF_PointerToInt - Fortran-callable routine which returns
 //   the value of a fortran address as a simple integer.
@@ -935,8 +935,8 @@ extern "C" {
 }
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "esmf_pointerdifference"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmf_pointerdifference"
 //BOPI
 // !IROUTINE:  ESMF_PointerDifference - Fortran-callable routine which returns
 //   the difference between 2 addresses as a simple integer.

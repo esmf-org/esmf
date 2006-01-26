@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.41 2006/01/12 16:06:43 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.42 2006/01/26 23:10:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.41 2006/01/12 16:06:43 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.42 2006/01/26 23:10:28 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -760,8 +760,8 @@ int ESMC_DELayout::ESMC_DELayoutPrint(){
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_DELayoutSerialize"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutSerialize"
 //BOPI
 // !IROUTINE:  ESMC_DELayoutSerialize - Turn delayout information into a byte stream
 //
@@ -794,6 +794,12 @@ int ESMC_DELayout::ESMC_DELayoutPrint(){
     //  allocated on the f90 side.  change the code to make the allocate
     //  happen in C++; then this will be fine.  (for now make sure buffer
     //  is always big enough so realloc is not needed.)
+    fixedpart = sizeof(ESMC_DELayout);
+    if ((*length - *offset) < fixedpart) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                             "Buffer too short to add a DELayout object", &rc);
+        return ESMF_FAILURE; 
+    }
 
     // fixedpart = sizeof(ESMC_DELayout);
     // if ((*length - *offset) < fixedpart) {
@@ -882,8 +888,8 @@ class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_DELayoutDeserialize"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutDeserialize"
 //BOPI
 // !IROUTINE:  ESMC_DELayoutDeserialize - Turn a byte stream into an object
 //

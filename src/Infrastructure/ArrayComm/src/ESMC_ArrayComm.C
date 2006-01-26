@@ -1,4 +1,4 @@
-// $Id: ESMC_ArrayComm.C,v 1.19 2005/01/10 23:52:19 nscollins Exp $
+// $Id: ESMC_ArrayComm.C,v 1.20 2006/01/26 23:10:28 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_ArrayComm.C,v 1.19 2005/01/10 23:52:19 nscollins Exp $";
+            "$Id: ESMC_ArrayComm.C,v 1.20 2006/01/26 23:10:28 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -51,8 +51,8 @@
 //
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayHalo"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayHalo"
 //BOP
 // !IROUTINE:  ESMC_ArrayHalo - update the halo of an Array
 //
@@ -91,8 +91,8 @@
 
 #if 1
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_newDELayoutGatherArray"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_newDELayoutGatherArray"
 //BOP
 // !IROUTINE:  ESMC_DELayoutGatherArray - all gather a distributed array
 //
@@ -327,8 +327,8 @@ static int ESMC_newDELayoutGatherArray(
 #endif
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayGather"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayGather"
 //BOP
 // !IROUTINE:  ESMC_ArrayGather - gather a distributed Array onto 1 DE
 //
@@ -408,8 +408,8 @@ static int ESMC_newDELayoutGatherArray(
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayScatter"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayScatter"
 //BOP
 // !IROUTINE:  ESMC_ArrayScatter - scatter a single Array onto N distributed DEs
 //
@@ -524,8 +524,8 @@ static int ESMC_newDELayoutGatherArray(
 
 
 //-----------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_ArrayRedist"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayRedist"
 //BOP
 // !IROUTINE:  ESMC_ArrayRedist - general redistribution of an Array
 //
