@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.8 2005/03/01 21:04:32 nscollins Exp $
+# $Id: makefile,v 1.9 2006/01/26 21:39:07 nscollins Exp $
 
-All: alldoc
+ALL: onedoc
 
 LOCDIR = src/Infrastructure/Route/doc
 

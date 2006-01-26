@@ -1,5 +1,6 @@
-# $Id: makefile,v 1.11 2005/03/01 21:00:50 nscollins Exp $ 
-ALL: alldoc
+# $Id: makefile,v 1.12 2006/01/26 21:39:06 nscollins Exp $ 
+
+ALL: onedoc
 
 CFLAGS    =
 FFLAGS    =
