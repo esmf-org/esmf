@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.144 2006/01/23 21:34:56 nscollins Exp $
+#  $Id: common.mk,v 1.145 2006/01/26 21:35:50 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -835,7 +835,7 @@ reqdir_examples:
 # call it success, even if a source file is more recent than the lib.
 
 reqfile_libesmf:  
-	if [ ! -f $(ESMFLIB) ]; then \
+	@if [ ! -f $(ESMFLIB) ]; then \
 	  $(MAKE) lib ; fi
 
 #-------------------------------------------------------------------------------
@@ -1053,24 +1053,25 @@ ALLTEST_TARGETS_UNI = $(TEST_TARGETS_UNI) \
 # just runs the unit tests.
 #
 
-# quick sanity check, with an override to only do non-exhaustive tests
+# quick sanity check, defaulting to EXHAUSTIVE OFF but respecting
+# the user setting if it already has a value.
 check:
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-	  $(MAKE) ESMF_EXHAUSTIVE=OFF info clean_check $(TEST_TARGETS_UNI) ;\
+	  $(MAKE) info clean_check $(TEST_TARGETS_UNI) ;\
 	else \
-	  $(MAKE) ESMF_EXHAUSTIVE=OFF info clean_check $(TEST_TARGETS) ;\
+	  $(MAKE) info clean_check $(TEST_TARGETS) ;\
         fi
 
 
 build_check:
-	$(MAKE) ESMF_EXHAUSTIVE=OFF build_unit_tests build_system_tests 
+	$(MAKE) build_unit_tests build_system_tests 
 
 
 run_check:
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-	  $(MAKE) ESMF_EXHAUSTIVE=OFF run_unit_tests_uni run_system_tests_uni ; \
+	  $(MAKE) run_unit_tests_uni run_system_tests_uni ; \
 	else \
-	  $(MAKE) ESMF_EXHAUSTIVE=OFF run_unit_tests run_system_tests ;\
+	  $(MAKE) run_unit_tests run_system_tests ;\
         fi
 
 
@@ -1087,7 +1088,7 @@ all_tests:
         fi
 
 
-build_all_tests:
+build_all_tests: clean_if_exhaustive_flag_mismatch
 	$(MAKE) build_unit_tests build_system_tests build_examples build_demos 
 
 
@@ -1344,7 +1345,7 @@ tree_unit_tests_uni: tree_build_unit_tests tree_run_unit_tests_uni
 #
 # build_unit_tests
 #
-build_unit_tests: reqfile_libesmf reqdir_lib chkdir_tests
+build_unit_tests: reqfile_libesmf reqdir_lib chkdir_tests verify_exhaustive_flag
 	$(MAKE) config_unit_tests 
 	$(MAKE) ACTION=tree_build_unit_tests tree
 	@echo "ESMF unit tests built successfully."
@@ -1459,6 +1460,20 @@ exhaustive_flag_check:
 	  echo "or change ESMF_EXHAUSTIVE to ON or OFF to match the build-time value." ;\
 	  echo "" ;\
 	  $(MAKE) err ;\
+	fi
+
+# call clean only if flags do not match
+clean_if_exhaustive_flag_mismatch:
+ifeq ($(ESMF_EXHAUSTIVE),ON) 
+	@$(MAKE) UNIT_TEST_STRING="Exhaustive" exhaustive_flag_clobber
+else
+	@$(MAKE) UNIT_TEST_STRING="Non-exhaustive" exhaustive_flag_clobber
+endif
+
+exhaustive_flag_clobber:
+	@if [ -s $(TESTS_CONFIG) -a \
+	     `$(SED) -ne '/$(UNIT_TEST_STRING)/p' $(TESTS_CONFIG) | $(WC) -l` -ne 1 ] ; then \
+	  $(MAKE) clean_unit_tests ;\
 	fi
 
 #
@@ -1801,19 +1816,21 @@ doc:  chkdir_doc
 	$(MAKE) dvi html pdf
 	@echo "Build doc completed."
 
+
+
+# 'doc' and 'alldoc' do identical things now.
 alldoc: doc
 
-# the 'doc' and 'alldoc' do identical things now.
-# in the past it used to be possible to build documents
-# for individual parts of the system, but that has not
-# been working for quite a while now.
-#
-#alldoc: chkdir_doc include cppfiles tex
-#	@echo "========================================="
-#	@echo "Building All Documentation"
-#	@echo "========================================="
-#	@$(MAKE) dvi pdf html
-#	@echo "Build alldoc completed."
+# this new target should be called from an individual
+# subsystem doc directory and will build only that doc.
+# this is also the default if you call make from a doc subdir.
+
+onedoc: chkdir_doc include cppfiles tex
+	@echo "========================================="
+	@echo "Building Single Document"
+	@echo "========================================="
+	@$(MAKE) dvi pdf html
+	@echo "Build onedoc completed."
 
 tex: chkdir_doc include cppfiles
 	cd $(ESMF_TOP_DIR) ;\
@@ -2167,7 +2184,7 @@ $(ESMF_DOCDIR)/%_desdoc: %_desdoc.ctex $(DESDOC_DEP_FILES)
 	@echo "========================================="
 	@echo "_%desdoc from %.ctex rule from common.mk"
 	@echo "========================================="
-	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
+	@if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
 	fi;
 	$(DO_L2H) $* des
@@ -2179,7 +2196,7 @@ $(ESMF_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
 	@echo "========================================="
 	@echo "_%refdoc from %.ctex rule from common.mk"
 	@echo "========================================="
-	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
+	@if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
 	fi;
 	$(DO_L2H) $* ref
@@ -2190,7 +2207,7 @@ $(ESMF_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 	@echo "========================================="
 	@echo "_%reqdoc from %.ctex rule from common.mk"
 	@echo "========================================="
-	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
+	@if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
 	fi;
 	$(DO_L2H) $* req
