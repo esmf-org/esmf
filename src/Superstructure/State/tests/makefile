@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2005/10/12 19:06:22 nscollins Exp $ 
+# $Id: makefile,v 1.13 2006/01/26 23:14:06 nscollins Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -17,14 +17,17 @@ LOCDIR	  = src/Superstructure/State/tests
 
 TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_StateCreateUTest \
 		$(ESMF_TESTDIR)/ESMF_StateReconcileUTest \
+		$(ESMF_TESTDIR)/ESMF_StateLimitUTest \
 		$(ESMF_TESTDIR)/ESMF_StateUTest
 
 TESTS_RUN     =	RUN_ESMF_StateCreateUTest \
 		RUN_ESMF_StateReconcileUTest \
+		RUN_ESMF_StateLimitUTest \
 		RUN_ESMF_StateUTest
 
 TESTS_RUN_UNI =	RUN_ESMF_StateCreateUTestUNI \
 		RUN_ESMF_StateReconcileUTestUNI \
+		RUN_ESMF_StateLimitUTestUNI \
 		RUN_ESMF_StateUTestUNI
 
 
@@ -69,5 +72,21 @@ RUN_ESMF_StateReconcileUTest:
 
 RUN_ESMF_StateReconcileUTestUNI:
 	$(MAKE) TNAME=StateReconcile NP=1 ftest
+
+
+
+#       
+# StateLimit Unit Test
+#
+
+UTEST_StateLimit_OBJS = ESMF_StateHelpers.o
+
+ESMF_StateLimitUTest.o: ESMF_StateHelpers.o
+
+RUN_ESMF_StateLimitUTest:
+	$(MAKE) TNAME=StateLimit NP=4 ftest
+
+RUN_ESMF_StateLimitUTestUNI:
+	$(MAKE) TNAME=StateLimit NP=1 ftest
 
 
