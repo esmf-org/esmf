@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.47 2005/05/17 20:29:45 theurich Exp $
+% $Id: ESMF_install.tex,v 1.48 2006/01/30 18:11:38 nscollins Exp $
 
 %\section{Installing and Building the ESMF}
 \subsection{ESMF Download Options}
@@ -35,6 +35,14 @@ The other variables have defaults which work for most systems.
 Variable that has the value of {\tt uname -s}.  For example, this will be
 AIX for IBM RS6000's.  There should be no reason for the user to set 
 {\tt ESMF\_ARCH} since the proper value should be determined automatically.
+
+\item[ESMF\_BATCHQUEUE] 
+
+Variable specifying that the ESMF tests should use an alternative batch
+system for submitting jobs.  The valid values are system dependent.
+Currently, only the value {\tt lsf} is valid for AIX systems which 
+are using the Platform LSF (Load Sharing Facility) to schedule jobs
+instead of {\tt POE}.
 
 \item[ESMF\_BOPT] 
 
