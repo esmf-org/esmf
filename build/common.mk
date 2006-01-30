@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.148 2006/01/30 18:40:26 nscollins Exp $
+#  $Id: common.mk,v 1.149 2006/01/30 19:58:14 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1306,6 +1306,10 @@ run_system_tests_uni:  reqdir_tests
 
 tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 
+#
+# run the systests, either redirecting the stdout from the command line, or
+# relying on the mpirun script to redirect stdout from inside the batch script.
+#
 stest:
 	-@if [ $(ESMF_BATCH) = "true" ] ; then \
 	  echo $(MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)STest ; \
@@ -1661,6 +1665,28 @@ run_examples_uni:  reqdir_examples
 	$(MAKE) check_examples
 
 tree_run_examples_uni: $(EXAMPLES_RUN_UNI)
+
+#
+# run the examples, either redirecting the stdout from the command line, or
+# relying on the mpirun script to redirect stdout from inside the batch script.
+#
+exfrun:
+	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	  echo $(MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex ; \
+	  $(MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex ; \
+	else \
+	  echo $(MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex \> $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex.stdout 2\>\&1 ; \
+	  $(MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex > $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex.stdout 2>&1 ; \
+	fi 
+
+excrun:
+	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	  echo $(MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex ; \
+	  $(MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex ; \
+	else \
+	  echo $(MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex \> $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex.stdout 2\>\&1 ; \
+	  $(MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex > $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex.stdout 2>&1 ; \
+	fi 
 
 #
 # this target deletes only the example related files from the example subdir
