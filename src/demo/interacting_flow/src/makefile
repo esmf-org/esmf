@@ -1,6 +1,8 @@
-# $Id: makefile,v 1.5 2005/06/08 21:50:39 nscollins Exp $
+# $Id: makefile,v 1.6 2006/01/30 18:40:57 nscollins Exp $
 
-ALL: demos
+ALL: tree_build_demos
+
+run:  tree_run_demos
 
 CFLAGS    =
 FFLAGS    =
@@ -14,7 +16,7 @@ LIBBASE	  =
 LOCDIR	  = src/demo/interacting_flow/src
 
 
-DEMOS_BUILD    = $(ESMC_TESTDIR)/InteractingFlowApp
+DEMOS_BUILD    = $(ESMF_TESTDIR)/InteractingFlowApp
 
 # Object files other than main that the
 # system tests executable will depend on.
@@ -50,16 +52,28 @@ CLOBBERDIRS =
 RUN_InteractingFlowApp:
 	-@rm -f testlog stdlog.* logfile.* 
 	@echo "Ready to run the ESMF Interacting Flow Demo Application.  This may take several minutes."
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/InteractingFlowApp >$(ESMC_TESTDIR)/InteractingFlowApp.stdout
-	@echo "ESMF Interacting Flow Demo Application complete.  Please look in " $(ESMC_TESTDIR)/InteractingFlowApp.stdout " for status results."
+	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	  echo ${MPIRUN} -np 4 $(ESMF_TESTDIR)/InteractingFlowApp ; \
+	  ${MPIRUN} -np 4 $(ESMF_TESTDIR)/InteractingFlowApp ; \
+	else \
+	  echo ${MPIRUN} -np 4 $(ESMF_TESTDIR)/InteractingFlowApp \>$(ESMF_TESTDIR)/InteractingFlowApp.stdout ; \
+	  ${MPIRUN} -np 4 $(ESMF_TESTDIR)/InteractingFlowApp >$(ESMF_TESTDIR)/InteractingFlowApp.stdout ; \
+	fi ; 
+	@echo "ESMF Interacting Flow Demo Application complete.  Please look in " $(ESMF_TESTDIR)/InteractingFlowApp.stdout " for status results."
 	@echo "Look in " `pwd` " for output data files."
 
 
 RUN_InteractingFlowAppUNI:
 	-@rm -f testlog stdlog.* logfile.* 
 	@echo "Ready to run the ESMF Interacting Flow Demo Application.  This may take several minutes."
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/InteractingFlowApp >$(ESMC_TESTDIR)/InteractingFlowApp.stdout
-	@echo "ESMF Interacting Flow Demo Application complete.  Please look in " $(ESMC_TESTDIR)/InteractingFlowApp.stdout " for status results."
+	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	  echo ${MPIRUN} -np 1 $(ESMF_TESTDIR)/InteractingFlowApp ; \
+	  ${MPIRUN} -np 1 $(ESMF_TESTDIR)/InteractingFlowApp ; \
+	else \
+	  echo ${MPIRUN} -np 1 $(ESMF_TESTDIR)/InteractingFlowApp >$(ESMF_TESTDIR)/InteractingFlowApp.stdout ; \
+	  ${MPIRUN} -np 1 $(ESMF_TESTDIR)/InteractingFlowApp >$(ESMF_TESTDIR)/InteractingFlowApp.stdout ; \
+	fi ; 
+	@echo "ESMF Interacting Flow Demo Application complete.  Please look in " $(ESMF_TESTDIR)/InteractingFlowApp.stdout " for status results."
 	@echo "Look in " `pwd` " for output data files."
 
 

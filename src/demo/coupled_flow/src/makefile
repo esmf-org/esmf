@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2005/06/08 21:52:46 nscollins Exp $
+# $Id: makefile,v 1.13 2006/01/30 18:40:56 nscollins Exp $
 
 ALL: tree_build_demos
 
@@ -52,7 +52,13 @@ CLOBBERDIRS =
 RUN_CoupledFlowApp:
 	-@rm -f testlog stdlog.* logfile.* 
 	@echo "Ready to run the ESMF Coupled Flow Demo Application.  This may take several minutes."
-	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/CoupledFlowApp >$(ESMF_TESTDIR)/CoupledFlowApp.stdout
+	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	  echo ${MPIRUN} -np 4 $(ESMF_TESTDIR)/CoupledFlowApp ; \
+	  ${MPIRUN} -np 4 $(ESMF_TESTDIR)/CoupledFlowApp ; \
+	else \
+	  echo ${MPIRUN} -np 4 $(ESMF_TESTDIR)/CoupledFlowApp \>$(ESMF_TESTDIR)/CoupledFlowApp.stdout ; \
+	  ${MPIRUN} -np 4 $(ESMF_TESTDIR)/CoupledFlowApp >$(ESMF_TESTDIR)/CoupledFlowApp.stdout ; \
+	fi ; 
 	@echo "ESMF Coupled Flow Demo Application complete.  Please look in " $(ESMF_TESTDIR)/CoupledFlowApp.stdout " for status results."
 	@echo "Look in " `pwd` " for output data files."
 
@@ -60,7 +66,13 @@ RUN_CoupledFlowApp:
 RUN_CoupledFlowAppUNI:
 	-@rm -f testlog stdlog.* logfile.* 
 	@echo "Ready to run the ESMF Coupled Flow Demo Application.  This may take several minutes."
-	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/CoupledFlowApp >$(ESMF_TESTDIR)/CoupledFlowApp.stdout
+	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	  echo ${MPIRUN} -np 1 $(ESMF_TESTDIR)/CoupledFlowApp ; \
+	  ${MPIRUN} -np 1 $(ESMF_TESTDIR)/CoupledFlowApp ; \
+	else \
+	  echo ${MPIRUN} -np 1 $(ESMF_TESTDIR)/CoupledFlowApp >$(ESMF_TESTDIR)/CoupledFlowApp.stdout ; \
+	  ${MPIRUN} -np 1 $(ESMF_TESTDIR)/CoupledFlowApp >$(ESMF_TESTDIR)/CoupledFlowApp.stdout ; \
+	fi ; 
 	@echo "ESMF Coupled Flow Demo Application complete.  Please look in " $(ESMF_TESTDIR)/CoupledFlowApp.stdout " for status results."
 	@echo "Look in " `pwd` " for output data files."
 
