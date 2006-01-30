@@ -1,4 +1,4 @@
-! $Id: ESMF_StateLimitUTest.F90,v 1.2 2006/01/30 21:31:26 nscollins Exp $
+! $Id: ESMF_StateLimitUTest.F90,v 1.3 2006/01/30 22:25:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateLimitUTest.F90,v 1.2 2006/01/30 21:31:26 nscollins Exp $'
+      '$Id: ESMF_StateLimitUTest.F90,v 1.3 2006/01/30 22:25:13 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -460,7 +460,7 @@
       !NEX_UTest
       ! reconcile
       call ESMF_StateReconcile(state, vm=vm, rc=rc)
-      write(name, *) "Calling StateReconcile"
+      write(name, *) "Calling StateReconcile expecting failure"
       write(failMsg, *) "No Error return from StateReconcile"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
