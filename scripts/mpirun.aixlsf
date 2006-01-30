@@ -1,6 +1,6 @@
 #!/bin/ksh
 ##
-# $Id: mpirun.aixlsf,v 1.1 2006/01/30 18:11:24 nscollins Exp $
+# $Id: mpirun.aixlsf,v 1.2 2006/01/30 18:12:49 nscollins Exp $
 # This script provides an interface such that the simple command
 # mpirun -np # runs # copies of the program in parallel.
 
@@ -24,8 +24,7 @@ shift 2
 prog=$*
 
 # name of the run queue to use
-queue=share
-#queue=regular
+queue=regular
 
 echo executing: bsub -q ${queue} -n $num_procs -K -oo ${prog}.stdout -e lsf.errlog \"mpirun.lsf ${prog}\"
 
