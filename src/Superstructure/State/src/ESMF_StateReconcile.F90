@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.26 2006/01/30 22:58:01 theurich Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.27 2006/01/30 23:08:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.26 2006/01/30 22:58:01 theurich Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.27 2006/01/30 23:08:39 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -374,8 +374,7 @@
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) then
         
-print *, "i, offset, bufsize = ", i, offset, bufsize
-!!DEBUG "i, offset, bufsize = ", i, offset, bufsize
+!!DEBUG "error -- i, offset, bufsize = ", i, offset, bufsize
 
            ! TODO: this is a bit too late; if offset has moved past the end
            ! of the buffer, we've already written over memory that is not ours.
@@ -389,6 +388,7 @@ print *, "i, offset, bufsize = ", i, offset, bufsize
         return
         endif
 
+!!DEUBG "i, offset, bufsize = ", i, offset, bufsize
     enddo
        
     !! TODO: Is this safe?
@@ -712,7 +712,7 @@ print *, "i, offset, bufsize = ", i, offset, bufsize
                 !print *, "vm compare says ", ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) 
                 if ((si%idrecv(k) .eq. si%idsend(l)) &
                 .and. & 
-       (ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) .eq. ESMF_TRUE)) then 
+     (ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) .eq. ESMF_TRUE)) then 
                      ihave = .true.
 !!DEBUG "  objects match, no need to create proxy"
                      exit
