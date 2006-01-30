@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2005/04/13 23:03:06 nscollins Exp $ 
+# $Id: makefile,v 1.8 2006/01/30 18:11:24 nscollins Exp $ 
 
 
 ALL: tree_build_system_tests
@@ -54,10 +54,10 @@ CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 RUN_CompCreate:
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CompCreateSTest > $(ESMC_TESTDIR)/ESMF_CompCreateSTest.stdout
+	$(MAKE) TNAME=CompCreate NP=4 stest
 
 RUN_CompCreateUNI:
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CompCreateSTest > $(ESMC_TESTDIR)/ESMF_CompCreateSTest.stdout
+	$(MAKE) TNAME=CompCreate NP=1 stest
 
 
 

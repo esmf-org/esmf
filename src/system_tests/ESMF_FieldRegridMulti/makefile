@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2005/04/13 23:03:11 nscollins Exp $ 
+# $Id: makefile,v 1.6 2006/01/30 18:11:26 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -53,10 +53,10 @@ CLOBBERDIRS =
 
 
 RUN_FieldRegridMulti:
-	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_FieldRegridMultiSTest >$(ESMC_TESTDIR)/ESMF_FieldRegridMultiSTest.stdout
+	$(MAKE) TNAME=FieldRegridMulti NP=6 stest
 
 RUN_FieldRegridMultiUNI:
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldRegridMultiSTest >$(ESMC_TESTDIR)/ESMF_FieldRegridMultiSTest.stdout
+	$(MAKE) TNAME=FieldRegridMulti NP=1 stest
 
 
 

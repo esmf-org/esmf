@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.67 2005/07/01 21:12:12 nscollins Exp $
+# $Id: makefile,v 1.68 2006/01/30 18:11:21 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -77,6 +77,7 @@ script_info:
 	-@echo "ESMF_COMM: $(ESMF_COMM)"
 	-@echo "ESMF_SITE: $(ESMF_SITE)"
 	-@echo "ESMF_EXHAUSTIVE: $(ESMF_EXHAUSTIVE)"
+	-@echo "ESMF_BATCHQUEUE: $(ESMF_BATCHQUEUE)"
 	-@echo "ESMF_PTHREADS: $(ESMF_PTHREADS)"
 	-@if [ -n "$(ESMF_TESTWITHTHREADS)" ] ; then \
 	  echo "ESMF_TESTWITHTHREADS: $(ESMF_TESTWITHTHREADS)" ; fi

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2005/04/13 23:03:13 nscollins Exp $ 
+# $Id: makefile,v 1.8 2006/01/30 18:11:27 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -53,10 +53,10 @@ CLOBBERDIRS =
 
 
 RUN_SimpleCoupling:
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_SimpleCouplingSTest >$(ESMC_TESTDIR)/ESMF_SimpleCouplingSTest.stdout
+	$(MAKE) TNAME=SimpleCoupling NP=4 stest
 
 RUN_SimpleCouplingUNI:
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_SimpleCouplingSTest >$(ESMC_TESTDIR)/ESMF_SimpleCouplingSTest.stdout
+	$(MAKE) TNAME=SimpleCoupling NP=1 stest
 
 
 

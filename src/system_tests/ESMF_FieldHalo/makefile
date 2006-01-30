@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2005/03/01 21:07:58 nscollins Exp $ 
+# $Id: makefile,v 1.6 2006/01/30 18:11:25 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -41,12 +41,10 @@ CLOBBERDIRS =
 
 
 RUN_FieldHalo:
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FieldHaloSTest > $(ESMC_TESTDIR)/ESMF_FieldHaloSTest.stdout
+	$(MAKE) TNAME=FieldHalo NP=4 stest
 
 RUN_FieldHaloUNI:
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldHaloSTest > $(ESMC_TESTDIR)/ESMF_FieldHaloSTest.stdout
+	$(MAKE) TNAME=FieldHalo NP=1 stest
 
-FieldHalo.rm:
-	echo "FieldHalo.rm target called here."
 
 

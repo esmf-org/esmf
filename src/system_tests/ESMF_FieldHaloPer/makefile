@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2005/03/01 21:08:05 nscollins Exp $ 
+# $Id: makefile,v 1.6 2006/01/30 18:11:25 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -41,10 +41,10 @@ CLOBBERDIRS =
 
 
 RUN_FieldHaloPeriodic:
-	-${MPIRUN} -np 12 $(ESMC_TESTDIR)/ESMF_FieldHaloPerSTest > $(ESMC_TESTDIR)/ESMF_FieldHaloPerSTest.stdout
+	$(MAKE) TNAME=FieldHaloPer NP=12 stest
 
 RUN_FieldHaloPeriodicUNI:
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldHaloPerSTest > $(ESMC_TESTDIR)/ESMF_FieldHaloPerSTest.stdout
+	$(MAKE) TNAME=FieldHaloPer NP=1 stest
 
 
 

@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.146 2006/01/28 00:01:41 nscollins Exp $
+#  $Id: common.mk,v 1.147 2006/01/30 18:11:23 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -101,6 +101,12 @@ endif
 # If not set, the default for EXHAUSTIVE is OFF
 ifndef ESMF_EXHAUSTIVE
 export ESMF_EXHAUSTIVE = OFF
+endif
+
+
+# If not set, the default for BATCHQUEUE is default
+ifndef ESMF_BATCHQUEUE
+export ESMF_BATCHQUEUE = default
 endif
 
 
@@ -1295,6 +1301,15 @@ run_system_tests_uni:  reqdir_tests
 
 tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 
+stest:
+	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	  echo $(MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)STest ; \
+	  $(MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)STest ; \
+	else \
+	  echo $(MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)STest 1> $(ESMF_TESTDIR)/ESMF_$(TNAME)STest.stdout 2>&1 ; \
+	  $(MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)STest 1> $(ESMF_TESTDIR)/ESMF_$(TNAME)STest.stdout 2>&1 ; \
+	fi 
+
 #
 # this target deletes only the system test related files from the test subdir
 #
@@ -1505,16 +1520,28 @@ check_unit_tests:
 # the cat step.)
 #
 ftest:
-	-cd $(ESMF_TESTDIR) ; \
+	-@cd $(ESMF_TESTDIR) ; \
 	$(RM) ./PET*$(TNAME)UTest.Log ; \
-	$(MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
+	if [ $(ESMF_BATCH) = "true" ] ; then \
+	  echo $(MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest ; \
+	  $(MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest ; \
+	else \
+	  echo $(MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
+	  $(MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
+	fi ; \
 	cat ./PET*$(TNAME)UTest.Log > ./ESMF_$(TNAME)UTest.Log ; \
 	$(RM) ./PET*$(TNAME)UTest.Log
 
 ctest:
-	-cd $(ESMF_TESTDIR) ; \
+	-@cd $(ESMF_TESTDIR) ; \
 	$(RM) ./PET*$(TNAME)UTest.Log ; \
-	$(MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest 1> ./ESMC_$(TNAME)UTest.stdout 2>&1 ; \
+	if [ $(ESMF_BATCH) = "true" ] ; then \
+	  echo $(MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest ; \
+	  $(MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest ; \
+	else \
+	  echo $(MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest 1> ./ESMC_$(TNAME)UTest.stdout 2>&1 ; \
+	  $(MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest 1> ./ESMC_$(TNAME)UTest.stdout 2>&1 ; \
+	fi ; \
 	cat ./PET*$(TNAME)UTest.Log > ./ESMC_$(TNAME)UTest.Log ; \
 	$(RM) ./PET*$(TNAME)UTest.Log
 

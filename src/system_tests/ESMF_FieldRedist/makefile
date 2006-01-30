@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2005/03/01 21:08:12 nscollins Exp $ 
+# $Id: makefile,v 1.5 2006/01/30 18:11:25 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -38,10 +38,10 @@ CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 RUN_FieldRedist:
-	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_FieldRedistSTest > $(ESMC_TESTDIR)/ESMF_FieldRedistSTest.stdout
+	$(MAKE) TNAME=FieldRedist NP=6 stest
 
 RUN_FieldRedistUNI:
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldRedistSTest > $(ESMC_TESTDIR)/ESMF_FieldRedistSTest.stdout
+	$(MAKE) TNAME=FieldRedist NP=1 stest
 
 
 

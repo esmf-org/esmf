@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2005/03/01 21:07:38 nscollins Exp $ 
+# $Id: makefile,v 1.7 2006/01/30 18:11:24 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -41,10 +41,10 @@ CLOBBERDIRS =
 ESMF_CplOnExclDEsSTest.o:  user_model1.o user_model2.o user_coupler.o
 
 RUN_CouplingOnExclDEs:
-	-${MPIRUN} -np 8 $(ESMC_TESTDIR)/ESMF_CplOnExclDEsSTest >$(ESMC_TESTDIR)/ESMF_CplOnExclDEsSTest.stdout
+	$(MAKE) TNAME=CplOnExclDEs NP=8 stest
 
 RUN_CouplingOnExclDEsUNI:
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CplOnExclDEsSTest >$(ESMC_TESTDIR)/ESMF_CplOnExclDEsSTest.stdout
+	$(MAKE) TNAME=CplOnExclDEs NP=1 stest
 
 
 

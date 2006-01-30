@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2005/04/13 23:03:07 nscollins Exp $ 
+# $Id: makefile,v 1.7 2006/01/30 18:11:25 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -52,10 +52,10 @@ CLOBBERDIRS =
 
 
 RUN_FieldExcl:
-	-${MPIRUN} -np 8 $(ESMC_TESTDIR)/ESMF_FieldExclSTest >$(ESMC_TESTDIR)/ESMF_FieldExclSTest.stdout
+	$(MAKE) TNAME=FieldExcl NP=8 stest
 
 RUN_FieldExclUNI:
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldExclSTest >$(ESMC_TESTDIR)/ESMF_FieldExclSTest.stdout
+	$(MAKE) TNAME=FieldExcl NP=1 stest
 
 
 

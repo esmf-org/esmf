@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2005/06/28 19:56:50 nscollins Exp $ 
+# $Id: makefile,v 1.8 2006/01/30 18:11:26 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -43,10 +43,10 @@ CLOBBERDIRS =
 
 
 RUN_FlowComp:
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FlowCompSTest >$(ESMC_TESTDIR)/ESMF_FlowCompSTest.stdout
+	$(MAKE) TNAME=FlowComp NP=4 stest
 
 RUN_FlowCompUNI:
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FlowCompSTest >$(ESMC_TESTDIR)/ESMF_FlowCompSTest.stdout
+	$(MAKE) TNAME=FlowComp NP=1 stest
 
 
 

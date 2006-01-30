@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2005/08/11 17:42:33 theurich Exp $ 
+# $Id: makefile,v 1.2 2006/01/30 18:11:25 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -54,7 +54,7 @@ RUN_FieldExclMPMD:
 	-${MPIMPMDRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldExclMPMDSTestA : -np 1 $(ESMC_TESTDIR)/ESMF_FieldExclMPMDSTestB : -np 1 $(ESMC_TESTDIR)/ESMF_FieldExclMPMDSTestA : -np 1 $(ESMC_TESTDIR)/ESMF_FieldExclMPMDSTestB : -np 1 $(ESMC_TESTDIR)/ESMF_FieldExclMPMDSTestA : -np 1 $(ESMC_TESTDIR)/ESMF_FieldExclMPMDSTestB : -np 2 $(ESMC_TESTDIR)/ESMF_FieldExclMPMDSTestA >$(ESMC_TESTDIR)/ESMF_FieldExclMPMDSTest.stdout
 
 RUN_FieldExclUNI:
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldExclSTest >$(ESMC_TESTDIR)/ESMF_FieldExclSTest.stdout
+	$(MAKE) TNAME=FieldExcl NP=1 stest
 
 
 

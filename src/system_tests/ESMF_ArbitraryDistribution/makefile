@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2005/07/01 17:26:59 jwolfe Exp $ 
+# $Id: makefile,v 1.2 2006/01/30 18:11:24 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -49,11 +49,10 @@ CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 RUN_ArbitraryDistribution:
-	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_ArbitraryDistSTest > $(ESMC_TESTDIR)/ESMF_ArbitraryDistSTest.stdout
+	$(MAKE) TNAME=ArbitraryDist NP=6 stest
 
 RUN_ArbitraryDistributionUNI:
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ArbitraryDistSTest > $(ESMC_TESTDIR)/ESMF_ArbitraryDistSTest.stdout
-
+	$(MAKE) TNAME=ArbitraryDist NP=1 stest
 
 
 

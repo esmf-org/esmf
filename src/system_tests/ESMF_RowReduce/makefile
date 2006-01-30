@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2005/03/01 21:09:02 nscollins Exp $ 
+# $Id: makefile,v 1.6 2006/01/30 18:11:27 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -38,10 +38,10 @@ CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 RUN_RowReduce:
-	-${MPIRUN} -np 2 $(ESMC_TESTDIR)/ESMF_RowReduceSTest > $(ESMC_TESTDIR)/ESMF_RowReduceSTest.stdout
+	$(MAKE) TNAME=RowReduce NP=2 stest
 
 RUN_RowReduceUNI:
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_RowReduceSTest > $(ESMC_TESTDIR)/ESMF_RowReduceSTest.stdout
+	$(MAKE) TNAME=RowReduce NP=1 stest
 
 
 

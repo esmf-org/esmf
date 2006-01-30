@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2005/03/01 21:08:58 nscollins Exp $ 
+# $Id: makefile,v 1.5 2006/01/30 18:11:27 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -42,10 +42,10 @@ CLOBBERDIRS =
 
 
 RUN_MergeCoupling:
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_MergeCouplingSTest >$(ESMC_TESTDIR)/ESMF_MergeCouplingSTest.stdout
+	$(MAKE) TNAME=MergeCoupling NP=4 stest
 
 RUN_MergeCouplingUNI:
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_MergeCouplingSTest >$(ESMC_TESTDIR)/ESMF_MergeCouplingSTest.stdout
+	$(MAKE) TNAME=MergeCoupling NP=1 stest
 
 
 

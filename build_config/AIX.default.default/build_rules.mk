@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.23 2005/04/22 19:46:36 nscollins Exp $
+#  $Id: build_rules.mk,v 1.24 2006/01/30 18:11:24 nscollins Exp $
 #
 #  AIX.default.default
 #
@@ -52,7 +52,13 @@ endif
 ifeq ($(ESMF_COMM),mpi)
 MPI_INCLUDE    += 
 MPI_LIB        += -lmpi_r
+ifeq ($(ESMF_BATCHQUEUE),lsf)
+MPIRUN         = ${ESMF_TOP_DIR}/scripts/mpirun.aixlsf
+export ESMF_BATCH := true
+else
 MPIRUN         = ${ESMF_TOP_DIR}/scripts/mpirun.rs6000_sp
+export ESMF_BATCH := false
+endif
 endif
 
 

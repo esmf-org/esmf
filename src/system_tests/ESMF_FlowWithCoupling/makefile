@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2005/04/13 23:03:13 nscollins Exp $ 
+# $Id: makefile,v 1.9 2006/01/30 18:11:26 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -52,9 +52,9 @@ CLEANFILES  = $(SYSTEM_TESTS_BUILD) SIE* V_velocity.* U_velocity.* FLAG.*
 CLOBBERDIRS =
 
 RUN_FlowWithCoupling:
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest >$(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest.stdout
+	$(MAKE) TNAME=FlowWithCoupling NP=4 stest
 
 RUN_FlowWithCouplingUNI:
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest >$(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest.stdout
+	$(MAKE) TNAME=FlowWithCoupling NP=1 stest
 
 
