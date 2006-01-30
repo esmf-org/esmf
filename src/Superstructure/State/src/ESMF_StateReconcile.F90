@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.27 2006/01/30 23:08:39 nscollins Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.28 2006/01/30 23:13:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.27 2006/01/30 23:08:39 nscollins Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.28 2006/01/30 23:13:53 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -262,7 +262,6 @@
     call ESMF_VMGet(vm, localPet=mypet, rc=rc)
 
     ! Get the VM ID of the state to use as a dummy in the code below
-    call ESMF_VMIdCreate(VMdummyID)
     call c_ESMC_GetVMId(state%statep, VMdummyID, localrc)
 
     ! make some initial space
@@ -392,7 +391,6 @@
     enddo
        
     !! TODO: Is this safe?
-    !!call ESMF_VMIdDestroy(VMdummyID)
     if (present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_StateInfoBuild
