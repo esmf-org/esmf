@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.8 2005/03/01 20:57:12 nscollins Exp $
-
-# makefile template for the examples directory.
+# $Id: makefile,v 1.9 2006/01/30 20:10:06 nscollins Exp $
 
 ALL: build_examples
+
+run: run_examples
 
 CFLAGS    =
 FFLAGS    =
@@ -36,8 +36,8 @@ CLEANFILES  = $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
 run_ESMF_ArrayDataMapEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArrayDataMapEx > $(ESMF_EXDIR)/ESMF_ArrayDataMapEx.stdout
+	$(MAKE) EXNAME=ArrayDataMap NP=4 exfrun
 
 run_ESMF_ArrayDataMapEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArrayDataMapEx > $(ESMF_EXDIR)/ESMF_ArrayDataMapEx.stdout
+	$(MAKE) EXNAME=ArrayDataMap NP=1 exfrun
 

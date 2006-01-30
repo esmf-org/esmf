@@ -1,6 +1,8 @@
-# $Id: makefile,v 1.8 2005/03/01 20:56:32 nscollins Exp $ 
+# $Id: makefile,v 1.9 2006/01/30 20:10:05 nscollins Exp $ 
 
 ALL:  build_examples
+
+run:  run_examples
 
 CFLAGS    =
 FFLAGS    =
@@ -43,20 +45,18 @@ CLOBBERDIRS =
 # ESMF_ArrayCreateEx
 #
 run_ESMF_ArrayCreateEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArrayCreateEx > $(ESMF_EXDIR)/ESMF_ArrayCreateEx.stdout
-
+	$(MAKE) EXNAME=ArrayCreate NP=4 exfrun
 
 run_ESMF_ArrayCreateEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArrayCreateEx > $(ESMF_EXDIR)/ESMF_ArrayCreateEx.stdout
+	$(MAKE) EXNAME=ArrayCreate NP=1 exfrun
 
 
 #
 # ESMF_ArrayGetEx
 #
 run_ESMF_ArrayGetEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArrayGetEx > $(ESMF_EXDIR)/ESMF_ArrayGetEx.stdout
-
+	$(MAKE) EXNAME=ArrayGet NP=4 exfrun
 
 run_ESMF_ArrayGetEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArrayGetEx > $(ESMF_EXDIR)/ESMF_ArrayGetEx.stdout
+	$(MAKE) EXNAME=ArrayGet NP=1 exfrun
 

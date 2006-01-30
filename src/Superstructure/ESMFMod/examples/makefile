@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.6 2005/03/01 21:06:34 nscollins Exp $
-
-# makefile template for the examples directory.
+# $Id: makefile,v 1.7 2006/01/30 20:10:10 nscollins Exp $
 
 ALL:   build_examples
+
+run: run_examples
 
 CFLAGS    =
 FFLAGS    =
@@ -16,13 +16,10 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Superstructure/ESMFMod/examples
 
-TESTEXAMPLES_3  = \
-	ESMF_BaseEx RUN_ESMF_BaseEx ESMF_BaseEx.rm
 
-TESTEXAMPLES_9  = \
-	ESMF_BaseEx RUN_ESMF_BaseExUNI ESMF_BaseEx.rm
-
-EXAMPLESF       = ESMF_BaseEx.F90
+EXAMPLES_BUILD =
+EXAMPLES_RUN =
+EXAMPLES_RUN_UNI =
 
 CLEANDIRS   = 
 CLEANFILES  = $(EXAMPLES_BUILD)
@@ -32,17 +29,5 @@ include ${ESMF_DIR}/makefile
 
 DIRS = 
 
-ESMF_BaseDir:
-	mkdir -p ${ESMC_TESTDIR}
-
-ESMF_BaseEx: ESMF_BaseEx.o  chkopts
-	${F90CXXLD} -g -o ESMF_BaseEx ESMF_BaseEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
-	${RM} ESMF_BaseEx.o
-
-RUN_ESMF_BaseEx:
-	-${MPIRUN} -np 4 ESMF_BaseEx > ESMF_BaseEx.stdout
-
-RUN_ESMF_BaseExUNI:
-	-${MPIRUN} -np 1 ESMF_BaseEx > ESMF_BaseEx.stdout
 
 

@@ -1,6 +1,8 @@
-# $Id: makefile,v 1.7 2005/03/01 20:58:35 nscollins Exp $
+# $Id: makefile,v 1.8 2006/01/30 20:10:06 nscollins Exp $
 
 ALL:  build_examples
+
+run: run_examples
 
 CFLAGS    =
 FFLAGS    =
@@ -37,8 +39,8 @@ CLOBBERDIRS =
 
 
 run_ESMF_BundleCommEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_BundleCommEx > $(ESMF_EXDIR)/ESMF_BundleCommEx.stdout
+	$(MAKE) EXNAME=BundleComm NP=4 exfrun
 
 run_ESMF_BundleCommEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_BundleCommEx > $(ESMF_EXDIR)/ESMF_BundleCommEx.stdout
+	$(MAKE) EXNAME=BundleComm NP=1 exfrun
 

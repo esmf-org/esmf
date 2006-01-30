@@ -1,34 +1,8 @@
-# $Id: makefile,v 1.22 2005/08/30 16:28:51 nscollins Exp $ 
+# $Id: makefile,v 1.23 2006/01/30 20:10:09 nscollins Exp $ 
 
 ALL:  build_examples
 
-#
-#  makefile for examples directory.
-# 
-# All of the makefile targets and rules for building and linking
-# examples are located in the build system makefile fragments.
-# The run targets are located in this makefile.
-#
-# Applications and their standard output files are created in
-# $(ESMF_EXDIR).  $(ESMF_EXDIR) is defined in build/common.mk.
-#
-# Targets:
-#
-#    examples:         Will first build the ESMF library, then will 
-#                      build the example applications and finally 
-#                      will run the examples
-#
-#    examples_uni:     Same as examples target, but runs examples on  
-#                      a single processor.
-#
-#    build_examples:   Builds example applications in $(ESMF_EXDIR)
-#
-#    run_examples:     Runs applications built from source in this
-#                      directory.  Output is saved in file in $(ESMF_EXDIR).
-#
-#    run_examples_uni: Same as run_examples target, but runs examples on 
-#                      only one processor.
-#
+run: run_examples
 
 CFLAGS    =
 FFLAGS    =
@@ -42,20 +16,6 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Superstructure/Component/examples
 
-#
-# Set EXAMPLES_BUILD to full path of the examples to be
-# built.  The compiling from source code to object code is 
-# handle by the same compile rules used to build the objects 
-# used in the library. The linking of the objects is done with 
-# specific linking rules in build/common.mk.
-#
-# The examples executable files follow this naming convention:
-#
-#      $(ESMF_EXDIR)/ESM?_<Comp>Ex
-#
-# Where the ? is ether F or C.  The example linking rules
-# depend on this naming convention being followed.
-#
 
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_AppMainEx \
                  $(ESMF_EXDIR)/ESMC_CplEx \
@@ -65,12 +25,6 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_AppMainEx \
                  $(ESMF_EXDIR)/ESMF_GCompEx \
                  $(ESMF_EXDIR)/ESMF_InternalStateEx 
 
-#
-# List the example run targets in EXAMPLES_RUN and 
-# EXAMPLES_RUN_UNI.  All of the run targets should be defined
-# in this makefile.
-#
-
 EXAMPLES_RUN   = run_ESMC_AppMainEx \
                  run_ESMC_CplEx \
                  run_ESMC_GCompEx \
@@ -78,7 +32,6 @@ EXAMPLES_RUN   = run_ESMC_AppMainEx \
                  run_ESMF_CplEx \
                  run_ESMF_GCompEx \
                  run_ESMF_InternalStateEx 
-
 
 EXAMPLES_RUN_UNI = run_ESMC_AppMainEx_uni \
                    run_ESMC_CplEx_uni \
@@ -102,65 +55,66 @@ CLOBBERDIRS =
 #
 run_ESMC_AppMainEx:
 	cp -f setup.rc $(ESMF_EXDIR)
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_AppMainEx > $(ESMF_EXDIR)/ESMC_AppMainEx.stdout
+	$(MAKE) EXNAME=AppMain NP=4 excrun
 
 run_ESMC_AppMainEx_uni:
 	cp -f setup.rc $(ESMF_EXDIR)
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_AppMainEx > $(ESMF_EXDIR)/ESMC_AppMainEx.stdout
+	$(MAKE) EXNAME=AppMain NP=1 excrun
 
 #
 # ESMC_CplEx
 #
 run_ESMC_CplEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_CplEx > $(ESMF_EXDIR)/ESMC_CplEx.stdout
+	$(MAKE) EXNAME=Cpl NP=4 excrun
 
 run_ESMC_CplEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_CplEx > $(ESMF_EXDIR)/ESMC_CplEx.stdout
+	$(MAKE) EXNAME=Cpl NP=1 excrun
 
 #
 # ESMC_GCompEx
 #
 run_ESMC_GCompEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_GCompEx > $(ESMF_EXDIR)/ESMC_GCompEx.stdout
+	$(MAKE) EXNAME=GComp NP=4 excrun
 
 run_ESMC_GCompEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_GCompEx > $(ESMF_EXDIR)/ESMC_GCompEx.stdout
+	$(MAKE) EXNAME=GComp NP=1 excrun
 
 #
 # ESMF_AppMainEx
 #
 run_ESMF_AppMainEx:
 	cp -f setup.rc $(ESMF_EXDIR)
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_AppMainEx > $(ESMF_EXDIR)/ESMF_AppMainEx.stdout
+	$(MAKE) EXNAME=AppMain NP=4 exfrun
 
 run_ESMF_AppMainEx_uni:
 	cp -f setup.rc $(ESMF_EXDIR)
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_AppMainEx > $(ESMF_EXDIR)/ESMF_AppMainEx.stdout
+	$(MAKE) EXNAME=AppMain NP=1 exfrun
 
 #
 # ESMF_CplEx
 #
 run_ESMF_CplEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_CplEx > $(ESMF_EXDIR)/ESMF_CplEx.stdout
+	$(MAKE) EXNAME=Cpl NP=4 exfrun
 
 run_ESMF_CplEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_CplEx > $(ESMF_EXDIR)/ESMF_CplEx.stdout
+	$(MAKE) EXNAME=Cpl NP=1 exfrun
 
 #
 # ESMF_GCompEx
 #
 run_ESMF_GCompEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_GCompEx > $(ESMF_EXDIR)/ESMF_GCompEx.stdout
+	$(MAKE) EXNAME=GComp NP=4 exfrun
 
 run_ESMF_GCompEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_GCompEx > $(ESMF_EXDIR)/ESMF_GCompEx.stdout
+	$(MAKE) EXNAME=GComp NP=1 exfrun
 
 #
 # ESMF_InternalStateEx
 #
 run_ESMF_InternalStateEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_InternalStateEx > $(ESMF_EXDIR)/ESMF_InternalStateEx.stdout
+	$(MAKE) EXNAME=InternalState NP=4 exfrun
 
 run_ESMF_InternalStateEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_InternalStateEx > $(ESMF_EXDIR)/ESMF_InternalStateEx.stdout
+	$(MAKE) EXNAME=InternalState NP=1 exfrun
+
 
