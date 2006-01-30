@@ -1,4 +1,4 @@
-! $Id: ESMF_StateLimitUTest.F90,v 1.1 2006/01/26 23:13:29 nscollins Exp $
+! $Id: ESMF_StateLimitUTest.F90,v 1.2 2006/01/30 21:31:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2006, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateLimitUTest.F90,v 1.1 2006/01/26 23:13:29 nscollins Exp $'
+      '$Id: ESMF_StateLimitUTest.F90,v 1.2 2006/01/30 21:31:26 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -60,6 +60,7 @@
       type(ESMF_Field) :: sfield(20), dfield(25)
       type(ESMF_Bundle) :: bundle(2)
       type(ESMF_VM) :: vm
+      character(ESMF_MAXSTR) :: placeholders(5)
 
       type(ESMF_State) :: state
 
@@ -381,13 +382,38 @@
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! and still more stuff
+      ! and more stuff
 
       call ESMF_StateAddField(state, &
                               5, fieldlist=sfield(1:5), &
                               rc=rc)
       write(name, *) "Adding Field(s) to State"
       write(failMsg, *) "Unable to add Field(s) to State"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! reconcile
+      call ESMF_StateReconcile(state, vm=vm, rc=rc)
+      write(name, *) "Calling StateReconcile"
+      write(failMsg, *) "Error return from StateReconcile"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! and more stuff
+      placeholders(1) = "Temperature Field"
+      placeholders(2) = "Density Field"
+      placeholders(3) = "U Field"
+      placeholders(4) = "V Field"
+      placeholders(5) = "Energy Field"
+
+      call ESMF_StateAddNameOnly(state, &
+                                 5, namelist=placeholders(1:5), &
+                                 rc=rc)
+      write(name, *) "Adding Placeholder Name(s) to State"
+      write(failMsg, *) "Unable to add Placeholder Name(s) to State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
