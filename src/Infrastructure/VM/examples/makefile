@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2006/01/30 20:10:09 nscollins Exp $
+# $Id: makefile,v 1.17 2006/01/30 21:36:28 nscollins Exp $
 
 ALL: build_examples
 
@@ -75,7 +75,7 @@ run_ESMF_VMScatterVMGatherEx_uni:
 	echo "PASS: ESMF_VMScatterVMGatherEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_VMScatterVMGatherEx.stdout
 
 run_ESMF_VMAllFullReduceEx:
-	$(MAKE) EXNAME=VMAllRullReduce NP=4 exfrun
+	$(MAKE) EXNAME=VMAllFullReduce NP=4 exfrun
 
 run_ESMF_VMAllFullReduceEx_uni:
 	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx > $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx.stdout
