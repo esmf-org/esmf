@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.24 2005/12/01 20:17:30 nscollins Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.25 2006/01/30 22:01:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -53,7 +53,7 @@
       use ESMF_StateMod
       implicit none
 
-      integer :: bufsize = 8192
+      integer :: bufsize = 81920
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.24 2005/12/01 20:17:30 nscollins Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.25 2006/01/30 22:01:39 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -347,32 +347,48 @@
              si%idsend(i) = -1
              ! TODO: decide what this should be.
              si%vmidsend(i) = VMdummyID
-             si%objsend(i) = 0
+             si%objsend(i) = ESMF_STATEITEM_NAME%ot
              bptr => si%blindsend(:,i)
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
-!!DEBUG "serialized placeholder, name=", stateitem%namep
+!!DEBUG "serialized placeholder, name=", trim(stateitem%namep)
              localrc = ESMF_SUCCESS
            case (ESMF_STATEITEM_INDIRECT%ot)
              si%idsend(i) = -2
              si%vmidsend(i) = VMdummyID
-             si%objsend(i) = 0
+             si%objsend(i) = ESMF_STATEITEM_NAME%ot
              bptr => si%blindsend(:,i)
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
-!!DEBUG "serialized field-in-bundle, name=", stateitem%namep
+!!DEBUG "serialized field-in-bundle, name=", trim(stateitem%namep)
              localrc = ESMF_SUCCESS
            case (ESMF_STATEITEM_UNKNOWN%ot)
-            print *, "WARNING: unknown type"
              si%idsend(i) = -3
              si%vmidsend(i) = VMdummyID
-             si%objsend(i) = 0
+             si%objsend(i) = ESMF_STATEITEM_NAME%ot
              bptr => si%blindsend(:,i)
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
-!!DEBUG "serialized unknown type, name=", stateitem%namep
+!!DEBUG "serialized unknown type, name=", trim(stateitem%namep)
              localrc = ESMF_SUCCESS
         end select
+
         if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rc)) then
+        
+print *, "i, offset, bufsize = ", i, offset, bufsize
+!!DEBUG "i, offset, bufsize = ", i, offset, bufsize
+
+           ! TODO: this is a bit too late; if offset has moved past the end
+           ! of the buffer, we've already written over memory that is not ours.
+           ! but better late than never??
+           if (offset > bufsize) then
+               call ESMF_LogMsgSetError(ESMF_RC_INTNRL_INCONS, &
+                         "Too many objects in State for Reconcile to handle", &
+                                        ESMF_CONTEXT, rc)
+           endif
+        ! either way, return here.
+        return
+        endif
+
     enddo
        
     !! TODO: Is this safe?
@@ -506,7 +522,7 @@
     type(ESMF_Bundle) :: bundle
     type(ESMF_Field) :: field
     type(ESMF_Array) :: array
-    character(len=bufsize) :: thisname
+    character(len=ESMF_MAXSTR) :: thisname
     integer(ESMF_KIND_I4), pointer, dimension(:) :: bptr
     logical :: ihave
     type(ESMF_VMId) :: temp_vmid
