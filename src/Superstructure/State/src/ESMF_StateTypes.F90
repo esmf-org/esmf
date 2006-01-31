@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.7 2006/01/30 21:32:49 nscollins Exp $
+! $Id: ESMF_StateTypes.F90,v 1.8 2006/01/31 15:53:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,6 +77,7 @@
          integer :: ot
       end type
 
+      ! keep these numbers distinct from the 30 or so esmf object types.
       type(ESMF_StateItemType), parameter :: &
                 ESMF_STATEITEM_BUNDLE = ESMF_StateItemType(101), &
                 ESMF_STATEITEM_FIELD = ESMF_StateItemType(102), &
@@ -257,7 +258,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.7 2006/01/30 21:32:49 nscollins Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.8 2006/01/31 15:53:51 nscollins Exp $'
 
 !==============================================================================
 ! 
