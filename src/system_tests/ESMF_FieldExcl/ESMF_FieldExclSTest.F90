@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.22 2006/01/31 15:47:22 nscollins Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.23 2006/01/31 17:12:48 nscollins Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -99,26 +99,19 @@
    
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-    comp1 = ESMF_GridCompCreate(vm, cname1, &
-                                petList=(/ 6,2,4,0 /), rc=rc)
+    comp1 = ESMF_GridCompCreate(vm, cname1, petList=(/ 6,2,4,0 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     !print *, "Created component ", trim(cname1), "rc =", rc
-    call ESMF_GridCompGet(comp1, vm=vmsub1, rc=rc)
-    !  call ESMF_GridCompPrint(comp1, "", rc)
 
     cname2 = "user model 2"
-    comp2 = ESMF_GridCompCreate(vm, cname2, &
-                                petList=(/ 5,1,3 /), rc=rc)
+    comp2 = ESMF_GridCompCreate(vm, cname2, petList=(/ 5,1,3 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     !print *, "Created component ", trim(cname2), "rc =", rc
-    call ESMF_GridCompGet(comp2, vm=vmsub2, rc=rc)
-    !  call ESMF_GridCompPrint(comp2, "", rc)
 
     cplname = "user one-way coupler"
     cpl = ESMF_CplCompCreate(vm, cplname, petList=(/ 0,1,2,3,4,5,6 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     !print *, "Created component ", trim(cplname), ", rc =", rc
-    !  call ESMF_CplCompPrint(cpl, "", rc)
 
     !print *, "Comp Creates finished"
 
