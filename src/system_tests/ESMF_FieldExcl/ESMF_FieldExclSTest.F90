@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.21 2005/08/09 06:49:52 theurich Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.22 2006/01/31 15:47:22 nscollins Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -259,10 +259,6 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
     !print *, "Coupler Finalize finished, rc =", rc
 
-
-    ! Figure out our local PET id for message below.
-    call ESMF_VMGet(vm, localPet=pet_id, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
 
     !print *, "Comp Finalize returned"
 
