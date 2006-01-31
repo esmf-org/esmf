@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.24 2006/01/17 22:15:47 jwolfe Exp $
+# $Id: build_rules.mk,v 1.25 2006/01/31 15:43:10 nscollins Exp $
 #
 #  Linux.pgi.default
 #
@@ -108,12 +108,12 @@ F_FIXNOCPP         = -Mnofreeform
 # use LD_LIBRARY_PATH to find settings; this is just here as a default
 # if the variable is unset
 ifneq ($(origin LD_LIBRARY_PATH), environment)
-LIB_PATHS   = -L/opt/pgi-5.2/linux86/5.2/lib
-LD_PATHS    = $(C_SLFLAG)/opt/pgi/pgi-5.2/linux86/5.2/lib
+C_LIB_PATHS   = -L/opt/pgi-5.2/linux86/5.2/lib
+C_LD_PATHS    = $(C_SLFLAG)/opt/pgi/pgi-5.2/linux86/5.2/lib
 endif
 
-C_F90CXXLIBS       = $(LD_PATHS) $(LIB_PATHS) $(PGI_C_LIB_NEEDED) -lrt -lC -lc
-C_CXXF90LIBS       = $(LD_PATHS) $(LIB_PATHS) $(PGI_C_LIB_NEEDED) -lrt -lC \
+C_F90CXXLIBS       = $(PGI_C_LIB_NEEDED) -lrt -lC -lc
+C_CXXF90LIBS       = $(PGI_C_LIB_NEEDED) -lrt -lC \
                      -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
 ###############################################################################
 
