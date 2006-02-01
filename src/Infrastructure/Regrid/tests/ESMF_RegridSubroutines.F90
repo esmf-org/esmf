@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.9 2006/01/18 18:06:24 svasquez Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.10 2006/02/01 16:18:06 svasquez Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -149,7 +149,7 @@ contains
 		testMsg = trim(" Source Halo               : " // testArgs%srcHaloString)
 		print *, testMsg
 		call ESMF_LogWrite(testMsg, ESMF_LOG_INFO)
-		testMsg = trim(" Dest.  Halo               : " // testArgs%srcHaloString)
+		testMsg = trim(" Destination  Halo         : " // testArgs%dstHaloString)
 		call ESMF_LogWrite(testMsg, ESMF_LOG_INFO)
 		print *, testMsg
 		print *, ""
