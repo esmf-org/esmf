@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclMPMDSTestB.F90,v 1.1 2005/08/11 17:42:33 theurich Exp $
+! $Id: ESMF_FieldExclMPMDSTestB.F90,v 1.2 2006/02/01 16:14:18 theurich Exp $
 !
 ! System test code FieldExclMPMD
 !  Description on Sourceforge under System Test #79497
@@ -60,7 +60,7 @@
     ! Local variables
     integer :: pet_id, npets, rc
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
-    type(ESMF_VM):: vm, vmsub1, vmsub2
+    type(ESMF_VM):: vm
     type(ESMF_State) :: c1exp, c2imp
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
@@ -118,7 +118,6 @@
                                 petList=(/ 6,2,4,0 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     !print *, "Created component ", trim(cname1), "rc =", rc
-    call ESMF_GridCompGet(comp1, vm=vmsub1, rc=rc)
     !  call ESMF_GridCompPrint(comp1, "", rc)
 
     cname2 = "user model 2"
@@ -126,7 +125,6 @@
                                 petList=(/ 5,1,3 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     !print *, "Created component ", trim(cname2), "rc =", rc
-    call ESMF_GridCompGet(comp2, vm=vmsub2, rc=rc)
     !  call ESMF_GridCompPrint(comp2, "", rc)
 
     cplname = "user one-way coupler"

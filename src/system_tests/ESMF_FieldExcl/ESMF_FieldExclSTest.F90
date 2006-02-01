@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.23 2006/01/31 17:12:48 nscollins Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.24 2006/02/01 16:14:17 theurich Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -50,7 +50,7 @@
     ! Local variables
     integer :: pet_id, npets, rc
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
-    type(ESMF_VM):: vm, vmsub1, vmsub2
+    type(ESMF_VM):: vm
     type(ESMF_State) :: c1exp, c2imp
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
