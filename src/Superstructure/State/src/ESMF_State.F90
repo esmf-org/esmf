@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.90 2005/11/28 15:16:55 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.91 2006/02/01 16:20:30 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.90 2005/11/28 15:16:55 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.91 2006/02/01 16:20:30 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -594,7 +594,7 @@ end interface
 ! !IROUTINE: ESMF_StateAddField - Add a list of Fields to a State
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateAddFields()   
+      ! Private name; call using ESMF_StateAddField()   
       subroutine ESMF_StateAddFieldList(state, fieldCount, fieldList, rc)
 !
 ! !ARGUMENTS:
