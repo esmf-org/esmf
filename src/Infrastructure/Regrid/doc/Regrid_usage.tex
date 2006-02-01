@@ -1,4 +1,4 @@
-% $Id: Regrid_usage.tex,v 1.13 2006/01/10 18:01:50 jwolfe Exp $
+% $Id: Regrid_usage.tex,v 1.14 2006/02/01 18:56:28 cdeluca Exp $
 
 
 Regrid is designed to be called with Field or Bundle
@@ -55,17 +55,15 @@ same domain with a different range.  Currently, users are responsible for any
 necessary conversion or translation.  
 
 There are five possible physical overlap situations between the source and
-% destination Grids, illustrated in Figure~\ref{fig:RegridGridOverlap}.
+destination Grids, illustrated in Figure~\ref{fig:RegridGridOverlap}.
 
-% DIAGFIX_BASELINE19
-% \begin{center}
-% \begin{figure}
-% \caption{Possible Relationships between Grids in Physical (Coordinate) Space. }
-% \label{fig:RegridGridOverlap}
-% \resizebox{\textwidth}{!}
-%   {\includegraphics{RegridGridOverlap}}
-% \end{figure}
-% \end{center}
+\begin{center}
+\begin{figure}
+\scalebox{0.9}{\includegraphics{RegridGridOverlap}}
+\caption{Possible Relationships between Grids in Physical (Coordinate) Space. }
+\label{fig:RegridGridOverlap}
+\end{figure}
+\end{center}
 
 Regrid can provide complete interpolation weights for the destination Field
 only for those situations where there is source data covering the entire physical
@@ -87,47 +85,38 @@ between Fields with different RelLocs can have unintended consequences if the
 related Grids cover exactly the same physical domain.  The RelLocs represent
 different subGrids, which can shift the represented physical domain by plus or
 minus one-half of a cell width.  This is illustrated below in
-% Figure~\ref{fig:RegridRelLocEffect}, which shows the physical areas described by
-% two
-
-% DIAGFIX_BASELINE20
-% \begin{center}
-% \begin{figure}
-% \caption{Illustration of Grid areas represented by differing RelLocs. }
-% \label{fig:RegridRelLocEffect}
-% \resizebox{\textwidth}{!}
-%   {\includegraphics{RegridRelLocEffect}}
-% \end{figure}
-% \end{center}
-
-sample RelLocs and the effect on the overlap of the global Grids.  In this
+Figure~\ref{fig:RegridRelLocEffect}, which shows the physical areas described by
+two sample RelLocs and the effect on the overlap of the global Grids.  In this
 situation, there may be some unfilled or less accurate Field data at some of the
 Grid boundaries.
 
+\begin{center}
+\begin{figure}
+\scalebox{0.9}{\includegraphics{RegridRelLocEffect}}
+\caption{Illustration of Grid areas represented by differing RelLocs. }
+\label{fig:RegridRelLocEffect}
+\end{figure}
+\end{center}
 
 \subsubsection{Regrid and Grid Refinement}
 
 Different refinement or cell sizes (also called resolution) between the source
 and destination Grids may have a similar effect on regridding as does different
 data locations. This can be true even if the source and destination Fields have
-% the same RelLoc, as illustrated in Figure~\ref{fig:RegridRefinementEffect}.  In
-% this diagram,
-
-% DIAGFIX_BASELINE21
-% \begin{center}
-% \begin{figure}
-% \caption{Illustration of areas represented by the same RelLoc on Grids with
-%          different refinement. }
-% \label{fig:RegridRefinementEffect}
-% \resizebox{\textwidth}{!}
-%   {\includegraphics{RegridRefinementEffect}}
-% \end{figure}
-% \end{center}
-
-the areas of the two grids represented by the corresponding Fields do not overlap
+the same RelLoc, as illustrated in Figure~\ref{fig:RegridRefinementEffect}.  In
+this diagram, the areas of the two grids represented by the corresponding Fields do not overlap
 exactly despite sharing identical physical extents and relative data locations.
 Again, this situation may cause some inaccuracy in the regridded Field data at
 the Grid boundaries.
+
+\begin{center}
+\begin{figure}
+\scalebox{\includegraphics{RegridRefinementEffect}}
+\caption{Illustration of areas represented by the same RelLoc on Grids with
+          different refinement. }
+\label{fig:RegridRefinementEffect}
+\end{figure}
+\end{center}
 
 
 \subsubsection{Regrid and Periodicity}
@@ -138,19 +127,16 @@ periodic boundary conditions into Regrid routines.  As illustrated in
 Figure~\ref{fig:RegridPeriodicity}, areas represented by Field data that
 would otherwise extend beyond the nominal Grid boundaries are mapped or "wrapped"
 back onto the Grid at the corresponding periodic boundary.  This effectively 
-
-% DIAGFIX_BASELINE22
-% \begin{center}
-% \begin{figure}
-% \caption{Illustration of Regrid Overlap issues solved by the implementation
-%          of periodic boundary conditions. }
-% \label{fig:RegridPeriodicity}
-% \resizebox{\textwidth}{!}
-%   {\includegraphics{RegridPeriodicity}}
-% \end{figure}
-% \end{center}
-
 ensures complete overlap for Grids that share identical physical extents.
+
+\begin{center}
+\begin{figure}
+\scalebox{0.9}{\includegraphics{RegridPeriodicity}}
+\caption{Illustration of Regrid Overlap issues solved by the implementation
+          of periodic boundary conditions. }
+\label{fig:RegridPeriodicity}
+\end{figure}
+\end{center}
 
 Unfortunately, the Regrid routines in ESMF do not currently include periodic
 boundary effects, so users must be aware of possible problems.

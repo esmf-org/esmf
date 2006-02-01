@@ -35,18 +35,15 @@ that takes place inside Store.  In initial timings, typical RegridStore calls
 take on the order of seconds while the application routines themselves require
 more on the order of milliseconds.  Scaling on parallel architectures is
 reasonably good up until communication overhead dominates timings (see 
-% Figure~\ref{fig:RegridScaling} for scaling curves from an example application).
+Figure~\ref{fig:RegridScaling} for scaling curves from an example application).
 
-% DIAGFIX_BASELINE23
-% \begin{center}
-% \begin{figure}
-% \caption{Sample scaling graphs for Regrid Run and Store routines. }
-% \label{fig:RegridScaling}
-% \resizebox{\textwidth}{!}
-%   {\includegraphics{RegridScaling}}
-% \end{figure}
-% \end{center}
-
+\begin{center}
+\begin{figure}
+\scalebox{0.9}{\includegraphics{RegridScaling}}
+\caption{Sample scaling graphs for Regrid Run and Store routines. }
+\label{fig:RegridScaling}
+\end{figure}
+\end{center}
 
 \subsubsection{Bilinear Regridding Algorithm}
 \label{sec:BilinearRegrid}
@@ -169,17 +166,16 @@ A = \left[\begin{array}{cc}
      further optimized by tracking the index of the source cell containing the
      previous point and using that as the initial starting index for the next
      point's sweep, since both grids are logically ordered.  Please see
-%      Figure~\ref{fig:BilinearSweep} for an illustration of the sweep algorithm.
+     Figure~\ref{fig:BilinearSweep} for an illustration of the sweep algorithm.
 
-% DIAGFIX_BASELINE24
-% \begin{center}
-% \begin{figure}
-% \caption{Illustration of the Bilinear Sweep Algorithm. }
-% \label{fig:BilinearSweep}
-% \scalebox{0.75}{\includegraphics{BilinearSweep}}
-% \end{figure}
-% \end{center}
+\begin{center}
+\begin{figure}
+\scalebox{0.9}{\includegraphics{BilinearSweep}}
+\caption{Illustration of the Bilinear Sweep Algorithm. }
+\label{fig:BilinearSweep}
 
+\end{figure}
+\end{center}
 
 \subsubsection{Bicubic Regridding Algorithm}  Not yet implemented!
 \label{sec:BicubicRegrid}
@@ -439,14 +435,13 @@ w_{3nk} & = & {1\over{A_k}}\int\int_{A_{nk}}\cos\theta(\phi-\phi_n)dA \nonumber 
      Figure~\ref{fig:ConservSweep} for an illustration of binning and the sweep
      algorithm.
 
-% DIAGFIX_BASELINE25
-% \begin{center}
-% \begin{figure}
-% \caption{Illustration of the Conservative Sweep Algorithm. }
-% \label{fig:ConservSweep}
-% \scalebox{0.75}{\includegraphics{ConservSweep}}
-% \end{figure}
-% \end{center}
+\begin{center}
+\begin{figure}
+\scalebox{0.9}{\includegraphics{ConservSweep}}
+\caption{Illustration of the Conservative Sweep Algorithm. }
+\label{fig:ConservSweep}
+\end{figure}
+\end{center}
 
      Note that currently ESMF creates bins based
      only on coordinates in the second grid direction (typically "y" or "latitude").
@@ -563,19 +558,8 @@ Y &=& 2\sin\left({\pi \over 4} - {\theta \over 2}\right)\sin\phi
 On parallel processing platforms, the physical domains of the source and
 destination Grids are decomposed into logical Decomposition Elements (DEs), as
 illustrated in Figure~\ref{fig:ParallelRegrid}.  In order to calculate
-interpolation weights, each
-
-% DIAGFIX_BASELINE26
-% \begin{center}
-% \begin{figure}
-% \caption{Illustration of Parallel Regridding. }
-% \label{fig:ParallelRegrid}
-% \resizebox{\textwidth}{!}
-%   {\includegraphics{ParallelRegrid}}
-% \end{figure}
-% \end{center}
-
-destination DE will require coordinate data from any of the source Grid that
+interpolation weights, each destination DE will require coordinate
+data from any of the source Grid that
 overlaps it in physical space, which may span several DEs from the source Grid.
 Corresponding source Field data is necessary later for regridding calculations
 using the regridding weights.  The DEs for each Grid are mapped to sets of PETs,
@@ -585,11 +569,18 @@ a CouplerComponent.  In any case, most situations will require data transfer
 between PETs for regridding.  Once source data is available locally, the
 regridding algorithms discussed earlier can be applied.
 
+\begin{center}
+\begin{figure}
+\scalebox{0.9}{\includegraphics{ParallelRegrid}}
+\caption{Illustration of Parallel Regridding. }
+\label{fig:ParallelRegrid}
+\end{figure}
+\end{center}
+
 There are four major sections of regridding that are impacted by the
 parallelization process: identifying necessary data, transferring that data, the
 sweep algorithms, and then calculating and applying the interpolation weights to
 calculate regridded Fields.  Each will be discussed below.
-
 
 \subsubsection{Parallelization of Regrid: Identification of Necessary Data}
 
@@ -610,19 +601,7 @@ algorithms.  It requires only a slight bit more work to identify which source DE
 intersect the the local destination DE in physical space and then transfer all
 the data from those DEs.  In some cases, this will save communication and memory
 overhead.  But in other cases, like between one Grid decomposed in rows and
-% another decomposed by columns as illustrated in Figure~\ref{fig:RToCRegrid}, that
-
-% DIAGFIX_BASELINE27
-% \begin{center}
-% \begin{figure}
-% \caption{Example of parallel regridding requiring transfer of all data,
-%          when transferring all data between intersecting DEs. }
-% \label{fig:RToCRegrid}
-% \resizebox{\textwidth}{!}
-%   {\includegraphics{RToCRegrid}}
-% \end{figure}
-% \end{center}
-
+another decomposed by columns as illustrated in Figure~\ref{fig:RToCRegrid}, that
 still ultimately means copying all of the source Grid to each destination PET.
 It often makes more sense to identify and transfer only the data from the
 source Grid that is required by the destination DE.  In a parallel environment,
@@ -635,24 +614,22 @@ the framework.  By default the framework will transfer only the necessary data,
 and the option is currently not readily available to users but is set internally
 in the Grid code using a parameter called "domainOption."
 
+\begin{center}
+\begin{figure}
+\scalebox{0.9}{\includegraphics{RToCRegrid}}
+\caption{Example of parallel regridding requiring transfer of all data,
+         when transferring all data between intersecting DEs. }
+\label{fig:RToCRegrid}
+\end{figure}
+\end{center}
+
 This intersection of DEs is calculated in physical space, using a private Grid
 method.  In complicated Grids, these intersections could be non-rectangular, but
 for the current logically rectangular Grids each intersection is defined as the
 block of the source DE that encompasses any physical overlap with the destination
 DE's domain.  Future Grid types would need appropriate methods to identify
 intersections, based on their topologies as well as communication issues.  As
-% shown in Figure~\ref{fig:RegridIntersection}, 
-
-% DIAGFIX_BASELINE28
-% \begin{center}
-% \begin{figure}
-% \caption{Intersection of DE Domains in Parallel Regridding. }
-% \label{fig:RegridIntersection}
-% \resizebox{\textwidth}{!}
-%   {\includegraphics{RegridIntersection}}
-% \end{figure}
-% \end{center}
-
+shown in Figure~\ref{fig:RegridIntersection}, 
 the intersection is often a subset of both the source and destination DEs'
 domains, which means that each destination DE must receive and process data from
 multiple source DEs.  Each PET involved in a regridding process must calculate
@@ -662,21 +639,27 @@ current Grid structures contain enough global information to individually
 determine the sending data, but the calculation of the data to be received takes
 some global communication.
 
+\begin{center}
+\begin{figure}
+\scalebox{0.9}{\includegraphics{RegridIntersection}}
+\caption{Intersection of DE Domains in Parallel Regridding. }
+\label{fig:RegridIntersection}
+\end{figure}
+\end{center}
+
 Regridding algorithms that are point-based (as opposed to cell-based), like
 bilinear or bicubic interpolation, require an extra layer of cells around the
 identified region, because those algorithms need the location of all surrounding
-% data points (see Figure~\ref{fig:RegridExtraLayer}).
+data points (see Figure~\ref{fig:RegridExtraLayer}).
 
-% DIAGFIX_BASELINE29
-% \begin{center}
-% \begin{figure} 
-% \caption{Illustration of the extra layer of points required by point-based Regrid
-%          algorithms. }
-% \label{fig:RegridExtraLayer}
-% \resizebox{\textwidth}{!}
-%   {\includegraphics{RegridExtraLayer}}
-% \end{figure}
-% \end{center}
+\begin{center}
+\begin{figure} 
+\scalebox{0.9}{\includegraphics{RegridExtraLayer}}
+\caption{Illustration of the extra layer of points required by point-based Regrid
+          algorithms. }
+\label{fig:RegridExtraLayer}
+\end{figure}
+\end{center}
 
 Points in this extra layer are assigned internal mask values and are used in the
 calculation of interpolation weights for data locations inside the identified
@@ -716,17 +699,15 @@ number of cells per bin, called {\tt targetBinSize}.  The number of bins on any
 PET is set by the local number of cells divided by the targetBinSize.  Currently
 this parameter is hard-coded in Regrid, but could be made available to users.
 It has been set to 250, based on some preliminary timings on its effect on
-% Regrid Store (see Figure~\ref{fig:TargetBinSize}).
+Regrid Store (see Figure~\ref{fig:TargetBinSize}).
 
-% DIAGFIX_BASELINE30
-% \begin{center}
-% \begin{figure}
-% \caption{Example of TargetBinSize on RegridStore timing. }
-% \label{fig:TargetBinSize}
-% \resizebox{\textwidth}{!}
-%   {\includegraphics{TargetBinSize}}
-% \end{figure}
-% \end{center}
+\begin{center}
+\begin{figure}
+\scalebox{0.9}{\includegraphics{TargetBinSize}}
+\caption{Effect of TargetBinSize on RegridStore timing. }
+\label{fig:TargetBinSize}
+\end{figure}
+\end{center}
 
 Because the conservative regrid algorithm is based on cells and assumes data
 values at the vertices, it can operate on the entire set of 1D Arrays of Grid

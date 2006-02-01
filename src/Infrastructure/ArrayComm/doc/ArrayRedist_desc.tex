@@ -1,4 +1,4 @@
-% $Id: ArrayRedist_desc.tex,v 1.9 2006/01/10 18:03:41 jwolfe Exp $
+% $Id: ArrayRedist_desc.tex,v 1.10 2006/02/01 18:56:27 cdeluca Exp $
 
 
 As the name implies, Redistribution operations move data from one distribution,
@@ -27,16 +27,15 @@ ways:
 In all of these situations, the source and destination data structures are
 required to have identical global sizes but not DE-local sizes.  Although
 illustrations of Redistribution may look very similar to Regridding (please
-% see Figure \ref{fig:Redist}),
+see Figure \ref{fig:Redist}),
 
-% DIAGFIX_BASELINE31
-% \begin{center}
-% \begin{figure}
-% \label{fig:Redist}
-% \scalebox{0.75}{\includegraphics{Redist}}
-% \caption{Illustration of redistribution of data. }
-% \end{figure}
-% \end{center}
+\begin{center}
+\begin{figure}
+\scalebox{0.9}{\includegraphics{Redist}}
+\label{fig:Redist}
+\caption{Illustration of redistribution of data. }
+\end{figure}
+\end{center}
 
 Redistribution methods involve only data movement; no interpolation, data
 binning, or averaging is performed.  For data associated with physical locations
