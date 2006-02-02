@@ -57,9 +57,6 @@ Each default directory contains the following files:
  build_rules.mk : makefile fragment which is included by the main ESMF build
                   system and contains specific settings for this platform.
 
- link_rules     : makefile fragment which suggests how user code would link
-                  with the ESMF libraries
-        
 
 Additional Environment Variables
 --------------------------------
@@ -188,4 +185,4 @@ gcc or xlc.  Use ESMF_C_COMPILER to control this choice.
 
 
 ================================================================================
- $Id: README,v 1.24 2005/07/04 14:03:13 nscollins Exp $
+ $Id: README,v 1.25 2006/02/02 21:02:59 nscollins Exp $
