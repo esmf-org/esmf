@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.69 2005/08/08 21:37:48 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.70 2006/02/02 02:00:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.69 2005/08/08 21:37:48 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.70 2006/02/02 02:00:00 theurich Exp $'
 
 !==============================================================================
 !
@@ -106,7 +106,6 @@
       interface ESMF_GridCompCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_GridCompCreateConf
         module procedure ESMF_GridCompCreateVM
         module procedure ESMF_GridCompCreateCPar
         module procedure ESMF_GridCompCreateGPar
@@ -223,110 +222,9 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCompCreateConf"
-!BOP
-! !IROUTINE: ESMF_GridCompCreate - Create a new GridComp with a Config filename
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_GridCompCreate()      
-      function ESMF_GridCompCreateConf(name, gridcomptype, grid, &
-                                       config, configFile, clock, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_GridComp) :: ESMF_GridCompCreateConf
-!
-! !ARGUMENTS:
-      !external :: services
-      character(len=*), intent(in), optional :: name
-      type(ESMF_GridCompType), intent(in), optional :: gridcomptype 
-      type(ESMF_Grid), intent(in), optional :: grid
-      type(ESMF_Config), intent(in), optional :: config
-      character(len=*), intent(in), optional :: configFile
-      type(ESMF_Clock), intent(inout), optional :: clock
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Create a new {\tt ESMF\_GridComp}, specifying optional configuration
-!  file and other information.
-!
-!  The return value is the new {\tt ESMF\_GridComp}.
-!    
-!  The arguments are:
-!  \begin{description}
-!   \item[{[name]}]
-!    Name of the newly-created {\tt ESMF\_GridComp}.  This name can be altered
-!    from within the {\tt ESMF\_GridComp} code once the initialization routine
-!    is called.
-!   \item[{[gridcomptype]}]
-!    {\tt ESMF\_GridComp} model type, where model includes 
-!    {\tt ESMF\_ATM, ESMF\_LAND, ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER}.  
-!    Note that this has no meaning to the framework, it is an
-!    annotation for user code to query.
-!   \item[{[grid]}]
-!    Default {\tt ESMF\_Grid} associated with this {\tt gridcomp}.
-!   \item[{[config]}]
-!    An already-created {\tt ESMF\_Config} configuration object
-!    from which the new {\tt ESMF\_GridComp}
-!    can read in namelist-type information to set parameters for this run.
-!   \item[{[configFile]}]
-!    The filename of an {\tt ESMF\_Config} format file.
-!    If specified, this file is opened an {\tt ESMF\_Config} configuration
-!    object is created for the file
-!    and attached to the new {\tt ESMF\_GridComp}.  
-!    The user can call
-!    {\tt ESMF\_GridCompGet()} to get and use the object.
-!    If both are specified, the {\tt config} object takes priority
-!    over this one.
-!   \item[{[clock]}]
-!    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
-!    queried and updated by the new {\tt ESMF\_GridComp} as it chooses.
-!    This should
-!    not be the parent component clock, which should be maintained and passed
-!    down to the initialize/run/finalize routines separately.
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-
-        ! local vars
-        type (ESMF_CompClass), pointer :: compclass      ! generic comp
-        integer :: localrc                               ! local error status
-
-        ! Initialize the pointer to null.
-        nullify(ESMF_GridCompCreateConf%compp)
-        nullify(compclass)
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) rc = ESMF_FAILURE
-
-        ! Allocate a new comp class
-        allocate(compclass, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "allocating compclass", &
-                                       ESMF_CONTEXT, rc)) return
-   
-        ! Call construction method to initialize gridcomp internals
-        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
-                                gridcomptype=gridcomptype, &
-                                configFile=configFile, &
-                                config=config, grid=grid, clock=clock, &
-                                rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        ! Set return values
-        ESMF_GridCompCreateConf%compp => compclass
-        if (present(rc)) rc = ESMF_SUCCESS
-
-        end function ESMF_GridCompCreateConf
-    
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompCreateVM"
 !BOP
-! !IROUTINE: ESMF_GridCompCreate - Create a new GridComp with VM enabled
+! !IROUTINE: ESMF_GridCompCreate - Create a Gridded Component
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_GridCompCreate()      
@@ -338,7 +236,7 @@
 !
 ! !ARGUMENTS:
       !external :: services
-      type(ESMF_VM),           intent(in)              :: vm
+      type(ESMF_VM),           intent(in),    optional :: vm
       character(len=*),        intent(in),    optional :: name
       type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
       type(ESMF_Grid),         intent(in),    optional :: grid
@@ -350,17 +248,16 @@
       integer,                 intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new {\tt ESMF\_GridComp}, setting the resources explicitly.
+!  Create an {\tt ESMF\_GridComp} object.
 !
 !  The return value is the new {\tt ESMF\_GridComp}.
 !    
 !  The arguments are:
 !  \begin{description}
-!   \item[vm]
-!    {\tt ESMF\_VM} object for the parent component out of which 
-!    this {\tt ESMF\_GridCompCreate()} call is issued.
-!    This will become the parent {\tt ESMF\_VM} 
-!    of the newly create {\tt ESMF\_GridComp}.
+!   \item[{[vm]}]
+!    {\tt ESMF\_VM} object for the current component. This will become the
+!    parent {\tt ESMF\_VM} for the newly created {\tt ESMF\_GridComp} object.
+!    By default the current VM is determined automatically.
 !   \item[{[name]}]
 !    Name of the newly-created {\tt ESMF\_GridComp}.  This name can be altered
 !    from within the {\tt ESMF\_GridComp} code once the initialization routine

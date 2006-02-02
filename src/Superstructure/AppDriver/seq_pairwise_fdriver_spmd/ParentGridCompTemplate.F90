@@ -1,4 +1,4 @@
-! $Id: ParentGridCompTemplate.F90,v 1.4 2004/08/19 16:52:23 nscollins Exp $
+! $Id: ParentGridCompTemplate.F90,v 1.5 2006/02/02 01:59:59 theurich Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -63,28 +63,27 @@
       type(ESMF_Clock) :: parentclock
       integer :: rc
      
-      type(ESMF_VM) :: parentvm
       type(ESMF_Grid) :: parentgrid
 
       call ESMF_LogWrite("Parent Gridded Component Initialize routine called",&
                           ESMF_LOG_INFO)
 
       ! Get the layout and grid associated with this component
-      call ESMF_GridCompGet(gcomp, vm=parentvm, grid=parentgrid, rc=rc)
+      call ESMF_GridCompGet(gcomp, grid=parentgrid, rc=rc)
 
       ! Create the first child Gridded component
       gname1 = "ESMF Gridded Child Component 1"
-      comp1Grid = ESMF_GridCompCreate(parentvm, name=gname1, & 
+      comp1Grid = ESMF_GridCompCreate(name=gname1, & 
                                          grid=parentgrid, rc=rc)
 
       ! Create the second child Gridded component
       gname2 = "ESMF Gridded Child Component 2"
-      comp2Grid = ESMF_GridCompCreate(parentvm, name=gname2, &
+      comp2Grid = ESMF_GridCompCreate(name=gname2, &
                                          grid=parentgrid, rc=rc)
 
       ! Create the Coupler component
       cname = "ESMF Coupler Component"
-      compCoupler = ESMF_CplCompCreate(parentvm, name=cname, rc=rc)
+      compCoupler = ESMF_CplCompCreate(name=cname, rc=rc)
 
       call ESMF_LogWrite("Component Creates finished", ESMF_LOG_INFO)
 

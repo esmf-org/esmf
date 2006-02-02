@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.2 2005/10/21 22:32:29 nscollins Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.3 2006/02/02 02:00:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -88,7 +88,7 @@
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     comp1name = "Atmosphere"
-    comp1 = ESMF_GridCompCreate(vm, comp1name, petList=(/ 0, 1 /), rc=rc)
+    comp1 = ESMF_GridCompCreate(name=comp1name, petList=(/ 0, 1 /), rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -104,7 +104,7 @@
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     comp2name = "Ocean"
-    comp2 = ESMF_GridCompCreate(vm, comp2name, petList=(/ 2, 3 /), rc=rc)
+    comp2 = ESMF_GridCompCreate(name=comp2name, petList=(/ 2, 3 /), rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -227,7 +227,7 @@
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     comp1name = "Atmosphere"
-    comp1 = ESMF_GridCompCreate(vm, comp1name, rc=rc)
+    comp1 = ESMF_GridCompCreate(name=comp1name, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -235,7 +235,7 @@
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     comp2name = "Ocean"
-    comp2 = ESMF_GridCompCreate(vm, comp2name, rc=rc)
+    comp2 = ESMF_GridCompCreate(name=comp2name, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -353,7 +353,7 @@
     !NEX_UTest_Multi_Proc_Only
     comp1name = "Atmosphere"
     ! TODO: add the parent VM flag here
-    comp1 = ESMF_GridCompCreate(vm, comp1name, rc=rc)
+    comp1 = ESMF_GridCompCreate(name=comp1name, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -362,7 +362,7 @@
     !NEX_UTest_Multi_Proc_Only
     comp2name = "Ocean"
     ! TODO: add the parent VM flag here
-    comp2 = ESMF_GridCompCreate(vm, comp2name, rc=rc)
+    comp2 = ESMF_GridCompCreate(name=comp2name, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

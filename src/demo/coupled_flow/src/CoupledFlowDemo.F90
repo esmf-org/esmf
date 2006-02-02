@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.28 2005/06/22 22:52:22 nscollins Exp $
+! $Id: CoupledFlowDemo.F90,v 1.29 2006/02/02 02:00:01 theurich Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -184,13 +184,13 @@
 !
 !\begin{verbatim}
     cnameIN = "Injector model"
-    INcomp = ESMF_GridCompCreate(vm, cnameIN, rc=rc)
+    INcomp = ESMF_GridCompCreate(name=cnameIN, rc=rc)
 
     cnameFS = "Flow Solver model"
-    FScomp = ESMF_GridCompCreate(vm, cnameFS, rc=rc)
+    FScomp = ESMF_GridCompCreate(name=cnameFS, rc=rc)
 
     cplname = "Two-way coupler"
-    cpl = ESMF_CplCompCreate(vm, cplname, rc=rc)
+    cpl = ESMF_CplCompCreate(name=cplname, rc=rc)
 !\end{verbatim}
 !EOP
 

@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.26 2005/08/15 22:53:40 theurich Exp $
+! $Id: CoupledFlowApp.F90,v 1.27 2006/02/02 02:00:01 theurich Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -155,7 +155,7 @@
 !BOP
 !\begin{verbatim}
     ! Create the top level Gridded Component, passing in the default VM.
-    compGridded = ESMF_GridCompCreate(vm, "Coupled Flow Demo", rc=rc)
+    compGridded = ESMF_GridCompCreate(name="Coupled Flow Demo", rc=rc)
 !\end{verbatim}
 !EOP 
 

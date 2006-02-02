@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.18 2005/03/03 22:29:13 nscollins Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.19 2006/02/02 02:00:08 theurich Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
@@ -81,7 +81,7 @@
 
     ! Create the model component, giving it all PETs to run on
     cname1 = "fluid flow"
-    comp1 = ESMF_GridCompCreate(vm, cname1, rc=rc)
+    comp1 = ESMF_GridCompCreate(name=cname1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname1), "rc =", rc 
 

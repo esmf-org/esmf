@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.35 2005/11/08 20:55:07 nscollins Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.36 2006/02/02 02:00:08 theurich Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -88,7 +88,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test FieldHaloPeriodic"
-    comp1 = ESMF_GridCompCreate(vm, name=cname, rc=rc)
+    comp1 = ESMF_GridCompCreate(name=cname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     if (verbose) print *, "Comp Create finished, name = ", trim(cname)

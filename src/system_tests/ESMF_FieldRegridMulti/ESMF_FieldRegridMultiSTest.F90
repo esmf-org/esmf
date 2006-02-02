@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.15 2005/02/14 04:06:59 theurich Exp $
+! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.16 2006/02/02 02:00:08 theurich Exp $
 !
 ! System test code FieldRegridMulti
 !  Description on Sourceforge under System Test #xxxxx
@@ -96,19 +96,19 @@
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-    comp1 = ESMF_GridCompCreate(vm, cname1, rc=rc)
+    comp1 = ESMF_GridCompCreate(name=cname1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname1), "rc =", rc
     !  call ESMF_GridCompPrint(comp1, "", rc)
 
     cname2 = "user model 2"
-    comp2 = ESMF_GridCompCreate(vm, cname2, rc=rc)
+    comp2 = ESMF_GridCompCreate(name=cname2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname2), "rc =", rc
     !  call ESMF_GridCompPrint(comp2, "", rc)
 
     cplname = "user one-way coupler"
-    cpl = ESMF_CplCompCreate(vm, cplname, rc=rc)
+    cpl = ESMF_CplCompCreate(name=cplname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cplname), ", rc =", rc
     !  call ESMF_CplCompPrint(cpl, "", rc)

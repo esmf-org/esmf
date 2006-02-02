@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.21 2005/02/14 04:07:16 theurich Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.22 2006/02/02 02:00:08 theurich Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -99,15 +99,15 @@
 
     ! Create the 2 model components and coupler.
     cnameIN = "Injector model"
-    INcomp = ESMF_GridCompCreate(vm, cnameIN, rc=rc)
+    INcomp = ESMF_GridCompCreate(name=cnameIN, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cnameFS = "Flow Solver model"
-    FScomp = ESMF_GridCompCreate(vm, cnameFS, rc=rc)
+    FScomp = ESMF_GridCompCreate(name=cnameFS, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cplname = "Two-way coupler"
-    cpl = ESMF_CplCompCreate(vm, cplname, rc=rc)
+    cpl = ESMF_CplCompCreate(name=cplname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
 

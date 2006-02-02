@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.11 2005/02/28 16:31:47 nscollins Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.12 2006/02/02 02:00:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,6 @@
     integer :: rc
     character(ESMF_MAXSTR) :: cname, bname, cplname
     type(ESMF_CplComp) :: cpl
-    type(ESMF_VM):: vm
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -64,9 +63,8 @@
 !   added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
         
-   ! Initialize framework and get back default global VM
+   ! Initialize framework
    call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
-   call ESMF_VMGetGlobal(vm, rc=rc)
 
 
 !-------------------------------------------------------------------------
@@ -74,7 +72,7 @@
     !NEX_UTest
 !   !  Test creation of a Coupler Component
     cplname = "One Way Coupler"
-    cpl = ESMF_CplCompCreate(vm, cplname, rc=rc)
+    cpl = ESMF_CplCompCreate(name=cplname, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Coupler Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -98,7 +96,7 @@
     !EX_UTest
 !   !  Test creation of a Component
     cplname = "One Way Coupler"
-    cpl = ESMF_CplCompCreate(vm, cplname, rc=rc)
+    cpl = ESMF_CplCompCreate(name=cplname, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Coupler Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

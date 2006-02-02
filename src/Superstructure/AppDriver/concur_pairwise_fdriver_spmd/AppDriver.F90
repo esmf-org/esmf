@@ -109,7 +109,7 @@
     call ESMF_VMGetGlobal(defaultvm, rc)
 
     ! Create the top Gridded component, passing in the default layout.
-    compGridded = ESMF_GridCompCreate(defaultvm, "ESMF Gridded Component", rc=rc)
+    compGridded = ESMF_GridCompCreate(name="ESMF Gridded Component", rc=rc)
 
     call ESMF_LogWrite("Component Create finished", ESMF_LOG_INFO)
 

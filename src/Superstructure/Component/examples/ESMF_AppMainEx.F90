@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.25 2004/06/16 21:58:21 svasquez Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.26 2006/02/02 01:59:59 theurich Exp $
 !
 ! Example code for a main Application program. 
 
@@ -270,12 +270,12 @@
     ! Create the top level application component
 
     cname = "Top Level Atmosphere Model Component"
-    top = ESMF_GridCompCreate(cname, configFile="setup.rc", rc=rc)  
+    top = ESMF_GridCompCreate(name=cname, configFile="setup.rc", rc=rc)  
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     cname1 = "Atmosphere Physics"
-    gcomp1 = ESMF_GridCompCreate(cname1, ESMF_ATM, rc=rc)  
+    gcomp1 = ESMF_GridCompCreate(name=cname1, gridcomptype=ESMF_ATM, rc=rc)  
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -292,7 +292,7 @@
     print *, "Comp Create returned, name = ", trim(cname1)
 
     cname2 = "Atmosphere Dynamics"
-    gcomp2 = ESMF_GridCompCreate(cname2, ESMF_ATM, rc=rc)  
+    gcomp2 = ESMF_GridCompCreate(name=cname2, gridcomptype=ESMF_ATM, rc=rc)  
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -303,7 +303,7 @@
     print *, "Comp Create returned, name = ", trim(cname2)
 
     cname = "Atmosphere Coupler"
-    cpl = ESMF_CplCompCreate(cname, rc=rc)
+    cpl = ESMF_CplCompCreate(name=cname, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC

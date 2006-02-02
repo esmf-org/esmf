@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.133 2005/08/08 21:37:47 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.134 2006/02/02 02:00:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -261,7 +261,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.133 2005/08/08 21:37:47 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.134 2006/02/02 02:00:00 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -472,7 +472,7 @@ end function
           if (present(parent)) then
             compp%vm_parent = parent%vm
           else
-            call ESMF_VMGetGlobal(compp%vm_parent)
+            call ESMF_VMGetCurrent(compp%vm_parent)
           endif
         endif
       

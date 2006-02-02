@@ -1,4 +1,4 @@
-! $Id: ParentGridCompTemplate.F90,v 1.1 2004/12/09 23:08:38 nscollins Exp $
+! $Id: ParentGridCompTemplate.F90,v 1.2 2006/02/02 01:59:59 theurich Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -79,19 +79,19 @@
 
       ! Create the first child Gridded component
       gname1 = "ESMF Gridded Child Component 1"
-      comp1Grid = ESMF_GridCompCreate(parentvm, name=gname1, & 
+      comp1Grid = ESMF_GridCompCreate(name=gname1, & 
                                       petlist = (/ (i, i=0, split-1) /), &
                                       grid=parentgrid, rc=rc)
 
       ! Create the second child Gridded component
       gname2 = "ESMF Gridded Child Component 2"
-      comp2Grid = ESMF_GridCompCreate(parentvm, name=gname2, &
+      comp2Grid = ESMF_GridCompCreate(name=gname2, &
                                       petlist = (/ (i, i=split, parentpetcount-1) /), &
                                       grid=parentgrid, rc=rc)
 
       ! Create the Coupler component
       cname = "ESMF Coupler Component"
-      compCoupler = ESMF_CplCompCreate(parentvm, name=cname, rc=rc)
+      compCoupler = ESMF_CplCompCreate(name=cname, rc=rc)
 
       call ESMF_LogWrite("Component Creates finished", ESMF_LOG_INFO)
 
@@ -147,8 +147,8 @@
                             blockingflag=ESMF_NONBLOCKING, rc=rc)
 
       ! Wait until they both finish before calling the coupler.
-      call ESMF_GridCompWait(comp1Grid, rc)
-      call ESMF_GridCompWait(comp2Grid, rc)
+      call ESMF_GridCompWait(comp1Grid, rc=rc)
+      call ESMF_GridCompWait(comp2Grid, rc=rc)
 
       ! Call the coupler synchronously.
       call ESMF_CplCompRun(compCoupler, G1exp, G2imp, parentclock, rc=rc)

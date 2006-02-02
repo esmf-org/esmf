@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.25 2005/11/07 19:48:20 theurich Exp $
+! $Id: ESMF_GCompEx.F90,v 1.26 2006/02/02 01:59:59 theurich Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
@@ -225,7 +225,7 @@
     print *, "Application Example 1:"
     ! Create the top level application component
     cname = "Atmosphere Model Gridded Component"
-    gcomp = ESMF_GridCompCreate(cname, configFile="setup.rc", rc=rc)  
+    gcomp = ESMF_GridCompCreate(name=cname, configFile="setup.rc", rc=rc)  
 
     if (rc.NE.ESMF_SUCCESS) then
        finalrc = ESMF_FAILURE

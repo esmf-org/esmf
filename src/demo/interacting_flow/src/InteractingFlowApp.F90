@@ -1,4 +1,4 @@
-! $Id: InteractingFlowApp.F90,v 1.4 2005/08/15 22:53:40 theurich Exp $
+! $Id: InteractingFlowApp.F90,v 1.5 2006/02/02 02:00:01 theurich Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -136,7 +136,7 @@
 !
 
     ! Create the Gridded component, passing in the default VM.
-    compGridded = ESMF_GridCompCreate(vm, "Coupled Flow Demo", rc=rc)
+    compGridded = ESMF_GridCompCreate(name="Coupled Flow Demo", rc=rc)
 
     print *, "Comp Creates finished"
 

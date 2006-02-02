@@ -1,4 +1,4 @@
-! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.17 2005/02/14 04:06:58 theurich Exp $
+! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.18 2006/02/02 02:00:07 theurich Exp $
 !
 ! System test code CouplingOnExclDEs
 !  Description on Sourceforge under System Test #62503
@@ -33,7 +33,7 @@
     ! Local variables
     integer :: i, pe_id, ndes, mid, rc, delist(64), pid, cid
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
-    type(ESMF_VM) :: vm, childvm1, childvm2
+    type(ESMF_VM) :: vm
     type(ESMF_State) :: c1exp, c2imp
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
@@ -88,9 +88,7 @@
     cname1 = "user model 1"
 
     ! TODO: create a child vm with half the pets here
-    childvm1 = vm
-
-    comp1 = ESMF_GridCompCreate(childvm1, cname1, rc=rc)
+    comp1 = ESMF_GridCompCreate(name=cname1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Created component ", trim(cname1), "rc =", rc
@@ -100,16 +98,14 @@
     cname2 = "user model 2"
 
     ! TODO: create a child vm with other half the pets here
-    childvm1 = vm
-
-    comp2 = ESMF_GridCompCreate(childvm2, cname2, rc=rc)
+    comp2 = ESMF_GridCompCreate(name=cname2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Created component ", trim(cname2), "rc =", rc
     call ESMF_GridCompPrint(comp2, "", rc)
 
     cplname = "user one-way coupler"
-    cpl = ESMF_CplCompCreate(vm, cplname, rc=rc)
+    cpl = ESMF_CplCompCreate(name=cplname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cplname), ", rc =", rc
     call ESMF_CplCompPrint(cpl, "", rc)

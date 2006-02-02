@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclMPMDSTestB.F90,v 1.2 2006/02/01 16:14:18 theurich Exp $
+! $Id: ESMF_FieldExclMPMDSTestB.F90,v 1.3 2006/02/02 02:00:08 theurich Exp $
 !
 ! System test code FieldExclMPMD
 !  Description on Sourceforge under System Test #79497
@@ -114,21 +114,21 @@
    
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-    comp1 = ESMF_GridCompCreate(vm, cname1, &
+    comp1 = ESMF_GridCompCreate(name=cname1, &
                                 petList=(/ 6,2,4,0 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     !print *, "Created component ", trim(cname1), "rc =", rc
     !  call ESMF_GridCompPrint(comp1, "", rc)
 
     cname2 = "user model 2"
-    comp2 = ESMF_GridCompCreate(vm, cname2, &
+    comp2 = ESMF_GridCompCreate(name=cname2, &
                                 petList=(/ 5,1,3 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     !print *, "Created component ", trim(cname2), "rc =", rc
     !  call ESMF_GridCompPrint(comp2, "", rc)
 
     cplname = "user one-way coupler"
-    cpl = ESMF_CplCompCreate(vm, cplname, petList=(/ 0,1,2,3,4,5,6 /), rc=rc)
+    cpl = ESMF_CplCompCreate(name=cplname, petList=(/ 0,1,2,3,4,5,6 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     !print *, "Created component ", trim(cplname), ", rc =", rc
     !  call ESMF_CplCompPrint(cpl, "", rc)

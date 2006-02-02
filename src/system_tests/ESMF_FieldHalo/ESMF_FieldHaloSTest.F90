@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.38 2005/11/08 20:50:58 nscollins Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.39 2006/02/02 02:00:08 theurich Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -77,7 +77,7 @@
     endif
 
     cname = "System Test FieldHalo"
-    comp1 = ESMF_GridCompCreate(vm, name=cname, rc=rc)
+    comp1 = ESMF_GridCompCreate(name=cname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Create finished, name = ", trim(cname)

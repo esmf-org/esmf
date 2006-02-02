@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.26 2005/11/07 19:48:20 theurich Exp $
+! $Id: ESMF_CplEx.F90,v 1.27 2006/02/02 01:59:59 theurich Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -229,7 +229,7 @@
     ! Create the top level application component
 
     cname = "Atmosphere Model Coupler"
-    cpl = ESMF_CplCompCreate(cname, configFile="setup.rc", rc=rc)  
+    cpl = ESMF_CplCompCreate(name=cname, configFile="setup.rc", rc=rc)  
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE

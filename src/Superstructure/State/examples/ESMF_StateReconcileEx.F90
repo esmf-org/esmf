@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.6 2005/02/28 16:23:02 nscollins Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.7 2006/02/02 02:00:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@
     integer :: rc
     type(ESMF_State) :: state1
     type(ESMF_GridComp) :: comp1, comp2
-    type(ESMF_VM) :: vm, vmsub1, vmsub2
+    type(ESMF_VM) :: vm
     character(len=ESMF_MAXSTR) :: comp1name, comp2name, statename
 
 !EOC
@@ -82,13 +82,11 @@
     call ESMF_VMGetGlobal(vm=vm, rc=rc)
 
     comp1name = "Atmosphere"
-    comp1 = ESMF_GridCompCreate(vm, comp1name, petList=(/ 0, 1 /), rc=rc)
-    call ESMF_GridCompGet(comp1, vm=vmsub1, rc=rc)
+    comp1 = ESMF_GridCompCreate(name=comp1name, petList=(/ 0, 1 /), rc=rc)
     print *, "GridComp Create returned, name = ", trim(comp1name)
 
     comp2name = "Ocean"
-    comp2 = ESMF_GridCompCreate(vm, comp2name, petList=(/ 2, 3 /), rc=rc)
-    call ESMF_GridCompGet(comp2, vm=vmsub2, rc=rc)
+    comp2 = ESMF_GridCompCreate(name=comp2name, petList=(/ 2, 3 /), rc=rc)
     print *, "GridComp Create returned, name = ", trim(comp2name)
 
     statename = "Ocn2Atm"
@@ -117,6 +115,8 @@
     ! This is where the VM for each component is initialized.
     ! Normally you would call SetEntryPoint inside set services,
     ! but to make this example very short, they are called inline below.
+    ! This is o.k. because the SetServices routine must execute from within
+    ! the parent component VM.
     call ESMF_GridCompSetServices(comp1, comp_dummy, rc)
     call ESMF_GridCompSetServices(comp2, comp_dummy, rc)
 

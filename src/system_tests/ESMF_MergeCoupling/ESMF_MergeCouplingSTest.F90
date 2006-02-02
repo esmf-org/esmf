@@ -1,4 +1,4 @@
-! $Id: ESMF_MergeCouplingSTest.F90,v 1.14 2005/11/23 20:03:37 jwolfe Exp $
+! $Id: ESMF_MergeCouplingSTest.F90,v 1.15 2006/02/02 02:00:08 theurich Exp $
 !
 ! System test code MergeCoupling
 !  Description on Sourceforge under System Test #62502
@@ -85,22 +85,22 @@
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-    comp1 = ESMF_GridCompCreate(vm, cname1, rc=rc)
+    comp1 = ESMF_GridCompCreate(name=cname1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname1), "rc =", rc
 
     cname2 = "user model 2"
-    comp2 = ESMF_GridCompCreate(vm, cname2, rc=rc)
+    comp2 = ESMF_GridCompCreate(name=cname2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname2), "rc =", rc
 
     cname3 = "user model 3"
-    comp3 = ESMF_GridCompCreate(vm, cname3, rc=rc)
+    comp3 = ESMF_GridCompCreate(name=cname3, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname3), "rc =", rc
 
     cplname = "user one-way coupler"
-    cpl = ESMF_CplCompCreate(vm, cplname, rc=rc)
+    cpl = ESMF_CplCompCreate(name=cplname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cplname), ", rc =", rc
 
