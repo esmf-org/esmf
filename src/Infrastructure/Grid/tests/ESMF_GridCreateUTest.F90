@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.37 2005/02/28 16:29:55 nscollins Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.38 2006/02/03 00:34:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.37 2005/02/28 16:29:55 nscollins Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.38 2006/02/03 00:34:29 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -65,6 +65,7 @@
       type(ESMF_GridVertStagger) :: vert_stagger
       integer :: status
       integer, dimension (4) :: DEDim1
+      integer, dimension (1) :: DEDimX
       integer, dimension (10000) :: DEDim2
       real(ESMF_KIND_R8) :: delta(15), grid_min(3), grid_max(3)
       real(ESMF_KIND_R8) :: coord1(21), coord2(16)
@@ -363,6 +364,65 @@
 
       !------------------------------------------------------------------------
 
+      !------------------------------------------------------------------------
+      ! Create a Grid Test.
+      !EX_UTest
+      grid = ESMF_GridCreateHorzXY(coord1=(/ 1d0,2d0,3d0,4d0,5d0,6d0,7d0,8d0,9d0,10d0,11d0 /), &
+                                   coord2=(/ 1d0,2d0,3d0,4d0,5d0,6d0,7d0,8d0,9d0,10d0,11d0 /), &
+                                   horzstagger=ESMF_GRID_HORZ_STAGGER_C_SW, &
+                                   name="coordinate grid", rc=status)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating a grid with explicit coordinates Test"
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Grid Distribute Test - should fail.
+      !EX_UTest
+      DEDim1(:) = 6
+      DEDimX(1) = 11
+      write(failMsg, *) "Returned ESMF_SUCCESS when expecting failure"
+      write(name, *) "Grid Distribute Test"
+      call ESMF_GridDistribute(grid, delayout=layout, &
+                               countsPerDEDim1=DEDim1, &
+                               countsPerDEDim2=DEDimX, rc=status)
+      call ESMF_Test((status.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Create a Grid Test.
+      !EX_UTest
+      grid = ESMF_GridCreateHorzXY(coord1=(/ 1d0,2d0,3d0,4d0,5d0,6d0,7d0,8d0,9d0,10d0,11d0 /), &
+                                   coord2=(/ 1d0,2d0,3d0,4d0,5d0,6d0,7d0,8d0,9d0,10d0,11d0 /), &
+                                   horzstagger=ESMF_GRID_HORZ_STAGGER_C_SW, &
+                                   name="coordinate grid", rc=status)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating a grid with explicit coordinates Test"
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Grid Distribute Test - should succeed.
+      !EX_UTest
+      DEDim1(:) = 5
+      DEDimX(1) = 10
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Grid Distribute Test"
+      call ESMF_GridDistribute(grid, delayout=layout, &
+                               countsPerDEDim1=DEDim1, &
+                               countsPerDEDim2=DEDimX, rc=status)
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Printing a Grid
+      !EX_UTest
+      call ESMF_GridPrint(grid, "", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Printing a Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
 #endif
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
