@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.10 2006/02/01 16:18:06 svasquez Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.11 2006/02/03 16:51:29 svasquez Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -711,14 +711,18 @@ contains
     xmax = 2.*pi
     ymax = 0.5*pi
 
-    crop_factor=1.  !portion of the domain to be covered by the grid
+    crop_factor=1.0 !portion of the domain to be covered by the grid
 
     !--- Grid dimension to cover full physical domain.
     nx_domain=100
     ny_domain=150
 
     !--Coordinate ranges of the "test grids"
-    mincoords = (/ xmin*crop_factor,  ymin*crop_factor /)
+    ! The following line is replaced with actual values to avoid an
+    ! internal compiler error on jazz pgi.
+    ! PGF90-F-0000-Internal compiler error. Errors in Lowering
+    !mincoords = (/ xmin*crop_factor,  ymin*crop_factor /)
+    mincoords = (/ 0.0*1.0,  -0.5*pi*1.0 /)
     maxcoords = (/ xmax*crop_factor,  ymax*crop_factor /)
 
     !--- Number of cells in the current grid.
