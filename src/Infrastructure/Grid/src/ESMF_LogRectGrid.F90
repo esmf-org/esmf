@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.149 2006/01/05 22:03:51 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.150 2006/02/03 00:32:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.149 2006/01/05 22:03:51 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.150 2006/02/03 00:32:49 nscollins Exp $'
 
 !==============================================================================
 !
@@ -327,9 +327,13 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[coord1]
-!          Array of physical coordinates in the first direction.
+!          Array of physical vertex coordinates in the first direction.
+!          Note that there must be 1 more vertex coordinate in each dimension
+!          than the number of cells.
 !     \item[coord2]
-!          Array of physical coordinates in the second direction.
+!          Array of physical vertex coordinates in the second direction.
+!          Note that there must be 1 more vertex coordinate in each dimension
+!          than the number of cells.
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal Grid
 !          stagger.  If none is specified, the default is 
@@ -443,10 +447,15 @@
 !     \begin{description}
 !     \item[minGlobalCoordsPerDim]
 !          Array of minimum physical coordinate in each direction.
+!          Note this is the vertex coordinate and not the cell center.
 !     \item[delta1]
 !          Array of physical increments between nodes in the first direction.
+!          These are cell widths, and there should be as many as there are
+!          cells in the grid.
 !     \item[delta2]
 !          Array of physical increments between nodes in the second direction.
+!          These are cell widths, and there should be as many as there are
+!          cells in the grid.
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal Grid
 !          stagger.  If none is specified, the default is 
@@ -573,8 +582,10 @@
 !          first two array locations or a fatal error occurs.
 !     \item[minGlobalCoordPerDim]
 !          Array of minimum physical coordinates in each dimension.
+!          Note these are the vertex coordinates and not the cell centers.
 !     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum physical coordinates in each direction.
+!          Note these are the vertex coordinates and not the cell centers.
 !     \item[{[deltaPerDim]}]
 !          Array of constant physical increments in each direction.
 !     \item[{[horzstagger]}]
@@ -686,9 +697,13 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[coord1]
-!          Array of physical coordinates in the first direction.
+!          Array of physical vertex coordinates in the first direction.
+!          Note that there must be 1 more vertex coordinate in each dimension
+!          than the number of cells.
 !     \item[coord2]
-!          Array of physical coordinates in the second direction.
+!          Array of physical vertex coordinates in the second direction.
+!          Note that there must be 1 more vertex coordinate in each dimension
+!          than the number of cells.
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal Grid
 !          stagger.  If none is specified, the default is 
@@ -802,10 +817,15 @@
 !     \begin{description}
 !     \item[minGlobalCoordsPerDim]
 !          Array of minimum physical coordinates in each direction.
+!          Note this is the vertex coordinate and not the cell center.
 !     \item[delta1]
 !          Array of physical increments between nodes in the first direction.
+!          These are cell widths, and there should be as many as there are
+!          cells in the grid.
 !     \item[delta2]
 !          Array of physical increments between nodes in the second direction.
+!          These are cell widths, and there should be as many as there are
+!          cells in the grid.
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal Grid
 !          stagger.  If none is specified, the default is 
@@ -932,8 +952,10 @@
 !          first two array locations or a fatal error occurs.
 !     \item[minGlobalCoordPerDim]
 !          Array of minimum physical coordinates in each dimension.
+!          Note this is the vertex coordinate and not the cell center.
 !     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum physical coordinates in each direction.
+!          Note this is the vertex coordinate and not the cell center.
 !     \item[{[deltaPerDim]}]
 !          Array of constant physical increments in each direction.
 !     \item[{[horzstagger]}]
@@ -2103,11 +2125,11 @@
 !     \item[delayout]
 !         {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[{[countsPerDEDecomp1]}]
-!          Array of number of grid increments per DE in the first decomposition
-!          axis.
+!          Array of number of grid increments (cells) per DE in the 
+!          first decomposition axis.
 !     \item[{[countsPerDEDecomp2]}]
-!          Array of number of grid increments per DE in the second decomposition
-!          axis.
+!          Array of number of grid increments (cells) per DE in the 
+!          second decomposition axis.
 !     \item[{[decompIds]}]
 !          Identifier for which Grid axes are decomposed.
 !     \item[{[rc]}]
@@ -4007,6 +4029,19 @@
         i2 = localStart(1) + counts(1) + 1
         j1 = localStart(2) + 1
         j2 = localStart(2) + counts(2) + 1
+        if (size(coordUse1) .lt. (i2-i1+1)) then
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
+                         "not enough I vertex coordinates for I cell counts", &
+                                     ESMF_CONTEXT, rc)
+            return
+         
+        endif
+        if (size(coordUse2) .lt. (j2-j1+1)) then
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
+                         "not enough J vertex coordinates for J cell counts", &
+                                     ESMF_CONTEXT, rc)
+            return
+        endif
         call ESMF_LRGridSetCoord(grid, physGridId, dimCount, counts, &
                                  gridBoundWidth, relloc, coordUse1(i1:i2), &
                                  coordUse2(j1:j2), total=.true., rc=localrc)
