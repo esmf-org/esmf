@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.38 2006/02/03 00:34:29 nscollins Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.39 2006/02/06 23:33:03 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.38 2006/02/03 00:34:29 nscollins Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.39 2006/02/06 23:33:03 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -379,7 +379,7 @@
       !------------------------------------------------------------------------
       ! Grid Distribute Test - should fail.
       !EX_UTest
-      DEDim1(:) = 6
+      DEDim1(:) = (/ 2, 3, 3, 3 /)
       DEDimX(1) = 11
       write(failMsg, *) "Returned ESMF_SUCCESS when expecting failure"
       write(name, *) "Grid Distribute Test"
@@ -404,7 +404,7 @@
       !------------------------------------------------------------------------
       ! Grid Distribute Test - should succeed.
       !EX_UTest
-      DEDim1(:) = 5
+      DEDim1(:) = (/ 2, 3, 2, 3 /)
       DEDimX(1) = 10
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Grid Distribute Test"
