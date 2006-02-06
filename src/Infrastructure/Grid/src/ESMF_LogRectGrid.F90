@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.150 2006/02/03 00:32:49 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.151 2006/02/06 23:32:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.150 2006/02/03 00:32:49 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.151 2006/02/06 23:32:23 nscollins Exp $'
 
 !==============================================================================
 !
@@ -4029,14 +4029,18 @@
         i2 = localStart(1) + counts(1) + 1
         j1 = localStart(2) + 1
         j2 = localStart(2) + counts(2) + 1
-        if (size(coordUse1) .lt. (i2-i1+1)) then
+        if ((size(coordUse1) .lt. (i2-i1+1)) .or. &
+            (lbound(coordUse1, 1) .gt. i1) .or. &
+            (ubound(coordUse1, 1) .lt. i2)) then
             call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
                          "not enough I vertex coordinates for I cell counts", &
                                      ESMF_CONTEXT, rc)
             return
          
         endif
-        if (size(coordUse2) .lt. (j2-j1+1)) then
+        if ((size(coordUse2) .lt. (j2-j1+1)) .or. &
+            (lbound(coordUse2, 1) .gt. j1) .or. &
+            (ubound(coordUse2, 1) .lt. j2)) then
             call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
                          "not enough J vertex coordinates for J cell counts", &
                                      ESMF_CONTEXT, rc)
