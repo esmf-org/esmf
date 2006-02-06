@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.11 2006/02/03 16:51:29 svasquez Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.12 2006/02/06 18:31:28 svasquez Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -722,7 +722,7 @@ contains
     ! internal compiler error on jazz pgi.
     ! PGF90-F-0000-Internal compiler error. Errors in Lowering
     !mincoords = (/ xmin*crop_factor,  ymin*crop_factor /)
-    mincoords = (/ 0.0*1.0,  -0.5*pi*1.0 /)
+    mincoords = (/ 0.0*1.0d0,  -0.5d0*pi*1.0d0 /)
     maxcoords = (/ xmax*crop_factor,  ymax*crop_factor /)
 
     !--- Number of cells in the current grid.
