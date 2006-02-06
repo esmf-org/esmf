@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompSetServ.F90,v 1.4 2004/10/27 22:23:32 nscollins Exp $
+! $Id: ESMF_CplCompSetServ.F90,v 1.5 2006/02/06 20:18:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
 ! !ARGUMENTS:
 !      type(ESMF_CplComp), intent(inout) :: cplcomp
 !      type(any), pointer, intent(in) :: dataPointer
-!      integer, intent(out), optional :: rc
+!      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
 !  Available to be called by an {\tt ESMF\_CplComp} at any time after 
@@ -61,8 +61,10 @@
 !    {\tt ESMF\_CplCompSetInternalState}.
 !    This level of indirection is needed to reliably set and retrieve 
 !    the data block no matter which architecture or compiler is used.  
-!   \item[{[rc]}] 
+!   \item[rc] 
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!    Note: unlike most other ESMF routines, this argument is not optional
+!    because of implementation considerations.
 !   \end{description}
 !
 !EOP
@@ -79,7 +81,7 @@
 !      character(len=*), intent(in) :: subroutineType
 !      subroutine, intent(in) :: subroutineName
 !      integer, intent(in) :: phase
-!      integer, intent(out), optional :: rc
+!      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
 !  Intended to be called by an {\tt ESMF\_CplComp} during the 
@@ -114,8 +116,10 @@
 !    must document
 !    the requirements of the {\tt ESMF\_CplComp} for how and when 
 !    the multiple phases are expected to be called.
-!   \item[{[rc]}] 
+!   \item[rc] 
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!    Note: unlike most other ESMF routines, this argument is not optional
+!    because of implementation considerations.
 !   \end{description}
 !EOP
 
@@ -128,7 +132,7 @@
 ! !ARGUMENTS:
 !      type(ESMF_CplComp), intent(inout) :: cplcomp
 !      type(any), pointer, intent(in) :: dataPointer
-!      integer, intent(out), optional :: rc
+!      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
 !  Available to be called by an {\tt ESMF\_CplComp} at any time, but 
@@ -153,8 +157,10 @@
 !    contains only a pointer to the block.  This level of indirection is
 !    needed to reliably set and retrieve the data block no matter which
 !    architecture or compiler is used.  
-!   \item[{[rc]}] 
+!   \item[rc] 
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!    Note: unlike most other ESMF routines, this argument is not optional
+!    because of implementation considerations.
 !   \end{description}
 !
 !EOP
@@ -169,7 +175,7 @@
 ! !ARGUMENTS:
 !      type(ESMF_CplComp), intent(inout) :: cplcomp
 !      subroutine, intent(in) :: subroutineName
-!      integer, intent(out), optional :: rc
+!      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
 !  Call an {\tt ESMF\_CplComp}'s setservices registration routine.  
@@ -191,8 +197,10 @@
 !    {\tt ESMF\_CplCompSetServices} call.  
 !    An {\tt ESMF\_CplComp} writer must provide this information.
 !    Note this is the actual subroutine, not a character string.
-!   \item[{[rc]}] 
+!   \item[rc] 
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!    Note: unlike most other ESMF routines, this argument is not optional
+!    because of implementation considerations.
 !   \end{description}
 !
 !EOP
