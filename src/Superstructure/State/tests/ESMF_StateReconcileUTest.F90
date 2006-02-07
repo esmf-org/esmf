@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.3 2006/02/02 02:00:01 theurich Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.4 2006/02/07 18:49:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -40,8 +40,10 @@
 
       subroutine comp1_init(gcomp, istate, ostate, clock, rc)
         use ESMF_Mod
+        type(ESMF_GridComp), intent(inout) :: gcomp
         type(ESMF_State), intent(inout) :: istate, ostate
         type(ESMF_Clock), intent(in) :: clock
+        integer, intent(out) :: rc
     
       end subroutine comp1_init
     
