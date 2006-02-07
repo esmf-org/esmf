@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.19 2005/10/21 22:33:13 nscollins Exp $
+// $Id: ESMC_FTable.C,v 1.20 2006/02/07 16:43:54 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.19 2005/10/21 22:33:13 nscollins Exp $";
+           "$Id: ESMC_FTable.C,v 1.20 2006/02/07 16:43:54 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -237,9 +237,9 @@
     if (thisfunc == funccount) {
         funcs[thisfunc].funcname = new char[strlen(name)+1];
         strcpy(funcs[thisfunc].funcname, name);
+        funccount++;
     }
    
-    funccount++;
 
     return ESMF_SUCCESS;
 
@@ -298,9 +298,9 @@
     if (thisfunc == funccount) {
         funcs[thisfunc].funcname = new char[strlen(name)+1];
         strcpy(funcs[thisfunc].funcname, name);
+        funccount++;
     }
    
-    funccount++;
 
     return ESMF_SUCCESS;
 
@@ -359,9 +359,9 @@
     if (thisfunc == funccount) {
         funcs[thisfunc].funcname = new char[strlen(name)+1];
         strcpy(funcs[thisfunc].funcname, name);
+        funccount++;
     }
    
-    funccount++;
 
     return ESMF_SUCCESS;
 
