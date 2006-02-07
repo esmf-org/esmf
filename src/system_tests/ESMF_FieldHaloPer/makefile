@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2006/01/30 18:11:25 nscollins Exp $ 
+# $Id: makefile,v 1.7 2006/02/07 18:13:22 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -40,8 +40,14 @@ CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 
+# note: this test is set up to run with a variety of different processor 
+#  counts (1, 2, and any even number up to 32).  we used to run it with 
+#  -np 12, but on some of the smaller machines that used to hang in the
+#  mpi code (running out of resources).  so we dropped it down to 6, but
+#  on the larger machines we could run this with larger processor counts.
 RUN_FieldHaloPeriodic:
-	$(MAKE) TNAME=FieldHaloPer NP=12 stest
+	$(MAKE) TNAME=FieldHaloPer NP=6 stest
+	#$(MAKE) TNAME=FieldHaloPer NP=12 stest
 
 RUN_FieldHaloPeriodicUNI:
 	$(MAKE) TNAME=FieldHaloPer NP=1 stest
