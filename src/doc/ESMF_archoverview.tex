@@ -1,4 +1,4 @@
-% $Id: ESMF_archoverview.tex,v 1.14 2005/01/10 23:55:33 cdeluca Exp $
+% $Id: ESMF_archoverview.tex,v 1.15 2006/02/07 20:34:05 nscollins Exp $
 
 \section{Architectural Overview}
 \label{sec:ArchOver}
@@ -105,7 +105,7 @@ Driver.  A similar diagram could be drawn for an atmospheric model containing
 physics and dynamics components, as described in Section 
 \ref{sec:principles-hierarchy}.}
 \label{fig:appunit}
-\scalebox{1.0}{\includegraphics{ESMF_appunit.eps}}
+\scalebox{1.0}{\includegraphics{ESMF_appunit}}
 \end{figure}
 
 \subsubsection{Communication Within Components}
@@ -193,7 +193,7 @@ executing Gridded Components joined through a single Coupler Component of the st
 \caption{ESMF supports configurations with a single central Coupler Component. In this case inputs from all Gridded 
 Components are transferred and regridded through the central coupler.}
 \label{fig:hubspoke}
-\scalebox{1.0}{\includegraphics{ESMF_hubandspokes.eps}}
+\scalebox{1.0}{\includegraphics{ESMF_hubandspokes}}
 \end{figure}
 
 \begin{figure}
@@ -202,7 +202,7 @@ These take inputs from one Gridded
 Component and transfer and regrid the data before passing it to another Gridded Component. This schematic shows a 
 flow of data between two Coupler Components that connect three Gridded Components:  an atmosphere model with a land model, and the same atmosphere model with a data assimilation system.}
 \label{fig:point2point}
-\scalebox{1.0}{\includegraphics{ESMF_pairwise.eps}}
+\scalebox{1.0}{\includegraphics{ESMF_pairwise}}
 \end{figure}
 
 The set of superstructure abstractions allows flexible data flow and control between components. However, 
@@ -233,7 +233,7 @@ software for coupling between components on different grids, mapping between com
 multi-processor compute environment and synchronizing events between components with different time-stepping intervals 
 and algorithms.  }
 \label{fig:threecomponents}
-\scalebox{0.5}{\includegraphics{regrid.eps}}
+\scalebox{0.5}{\includegraphics{regrid}}
 \end{figure}
 
 \subsubsection{Bundle, Field and Array Classes}

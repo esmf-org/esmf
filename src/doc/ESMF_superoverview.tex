@@ -1,4 +1,4 @@
-% $Id: ESMF_superoverview.tex,v 1.23 2004/12/30 20:17:31 cdeluca Exp $
+% $Id: ESMF_superoverview.tex,v 1.24 2006/02/07 20:34:05 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -121,7 +121,7 @@ circulation model GEOS-5 to be structured hierarchically, and
 reconfigured and extended easily.  Each box in this diagram is an
 ESMF Gridded Component.}
 \label{fig:GEOS5}
-\scalebox{1.0}{\includegraphics{ESMF_GEOS5.eps}}
+\scalebox{1.0}{\includegraphics{ESMF_GEOS5}}
 \end{figure}
 \end{center}
 
@@ -149,7 +149,7 @@ within, or wholly contain another component.
 by a parent component triggers calls to initialize (run, finalize)
 all of its child components.}
 \label{fig:appunit}
-\scalebox{1.0}{\includegraphics{ESMF_appunit.eps}}
+\scalebox{1.0}{\includegraphics{ESMF_appunit}}
 \end{figure}
 \end{center}
 
@@ -186,7 +186,7 @@ Gridded Component contains the sequencing information and time
 advancement loop.  The AppDriver, Coupler, and all Gridded Components 
 are distributed over nine PETs.}
 \label{fig:serial}
-\scalebox{1.0}{\includegraphics{ESMF_serial.eps}}
+\scalebox{1.0}{\includegraphics{ESMF_serial}}
 \end{figure}
 \end{center}
 
@@ -201,7 +201,7 @@ Model'' Gridded Component are distributed over nine PETs.  The
 ``Atmosphere'' Gridded Component is distributed over three PETs and
 the ``Ocean'' Gridded Component is distributed over six PETs.}
 \label{fig:concurrent}
-\scalebox{1.0}{\includegraphics{ESMF_concurrent.eps}}
+\scalebox{1.0}{\includegraphics{ESMF_concurrent}}
 \end{figure}
 \end{center}
 
@@ -252,7 +252,7 @@ sequence of events in a reconcile call.
 objects for use in subsequent communication calls.  The reconcile 
 call would normally be made during Coupler initialization.}
 \label{fig:reconcile}
-\scalebox{1.0}{\includegraphics{ESMF_reconcile.eps}}
+\scalebox{1.0}{\includegraphics{ESMF_reconcile}}
 \end{figure}
 \end{center}
 
@@ -282,7 +282,7 @@ to UML}, for a translation table that lists the symbols in the diagram
 and their meaning.
 
 \begin{center}
-\includegraphics{Comp_obj.eps}   
+\includegraphics{Comp_obj}   
 \end{center}
 
 
