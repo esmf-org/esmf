@@ -1,4 +1,4 @@
-! $Id: ESMF_WordsizeUTest.F90,v 1.5 2006/02/01 16:12:09 nscollins Exp $
+! $Id: ESMF_WordsizeUTest.F90,v 1.6 2006/02/08 06:14:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -65,12 +65,12 @@
 
     type testr4 
     sequence
-        integer(ESMF_KIND_R4) :: fredr4
+        real(ESMF_KIND_R4) :: fredr4
     end type
 
     type testr8 
     sequence
-        integer(ESMF_KIND_R8) :: fredr8
+        real(ESMF_KIND_R8) :: fredr8
     end type
 
     type(testi)  :: vi(2)
@@ -122,10 +122,10 @@
     print *, "F90: Explicit Integer I8 size = ", i8sizeF
 
     call ESMF_PointerDifference(ESMC_POINTER_SIZE, vr4(1), vr4(2), r4sizeF)
-    print *, "F90: Explicit Integer R4 size = ", r4sizeF
+    print *, "F90: Explicit Real R4 size = ", r4sizeF
 
     call ESMF_PointerDifference(ESMC_POINTER_SIZE, vr8(1), vr8(2), r8sizeF)
-    print *, "F90: Explicit Integer R8 size = ", r8sizeF
+    print *, "F90: Explicit Real R8 size = ", r8sizeF
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
