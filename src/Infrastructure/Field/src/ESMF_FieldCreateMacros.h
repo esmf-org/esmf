@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.7 2005/02/24 23:22:01 nscollins Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.8 2006/02/08 15:40:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -67,8 +67,8 @@
 !     A Fortran array pointer which must be already allocated and the @\
 !     proper size for this portion of the grid. @\
 !   \item [copyflag] @\
-!     Whether to copy the existing data space or reference directly. Default @\
-!     is {\tt ESMF\_DATA\_COPY}.  Other option is {\tt ESMF\_DATA\_REF}. @\
+!     Whether to copy the existing data space or reference directly. Valid @\
+!     values are {\tt ESMF\_DATA\_COPY} or {\tt ESMF\_DATA\_REF}. @\
 !   \item [{[horzRelloc]}] @\
 !     Relative location of data per grid cell/vertex in the horizontal grid. @\
 !   \item [{[vertRelloc]}] @\
