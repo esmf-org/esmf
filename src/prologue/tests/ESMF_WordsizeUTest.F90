@@ -1,4 +1,4 @@
-! $Id: ESMF_WordsizeUTest.F90,v 1.6 2006/02/08 06:14:52 eschwab Exp $
+! $Id: ESMF_WordsizeUTest.F90,v 1.7 2006/02/08 06:54:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -28,60 +28,22 @@
     integer :: i1sizeF, i2sizeF, i4sizeF, i8sizeF, r4sizeF, r8sizeF, ptrsizeF
     integer :: i1sizeC, i2sizeC, i4sizeC, i8sizeC, r4sizeC, r8sizeC, ptrsizeC
 
-    type testi 
-    sequence
-        integer :: fredi
-    end type
-
-    type testr 
-    sequence
-        real :: fredr
-    end type
-
+    ! create array of pointers
     type testp 
     sequence
         integer, pointer :: fredp
     end type
+    type(testp)           :: vip(2)
 
-    type testi1 
-    sequence
-        integer(ESMF_KIND_I1) :: fredi1
-    end type
-
-    type testi2 
-    sequence
-        integer(ESMF_KIND_I2) :: fredi2
-    end type
-
-    type testi4 
-    sequence
-        integer(ESMF_KIND_I4) :: fredi4
-    end type
-
-    type testi8 
-    sequence
-        integer(ESMF_KIND_I8) :: fredi8
-    end type
-
-    type testr4 
-    sequence
-        real(ESMF_KIND_R4) :: fredr4
-    end type
-
-    type testr8 
-    sequence
-        real(ESMF_KIND_R8) :: fredr8
-    end type
-
-    type(testi)  :: vi(2)
-    type(testr)  :: vr(2)
-    type(testp)  :: vip(2)
-    type(testi1) :: vi1(2)
-    type(testi2) :: vi2(2)
-    type(testi4) :: vi4(2)
-    type(testi8) :: vi8(2)
-    type(testr4) :: vr4(2)
-    type(testr8) :: vr8(2)
+    ! create arrays of integer and real kinds
+    integer               :: vi(2)
+    real                  :: vr(2)
+    integer(ESMF_KIND_I1) :: vi1(2)
+    integer(ESMF_KIND_I2) :: vi2(2)
+    integer(ESMF_KIND_I4) :: vi4(2)
+    integer(ESMF_KIND_I8) :: vi8(2)
+    real(ESMF_KIND_R4)    :: vr4(2)
+    real(ESMF_KIND_R8)    :: vr8(2)
 
 
 !------------------------------------------------------------------------
