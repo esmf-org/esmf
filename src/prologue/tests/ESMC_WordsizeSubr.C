@@ -1,4 +1,4 @@
-// $Id: ESMC_WordsizeSubr.C,v 1.2 2005/12/01 20:07:58 nscollins Exp $
+// $Id: ESMC_WordsizeSubr.C,v 1.3 2006/02/08 06:17:12 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -31,14 +31,14 @@ extern "C" {
 void FTN(c_ints)(int *i1, int *i2, int *i3, int *i4,
                  int *i5, int *i6, int *i7, int *rc) {
 
-      printf("In C++: sizeof(char)     = %d\n", sizeof(char));
-      printf("In C++: sizeof(short)     = %d\n", sizeof(short));
-      printf("In C++: sizeof(int)       = %d\n", sizeof(int));
-      printf("In C++: sizeof(long)      = %d\n", sizeof(long));
-      printf("In C++: sizeof(long long) = %d\n", sizeof(long long));
-      printf("In C++: sizeof(float)     = %d\n", sizeof(float));
-      printf("In C++: sizeof(double)    = %d\n", sizeof(double));
-      printf("In C++: sizeof(pointer)   = %d\n", sizeof(*i1));
+      printf("In C++: sizeof(char)     = %d\n", (int) sizeof(char));
+      printf("In C++: sizeof(short)     = %d\n", (int) sizeof(short));
+      printf("In C++: sizeof(int)       = %d\n", (int) sizeof(int));
+      printf("In C++: sizeof(long)      = %d\n", (int) sizeof(long));
+      printf("In C++: sizeof(long long) = %d\n", (int) sizeof(long long));
+      printf("In C++: sizeof(float)     = %d\n", (int) sizeof(float));
+      printf("In C++: sizeof(double)    = %d\n", (int) sizeof(double));
+      printf("In C++: sizeof(pointer)   = %d\n", (int) sizeof(i1));
 
       *i1 = sizeof(ESMF_KIND_I1);
       *i2 = sizeof(ESMF_KIND_I2);
