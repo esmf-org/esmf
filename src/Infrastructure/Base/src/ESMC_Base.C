@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.67 2006/01/26 23:10:28 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.68 2006/02/09 16:58:13 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.67 2006/01/26 23:10:28 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.68 2006/02/09 16:58:13 svasquez Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -702,7 +702,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //    Turn info in base class into a stream of bytes.
 //
 //EOPI
-    int fixedpart, nbytes;
+    int fixedpart;
     int *ip, i, rc;
     ESMC_Status *sp;
     char *cp;
@@ -2308,7 +2308,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOP
 
-  int i;
   char msgbuf[ESMF_MAXSTR];
 
   // simple sanity check
