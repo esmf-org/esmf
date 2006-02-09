@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.39 2005/07/08 21:37:40 nscollins Exp $
+// $Id: ESMC_Base_F.C,v 1.40 2006/02/09 17:08:18 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.39 2005/07/08 21:37:40 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.40 2006/02/09 17:08:18 svasquez Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -324,8 +324,6 @@ extern "C" {
 //
 //EOPI
 
-  int i, status;
-
   if (!base) {
     if (rc) *rc = ESMF_FAILURE;
     return;
@@ -362,7 +360,6 @@ extern "C" {
 //
 //EOPI
 
-  int i, status;
   char *oname = NULL;
   char *cname = NULL;
 
@@ -419,8 +416,6 @@ extern "C" {
 //     return the name to a Fortran caller.
 //
 //EOPI
-
-  int i, status;
 
   if (!base) {
     if (rc) *rc = ESMF_FAILURE;
@@ -491,8 +486,6 @@ extern "C" {
 //
 //EOPI
 
-  int i, status;
-
   if (!base || !id) {
     printf("in c_ESMC_SetID, base or id bad, returning failure\n");
     if (rc) *rc = ESMF_FAILURE;
@@ -528,8 +521,6 @@ extern "C" {
 //
 //EOPI
 
-  int i, status;
-
   if (!base) {
     printf("in c_ESMC_GetVMId, base is bad, returning failure\n");
     if (rc) *rc = ESMF_FAILURE;
@@ -562,8 +553,6 @@ extern "C" {
 //     allocate space and set the object's VMId.
 //
 //EOPI
-
-  int i, status;
 
   if (!base) {
     printf("in c_ESMC_SetVMId, base is bad, returning failure\n");
@@ -614,7 +603,6 @@ extern "C" {
 //
 //EOP
 
-  int i, status;
   char *cname;
 
   if (!base) {
@@ -747,7 +735,7 @@ extern "C" {
 //
 //EOP
 
-  int i, status, attrCount;
+  int status, attrCount;
   ESMC_DataType attrDt;
   ESMC_DataKind attrDk;
   char *cname;
@@ -844,7 +832,7 @@ extern "C" {
 //
 //EOP
 
-  int i, status;
+  int i;
   ESMC_DataType attrDt;
   char *cname, *cvalue;
   int slen;              // actual attribute string length
@@ -934,7 +922,6 @@ extern "C" {
 //
 //EOP
 
-  int i, status, attrCount;
   char *cname;
 
   if (!base) {
@@ -1006,7 +993,6 @@ extern "C" {
 //
 //EOP
 
-  int i, status;
   char *cname;
 
   if (!base) {
