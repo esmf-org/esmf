@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridUTest.F90,v 1.15 2005/10/12 19:06:17 nscollins Exp $
+! $Id: ESMF_RegridUTest.F90,v 1.16 2006/02/09 00:24:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridUTest.F90,v 1.15 2005/10/12 19:06:17 nscollins Exp $'
+      '$Id: ESMF_RegridUTest.F90,v 1.16 2006/02/09 00:24:28 nscollins Exp $'
 !------------------------------------------------------------------------------
       type(ESMF_VM):: vm
 
@@ -231,7 +231,6 @@
       ! add more tests here.
 
       !------------------------------------------------------------------------
-      ! This unt test fails openned bug 1089931
       !EX_UTest_Multi_Proc_Only
       call ESMF_FieldRegridStore(humidity1, humidity2, vm, &
                                  routehandle, &
