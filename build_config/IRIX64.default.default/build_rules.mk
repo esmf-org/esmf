@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.23 2006/01/12 23:05:25 nscollins Exp $
+# $Id: build_rules.mk,v 1.24 2006/02/09 19:54:42 theurich Exp $
 # 
 # IRIX64.default.default
 #
@@ -67,13 +67,13 @@ SGI_FLAGS2          = -woff 1164
 ifeq ($(ESMF_PREC),32)
 SIZEFLAG = -n32
 SL_ABIOPTS         = -check_registry /usr/lib32/so_locations
-CXXINITFILE        = /usr/lib32/c++init_mp.o
+CXXINITFILE        =
 endif
 
 ifeq ($(ESMF_PREC),64)
 SIZEFLAG = -64
 SL_ABIOPTS         = -check_registry /usr/lib64/so_locations
-CXXINITFILE        = /usr/lib64/c++init_mp.o
+CXXINITFILE        =
 endif
 
 C_CC		   = CC $(SIZEFLAG) -mp $(SGI_FLAGS2) 
@@ -81,7 +81,10 @@ C_CXX		   = CC $(SIZEFLAG) -mp $(SGI_FLAGS2) -LANG:std
 C_FC		   = f90 $(SIZEFLAG) -mp -macro_expand
 
 C_CLINKER	   = CC $(SIZEFLAG) -mp $(SGI_FLAGS1) -MP:open_mp=ON
-C_FLINKER	   = f90 $(SIZEFLAG) -mp $(SGI_FLAGS1) -MP:open_mp=ON
+C_FLINKER	   = CC $(SIZEFLAG) -mp $(SGI_FLAGS1) -MP:open_mp=ON
+# replaced the following line by the line above to force C++ linker front end
+# for _all_ ESMF application. *gjt*
+#C_FLINKER	   = f90 $(SIZEFLAG) -mp $(SGI_FLAGS1) -MP:open_mp=ON
 
 C_SLFLAG           = -rpath
 
@@ -94,8 +97,11 @@ C_CCV		   = cc -version
 C_CXXV		   = CC -version
 C_FCV              = f90 -version
 
-C_CXXF90LIBS       = -rpath . -lftn -lfortran -lCio -lmpi++ -lmpi -lpthread 
-C_F90CXXLIBS       = $(CXXINITFILE) -rpath . -lC -lCio -lc -lmpi++ -lmpi -lpthread 
+C_CXXF90LIBS       = -rpath . -lftn -lfortran -lCio -lmpi++ -lmpi -lpthread -lm
+C_F90CXXLIBS       = -rpath . -lftn -lfortran -lCio -lmpi++ -lmpi -lpthread -lm
+# replaced the following line by the line above to force C++ linker front end
+# for _all_ ESMF application. *gjt*
+#C_F90CXXLIBS       = $(CXXINITFILE) -rpath . -lC -lCio -lc -lmpi++ -lmpi #-lpthread 
 
 # fortran flags
 F_FREECPP       = -freeform -cpp
