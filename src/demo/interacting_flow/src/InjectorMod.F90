@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.2 2005/01/12 22:21:18 eschwab Exp $
+! $Id: InjectorMod.F90,v 1.3 2006/02/09 21:00:03 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -23,7 +23,7 @@
 
     module InjectorMod
 
-    ! ESMF Framework module
+    ! ESMF module
     use ESMF_Mod
     use InjectArraysMod
     
@@ -71,7 +71,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[comp]
-!          The Gridded Component corresponding to this code.
+!          A Gridded Component.
 !     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors,
 !          {\tt ESMF\_FAILURE} othewise.
@@ -133,15 +133,15 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[gcomp]
-!          Argument 1.
+!           A Gridded Component.
 !     \item[importState]
-!          Argument 2.
+!           State containing the import list.
 !     \item[exportState]
-!          Argument 2.
+!           State containing the export list.
 !     \item[clock]
-!          Optional object name.
+!           Clock describing the external time.
 !     \item[rc]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
@@ -164,7 +164,7 @@
 ! !DESCRIPTION:
 ! \subsection{Namelist Input Parameters for Injector:}
 !     The following variables must be input to the Injector Component to run.
-!     They are located in a file called "coupled\_inject\_input."
+!     They are located in a file called "interacting\_inject\_input."
 !
 !     The variables are:
 !     \begin{description}
@@ -201,9 +201,9 @@
       !
       ! Read in input file
       !
-      open(10, status="old", file="coupled_inject_input",action="read",iostat=rc)
+      open(10, status="old", file="interacting_inject_input",action="read",iostat=rc)
       if (rc .ne. 0) then
-        print *, "Error!  Failed to open namelist file 'coupled_inject_input' "
+        print *, "Error!  Failed to open namelist file 'interacting_inject_input' "
         stop
       endif
       read(10, input, end=20)
@@ -271,9 +271,9 @@
       call ESMF_StateAddNameOnly(exportState, "Q", rc)
       call ESMF_StateAddNameOnly(exportState, "FLAG", rc)
 
-      !! DEBUG: these are here so we can run w/o the coupler to debug
-      !!  code.  remove these lines later.
+! Give the export state an initial set of values for the SIE Field.
       call ESMF_StateAddField(exportState, field_sie, rc)
+
       rc = ESMF_SUCCESS
 
       end subroutine injector_init1
@@ -288,7 +288,7 @@
 ! !ARGUMENTS:
      type(ESMF_GridComp), intent(inout) :: gcomp
      type(ESMF_State), intent(inout) :: importState, exportState
-     type(ESMF_Clock), intent(inout) :: clock
+     type(ESMF_Clock), intent(in) :: clock
      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -299,13 +299,13 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[comp] 
-!          Component.
+!           A Gridded Component.
 !     \item[importState]
-!          Importstate.
+!           State containing the import list.
 !     \item[exportState]
-!          Exportstate.
+!           State containing the export list.
 !     \item[clock] 
-!          External clock.
+!           Clock describing the external time.
 !     \item[rc] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors,
 !          otherwise {\tt ESMF\_FAILURE}.
@@ -356,7 +356,7 @@
 ! !ARGUMENTS:
      type(ESMF_GridComp), intent(inout) :: comp
      type(ESMF_State), intent(inout) :: importState, exportState
-     type(ESMF_Clock), intent(inout) :: clock
+     type(ESMF_Clock), intent(in) :: clock
      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -368,13 +368,13 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[comp] 
-!          Component.
+!           A Gridded Component.
 !     \item[importState]
-!          Importstate.
+!           State containing the import list.
 !     \item[exportState]
-!          Exportstate.
+!           State containing the export list.
 !     \item[clock] 
-!          External clock.
+!           Clock describing the external time.
 !     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors,
 !          otherwise {\tt ESMF\_FAILURE}.
@@ -488,7 +488,7 @@
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: comp
       type(ESMF_State), intent(inout) :: importState, exportState
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -498,13 +498,13 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[comp] 
-!          Component.
+!           A Gridded Component.
 !     \item[importState]
-!          Importstate.
+!           State containing the import list.
 !     \item[exportState]
-!          Exportstate.
+!           State containing the export list.
 !     \item[clock] 
-!          External clock.
+!           Clock describing the external time.
 !     \item[rc] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors,
 !          otherwise {\tt ESMF\_FAILURE}.

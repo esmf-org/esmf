@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.1 2004/10/14 17:00:55 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.2 2006/02/09 21:00:03 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -94,12 +94,12 @@
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
-!     The Register routine sets the subroutines to be called
+!     The register routine sets the subroutines to be called
 !     as the init, run, and finalize routines.  Note that these are
 !     private to the module.
 !     \begin{description}
 !     \item [comp]
-!           Pointer to a {\tt Gridded Component} object.
+!           A Gridded Component.
 !     \item [rc]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -137,22 +137,22 @@
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
-      type(ESMF_Clock) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
 !     This subroutine is the registered init routine.  It reads input,
-!     creates the {\tt Grid}, attaches it to the {\tt Gridded Component},
-!     initializes data, and sets the import and export {\tt States}.
+!     creates the Grid, attaches it to the Gridded Component,
+!     initializes data, and sets the import and export States.
 !     \begin{description}
 !     \item [gcomp]
-!           Pointer to a {\tt Gridded Component} object.
+!           A Gridded Component.
 !     \item [import\_state]
-!           Pointer to a {\tt State} object containing the import list.
+!           State containing the import list.
 !     \item [export\_state]
-!           Pointer to a {\tt State} object containing the export list.
+!           State containing the export list.
 !     \item [clock]
-!           Pointer to a {\tt Clock} object.
+!           Clock describing the external time.
 !     \item [rc]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -178,7 +178,7 @@
 ! !DESCRIPTION:
 ! \subsubsection{Namelist Input Parameters for Flowsolver:}
 !     The following variables must be input to the FlowSolver Component to run.
-!     They are located in a file called "coupled\_flow\_input."
+!     They are located in a file called "interacting\_flow\_input."
 !
 !     The variables are:
 !     \begin{description}
@@ -244,9 +244,9 @@
 !
 ! Read in input file
 !
-      open(10, status="old", file="coupled_flow_input",action="read",iostat=rc)
+      open(10, status="old", file="interacting_flow_input",action="read",iostat=rc)
       if (rc .ne. 0) then
-        print *, "Error!  Failed to open namelist file 'coupled_flow_input' "
+        print *, "Error!  Failed to open namelist file 'interacting_flow_input' "
         stop
       endif
       read(10, input, end=20)
@@ -281,6 +281,11 @@
         return
       endif
 !
+! Precompute the Halo communication pattern; since all data variables are
+! the same data type and size, the same handle can be reused for all of them.
+!
+      call ESMF_FieldHaloStore(field_u, halohandle, rc=rc)
+!
 ! For initialization, add all fields to the import state.  Only the ones
 ! needed will be copied over to the export state for coupling.
 !
@@ -304,8 +309,9 @@
       call ESMF_StateAddNameOnly(export_state, "Q", rc)
       call ESMF_StateAddNameOnly(export_state, "FLAG", rc)
 
-! temporary fix
+! Give the export state an initial set of values for the SIE Field.
       call ESMF_StateAddField(export_state, field_sie, rc)
+
       rc = ESMF_SUCCESS
 
       end subroutine Flow_Init1
@@ -321,7 +327,7 @@
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
-      type(ESMF_Clock) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -329,13 +335,13 @@
 !     It sets the export fields in the export state for what's required.
 !     \begin{description}
 !     \item [gcomp]
-!           Pointer to a {\tt Gridded Component} object.
+!           A Gridded Component.
 !     \item [import\_state]
-!           Pointer to a {\tt State} object containing the import list.
+!           State containing the import list.
 !     \item [export\_state]
-!           Pointer to a {\tt State} object containing the export list.
+!           State containing the export list.
 !     \item [clock]
-!           Pointer to a {\tt Clock} object.
+!           Clock describing the external time.
 !     \item [rc]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -390,7 +396,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: gcomp
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       integer, optional, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -398,9 +404,9 @@
 !     FlowSolver.
 !     \begin{description}
 !     \item [gcomp]
-!           Pointer to a {\tt Gridded Component} object.
+!           A Gridded Component.
 !     \item [clock]
-!           Pointer to a {\tt Clock} object.
+!           Clock describing the external time.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -706,13 +712,11 @@
 !     algorithm and checks the output interval.
 !     \begin{description}
 !     \item [gcomp]
-!           Pointer to a {\tt Gridded Component} object.
+!           A Gridded Component.
 !     \item [import\_state]
-!           An {\tt ESMF\_State} object containing data obtained from other
-!           components.
+!           State containing data obtained from other components.
 !     \item [export\_state]
-!           An {\tt ESMF\_State} object containing data needed by other
-!           components.
+!           State containing data needed by other components.
 !     \item [clock]
 !           An {\tt ESMF\_Clock} object containing the current time,
 !           time step, and stop time.
@@ -928,13 +932,14 @@
 ! !DESCRIPTION:
 ! \subsubsection{Example of FieldHalo Usage:}
 !
-!     The following piece of code provides an example of Haloing the data in a
-!     Field.  Currently the FieldHalo routine assumes the entire Halo is updated
-!     completely; i.e. the user cannot specify halo width or side separately.
-!     FieldHalo uses the Route object to transfer data from the exclusive
-!     computational domain of one DE to the Halo region of another.
+!     The following piece of code provides an example of haloing the data in a
+!     Field.  Currently the Field halo routine assumes the entire halo is 
+!     updated completely; i.e. the user cannot specify halo width or side 
+!     separately.
+!     Field halo uses a Route object to transfer data from the exclusive
+!     computational domain of one DE to the halo region of another.
 !\begin{verbatim}
-      call ESMF_FieldHalo(field_rhou, rc=status)
+      call ESMF_FieldHalo(field_rhou, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRhoVel:  rhou halo"
         return
@@ -974,9 +979,9 @@
         enddo
       enddo
 !
-! Update RHOV with Halo
+! Update RHOV with halo
 !
-      call ESMF_FieldHalo(field_rhov, rc=status)
+      call ESMF_FieldHalo(field_rhov, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRhoVel:  rhov halo"
         return
@@ -1094,9 +1099,9 @@
         enddo
       enddo
 !
-! Update RHOI with Halo
+! Update RHOI with halo
 !
-      call ESMF_FieldHalo(field_rhoi, rc=status)
+      call ESMF_FieldHalo(field_rhoi, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRhoI:  rhoi halo"
         return
@@ -1210,14 +1215,14 @@
         enddo
       enddo
 !
-! Update the RHO and SIE arrays with Halo.
+! Update the RHO and SIE arrays with halo.
 !
-      call ESMF_FieldHalo(field_rho, rc=status)
+      call ESMF_FieldHalo(field_rho, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRho:  rho halo"
         return
       endif
-      call ESMF_FieldHalo(field_sie, rc=status)
+      call ESMF_FieldHalo(field_sie, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRho:  sie halo"
         return
@@ -1365,22 +1370,22 @@
 !
 ! Halo all the velocity and momentum arrays
 !
-      call ESMF_FieldHalo(field_u, rc=status)
+      call ESMF_FieldHalo(field_u, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  u halo"
         return
       endif
-      call ESMF_FieldHalo(field_v, rc=status)
+      call ESMF_FieldHalo(field_v, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  v halo"
         return
       endif
-      call ESMF_FieldHalo(field_rhou, rc=status)
+      call ESMF_FieldHalo(field_rhou, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  rhou halo"
         return
       endif
-      call ESMF_FieldHalo(field_rhov, rc=status)
+      call ESMF_FieldHalo(field_rhov, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  rhov halo"
         return
@@ -1466,12 +1471,12 @@
 !
 ! Halo calculated fields to update
 !
-      call ESMF_FieldHalo(field_p, rc=status)
+      call ESMF_FieldHalo(field_p, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowState:  p halo"
         return
       endif
-      call ESMF_FieldHalo(field_q, rc=status)
+      call ESMF_FieldHalo(field_q, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowState:  q halo"
         return
@@ -1567,7 +1572,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp) :: gcomp
-      type(ESMF_Clock) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       integer, intent(in) :: file_no
       integer, optional, intent(out) :: rc
 !
@@ -1577,9 +1582,9 @@
 !     run.
 !     \begin{description}
 !     \item [gcomp]
-!           Pointer to a {\tt Gridded Component} object.
+!           A Gridded Component.
 !     \item [clock]
-!           Pointer to a {\tt Clock} object.
+!           Clock describing the external time.
 !     \item [file\_no]
 !           File number for output files, 999 max.
 !     \item [{[rc]}]
@@ -1683,7 +1688,7 @@
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
-      type(ESMF_Clock) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -1692,13 +1697,13 @@
 !     process.
 !     \begin{description}
 !     \item [gcomp]
-!           Pointer to a {\tt Gridded Component} object.
+!           A Gridded Component.
 !     \item [import\_state]
-!           Pointer to a {\tt State} object containing the import list.
+!           State containing the import list.
 !     \item [export\_state]
-!           Pointer to a {\tt State} object containing the export list.
+!           State containing the export list.
 !     \item [clock]
-!           Pointer to a {\tt Clock} object.
+!           Clock describing the external time.
 !     \item [rc]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -1718,6 +1723,8 @@
         print *, "ERROR in Flow_Final"
         return
       endif
+   
+      call ESMF_FieldHaloRelease(halohandle, rc)
 
       rc = ESMF_SUCCESS
 

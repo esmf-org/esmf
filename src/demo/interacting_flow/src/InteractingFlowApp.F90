@@ -1,4 +1,4 @@
-! $Id: InteractingFlowApp.F90,v 1.5 2006/02/02 02:00:01 theurich Exp $
+! $Id: InteractingFlowApp.F90,v 1.6 2006/02/09 21:00:03 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -6,7 +6,7 @@
 ! !MODULE: InteractingFlowApp.F90 - Main program source file for demo
 !
 ! !DESCRIPTION:
-! ESMF Application Wrapper for Coupled Flow Demo.  This file contains the
+! ESMF Application Wrapper for Interacting Flow Demo.  This file contains the
 !  main program, and creates a top level ESMF Gridded Component to contain
 !  all other Components.
 !
@@ -15,7 +15,7 @@
 
     program ESMF_ApplicationWrapper
 
-    ! ESMF Framework module, defines all ESMF data types and procedures
+    ! ESMF module, defines all ESMF data types and procedures
     use ESMF_Mod
     
     ! Flow Component registration routines
@@ -59,7 +59,7 @@
 ! !DESCRIPTION:
 ! \subsubsection{Namelist Input Parameters for InteractingFlowApp:}
 !     The following variables must be input to the InteractingFlow Application to
-!     run.  They are located in a file called "coupled\_app\_input."
+!     run.  They are located in a file called "interacting\_app\_input."
 !
 !     The variables are:
 !     \begin{description}
@@ -100,15 +100,32 @@
         
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+!    ESMF_Initialize
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!
 
-    ! Initialize the ESMF Framework, get the default Global VM, and set
+!BOP
+!
+! !DESCRIPTION:
+! \subsubsection{Example of Initializing the Framework:}
+!
+!     The first call to ESMF must be the initialize method.   As part of
+!     initialization the default Calendar can be specified, some options
+!     for logging can be set, and the default global VM can be returned.
+!     Here we are setting the default Calendar to be Gregorian, and getting
+!     back the global VM:
+!\begin{verbatim}
+    ! Initialize ESMF, get the default Global VM, and set
     ! the default calendar to be Gregorian.
     call ESMF_Initialize(vm=vm, defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
+!\end{verbatim}
+!EOP 
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
-    print *, "Coupled Flow Demo Application Start"
+    print *, "Interacting Flow Demo Application Start"
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -119,9 +136,9 @@
       !
       ! Read in input file
       !
-      open(9, status="old", file="coupled_app_input",action="read",iostat=rc)
+      open(9, status="old", file="interacting_app_input",action="read",iostat=rc)
       if (rc .ne. 0) then
-        print *, "Error!  Failed to open namelist file 'coupled_app_input' "
+        print *, "Error!  Failed to open namelist file 'interacting_app_input' "
         stop
       endif
       read(9, input, end=20)
@@ -135,8 +152,12 @@
 !------------------------------------------------------------------------------
 !
 
-    ! Create the Gridded component, passing in the default VM.
-    compGridded = ESMF_GridCompCreate(name="Coupled Flow Demo", rc=rc)
+!BOP
+!\begin{verbatim}
+    ! Create the top level Gridded Component.
+    compGridded = ESMF_GridCompCreate(name="Interacting Flow Demo", rc=rc)
+!\end{verbatim}
+!EOP 
 
     print *, "Comp Creates finished"
 
@@ -162,7 +183,7 @@
 !
 !     The following piece of code provides an example of Clock creation used in
 !     the Demo.  Note that the Gregorian calendar was set as the default in
-!     the ESMF_Initialize() call above.  As shown in this example, we first
+!     the ESMF\_Initialize() call above.  As shown in this example, we first
 !     initialize a time interval (timestep) to 2 seconds:
 !\begin{verbatim}
       call ESMF_TimeIntervalSet(timeStep, s=2, rc=rc)
@@ -199,9 +220,9 @@
 !  The following piece of code provides an example of Grid creation used in
 !  the Demo.  The extents of the Grid were previously read in from an input
 !  file, but the rest of the Grid parameters are set here by default.  The
-!  Grid spans the Application's DELayout, while the type of the Grid is 
+!  Grid spans the Application's PET list, while the type of the Grid is 
 !  assumed to be horizontal and cartesian x-y with an Arakawa C staggering.  
-!  The Halo width for the Grid is set to one and the name to "source grid":
+!  The Grid name is set to "source grid":
 !\begin{verbatim}
       counts(1) = i_max
       counts(2) = j_max
@@ -217,7 +238,7 @@
       call ESMF_GridDistribute(grid, delayout=DELayoutTop, rc=rc)
 
 !\end{verbatim}
-!     The Grid can then be attached to the Gridded Component with a Set call:
+!     The Grid can then be attached to the Gridded Component with a set call:
 !\begin{verbatim}
      call ESMF_GridCompSet(compGridded, grid=grid, rc=rc)
 !\end{verbatim}
@@ -229,7 +250,7 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
-      flowstate = ESMF_StateCreate("Coupled Flow State", rc=rc)
+      flowstate = ESMF_StateCreate("Interacting Flow State", rc=rc)
      
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -239,17 +260,17 @@
  
       call ESMF_GridCompInitialize(compGridded, flowstate, flowstate, &
                                                                  clock, rc=rc)
-      print *, "Coupled Flow Component Initialize finished, rc =", rc
+      print *, "Interacting Flow Component Initialize finished, rc =", rc
  
 
 
       call ESMF_GridCompRun(compGridded, flowstate, flowstate, clock, rc=rc)
-      print *, "Coupled Flow Component Run finished, rc =", rc
+      print *, "Interacting Flow Component Run finished, rc =", rc
  
 
 
       call ESMF_GridCompFinalize(compGridded, flowstate, flowstate, clock, rc=rc)
-      print *, "Coupled Flow Component Finalize finished, rc =", rc
+      print *, "Interacting Flow Component Finalize finished, rc =", rc
  
  
 !------------------------------------------------------------------------------
@@ -274,7 +295,7 @@
 !------------------------------------------------------------------------------
       ! This output goes into the log file (standard output, unit 6)
       print *, "**********************************************************"
-      print *, "SUCCESS!  Your ESMF Coupled Flow Application Demo ", &
+      print *, "SUCCESS!  Your ESMF Interacting Flow Application Demo ", &
                "ran to completion!"
       print *, "See the output files in the Demo source directory for ", &
                "the generated data."
@@ -287,7 +308,7 @@
       ! hopefully the user will see it without needing to inspect the log file.
       if (pet_id .eq. 0) then
         write(0, *) ""
-        write(0, *) "SUCCESS!  Your ESMF Coupled Flow Application Demo ", &
+        write(0, *) "SUCCESS!  Your ESMF Interacting Flow Application Demo ", &
                  "ran to completion!"
         write(0, *) ""
       endif
