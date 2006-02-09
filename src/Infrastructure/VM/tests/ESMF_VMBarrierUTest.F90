@@ -1,4 +1,4 @@
-! $Id: ESMF_VMBarrierUTest.F90,v 1.6 2005/06/04 00:16:12 theurich Exp $
+! $Id: ESMF_VMBarrierUTest.F90,v 1.7 2006/02/09 07:27:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMBarrierUTest.F90,v 1.6 2005/06/04 00:16:12 theurich Exp $'
+      '$Id: ESMF_VMBarrierUTest.F90,v 1.7 2006/02/09 07:27:40 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -128,7 +128,7 @@
          &         delay,'[  -- should be >= ',max_time-dt_prec,'--  ]'
       end do   !Loop over i -- "slow" Pet's
 
-      !EX_UTest
+      !NEX_UTest
       !Verify loop test results
       call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
