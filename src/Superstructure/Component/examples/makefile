@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2006/01/30 20:10:09 nscollins Exp $ 
+# $Id: makefile,v 1.24 2006/02/10 22:11:25 nscollins Exp $ 
 
 ALL:  build_examples
 
@@ -17,26 +17,17 @@ LIBBASE	  =
 LOCDIR	  = src/Superstructure/Component/examples
 
 
-EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_AppMainEx \
-                 $(ESMF_EXDIR)/ESMC_CplEx \
-                 $(ESMF_EXDIR)/ESMC_GCompEx \
-                 $(ESMF_EXDIR)/ESMF_AppMainEx \
+EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_AppMainEx \
                  $(ESMF_EXDIR)/ESMF_CplEx \
                  $(ESMF_EXDIR)/ESMF_GCompEx \
                  $(ESMF_EXDIR)/ESMF_InternalStateEx 
 
-EXAMPLES_RUN   = run_ESMC_AppMainEx \
-                 run_ESMC_CplEx \
-                 run_ESMC_GCompEx \
-                 run_ESMF_AppMainEx \
+EXAMPLES_RUN   = run_ESMF_AppMainEx \
                  run_ESMF_CplEx \
                  run_ESMF_GCompEx \
                  run_ESMF_InternalStateEx 
 
-EXAMPLES_RUN_UNI = run_ESMC_AppMainEx_uni \
-                   run_ESMC_CplEx_uni \
-                   run_ESMC_GCompEx_uni \
-                   run_ESMF_AppMainEx_uni \
+EXAMPLES_RUN_UNI = run_ESMF_AppMainEx_uni \
                    run_ESMF_CplEx_uni \
                    run_ESMF_GCompEx_uni \
                    run_ESMF_InternalStateEx_uni 
