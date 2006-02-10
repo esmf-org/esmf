@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.71 2006/02/10 22:26:34 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.72 2006/02/10 23:31:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.71 2006/02/10 22:26:34 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.72 2006/02/10 23:31:16 theurich Exp $'
 
 !==============================================================================
 !
@@ -229,7 +229,7 @@
 !
 ! !INTERFACE:
       recursive function ESMF_GridCompCreate(name, gridcomptype, grid, &
-        config, configFile, clock, petList, contextflag, vm, rc)
+        config, configFile, clock, petList, contextflag, parentVM, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_GridComp) :: ESMF_GridCompCreate
@@ -244,7 +244,7 @@
       type(ESMF_Clock),        intent(inout), optional :: clock
       integer,                 intent(in),    optional :: petList(:)
       type(ESMF_ContextFlag),  intent(in),    optional :: contextflag
-      type(ESMF_VM),           intent(in),    optional :: vm
+      type(ESMF_VM),           intent(in),    optional :: parentVM
       integer,                 intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
@@ -293,7 +293,7 @@
 !    Specify the component's VM context. The default context is
 !    {\tt ESMF\_CHILD\_IN\_NEW\_VM}. See section \ref{opt:contextflag} for a
 !    complete list of valid flags.
-!   \item[{[vm]}]
+!   \item[{[parentVM]}]
 !    {\tt ESMF\_VM} object for the current component. This will become the
 !    parent {\tt ESMF\_VM} for the newly created {\tt ESMF\_GridComp} object.
 !    By default the current VM is determined automatically.
@@ -324,7 +324,7 @@
                                 gridcomptype=gridcomptype, &
                                 configFile=configFile, &
                                 config=config, grid=grid, clock=clock, &
-                                vm=vm, petList=petList, &
+                                vm=parentVM, petList=petList, &
                                 contextflag=contextflag, rc=localrc)
         ! if (ESMF_LogPassFoundError(localrc, rc)) return
         if (ESMF_LogMsgFoundError(localrc, &
