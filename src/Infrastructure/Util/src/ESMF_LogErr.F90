@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.12 2006/01/11 00:26:48 eschwab Exp $
+! $Id: ESMF_LogErr.F90,v 1.13 2006/02/10 20:11:29 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -312,7 +312,8 @@ end subroutine ESMF_LogFinalize
 	integer, intent(out),optional		                :: rc
 
 ! !DESCRIPTION:
-!      This subroutine flushes the {\tt ESMF\_Log}.
+!      This subroutine flushes the {\tt ESMF\_Log} buffer to its
+!      associated file.
 !
 !      The arguments are:
 !      \begin{description}
