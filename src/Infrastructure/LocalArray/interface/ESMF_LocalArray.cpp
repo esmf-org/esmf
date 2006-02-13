@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.cpp,v 1.21 2005/11/04 22:11:11 nscollins Exp $
+! $Id: ESMF_LocalArray.cpp,v 1.22 2006/02/13 21:50:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -158,7 +158,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.cpp,v 1.21 2005/11/04 22:11:11 nscollins Exp $'
+      '$Id: ESMF_LocalArray.cpp,v 1.22 2006/02/13 21:50:29 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -329,9 +329,9 @@ end function
 ! {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL},
 ! {\tt ESMF\_DATA\_CHARACTER}.
 ! \item[kind]
-! Array kind. Valid kinds include {\tt ESMF\_KIND\_I4},
-! {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
-! {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
+! Array kind. Valid kinds include {\tt ESMF\_I4},
+! {\tt ESMF\_I8}, {\tt ESMF\_R4}, {\tt ESMF\_R8}.
+! %%% {\tt ESMF\_C8}, {\tt ESMF\_C16}. % add back when supported
 ! \item[counts]
 ! The number of items in the single dimension of the array.   This is a
 ! scalar.  Note that if you call {\tt ESMF\_LocalArrayCreate} with 
@@ -398,9 +398,9 @@ end function
 !    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
 !    {\tt ESMF\_DATA\_CHARACTER}.
 !  \item[kind]
-!    Array kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
-!    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
-!    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
+!    Array kind.  Valid kinds include {\tt ESMF\_I4}, 
+!    {\tt ESMF\_I8}, {\tt ESMF\_R4}, {\tt ESMF\_R8}. 
+!    %%% {\tt ESMF\_C8}, {\tt ESMF\_C16}.  % add back when supported
 !  \item[counts]
 !    The number of items in each dimension of the array.  This is a 1D
 !    integer array the same length as the rank.
