@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.62 2006/02/10 23:31:16 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.63 2006/02/13 18:51:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.62 2006/02/10 23:31:16 theurich Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.63 2006/02/13 18:51:06 theurich Exp $'
 
 !==============================================================================
 !
@@ -229,7 +229,7 @@
 !
 ! !INTERFACE:
       recursive function ESMF_CplCompCreate(name, config, configFile, &
-                                    clock, petList, contextflag, parentVM, rc)
+                                    clock, petList, contextflag, parentVm, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_CplComp) :: ESMF_CplCompCreate
@@ -241,7 +241,7 @@
       type(ESMF_Clock),       intent(in),  optional :: clock
       integer,                intent(in),  optional :: petList(:)
       type(ESMF_ContextFlag), intent(in),  optional :: contextflag
-      type(ESMF_VM),          intent(in),  optional :: parentVM
+      type(ESMF_VM),          intent(in),  optional :: parentVm
       integer,                intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -283,7 +283,7 @@
 !    Specify the component's VM context. The default context is
 !    {\tt ESMF\_CHILD\_IN\_NEW\_VM}. See section \ref{opt:contextflag} for a
 !    complete list of valid flags.
-!   \item[{[parentVM]}]
+!   \item[{[parentVm]}]
 !    {\tt ESMF\_VM} object for the current component. This will become the
 !    parent {\tt ESMF\_VM} for the newly created {\tt ESMF\_CplComp} object.
 !    By default the current VM is determined automatically.
@@ -312,7 +312,7 @@
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
-                                clock=clock, vm=parentVM, petList=petList, &
+                                clock=clock, vm=parentVm, petList=petList, &
                                 contextflag=contextflag, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
