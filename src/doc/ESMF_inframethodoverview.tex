@@ -1,4 +1,4 @@
-% $Id: ESMF_inframethodoverview.tex,v 1.17 2006/02/07 20:32:50 nscollins Exp $
+% $Id: ESMF_inframethodoverview.tex,v 1.18 2006/02/13 17:01:44 cdeluca Exp $
 
 \section{Overview of Distributed Data Methods}
 
@@ -370,13 +370,13 @@ into another buffer; it can be communicated inplace.  There is
 a flag in the XPacket which marks how many of the dimensions
 are contiguous.}
 \label{fig:xpacketcontig}
-\scalebox{0.5}{\includegraphics{Basic_xpacket_contig}}
+\scalebox{0.9}{\includegraphics{Basic_xpacket_contig}}
 \end{figure}
 \end{center}
 
 \begin{center}
 \begin{figure}
-\scalebox{0.5}{\includegraphics{Basic_pack_route}}
+\scalebox{0.9}{\includegraphics{Basic_pack_route}}
 \caption{Often the overhead of making multiple communication calls 
 outweighs the cost of copying non-contiguous data into a contiguous buffer,
 sending it in a single operation, and then copying it to the final
