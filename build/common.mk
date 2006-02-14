@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.149 2006/01/30 19:58:14 nscollins Exp $
+#  $Id: common.mk,v 1.150 2006/02/14 18:07:02 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -305,6 +305,7 @@ ESMF_BUILD_DOCDIR = $(ESMF_BUILD)/build/doc
 ESMF_STDIR      = $(ESMF_TOP_DIR)/src/system_tests
 ESMF_CONFDIR    = $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).default
 ESMF_SITEDIR    = $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)
+ESMF_UTCDIR     = $(ESMF_TOP_DIR)/src/use_test_cases
 
 # TODO: these may be leftovers from the impl_rep, and if so, they should
 # be moved up into that makefile.  as far as i know, these are not used
@@ -1143,6 +1144,7 @@ clean_validate:
 	$(MAKE) clean_unit_tests 
 
 
+
 #-------------------------------------------------------------------------------
 # Targets for building and running system tests.
 #-------------------------------------------------------------------------------
@@ -1205,7 +1207,7 @@ build_system_tests: reqfile_libesmf reqdir_lib chkdir_tests
 	$(MAKE) ACTION=tree_build_system_tests tree ; \
 	echo "ESMF system tests built successfully."
 
-tree_build_system_tests:  $(SYSTEM_TESTS_BUILD) 
+tree_build_system_tests: $(SYSTEM_TESTS_BUILD) 
 
 
 #
@@ -1330,6 +1332,199 @@ clean_system_tests:
 #
 check_system_tests: 
 	@$(DO_ST_RESULTS)
+
+
+#-------------------------------------------------------------------------------
+# Targets for building and running use test cases
+#-------------------------------------------------------------------------------
+
+use_test_cases: chkdir_tests
+	@if [ -d $(ESMF_UTCDIR) ] ; then cd $(ESMF_UTCDIR); fi; \
+	if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
+	   if [ -d $(USE_TEST_CASE) ] ; then \
+	       cd $(USE_TEST_CASE); \
+           else \
+               echo "USE_TEST_CASE $(USE_TEST_CASE) does not exist."; \
+               echo "Check out use_test_cases at the $(ESMF_DIR)/src directory."; \
+               exit; \
+	   fi; \
+	   echo current working directory is now `pwd` ; \
+        fi; \
+	if [ $(ESMF_COMM) = "mpiuni" ] ; then \
+          echo "Cannot run multiprocessor use test cases when ESMF_COMM is mpiuni;" ; \
+	  echo "run use_test_cases_uni instead." ; \
+	  echo "" ; \
+	  $(MAKE) err ; \
+	fi; \
+	$(MAKE) ACTION=tree_use_test_cases tree ; \
+#	$(MAKE) check_use_test_cases
+
+tree_use_test_cases: tree_build_use_test_cases tree_run_use_test_cases
+
+#
+# use_test_cases_uni, build and run uni versions of the use test cases
+#
+use_test_cases_uni: chkdir_tests
+	@if [ -d $(ESMF_UTCDIR) ] ; then cd $(ESMF_UTCDIR); fi; \
+	if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
+	   if [ -d $(USE_TEST_CASE) ] ; then \
+	       cd $(USE_TEST_CASE); \
+           else \
+              echo "USE_TEST_CASE $(USE_TEST_CASE) does not exist."; \
+              exit; \
+	   fi; \
+	   echo current working directory is now `pwd` ; \
+	fi; \
+	$(MAKE) ACTION=tree_use_test_cases_uni tree ; \
+#	$(MAKE) check_use_test_cases
+
+tree_use_test_cases_uni: tree_build_use_test_cases tree_run_use_test_cases_uni
+
+#
+# build_use_test_cases
+#
+build_use_test_cases: reqfile_libesmf reqdir_lib chkdir_tests
+	@if [ -d $(ESMF_UTCDIR) ] ; then cd $(ESMF_UTCDIR) ; fi; \
+	if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
+	   if [ -d $(USE_TEST_CASE) ] ; then \
+	       cd $(USE_TEST_CASE); \
+           else \
+              echo "USE_TEST_CASE $(USE_TEST_CASE) does not exist."; \
+              exit; \
+	   fi; \
+	   echo current working directory is now `pwd` ; \
+        fi; \
+	echo " Make is $(MAKE)";\
+	$(MAKE) ACTION=tree_build_use_test_cases tree ; \
+	echo "ESMF use test cases built successfully."
+
+tree_build_use_test_cases: $(USE_TEST_CASES_BUILD)
+
+
+#
+# TODO: the RM in the link rules below means that any use test case which 
+# includes additional .o files (which most do) will always rebuild even if 
+# it is up-to-date.  but we remove the .o and .mod files because we also
+# are required to be able to build multiple architectures from a single
+# build tree.  we currently have a race-condition with the system tests
+# in that we build with the current directory being the src dir, which
+# means compilers can trample each others .o and .mod files.  the library
+# cds into the lib or mod dir before compiling, so .o and .mod files
+# are created in a compiler/platform directory and do not interfere with
+# each other.  
+# 
+# the fix for this is either to cd into the test dir before compiling
+# and linking, or to create a temp subdir based on the compiler/platform/
+# BOPT/SITE settings - so compiles are truly independent.
+#
+# this also applies to the tests, examples, and demo code.
+#
+
+#
+#  Link rule for Fortran use test cases.
+#
+$(ESMF_TESTDIR)/ESMF_%UseTestCase : ESMF_%UseTestCase.o $(USE_TEST_CASES_OBJ) $(ESMFLIB)
+	$(FLINKER) $(LINKOPTS) -o $@ $(USE_TEST_CASES_OBJ) $< $(FLINKLIBS)
+	$(RM) -f *.o *.mod
+
+
+# debugging aid:  link the executable, standard output, and log file to
+# temporary names in the current directory (they are built in the test
+# directory which is a long ways away from the source.  debuggers work
+# better if the current directory is the source dir, not the executable dir.)
+# example use:  gmake TNAME=FieldExcl system_test_links
+use_test_cases_links:
+	$(RM) t s l
+	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase t
+	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase.stdout s
+	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase.Log l
+
+#
+#  Link rule for Fortran use test cases (MPMD).
+#
+$(ESMF_TESTDIR)/ESMF_%UseTestCaseA : $(USE_TEST_CASES_OBJ_A) $(ESMFLIB) ESMF_%UseTestCaseA.o
+	$(FLINKER) $(LINKOPTS) -o $@ $(USE_TEST_CASES_OBJ_A) ESMF_$*UseTestCaseA.o $(FLINKLIBS)
+$(ESMF_TESTDIR)/ESMF_%UseTestCaseB : $(USE_TEST_CASES_OBJ_B) $(ESMFLIB) ESMF_%UseTestCaseB.o 
+	$(FLINKER) $(LINKOPTS) -o $@ $(USE_TEST_CASES_OBJ_B) ESMF_$*UseTestCaseB.o $(FLINKLIBS)
+$(ESMF_TESTDIR)/ESMF_%UseTestCaseC : $(USE_TEST_CASES_OBJ_C) $(ESMFLIB) ESMF_%UseTestCaseC.o 
+	$(FLINKER) $(LINKOPTS) -o $@ $(USE_TEST_CASES_OBJ_C) ESMF_$*UseTestCaseC.o $(FLINKLIBS)
+$(ESMF_TESTDIR)/ESMF_%UseTestCaseD : $(USE_TEST_CASES_OBJ_D) $(ESMFLIB) ESMF_%UseTestCaseD.o 
+	$(FLINKER) $(LINKOPTS) -o $@ $(USE_TEST_CASES_OBJ_D) ESMF_$*UseTestCaseD.o $(FLINKLIBS)
+$(ESMF_TESTDIR)/ESMF_%UseTestCaseE : $(USE_TEST_CASES_OBJ_E) $(ESMFLIB) ESMF_%UseTestCaseE.o 
+	$(FLINKER) $(LINKOPTS) -o $@ $(USE_TEST_CASES_OBJ_E) ESMF_$*UseTestCaseE.o $(FLINKLIBS)
+MPMDCLEANUP:
+	$(RM) -f *.o *.mod
+
+#
+# run_use_test_cases
+#
+run_use_test_cases:  reqdir_tests
+	@if [ -d $(ESMF_UTCDIR) ] ; then cd $(ESMF_UTCDIR) ; fi; \
+	if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
+	   if [ -d $(USE_TEST_CASE) ] ; then \
+	       cd $(USE_TEST_CASE); \
+           else \
+              echo "USE_TEST_CASE $(USE_TEST_CASE) does not exist."; \
+              echo "Check out use_test_cases at the $(ESMF_DIR)/src directory."; \
+              exit; \
+	   fi; \
+	   echo current working directory is now `pwd` ; \
+        fi; \
+	if [ $(ESMF_COMM) = "mpiuni" ] ; then \
+          echo "Cannot run multiprocessor use test cases when ESMF_COMM is mpiuni;" ; \
+	  echo "run run_use_test_cases_uni instead." ; \
+	  echo "" ; \
+	  $(MAKE) err ; \
+	fi; \
+	$(MAKE) ACTION=tree_run_use_test_cases tree ; \
+#	$(MAKE) check_use_test_cases
+
+tree_run_use_test_cases: $(USE_TEST_CASES_RUN) 
+
+#
+# run_use_test_cases_uni
+#
+run_use_test_cases_uni:  reqdir_tests
+	@if [ -d $(ESMF_UTCDIR) ] ; then cd $(ESMF_UTCDIR) ; fi; \
+	if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
+	   if [ -d $(USE_TEST_CASE) ] ; then \
+	       cd $(USE_TEST_CASE); \
+           else \
+              echo "USE_TEST_CASE  $(USE_TEST_CASE) does not exist."; \
+               echo "Checkout use_test_cases at the $(ESMF_DIR)/src directory."; \
+              exit; \
+	   fi; \
+	   echo current working directory is now `pwd` ; \
+        fi; \
+	$(MAKE) ACTION=tree_use_test_cases_uni tree ; \
+#	$(MAKE) check_use_test_cases
+
+tree_run_use_test_cases_uni: $(USE_TEST_CASES_RUN_UNI)
+
+#
+# run the use test cases, either redirecting the stdout from the command line, or
+# relying on the mpirun script to redirect stdout from inside the batch script.
+#
+uctest:
+	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	  echo $(MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase ; \
+	  $(MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase ; \
+	else \
+	  echo $(MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase 1\> $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase.stdout 2\>\&1 ; \
+	  $(MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase 1> $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase.stdout 2>&1 ; \
+	fi 
+
+#
+# this target deletes only the use test cases related files from the test subdir
+#
+clean_use_test_cases:
+	$(RM) $(ESMF_TESTDIR)/*UseTestCase* 
+
+#
+# report statistics on system tests
+#
+#check_use_test_cases: 
+#	@$(DO_UTC_RESULTS)
 
 
 #-------------------------------------------------------------------------------
