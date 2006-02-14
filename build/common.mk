@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.150 2006/02/14 18:07:02 svasquez Exp $
+#  $Id: common.mk,v 1.151 2006/02/14 23:25:10 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1452,8 +1452,6 @@ $(ESMF_TESTDIR)/ESMF_%UseTestCaseD : $(USE_TEST_CASES_OBJ_D) $(ESMFLIB) ESMF_%Us
 	$(FLINKER) $(LINKOPTS) -o $@ $(USE_TEST_CASES_OBJ_D) ESMF_$*UseTestCaseD.o $(FLINKLIBS)
 $(ESMF_TESTDIR)/ESMF_%UseTestCaseE : $(USE_TEST_CASES_OBJ_E) $(ESMFLIB) ESMF_%UseTestCaseE.o 
 	$(FLINKER) $(LINKOPTS) -o $@ $(USE_TEST_CASES_OBJ_E) ESMF_$*UseTestCaseE.o $(FLINKLIBS)
-MPMDCLEANUP:
-	$(RM) -f *.o *.mod
 
 #
 # run_use_test_cases
