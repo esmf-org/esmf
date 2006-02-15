@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.134 2006/02/02 02:00:00 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.135 2006/02/15 00:36:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -261,7 +261,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.134 2006/02/02 02:00:00 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.135 2006/02/15 00:36:50 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -411,9 +411,10 @@ end function
 
         ! Fill in values
         if (.not.associated(compp)) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "Uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                    "Uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)
+            return
         endif
 
         ! component type
@@ -468,7 +469,7 @@ end function
         if (present(vm)) then
           compp%vm_parent = vm
         else
-          ! if parent specified, use their vm, else use global.
+          ! if parent specified use that vm, else use current VM.
           if (present(parent)) then
             compp%vm_parent = parent%vm
           else
@@ -507,21 +508,21 @@ end function
           compp%configFile = configFile
           compp%config = ESMF_ConfigCreate(status)
           call ESMF_ConfigLoadFile(compp%config, configFile, rc=status)
-          ! TODO: rationalize return codes from config with ESMF codes
-          if (status .ne. 0) then
+          if (status .ne. ESMF_SUCCESS) then
               ! try again with the dirPath concatinated on front
               fullpath = trim(dirPath) // '/' // trim(configFile)
               call ESMF_ConfigLoadFile(compp%config, fullpath, rc=status)
               ! TODO: construct a msg string and then call something here.
               ! if (ESMF_LogMsgFoundError(status, msgstr, rc)) return
-              if (status .ne. 0) then
+              if (status .ne. ESMF_SUCCESS) then
                 call ESMF_BaseDestroy(compp%base)
                 write(msgbuf, *) &
                   "ERROR: loading config file, unable to open either", &
                   " name = ", trim(configFile), " or name = ", trim(fullpath)
-                if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  msgbuf, &
-                                  ESMF_CONTEXT, rc)) return
+                call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                                         msgbuf, &
+                                         ESMF_CONTEXT, rc)
+                return
               endif
           endif
         else if (present(config)) then
@@ -561,11 +562,12 @@ end function
         call ESMF_VMGet(compp%vm_parent, localPet=mypet, petCount=npets)
         if (present(contextflag)) then
           if (contextflag==ESMF_CHILD_IN_PARENT_VM) then
-            if (compp%npetlist>0 .and. compp%npetlist<npets) then
+            if ((compp%npetlist .gt. 0) .and. (compp%npetlist .lt. npets)) then
               ! conflict between contextflag and petlist -> bail out
-              if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                "Conflict between contextflag and petlist arguments", &
-                ESMF_CONTEXT, rc)) return
+              call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+                      "Conflict between contextflag and petlist arguments", &
+                                       ESMF_CONTEXT, rc) 
+              return
             endif
           endif
           compp%contextflag = contextflag
@@ -575,7 +577,7 @@ end function
         
         ! set the participation flag
         compp%iAmParticipant = .false.  ! reset
-        if (compp%npetlist>0) then
+        if (compp%npetlist .gt. 0) then
           ! see if mypet is in the petlist
           do i=1, compp%npetlist
             if (compp%petlist(i) == mypet) compp%iAmParticipant = .true.  ! set
@@ -647,9 +649,10 @@ end function
         endif
 
         if (.not.associated(compp)) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "Uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                    "Uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)
+            return
         endif
 
         if (compp%vm_info /= ESMF_NULL_POINTER) then
@@ -757,15 +760,17 @@ end function
         endif
         
         if (.not.associated(compp)) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "Uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                    "Uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc) 
+            return
         endif
 
         if (compp%compstatus .ne. ESMF_STATUS_READY) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                    "uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc) 
+            return
         endif
 
         ! set the default mode to ESMF_VASBLOCKING
@@ -908,15 +913,17 @@ end function
         endif
 
         if (.not.associated(compp)) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "Uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                    "Uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc) 
+            return
         endif
 
         if (compp%compstatus .ne. ESMF_STATUS_READY) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc) 
+            return
         endif
 
         call ESMF_GetName(compp%base, cname, status)
@@ -1010,15 +1017,17 @@ end function
         endif
 
         if (.not.associated(compp)) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "Uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "Uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc) 
+            return
         endif
 
         if (compp%compstatus .ne. ESMF_STATUS_READY) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)  
+            return
         endif
 
         call ESMF_GetName(compp%base, cname, status)
@@ -1121,15 +1130,17 @@ end function
         endif
 
         if (.not.associated(compp)) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "Uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "Uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc) 
+            return
         endif
 
         if (compp%compstatus .ne. ESMF_STATUS_READY) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc) 
+            return
         endif
 
         ! set the default mode to ESMF_VASBLOCKING
@@ -1276,15 +1287,17 @@ end function
         endif
 
         if (.not.associated(compp)) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "Uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "Uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)
+             return
         endif
 
         if (compp%compstatus .ne. ESMF_STATUS_READY) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                    "uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)
+            return
         endif
 
         ! set the default mode to ESMF_VASBLOCKING
@@ -1421,15 +1434,17 @@ end function
         endif
 
         if (.not.associated(compp)) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "Uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "Uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)
+            return
         endif
 
         if (compp%compstatus .ne. ESMF_STATUS_READY) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)
+            return
         endif
 
         if (present(name)) then
@@ -1535,15 +1550,17 @@ end function
         endif
 
         if (.not.associated(compp)) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "Uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "Uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)
+            return
         endif
 
         if (compp%compstatus .ne. ESMF_STATUS_READY) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)
+            return
         endif
 
         if (present(name)) then
@@ -1627,15 +1644,17 @@ end function
         endif
 
         if (.not.associated(compp)) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "Uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "Uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)
+            return
         endif
 
         if (compp%compstatus .ne. ESMF_STATUS_READY) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)
+            return
         endif
         
         ESMF_CompIsPetLocal = compp%iAmParticipant
@@ -1756,15 +1775,17 @@ end function
        endif
 
         if (.not.associated(compp)) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "Uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "Uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)
+            return
         endif
 
        if (compp%compstatus .ne. ESMF_STATUS_READY) then
-           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                     "uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc)) return
+           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                    "uninitialized or destroyed component", &
+                                    ESMF_CONTEXT, rc)
+            return
        endif
 
        defaultopts = "brief"
@@ -1902,16 +1923,18 @@ end function
     endif
 
         if (.not.associated(compp)) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "Uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "Uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)
+            return
         endif
 
     ! ensure that this is not a child_in_parent_vm plan
     if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
-      if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-        "xxxCompSetVMxxx() calls are incompatible with CHILD_IN_PARENT_VM component", &
-        ESMF_CONTEXT, rc)) return
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+      "CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
+                               ESMF_CONTEXT, rc)
+            return
     endif
 
     ! call CompClass method
@@ -1979,16 +2002,18 @@ end function
     endif
 
         if (.not.associated(compp)) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "Uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "Uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)
+            return
         endif
 
     ! ensure that this is not a child_in_parent_vm plan
     if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
-      if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-        "xxxCompSetVMxxx() calls are incompatible with CHILD_IN_PARENT_VM component", &
-        ESMF_CONTEXT, rc)) return
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+      "CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
+                               ESMF_CONTEXT, rc)
+            return
     endif
 
     ! call CompClass method
@@ -2056,16 +2081,18 @@ end function
     endif
 
         if (.not.associated(compp)) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "Uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "Uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)
+            return
         endif
 
     ! ensure that this is not a child_in_parent_vm plan
     if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
-      if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-        "xxxCompSetVMxxx() calls are incompatible with CHILD_IN_PARENT_VM component", &
-        ESMF_CONTEXT, rc)) return
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+      "CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
+                               ESMF_CONTEXT, rc)
+            return
     endif
 
     ! call CompClass method
@@ -2129,15 +2156,17 @@ end function
     endif
 
         if (.not.associated(compp)) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "Uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                     "Uninitialized or destroyed component", &
+                                     ESMF_CONTEXT, rc)
+            return
         endif
 
     if (compp%compstatus .ne. ESMF_STATUS_READY) then
-        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                  "uninitialized or destroyed component", &
-                                  ESMF_CONTEXT, rc)) return
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                                 "uninitialized or destroyed component", &
+                                 ESMF_CONTEXT, rc)
+            return
     endif
 
 
