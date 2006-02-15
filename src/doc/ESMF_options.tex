@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.16 2005/08/18 19:40:15 nscollins Exp $
+% $Id: ESMF_options.tex,v 1.17 2006/02/15 05:56:10 theurich Exp $
 
 \section{Global Options and Parameters}
 
@@ -20,20 +20,38 @@ Valid values are:
 \subsubsection{ESMF\_BlockingFlag}
 \label{opt:blockingflag}
 {\sf DESCRIPTION:\\}  
-Indicates whether to block during a communication call.
+Indicates blocking behavior and PET synchronization.
 
 Valid values are:
 \begin{description}
 
 \item [ESMF\_BLOCKING]
-         The called method will block until all (PET-)local operations are 
-         complete. After the return of a blocking method it is safe to modify
-         or use all participating local data.
+         {\em Communication calls:} The called method will block until all
+         (PET-)local operations are complete. After the return of a blocking
+         communication method it is safe to modify or use all participating
+         local data.
+         
+         {\em Component calls:} The called method will block until all PETs in
+         all virtual address spaces (VASs) have completed the operation.
+
+\item [ESMF\_VASBLOCKING]
+         {\em Communication calls:} Not available for communication calls.
+         
+         {\em Component calls:} The called method will block until all PETs that
+         operate in the PET-local VAS have completed the operation. For PETs
+         that run as single threaded processes this means that the method does
+         {\em not} synchronize PETs on return.
+         
 \item [ESMF\_NONBLOCKING]
-         The called method will not block but return immediately after
-         initiating the requested operation. It is unsafe to modify
-         or use participating local data before all local operations have     
-         completed.
+         {\em Communication calls:} The called method will not block but 
+         returns immediately after initiating the requested operation. It is
+         unsafe to modify or use participating local data before all local
+         operations have completed.
+
+         {\em Component calls:} The called method will not block but 
+         returns immediately after initiating the requested operation. It is
+         unsafe to modify or use participating local data before all local
+         operations have completed.
 
 \end{description}
 
