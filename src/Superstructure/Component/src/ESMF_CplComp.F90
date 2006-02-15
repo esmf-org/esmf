@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.63 2006/02/13 18:51:06 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.64 2006/02/15 05:28:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.63 2006/02/13 18:51:06 theurich Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.64 2006/02/15 05:28:11 theurich Exp $'
 
 !==============================================================================
 !
@@ -749,7 +749,10 @@
 !      For multiple-phase child components, this is the integer phase 
 !      number to be invoked.
 !   \item[{[blockingflag]}]
-!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
+!    Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+!    for a list of valid blocking options. Default option is
+!    {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!    across each VAS but does not synchronize PETs that run in different VASs.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -869,8 +872,10 @@
 !    For multiple-phase child components, this is the integer phase 
 !    number to be invoked.
 !   \item[{[blockingflag]}]
-!    Valid values are {\tt ESMF\_BLOCKING} (the default) 
-!    or {\tt ESMF\_NONBLOCKING}.
+!    Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+!    for a list of valid blocking options. Default option is
+!    {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!    across each VAS but does not synchronize PETs that run in different VASs.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -967,8 +972,10 @@
 !    If multiple-phase restore, which phase number this is.
 !    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !   \item[{[blockingflag]}]
-!    Valid values are {\tt ESMF\_BLOCKING} (the default) 
-!    or {\tt ESMF\_NONBLOCKING}.
+!    Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+!    for a list of valid blocking options. Default option is
+!    {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!    across each VAS but does not synchronize PETs that run in different VASs.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1032,7 +1039,10 @@
 !    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !    External clock for passing in time information.
 !   \item[{[blockingflag]}]
-!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
+!    Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+!    for a list of valid blocking options. Default option is
+!    {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!    across each VAS but does not synchronize PETs that run in different VASs.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1348,8 +1358,10 @@
 !    For multiple-phase child components, this is the integer phase 
 !    number to be invoked.
 !   \item[{[blockingflag]}]
-!    Valid values are {\tt ESMF\_BLOCKING} (the default) 
-!    or {\tt ESMF\_NONBLOCKING}.
+!    Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+!    for a list of valid blocking options. Default option is
+!    {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!    across each VAS but does not synchronize PETs that run in different VASs.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1385,9 +1397,10 @@
 !     \item[cplcomp] 
 !      {\tt ESMF\_CplComp} to wait for.
 !     \item[{[blockingFlag]}]
-!       The blocking behavior determines exactly what this call waits for. The
-!       default is {\tt ESMF\_VASBLOCKING} which blocks PETs across each VAS.
-!       See section \ref{opt:blockingflag} for a list of valid blocking options.
+!    Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+!    for a list of valid blocking options. Default option is
+!    {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!    across each VAS but does not synchronize PETs that run in different VASs.
 !     \item[{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
