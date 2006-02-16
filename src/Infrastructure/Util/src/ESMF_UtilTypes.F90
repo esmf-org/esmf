@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.10 2006/02/15 18:43:21 nscollins Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.11 2006/02/16 18:46:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
       type ESMF_Pointer
       sequence
       !private
-#ifdef S32
+#ifdef ESMF_IS_32BIT_MACHINE
           integer*4 :: ptr
 #else
           integer*8 :: ptr
@@ -155,8 +155,12 @@
 
       ! these work well for internal ESMF use, arguments, etc
       type(ESMF_DataKind), parameter :: &
+#ifndef ESMF_NO_INTEGER_1_BYTE 
                    ESMF_I1 = ESMF_DataKind(1), &
+#endif
+#ifndef ESMF_NO_INTEGER_2_BYTE 
                    ESMF_I2 = ESMF_DataKind(2), &
+#endif
                    ESMF_I4 = ESMF_DataKind(3), &
                    ESMF_I8 = ESMF_DataKind(4), &
                    ESMF_R4 = ESMF_DataKind(5), &
@@ -168,8 +172,12 @@
       ! these work where you have to declare an array or something that
       ! the compiler needs to have a fixed 'kind' for.
       integer, parameter :: &
+#ifndef ESMF_NO_INTEGER_1_BYTE 
                    ESMF_KIND_I1 = selected_int_kind(2), &
+#endif
+#ifndef ESMF_NO_INTEGER_2_BYTE 
                    ESMF_KIND_I2 = selected_int_kind(4), &
+#endif
                    ESMF_KIND_I4 = selected_int_kind(9), &
                    ESMF_KIND_I8 = selected_int_kind(18), &
                    ESMF_KIND_R4 = selected_real_kind(3,25), &
@@ -440,7 +448,13 @@
       public ESMF_I1, ESMF_I2, ESMF_I4, ESMF_I8, & 
              ESMF_R4, ESMF_R8, ESMF_C8, ESMF_C16, ESMF_NOKIND
 
-      public ESMF_KIND_I1, ESMF_KIND_I2, ESMF_KIND_I4, ESMF_KIND_I8, & 
+#ifndef ESMF_NO_INTEGER_1_BYTE 
+      public ESMF_KIND_I1
+#endif
+#ifndef ESMF_NO_INTEGER_2_BYTE 
+      public ESMF_KIND_I2
+#endif
+      public ESMF_KIND_I4, ESMF_KIND_I8, & 
              ESMF_KIND_R4, ESMF_KIND_R8, ESMF_KIND_C8, ESMF_KIND_C16
 
       public ESMF_NULL_POINTER, ESMF_BAD_POINTER

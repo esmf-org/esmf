@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.46 2005/07/07 20:52:10 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.47 2006/02/16 18:46:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -205,7 +205,7 @@
         type (ESMF_Base) :: base              ! base class object
         type (ESMF_GridStatus) :: gridStatus  ! uninitialized, init ok, etc
 
-#ifdef S32
+#ifdef ESMF_IS_32BIT_MACHINE
 
         real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: minGlobalCoordPerDim
         real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: maxGlobalCoordPerDim
@@ -546,7 +546,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.46 2005/07/07 20:52:10 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.47 2006/02/16 18:46:16 nscollins Exp $'
 
 !==============================================================================
 !

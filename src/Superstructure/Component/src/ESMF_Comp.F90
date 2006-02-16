@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.135 2006/02/15 00:36:50 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.136 2006/02/16 18:46:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -159,7 +159,7 @@
 
 ! gjt - added these here to make things safe for non-blocking mode...
          type(ESMF_State)   :: is, es
-#ifdef S32
+#ifdef ESMF_IS_32BIT_MACHINE
 
          integer            :: npetlist           ! number of PETs in petlist
 #endif
@@ -261,7 +261,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.135 2006/02/15 00:36:50 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.136 2006/02/16 18:46:17 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     

@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.17 2005/10/19 23:32:09 nscollins Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.18 2006/02/16 18:46:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -66,7 +66,7 @@
       type ESMF_PhysCoordType
       sequence
         type (ESMF_Base) :: base              ! contains coordinate name 
-#ifdef S32
+#ifdef ESMF_IS_32BIT_MACHINE
         type (ESMF_CoordType) :: kind         ! type of coordinate
 
         ! axis extents
@@ -230,7 +230,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.17 2005/10/19 23:32:09 nscollins Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.18 2006/02/16 18:46:17 nscollins Exp $'
 
 !==============================================================================
 !
