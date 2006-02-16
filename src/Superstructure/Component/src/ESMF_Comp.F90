@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.136 2006/02/16 18:46:17 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.137 2006/02/16 23:35:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -139,7 +139,7 @@
          character(len=ESMF_MAXSTR) :: configFile ! resource filename
          character(len=ESMF_MAXSTR) :: dirPath    ! relative dirname, app only
          type(ESMF_Grid) :: grid                  ! default grid, gcomp only
-#ifdef S64
+#ifdef ESMF_IS_64BIT_MACHINE
 
          integer            :: npetlist           ! number of PETs in petlist
 #endif
@@ -261,7 +261,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.136 2006/02/16 18:46:17 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.137 2006/02/16 23:35:27 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
