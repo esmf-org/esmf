@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.19 2005/06/20 17:34:30 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.20 2006/02/17 19:56:30 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -36,6 +36,11 @@
        real :: inject_energy
        real :: inject_velocity
        real :: inject_density
+       ! padding to prevent issues on nag
+       integer:: pad_1
+       integer:: pad_2
+       integer:: pad_3
+       integer:: pad_4
     end type
 
     type wrapper
