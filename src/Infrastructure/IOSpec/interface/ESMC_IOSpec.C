@@ -1,4 +1,4 @@
-// $Id: ESMC_IOSpec.C,v 1.2 2006/02/17 00:02:54 nscollins Exp $
+// $Id: ESMC_IOSpec.C,v 1.3 2006/02/17 16:39:50 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_IOSpec.C,v 1.2 2006/02/17 00:02:54 nscollins Exp $";
+            "$Id: ESMC_IOSpec.C,v 1.3 2006/02/17 16:39:50 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -41,5 +41,5 @@
 // One single (private) symbol to shut up some of the compilers which 
 // warn about a .o file with no contents.  remove this when real
 // interfaces are added.
-static ESMC_IOSpec default_IOS;
+static ESMC_IOSpec* default_IOS;
 
