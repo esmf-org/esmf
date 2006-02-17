@@ -35,7 +35,12 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_ArraySpec.C,v 1.1 2004/03/17 22:21:46 nscollins Exp $";
+            "$Id: ESMC_ArraySpec.C,v 1.2 2006/02/17 00:02:32 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
+// One single (private) symbol to shut up some of the compilers which 
+// warn about a .o file with no contents.  remove this when real
+// interfaces are added.
+static ESMC_ArraySpec default_AS;
+
