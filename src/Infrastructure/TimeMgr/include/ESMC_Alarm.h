@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.32 2005/06/22 20:31:28 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.33 2006/02/17 17:04:42 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,6 +25,7 @@
  // put any constants or macros which apply to the whole component in this file.
  // anything public or esmf-wide should be up higher at the top level
  // include files.
+ #include <ESMC_Start.h>
  #include <ESMF_TimeMgr.inc>
  #include "ESMF_Pthread.h"
 
