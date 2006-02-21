@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.59 2005/12/16 00:43:01 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.60 2006/02/21 20:45:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -2531,7 +2531,7 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source){
     // MPI-1 implementation
     // use mutex to serialize mpi comm calls if mpi thread support requires it
     if (mpi_mutex_flag)
-      pthread_mutex_lock(pth_mutex2);
+      pthread_mutex_lock(pth_mutex);
     MPI_Status mpi_s;
     MPI_Recv(message, size, MPI_BYTE, lpid[source], 1000*source+mypet, 
     mpi_c, &mpi_s);
@@ -2539,7 +2539,7 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source){
 //gjt - don't use yet:      commarray[source][mypet].mpitag_recv, mpi_c, &mpi_s);
 //gjt - don't use yet:    ++commarray[source][mypet].mpitag_recv;
     if (mpi_mutex_flag)
-      pthread_mutex_unlock(pth_mutex2);
+      pthread_mutex_unlock(pth_mutex);
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
@@ -2682,7 +2682,7 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source,
     // MPI-1 implementation
     // use mutex to serialize mpi comm calls if mpi thread support requires it
     if (mpi_mutex_flag)
-      pthread_mutex_lock(pth_mutex2);
+      pthread_mutex_lock(pth_mutex);
 //fprintf(stderr, "MPI_Irecv: commhandle=%p\n", (*commhandle)->mpireq);
     MPI_Irecv(message, size, MPI_BYTE, lpid[source], 1000*source+mypet, 
       mpi_c, (*commhandle)->mpireq);
@@ -2690,7 +2690,7 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source,
 //gjt - don't use yet:      commarray[source][mypet].mpitag_recv, mpi_c, (*commhandle)->mpireq);
 //gjt - don't use yet:    ++commarray[source][mypet].mpitag_recv;
     if (mpi_mutex_flag)
-      pthread_mutex_unlock(pth_mutex2);
+      pthread_mutex_unlock(pth_mutex);
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
