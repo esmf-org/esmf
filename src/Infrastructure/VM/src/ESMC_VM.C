@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.38 2005/12/12 18:24:45 theurich Exp $
+// $Id: ESMC_VM.C,v 1.39 2006/02/21 23:32:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.38 2005/12/12 18:24:45 theurich Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.39 2006/02/21 23:32:02 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -327,16 +327,17 @@ void *ESMC_VM::ESMC_VMStartup(
 //EOP
 //-----------------------------------------------------------------------------
   // startup the VM
-  void *info = vmk_startup(static_cast<ESMC_VMKPlan *>(vmp), fctp, NULL, rc);
-  // translate error code
-  if (*rc) *rc=ESMF_FAILURE;
-  else *rc=ESMF_SUCCESS;
-  // use LogErr to handle error
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(*rc, " - VMKernel could not "
-    "create additional pthreads! Please check stack limit.", rc))
+  void *info = vmk_startup(static_cast<ESMC_VMKPlan *>(vmp), fctp, cargo, rc);
+  // the rc set by vmk_startup indicates failure in pthread_create() if used
+  // translate error code to ESMF error codes
+  if (*rc){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_SYS, " - VMKernel could not "
+    "create additional pthreads! Please check stack limit.", rc);
     return NULL;  // bail out if pthreads could not be created
+  }else
+    *rc=ESMF_SUCCESS;
 
-  // now take care of book keeping for ESMF...
+  // now take care of VMId book keeping for ESMF...
   int i, pid, m, n;
   int localrc;
   int matchArray_count_old = matchArray_count;
