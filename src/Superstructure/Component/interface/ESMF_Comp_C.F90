@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.31 2006/02/02 02:00:00 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.32 2006/02/21 23:33:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.31 2006/02/02 02:00:00 theurich Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.32 2006/02/21 23:33:03 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -49,9 +49,9 @@
 
        type(ESMF_CWrap)   :: comp
        type(ESMF_Pointer) :: vm_info
-       integer :: rc
+       integer            :: rc
 
-       call ESMF_CompSet(comp%compp, vm_info=vm_info)
+       call ESMF_CompSet(compp=comp%compp, vm_info=vm_info, rc=rc)
 
    end subroutine f_esmf_compsetvminfo
 
@@ -63,9 +63,9 @@
 
        type(ESMF_CWrap) :: comp
        type(ESMF_VM)    :: vm_parent
-       integer :: rc
+       integer          :: rc
 
-       call ESMF_CompGet(comp%compp, vm_parent=vm_parent)
+       call ESMF_CompGet(compp=comp%compp, vm_parent=vm_parent, rc=rc)
 
    end subroutine f_esmf_compgetvmparent
 
@@ -75,11 +75,11 @@
        use ESMF_CompMod
        use ESMF_VMMod
 
-       type(ESMF_CWrap) :: comp
-       type(ESMF_VMPlan)    :: vmplan
-       integer :: rc
+       type(ESMF_CWrap)   :: comp
+       type(ESMF_VMPlan)  :: vmplan
+       integer            :: rc
 
-       call ESMF_CompGet(comp%compp, vmplan=vmplan)
+       call ESMF_CompGet(compp=comp%compp, vmplan=vmplan, rc=rc)
 
    end subroutine f_esmf_compgetvmplan
 
@@ -91,9 +91,9 @@
 
        type(ESMF_CWrap) :: comp
        type(ESMF_VM)    :: vm
-       integer :: rc
+       integer          :: rc
 
-       call ESMF_CompSet(comp%compp, vm=vm)
+       call ESMF_CompSet(compp=comp%compp, vm=vm, rc=rc)
 
    end subroutine f_esmf_compinsertvm
 
