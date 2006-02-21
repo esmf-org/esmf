@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.137 2006/02/16 23:35:27 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.138 2006/02/21 21:59:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -261,7 +261,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.137 2006/02/16 23:35:27 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.138 2006/02/21 21:59:40 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -395,6 +395,7 @@ end function
 !EOPI
         ! Local vars
         integer :: status                            ! local error status
+        integer :: allocstatus                       ! alloc/dealloc status
         logical :: rcpresent                         ! did user specify rc?
         character(len=ESMF_MAXSTR) :: fullpath       ! config file + dirPath
         character(len=ESMF_MAXSTR) :: msgbuf
@@ -469,11 +470,14 @@ end function
         if (present(vm)) then
           compp%vm_parent = vm
         else
-          ! if parent specified use that vm, else use current VM.
+          ! if parent comp was specified then use its VM, else use current VM.
           if (present(parent)) then
             compp%vm_parent = parent%vm
           else
-            call ESMF_VMGetCurrent(compp%vm_parent)
+            call ESMF_VMGetCurrent(vm=compp%vm_parent, rc=status)
+            if (ESMF_LogMsgFoundError(status, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
           endif
         endif
       
@@ -551,15 +555,24 @@ end function
         ! petlist
         if (present(petlist)) then
           compp%npetlist = size(petlist)
-          allocate(petlist_loc(compp%npetlist))
+          allocate(petlist_loc(compp%npetlist), stat=allocstatus)
+          if (ESMF_LogMsgFoundAllocError(allocstatus, "local petlist", &
+            ESMF_CONTEXT, rc)) return 
           compp%petlist => petlist_loc
-          compp%petlist = petlist
+          compp%petlist = petlist     ! copy contents of petlist
         else
           compp%npetlist = 0
-          allocate(compp%petlist(0))
+          allocate(compp%petlist(0), stat=allocstatus)
+          if (ESMF_LogMsgFoundAllocError(allocstatus, "local petlist", &
+            ESMF_CONTEXT, rc)) return 
         endif
 
-        call ESMF_VMGet(compp%vm_parent, localPet=mypet, petCount=npets)
+        ! check for consistency between contextflag and petlist
+        call ESMF_VMGet(vm=compp%vm_parent, localPet=mypet, petCount=npets, &
+          rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
         if (present(contextflag)) then
           if (contextflag==ESMF_CHILD_IN_PARENT_VM) then
             if ((compp%npetlist .gt. 0) .and. (compp%npetlist .lt. npets)) then
@@ -588,10 +601,14 @@ end function
         endif
 
         ! instantiate a default VMPlan
-        call ESMF_VMPlanConstruct(compp%vmplan, compp%vm_parent, &
-          compp%npetlist, compp%petlist, compp%contextflag, status)
+        call ESMF_VMPlanConstruct(vmplan=compp%vmplan, vm=compp%vm_parent, &
+          npetlist=compp%npetlist, petlist=compp%petlist, &
+          contextflag=compp%contextflag, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
                                   
-        ! Initialize the remaining vm members in compp
+        ! initialize the remaining VM members in compp
         compp%vm_info = ESMF_NULL_POINTER
         compp%vm_cargo = ESMF_NULL_POINTER
         compp%vm_released = .false.
@@ -638,6 +655,7 @@ end function
 
         ! local vars
         integer :: status                       ! local error status
+        integer :: allocstatus                  ! alloc/dealloc status
         logical :: rcpresent                    ! did user specify rc?
 
         ! Initialize return code; assume failure until success is certain
@@ -656,15 +674,24 @@ end function
         endif
 
         if (compp%vm_info /= ESMF_NULL_POINTER) then
-          ! Shut down this component's VM
-          call ESMF_VMShutdown(compp%vm_parent, compp%vmplan, compp%vm_info)
+          ! shut down this component's VM
+          call ESMF_VMShutdown(vm=compp%vm_parent, vmplan=compp%vmplan, &
+            vm_info=compp%vm_info, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
         endif
 
         ! destruct the VMPlan
-        call ESMF_VMPlanDestruct(compp%vmplan)
+        call ESMF_VMPlanDestruct(vmplan=compp%vmplan, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
 
-        ! Deallocate space held for petlist
-        deallocate(compp%petlist)
+        ! deallocate space held for petlist
+        deallocate(compp%petlist, stat=allocstatus)
+        if (ESMF_LogMsgFoundAllocError(allocstatus, "local petlist", &
+          ESMF_CONTEXT, rc)) return 
 
         ! mark obj invalid
         compp%compstatus = ESMF_STATUS_INVALID
