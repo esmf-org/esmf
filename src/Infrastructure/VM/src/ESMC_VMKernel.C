@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.60 2006/02/21 20:45:56 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.61 2006/02/21 23:30:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -895,6 +895,8 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
   if (at_least_1 < 1)
     at_least_1 = 1;
   vmk_spawn_arg *sarg = new vmk_spawn_arg[at_least_1];
+  // set rc to indicate "no error". pthread_create() (if used) will set rc below
+  *rc = 0;
   // first handle the simple case of using the parent VM
   if (vmp->parentVMflag){
     sarg[0].myvm = this;
