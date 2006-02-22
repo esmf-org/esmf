@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.138 2006/02/21 21:59:40 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.139 2006/02/22 05:10:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -261,7 +261,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.138 2006/02/21 21:59:40 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.139 2006/02/22 05:10:42 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -770,13 +770,12 @@ end function
 
 
         ! local vars
-        integer :: status                       ! local error status
-        logical :: rcpresent                    ! did user specify rc?
-        character(ESMF_MAXSTR) :: cname
-        integer :: dummy
-        type(ESMF_BlockingFlag):: blocking
-        integer :: callrc
-        type(ESMF_VM)::vm
+        integer                 :: status       ! local error status
+        logical                 :: rcpresent    ! did user specify rc?
+        character(ESMF_MAXSTR)  :: cname
+        type(ESMF_BlockingFlag) :: blocking
+        integer                 :: callrc
+        type(ESMF_VM)           :: vm
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -813,7 +812,11 @@ end function
           compp%isdel = .FALSE.
         else
           ! create an empty state
-          compp%is = ESMF_StateCreate("dummy import", ESMF_STATE_IMPORT, rc=rc)
+          compp%is = ESMF_StateCreate("dummy import", ESMF_STATE_IMPORT, &
+            rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
           compp%isdel = .TRUE.
         endif
 
@@ -822,7 +825,11 @@ end function
           compp%esdel = .FALSE.
         else
           ! create an empty state
-          compp%es = ESMF_StateCreate("dummy export", ESMF_STATE_EXPORT, rc=rc)
+          compp%es = ESMF_StateCreate("dummy export", ESMF_STATE_EXPORT, &
+            rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
           compp%esdel = .TRUE.
         endif
 
@@ -835,48 +842,79 @@ end function
         endif
 
         call ESMF_GetName(compp%base, cname, status)
+        if (ESMF_LogMsgFoundError(status, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
 
         ! Wrap comp so it's passed to C++ correctly.
         compp%compw%compp => compp
 
-        ! Set up the arguments, then make the call
+        ! Set up the arguments
         call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETINIT, phase, &
                                        compp%compw, compp%is, compp%es, clock, &
-                                       compp%status)
+                                       status)
+        if (ESMF_LogMsgFoundError(status, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
           
+        ! callback into user code
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
           compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETINIT, phase, &
-          compp%status)
+          status)
+        if (ESMF_LogMsgFoundError(status, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rc)) return
           
+        ! for threaded VMs (single- or multi-threaded) the child VM will 
+        ! now be running concurrently with the parent VM. This is indicated
+        ! by the following flag:  
         compp%vm_released = .true.
-          
+        
+        ! sync PETs according to blocking mode
         if (blocking == ESMF_VASBLOCKING .or. blocking == ESMF_BLOCKING) then
           call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-            compp%vm_cargo, callrc, status)
-          status = callrc
-          if (compp%isdel) call ESMF_StateDestroy(compp%is, rc=dummy)
-          if (compp%esdel) call ESMF_StateDestroy(compp%es, rc=dummy)
-          compp%vm_released = .false.
+            compp%vm_cargo, callrc, status) ! wait for all PETs in VAS to finish
+          ! callrc - return code of registered user callback method
+          ! status - return code of ESMF internal callback stack
+          if (ESMF_LogMsgFoundError(status, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+          compp%vm_released = .false.       ! indicate child VM has been caught
+          if (compp%isdel) then
+            call ESMF_StateDestroy(compp%is, rc=status)
+            if (ESMF_LogMsgFoundError(status, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+          endif
+          if (compp%esdel) then
+            call ESMF_StateDestroy(compp%es, rc=status)
+            if (ESMF_LogMsgFoundError(status, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+          endif
           if (blocking == ESMF_BLOCKING) then
             call ESMF_VMGetCurrent(vm)
-            call ESMF_VMBarrier(vm)
+            call ESMF_VMBarrier(vm)   ! barrier across current (parent) context
           endif
         endif
 
-#if 0
-        ! Old entry point, pre-VM
-        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETINIT, phase, &
-          status)
-#endif
-
-        ! set error code but fall thru and clean up states
-        if (ESMF_LogMsgFoundError(status, &
+        ! TODO: we need to be able to return two return codes here!
+        
+        ! TODO: callrc is only valid user return code if the component was 
+        ! called in one of the blocking modes -> for non-blocking the following is 
+        ! code is incorrect!!!
+        
+        ! set return code to callrc
+        status = callrc
+        
+        ! TODO: not sure we want to log an error for user return codes. Are
+        ! users required to abide to the ESMF error code convention? The least
+        ! restrictive thing to do is to just pass the user return code through
+        ! to the parent component and have the user code interpret what it 
+        ! means.
+        call ESMF_LogMsgSetError(status, &
                                   "Component initialization error", &
-                                  ESMF_CONTEXT, rc)) continue
-        ! fall thru intentionally - we still have cleanup to do
-
-        ! Set return values
-        if (rcpresent) rc = status
+                                  ESMF_CONTEXT, rc)
 
         end subroutine ESMF_CompInitialize
 

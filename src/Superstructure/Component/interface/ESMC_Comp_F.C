@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.36 2005/10/25 19:03:18 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.37 2006/02/22 05:10:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -333,24 +333,28 @@ extern "C" {
 static void *ESMC_FTableCallEntryPointVMHop(void *vm, void *cargo){
   // This routine is the first level that gets instantiated in new VM
   // The first argument must be of type (void *) and points to a derived
-  // ESMC_VMK class object.
+  // ESMC_VMK class object. The second argument is also of type (void *)
+  // and points to a cargotype structure.
   
   // pull out info from cargo
-  char *name = ((cargotype *)cargo)->name;
-  ESMC_FTable *ftable = ((cargotype *)cargo)->ftable;  // pointer to ftable
+  char *name = ((cargotype *)cargo)->name;              // name of callback
+  ESMC_FTable *ftable = ((cargotype *)cargo)->ftable;   // pointer to ftable
   
-  // Need to call a special call function which adds the VM to the interface
-  int funcrc, localrc;
+  int esmfrc;   // ESMF return code of ESMC_FTableCallVFuncPtr()
+  int userrc;   // user return code from the registered component method 
   
-//  fprintf(stderr, "gjt I am in ESMC_FTableCallEntryPointVMHop\n");
+  // call into user code through ESMF function table...
+  esmfrc = ftable->ESMC_FTableCallVFuncPtr(name, (ESMC_VM*)vm, &userrc);
+  // ...back from user code
   
-  localrc = ftable->ESMC_FTableCallVFuncPtr(name, (ESMC_VM*)vm, &funcrc);
-  
-  // TODO: Here I need to communicate between all child PET's to find out if
-  // any failed in the call to user supplied component method
-  
-  // put the return code into cargo   
-  ((cargotype *)cargo)->rc = funcrc;    // TODO cargo is shared between threads
+  // put the return codes into cargo 
+  // TODO: If this PET is part of a threadgroup that was spawned out of a
+  // single parent PET then return codes must be returned as a single value to
+  // the parent in the cargo structure (btw, each child PET that's a thread
+  // has the same pointer to cargo. Naturally the above must be done in a
+  // threadsafe manner :-). 
+  ((cargotype *)cargo)->esmfrc = esmfrc;
+  ((cargotype *)cargo)->esmfrc = userrc;
   
   return NULL;
 }
@@ -368,15 +372,10 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   int slen) {               // additional F90 argument associated with type
        
   // local variables
-  int funcrc;               // function return value
-  int localrc;              // local return value
+  int localrc;              // local return code
   char *name;               // trimmed type string
 
   newtrim(type, slen, phase, NULL, &name);
-
-  // TODO: two return codes here - one is whether we could find
-  // the right function to call; the other is the actual return code
-  // from the user function itself.
 
   // Things get a little confusing here with pointers, so I will define
   // some temp. variables that make matters a little clearer I hope:
@@ -387,56 +386,60 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   cargotype *cargo = new cargotype;
   strcpy(cargo->name, name);   // copy trimmed type string
   cargo->ftable = ftable;      // pointer to function table
-  cargo->rc = ESMF_SUCCESS;    // initialize return code to SUCCESS for all PETs
+  cargo->esmfrc = ESMF_SUCCESS;// initialize return code to SUCCESS for all PETs
+  cargo->userrc = ESMF_SUCCESS;// initialize return code to SUCCESS for all PETs
   *vm_cargo=(void*)cargo;      // store pointer to the cargo structure
-         
-//fprintf(stderr, "gjt cargo after new: %p\n", cargo);
+
+  // enter the child VM -> resurface in ESMC_FTableCallEntryPointVMHop()
+  localrc = vm_parent->ESMC_VMEnter(vmplan, *vm_info, (void*)cargo);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, status);
+        
+  // ... if the child VM uses threads (multi-threading or single-threading) 
+  // then this parent PET continues running concurrently to the child PET in the
+  // same VAS! In that case the return codes in cargo are not valid here!
+  // The status returned by VMEnter() indicates that success of entering the
+  // child VM, not failure or success of the callback.
+  // The return code of the callback code will be valid in all cases (threading
+  // or no threading) _after_ VMWait() returns.
   
-  vm_parent->ESMC_VMEnter(vmplan, *vm_info, (void*)cargo);
-  
-  delete[] name;
-  *status = ESMF_SUCCESS;
+  delete[] name;  // delete memory that "newtrim" allocated above
 }
 
-  void FTN(c_esmc_compwait)(
-    ESMC_VM **ptr_vm_parent,  // p2 to the parent VM
-    ESMC_VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
-    void **vm_info,           // p2 to member which holds info
-    void **vm_cargo,          // p2 to member which holds cargo
-    int *callrc,              // return code of the user component method
-    int *status) {            // return error code in status
+void FTN(c_esmc_compwait)(
+  ESMC_VM **ptr_vm_parent,  // p2 to the parent VM
+  ESMC_VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
+  void **vm_info,           // p2 to member which holds info
+  void **vm_cargo,          // p2 to member which holds cargo
+  int *callrc,              // return code of the user component method
+  int *status) {            // return error code in status
 
-    // Things get a little confusing here with pointers, so I will define
-    // some temp. variables that make matters a little clearer I hope:
-    ESMC_VM *vm_parent = *ptr_vm_parent;      // pointer to parent VM
-    ESMC_VMPlan *vmplan = *ptr_vmplan;        // pointer to VMPlan
+  // Things get a little confusing here with pointers, so I will define
+  // some temp. variables that make matters a little clearer I hope:
+  ESMC_VM *vm_parent = *ptr_vm_parent;        // pointer to parent VM
+  ESMC_VMPlan *vmplan = *ptr_vmplan;          // pointer to VMPlan
+  cargotype *cargo = (cargotype *)*vm_cargo;  // pointer to cargo
+  
+  // initialize the return codes to failure
+  *status = ESMF_FAILURE;   // return code of ESMF callback code
+  *callrc = ESMF_FAILURE;   // return code of registered user code
 
-    // Now call the vmk_exit function which will block respective PETs
-//fprintf(stderr, "gjt debug: c_esmc_compwait, vm_parent=%p\n", vm_parent);
-//fprintf(stderr, "gjt debug: c_esmc_compwait, vm_info=%p\n", *vm_info);
-//fprintf(stderr, "gjt debug: c_esmc_compwait, vm_plan=%p\n", vmplan);
-    
-//    vm_parent->vmk_print();
-//    vmplan->vmkplan_print();
-    
-    
-//    fprintf(stderr, "gjt debug: i am in c_esmc_compwait\n");
-
-    vm_parent->vmk_exit(static_cast<ESMC_VMKPlan *>(vmplan), *vm_info);
-    cargotype *cargo = (cargotype *)*vm_cargo;
-    if (cargo == NULL) {
-//fprintf(stderr, "nsc cargo before delete was null\n");
-        if (status) *status = ESMF_FAILURE;
-        return;
-    }
-    *callrc = cargo->rc;
-//fprintf(stderr, "gjt cargo before delete: %p\n", cargo);
-    delete cargo;
-
-    if (status) *status = ESMF_SUCCESS;
+  // Now call the vmk_exit function which will block respective PETs
+  vm_parent->vmk_exit(static_cast<ESMC_VMKPlan *>(vmplan), *vm_info);
+  
+  // return with errors if there is no cargo to obtain error codes
+  if (cargo == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "No cargo structure to obtain error codes", status);
+    return;
   }
-
+  
+  // obtain return codes out of cargo
+  *status = cargo->esmfrc;
+  *callrc = cargo->userrc;
+  
+  // delete cargo structure
+  delete cargo;
 }
 
-
-
+  
+} // extern "C"
