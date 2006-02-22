@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.39 2006/02/21 23:32:02 theurich Exp $
+// $Id: ESMC_VM.C,v 1.40 2006/02/22 05:01:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.39 2006/02/21 23:32:02 theurich Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.40 2006/02/22 05:01:20 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -101,7 +101,7 @@ static ESMC_Logical ESMC_VMKeyCompare(char *vmKey1, char *vmKey2){
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMIdCreate()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_VMIdCreate
 //
 // !INTERFACE:
@@ -117,7 +117,7 @@ ESMC_VMId ESMC_VMIdCreate(
 // !DESCRIPTION:
 //    Allocate memory for a new {\tt ESMC\_VMId} object and reset members.
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // allocates memory for vmKey member
   ESMC_VMId vmID;    // temporary stack variable
@@ -134,7 +134,7 @@ ESMC_VMId ESMC_VMIdCreate(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMIdDestroy()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_VMIdDestroy
 //
 // !INTERFACE:
@@ -152,7 +152,7 @@ void ESMC_VMIdDestroy(
 // !DESCRIPTION:
 //    Free memory for a previously created {\tt ESMC\_VMId} object.
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   *rc = ESMF_FAILURE;         // assume failure
   if (vmID==NULL){
@@ -177,7 +177,7 @@ void ESMC_VMIdDestroy(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMIdCompare()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_VMIdCompare
 //
 // !INTERFACE:
@@ -195,7 +195,7 @@ ESMC_Logical ESMC_VMIdCompare(
 // !DESCRIPTION:
 //    Compare two {\tt ESMC\_VMId} objects.
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   if (vmID1==NULL || vmID2==NULL){
     ESMC_LogDefault.ESMC_LogWrite("invalid vmIDs", ESMC_LOG_ERROR);
@@ -210,7 +210,7 @@ ESMC_Logical ESMC_VMIdCompare(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMIdCopy()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_VMIdCopy
 //
 // !INTERFACE:
@@ -228,7 +228,7 @@ int ESMC_VMIdCopy(
 // !DESCRIPTION:
 //    Copy {\tt ESMC\_VMId} object.
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   if (vmIDdst==NULL || vmIDsrc==NULL){
     ESMC_LogDefault.ESMC_LogWrite("invalid vmIDs", ESMC_LOG_ERROR);
@@ -245,7 +245,7 @@ int ESMC_VMIdCopy(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMIdPrint()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_VMIdPrint
 //
 // !INTERFACE:
@@ -262,7 +262,7 @@ void ESMC_VMIdPrint(
 // !DESCRIPTION:
 //    Print an {\tt ESMC\_VMId} object.
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   printf("ESMC_VMIdPrint:\n");
   if (vmID==NULL){
@@ -305,7 +305,7 @@ void ESMC_VMIdPrint(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMStartup()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_VMStartup
 //
 // !INTERFACE:
@@ -324,7 +324,7 @@ void *ESMC_VM::ESMC_VMStartup(
 // !DESCRIPTION:
 //    Startup a new child VM according to plan.
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   // startup the VM
   void *info = vmk_startup(static_cast<ESMC_VMKPlan *>(vmp), fctp, cargo, rc);
@@ -376,14 +376,14 @@ void *ESMC_VM::ESMC_VMStartup(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMEnter()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_VMEnter
 //
 // !INTERFACE:
-void ESMC_VM::ESMC_VMEnter(
+int ESMC_VM::ESMC_VMEnter(
 //
 // !RETURN VALUE:
-//    
+//    Error return code
 //
 // !ARGUMENTS:
 //
@@ -395,7 +395,7 @@ void ESMC_VM::ESMC_VMEnter(
 // !DESCRIPTION:
 //    Enter a child VM.
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   int oldMatchIndex;
   if(vmp->nothreadflag){
@@ -415,6 +415,7 @@ void ESMC_VM::ESMC_VMEnter(
     // restore book keeping for ESMF...
     matchIndex = oldMatchIndex;
   }
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
@@ -467,7 +468,7 @@ int ESMC_VM::ESMC_VMGet(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMGetPETLocalInfo()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_VMGetPETLocalInfo
 //
 // !INTERFACE:
@@ -489,7 +490,7 @@ int ESMC_VM::ESMC_VMGetPETLocalInfo(
 //   Get internal information about the specified PET within the {\tt ESMF\_VM}
 //   object.
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   if (peCount != ESMC_NULL_POINTER)
     *peCount = this->vmk_ncpet(pet);
@@ -509,7 +510,7 @@ int ESMC_VM::ESMC_VMGetPETLocalInfo(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMGetPETMatchPET()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_VMGetPETMatchPET
 //
 // !INTERFACE:
@@ -537,7 +538,7 @@ int ESMC_VM::ESMC_VMGetPETMatchPET(
 //    PETs found. Otherwise returns ESMF_SUCCESS (even if no matching PETs were
 //    found!).
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   int npets = vmMatch.vmk_npets();  // maximum number of PETs in vmMatch
   int *tempMatchList = new int[npets];
@@ -571,7 +572,7 @@ int ESMC_VM::ESMC_VMGetPETMatchPET(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMGetVMId()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_VMGetVMId - Get ID of VM object
 //
 // !INTERFACE:
@@ -587,7 +588,7 @@ ESMC_VMId *ESMC_VM::ESMC_VMGetVMId(
 // !DESCRIPTION:
 //   Get the ID of the {\tt ESMC\_VM} object.
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   *rc = ESMF_FAILURE; // assume failure
   pthread_t mytid = vmk_mypthid();
@@ -611,7 +612,7 @@ ESMC_VMId *ESMC_VM::ESMC_VMGetVMId(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMSendVMId()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_VMSendVMId
 //
 // !INTERFACE:
@@ -629,7 +630,7 @@ int ESMC_VM::ESMC_VMSendVMId(
 // !DESCRIPTION:
 //    Send {\tt ESMC\_VMId} to another PET.
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   if (vmID==ESMC_NULL_POINTER){
     ESMC_LogDefault.ESMC_LogWrite("invalid vmID", ESMC_LOG_ERROR);
@@ -645,7 +646,7 @@ int ESMC_VM::ESMC_VMSendVMId(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMRecvVMId()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_VMRecvVMId
 //
 // !INTERFACE:
@@ -663,7 +664,7 @@ int ESMC_VM::ESMC_VMRecvVMId(
 // !DESCRIPTION:
 //    Receive {\tt ESMC\_VMId} from another PET.
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   if (vmID==ESMC_NULL_POINTER){
     ESMC_LogDefault.ESMC_LogWrite("invalid vmID", ESMC_LOG_ERROR);
@@ -718,7 +719,7 @@ void ESMC_VM::ESMC_VMPrint(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMGetArgs()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_VMGetArgs - Get command line arguments
 //
 // !INTERFACE:
@@ -736,7 +737,7 @@ void ESMC_VMGetArgs(
 // !DESCRIPTION:
 //   Get the command line arguments
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   *rc = ESMF_FAILURE; // assume failure
   if (GlobalVM==NULL){
@@ -868,7 +869,7 @@ ESMC_VMId *ESMC_VMGetCurrentID(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMInitialize()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_VMInitialize
 //
 // !INTERFACE:
@@ -885,7 +886,7 @@ ESMC_VM *ESMC_VMInitialize(
 //    Initialize the global virtual machine as an all MPI VM and return a 
 //    handle to the local instance of the GlobalVM.
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   *rc = ESMF_FAILURE;         // assume failure
   GlobalVM = new ESMC_VM;
@@ -937,7 +938,7 @@ ESMC_VM *ESMC_VMInitialize(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMFinalize()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_VMFinalize
 //
 // !INTERFACE:
@@ -953,7 +954,7 @@ void ESMC_VMFinalize(
 // !DESCRIPTION:
 //    Finalize the global virtual machine referenced by GlobalVM
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   *rc = ESMF_FAILURE;         // assume failure
   if (GlobalVM==NULL){
@@ -974,7 +975,7 @@ void ESMC_VMFinalize(
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMAbort()"
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_VMAbort
 //
 // !INTERFACE:
@@ -990,7 +991,7 @@ void ESMC_VMAbort(
 // !DESCRIPTION:
 //    Abort the global virtual machine referenced by GlobalVM
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
   *rc = ESMF_FAILURE;         // assume failure
   if (GlobalVM==NULL){
