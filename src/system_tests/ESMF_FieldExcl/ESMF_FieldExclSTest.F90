@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.25 2006/02/02 02:00:07 theurich Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.26 2006/02/23 22:19:19 theurich Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -26,8 +26,15 @@
 !                 each DE.
 !
 !                 The Gridded Components are running on separate sets of
-!                 PETs, concurrently.  The coupler is running on all PETs
-!                 and we synchronize before calling the coupler.
+!                 PETs, concurrently.  The coupler is running on the
+!                 union of PETs (which is one less PET than the total number
+!                 of PETs).
+!
+!                 By default the run loop is written to run comp1 and comp2
+!                 concurrently (after the first time through the time loop).
+!                 However, there are commented out options that may be used
+!                 to force synchronization between the components and have them
+!                 run sequentially.
 !
 !
 !\begin{verbatim}
@@ -191,48 +198,75 @@
 
     do while (.not. ESMF_ClockIsStopTime(clock, rc))
     
-      ! Run the first component.  After the first time thru the loop
-      ! this will be running concurrently with the second component.
-      call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, &
-                            blockingFlag=ESMF_NONBLOCKING, rc=rc)
+      !print *, "PET ", pet_id, " starting time step..."
+
+      ! Uncomment the following call to ESMF_GridCompWait() to sequentialize
+      ! comp1 and comp2. The following ESMF_GridCompWait() call will block
+      ! all PETs until comp2 has returned. Consequently comp1 will not be
+      ! run until comp2 has returned.
+      !call ESMF_GridCompWait(comp2, blockingflag=ESMF_BLOCKING, rc=rc)
+      !print *, "Comp 2 Wait returned, rc =", rc
+      !if (rc .ne. ESMF_SUCCESS) goto 10
+    
+      ! Run the first component:
+      ! After the first time thru the loop this will be running concurrently 
+      ! with the second component since comp1 and comp2 are defined on 
+      ! exclusive sets of PETs
+      !print *, "I am calling into GridCompRun(comp1)"
+      call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=rc)
       !print *, "Comp 1 Run returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
- 
-      ! Wait for both components to finish before coupling
-      call ESMF_GridCompWait(comp1, rc=rc)
+
+      ! Uncomment the following calls to ESMF_GridCompWait() to sequentialize
+      ! comp1, comp2 and the coupler. The following ESMF_GridCompWait() calls 
+      ! will block all PETs until comp1 and comp2 have returned. Consequently 
+      ! the coupler component will not be run until comp1 and comp2 have 
+      ! returned.
+      !call ESMF_GridCompWait(comp1, blockingflag=ESMF_BLOCKING, rc=rc)
       !print *, "Comp 1 Wait returned, rc =", rc
-      if (rc .ne. ESMF_SUCCESS) goto 10
-
-      call ESMF_GridCompWait(comp2, rc=rc)
+      !if (rc .ne. ESMF_SUCCESS) goto 10
+      !call ESMF_GridCompWait(comp2, blockingflag=ESMF_BLOCKING, rc=rc)
       !print *, "Comp 2 Wait returned, rc =", rc
-      if (rc .ne. ESMF_SUCCESS) goto 10
+      !if (rc .ne. ESMF_SUCCESS) goto 10
 
-      ! Run the coupler in sequential mode.
-      call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, &
-                            blockingFlag=ESMF_BLOCKING, rc=rc)
+      ! Run the coupler:
+      ! The coupler will run in "per-PET sequential" mode because it runs on 
+      ! the union of all PETs. Depending on the per-PET runtime of comp1 and
+      ! comp2 some PETs may start/finish executing the coupler at different
+      ! times. There is no intrinsic inter PET synchronization in calling
+      ! component methods via CompI/R/F(). However, collective communication
+      ! calls contained in the user written coupler methods will indirectly
+      ! lead to inter PET synchronization of the coupler component.
+      !print *, "I am calling into CplCompRun(cpl)"
+      call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, rc=rc)
       !print *, "Coupler Run returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      ! Run the second component concurrently with the first component.
-      call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, &
-                            blockingFlag=ESMF_NONBLOCKING, rc=rc)
+      ! Uncomment the following call to ESMF_GridCompWait() to sequentialize
+      ! comp1 and comp2. The following ESMF_GridCompWait() call will block
+      ! all PETs until comp1 has returned. Consequently comp2 will not be
+      ! run until comp2 has returned.
+      !call ESMF_GridCompWait(comp1, blockingflag=ESMF_BLOCKING, rc=rc)
+      !print *, "Comp 1 Wait returned, rc =", rc
+      !if (rc .ne. ESMF_SUCCESS) goto 10
+
+      ! Run the second component:
+      ! Since comp1 and comp2 are defined on exclusive sets of PETs those PET
+      ! that are part of comp1 will not block in the following call but proceed
+      ! to the next loop increment, executing comp1 concurrently with comp2.
+      !print *, "I am calling into GridCompRun(comp2)"
+      call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, rc=rc)
       !print *, "Comp 2 Run returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_ClockAdvance(clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       !call ESMF_ClockPrint(clock, rc=rc)
+      
+      !print *, "... time step finished on PET ", pet_id, "."
 
     enddo
  
-    call ESMF_GridCompWait(comp1, rc=rc)
-    !print *, "Comp 1 Wait returned, rc =", rc
-    if (rc .ne. ESMF_SUCCESS) goto 10
-
-    call ESMF_GridCompWait(comp2, rc=rc)
-    !print *, "Comp 2 Wait returned, rc =", rc
-    if (rc .ne. ESMF_SUCCESS) goto 10
-
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !     Finalize section
