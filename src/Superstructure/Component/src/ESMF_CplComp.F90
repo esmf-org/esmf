@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.64 2006/02/15 05:28:11 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.65 2006/02/23 05:14:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.64 2006/02/15 05:28:11 theurich Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.65 2006/02/23 05:14:25 theurich Exp $'
 
 !==============================================================================
 !
@@ -759,9 +759,9 @@
 !
 !EOP
 
-        call ESMF_CompFinalize(cplcomp%compp, importState=importState, &
-                 exportState=exportState, clock=clock, phase=phase, &
-                 blockingflag=blockingflag, rc=rc)
+        call ESMF_CompExecute(cplcomp%compp, importState, exportState, &
+          clock=clock, methodtype=ESMF_SETFINAL, phase=phase, &
+          blockingflag=blockingflag, rc=rc)
 
         end subroutine ESMF_CplCompFinalize
 
@@ -882,8 +882,9 @@
 !
 !EOP
 
-        call ESMF_CompInitialize(cplcomp%compp, importState, exportState, &
-                    clock=clock, phase=phase, blockingflag=blockingflag, rc=rc)
+        call ESMF_CompExecute(cplcomp%compp, importState, exportState, &
+          clock=clock, methodtype=ESMF_SETINIT, phase=phase, &
+          blockingflag=blockingflag, rc=rc)
 
         end subroutine ESMF_CplCompInitialize
 
@@ -1049,8 +1050,9 @@
 !
 !EOP
 
-        call ESMF_CompRun(cplcomp%compp, importState, exportState, &
-                    clock=clock, phase=phase, blockingflag=blockingflag, rc=rc)
+        call ESMF_CompExecute(cplcomp%compp, importState, exportState, &
+          clock=clock, methodtype=ESMF_SETRUN, phase=phase, &
+          blockingflag=blockingflag, rc=rc)
 
         end subroutine ESMF_CplCompRun
 

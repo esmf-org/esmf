@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.140 2006/02/22 21:17:27 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.141 2006/02/23 05:14:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -242,7 +242,7 @@
       !  but they are not intended to be used outside the Framework code.
 
       public ESMF_CompConstruct, ESMF_CompDestruct
-      public ESMF_CompInitialize, ESMF_CompRun, ESMF_CompFinalize
+      public ESMF_CompExecute
       public ESMF_CompWriteRestart, ESMF_CompReadRestart
       public ESMF_CompGet, ESMF_CompSet
       public ESMF_CompIsPetLocal
@@ -261,7 +261,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.140 2006/02/22 21:17:27 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.141 2006/02/23 05:14:25 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -718,30 +718,35 @@ end function
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
-! This section includes the Component Init, Run, and Finalize methods
+! This section includes the Component Execute method used by GridComp and 
+! CplComp for:
+!   * Initialize,
+!   * Run,
+!   * Finalize.
 !
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CompInitialize"
+#define ESMF_METHOD "ESMF_CompExecute"
 !BOPI
-! !IROUTINE: ESMF_CompInitialize -- Call the Component's init routine
+! !IROUTINE: ESMF_CompExecute -- Call into registered component method
 
 ! !INTERFACE:
-      recursive subroutine ESMF_CompInitialize(compp, importState, &
-                                 exportState, clock, phase, blockingFlag, rc)
+      recursive subroutine ESMF_CompExecute(compp, importState, exportState, &
+        clock, methodtype, phase, blockingFlag, rc)
 !
 !
 ! !ARGUMENTS:
-      type (ESMF_CompClass), pointer :: compp
-      type (ESMF_State), intent(inout), optional :: importState
-      type (ESMF_State), intent(inout), optional :: exportState
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
-      integer, intent(out), optional :: rc 
+      type (ESMF_CompClass), pointer                           :: compp
+      type (ESMF_State),              intent(inout),  optional :: importState
+      type (ESMF_State),              intent(inout),  optional :: exportState
+      type (ESMF_Clock),              intent(in),     optional :: clock
+      character(len=*),               intent(in),     optional :: methodtype
+      integer,                        intent(in),     optional :: phase
+      type (ESMF_BlockingFlag),       intent(in),     optional :: blockingFlag
+      integer,                        intent(out),    optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user initialization code for a component.
+!  Call into the associated user code for a component's method.
 !
 !  The arguments are:
 !  \begin{description}
@@ -749,13 +754,15 @@ end function
 !   \item[compp]
 !    Component to call Initialization routine for.
 !   \item[{[importState]}]  
-!    Import data for initialization.
+!    Import data for component method.
 !   \item[{[exportState]}]  
-!    Export data for initialization.
+!    Export data for component method.
 !   \item[{[clock]}]  
 !    External clock for passing in time information.
+!   \item[{[methodtype]}]
+!    One of the method types: ESMF\_SETINIT, ESMF\_SETRUN, ESMF\_SETFINAL
 !   \item[{[phase]}]  
-!    If multiple-phase init, which phase number this is.
+!    If multiple-phase methods, which phase number this is.
 !    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !   \item[{[blockingFlag]}]
 !    Blocking behavior of this method call. See section \ref{opt:blockingflag} 
@@ -772,10 +779,9 @@ end function
         ! local vars
         integer                 :: status       ! local error status
         logical                 :: rcpresent    ! did user specify rc?
-        character(ESMF_MAXSTR)  :: cname
         integer                 :: callrc       ! return code from user code
-        type(ESMF_BlockingFlag) :: blocking
-        type(ESMF_VM)           :: vm
+        type(ESMF_BlockingFlag) :: blocking     ! local blocking flag
+        type(ESMF_VM)           :: vm           ! VM for current context
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -843,16 +849,11 @@ end function
             ! non-present object into the C interface?
         endif
 
-        call ESMF_GetName(compp%base, cname, status)
-        if (ESMF_LogMsgFoundError(status, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rc)) return
-
         ! Wrap comp so it's passed to C++ correctly.
         compp%compw%compp => compp
 
         ! Set up the arguments
-        call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETINIT, phase, &
+        call c_ESMC_FTableSetStateArgs(compp%this, methodtype, phase, &
                                        compp%compw, compp%is, compp%es, clock, &
                                        status)
         if (ESMF_LogMsgFoundError(status, &
@@ -861,7 +862,7 @@ end function
           
         ! callback into user code
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
-          compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETINIT, phase, &
+          compp%vm_info, compp%vm_cargo, compp%this, methodtype, phase, &
           status)
         if (ESMF_LogMsgFoundError(status, &
           ESMF_ERR_PASSTHRU, &
@@ -929,12 +930,18 @@ end function
         ! to the parent component and have the user code interpret what it 
         ! means.
         call ESMF_LogMsgSetError(status, &
-                                  "Component initialization error", &
-                                  ESMF_CONTEXT, rc)
+          "Registered component method returned error", &
+          ESMF_CONTEXT, rc)
 
-        end subroutine ESMF_CompInitialize
+        end subroutine ESMF_CompExecute
 
 
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!
+! This section includes the Component WriteRestart and ReadRestart methods
+!
+!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CompWriteRestart"
@@ -1144,320 +1151,6 @@ end function
 
 
         end subroutine ESMF_CompReadRestart
-
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CompFinalize"
-!BOPI
-! !IROUTINE: ESMF_CompFinalize -- Call the Component's finalize routine
-
-! !INTERFACE:
-      recursive subroutine ESMF_CompFinalize(compp, importState, &
-                                  exportState, clock, phase, blockingFlag, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_CompClass), pointer :: compp
-      type (ESMF_State), intent(inout), optional :: importState
-      type (ESMF_State), intent(inout), optional :: exportState
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user finalize code for a component.
-!
-!    
-!  The arguments are:
-!  \begin{description}
-!   \item[compp]
-!    Component to call Finalize routine for.
-!   \item[{[importState]}]  
-!    Import data for finalize.
-!   \item[{[exportState]}]  
-!    Export data for finalize.
-!   \item[{[clock]}]  
-!    External clock for passing in time information.
-!   \item[{[phase]}]  
-!    If multiple-phase finalize, which phase number this is.
-!    Pass in 0 or {\tt ESMF\_SINGLEPHAS} for non-multiples.
-!   \item[{[blockingFlag]}]  
-!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOPI
-
-        ! local vars
-        integer :: status                       ! local error status
-        logical :: rcpresent                    ! did user specify rc?
-        character(ESMF_MAXSTR) :: cname
-        integer :: dummy
-        type(ESMF_BlockingFlag) :: blocking
-        integer :: callrc
-        type(ESMF_VM):: vm
-        
-        ! Finalize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        if (.not.associated(compp)) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "Uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc) 
-            return
-        endif
-
-        if (compp%compstatus .ne. ESMF_STATUS_READY) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc) 
-            return
-        endif
-
-        ! set the default mode to ESMF_VASBLOCKING
-        if (present(blockingFlag)) then
-          blocking = blockingFlag
-        else
-          blocking = ESMF_VASBLOCKING
-        endif
-
-        ! supply default objects if unspecified by the caller
-        if (present(importState)) then
-          compp%is = importState
-          compp%isdel = .FALSE.
-        else
-          ! create an empty state
-          compp%is = ESMF_StateCreate(rc=rc)
-          compp%isdel = .TRUE.
-        endif
-
-        if (present(exportState)) then
-          compp%es = exportState
-          compp%esdel = .FALSE.
-        else
-          ! create an empty state
-          compp%es = ESMF_StateCreate(rc=rc)
-          compp%esdel = .TRUE.
-        endif
-
-        ! and something for clocks?
-        if (present(clock)) then
-            ! all is well
-        else
-            call ESMF_LogWrite("Component Initialize called without a clock", &
-                               ESMF_LOG_WARNING)
-        endif
-
-        call ESMF_GetName(compp%base, cname, status)
-
-        ! Wrap comp so it's passed to C++ correctly.
-        compp%compw%compp => compp
-
-        ! Set up the arguments before the call     
-        call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETFINAL, phase, &
-                       compp%compw, compp%is, compp%es, clock, compp%status)
-        
-        call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
-          compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETFINAL, phase, &
-          compp%status)
-          
-        compp%vm_released = .true.
-         
-        if (blocking == ESMF_VASBLOCKING .or. blocking == ESMF_BLOCKING) then
-          call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-            compp%vm_cargo, callrc, status)
-          status = callrc
-          if (compp%isdel) call ESMF_StateDestroy(compp%is, rc=dummy)
-          if (compp%esdel) call ESMF_StateDestroy(compp%es, rc=dummy)
-          compp%vm_released = .false.
-          if (blocking == ESMF_BLOCKING) then
-            call ESMF_VMGetCurrent(vm)
-            call ESMF_VMBarrier(vm)
-          endif
-        endif
-#if 0
-        ! old pre-VM interface
-        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETFINAL, phase, &
-          status)
-#endif
-
-        ! set error code but fall thru and clean up states
-        if (ESMF_LogMsgFoundError(status, &
-                                  "Component finalize error", &
-                                  ESMF_CONTEXT, rc)) continue
-        ! fall thru intentionally - we have more cleanup to do.
-
-        ! Set return values
-        if (rcpresent) rc = status
-
-        end subroutine ESMF_CompFinalize
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CompRun"
-!BOPI
-! !IROUTINE: ESMF_CompRun -- Call the Component's run routine
-
-! !INTERFACE:
-      recursive subroutine ESMF_CompRun(compp, importState, &
-                                    exportState, clock, phase, blockingFlag, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_CompClass), pointer :: compp
-      type (ESMF_State), intent(inout), optional :: importState
-      type (ESMF_State), intent(inout), optional :: exportState
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user run code for a component.
-!
-!    
-!  The arguments are:
-!  \begin{description}
-!
-!   \item[compp]
-!    Component to call Run routine for.
-!   \item[{[importState]}]  
-!     Import data for run.
-!   \item[{[exportState]}]  
-!     Export data for run.
-!   \item[{[clock]}]  
-!     External clock for passing in time information.
-!   \item[{[phase]}]  
-!    If multiple-phase run, which phase number this is.
-!    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!   \item[{[blockingFlag]}]  
-!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOPI
-
-        ! local vars
-        integer :: status                       ! local error status
-        logical :: rcpresent                    ! did user specify rc?
-        character(ESMF_MAXSTR) :: cname
-        integer :: dummy
-        type(ESMF_BlockingFlag):: blocking
-        integer :: callrc
-        type(ESMF_VM)::vm
-
-        ! Run return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        if (.not.associated(compp)) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                     "Uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc)
-             return
-        endif
-
-        if (compp%compstatus .ne. ESMF_STATUS_READY) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                                    "uninitialized or destroyed component", &
-                                     ESMF_CONTEXT, rc)
-            return
-        endif
-
-        ! set the default mode to ESMF_VASBLOCKING
-        if (present(blockingFlag)) then
-          blocking = blockingFlag
-        else
-          blocking = ESMF_VASBLOCKING
-        endif
-
-        ! handle creating defaults if not specified by the user
-        if (present(importState)) then
-          compp%is = importState
-          compp%isdel = .FALSE.
-        else
-          ! create an empty state
-          compp%is = ESMF_StateCreate(rc=rc)
-          compp%isdel = .TRUE.
-        endif
-
-        if (present(exportState)) then
-          compp%es = exportState
-          compp%esdel = .FALSE.
-        else
-          ! create an empty state
-          compp%es = ESMF_StateCreate(rc=rc)
-          compp%esdel = .TRUE.
-        endif
-
-        ! and something for clocks?
-        if (present(clock)) then
-            ! all is well
-        else
-            call ESMF_LogWrite("Component Initialize called without a clock", &
-                               ESMF_LOG_WARNING)
-        endif
-
-        call ESMF_GetName(compp%base, cname, status)
-
-        ! Wrap comp so it's passed to C++ correctly.
-        compp%compw%compp => compp
-
-        ! Set up the arguments before the call     
-        call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETRUN, phase, &
-                       compp%compw, compp%is, compp%es, clock, compp%status)
-        
-        call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
-          compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETRUN, phase, &
-          compp%status)
-          
-        compp%vm_released = .true.          
-                                            
-        if (blocking == ESMF_VASBLOCKING .or. blocking == ESMF_BLOCKING) then
-          call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-            compp%vm_cargo, callrc, status)
-          status = callrc
-          if (compp%isdel) call ESMF_StateDestroy(compp%is, rc=dummy)
-          if (compp%esdel) call ESMF_StateDestroy(compp%es, rc=dummy)
-          compp%vm_released = .false.
-          if (blocking == ESMF_BLOCKING) then
-            call ESMF_VMGetCurrent(vm)
-            call ESMF_VMBarrier(vm)
-          endif
-        endif
-#if 0
-        ! old pre-VM name
-        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETRUN, phase, &
-          status)
-#endif
-
-        ! set error code but fall thru and clean up states
-        if (ESMF_LogMsgFoundError(status, &
-                                  "Component run error", &
-                                  ESMF_CONTEXT, rc)) continue
-        ! fall thru intentionally - we have cleanup to do.
-
-        ! Set return values
-        if (rcpresent) rc = status
-
-        end subroutine ESMF_CompRun
 
 
 
@@ -2190,6 +1883,7 @@ end function
   end subroutine ESMF_CompSetVMMaxPEs
 !------------------------------------------------------------------------------
 
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CompWait"
@@ -2200,9 +1894,9 @@ end function
   subroutine ESMF_CompWait(compp, blockingFlag, rc)
 !
 ! !ARGUMENTS:
-    type (ESMF_CompClass), pointer ::                 compp
-    type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
-    integer, intent(out), optional ::                 rc           
+    type (ESMF_CompClass), pointer                         :: compp
+    type (ESMF_BlockingFlag),       intent(in),   optional :: blockingFlag
+    integer,                        intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
 !     Wait for component to return
@@ -2221,8 +1915,8 @@ end function
 !
 !EOPI
 
-    integer :: status                       ! local error status
-    logical :: rcpresent
+    integer                 :: status       ! local error status
+    logical                 :: rcpresent    ! did user specify rc?
     integer                 :: callrc       ! return code from user code
     type(ESMF_BlockingFlag) :: blocking     ! local blocking flag
     type(ESMF_VM)           :: vm           ! VM for current context
@@ -2318,8 +2012,8 @@ end function
     ! to the parent component and have the user code interpret what it 
     ! means.
     call ESMF_LogMsgSetError(status, &
-                              "Component initialization error", &
-                              ESMF_CONTEXT, rc)
+      "Registered component method returned error", &
+      ESMF_CONTEXT, rc)
  
   end subroutine ESMF_CompWait
 !------------------------------------------------------------------------------

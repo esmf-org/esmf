@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.74 2006/02/15 05:28:11 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.75 2006/02/23 05:14:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.74 2006/02/15 05:28:11 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.75 2006/02/23 05:14:25 theurich Exp $'
 
 !==============================================================================
 !
@@ -809,8 +809,9 @@
 !
 !EOP
 
-        call ESMF_CompFinalize(gridcomp%compp, importState, exportState, &
-          clock=clock, phase=phase, blockingflag=blockingflag, rc=rc)
+        call ESMF_CompExecute(gridcomp%compp, importState, exportState, &
+          clock=clock, methodtype=ESMF_SETFINAL, phase=phase, &
+          blockingflag=blockingflag, rc=rc)
 
         end subroutine ESMF_GridCompFinalize
 
@@ -936,8 +937,9 @@
 !
 !EOP
 
-        call ESMF_CompInitialize(gridcomp%compp, importState, exportState, &
-                    clock=clock, phase=phase, blockingflag=blockingflag, rc=rc)
+        call ESMF_CompExecute(gridcomp%compp, importState, exportState, &
+          clock=clock, methodtype=ESMF_SETINIT, phase=phase, &
+          blockingflag=blockingflag, rc=rc)
 
         end subroutine ESMF_GridCompInitialize
 
@@ -1103,9 +1105,10 @@
 !
 !EOP
 
-        call ESMF_CompRun(gridcomp%compp, importState, exportState, &
-                    clock=clock, phase=phase, blockingflag=blockingflag, rc=rc)
-
+        call ESMF_CompExecute(gridcomp%compp, importState, exportState, &
+          clock=clock, methodtype=ESMF_SETRUN, phase=phase, &
+          blockingflag=blockingflag, rc=rc)
+          
         end subroutine ESMF_GridCompRun
 
 !------------------------------------------------------------------------------
