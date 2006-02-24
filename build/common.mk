@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.151 2006/02/14 23:25:10 theurich Exp $
+#  $Id: common.mk,v 1.152 2006/02/24 23:03:26 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -306,6 +306,7 @@ ESMF_STDIR      = $(ESMF_TOP_DIR)/src/system_tests
 ESMF_CONFDIR    = $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).default
 ESMF_SITEDIR    = $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)
 ESMF_UTCDIR     = $(ESMF_TOP_DIR)/src/use_test_cases
+ESMF_UTCSCRIPTS = $(ESMF_TOP_DIR)/src/use_test_cases/scripts
 
 # TODO: these may be leftovers from the impl_rep, and if so, they should
 # be moved up into that makefile.  as far as i know, these are not used
@@ -329,6 +330,7 @@ DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) 
 DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
 DO_ST_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT)
+DO_UTC_RESULTS	    = $(ESMF_UTCSCRIPTS)/do_utc_results.pl -h $(ESMF_UTCSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 
 # set up the defaults for all compilers, all options.  if the platform
 # dependent files want to add flags, they can += more flags.  if they want
@@ -1357,7 +1359,7 @@ use_test_cases: chkdir_tests
 	  $(MAKE) err ; \
 	fi; \
 	$(MAKE) ACTION=tree_use_test_cases tree ; \
-#	$(MAKE) check_use_test_cases
+	$(MAKE) check_use_test_cases
 
 tree_use_test_cases: tree_build_use_test_cases tree_run_use_test_cases
 
@@ -1376,7 +1378,7 @@ use_test_cases_uni: chkdir_tests
 	   echo current working directory is now `pwd` ; \
 	fi; \
 	$(MAKE) ACTION=tree_use_test_cases_uni tree ; \
-#	$(MAKE) check_use_test_cases
+	$(MAKE) check_use_test_cases
 
 tree_use_test_cases_uni: tree_build_use_test_cases tree_run_use_test_cases_uni
 
@@ -1394,7 +1396,6 @@ build_use_test_cases: reqfile_libesmf reqdir_lib chkdir_tests
 	   fi; \
 	   echo current working directory is now `pwd` ; \
         fi; \
-	echo " Make is $(MAKE)";\
 	$(MAKE) ACTION=tree_build_use_test_cases tree ; \
 	echo "ESMF use test cases built successfully."
 
@@ -1475,7 +1476,7 @@ run_use_test_cases:  reqdir_tests
 	  $(MAKE) err ; \
 	fi; \
 	$(MAKE) ACTION=tree_run_use_test_cases tree ; \
-#	$(MAKE) check_use_test_cases
+	$(MAKE) check_use_test_cases
 
 tree_run_use_test_cases: $(USE_TEST_CASES_RUN) 
 
@@ -1495,7 +1496,7 @@ run_use_test_cases_uni:  reqdir_tests
 	   echo current working directory is now `pwd` ; \
         fi; \
 	$(MAKE) ACTION=tree_use_test_cases_uni tree ; \
-#	$(MAKE) check_use_test_cases
+	$(MAKE) check_use_test_cases
 
 tree_run_use_test_cases_uni: $(USE_TEST_CASES_RUN_UNI)
 
@@ -1521,8 +1522,8 @@ clean_use_test_cases:
 #
 # report statistics on system tests
 #
-#check_use_test_cases: 
-#	@$(DO_UTC_RESULTS)
+check_use_test_cases: 
+	@$(DO_UTC_RESULTS)
 
 
 #-------------------------------------------------------------------------------
