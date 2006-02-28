@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.51 2006/02/16 22:57:05 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.52 2006/02/28 17:05:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -648,4 +648,15 @@ extern "C" {
     *rc = (*ptr)->ESMC_VMRecvVMId(*vmid, *source);
   }
     
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // VM utilities
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  void FTN(c_esmc_vmpointerprint)(void *ptr){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmpointerprint()"
+    // print the address to which this pointer points
+    printf("c_esmc_vmpointerprint: %p\n", ptr);
+  }
+  
 };
