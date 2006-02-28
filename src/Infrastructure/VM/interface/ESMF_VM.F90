@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.72 2005/12/16 20:10:57 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.73 2006/02/28 18:00:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -168,7 +168,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.72 2005/12/16 20:10:57 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.73 2006/02/28 18:00:54 theurich Exp $"
 
 !==============================================================================
 
@@ -398,7 +398,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)
+    integer(ESMF_KIND_I4), target,    intent(in)      :: sendData(:)
     integer(ESMF_KIND_I4),    intent(out)             :: recvData
     integer,                  intent(in)              :: count
     type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
@@ -475,7 +475,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllFullReduce(vm, sendData, recvData, count, ESMF_I4, &
+    call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, ESMF_I4, &
       reduceflag, localrc)
 
     ! Use LogErr to handle return code
@@ -499,7 +499,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(in)              :: sendData(:)
+    real(ESMF_KIND_R4), target,      intent(in)       :: sendData(:)
     real(ESMF_KIND_R4),       intent(out)             :: recvData
     integer,                  intent(in)              :: count
     type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
@@ -576,7 +576,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllFullReduce(vm, sendData, recvData, count, ESMF_R4, &
+    call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, ESMF_R4, &
       reduceflag, localrc)
 
     ! Use LogErr to handle return code
@@ -600,7 +600,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(in)              :: sendData(:)
+    real(ESMF_KIND_R8), target,      intent(in)       :: sendData(:)
     real(ESMF_KIND_R8),       intent(out)             :: recvData
     integer,                  intent(in)              :: count
     type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
@@ -677,7 +677,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllFullReduce(vm, sendData, recvData, count, ESMF_R8, &
+    call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, ESMF_R8, &
       reduceflag, localrc)
 
     ! Use LogErr to handle return code
@@ -701,8 +701,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)
-    integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
@@ -767,10 +767,10 @@ module ESMF_VMMod
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
+      call c_ESMC_VMAllGather(vm, sendData(1), recvData(1), size, localrc)
     else
-      call c_ESMC_VMAllGatherNB(vm, sendData, recvData, size, localcommhandle, &
-        localrc)
+      call c_ESMC_VMAllGatherNB(vm, sendData(1), recvData(1), size, &
+        localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
@@ -798,8 +798,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(in)              :: sendData(:)
-    real(ESMF_KIND_R4),       intent(out)             :: recvData(:)
+    real(ESMF_KIND_R4), target,      intent(in)       :: sendData(:)
+    real(ESMF_KIND_R4), target,      intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
@@ -895,8 +895,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(in)              :: sendData(:)
-    real(ESMF_KIND_R8),       intent(out)             :: recvData(:)
+    real(ESMF_KIND_R8), target,      intent(in)       :: sendData(:)
+    real(ESMF_KIND_R8), target,      intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
@@ -961,10 +961,10 @@ module ESMF_VMMod
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
+      call c_ESMC_VMAllGather(vm, sendData(1), recvData(1), size, localrc)
     else
-      call c_ESMC_VMAllGatherNB(vm, sendData, recvData, size, localcommhandle, &
-        localrc)
+      call c_ESMC_VMAllGatherNB(vm, sendData(1), recvData(1), size, &
+        localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
@@ -992,8 +992,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_Logical),       intent(in)              :: sendData(:)
-    type(ESMF_Logical),       intent(out)             :: recvData(:)
+    type(ESMF_Logical), target,      intent(in)       :: sendData(:)
+    type(ESMF_Logical), target,      intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
@@ -1058,10 +1058,10 @@ module ESMF_VMMod
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
+      call c_ESMC_VMAllGather(vm, sendData(1), recvData(1), size, localrc)
     else
-      call c_ESMC_VMAllGatherNB(vm, sendData, recvData, size, localcommhandle, &
-        localrc)
+      call c_ESMC_VMAllGatherNB(vm, sendData(1), recvData(1), size, &
+        localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
@@ -1089,8 +1089,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)
-    integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -1167,7 +1167,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllReduce(vm, sendData, recvData, count, ESMF_I4, &
+    call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, ESMF_I4, &
       reduceflag, localrc)
 
     ! Use LogErr to handle return code
@@ -1191,8 +1191,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(in)              :: sendData(:)
-    real(ESMF_KIND_R4),       intent(out)             :: recvData(:)
+    real(ESMF_KIND_R4), target,      intent(in)       :: sendData(:)
+    real(ESMF_KIND_R4), target,      intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -1269,7 +1269,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllReduce(vm, sendData, recvData, count, ESMF_R4, &
+    call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, ESMF_R4, &
       reduceflag, localrc)
 
     ! Use LogErr to handle return code
@@ -1293,8 +1293,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(in)              :: sendData(:)
-    real(ESMF_KIND_R8),       intent(out)             :: recvData(:)
+    real(ESMF_KIND_R8), target,      intent(in)       :: sendData(:)
+    real(ESMF_KIND_R8), target,      intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -1371,7 +1371,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllReduce(vm, sendData, recvData, count, ESMF_R8, &
+    call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, ESMF_R8, &
       reduceflag, localrc)
 
     ! Use LogErr to handle return code
@@ -1439,7 +1439,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(inout)           :: bcstData(:)
+    integer(ESMF_KIND_I4), target,   intent(inout)    :: bcstData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -1505,9 +1505,9 @@ module ESMF_VMMod
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMBroadcast(vm, bcstData, size, root, localrc)
+      call c_ESMC_VMBroadcast(vm, bcstData(1), size, root, localrc)
     else
-      call c_ESMC_VMBroadcastNB(vm, bcstData, size, root, localcommhandle, &
+      call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, root, localcommhandle, &
         localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -1536,7 +1536,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(inout)           :: bcstData(:)
+    real(ESMF_KIND_R4), target,      intent(inout)    :: bcstData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -1603,9 +1603,9 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMBroadcast(vm, bcstData, size, root, localrc)
+      call c_ESMC_VMBroadcast(vm, bcstData(1), size, root, localrc)
     else
-      call c_ESMC_VMBroadcastNB(vm, bcstData, size, root, localcommhandle, &
+      call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, root, localcommhandle, &
         localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -1634,7 +1634,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(inout)           :: bcstData(:)
+    real(ESMF_KIND_R8), target,      intent(inout)    :: bcstData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -1700,9 +1700,9 @@ module ESMF_VMMod
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMBroadcast(vm, bcstData, size, root, localrc)
+      call c_ESMC_VMBroadcast(vm, bcstData(1), size, root, localrc)
     else
-      call c_ESMC_VMBroadcastNB(vm, bcstData, size, root, localcommhandle, &
+      call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, root, localcommhandle, &
         localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -1731,7 +1731,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_Logical),       intent(inout)           :: bcstData(:)
+    type(ESMF_Logical), target,      intent(inout)    :: bcstData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -1797,9 +1797,9 @@ module ESMF_VMMod
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMBroadcast(vm, bcstData, size, root, localrc)
+      call c_ESMC_VMBroadcast(vm, bcstData(1), size, root, localrc)
     else
-      call c_ESMC_VMBroadcastNB(vm, bcstData, size, root, localcommhandle, &
+      call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, root, localcommhandle, &
         localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -1828,8 +1828,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)
-    integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -1897,9 +1897,9 @@ module ESMF_VMMod
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMGather(vm, sendData, recvData, size, root, localrc)
+      call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, root, localrc)
     else
-      call c_ESMC_VMGatherNB(vm, sendData, recvData, size, root, &
+      call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -1928,8 +1928,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(in)              :: sendData(:)
-    real(ESMF_KIND_R4),       intent(out)             :: recvData(:)
+    real(ESMF_KIND_R4), target,      intent(in)       :: sendData(:)
+    real(ESMF_KIND_R4), target,      intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -1997,9 +1997,9 @@ module ESMF_VMMod
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMGather(vm, sendData, recvData, size, root, localrc)
+      call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, root, localrc)
     else
-      call c_ESMC_VMGatherNB(vm, sendData, recvData, size, root, &
+      call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -2028,8 +2028,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(in)              :: sendData(:)
-    real(ESMF_KIND_R8),       intent(out)             :: recvData(:)
+    real(ESMF_KIND_R8), target,      intent(in)       :: sendData(:)
+    real(ESMF_KIND_R8), target,      intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -2097,9 +2097,9 @@ module ESMF_VMMod
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMGather(vm, sendData, recvData, size, root, localrc)
+      call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, root, localrc)
     else
-      call c_ESMC_VMGatherNB(vm, sendData, recvData, size, root, &
+      call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -2128,8 +2128,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_Logical),       intent(in)              :: sendData(:)
-    type(ESMF_Logical),       intent(out)             :: recvData(:)
+    type(ESMF_Logical), target,      intent(in)       :: sendData(:)
+    type(ESMF_Logical), target,      intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -2197,9 +2197,9 @@ module ESMF_VMMod
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMGather(vm, sendData, recvData, size, root, localrc)
+      call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, root, localrc)
     else
-      call c_ESMC_VMGatherNB(vm, sendData, recvData, size, root, &
+      call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -2579,7 +2579,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)  
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -2640,9 +2640,9 @@ module ESMF_VMMod
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMRecv(vm, recvData, size, src, localrc)
+      call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
     else
-      call c_ESMC_VMRecvNB(vm, recvData, size, src, localcommhandle, localrc)
+      call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
@@ -2670,7 +2670,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(out)             :: recvData(:)  
+    real(ESMF_KIND_R4), target,      intent(out)      :: recvData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -2731,9 +2731,9 @@ module ESMF_VMMod
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMRecv(vm, recvData, size, src, localrc)
+      call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
     else
-      call c_ESMC_VMRecvNB(vm, recvData, size, src, localcommhandle, localrc)
+      call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
@@ -2761,7 +2761,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(out)             :: recvData(:)  
+    real(ESMF_KIND_R8), target,      intent(out)      :: recvData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -2822,9 +2822,9 @@ module ESMF_VMMod
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMRecv(vm, recvData, size, src, localrc)
+      call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
     else
-      call c_ESMC_VMRecvNB(vm, recvData, size, src, localcommhandle, localrc)
+      call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
@@ -2852,7 +2852,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_Logical),       intent(out)             :: recvData(:)  
+    type(ESMF_Logical), target,      intent(out)      :: recvData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -2913,9 +2913,9 @@ module ESMF_VMMod
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMRecv(vm, recvData, size, src, localrc)
+      call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
     else
-      call c_ESMC_VMRecvNB(vm, recvData, size, src, localcommhandle, localrc)
+      call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
@@ -3034,8 +3034,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)
-    integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
     integer,                  intent(in)              :: root
@@ -3115,7 +3115,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMReduce(vm, sendData, recvData, count, ESMF_I4, &
+    call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, ESMF_I4, &
       reduceflag, root, localrc)
 
     ! Use LogErr to handle return code
@@ -3139,8 +3139,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(in)              :: sendData(:)
-    real(ESMF_KIND_R4),       intent(out)             :: recvData(:)
+    real(ESMF_KIND_R4), target,      intent(in)       :: sendData(:)
+    real(ESMF_KIND_R4), target,      intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
     integer,                  intent(in)              :: root
@@ -3220,7 +3220,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMReduce(vm, sendData, recvData, count, ESMF_R4, &
+    call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, ESMF_R4, &
       reduceflag, root, localrc)
 
     ! Use LogErr to handle return code
@@ -3244,8 +3244,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(in)              :: sendData(:)
-    real(ESMF_KIND_R8),       intent(out)             :: recvData(:)
+    real(ESMF_KIND_R8), target,      intent(in)       :: sendData(:)
+    real(ESMF_KIND_R8), target,      intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
     integer,                  intent(in)              :: root
@@ -3325,7 +3325,7 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMReduce(vm, sendData, recvData, count, ESMF_R8, &
+    call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, ESMF_R8, &
       reduceflag, root, localrc)
 
     ! Use LogErr to handle return code
@@ -3349,8 +3349,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)
-    integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -3418,9 +3418,9 @@ module ESMF_VMMod
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMScatter(vm, sendData, recvData, size, root, localrc)
+      call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, root, localrc)
     else
-      call c_ESMC_VMScatterNB(vm, sendData, recvData, size, root, &
+      call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -3449,8 +3449,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(in)              :: sendData(:)
-    real(ESMF_KIND_R4),       intent(out)             :: recvData(:)
+    real(ESMF_KIND_R4), target,      intent(in)       :: sendData(:)
+    real(ESMF_KIND_R4), target,      intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -3518,9 +3518,9 @@ module ESMF_VMMod
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMScatter(vm, sendData, recvData, size, root, localrc)
+      call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, root, localrc)
     else
-      call c_ESMC_VMScatterNB(vm, sendData, recvData, size, root, &
+      call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -3549,8 +3549,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(in)              :: sendData(:)
-    real(ESMF_KIND_R8),       intent(out)             :: recvData(:)
+    real(ESMF_KIND_R8), target,      intent(in)       :: sendData(:)
+    real(ESMF_KIND_R8), target,      intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -3618,9 +3618,9 @@ module ESMF_VMMod
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMScatter(vm, sendData, recvData, size, root, localrc)
+      call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, root, localrc)
     else
-      call c_ESMC_VMScatterNB(vm, sendData, recvData, size, root, &
+      call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -3649,8 +3649,8 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_Logical),       intent(in)              :: sendData(:)
-    type(ESMF_Logical),       intent(out)             :: recvData(:)
+    type(ESMF_Logical), target,      intent(in)       :: sendData(:)
+    type(ESMF_Logical), target,      intent(out)      :: recvData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -3718,9 +3718,9 @@ module ESMF_VMMod
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMScatter(vm, sendData, recvData, size, root, localrc)
+      call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, root, localrc)
     else
-      call c_ESMC_VMScatterNB(vm, sendData, recvData, size, root, &
+      call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -3749,7 +3749,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)  
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: dst
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -3810,9 +3810,9 @@ module ESMF_VMMod
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMSend(vm, sendData, size, dst, localrc)
+      call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
     else
-      call c_ESMC_VMSendNB(vm, sendData, size, dst, localcommhandle, localrc)
+      call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
@@ -3840,7 +3840,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(in)              :: sendData(:)  
+    real(ESMF_KIND_R4), target,      intent(in)       :: sendData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: dst
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -3901,9 +3901,9 @@ module ESMF_VMMod
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMSend(vm, sendData, size, dst, localrc)
+      call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
     else
-      call c_ESMC_VMSendNB(vm, sendData, size, dst, localcommhandle, localrc)
+      call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
@@ -3931,7 +3931,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(in)              :: sendData(:)  
+    real(ESMF_KIND_R8), target,      intent(in)       :: sendData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: dst
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -3992,9 +3992,9 @@ module ESMF_VMMod
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMSend(vm, sendData, size, dst, localrc)
+      call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
     else
-      call c_ESMC_VMSendNB(vm, sendData, size, dst, localcommhandle, localrc)
+      call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
@@ -4022,7 +4022,7 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_Logical),       intent(in)              :: sendData(:)  
+    type(ESMF_Logical), target,      intent(in)       :: sendData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: dst
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -4083,9 +4083,9 @@ module ESMF_VMMod
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMSend(vm, sendData, size, dst, localrc)
+      call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
     else
-      call c_ESMC_VMSendNB(vm, sendData, size, dst, localcommhandle, localrc)
+      call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
@@ -4204,10 +4204,10 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)  
+    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)  
     integer,                  intent(in)              :: sendCount
     integer,                  intent(in)              :: dst
-    integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)  
+    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)  
     integer,                  intent(in)              :: recvCount
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -4277,11 +4277,11 @@ module ESMF_VMMod
     recvSize = recvCount * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, &
-        recvData, recvSize, src, localrc)
+      call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dst, &
+        recvData(1), recvSize, src, localrc)
     else
-      call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, &
-        recvData, recvSize, src, localcommhandle, localrc)
+      call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dst, &
+        recvData(1), recvSize, src, localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
@@ -4309,10 +4309,10 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(in)              :: sendData(:)  
+    real(ESMF_KIND_R4), target,      intent(in)       :: sendData(:)  
     integer,                  intent(in)              :: sendCount
     integer,                  intent(in)              :: dst
-    real(ESMF_KIND_R4),       intent(out)             :: recvData(:)  
+    real(ESMF_KIND_R4), target,      intent(out)      :: recvData(:)  
     integer,                  intent(in)              :: recvCount
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -4382,11 +4382,11 @@ module ESMF_VMMod
     recvSize = recvCount * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, &
-        recvData, recvSize, src, localrc)
+      call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dst, &
+        recvData(1), recvSize, src, localrc)
     else
-      call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, &
-        recvData, recvSize, src, localcommhandle, localrc)
+      call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dst, &
+        recvData(1), recvSize, src, localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
@@ -4414,10 +4414,10 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(in)              :: sendData(:)  
+    real(ESMF_KIND_R8), target,      intent(in)       :: sendData(:)  
     integer,                  intent(in)              :: sendCount
     integer,                  intent(in)              :: dst
-    real(ESMF_KIND_R8),       intent(out)             :: recvData(:)  
+    real(ESMF_KIND_R8), target,      intent(out)      :: recvData(:)  
     integer,                  intent(in)              :: recvCount
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -4487,11 +4487,11 @@ module ESMF_VMMod
     recvSize = recvCount * 8 ! 8 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, &
-        recvData, recvSize, src, localrc)
+      call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dst, &
+        recvData(1), recvSize, src, localrc)
     else
-      call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, &
-        recvData, recvSize, src, localcommhandle, localrc)
+      call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dst, &
+        recvData(1), recvSize, src, localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
@@ -4519,10 +4519,10 @@ module ESMF_VMMod
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_Logical),       intent(in)              :: sendData(:)  
+    type(ESMF_Logical), target,      intent(in)       :: sendData(:)  
     integer,                  intent(in)              :: sendCount
     integer,                  intent(in)              :: dst
-    type(ESMF_Logical),       intent(out)             :: recvData(:)  
+    type(ESMF_Logical), target,      intent(out)      :: recvData(:)  
     integer,                  intent(in)              :: recvCount
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -4592,11 +4592,11 @@ module ESMF_VMMod
     recvSize = recvCount * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
-      call c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, &
-        recvData, recvSize, src, localrc)
+      call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dst, &
+        recvData(1), recvSize, src, localrc)
     else
-      call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, &
-        recvData, recvSize, src, localcommhandle, localrc)
+      call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dst, &
+        recvData(1), recvSize, src, localcommhandle, localrc)
       ! check if we need to pass back the commhandle
       if (present(commhandle)) then
         commhandle = localcommhandle  ! copy the commhandle pointer back
