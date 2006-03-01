@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.152 2006/02/24 23:03:26 svasquez Exp $
+#  $Id: common.mk,v 1.153 2006/03/01 21:31:29 eschwab Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -224,6 +224,7 @@ RANLIB		   = ranlib
 M4	           = m4
 SED		   = sed 
 WC		   = wc 
+GREPV		   = grep -v
 
 OMAKE		   = $(MAKE)
 SHELL		   = /bin/sh
@@ -2338,6 +2339,10 @@ shared:
 	$(F_PROTEX) $* $<
 
 %_chapi.tex : ../include/%.h
+	export PROTEX=$(PROTEX) ;\
+	$(CH_PROTEX) $* $<
+
+%_chapi.tex : ../include/%.inc
 	export PROTEX=$(PROTEX) ;\
 	$(CH_PROTEX) $* $<
 
