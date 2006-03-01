@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_ErrReturnCodes.inc,v 1.2 2005/10/27 22:36:19 eschwab Exp $
+$Id: ESMF_ErrReturnCodes.inc,v 1.3 2006/03/01 21:34:29 eschwab Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,9 +31,22 @@ ESMC_LogErrMsgs.C
 #endif
 
 #if 0
-======================
-F90 Return codes 1-500
-======================
+These are here for convenient reference and possible future definition;
+they are currently defined in ESMF_UtilTypes.F90 and ESMC_Macros.h
+//BOP
+\begin{verbatim}
+=====================================================
+Success/Failure Return codes for both Fortran and C++
+=====================================================
+
+#define  ESMF_SUCCESS             0
+#define  ESMF_FAILURE            -1
+#endif
+
+#if 0
+==========================
+Fortran Return codes 1-500
+==========================
 #endif
 
 #define  ESMF_RC_OBJ_BAD          1 
@@ -41,7 +54,6 @@ F90 Return codes 1-500
 #define  ESMF_RC_OBJ_CREATE       3
 #define  ESMF_RC_OBJ_COR          4
 #define  ESMF_RC_OBJ_WRONGSTATE   5
-
 #define  ESMF_RC_ARG_BAD          6
 #define  ESMF_RC_ARG_RANK         7
 #define  ESMF_RC_ARG_SIZE         8
@@ -54,9 +66,7 @@ F90 Return codes 1-500
 #define  ESMF_RC_ARG_WRONG       15
 #define  ESMF_RC_ARG_OUTOFRANGE  16
 #define  ESMF_RC_ARG_OPT         17
- 
 #define  ESMF_RC_NOT_IMPL        18
-
 #define  ESMF_RC_FILE_OPEN       19
 #define  ESMF_RC_FILE_CREATE     20
 #define  ESMF_RC_FILE_READ       21
@@ -64,14 +74,12 @@ F90 Return codes 1-500
 #define  ESMF_RC_FILE_UNEXPECTED 23
 #define  ESMF_RC_FILE_CLOSE      24
 #define  ESMF_RC_FILE_ACTIVE     25
-
 #define  ESMF_RC_PTR_NULL        26
 #define  ESMF_RC_PTR_BAD         27
 #define  ESMF_RC_PTR_NOTALLOC    28
 #define  ESMF_RC_PTR_ISALLOC     29
 #define  ESMF_RC_MEM             30
 #define  ESMF_RC_MEMC            31
-
 #define  ESMF_RC_DUP_NAME        32
 #define  ESMF_RC_LONG_NAME       33
 #define  ESMF_RC_LONG_STR        34
@@ -81,16 +89,17 @@ F90 Return codes 1-500
 #define  ESMF_RC_CANNOT_SET      38
 #define  ESMF_RC_NOT_FOUND       39
 #define  ESMF_RC_NOT_VALID       40
-
 #define  ESMF_RC_INTNRL_LIST     41
 #define  ESMF_RC_INTNRL_INCONS   42
 #define  ESMF_RC_INTNRL_BAD      43
-
 #define  ESMF_RC_SYS             44
 #define  ESMF_RC_BUSY            45
 #define  ESMF_RC_LIB             46
-
 #define  ESMF_RC_ATTR_UNUSED     47
+
+#if 0
+48-500 reserved for future Fortran return code definitions
+#endif
 
 #if 0
 =========================
@@ -103,7 +112,6 @@ C++ Return codes 501-1000
 #define  ESMC_RC_OBJ_CREATE      503
 #define  ESMC_RC_OBJ_COR         504
 #define  ESMC_RC_OBJ_WRONGSTATE  505
-
 #define  ESMC_RC_ARG_BAD         506
 #define  ESMC_RC_ARG_RANK        507
 #define  ESMC_RC_ARG_SIZE        508
@@ -116,9 +124,7 @@ C++ Return codes 501-1000
 #define  ESMC_RC_ARG_WRONG       515
 #define  ESMC_RC_ARG_OUTOFRANGE  516
 #define  ESMC_RC_ARG_OPT         517
- 
 #define  ESMC_RC_NOT_IMPL        518
-
 #define  ESMC_RC_FILE_OPEN       519
 #define  ESMC_RC_FILE_CREATE     520
 #define  ESMC_RC_FILE_READ       521
@@ -126,14 +132,12 @@ C++ Return codes 501-1000
 #define  ESMC_RC_FILE_UNEXPECTED 523
 #define  ESMC_RC_FILE_CLOSE      524
 #define  ESMC_RC_FILE_ACTIVE     525
-
 #define  ESMC_RC_PTR_NULL        526
 #define  ESMC_RC_PTR_BAD         527
 #define  ESMC_RC_PTR_NOTALLOC    528
 #define  ESMC_RC_PTR_ISALLOC     529
 #define  ESMC_RC_MEM             530
 #define  ESMC_RC_MEMC            531
-
 #define  ESMC_RC_DUP_NAME        532
 #define  ESMC_RC_LONG_NAME       533
 #define  ESMC_RC_LONG_STR        534
@@ -143,15 +147,18 @@ C++ Return codes 501-1000
 #define  ESMC_RC_CANNOT_SET      538
 #define  ESMC_RC_NOT_FOUND       539
 #define  ESMC_RC_NOT_VALID       540
-
 #define  ESMC_RC_INTNRL_LIST     541
 #define  ESMC_RC_INTNRL_INCONS   542
 #define  ESMC_RC_INTNRL_BAD      543
-
 #define  ESMC_RC_SYS             544
 #define  ESMC_RC_BUSY            545
 #define  ESMC_RC_LIB             546
-
 #define  ESMC_RC_ATTR_UNUSED     547
+
+#if 0
+548-1000 reserved for future C++ return code definitions
+\end{verbatim}
+//EOP
+#endif
 
 #endif
