@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.61 2006/02/21 23:30:34 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.62 2006/03/02 01:11:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -50,6 +50,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include <time.h>
 
 #include <sys/mman.h>
 #include <fcntl.h>
@@ -311,8 +312,6 @@ void ESMC_VMK::vmk_init(void){
       // normally for the default ESMC_VMK all communication is via MPI-1
       commarray[i][j].comm_type = VM_COMM_TYPE_MPI1;
 #endif      
-//gjt - don't use yet:      commarray[i][j].mpitag_send = 0; // reset the tag counter
-//gjt - don't use yet:      commarray[i][j].mpitag_recv = 0; // reset the tag counter
     }
   }
   // set up the request queue
@@ -2167,6 +2166,7 @@ void ESMC_VMKPlan::vmkplan_print(void){
 
 void ESMC_VMK::vmk_commhandle_add(vmk_commhandle *commhandle){
   vmk_commhandle *handle;
+  pthread_mutex_lock(pth_mutex2);
   if (nhandles==0){
     firsthandle=commhandle;
     commhandle->prev_handle=NULL;
@@ -2180,15 +2180,19 @@ void ESMC_VMK::vmk_commhandle_add(vmk_commhandle *commhandle){
     commhandle->next_handle=NULL;
   }
   ++nhandles;
+  pthread_mutex_unlock(pth_mutex2);
 }
 
 int ESMC_VMK::vmk_commhandle_del(vmk_commhandle *commhandle){
   vmk_commhandle *handle;
-  if (nhandles==0)
+  pthread_mutex_lock(pth_mutex2);
+  if (nhandles==0){
+    pthread_mutex_unlock(pth_mutex2);
     return 0;
-  else if(nhandles==1){
+  }else if(nhandles==1){
     nhandles=0;
     firsthandle=NULL;
+    pthread_mutex_unlock(pth_mutex2);
     return 1;
   }else{
     handle=firsthandle;
@@ -2219,11 +2223,12 @@ int ESMC_VMK::vmk_commhandle_del(vmk_commhandle *commhandle){
         handle->next_handle->prev_handle=handle->prev_handle;
     }
   }
+  pthread_mutex_unlock(pth_mutex2);
   return 1;
 }
 
 
-void ESMC_VMK::vmk_send(void *message, int size, int dest){
+void ESMC_VMK::vmk_send(void *message, int size, int dest, int tag){
   // p2p send
 #if (VERBOSITY > 9)
   printf("sending to: %d, %d\n", dest, lpid[dest]);
@@ -2242,10 +2247,8 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest){
     // use mutex to serialize mpi comm calls if mpi thread support requires it
     if (mpi_mutex_flag)
       pthread_mutex_lock(pth_mutex);
-    MPI_Send(message, size, MPI_BYTE, lpid[dest], 1000*mypet+dest, mpi_c);
-//gjt - don't use yet:    MPI_Send(message, size, MPI_BYTE, lpid[dest], 
-//gjt - don't use yet:      commarray[mypet][dest].mpitag_send, mpi_c);
-//gjt - don't use yet:    ++commarray[mypet][dest].mpitag_send;
+    if (tag == -1) tag = 1000*mypet+dest;   // default tag to simplify debugging
+    MPI_Send(message, size, MPI_BYTE, lpid[dest], tag, mpi_c);
     if (mpi_mutex_flag)
       pthread_mutex_unlock(pth_mutex);
     break;
@@ -2361,7 +2364,7 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest){
 
 
 void ESMC_VMK::vmk_send(void *message, int size, int dest, 
-  vmk_commhandle **commhandle){
+  vmk_commhandle **commhandle, int tag){
   // p2p send
 //fprintf(stderr, "vmk_send: commhandle=%p\n", *commhandle);
 #if (VERBOSITY > 9)
@@ -2390,11 +2393,9 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest,
     if (mpi_mutex_flag)
       pthread_mutex_lock(pth_mutex);
 //fprintf(stderr, "MPI_Isend: commhandle=%p\n", (*commhandle)->mpireq);
-    MPI_Isend(message, size, MPI_BYTE, lpid[dest], 1000*mypet+dest, mpi_c, 
+    if (tag == -1) tag = 1000*mypet+dest;   // default tag to simplify debugging
+    MPI_Isend(message, size, MPI_BYTE, lpid[dest], tag, mpi_c, 
       (*commhandle)->mpireq);
-//gjt - don't use yet:    MPI_Isend(message, size, MPI_BYTE, lpid[dest],
-//gjt - don't use yet:      commarray[mypet][dest].mpitag_send, mpi_c, (*commhandle)->mpireq);
-//gjt - don't use yet:    ++commarray[mypet][dest].mpitag_send;
     if (mpi_mutex_flag)
       pthread_mutex_unlock(pth_mutex);
     break;
@@ -2515,7 +2516,7 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest,
 }
 
 
-void ESMC_VMK::vmk_recv(void *message, int size, int source){
+void ESMC_VMK::vmk_recv(void *message, int size, int source, int tag){
   // p2p recv
 #if (VERBOSITY > 9)
   printf("receiving from: %d, %d\n", source, lpid[source]);
@@ -2534,12 +2535,9 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source){
     // use mutex to serialize mpi comm calls if mpi thread support requires it
     if (mpi_mutex_flag)
       pthread_mutex_lock(pth_mutex);
+    if (tag == -1) tag = 1000*source+mypet; // default tag to simplify debugging
     MPI_Status mpi_s;
-    MPI_Recv(message, size, MPI_BYTE, lpid[source], 1000*source+mypet, 
-    mpi_c, &mpi_s);
-//gjt - don't use yet:    MPI_Recv(message, size, MPI_BYTE, lpid[source],
-//gjt - don't use yet:      commarray[source][mypet].mpitag_recv, mpi_c, &mpi_s);
-//gjt - don't use yet:    ++commarray[source][mypet].mpitag_recv;
+    MPI_Recv(message, size, MPI_BYTE, lpid[source], tag, mpi_c, &mpi_s);
     if (mpi_mutex_flag)
       pthread_mutex_unlock(pth_mutex);
     break;
@@ -2657,7 +2655,7 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source){
 
 
 void ESMC_VMK::vmk_recv(void *message, int size, int source,
-  vmk_commhandle **commhandle){
+  vmk_commhandle **commhandle, int tag){
   // p2p recv
 //fprintf(stderr, "vmk_recv: commhandle=%p\n", *commhandle);
 #if (VERBOSITY > 9)
@@ -2686,11 +2684,9 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source,
     if (mpi_mutex_flag)
       pthread_mutex_lock(pth_mutex);
 //fprintf(stderr, "MPI_Irecv: commhandle=%p\n", (*commhandle)->mpireq);
-    MPI_Irecv(message, size, MPI_BYTE, lpid[source], 1000*source+mypet, 
+    if (tag == -1) tag = 1000*source+mypet; // default tag to simplify debugging
+    MPI_Irecv(message, size, MPI_BYTE, lpid[source], tag,
       mpi_c, (*commhandle)->mpireq);
-//gjt - don't use yet:    MPI_Irecv(message, size, MPI_BYTE, lpid[source],
-//gjt - don't use yet:      commarray[source][mypet].mpitag_recv, mpi_c, (*commhandle)->mpireq);
-//gjt - don't use yet:    ++commarray[source][mypet].mpitag_recv;
     if (mpi_mutex_flag)
       pthread_mutex_unlock(pth_mutex);
     break;
@@ -2813,6 +2809,34 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source,
 }
 
 
+void ESMC_VMK::vmk_vassend(void *message, int size, int destVAS,
+  vmk_commhandle **commhandle, int tag){
+  // non-blocking send where the destination is a VAS, _not_ a PET
+  // todo: currently this is just a stub that uses the PET-based 
+  //       non-blocking send. Hence this will not work for the ESMF-threading
+  //       case for which it is actually thought for!
+  // for this stub implementation figure out first PET to run in the destVAS
+  int dest;
+  for (dest=0; dest<npets; dest++)
+    if (pid[dest] == destVAS) break;
+  vmk_send(message, size, dest, commhandle, tag);
+}
+
+
+void ESMC_VMK::vmk_vasrecv(void *message, int size, int srcVAS,
+  vmk_commhandle **commhandle, int tag){
+  // non-blocking recv where the source is a VAS, _not_ a PET
+  // todo: currently this is just a stub that uses the PET-based 
+  //       non-blocking recv. Hence this will not work for the ESMF-threading
+  //       case for which it is actually thought for!
+  // for this stub implementation figure out first PET to run in the sourceVAS
+  int src;
+  for (src=0; src<npets; src++)
+    if (pid[src] == srcVAS) break;
+  vmk_recv(message, size, src, commhandle, tag);
+}
+
+  
 void ESMC_VMK::vmk_barrier(void){
   // collective barrier over all PETs
   if (mpionly){
@@ -3719,7 +3743,7 @@ void ESMC_VMK::vmk_broadcast(void *data, int len, int root,
 }
 
 
-void ESMC_VMK::vmk_wait(vmk_commhandle **commhandle){
+void ESMC_VMK::vmk_wait(vmk_commhandle **commhandle, int nanopause){
 //fprintf(stderr, "vmk_wait: nhandles=%d\n", nhandles);
 //fprintf(stderr, "vmk_wait: commhandle=%p\n", (*commhandle));
   if ((*commhandle)!=NULL){
@@ -3736,7 +3760,26 @@ void ESMC_VMK::vmk_wait(vmk_commhandle **commhandle){
       MPI_Status mpi_s;
       for (int i=0; i<(*commhandle)->nelements; i++){
 //fprintf(stderr, "MPI_Wait: commhandle=%p\n", &((*commhandle)->mpireq[i]));
-        MPI_Wait(&((*commhandle)->mpireq[i]), &mpi_s);
+        if (nanopause){
+          // use nanosleep to pause between tests to lower impact on CPU load
+          struct timespec dt = {0, nanopause};
+          int completeFlag = 0;
+          for(;;){
+            if (mpi_mutex_flag)
+              pthread_mutex_lock(pth_mutex);
+            MPI_Test(&((*commhandle)->mpireq[i]), &completeFlag, &mpi_s);
+            if (mpi_mutex_flag)
+              pthread_mutex_unlock(pth_mutex);
+            if (completeFlag) break;
+            nanosleep(&dt, NULL);
+          }
+        }else{
+          if (mpi_mutex_flag)
+            pthread_mutex_lock(pth_mutex);
+          MPI_Wait(&((*commhandle)->mpireq[i]), &mpi_s);
+          if (mpi_mutex_flag)
+            pthread_mutex_unlock(pth_mutex);
+        }
       }
       delete [] (*commhandle)->mpireq;
     }else if ((*commhandle)->type==-1){
@@ -3749,7 +3792,6 @@ void ESMC_VMK::vmk_wait(vmk_commhandle **commhandle){
       delete *commhandle;    
       *commhandle = NULL;
     }
-    
   }
 }
 
@@ -3763,6 +3805,33 @@ void ESMC_VMK::vmk_waitqueue(void){
     vmk_wait(&fh);
   }
 //  printf("vmk_waitqueue: %d\n", nhandles);
+}
+
+
+void ESMC_VMK::vmk_cancel(vmk_commhandle **commhandle){
+//fprintf(stderr, "vmk_cancel: nhandles=%d\n", nhandles);
+//fprintf(stderr, "vmk_cancel: commhandle=%p\n", (*commhandle));
+  if ((*commhandle)!=NULL){
+    // cancel all non-blocking requests in commhandle to complete
+    if ((*commhandle)->type==0){
+      // this is a commhandle container
+      for (int i=0; i<(*commhandle)->nelements; i++){
+        vmk_cancel(&((*commhandle)->handles[i]));  // recursive call
+      }
+    }else if ((*commhandle)->type==1){
+      // this commhandle contains MPI_Requests
+      for (int i=0; i<(*commhandle)->nelements; i++){
+//fprintf(stderr, "MPI_Cancel: commhandle=%p\n", &((*commhandle)->mpireq[i]));
+        if (mpi_mutex_flag)
+          pthread_mutex_lock(pth_mutex);
+        MPI_Cancel(&((*commhandle)->mpireq[i]));
+        if (mpi_mutex_flag)
+          pthread_mutex_unlock(pth_mutex);
+      }
+    }else{
+      printf("ESMC_VMK: only MPI non-blocking implemented\n");
+    }
+  }
 }
 
 

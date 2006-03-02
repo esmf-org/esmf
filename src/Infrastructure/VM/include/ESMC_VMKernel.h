@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.30 2005/12/15 23:27:04 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.31 2006/03/02 01:11:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -107,8 +107,6 @@ typedef struct{
 
 typedef struct{
   int comm_type;    // communication type
-//gjt - don't use yet:  int mpitag_send;  // tag for MPI communications
-//gjt - don't use yet:  int mpitag_recv;  // tag for MPI communications
   shared_mp *shmp;  // shared memory message passing structure
   pipc_mp *pipcmp;  // posix ipc message passing structure
 }comminfo;
@@ -203,41 +201,54 @@ class ESMC_VMK{
     int vmk_lpid(int i);           // return lpid for PET
     
     
-    // communication calls
-    void vmk_send(void *message, int size, int dest);
+    // p2p communication calls
+    void vmk_send(void *message, int size, int dest, int tag=-1);
     void vmk_send(void *message, int size, int dest,
-      vmk_commhandle **commhandle);
-    void vmk_recv(void *message, int size, int source);
+      vmk_commhandle **commhandle, int tag=-1);
+    void vmk_recv(void *message, int size, int source, int tag=-1);
     void vmk_recv(void *message, int size, int source,
-      vmk_commhandle **commhandle);
-    void vmk_barrier(void);
+      vmk_commhandle **commhandle, int tag=-1);
     
-    // newly written communication calls
     void vmk_sendrecv(void *sendData, int sendSize, int dst,
       void *recvData, int recvSize, int src);
     void vmk_sendrecv(void *sendData, int sendSize, int dst,
       void *recvData, int recvSize, int src, vmk_commhandle **commhandle);
+
+    void vmk_vassend(void *message, int size, int destVAS,
+      vmk_commhandle **commhandle, int tag=-1);
+    void vmk_vasrecv(void *message, int size, int srcVAS,
+      vmk_commhandle **commhandle, int tag=-1);
+
+    // collective communication calls
+    void vmk_barrier(void);
+
     void vmk_threadbarrier(void);
+
     void vmk_reduce(void *in, void *out, int len, vmType type, vmOp op, 
       int root);
     void vmk_allreduce(void *in, void *out, int len, vmType type, vmOp op);
     void vmk_allfullreduce(void *in, void *out, int len, vmType type,
       vmOp op);
+    
     void vmk_scatter(void *in, void *out, int len, int root);
     void vmk_scatter(void *in, void *out, int len, int root,
       vmk_commhandle **commhandle);
+    
     void vmk_gather(void *in, void *out, int len, int root);
     void vmk_gather(void *in, void *out, int len, int root,
       vmk_commhandle **commhandle);
     void vmk_allgather(void *in, void *out, int len);
     void vmk_allgather(void *in, void *out, int len,
       vmk_commhandle **commhandle);
+    
     void vmk_broadcast(void *data, int len, int root);
     void vmk_broadcast(void *data, int len, int root,
       vmk_commhandle **commhandle);
     
-    void vmk_wait(vmk_commhandle **commhandle);
+    // non-blocking service calls
+    void vmk_wait(vmk_commhandle **commhandle, int nanopause=0);
     void vmk_waitqueue(void);
+    void vmk_cancel(vmk_commhandle **commhandle);
 
   // friend classes
   friend class ESMC_VMKPlan;
