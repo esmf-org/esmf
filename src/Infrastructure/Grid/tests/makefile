@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2005/10/12 19:06:16 nscollins Exp $ 
+# $Id: makefile,v 1.16 2006/03/03 21:52:47 nscollins Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -17,12 +17,15 @@ DIRS	  =
 LOCDIR	  = src/Infrastructure/Grid/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_GridUTest \
+	        $(ESMF_TESTDIR)/ESMF_GridWrapUTest \
 	        $(ESMF_TESTDIR)/ESMF_GridCreateUTest
 
 TESTS_RUN     = RUN_ESMF_GridUTest \
+                RUN_ESMF_GridWrapUTest \
                 RUN_ESMF_GridCreateUTest
 
 TESTS_RUN_UNI = RUN_ESMF_GridUTestUNI \
+                RUN_ESMF_GridWrapUTest \
                 RUN_ESMF_GridCreateUTestUNI
 
 
@@ -41,6 +44,15 @@ RUN_ESMF_GridUTest:
 
 RUN_ESMF_GridUTestUNI:
 	$(MAKE) TNAME=Grid NP=1 ftest
+
+
+
+RUN_ESMF_GridWrapUTest:
+	$(MAKE) TNAME=GridWrap NP=4 ftest
+
+RUN_ESMF_GridWrapUTestUNI:
+	$(MAKE) TNAME=GridWrap NP=1 ftest
+
 
 
 
