@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.8 2006/01/26 18:49:28 nscollins Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.9 2006/03/03 20:39:15 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -509,19 +509,22 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
     real (ESMF_KIND_R8), dimension(:,:),       pointer :: ptr2dr8
     real (ESMF_KIND_R8), dimension(:,:,:),     pointer :: ptr3dr8
     real (ESMF_KIND_R8), dimension(:,:,:,:),   pointer :: ptr4dr8
-    real (ESMF_KIND_R8), dimension(:,:,:,:,:), pointer :: ptr5dr8
     real (ESMF_KIND_R4), dimension(:,:),       pointer :: ptr2dr4
     real (ESMF_KIND_R4), dimension(:,:,:),     pointer :: ptr3dr4
     real (ESMF_KIND_R4), dimension(:,:,:,:),   pointer :: ptr4dr4
-    real (ESMF_KIND_R4), dimension(:,:,:,:,:), pointer :: ptr5dr4
     real (ESMF_KIND_I8), dimension(:,:),       pointer :: ptr2di8
     real (ESMF_KIND_I8), dimension(:,:,:),     pointer :: ptr3di8
     real (ESMF_KIND_I8), dimension(:,:,:,:),   pointer :: ptr4di8
-    real (ESMF_KIND_I8), dimension(:,:,:,:,:), pointer :: ptr5di8
     real (ESMF_KIND_I4), dimension(:,:),       pointer :: ptr2di4
     real (ESMF_KIND_I4), dimension(:,:,:),     pointer :: ptr3di4
     real (ESMF_KIND_I4), dimension(:,:,:,:),   pointer :: ptr4di4
+
+#ifndef ESMF_NO_GREATER_THAN_4D
+    real (ESMF_KIND_R8), dimension(:,:,:,:,:), pointer :: ptr5dr8
+    real (ESMF_KIND_R4), dimension(:,:,:,:,:), pointer :: ptr5dr4
+    real (ESMF_KIND_I8), dimension(:,:,:,:,:), pointer :: ptr5di8
     real (ESMF_KIND_I4), dimension(:,:,:,:,:), pointer :: ptr5di4
+#endif
 
     rc = ESMF_FAILURE
         
@@ -695,6 +698,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
             return
          end select
 
+#ifndef ESMF_NO_GREATER_THAN_4D
       case (5)
         select case (kind)
           case (ESMF_R8%dkind)
@@ -740,6 +744,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
             if (rc.NE.ESMF_SUCCESS) return
 
             ptr5di4(:,:,:,:,:) = i4val
+#endif
 
           case default
             print *, "unsupported data type in Field"
