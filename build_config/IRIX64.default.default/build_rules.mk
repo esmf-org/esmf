@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.25 2006/02/27 18:16:58 theurich Exp $
+# $Id: build_rules.mk,v 1.26 2006/03/03 21:12:35 theurich Exp $
 # 
 # IRIX64.default.default
 #
@@ -77,7 +77,7 @@ CXXINITFILE        =
 endif
 
 C_CC		   = CC $(SIZEFLAG) -mp $(SGI_FLAGS2) 
-C_CXX		   = CC $(SIZEFLAG) -mp $(SGI_FLAGS2) -LANG:std=on -LANG:libc_in_namespace_std=on
+C_CXX		   = CC $(SIZEFLAG) -mp $(SGI_FLAGS2) -LANG:std=on:libc_in_namespace_std=off
 C_FC		   = f90 $(SIZEFLAG) -mp -macro_expand
 
 C_CLINKER	   = CC $(SIZEFLAG) -mp $(SGI_FLAGS1) -MP:open_mp=ON
