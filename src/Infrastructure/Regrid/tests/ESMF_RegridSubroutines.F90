@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.12 2006/02/06 18:31:28 svasquez Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.13 2006/03/03 20:40:15 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -726,7 +726,8 @@ contains
     maxcoords = (/ xmax*crop_factor,  ymax*crop_factor /)
 
     !--- Number of cells in the current grid.
-    n_cells = (/real(nx_domain)*crop_factor, real(ny_domain)*crop_factor /)
+    n_cells = (/ int(real(nx_domain)*crop_factor), &
+                 int(real(ny_domain)*crop_factor) /)
 
     if (localPET == 0) then
       print*,'n_cells=',n_cells
