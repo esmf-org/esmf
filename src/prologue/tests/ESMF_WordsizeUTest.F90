@@ -1,4 +1,4 @@
-! $Id: ESMF_WordsizeUTest.F90,v 1.7 2006/02/08 06:54:14 eschwab Exp $
+! $Id: ESMF_WordsizeUTest.F90,v 1.8 2006/03/03 20:41:22 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -38,8 +38,13 @@
     ! create arrays of integer and real kinds
     integer               :: vi(2)
     real                  :: vr(2)
+
+#ifndef ESMF_NO_INTEGER_1_BYTE 
     integer(ESMF_KIND_I1) :: vi1(2)
+#endif
+#ifndef ESMF_NO_INTEGER_2_BYTE 
     integer(ESMF_KIND_I2) :: vi2(2)
+#endif
     integer(ESMF_KIND_I4) :: vi4(2)
     integer(ESMF_KIND_I8) :: vi8(2)
     real(ESMF_KIND_R4)    :: vr4(2)
@@ -71,11 +76,15 @@
     call ESMF_PointerDifference(ESMC_POINTER_SIZE, vip(1), vip(2), ptrsizeF)
     print *, "F90: Pointer size = ", ptrsizeF
 
+#ifndef ESMF_NO_INTEGER_1_BYTE
     call ESMF_PointerDifference(ESMC_POINTER_SIZE, vi1(1), vi1(2), i1sizeF)
     print *, "F90: Explicit Integer I1 size = ", i1sizeF
+#endif
 
+#ifndef ESMF_NO_INTEGER_2_BYTE
     call ESMF_PointerDifference(ESMC_POINTER_SIZE, vi2(1), vi2(2), i2sizeF)
     print *, "F90: Explicit Integer I2 size = ", i2sizeF
+#endif
 
     call ESMF_PointerDifference(ESMC_POINTER_SIZE, vi4(1), vi4(2), i4sizeF)
     print *, "F90: Explicit Integer I4 size = ", i4sizeF
