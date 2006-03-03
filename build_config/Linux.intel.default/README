@@ -1,5 +1,6 @@
 Settings for Linux, using the commercial intel ifort
 compiler and either intel icc or the gnu gcc compiler.
+(This is also the correct configuration for an SGI Altix cluster.)
 
 Requires the following environment settings:
 
