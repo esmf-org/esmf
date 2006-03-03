@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1 2006/03/03 16:15:56 nscollins Exp $
+# $Id: build_rules.mk,v 1.2 2006/03/03 20:37:46 nscollins Exp $
 #
 #  Darwin.g95.default
 #  T. Wainwright, April 2005, based on Linux.pgi.default
@@ -48,7 +48,6 @@ C_CXXV		= ${C_CXX} -dumpversion
 C_FCV           = ${C_FC} -dumpversion
 
 FFLAGS          = -fno-second-underscore 
-C_FPPOPTS       = -DESMF_NO_INTEGER_2_BYTE -DESMF_NO_GREATER_THAN_4D
 
 ifeq ($(ESMF_PREC),64)
 CFLAGS         += -march=k8 -m64 -mcmodel=medium
