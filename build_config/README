@@ -4,7 +4,7 @@
 
 
  Earth System Modeling Framework
- Copyright 2002-2005, University Corporation for Atmospheric Research,
+ Copyright 2002-2006, University Corporation for Atmospheric Research,
  Massachusetts Institute of Technology, Geophysical Fluid Dynamics
  Laboratory, University of Michigan, National Centers for Environmental
  Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -15,6 +15,8 @@
 
 The files in this directory contain per-platform makefile information which is 
 included by the ESMF build system.
+
+** See the top level README file for more details. **
 
 
 Naming Conventions
@@ -58,131 +60,5 @@ Each default directory contains the following files:
                   system and contains specific settings for this platform.
 
 
-Additional Environment Variables
---------------------------------
-
-See the ESMF User's Guide for a complete description of all the environment
-variables supported by the build system.  However, for convienence, these
-are the ones most likely to be necessary to adjust for new platforms:
-
-On platforms that don't support Pthreads the following option is critical:
-
-ESMF_PTHREADS     
-
-The default value is ON. Setting this variable to OFF will turn ESMF's
-pthreads features off and a stub header file will be used instead of the
-Pthreads header during library compilation. This may be necessary on systems
-that do not supply a working Pthreads implementation.
-
-
-Compiling with or without netCDF I/O libraries:
-
-NETCDF_LIB
-NETCDF_INCLUDE    
-
-By default the system does not try to link in the netCDF I/O libraries, but
-the makefiles are prepared to include them if these variables are defined.
-To use netCDF I/O, set both NETCDF_LIB and NETCDF_INCLUDE environment 
-variables to the directories where the netCDF files have been installed.
-
-
-Selecting a particular C compiler or Compiler Version:
-
-ESMF_C_COMPILER         
-ESMF_COMPILER_VERSION
-
-If it is possible to compile Fortran code with different C compilers on this
-platform (e.g. vendor-supplied C vs. gcc) then ESMF_C_COMPILER should control
-this choice.   If there are incompatible changes in flags or link libs from
-one version of the compiler to another, ESMF_COMPILER_VERSION should be set to
-the numeric version to select the right case inside the makefiles.
-
-
-
-Customizing an Existing Platform
---------------------------------
-
-0. Check on http://sourceforge.net/projects/esmfcontrib -> CVS to be sure
-   someone else has not already done this for your location or machine.
-
-1. Set the environment variable ESMF_SITE to a string.  Suggested values are
-   either your location (e.g. mit, cola) or a specific machine (e.g. bluesky).
-
-2. Make a subdirectory named in the form:  system.compiler.site
-
-3. Initially copy over only build_rules.mk from the corresponding default
-   directory and remove all values which remain the same.  The build_rules.mk
-   file in this site-specific directory will be included after the default
-   one has been read, so only differences should be maintained.  
-
-4. The ESMC_Conf.h and ESMF_conf.inc files do not need to be copied.
-
-5. Test and get it working.
-
-6. Post it back on the esmfcontrib sourceforge site for others to use.
-
-
-Adding a New Platform
----------------------
-
-1. Create a new subdirectory which follows the naming conventions.
-
-2. Copy the contents of the most similar existing directory over to the 
-   new directory.
-
-3. Edit the build_rules.mk file to set the compiler names, flags, etc.
-   Since ESMF contains both F90 and C++ code, generally the linkers are
-   not able to simply link without being given additional libraries.
-
-   Generally the C_CXXF90LIBS line (F90 libraries which need to be added to
-   the link line when the link is being done with the C++ compiler), and the
-   C_F90CXXLIBS line (C++ libs which need to be added when the link is being
-   done with the F90 compiler) will need to be updated.  Running a C++ or F90
-   link in a single language with -v (or whatever flag gives verbose output
-   about the exact lines being executed) may help find what libraries are
-   silently added by the compilers.
-
-   The build_rules.mk file should only need to set C_xxx variables, which
-   is the naming convention for platform specific values.  If you have to
-   set a value which does not have a C_xxx name in order to compile, email
-   esmf_support@ucar.edu to let us know.
-
-4. Edit the ESMC_Conf.h file and look over the values.  (In reality, most
-   of these variables are not actually used.)  However, see the ESMF_F90_PTR
-   settings at the end of the file.  These *must* match the size of the 
-   "dope vector" that the Fortran compiler uses on this machine to store
-   information about Fortran arrays (rank, lower bounds, upper bounds, etc).  
-   Put in a good guess (or leave them as-is) and build and run the unit tests.
-
-   Ignore the output of all other unit tests until the ESMF_ArrayF90PtrUTest
-   passes cleanly without complaining about byte count mismatches.  Adjust the
-   sizes in the ESMC_Conf.h file until it passes, and then make clean and
-   rebuild the entire library and test suite.
-
-5. Once it is working, post it back on the esmfcontrib sourceforge site and
-   email esmf_support@ucar.edu so we can include it in our next release.
-
-
-Platform Specific Notes Related to makefiles and Environment Variables
-----------------------------------------------------------------------
-
-AIX systems - Those using LoadLeveler will generally need to set the
-MP_RMPOOL environment variable, and generally 1 will be a good value.
-See your own system admins for more help on this if 1 doesn't work.
-
-OSF (HP/Compaq) systems - Our makefiles support those systems needing 
-a -P project number argument to the bsub command in order to correctly 
-charge system usage.  Set the ESMF_PROJECT environment variable to the
-project name and it will be passed with -P into bsub when submitting a job.
-See your own system admins for more info on whether this is needed.
-
-Linux/intel - The intel compilers have an additional option on cross-language
-linking.  You can compile with the intel C and Fortran compilers, but then
-link with the gcc libraries.  To use this combination set ESMF_C_LIBRARY to gcc.
-
-Darwin (Mac)/xlf - This compiler supports compiling and linking with either
-gcc or xlc.  Use ESMF_C_COMPILER to control this choice.
-
-
 ================================================================================
- $Id: README,v 1.25 2006/02/02 21:02:59 nscollins Exp $
+ $Id: README,v 1.26 2006/03/03 20:32:29 nscollins Exp $
