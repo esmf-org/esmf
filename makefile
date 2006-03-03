@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.68 2006/01/30 18:11:21 nscollins Exp $
+# $Id: makefile,v 1.69 2006/03/03 20:33:26 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -78,11 +78,27 @@ script_info:
 	-@echo "ESMF_SITE: $(ESMF_SITE)"
 	-@echo "ESMF_EXHAUSTIVE: $(ESMF_EXHAUSTIVE)"
 	-@echo "ESMF_BATCHQUEUE: $(ESMF_BATCHQUEUE)"
+	-@if [ -n "$(ESMF_NO_LD_LIBRARY_PATH)" ] ; then \
+	  echo "ESMF_NO_LD_LIBRARY_PATH: $(ESMF_NO_LD_LIBRARY_PATH)" ; fi
+	-@if [ -n "$(ESMF_CXX_LIBRARIES)" ] ; then \
+	  echo "ESMF_CXX_LIBRARIES: $(ESMF_CXX_LIBRARIES)" ; fi
+	-@if [ -n "$(ESMF_CXX_LIBRARY_PATH)" ] ; then \
+	  echo "ESMF_CXX_LIBRARY_PATH: $(ESMF_CXX_LIBRARY_PATH)" ; fi
+	-@if [ -n "$(ESMF_F90_LIBRARIES)" ] ; then \
+	  echo "ESMF_F90_LIBRARIES: $(ESMF_F90_LIBRARIES)" ; fi
+	-@if [ -n "$(ESMF_F90_LIBRARY_PATH)" ] ; then \
+	  echo "ESMF_F90_LIBRARY_PATH: $(ESMF_F90_LIBRARY_PATH)" ; fi
 	-@echo "ESMF_PTHREADS: $(ESMF_PTHREADS)"
 	-@if [ -n "$(ESMF_TESTWITHTHREADS)" ] ; then \
 	  echo "ESMF_TESTWITHTHREADS: $(ESMF_TESTWITHTHREADS)" ; fi
 	-@if [ -n "$(ESMF_NO_IOCODE)" ] ; then \
 	  echo "ESMF_NO_IOCODE: $(ESMF_NO_IOCODE)" ; fi
+	-@if [ -n "$(ESMF_ARRAY_LITE)" ] ; then \
+	  echo "ESMF_ARRAY_LITE: $(ESMF_ARRAY_LITE)" ; fi
+	-@if [ -n "$(ESMF_NO_INTEGER_1_BYTE)" ] ; then \
+	  echo "ESMF_NO_INTEGER_1_BYTE: $(ESMF_NO_INTEGER_1_BYTE)" ; fi
+	-@if [ -n "$(ESMF_NO_INTEGER_2_BYTE)" ] ; then \
+	  echo "ESMF_NO_INTEGER_2_BYTE: $(ESMF_NO_INTEGER_2_BYTE)" ; fi
 	-@echo " "
 	-@echo "------------------------------------------"
 	-@echo "If set, using additional flags:"
