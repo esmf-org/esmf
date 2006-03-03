@@ -1,0 +1,13 @@
+Settings for Mac OS X, using the g95 compiler and the gnu gcc compiler.
+(For the gnu gfortran/f95 compiler, see the gfortran directory).
+
+Requires the following environment settings:
+
+ESMF_COMPILER g95
+ESMF_PREC 32
+
+Note:  We have *not* successfully compiled ESMF with this compiler
+on the Mac platform.  If you do get this to work, please email
+esmf_support@ucar.edu with your successful configuration and
+any changes the files in this directory.
+

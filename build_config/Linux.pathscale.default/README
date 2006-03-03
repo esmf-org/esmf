@@ -1,0 +1,8 @@
+Settings for Linux, using the commercial Pathscale Fortran
+compiler and the gnu gcc compiler.
+
+
+Requires the following environment settings:
+
+ESMF_COMPILER pathscale
+

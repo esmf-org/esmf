@@ -1,8 +1,13 @@
 
- This is where build-dependent information can be placed about
-this particular platform and compiler combination.
-
- This version has been tested on the Jazz linux cluster at argonne.
+Settings for Linux, using the commercial NAGware Fortran
+compiler and the gnu gcc compiler.
 
 
+This version has been tested on the Jazz linux cluster at argonne.
+
+
+Requires the following environment settings:
+
+ESMF_COMPILER nag
+ESMF_PREC 32
 

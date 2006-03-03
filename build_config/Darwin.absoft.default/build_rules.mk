@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.18 2005/04/22 20:15:33 nscollins Exp $
+#  $Id: build_rules.mk,v 1.19 2006/03/03 16:15:56 nscollins Exp $
 #
 #  Darwin.absoft.default
 #
@@ -108,6 +108,7 @@ F_FREECPP       = -ffree
 F_FIXCPP        = -ffixed
 F_FREENOCPP     = -ffree
 F_FIXNOCPP      = -ffixed
+
 
 # for fortran executables use c++ for linking
 C_F90CXXLD      = $(C_CXX)

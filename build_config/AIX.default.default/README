@@ -1,0 +1,8 @@
+Settings specific to IBM's AIX operating system,
+using the xlf and xlC compilers.
+
+Requires no specific environment variable settings, although
+to compile a 32-bit executable you can set:
+
+ESMF_PREC 32
+

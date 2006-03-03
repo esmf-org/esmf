@@ -1,11 +1,16 @@
+Settings for Mac OS X, using the commercial IBM xlf Fortran
+compiler and either IBM xlC or the gnu gcc compiler.
 
 
-The IBM xlf compiler is available now from Absoft for the Mac OS X
-platform.  You can compile the ESMF libraries with either a mix of
+Requires the following environment settings:
+
+ESMF_COMPILER xlf
+ESMF_PREC 32
+
+You can compile the ESMF libraries with either a mix of
 xlf and gcc/g++ (the gnu C compilers), or with xlf and xlc/xlc++ 
 (the IBM product C/C++ compilers).
 
-If you want to compile with gcc, leave ESMF_C_COMPILER unset.
-If you want to compile with xlc/xlc++ set the ESMF_C_COMPILER 
-environment variable to 'xlc' before compiling.
+To compile with gcc, leave ESMF_C_COMPILER unset.
+To compile with xlc/xlc++ set: ESMF_C_COMPILER xlc
 

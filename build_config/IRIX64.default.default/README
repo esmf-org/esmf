@@ -1,0 +1,10 @@
+Settings for SGI IRIX operating system, using the SGI Fortran
+and C compilers.  (If you are looking for the Altix makefiles,
+see the Linux.intel directory.)
+
+
+Requires no specific environment variable settings; if you
+want to compile 32 bit executables, set this first:
+
+ESMF_PREC 32
+

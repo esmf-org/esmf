@@ -1,0 +1,18 @@
+Settings for Linux, using the commercial intel ifort
+compiler and either intel icc or the gnu gcc compiler.
+
+Requires the following environment settings:
+
+ESMF_COMPILER intel
+
+You can compile the ESMF libraries with either a mix of
+ifort and gcc/g++ (the gnu C compilers), or with ifort and icc
+(the intel product C/C++ compilers).
+
+To compile with icc, leave ESMF_C_COMPILER unset.
+To compile with gcc,  set: ESMF_C_COMPILER gcc
+
+Defaults to 64 bit, can compile on 32-bit systems with:
+
+ESMF_PREC 32
+

@@ -1,0 +1,7 @@
+Settings for Linux, using the commercial Absoft Fortran
+compiler and the gnu gcc compiler.
+
+Requires the following environment settings:
+
+ESMF_COMPILER absoft
+
