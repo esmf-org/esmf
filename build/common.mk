@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.153 2006/03/01 21:31:29 eschwab Exp $
+#  $Id: common.mk,v 1.154 2006/03/03 20:37:21 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -199,6 +199,17 @@ ifdef PBS_NODEFILE
 export ESMF_NODES := -machinefile $(PBS_NODEFILE)
 endif           
 
+# if these env vars are set, add to the fortran preprocessing options.
+ifdef ESMF_ARRAY_LITE
+FPPDEFS += -DESMF_NO_GREATER_THAN_4D
+endif           
+ifdef ESMF_NO_INTEGER_1_BYTE
+FPPDEFS += -DESMF_NO_INTEGER_1_BYTE
+endif           
+ifdef ESMF_NO_INTEGER_2_BYTE
+FPPDEFS += -DESMF_NO_INTEGER_2_BYTE
+endif           
+
 # compiler option:  g to add debugging info, O (oh) for optimized code.
 # default compiler flag is optimized.  if you want to disable the optimization
 # set ESMF_BOPT to O and set ESMF_OPTLEVEL to 0 (zero).  that will compile
@@ -252,9 +263,36 @@ C_SLFLAG           = -Wl,-rpath,
 # that is how it works - by adding dirs to LD_LIBRARY_PATH.)  if your libs 
 # are not found, set LD_LIBRARY_PATH, or make a site specific file and edit 
 # the paths explicitly.
+#
+# TODO: user request that we support CXX_LIBRARY_PATH and CXX_LIBS
+# (and for symmetry, i suppose F90_LIBRARY_PATH and F90LIBS).  if these
+# are set in the environment, they are picked up and used, before the
+# more generic LD_LIBRARY_PATH (which specifies only a search path and
+# not specific libs).  define ESMF_NO_LD_LIBRARY_PATH to disable it.
+#
+
+ifeq ($(origin ESMF_CXX_LIBRARY_PATH), environment)
+LIB_PATHS  += $(addprefix -L, $(subst :, ,$(ESMF_CXX_LIBRARY_PATH)))
+LD_PATHS   += $(addprefix $(SLFLAG), $(subst :, ,$(ESMF_CXX_LIBRARY_PATH)))
+endif
+ifeq ($(origin ESMF_CXX_LIBRARIES), environment)
+F90CXXLIBS    += $(ESMF_CXX_LIBRARIES)
+endif
+
+ifeq ($(origin ESMF_F90_LIBRARY_PATH), environment)
+LIB_PATHS  += $(addprefix -L, $(subst :, ,$(ESMF_F90_LIBRARY_PATH)))
+LD_PATHS   += $(addprefix $(SLFLAG), $(subst :, ,$(ESMF_F90_LIBRARY_PATH)))
+endif
+ifeq ($(origin ESMF_F90_LIBRARIES), environment)
+CXXF90LIBS    += $(ESMF_F90_LIBRARIES)
+endif
+
+
+ifndef ESMF_NO_LD_LIBRARY_PATH
 ifeq ($(origin LD_LIBRARY_PATH), environment)
 ENV_LIB_PATHS  = $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
 ENV_LD_PATHS   = $(addprefix $(SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
+endif
 endif
 
 # SL in the next section refers to a shared library.  if a platform
@@ -464,7 +502,6 @@ endif
 ifndef NETCDF_LIB
 NETCDF_INCLUDE   = -I$(ESMF_DIR)/src/Infrastructure/stubs/netcdf_stubs
 NETCDF_LIB       = -lnetcdf_stubs
-##FPPFLAGS       += $(FPP_PREFIX)-DESMF_NO_IOCODE
 CPPFLAGS       += -DESMF_NO_IOCODE
 export ESMF_NO_IOCODE = true
 endif
@@ -580,25 +617,26 @@ CPP	       = gcc
 endif
 
 #-------------------------------------------------------------------------------
-# add in any FPPOPTS defined in the system dep files, and add a definition
-#  for the selected word size (32/64) by defining the syms S32 or S64.
-#-------------------------------------------------------------------------------
-CPPFLAGS        +=-DS$(ESMF_PREC)=1 
-
-FPPFLAGS        += $(addprefix $(FPP_PREFIX), $(C_FPPOPTS))
-FPPFLAGS        += $(addprefix $(FPP_PREFIX), $(CPPFLAGS))
-
-
-#-------------------------------------------------------------------------------
 # ESMF_EXHAUSTIVE is passed (by CPP) into test programs to control the number 
 # of tests that a test program will do.
 #-------------------------------------------------------------------------------
 
 ifeq ($(ESMF_EXHAUSTIVE),ON) 
-# the cpp flags are automatically added to the fpp lines as well now.
-#FPPFLAGS       += $(FPP_PREFIX)-DESMF_EXHAUSTIVE 
+# the cpp flags are automatically added to the fpp lines as well now
+# so this does not have to be added to FPPFLAGS separately.
 CPPFLAGS       += -DESMF_EXHAUSTIVE 
 endif
+
+#-------------------------------------------------------------------------------
+# add in any FPPDEFS defined in the system dep files, and add a definition
+#  for the selected word size (32/64) by defining the syms S32 or S64.
+#-------------------------------------------------------------------------------
+CPPFLAGS        +=-DS$(ESMF_PREC)=1 
+FPPDEFS         += $(C_FPPDEFS)
+
+FPPFLAGS        += $(addprefix $(FPP_PREFIX), $(FPPDEFS))
+FPPFLAGS        += $(addprefix $(FPP_PREFIX), $(CPPFLAGS))
+
 
 
 # C++ <=> F90 
@@ -2266,12 +2304,12 @@ endif
 
 ifeq ($(origin CPPRULES),undefined)
 .cpp.F90:
-	$(CPP) -E -P -I$(ESMF_INCDIR) $< | tr "@^" "\n#" | \
+	$(CPP) -E -P -I$(ESMF_INCDIR) $(FPPDEFS) $< | tr "@^" "\n#" | \
               $(SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@)
 
 
 .cpp.o:
-	$(CPP) -E -P -I$(ESMF_INCDIR) $< | tr "@^" "\n#" | \
+	$(CPP) -E -P -I$(ESMF_INCDIR) $(FPPDEFS) $< | tr "@^" "\n#" | \
               $(SED) -e '/^#pragma GCC/d' > $(dir $<)$(basename $@).F90
 	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
           $(F_FREECPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $(dir $<)$(basename $@).F90
