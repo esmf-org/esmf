@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StdCppMacros.h,v 1.2 2005/10/12 19:06:21 nscollins Exp $
+! $Id: ESMF_StdCppMacros.h,v 1.3 2006/03/03 20:40:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -110,45 +110,53 @@
     module procedure ESMF_##funcname##2DI1 @\
     module procedure ESMF_##funcname##3DI1 @\
     module procedure ESMF_##funcname##4DI1 @\
+^ifndef ESMF_NO_GREATER_THAN_4D @\
     module procedure ESMF_##funcname##5DI1 @\
     module procedure ESMF_##funcname##6DI1 @\
     module procedure ESMF_##funcname##7DI1 @\
 ^endif @\
+^endif @\
+^ifndef ESMF_NO_INTEGER_2_BYTE @\
     module procedure ESMF_##funcname##1DI2 @\
+    module procedure ESMF_##funcname##2DI2 @\
+    module procedure ESMF_##funcname##3DI2 @\
+    module procedure ESMF_##funcname##4DI2 @\
+^ifndef ESMF_NO_GREATER_THAN_4D @\
+    module procedure ESMF_##funcname##5DI2 @\
+    module procedure ESMF_##funcname##6DI2 @\
+    module procedure ESMF_##funcname##7DI2 @\
+^endif @\
+^endif @\
     module procedure ESMF_##funcname##1DI4 @\
     module procedure ESMF_##funcname##1DI8 @\
-    module procedure ESMF_##funcname##2DI2 @\
-    module procedure ESMF_##funcname##2DI4 @\
-    module procedure ESMF_##funcname##2DI8 @\
-    module procedure ESMF_##funcname##3DI2 @\
-    module procedure ESMF_##funcname##3DI4 @\
-    module procedure ESMF_##funcname##3DI8 @\
-    module procedure ESMF_##funcname##4DI2 @\
-    module procedure ESMF_##funcname##4DI4 @\
-    module procedure ESMF_##funcname##4DI8 @\
-    module procedure ESMF_##funcname##5DI2 @\
-    module procedure ESMF_##funcname##5DI4 @\
-    module procedure ESMF_##funcname##5DI8 @\
-    module procedure ESMF_##funcname##6DI2 @\
-    module procedure ESMF_##funcname##6DI4 @\
-    module procedure ESMF_##funcname##6DI8 @\
-    module procedure ESMF_##funcname##7DI2 @\
-    module procedure ESMF_##funcname##7DI4 @\
-    module procedure ESMF_##funcname##7DI8 @\
     module procedure ESMF_##funcname##1DR4 @\
     module procedure ESMF_##funcname##1DR8 @\
+    module procedure ESMF_##funcname##2DI4 @\
+    module procedure ESMF_##funcname##2DI8 @\
     module procedure ESMF_##funcname##2DR4 @\
     module procedure ESMF_##funcname##2DR8 @\
+    module procedure ESMF_##funcname##3DI4 @\
+    module procedure ESMF_##funcname##3DI8 @\
     module procedure ESMF_##funcname##3DR4 @\
     module procedure ESMF_##funcname##3DR8 @\
+    module procedure ESMF_##funcname##4DI4 @\
+    module procedure ESMF_##funcname##4DI8 @\
     module procedure ESMF_##funcname##4DR4 @\
     module procedure ESMF_##funcname##4DR8 @\
+^ifndef ESMF_NO_GREATER_THAN_4D @\
+    module procedure ESMF_##funcname##5DI4 @\
+    module procedure ESMF_##funcname##5DI8 @\
     module procedure ESMF_##funcname##5DR4 @\
     module procedure ESMF_##funcname##5DR8 @\
+    module procedure ESMF_##funcname##6DI4 @\
+    module procedure ESMF_##funcname##6DI8 @\
     module procedure ESMF_##funcname##6DR4 @\
     module procedure ESMF_##funcname##6DR8 @\
+    module procedure ESMF_##funcname##7DI4 @\
+    module procedure ESMF_##funcname##7DI8 @\
     module procedure ESMF_##funcname##7DR4 @\
     module procedure ESMF_##funcname##7DR8 @\
+^endif @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
 
@@ -175,48 +183,58 @@
 !! < start of macros which become actual subroutine bodies after expansion > @\
  @\
 funcname##Doc() @\
+^ifndef ESMF_NO_INTEGER_1_BYTE @\
 funcname##Macro(integer, I1, 1, COL1, LEN1, RNG1, LOC1) @\
+funcname##Macro(integer, I1, 2, COL2, LEN2, RNG2, LOC2) @\
+funcname##Macro(integer, I1, 3, COL3, LEN3, RNG3, LOC3) @\
+funcname##Macro(integer, I1, 4, COL4, LEN4, RNG4, LOC4) @\
+^ifndef ESMF_NO_GREATER_THAN_4D @\
+funcname##Macro(integer, I1, 5, COL5, LEN5, RNG5, LOC5) @\
+funcname##Macro(integer, I1, 6, COL6, LEN6, RNG6, LOC6) @\
+funcname##Macro(integer, I1, 7, COL7, LEN7, RNG7, LOC7) @\
+^endif @\
+^endif @\
+^ifndef ESMF_NO_INTEGER_2_BYTE @\
 funcname##Macro(integer, I2, 1, COL1, LEN1, RNG1, LOC1) @\
+funcname##Macro(integer, I2, 2, COL2, LEN2, RNG2, LOC2) @\
+funcname##Macro(integer, I2, 3, COL3, LEN3, RNG3, LOC3) @\
+funcname##Macro(integer, I2, 4, COL4, LEN4, RNG4, LOC4) @\
+^ifndef ESMF_NO_GREATER_THAN_4D @\
+funcname##Macro(integer, I2, 5, COL5, LEN5, RNG5, LOC5) @\
+funcname##Macro(integer, I2, 6, COL6, LEN6, RNG6, LOC6) @\
+funcname##Macro(integer, I2, 7, COL7, LEN7, RNG7, LOC7) @\
+^endif @\
+^endif @\
 funcname##Macro(integer, I4, 1, COL1, LEN1, RNG1, LOC1) @\
 funcname##Macro(integer, I8, 1, COL1, LEN1, RNG1, LOC1) @\
-funcname##Macro(integer, I1, 2, COL2, LEN2, RNG2, LOC2) @\
-funcname##Macro(integer, I2, 2, COL2, LEN2, RNG2, LOC2) @\
+funcname##Macro(real,    R4, 1, COL1, LEN1, RNG1, LOC1) @\
+funcname##Macro(real,    R8, 1, COL1, LEN1, RNG1, LOC1) @\
 funcname##Macro(integer, I4, 2, COL2, LEN2, RNG2, LOC2) @\
 funcname##Macro(integer, I8, 2, COL2, LEN2, RNG2, LOC2) @\
-funcname##Macro(integer, I1, 3, COL3, LEN3, RNG3, LOC3) @\
-funcname##Macro(integer, I2, 3, COL3, LEN3, RNG3, LOC3) @\
+funcname##Macro(real,    R4, 2, COL2, LEN2, RNG2, LOC2) @\
+funcname##Macro(real,    R8, 2, COL2, LEN2, RNG2, LOC2) @\
 funcname##Macro(integer, I4, 3, COL3, LEN3, RNG3, LOC3) @\
 funcname##Macro(integer, I8, 3, COL3, LEN3, RNG3, LOC3) @\
-funcname##Macro(integer, I1, 4, COL4, LEN4, RNG4, LOC4) @\
-funcname##Macro(integer, I2, 4, COL4, LEN4, RNG4, LOC4) @\
+funcname##Macro(real,    R4, 3, COL3, LEN3, RNG3, LOC3) @\
+funcname##Macro(real,    R8, 3, COL3, LEN3, RNG3, LOC3) @\
 funcname##Macro(integer, I4, 4, COL4, LEN4, RNG4, LOC4) @\
 funcname##Macro(integer, I8, 4, COL4, LEN4, RNG4, LOC4) @\
-funcname##Macro(integer, I1, 5, COL5, LEN5, RNG5, LOC5) @\
-funcname##Macro(integer, I2, 5, COL5, LEN5, RNG5, LOC5) @\
+funcname##Macro(real,    R4, 4, COL4, LEN4, RNG4, LOC4) @\
+funcname##Macro(real,    R8, 4, COL4, LEN4, RNG4, LOC4) @\
+^ifndef ESMF_NO_GREATER_THAN_4D @\
 funcname##Macro(integer, I4, 5, COL5, LEN5, RNG5, LOC5) @\
 funcname##Macro(integer, I8, 5, COL5, LEN5, RNG5, LOC5) @\
-funcname##Macro(integer, I1, 6, COL6, LEN6, RNG6, LOC6) @\
-funcname##Macro(integer, I2, 6, COL6, LEN6, RNG6, LOC6) @\
+funcname##Macro(real,    R4, 5, COL5, LEN5, RNG5, LOC5) @\
+funcname##Macro(real,    R8, 5, COL5, LEN5, RNG5, LOC5) @\
 funcname##Macro(integer, I4, 6, COL6, LEN6, RNG6, LOC6) @\
 funcname##Macro(integer, I8, 6, COL6, LEN6, RNG6, LOC6) @\
-funcname##Macro(integer, I1, 7, COL7, LEN7, RNG7, LOC7) @\
-funcname##Macro(integer, I2, 7, COL7, LEN7, RNG7, LOC7) @\
+funcname##Macro(real,    R4, 6, COL6, LEN6, RNG6, LOC6) @\
+funcname##Macro(real,    R8, 6, COL6, LEN6, RNG6, LOC6) @\
 funcname##Macro(integer, I4, 7, COL7, LEN7, RNG7, LOC7) @\
 funcname##Macro(integer, I8, 7, COL7, LEN7, RNG7, LOC7) @\
-funcname##Macro(real, R4, 1, COL1, LEN1, RNG1, LOC1) @\
-funcname##Macro(real, R8, 1, COL1, LEN1, RNG1, LOC1) @\
-funcname##Macro(real, R4, 2, COL2, LEN2, RNG2, LOC2) @\
-funcname##Macro(real, R8, 2, COL2, LEN2, RNG2, LOC2) @\
-funcname##Macro(real, R4, 3, COL3, LEN3, RNG3, LOC3) @\
-funcname##Macro(real, R8, 3, COL3, LEN3, RNG3, LOC3) @\
-funcname##Macro(real, R4, 4, COL4, LEN4, RNG4, LOC4) @\
-funcname##Macro(real, R8, 4, COL4, LEN4, RNG4, LOC4) @\
-funcname##Macro(real, R4, 5, COL5, LEN5, RNG5, LOC5) @\
-funcname##Macro(real, R8, 5, COL5, LEN5, RNG5, LOC5) @\
-funcname##Macro(real, R4, 6, COL6, LEN6, RNG6, LOC6) @\
-funcname##Macro(real, R8, 6, COL6, LEN6, RNG6, LOC6) @\
-funcname##Macro(real, R4, 7, COL7, LEN7, RNG7, LOC7) @\
-funcname##Macro(real, R8, 7, COL7, LEN7, RNG7, LOC7) @\
+funcname##Macro(real,    R4, 7, COL7, LEN7, RNG7, LOC7) @\
+funcname##Macro(real,    R8, 7, COL7, LEN7, RNG7, LOC7) @\
+^endif @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
@@ -239,61 +257,67 @@ funcname##Macro(real, R8, 7, COL7, LEN7, RNG7, LOC7) @\
 
 #define AllTypesMacro(fname) \
  @\
+^ifndef ESMF_NO_INTEGER_1_BYTE @\
       fname##Macro(integer, I1, 1, COL1) @\
+      fname##Macro(integer, I1, 2, COL2) @\
+      fname##Macro(integer, I1, 3, COL3) @\
+      fname##Macro(integer, I1, 4, COL4) @\
+^ifndef ESMF_NO_GREATER_THAN_4D @\
+      fname##Macro(integer, I1, 5, COL5) @\
+      fname##Macro(integer, I1, 6, COL6) @\
+      fname##Macro(integer, I1, 7, COL7) @\
+^endif @\
+^endif @\
+^ifndef ESMF_NO_INTEGER_2_BYTE @\
       fname##Macro(integer, I2, 1, COL1) @\
+      fname##Macro(integer, I2, 2, COL2) @\
+      fname##Macro(integer, I2, 3, COL3) @\
+      fname##Macro(integer, I2, 4, COL4) @\
+^ifndef ESMF_NO_GREATER_THAN_4D @\
+      fname##Macro(integer, I2, 5, COL5) @\
+      fname##Macro(integer, I2, 6, COL6) @\
+      fname##Macro(integer, I2, 7, COL7) @\
+^endif @\
+^endif @\
       fname##Macro(integer, I4, 1, COL1) @\
       fname##Macro(integer, I8, 1, COL1) @\
+      fname##Macro(real,    R4, 1, COL1) @\
+      fname##Macro(real,    R8, 1, COL1) @\
  @\
-      fname##Macro(integer, I1, 2, COL2) @\
-      fname##Macro(integer, I2, 2, COL2) @\
       fname##Macro(integer, I4, 2, COL2) @\
       fname##Macro(integer, I8, 2, COL2) @\
+      fname##Macro(real,    R4, 2, COL2) @\
+      fname##Macro(real,    R8, 2, COL2) @\
  @\
-      fname##Macro(integer, I1, 3, COL3) @\
-      fname##Macro(integer, I2, 3, COL3) @\
       fname##Macro(integer, I4, 3, COL3) @\
       fname##Macro(integer, I8, 3, COL3) @\
+      fname##Macro(real,    R4, 3, COL3) @\
+      fname##Macro(real,    R8, 3, COL3) @\
  @\
-      fname##Macro(integer, I1, 4, COL4) @\
-      fname##Macro(integer, I2, 4, COL4) @\
       fname##Macro(integer, I4, 4, COL4) @\
       fname##Macro(integer, I8, 4, COL4) @\
+      fname##Macro(real,    R4, 4, COL4) @\
+      fname##Macro(real,    R8, 4, COL4) @\
  @\
-      fname##Macro(integer, I1, 5, COL5) @\
-      fname##Macro(integer, I2, 5, COL5) @\
+^ifndef ESMF_NO_GREATER_THAN_4D @\
+ @\
       fname##Macro(integer, I4, 5, COL5) @\
       fname##Macro(integer, I8, 5, COL5) @\
+      fname##Macro(real,    R4, 5, COL5) @\
+      fname##Macro(real,    R8, 5, COL5) @\
  @\
-      fname##Macro(integer, I1, 6, COL6) @\
-      fname##Macro(integer, I2, 6, COL6) @\
       fname##Macro(integer, I4, 6, COL6) @\
       fname##Macro(integer, I8, 6, COL6) @\
+      fname##Macro(real,    R4, 6, COL6) @\
+      fname##Macro(real,    R8, 6, COL6) @\
  @\
-      fname##Macro(integer, I1, 7, COL7) @\
-      fname##Macro(integer, I2, 7, COL7) @\
       fname##Macro(integer, I4, 7, COL7) @\
       fname##Macro(integer, I8, 7, COL7) @\
+      fname##Macro(real,    R4, 7, COL7) @\
+      fname##Macro(real,    R8, 7, COL7) @\
  @\
-      fname##Macro(real, R4, 1, COL1) @\
-      fname##Macro(real, R8, 1, COL1) @\
+^endif @\
  @\
-      fname##Macro(real, R4, 2, COL2) @\
-      fname##Macro(real, R8, 2, COL2) @\
- @\
-      fname##Macro(real, R4, 3, COL3) @\
-      fname##Macro(real, R8, 3, COL3) @\
- @\
-      fname##Macro(real, R4, 4, COL4) @\
-      fname##Macro(real, R8, 4, COL4) @\
- @\
-      fname##Macro(real, R4, 5, COL5) @\
-      fname##Macro(real, R8, 5, COL5) @\
- @\
-      fname##Macro(real, R4, 6, COL6) @\
-      fname##Macro(real, R8, 6, COL6) @\
- @\
-      fname##Macro(real, R4, 7, COL7) @\
-      fname##Macro(real, R8, 7, COL7) @\
 ! < end macro - do not edit directly >  @\
  @\
 
