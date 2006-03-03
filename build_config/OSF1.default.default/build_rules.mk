@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.30 2005/08/11 17:57:42 theurich Exp $
+#  $Id: build_rules.mk,v 1.31 2006/03/03 20:43:12 nscollins Exp $
 #
 #  OSF1.default.default
 #
@@ -98,7 +98,6 @@ REAL8			= -r8
 STRICT			= -nopipeline
 EXPAND_TEMPLATES        = -tweak
 
-FPPFLAGS		= $(FPPOPTS)
 F_FREECPP               = -free -cpp
 F_FIXCPP                = -cpp -extend_source
 F_FREENOCPP             = -free
