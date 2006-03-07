@@ -46,16 +46,32 @@ LINKING applications with ESMF:
 If you want to compile and link your application with an ESMF library
 which has already been installed on your system, you will need to tell
 the compiler where the ESMF module files and ESMF library files are located.
+If this has already been documented by the installer of the ESMF library,
+follow the directions given.  However, if not, then you must add the
+correct compiler flags yourself.
 
-ESMF comes with an example makefile for user code that can be found in
-$ESMF_DIR/build/makefile.sample, which includes the makefile fragment
-$ESMF_DIR/build/esmfuser.mk that sets the correct module and library paths.
-The sample makefile depends on a correctly set ESMF_DIR environment
-variable that contains the path to the ESMF installation.  Other environment
-variables which may need to be set depend on the platform.  The most
-likely ones are briefly listed immediately below, but see the
-"BUILDING" section below for more detailed information on what the variables
-are for and what values they need to have.
+You can do this in a variety of ways.  If you already have build scripts or
+existing makefiles, you can explicitly add the correct compiler flags which
+tell the compiler which directories to search for modules and which libraries
+to include at link time.  The ESMF build process puts the modules and
+libraries in separate directories depending on the options used to compile
+the library.  Running 'gmake info' from the top of the ESMF install
+directory will print out what flags need to be used.  The actual values
+depend on having several environment variables set first, including ESMF_DIR
+and those listed below.
+
+If you do not have a makefile, or if you are willing to include a makefile
+fragment from within your own makefile, an example makefile for user code can
+be found in $ESMF_DIR/build/makefile.sample.  It in turn includes the
+makefile fragment $ESMF_DIR/build/esmfuser.mk that sets the correct module
+and library paths.
+
+The sample makefile depends on a correctly set ESMF_DIR environment variable
+that contains the path to the ESMF installation.  Other environment variables
+which may need to be set depend on the platform.  The most likely ones are
+briefly listed immediately below, but see the "BUILDING" section below for
+more detailed information on what the variables are for and what values they
+need to have.
 
 ESMF_COMPILER - Will need to be set on all Linux systems, and on any other
                 system which can have more than one type of compiler installed.
@@ -70,11 +86,6 @@ ESMF_BOPT - The default is an optimized library, but a debuggable library
             can be selected by setting this to "g".
 
 
-ESMF does not use configure and autoconf; it uses gnu makefiles to set
-options and compile correctly on a wide variety of systems.  An example
-makefile for user code can be found in $ESMF_DIR/build/makefile.sample, which
-includes the makefile fragment $ESMF_DIR/build/esmfuser.mk.
-
 If you do not already have a makefile, copy the makefile.sample to your 
 directory, edit it to replace the sample program with your own, make sure 
 the proper environment variables are set, and type 'gmake'.
@@ -88,10 +99,10 @@ Or you can use the sample makefile to print out the actual variable values
 and transfer them into your own makefiles if you do not want to include
 'esmfuser.mk' in your own makefile.
 
-To print out what settings will be used, cd to $ESMF_DIR and run 'gmake info'.
-This will print out the compiler names, the compiler version information, the
-compiler flags, and link-time libraries which have been selected by the
-various environment variable settings.
+Another way to see the values of the compiler and linker flags is to cd to
+$ESMF_DIR and run 'gmake info'.  This will print out the compiler names, the
+compiler version information, the compiler flags, and link-time libraries
+which have been selected by the various environment variable settings.
 
 
 For help at the programming level, cd to $ESMF_DIR/quick_start for an
@@ -116,10 +127,10 @@ Quickstart information for the impatient:
 GNUmake
 -------
 
-The ESMF build system uses the GNU make program; it is generally named 'gmake'
-but may also be simply 'make' or 'gnumake' on some platforms.  We do not
-use configure or autoconf;  the selection of various options is done by
-setting environment variables before building the framework. 
+The ESMF build system uses the GNU make program; it is generally named
+'gmake' but may also be simply 'make' or 'gnumake' on some platforms.  We do
+not use configure or autoconf;  the selection of various options is done by
+setting environment variables before building the framework.
 
 
 Environment Variables
@@ -177,6 +188,17 @@ ESMF_PREC
 If this system supports the building of both 32-bit and 64-bit executables
 (pointer wordsize), this variable can be set to select which format to use.
 Valid values are '32' or '64'.
+
+LD_LIBRARY_PATH
+ESMF_CXX_LIBRARY_PATH
+ESMF_F90_LIBRARY_PATH
+
+The first of these is often set by default in a system configuration file
+and consists of colon-separated directories to search for library files.
+The other two variables are ESMF specific, in the same colon-separated
+format, which indicate where to search for C++ and F90 libraries,
+respectively.  If the library builds successfully but none of the tests
+can be linked, set these to indicate where to find the libraries needed.
 
 
 There are other environment variables which can be set to customize
@@ -240,7 +262,8 @@ build_config:    Contains makefile fragments that can be customized by the
                  new platforms or compilers.
 
 build:           Contains the generic portion of the build that a
-                 user would not be expected to modify.
+                 user would not be expected to modify.  Also contains a 
+                 sample user makefile.
 
 scripts:         Contains scripts for testing and uniprocessor runs, and some
                  templates.
@@ -511,4 +534,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.67 2006/03/03 20:31:19 nscollins Exp $
+ $Id: README,v 1.68 2006/03/07 16:24:10 nscollins Exp $
