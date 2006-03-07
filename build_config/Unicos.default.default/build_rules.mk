@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.7 2006/03/07 18:44:14 svasquez Exp $
+# $Id: build_rules.mk,v 1.8 2006/03/07 22:41:02 svasquez Exp $
 # 
 # Unicos.default.default
 #
@@ -8,6 +8,9 @@
 #
 ifeq ($(ESMF_COMM),default)
 export ESMF_COMM := mpi
+endif
+
+ifeq ($(ESMF_COMM),mpi)
 MPIRUN         = ${ESMF_TOP_DIR}/scripts/mpirun.unicos
 endif
 
