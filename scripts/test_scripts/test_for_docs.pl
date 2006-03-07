@@ -1,6 +1,6 @@
-#! /usr/bin/perl -w
+#! /usr/bin/env perl -w
 #
-# $Id: test_for_docs.pl,v 1.6 2004/06/21 21:26:46 svasquez Exp $
+# $Id: test_for_docs.pl,v 1.7 2006/03/07 20:48:00 svasquez Exp $
 #
 # test_for_docs.pl
 # 

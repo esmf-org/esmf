@@ -1,5 +1,5 @@
-#!/usr/bin/perl
-# $Id: examples_results.pl,v 1.1 2005/03/18 16:07:55 svasquez Exp $
+#!/usr/bin/env perl
+# $Id: examples_results.pl,v 1.2 2006/03/07 20:48:00 svasquez Exp $
 # This subroutine is called at the end of the examples, "check_examples" and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 # The results are either complete results or a summary.
