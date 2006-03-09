@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclMPMDSTestA.F90,v 1.3 2006/02/02 02:00:07 theurich Exp $
+! $Id: ESMF_FieldExclMPMDSTestA.F90,v 1.4 2006/03/09 21:44:35 svasquez Exp $
 !
 ! System test code FieldExclMPMD
 !  Description on Sourceforge under System Test #79497
@@ -10,7 +10,9 @@
 ! ********************************************************************
 
 !-------------------------------------------------------------------------
-!SYSTEM_TEST        String used by test script to count system tests.
+!SYSTEM_____TEST__DISABLED        String used by test script to count system tests.
+! This system test is not being built, when it is listed in the makefile
+! please fix the tag.
 !=========================================================================
 
 
