@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.19 2006/02/22 23:57:00 theurich Exp $
+# $Id: build_rules.mk,v 1.20 2006/03/09 18:28:49 nscollins Exp $
 #
 # Linux.lahey.default
 #
@@ -79,10 +79,33 @@ F_FREENOCPP        = --nfix
 F_FIXNOCPP         = --fix
 
 # use dir values in LD_LIBRARY_PATH, others are defaults if no other choice.
+ifeq ($(origin ESMF_CXX_LIBRARY_PATH), environment)
+PATHSET=true
+endif
+
+ifeq ($(origin ESMF_F90_LIBRARY_PATH), environment)
+PATHSET=true
+endif
+
 ifeq ($(origin LD_LIBRARY_PATH), environment)
 C_LIB_PATHS  += $(ENV_LIB_PATHS)
 C_LD_PATHS   += $(ENV_LD_PATHS)
+PATHSET=true
+endif
 
+ifeq ($PATHSET,)
+# the user has given us no input, use hardcoded values which are 
+# just a best-guess.
+C_LIB_PATHS  += /usr/lib/gcc-lib/i386-redhat-linux/3.2.2 \
+                /usr/local/lf9560/lib 
+
+C_LD_PATHS   += /usr/lib/gcc-lib/i386-redhat-linux/3.2.2 \
+                /usr/local/lf9560/lib 
+endif
+
+# by now there are vlaues for lib and ld paths; either from the
+# environment or from the lines above.  add them plus the libs to
+# the variable which gets used as a link line.
 C_F90CXXLIBS       = $(LIB_PATHS) $(LD_PATHS) \
                      -Wl,-rpath $(ESMF_LIBDIR) \
                      -lstdc++ -lgcc -lg2c -lrt
@@ -90,16 +113,7 @@ C_F90CXXLIBS       = $(LIB_PATHS) $(LD_PATHS) \
 C_CXXF90LIBS       = $(LIB_PATHS) $(LD_PATHS) \
                      -Wl,-rpath $(ESMF_LIBDIR) \
                      -lfj9i6 -lfj9f6 -lfj9e6 -lfccx86_6a -lrt
-else
-C_F90CXXLIBS       = -Wl,-rpath /usr/lib/gcc-lib/i386-redhat-linux/3.2.2 \
-                     -Wl,-rpath /usr/local/lf9560/lib \
-                     -Wl,-rpath $(ESMF_LIBDIR) \
-                     -L/usr/lib/gcc-lib/i386-redhat-linux/3.2.2 \
-                     -lstdc++ -lgcc -lg2c -lrt
 
-C_CXXF90LIBS       = -L/usr/local/lf9560/lib \
-                      -lfj9i6 -lfj9f6 -lfj9e6 -lfccx86_6a -lrt
-endif
 
 ##############################################################################
 
