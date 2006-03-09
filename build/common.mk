@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.154 2006/03/03 20:37:21 nscollins Exp $
+#  $Id: common.mk,v 1.155 2006/03/09 18:28:10 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -700,14 +700,11 @@ LINKOPTS     = $(C_LINKOPTS)
 
 # default is to include the esmf lib dir in the library search path
 # plus anything set in the platform dep file.   if there is a load-time 
-# flag needed for a platform, set C_LD_PATHS in the platform dep files and
-# be sure to include $(LDIR).
-LIB_PATHS = -L$(LDIR) $(C_LIB_PATHS)
+# flag needed for a platform, set C_LD_PATHS in the platform dep files.
+# be sure to include $(LDIR) here.
+LIB_PATHS += -L$(LDIR) $(C_LIB_PATHS)
 ifneq ($(C_LD_PATHS),)
-LD_PATHS  = $(C_LD_PATHS)
-#LD_PATHS  = $(SLFLAG)$(LDIR) $(C_LD_PATHS)
-else
-LD_PATHS  =
+LD_PATHS  += $(C_LD_PATHS)
 endif
 
 # add the LIB_PATHS and LD_PATHS to the LINKOPTS - this does not automatically
