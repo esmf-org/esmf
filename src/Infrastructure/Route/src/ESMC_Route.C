@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.150 2006/01/26 23:10:34 nscollins Exp $
+//$Id: ESMC_Route.C,v 1.151 2006/03/14 19:33:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.150 2006/01/26 23:10:34 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.151 2006/03/14 19:33:48 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -289,6 +289,53 @@
     return rc;
 
  } // end ESMC_RouteSetRecv
+ 
+ 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteSetOptions"
+//BOP
+// !IROUTINE:  ESMC_RouteSetOptions - set Route option
+//
+// !INTERFACE:
+    int ESMC_Route::ESMC_RouteSetOptions(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+    ESMC_RouteOptions opt       // in - option
+    ){
+//
+// !DESCRIPTION:
+//     Set option, adding defaults if necessary!
+//
+//EOP
+// !REQUIREMENTS:  
+    
+    // check for sync/async
+    if (!(opt&ESMC_ROUTE_OPTION_ASYNC || opt&ESMC_ROUTE_OPTION_SYNC)){
+      // set SYNC by default
+      opt = (ESMC_RouteOptions)(opt|ESMC_ROUTE_OPTION_SYNC);
+    }
+    
+    // check for pack option
+    if (!(opt&ESMC_ROUTE_OPTION_PACK_PET || 
+          opt&ESMC_ROUTE_OPTION_PACK_XP ||
+          opt&ESMC_ROUTE_OPTION_PACK_NOPACK ||
+          opt&ESMC_ROUTE_OPTION_PACK_VECTOR ||
+          opt&ESMC_ROUTE_OPTION_PACK_BUFFER)){
+      // set NOPACK by default
+      opt = (ESMC_RouteOptions)(opt|ESMC_ROUTE_OPTION_PACK_NOPACK);
+    }
+
+    options = opt;
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_RouteSetOptions
+
+ 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.60 2006/01/06 19:56:54 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.61 2006/03/14 19:33:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -96,8 +96,7 @@
     int ESMC_RouteSetSend(int dst_pet, ESMC_XPacket *xp);
     int ESMC_RouteSetRecv(int src_pet, ESMC_XPacket *xp);
     
-    int ESMC_RouteSetOptions(ESMC_RouteOptions opt) { 
-                                         options = opt; return ESMF_SUCCESS; }
+    int ESMC_RouteSetOptions(ESMC_RouteOptions opt);
     int ESMC_RouteGetOptions(void) { return options; };
 
     int ESMC_RouteSetRecvItems(int nitems);
