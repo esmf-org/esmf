@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistUseUTest.F90,v 1.7 2006/03/13 23:59:36 svasquez Exp $
+! $Id: ESMF_BundleRedistUseUTest.F90,v 1.8 2006/03/14 17:33:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleRedistUseUTest.F90,v 1.7 2006/03/13 23:59:36 svasquez Exp $'
+      '$Id: ESMF_BundleRedistUseUTest.F90,v 1.8 2006/03/14 17:33:50 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -145,7 +145,7 @@
       ! these depend on npets - use these for testing
       m = 2
       n = 2
-      mprime = 2
+      mprime = 1
       nprime = 4
       
       !------------------------------------------------------------------------
@@ -209,7 +209,7 @@
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !NEX_UTest
-      grid(2) = CreateLatLonGrid(nx, ny, nz, mprime, nprime, "M'xN'", mprime-1, nprime-1, rc)
+      grid(2) = CreateLatLonGrid(nx, ny, nz, mprime, nprime, "M'xN'", mprime, nprime-1, rc)
       write(name, *) "Creating grid 2"
       write(failMsg, *) "Unable to create grid 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
