@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.11 2006/03/14 17:23:22 theurich Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.12 2006/03/14 18:38:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -2432,10 +2432,10 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
 
     ! do some basic error checks and then figure out how many x DEs are empty
     if (present(data_xde)) then
-       if ((data_xde .lt. 0) .or. (data_xde .gt. xde)) then
+       if ((data_xde .le. 0) .or. (data_xde .gt. xde)) then
 
          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-                               "data_xde must be > 0 and < xde", &
+                               "data_xde must be > 0 and <= xde", &
                                 ESMF_CONTEXT, rc)
          goto 10
        else
@@ -2446,10 +2446,10 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
 
     ! same thing for y
     if (present(data_yde)) then
-       if ((data_yde .lt. 0) .or. (data_yde .gt. yde)) then
+       if ((data_yde .le. 0) .or. (data_yde .gt. yde)) then
 
          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-                               "data_yde must be > 0 and < yde", &
+                               "data_yde must be > 0 and <= yde", &
                                 ESMF_CONTEXT, rc)
           goto 10
        else
