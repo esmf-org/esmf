@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.9 2006/03/03 20:39:15 nscollins Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.10 2006/03/14 17:04:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -2437,6 +2437,7 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
                                "data_xde must be >= 0 and < xde", &
                                 ESMF_CONTEXT, rc)
+         goto 10
        else
         emptyx = xde - data_xde
         fullx = data_xde
@@ -2450,6 +2451,7 @@ function CreateLatLonGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
                                "data_yde must be >= 0 and < yde", &
                                 ESMF_CONTEXT, rc)
+          goto 10
        else
         emptyy = yde - data_yde
         fully = data_yde
