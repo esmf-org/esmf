@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistUseUTest.F90,v 1.8 2006/03/14 17:33:50 theurich Exp $
+! $Id: ESMF_BundleRedistUseUTest.F90,v 1.9 2006/03/14 19:38:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleRedistUseUTest.F90,v 1.8 2006/03/14 17:33:50 theurich Exp $'
+      '$Id: ESMF_BundleRedistUseUTest.F90,v 1.9 2006/03/14 19:38:39 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -437,7 +437,7 @@
       ! store
       call ESMF_VMGetGlobal(vm, rc=rc)
       call ESMF_BundleRedistStore(bundle(1), bundle(2), vm, &
-                                                routehandle=redist_rh, rc=rc)
+        routehandle=redist_rh, routeOptions=ESMF_ROUTE_OPTION_PACK_PET, rc=rc)
       write(name, *) "Computing route for redist"
       write(failMsg, *) "Computing route for redist"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
