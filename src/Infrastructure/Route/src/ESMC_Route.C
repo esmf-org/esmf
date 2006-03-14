@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.151 2006/03/14 19:33:48 theurich Exp $
+//$Id: ESMC_Route.C,v 1.152 2006/03/14 21:23:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.151 2006/03/14 19:33:48 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.152 2006/03/14 21:23:43 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -322,11 +322,9 @@
     // check for pack option
     if (!(opt&ESMC_ROUTE_OPTION_PACK_PET || 
           opt&ESMC_ROUTE_OPTION_PACK_XP ||
-          opt&ESMC_ROUTE_OPTION_PACK_NOPACK ||
-          opt&ESMC_ROUTE_OPTION_PACK_VECTOR ||
-          opt&ESMC_ROUTE_OPTION_PACK_BUFFER)){
+          opt&ESMC_ROUTE_OPTION_PACK_NOPACK)){
       // set NOPACK by default
-      opt = (ESMC_RouteOptions)(opt|ESMC_ROUTE_OPTION_PACK_NOPACK);
+      opt = (ESMC_RouteOptions)(opt|ESMC_ROUTE_OPTION_PACK_PET);
     }
 
     options = opt;
