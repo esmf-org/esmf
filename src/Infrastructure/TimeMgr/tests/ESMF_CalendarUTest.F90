@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.37 2005/04/05 21:51:04 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.38 2006/03/15 20:55:06 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.37 2005/04/05 21:51:04 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.38 2006/03/15 20:55:06 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -893,9 +893,6 @@
       write(failMsg, *) "Should return ESMF_SUCCESS."
       call ESMF_TimeIntervalSet(timeStep, d=days, rc=rc)
       write(name, *) "Set Time Interval Test"
-      ! TODO: this print * is a workaround to a split-line anomaly on babyblue
-      !   see bug# 977786
-      print *, "   "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -961,9 +958,6 @@
       clock_no_leap = ESMF_ClockCreate("No Leap Clock", timeStep, &    
                                         startTime, stopTime, rc=rc) 
       write(name, *) "Clock initialization with above settings Test"
-      ! TODO: this print * is a workaround to a split-line anomaly on babyblue
-      !   see bug# 977786
-      print *, "   "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
