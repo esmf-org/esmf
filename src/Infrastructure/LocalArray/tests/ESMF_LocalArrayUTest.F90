@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.30 2005/02/28 16:30:35 nscollins Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.31 2006/03/15 20:48:09 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -532,9 +532,6 @@
    !EX_UTest
     write(failMsg, *) "Array data should be the same."
     write(name, *) "Compare Local Array 3D Real Data Test"
-    ! TODO: this print is workaround to a split-line anomaly on babyblue
-    !   see bug# 977786
-    print *
     call ESMF_Test((result.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
     ! with do copy, the original can go now
