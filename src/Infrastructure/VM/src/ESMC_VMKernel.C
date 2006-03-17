@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.62 2006/03/02 01:11:14 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.63 2006/03/17 22:44:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -314,6 +314,16 @@ void ESMC_VMK::vmk_init(void){
 #endif      
     }
   }
+    // setup the IntraProcessSharedMemoryAllocation Table
+  ipshmTable = new void*[IPSHM_TABLE_SIZE];
+  ipshmDeallocTable = new int[IPSHM_TABLE_SIZE];
+  ipshmCount = new int;
+  *ipshmCount = 0;        // reset
+  ipshmAllocCount = 0;    // reset
+  ipshmMutex = new pthread_mutex_t;
+  pthread_mutex_init(ipshmMutex, NULL);
+  ipSetupMutex = new pthread_mutex_t;
+  pthread_mutex_init(ipSetupMutex, NULL);
   // set up the request queue
   nhandles=0;
   firsthandle=NULL;
@@ -384,14 +394,72 @@ void ESMC_VMK::vmk_abort(void){
 }
 
 
-void ESMC_VMK::vmk_construct(int mypet, pthread_t pthid, int npets, int *lpid,
-  int *pid, int *tid, int *ncpet, int **cid, MPI_Group mpi_g, 
-  MPI_Comm mpi_c, pthread_mutex_t *pth_mutex2, pthread_mutex_t *pth_mutex, 
-  int *pth_finish_count, comminfo **commarray, int pref_intra_ssi,
-  int nothreadsflag){
+struct contrib_id{
+  pthread_t blocker_tid;    // POSIX thread id of blocker thread
+  vmkt_t *blocker_vmkt;     // pointer to blocker's vmkt structure
+  int mpi_pid;              // MPI rank in the context of the default ESMC_VMK
+  pid_t pid;                // POSIX process id
+  pthread_t tid;            // POSIX thread id
+};
+
+
+struct vmk_spawn_arg{
+  // members which are different for each new pet
+  ESMC_VMK *myvm;             // pointer to vm instance on heap
+  pthread_t pthid;            // pthread id of the spawned thread
+  int mypet;                  // new mypet 
+  int *ncontributors;         // number of pets that contributed cores 
+  contrib_id **contributors;  // array of contributors
+  vmkt_t vmkt;                // this pet's vmkt
+  vmkt_t vmkt_extra;          // extra vmkt for this pet (sigcatcher)
+  // members which are identical for all new pets
+  void *(*fctp)(void *, void *);  // pointer to the user function
+  // 1st (void *) points to the provided object (child of ESMC_VMK class)
+  // 2nd (void *) points to data that shall be passed to the user function
+  int npets;                  // new number of pets
+  int *lpid;
+  int *pid;
+  int *tid;
+  int *ncpet;
+  int **cid;
+  MPI_Group mpi_g;
+  MPI_Comm mpi_c;
+  int nothreadsflag;
+  // shared memory variables
+  pthread_mutex_t *pth_mutex2;
+  pthread_mutex_t *pth_mutex;
+  int *pth_finish_count;
+  comminfo **commarray;
+  void **ipshmTable;
+  int *ipshmDeallocTable;
+  int *ipshmCount;
+  pthread_mutex_t *ipshmMutex;
+  pthread_mutex_t *ipSetupMutex;
+  int pref_intra_ssi;
+  // cargo
+  void *cargo;
+};
+
+    
+void ESMC_VMK::vmk_construct(void *ssarg){
+  vmk_spawn_arg *sarg = (vmk_spawn_arg *)ssarg;
+  int npets = sarg->npets;
+  int *lpid = sarg->lpid;
+  int *pid = sarg->pid;
+  int *tid = sarg->tid;
+  int *ncpet = sarg->ncpet;
+  int **cid = sarg->cid;
+  MPI_Group mpi_g = sarg->mpi_g;
+  MPI_Comm mpi_c = sarg->mpi_c;
+  pthread_mutex_t *pth_mutex2 = sarg->pth_mutex2;
+  pthread_mutex_t *pth_mutex = sarg->pth_mutex;
+  int *pth_finish_count = sarg->pth_finish_count;
+  comminfo **commarray = sarg->commarray;
+  int pref_intra_ssi = sarg->pref_intra_ssi;
+  int nothreadsflag = sarg->nothreadsflag;
   // fill an already existing ESMC_VMK object with info
-  this->mypet=mypet;
-  this->mypthid=pthid;
+  mypet=sarg->mypet;
+  mypthid=sarg->pthid;
   this->npets=npets;
   this->lpid = new int[npets];
   this->pid = new int[npets];
@@ -417,6 +485,13 @@ void ESMC_VMK::vmk_construct(int mypet, pthread_t pthid, int npets, int *lpid,
   else
     this->mpi_mutex_flag = 0; // don't need to use muteces around mpi comms
   this->commarray = commarray;
+  // setup the IntraProcessSharedMemoryAllocation Table
+  ipshmTable = sarg->ipshmTable;
+  ipshmDeallocTable = sarg->ipshmDeallocTable;
+  ipshmCount = sarg->ipshmCount;
+  ipshmAllocCount = 0;
+  ipshmMutex = sarg->ipshmMutex;
+  ipSetupMutex = sarg->ipSetupMutex;
   // initialize the request queue
   this->nhandles=0;
   this->firsthandle=NULL;
@@ -529,6 +604,16 @@ void ESMC_VMK::vmk_destruct(void){
     pthread_mutex_destroy(pth_mutex);
     delete pth_mutex;
     delete pth_finish_count;
+    // free - the IntraProcessSharedMemoryAllocation Table
+    for (int i=0; i<*ipshmCount; i++)
+      if (ipshmTable[i] != NULL) free(ipshmTable[i]);
+    delete [] ipshmTable;
+    delete [] ipshmDeallocTable;
+    delete ipshmCount;
+    pthread_mutex_destroy(ipshmMutex);
+    delete ipshmMutex;
+    pthread_mutex_destroy(ipSetupMutex);
+    delete ipSetupMutex;
     // - free commarray
     for (int pet1=0; pet1<npets; pet1++){
       for (int pet2=0; pet2<npets; pet2++){
@@ -574,48 +659,6 @@ void ESMC_VMK::vmk_destruct(void){
 }  
 
 
-struct contrib_id{
-  pthread_t blocker_tid;    // POSIX thread id of blocker thread
-  vmkt_t *blocker_vmkt;     // pointer to blocker's vmkt structure
-  int mpi_pid;              // MPI rank in the context of the default ESMC_VMK
-  pid_t pid;                // POSIX process id
-  pthread_t tid;            // POSIX thread id
-};
-
-
-struct vmk_spawn_arg{
-  // members which are different for each new pet
-  ESMC_VMK *myvm;             // pointer to vm instance on heap
-  pthread_t pthid;            // pthread id of the spawned thread
-  int mypet;                  // new mypet 
-  int *ncontributors;         // number of pets that contributed cores 
-  contrib_id **contributors;  // array of contributors
-  vmkt_t vmkt;                // this pet's vmkt
-  vmkt_t vmkt_extra;          // extra vmkt for this pet (sigcatcher)
-  // members which are identical for all new pets
-  void *(*fctp)(void *, void *);  // pointer to the user function
-  // 1st (void *) points to the provided object (child of ESMC_VMK class)
-  // 2nd (void *) points to data that shall be passed to the user function
-  int npets;                  // new number of pets
-  int *lpid;
-  int *pid;
-  int *tid;
-  int *ncpet;
-  int **cid;
-  MPI_Group mpi_g;
-  MPI_Comm mpi_c;
-  int nothreadsflag;
-  // shared memory variables
-  pthread_mutex_t *pth_mutex2;
-  pthread_mutex_t *pth_mutex;
-  int *pth_finish_count;
-  comminfo **commarray;
-  int pref_intra_ssi;
-  // cargo
-  void *cargo;
-};
-
-    
 static void *vmk_spawn(void *arg){
   // vmkt's first level spawn function, includes the catch/release loop
   // typecast the argument into the type it really is:
@@ -638,10 +681,7 @@ static void *vmk_spawn(void *arg){
   // obtain reference to the vm instance on heap
   ESMC_VMK *vm = sarg->myvm;
   // setup the pet section in this vm instance
-  vm->vmk_construct(sarg->mypet, sarg->pthid, sarg->npets, sarg->lpid, 
-    sarg->pid, sarg->tid, sarg->ncpet, sarg->cid, sarg->mpi_g, sarg->mpi_c,
-    sarg->pth_mutex2, sarg->pth_mutex, sarg->pth_finish_count,
-    sarg->commarray, sarg->pref_intra_ssi, sarg->nothreadsflag);
+  vm->vmk_construct((void *)sarg);
   // note: The VM above must be constructed _before_ back-sync'ing #2 to
   //       vmkt_create in order to assure that the entries in the VM are valid!
   // now use vmkt features to prepare for catch/release loop (back-sync)
@@ -955,6 +995,11 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
   pthread_mutex_t *new_pth_mutex2;
   pthread_mutex_t *new_pth_mutex;
   int *new_pth_finish_count;
+  void **new_ipshmTable;
+  int *new_ipshmDeallocTable;
+  int *new_ipshmCount;
+  pthread_mutex_t *new_ipshmMutex;
+  pthread_mutex_t *new_ipSetupMutex;
   // utility variables that will be used beyond the next i-loop
   int num_diff_pids=0;  // total number of different pids/lpids in new ESMC_VMK
   // utility arrays and variables used only during the next i-loop
@@ -1295,6 +1340,15 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
             }
           }
         }
+        // initialize the IntraProcessSharedMemoryAllocation Table
+        new_ipshmTable = new void*[IPSHM_TABLE_SIZE];
+        new_ipshmDeallocTable = new int[IPSHM_TABLE_SIZE];
+        new_ipshmCount = new int;
+        *new_ipshmCount = 0;
+        new_ipshmMutex = new pthread_mutex_t;
+        pthread_mutex_init(new_ipshmMutex, NULL);
+        new_ipSetupMutex = new pthread_mutex_t;
+        pthread_mutex_init(new_ipSetupMutex, NULL);
       }
       // share pointers with all current pets that also spawn for same pid/lpid
       for (int j=1; j<lpid_list[1][i]; j++){
@@ -1306,6 +1360,11 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
           vmk_send(&new_pth_mutex, sizeof(pthread_mutex_t*), pet_dest);
           vmk_send(&new_pth_finish_count, sizeof(int*), pet_dest);
           vmk_send(&new_commarray, sizeof(comminfo**), pet_dest);
+          vmk_send(&new_ipshmTable, sizeof(void**), pet_dest);
+          vmk_send(&new_ipshmDeallocTable, sizeof(int*), pet_dest);
+          vmk_send(&new_ipshmCount, sizeof(int*), pet_dest);
+          vmk_send(&new_ipshmMutex, sizeof(pthread_mutex_t*), pet_dest);
+          vmk_send(&new_ipSetupMutex, sizeof(pthread_mutex_t*), pet_dest);
         }else if(mypet==pet_dest){
           // mypet is one of the pets that also spawn for this lpid -> receive
           // before this PETs new_commarray is overwritten it must be deleted
@@ -1317,6 +1376,11 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
           vmk_recv(&new_pth_mutex, sizeof(pthread_mutex_t*), pet_src);
           vmk_recv(&new_pth_finish_count, sizeof(int*), pet_src);
           vmk_recv(&new_commarray, sizeof(comminfo**), pet_src);
+          vmk_recv(&new_ipshmTable, sizeof(void**), pet_src);
+          vmk_recv(&new_ipshmDeallocTable, sizeof(int*), pet_src);
+          vmk_recv(&new_ipshmCount, sizeof(int*), pet_src);
+          vmk_recv(&new_ipshmMutex, sizeof(pthread_mutex_t*), pet_src);
+          vmk_recv(&new_ipSetupMutex, sizeof(pthread_mutex_t*), pet_src);
         }
       }
     }
@@ -1359,6 +1423,11 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
     sarg[i].pth_mutex = new_pth_mutex;
     sarg[i].pth_finish_count = new_pth_finish_count;
     sarg[i].commarray = new_commarray;
+    sarg[i].ipshmTable = new_ipshmTable;
+    sarg[i].ipshmDeallocTable = new_ipshmDeallocTable;
+    sarg[i].ipshmCount = new_ipshmCount;
+    sarg[i].ipshmMutex = new_ipshmMutex;
+    sarg[i].ipSetupMutex = new_ipSetupMutex;
     sarg[i].pref_intra_ssi = vmp->pref_intra_ssi;
     // cargo
     sarg[i].cargo = cargo;
@@ -1370,11 +1439,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
       ESMC_VMK &vm = *(sarg[0].myvm);
       // setup the pet section in this vm instance
       sarg[0].pthid = pthread_self();
-      vm.vmk_construct(sarg[0].mypet, sarg[0].pthid, sarg[0].npets,
-        sarg[0].lpid, sarg[0].pid, sarg[0].tid, sarg[0].ncpet, sarg[0].cid,
-        sarg[0].mpi_g, sarg[0].mpi_c, sarg[0].pth_mutex2, sarg[0].pth_mutex,
-        sarg[0].pth_finish_count, sarg[0].commarray, sarg[0].pref_intra_ssi,
-        sarg[0].nothreadsflag);
+      vm.vmk_construct((void *)&sarg[0]);
     }else{
       // if this is a thread-based VM then...
       // ...finally spawn threads from this pet...
@@ -3855,6 +3920,91 @@ void vmk_wtimeprec(double *prec){
   *prec = temp_prec;
 }
 
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~ IntraProcessSharedMemoryAllocation Table Methods
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    
+    void *ESMC_VMK::vmk_ipshmallocate(int bytes, int *firstFlag){
+      if (firstFlag != NULL) *firstFlag = 0; // reset
+      ++ipshmAllocCount;  // increment the local count
+      if (ipshmAllocCount >= IPSHM_TABLE_SIZE) return NULL;
+      pthread_mutex_lock(ipshmMutex);
+      if (ipshmAllocCount > *ipshmCount){
+        // this is the first thread for this new request to allocate
+        if (firstFlag != NULL) *firstFlag = 1; // set
+        ipshmTable[*ipshmCount] = (void *)malloc(bytes);
+        ipshmDeallocTable[*ipshmCount] = vmk_nthreads(vmk_mypet()); //reset
+        ++(*ipshmCount);  // increment the count of allocated segments in table
+      }
+      void *result = ipshmTable[ipshmAllocCount-1];// pull out the correct alloc
+      pthread_mutex_unlock(ipshmMutex);
+      return result;
+    }
+    
+    
+    void ESMC_VMK::vmk_ipshmdeallocate(void *pointer){
+      int i;
+      pthread_mutex_lock(ipshmMutex);
+      for (i=0; i<*ipshmCount; i++)
+        if (ipshmTable[i] == pointer) break;
+      if (i<*ipshmCount){
+        // found the allocation
+        --ipshmDeallocTable[i]; // indicate that this thread called deallocate
+        if (ipshmDeallocTable[i] == 0){
+          //printf("freeing %p\n", pointer);
+          free(pointer);
+          ipshmTable[i] = NULL;
+        }
+      }
+      pthread_mutex_unlock(ipshmMutex);
+    }
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~ IntraProcessMutex Methods
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#if 0
+    // IntraProcessMutex Methods
+    vmk_ipmutex *vmk_ipmutexallocate(void);
+    void vmk_ipmutexdeallocate(vmk_ipmutex *ipmutex);
+    int vmk_ipmutexlock(vmk_ipmutex *ipmutex);
+    int vmk_ipmutexunlock(vmk_ipmutex *ipmutex);
+#endif
+
+    
+    vmk_ipmutex *ESMC_VMK::vmk_ipmutexallocate(void){
+      int firstFlag;
+      pthread_mutex_lock(ipSetupMutex);
+      vmk_ipmutex *ipmutex = (vmk_ipmutex *)
+        vmk_ipshmallocate(sizeof(vmk_ipmutex), &firstFlag);
+      if (firstFlag) pthread_mutex_init(&(ipmutex->pth_mutex), NULL);
+      ipmutex->lastFlag = vmk_nthreads(vmk_mypet()); //reset
+      pthread_mutex_unlock(ipSetupMutex);
+      return ipmutex;
+    }
+
+    void ESMC_VMK::vmk_ipmutexdeallocate(vmk_ipmutex *ipmutex){
+      pthread_mutex_lock(ipSetupMutex);
+      --(ipmutex->lastFlag);  // register this thread
+      if (ipmutex->lastFlag == 0) pthread_mutex_destroy(&(ipmutex->pth_mutex));
+      vmk_ipshmdeallocate(ipmutex);
+      pthread_mutex_unlock(ipSetupMutex);
+    }
+
+    int ESMC_VMK::vmk_ipmutexlock(vmk_ipmutex *ipmutex){
+      return pthread_mutex_lock(&(ipmutex->pth_mutex));
+    }
+    
+    int ESMC_VMK::vmk_ipmutexunlock(vmk_ipmutex *ipmutex){
+      return pthread_mutex_unlock(&(ipmutex->pth_mutex));
+    }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

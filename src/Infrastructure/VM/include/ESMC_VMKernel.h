@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.31 2006/03/02 01:11:14 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.32 2006/03/17 22:44:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,6 +44,9 @@ enum vmType { vmI4=1, vmR4, vmR8};
 #define PIPC_BUFFER                   (4096)
 #define SHARED_BUFFER                 (64)
 
+// IntraProcessSharedMemoryAllocation Table size
+#define IPSHM_TABLE_SIZE              (1000)
+
 // begin sync stuff -----
 #define SYNC_NBUFFERS                 (2)
 typedef struct{
@@ -66,6 +69,13 @@ void sync_buffer_wait_fill(shmsync *shms, int select);
 void sync_buffer_wait_empty(shmsync *shms, int select);
 void sync_reset(shmsync *shms);
 // end sync stuff -----
+
+
+typedef struct{
+  // mutex variable for intraProcess sync
+  pthread_mutex_t pth_mutex;
+  int lastFlag;
+}vmk_ipmutex;
 
 
 typedef struct vmk_ch{
@@ -111,6 +121,7 @@ typedef struct{
   pipc_mp *pipcmp;  // posix ipc message passing structure
 }comminfo;
 
+
 class ESMC_VMK{
   // members
   protected:
@@ -139,6 +150,14 @@ class ESMC_VMK{
     int mpi_mutex_flag;
     // Communications array
     comminfo **commarray;   // this array is shared between pets of same pid
+    // IntraProcessSharedMemoryAllocation Table
+    void **ipshmTable;  // table of memory pointers (shared)
+    int *ipshmDeallocTable;  // keep track of how many threads dealloc (shared)
+    int *ipshmCount;    // current number of allocations (shared)
+    int ipshmAllocCount;// local count of how many times Alloc was called not-s
+    pthread_mutex_t *ipshmMutex;  // mutex to operate (shared)
+    // IntraProcessMutex setup mutex
+    pthread_mutex_t *ipSetupMutex;  // mutex used to init and destroy (shared)
     // Communication requests queue
     int nhandles;
     vmk_commhandle *firsthandle;
@@ -169,11 +188,7 @@ class ESMC_VMK{
     void vmk_abort(void);
       // abort default (all MPI) virtual machine
 
-    void vmk_construct(int mypet, pthread_t pthid, int npets, int *lpid, 
-      int *pid, int *tid, int *ncpet, int **cid, MPI_Group mpi_g, 
-      MPI_Comm mpi_c, pthread_mutex_t *pth_mutex2, pthread_mutex_t *pth_mutex,
-      int *pth_finish_count, comminfo **commarray, int pref_intra_ssi,
-      int nothreadsflag);
+    void vmk_construct(void *sarg);
       // fill an already existing ESMC_VMK object with info
     void vmk_destruct(void);
       // free allocations within an existing ESMC_VMK object
@@ -249,6 +264,16 @@ class ESMC_VMK{
     void vmk_wait(vmk_commhandle **commhandle, int nanopause=0);
     void vmk_waitqueue(void);
     void vmk_cancel(vmk_commhandle **commhandle);
+    
+    // IntraProcessSharedMemoryAllocation Table Methods
+    void *vmk_ipshmallocate(int bytes, int *firstFlag=NULL);
+    void vmk_ipshmdeallocate(void *);
+
+    // IntraProcessMutex Methods
+    vmk_ipmutex *vmk_ipmutexallocate(void);
+    void vmk_ipmutexdeallocate(vmk_ipmutex *ipmutex);
+    int vmk_ipmutexlock(vmk_ipmutex *ipmutex);
+    int vmk_ipmutexunlock(vmk_ipmutex *ipmutex);
 
   // friend classes
   friend class ESMC_VMKPlan;
