@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.28 2005/05/17 18:22:05 theurich Exp $
+! $Id: user_model1.F90,v 1.29 2006/03/20 22:40:44 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -120,7 +120,7 @@
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! and get our local de number
-        call ESMF_DELayoutGet(delayout, localDE=de_id, rc=status)
+        call ESMF_DELayoutGetDeprecated(delayout, localDE=de_id, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         print *, de_id, "User Comp 1 Init starting"

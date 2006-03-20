@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.23 2005/10/12 19:06:23 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.24 2006/03/20 22:40:44 theurich Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -331,7 +331,7 @@
         print *, "ERROR in Flowinit:  grid comp get"
         return
       endif
-      call ESMF_DELayoutGet(layout, localDE=de_id, deCountPerDim=ncounts, &
+      call ESMF_DELayoutGetDeprecated(layout, localDE=de_id, deCountPerDim=ncounts, &
                                rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get size"
@@ -1387,7 +1387,7 @@
 !
       call ESMF_GridCompGet(gcomp, grid=grid, rc=status)
       call ESMF_GridGet(grid, delayout=layout, rc=status)
-      call ESMF_DELayoutGet(layout, localDe=de_id, rc=status)
+      call ESMF_DELayoutGetDeprecated(layout, localDe=de_id, rc=status)
 !
 ! Frame number from computation
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.36 2006/02/02 02:00:08 theurich Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.37 2006/03/20 22:40:44 theurich Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -378,7 +378,7 @@
       if (verbose) print *, "Grid Create returned"
 
       ! Figure out our local processor id to use as data in the Field.
-      call ESMF_DELayoutGet(layout1, localDe=pe_id, rc=rc)
+      call ESMF_DELayoutGetDeprecated(layout1, localDe=pe_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Create an arrayspec for a 2-D array 
@@ -669,7 +669,7 @@
       if (verbose) print *, "name back from field"
 
       ! Get our pe_id from layout
-      call ESMF_DELayoutGet(layout, localDe=pe_id, rc=rc)
+      call ESMF_DELayoutGetDeprecated(layout, localDe=pe_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 40
 
       ! Get a pointer to the start of the data
@@ -685,8 +685,7 @@
 
       ! get info about total number of DEs in each dim and which one
       ! we are.  then use them to compute the values in the halo.
-      !call ESMF_DELayoutGetSize(layout, nx, ny, rc)
-      call ESMF_DELayoutGet(layout, deCountPerDim=ncount, rc=rc)
+      call ESMF_DELayoutGetDeprecated(layout, deCountPerDim=ncount, rc=rc)
       nx = ncount(1)
       ny = ncount(2)
       if (rc .ne. ESMF_SUCCESS) goto 40

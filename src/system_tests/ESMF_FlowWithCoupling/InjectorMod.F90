@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.23 2006/02/17 06:17:25 theurich Exp $
+! $Id: InjectorMod.F90,v 1.24 2006/03/20 22:40:45 theurich Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -458,7 +458,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       !
       call ESMF_GridCompGet(gcomp, grid=grid, rc=status)
       call ESMF_GridGet(grid, delayout=layout, rc=status)
-      call ESMF_DELayoutGet(layout, localDe=de_id, rc=status)
+      call ESMF_DELayoutGetDeprecated(layout, localDe=de_id, rc=status)
       !
       ! Collect results on DE 0 and output to a file
       !

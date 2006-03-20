@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.31 2005/03/03 22:16:55 nscollins Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.32 2006/03/20 22:40:44 theurich Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -236,7 +236,7 @@
 !-------------------------------------------------------------------------
 !   Print result
 
-    call ESMF_DELayoutGet(delayout1, localDE=my_de, rc=rc)
+    call ESMF_DELayoutGetDeprecated(delayout1, localDE=my_de, rc=rc)
 
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.19 2005/05/17 18:22:07 theurich Exp $
+! $Id: user_model1.F90,v 1.20 2006/03/20 22:40:46 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -123,7 +123,7 @@
         if (status .ne. ESMF_SUCCESS) goto 10
         
         ! and get our local de number
-        call ESMF_DELayoutGet(layout, localDE=de_id, rc=status)
+        call ESMF_DELayoutGetDeprecated(layout, localDE=de_id, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Add a "humidity" field to the export state.

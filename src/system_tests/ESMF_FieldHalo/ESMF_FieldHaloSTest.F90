@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.39 2006/02/02 02:00:08 theurich Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.40 2006/03/20 22:40:44 theurich Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -280,7 +280,7 @@
       print *, "Grid Create returned"
 
       ! Figure out our local processor id to use as data in the Field.
-      call ESMF_DELayoutGet(delayout1, localDE=de_id, rc=rc)
+      call ESMF_DELayoutGetDeprecated(delayout1, localDE=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Create an arrayspec for a 2-D array 
@@ -430,7 +430,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! get our local de number from the layout
-      call ESMF_DELayoutGet(delayout, localDE=de_id, rc=rc)
+      call ESMF_DELayoutGetDeprecated(delayout, localDE=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get a pointer to the data Array in the Field
@@ -452,7 +452,7 @@
 
       ! get info about total number of DEs in each dim and which one
       ! we are.  then use them to compute the values in the halo.
-      call ESMF_DELayoutGet(delayout, deCountPerDim=nDE, rc=rc)
+      call ESMF_DELayoutGetDeprecated(delayout, deCountPerDim=nDE, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       nx = nDE(1)
       ny = nDE(2)

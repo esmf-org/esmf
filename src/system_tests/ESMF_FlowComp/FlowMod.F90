@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.16 2005/05/17 18:22:06 theurich Exp $
+! $Id: FlowMod.F90,v 1.17 2006/03/20 22:40:44 theurich Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -90,7 +90,7 @@
       if (rc .ne. ESMF_SUCCESS) return
 
       ! and get our local de number
-      call ESMF_DELayoutGet(layout, localDE=myde, rc=rc)
+      call ESMF_DELayoutGetDeprecated(layout, localDE=myde, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
 
 !
@@ -211,8 +211,7 @@
         print *, "ERROR in Flowinit:  grid get"
         return
       endif
-      !call ESMF_DELayoutGetSize(layout, nx, ny, rc)
-      call ESMF_DELayoutGet(layout, localDE=de_id, deCountPerDim=ncounts, rc=rc)
+      call ESMF_DELayoutGetDeprecated(layout, localDE=de_id, deCountPerDim=ncounts, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get size"
         return
@@ -935,7 +934,7 @@
       ! Collect results on DE 0 and output to a file
       call ESMF_GridCompGet(gcomp, grid=grid, rc=rc)
       call ESMF_GridGet(grid, delayout=layout, rc=rc)
-      call ESMF_DELayoutGet(layout, localDe=de_id, rc=rc)
+      call ESMF_DELayoutGetDeprecated(layout, localDe=de_id, rc=rc)
 
       ! Frame number from computation
       call ESMF_ClockGet(clock, advanceCount=frame, rc=rc)

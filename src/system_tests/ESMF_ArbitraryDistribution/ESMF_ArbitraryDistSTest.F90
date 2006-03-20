@@ -1,4 +1,4 @@
-! $Id: ESMF_ArbitraryDistSTest.F90,v 1.2 2005/10/12 19:06:22 nscollins Exp $
+! $Id: ESMF_ArbitraryDistSTest.F90,v 1.3 2006/03/20 22:40:44 theurich Exp $
 !
 ! System test ArbitraryDistribution
 !  Description on Sourceforge under System Test #XXXXX
@@ -107,7 +107,7 @@
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! and get our local DE number on the first layout
-     call ESMF_DELayoutGet(delayout1, localDE=myDE, rc=status)
+     call ESMF_DELayoutGetDeprecated(delayout1, localDE=myDE, rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Create the grids and corresponding Fields
@@ -277,7 +277,7 @@
 !-------------------------------------------------------------------------
 !   Print result
 
-    call ESMF_DELayoutGet(delayout1, localDE=myDE, rc=status)
+    call ESMF_DELayoutGetDeprecated(delayout1, localDE=myDE, rc=status)
 
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"

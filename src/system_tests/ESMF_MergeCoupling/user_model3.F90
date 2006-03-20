@@ -1,4 +1,4 @@
-! $Id: user_model3.F90,v 1.12 2005/11/23 20:04:46 jwolfe Exp $
+! $Id: user_model3.F90,v 1.13 2006/03/20 22:40:46 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -135,7 +135,7 @@
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Figure out our local processor id
-        call ESMF_DELayoutGet(layout, localDe=de_id, rc=rc)
+        call ESMF_DELayoutGetDeprecated(layout, localDe=de_id, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set up a 2D integer array
