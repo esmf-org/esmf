@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.51 2006/03/20 21:53:30 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.52 2006/03/20 22:58:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -130,7 +130,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.51 2006/03/20 21:53:30 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.52 2006/03/20 22:58:50 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -150,7 +150,8 @@ module ESMF_DELayoutMod
       module procedure ESMF_DELayoutCreateFromPetMap
       module procedure ESMF_DELayoutCreateDefault
       module procedure ESMF_DELayoutCreateHintWeights
-      module procedure ESMF_DELayoutCreateND            ! deprecated
+      
+      module procedure ESMF_DELayoutCreateDeprecated
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -526,17 +527,17 @@ end function
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DELayoutCreateND()"
+#define ESMF_METHOD "ESMF_DELayoutCreateDeprecated()"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutCreate - Create N-dimensional logically rectangular DELayout
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
-  function ESMF_DELayoutCreateND(vm, deCountList, petList, &
+  function ESMF_DELayoutCreateDeprecated(vmObject, deCountList, petList, &
     connectionWeightDimList, cyclicFlagDimList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),      intent(in)              :: vm
+    type(ESMF_VM),      intent(in)              :: vmObject
     integer, target,    intent(in),   optional  :: deCountList(:)
     integer, target,    intent(in),   optional  :: petList(:)
     integer,            intent(in),   optional  :: connectionWeightDimList(:)
@@ -544,7 +545,7 @@ end function
     integer,            intent(out),  optional  :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_DELayout) :: ESMF_DELayoutCreateND
+    type(ESMF_DELayout) :: ESMF_DELayoutCreateDeprecated
 !
 ! !DESCRIPTION:
 !     Create an N-dimensional, logically rectangular {\tt ESMF\_DELayout}.
@@ -595,7 +596,7 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[vm] 
+!     \item[vmObject] 
 !          {\tt ESMF\_VM} object of the current component in which the 
 !          {\tt ESMF\_DELayout} object shall operate.
 !     \item[{[deCountList]}] 
@@ -647,7 +648,7 @@ end function
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutCreateND(delayout, vm, opt_deCountList, &
+    call c_ESMC_DELayoutCreateND(delayout, vmObject, opt_deCountList, &
       len_deCountList, opt_petList, len_petList, localrc)
 
     ! Use LogErr to handle return code
@@ -655,9 +656,9 @@ end function
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! set return value
-    ESMF_DELayoutCreateND = delayout 
+    ESMF_DELayoutCreateDeprecated = delayout 
  
-  end function ESMF_DELayoutCreateND
+  end function ESMF_DELayoutCreateDeprecated
 !------------------------------------------------------------------------------
 
 
