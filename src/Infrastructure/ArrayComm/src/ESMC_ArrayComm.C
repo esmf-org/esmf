@@ -1,4 +1,4 @@
-// $Id: ESMC_ArrayComm.C,v 1.20 2006/01/26 23:10:28 nscollins Exp $
+// $Id: ESMC_ArrayComm.C,v 1.21 2006/03/20 22:04:02 theurich Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_ArrayComm.C,v 1.20 2006/01/26 23:10:28 nscollins Exp $";
+            "$Id: ESMC_ArrayComm.C,v 1.21 2006/03/20 22:04:02 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -130,11 +130,14 @@ static int ESMC_newDELayoutGatherArray(
   int i, j, k, l, m;     // general counter vars
 
   // get layout size
-  int nx, ny, nde, ncount[2], thisde;
-  delayout->ESMC_DELayoutGet(&nde, NULL, NULL, NULL, 0, &thisde,
+  int nx, ny, nde, ncount[2];
+
+  // TODO: remove dependency on deprecated DELayout  
+  delayout->ESMC_DELayoutGetDeprecated(&nde, NULL, NULL, NULL, 0, NULL,
                             NULL, NULL, ncount, 2);
   nx = ncount[0];
   ny = ncount[1];
+  
   int rankx, ranky;
   int bytesperitem = ESMC_DataKindSize(datatype);
  
@@ -218,8 +221,8 @@ static int ESMC_newDELayoutGatherArray(
             
           }
           // call layout gather routine
-          delayout->ESMC_DELayoutGatherV((void **)sendbuf, (void **)recvbuf, recvcounts, 
-                                         displs, datatype, root, ESMF_TRUE);
+          delayout->ESMC_DELayoutGatherV((void *)sendbuf, (void *)recvbuf,
+            recvcounts, displs, datatype, root);
           //comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
           //                         displs, datatype);
         }
@@ -371,7 +374,8 @@ static int ESMC_newDELayoutGatherArray(
       counts[i] = global_dimlengths[i];
     }
 
-    delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, 0, &thisde,
+    // TODO: remove dependency on deprecated DELayout  
+    delayout->ESMC_DELayoutGetDeprecated(NULL, NULL, NULL, NULL, 0, &thisde,
                                   NULL, NULL, NULL, 0);
 
     // create array with global data buffer
@@ -457,7 +461,8 @@ static int ESMC_newDELayoutGatherArray(
       counts[i] = ai_comp[i].max;
     }
 
-    delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, 0, &thisde,
+    // TODO: remove dependency on deprecated DELayout
+    delayout->ESMC_DELayoutGetDeprecated(NULL, NULL, NULL, NULL, 0, &thisde,
                                   NULL, NULL, NULL, 0);
 
     // switch based on datatype  TODO: this might be a good place to use templates

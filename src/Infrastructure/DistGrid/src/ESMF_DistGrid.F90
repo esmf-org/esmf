@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.144 2005/11/04 21:52:52 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.145 2006/03/20 22:05:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -220,7 +220,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.144 2005/11/04 21:52:52 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.145 2006/03/20 22:05:55 theurich Exp $'
 
 !==============================================================================
 !
@@ -794,7 +794,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Allocate resources based on number of DE's
-      call ESMF_DELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
+      call ESMF_DELayoutGetDeprecated(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
                             logRectFlag=lrFlag, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -819,7 +819,7 @@
       !                              ESMF_CONTEXT, rc)
       !   return
       ! endif
-      call ESMF_DELayoutGet(delayout, deCountPerDim=nDEs(1:2), rc=localrc)
+      call ESMF_DELayoutGetDeprecated(delayout, deCountPerDim=nDEs(1:2), rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1014,7 +1014,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Allocate resources based on number of DE's
-      call ESMF_DELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
+      call ESMF_DELayoutGetDeprecated(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
                             logRectFlag=lrFlag, deCount=nDEs, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1864,11 +1864,11 @@
       ! Allocate resources based on number of DE's
 
       ! first, query the delayout for information
-      call ESMF_DELayoutGet(delayout, deCount=nDEs, localDe=myDE, rc=localrc)
+      call ESMF_DELayoutGetDeprecated(delayout, deCount=nDEs, localDe=myDE, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_DELayoutGetVM(delayout, vm, localrc)
+      call ESMF_DELayoutGet(delayout, vm=vm, rc=localrc)
  
       ! collective call to gather count from all DEs
       do j     = 1,nDEs
@@ -2029,7 +2029,7 @@
       ! Initialize return code; assume failure until success is certain
       rc = ESMF_FAILURE
 
-      call ESMF_DELayoutGet(dgtype%delayout, localDe=localDE, &
+      call ESMF_DELayoutGetDeprecated(dgtype%delayout, localDe=localDE, &
                             deCountPerDim=deCountPerDim, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2122,7 +2122,7 @@
       ! Initialize return code; assume failure until success is certain
       rc = ESMF_FAILURE
 
-      call ESMF_DELayoutGet(dgtype%delayout, localDe=myDE, rc=localrc)
+      call ESMF_DELayoutGetDeprecated(dgtype%delayout, localDe=myDE, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2352,8 +2352,7 @@
                                      ESMF_CONTEXT, rc)) return
 
       ! first get the appropriate VM
-      call ESMF_DELayoutGetVM(dgtype%delayout, vm, localrc)
-      call ESMF_DELayoutGet(dgtype%delayout, deCount=nDEs, rc=localrc)
+      call ESMF_DELayoutGet(dgtype%delayout, vm=vm, deCount=nDEs, rc=localrc)
       call ESMF_VMGet(vm, localPet=myDE, rc=localrc)   ! fix this
 
       i1    = 0

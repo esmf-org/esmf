@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.82 2006/01/23 21:31:29 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.83 2006/03/20 22:04:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -79,7 +79,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.82 2006/01/23 21:31:29 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.83 2006/03/20 22:04:01 theurich Exp $'
 !
 !==============================================================================
 !
@@ -382,8 +382,13 @@
  
     ! extract necessary information from the grid
     call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, rc=status)
-    call ESMF_DELayoutGet(delayout, deCount=nDEs, dimCount=size_decomp, &
-      rc=status)
+    
+    call ESMF_DELayoutGetDeprecated(delayout, deCount=nDEs, &
+      dimCount=size_decomp, rc=status)
+    
+    ! gjt size_decomp can be hardcoded to 2 here because that what it had to be
+    
+      
     allocate(localAxisLengths(nDEs,ESMF_MAXDIM), stat=status)
     allocate( tempMLCCPD(     gridrank), stat=status)
     allocate(  tempGCCPD(     gridrank), stat=status)
@@ -548,7 +553,7 @@
       call ESMF_ArrayGet(array, rank=datarank, rc=localrc)
       call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, &
                         rc=localrc)
-      call ESMF_DELayoutGet(delayout, nDEs, rc=localrc)
+      call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=localrc)
 
       ! check if the AI array pointer is associated
       !  -  If it is, check that it is right size to hold the requested data.
@@ -753,7 +758,7 @@
       call ESMF_ArrayGet(array, rank=datarank, rc=status)
       call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, &
                         gridStorage=gridStorage, rc=status)
-      call ESMF_DELayoutGet(delayout, nDEs, rc=status)
+      call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=status)
 
       ! allocate dimOrder array and get from datamap
       maxrank = max(datarank, gridrank)
@@ -1297,10 +1302,9 @@
       
       ! Get the current VM context
       call ESMF_VMGetCurrent(vm, rc)
-      !call ESMF_DELayoutGetVM(delayout, vm, rc=status)
 
       ! Our DE number in the layout and the total number of DEs
-      call ESMF_DELayoutGet(delayout, deCount=nDEs, localDE=my_DE, rc=status)
+      call ESMF_DELayoutGetDeprecated(delayout, deCount=nDEs, localDE=my_DE, rc=status)
 
       ! Allocate temporary arrays
       allocate(periodic(gridrank), stat=status)
@@ -2196,9 +2200,9 @@
       endif
 
       ! Our DE number in the layout and the total number of DEs
-      call ESMF_DELayoutGet(dstDElayout, deCount=dstDEs,  &
+      call ESMF_DELayoutGetDeprecated(dstDElayout, deCount=dstDEs,  &
                             localDE=myDstDE, rc=status)
-      call ESMF_DELayoutGet(srcDElayout, deCount=srcDEs, &
+      call ESMF_DELayoutGetDeprecated(srcDElayout, deCount=srcDEs, &
                             localDE=mySrcDE, rc=status)
 
       ! And get the Array sizes
@@ -2496,9 +2500,9 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Our DE number in the layout and the total number of DEs
-      call ESMF_DELayoutGet(dstDElayout, deCount=dstDEs,  &
+      call ESMF_DELayoutGetDeprecated(dstDElayout, deCount=dstDEs,  &
                             localDE=dstMyDE, rc=status)
-      call ESMF_DELayoutGet(srcDElayout, deCount=srcDEs, &
+      call ESMF_DELayoutGetDeprecated(srcDElayout, deCount=srcDEs, &
                             localDE=srcMyDE, rc=status)
 
       if (dstCount .gt. 0) then
