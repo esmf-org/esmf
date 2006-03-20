@@ -1,18 +1,5 @@
-% $Id: DELayout_implnotes.tex,v 1.2 2004/06/09 13:31:33 theurich Exp $
+% $Id: DELayout_implnotes.tex,v 1.3 2006/03/20 21:53:29 theurich Exp $
 
 %\subsection{Design and Implementation Notes}
 
-The DELayout class stores information about the DEs and their connectivity, thus holding an abstraction of the computational problem. Furthermore a DELayout object holds DE-to-PET mapping info, which maps {\it every} DE to {\it exactly one} PET of the underlying VM. The DELayout is associated with the VM of the context in which the DELayout was created.
-
-%\begin{center}
-%\scalebox{0.6}{\includegraphics{VM_design.eps}}
-%\end{center}
-
-
-%{\bf Definition of terms used in the diagram}
-
-%\begin{itemize}
-
-%\item DE: Decomposition element.
-
-%\end{itemize}
+The DELayout class is a light weight object. It stores the DE to PET and VAS mapping for all DEs within all PET instances and a list of local DEs for each PET instance. The DELayout does not store the computational and communication weights optionally provided as arguments to the create method. These hints are only used during create while they are available in user owned arrays.

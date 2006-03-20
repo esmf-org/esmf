@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.25 2005/06/21 19:26:14 theurich Exp $
+// $Id: ESMC_DELayout_F.C,v 1.26 2006/03/20 21:53:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -41,16 +41,53 @@ extern "C" {
 
   // - ESMF-public methods:
 
-  void FTN(c_esmc_delayoutcreate)(ESMC_DELayout **ptr, ESMC_VM **vm,
-    int *deCountList, int *len_deCountList, int *petList, int *len_petList,
+  void FTN(c_esmc_delayoutcreatefrompetmap)(ESMC_DELayout **ptr, int *petMap, 
+    int *petMapCount, ESMC_DePinFlag *dePinFlag, ESMC_VM **vm, int *rc){
+    int localrc;
+    ESMC_VM *opt_vm;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutcreatefrompetmap()"
+    // deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
+    else opt_vm = *vm;
+    // call into C++
+    *ptr = ESMC_DELayoutCreate(petMap, *petMapCount,
+      ESMC_NOT_PRESENT_FILTER(dePinFlag), 
+      opt_vm, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_delayoutcreatedefault)(ESMC_DELayout **ptr, int *deCount,
+    int *deGrouping, int *deGroupingCount, ESMC_DePinFlag *dePinFlag, 
+    int *petList, int *petListCount, ESMC_VM **vm, int *rc){
+    int localrc;
+    ESMC_VM *opt_vm;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutcreatedefault()"
+    // deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
+    else opt_vm = *vm;
+    // call into C++
+    *ptr = ESMC_DELayoutCreate(
+      ESMC_NOT_PRESENT_FILTER(deCount), 
+      deGrouping, *deGroupingCount, 
+      ESMC_NOT_PRESENT_FILTER(dePinFlag),
+      petList, *petListCount, opt_vm, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_delayoutcreatend)(ESMC_DELayout **ptr, ESMC_VM **vm,
+    int *deCountList, int *deCountListCount, int *petList, int *petListCount,
     int *rc){
     int localrc;
     ESMC_Logical cyclic = ESMF_TRUE;  // TODO: fix API
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_delayoutcreate()"
-    *ptr = ESMC_DELayoutCreate(**vm, deCountList, *len_deCountList, petList,
-      *len_petList, &cyclic, &localrc);
-    // Use LogErr to handle return code
+#define ESMC_METHOD "c_esmc_delayoutcreatend()"
+    // call into C++
+    *ptr = ESMC_DELayoutCreate(**vm, deCountList, *deCountListCount, petList,
+      *petListCount, &cyclic, &localrc);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -58,31 +95,48 @@ extern "C" {
   void FTN(c_esmc_delayoutdestroy)(ESMC_DELayout **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutdestroy()"
-    // Call into the actual C++ method wrapped inside LogErr handling
+    // call into C++
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_DELayoutDestroy(ptr),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
-       
-  void FTN(c_esmc_delayoutgetvm)(ESMC_DELayout **ptr, ESMC_VM **vm, int *rc){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_delayoutgetvm()"
-    // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetVM(
-      vm),
-      ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(rc));  
-}
 
-  void FTN(c_esmc_delayoutget)(ESMC_DELayout **ptr,
+  void FTN(c_esmc_delayoutget)(ESMC_DELayout **ptr, ESMC_VM **vm,
+    int *deCount, int *petMap, int *petMapCount, int *vasMap,
+    int *vasMapCount, ESMC_Logical *oneToOneFlag, ESMC_DePinFlag *dePinFlag,
+    int *localDeCount, int *localDeList, int *localDeListCount,
+    int *vasLocalDeCount, int *vasLocalDeList, int *vasLocalDeListCount, 
+    int *rc){
+    ESMC_VM **opt_vm;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutget()"
+    // deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
+    else opt_vm = vm;
+    // call into C++, dealing with optional arguments 
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGet(
+      opt_vm,
+      ESMC_NOT_PRESENT_FILTER(deCount),
+      petMap, *petMapCount, vasMap, *vasMapCount,
+      ESMC_NOT_PRESENT_FILTER(oneToOneFlag),
+      ESMC_NOT_PRESENT_FILTER(dePinFlag),
+      ESMC_NOT_PRESENT_FILTER(localDeCount),
+      localDeList, *localDeListCount, 
+      ESMC_NOT_PRESENT_FILTER(vasLocalDeCount),
+      vasLocalDeList, *vasLocalDeListCount), 
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_delayoutgetdeprecated)(ESMC_DELayout **ptr,
     int *deCount, int *dimCount, int *localDeCount, int *localDeList,
     int *len_localDeList, int *localDe, ESMC_Logical *oneToOneFlag, 
     ESMC_Logical *logRectFlag, int *deCountPerDim, int *len_deCountPerDim,
     int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_delayoutget()"
-    // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGet(
+#define ESMC_METHOD "c_esmc_delayoutgetdeprecated()"
+    // call into C++
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetDeprecated(
       ESMC_NOT_PRESENT_FILTER(deCount), 
       ESMC_NOT_PRESENT_FILTER(dimCount), 
       ESMC_NOT_PRESENT_FILTER(localDeCount),
@@ -93,6 +147,16 @@ extern "C" {
       deCountPerDim, *len_deCountPerDim),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_delayoutgetvm)(ESMC_DELayout **ptr, ESMC_VM **vm, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutgetvm()"
+    // call into C++
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetVM(
+      vm),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));  
   }
 
   void FTN(c_esmc_delayoutgetdelocalinfo)(ESMC_DELayout **ptr,
@@ -113,7 +177,7 @@ extern "C" {
     int *DEid, ESMC_DELayout **ptrMatch, int *deMatchCount, int *deMatchList,
     int *len_deMatchList, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_delayoutgetdematch()"
+#define ESMC_METHOD "c_esmc_delayoutgetdematchde()"
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetDEMatchDE(
       *DEid, **ptrMatch, 
@@ -127,7 +191,7 @@ extern "C" {
     int *DEid, ESMC_VM **ptrMatch, int *petMatchCount, int *petMatchList,
     int *len_petMatchList, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_delayoutgetdematch()"
+#define ESMC_METHOD "c_esmc_delayoutgetdematchpet()"
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetDEMatchPET(
       *DEid, **ptrMatch, 
@@ -155,132 +219,42 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  // - ESMF-private methods:
-       
-  void FTN(c_esmc_delayoutallfullreduce)(ESMC_DELayout **ptr, 
-    void ***datain, void *result, int *len, ESMC_DataKind *dtk,
-    ESMC_Operation *op, ESMC_Logical *oneToOneFlag, int *rc){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_delayoutallfullreduce()"
+  
+
+  
+  void FTN(c_esmc_delayoutserviceoffer)(ESMC_DELayout **ptr, int *de,
+    ESMC_DELayoutServiceReply *reply, int *rc){
     int localrc;
-    if (*oneToOneFlag == ESMF_TRUE){
-      localrc = (*ptr)->ESMC_DELayoutAllFullReduce((void **)datain, result,
-        *len, *dtk, *op, *oneToOneFlag);
-    }else{
-      localrc = (*ptr)->ESMC_DELayoutAllFullReduce(*datain, result,
-        *len, *dtk, *op, *oneToOneFlag);
-    }
-    // Use LogErr to handle return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(rc));
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutserviceoffer()"
+    // call into C++
+    *reply = (*ptr)->ESMC_DELayoutServiceOffer(*de, &localrc);
+//TODO: enable LogErr once it is thread-safe
+    *rc=localrc;  
+//    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+//      ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_delayoutcopy)(ESMC_DELayout **ptr,
-    void ***datain, void ***dataout, int *blen, int *src, int *dest,
-    ESMC_Logical *oneToOneFlag, int *rc){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_delayoutcopy()"
-    int localrc;
-    if (*oneToOneFlag == ESMF_TRUE){
-      localrc = (*ptr)->ESMC_DELayoutCopy((void **)datain, (void **)dataout,
-        *blen, *src, *dest, *oneToOneFlag);
-    }else{
-      localrc = (*ptr)->ESMC_DELayoutCopy(*datain, *dataout, *blen,
-        *src, *dest, *oneToOneFlag);
-    }
-    // Use LogErr to handle return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(rc));
-  }
-  
-  void FTN(c_esmc_delayoutexchange)(ESMC_DELayout **ptr,
-    void ***datain1, void ***datain2, void ***dataout1, void ***dataout2, 
-    int *blen1, int *blen2, int *de1, int *de2,
-    ESMC_Logical *oneToOneFlag, int *rc){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_delayoutexchange()"
-    int localrc;
-    if (*oneToOneFlag == ESMF_TRUE){
-      localrc = (*ptr)->ESMC_DELayoutExchange((void **)datain1, 
-        (void **)datain2, (void **)dataout1, (void **)dataout2,
-        *blen1, *blen2, *de1, *de2, *oneToOneFlag);
-    }else{
-      localrc = (*ptr)->ESMC_DELayoutExchange(*datain1, *datain2, *dataout1,
-        *dataout2, *blen1, *blen2, *de1, *de2, *oneToOneFlag);
-    }
-    // Use LogErr to handle return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(rc));
-  }
-  
-  void FTN(c_esmc_delayoutgather)(ESMC_DELayout **ptr,
-    void ***datain, void ***dataout, int *blen, int *root, 
-    ESMC_Logical *oneToOneFlag, int *rc){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_delayoutgather()"
-    int localrc;
-    if (*oneToOneFlag == ESMF_TRUE){
-      localrc = (*ptr)->ESMC_DELayoutGather((void **)datain, 
-        (void **)dataout, *blen, *root, *oneToOneFlag);
-    }else{
-      localrc = (*ptr)->ESMC_DELayoutGather(*datain, *dataout, *blen,
-        *root, *oneToOneFlag);
-    }
-    // Use LogErr to handle return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(rc));
-  }
 
-  void FTN(c_esmc_delayoutscatter)(ESMC_DELayout **ptr,
-    void ***datain, void ***dataout, int *blen, int *root, 
-    ESMC_Logical *oneToOneFlag, int *rc){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_delayoutscatter()"
-    int localrc;
-    if (*oneToOneFlag == ESMF_TRUE){
-      localrc = (*ptr)->ESMC_DELayoutScatter((void **)datain, 
-        (void **)dataout, *blen, *root, *oneToOneFlag);
-    }else{      
-      localrc = (*ptr)->ESMC_DELayoutScatter(*datain, *dataout, *blen,
-        *root, *oneToOneFlag);
-    }
-    // Use LogErr to handle return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(rc));
-  }
-  
-  void FTN(c_esmc_delayoutdatacreate)(void ***ptr, int *n, int *rc){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_delayoutdatacreate()"
-    int localrc;
-    *ptr = ESMC_DELayoutDataCreate(*n, &localrc);
-    // Use LogErr to handle return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(rc));
-  }
-  
-  void FTN(c_esmc_delayoutdataadd)(void ***ptr, void *a, int *index, 
+  void FTN(c_esmc_delayoutservicecomplete)(ESMC_DELayout **ptr, int *de,
     int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_delayoutdataadd()"
-    // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError(
-      ESMC_DELayoutDataAdd(*ptr, a, *index-1),
-      ESMF_ERR_PASSTHRU,
-      ESMC_NOT_PRESENT_FILTER(rc));
-  }
-
-  void FTN(c_esmc_delayoutdatadestroy)(void ***ptr, int *rc){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_delayoutdatadestroy()"
-    // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError(
-      ESMC_DELayoutDataDestroy(*ptr),
+#define ESMC_METHOD "c_esmc_delayoutservicecomplete()"
+    // call into C++
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutServiceComplete(
+      *de),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-
+  
+  
+  
+  
+  
+  
+    
+  
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutserialize"

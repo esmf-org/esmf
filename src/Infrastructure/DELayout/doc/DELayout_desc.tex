@@ -1,62 +1,14 @@
-% $Id: DELayout_desc.tex,v 1.9 2005/11/30 23:30:17 theurich Exp $
+% $Id: DELayout_desc.tex,v 1.10 2006/03/20 21:53:29 theurich Exp $
 
-The DELayout class provides an additional layer of abstraction on top of the
-Virtual Machine (VM) layer. There are three key aspects the DELayout class deals
-with.
+The DELayout class provides an additional layer of abstraction on top of the Virtual Machine (VM) layer. DELayout does this by introducing DEs (Decomposition Elements) as logical resource units. The DELayout object keeps track of the relationship between its DEs and the resources of the associated VM object. 
 
-\begin{enumerate}
+The relationship between DEs and VM resources (PETs (Persistent Execution Threads) and VASs (Virtual Address Spaces)) contained in a DELayout object is defined during its creation and cannot be changed thereafter. There are, however, a number of hint and specification arguments that can be used to shape the DELayout during its creation.
 
-\item Problem decomposition via logical Decomposition Elements (DEs).
+Contrary to the number of PETs and VASs contained in a VM object which are fixed by the available resources the number of DEs contained in a DELayout can be chosen freely to best match the computational problem or other design criteria. Creating a DELayout with less DEs than there are PETs in the associated VM object can be used to share resources between decomposed objects within an ESMF component. Creating a DELayout with more DEs than there are PETs in the associated VM object can be used to evenly partition the computation over the available resources.
 
-\item Support of load balancing in terms of computational and connection weights
-on and between the DEs. 
+The simplest case, however, is where the DELayout contains the same number of DEs as there are PETs in the associated VM context. In this case the DELayout may be used to re-label the hardware and operating system resources held by the VM. For instance, it is possible to order the resources so that specific DEs have best available communication paths. The DELayout will map the DEs to the PETs of the VM according to the resource details provided by the VM instance. 
 
-\item Mapping of the logical problem decomposition onto an ESMF Virtual Machine.
+Furthermore, general DE to PET mapping can be used to offer computational resources with finer granularity than the VM does. The DELayout can be queried for computational and communication capacities of DEs and DE pairs, respectively. This information can be used to best utilize the DE resources when partitioning the computational problem. In combination with other ESMF classes general DE to PET mapping can be used to realize cache blocking, communication hiding and dynamic load balancing.
 
-\end{enumerate}
+Finally, the DELayout layer offers primitives that allow a work queue style dynamic load balancing between DEs.
 
-It is critical to understand that {\it no} user data is associated with DELayout
-objects! DELayouts are {\it control} objects which store important decomposition
-information and provide crucial functionality to ESMF applications with respect
-to various aspects of logical problem decomposition. Data objects, such as
-Arrays and Fields, which hold user data, rely in the implementation of their
-methods on the DELayout class to provide this decomposition functionality.
-
-The application writer uses the DELayout to specify the decomposition of the
-computational problem in terms of logical Decomposition Elements (DEs). From an
-ESMF perspective the DEs are the smallest units of decomposition. DEs are
-logical units, not necessarily having a 1-to-1 correspondence to the Persistent
-Execution threads (PETs) of a VM or their physical Processing Elements (PEs) in
-the underlying physical machine. Consequently there are no restrictions on the
-number of DEs posed by the VM or the available physical machine resources.
-Hence, the application writer may chose the number of DEs to best match the
-computational problem and the employed algorithm.
-
-A DELayout object not only keeps track of the number of DEs into which a problem
-is decomposed, but furthermore allows the user to specify a problem topology by
-means of computational weights on each DE and connection weights between DEs.
-Both types of weights are relative measures, meaningful only for comparison
-{\it within} the same DELayout object. The purpose of these weights is to 
-provide load balancing information and to allow for a best possible DE-to-PET 
-mapping of a DELayout onto the component's VM.
-
-It is possible for the application writer to overwrite the framework's DE-to-PET
-mapping. This allows for user level load balancing schemes and offers an entry
-point for user codes that already deal with the issue of mapping the
-{\em computational problem topology} onto the {\em resource topology}.
-
-In a typical ESMF application direct interaction with the DELayout class is
-minimal. This is reflected by the small number of methods in the DELayout API.
-Besides the {\tt ESMF\_DELayoutCreate()} and {\tt ESMF\_DELayoutDestroy()}
-methods there are three types of {\tt ESMF\_DELayoutGet} methods. After creating
-a DELayout the application writer will use the get methods to find out general
-information, such as number of DEs and dimensionality of the decomposition. More
-importantly though, because it is unknown until the DELayout has been created, is the {\it PET-local} information that is provided by the DELayout Get methods.
-Having obtained PET specific information about the decomposition each running
-user thread can take appropriate steps in facilitating the decomposition within
-its local PET.
-
-Notice that a single ESMF component may contain multiple DELayouts, all of which
-may describe the decomposition of different computational problems or different
-compositions of the same computational problem. However, all DELayouts within a
-component map onto the same VM instance of the component.
