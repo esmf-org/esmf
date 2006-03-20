@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/06/07 17:07:19 slswift Exp $
+# $Id: makefile,v 1.3 2006/03/20 20:13:19 tjcnrl Exp $
 
 ALL: build_here 
 
@@ -6,7 +6,7 @@ CFLAGS    =
 FFLAGS    =
 
 SOURCEC	  = 
-SOURCEF	  = netcdf_stub.F
+SOURCEF	  = netcdf_stub.f90
 SOURCEH	  = netcdf.inc
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

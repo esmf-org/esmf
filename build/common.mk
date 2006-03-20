@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155 2006/03/09 18:28:10 nscollins Exp $
+#  $Id: common.mk,v 1.156 2006/03/20 20:13:18 tjcnrl Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2235,11 +2235,10 @@ endif
 
 .F.o:
 	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
-           $(F_FREENOCPP) $<
+           $(F_FIXCPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $<
 
 .f90.o:
-	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
-           $(F_FIXCPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $<
+	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) $(F_FREENOCPP) $<
 
 .f.o:
 	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) $(F_FIXNOCPP) $<
@@ -2258,13 +2257,12 @@ endif
 
 .F.a:
 	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
-           $(F_FREENOCPP) $<
+           $(F_FIXCPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $<
 	$(AR) $(AR_FLAGS) $(LIBNAME) $*.o
 	$(RM) $*.o
 
 .f90.a:
-	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
-           $(F_FIXCPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $<
+	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) $(F_FREENOCPP) $<
 	$(AR) $(AR_FLAGS) $(LIBNAME) $*.o
 	$(RM) $*.o
 

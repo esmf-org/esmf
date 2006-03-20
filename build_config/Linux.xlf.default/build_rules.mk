@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.5 2005/04/11 15:53:38 nscollins Exp $
+#  $Id: build_rules.mk,v 1.6 2006/03/20 20:13:19 tjcnrl Exp $
 #
 #  Linux.xlf.default - which currently means Blue Gene L
 #   which is the only semi-Linux platform which runs xlf.
@@ -66,9 +66,9 @@ NO_INLINING		= -Q
 NO_LINE_DIRECTIVES	= -P
 
 FPP_PREFIX		= -WF,
-F_FREECPP               = -qsuffix=cpp=F90
-F_FIXCPP                = -qfixed=132 -qsuffix=cpp=f90
-F_FREENOCPP             = -qsuffix=f=F
+F_FREECPP               = -qfree=f90 -qsuffix=cpp=F90
+F_FIXCPP                = -qfixed=132 -qsuffix=cpp=F
+F_FREENOCPP             = -qfree=f90 -qsuffix=f=f90
 F_FIXNOCPP              = -qfixed=132 -qsuffix=f=f        
 
 C_SLFLAG	        = -L

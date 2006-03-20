@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.16 2005/04/12 22:12:05 nscollins Exp $
+#  $Id: build_rules.mk,v 1.17 2006/03/20 20:13:19 tjcnrl Exp $
 #
 #  Darwin.xlf.default
 #
@@ -85,8 +85,8 @@ REAL8			= -qrealsize=8
 STRICT			= -qstrict
 FPP_PREFIX		= -WF,
 F_FREECPP               = -qfree=f90 -qsuffix=cpp=F90
-F_FIXCPP                = -qfixed=132 -qsuffix=cpp=f90
-F_FREENOCPP             = -qfree=f90 -qsuffix=f=F
+F_FIXCPP                = -qfixed=132 -qsuffix=cpp=F
+F_FREENOCPP             = -qfree=f90 -qsuffix=f=f90
 F_FIXNOCPP              = -qfixed=132 -qsuffix=f=f        
 
 #

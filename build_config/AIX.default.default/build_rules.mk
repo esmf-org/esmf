@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.24 2006/01/30 18:11:24 nscollins Exp $
+#  $Id: build_rules.mk,v 1.25 2006/03/20 20:13:18 tjcnrl Exp $
 #
 #  AIX.default.default
 #
@@ -95,9 +95,9 @@ NO_INLINING		= -Q
 NO_LINE_DIRECTIVES	= -P
 
 FPP_PREFIX		= -WF,
-F_FREECPP               = -qsuffix=cpp=F90
-F_FIXCPP                = -qfixed=132 -qsuffix=cpp=f90
-F_FREENOCPP             = -qsuffix=f=F
+F_FREECPP               = -qfree=f90 -qsuffix=cpp=F90
+F_FIXCPP                = -qfixed=132 -qsuffix=cpp=F
+F_FREENOCPP             = -qfree=f90 -qsuffix=f=f90
 F_FIXNOCPP              = -qfixed=132 -qsuffix=f=f        
 
 C_SLFLAG		= -L
