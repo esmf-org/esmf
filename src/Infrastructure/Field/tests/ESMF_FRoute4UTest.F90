@@ -1,4 +1,4 @@
-! $Id: ESMF_FRoute4UTest.F90,v 1.12 2005/02/28 21:57:25 nscollins Exp $
+! $Id: ESMF_FRoute4UTest.F90,v 1.13 2006/03/20 22:15:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRoute4UTest.F90,v 1.12 2005/02/28 21:57:25 nscollins Exp $'
+      '$Id: ESMF_FRoute4UTest.F90,v 1.13 2006/03/20 22:15:34 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -132,7 +132,7 @@
       !NEX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "DELayout Get Test"
-      call ESMF_DELayoutGet(layout1, localDE=myde, rc=rc)
+      call ESMF_DELayoutGetDeprecated(layout1, localDE=myde, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------

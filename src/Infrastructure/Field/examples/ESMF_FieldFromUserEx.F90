@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldFromUserEx.F90,v 1.4 2005/06/21 19:26:14 theurich Exp $
+! $Id: ESMF_FieldFromUserEx.F90,v 1.5 2006/03/20 22:15:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -88,7 +88,7 @@
     ! this PE (or DE since we are assuming a one-to-one correspondence) in the
     ! layout.  We will use this information later.
 
-    call ESMF_DELayoutGet(layout, localDe=myPE, rc=rc)
+    call ESMF_DELayoutGetDeprecated(layout, localDe=myPE, rc=rc)
     call ESMF_DELayoutGetDELocalInfo(layout, de=myPE, coord=myLocation, rc=rc)
 
     ! If any of the user fields are to be used for ESMF regridding or any

@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.210 2006/01/05 18:21:08 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.211 2006/03/20 22:15:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -285,7 +285,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.210 2006/01/05 18:21:08 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.211 2006/03/20 22:15:34 theurich Exp $'
 
 !==============================================================================
 !
@@ -3358,7 +3358,7 @@
         call ESMF_FieldGet(field, grid=grid, rc=status)
 !!$        call ESMF_FieldGet( field, name=fieldname, rc=status)
         call ESMF_GridGet(grid, delayout=delayout, rc=status)
-        call ESMF_DELayoutGet(delayout, localDE=de_id, rc=status)
+        call ESMF_DELayoutGetDeprecated(delayout, localDE=de_id, rc=status)
 
         ! Output to file, from de_id 0 only
 !!$        call ESMF_FieldAllGather(field, out_array, rc=status)
@@ -4225,7 +4225,7 @@
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        call ESMF_DELayoutGet(delayout, localDE=de_id, rc=status)
+        call ESMF_DELayoutGetDeprecated(delayout, localDE=de_id, rc=status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4996,7 +4996,7 @@
 
       ! TODO: replace this with a better way to get the current VM
       call ESMF_GridGet(srcField%ftypep%grid, delayout=gridDELayout, rc=status)
-      call ESMF_DELayoutGetVM(gridDELayout, vm, rc=status)
+      call ESMF_DELayoutGet(gridDELayout, vm=vm, rc=status)
 
       ! This routine is called on every processor in the parent layout.
       !  It is quite possible that the source and destination fields do

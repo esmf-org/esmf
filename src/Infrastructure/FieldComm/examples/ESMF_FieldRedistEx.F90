@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.6 2005/12/21 23:14:01 jwolfe Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.7 2006/03/20 22:18:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -125,7 +125,7 @@
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
      ! and get our local DE number on the second layout
-     call ESMF_DELayoutGet(delayout2, localDE=myDE, rc=rc)
+     call ESMF_DELayoutGetDeprecated(delayout2, localDE=myDE, rc=rc)
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC

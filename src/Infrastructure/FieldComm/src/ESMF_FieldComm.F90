@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.81 2006/01/23 21:31:49 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.82 2006/03/20 22:18:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.81 2006/01/23 21:31:49 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.82 2006/03/20 22:18:06 theurich Exp $'
 
 !==============================================================================
 !
@@ -2225,10 +2225,10 @@
       call ESMF_GridGet(ftypep%grid, delayout=delayout, rc=status)
       
       ! Get the associated VM
-      call ESMF_DELayoutGetVM(delayout, vm, rc=status)
+      call ESMF_DELayoutGet(delayout, vm=vm, rc=status)
 
       ! Our DE number in the layout
-      call ESMF_DELayoutGet(delayout, localDE=my_DE, rc=status)
+      call ESMF_DELayoutGetDeprecated(delayout, localDE=my_DE, rc=status)
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indices and the grid indices.
