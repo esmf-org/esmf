@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.7 2006/03/20 21:53:30 theurich Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.8 2006/03/20 23:55:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -304,6 +304,9 @@ program ESMF_DELayoutEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DELayoutDestroy(delayout, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+  
+  print *, "PASS: ESMF_DELayoutEx.F90"
 
 
   ! shut down ESMF
