@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.13 2006/02/10 20:11:29 eschwab Exp $
+! $Id: ESMF_LogErr.F90,v 1.14 2006/03/20 22:31:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -1172,7 +1172,7 @@ end subroutine ESMF_LogSet
 ! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
 
 ! !INTERFACE: 
-	subroutine ESMF_LogWrite(msg,MsgType,line,file,method,log,rc)
+	recursive subroutine ESMF_LogWrite(msg,MsgType,line,file,method,log,rc)
 !
 !
 ! !ARGUMENTS:
