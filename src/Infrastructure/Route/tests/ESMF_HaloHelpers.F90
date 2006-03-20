@@ -1,4 +1,4 @@
-! $Id: ESMF_HaloHelpers.F90,v 1.5 2005/12/01 20:14:39 nscollins Exp $
+! $Id: ESMF_HaloHelpers.F90,v 1.6 2006/03/20 22:29:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -483,7 +483,7 @@ subroutine ValidateIndexHalo(field, originalval, rc)
     ! figure out where we are in the overall layout, and set flags in case
     ! we are on the boundaries relative to the entire grid.
     call ESMF_GridGet(grid, delayout=delayout, periodic=periodic, rc=rc)
-    call ESMF_DELayoutGet(delayout, deCountPerDim=ncount, localDE=deid, rc=rc)
+    call ESMF_DELayoutGetDeprecated(delayout, deCountPerDim=ncount, localDE=deid, rc=rc)
     call ESMF_DELayoutGetDELocalInfo(delayout, deid, coord=pos, rc=rc)
    
     xperiodic = (periodic(1) .eq. ESMF_TRUE)

@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.152 2006/03/14 21:23:43 theurich Exp $
+//$Id: ESMC_Route.C,v 1.153 2006/03/20 22:29:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.152 2006/03/14 21:23:43 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.153 2006/03/20 22:29:28 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1867,7 +1867,7 @@
 
     // Calculate the sending table.  If this DE is not part of the sending
     // TODO: this assumes a 2D layout?  (certainly < 3D)
-    delayout->ESMC_DELayoutGet(&decount, NULL, NULL, NULL, 0, NULL,
+    delayout->ESMC_DELayoutGetDeprecated(&decount, NULL, NULL, NULL, 0, NULL,
                                       NULL, NULL, nde, ESMF_MAXGRIDDIM);
 
     // Calculate the sending table.
@@ -2377,7 +2377,7 @@
     if (hasSrcData == ESMF_TRUE) {
 
       // get the number of destination DEs 
-      dstdeLayout->ESMC_DELayoutGet(&theirDECount, NULL, NULL, NULL, 0,  
+      dstdeLayout->ESMC_DELayoutGetDeprecated(&theirDECount, NULL, NULL, NULL, 0,  
                                     NULL, NULL, NULL, NULL, 0); 
 
       // get the starting count in the AI list for myDE
@@ -2468,7 +2468,7 @@
     if (hasDstData == ESMF_TRUE) {
 
       // get the number of source DEs
-      srcdeLayout->ESMC_DELayoutGet(&theirDECount, NULL, NULL, NULL, 0, 
+      srcdeLayout->ESMC_DELayoutGetDeprecated(&theirDECount, NULL, NULL, NULL, 0, 
                                     NULL, NULL, NULL, NULL, 0);
 
       // get the starting count in the AI list for myDE
@@ -2652,7 +2652,7 @@
                                      NULL, &my_XP, &my_XPcount);
 
       // loop over DE's from receiving layout to calculate send table
-      delayout_rcv->ESMC_DELayoutGet(&their_decount, NULL, NULL, NULL, 0,
+      delayout_rcv->ESMC_DELayoutGetDeprecated(&their_decount, NULL, NULL, NULL, 0,
                                         NULL, NULL, NULL, NULL, 0);
       for (i=0; i<their_decount; i++) {
           their_de = i;

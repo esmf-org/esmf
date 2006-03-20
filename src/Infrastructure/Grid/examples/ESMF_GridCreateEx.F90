@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateEx.F90,v 1.30 2005/02/14 04:36:24 theurich Exp $
+! $Id: ESMF_GridCreateEx.F90,v 1.31 2006/03/20 22:27:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -253,7 +253,7 @@
       allocate (myIndices(i,2))
 
      ! and get our local DE number from the layout
-     call ESMF_DELayoutGet(layout, localDE=myDE, rc=rc)
+     call ESMF_DELayoutGetDeprecated(layout, localDE=myDE, rc=rc)
 
 !BOC
 

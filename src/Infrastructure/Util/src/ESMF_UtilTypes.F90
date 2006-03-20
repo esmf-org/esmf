@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.12 2006/03/07 22:09:06 nscollins Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.13 2006/03/20 22:31:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -421,6 +421,20 @@
 
 !------------------------------------------------------------------------------
 !
+!     ! Typed DE pinning flag
+
+      type ESMF_DePinFlag
+      sequence
+      private
+          integer :: value
+      end type
+
+      type(ESMF_DePinFlag), parameter:: &
+        ESMF_DE_PIN_PET        = ESMF_DePinFlag(1), &
+        ESMF_DE_PIN_VAS        = ESMF_DePinFlag(2)
+
+!------------------------------------------------------------------------------
+!
 !     ! Direction type
 
       type ESMF_Direction
@@ -468,6 +482,7 @@
              ESMF_NONBLOCKING
       public ESMF_ContextFlag, ESMF_CHILD_IN_NEW_VM, ESMF_CHILD_IN_PARENT_VM
       public ESMF_TerminationFlag, ESMF_FINAL, ESMF_ABORT
+      public ESMF_DePinFlag, ESMF_DE_PIN_PET, ESMF_DE_PIN_VAS
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridOptionsUTest.F90,v 1.5 2005/10/12 19:06:17 nscollins Exp $
+! $Id: ESMF_RegridOptionsUTest.F90,v 1.6 2006/03/20 22:28:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_RegridOptionsUTest.F90,v 1.5 2005/10/12 19:06:17 nscollins Exp $'
+      '$Id: ESMF_RegridOptionsUTest.F90,v 1.6 2006/03/20 22:28:10 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -366,7 +366,7 @@ contains
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! and get our local de number
-      call ESMF_DELayoutGet(delayout, localDE=de_id, rc=status)
+      call ESMF_DELayoutGetDeprecated(delayout, localDE=de_id, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
 

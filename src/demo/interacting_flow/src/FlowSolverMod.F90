@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.2 2006/02/09 21:00:03 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.3 2006/03/20 22:33:04 theurich Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -478,7 +478,7 @@
         print *, "ERROR in Flowinit:  grid comp get"
         return
       endif
-      call ESMF_DELayoutGet(layout, deCountPerDim=ncounts, localDE=de_id, &
+      call ESMF_DELayoutGetDeprecated(layout, deCountPerDim=ncounts, localDE=de_id, &
                                rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  delayout get size"

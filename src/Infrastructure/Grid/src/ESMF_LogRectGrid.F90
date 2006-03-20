@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.151 2006/02/06 23:32:23 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.152 2006/03/20 22:27:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.151 2006/02/06 23:32:23 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.152 2006/03/20 22:27:33 theurich Exp $'
 
 !==============================================================================
 !
@@ -2237,7 +2237,7 @@
         enddo
       endif
 
-      call ESMF_DELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
+      call ESMF_DELayoutGetDeprecated(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
                             logRectFlag=lrFlag, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2264,7 +2264,7 @@
       !   return
       ! endif
 
-      call ESMF_DELayoutGet(delayout, deCountPerDim=nDEs(1:2), rc=localrc)
+      call ESMF_DELayoutGetDeprecated(delayout, deCountPerDim=nDEs(1:2), rc=localrc)
       nDEs(0) = 1
 
       ! if there is an axis to decompose, either grab the specfied countsPerDE
@@ -2354,7 +2354,7 @@
       endif
 
       ! Check to see if this DE has any data associated with it
-      call ESMF_DELayoutGet(delayout, localDE=localDE, rc=localrc)
+      call ESMF_DELayoutGetDeprecated(delayout, localDE=localDE, rc=localrc)
       call ESMF_DELayoutGetDELocalInfo(delayout, de=localDE, &
                                        coord=myDEDecomp(1:2), rc=localrc)
       myDEDecomp(0) = 1
@@ -2997,7 +2997,7 @@
         enddo
       endif
 
-      call ESMF_DELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
+      call ESMF_DELayoutGetDeprecated(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
                             logRectFlag=lrFlag, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3023,7 +3023,7 @@
       !   return
       ! endif
 
-      call ESMF_DELayoutGet(delayout, deCountPerDim=nDEs(1:2), rc=localrc)
+      call ESMF_DELayoutGetDeprecated(delayout, deCountPerDim=nDEs(1:2), rc=localrc)
       nDEs(0) = 1
 
       ! Create DistGrid and PhysGrid at cell center
@@ -3835,7 +3835,7 @@
       ! figure out the position of myDE to get local counts
       gridp%ptr => grid
       call ESMF_LRGridGet(gridp, delayout=delayout)
-      call ESMF_DELayoutGet(delayout, localDE=localDE, rc=localrc)
+      call ESMF_DELayoutGetDeprecated(delayout, localDE=localDE, rc=localrc)
       call ESMF_DELayoutGetDELocalInfo(delayout, de=localDE, &
                                        coord=myDEDecomp(1:2), rc=localrc)
       myDEDecomp(0) = 1
@@ -4438,7 +4438,7 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_DELayoutGet(layout, deCountPerDim=myDE, localrc)
+      call ESMF_DELayoutGetDeprecated(layout, deCountPerDim=myDE, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -5013,7 +5013,7 @@
       ! vs. 1-based issues.  note: layout the same for all distgrids, so use 1
       if (present(myDE)) then
         call ESMF_LRGridGet(grid, delayout=delayout)
-        call ESMF_DELayoutGet(delayout, localDE=myDE, rc=localrc)
+        call ESMF_DELayoutGetDeprecated(delayout, localDE=myDE, rc=localrc)
       endif
 
       ! make DistGrid calls first

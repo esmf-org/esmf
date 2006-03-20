@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.226 2005/11/05 00:12:32 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.227 2006/03/20 22:27:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -110,7 +110,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.226 2005/11/05 00:12:32 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.227 2006/03/20 22:27:33 theurich Exp $'
 
 !==============================================================================
 !
@@ -6117,12 +6117,12 @@
       ! For now, allocate everything as 2 regardless of the rank of the layout.
       ! If the layout is rank 1, it does not change anything if the second
       ! dimension is length 1 by default.
-      call ESMF_DELayoutGet(oldDELayout, dimCount=oldDimCount, rc=localrc)
+      call ESMF_DELayoutGetDeprecated(oldDELayout, dimCount=oldDimCount, rc=localrc)
       allocate(decompIDs(2), &
                  newNDEs(2), &
                  oldNDEs(2), stat=localrc)
       oldNDEs = 1
-      call ESMF_DELayoutGet(oldDELayout, deCountPerDim=oldNDEs(1:oldDimCount), &
+      call ESMF_DELayoutGetDeprecated(oldDELayout, deCountPerDim=oldNDEs(1:oldDimCount), &
                             rc=localrc)
       allocate(oldCountPerDE1(oldNDEs(1)))
       allocate(oldCountPerDE2(oldNDEs(2)))
