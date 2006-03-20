@@ -1,10 +1,11 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.33 2005/02/14 04:07:17 theurich Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.34 2006/03/20 22:38:35 theurich Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
 
 !-------------------------------------------------------------------------
-!SYSTEM_TEST        String used by test script to count system tests.
+!SYSTEM_____TEST__DISABLED        String used by test script to count system tests.
+! Until the newArray becomes available this system tests has been disabled
 !=========================================================================
 
 !BOP

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2005/07/01 17:38:00 jwolfe Exp $ 
+# $Id: makefile,v 1.21 2006/03/20 22:34:39 theurich Exp $ 
 
 ALL: build_system_tests
 
@@ -7,7 +7,7 @@ LOCDIR   = src/system_tests
 include $(ESMF_DIR)/makefile
 
 # arranged roughly in order of complexity
-DIRS     = ESMF_RowReduce \
+DIRS     = \
            ESMF_CompCreate \
            ESMF_FieldRedist \
            ESMF_FieldHalo \
@@ -23,6 +23,7 @@ DIRS     = ESMF_RowReduce \
            ESMF_FlowWithCoupling
 
 # tests not yet ready
+#           ESMF_RowReduce \        gjt: currently the code depends on DELayout comms, but it should be covered/converted to newArray
 #           ESMF_MergeCoupling \
 #           ESMF_CplOnExclDEs \
 
