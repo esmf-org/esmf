@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.43 2006/03/20 21:53:30 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.44 2006/03/20 23:35:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.43 2006/03/20 21:53:30 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.44 2006/03/20 23:35:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -997,7 +997,7 @@ int ESMC_DELayout::ESMC_DELayoutGet(
 
   if (vasLocalDeListCount == vasLocalDeCount){
     // TODO: once OLDSTYLE DELayout goes remove this check!
-    if (oldstyle){
+    if (oldstyle && vasLocalDeCount!=0){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- OLDSTYLE DELayout does not support this query", rc);
       return localrc;
