@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.8 2006/03/20 23:55:13 theurich Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.9 2006/03/21 21:36:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,10 +30,12 @@ program ESMF_DELayoutEx
   ! result code
   integer :: finalrc
   finalrc = ESMF_SUCCESS
+  
+  
   call ESMF_Initialize(vm=vm, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
   call ESMF_VMGet(vm, localPET=localPET, petCount=petCount, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
 
 !BOE
 ! \subsubsection{Default DELayout}
@@ -47,10 +49,8 @@ program ESMF_DELayoutEx
 !BOC
   delayout = ESMF_DELayoutCreate(rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
 !  call ESMF_DELayoutPrint(delayout, rc=rc)
-  call ESMF_DELayoutDestroy(delayout, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! The default DE to PET mapping is simply:
 ! \begin{verbatim}
@@ -58,32 +58,42 @@ program ESMF_DELayoutEx
 ! DE 1  -> PET 1
 ! ...
 ! \end{verbatim}
-! The optional {\tt vm} argument can be provided to lower the method's overhead
-! by the amount it takes to determine the current VM context.
+!
+! When no longer needed the DELayout object should be destroyed.
+!BOC
+  call ESMF_DELayoutDestroy(delayout, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) goto 99
+!BOE
+! The optional {\tt vm} argument can be provided to DELayoutCreate() to lower 
+! the method's overhead by the amount it takes to determine the current VM.
 !EOE
 !BOC
   delayout = ESMF_DELayoutCreate(vm=vm, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
+!  call ESMF_DELayoutPrint(delayout, rc=rc)
   call ESMF_DELayoutDestroy(delayout, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
 !BOE
 ! By default all PETs of the associated VM will be considered. However, if the 
 ! optional argument {\tt petList} is present DEs will only be mapped against
 ! the PETs contained in the list. When the following example is executed on
 ! four PETs it creates a DELayout with four DEs by default that are mapped 
 ! to the provided PETs in their given order. It is erroneous to specify PETs 
-! that are not part of the VM conext on which the DELayout is defined. 
+! that are not part of the VM context on which the DELayout is defined. 
 !EOE
 !BOC
-  delayout = ESMF_DELayoutCreate(petList=(/3, 2, 1/), rc=rc)
+  delayout = ESMF_DELayoutCreate(petList=(/(i,i=petCount-1,1,-1)/), rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
+!  call ESMF_DELayoutPrint(delayout, rc=rc)
   call ESMF_DELayoutDestroy(delayout, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
 !BOE  
 ! Once the end of the petList has been reached the DE to PET mapping 
-! continues from the beginning to the list:
+! continues from the beginning of the list. For a 4 PET VM the above created
+! DELayout will end up with the following DE to PET mapping:
 !
 ! \begin{verbatim}
 ! DE 0  -> PET 3
@@ -103,9 +113,9 @@ program ESMF_DELayoutEx
 !BOC
   delayout = ESMF_DELayoutCreate(deCount=4*petCount, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
   call ESMF_DELayoutDestroy(delayout, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
 !BOE
 ! Cyclic DE to PET mapping is the default. For 4 PETs this means:
 ! \begin{verbatim}
@@ -122,11 +132,13 @@ program ESMF_DELayoutEx
 !EOE
 !BOC
   delayout = ESMF_DELayoutCreate(deCount=4*petCount, &
-    deGrouping=(/1,1,1,1, 5,5,5,5, 2,2,2,2, 9,9,9,9/), rc=rc)
+!    deGrouping=(/1,1,1,1, 5,5,5,5, 2,2,2,2, 9,9,9,9/), rc=rc)
+    deGrouping=(/(i/4,i=0,4*petCount-1)/), rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
+!  call ESMF_DELayoutPrint(delayout, rc=rc)
   call ESMF_DELayoutDestroy(delayout, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
 !BOE
 ! This will achieve blocked DE to PET mapping:
 ! \begin{verbatim}
@@ -157,9 +169,9 @@ program ESMF_DELayoutEx
     commWeights=commWeights, rc=rc)
   deallocate(compWeights, commWeights)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
   call ESMF_DELayoutDestroy(delayout, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
 !BOE
 ! The resulting DE to PET mapping depends on the specifics of the VM object and
 ! the provided compWeights and commWeights arrays.
@@ -169,8 +181,8 @@ program ESMF_DELayoutEx
 ! \subsubsection{DELayout from petMap}
 ! 
 ! Full control over the DE to PET mapping is provided via the {\tt petMap}
-! argument. This example is expected to run on 4 or more PETs and uses a 
-! {\tt petMap} to specify the following mapping:
+! argument. This example maps the DEs to PETs in reverse order. In the 4 PET
+! case this will result in the following mapping:
 ! \begin{verbatim}
 ! DE 0 -> PET 3
 ! DE 1 -> PET 1
@@ -179,14 +191,12 @@ program ESMF_DELayoutEx
 ! \end{verbatim}
 !EOE
 !BOC
-  delayout = ESMF_DELayoutCreate(petMap=(/3, 1, 2, 0/), rc=rc)
+  delayout = ESMF_DELayoutCreate(petMap=(/(i,i=petCount-1,0,-1)/), rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
   call ESMF_DELayoutDestroy(delayout, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
 !BOE
-! Running the above example on a VM with less than 4 PETs will result in an
-! ESMF run-time error.
 !EOE
 
 !BOE
@@ -206,13 +216,14 @@ program ESMF_DELayoutEx
 ! DE 7 -> PET 1
 ! \end{verbatim}
 !EOE
+if (petCount == 4) then
 !BOC
   delayout = ESMF_DELayoutCreate(petMap=(/3, 3, 1, 0, 2, 1, 3, 1/), rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
   call ESMF_DELayoutDestroy(delayout, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-! 
+  if (rc /= ESMF_SUCCESS) goto 99
+endif
 
 !BOE
 ! \subsubsection{Working with a DELayout - simple 1-to-1 DE to PET mapping}
@@ -226,21 +237,21 @@ program ESMF_DELayoutEx
 !BOC
   delayout = ESMF_DELayoutCreate(rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
 !BOC
-  call ESMF_DELayoutGet(delayout, oneToOneFlag=oneToOneFlag,&
-    rc=rc)
+  call ESMF_DELayoutGet(delayout, oneToOneFlag=oneToOneFlag, rc=rc)
+  if (rc /= ESMF_SUCCESS) finalrc=rc
   if (oneToOneFlag == ESMF_FALSE) then
     ! handle the unexpected case of general DE to PET mapping
   endif
   allocate(localDeList(1))
   call ESMF_DELayoutGet(delayout, localDeList=localDeList, rc=rc)
+  if (rc /= ESMF_SUCCESS) finalrc=rc
   myDe = localDeList(1)
   deallocate(localDeList)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DELayoutDestroy(delayout, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
 
 !BOE
 ! \subsubsection{Working with a DELayout - general DE to PET mapping}
@@ -252,20 +263,21 @@ program ESMF_DELayoutEx
 !BOC
   delayout = ESMF_DELayoutCreate(deCount=petCount+2, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
 !BOC
   call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) finalrc=rc
   allocate(localDeList(localDeCount))
   call ESMF_DELayoutGet(delayout, localDeList=localDeList, rc=rc)
+  if (rc /= ESMF_SUCCESS) finalrc=rc
   do i=1, localDeCount
     workDe = localDeList(i)
 !    print *, "I am PET", localPET, " and I am working on DE ", workDe
   enddo
   deallocate(localDeList)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DELayoutDestroy(delayout, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
 
 !BOE
 ! \subsubsection{Work queue dynamic load balancing}
@@ -282,34 +294,45 @@ program ESMF_DELayoutEx
   delayout = ESMF_DELayoutCreate(deCount=petCount+2, dePinFlag=ESMF_DE_PIN_VAS,&
     rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
+!  call ESMF_DELayoutPrint(delayout, rc=rc)
 !BOC
-  call ESMF_DELayoutGet(delayout, vasLocalDeCount=localDeCount, &
-    rc=rc)
+  call ESMF_DELayoutGet(delayout, vasLocalDeCount=localDeCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) finalrc=rc
   allocate(localDeList(localDeCount))
   call ESMF_DELayoutGet(delayout, vasLocalDeList=localDeList, rc=rc)
+  if (rc /= ESMF_SUCCESS) finalrc=rc
   do i=1, localDeCount
     workDe = localDeList(i)
     print *, "I am PET", localPET, " and I am offering service for DE ", workDe
     reply = ESMF_DELayoutServiceOffer(delayout, de=workDe, rc=rc)
+    if (rc /= ESMF_SUCCESS) finalrc=rc
     if (reply == ESMF_DELAYOUT_SERVICE_ACCEPT) then
       ! process work associated with workDe
       print *, "I am PET", localPET, ", service offer for DE ", workDe, &
         " was accepted."
       call ESMF_DELayoutServiceComplete(delayout, de=workDe, rc=rc)
+      if (rc /= ESMF_SUCCESS) finalrc=rc
     endif
   enddo
   deallocate(localDeList)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DELayoutDestroy(delayout, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) goto 99
   
-  
-  print *, "PASS: ESMF_DELayoutEx.F90"
-
 
   ! shut down ESMF
-  call ESMF_Finalize()
+  call ESMF_Finalize(rc=rc)
+  if (finalrc==ESMF_SUCCESS) then
+    print *, "PASS: ESMF_DELayoutEx.F90"
+  else
+    print *, "FAIL: ESMF_DELayoutEx.F90"
+  endif
+  goto 100
+  
+99 continue   ! Abort
+  print *, "FAIL: ESMF_DELayoutEx.F90"
+  call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+100 continue  
 end program
