@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.11 2006/03/20 21:53:30 theurich Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.12 2006/03/21 18:03:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.11 2006/03/20 21:53:30 theurich Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.12 2006/03/21 18:03:37 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,7 @@
       type(ESMF_DELayout):: delayout
       integer:: petCount, ndes, i, n, nsum, isum
       integer, allocatable:: list(:)
-      integer, allocatable:: petMap(:)
+      integer, allocatable:: petMap(:), deGrouping(:)
 
 
 !-------------------------------------------------------------------------------
@@ -178,8 +178,9 @@
       if (rc.ne.ESMF_SUCCESS) goto 10
 
 
+#ifdef ESMF_EXHAUSTIVE
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "DELayout with petList Create Test"
       delayout = ESMF_DELayoutCreate(petList=(/0,3,1,2/), rc=rc)
@@ -189,7 +190,7 @@
 !      call ESMF_DELayoutPrint(delayout)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "DELayout with petList Destroy Test"
       call ESMF_DELayoutDestroy(delayout, rc=rc)
@@ -198,7 +199,7 @@
 
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "DELayout with deCount Create Test"
       delayout = ESMF_DELayoutCreate(deCount=2*petCount, rc=rc)
@@ -208,7 +209,7 @@
 !      call ESMF_DELayoutPrint(delayout)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "DELayout with deCount Destroy Test"
       call ESMF_DELayoutDestroy(delayout, rc=rc)
@@ -217,19 +218,24 @@
 
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "DELayout with deCount and deGrouping Create Test"
-      delayout = ESMF_DELayoutCreate(deCount=2*petCount, &
-        deGrouping=(/1,6,5,5,3,3,2,1/), dePinFlag=ESMF_DE_PIN_VAS, &
-        rc=rc)
+      allocate(deGrouping(2*petCount))
+      do i=1, 2*petCount
+        deGrouping(i) = real(petCount) * sin(3.1416*real(i)/real(2*petCount))
+      enddo
+      print *, "deGrouping: ", deGrouping
+      delayout = ESMF_DELayoutCreate(deCount=2*petCount, deGrouping=deGrouping,&
+        dePinFlag=ESMF_DE_PIN_VAS, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      deallocate(deGrouping)
       if (rc.ne.ESMF_SUCCESS) goto 10
 
 !      call ESMF_DELayoutPrint(delayout)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "DELayoutGetNEW() "
       
@@ -239,19 +245,20 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   
-      print *, petMap
+      print *, "petMap: ", petMap
       call ESMF_VMPrint(vm1)
       call ESMF_VMPrint(vm)
 
       deallocate(petMap)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "DELayout with deCount and deGrouping Destroy Test"
       call ESMF_DELayoutDestroy(delayout, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc.ne.ESMF_SUCCESS) goto 10
+#endif
       
 
 10    continue
