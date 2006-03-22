@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.1 2006/03/22 04:34:01 theurich Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.2 2006/03/22 21:42:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,6 +63,7 @@ module ESMF_DELayoutWQUTest_mod
     type(ESMF_VM):: vm
     type(ESMF_DELayout):: delayout
     integer:: petCount, localPet, localDeCount, i, workDe, k, deCount
+    integer:: localrc ! absoft refuses to use the dummy variable rc in functions
     integer, allocatable:: localDeList(:)
     type(ESMF_DELayoutServiceReply):: reply
     real:: x
@@ -77,7 +78,8 @@ module ESMF_DELayoutWQUTest_mod
 
     deCount = 10*petCount
     delayout = ESMF_DELayoutCreate(deCount=deCount, &
-      dePinFlag=ESMF_DE_PIN_VAS, rc=rc)
+      dePinFlag=ESMF_DE_PIN_VAS, rc=localrc)
+    rc = localrc
     
 !    call ESMF_DELayoutPrint(delayout, rc=rc)
 
@@ -90,7 +92,8 @@ module ESMF_DELayoutWQUTest_mod
     do i=1, localDeCount
       workDe = localDeList(i)
 !      print *, "I am PET", localPET, " and I am offering service for DE ", workDe
-      reply = ESMF_DELayoutServiceOffer(delayout, de=workDe, rc=rc)
+      reply = ESMF_DELayoutServiceOffer(delayout, de=workDe, rc=localrc)
+      rc = localrc
       if (reply == ESMF_DELAYOUT_SERVICE_ACCEPT) then
 !        print *, "I am PET", localPET, ", service offer for DE ", workDe, &
 !          " was accepted."
