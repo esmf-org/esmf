@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.63 2006/03/17 22:44:35 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.64 2006/03/22 01:00:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,6 +51,8 @@
 #include <string.h>
 #include <signal.h>
 #include <time.h>
+#include <float.h>
+#include <math.h>
 
 #include <sys/mman.h>
 #include <fcntl.h>
@@ -3911,9 +3913,8 @@ void vmk_wtimeprec(double *prec){
   for(int i=0; i<10; i++){
     vmk_wtime(&t1);
     t2 = t1;
-    while(t1==t2){
+    while(fabs(t2-t1)<DBL_MIN)
       vmk_wtime(&t2);
-    };
     dt = t2 - t1;
     if (dt > temp_prec) temp_prec = dt;
   }  
