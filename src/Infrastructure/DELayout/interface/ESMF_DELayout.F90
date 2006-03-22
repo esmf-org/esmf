@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.52 2006/03/20 22:58:50 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.53 2006/03/22 04:55:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -130,7 +130,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.52 2006/03/20 22:58:50 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.53 2006/03/22 04:55:01 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -147,8 +147,8 @@ module ESMF_DELayoutMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_DELayoutCreateFromPetMap
       module procedure ESMF_DELayoutCreateDefault
+      module procedure ESMF_DELayoutCreateFromPetMap
       module procedure ESMF_DELayoutCreateHintWeights
       
       module procedure ESMF_DELayoutCreateDeprecated
@@ -192,86 +192,8 @@ function ESMF_srne(sr1, sr2)
 end function
 
 
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DELayoutCreateFromPetMap()"
-!BOP
-! !IROUTINE: ESMF_DELayoutCreateEityhPetMap - Create DELayout from petMap
 
-! !INTERFACE:
-  ! Private name; call using ESMF_DELayoutCreate()
-  function ESMF_DELayoutCreateFromPetMap(petMap, dePinFlag, vm, rc)
-!
-! !ARGUMENTS:
-    integer,                      intent(in)            :: petMap(:)
-    type(ESMF_DePinFlag),         intent(in), optional  :: dePinFlag
-    type(ESMF_VM),                intent(in), optional  :: vm
-    integer,                      intent(out),optional  :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DELayout) :: ESMF_DELayoutCreateFromPetMap
-!
-! !DESCRIPTION:
-!     Create an {\tt ESMF\_DELayout} with exactly specified DE to PET mapping.
-!
-!     This ESMF method must be called in unison by all PETs of the VM. Calling
-!     this method from a PET not part of the VM or not calling it from a PET
-!     that is part of the VM will result in undefined behavior. ESMF does not
-!     guard against violation of the unison requirement. The call is not
-!     collective, there is no communication between PETs.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[petMap]
-!          List specifying the DE-to-PET mapping. The list elements correspond 
-!          to DE 0, 1, 2, ... and map against the specified PET of the VM
-!          context. The size of the {\tt petMap} 
-!          argument determines the number of DEs in the created DELayout. It is
-!          erroneous to specify a PET identifyer that lies outside the VM 
-!          context.
-!     \item[{[dePinFlag]}]
-!          This flag specifies which type of resource DEs are pinned to. 
-!          The default is to pin DEs to PETs. Alternatively it is
-!          also possible to pin DEs to VASs. See section 
-!          \ref{opt:depinflag} for a list of valid pinning options.
-!     \item[{[vm]}]
-!          Optional {\tt ESMF\_VM} object. The VM of the current context is the
-!          typical and default value.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    integer                 :: status       ! local error status
-    type(ESMF_DELayout)     :: delayout     ! opaque pointer to new C++ DELayout  
-    integer                 :: len_petMap   ! number of elements in petMap
 
-    ! initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
-    
-    ! set arguments
-    len_petMap = size(petMap)
-
-    ! mark this DELayout as invalid
-    delayout%this = ESMF_NULL_POINTER
-
-    ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
-      dePinFlag, vm, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! set return value
-    ESMF_DELayoutCreateFromPetMap = delayout 
-    
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
- 
-  end function ESMF_DELayoutCreateFromPetMap
-!------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -386,6 +308,88 @@ end function
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DELayoutCreateDefault
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutCreateFromPetMap()"
+!BOP
+! !IROUTINE: ESMF_DELayoutCreateFromPetMap - Create DELayout from petMap
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DELayoutCreate()
+  function ESMF_DELayoutCreateFromPetMap(petMap, dePinFlag, vm, rc)
+!
+! !ARGUMENTS:
+    integer,                      intent(in)            :: petMap(:)
+    type(ESMF_DePinFlag),         intent(in), optional  :: dePinFlag
+    type(ESMF_VM),                intent(in), optional  :: vm
+    integer,                      intent(out),optional  :: rc
+!         
+! !RETURN VALUE:
+    type(ESMF_DELayout) :: ESMF_DELayoutCreateFromPetMap
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DELayout} with exactly specified DE to PET mapping.
+!
+!     This ESMF method must be called in unison by all PETs of the VM. Calling
+!     this method from a PET not part of the VM or not calling it from a PET
+!     that is part of the VM will result in undefined behavior. ESMF does not
+!     guard against violation of the unison requirement. The call is not
+!     collective, there is no communication between PETs.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[petMap]
+!          List specifying the DE-to-PET mapping. The list elements correspond 
+!          to DE 0, 1, 2, ... and map against the specified PET of the VM
+!          context. The size of the {\tt petMap} 
+!          argument determines the number of DEs in the created DELayout. It is
+!          erroneous to specify a PET identifyer that lies outside the VM 
+!          context.
+!     \item[{[dePinFlag]}]
+!          This flag specifies which type of resource DEs are pinned to. 
+!          The default is to pin DEs to PETs. Alternatively it is
+!          also possible to pin DEs to VASs. See section 
+!          \ref{opt:depinflag} for a list of valid pinning options.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object. The VM of the current context is the
+!          typical and default value.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer                 :: status       ! local error status
+    type(ESMF_DELayout)     :: delayout     ! opaque pointer to new C++ DELayout  
+    integer                 :: len_petMap   ! number of elements in petMap
+
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! set arguments
+    len_petMap = size(petMap)
+
+    ! mark this DELayout as invalid
+    delayout%this = ESMF_NULL_POINTER
+
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
+      dePinFlag, vm, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! set return value
+    ESMF_DELayoutCreateFromPetMap = delayout 
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end function ESMF_DELayoutCreateFromPetMap
 !------------------------------------------------------------------------------
 
 
@@ -630,8 +634,6 @@ end function
     delayout%this = ESMF_NULL_POINTER
 
     ! Deal with optional array arguments
-    ! TODO: make sure that this pointer, target stuff is a portable way of 
-    ! TODO: dealing with multiple optional arrays and the F90/C++ interface.
     if (present(deCountList)) then
       len_deCountList = size(deCountList)
       opt_deCountList => deCountList
@@ -940,8 +942,6 @@ end function
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Deal with optional array arguments
-    ! TODO: make sure that this pointer, target stuff is a portable way of 
-    ! TODO: dealing with multiple optional arrays and the F90/C++ interface.
     if (present(localDeList)) then
       len_localDeList = size(localDeList)
       opt_localDeList => localDeList
@@ -1031,8 +1031,6 @@ end function
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Deal with optional array arguments
-    ! TODO: make sure that this pointer, target stuff is a portable way of 
-    ! TODO: dealing with multiple optional arrays and the F90/C++ interface.
     if (present(coord)) then
       len_coord = size(coord)
       opt_DEcoord => coord
@@ -1131,8 +1129,6 @@ end function
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Deal with optional array arguments
-    ! TODO: make sure that this pointer, target stuff is a portable way of 
-    ! TODO: dealing with multiple optional arrays and the F90/C++ interface.
     if (present(deMatchList)) then
       len_deMatchList = size(deMatchList)
       opt_deMatchList => deMatchList
@@ -1211,8 +1207,6 @@ end function
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Deal with optional array arguments
-    ! TODO: make sure that this pointer, target stuff is a portable way of 
-    ! TODO: dealing with multiple optional arrays and the F90/C++ interface.
     if (present(petMatchList)) then
       len_petMatchList = size(petMatchList)
       opt_petMatchList => petMatchList
@@ -1236,7 +1230,7 @@ end function
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutGetVM()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DELayoutGetVM - Get VM on which this DELayout is defined
 
 ! !INTERFACE:
@@ -1262,7 +1256,7 @@ end function
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -1326,6 +1320,57 @@ end function
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_DELayoutPrint
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutServiceComplete()"
+!BOP
+! !IROUTINE: ESMF_DELayoutServiceComplete - Close service window
+
+! !INTERFACE:
+  recursive subroutine ESMF_DELayoutServiceComplete(delayout, de, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),  intent(in)              :: delayout
+    integer,              intent(in)              :: de
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!   The PET who's service offer was accepted for {\tt de} must use 
+!   {\tt ESMF\_DELayoutServiceComplete} to close the service window.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!          Specified {\tt ESMF\_DELayout} object.
+!     \item[de]
+!          DE for which to close service window.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer                 :: status       ! local error status
+
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_DELayoutServiceComplete(delayout, de, status)
+!TODO: enable LogErr once it is thread-safe
+!    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+!      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+      
+  end subroutine ESMF_DELayoutServiceComplete
 !------------------------------------------------------------------------------
 
 
@@ -1396,52 +1441,53 @@ end function
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DELayoutServiceComplete()"
-!BOP
-! !IROUTINE: ESMF_DELayoutServiceComplete - Close service window
+#define ESMF_METHOD "ESMF_DELayoutValidate()"
+!BOPI
+! !IROUTINE: ESMF_DELayoutValidate - Validate DELayout internals
 
 ! !INTERFACE:
-  recursive subroutine ESMF_DELayoutServiceComplete(delayout, de, rc)
+  subroutine ESMF_DELayoutValidate(delayout, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),  intent(in)              :: delayout
-    integer,              intent(in)              :: de
     integer,              intent(out),  optional  :: rc  
 !         
 !
 ! !DESCRIPTION:
-!   The PET who's service offer was accepted for {\tt de} must use 
-!   {\tt ESMF\_DELayoutServiceComplete} to close the service window.
+!      Validates that the {\tt delayout} is internally consistent.
+!      The method returns an error code if problems 
+!      are found.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[delayout] 
 !          Specified {\tt ESMF\_DELayout} object.
-!     \item[de]
-!          DE for which to close service window.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status       ! local error status
+    integer :: localrc                        ! local return code
 
-    ! initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
+    ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
+
+    if (delayout%this .eq. ESMF_NULL_POINTER) then
+      call ESMF_LogWrite("Uninitialized DELayout object", ESMF_LOG_INFO)
+      rc = ESMF_FAILURE
+      return
+    endif
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_DELayoutValidate(delayout, localrc)
     
-    ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DELayoutServiceComplete(delayout, de, status)
-!TODO: enable LogErr once it is thread-safe
-!    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-      
-  end subroutine ESMF_DELayoutServiceComplete
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_DELayoutValidate
 !------------------------------------------------------------------------------
 
 
@@ -1502,8 +1548,6 @@ end function
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Deal with optional array arguments
-    ! TODO: make sure that this pointer, target stuff is a portable way of 
-    ! TODO: dealing with multiple optional arrays and the F90/C++ interface.
     if (present(petMatchList)) then
       len_petMatchList = size(petMatchList)
       opt_petMatchList => petMatchList
@@ -1523,57 +1567,6 @@ end function
   end subroutine ESMF_DELayoutVASMatch
 !------------------------------------------------------------------------------
 
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DELayoutValidate()"
-!BOPI
-! !IROUTINE: ESMF_DELayoutValidate - Validate DELayout internals
-
-! !INTERFACE:
-  subroutine ESMF_DELayoutValidate(delayout, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DELayout),  intent(in)              :: delayout
-    integer,              intent(out),  optional  :: rc  
-!         
-!
-! !DESCRIPTION:
-!      Validates that the {\tt delayout} is internally consistent.
-!      The method returns an error code if problems 
-!      are found.  
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout] 
-!          Specified {\tt ESMF\_DELayout} object.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
-
-    if (delayout%this .eq. ESMF_NULL_POINTER) then
-      call ESMF_LogWrite("Uninitialized DELayout object", ESMF_LOG_INFO)
-      rc = ESMF_FAILURE
-      return
-    endif
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutValidate(delayout, localrc)
-    
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-  end subroutine ESMF_DELayoutValidate
-!------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
