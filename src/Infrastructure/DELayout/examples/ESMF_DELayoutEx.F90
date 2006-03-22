@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.9 2006/03/21 21:36:23 theurich Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.10 2006/03/22 00:29:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@ program ESMF_DELayoutEx
 ! ...
 ! \end{verbatim}
 !
-! When no longer needed the DELayout object should be destroyed.
+! DELayout objects that are not used any longer should be destroyed.
 !BOC
   call ESMF_DELayoutDestroy(delayout, rc=rc)
 !EOC  
@@ -132,7 +132,6 @@ program ESMF_DELayoutEx
 !EOE
 !BOC
   delayout = ESMF_DELayoutCreate(deCount=4*petCount, &
-!    deGrouping=(/1,1,1,1, 5,5,5,5, 2,2,2,2, 9,9,9,9/), rc=rc)
     deGrouping=(/(i/4,i=0,4*petCount-1)/), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) goto 99
@@ -140,7 +139,7 @@ program ESMF_DELayoutEx
   call ESMF_DELayoutDestroy(delayout, rc=rc)
   if (rc /= ESMF_SUCCESS) goto 99
 !BOE
-! This will achieve blocked DE to PET mapping:
+! This will achieve blocked DE to PET mapping. For 4 PETs this means:
 ! \begin{verbatim}
 ! DE  0,  1,  2,  3  -> PET 0
 ! DE  4,  5,  6,  7  -> PET 1
