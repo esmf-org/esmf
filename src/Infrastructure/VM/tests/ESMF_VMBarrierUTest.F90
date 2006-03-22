@@ -1,4 +1,4 @@
-! $Id: ESMF_VMBarrierUTest.F90,v 1.7 2006/02/09 07:27:40 theurich Exp $
+! $Id: ESMF_VMBarrierUTest.F90,v 1.8 2006/03/22 03:39:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMBarrierUTest.F90,v 1.7 2006/02/09 07:27:40 theurich Exp $'
+      '$Id: ESMF_VMBarrierUTest.F90,v 1.8 2006/03/22 03:39:15 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -73,15 +73,7 @@
       allocate(delay_time(0:petCount-1))
       
       ! Determine the precision of the timer function
-      dt_prec = 0.
-      do i=1, 10
-        t_a = get_time()
-        t_b = t_a
-        do while (t_b == t_a)
-          t_b = get_time()
-        end do
-        if (t_b - t_a > dt_prec) dt_prec = t_b - t_a
-      end do
+      call ESMF_VMWTimePrec(dt_prec)
       print *, "timing precision is: ", dt_prec
 
       !Loop to test delaying each of the processors in turn
@@ -91,28 +83,25 @@
         delay_time=0.
         delay_time(i)=1.
         !t_a=starting time in each processor
-        t_a = get_time()
+        call ESMF_VMWTime(t_a)
 
         call ESMF_VMBarrier(vm, rc)
 
         !Delay each process for dt=delay_time seconds.
-        t0 = get_time()
+        call ESMF_VMWTime(t0)
         t1 = t0
         dt = delay_time(localPet)
 
         Do While (t1-t0 < dt) 
-          t1 = get_time()
-          if (t1-t0 < -100.) t1 = t1 + get_time_max()
+          call ESMF_VMWTime(t1)
         End do
 
         call ESMF_VMBarrier(vm, rc)
 
         !t_b=ending time at each processor
-        t_b = get_time()
+        call ESMF_VMWTime(t_b)
 
         max_time = 1.
-        !In case count_max was reached in the system_clock routine...
-        if (t_b-t_a < -100.) t_b=t_b+get_time_max()
       !----------------------------------------------------------------
       ! Test Barrier method 
         write(failMsg, *) "Barrier did not hold. Slow PET=", i
@@ -133,26 +122,5 @@
       call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
-
-
-      contains
-
-      function get_time()
-      implicit none
-      real(ESMF_KIND_R8) get_time
-      integer count,count_rate,count_max
-      count=0;count_rate=0;count_max=0
-      call system_clock(count, count_rate, count_max)
-      get_time = real(count)/real(count_rate)
-      end function get_time
-
-      function get_time_max()
-      implicit none
-      real(ESMF_KIND_R8) get_time_max
-      integer count,count_rate,count_max
-      count=0;count_rate=0;count_max=0
-      call system_clock(count, count_rate, count_max)
-      get_time_max = real(count_max)/real(count_rate)
-      end function get_time_max
 
       end program ESMF_VMBarrierUTest
