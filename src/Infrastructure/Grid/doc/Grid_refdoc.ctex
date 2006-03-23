@@ -1,4 +1,4 @@
-% $Id: Grid_refdoc.ctex,v 1.13 2005/12/13 23:30:57 nscollins Exp $
+% $Id: Grid_refdoc.ctex,v 1.14 2006/03/23 22:29:27 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,11 +92,11 @@
 \input{../Infrastructure/Grid/doc/Grid_implnotes}
 #endif
 
-\subsubsection{DistGrid Implementation Notes}
+\subsubsection{InternDG Implementation Notes}
 #ifdef STANDALONE
-\input{../../DistGrid/doc/DistGrid_implnotes}
+\input{../../InternDG/doc/InternDG_implnotes}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DistGrid/doc/DistGrid_implnotes}
+\input{../Infrastructure/InternDG/doc/InternDG_implnotes}
 #endif
 
 \subsubsection{PhysGrid Implementation Notes}
