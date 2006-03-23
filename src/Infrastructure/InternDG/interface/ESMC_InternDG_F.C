@@ -1,4 +1,4 @@
-// $Id: ESMC_InternDG_F.C,v 1.1 2006/03/23 00:08:10 theurich Exp $
+// $Id: ESMC_InternDG_F.C,v 1.2 2006/03/23 00:13:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,13 +27,13 @@
 
 
  // associated class definition file
-#include "ESMC_DistGrid.h"
+#include "ESMC_InternDG.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_InternDG_F.C,v 1.1 2006/03/23 00:08:10 theurich Exp $";
+             "$Id: ESMC_InternDG_F.C,v 1.2 2006/03/23 00:13:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
