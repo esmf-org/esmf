@@ -1,0 +1,46 @@
+
+DESTEX =  \
+      InternDG_alg.tex InternDG_desc.tex InternDG_desrev.tex \
+      InternDG_fapi.tex InternDG_glos.tex InternDG_req.tex \
+      InternDG_syn.tex InternDG_desdoc.ctex
+
+# DESEPS = fieldclass.eps bundleclass.eps 
+
+FSRC = ../src/ESMF_InternDG.F90
+
+# are these .C or .h (or both)?
+# CSRC = ../include/ESMC_Field.h ../include/ESMC_Bundle.h \
+#        ../include/ESMC_DataMap.h ../../Data/include/ESMC_Array.h 
+
+
+all: doc
+
+
+doc: InternDG_desdoc.ps InternDG_desdoc.pdf InternDG_desdoc.html
+
+# design doc
+InternDG_desdoc.html: InternDG_desdoc.dvi
+	rm -f InternDG_desdoc/*.gif
+	do_l2h InternDG des
+	rm -f InternDG_desdoc.html
+	ln -s InternDG_desdoc/InternDG_desdoc.html .
+
+InternDG_desdoc.ps:  InternDG_desdoc.dvi
+	dvips -o InternDG_desdoc.ps InternDG_desdoc.dvi
+
+InternDG_desdoc.pdf:  InternDG_desdoc.dvi
+	dvipdf InternDG_desdoc.dvi InternDG_desdoc.pdf
+
+InternDG_desdoc.dvi: ${DESTEX} ${DESEPS} fsrc ccsrc
+	do_latex InternDG des
+
+# source files which gen input for design doc
+ccsrc: ${CSRC}
+	touch ccsrc
+
+fsrc:  ${FSRC}
+	do_fprotex InternDG ../src/ESMF_InternDG.F90
+	touch fsrc
+
+clean:
+	rm -f *.dvi *.ps InternDG_desdoc/* fsrc ccsrc
