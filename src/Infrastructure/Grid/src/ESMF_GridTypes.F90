@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.47 2006/02/16 18:46:16 nscollins Exp $
+! $Id: ESMF_GridTypes.F90,v 1.48 2006/03/23 01:14:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@
       use ESMF_LocalArrayMod    ! ESMF local array class
       use ESMF_ArrayDataMapMod  ! ESMF data map class
       use ESMF_DELayoutMod      ! ESMF layout class
-      use ESMF_DistGridMod      ! ESMF distributed grid class
+      use ESMF_InternDGMod      ! ESMF distributed grid class
       use ESMF_PhysCoordMod     ! ESMF physical coord class
       use ESMF_PhysGridMod      ! ESMF physical grid class
       implicit none
@@ -256,12 +256,12 @@
                                               ! info for all grid descriptions
                                               ! necessary to define horizontal,
                                               ! staggered and vertical grids
-        integer, dimension(:), pointer :: distGridIndex
+        integer, dimension(:), pointer :: internDGIndex
                                               ! for each physgrid, the index of
-                                              ! the corresponding DistGrid
+                                              ! the corresponding InternDG
 
 
-        type (ESMF_DistGrid), dimension(:), pointer :: distgrids       
+        type (ESMF_InternDG), dimension(:), pointer :: internDGs       
                                               ! decomposition and other
                                               ! logical space info for grid
 
@@ -273,9 +273,9 @@
                                             ! used for search routines
         type (ESMF_GridSpecific) :: gridSpecific
 
-        integer :: numDistGridsAlloc          ! number of DistGrids allocated
+        integer :: numInternDGsAlloc          ! number of InternDGs allocated
 
-        integer :: numDistGrids               ! number of grid descriptors
+        integer :: numInternDGs               ! number of grid descriptors
                                               ! necessary to support
                                               ! staggering, vertical
                                               ! grids, background grids
@@ -318,13 +318,13 @@
     
     public ESMF_GridConstructNew
     public ESMF_GridGetDELayout
-    public ESMF_GridAddDistGrid
-    public ESMF_GridMakeDistGridSpace
+    public ESMF_GridAddInternDG
+    public ESMF_GridMakeInternDGSpace
     public ESMF_GridAddPhysGrid
     public ESMF_GridMakePhysGridSpace
     public ESMF_GridGetPhysGrid
     public ESMF_GridGetPhysGridID
-    public ESMF_GridGetDistGrid
+    public ESMF_GridGetInternDG
     public ESMF_GridGetBoundingBoxes
 
     public operator(==), operator(/=) ! for overloading 
@@ -546,7 +546,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.47 2006/02/16 18:46:16 nscollins Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.48 2006/03/23 01:14:40 theurich Exp $'
 
 !==============================================================================
 !
@@ -669,13 +669,13 @@
         grid%periodic(i)     = ESMF_FALSE
       !   grid%coversDomain(i) = ESMF_TRUE
       enddo
-      grid%numDistGrids = 0
-      grid%numDistGridsAlloc = 0
-      nullify(grid%distGrids)
+      grid%numInternDGs = 0
+      grid%numInternDGsAlloc = 0
+      nullify(grid%internDGs)
       grid%numPhysGrids = 0
       grid%numPhysGridsAlloc = 0
       nullify(grid%physGrids)
-      nullify(grid%distGridIndex)
+      nullify(grid%internDGIndex)
       ! nullify(grid%gridSpecific)
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -697,7 +697,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
+!     Get a {\tt ESMF\_InternDG} attribute with the given value.
 !
 !     The arguments are:
 !     \begin{description}
@@ -718,10 +718,10 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! call DistGrid method to retrieve information otherwise not available
+      ! call InternDG method to retrieve information otherwise not available
       ! to the application level -- does not matter which one since they all share
       ! the same layout    !TODO: move layout to Grid class?
-      call ESMF_DistGridGetDELayout(grid%ptr%distgrids(1)%ptr, delayout, localrc)
+      call ESMF_InternDGGetDELayout(grid%ptr%internDGs(1)%ptr, delayout, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -732,29 +732,29 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridAddDistGrid"
+#define ESMF_METHOD "ESMF_GridAddInternDG"
 !BOPI
-! !IROUTINE: ESMF_GridAddDistGrid - adds a complete DistGrid to Grid type
+! !IROUTINE: ESMF_GridAddInternDG - adds a complete InternDG to Grid type
 
 ! !INTERFACE:
-      subroutine ESMF_GridAddDistGrid(grid, distgrid, rc)
+      subroutine ESMF_GridAddInternDG(grid, interndg, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass), intent(inout) :: grid
-      type(ESMF_DistGrid), intent(in)    :: distgrid
+      type(ESMF_InternDG), intent(in)    :: interndg
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This routine attaches an {\tt ESMF\_DistGrid} object to an
+!     This routine attaches an {\tt ESMF\_InternDG} object to an
 !     {\tt ESMF\_Grid} object.  It is only meant to be called by
 !     grid creation routines in the processes of building a grid.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Grid structure to which new DistGrid is to be added.
-!     \item[distgrid]
-!          Complete {\tt ESMF\_DistGrid} to be added.
+!          Grid structure to which new InternDG is to be added.
+!     \item[interndg]
+!          Complete {\tt ESMF\_InternDG} to be added.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -767,30 +767,30 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! Update the DistGridAlloc counter and check to see if DistGrid
-      ! array needs to be resized to add the new distgrid
-      call ESMF_GridMakeDistGridSpace(grid, grid%numDistGrids+1, localrc)
+      ! Update the InternDGAlloc counter and check to see if InternDG
+      ! array needs to be resized to add the new interndg
+      call ESMF_GridMakeInternDGSpace(grid, grid%numInternDGs+1, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      grid%numDistGrids = grid%numDistGrids + 1
+      grid%numInternDGs = grid%numInternDGs + 1
 
-      ! Add the DistGrid
-      grid%distgrids(grid%numDistGrids) = distgrid
+      ! Add the InternDG
+      grid%internDGs(grid%numInternDGs) = interndg
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridAddDistGrid
+      end subroutine ESMF_GridAddInternDG
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridMakeDistGridSpace"
+#define ESMF_METHOD "ESMF_GridMakeInternDGSpace"
 !BOPI
-! !IROUTINE: ESMF_GridMakeDistGridSpace - Allocate or extend DistGrid array
+! !IROUTINE: ESMF_GridMakeInternDGSpace - Allocate or extend InternDG array
 
 ! !INTERFACE:
-      subroutine ESMF_GridMakeDistGridSpace(gridp, newcount, rc)
+      subroutine ESMF_GridMakeInternDGSpace(gridp, newcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass) :: gridp
@@ -799,7 +799,7 @@
 !
 ! !DESCRIPTION:
 !     Internal routine which verifies there is enough array space to
-!     hold the specified number of DistGrids.  Allocates more space and
+!     hold the specified number of InternDGs.  Allocates more space and
 !     copies the contents into the new space if not.
 !
 !     The arguments are:
@@ -822,15 +822,15 @@
 
       ! the save attribute is to be sure that the temp space isn't
       ! deallocated automatically by the compiler at the return of
-      ! this routine. it's going to be pointed to by the DistGrids pointer
+      ! this routine. it's going to be pointed to by the InternDGs pointer
       ! in the grid structure, but that might not be obvious to the compiler.
-      type(ESMF_DistGrid), dimension(:), pointer, save :: temp_dgrids
+      type(ESMF_InternDG), dimension(:), pointer, save :: temp_dgrids
       integer :: localrc                          ! Error status
       integer :: i, oldcount, alloccount
 
       ! number of currently used and available entries
-      oldcount = gridp%numDistGrids
-      alloccount = gridp%numDistGridsAlloc
+      oldcount = gridp%numInternDGs
+      alloccount = gridp%numInternDGsAlloc
 
       ! if there are already enough, we are done.
       if (alloccount .ge. newcount) then
@@ -843,11 +843,11 @@
       ! if none are allocated yet, allocate and return.
       ! the chunksize is 4 because it is a round number in base 2.
       if (alloccount .eq. 0) then
-        allocate(gridp%distGrids(CHUNK), stat=localrc)
+        allocate(gridp%internDGs(CHUNK), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, &
-                                       "Allocating initial distGrids", &
+                                       "Allocating initial InternDGs", &
                                        ESMF_CONTEXT, rc)) return
-        gridp%numDistGridsAlloc = CHUNK
+        gridp%numInternDGsAlloc = CHUNK
         rc = ESMF_SUCCESS
         return
       endif
@@ -868,24 +868,24 @@
 
      ! copy old contents over (note use of = and not => )
      do i = 1, oldcount
-       temp_dgrids(i) = gridp%distGrids(i)
+       temp_dgrids(i) = gridp%internDGs(i)
      enddo
 
      ! deallocate old array
-     deallocate(gridp%distGrids, stat=localrc)
+     deallocate(gridp%internDGs, stat=localrc)
      if (ESMF_LogMsgFoundAllocError(localrc, &
-                                    "Deallocating distGrids", &
+                                    "Deallocating InternDGs", &
                                     ESMF_CONTEXT, rc)) return
 
      ! and set original pointer to the new space
-     gridp%DistGrids => temp_dgrids
+     gridp%internDGs => temp_dgrids
 
      ! update count of how many items are currently allocated
-     gridp%numDistGridsAlloc = alloccount
+     gridp%numInternDGsAlloc = alloccount
 
      rc = ESMF_SUCCESS
 
-     end subroutine ESMF_GridMakeDistGridSpace
+     end subroutine ESMF_GridMakeInternDGSpace
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1006,9 +1006,9 @@
                                        "Allocating initial physGrids", &
                                        ESMF_CONTEXT, rc)) return
 
-        allocate(gridp%distGridIndex(CHUNK), stat=localrc)
+        allocate(gridp%internDGIndex(CHUNK), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, &
-                                       "Allocating initial distGridIndex", &
+                                       "Allocating initial InternDGIndex", &
                                        ESMF_CONTEXT, rc)) return
 
         gridp%numPhysGridsAlloc = CHUNK
@@ -1038,7 +1038,7 @@
      ! copy old contents over (note use of = and not => )
      do i = 1, oldcount
        temp_pgrids(i)  = gridp%physGrids(i)
-       temp_dgIndex(i) = gridp%distGridIndex(i)
+       temp_dgIndex(i) = gridp%internDGIndex(i)
      enddo
 
      ! deallocate old arrays
@@ -1047,14 +1047,14 @@
                                     "Deallocating physGrids", &
                                     ESMF_CONTEXT, rc)) return
 
-     deallocate(gridp%distGridIndex, stat=localrc)
+     deallocate(gridp%internDGIndex, stat=localrc)
      if (ESMF_LogMsgFoundAllocError(localrc, &
-                                    "Deallocating distGridIndex", &
+                                    "Deallocating InternDGIndex", &
                                     ESMF_CONTEXT, rc)) return
 
      ! and set original pointers to the new space
      gridp%physGrids => temp_pgrids
-     gridp%distGridIndex => temp_dgIndex
+     gridp%internDGIndex => temp_dgIndex
 
      ! update count of how many items are currently allocated
      gridp%numPhysGridsAlloc = alloccount
@@ -1238,31 +1238,31 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridGetDistGrid"
+#define ESMF_METHOD "ESMF_GridGetInternDG"
 !BOPI
-! !IROUTINE: ESMF_GridGetDistGrid - retrieves complete DistGrid from Grid type
+! !IROUTINE: ESMF_GridGetInternDG - retrieves complete InternDG from Grid type
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetDistGrid(distgrid, grid, name, rc)
+      subroutine ESMF_GridGetInternDG(interndg, grid, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGrid), intent(out) :: distgrid
+      type(ESMF_InternDG), intent(out) :: interndg
       type(ESMF_GridClass), intent(in)  :: grid
       character(*), intent(in) :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This routine retrieves an {\tt ESMF\_DistGrid} object from an
-!     {\tt ESMF\_Grid} object, given the name of the distgrid.
+!     This routine retrieves an {\tt ESMF\_InternDG} object from an
+!     {\tt ESMF\_Grid} object, given the name of the interndg.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[distgrid]
-!          {\tt ESMF\_DistGrid} to be retrieved.
+!     \item[interndg]
+!          {\tt ESMF\_InternDG} to be retrieved.
 !     \item[grid]
-!          Grid structure from which DistGrid is to be extracted.
+!          Grid structure from which interndg is to be extracted.
 !     \item[name]
-!          Name to identify which DistGrid to retrieve.
+!          Name to identify which InternDG to retrieve.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1278,15 +1278,15 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! Search by name and return selected DistGrid
+      ! Search by name and return selected InternDG
       found = .false.
-      name_search: do n=1,grid%numDistGridsAlloc
-         call ESMF_DistGridGet(grid%distgrids(n), name=nameTmp, rc=localrc)
+      name_search: do n=1,grid%numInternDGsAlloc
+         call ESMF_InternDGGet(grid%internDGs(n), name=nameTmp, rc=localrc)
          if (ESMF_LogMsgFoundError(localrc, &
                                    ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rc)) return
          if (name == nameTmp) then
-            distgrid = grid%distgrids(n)
+            interndg = grid%internDGs(n)
             found = .true.
             exit name_search
          endif
@@ -1300,7 +1300,7 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridGetDistGrid
+      end subroutine ESMF_GridGetInternDG
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.13 2006/03/20 22:31:35 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.14 2006/03/23 01:14:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -230,7 +230,7 @@
          ESMF_ID_CONFIG = ESMF_ObjectID(14, "ESMF_Config"), &
          ESMF_ID_PERFPROF = ESMF_ObjectID(15, "ESMF_PerfProf"), &
          ESMF_ID_ARRAY = ESMF_ObjectID(16, "ESMF_Array"), &
-         ESMF_ID_DISTGRID = ESMF_ObjectID(17, "ESMF_DistGrid"), &
+         ESMF_ID_INTERNDG = ESMF_ObjectID(17, "ESMF_InternDG"), &
          ESMF_ID_PHYSGRID = ESMF_ObjectID(18, "ESMF_PhysGrid"), &
          ESMF_ID_GRID = ESMF_ObjectID(19, "ESMF_Grid"), &
          ESMF_ID_EXCHANGEPACKET = ESMF_ObjectID(20, "ESMF_ExchangePacket"), &
@@ -497,7 +497,7 @@
       public ESMF_ID_CALENDAR, ESMF_ID_TIMEINTERVAL, ESMF_ID_ALARM
       public ESMF_ID_CLOCK, ESMF_ID_ARRAYSPEC, ESMF_ID_LOCALARRAY
       public ESMF_ID_ARRAYDATAMAP, ESMF_ID_VM, ESMF_ID_DELAYOUT
-      public ESMF_ID_CONFIG, ESMF_ID_PERFPROF, ESMF_ID_ARRAY, ESMF_ID_DISTGRID
+      public ESMF_ID_CONFIG, ESMF_ID_PERFPROF, ESMF_ID_ARRAY, ESMF_ID_INTERNDG
       public ESMF_ID_PHYSGRID, ESMF_ID_GRID, ESMF_ID_EXCHANGEPACKET
       public ESMF_ID_COMMTABLE, ESMF_ID_ROUTETABLE, ESMF_ID_ROUTE
       public ESMF_ID_ROUTEHANDLE, ESMF_ID_FIELDDATAMAP, ESMF_ID_FIELD

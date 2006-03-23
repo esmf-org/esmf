@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.227 2006/03/20 22:27:33 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.228 2006/03/23 01:14:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 !
 ! The code in this file implements the {\tt ESMF\_Grid} class.  This class
 ! provides a unified interface for both {\tt ESMF\_PhysGrid} and 
-! {\tt ESMF\_DistGrid} information for model Grids.  
+! {\tt ESMF\_InternDG} information for model Grids.  
 ! Functions for defining and computing {\tt ESMF\_Grid}
 ! information are available through this class.
 !
@@ -48,7 +48,7 @@
       
       use ESMF_DELayoutMod ! ESMF layout class
       use ESMF_ArrayMod
-      use ESMF_DistGridMod    ! ESMF distributed Grid class
+      use ESMF_InternDGMod    ! ESMF distributed Grid class
       use ESMF_PhysCoordMod   ! ESMF physical Coord class
       use ESMF_PhysGridMod    ! ESMF physical Grid class
       use ESMF_GridTypesMod   ! ESMF basic Grid types and primitives
@@ -110,7 +110,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.227 2006/03/20 22:27:33 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.228 2006/03/23 01:14:40 theurich Exp $'
 
 !==============================================================================
 !
@@ -3378,7 +3378,7 @@
 
 
       ! if the grid has been distributed, then print the associated
-      ! physgrids and distgrids
+      ! physgrids and interndgs
       if (gp%gridStatus.eq.ESMF_GRID_STATUS_READY) then
 
         ! Print the Associated physgrids
@@ -3387,10 +3387,10 @@
           call ESMF_PhysGridPrint(gp%physgrids(i), 'no-opt')
         enddo
 
-        ! Print the DistGrid
-        print *, 'DistGrids associated with this Grid:'
-        do i=1, gp%numDistGrids
-          call ESMF_DistGridPrint(gp%distgrids(i), 'no-opt')
+        ! Print the InternDG
+        print *, 'InternDGs associated with this Grid:'
+        do i=1, gp%numInternDGs
+          call ESMF_InternDGPrint(gp%interndgs(i), 'no-opt')
         enddo
       endif
 
@@ -5085,7 +5085,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get an {\tt ESMF\_DistGrid} attribute with the given value.
+!     Get an {\tt ESMF\_InternDG} attribute with the given value.
 !
 !   The arguments are:
 !   \begin{description}
@@ -5095,7 +5095,7 @@
 !        2D Array of AxisIndex types, must be (number of DEs, grid rank) long,
 !        intent(out) for this routine.
 !   \item[horzrelloc]
-!        Required for a 2D grid; controls which of the DistGrids will be
+!        Required for a 2D grid; controls which of the InternDGs will be
 !        used to answer the query.  (e.g. Cell-centered data will return
 !        different counts than vertex-based data.)
 !   \item[{[vertrelloc]}]
@@ -5194,7 +5194,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get an {\tt ESMF\_DistGrid} attribute with the given value.
+!     Get an {\tt ESMF\_InternDG} attribute with the given value.
 !
 !     The arguments are:
 !     \begin{description}
@@ -5395,12 +5395,12 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get an {\tt ESMF\_DistGrid} attribute with the given value.  Since a single
-!     {\tt ESMF\_Grid} can have many {\tt ESMF\_DistGrids}, the correct
-!     {\tt ESMF\_DistGrid} must be identified by this calling routine.  For a 3D
+!     Get an {\tt ESMF\_InternDG} attribute with the given value.  Since a single
+!     {\tt ESMF\_Grid} can have many {\tt ESMF\_InternDGs}, the correct
+!     {\tt ESMF\_InternDG} must be identified by this calling routine.  For a 3D
 !     {\tt ESMF\_Grid}, the user must supply identifiers for both the horizontal
 !     and vertical grids if querying for an array of values, like 
-!     localCellCountPerDim.  The {\tt ESMF\_DistGrid(s)} are identified
+!     localCellCountPerDim.  The {\tt ESMF\_InternDG(s)} are identified
 !     using the set of input variables:  horzrelloc and/or vertrelloc.
 !
 !     The arguments are:
@@ -5516,7 +5516,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Provides access to a {\tt ESMF\_DistGrid} routine that translates an array of
+!     Provides access to a {\tt ESMF\_InternDG} routine that translates an array of
 !     integer cell identifiers from global indexing to local indexing
 !
 !     The arguments are:
@@ -5620,7 +5620,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Provides access to a {\tt ESMF\_DistGrid} routine that translates an array of
+!     Provides access to a {\tt ESMF\_InternDG} routine that translates an array of
 !     axis indices from global indexing to local indexing
 !
 !     The arguments are:
@@ -5952,7 +5952,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! serialize the decomposition information
-      call ESMF_DistGridSerialize(gp%distgrids(1), buffer, length, offset, &
+      call ESMF_InternDGSerialize(gp%interndgs(1), buffer, length, offset, &
                                   localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -6128,7 +6128,7 @@
       allocate(oldCountPerDE2(oldNDEs(2)))
 
       ! deserialize the decomposition information
-      call ESMF_DistGridDeserialize(buffer, offset, decompIDs, oldCountPerDE1, &
+      call ESMF_InternDGDeserialize(buffer, offset, decompIDs, oldCountPerDE1, &
                                     oldCountPerDE2, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &

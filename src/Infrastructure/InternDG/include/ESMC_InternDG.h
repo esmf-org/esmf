@@ -1,4 +1,4 @@
-// $Id: ESMC_InternDG.h,v 1.1 2006/03/23 00:06:00 theurich Exp $
+// $Id: ESMC_InternDG.h,v 1.2 2006/03/23 01:12:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,19 +8,19 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
 
-// ESMC DistGrid include file for C++
+// ESMC InternDG include file for C++
 
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
 
-#ifndef ESMC_DistGrid_H
-#define ESMC_DistGrid_H
+#ifndef ESMC_InternDG_H
+#define ESMC_InternDG_H
 
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
 //
-// The code in this file implements constants and macros for the DistGrid...
+// The code in this file implements constants and macros for the InternDG...
 //
 // 
 //
@@ -39,7 +39,7 @@
 //
 //
 
-#define ESMC_DistGridMACRO1(arg1, arg2)  foo(arg1, arg2)
+#define ESMC_InternDGMACRO1(arg1, arg2)  foo(arg1, arg2)
 
 
 // 
@@ -50,7 +50,7 @@
 //
 //
 
-#define ESMC_DistGridCONSTANT_FRED   23
+#define ESMC_InternDGCONSTANT_FRED   23
 
 
-#endif  // ESMC_DistGrid_H
+#endif  // ESMC_InternDG_H

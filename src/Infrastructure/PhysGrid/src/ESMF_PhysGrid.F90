@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.97 2006/01/24 17:50:58 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.98 2006/03/23 01:14:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -324,7 +324,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.97 2006/01/24 17:50:58 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.98 2006/03/23 01:14:40 theurich Exp $'
 
 !==============================================================================
 !
@@ -1971,7 +1971,7 @@
 !
 !! !INTERFACE:
 !      subroutine ESMF_PhysGridSearchBboxSphericalPoint(dst_add, x, y, DEid, &
-!                                  physgrid, distgrid, rc)
+!                                  physgrid, interndg, rc)
 !
 !!
 !! !ARGUMENTS:
@@ -1980,7 +1980,7 @@
 !      real(kind=ESMF_KIND_R8), intent(in) :: y
 !      integer, intent(in) :: DEid
 !      type(ESMF_PhysGrid), intent(in) :: physgrid
-!      type(ESMF_DistGrid), intent(in) :: distgrid
+!      type(ESMF_InternDG), intent(in) :: interndg
 !      integer, intent(out), optional :: rc
 !
 !!
@@ -2001,8 +2001,8 @@
 !!          id of {\tt ESMF\_DE} that owns search point.
 !!     \item[physgrid]
 !!          {\tt ESMF\_PhysGrid} to search for location.
-!!     \item[distgrid]
-!!          {\tt ESMF\_DistGrid} describing distribution of {\tt ESMF\_PhysGrid} above.
+!!     \item[interndg]
+!!          {\tt ESMF\_InternDG} describing distribution of {\tt ESMF\_PhysGrid} above.
 !!     \item[{[rc]}]
 !!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !!     \end{description}
@@ -2365,7 +2365,7 @@
 !
 !! !INTERFACE:
 !      subroutine ESMF_PhysGridSearchBboxCartesianPoint(dst_add, x, y, DEid, &
-!                                                       physgrid, distgrid, rc)
+!                                                       physgrid, interndg, rc)
 !
 !!
 !! !ARGUMENTS:
@@ -2374,7 +2374,7 @@
 !      real(kind=ESMF_KIND_R8), intent(in) :: y
 !      integer, intent(in) :: DEid
 !      type(ESMF_PhysGrid), intent(in) :: physgrid
-!      type(ESMF_DistGrid), intent(in) :: distgrid
+!      type(ESMF_InternDG), intent(in) :: interndg
 !      integer, intent(out), optional :: rc
 !
 !!
@@ -2395,8 +2395,8 @@
 !!          id of {\tt ESMF\_DE} that owns search point.
 !!     \item[physgrid]
 !!          {\tt ESMF\_PhysGrid} to search for location.
-!!     \item[distgrid]
-!!          {\tt ESMF\_DistGrid} describing distribution of {\tt ESMF\_PhysGrid} above.
+!!     \item[interndg]
+!!          {\tt ESMF\_InternDG} describing distribution of {\tt ESMF\_PhysGrid} above.
 !!     \item[{[rc]}]
 !!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !!     \end{description}
@@ -2506,7 +2506,7 @@
 !
 !! !INTERFACE:
 !      subroutine ESMF_PhysGridSearchGeneralSphericalPoint(dst_add, x, y, DEid, &
-!                                                          physgrid, distgrid, rc)
+!                                                          physgrid, interndg, rc)
 !
 !!
 !! !ARGUMENTS:
@@ -2515,7 +2515,7 @@
 !      real(kind=ESMF_KIND_R8), intent(in) :: y
 !      integer, intent(in) :: DEid
 !      type(ESMF_PhysGrid), intent(in) :: physgrid
-!      type(ESMF_DistGrid), intent(in) :: distgrid
+!      type(ESMF_InternDG), intent(in) :: interndg
 !      integer, intent(out), optional :: rc
 !
 !!
@@ -2535,8 +2535,8 @@
 !!          id of {\tt ESMF\_DE} that owns search point.
 !!     \item[physgrid]
 !!          {\tt ESMF\_PhysGrid} to search for location.
-!!     \item[distgrid]
-!!          {\tt ESMF\_DistGrid} describing distribution of {\tt ESMF\_PhysGrid} above.
+!!     \item[interndg]
+!!          {\tt ESMF\_InternDG} describing distribution of {\tt ESMF\_PhysGrid} above.
 !!     \item[{[rc]}]
 !!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !!     \end{description}

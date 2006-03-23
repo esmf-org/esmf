@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.11 2006/01/26 23:10:28 nscollins Exp $
+// $Id: ESMC_Util.C,v 1.12 2006/03/23 01:14:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.11 2006/01/26 23:10:28 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.12 2006/03/23 01:14:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -55,7 +55,7 @@ ESMC_ObjectID ESMC_ID_DELAYOUT = {13, "ESMF_DELayout"};
 ESMC_ObjectID ESMC_ID_CONFIG = {14, "ESMF_Config"};
 ESMC_ObjectID ESMC_ID_PERFPROF = {15, "ESMF_PerfProf"};
 ESMC_ObjectID ESMC_ID_ARRAY = {16, "ESMF_Array"};
-ESMC_ObjectID ESMC_ID_DISTGRID = {17, "ESMF_DistGrid"};
+ESMC_ObjectID ESMC_ID_INTERNDG = {17, "ESMF_InternDG"};
 ESMC_ObjectID ESMC_ID_PHYSGRID = {18, "ESMF_PhysGrid"};
 ESMC_ObjectID ESMC_ID_GRID = {19, "ESMF_Grid"};
 ESMC_ObjectID ESMC_ID_EXCHANGEPACKET = {20, "ESMF_ExchangePacket"};

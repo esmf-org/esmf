@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.152 2006/03/20 22:27:33 theurich Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.153 2006/03/23 01:14:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 !
 ! The code in this file implements the {\tt ESMF\_LogRectGrid} class.  
 ! This class provides a unified interface for both {\tt ESMF\_PhysGrid} and 
-! {\tt ESMF\_DistGrid} information for model grids.  
+! {\tt ESMF\_InternDG} information for model grids.  
 ! Functions for defining and computing {\tt ESMF\_Grid}
 ! information are available through this class.
 !
@@ -48,7 +48,7 @@
       use ESMF_ArrayMod
       use ESMF_ArrayCreateMod
       use ESMF_ArrayGetMod
-      use ESMF_DistGridMod    ! ESMF distributed grid class
+      use ESMF_InternDGMod    ! ESMF distributed grid class
       use ESMF_PhysCoordMod   ! ESMF physical coord class
       use ESMF_PhysGridMod    ! ESMF physical grid class
       use ESMF_GridTypesMod   ! ESMF basic grid types and primitives
@@ -87,16 +87,16 @@
     public ESMF_LRGridCreateCutout
     public ESMF_LRGridCreateDiffRes
     public ESMF_LRGridCreateExchange
-    public ESMF_LRGridAddDistGridBlock
-    public ESMF_LRGridAddDistGridArb
+    public ESMF_LRGridAddInternDGBlock
+    public ESMF_LRGridAddInternDGArb
     public ESMF_LRGridAddPhysGridBlock
     public ESMF_LRGridAddPhysGridArb
     public ESMF_LRGridAddVertPhysGrid
     public ESMF_LRGridGetCoord
     public ESMF_LRGridSetCoord
-    public ESMF_LRGridGetDELocalInfo   ! access DistGrid from above
-    public ESMF_LRGridGetAllAxisIndex  ! access DistGrid from above
-    public ESMF_LRGridGetAIsAllDEs     ! access DistGrid from above
+    public ESMF_LRGridGetDELocalInfo   ! access InternDG from above
+    public ESMF_LRGridGetAllAxisIndex  ! access InternDG from above
+    public ESMF_LRGridGetAIsAllDEs     ! access InternDG from above
     public ESMF_LRGridGlobalToDELocalIndex
     public ESMF_LRGridDELocalToGlobalIndex
     public ESMF_LRGridGlobalToDELocalAI
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.152 2006/03/20 22:27:33 theurich Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.153 2006/03/23 01:14:40 theurich Exp $'
 
 !==============================================================================
 !
@@ -2141,9 +2141,9 @@
 
       integer :: localrc                          ! Error status
       logical :: dummy
-      character(len=ESMF_MAXSTR) :: distGridName, physGridName
+      character(len=ESMF_MAXSTR) :: internDGName, physGridName
       character(len=ESMF_MAXSTR), dimension(:), allocatable :: dimNames, dimUnits
-      integer :: distGridId, physGridId, nDEs(0:2)
+      integer :: internDGId, physGridId, nDEs(0:2)
       integer :: localDE, myCount, myDEDecomp(0:2), myDE(3)
       integer :: i, dimCount, dimCountGrid, aSize, ndim
       integer, dimension(:), allocatable :: decompIdsUse, counts
@@ -2367,20 +2367,20 @@
       grid%hasLocalData = ESMF_TRUE
       if (myCount.le.0) grid%hasLocalData = ESMF_FALSE
 
-      ! Create DistGrid and PhysGrid at cell center
+      ! Create InternDG and PhysGrid at cell center
       dimCountGrid = dimCount
       if (dimCount.eq.3) dimCountGrid = 2
-      distGridId = 1
-      distGridName = 'cell_center'
+      internDGId = 1
+      internDGName = 'cell_center'
       physGridId = 1
       physGridName = 'cell_center'
       relloc = ESMF_CELL_CENTER
-      call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, counts, &
+      call ESMF_LRGridAddInternDGBlock(grid, internDGId, dimCountGrid, counts, &
                                        delayout, decompIdsUse(1:2), &
                                        countsPerDEDim1=countsPerDE1, &
                                        countsPerDEDim2=countsPerDE2, &
                                        periodic=periodic, &
-                                       distGridName=distGridName, rc=localrc)
+                                       internDGName=internDGName, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2393,11 +2393,11 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      grid%distGridIndex(physGridId) = distGridId
-      distGridId = distGridId + 1 
+      grid%internDGIndex(physGridId) = internDGId
+      internDGId = internDGId + 1 
       physGridId = physGridId + 1 
 
-      ! Create any other DistGrids and PhysGrids necessary for horizontal
+      ! Create any other InternDGs and PhysGrids necessary for horizontal
       ! grid stagger
       ! TODO: finish filling out, look up D
       select case (grid%horzStagger%stagger)
@@ -2407,15 +2407,15 @@
 
         ! Arakawa B_NE (velocities at NE grid corner)
         case (2)
-          distGridName = 'cell_necorner'
+          internDGName = 'cell_necorner'
           physGridName = 'cell_necorner'
           relloc = ESMF_CELL_NECORNER
-          call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
+          call ESMF_LRGridAddInternDGBlock(grid, internDGId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
                                            periodic=periodic, &
-                                           distGridName=distGridName, rc=localrc)
+                                           internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -2429,21 +2429,21 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1 
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1 
           physGridId = physGridId + 1 
 
         ! Arakawa B_SW (velocities at SW grid corner)
         case (3)
-          distGridName = 'cell_swcorner'
+          internDGName = 'cell_swcorner'
           physGridName = 'cell_swcorner'
           relloc = ESMF_CELL_SWCORNER
-          call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
+          call ESMF_LRGridAddInternDGBlock(grid, internDGId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
                                            periodic=periodic, &
-                                           distGridName=distGridName, rc=localrc)
+                                           internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -2457,21 +2457,21 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
 
         ! Arakawa B_SE (velocities at SE grid corner)
         case (4)
-          distGridName = 'cell_secorner'
+          internDGName = 'cell_secorner'
           physGridName = 'cell_secorner'
           relloc = ESMF_CELL_SECORNER
-          call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
+          call ESMF_LRGridAddInternDGBlock(grid, internDGId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
                                            periodic=periodic, &
-                                           distGridName=distGridName, rc=localrc)
+                                           internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -2485,21 +2485,21 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
 
         ! Arakawa B_NW (velocities at NW grid corner)
         case (5)
-          distGridName = 'cell_nwcorner'
+          internDGName = 'cell_nwcorner'
           physGridName = 'cell_nwcorner'
           relloc = ESMF_CELL_NWCORNER
-          call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
+          call ESMF_LRGridAddInternDGBlock(grid, internDGId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
                                            periodic=periodic, &
-                                           distGridName=distGridName, rc=localrc)
+                                           internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -2513,22 +2513,22 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
 
         ! Arakawa C_NE (U at E face, V at N face) and
         ! Arakawa D_NE (V at E face, U at N face)
         case (6,10)
-          distGridName = 'cell_eface'
+          internDGName = 'cell_eface'
           physGridName = 'cell_eface'
           relloc = ESMF_CELL_EFACE
-          call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
+          call ESMF_LRGridAddInternDGBlock(grid, internDGId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
                                            periodic=periodic, &
-                                           distGridName=distGridName, rc=localrc)
+                                           internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -2542,18 +2542,18 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
-          distGridName = 'cell_nface'
+          internDGName = 'cell_nface'
           physGridName = 'cell_nface'
           relloc = ESMF_CELL_NFACE
-          call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
+          call ESMF_LRGridAddInternDGBlock(grid, internDGId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
                                            periodic=periodic, &
-                                           distGridName=distGridName, rc=localrc)
+                                           internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -2567,22 +2567,22 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
 
         ! Arakawa C_SW (U at W face, V at S face) and
         ! Arakawa D_SW (V at W face, U at S face)
         case (7,11)
-          distGridName = 'cell_wface'
+          internDGName = 'cell_wface'
           physGridName = 'cell_wface'
           relloc = ESMF_CELL_WFACE
-          call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
+          call ESMF_LRGridAddInternDGBlock(grid, internDGId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
                                            periodic=periodic, &
-                                           distGridName=distGridName, rc=localrc)
+                                           internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -2596,18 +2596,18 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
-          distGridName = 'cell_sface'
+          internDGName = 'cell_sface'
           physGridName = 'cell_sface'
           relloc = ESMF_CELL_SFACE
-          call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
+          call ESMF_LRGridAddInternDGBlock(grid, internDGId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
                                            periodic=periodic, &
-                                           distGridName=distGridName, rc=localrc)
+                                           internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -2621,22 +2621,22 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
 
         ! Arakawa C_SE (U at E face, V at S face) and
         ! Arakawa D_SE (V at E face, U at S face)
         case (8,12)
-          distGridName = 'cell_eface'
+          internDGName = 'cell_eface'
           physGridName = 'cell_eface'
           relloc = ESMF_CELL_EFACE
-          call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
+          call ESMF_LRGridAddInternDGBlock(grid, internDGId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
                                            periodic=periodic, &
-                                           distGridName=distGridName, rc=localrc)
+                                           internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -2650,18 +2650,18 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
-          distGridName = 'cell_sface'
+          internDGName = 'cell_sface'
           physGridName = 'cell_sface'
           relloc = ESMF_CELL_SFACE
-          call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
+          call ESMF_LRGridAddInternDGBlock(grid, internDGId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
                                            periodic=periodic, &
-                                           distGridName=distGridName, rc=localrc)
+                                           internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -2675,22 +2675,22 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
 
         ! Arakawa C_NW (U at W face, V at N face) and
         ! Arakawa D_NW (V at W face, U at N face)
         case (9,13)
-          distGridName = 'cell_wface'
+          internDGName = 'cell_wface'
           physGridName = 'cell_wface'
           relloc = ESMF_CELL_WFACE
-          call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
+          call ESMF_LRGridAddInternDGBlock(grid, internDGId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
                                            periodic=periodic, &
-                                           distGridName=distGridName, rc=localrc)
+                                           internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -2704,18 +2704,18 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
-          distGridName = 'cell_nface'
+          internDGName = 'cell_nface'
           physGridName = 'cell_nface'
           relloc = ESMF_CELL_NFACE
-          call ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCountGrid, &
+          call ESMF_LRGridAddInternDGBlock(grid, internDGId, dimCountGrid, &
                                            counts, delayout, decompIdsUse(1:2), &
                                            countsPerDEDim1=countsPerDE1, &
                                            countsPerDEDim2=countsPerDE2, &
                                            periodic=periodic, &
-                                           distGridName=distGridName, rc=localrc)
+                                           internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -2729,22 +2729,22 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
 
       end select
 
       ! Create vertical PhysGrid if requested
       if (dimCount.eq.3) then
-        distGridName = 'vertical center'
+        internDGName = 'vertical center'
         physGridName = 'vertical center'
         relloc = ESMF_CELL_CELL    ! TODO: right relloc?
-        call ESMF_LRGridAddDistGridBlock(grid, distGridId, 1, counts(3:3), &
+        call ESMF_LRGridAddInternDGBlock(grid, internDGId, 1, counts(3:3), &
                                          delayout, decompIdsUse(3:3), &
                                          countsPerDEDim1=countsPerDE3, &
                                          periodic=periodic(3:3), &
-                                         distGridName=distGridName, rc=localrc)
+                                         internDGName=internDGName, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -2755,8 +2755,8 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        grid%distGridIndex(physGridId) = distGridId
-        distGridId = distGridId + 1
+        grid%internDGIndex(physGridId) = internDGId
+        internDGId = internDGId + 1
         physGridId = physGridId + 1
 
         select case (grid%vertStagger%stagger)
@@ -2766,14 +2766,14 @@
 
           ! ESMF_GRID_VERT_STAGGER_TOP - vertical velocity at top vertical face
           case (2)
-            distGridName = 'vertical top face'
+            internDGName = 'vertical top face'
             physGridName = 'vertical top face'
             relloc = ESMF_CELL_TOPFACE
-            call ESMF_LRGridAddDistGridBlock(grid, distGridId, 1, counts(3:3), &
+            call ESMF_LRGridAddInternDGBlock(grid, internDGId, 1, counts(3:3), &
                                              delayout, decompIdsUse(3:3), &
                                              countsPerDEDim1=countsPerDE3, &
                                              periodic=periodic(3:3), &
-                                             distGridName=distGridName, rc=localrc)
+                                             internDGName=internDGName, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
@@ -2784,8 +2784,8 @@
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
 
-            grid%distGridIndex(physGridId) = distGridId
-            distGridId = distGridId + 1
+            grid%internDGIndex(physGridId) = internDGId
+            internDGId = internDGId + 1
             physGridId = physGridId + 1
 
         ! TODO: add default in case vertical stagger is not defined
@@ -2905,9 +2905,9 @@
 
       integer :: localrc                          ! Error status
       logical :: dummy
-      character(len=ESMF_MAXSTR) :: distGridName, physGridName
+      character(len=ESMF_MAXSTR) :: internDGName, physGridName
       character(len=ESMF_MAXSTR), dimension(:), allocatable :: dimNames, dimUnits
-      integer :: distGridId, physGridId, nDEs(0:2)
+      integer :: internDGId, physGridId, nDEs(0:2)
       integer :: i, dimCount, dimCountGrid, distCount, ndim
       integer, dimension(:), allocatable :: decompIdsUse, counts
       real(ESMF_KIND_R8) :: delta
@@ -3026,22 +3026,22 @@
       call ESMF_DELayoutGetDeprecated(delayout, deCountPerDim=nDEs(1:2), rc=localrc)
       nDEs(0) = 1
 
-      ! Create DistGrid and PhysGrid at cell center
+      ! Create InternDG and PhysGrid at cell center
       dimCountGrid = dimCount
       distCount    = 1
       if (dimCount.eq.3) then
         dimCountGrid = 2
         distCount    = 2
       endif
-      distGridId = 1
-      distGridName = 'cell_center'
+      internDGId = 1
+      internDGName = 'cell_center'
       physGridId = 1
       physGridName = 'cell_center'
       relloc = ESMF_CELL_CENTER
-      call ESMF_LRGridAddDistGridArb(grid, distGridId, distCount, &
+      call ESMF_LRGridAddInternDGArb(grid, internDGId, distCount, &
                                      myCount, myIndices, counts, delayout, &
                                      decompIdsUse(1:2), &
-                                     distGridName=distGridName, rc=localrc)
+                                     internDGName=internDGName, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -3054,11 +3054,11 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      grid%distGridIndex(physGridId) = distGridId
-      distGridId = distGridId + 1 
+      grid%internDGIndex(physGridId) = internDGId
+      internDGId = internDGId + 1 
       physGridId = physGridId + 1 
 
-      ! Create any other DistGrids and PhysGrids necessary for horizontal
+      ! Create any other InternDGs and PhysGrids necessary for horizontal
       ! grid stagger
       ! TODO: finish filling out, look up D
       select case (grid%horzStagger%stagger)
@@ -3068,13 +3068,13 @@
 
         ! Arakawa B_NE (velocities at NE grid corner)
         case (2)
-          distGridName = 'cell_necorner'
+          internDGName = 'cell_necorner'
           physGridName = 'cell_necorner'
           relloc = ESMF_CELL_NECORNER
-          call ESMF_LRGridAddDistGridArb(grid, distGridId, distCount, &
+          call ESMF_LRGridAddInternDGArb(grid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
-                                         distGridName=distGridName, rc=localrc)
+                                         internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3088,19 +3088,19 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1 
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1 
           physGridId = physGridId + 1 
 
         ! Arakawa B_SW (velocities at SW grid corner)
         case (3)
-          distGridName = 'cell_swcorner'
+          internDGName = 'cell_swcorner'
           physGridName = 'cell_swcorner'
           relloc = ESMF_CELL_SWCORNER
-          call ESMF_LRGridAddDistGridArb(grid, distGridId, distCount, &
+          call ESMF_LRGridAddInternDGArb(grid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
-                                         distGridName=distGridName, rc=localrc)
+                                         internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3114,19 +3114,19 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
 
         ! Arakawa B_SE (velocities at SE grid corner)
         case (4)
-          distGridName = 'cell_secorner'
+          internDGName = 'cell_secorner'
           physGridName = 'cell_secorner'
           relloc = ESMF_CELL_SECORNER
-          call ESMF_LRGridAddDistGridArb(grid, distGridId, distCount, &
+          call ESMF_LRGridAddInternDGArb(grid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
-                                         distGridName=distGridName, rc=localrc)
+                                         internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3140,19 +3140,19 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
 
         ! Arakawa B_NW (velocities at NW grid corner)
         case (5)
-          distGridName = 'cell_nwcorner'
+          internDGName = 'cell_nwcorner'
           physGridName = 'cell_nwcorner'
           relloc = ESMF_CELL_NWCORNER
-          call ESMF_LRGridAddDistGridArb(grid, distGridId, distCount, &
+          call ESMF_LRGridAddInternDGArb(grid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
-                                         distGridName=distGridName, rc=localrc)
+                                         internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3166,20 +3166,20 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
 
         ! Arakawa C_NE (U at E face, V at N face) and
         ! Arakawa D_NE (V at E face, U at N face)
         case (6,10)
-          distGridName = 'cell_eface'
+          internDGName = 'cell_eface'
           physGridName = 'cell_eface'
           relloc = ESMF_CELL_EFACE
-          call ESMF_LRGridAddDistGridArb(grid, distGridId, distCount, &
+          call ESMF_LRGridAddInternDGArb(grid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
-                                         distGridName=distGridName, rc=localrc)
+                                         internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3193,16 +3193,16 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
-          distGridName = 'cell_nface'
+          internDGName = 'cell_nface'
           physGridName = 'cell_nface'
           relloc = ESMF_CELL_NFACE
-          call ESMF_LRGridAddDistGridArb(grid, distGridId, distCount, &
+          call ESMF_LRGridAddInternDGArb(grid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
-                                         distGridName=distGridName, rc=localrc)
+                                         internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3216,20 +3216,20 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
 
         ! Arakawa C_SW (U at W face, V at S face) and
         ! Arakawa D_SW (V at W face, U at S face)
         case (7,11)
-          distGridName = 'cell_wface'
+          internDGName = 'cell_wface'
           physGridName = 'cell_wface'
           relloc = ESMF_CELL_WFACE
-          call ESMF_LRGridAddDistGridArb(grid, distGridId, distCount, &
+          call ESMF_LRGridAddInternDGArb(grid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
-                                         distGridName=distGridName, rc=localrc)
+                                         internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3243,16 +3243,16 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
-          distGridName = 'cell_sface'
+          internDGName = 'cell_sface'
           physGridName = 'cell_sface'
           relloc = ESMF_CELL_SFACE
-          call ESMF_LRGridAddDistGridArb(grid, distGridId, distCount, &
+          call ESMF_LRGridAddInternDGArb(grid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
-                                         distGridName=distGridName, rc=localrc)
+                                         internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3266,20 +3266,20 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
 
         ! Arakawa C_SE (U at E face, V at S face) and
         ! Arakawa D_SE (V at E face, U at S face)
         case (8,12)
-          distGridName = 'cell_eface'
+          internDGName = 'cell_eface'
           physGridName = 'cell_eface'
           relloc = ESMF_CELL_EFACE
-          call ESMF_LRGridAddDistGridArb(grid, distGridId, distCount, &
+          call ESMF_LRGridAddInternDGArb(grid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
-                                         distGridName=distGridName, rc=localrc)
+                                         internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3293,16 +3293,16 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
-          distGridName = 'cell_sface'
+          internDGName = 'cell_sface'
           physGridName = 'cell_sface'
           relloc = ESMF_CELL_SFACE
-          call ESMF_LRGridAddDistGridArb(grid, distGridId, distCount, &
+          call ESMF_LRGridAddInternDGArb(grid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
-                                         distGridName=distGridName, rc=localrc)
+                                         internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3316,20 +3316,20 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
 
         ! Arakawa C_NW (U at W face, V at N face) and
         ! Arakawa D_NW (V at W face, U at N face)
         case (9,13)
-          distGridName = 'cell_wface'
+          internDGName = 'cell_wface'
           physGridName = 'cell_wface'
           relloc = ESMF_CELL_WFACE
-          call ESMF_LRGridAddDistGridArb(grid, distGridId, distCount, &
+          call ESMF_LRGridAddInternDGArb(grid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
-                                         distGridName=distGridName, rc=localrc)
+                                         internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3343,16 +3343,16 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
-          distGridName = 'cell_nface'
+          internDGName = 'cell_nface'
           physGridName = 'cell_nface'
           relloc = ESMF_CELL_NFACE
-          call ESMF_LRGridAddDistGridArb(grid, distGridId, distCount, &
+          call ESMF_LRGridAddInternDGArb(grid, internDGId, distCount, &
                                          myCount, myIndices, counts, delayout, &
                                          decompIdsUse(1:2), &
-                                         distGridName=distGridName, rc=localrc)
+                                         internDGName=internDGName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3366,21 +3366,21 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          grid%distGridIndex(physGridId) = distGridId
-          distGridId = distGridId + 1
+          grid%internDGIndex(physGridId) = internDGId
+          internDGId = internDGId + 1
           physGridId = physGridId + 1
 
       end select
 
       ! Create vertical PhysGrid if requested
       if (dimCount.eq.3) then
-        distGridName = 'vertical center'
+        internDGName = 'vertical center'
         physGridName = 'vertical center'
         relloc = ESMF_CELL_CELL    ! TODO: right relloc?
-        call ESMF_LRGridAddDistGridBlock(grid, distGridId, 1, counts(3:3), &
+        call ESMF_LRGridAddInternDGBlock(grid, internDGId, 1, counts(3:3), &
                                          delayout, decompIdsUse(3:3), &
                                          countsPerDEDim1=counts(3:3), &
-                                         distGridName=distGridName, rc=localrc)
+                                         internDGName=internDGName, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -3391,8 +3391,8 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        grid%distGridIndex(physGridId) = distGridId
-        distGridId = distGridId + 1
+        grid%internDGIndex(physGridId) = internDGId
+        internDGId = internDGId + 1
         physGridId = physGridId + 1
 
         select case (grid%vertStagger%stagger)
@@ -3402,13 +3402,13 @@
 
           ! ESMF_GRID_VERT_STAGGER_TOP - vertical velocity at top vertical face
           case (2)
-            distGridName = 'vertical top face'
+            internDGName = 'vertical top face'
             physGridName = 'vertical top face'
             relloc = ESMF_CELL_TOPFACE
-            call ESMF_LRGridAddDistGridBlock(grid, distGridId, 1, counts(3:3), &
+            call ESMF_LRGridAddInternDGBlock(grid, internDGId, 1, counts(3:3), &
                                              delayout, decompIdsUse(3:3), &
                                              countsPerDEDim1=counts(3:3), &
-                                             distGridName=distGridName, &
+                                             internDGName=internDGName, &
                                              rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
@@ -3420,8 +3420,8 @@
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
 
-            grid%distGridIndex(physGridId) = distGridId
-            distGridId = distGridId + 1
+            grid%internDGIndex(physGridId) = internDGId
+            internDGId = internDGId + 1
             physGridId = physGridId + 1
 
         ! TODO: add default in case vertical stagger is not defined
@@ -3530,19 +3530,19 @@
         end do
         grid%numPhysGridsAlloc = 0
         deallocate(grid%physgrids, &
-                   grid%distGridIndex, stat=localrc)
+                   grid%internDGIndex, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "deallocating physgrids", &
                                        ESMF_CONTEXT, rc)) return
 
-        do n = 1,grid%numDistGrids
-          call ESMF_DistGridDestroy(grid%distgrids(n), rc=localrc)
+        do n = 1,grid%numInternDGs
+          call ESMF_InternDGDestroy(grid%interndgs(n), rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
         end do
-        grid%numDistGridsAlloc = 0
-        deallocate(grid%distgrids, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating distgrids", &
+        grid%numInternDGsAlloc = 0
+        deallocate(grid%interndgs, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating interndgs", &
                                        ESMF_CONTEXT, rc)) return
 
         grid%minGlobalCoordPerDim(:) = 0
@@ -3566,7 +3566,7 @@
       grid%coordOrder      = ESMF_COORD_ORDER_UNKNOWN
       grid%periodic        = ESMF_FALSE
       grid%numPhysGrids    = 0
-      grid%numDistGrids    = 0
+      grid%numInternDGs    = 0
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3574,20 +3574,20 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridAddDistGridBlock"
+#define ESMF_METHOD "ESMF_LRGridAddInternDGBlock"
 !BOPI
-! !IROUTINE: ESMF_LRGridAddDistGridBlock - Add a DistGrid to a LogRectGrid with block storage
+! !IROUTINE: ESMF_LRGridAddInternDGBlock - Add a InternDG to a LogRectGrid with block storage
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCount, &
+      subroutine ESMF_LRGridAddInternDGBlock(grid, internDGId, dimCount, &
                                              counts, delayout, decompIds, &
                                              countsPerDEDim1, countsPerDEDim2, &
                                              periodic, coversDomain, &
-                                             distGridName, rc)
+                                             internDGName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass), target :: grid
-      integer, intent(out) :: distGridId
+      integer, intent(out) :: internDGId
       integer, intent(in) :: dimCount 
       integer, dimension(dimCount), intent(in) :: counts
       type (ESMF_DELayout), intent(in) :: delayout
@@ -3597,19 +3597,19 @@
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: periodic
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: &
                                                      coversDomain
-      character (len=*), intent(in), optional :: distGridName
+      character (len=*), intent(in), optional :: internDGName
       integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
-!     Adds a {\tt ESMF\_DistGrid} to a {\tt ESMF\_Grid}.
+!     Adds a {\tt ESMF\_InternDG} to a {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          {\tt ESMF\_Grid} to add {\tt DistGrid} to.
-!     \item[distGridId]
-!          Integer identifier for {\tt ESMF\_DistGrid}.
+!          {\tt ESMF\_Grid} to add {\tt InternDG} to.
+!     \item[internDGId]
+!          Integer identifier for {\tt ESMF\_InternDG}.
 !     \item[dimCount]
 !          Number of grid dimensions.
 !     \item[counts]
@@ -3622,7 +3622,7 @@
 !          Logical specifier (array) to denote periodicity along the coordinate
 !          axes.
 !     \item[{[coversDomain]}]
-!          Logical specifier (array) to denote if the DistGrid covers the entire
+!          Logical specifier (array) to denote if the InternDG covers the entire
 !          physical domain in each direction.
 !     \item[{[countsPerDEDim1]}]
 !          Array of number of grid increments per DE in the first
@@ -3630,8 +3630,8 @@
 !     \item[{[countsPerDEDim2]}]
 !          Array of number of grid increments per DE in the second
 !          decomposition direction.
-!     \item[{[distGridName]}]
-!          {\tt ESMF\_DistGrid} name.
+!     \item[{[internDGName]}]
+!          {\tt ESMF\_InternDG} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3640,64 +3640,64 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      type(ESMF_DistGrid) :: distGrid
+      type(ESMF_InternDG) :: internDG
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! Create the DistGrid
-      distGrid = ESMF_DistGridCreate(dimCount=dimCount, counts=counts, &
+      ! Create the InternDG
+      internDG = ESMF_InternDGCreate(dimCount=dimCount, counts=counts, &
                                      delayout=delayout, decompIDs=decompIds, &
                                      countsPerDEDim1=countsPerDEDim1, &
                                      countsPerDEDim2=countsPerDEDim2, &
                                      periodic=periodic, &
                                      coversDomain=coversDomain, &
-                                     name=distGridName, rc=localrc)
+                                     name=internDGName, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! now that it's created, add the distgrid to the grid
-      call ESMF_GridAddDistGrid(grid, distGrid, localrc)
-      distGridId = grid%numDistGrids
+      ! now that it's created, add the interndg to the grid
+      call ESMF_GridAddInternDG(grid, internDG, localrc)
+      internDGId = grid%numInternDGs
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridAddDistGridBlock
+      end subroutine ESMF_LRGridAddInternDGBlock
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridAddDistGridArb"
+#define ESMF_METHOD "ESMF_LRGridAddInternDGArb"
 !BOPI
-! !IROUTINE: ESMF_LRGridAddDistGridArb - Add a DistGrid to a LogRectGrid with arbitrary storage
+! !IROUTINE: ESMF_LRGridAddInternDGArb - Add a InternDG to a LogRectGrid with arbitrary storage
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridAddDistGridArb(grid, distGridId, dimCount, &
+      subroutine ESMF_LRGridAddInternDGArb(grid, internDGId, dimCount, &
                                            myCount, myIndices, counts, delayout, &
-                                           decompIds, distGridName, rc)
+                                           decompIds, internDGName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass), target :: grid
-      integer, intent(out) :: distGridId
+      integer, intent(out) :: internDGId
       integer, intent(in) :: dimCount 
       integer, intent(in) :: myCount
       integer, dimension(:,:), intent(in) :: myIndices
       integer, dimension(:), intent(in) :: counts
       type (ESMF_DELayout), intent(in) :: delayout
       integer, dimension(dimCount), intent(in), optional :: decompIds
-      character (len=*), intent(in), optional :: distGridName
+      character (len=*), intent(in), optional :: internDGName
       integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
-!     Adds a {\tt ESMF\_DistGrid} to a {\tt ESMF\_Grid}.
+!     Adds a {\tt ESMF\_InternDG} to a {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          {\tt ESMF\_Grid} to add {\tt DistGrid} to.
-!     \item[distGridId]
-!          Integer identifier for {\tt ESMF\_DistGrid}.
+!          {\tt ESMF\_Grid} to add {\tt InternDG} to.
+!     \item[internDGId]
+!          Integer identifier for {\tt ESMF\_InternDG}.
 !     \item[dimCount]
 !          Number of grid dimensions.
 !     \item[myCount]
@@ -3712,8 +3712,8 @@
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[decompIDs]
 !          Identifier for which Grid axes are decomposed.
-!     \item[{[distGridName]}]
-!          {\tt ESMF\_DistGrid} name.
+!     \item[{[internDGName]}]
+!          {\tt ESMF\_InternDG} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3722,26 +3722,26 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      type(ESMF_DistGrid) :: distGrid
+      type(ESMF_InternDG) :: internDG
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! Create the DistGrid
-      distGrid = ESMF_DistGridCreate(dimCount, myCount, myIndices, &
+      ! Create the InternDG
+      internDG = ESMF_InternDGCreate(dimCount, myCount, myIndices, &
                                      counts, delayout, decompIds, &
-                                     distGridName, localrc)
+                                     internDGName, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! now that it's created, add the distgrid to the grid
-      call ESMF_GridAddDistGrid(grid, distGrid, localrc)
-      distGridId = grid%numDistGrids
+      ! now that it's created, add the interndg to the grid
+      call ESMF_GridAddInternDG(grid, internDG, localrc)
+      internDGId = grid%numInternDGs
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridAddDistGridArb
+      end subroutine ESMF_LRGridAddInternDGArb
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -4873,12 +4873,12 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt ESMF\_DistGrid} attribute with the given value.  Since a single
-!     {\tt ESMF\_Grid} can have many {\tt ESMF\_DistGrids}, the correct
-!     {\tt ESMF\_DistGrid} must be identified by this calling routine.  For a 3D
+!     Get a {\tt ESMF\_InternDG} attribute with the given value.  Since a single
+!     {\tt ESMF\_Grid} can have many {\tt ESMF\_InternDGs}, the correct
+!     {\tt ESMF\_InternDG} must be identified by this calling routine.  For a 3D
 !     {\tt ESMF\_Grid}, the user must supply identifiers for both the horizontal
 !     and vertical grids if querying for an array of values, like
-!     localCellCountPerDim.  The {\tt ESMF\_DistGrid(s)} are identified
+!     localCellCountPerDim.  The {\tt ESMF\_InternDG(s)} are identified
 !     using the set of input variables:  horzRelLoc and/or vertRelLoc.
 !
 !     The arguments are:
@@ -4912,7 +4912,7 @@
 !          applications.  This optional argument is available primarily for
 !          internal use.
 !     \item[{[total]}]
-!          Logical flag to indicate getting DistGrid information for total cells.
+!          Logical flag to indicate getting InternDG information for total cells.
 !          The default is the computational regime.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4970,7 +4970,7 @@
         totalUse = .FALSE.
       endif
 
-      ! get physgrid and distgrid identifiers from relative locations
+      ! get physgrid and interndg identifiers from relative locations
       if (present(horzRelLoc)) then
         if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
           call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, localrc)
@@ -4978,7 +4978,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+          horzDistIdUse = grid%ptr%internDGIndex(horzPhysIdUse)
         else
             if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                 "undefined horizontal relloc", &
@@ -4998,7 +4998,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+          vertDistIdUse = grid%ptr%internDGIndex(vertPhysIdUse)
   !      else
   !           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
   !                               "undefined vertical relloc", &
@@ -5006,17 +5006,17 @@
         endif
       endif
 
-      ! TODO: make sure the horzDistIdUse points to a horizontal distgrid,
+      ! TODO: make sure the horzDistIdUse points to a horizontal interndg,
       !       same for vert
 
-      ! use DELayout call instead of DistGrid to get myDE to avoid zero-based
-      ! vs. 1-based issues.  note: layout the same for all distgrids, so use 1
+      ! use DELayout call instead of InternDG to get myDE to avoid zero-based
+      ! vs. 1-based issues.  note: layout the same for all interndgs, so use 1
       if (present(myDE)) then
         call ESMF_LRGridGet(grid, delayout=delayout)
         call ESMF_DELayoutGetDeprecated(delayout, localDE=myDE, rc=localrc)
       endif
 
-      ! make DistGrid calls first
+      ! make InternDG calls first
       ! check maximum size of array variables
       aSize = 0
       if (present(localCellCountPerDim)) &
@@ -5027,13 +5027,13 @@
         aSize = max(aSize, size(      globalAIPerDim))
       aSize = min(gridRank, aSize)
 
-      ! call DistGrid method to retrieve information otherwise not available
+      ! call InternDG method to retrieve information otherwise not available
       ! to the application level
       if (present(localCellCount)) then
         horzCellCount = 1
         vertCellCount = 1
         if (horzPhysIdUse.ne.-1) then
-          call ESMF_DistGridGetDE(grid%ptr%distgrids(horzDistIdUse)%ptr, &
+          call ESMF_InternDGGetDE(grid%ptr%interndgs(horzDistIdUse)%ptr, &
                                   horzCellCount, &
                                   total=totalUse, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -5041,7 +5041,7 @@
                                     ESMF_CONTEXT, rc)) return
         endif
         if (vertPhysIdUse.ne.-1) then
-          call ESMF_DistGridGetDE(grid%ptr%distgrids(vertDistIdUse)%ptr, &
+          call ESMF_InternDGGetDE(grid%ptr%interndgs(vertDistIdUse)%ptr, &
                                   vertCellCount, &
                                   total=totalUse, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -5054,7 +5054,7 @@
         index = 1
         if (distDimCount.eq.1 .AND. horzPhysIdUse.ne.-1) then
           index = 2
-          call ESMF_DistGridGetDE(grid%ptr%distgrids(horzDistIdUse)%ptr, &
+          call ESMF_InternDGGetDE(grid%ptr%interndgs(horzDistIdUse)%ptr, &
                     localCellCountPerDim=localCellCountPerDimUse(1:1), &
                     globalStartPerDim=globalStartPerDimUse(1:1), &
                     globalAIPerDim=globalAIPerDimUse(1:1), &
@@ -5065,7 +5065,7 @@
         endif
         if (distDimCount.ge.2 .AND. horzPhysIdUse.ne.-1) then
           index         = 3
-          call ESMF_DistGridGetDE(grid%ptr%distgrids(horzDistIdUse)%ptr, &
+          call ESMF_InternDGGetDE(grid%ptr%interndgs(horzDistIdUse)%ptr, &
                     localCellCountPerDim=localCellCountPerDimUse(1:2), &
                     globalStartPerDim=globalStartPerDimUse(1:2), &
                     globalAIPerDim=globalAIPerDimUse(1:2), &
@@ -5075,7 +5075,7 @@
                                     ESMF_CONTEXT, rc)) return
         endif
         if (aSize.ge.index .AND. vertPhysIdUse.ne.-1) then
-          call ESMF_DistGridGetDE(grid%ptr%distgrids(vertDistIdUse)%ptr, &
+          call ESMF_InternDGGetDE(grid%ptr%interndgs(vertDistIdUse)%ptr, &
                     localCellCountPerDim=localCellCountPerDimUse(index:index), &
                     globalStartPerDim=globalStartPerDimUse(index:index), &
                     globalAIPerDim=globalAIPerDimUse(index:index), &
@@ -5184,7 +5184,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRGridGetAllAxisIndex"
 !BOPI
-! !IROUTINE: ESMF_LRGridGetAllAxisIndex - Get all axis indices for a DistGrid
+! !IROUTINE: ESMF_LRGridGetAllAxisIndex - Get all axis indices for a InternDG
 
 ! !INTERFACE:
       subroutine ESMF_LRGridGetAllAxisIndex(grid, globalAI, horzRelLoc, &
@@ -5200,7 +5200,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
+!     Get a {\tt ESMF\_InternDG} attribute with the given value.
 !
 !     The arguments are:
 !     \begin{description}
@@ -5263,7 +5263,7 @@
       if (ESMF_LogMsgFoundAllocError(localrc, "allocating AI arrays", &
                                      ESMF_CONTEXT, rc)) return
 
-      ! get distgrid identifiers from relative locations
+      ! get interndg identifiers from relative locations
       if (present(horzRelLoc)) then
         if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
           call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, localrc)
@@ -5271,7 +5271,7 @@
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+          horzDistIdUse = grid%ptr%internDGIndex(horzPhysIdUse)
         else
           dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                         "undefined horizontal relloc", &
@@ -5290,7 +5290,7 @@
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
-            vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+            vertDistIdUse = grid%ptr%internDGIndex(vertPhysIdUse)
           else
             dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                           "undefined vertical relloc", &
@@ -5300,14 +5300,14 @@
         endif
       endif
 
-      ! call DistGrid method to retrieve information otherwise not available
+      ! call InternDG method to retrieve information otherwise not available
       ! to the application level
       index = 1
       if (aSize.ge.2 .AND. horzPhysIdUse.ne.-1) then
         index = 3
         if (grid%ptr%gridStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
           if (present(AICountPerDE)) then
-            call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrids(horzDistIdUse)%ptr, &
+            call ESMF_InternDGGetAllAxisIndex(grid%ptr%interndgs(horzDistIdUse)%ptr, &
                                               horzAI, AICountPerDE, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
@@ -5319,7 +5319,7 @@
             return
           endif 
         else
-          call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrids(horzDistIdUse)%ptr, &
+          call ESMF_InternDGGetAllAxisIndex(grid%ptr%interndgs(horzDistIdUse)%ptr, &
                                             horzAI, total, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -5327,7 +5327,7 @@
         endif
       endif
       if (aSize.ge.index .AND. vertDistIdUse.ne.-1) then
-        call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrids(vertDistIdUse)%ptr, &
+        call ESMF_InternDGGetAllAxisIndex(grid%ptr%interndgs(vertDistIdUse)%ptr, &
                                           vertAI, total, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -5361,7 +5361,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRGridGetAIsAllDEs"
 !BOPI
-! !IROUTINE: ESMF_LRGridGetAIsAllDEs - Get all axis indices for a DistGrid
+! !IROUTINE: ESMF_LRGridGetAIsAllDEs - Get all axis indices for a InternDG
 
 ! !INTERFACE:
       subroutine ESMF_LRGridGetAIsAllDEs(grid, localGlobalFlag, &
@@ -5377,7 +5377,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
+!     Get a {\tt ESMF\_InternDG} attribute with the given value.
 !
 !     The arguments are:
 !     \begin{description}
@@ -5439,14 +5439,14 @@
       ! required size of the AI array
       if (present(horzRelLoc)) then
  
-        ! get the physgrid/distgrid identifier from the horizontal relLoc.  If it
+        ! get the physgrid/interndg identifier from the horizontal relLoc.  If it
         ! is not valid return an error.
         if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
           call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+          horzDistIdUse = grid%ptr%internDGIndex(horzPhysIdUse)
           AIrank = AIrank + 2
           horz   = .true.
         else
@@ -5466,14 +5466,14 @@
                              ESMF_LOG_WARNING, ESMF_CONTEXT)
         else
 
-          ! get the physgrid/distgrid identifier from the vertical relLoc.  If it
+          ! get the physgrid/interndg identifier from the vertical relLoc.  If it
           ! is not valid return an error.
           if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
             call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
-            vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+            vertDistIdUse = grid%ptr%internDGIndex(vertPhysIdUse)
             AIrank = AIrank + 1
             vert   = .true.
           else
@@ -5503,7 +5503,7 @@
       endif
 
       ! first get the horizontal subGrid AIs, if requested and identified with
-      ! a proper distGridID
+      ! a proper internDGID
       if (horz) then
  
         ! allocate horz temp AI array
@@ -5511,8 +5511,8 @@
         if (ESMF_LogMsgFoundAllocError(localrc, "allocating horz AI array", &
                                        ESMF_CONTEXT, rc)) return
 
-        ! call the proper distgrid to retrieve the horizontal AIs
-        call ESMF_DistGridGetAIsAllDEs(grid%ptr%distgrids(horzDistIdUse)%ptr, &
+        ! call the proper interndg to retrieve the horizontal AIs
+        call ESMF_InternDGGetAIsAllDEs(grid%ptr%interndgs(horzDistIdUse)%ptr, &
                                        horzAI, localGlobalFlag, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -5521,7 +5521,7 @@
       endif
 
       ! next get the vertical subGrid AIs, if requested and identified with
-      ! a proper distGridID
+      ! a proper internDGID
       if (vert) then
  
         ! allocate vert temp AI array
@@ -5529,8 +5529,8 @@
         if (ESMF_LogMsgFoundAllocError(localrc, "allocating vert AI array", &
                                        ESMF_CONTEXT, rc)) return
 
-        ! call the proper distgrid to retrieve the vertical AIs
-        call ESMF_DistGridGetAIsAllDEs(grid%ptr%distgrids(vertDistIdUse)%ptr, &
+        ! call the proper interndg to retrieve the vertical AIs
+        call ESMF_InternDGGetAIsAllDEs(grid%ptr%interndgs(vertDistIdUse)%ptr, &
                                        vertAI, localGlobalFlag, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -5594,7 +5594,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Provides access to a {\tt ESMF\_DistGrid} routine that translates an array of
+!     Provides access to a {\tt ESMF\_InternDG} routine that translates an array of
 !     integer cell identifiers from global indexing to local indexing
 !
 !     The arguments are:
@@ -5635,7 +5635,7 @@
       integer, dimension(:), allocatable :: dimOrderUse
       integer(ESMF_KIND_I4), dimension(:,:), allocatable :: gTemp2D,   lTemp2D
       logical :: dummy
-      type(ESMF_DistGridType), pointer :: hdgtype, vdgtype
+      type(ESMF_InternDGType), pointer :: hdgtype, vdgtype
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -5689,13 +5689,13 @@
         enddo
       endif
 
-      ! get distgrid identifier from relative locations
+      ! get interndg identifier from relative locations
       if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
         call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+        horzDistIdUse = grid%ptr%internDGIndex(horzPhysIdUse)
       else
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                 "undefined horizontal relloc", &
@@ -5708,7 +5708,7 @@
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+          vertDistIdUse = grid%ptr%internDGIndex(vertPhysIdUse)
         endif
  !    else
  !      dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
@@ -5716,9 +5716,9 @@
  !                                    ESMF_CONTEXT, rc)) return
       endif
 
-      hdgtype => grid%ptr%distgrids(horzDistIdUse)%ptr
+      hdgtype => grid%ptr%interndgs(horzDistIdUse)%ptr
       if (vertDistIdUse.ne.-1) then
-        vdgtype => grid%ptr%distgrids(vertDistIdUse)%ptr
+        vdgtype => grid%ptr%interndgs(vertDistIdUse)%ptr
       else
         if (aSize.ge.3 .and. gridRank.eq.3) then
            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
@@ -5727,12 +5727,12 @@
         endif
       endif
 
-      ! call DistGrid method to retrieve information otherwise not available
+      ! call InternDG method to retrieve information otherwise not available
       ! to the application level
       ! can't send parts of optional arguments, so for now break out
       if (present(global1D)) then
         if (gridRank.le.2) then
-          call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
+          call ESMF_InternDGGlobalToLocalIndex(hdgtype, &
                                                global1D=global1D, &
                                                local1D=local1D, &
                                                dimOrder=dimOrderUse(1:2), &
@@ -5749,7 +5749,7 @@
       endif
 
       if (present(global2D)) then
-        call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
+        call ESMF_InternDGGlobalToLocalIndex(hdgtype, &
                                              global2D=gTemp2D(:,1:2), &
                                              local2D=lTemp2D(:,1:2), &
                                              dimOrder=dimOrderUse(1:2), &
@@ -5759,7 +5759,7 @@
                                   ESMF_CONTEXT, rc)) return
 
         if (vertDistIdUse.ne.-1) then
-          call ESMF_DistGridGlobalToLocalIndex(vdgtype, &
+          call ESMF_InternDGGlobalToLocalIndex(vdgtype, &
                                                global2D=gTemp2D(:,3:3), &
                                                local2D=lTemp2D(:,3:3), &
                                                dimOrder=dimOrderUse(3:3), &
@@ -5810,7 +5810,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Provides access to a {\tt ESMF\_DistGrid} routine that translates an array of
+!     Provides access to a {\tt ESMF\_InternDG} routine that translates an array of
 !     integer cell identifiers from global indexing to local indexing
 !
 !     The arguments are:
@@ -5850,7 +5850,7 @@
       integer :: horzPhysIdUse, vertPhysIdUse
       integer(ESMF_KIND_I4), dimension(:,:), allocatable :: gTemp2D,   lTemp2D
       logical :: dummy
-      type(ESMF_DistGridType), pointer :: hdgtype, vdgtype
+      type(ESMF_InternDGType), pointer :: hdgtype, vdgtype
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -5892,13 +5892,13 @@
       endif
       aSize = min(gridRank, aSize)
 
-      ! get distgrid identifiers from relative locations
+      ! get interndg identifiers from relative locations
       if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
         call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+        horzDistIdUse = grid%ptr%internDGIndex(horzPhysIdUse)
       else
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                      "undefined horizontal relloc", &
@@ -5912,13 +5912,13 @@
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+          vertDistIdUse = grid%ptr%internDGIndex(vertPhysIdUse)
         endif
       endif
 
-      hdgtype => grid%ptr%distgrids(horzDistIdUse)%ptr
+      hdgtype => grid%ptr%interndgs(horzDistIdUse)%ptr
       if (vertDistIdUse.ne.-1) then
-        vdgtype => grid%ptr%distgrids(vertDistIdUse)%ptr
+        vdgtype => grid%ptr%interndgs(vertDistIdUse)%ptr
       else
         if (aSize.ge.3 .and. gridRank.eq.3) then
            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
@@ -5927,12 +5927,12 @@
         endif
       endif
 
-      ! call DistGrid method to retrieve information otherwise not available
+      ! call InternDG method to retrieve information otherwise not available
       ! to the application level
       ! can't send parts of optional arguments, so for now break out  TODO: fix
       if (present(local1D)) then
         if (gridRank.le.2) then
-          call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
+          call ESMF_InternDGLocalToGlobalIndex(hdgtype, &
                                                local1D=local1D, &
                                                global1D=global1D, &
                                                rc=localrc)
@@ -5948,7 +5948,7 @@
       endif
 
       if (present(local2D)) then
-        call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
+        call ESMF_InternDGLocalToGlobalIndex(hdgtype, &
                                              local2D=lTemp2D(:,1:2), &
                                              global2D=gTemp2D(:,1:2), &
                                              rc=localrc)
@@ -5957,7 +5957,7 @@
                                   ESMF_CONTEXT, rc)) return
 
         if (vertDistIdUse.ne.-1) then
-          call ESMF_DistGridLocalToGlobalIndex(vdgtype, &
+          call ESMF_InternDGLocalToGlobalIndex(vdgtype, &
                                                local2D=lTemp2D(:,3:3), &
                                                global2D=gTemp2D(:,3:3), &
                                                rc=localrc)
@@ -6004,7 +6004,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Provides access to a {\tt ESMF\_DistGrid} routine that translates an array of
+!     Provides access to a {\tt ESMF\_InternDG} routine that translates an array of
 !     integer cell identifiers from global indexing to local indexing
 !
 !     The arguments are:
@@ -6041,7 +6041,7 @@
       integer, dimension(:), allocatable :: dimOrderUse
       logical :: dummy
       type(ESMF_AxisIndex),  dimension(:,:), allocatable :: gTempAI2D, lTempAI2D
-      type(ESMF_DistGridType), pointer :: hdgtype, vdgtype
+      type(ESMF_InternDGType), pointer :: hdgtype, vdgtype
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -6095,13 +6095,13 @@
         enddo
       endif
 
-      ! get distgrid identifier from relative locations
+      ! get interndg identifier from relative locations
       if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
         call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+        horzDistIdUse = grid%ptr%internDGIndex(horzPhysIdUse)
       else
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                 "undefined horizontal relloc", &
@@ -6114,7 +6114,7 @@
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+          vertDistIdUse = grid%ptr%internDGIndex(vertPhysIdUse)
         endif
  !    else
  !      dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
@@ -6122,9 +6122,9 @@
  !                                    ESMF_CONTEXT, rc)) return
       endif
 
-      hdgtype => grid%ptr%distgrids(horzDistIdUse)%ptr
+      hdgtype => grid%ptr%interndgs(horzDistIdUse)%ptr
       if (vertDistIdUse.ne.-1) then
-        vdgtype => grid%ptr%distgrids(vertDistIdUse)%ptr
+        vdgtype => grid%ptr%interndgs(vertDistIdUse)%ptr
       else
         if (aSize.ge.3 .and. gridRank.eq.3) then
            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
@@ -6133,12 +6133,12 @@
         endif
       endif
 
-      ! call DistGrid method to retrieve information otherwise not available
+      ! call InternDG method to retrieve information otherwise not available
       ! to the application level
       ! can't send parts of optional arguments, so for now break out
       if (present(globalAI1D)) then
         if (gridRank.le.2) then
-          call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
+          call ESMF_InternDGGlobalToLocalIndex(hdgtype, &
                                                globalAI1D=globalAI1D, &
                                                localAI1D=localAI1D, &
                                                dimOrder=dimOrderUse(1:2), &
@@ -6155,7 +6155,7 @@
       endif
 
       if (present(globalAI2D)) then
-        call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
+        call ESMF_InternDGGlobalToLocalIndex(hdgtype, &
                                              globalAI2D=gTempAI2D(:,1:2), &
                                              localAI2D=lTempAI2D(:,1:2), &
                                              dimOrder=dimOrderUse(1:2), &
@@ -6165,7 +6165,7 @@
                                   ESMF_CONTEXT, rc)) return
 
         if (vertDistIdUse.ne.-1) then
-          call ESMF_DistGridGlobalToLocalIndex(vdgtype, &
+          call ESMF_InternDGGlobalToLocalIndex(vdgtype, &
                                                globalAI2D=gTempAI2D(:,3:3), &
                                                localAI2D=lTempAI2D(:,3:3), &
                                                dimOrder=dimOrderUse(3:3), &
@@ -6215,7 +6215,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Provides access to a {\tt ESMF\_DistGrid} routine that translates an array of
+!     Provides access to a {\tt ESMF\_InternDG} routine that translates an array of
 !     integer cell identifiers from global indexing to local indexing
 !
 !     The arguments are:
@@ -6251,7 +6251,7 @@
       integer :: horzPhysIdUse, vertPhysIdUse
       logical :: dummy
       type(ESMF_AxisIndex),  dimension(:,:), allocatable :: gTempAI2D, lTempAI2D
-      type(ESMF_DistGridType), pointer :: hdgtype, vdgtype
+      type(ESMF_InternDGType), pointer :: hdgtype, vdgtype
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -6293,13 +6293,13 @@
       endif
       aSize = min(gridRank, aSize)
 
-      ! get distgrid identifiers from relative locations
+      ! get interndg identifiers from relative locations
       if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
         call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+        horzDistIdUse = grid%ptr%internDGIndex(horzPhysIdUse)
       else
         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                      "undefined horizontal relloc", &
@@ -6313,13 +6313,13 @@
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+          vertDistIdUse = grid%ptr%internDGIndex(vertPhysIdUse)
         endif
       endif
 
-      hdgtype => grid%ptr%distgrids(horzDistIdUse)%ptr
+      hdgtype => grid%ptr%interndgs(horzDistIdUse)%ptr
       if (vertDistIdUse.ne.-1) then
-        vdgtype => grid%ptr%distgrids(vertDistIdUse)%ptr
+        vdgtype => grid%ptr%interndgs(vertDistIdUse)%ptr
       else
         if (aSize.ge.3 .and. gridRank.eq.3) then
            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
@@ -6328,12 +6328,12 @@
         endif
       endif
 
-      ! call DistGrid method to retrieve information otherwise not available
+      ! call InternDG method to retrieve information otherwise not available
       ! to the application level
       ! can't send parts of optional arguments, so for now break out  TODO: fix
       if (present(localAI1D)) then
         if (gridRank.le.2) then
-          call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
+          call ESMF_InternDGLocalToGlobalIndex(hdgtype, &
                                                localAI1D=localAI1D, &
                                                globalAI1D=globalAI1D, &
                                                rc=localrc)
@@ -6349,7 +6349,7 @@
       endif
 
       if (present(localAI2D)) then
-        call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
+        call ESMF_InternDGLocalToGlobalIndex(hdgtype, &
                                              localAI2D=lTempAI2D(:,1:2), &
                                              globalAI2D=gTempAI2D(:,1:2), &
                                              rc=localrc)
@@ -6358,7 +6358,7 @@
                                   ESMF_CONTEXT, rc)) return
 
         if (vertDistIdUse.ne.-1) then
-          call ESMF_DistGridLocalToGlobalIndex(vdgtype, &
+          call ESMF_InternDGLocalToGlobalIndex(vdgtype, &
                                                localAI2D=lTempAI2D(:,3:3), &
                                                globalAI2D=gTempAI2D(:,3:3), &
                                                rc=localrc)
@@ -7468,7 +7468,7 @@
         enddo
       endif
 
-      ! if DistGrid info is being queried, make sure there is a valid distGridId
+      ! if InternDG info is being queried, make sure there is a valid internDGId
       if (present(globalCellCountPerDim)   .or. &
           present(globalStartPerDEPerDim)  .or. &
           present(maxLocalCellCountPerDim) .or. &
@@ -7486,7 +7486,7 @@
             aSize = max(aSize, size(cellCountPerDEPerDim,2))
         aSize = min(gridRank, aSize)
 
-        ! get distgrid identifiers from relative locations
+        ! get interndg identifiers from relative locations
         if (.not.(present(horzRelLoc))) then
            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                 "invalid horizontal relloc", &
@@ -7497,12 +7497,12 @@
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+        horzDistIdUse = grid%ptr%internDGIndex(horzPhysIdUse)
 
         if (aSize.ge.3) then
           if (.not.(present(vertRelLoc))) then
             if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                 "no valid vertical DistGrid identifier", &
+                                 "no valid vertical InternDG identifier", &
                                  ESMF_CONTEXT, rc)) return
           endif
           call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, &
@@ -7510,16 +7510,16 @@
           if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-          vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+          vertDistIdUse = grid%ptr%internDGIndex(vertPhysIdUse)
         endif
 
-        ! Get distgrid info with global coordinate counts
+        ! Get interndg info with global coordinate counts
         if (present(globalCellCountPerDim)) then
           aSize = min(gridRank, size(globalCellCountPerDim))
           allocate(gCCPDUse(aSize), stat=localrc)
           if (ESMF_LogMsgFoundAllocError(localrc, "gCCPDUse", &
                                          ESMF_CONTEXT, rc)) return
-          call ESMF_DistGridGet(gridp%distgrids(horzDistIdUse), &
+          call ESMF_InternDGGet(gridp%interndgs(horzDistIdUse), &
                                 globalCellCountPerDim=gCCPDUse(1:2), &
                                 rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -7527,7 +7527,7 @@
                                     ESMF_CONTEXT, rc)) return
 
           if (aSize.ge.3) then
-            call ESMF_DistGridGet(gridp%distgrids(vertDistIdUse), &
+            call ESMF_InternDGGet(gridp%interndgs(vertDistIdUse), &
                                   globalCellCountPerDim=gCCPDUse(3:3), &
                                   rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
@@ -7548,7 +7548,7 @@
           allocate(gSPDEPDUse(size(globalStartPerDEPerDim,1), aSize), stat=localrc)
           if (ESMF_LogMsgFoundAllocError(localrc, "gSPDEPUse", &
                                          ESMF_CONTEXT, rc)) return
-          call ESMF_DistGridGet(gridp%distgrids(horzDistIdUse), &
+          call ESMF_InternDGGet(gridp%interndgs(horzDistIdUse), &
                                 globalStartPerDEPerDim=gSPDEPDUse(:,1:2), &
                                 rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -7556,7 +7556,7 @@
                                     ESMF_CONTEXT, rc)) return
 
           if (aSize.ge.3) then
-            call ESMF_DistGridGet(gridp%distgrids(vertDistIdUse), &
+            call ESMF_InternDGGet(gridp%interndgs(vertDistIdUse), &
                                   globalStartPerDEPerDim=gSPDEPDUse(:,3:3), &
                                   rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
@@ -7577,7 +7577,7 @@
           allocate(mLCCPDUse(aSize), stat=localrc)
           if (ESMF_LogMsgFoundAllocError(localrc, "mLCCPDUse", &
                                          ESMF_CONTEXT, rc)) return
-          call ESMF_DistGridGet(gridp%distgrids(horzDistIdUse), &
+          call ESMF_InternDGGet(gridp%interndgs(horzDistIdUse), &
                                 maxLocalCellCountPerDim=mLCCPDUse(1:2), &
                                 rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -7585,7 +7585,7 @@
                                     ESMF_CONTEXT, rc)) return
 
           if (aSize.ge.3) then
-            call ESMF_DistGridGet(gridp%distgrids(vertDistIdUse), &
+            call ESMF_InternDGGet(gridp%interndgs(vertDistIdUse), &
                                   maxLocalCellCountPerDim=mLCCPDUse(3:3), &
                                   rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
@@ -7606,14 +7606,14 @@
           allocate(cCPDEPDUse(size(cellCountPerDEPerDim,1), aSize), stat=localrc)
           if (ESMF_LogMsgFoundAllocError(localrc, "cCPDEPDUse", &
                                          ESMF_CONTEXT, rc)) return
-          call ESMF_DistGridGetAllCounts(gridp%distgrids(horzDistIdUse)%ptr, &
+          call ESMF_InternDGGetAllCounts(gridp%interndgs(horzDistIdUse)%ptr, &
                                          cCPDEPDUse(:,1:2), rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
           if (aSize.ge.3) then
-            call ESMF_DistGridGetAllCounts(gridp%distgrids(vertDistIdUse)%ptr, &
+            call ESMF_InternDGGetAllCounts(gridp%interndgs(vertDistIdUse)%ptr, &
                                            cCPDEPDUse(:,3:3), rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
@@ -7637,7 +7637,7 @@
       endif
 
       if (present(delayout)) then
-        call ESMF_DistGridGet(gridp%distgrids(1), delayout=delayout, rc=localrc)
+        call ESMF_InternDGGet(gridp%interndgs(1), delayout=delayout, rc=localrc)
       endif
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -8645,7 +8645,7 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! TODO: add calls to PhysGrid and distgrid validates
+      ! TODO: add calls to PhysGrid and interndg validates
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -9465,13 +9465,13 @@
 !! !REQUIREMENTS:  SSSn.n, GGGn.n
 !
 !!
-!!     extract appropriate PhysGrid and DistGrid to search
+!!     extract appropriate PhysGrid and InternDG to search
 !!     extract various other grid properties
 !!
 !      if (.not. present(physGridId)) physGridId = 1 (or whatever default)
 !      ! combine these queries?  format of query functions?
 !      call ESMF_LRGridGet(searchGrid, physGrid=physGridId) ??? 
-!      call ESMF_LRGridGet(searchGrid, distGrid = ??)
+!      call ESMF_LRGridGet(searchGrid, internDG = ??)
 !      call ESMF_LRGridGet(searchGrid, horzGridType = searchGridType)
 !!
 !!     Call appropriate search routine based on coordinate system and
@@ -9483,17 +9483,17 @@
 !           ESMF_GRID_TYPE_LATLON_GAUSS, ESMF_GRID_TYPE_REDUCED)
 !         !*** simple search adequate for these cases
 !         call ESMF_PhysGridSearchBboxSpherical(dstAdd, x, y, DEId, physGrid, &
-!                                               distGrid, localrc)
+!                                               internDG, localrc)
 !
 !      case(ESMF_GRID_TYPE_DIPOLE,   ESMF_GRID_TYPE_TRIPOLE, &
 !           ESMF_GRID_TYPE_GEODESIC, ESMF_GRID_TYPE_CUBEDSPHERE)
 !         !*** must use more general algorithm for these cases
 !         call ESMF_PhysGridSearchGeneralSpherical(dstAdd, x, y, DEId, physGrid, &
-!                                                  distGrid, localrc)
+!                                                  internDG, localrc)
 !
 !      case(ESMF_GRIDTYPE_XY, ESMF_GRIDTYPE_XY_UNI)
 !         call ESMF_PhysGridSearchBboxCartesian(dstAdd, x, y, DEId, physGrid, &
-!                                               distGrid, localrc)
+!                                               internDG, localrc)
 !
 !      case default
 !         print *,'GridSearchPoint: search of this grid type not supported'

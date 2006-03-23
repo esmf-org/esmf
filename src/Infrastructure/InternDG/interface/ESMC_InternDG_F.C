@@ -1,4 +1,4 @@
-// $Id: ESMC_InternDG_F.C,v 1.2 2006/03/23 00:13:35 theurich Exp $
+// $Id: ESMC_InternDG_F.C,v 1.3 2006/03/23 01:12:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -14,8 +14,8 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt ESMC\_DistGrid} methods declared
-// in the companion file ESMC_DistGrid.h
+// The code in this file implements the C++ {\tt ESMC\_InternDG} methods declared
+// in the companion file ESMC_InternDG.h
 //
 // 
 //
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_InternDG_F.C,v 1.2 2006/03/23 00:13:35 theurich Exp $";
+             "$Id: ESMC_InternDG_F.C,v 1.3 2006/03/23 01:12:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -41,12 +41,12 @@ extern "C" {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
-// This section includes all the DistGrid routines
+// This section includes all the InternDG routines
 //
 //
 
 // non-method functions
-void FTN(c_esmc_distgridserialize)(int *dimCount, int *ndes,
+void FTN(c_esmc_interndgserialize)(int *dimCount, int *ndes,
                                    int *decompIDs,
                                    int *cellCountPerDEPerDim,
                                    void *buffer, int *length,
@@ -84,7 +84,7 @@ void FTN(c_esmc_distgridserialize)(int *dimCount, int *ndes,
 } 
 
 
-void FTN(c_esmc_distgriddeserialize)(int *decompIDs,
+void FTN(c_esmc_interndgdeserialize)(int *decompIDs,
                                      int *cellCountPerDEPerDim,
                                      void *buffer, int *offset, int *localrc){
 
