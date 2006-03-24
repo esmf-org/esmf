@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.60 2006/03/01 21:33:17 eschwab Exp $
+% $Id: ESMF_refdoc.ctex,v 1.61 2006/03/24 16:50:43 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -128,9 +128,9 @@
 
 #include "../Infrastructure/FieldDataMap/doc/FieldDataMap_refdoc.ctex"
 
-#include "../Infrastructure/ArrayComm/doc/Array_refdoc.ctex"
+%#include "../Infrastructure/ArrayComm/doc/Array_refdoc.ctex"
 
-#include "../Infrastructure/ArrayDataMap/doc/ArrayDataMap_refdoc.ctex"
+%#include "../Infrastructure/ArrayDataMap/doc/ArrayDataMap_refdoc.ctex"
 
 #include "../Infrastructure/ArraySpec/doc/ArraySpec_refdoc.ctex"
 
@@ -143,11 +143,11 @@
 %\section{Overview of Distributed Data Methods}
 \input{ESMF_inframethodoverview.tex}
 
-#include "../Infrastructure/ArrayComm/doc/ArrayHalo_refdoc.ctex"
+#include "../Infrastructure/InternArrayComm/doc/InternArrayHalo_refdoc.ctex"
 
 #include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
 
-#include "../Infrastructure/ArrayComm/doc/ArrayRedist_refdoc.ctex"
+#include "../Infrastructure/InternArrayComm/doc/InternArrayRedist_refdoc.ctex"
 
 %===============================================================================
 \newpage
