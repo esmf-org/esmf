@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldDataMap_F.C,v 1.3 2006/01/26 23:10:34 nscollins Exp $
+// $Id: ESMC_FieldDataMap_F.C,v 1.4 2006/03/24 16:39:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -26,14 +26,14 @@
 #include "ESMC_LogErr.h"
 
  // associated class definition files
-#include "ESMC_ArrayDataMap.h"
+#include "ESMC_InternArrayDataMap.h"
 #include "ESMC_FieldDataMap.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_FieldDataMap_F.C,v 1.3 2006/01/26 23:10:34 nscollins Exp $";
+             "$Id: ESMC_FieldDataMap_F.C,v 1.4 2006/03/24 16:39:07 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
