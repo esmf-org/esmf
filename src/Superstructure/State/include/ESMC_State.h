@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.6 2004/12/01 18:32:14 nscollins Exp $
+// $Id: ESMC_State.h,v 1.7 2006/03/24 16:46:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 // 
 // !USES:
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
-#include "ESMC_Array.h"
+#include "ESMC_InternArray.h"
 #include "ESMC_Field.h"
 #include "ESMC_Bundle.h"
 #include "ESMC_Xform.h"
