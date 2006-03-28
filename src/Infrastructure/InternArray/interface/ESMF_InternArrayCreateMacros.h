@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_InternArrayCreateMacros.h,v 1.1 2006/03/24 16:33:28 theurich Exp $
+! $Id: ESMF_InternArrayCreateMacros.h,v 1.2 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -50,7 +50,7 @@
 !      function ESMF_ArrayCreateByMTPtr<rank><type><kind>(farr, counts, haloWidth, lbounds, ubounds, rc) @\
 ! @\
 ! !RETURN VALUE: @\
-!      type(ESMF_Array) :: ESMF_ArrayCreateByMTPtr<rank><type><kind> @\
+!      type(ESMF_InternArray) :: ESMF_ArrayCreateByMTPtr<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
 !      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farr @\
@@ -102,7 +102,7 @@
       function ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind(fptr, counts, & @\
                                            haloWidth, lbounds, ubounds, rc) @\
  @\
-      type(ESMF_Array) :: ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind @\
+      type(ESMF_InternArray) :: ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind @\
  @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
       integer, dimension(:), intent(in) :: counts @\
@@ -112,7 +112,7 @@
       integer, intent(out), optional :: rc   @\
  @\
         ! Local variables @\
-        type (ESMF_Array) :: array          ! new array object @\
+        type(ESMF_InternArray) :: array          ! new array object @\
         integer :: status                   ! local error status @\
         integer :: hwidth                   ! local copy of halo width @\
  @\
@@ -137,7 +137,7 @@
         endif @\
  @\
         ! Call create routine @\
-        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
+        call c_ESMC_IArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
                                           ESMF_FROM_FORTRAN, status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
@@ -177,7 +177,7 @@
 !      function ESMF_ArrayCreateByFullPtr<rank><type><kind>(farr, docopy, haloWidth, rc) @\
 ! @\
 ! !RETURN VALUE: @\
-!      type(ESMF_Array) :: ESMF_ArrayCreateByFullPtr<rank><type><kind> @\
+!      type(ESMF_InternArray) :: ESMF_ArrayCreateByFullPtr<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
 !      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farr @\
@@ -224,7 +224,7 @@
       function ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind(fptr, docopy, & @\
                                                 haloWidth, rc) @\
  @\
-      type(ESMF_Array) :: ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind @\
+      type(ESMF_InternArray) :: ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind @\
  @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
       type(ESMF_CopyFlag), intent(in), optional :: docopy @\
@@ -232,7 +232,7 @@
       integer, intent(out), optional :: rc   @\
  @\
         ! Local variables @\
-        type (ESMF_Array) :: array          ! new array object @\
+        type(ESMF_InternArray) :: array          ! new array object @\
         integer :: status                   ! local error status @\
         integer :: hwidth                   ! local copy of halo width @\
         type (ESMF_CopyFlag) :: copy        ! do we copy or ref? @\
@@ -274,7 +274,7 @@
         endif @\
  @\
         ! Call create routine @\
-        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
+        call c_ESMC_IArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
                                       ESMF_FROM_FORTRAN, status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
@@ -313,7 +313,7 @@
 !                                                   docopy, lbounds, ubounds, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!      type(ESMF_Array), intent(inout) :: array @\
+!      type(ESMF_InternArray), intent(inout) :: array @\
 !      integer, dimension(:), intent(in) :: counts @\
 !      integer, intent(in) :: hwidth @\
 !      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer, optional :: fptr  @\
@@ -363,7 +363,7 @@
       subroutine ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind(array, counts, hwidth, fptr, & @\
                                                    docopy, lbounds, ubounds, rc) @\
  @\
-      type(ESMF_Array), intent(inout) :: array @\
+      type(ESMF_InternArray), intent(inout) :: array @\
       integer, dimension(:), intent(in) :: counts @\
       integer, intent(in) :: hwidth @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer, optional :: fptr  @\
@@ -472,12 +472,12 @@
  @\
         wrap % ptr##mrank##D##mtypekind => newp @\
         if (zerosize) then @\
-            call c_ESMC_ArraySetInfo(array, wrap, & @\
+            call c_ESMC_IArraySetInfo(array, wrap, & @\
                                      ESMF_NULL_POINTER, counts, & @\
                                      lb, ub, offsets, & @\
                                      ESMF_TRUE, do_dealloc, hwidth, status) @\
         else @\
-            call c_ESMC_ArraySetInfo(array, wrap, & @\
+            call c_ESMC_IArraySetInfo(array, wrap, & @\
                                      ESMF_DATA_ADDRESS(newp(mloc)), counts, & @\
                                      lb, ub, offsets, & @\
                                      ESMF_TRUE, do_dealloc, hwidth, status) @\
@@ -508,7 +508,7 @@
 !      subroutine ESMF_ArrayDeallocate<rank><type><kind>(array, wrap, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!      type(ESMF_Array) :: array @\
+!      type(ESMF_InternArray) :: array @\
 !      type (ESMF_ArrWrap<rank><type><kind>) :: wrap @\
 !      integer, intent(out), optional :: rc @\
 ! @\
@@ -537,7 +537,7 @@
 ^define ESMF_METHOD "ESMF_ArrayDeallocate" @\
       subroutine ESMF_ArrayDeallocate##mrank##D##mtypekind(array, wrap, rc) @\
  @\
-      type(ESMF_Array) :: array @\
+      type(ESMF_InternArray) :: array @\
       type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap @\
       integer, intent(out), optional :: rc @\
  @\
@@ -545,7 +545,7 @@
  @\
         status = ESMF_FAILURE  @\
  @\
-        call c_ESMC_ArrayGetF90Ptr(array, wrap, status) @\
+        call c_ESMC_IArrayGetF90Ptr(array, wrap, status) @\
         deallocate(wrap % ptr##mrank##D##mtypekind) @\
  @\
         if (present(rc)) rc = status @\

@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray_F.C,v 1.1 2006/03/24 16:33:28 theurich Exp $
+// $Id: ESMC_InternArray_F.C,v 1.2 2006/03/28 21:52:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,34 +38,34 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the inter-language code which
-//  allows F90 to call C++ for supporting {\tt Array} class functions.
+//  allows F90 to call C++ for supporting {\tt InternArray} class functions.
 //
 //EOP
 
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-     void FTN(c_esmc_arraycreateall)(ESMC_Array **ptr, int *rank, 
+     void FTN(c_esmc_iarraycreateall)(ESMC_InternArray **ptr, int *rank, 
                                      ESMC_DataType *dt, ESMC_DataKind *dk,
                                      int *counts, int *lbounds, int *ubounds,
                                      int *status)  {
-         (*ptr) = ESMC_ArrayCreate_F(*rank, *dt, *dk, counts, 
+         (*ptr) = ESMC_InternArrayCreate_F(*rank, *dt, *dk, counts, 
                                     NULL, NULL, ESMC_DATA_NONE, 
                                     lbounds, ubounds, status);
 
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
 
-     void FTN(c_esmc_arraycreatenodata)(ESMC_Array **ptr, int *rank, 
+     void FTN(c_esmc_iarraycreatenodata)(ESMC_InternArray **ptr, int *rank, 
                                         ESMC_DataType *dt, ESMC_DataKind *dk, 
                                         ESMC_ArrayOrigin *oflag, int *status) {
              
-             (*ptr) = ESMC_ArrayCreateNoData(*rank, *dt, *dk, *oflag, status);
+             (*ptr) = ESMC_InternArrayCreateNoData(*rank, *dt, *dk, *oflag, status);
 
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
  
-     void FTN(c_esmc_arraysetinfo)(ESMC_Array **ptr, 
+     void FTN(c_esmc_iarraysetinfo)(ESMC_InternArray **ptr, 
                                struct c_F90ptr *fptr, void XD *base, int *counts,
                                int *lbounds, int *ubounds, int *offsets,
                                ESMC_Logical *contig, ESMC_Logical *dealloc,
@@ -81,7 +81,7 @@ extern "C" {
                                             *contig, *dealloc, *hwidth);
      }
 
-     void FTN(c_esmc_arraysetlengths)(ESMC_Array **ptr, int *rank, int *lengths, int *status) {
+     void FTN(c_esmc_iarraysetlengths)(ESMC_InternArray **ptr, int *rank, int *lengths, int *status) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
@@ -91,7 +91,7 @@ extern "C" {
          *status = (*ptr)->ESMC_ArraySetLengths(*rank, lengths);
      }
 
-     void FTN(c_esmc_arraygetlengths)(ESMC_Array **ptr, int *rank, int *lengths, int *status) {
+     void FTN(c_esmc_iarraygetlengths)(ESMC_InternArray **ptr, int *rank, int *lengths, int *status) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
@@ -101,7 +101,7 @@ extern "C" {
          *status = (*ptr)->ESMC_ArrayGetLengths(*rank, lengths);
      }
 
-     void FTN(c_esmc_arraygetlbounds)(ESMC_Array **ptr, int *rank, int *lbounds, int *status) {
+     void FTN(c_esmc_iarraygetlbounds)(ESMC_InternArray **ptr, int *rank, int *lbounds, int *status) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
@@ -111,7 +111,7 @@ extern "C" {
          *status = (*ptr)->ESMC_ArrayGetLbounds(*rank, lbounds);
      }
 
-     void FTN(c_esmc_arraygetubounds)(ESMC_Array **ptr, int *rank, int *ubounds, int *status) {
+     void FTN(c_esmc_iarraygetubounds)(ESMC_InternArray **ptr, int *rank, int *ubounds, int *status) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
@@ -121,7 +121,7 @@ extern "C" {
          *status = (*ptr)->ESMC_ArrayGetUbounds(*rank, ubounds);
      }
 
-     void FTN(c_esmc_arraygethwidth)(ESMC_Array **ptr, int *hwidth, int *status) {
+     void FTN(c_esmc_iarraygethwidth)(ESMC_InternArray **ptr, int *hwidth, int *status) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
@@ -131,7 +131,7 @@ extern "C" {
          *status = (*ptr)->ESMC_ArrayGetHWidth(hwidth);
      }
 
-     void FTN(c_esmc_arraygethwidthlist)(ESMC_Array **ptr, int *hwidth, int *status) {
+     void FTN(c_esmc_iarraygethwidthlist)(ESMC_InternArray **ptr, int *hwidth, int *status) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
@@ -141,7 +141,7 @@ extern "C" {
          *status = (*ptr)->ESMC_ArrayGetHWidthList(hwidth);
      }
 
-     void FTN(c_esmc_arraygetrank)(ESMC_Array **ptr, int *rank, int *status) {
+     void FTN(c_esmc_iarraygetrank)(ESMC_InternArray **ptr, int *rank, int *status) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
@@ -152,7 +152,7 @@ extern "C" {
          *status = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_arraygettype)(ESMC_Array **ptr, int *type, int *status) {
+     void FTN(c_esmc_iarraygettype)(ESMC_InternArray **ptr, int *type, int *status) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
@@ -163,7 +163,7 @@ extern "C" {
          *status = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_arraygetkind)(ESMC_Array **ptr, int *kind, int *status) {
+     void FTN(c_esmc_iarraygetkind)(ESMC_InternArray **ptr, int *kind, int *status) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
@@ -174,7 +174,7 @@ extern "C" {
          *status = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_arraygetname)(ESMC_Array **ptr, char *name, int *status,
+     void FTN(c_esmc_iarraygetname)(ESMC_InternArray **ptr, char *name, int *status,
                                                                    int nlen) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
@@ -190,16 +190,16 @@ extern "C" {
      }
 
 
-     void FTN(c_esmc_arraydestroy)(ESMC_Array **ptr, int *status) {
+     void FTN(c_esmc_iarraydestroy)(ESMC_InternArray **ptr, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
           }
 
-         *status = ESMC_ArrayDestroy(*ptr);
+         *status = ESMC_InternArrayDestroy(*ptr);
      }
 
-//     void FTN(c_esmc_arraycomputeaxisindex)(ESMC_Array **ptr, 
+//     void FTN(c_esmc_iarraycomputeaxisindex)(ESMC_InternArray **ptr, 
 //                                        ESMC_DELayout **delayout, 
 //                                        int *decompids, int *dlen, 
 //                                        int *status) {
@@ -212,7 +212,7 @@ extern "C" {
 //                                                       decompids, *dlen);
 //     }
 
-     void FTN(c_esmc_arraysetaxisindex)(ESMC_Array **ptr, ESMC_DomainType *dt, 
+     void FTN(c_esmc_iarraysetaxisindex)(ESMC_InternArray **ptr, ESMC_DomainType *dt, 
                                         ESMC_AxisIndex *ai, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
@@ -222,7 +222,7 @@ extern "C" {
           *status = (*ptr)->ESMC_ArraySetAxisIndex(*dt, ai);
      }
 
-     void FTN(c_esmc_arraygetaxisindex)(ESMC_Array **ptr, ESMC_DomainType *dt, 
+     void FTN(c_esmc_iarraygetaxisindex)(ESMC_InternArray **ptr, ESMC_DomainType *dt, 
                                         ESMC_AxisIndex *ai, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
@@ -233,7 +233,7 @@ extern "C" {
      }
 
 // obsolete when arbitrary distribution stops needing this.  nsc 03nov05
-     void FTN(c_esmc_arraygetallaxisindices)(ESMC_Array **ptr, 
+     void FTN(c_esmc_iarraygetallaxisindices)(ESMC_InternArray **ptr, 
                                      ESMC_AxisIndex *global, int *nDEs,
                                      int *rank, ESMC_AxisIndex *total,
                                      ESMC_AxisIndex *comp, ESMC_AxisIndex *excl,
@@ -247,7 +247,7 @@ extern "C" {
                                      total, comp, excl);
      }
 
-     void FTN(c_esmc_arraygetallaxisindex)(ESMC_Array **ptr, ESMC_DomainType *dt, 
+     void FTN(c_esmc_iarraygetallaxisindex)(ESMC_InternArray **ptr, ESMC_DomainType *dt, 
                                      ESMC_AxisIndex *global, int *nDEs,
                                      int *rank, ESMC_AxisIndex *ai,
                                      int *status) {
@@ -272,7 +272,7 @@ extern "C" {
          }
      }
 
-     void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array **ptr, void XD *base, int *status) {
+     void FTN(c_esmc_iarraysetbaseaddr)(ESMC_InternArray **ptr, void XD *base, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
@@ -281,7 +281,7 @@ extern "C" {
           *status = (*ptr)->ESMC_ArraySetBaseAddr(XD base);
      }
 
-     void FTN(c_esmc_arraygetbaseaddr)(ESMC_Array **ptr, void **base, int *status) {
+     void FTN(c_esmc_iarraygetbaseaddr)(ESMC_InternArray **ptr, void **base, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
@@ -290,7 +290,7 @@ extern "C" {
           *status = (*ptr)->ESMC_ArrayGetBaseAddr((void **)base);
      }
 
-     void FTN(c_esmc_arraysetf90ptr)(ESMC_Array **ptr, struct c_F90ptr *p, int *status) {
+     void FTN(c_esmc_iarraysetf90ptr)(ESMC_InternArray **ptr, struct c_F90ptr *p, int *status) {
         //fprintf(stderr, "interface code, setting f90 ptr to %lx, this = %lx, &this = %lx\n", 
         //                                (long int)p, (long int)(*ptr), (long int)ptr);
           if ((ptr == NULL) || (*ptr == NULL)) {
@@ -301,7 +301,7 @@ extern "C" {
           *status = (*ptr)->ESMC_ArraySetF90Ptr(p);
      }
 
-     void FTN(c_esmc_arraygetf90ptr)(ESMC_Array **ptr, struct c_F90ptr *p, int *status) {
+     void FTN(c_esmc_iarraygetf90ptr)(ESMC_InternArray **ptr, struct c_F90ptr *p, int *status) {
         //fprintf(stderr, "interface code, getting f90 ptr into %lx, this = %lx, &this = %lx\n", 
         //                                (long int)p, (long int)(*ptr), (long int)ptr);
           if ((ptr == NULL) || (*ptr == NULL)) {
@@ -312,7 +312,7 @@ extern "C" {
           *status = (*ptr)->ESMC_ArrayGetF90Ptr(p);
      }
 
-     void FTN(c_esmc_arraysetdealloc)(ESMC_Array **ptr, int *status) {
+     void FTN(c_esmc_iarraysetdealloc)(ESMC_InternArray **ptr, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
@@ -321,7 +321,7 @@ extern "C" {
           *status = (*ptr)->ESMC_ArraySetDealloc();
      }
 
-     void FTN(c_esmc_arraysetnodealloc)(ESMC_Array **ptr, int *status) {
+     void FTN(c_esmc_iarraysetnodealloc)(ESMC_InternArray **ptr, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
@@ -330,7 +330,7 @@ extern "C" {
           *status = (*ptr)->ESMC_ArraySetNoDealloc();
      }
 
-     void FTN(c_esmc_arrayneedsdealloc)(ESMC_Array **ptr, int flag, int *status) {
+     void FTN(c_esmc_iarrayneedsdealloc)(ESMC_InternArray **ptr, int flag, int *status) {
       
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
@@ -341,7 +341,7 @@ extern "C" {
           *status = ESMF_SUCCESS;
      }
 
-     void FTN(c_esmc_arrayprint)(ESMC_Array **ptr, char *opts, int *status, 
+     void FTN(c_esmc_iarrayprint)(ESMC_InternArray **ptr, char *opts, int *status, 
                                                                  int clen) {
          char *temp = NULL;
 
@@ -364,7 +364,7 @@ extern "C" {
              delete[] temp;
      }
 
-     void FTN(c_esmc_arraywrite)(ESMC_Array **ptr, char *opts, char *fname,
+     void FTN(c_esmc_iarraywrite)(ESMC_InternArray **ptr, char *opts, char *fname,
                                     int *status, int optlen, int flen) {
          char *opttemp = NULL;
          char *filetemp = NULL;
@@ -398,151 +398,151 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arrayserialize"
+#define ESMC_METHOD "c_esmc_iarrayserialize"
 //BOP
-// !IROUTINE:  c_ESMC_ArraySerialize - Serialize Array object 
+// !IROUTINE:  c_ESMC_IArraySerialize - Serialize InternArray object 
 //
 // !INTERFACE:
-      void FTN(c_esmc_arrayserialize)(
+      void FTN(c_esmc_iarrayserialize)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_Array **array,       // in - array object
+      ESMC_InternArray **iarray,       // in - iarray object
       char *buf,                // in/out - a byte stream buffer
       int *length,              // in/out - number of allocated bytes
       int *offset,              // in/out - current offset in the stream
       int *rc) {                // out - return code
 // 
 // !DESCRIPTION:
-//     Serialize the contents of a array object.
+//     Serialize the contents of a iarray object.
 //     Warning!!  Not completely implemented yet.
 //
 //EOP
 
-  if (!array) {
-    //printf("uninitialized Array object\n");
-    ESMC_LogDefault.ESMC_LogWrite("Array object uninitialized", ESMC_LOG_INFO);
+  if (!iarray) {
+    //printf("uninitialized InternArray object\n");
+    ESMC_LogDefault.ESMC_LogWrite("InternArray object uninitialized", ESMC_LOG_INFO);
     if (rc) *rc = ESMF_SUCCESS;
     return;
   }
 
-  *rc = (*array)->ESMC_ArraySerialize(buf, length, offset);
+  *rc = (*iarray)->ESMC_ArraySerialize(buf, length, offset);
 
   return;
 
-}  // end c_ESMC_ArraySerialize
+}  // end c_ESMC_IArraySerialize
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraydeserialize"
+#define ESMC_METHOD "c_esmc_iarraydeserialize"
 //BOP
-// !IROUTINE:  c_ESMC_ArrayDeserialize - Deserialize Array object 
+// !IROUTINE:  c_ESMC_IArrayDeserialize - Deserialize InternArray object 
 //
 // !INTERFACE:
-      void FTN(c_esmc_arraydeserialize)(
+      void FTN(c_esmc_iarraydeserialize)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_Array **array,       // in/out - empty array object to fill in
+      ESMC_InternArray **iarray,       // in/out - empty iarray object to fill in
       char *buf,                // in - byte stream buffer
       int *offset,              // in/out - current offset in the stream
       int *rc) {                // out - return code
 // 
 // !DESCRIPTION:
-//     Deserialize the contents of a array object.
+//     Deserialize the contents of a iarray object.
 //
 //EOP
 
-  // create a new array object to deserialize into
-  *array = new ESMC_Array;
+  // create a new iarray object to deserialize into
+  *iarray = new ESMC_InternArray;
 
-  (*array)->ESMC_ArrayDeserialize(buf, offset);
+  (*iarray)->ESMC_ArrayDeserialize(buf, offset);
 
   if (rc) *rc = ESMF_SUCCESS;
 
   return;
 
-}  // end c_ESMC_ArrayDeserialize
+}  // end c_ESMC_IArrayDeserialize
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arrayserializenodata"
+#define ESMC_METHOD "c_esmc_iarrayserializenodata"
 //BOP
-// !IROUTINE:  c_ESMC_ArraySerializeNoData - Serialize Array object 
+// !IROUTINE:  c_ESMC_IArraySerializeNoData - Serialize InternArray object 
 //
 // !INTERFACE:
-      void FTN(c_esmc_arrayserializenodata)(
+      void FTN(c_esmc_iarrayserializenodata)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_Array **array,       // in - array object
+      ESMC_InternArray **iarray,       // in - iarray object
       char *buf,                // in/out - a byte stream buffer
       int *length,              // in/out - number of allocated bytes
       int *offset,              // in/out - current offset in the stream
       int *rc) {                // out - return code
 // 
 // !DESCRIPTION:
-//     Serialize the contents of a array object, without preserving
+//     Serialize the contents of a iarray object, without preserving
 //     the data values.
 //
 //EOP
 
-  if (!array) {
-    //printf("uninitialized Array object\n");
-    ESMC_LogDefault.ESMC_LogWrite("Array object uninitialized", ESMC_LOG_INFO);
+  if (!iarray) {
+    //printf("uninitialized InternArray object\n");
+    ESMC_LogDefault.ESMC_LogWrite("InternArray object uninitialized", ESMC_LOG_INFO);
     if (rc) *rc = ESMF_SUCCESS;
     return;
   }
 
-  *rc = (*array)->ESMC_ArraySerializeNoData(buf, length, offset);
+  *rc = (*iarray)->ESMC_ArraySerializeNoData(buf, length, offset);
 
   return;
 
-}  // end c_ESMC_ArraySerializeNoData
+}  // end c_ESMC_InternArraySerializeNoData
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraydeserializenodata"
+#define ESMC_METHOD "c_esmc_iarraydeserializenodata"
 //BOP
-// !IROUTINE:  c_ESMC_ArrayDeserializeNoData - Deserialize Array object 
+// !IROUTINE:  c_ESMC_IArrayDeserializeNoData - Deserialize InternArray object 
 //
 // !INTERFACE:
-      void FTN(c_esmc_arraydeserializenodata)(
+      void FTN(c_esmc_iarraydeserializenodata)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list.
 // 
 // !ARGUMENTS:
-      ESMC_Array **array,       // in/out - empty array object to fill in
+      ESMC_InternArray **iarray,       // in/out - empty iarray object to fill in
       char *buf,                // in - byte stream buffer
       int *offset,              // in/out - current offset in the stream
       int *rc) {                // out - return code
 // 
 // !DESCRIPTION:
-//     Deserialize the contents of a array object, without preserving
+//     Deserialize the contents of a iarray object, without preserving
 //     any of the data (counts explicitly set to 0).
 //
 //EOP
 
-  // create a new array object to deserialize into
-  *array = new ESMC_Array;
+  // create a new iarray object to deserialize into
+  *iarray = new ESMC_InternArray;
 
-  (*array)->ESMC_ArrayDeserializeNoData(buf, offset);
+  (*iarray)->ESMC_ArrayDeserializeNoData(buf, offset);
 
   if (rc) *rc = ESMF_SUCCESS;
 
   return;
 
-}  // end c_ESMC_ArrayDeserializeNoData
+}  // end c_ESMC_InternArrayDeserializeNoData
 
 
 #undef  ESMC_METHOD

@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayCreate.cpp,v 1.1 2006/03/24 16:33:28 theurich Exp $
+! $Id: ESMF_InternArrayCreate.cpp,v 1.2 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 ^define ESMF_FILENAME "ESMF_InternArrayCreate.F90"
 !
 !     ESMF Array module
-      module ESMF_ArrayCreateMod
+      module ESMF_InternArrayCreateMod
 !
 !==============================================================================
 !
@@ -36,7 +36,7 @@
       use ESMF_LogErrMod
       use ESMF_ArraySpecMod
       use ESMF_LocalArrayMod
-      use ESMF_ArrayMod
+      use ESMF_InternArrayMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -71,11 +71,11 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_ArrayCreate, ESMF_ArrayDestroy
+      public ESMF_InternArrayCreate, ESMF_InternArrayDestroy
 
-      public ESMF_ArrayF90Allocate
-      public ESMF_ArrayF90Deallocate
-      public ESMF_ArrayConstructF90Ptr    ! needed for C++ callback only
+      public ESMF_InternArrayF90Allocate
+      public ESMF_InternArrayF90Deallocate
+      public ESMF_InternArrayConstructF90Ptr    ! needed for C++ callback only
 
 !EOP
       public operator(.eq.), operator(.ne.)
@@ -83,8 +83,8 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_InternArrayCreate.cpp,v 1.1 2006/03/24 16:33:28 theurich Exp $'
-
+      '$Id: ESMF_InternArrayCreate.cpp,v 1.2 2006/03/28 21:52:26 theurich Exp $'
+      
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -92,10 +92,10 @@ AllTypesMacro(ArrayType)
 !==============================================================================
 
 !BOP
-! !IROUTINE: ESMF_ArrayCreate -- Generic interface to create an Array
+! !IROUTINE: ESMF_InternArrayCreate -- Generic interface to create an Array
 !
 ! !INTERFACE:
-     interface ESMF_ArrayCreate
+     interface ESMF_InternArrayCreate
 !
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -185,7 +185,7 @@ DeclarationMacro(ArrayCreateByFullPtr)
                                       haloWidth, lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Array) :: ESMF_ArrayCreateByList
+      type(ESMF_InternArray) :: ESMF_ArrayCreateByList
 !
 ! !ARGUMENTS:
       integer, intent(in) :: rank
@@ -231,7 +231,7 @@ DeclarationMacro(ArrayCreateByFullPtr)
 !EOP
 
         ! Local vars
-        type (ESMF_Array) :: array          ! new C++ Array
+        type(ESMF_InternArray) :: array          ! new C++ Array
         integer :: hwidth                   ! local copy of halo width 
         integer, dimension(ESMF_MAXDIM) :: lb, ub  ! local bounds
         integer :: status                   ! local error status
@@ -266,13 +266,13 @@ DeclarationMacro(ArrayCreateByFullPtr)
  
         ! TODO: should this take the counts, or not?  for now i am going to
         !  set the counts after i have created the f90 array and not here.
-        call c_ESMC_ArrayCreateNoData(array, rank, type, kind, &
+        call c_ESMC_IArrayCreateNoData(array, rank, type, kind, &
                                             ESMF_FROM_FORTRAN, status)
         if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-        call ESMF_ArrayConstructF90Ptr(array, counts, hwidth, rank, type, &
+        call ESMF_InternArrayConstructF90Ptr(array, counts, hwidth, rank, type, &
                                        kind, lb, ub, status)
 
         ! Set return values
@@ -303,7 +303,7 @@ DeclarationMacro(ArrayCreateByMTPtr)
                                       lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Array) :: ESMF_ArrayCreateBySpec
+      type(ESMF_InternArray) :: ESMF_ArrayCreateBySpec
 !
 ! !ARGUMENTS:
       type(ESMF_ArraySpec), intent(in) :: arrayspec
@@ -340,7 +340,7 @@ DeclarationMacro(ArrayCreateByMTPtr)
 !EOP
 
         ! Local vars
-        type (ESMF_Array) :: array          ! new C++ Array
+        type(ESMF_InternArray) :: array          ! new C++ Array
         integer :: status                   ! local error status
         logical :: rcpresent                ! did user specify rc?
         integer :: rank
@@ -381,13 +381,13 @@ DeclarationMacro(ArrayDeallocate)
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayDestroy"
+^define ESMF_METHOD "ESMF_InternArrayDestroy"
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayDestroy(array, rc)
+      subroutine ESMF_InternArrayDestroy(array, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array) :: array
+      type(ESMF_InternArray) :: array
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -440,21 +440,21 @@ DeclarationMacro(ArrayDeallocate)
         !   (we will ignore the data) and call deallocate themselves.
 
         ! Call Destruct first, then free this memory
-        call c_ESMC_ArrayNeedsDealloc(array, needsdealloc, status)
+        call c_ESMC_IArrayNeedsDealloc(array, needsdealloc, status)
         if (needsdealloc) then
-          call c_ESMC_ArrayGetRank(array, rank, status)
-          call c_ESMC_ArrayGetType(array, type, status)
-          call c_ESMC_ArrayGetKind(array, kind, status)
-          call ESMF_ArrayF90Deallocate(array, rank, type, kind, status)
+          call c_ESMC_IArrayGetRank(array, rank, status)
+          call c_ESMC_IArrayGetType(array, type, status)
+          call c_ESMC_IArrayGetKind(array, kind, status)
+          call ESMF_InternArrayF90Deallocate(array, rank, type, kind, status)
           if (ESMF_LogMsgFoundAllocError(status, "Array deallocate", &
                                          ESMF_CONTEXT, rc)) return
 
-          call c_ESMC_ArraySetNoDealloc(array, status)
+          call c_ESMC_IArraySetNoDealloc(array, status)
         endif
 
         ! Calling deallocate first means this will not return back to F90
         !  before returning for good.
-        call c_ESMC_ArrayDestroy(array, status)
+        call c_ESMC_IArrayDestroy(array, status)
         if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -465,22 +465,22 @@ DeclarationMacro(ArrayDeallocate)
         ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayDestroy
+        end subroutine ESMF_InternArrayDestroy
 
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayConstructF90Ptr"
+^define ESMF_METHOD "ESMF_InternArrayConstructF90Ptr"
 !BOPI
-! !IROUTINE: ESMF_ArrayConstructF90Ptr - Create and add a Fortran ptr to array
+! !IROUTINE: ESMF_InternArrayConstructF90Ptr - Create and add a Fortran ptr to array
 !
 ! !INTERFACE:
-     subroutine ESMF_ArrayConstructF90Ptr(array, counts, hwidth, &
+     subroutine ESMF_InternArrayConstructF90Ptr(array, counts, hwidth, &
                                          rank, type, kind, lbounds, ubounds, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: array
+      type(ESMF_InternArray), intent(inout) :: array
       integer, dimension(:), intent(in) :: counts
       integer, intent(in) :: hwidth
       integer, intent(in) :: rank
@@ -843,7 +843,7 @@ DeclarationMacro(ArrayDeallocate)
 
         ! Note: rc is already set, nothing to do here.
 
-        end subroutine ESMF_ArrayConstructF90Ptr
+        end subroutine ESMF_InternArrayConstructF90Ptr
 
 !------------------------------------------------------------------------------
 
@@ -861,16 +861,16 @@ DeclarationMacro(ArrayConstructF90Ptr)
 
 !------------------------------------------------------------------------------ 
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayF90Allocate"
+^define ESMF_METHOD "ESMF_InternArrayF90Allocate"
 !BOPI
-! !IROUTINE:  ESMF_ArrayF90Allocate - Allocate an F90 pointer and set Array info
+! !IROUTINE:  ESMF_InternArrayF90Allocate - Allocate an F90 pointer and set Array info
 !
 ! !INTERFACE: 
-     subroutine ESMF_ArrayF90Allocate(array, rank, type, kind, &
+     subroutine ESMF_InternArrayF90Allocate(array, rank, type, kind, &
                                       counts, lbounds, ubounds, hwidth, rc)
 ! 
 ! !ARGUMENTS: 
-      type(ESMF_Array), intent(inout) :: array 
+      type(ESMF_InternArray), intent(inout) :: array 
       integer, intent(in) :: rank   
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
@@ -1178,20 +1178,20 @@ AllocAllocateMacro(R8, 7, RNG7, LOC7)
 
      if (present(rc)) rc = status 
  
-     end subroutine ESMF_ArrayF90Allocate
+     end subroutine ESMF_InternArrayF90Allocate
  
 
 !------------------------------------------------------------------------------ 
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayF90Deallocate"
+^define ESMF_METHOD "ESMF_InternArrayF90Deallocate"
 !BOPI
-! !IROUTINE:  ESMF_ArrayF90Deallocate - Deallocate an F90 pointer 
+! !IROUTINE:  ESMF_InternArrayF90Deallocate - Deallocate an F90 pointer 
 !
 ! !INTERFACE: 
-     subroutine ESMF_ArrayF90Deallocate(array, rank, type, kind, rc)
+     subroutine ESMF_InternArrayF90Deallocate(array, rank, type, kind, rc)
 ! 
 ! !ARGUMENTS: 
-      type(ESMF_Array) :: array 
+      type(ESMF_InternArray) :: array 
       integer :: rank   
       type(ESMF_DataType) :: type
       type(ESMF_DataKind) :: kind
@@ -1486,10 +1486,10 @@ AllocDeallocateMacro(R8, 7)
 
      if (present(rc)) rc = ESMF_SUCCESS
  
-     end subroutine ESMF_ArrayF90Deallocate
+     end subroutine ESMF_InternArrayF90Deallocate
  
 !------------------------------------------------------------------------------ 
 
 
-        end module ESMF_ArrayCreateMod
+        end module ESMF_InternArrayCreateMod
 

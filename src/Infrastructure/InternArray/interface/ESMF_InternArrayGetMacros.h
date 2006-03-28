@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_InternArrayGetMacros.h,v 1.1 2006/03/24 16:33:28 theurich Exp $
+! $Id: ESMF_InternArrayGetMacros.h,v 1.2 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,14 +38,14 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayGetData - Retrieve a Fortran pointer to Array data @\
+! !IROUTINE: ESMF_InternArrayGetData - Retrieve a Fortran pointer to Array data @\
 ! @\
 ! !INTERFACE: @\
-!      ! Private name; call using ESMF_ArrayGetData() @\
+!      ! Private name; call using ESMF_InternArrayGetData() @\
 !      subroutine ESMF_ArrayGetData<rank><type><kind>(array, fptr, docopy, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!      type(ESMF_Array) :: array @\
+!      type(ESMF_InternArray) :: array @\
 !      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr @\
 !      type(ESMF_CopyFlag), intent(in), optional :: docopy @\
 !      integer, intent(out), optional :: rc @\
@@ -79,11 +79,11 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
 ^undef  ESMF_METHOD @\
-!define ESMF_METHOD "ESMF_ArrayGetData##mrank##D##mtypekind" @\
-^define ESMF_METHOD "ESMF_ArrayGetData" @\
+!define ESMF_METHOD "ESMF_InternArrayGetData##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_InternArrayGetData" @\
       subroutine ESMF_ArrayGetData##mrank##D##mtypekind(array, fptr, docopy, rc) @\
  @\
-      type(ESMF_Array) :: array @\
+      type(ESMF_InternArray) :: array @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
       type(ESMF_CopyFlag), intent(in), optional :: docopy @\
       integer, intent(out), optional :: rc @\
@@ -112,18 +112,18 @@
           if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. @\
         endif @\
  @\
-        call c_ESMC_ArrayGetF90Ptr(array, wrap, status) @\
+        call c_ESMC_IArrayGetF90Ptr(array, wrap, status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
         ! Allocate a new buffer if requested and return a copy @\
         if (copyreq) then @\
-          call c_ESMC_ArrayGetLbounds(array, mrank, lb, status) @\
+          call c_ESMC_IArrayGetLbounds(array, mrank, lb, status) @\
           if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
-          call c_ESMC_ArrayGetUbounds(array, mrank, ub, status) @\
+          call c_ESMC_IArrayGetUbounds(array, mrank, ub, status) @\
           if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\

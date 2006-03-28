@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.54 2005/12/22 19:15:09 jwolfe Exp $
+! $Id: ESMF_BundleComm.F90,v 1.55 2006/03/28 21:52:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,11 +45,11 @@
       use ESMF_VMMod
       use ESMF_DELayoutMod
       use ESMF_LocalArrayMod
-      use ESMF_ArrayMod
+      use ESMF_InternArrayMod
       use ESMF_RHandleMod
       use ESMF_RouteMod
-      use ESMF_ArrayCommMod
-      use ESMF_ArrayDataMapMod
+      use ESMF_InternArrayCommMod
+      use ESMF_InternArrayDataMapMod
       use ESMF_GridTypesMod
       use ESMF_GridMod
       use ESMF_FieldDataMapMod
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.54 2005/12/22 19:15:09 jwolfe Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.55 2006/03/28 21:52:25 theurich Exp $'
 
 !==============================================================================
 !
@@ -185,7 +185,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle                 
-      type(ESMF_Array), intent(out) :: array
+      type(ESMF_InternArray), intent(out) :: array
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
@@ -261,7 +261,7 @@
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle                 
       integer, intent(in) :: destinationDE
-      type(ESMF_Array), intent(out) :: arrayList(:)
+      type(ESMF_InternArray), intent(out) :: arrayList(:)
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
@@ -393,7 +393,7 @@
       integer :: i                                ! loop counter
       integer :: nitems
       type(ESMF_BundleType), pointer :: btypep    ! bundle type info
-      type(ESMF_Array), allocatable :: arrayList(:)
+      type(ESMF_InternArray), allocatable :: arrayList(:)
       integer :: maptype
       logical :: bundlepack
       integer :: bopt, bflag, rcount
@@ -845,7 +845,7 @@
       integer :: status                            ! Error status
       integer :: i                                 ! loop counter
       type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
-      type(ESMF_Array), allocatable :: srcArrayList(:), dstArrayList(:)
+      type(ESMF_InternArray), allocatable :: srcArrayList(:), dstArrayList(:)
       integer :: condition
       integer :: maptype
       logical :: bundlepack
@@ -1427,7 +1427,7 @@
       integer :: status                            ! Error status
       integer :: i                                 ! loop counter
       type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
-      type(ESMF_Array), allocatable :: srcArrayList(:), dstArrayList(:)
+      type(ESMF_InternArray), allocatable :: srcArrayList(:), dstArrayList(:)
       integer :: condition
       logical :: hasSrcData, hasDstData
       integer :: maptype
@@ -1773,7 +1773,7 @@
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: array
+      type(ESMF_InternArray), intent(inout) :: array
       integer, intent(in) :: sourceDE
       type(ESMF_Bundle), intent(inout) :: bundle                 
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
@@ -1829,7 +1829,7 @@
       type(ESMF_BundleType) :: btypep             ! bundle type info
       !type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_DELayout) :: delayout          ! layout
-      type(ESMF_Array) :: dstarray                ! Destination array
+      type(ESMF_InternArray) :: dstarray                ! Destination array
       integer :: i, datarank
       !integer :: thisdim, thislength, numDims
       integer :: dimorder(ESMF_MAXDIM)   
@@ -1857,7 +1857,7 @@
       decomps(2) = 2
 
       ! And get the Array sizes
-      call ESMF_ArrayGet(btypep%flist(1)%ftypep%localfield%localdata, rank=datarank, &
+      call ESMF_InternArrayGet(btypep%flist(1)%ftypep%localfield%localdata, rank=datarank, &
                          counts=dimlengths, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1982,12 +1982,12 @@
 
       ! Make sure the data types are consistent. 
       do i=1, stypep%field_count
-          call ESMF_ArrayGet(stypep%flist(1)%ftypep%localfield%localdata, &
+          call ESMF_InternArrayGet(stypep%flist(1)%ftypep%localfield%localdata, &
                              rank=srank, type=stype, kind=skind, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          call ESMF_ArrayGet(dtypep%flist(1)%ftypep%localfield%localdata, &
+          call ESMF_InternArrayGet(dtypep%flist(1)%ftypep%localfield%localdata, &
                              rank=drank, type=dtype, kind=dkind, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &

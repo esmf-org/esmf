@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.7 2005/11/08 21:11:45 nscollins Exp $
+! $Id: FlowArraysMod.F90,v 1.8 2006/03/28 21:52:36 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -82,7 +82,6 @@
       logical :: rcpresent
       integer :: haloWidth
       type(ESMF_ArraySpec) :: arrayspec
-      type(ESMF_Array) :: array_temp
       integer :: lowerindex(2), upperindex(2)
 !
 ! Set initial values
@@ -120,69 +119,53 @@
       field_sie  = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="SIE", rc=status)
 !\end{verbatim}
-!     Once the Field has been created, we have to get a pointer to the Array
-!     inside it.  In this example, we are not interested in the Array itself
-!     so we use a temporary array:
-!\begin{verbatim}
-      call ESMF_FieldGetArray(field_sie, array_temp, rc=status)
-!\end{verbatim}
-!     Here we are getting a pointer to the data inside the Array and calling it
+!     Here we are getting a pointer to the data inside the Field and calling it
 !     "sie."  Inside the Component "sie" can be used like an array made by an
 !     F90 allocation but will reference the data inside "field\_sie."
 !\begin{verbatim}
-      call ESMF_ArrayGetData(array_temp, sie, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_sie, sie, ESMF_DATA_REF, rc=status)
 !\end{verbatim}
 !EOP
 
       field_u    = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_EFACE, &
                    haloWidth=haloWidth, name="U", rc=status)
-      call ESMF_FieldGetArray(field_u, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, u, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_u, u, ESMF_DATA_REF, rc=status)
 
       field_v    = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_NFACE, &
                    haloWidth=haloWidth, name="V", rc=status)
-      call ESMF_FieldGetArray(field_v, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, v, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_v, v, ESMF_DATA_REF, rc=status)
 
       field_rho  = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="RHO", rc=status)
-      call ESMF_FieldGetArray(field_rho, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, rho, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_rho, rho, ESMF_DATA_REF, rc=status)
 
       field_rhoi = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="RHOI", rc=status)
-      call ESMF_FieldGetArray(field_rhoi, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, rhoi, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_rhoi, rhoi, ESMF_DATA_REF, rc=status)
 
       field_rhou = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_EFACE, &
                    haloWidth=haloWidth, name="RHOU", rc=status)
-      call ESMF_FieldGetArray(field_rhou, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, rhou, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_rhou, rhou, ESMF_DATA_REF, rc=status)
 
       field_rhov = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_NFACE, &
                    haloWidth=haloWidth, name="RHOV", rc=status)
-      call ESMF_FieldGetArray(field_rhov, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, rhov, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_rhov, rhov, ESMF_DATA_REF, rc=status)
 
       field_p    = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="P", rc=status)
-      call ESMF_FieldGetArray(field_p, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, p, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_p, p, ESMF_DATA_REF, rc=status)
 
       field_q    = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="Q", rc=status)
-      call ESMF_FieldGetArray(field_q, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, q, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_q, q, ESMF_DATA_REF, rc=status)
 
       field_flag = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="FLAG", rc=status)
-      call ESMF_FieldGetArray(field_flag, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, flag, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_flag, flag, ESMF_DATA_REF, rc=status)
 
       field_de   = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="DE", rc=status)
-      call ESMF_FieldGetArray(field_de, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, de, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(field_de, de, ESMF_DATA_REF, rc=status)
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowArraysAlloc"

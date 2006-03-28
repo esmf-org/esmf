@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.80 2006/03/22 22:35:49 theurich Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.81 2006/03/28 21:52:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -50,15 +50,15 @@
       use ESMF_VMMod
       use ESMF_DELayoutMod
       use ESMF_LocalArrayMod
-      use ESMF_ArrayDataMapMod
-      use ESMF_ArrayMod      ! ESMF array  class
+      use ESMF_InternArrayDataMapMod
+      use ESMF_InternArrayMod! ESMF internal array  class
       use ESMF_PhysGridMod   ! ESMF physical grid class
       use ESMF_GridTypesMod  ! ESMF grid   class
       use ESMF_GridMod       ! ESMF grid   class
       use ESMF_RHandleMod    ! ESMF route handle class
       use ESMF_RouteMod      ! ESMF route  class
       use ESMF_FieldDataMapMod
-      use ESMF_ArrayCommMod
+      use ESMF_InternArrayCommMod
 
       implicit none
 
@@ -135,7 +135,7 @@
       private
         type (ESMF_Base) :: base
 
-        type (ESMF_Array) :: & 
+        type(ESMF_InternArray) :: & 
            srcArray,   &! source array
            dstArray     ! destination array
 
@@ -263,7 +263,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.80 2006/03/22 22:35:49 theurich Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.81 2006/03/28 21:52:31 theurich Exp $'
 
 !==============================================================================
 !
@@ -376,7 +376,7 @@
       integer :: numList
       real(kind=ESMF_KIND_R8), dimension(:), pointer :: wgtPtr
       type(ESMF_LocalArray) :: srcIndex, dstIndex, weights
-      !type (ESMF_Array) :: &! temps for use when re-sizing arrays
+      !type(ESMF_InternArray) :: &! temps for use when re-sizing arrays
       !   srcAddTmp, dstAddTmp, weightsTmp
 
       ! Initialize return code; assume failure until success is certain
@@ -583,8 +583,8 @@
       type(ESMF_FieldDataMap), intent(in   ) :: dstDatamap
       logical,                 intent(in   ), optional :: hasSrcData
       logical,                 intent(in   ), optional :: hasDstData
-      type(ESMF_Array),        intent(in   ), optional :: srcArray
-      type(ESMF_Array),        intent(in   ), optional :: dstArray
+      type(ESMF_InternArray),        intent(in   ), optional :: srcArray
+      type(ESMF_InternArray),        intent(in   ), optional :: dstArray
       logical,                 intent(in   ), optional :: reorder
       logical,                 intent(in   ), optional :: total
       logical,                 intent(in   ), optional :: layer
@@ -716,8 +716,8 @@
 
       type(ESMF_Regrid),        intent(inout) :: regrid
       character (*),            intent(out), optional :: name
-      type (ESMF_Array),        intent(out), optional :: srcArray
-      type (ESMF_Array),        intent(out), optional :: dstArray
+      type(ESMF_InternArray),        intent(out), optional :: srcArray
+      type(ESMF_InternArray),        intent(out), optional :: dstArray
       type (ESMF_Grid),         intent(out), optional :: srcGrid
       type (ESMF_Grid),         intent(out), optional :: dstGrid
       type (ESMF_FieldDataMap), intent(out), optional :: srcDatamap
@@ -820,8 +820,8 @@
 !
 ! !ARGUMENTS:
       type (ESMF_Regrid),       intent(inout) :: regrid
-      type (ESMF_Array),        intent(in   ), optional :: srcArray
-      type (ESMF_Array),        intent(in   ), optional :: dstArray
+      type(ESMF_InternArray),        intent(in   ), optional :: srcArray
+      type(ESMF_InternArray),        intent(in   ), optional :: dstArray
       type (ESMF_Grid),         intent(in   ), optional :: srcGrid
       type (ESMF_Grid),         intent(in   ), optional :: dstGrid
       type (ESMF_FieldDataMap), intent(in   ), optional :: srcDatamap
@@ -1067,7 +1067,7 @@
       character(4),            intent(in   ) :: option
       integer,                 intent(in   ) :: dimCount
       type(ESMF_DomainList),   intent(inout) :: domainList
-      type(ESMF_Array),        intent(in   ) :: array
+      type(ESMF_InternArray),        intent(in   ) :: array
       type(ESMF_Grid),         intent(in   ) :: grid
       type(ESMF_FieldDataMap), intent(in   ) :: dataMap
       logical,                 intent(in   ) :: total
@@ -1148,7 +1148,7 @@
 
         ! modify thisAI to include Array haloWidth and possibly different lbounds
         if (option.eq.'send') then
-          call ESMF_ArrayGet(array, haloWidth=haloWidth, lbounds=lbounds, &
+          call ESMF_InternArrayGet(array, haloWidth=haloWidth, lbounds=lbounds, &
                              rc=localrc)
           do j = 1,dimCount
             if (dimOrder(j).eq.1) then

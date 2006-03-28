@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayGet.cpp,v 1.1 2006/03/24 16:33:28 theurich Exp $
+! $Id: ESMF_InternArrayGet.cpp,v 1.2 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 ^define ESMF_FILENAME "ESMF_InternArrayGet.F90"
 !
 !     ESMF Array module
-      module ESMF_ArrayGetMod
+      module ESMF_InternArrayGetMod
 !
 !==============================================================================
 !
@@ -34,8 +34,8 @@
       use ESMF_BaseMod
       use ESMF_LogErrMod
       use ESMF_LocalArrayMod
-      use ESMF_ArrayMod
-      use ESMF_ArrayCreateMod
+      use ESMF_InternArrayMod
+      use ESMF_InternArrayCreateMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -54,15 +54,15 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_ArraySetData
-      public ESMF_ArrayGetData
+      public ESMF_InternArraySetData
+      public ESMF_InternArrayGetData
 
       public operator(.eq.), operator(.ne.)
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_InternArrayGet.cpp,v 1.1 2006/03/24 16:33:28 theurich Exp $'
+      '$Id: ESMF_InternArrayGet.cpp,v 1.2 2006/03/28 21:52:26 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -73,10 +73,10 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 
 !BOPI
-! !IROUTINE: ESMF_ArrayGetData -- Get a Fortran pointer to the data contents
+! !IROUTINE: ESMF_InternArrayGetData -- Get a Fortran pointer to the data contents
 !
 ! !INTERFACE:
-     interface ESMF_ArrayGetData
+     interface ESMF_InternArrayGetData
 !
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -85,7 +85,7 @@ InterfaceMacro(ArrayGetData)
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_ArrayGetData} functions.   
+!  types of {\tt ESMF\_InternArrayGetData} functions.   
 !  
 !EOPI 
 end interface
@@ -99,13 +99,13 @@ end interface
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArraySetData
+! !IROUTINE: ESMF_InternArraySetData
 !
 ! !INTERFACE:
-      subroutine ESMF_ArraySetData(array, databuf, docopy, rc)
+      subroutine ESMF_InternArraySetData(array, databuf, docopy, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array) :: array 
+      type(ESMF_InternArray) :: array 
       real, dimension (:), pointer :: databuf    
       type(ESMF_CopyFlag), intent(in) :: docopy 
       integer, intent(out), optional :: rc     
@@ -126,7 +126,7 @@ end interface
 !
         rc = ESMF_FAILURE
 
-        end subroutine ESMF_ArraySetData
+        end subroutine ESMF_InternArraySetData
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -138,5 +138,5 @@ DeclarationMacro(ArrayGetData)
 !------------------------------------------------------------------------------
 
 
-        end module ESMF_ArrayGetMod
+        end module ESMF_InternArrayGetMod
 

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldSetMacros.h,v 1.8 2004/09/17 22:08:21 nscollins Exp $
+! $Id: ESMF_FieldSetMacros.h,v 1.9 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -102,7 +102,7 @@
       integer, intent(out), optional :: rc   @\
 @\
         ! Local variables @\
-        type (ESMF_Array) :: array          ! array object @\
+        type(ESMF_InternArray) :: array          ! array object @\
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
  @\
@@ -123,7 +123,7 @@
                               ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
-        array = ESMF_ArrayCreate(dataPointer, copyflag, haloWidth, & @\
+        array = ESMF_InternArrayCreate(dataPointer, copyflag, haloWidth, & @\
                                  rc=status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\

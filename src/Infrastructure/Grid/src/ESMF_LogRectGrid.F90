@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.153 2006/03/23 01:14:40 theurich Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.154 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,11 +43,11 @@
       use ESMF_LogErrMod
       use ESMF_IOSpecMod      ! ESMF I/O class
       use ESMF_LocalArrayMod  ! ESMF local array class
-      use ESMF_ArrayDataMapMod     ! ESMF data map class
+      use ESMF_InternArrayDataMapMod     ! ESMF data map class
       use ESMF_DELayoutMod    ! ESMF layout class
-      use ESMF_ArrayMod
-      use ESMF_ArrayCreateMod
-      use ESMF_ArrayGetMod
+      use ESMF_InternArrayMod
+      use ESMF_InternArrayCreateMod
+      use ESMF_InternArrayGetMod
       use ESMF_InternDGMod    ! ESMF distributed grid class
       use ESMF_PhysCoordMod   ! ESMF physical coord class
       use ESMF_PhysGridMod    ! ESMF physical grid class
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.153 2006/03/23 01:14:40 theurich Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.154 2006/03/28 21:52:26 theurich Exp $'
 
 !==============================================================================
 !
@@ -4594,9 +4594,9 @@
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
-      type(ESMF_Array), intent(out), dimension(:), optional :: centerCoord
-      type(ESMF_Array), intent(out), dimension(:), optional :: cornerCoord
-      type(ESMF_Array), intent(out), dimension(:), optional :: faceCoord
+      type(ESMF_InternArray), intent(out), dimension(:), optional :: centerCoord
+      type(ESMF_InternArray), intent(out), dimension(:), optional :: cornerCoord
+      type(ESMF_InternArray), intent(out), dimension(:), optional :: faceCoord
       logical, intent(in), optional :: reorder
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
@@ -4652,8 +4652,8 @@
       integer, dimension(3) :: order
       logical :: dummy
       logical :: reorderUse
-      type(ESMF_Array) :: tempArray
-      type(ESMF_Array), dimension(:), pointer :: coord, coord2
+      type(ESMF_InternArray) :: tempArray
+      type(ESMF_InternArray), dimension(:), pointer :: coord, coord2
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -6492,7 +6492,7 @@
       real(ESMF_KIND_R8), dimension(:), pointer :: center
       real(ESMF_KIND_R8), dimension(:,:), pointer :: center1, center2, corner
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: corner1, corner2
-      type(ESMF_Array), dimension(:), pointer :: centerArray, cornerArray
+      type(ESMF_InternArray), dimension(:), pointer :: centerArray, cornerArray
       type(ESMF_DataKind) :: kind
       type(ESMF_DataType) :: type
 
@@ -6523,9 +6523,9 @@
       kind = ESMF_R8
       type = ESMF_DATA_REAL
       do i = 1,dimCount
-        centerArray(i) = ESMF_ArrayCreate(dimCount, type, kind, counts, &
+        centerArray(i) = ESMF_InternArrayCreate(dimCount, type, kind, counts, &
                                           haloWidth=hWidth, rc=localrc)
-        cornerArray(i) = ESMF_ArrayCreate(dimCount+1, type, kind, cornerCounts, &
+        cornerArray(i) = ESMF_InternArrayCreate(dimCount+1, type, kind, cornerCounts, &
                                           haloWidth=hWidth, rc=localrc)
       enddo
 
@@ -6533,8 +6533,8 @@
       case(1)   ! 1D coordinates, assumed mostly for vertical grids
 
         ! get data
-        call ESMF_ArrayGetData(centerArray(1), center, ESMF_DATA_REF, localrc)
-        call ESMF_ArrayGetData(cornerArray(1), corner, ESMF_DATA_REF, localrc)
+        call ESMF_InternArrayGetData(centerArray(1), center, ESMF_DATA_REF, localrc)
+        call ESMF_InternArrayGetData(cornerArray(1), corner, ESMF_DATA_REF, localrc)
 
         ! For now, an if construct for the different relative locations
         if (relloc .eq. ESMF_CELL_UNDEFINED) then
@@ -6573,10 +6573,10 @@
       case(2)   ! 2D coordinates
 
         ! get data
-        call ESMF_ArrayGetData(centerArray(1), center1, ESMF_DATA_REF, localrc)
-        call ESMF_ArrayGetData(centerArray(2), center2, ESMF_DATA_REF, localrc)
-        call ESMF_ArrayGetData(cornerArray(1), corner1, ESMF_DATA_REF, localrc)
-        call ESMF_ArrayGetData(cornerArray(2), corner2, ESMF_DATA_REF, localrc)
+        call ESMF_InternArrayGetData(centerArray(1), center1, ESMF_DATA_REF, localrc)
+        call ESMF_InternArrayGetData(centerArray(2), center2, ESMF_DATA_REF, localrc)
+        call ESMF_InternArrayGetData(cornerArray(1), corner1, ESMF_DATA_REF, localrc)
+        call ESMF_InternArrayGetData(cornerArray(2), corner2, ESMF_DATA_REF, localrc)
 
         ! For now, an if construct for the different relative locations
         ! TODO: also set corners and faces
@@ -6961,7 +6961,7 @@
       real(ESMF_KIND_R8) :: cornerUse11, cornerUse12, cornerUse21, cornerUse22
       real(ESMF_KIND_R8), dimension(:  ), pointer :: center, center1, center2
       real(ESMF_KIND_R8), dimension(:,:), pointer :: corner, corner1, corner2
-      type(ESMF_Array), dimension(:), pointer :: centerArray, cornerArray
+      type(ESMF_InternArray), dimension(:), pointer :: centerArray, cornerArray
       type(ESMF_DataKind) :: kind
       type(ESMF_DataType) :: type
 
@@ -6985,9 +6985,9 @@
       kind = ESMF_R8
       type = ESMF_DATA_REAL
       do i = 1,dimCount
-        centerArray(i) = ESMF_ArrayCreate(1, type, kind, counts, &
+        centerArray(i) = ESMF_InternArrayCreate(1, type, kind, counts, &
                                           haloWidth=0, rc=localrc)
-        cornerArray(i) = ESMF_ArrayCreate(2, type, kind, cornerCounts, &
+        cornerArray(i) = ESMF_InternArrayCreate(2, type, kind, cornerCounts, &
                                           haloWidth=0, rc=localrc)
       enddo
 
@@ -6995,8 +6995,8 @@
       case(1)   ! 1D coordinates, assumed mostly for vertical grids
 
         ! get data
-        call ESMF_ArrayGetData(centerArray(1), center, ESMF_DATA_REF, localrc)
-        call ESMF_ArrayGetData(cornerArray(1), corner, ESMF_DATA_REF, localrc)
+        call ESMF_InternArrayGetData(centerArray(1), center, ESMF_DATA_REF, localrc)
+        call ESMF_InternArrayGetData(cornerArray(1), corner, ESMF_DATA_REF, localrc)
 
         ! For now, an if construct for the different relative locations
         if (relloc .eq. ESMF_CELL_UNDEFINED) then
@@ -7027,10 +7027,10 @@
       case(2)   ! 2D coordinates
 
         ! get data
-        call ESMF_ArrayGetData(centerArray(1), center1, ESMF_DATA_REF, localrc)
-        call ESMF_ArrayGetData(centerArray(2), center2, ESMF_DATA_REF, localrc)
-        call ESMF_ArrayGetData(cornerArray(1), corner1, ESMF_DATA_REF, localrc)
-        call ESMF_ArrayGetData(cornerArray(2), corner2, ESMF_DATA_REF, localrc)
+        call ESMF_InternArrayGetData(centerArray(1), center1, ESMF_DATA_REF, localrc)
+        call ESMF_InternArrayGetData(centerArray(2), center2, ESMF_DATA_REF, localrc)
+        call ESMF_InternArrayGetData(cornerArray(1), corner1, ESMF_DATA_REF, localrc)
+        call ESMF_InternArrayGetData(cornerArray(2), corner2, ESMF_DATA_REF, localrc)
 
         ! For now, an if construct for the different relative locations
         ! TODO: also set faces
@@ -7763,7 +7763,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      type(ESMF_Array), intent(inout) :: maskArray
+      type(ESMF_InternArray), intent(inout) :: maskArray
       type(ESMF_RelLoc), intent(in) :: relloc
       integer, intent(out), optional :: rc
 !
@@ -7895,7 +7895,7 @@
       character(len=ESMF_MAXSTR) :: name
       integer :: i, j, iMax1, jMax1, iType, jType
       integer, dimension(:,:), pointer :: temp
-      type(ESMF_Array) :: arrayTemp
+      type(ESMF_InternArray) :: arrayTemp
       type(ESMF_DataKind) :: kind
       type(ESMF_DataType) :: type
 
@@ -7907,9 +7907,9 @@
       ! create ESMF_Array
       kind = ESMF_I4
       type = ESMF_DATA_INTEGER
-      arrayTemp = ESMF_ArrayCreate(dimCount, type, kind, counts, &
+      arrayTemp = ESMF_InternArrayCreate(dimCount, type, kind, counts, &
                                    haloWidth=gridBoundWidth, rc=localrc)
-      call ESMF_ArrayGetData(arrayTemp, temp, ESMF_DATA_REF, localrc)
+      call ESMF_InternArrayGetData(arrayTemp, temp, ESMF_DATA_REF, localrc)
 
       ! TODO: should this be different for different relative locations?
       iMax1 = counts(1) - gridBoundWidth + 1
@@ -7999,7 +7999,7 @@
       integer :: i
       integer, dimension(1) :: counts
       integer, dimension(:), pointer :: temp
-      type(ESMF_Array) :: arrayTemp
+      type(ESMF_InternArray) :: arrayTemp
       type(ESMF_DataKind) :: kind
       type(ESMF_DataType) :: type
 
@@ -8010,9 +8010,9 @@
       kind = ESMF_I4
       type = ESMF_DATA_INTEGER
       counts(1) = myCount
-      arrayTemp = ESMF_ArrayCreate(1, type, kind, counts, &
+      arrayTemp = ESMF_InternArrayCreate(1, type, kind, counts, &
                                    haloWidth=0, rc=localrc)
-      call ESMF_ArrayGetData(arrayTemp, temp, ESMF_DATA_REF, localrc)
+      call ESMF_InternArrayGetData(arrayTemp, temp, ESMF_DATA_REF, localrc)
 
       do i = 1,myCount
         ! default is computational for arbitrary storage
@@ -9355,8 +9355,8 @@
 !
 ! !ARGUMENTS:
 
-      type(ESMF_Array), intent(in)  :: array1   ! source array
-      type(ESMF_Array), intent(out) :: array2   ! dest array
+      type(ESMF_InternArray), intent(in)  :: array1   ! source array
+      type(ESMF_InternArray), intent(out) :: array2   ! dest array
       integer, intent(out), optional :: rc  ! return code
 
 ! !DESCRIPTION:
@@ -9384,7 +9384,7 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! get data in source array
-      call ESMF_ArrayGetData(array1, temp1, rc=localrc)
+      call ESMF_InternArrayGetData(array1, temp1, rc=localrc)
       i1 = size(temp1,1)
       j1 = size(temp1,2)
 
@@ -9401,7 +9401,7 @@
       enddo
  
       ! make destination array from data
-      array2 = ESMF_ArrayCreate(temp2, ESMF_DATA_COPY, rc=localrc)
+      array2 = ESMF_InternArrayCreate(temp2, ESMF_DATA_COPY, rc=localrc)
 
       deallocate(temp2, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocating temp2", &

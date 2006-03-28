@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.211 2006/03/20 22:15:34 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.212 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,14 +52,14 @@
       use ESMF_IOSpecMod
       use ESMF_ArraySpecMod
       use ESMF_LocalArrayMod
-      use ESMF_ArrayDataMapMod
+      use ESMF_InternArrayDataMapMod
       use ESMF_DELayoutMod
       use ESMF_GridTypesMod
       use ESMF_GridMod
-      use ESMF_ArrayMod
-      use ESMF_ArrayCreateMod
-      use ESMF_ArrayGetMod
-      use ESMF_ArrayCommMod
+      use ESMF_InternArrayMod
+      use ESMF_InternArrayCreateMod
+      use ESMF_InternArrayGetMod
+      use ESMF_InternArrayCommMod
       use ESMF_TimeMod
       use ESMF_FieldDataMapMod
       use wrf_data
@@ -122,7 +122,7 @@
 
       type ESMF_LocalField
         sequence
-        type (ESMF_Array) :: localdata           ! local data for this DE
+        type(ESMF_InternArray) :: localdata           ! local data for this DE
         type (ESMF_Mask) :: mask                 ! may belong in Grid
         type (ESMF_ArraySpec) :: arrayspec       ! so field can allocate
 
@@ -285,7 +285,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.211 2006/03/20 22:15:34 theurich Exp $'
+      '$Id: ESMF_Field.F90,v 1.212 2006/03/28 21:52:26 theurich Exp $'
 
 !==============================================================================
 !
@@ -746,7 +746,7 @@
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field    
       type(ESMF_Grid), intent(out), optional :: grid     
-      type(ESMF_Array), intent(out), optional :: array     
+      type(ESMF_InternArray), intent(out), optional :: array     
       type(ESMF_FieldDataMap), intent(out), optional :: datamap     
       type(ESMF_RelLoc), intent(out), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
@@ -862,7 +862,7 @@
                  "Cannot return haloWidth because no data attached to Field", &
                                  ESMF_CONTEXT, rc)) return
             endif
-            call ESMF_ArrayGet(ftype%localfield%localdata, &
+            call ESMF_InternArrayGet(ftype%localfield%localdata, &
                                haloWidth=haloWidth, rc=rc)
             if (ESMF_LogMsgFoundError(rc, &
                                       ESMF_ERR_PASSTHRU, &
@@ -895,7 +895,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field      
-      type(ESMF_Array), intent(out) :: array
+      type(ESMF_InternArray), intent(out) :: array
       integer, intent(out), optional :: rc           
 
 !
@@ -2018,7 +2018,7 @@
         write(*, *)  "Data status = ", trim(str)
         !TODO: add code here to print more info
         if (fp%datastatus .eq. ESMF_STATUS_READY) then 
-           call ESMF_ArrayPrint(fp%localfield%localdata, "", status)
+           call ESMF_InternArrayPrint(fp%localfield%localdata, "", status)
         endif
 
         call ESMF_StatusString(fp%datamapstatus, str, status)
@@ -2160,7 +2160,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field      
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_InternArray), intent(in) :: array
       integer, intent(out), optional :: rc           
 
 !
@@ -3146,7 +3146,7 @@
       if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
 
           ! get array counts and other info
-          call ESMF_ArrayGet(ftypep%localfield%localdata, counts=arraycounts, &
+          call ESMF_InternArrayGet(ftypep%localfield%localdata, counts=arraycounts, &
                              haloWidth=halo, rank=arrayrank, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
@@ -3269,7 +3269,7 @@
 
         ! Local variables
         integer :: status, de_id
-        type(ESMF_Array) :: out_array
+        type(ESMF_InternArray) :: out_array
         type(ESMF_DataType) arr_type
         type(ESMF_DataKind) arr_kind
         integer out_rank
@@ -3368,12 +3368,12 @@
 
 
         if (de_id .eq. 0) then       
-        call ESMF_ArrayGet(out_array, out_rank, arr_type, arr_kind, rc=rc)
+        call ESMF_InternArrayGet(out_array, out_rank, arr_type, arr_kind, rc=rc)
         allocate(out_counts (out_rank), &
                  out_lbounds(out_rank), &
                  out_ubounds(out_rank), &
                  out_strides(out_rank), stat=rc)
-        call ESMF_ArrayGet(out_array, counts=out_counts, lbounds=out_lbounds, &
+        call ESMF_InternArrayGet(out_array, counts=out_counts, lbounds=out_lbounds, &
                            ubounds=out_ubounds, strides=out_strides, rc=rc)
 
         out_type = arr_type%dtype
@@ -3610,7 +3610,7 @@
 
       endif ! (de_id .eq. 0) then  
 
-        call ESMF_ArrayDestroy(out_array, status)
+        call ESMF_InternArrayDestroy(out_array, rc=status)
         if  (present(rc)) rc = ESMF_SUCCESS
         
       end subroutine ESMF_FieldWrite
@@ -3629,7 +3629,7 @@
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field 
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_InternArray), intent(in) :: array
         integer, dimension(:), intent(in) :: counts
         integer, dimension(:), intent(in) :: lbounds
         integer, dimension(:), intent(in) :: ubounds
@@ -3717,7 +3717,7 @@
            DimNames(1) = 'X'
            DimNames(2) = 'Y'
         
-        call ESMF_ArrayGetData( array, data_ptr, ESMF_DATA_REF, rc)
+        call ESMF_InternArrayGetData( array, data_ptr, ESMF_DATA_REF, rc=rc)
 
 ! Initialize the output stream.
            call ext_ncd_ioinit(sysdepinfo,status)
@@ -3760,7 +3760,7 @@
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field 
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_InternArray), intent(in) :: array
         integer, dimension(:), intent(in) :: counts
         integer, dimension(:), intent(in) :: lbounds
         integer, dimension(:), intent(in) :: ubounds
@@ -3848,7 +3848,7 @@
            DimNames(1) = 'X'
            DimNames(2) = 'Y'
 
-        call ESMF_ArrayGetData( array, data_ptr, ESMF_DATA_REF, rc)
+        call ESMF_InternArrayGetData( array, data_ptr, ESMF_DATA_REF, rc=rc)
 
 ! Initialize the output stream.
            call ext_ncd_ioinit(SysDepInfo,Status)
@@ -3891,7 +3891,7 @@
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field 
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_InternArray), intent(in) :: array
         integer, dimension(:), intent(in) :: counts
         integer, dimension(:), intent(in) :: lbounds
         integer, dimension(:), intent(in) :: ubounds
@@ -3984,7 +3984,7 @@
            DimNames(3) = 'Z'
         
 
-        call ESMF_ArrayGetData( array, data_ptr, ESMF_DATA_REF, rc)
+        call ESMF_InternArrayGetData( array, data_ptr, ESMF_DATA_REF, rc=rc)
 
 ! Initialize the output stream.
            call ext_ncd_ioinit(SysDepInfo,Status)
@@ -4027,7 +4027,7 @@
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field 
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_InternArray), intent(in) :: array
         integer, dimension(:), intent(in) :: counts
         integer, dimension(:), intent(in) :: lbounds
         integer, dimension(:), intent(in) :: ubounds
@@ -4118,7 +4118,7 @@
            DimNames(2) = 'Y'
            DimNames(3) = 'Z'
         
-        call ESMF_ArrayGetData( array, data_ptr, ESMF_DATA_REF, rc)
+        call ESMF_InternArrayGetData( array, data_ptr, ESMF_DATA_REF, rc=rc)
 
 ! Initialize the output stream.
            call ext_ncd_ioinit(SysDepInfo,Status)
@@ -4188,7 +4188,7 @@
 
         ! Local variables
         integer :: status, de_id
-        type(ESMF_Array) :: outarray
+        type(ESMF_InternArray) :: outarray
         type(ESMF_Grid) :: grid
         type(ESMF_DELayout) :: delayout
         character(len=ESMF_MAXSTR) :: filename
@@ -4231,7 +4231,7 @@
                                   ESMF_CONTEXT, rc)) return
 
         write(name,'(i1)') de_id
-        call ESMF_ArrayWrite(field%ftypep%localfield%localdata,&
+        call ESMF_InternArrayWrite(field%ftypep%localfield%localdata,&
                              filename=trim(name), rc=status)
 
         ! Output to file, from de_id 0 only
@@ -4243,11 +4243,11 @@
                                   ESMF_CONTEXT, rc)) return
         !call ESMF_FieldAllGather(field, outarray, rc=status)
         if (de_id .eq. 0) then       
-            call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
+            call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
             if (ESMF_LogMsgFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
-            call ESMF_ArrayDestroy(outarray, status)
+            call ESMF_InternArrayDestroy(outarray, rc=status)
             if (ESMF_LogMsgFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
@@ -4375,7 +4375,7 @@
 
 
       integer :: status                           ! Error status
-      type(ESMF_Array) :: array                   ! New array
+      type(ESMF_InternArray) :: array                   ! New array
       type(ESMF_RelLoc) :: hRelLoc, vRelLoc
       type(ESMF_FieldDataMap) :: dmap
       integer, dimension(ESMF_MAXDIM) :: gridcounts, arraycounts
@@ -4478,7 +4478,7 @@
          endif
       enddo
 
-      array = ESMF_ArrayCreate(arrayspec, arraycounts, hwidth, rc=status) 
+      array = ESMF_InternArrayCreate(arrayspec, arraycounts, hwidth, rc=status) 
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4505,7 +4505,7 @@
 ! !ARGUMENTS:
       type(ESMF_FieldType), pointer :: ftype 
       type(ESMF_Grid) :: grid               
-      type(ESMF_Array), intent(in) :: array     
+      type(ESMF_InternArray), intent(in) :: array     
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       type(ESMF_FieldDataMap), intent(in), optional :: datamap           
@@ -4563,7 +4563,7 @@
                                   ESMF_CONTEXT, rc)) return
 
       ! make sure the array is a valid object first.
-      call ESMF_ArrayValidate(array, "", status)
+      call ESMF_InternArrayValidate(array, "", status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -5141,14 +5141,14 @@
       !                           ESMF_CONTEXT, rc)) return
 
       if (fp%datastatus .eq. ESMF_STATUS_READY) then
-          call c_ESMC_ArraySerializeNoData(fp%localfield%localdata, buffer(1),&
+          call c_ESMC_IArraySerializeNoData(fp%localfield%localdata, buffer(1),&
                                            length, offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      !call c_ESMC_ArraySpecSerialize(fp%localfield%arrayspec, buffer, length, &
+      !call c_ESMC_IArraySpecSerialize(fp%localfield%arrayspec, buffer, length, &
       !                               offset, localrc)
       !if (ESMF_LogMsgFoundError(localrc, &
       !                           ESMF_ERR_PASSTHRU, &
@@ -5261,7 +5261,7 @@
       !                           ESMF_CONTEXT, rc)) return
 
       if (fp%datastatus .eq. ESMF_STATUS_READY) then
-          call c_ESMC_ArrayDeserializeNoData(fp%localfield%localdata, &
+          call c_ESMC_IArrayDeserializeNoData(fp%localfield%localdata, &
                                        buffer(1), offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &

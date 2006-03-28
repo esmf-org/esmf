@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.17 2006/03/20 22:40:44 theurich Exp $
+! $Id: FlowMod.F90,v 1.18 2006/03/28 21:52:36 theurich Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -917,7 +917,7 @@
 !
       integer :: de_id
       integer(kind=ESMF_KIND_I8) :: frame
-      type(ESMF_Array) :: array2
+      type(ESMF_InternArray) :: array2
       type(ESMF_Grid) :: grid
       type(ESMF_DELayout) :: layout
       character(len=ESMF_MAXSTR) :: filename
@@ -943,24 +943,24 @@
       call ESMF_FieldGather(field_u, 0, array2, rc=rc)
       if (de_id .eq. 0) then
         write(filename, 20)  "U_velocity", frame
-        call ESMF_ArrayWrite(array2, filename=filename, rc=rc)
-        call ESMF_ArrayDestroy(array2, rc)
+        call ESMF_InternArrayWrite(array2, filename=filename, rc=rc)
+        call ESMF_InternArrayDestroy(array2, rc=rc)
       endif
 
       ! call ESMF_StateGetField(import_state, "V", field_v, rc)
       call ESMF_FieldGather(field_v, 0, array2, rc=rc)
       if (de_id .eq. 0) then
         write(filename, 20)  "V_velocity", frame
-        call ESMF_ArrayWrite(array2, filename=filename, rc=rc)
-        call ESMF_ArrayDestroy(array2, rc)
+        call ESMF_InternArrayWrite(array2, filename=filename, rc=rc)
+        call ESMF_InternArrayDestroy(array2, rc=rc)
       endif
 
       ! call ESMF_StateGetField(import_state, "SIE", field_sie, rc)
       call ESMF_FieldGather(field_sie, 0, array2, rc=rc)
       if (de_id .eq. 0) then
         write(filename, 20)  "SIE", frame
-        call ESMF_ArrayWrite(array2, filename=filename, rc=rc)
-        call ESMF_ArrayDestroy(array2, rc)
+        call ESMF_InternArrayWrite(array2, filename=filename, rc=rc)
+        call ESMF_InternArrayDestroy(array2, rc=rc)
       endif
 
  20   format(A,".",I0.2)

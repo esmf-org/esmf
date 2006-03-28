@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.40 2006/03/20 22:40:44 theurich Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.41 2006/03/28 21:52:35 theurich Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -227,7 +227,6 @@
       type(ESMF_Grid) :: grid1
       type(ESMF_Field) :: field1
       type(ESMF_ArraySpec) :: arrayspec
-      type(ESMF_Array) :: array1
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
       integer :: lowerindex(2), upperindex(2)
       integer :: de_id
@@ -305,10 +304,9 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get pointer to the actual data
-      call ESMF_FieldGetArray(field1, array1, rc=rc)
-      call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
+      call ESMF_FieldGetDataPointer(field1, ldata, ESMF_DATA_REF, rc=rc)
 
-      ! Set initial data values over whole array to -1
+      ! Set initial data values over whole field to -1
       lowerindex = lbound(ldata)
       upperindex = ubound(ldata)
       do j=lowerindex(2),upperindex(2)
@@ -410,7 +408,6 @@
       type(ESMF_DELayout) :: delayout
       type(ESMF_Field) :: field1
       type(ESMF_Grid) :: grid1
-      type(ESMF_Array) :: array1
 
       print *, "Entering Finalize routine"
 
@@ -433,12 +430,8 @@
       call ESMF_DELayoutGetDeprecated(delayout, localDE=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      ! Get a pointer to the data Array in the Field
-      call ESMF_FieldGetArray(field1, array1, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
-
-      ! Get a pointer to the start of the data
-      call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
+      ! Get a pointer to the data in the Field
+      call ESMF_FieldGetDataPointer(field1, ldata, ESMF_DATA_REF, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get size of local array

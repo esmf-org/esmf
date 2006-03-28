@@ -1,4 +1,4 @@
-!  $Id: ESMF_Alloc_C.F90,v 1.1 2006/03/24 16:33:28 theurich Exp $
+!  $Id: ESMF_Alloc_C.F90,v 1.2 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -13,7 +13,7 @@
 !
 ! F77 interface files for C++ layer calling into F90 implementation layer.
 !  This cannot use any F90 syntax, including modules, or allocatable 
-!   arrays, or ...
+!   s, or ...
 !
 !==============================================================================
 !
@@ -24,15 +24,15 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Alloc_C.F90,v 1.1 2006/03/24 16:33:28 theurich Exp $'
+!      '$Id: ESMF_Alloc_C.F90,v 1.2 2006/03/28 21:52:26 theurich Exp $'
 !==============================================================================
    subroutine f_esmf_arrayf90allocate(array, rank, type, kind, counts, &
                                       lbounds, ubounds, hwidth, rc)
        use ESMF_UtilTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
-       use ESMF_ArrayMod
-       use ESMF_ArrayCreateMod
-     type(ESMF_Array) :: array
+       use ESMF_InternArrayMod
+       use ESMF_InternArrayCreateMod
+     type(ESMF_InternArray) :: array
      integer :: rank
      type(ESMF_DataType) :: type
      type(ESMF_DataKind) :: kind
@@ -43,7 +43,7 @@
      integer, intent(out) :: rc     
 
      ! Beware - these args are not in the same order
-     call ESMF_ArrayConstructF90Ptr(array, counts, hwidth, rank, type, kind, &
+     call ESMF_InternArrayConstructF90Ptr(array, counts, hwidth, rank, type, kind, &
                                     lbounds, ubounds, rc)
     
    end subroutine f_esmf_arrayf90allocate
@@ -51,15 +51,15 @@
    subroutine f_esmf_arrayf90deallocate(array, rank, type, kind, rc)
        use ESMF_UtilTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
-       use ESMF_ArrayMod
-       use ESMF_ArrayCreateMod
-     type(ESMF_Array) :: array
+       use ESMF_InternArrayMod
+       use ESMF_InternArrayCreateMod
+     type(ESMF_InternArray) :: array
      integer :: rank
      type(ESMF_DataType) :: type
      type(ESMF_DataKind) :: kind
      integer, intent(out) :: rc     
 
-     call ESMF_ArrayF90Deallocate(array, rank, type, kind, rc)
+     call ESMF_InternArrayF90Deallocate(array, rank, type, kind, rc)
     
    end subroutine f_esmf_arrayf90deallocate
 

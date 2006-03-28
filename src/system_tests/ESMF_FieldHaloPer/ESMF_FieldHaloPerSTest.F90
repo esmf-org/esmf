@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.37 2006/03/20 22:40:44 theurich Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.38 2006/03/28 21:52:35 theurich Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -231,7 +231,6 @@
       type(ESMF_Field) :: field(4)
       type(ESMF_Grid) :: grid(4), thisgrid
       type(ESMF_ArraySpec) :: arrayspec
-      type(ESMF_Array) :: array1
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
       integer :: lowerindex(2), upperindex(2)
       integer :: pe_id
@@ -438,10 +437,9 @@
       do k=1, 4
 
           ! Get pointer to the actual data
-          call ESMF_FieldGetArray(field(k), array1, rc=rc)
-          call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
+          call ESMF_FieldGetDataPointer(field(k), ldata, ESMF_DATA_REF, rc=rc)
     
-          ! Set initial data values over whole array to -1
+          ! Set initial data values over whole field to -1
           lowerindex = lbound(ldata)
           upperindex = ubound(ldata)
           do j=lowerindex(2),upperindex(2)
@@ -648,15 +646,9 @@
       integer :: lowerindex(2), upperindex(2)
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid1
-      type(ESMF_Array) :: array1
       character(len=ESMF_MAXSTR) :: fname
 
       if (verbose) print *, "Entering halo verification routine"
-
-      ! Get a pointer to the data Array in the Field
-      call ESMF_FieldGetArray(thisfield, array1, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 40
-      if (verbose) print *, "array back from field"
 
       call ESMF_FieldGet(thisfield, grid=grid1, rc=rc)
       if (verbose) print *, "grid back from field"
@@ -673,7 +665,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 40
 
       ! Get a pointer to the start of the data
-      call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
+      call ESMF_FieldGetDataPointer(thisfield, ldata, ESMF_DATA_REF, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 40
       if (verbose) print *, "data back from array"
 

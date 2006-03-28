@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.24 2006/03/20 22:40:44 theurich Exp $
+! $Id: FlowSolverMod.F90,v 1.25 2006/03/28 21:52:36 theurich Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -1366,7 +1366,7 @@
       logical :: rcpresent
       integer :: de_id
       integer(kind=ESMF_KIND_I8) :: frame
-      type(ESMF_Array) :: outarray
+      type(ESMF_InternArray) :: outarray
       type(ESMF_Grid) :: grid
       type(ESMF_DELayout) :: layout
       character(len=ESMF_MAXSTR) :: filename
@@ -1398,22 +1398,22 @@
       call ESMF_FieldGather(field_u, 0, outarray, rc=status)
       if (de_id .eq. 0) then
         write(filename, 20)  "U_velocity", file_no
-        call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
-        call ESMF_ArrayDestroy(outarray, status)
+        call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
+        call ESMF_InternArrayDestroy(outarray, rc=status)
       endif
 
       call ESMF_FieldGather(field_v, 0, outarray, rc=status)
       if (de_id .eq. 0) then
         write(filename, 20)  "V_velocity", file_no
-        call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
-        call ESMF_ArrayDestroy(outarray, status)
+        call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
+        call ESMF_InternArrayDestroy(outarray, rc=status)
       endif
 
       call ESMF_FieldGather(field_sie, 0, outarray, rc=status)
       if (de_id .eq. 0) then
         write(filename, 20)  "SIE", file_no
-        call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
-        call ESMF_ArrayDestroy(outarray, status)
+        call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
+        call ESMF_InternArrayDestroy(outarray, rc=status)
       endif
 !
 ! First time through output two more files
@@ -1422,8 +1422,8 @@
         call ESMF_FieldGather(field_flag, 0, outarray, rc=status)
         if (de_id .eq. 0) then
           write(filename, 20)  "FLAG", file_no
-          call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
-          call ESMF_ArrayDestroy(outarray, status)
+          call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
+          call ESMF_InternArrayDestroy(outarray, rc=status)
         endif
       endif
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArrayComm.C,v 1.1 2006/03/24 16:36:36 theurich Exp $
+// $Id: ESMC_InternArrayComm.C,v 1.2 2006/03/28 21:52:31 theurich Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_InternArrayComm.C,v 1.1 2006/03/24 16:36:36 theurich Exp $";
+            "$Id: ESMC_InternArrayComm.C,v 1.2 2006/03/28 21:52:31 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -57,7 +57,7 @@
 // !IROUTINE:  ESMC_ArrayHalo - update the halo of an Array
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayHalo(
+      int ESMC_InternArray::ESMC_ArrayHalo(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -336,7 +336,7 @@ static int ESMC_newDELayoutGatherArray(
 // !IROUTINE:  ESMC_ArrayGather - gather a distributed Array onto 1 DE
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayGather(
+      int ESMC_InternArray::ESMC_ArrayGather(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -350,7 +350,7 @@ static int ESMC_newDELayoutGatherArray(
       int global_dimlengths[],   // in  - array of global dimensions
       int local_maxlength[],     // in  - array of maximum counts on any DE per dim
       int deid,                  // in  - the DE to collect the data on
-      ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
+      ESMC_InternArray **Array_out) {  // out - new Array on all DE's with the global data
 //
 // !DESCRIPTION:
 //     
@@ -362,7 +362,7 @@ static int ESMC_newDELayoutGatherArray(
     int thisde;
     int i_exc, j_exc;
     int counts[ESMF_MAXDIM];
-    ESMC_Array *gathered;
+    ESMC_InternArray *gathered;
 
 //  allocate global-sized array on 1 DE and fill with distributed data
 //  from each current Array
@@ -382,7 +382,7 @@ static int ESMC_newDELayoutGatherArray(
     //printf("arraygather: %d, %d\n", thisde, deid);
     if (thisde == deid) {
       //printf("arraygather: I am root\n");
-        gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
+        gathered = ESMC_InternArrayCreate(this->rank, this->type, this->kind, counts);
 
         // call something which will do a receive
         ESMC_newDELayoutGatherArray(delayout, deid, this->base_addr,
@@ -418,7 +418,7 @@ static int ESMC_newDELayoutGatherArray(
 // !IROUTINE:  ESMC_ArrayScatter - scatter a single Array onto N distributed DEs
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayScatter(
+      int ESMC_InternArray::ESMC_ArrayScatter(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -429,7 +429,7 @@ static int ESMC_newDELayoutGatherArray(
                                  //       axis for the Array
       int size_decomp,           // in  - size of decomp array
       int deid,                  // in  - the DE the original Array is on
-      ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
+      ESMC_InternArray **Array_out) {  // out - new Array on all DE's with the global data
 //
 // !DESCRIPTION:
 //      
@@ -445,7 +445,7 @@ static int ESMC_newDELayoutGatherArray(
     float *fp, *fp0;
     int *ip, *ip0;
     int counts[ESMF_MAXDIM];
-    ESMC_Array *scattered;
+    ESMC_InternArray *scattered;
 
 #if 0
     // TODO: this is simply a copy of gather - it needs to be fleshed out
@@ -470,7 +470,7 @@ static int ESMC_newDELayoutGatherArray(
       case ESMF_DATA_REAL:
         // create array with global data buffer
         if (thisde == deid) {
-          scattered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
+          scattered = ESMC_InternArrayCreate(this->rank, this->type, this->kind, counts);
           // allocate global array from this size
           fp = (float *)(scattered->base_addr);
 
@@ -491,7 +491,7 @@ static int ESMC_newDELayoutGatherArray(
       case ESMF_DATA_INTEGER:
         // create array with global data
         if (thisde == deid) {
-          scattered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
+          scattered = ESMC_InternArrayCreate(this->rank, this->type, this->kind, counts);
           // allocate global array from this size
           ip = (int *)(scattered->base_addr);
 
@@ -535,7 +535,7 @@ static int ESMC_newDELayoutGatherArray(
 // !IROUTINE:  ESMC_ArrayRedist - general redistribution of an Array
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayRedist(
+      int ESMC_InternArray::ESMC_ArrayRedist(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -552,7 +552,7 @@ static int ESMC_newDELayoutGatherArray(
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the redistributed Array
       int size_decomp,           // in  - size of decomp arrays
-      ESMC_Array *RedistArray) { // out - Redistributed Array
+      ESMC_InternArray *RedistArray) { // out - Redistributed Array
 //
 // !DESCRIPTION:
 //      

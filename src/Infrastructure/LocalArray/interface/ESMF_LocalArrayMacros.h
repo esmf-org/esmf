@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.20 2004/06/23 10:45:28 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.21 2006/03/28 21:52:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -540,11 +540,11 @@
  @\
         ! Allocate a new buffer if requested and return a copy @\
         if (copyreq) then @\
-          call c_ESMC_ArrayGetLbounds(array, mrank, lb, status) @\
+          call c_ESMC_IArrayGetLbounds(array, mrank, lb, status) @\
           if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
-          call c_ESMC_ArrayGetUbounds(array, mrank, ub, status) @\
+          call c_ESMC_IArrayGetUbounds(array, mrank, ub, status) @\
           if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.1 2006/03/24 16:36:36 theurich Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.2 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 #define ESMF_FILENAME "ESMF_ArrayComm.F90"
 !
 !     ESMF Array Comm module
-      module ESMF_ArrayCommMod
+      module ESMF_InternArrayCommMod
 !
 !==============================================================================
 !
@@ -42,11 +42,11 @@
       use ESMF_IOSpecMod
       use ESMF_LogErrMod
       use ESMF_LocalArrayMod
-      use ESMF_ArrayDataMapMod
+      use ESMF_InternArrayDataMapMod
       use ESMF_VMMod
       use ESMF_DELayoutMod  
-      use ESMF_ArrayMod
-      use ESMF_ArrayGetMod
+      use ESMF_InternArrayMod
+      use ESMF_InternArrayGetMod
       use ESMF_GridTypesMod
       use ESMF_GridMod
       use ESMF_RHandleMod
@@ -79,7 +79,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_InternArrayComm.F90,v 1.1 2006/03/24 16:36:36 theurich Exp $'
+      '$Id: ESMF_InternArrayComm.F90,v 1.2 2006/03/28 21:52:26 theurich Exp $'
 !
 !==============================================================================
 !
@@ -237,13 +237,13 @@
                                          local_maxlengths, gatheredArray, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_InternArray), intent(in) :: array
       type(ESMF_DELayout), intent(in) :: delayout
       integer, dimension(:), intent(in) :: decompids
       integer, dimension(:,:), intent(in) :: localAxisLengths
       integer, dimension(:), intent(in) :: globalDimLengths
       integer, dimension(:), intent(in) :: local_maxlengths
-      type(ESMF_Array), intent(out) :: gatheredArray
+      type(ESMF_InternArray), intent(out) :: gatheredArray
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -260,7 +260,7 @@
         ! call c routine to allgather
         size_decomp = size(decompids)
         size_axislengths = size(localAxisLengths,1) * size(localAxisLengths,2)
-        call c_ESMC_ArrayAllGather(array, delayout, decompids, size_decomp, &
+        call c_ESMC_IArrayAllGather(array, delayout, decompids, size_decomp, &
                                    localAxisLengths, &
                                    globalDimLengths, local_maxlengths, &
                                    gatheredArray, localrc)
@@ -284,13 +284,13 @@
                                   gatheredArray, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_InternArray), intent(in) :: array
       type(ESMF_DELayout), intent(in) :: delayout
       integer, dimension(:), intent(in) :: decompids
       integer, dimension(:), intent(in) :: global_dimlengths
       integer, dimension(:), intent(in) :: local_maxlengths
       integer, intent(in) :: deid
-      type(ESMF_Array), intent(out) :: gatheredArray
+      type(ESMF_InternArray), intent(out) :: gatheredArray
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -308,7 +308,7 @@
  
         ! call c routine to allgather
         size_decomp = size(decompids)
-        call c_ESMC_ArrayGather(array, delayout, decompids, size_decomp, &
+        call c_ESMC_IArrayGather(array, delayout, decompids, size_decomp, &
                                 global_dimlengths, local_maxlengths, deid, &
                                 gatheredArray, localrc)
 
@@ -332,11 +332,11 @@
     subroutine ESMF_ArrayGather(array, grid, datamap, rootDE, gatheredArray, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array), intent(in) :: array
+    type(ESMF_InternArray), intent(in) :: array
     type(ESMF_Grid), intent(in) :: grid
     type(ESMF_FieldDataMap), intent(in) :: datamap
     integer, intent(in) :: rootDE
-    type(ESMF_Array), intent(out) :: gatheredArray
+    type(ESMF_InternArray), intent(out) :: gatheredArray
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -417,7 +417,7 @@
     decomps(2) = 2
 
     ! get the Array sizes
-    call ESMF_ArrayGet(array, rank=datarank, counts=dimlengths, rc=status)
+    call ESMF_InternArrayGet(array, rank=datarank, counts=dimlengths, rc=status)
     if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -442,11 +442,11 @@
 
 
     ! call c routine to gather
-    call c_ESMC_ArrayGather(array, delayout, decompids, size_decomp, &
+    call c_ESMC_IArrayGather(array, delayout, decompids, size_decomp, &
                             localAxisLengths, globalCellDim, localMaxDimCount, &
                             rootDE, gatheredArray, status)
 #if 0
-        call c_ESMC_ArrayAllGather(array, delayout, decompids, datarank, &
+        call c_ESMC_IArrayAllGather(array, delayout, decompids, datarank, &
                                    localAxisLengths, globalCellDim, &
                                    localMaxDimCount, gatheredArray, status)
 #endif
@@ -478,7 +478,7 @@
                                       AIListPerDEPerRank, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array), intent(in) :: array
+    type(ESMF_InternArray), intent(in) :: array
     type(ESMF_Grid), intent(in) :: grid
     type(ESMF_FieldDataMap), intent(in) :: datamap
     type(ESMF_LocalGlobalFlag), intent(in) :: localGlobalFlag
@@ -550,7 +550,7 @@
       nullify(gridAIsPerDEPerRank)
 
       ! get layout from the grid in order to get the number of DEs
-      call ESMF_ArrayGet(array, rank=datarank, rc=localrc)
+      call ESMF_InternArrayGet(array, rank=datarank, rc=localrc)
       call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, &
                         rc=localrc)
       call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=localrc)
@@ -585,7 +585,7 @@
 
       ! allocate arrayindex array; get all types (excl, comp, total?) from the array
       allocate(myArrayAIsPerRank(datarank), stat=localrc)
-      call ESMF_ArrayGetAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
+      call ESMF_IArrayGetAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
                                   myArrayAIsPerRank, rc=localrc)
 
       ! load AIListPerDEPerRank with array AIs and grid AIs
@@ -633,7 +633,7 @@
                                       domainTypeFlag, globalAIPerRank, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array), intent(in) :: array
+    type(ESMF_InternArray), intent(in) :: array
     type(ESMF_Grid), intent(in) :: grid
     type(ESMF_FieldDataMap), intent(in) :: datamap
     type(ESMF_DomainTypeFlag), intent(in) :: domainTypeFlag
@@ -685,7 +685,7 @@
       type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
       ! get layout from the grid in order to get the number of DEs
-      call ESMF_ArrayGet(array, rank=datarank, rc=localrc)
+      call ESMF_InternArrayGet(array, rank=datarank, rc=localrc)
 
       ! get information from the datamap
       call ESMF_FieldDataMapGet(datamap, dataIndexList=dimOrder, &
@@ -697,7 +697,7 @@
                                    globalStartPerDim=gridOffsets, rc=localrc)
 
       ! allocate arrayindex array; get requested type from array
-      call ESMF_ArrayGetAxisIndex(array, domainTypeFlag, &
+      call ESMF_IArrayGetAxisIndex(array, domainTypeFlag, &
                                   localAIsPerRank, rc=localrc)
 
       ! load AIListPerDEPerRank with array AIs and grid AIs
@@ -730,7 +730,7 @@
                                              AICountPerDE, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_InternArray), intent(in) :: array
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_FieldDataMap), intent(in) :: datamap
       type(ESMF_AxisIndex), dimension(:,:), pointer, optional :: totalindex
@@ -755,7 +755,7 @@
       type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
       ! get layout from the grid in order to get the number of DEs
-      call ESMF_ArrayGet(array, rank=datarank, rc=status)
+      call ESMF_InternArrayGet(array, rank=datarank, rc=status)
       call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, &
                         gridStorage=gridStorage, rc=status)
       call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=status)
@@ -792,7 +792,7 @@
 
       ! allocate arrayindex array and get all of them from the array
       allocate(arrayindex(datarank), stat=status)
-      call ESMF_ArrayGetAxisIndex(array, arrayindex, rc=status)
+      call ESMF_IArrayGetAxisIndex(array, arrayindex, rc=status)
 
       ! allocate gridindex array and get all of them from the grid
       allocate(gridindex(nAIs,gridrank), stat=status)
@@ -824,7 +824,7 @@
 
       else
         if (present(totalindex)) then
-          call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_TOTAL, &
+          call c_ESMC_IArrayGetAllAxisIndex(array, ESMF_DOMAIN_TOTAL, &
                                            globalindex, nAIs, datarank, &
                                            totalindex, status)
           if (status .ne. ESMF_SUCCESS) goto 10
@@ -838,7 +838,7 @@
         endif
 
         if (present(compindex)) then
-          call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
+          call c_ESMC_IArrayGetAllAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
                                            globalindex, nAIs, datarank, &
                                            compindex, status)
           if (status .ne. ESMF_SUCCESS) goto 10
@@ -852,7 +852,7 @@
         endif
 
         if (present(exclindex)) then
-          call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_EXCLUSIVE, &
+          call c_ESMC_IArrayGetAllAxisIndex(array, ESMF_DOMAIN_EXCLUSIVE, &
                                            globalindex, nAIs, datarank, &
                                            exclindex, status)
           if (status .ne. ESMF_SUCCESS) goto 10
@@ -892,7 +892,7 @@
                                   blocking, commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array), intent(inout) :: arrayList(:)
+    type(ESMF_InternArray), intent(inout) :: arrayList(:)
     type(ESMF_RouteHandle), intent(in) :: routehandle
     integer, intent(in), optional :: routeIndex
     type(ESMF_BlockingFlag), intent(in), optional :: blocking
@@ -1003,7 +1003,7 @@
                                  blocking, commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array), intent(inout) :: array
+    type(ESMF_InternArray), intent(inout) :: array
     type(ESMF_RouteHandle), intent(in) :: routehandle
     integer, intent(in), optional :: routeIndex
     type(ESMF_BlockingFlag), intent(in), optional :: blocking
@@ -1133,7 +1133,7 @@
                                      halodirection, routeOptions, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: array
+      type(ESMF_InternArray), intent(inout) :: array
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_FieldDataMap), intent(in) :: datamap
       type(ESMF_RouteHandle), intent(out) :: routehandle
@@ -1204,7 +1204,7 @@
                                       halodirection, routeOptions, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: array
+      type(ESMF_InternArray), intent(inout) :: array
       integer, intent(in) :: index
       integer, intent(in) :: rmaptype
       integer, intent(in) :: maxindex
@@ -1363,7 +1363,7 @@
                                   ESMF_CONTEXT, rc)) return
 
       ! And get the Array sizes
-      call ESMF_ArrayGet(array, rank=datarank, counts=dimlengths, rc=status)
+      call ESMF_InternArrayGet(array, rank=datarank, counts=dimlengths, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1464,7 +1464,7 @@
                                           rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array), intent(inout) :: arrayList(:)
+    type(ESMF_InternArray), intent(inout) :: arrayList(:)
     type(ESMF_RouteHandle), intent(in) :: routehandle
     integer, intent(in), optional :: routeIndex
     integer, intent(out), optional :: rc
@@ -1523,7 +1523,7 @@
 
 
       do j=1, nitems
-        call ESMF_ArrayGet(arrayList(j), counts=counts, &
+        call ESMF_InternArrayGet(arrayList(j), counts=counts, &
                           rank=datarank, rc=status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1561,7 +1561,7 @@
     subroutine ESMF_ArrayHaloValidateOne(array, routehandle, routeIndex, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array), intent(inout) :: array
+    type(ESMF_InternArray), intent(inout) :: array
     type(ESMF_RouteHandle), intent(in) :: routehandle
     integer, intent(in), optional :: routeIndex
     integer, intent(out), optional :: rc
@@ -1611,7 +1611,7 @@
                                   ESMF_CONTEXT, rc)) return
 
       
-      call ESMF_ArrayGet(array, counts=counts, rank=datarank, rc=status)
+      call ESMF_InternArrayGet(array, counts=counts, rank=datarank, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1648,8 +1648,8 @@
                                       commhandle, routeOptions, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: srcArrayList(:)
-      type(ESMF_Array), intent(inout) :: dstArrayList(:)
+      type(ESMF_InternArray), intent(inout) :: srcArrayList(:)
+      type(ESMF_InternArray), intent(inout) :: dstArrayList(:)
       type(ESMF_RouteHandle), intent(in) :: routehandle
       integer, intent(in), optional :: routeIndex
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
@@ -1788,8 +1788,8 @@
                                      commhandle, routeOptions, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: srcArray
-      type(ESMF_Array), intent(in) :: dstArray
+      type(ESMF_InternArray), intent(in) :: srcArray
+      type(ESMF_InternArray), intent(in) :: dstArray
       type(ESMF_RouteHandle), intent(in) :: routehandle
       integer, intent(in), optional :: routeIndex
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
@@ -1930,10 +1930,10 @@
                                        parentVM, routeOptions, routehandle, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: srcArray
+      type(ESMF_InternArray), intent(in) :: srcArray
       type(ESMF_Grid), intent(in) :: srcGrid
       type(ESMF_FieldDataMap), intent(in) :: srcDataMap
-      type(ESMF_Array), intent(in) :: dstArray
+      type(ESMF_InternArray), intent(in) :: dstArray
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_FieldDataMap), intent(in) :: dstDataMap
       type(ESMF_VM), intent(in) :: parentVM
@@ -2010,10 +2010,10 @@
                                        parentVM, routehandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: srcArray
+      type(ESMF_InternArray), intent(in) :: srcArray
       type(ESMF_Grid), intent(in) :: srcGrid
       type(ESMF_FieldDataMap), intent(in) :: srcDataMap
-      type(ESMF_Array), intent(in) :: dstArray
+      type(ESMF_InternArray), intent(in) :: dstArray
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_FieldDataMap), intent(in) :: dstDataMap
       integer, intent(in) :: index
@@ -2206,7 +2206,7 @@
                             localDE=mySrcDE, rc=status)
 
       ! And get the Array sizes
-      call ESMF_ArrayGet(srcArray, rank=datarank, counts=dimlengths, rc=status)
+      call ESMF_InternArrayGet(srcArray, rank=datarank, counts=dimlengths, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2326,10 +2326,10 @@
                                        parentVM, routehandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: srcArray
+      type(ESMF_InternArray), intent(in) :: srcArray
       type(ESMF_Grid), intent(in) :: srcGrid
       type(ESMF_FieldDataMap), intent(in) :: srcDataMap
-      type(ESMF_Array), intent(in) :: dstArray
+      type(ESMF_InternArray), intent(in) :: dstArray
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_FieldDataMap), intent(in) :: dstDataMap
       integer, intent(in) :: index
@@ -2586,7 +2586,7 @@
       endif
 
       ! And get the Array sizes
-      call ESMF_ArrayGet(srcArray, rank=datarank, counts=dimlengths, rc=status)
+      call ESMF_InternArrayGet(srcArray, rank=datarank, counts=dimlengths, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2739,8 +2739,8 @@
                                               routehandle, routeIndex, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: srcArrayList(:)
-      type(ESMF_Array), intent(inout) :: dstArrayList(:)
+      type(ESMF_InternArray), intent(inout) :: srcArrayList(:)
+      type(ESMF_InternArray), intent(inout) :: dstArrayList(:)
       type(ESMF_RouteHandle), intent(in) :: routehandle
       integer, intent(in), optional :: routeIndex
       integer, intent(out), optional :: rc
@@ -2802,7 +2802,7 @@
 
       do j=1, nitemsSrc
 
-        call ESMF_ArrayGet(srcArrayList(j), counts=counts, &
+        call ESMF_InternArrayGet(srcArrayList(j), counts=counts, &
                            rank=datarank, rc=status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2815,7 +2815,7 @@
       enddo
         
       do j=1, nitemsDst
-        call ESMF_ArrayGet(dstArrayList(j), counts=counts, &
+        call ESMF_InternArrayGet(dstArrayList(j), counts=counts, &
                            rank=datarank, rc=status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2857,8 +2857,8 @@
                                              routeIndex, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: srcArray
-      type(ESMF_Array), intent(in) :: dstArray
+      type(ESMF_InternArray), intent(in) :: srcArray
+      type(ESMF_InternArray), intent(in) :: dstArray
       type(ESMF_RouteHandle), intent(in) :: routehandle
       integer, intent(in), optional :: routeIndex
       integer, intent(out), optional :: rc
@@ -2910,7 +2910,7 @@
                                   ESMF_CONTEXT, rc)) return
 
 
-      call ESMF_ArrayGet(srcArray, counts=counts, rank=datarank, rc=status)
+      call ESMF_InternArrayGet(srcArray, counts=counts, rank=datarank, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2920,7 +2920,7 @@
          srctotal(1) = srctotal(1) * counts(i)
       enddo
       
-      call ESMF_ArrayGet(dstArray, counts=counts, rank=datarank, rc=status)
+      call ESMF_InternArrayGet(dstArray, counts=counts, rank=datarank, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2951,11 +2951,11 @@
                                    scatteredArray, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_InternArray), intent(in) :: array
       type(ESMF_DELayout), intent(in) :: delayout
       integer, dimension(:), intent(in) :: decompids
       integer, intent(in) :: rootDE
-      type(ESMF_Array), intent(out) :: scatteredArray
+      type(ESMF_InternArray), intent(out) :: scatteredArray
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2989,7 +2989,7 @@
  
         ! call c routine to allgather
         size_decomp = size(decompids)
-        call c_ESMC_ArrayScatter(array, delayout, decompids, size_decomp, &
+        call c_ESMC_IArrayScatter(array, delayout, decompids, size_decomp, &
                                  rootDE, scatteredArray, localrc)
 
         if (ESMF_LogMsgFoundError(localrc, &
@@ -3001,7 +3001,7 @@
 
         end subroutine ESMF_ArrayScatter
 
-       end module ESMF_ArrayCommMod
+       end module ESMF_InternArrayCommMod
 
 
 

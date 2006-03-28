@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.101 2006/03/22 22:35:49 theurich Exp $
+! $Id: ESMF_Regrid.F90,v 1.102 2006/03/28 21:52:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -45,16 +45,16 @@
 ! !USES:
       use ESMF_UtilTypesMod      ! general utility methods and parameters
       use ESMF_BaseMod           ! base class
-      use ESMF_ArrayDataMapMod   ! array datamap class
+      use ESMF_InternArrayDataMapMod   ! array datamap class
       use ESMF_VMMod             ! virtual machine class
       use ESMF_DELayoutMod       ! DE layout class
-      use ESMF_ArrayMod          ! array class
-      use ESMF_ArrayGetMod       ! array class
+      use ESMF_InternArrayMod    ! internal array class
+      use ESMF_InternArrayGetMod       ! array class
       use ESMF_PhysGridMod       ! physical grid class
       use ESMF_GridMod           ! grid class
       use ESMF_RHandleMod        ! route handle class
       use ESMF_RouteMod          ! route class
-      use ESMF_ArrayCommMod      ! array communications class
+      use ESMF_InternArrayCommMod      ! array communications class
       use ESMF_FieldDataMapMod   ! field datamap class
       use ESMF_FieldMod          ! field class
       use ESMF_BundleMod         ! bundle class
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.101 2006/03/22 22:35:49 theurich Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.102 2006/03/28 21:52:31 theurich Exp $'
 
 !==============================================================================
 !
@@ -204,11 +204,11 @@
                                    rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array),         intent(in   ) :: srcArray
+      type(ESMF_InternArray),         intent(in   ) :: srcArray
       type(ESMF_Grid),          intent(in   ) :: srcGrid
       type(ESMF_FieldDataMap),  intent(in   ) :: srcDatamap
       logical,                  intent(in   ) :: hasSrcData
-      type(ESMF_Array),         intent(in   ) :: dstArray
+      type(ESMF_InternArray),         intent(in   ) :: dstArray
       type(ESMF_Grid),          intent(in   ) :: dstGrid
       type(ESMF_FieldDataMap),  intent(in   ) :: dstDatamap
       logical,                  intent(in   ) :: hasDstData
@@ -493,10 +493,10 @@
 !
 ! !ARGUMENTS:
 
-      type(ESMF_Array),        intent(in   ) :: srcArrayList(:)
+      type(ESMF_InternArray),        intent(in   ) :: srcArrayList(:)
       type(ESMF_FieldDataMap), intent(in   ) :: srcDatamap
       logical,                 intent(in   ) :: hasSrcData
-      type(ESMF_Array),        intent(inout) :: dstArrayList(:)
+      type(ESMF_InternArray),        intent(inout) :: dstArrayList(:)
       type(ESMF_FieldDataMap), intent(in   ) :: dstDatamap
       logical,                 intent(in   ) :: hasDstData
       type(ESMF_RouteHandle),  intent(in   ) :: routehandle 
@@ -590,7 +590,7 @@
 
       ! to get into this code we have already verified the types match in all
       ! the arrays, so just check the first one.
-      call ESMF_ArrayGet(srcArrayList(1), rank=rank, type=type, kind=kind, &
+      call ESMF_InternArrayGet(srcArrayList(1), rank=rank, type=type, kind=kind, &
                            counts=counts, rc=localrc)
   
       allocate(gatheredArrayList(narrays), stat=localrc)
@@ -640,7 +640,8 @@
   
           call ESMF_LocalArrayGetData(gatheredArrayList(na), gatheredData, &
                                       ESMF_DATA_REF, rc)
-          call ESMF_ArrayGetData(dstArrayList(na), dstData2D, ESMF_DATA_REF, rc)
+          call ESMF_InternArrayGetData(dstArrayList(na), dstData2D, &
+            ESMF_DATA_REF, rc=rc)
   
           !*** initialize dest field to zero
      
@@ -661,7 +662,8 @@
   
           call ESMF_LocalArrayGetData(gatheredArrayList(na), gatheredData, &
                                       ESMF_DATA_REF, rc)
-          call ESMF_ArrayGetData(dstArrayList(na), dstData3D, ESMF_DATA_REF, rc)
+          call ESMF_InternArrayGetData(dstArrayList(na), dstData3D, &
+            ESMF_DATA_REF, rc=rc)
   
           !*** initialize dest field to zero
      
@@ -833,10 +835,10 @@
 !
 ! !ARGUMENTS:
 
-      type(ESMF_Array),        intent(in   ) :: srcArrayList(:)
+      type(ESMF_InternArray),        intent(in   ) :: srcArrayList(:)
       type(ESMF_FieldDataMap), intent(in   ) :: srcDatamap
       logical,                 intent(in   ) :: hasSrcData
-      type(ESMF_Array),        intent(inout) :: dstArrayList(:)
+      type(ESMF_InternArray),        intent(inout) :: dstArrayList(:)
       type(ESMF_FieldDataMap), intent(in   ) :: dstDatamap
       logical,                 intent(in   ) :: hasDstData
       type(ESMF_RouteHandle),  intent(in   ) :: routehandle 
@@ -930,7 +932,7 @@
 
       ! to get into this code we have already verified the types match in all
       ! the arrays, so just check the first one.
-      call ESMF_ArrayGet(srcArrayList(1), rank=rank, type=type, kind=kind, &
+      call ESMF_InternArrayGet(srcArrayList(1), rank=rank, type=type, kind=kind, &
                            counts=counts, rc=localrc)
   
       allocate(gatheredArrayList(narrays), stat=localrc)
@@ -980,7 +982,8 @@
   
           call ESMF_LocalArrayGetData(gatheredArrayList(na), gatheredData, &
                                       ESMF_DATA_REF, rc)
-          call ESMF_ArrayGetData(dstArrayList(na), dstData2D, ESMF_DATA_REF, rc)
+          call ESMF_InternArrayGetData(dstArrayList(na), dstData2D, &
+            ESMF_DATA_REF, rc=rc)
   
           !*** initialize dest field to zero
      
@@ -1001,7 +1004,8 @@
   
           call ESMF_LocalArrayGetData(gatheredArrayList(na), gatheredData, &
                                       ESMF_DATA_REF, rc)
-          call ESMF_ArrayGetData(dstArrayList(na), dstData3D, ESMF_DATA_REF, rc)
+          call ESMF_InternArrayGetData(dstArrayList(na), dstData3D, &
+            ESMF_DATA_REF, rc=rc)
   
           !*** initialize dest field to zero
      
@@ -1335,10 +1339,10 @@
                                           srcmask, dstmask, routeOptions, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_Array),         intent(in   ) :: srcArray
+      type(ESMF_InternArray),         intent(in   ) :: srcArray
       type(ESMF_Grid),          intent(in   ) :: srcGrid
       type(ESMF_FieldDataMap),  intent(in   ) :: srcDatamap
-      type(ESMF_Array),         intent(in   ) :: dstArray
+      type(ESMF_InternArray),         intent(in   ) :: dstArray
       type(ESMF_Grid),          intent(in   ) :: dstGrid
       type(ESMF_FieldDataMap),  intent(in   ) :: dstDatamap
       type(ESMF_VM),            intent(in   ) :: parentVM
@@ -1424,10 +1428,10 @@
                                            srcmask, dstmask, routeOptions, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_Array),         intent(in   ) :: srcArray
+      type(ESMF_InternArray),         intent(in   ) :: srcArray
       type(ESMF_Grid),          intent(in   ) :: srcGrid
       type(ESMF_FieldDataMap),  intent(in   ) :: srcDatamap
-      type(ESMF_Array),         intent(in   ) :: dstArray
+      type(ESMF_InternArray),         intent(in   ) :: dstArray
       type(ESMF_Grid),          intent(in   ) :: dstGrid
       type(ESMF_FieldDataMap),  intent(in   ) :: dstDatamap
       type(ESMF_VM),            intent(in   ) :: parentVM
@@ -1591,10 +1595,10 @@
                                         blocking, commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array),        intent(inout) :: srcArray
+      type(ESMF_InternArray),        intent(inout) :: srcArray
       type(ESMF_FieldDataMap), intent(inout) :: srcDataMap
       logical,                 intent(in   ) :: hasSrcData
-      type(ESMF_Array),        intent(inout) :: dstArray
+      type(ESMF_InternArray),        intent(inout) :: dstArray
       type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
       logical,                 intent(in   ) :: hasDstData
       type(ESMF_RouteHandle),  intent(in   ) :: routehandle
@@ -1664,7 +1668,7 @@
       logical :: dummy
       type(ESMF_DataKind) :: srcKind, dstKind
       type(ESMF_Route) :: route
-      type(ESMF_Array) :: srcArrayList(1), dstArrayList(1)
+      type(ESMF_InternArray) :: srcArrayList(1), dstArrayList(1)
       integer :: routenum
 
       ! initialize return code; assume failure until success is certain
@@ -1678,11 +1682,11 @@
       endif
 
       ! get datakinds from the two arrays
-      call ESMF_ArrayGet(srcArray, kind=srcKind, rc=localrc)
+      call ESMF_InternArrayGet(srcArray, kind=srcKind, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_ArrayGet(dstArray, kind=dstKind, rc=localrc)
+      call ESMF_InternArrayGet(dstArray, kind=dstKind, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1752,10 +1756,10 @@
                                          blocking, commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array),        intent(inout) :: srcArrayList(:)
+      type(ESMF_InternArray),        intent(inout) :: srcArrayList(:)
       type(ESMF_FieldDataMap), intent(inout) :: srcDataMap
       logical,                 intent(in   ) :: hasSrcData
-      type(ESMF_Array),        intent(inout) :: dstArrayList(:)
+      type(ESMF_InternArray),        intent(inout) :: dstArrayList(:)
       type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
       logical,                 intent(in   ) :: hasDstData
       type(ESMF_RouteHandle),  intent(in   ) :: routehandle
@@ -1839,11 +1843,11 @@
       endif
 
       ! get datakinds from the two arrays
-      call ESMF_ArrayGet(srcArrayList(1), kind=srcKind, rc=localrc)
+      call ESMF_InternArrayGet(srcArrayList(1), kind=srcKind, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_ArrayGet(dstArrayList(1), kind=dstKind, rc=localrc)
+      call ESMF_InternArrayGet(dstArrayList(1), kind=dstKind, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return

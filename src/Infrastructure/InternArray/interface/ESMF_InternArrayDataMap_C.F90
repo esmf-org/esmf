@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayDataMap_C.F90,v 1.1 2006/03/24 16:33:28 theurich Exp $
+! $Id: ESMF_InternArrayDataMap_C.F90,v 1.2 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 !==============================================================================
 ! The following line turns the CVS identifier string into a printable variable.
 !   character(*), parameter, private :: version = &
-!     '$Id: ESMF_InternArrayDataMap_C.F90,v 1.1 2006/03/24 16:33:28 theurich Exp $'
+!     '$Id: ESMF_InternArrayDataMap_C.F90,v 1.2 2006/03/28 21:52:26 theurich Exp $'
 !==============================================================================
 ! 
 !------------------------------------------------------------------------------
@@ -43,9 +43,9 @@
     subroutine f_esmf_arraydatamapsetdefault(admp, dataRank, dataIndexList, counts, rc)
       use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
-      use ESMF_ArrayDataMapMod
+      use ESMF_InternArrayDataMapMod
 
-      type(ESMF_ArrayDataMap) :: admp
+      type(ESMF_InternArrayDataMap) :: admp
       integer, intent(in) :: dataRank 
       integer, dimension(:), intent(in) :: dataIndexList
       integer, dimension(:), intent(in), optional :: counts
@@ -61,9 +61,9 @@
     subroutine f_esmf_arraydatamapget(admp, rc)
       use ESMF_UtilTypesMod  ! ESMF generic types class
       use ESMF_BaseMod       ! ESMF_Base class
-      use ESMF_ArrayDataMapMod
+      use ESMF_InternArrayDataMapMod
 
-      type(ESMF_ArrayDataMap) :: admp
+      type(ESMF_InternArrayDataMap) :: admp
       ! TODO: add values to get and set
       integer, optional, intent(out) :: rc
      
@@ -76,9 +76,9 @@
     subroutine f_esmf_arraydatamapset(admp, rc)
       use ESMF_UtilTypesMod  ! ESMF generic types class
       use ESMF_BaseMod       ! ESMF_Base class
-      use ESMF_ArrayDataMapMod
+      use ESMF_InternArrayDataMapMod
 
-      type(ESMF_ArrayDataMap) :: admp
+      type(ESMF_InternArrayDataMap) :: admp
       ! TODO: add values to get and set
       integer, optional, intent(out) :: rc
      
@@ -91,9 +91,9 @@
     subroutine f_esmf_arraydatamapvalidate(admp, options, rc)
       use ESMF_UtilTypesMod  ! ESMF generic types class
       use ESMF_BaseMod       ! ESMF_Base class
-      use ESMF_ArrayDataMapMod
+      use ESMF_InternArrayDataMapMod
 
-      type(ESMF_ArrayDataMap) :: admp
+      type(ESMF_InternArrayDataMap) :: admp
       character(len=*) :: options
       integer, optional, intent(out) :: rc
      
@@ -106,9 +106,9 @@
     subroutine f_esmf_arraydatamapprint(admp, options, rc)
       use ESMF_UtilTypesMod  ! ESMF generic types class
       use ESMF_BaseMod       ! ESMF_Base class
-      use ESMF_ArrayDataMapMod
+      use ESMF_InternArrayDataMapMod
 
-      type(ESMF_ArrayDataMap) :: admp
+      type(ESMF_InternArrayDataMap) :: admp
       character(len=*) :: options
       integer, optional, intent(out) :: rc
      

@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.8 2006/03/20 22:40:44 theurich Exp $
+! $Id: user_model2.F90,v 1.9 2006/03/28 21:52:35 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -95,7 +95,6 @@
       type(ESMF_VM) :: vm
       type(ESMF_DELayout) :: delayout
       type(ESMF_Grid) :: grid1
-      type(ESMF_Array) :: array1
       type(ESMF_ArraySpec) :: arrayspec
       real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
       real(ESMF_KIND_R8) :: min(2), max(2)
@@ -164,9 +163,7 @@
       if (status .ne. ESMF_SUCCESS) goto 10
   
       ! Get the allocated array back and get an F90 array pointer
-      call ESMF_FieldGetArray(humidity, array1, status)
-      if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_ArrayGetData(array1, idata, rc=status)
+      call ESMF_FieldGetDataPointer(humidity, idata, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
   
       call ESMF_StateAddField(importState, humidity, status)
@@ -197,7 +194,6 @@
 
 !   ! Local variables
       type(ESMF_Field) :: humidity
-      type(ESMF_Array) :: array1
       integer :: status
 
       print *, "User Comp Run starting"
@@ -208,9 +204,7 @@
   !    call ESMF_FieldPrint(humidity, "", rc=status)
     
       ! This is where the model specific computation goes.
-      call ESMF_FieldGetArray(humidity, array1, rc=status)
       print *, "Imported Array in user model 2:"
-  !    call ESMF_ArrayPrint(array1, "", status)
 
       print *, "User Comp Run returning"
 
@@ -288,8 +282,6 @@
       ! Local variables
       integer :: status, i, j, myDE, counts(2)
       type(ESMF_RelLoc) :: relloc
-      type(ESMF_Array) :: array
-      type(ESMF_Array), dimension(:), pointer :: coordArray
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8) :: pi, error, maxError, maxPerError
       real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue
@@ -300,24 +292,21 @@
       pi = 3.14159
 
       ! get the grid and coordinates
-      allocate(coordArray(2))
       call ESMF_FieldGet(humidity, grid=grid, horzRelloc=relloc, rc=status)
       call ESMF_GridGetDELocalInfo(grid, myDE=myDE, &
                                    localCellCountPerDim=counts, &
                                    horzRelLoc=relloc, rc=status)
-      call ESMF_GridGetCoord(grid, horzRelloc=relloc, &
-                             centerCoord=coordArray, rc=status)
-      call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
-      call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
+        call ESMF_GridGetCoord(grid, dim=1, horzRelLoc=relloc, &
+                               centerCoord=coordX, rc=status)
+        call ESMF_GridGetCoord(grid, dim=2, horzRelLoc=relloc, &
+                               centerCoord=coordY, rc=status)
 
       ! update field values here
-      call ESMF_FieldGetArray(humidity, array, rc=status)
       ! Get a pointer to the start of the data
-      call ESMF_ArrayGetData(array, data, ESMF_DATA_REF, status)
+      call ESMF_FieldGetDataPointer(humidity, data, ESMF_DATA_REF, rc=status)
       print *, "rc from array get data = ", status
       !if (associated(data)) print *, "pointer is associated"
       !if (.not.associated(data)) print *, "pointer is *NOT* associated"
-      call ESMF_ArrayPrint(array)
       print *, "data in validate: ", data(1,1), data(1, 2), data(2, 1)
 
       ! allocate array for computed results and fill it

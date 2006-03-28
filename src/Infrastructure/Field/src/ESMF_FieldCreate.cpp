@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.11 2005/05/31 17:39:54 nscollins Exp $
+! $Id: ESMF_FieldCreate.cpp,v 1.12 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,14 +34,14 @@
       use ESMF_IOSpecMod
       use ESMF_ArraySpecMod
       use ESMF_LocalArrayMod
-      use ESMF_ArrayDataMapMod
+      use ESMF_InternArrayDataMapMod
       use ESMF_DELayoutMod
       use ESMF_GridTypesMod
       use ESMF_GridMod
-      use ESMF_ArrayMod
-      use ESMF_ArrayGetMod
-      use ESMF_ArrayCreateMod
-      use ESMF_ArrayCommMod
+      use ESMF_InternArrayMod
+      use ESMF_InternArrayGetMod
+      use ESMF_InternArrayCreateMod
+      use ESMF_InternArrayCommMod
       use ESMF_FieldDataMapMod
       use ESMF_FieldMod
       use ESMF_FieldGetMod
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.11 2005/05/31 17:39:54 nscollins Exp $'
+      '$Id: ESMF_FieldCreate.cpp,v 1.12 2006/03/28 21:52:26 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -224,7 +224,7 @@ InterfaceMacro(FieldCreateEPtr)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid                
-      type(ESMF_Array), intent(in) :: array              
+      type(ESMF_InternArray), intent(in) :: array              
       type(ESMF_CopyFlag), intent(in), optional :: copyflag       
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 

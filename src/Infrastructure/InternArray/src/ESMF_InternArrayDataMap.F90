@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayDataMap.F90,v 1.1 2006/03/24 16:33:28 theurich Exp $
+! $Id: ESMF_InternArrayDataMap.F90,v 1.2 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 
 ! module definition
 
-      module ESMF_ArrayDataMapMod
+      module ESMF_InternArrayDataMapMod
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -143,7 +143,7 @@
 !  ! the data array, plus other metadata info such as where the
 !  ! data is relative to the grid, and any interleaving info needed.
 
-      type ESMF_ArrayDataMap
+      type ESMF_InternArrayDataMap
       sequence
       !private
 #ifndef ESMF_NO_INITIALIZERS
@@ -166,7 +166,7 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER TYPES:
 !
-      public ESMF_ArrayDataMap
+      public ESMF_InternArrayDataMap
 
       public ESMF_InterleaveFlag
       public ESMF_INTERLEAVE_BY_BLOCK, ESMF_INTERLEAVE_BY_ITEM
@@ -211,7 +211,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_InternArrayDataMap.F90,v 1.1 2006/03/24 16:33:28 theurich Exp $'
+             '$Id: ESMF_InternArrayDataMap.F90,v 1.2 2006/03/28 21:52:26 theurich Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -328,7 +328,7 @@ end function
                                       counts, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap), intent(in) :: arraydatamap  
+      type(ESMF_InternArrayDataMap), intent(in) :: arraydatamap  
       integer, intent(out), optional :: dataRank    
       integer, dimension(:), intent(out), optional :: dataIndexList
       integer, dimension(:), intent(out), optional :: counts 
@@ -412,7 +412,7 @@ end function
       subroutine ESMF_ArrayDataMapPrint(arraydatamap, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap), intent(in) :: arraydatamap
+      type(ESMF_InternArrayDataMap), intent(in) :: arraydatamap
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
 !
@@ -480,7 +480,7 @@ end function
                                       dataIndexList, counts, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap), intent(inout) :: arraydatamap  
+      type(ESMF_InternArrayDataMap), intent(inout) :: arraydatamap  
       integer, intent(in), optional :: dataRank    
       integer, dimension(:), intent(in), optional :: dataIndexList
       integer, dimension(:), intent(in), optional :: counts 
@@ -580,7 +580,7 @@ end function
                                                  dataIndexList, counts, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap) :: arraydatamap
+      type(ESMF_InternArrayDataMap) :: arraydatamap
       integer, intent(in) :: dataRank
       integer, dimension(:), intent(in), optional :: dataIndexList
       integer, dimension(:), intent(in), optional :: counts
@@ -692,7 +692,7 @@ end function
       subroutine ESMF_ArrayDataMapSetDefIndex(arraydatamap, indexorder, counts, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap) :: arraydatamap
+      type(ESMF_InternArrayDataMap) :: arraydatamap
       type(ESMF_IndexOrder), intent(in) :: indexorder
       integer, dimension(:), intent(in), optional :: counts 
       integer, intent(out), optional :: rc  
@@ -828,7 +828,7 @@ end function
       subroutine ESMF_ArrayDataMapSetInvalid(arraydatamap, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap), intent(inout) :: arraydatamap
+      type(ESMF_InternArrayDataMap), intent(inout) :: arraydatamap
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -864,7 +864,7 @@ end function
       subroutine ESMF_ArrayDataMapValidate(arraydatamap, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap), intent(in) :: arraydatamap
+      type(ESMF_InternArrayDataMap), intent(in) :: arraydatamap
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
@@ -906,7 +906,7 @@ end function
       subroutine ESMF_ArrayDataMapWriteRestart(datamap, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap), intent(in) :: datamap
+      type(ESMF_InternArrayDataMap), intent(in) :: datamap
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc
 !
@@ -948,7 +948,7 @@ end function
       function ESMF_ArrayDataMapReadRestart(name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_ArrayDataMap) :: ESMF_ArrayDataMapReadRestart
+      type(ESMF_InternArrayDataMap) :: ESMF_ArrayDataMapReadRestart
 !
 !
 ! !ARGUMENTS:
@@ -994,7 +994,7 @@ end function
       subroutine ESMF_ArrayDataMapWrite(datamap, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap), intent(in) :: datamap
+      type(ESMF_InternArrayDataMap), intent(in) :: datamap
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc
 !
@@ -1036,7 +1036,7 @@ end function
       function ESMF_ArrayDataMapRead(name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_ArrayDataMap) :: ESMF_ArrayDataMapRead
+      type(ESMF_InternArrayDataMap) :: ESMF_ArrayDataMapRead
 !
 ! !ARGUMENTS:
       character (len = *), intent(in) :: name
@@ -1239,5 +1239,5 @@ end function
 !------------------------------------------------------------------------------
 
 
-        end module ESMF_ArrayDataMapMod
+        end module ESMF_InternArrayDataMapMod
 

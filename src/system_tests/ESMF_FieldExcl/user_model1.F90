@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.17 2005/07/01 16:39:02 nscollins Exp $
+! $Id: user_model1.F90,v 1.18 2006/03/28 21:52:35 theurich Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -187,7 +187,6 @@
        ! Local variables
         type(ESMF_Field) :: humidity1, pressure1
         type(ESMF_RelLoc) :: relloc
-        type(ESMF_Array), dimension(:), pointer :: coordArray
         type(ESMF_Grid) :: grid
         real(ESMF_KIND_R8) :: pi
         real(ESMF_KIND_R8), dimension(:,:), pointer :: humidityData, &
@@ -204,15 +203,14 @@
         call ESMF_StateGetField(exportState, "pressure1", pressure1, rc=status)
       
         ! get the grid and coordinates
-        allocate(coordArray(2))
         call ESMF_FieldGet(humidity1, grid=grid, horzRelLoc=relloc, rc=status)
         call ESMF_GridGetDELocalInfo(grid, localCellCountPerDim=counts, &
                                      horzRelLoc=relloc, rc=status)
         if (counts(1)*counts(2).ne.0) then
-          call ESMF_GridGetCoord(grid, horzRelLoc=relloc, &
-                                 centerCoord=coordArray, rc=status)
-          call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
-          call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
+          call ESMF_GridGetCoord(grid, dim=1, horzRelLoc=relloc, &
+                                 centerCoord=coordX, rc=status)
+          call ESMF_GridGetCoord(grid, dim=2, horzRelLoc=relloc, &
+                                 centerCoord=coordY, rc=status)
         endif
 
         ! update field values here
@@ -237,8 +235,6 @@
      !   call ESMF_StatePrint(exportState, rc=status)
      !   call ESMF_FieldPrint(humidity1, rc=status)
      
-        deallocate(coordArray)
-        
         !print *, "User Comp Run returning"
 
         rc = status
@@ -314,21 +310,17 @@
       ! Local variables
       integer :: status, i, j, miscount, haloWidth, counts(2)
       logical :: match
-      type(ESMF_Array) :: array1, array2
       real(ESMF_KIND_R8), dimension(:,:), pointer :: data1, data2
       
       !print *, "User verifyRedistResults starting"
       
       ! update field values here
-      call ESMF_FieldGetArray(field1, array1, rc=status)
-      call ESMF_FieldGetArray(field2, array2, rc=status)
       call ESMF_FieldGet(field1, haloWidth=haloWidth, rc=status)
 
-      call ESMF_ArrayGet(array1, counts=counts, rc=status)
-
       ! Get pointers to the start of the data
-      call ESMF_ArrayGetData(array1, data1, ESMF_DATA_REF, rc=status)
-      call ESMF_ArrayGetData(array2, data2, ESMF_DATA_REF, rc=status)
+      call ESMF_FieldGetDataPointer(field1, data1, ESMF_DATA_REF, &
+        counts=counts, rc=status)
+      call ESMF_FieldGetDataPointer(field2, data2, ESMF_DATA_REF, rc=status)
 
       ! check and make sure the data in the two fields match exactly
       match    = .true.
@@ -364,19 +356,16 @@
       ! Local variables
       integer :: status, i, j, miscount, haloWidth, counts(2)
       logical :: match
-      type(ESMF_Array) :: array1
       real(ESMF_KIND_R8), dimension(:,:), pointer :: data1
       
       !print *, "User verifyHaloResults starting"
       
       ! update field values here
-      call ESMF_FieldGetArray(field1, array1, rc=status)
       call ESMF_FieldGet(field1, haloWidth=haloWidth, rc=status)
 
-      call ESMF_ArrayGet(array1, counts=counts, rc=status)
-
       ! Get pointers to the start of the data
-      call ESMF_ArrayGetData(array1, data1, ESMF_DATA_REF, rc=status)
+      call ESMF_FieldGetDataPointer(field1, data1, ESMF_DATA_REF, &
+        counts=counts, rc=status)
 
       ! check and make sure the halo data is ok
       match    = .true.

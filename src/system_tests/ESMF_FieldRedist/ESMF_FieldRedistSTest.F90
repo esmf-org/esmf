@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.32 2006/03/20 22:40:44 theurich Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.33 2006/03/28 21:52:35 theurich Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -45,8 +45,6 @@
     real(ESMF_KIND_R8), dimension(:,:), pointer :: srcdata, resdata
     type(ESMF_GridHorzStagger) :: horzStagger
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_Array) :: array1, array2, array3
-    type(ESMF_Array), dimension(:), pointer :: coordArray
     type(ESMF_Grid)  ::  grid1,  grid2
     type(ESMF_Field) :: field1, field2, field3
     type(ESMF_RouteHandle) :: rh12, rh23
@@ -155,26 +153,19 @@
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! get coordinate arrays available for setting the source data array
-    allocate(coordArray(2))
-    call ESMF_GridGetCoord(grid1, horzRelloc=ESMF_CELL_CENTER, &
-                           centerCoord=coordArray, rc=rc)
+    call ESMF_GridGetCoord(grid1, dim=1, horzRelloc=ESMF_CELL_CENTER, &
+                           centerCoord=coordX, localCounts=localCounts, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, rc)
+    call ESMF_GridGetCoord(grid1, dim=2, horzRelloc=ESMF_CELL_CENTER, &
+                           centerCoord=coordY, localCounts=localCounts, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, rc)
+    
+    ! Get pointers to the data and set it up
+    call ESMF_FieldGetDataPointer(field1, srcdata, ESMF_DATA_REF, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArrayGet(coordArray(1), counts=localCounts, rc=rc)
+    call ESMF_FieldGetDataPointer(field3, resdata, ESMF_DATA_REF, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
-    ! Get pointers to the data and set it up
-    call ESMF_FieldGetArray(field1, array1, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArrayGetData(array1, srcdata, ESMF_DATA_REF, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldGetArray(field3, array3, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArrayGetData(array3, resdata, ESMF_DATA_REF, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! initialize data arrays
     srcdata = 0.0
@@ -190,8 +181,6 @@
     enddo
 
     print *, "Initial data, before Transpose:"
-    call ESMF_ArrayPrint(array1, "foo", rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! No deallocate() is needed for array data, it will be freed when the
     ! Array is destroyed. 
@@ -208,23 +197,15 @@
     !! Call transpose method here, output ends up in field2
     call ESMF_FieldRedist(field1, field2, rh12, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldGetArray(field2, array2, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after Transpose:"
-    call ESMF_ArrayPrint(array2, "", rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
 
     !! Transpose back so we can compare contents
     !! Call transpose method again here, output ends up in field3
     call ESMF_FieldRedist(field2, field3, rh23, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldGetArray(field3, array3, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after second Transpose, should match original:"
-    call ESMF_ArrayPrint(array3, "", rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "Run section finished"
 
@@ -252,6 +233,7 @@
         ifld = i+hWidth
         compval = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
                        + 2.0*sin(coordY(i,j)/50.0*pi)
+        print *, srcdata(ifld,jfld), resdata(ifld,jfld), compval
         if ((srcdata(ifld,jfld) .ne. resdata(ifld,jfld)) .OR. &
             (abs(resdata(ifld,jfld)-compval).ge.1.0d-12)) then
           print *, "array contents do not match at: (", i,j, ") on DE ", &

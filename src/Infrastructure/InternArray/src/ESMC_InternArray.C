@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray.C,v 1.1 2006/03/24 16:33:28 theurich Exp $
+// $Id: ESMC_InternArray.C,v 1.2 2006/03/28 21:52:26 theurich Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -14,11 +14,11 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ Array methods declared
-// in the companion file ESMC_Array.h.  
+// The code in this file implements the C++ InternArray methods declared
+// in the companion file ESMC_InternArray.h.  
 //
-// The {\tt ESMF\_Array} object allows C++ to emulate the richer
-// Fortran language Array operations.  It allows strided access, 
+// The {\tt ESMF\_InternArray} object allows C++ to emulate the richer
+// Fortran language InternArray operations.  It allows strided access, 
 // subsetting operations, known dimension sizes, and typed access 
 // to arrays instead of just a starting address to a block of memory.  
 //
@@ -39,25 +39,25 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_InternArray.C,v 1.1 2006/03/24 16:33:28 theurich Exp $";
+            "$Id: ESMC_InternArray.C,v 1.2 2006/03/28 21:52:26 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
-// This section includes all the Array routines
+// This section includes all the InternArray routines
 //
 //
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_ArrayCreate"
+#define ESMC_METHOD "ESMC_InternArrayCreate"
 //BOP
-// !IROUTINE:  ESMC_ArrayCreate - Create a new Array
+// !IROUTINE:  ESMC_InternArrayCreate - Create a new Array
 //
 // !INTERFACE:
-      ESMC_Array *ESMC_ArrayCreate(
+      ESMC_InternArray *ESMC_InternArrayCreate(
 //
 // !RETURN VALUE:
 //     pointer to newly allocated ESMC_Array
@@ -72,10 +72,10 @@
     int *rc) {                 // return code
 //
 // !DESCRIPTION:
-//      This routine is the C++ entry point for creating an {\tt ESMF\_Array}
+//      This routine is the C++ entry point for creating an {\tt ESMF\_InternArray}
 //      object.  Unlike natural C++ arrays which can be as simple as the
 //      base address pointer and the number of bytes necessary to move to
-//      the next item, {\tt ESMF\_Array}s are richer in the associated metadata
+//      the next item, {\tt ESMF\_InternArray}s are richer in the associated metadata
 //      which allows them to behave more like Fortran arrays.  They store
 //      the size of each dimension, allow non-contiguous strides per
 //      dimension, and allow whole-array or subsectional operations.
@@ -98,9 +98,9 @@
 //   else, if this is a C++ only build then it has to call malloc to get
 //   space, and it can ignore F90 pointers completely.
 //
-//   The return from this routine is a pointer to the new Array data.
+//   The return from this routine is a pointer to the new InternArray data.
 //
-     ESMC_Array *a = new ESMC_Array;
+     ESMC_InternArray *a = new ESMC_InternArray;
      int status;
 
 
@@ -115,19 +115,19 @@
 
      return a;
 
- } // end ESMC_ArrayCreate
+ } // end ESMC_InternArrayCreate
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_ArrayCreate"
+#define ESMC_METHOD "ESMC_InternArrayCreate"
 //BOP
-// !IROUTINE:  ESMC_ArrayCreate - Create a new Array
+// !IROUTINE:  ESMC_InternArrayCreate - Create a new InternArray
 //
 // !INTERFACE:
-      ESMC_Array *ESMC_ArrayCreate(
+      ESMC_InternArray *ESMC_InternArrayCreate(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_Array
+//     pointer to newly allocated ESMC_InternArray
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
@@ -145,7 +145,7 @@
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
 
-     ESMC_Array *a = new ESMC_Array;
+     ESMC_InternArray *a = new ESMC_InternArray;
      int status;
 
 
@@ -160,16 +160,16 @@
 
      return a;
 
- } // end ESMC_ArrayCreate
+ } // end ESMC_InternArrayCreate
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_ArrayDestroy"
+#define ESMC_METHOD "ESMC_InternArrayDestroy"
 //BOP
-// !IROUTINE:  ESMC_ArrayDestroy - free a Array created with Create
+// !IROUTINE:  ESMC_InternArrayDestroy - free a InternArray created with Create
 //
 // !INTERFACE:
-      int ESMC_ArrayDestroy(ESMC_Array *array) {
+      int ESMC_InternArrayDestroy(ESMC_InternArray *array) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -178,8 +178,8 @@
 //    none
 //
 // !DESCRIPTION:
-//      ESMF routine which destroys a Array object previously allocated
-//      via an {\tt ESMC\_ArrayCreate} routine.  Define for deep classes only.
+//      ESMF routine which destroys a InternArray object previously allocated
+//      via an {\tt ESMC\_InternArrayCreate} routine.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -190,19 +190,19 @@
 
     return 0;
 
- } // end ESMC_ArrayDestroy
+ } // end ESMC_InternArrayDestroy
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_ArrayCreateNoData"
+#define ESMC_METHOD "ESMC_InternArrayCreateNoData"
 //BOPI
-// !IROUTINE:  ESMC_ArrayCreateNoData - internal routine for fortran use
+// !IROUTINE:  ESMC_InternArrayCreateNoData - internal routine for fortran use
 //
 // !INTERFACE:
-      ESMC_Array *ESMC_ArrayCreateNoData(
+      ESMC_InternArray *ESMC_InternArrayCreateNoData(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_Array
+//     pointer to newly allocated ESMC_InternArray
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
@@ -213,15 +213,15 @@
 //
 // !DESCRIPTION:
 //      This version of Create is only intended for internal use by
-//      the {\tt ESMF\_ArrayCreate} fortran routine.  It creates a partially
+//      the {\tt ESMF\_InternArrayCreate} fortran routine.  It creates a partially
 //      constructed array, then depends on the caller to come back and
 //      complete the array with the {\tt ESMF\_ArraySetInfo} call.  
 //      (It is broken up this way to try to minimize the amount of
-//      macro-generated code needed in the {\tt ESMF\_Array.F90} source file.)
+//      macro-generated code needed in the {\tt ESMF\_InternArray.F90} source file.)
 //
 //EOPI
 
-     ESMC_Array *a = new ESMC_Array;
+     ESMC_InternArray *a = new ESMC_InternArray;
      int status;
 
      status = a->ESMC_ArrayConstruct(rank, dt, dk, NULL, NULL, oflag,
@@ -234,19 +234,19 @@
 
      return a;
 
- } // end ESMC_ArrayCreateNoData
+ } // end ESMC_InternArrayCreateNoData
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_ArrayCreate_F"
+#define ESMC_METHOD "ESMC_InternArrayCreate_F"
 //BOP
-// !IROUTINE:  ESMC_ArrayCreate_F - internal routine for fortran use
+// !IROUTINE:  ESMC_InternArrayCreate_F - internal routine for fortran use
 //
 // !INTERFACE:
-      ESMC_Array *ESMC_ArrayCreate_F(
+      ESMC_InternArray *ESMC_InternArrayCreate_F(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_Array
+//     pointer to newly allocated ESMC_InternArray
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
@@ -264,8 +264,8 @@
 //
 // !DESCRIPTION:
 //      This version of Create is only intended for internal use by
-//      the {\tt ESMF\_ArrayCreate} fortran routine.  This routine works in a
-//      similar manner as the regular {\tt ESMC\_ArrayCreate} routine, but the
+//      the {\tt ESMF\_InternArrayCreate} fortran routine.  This routine works in a
+//      similar manner as the regular {\tt ESMC\_InternArrayCreate} routine, but the
 //      differences include:  it gets a real fortran 90 array pointer as
 //      one of the arguments; instead of calling malloc to make space for
 //      the array contents, it passes the f90 pointer back to a fortran
@@ -294,9 +294,9 @@
 //   (also called the dope vector), so that it can be returned to any 
 //   fortran routine on demand. 
 // 
-//   The return from this routine is a pointer to the new Array data.
+//   The return from this routine is a pointer to the new InternArray data.
 //
-     ESMC_Array *a = new ESMC_Array;
+     ESMC_InternArray *a = new ESMC_InternArray;
      int status;
 
      if (base == NULL) 
@@ -319,16 +319,16 @@
 
      return a;
 
- } // end ESMC_ArrayCreate_F
+ } // end ESMC_InternArrayCreate_F
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ArrayConstruct"
 //BOP
-// !IROUTINE:  ESMC_ArrayConstruct - fill in an already allocated Array
+// !IROUTINE:  ESMC_ArrayConstruct - fill in an already allocated InternArray
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayConstruct(
+      int ESMC_InternArray::ESMC_ArrayConstruct(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -351,16 +351,16 @@
 //
 // !DESCRIPTION:
 //   ESMF routine which fills in the contents of an already
-//   allocated {\tt ESMF\_Array} object.  May need to do additional allocations
+//   allocated {\tt ESMF\_InternArray} object.  May need to do additional allocations
 //   as needed.  Must call the corresponding {\tt ESMC\_ArrayDestruct}
 //   routine to free the additional memory.  Intended for internal
-//   ESMF use only; end-users use {\tt ESMC\_ArrayCreate}, which calls
+//   ESMF use only; end-users use {\tt ESMC\_InternArrayCreate}, which calls
 //   {\tt ESMC\_ArrayConstruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
     int i, status;
-    ESMC_Array *aptr;
+    ESMC_InternArray *aptr;
     int alloc_stride;
     int C, twidth;
 
@@ -468,7 +468,7 @@
 
     
     // TODO: call LocalArray constructor first, then add halo info
-    ESMC_BaseSetName(NULL, "Array");
+    ESMC_BaseSetName(NULL, "InternArray");
 
     // TODO: memcpy from base to base_addr, proper number of bytes?
     //  if docopy flag is set.
@@ -483,10 +483,10 @@
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ArrayDestruct"
 //BOP
-// !IROUTINE:  ESMC_ArrayDestruct - release resources associated w/a Array
+// !IROUTINE:  ESMC_ArrayDestruct - release resources associated w/a InternArray
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayDestruct(void) {
+      int ESMC_InternArray::ESMC_ArrayDestruct(void) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -497,15 +497,15 @@
 // !DESCRIPTION:
 //      ESMF routine which deallocates any space allocated by
 //      {\tt ESMF\_ArrayConstruct}, does any additional cleanup before the
-//      original {\tt ESMC\_Array} object is freed.  Intended for internal ESMF
-//      use only; end-users use {\tt ESMC\_ArrayDestroy}, which calls
+//      original {\tt ESMC\_InternArray} object is freed.  Intended for internal ESMF
+//      use only; end-users use {\tt ESMC\_InternArrayDestroy}, which calls
 //      {\tt ESMC\_ArrayDestruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
 
     int rc = ESMF_FAILURE;
-    ESMC_Array *aptr = this;
+    ESMC_InternArray *aptr = this;
 
     // check origin and alloc flag, and call dealloc routine if needed 
     if (needs_dealloc != ESMF_TRUE)
@@ -530,7 +530,7 @@
 // !IROUTINE:  ESMC_ArrayGet<Value> - get <Value> for a Array
 //
 // !INTERFACE:
-      //int ESMC_Array::ESMC_ArrayGet<Value>(
+      //int ESMC_InternArray::ESMC_ArrayGet<Value>(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -539,7 +539,7 @@
       //<value type> *value) const {     // out - value
 //
 // !DESCRIPTION:
-//     Returns the value of {\tt ESMC\_Array} member <Value>.
+//     Returns the value of {\tt ESMC\_InternArray} member <Value>.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -555,10 +555,10 @@
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ArraySet"
 //BOP
-// !IROUTINE:  ESMC_ArraySet<Value> - set <Value> for a Array
+// !IROUTINE:  ESMC_ArraySet<Value> - set <Value> for a InternArray
 //
 // !INTERFACE:
-      //int ESMC_Array::ESMC_ArraySet<Value>(
+      //int ESMC_InternArray::ESMC_ArraySet<Value>(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -567,7 +567,7 @@
       //const <value type> *value) {     // in - value
 //
 // !DESCRIPTION:
-//     Sets the value of {\tt ESMC\_Array} member <Value>.
+//     Sets the value of {\tt ESMC\_InternArray} member <Value>.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -589,7 +589,7 @@
 // !IROUTINE:  ESMC_ArraySetInfo - Set the most common F90 needs
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArraySetInfo(
+      int ESMC_InternArray::ESMC_ArraySetInfo(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -730,7 +730,7 @@
 // !IROUTINE:  ESMC_ArrayGetF90Ptr - get F90Ptr for a Array
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayGetF90Ptr(
+      int ESMC_InternArray::ESMC_ArrayGetF90Ptr(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -764,10 +764,10 @@
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ArraySetF90Ptr"
 //BOP
-// !IROUTINE:  ESMC_ArraySetF90Ptr - set F90Ptr for a Array
+// !IROUTINE:  ESMC_ArraySetF90Ptr - set F90Ptr for a InternArray
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArraySetF90Ptr(
+      int ESMC_InternArray::ESMC_ArraySetF90Ptr(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -776,7 +776,7 @@
       const struct c_F90ptr *p) {     // in - f90 pointer block
 //
 // !DESCRIPTION:
-//     Sets the {\tt ESMC\_Array} member F90ptr with the given value.
+//     Sets the {\tt ESMC\_InternArray} member F90ptr with the given value.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -800,10 +800,10 @@
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ArraySetAxisIndex"
 //BOP
-// !IROUTINE:  ESMC_ArraySetAxisIndex - set annotation on Arrays for local/global
+// !IROUTINE:  ESMC_ArraySetAxisIndex - set annotation on InternArrays for local/global
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArraySetAxisIndex(
+      int ESMC_InternArray::ESMC_ArraySetAxisIndex(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -813,7 +813,7 @@
       struct ESMC_AxisIndex *ai) {     // in - values to set
 //
 // !DESCRIPTION:
-//     Sets the {\tt ESMC\_Array} member {\tt ESMC\_AxisIndex} with the given value.
+//     Sets the {\tt ESMC\_InternArray} member {\tt ESMC\_AxisIndex} with the given value.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -855,10 +855,10 @@
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ArrayGetAxisIndex"
 //BOP
-// !IROUTINE:  ESMC_ArrayGetAxisIndex - get annotation on Arrays for local/global
+// !IROUTINE:  ESMC_ArrayGetAxisIndex - get annotation on InternArrays for local/global
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayGetAxisIndex(
+      int ESMC_InternArray::ESMC_ArrayGetAxisIndex(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -868,7 +868,7 @@
       struct ESMC_AxisIndex *ai) const {  // out - values to get
 //
 // !DESCRIPTION:
-//     Gets the {\tt ESMC\_Array} member {\tt ESMC\_AxisIndex} with the given value.
+//     Gets the {\tt ESMC\_InternArray} member {\tt ESMC\_AxisIndex} with the given value.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -934,8 +934,8 @@
  // "All" in this routine means all DEs and all ranks, and it assumes
  // that halo widths are applied equally to all ranks, even non-grid ranks.
  // We are trying to fix this so halos are only defined for grid ranks.
- // So this needs to be defined in the ArrayComm file, where it can access
- // the Grid, the DataMap, and the Array so it pulls the right things from
+ // So this needs to be defined in the InternArrayComm file, where it can access
+ // the Grid, the DataMap, and the InternArray so it pulls the right things from
  // the right places.  
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ArrayGetAllAxisIndices"
@@ -943,7 +943,7 @@
 // !IROUTINE:  ESMC_ArrayGetAllAxisIndices - get all AIs for local/global
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayGetAllAxisIndices(
+      int ESMC_InternArray::ESMC_ArrayGetAllAxisIndices(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -957,10 +957,10 @@
       struct ESMC_AxisIndex *excl) const { // out - exclusive
 //
 // !DESCRIPTION:
-//  Based on the grid and the halo widths of the {\tt ESMC\_Array} 
+//  Based on the grid and the halo widths of the {\tt ESMC\_InternArray} 
 //  on the local DE, compute all requested AI lists for all {\tt DE}s
 //  in the DELayout associated with the specified {\tt ESMF_Grid}.
-//  This does assume that all {\tt ESMC\_Array}s associated with 
+//  This does assume that all {\tt ESMC\_InternArray}s associated with 
 //  a grid have the same halo widths (but they can be different sizes
 //  on different sides).
 //
@@ -1011,10 +1011,10 @@
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ArrayValidate"
 //BOP
-// !IROUTINE:  ESMC_ArrayValidate - internal consistency check for a Array
+// !IROUTINE:  ESMC_ArrayValidate - internal consistency check for a InternArray
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayValidate(
+      int ESMC_InternArray::ESMC_ArrayValidate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1023,7 +1023,7 @@
       const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a {\tt ESMC\_Array} is internally consistent.
+//      Validates that a {\tt ESMC\_InternArray} is internally consistent.
 //      Returns error code if problems are found.  {\tt ESMC\_Base} class method.
 //
 //EOP
@@ -1043,10 +1043,10 @@
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ArrayPrint"
 //BOP
-// !IROUTINE:  ESMC_ArrayPrint - print contents of a Array
+// !IROUTINE:  ESMC_ArrayPrint - print contents of a InternArray
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayPrint(
+      int ESMC_InternArray::ESMC_ArrayPrint(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1055,7 +1055,7 @@
       const char *options) const {     //  in - print options
 //
 // !DESCRIPTION:
-//      Print information about a {\tt ESMC\_Array}.  The options control the
+//      Print information about a {\tt ESMC\_InternArray}.  The options control the
 //      type of information and level of detail.  {\tt ESMC\_Base} class method.
 //
 //EOP
@@ -1086,7 +1086,7 @@
         beforeskip = '\n';
     }
 
-    sprintf(msgbuf,"ArrayPrint: Array at address 0x%08lx:\n", (unsigned long)this);
+    sprintf(msgbuf,"ArrayPrint: InternArray at address 0x%08lx:\n", (unsigned long)this);
     printf(msgbuf);
       // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
 
@@ -1636,10 +1636,10 @@
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ArrayWrite"
 //BOP
-// !IROUTINE:  ESMC_ArrayWrite - write contents of a Array
+// !IROUTINE:  ESMC_ArrayWrite - write contents of a InternArray
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayWrite(
+      int ESMC_InternArray::ESMC_ArrayWrite(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1649,7 +1649,7 @@
       const char *filename) const {    // in - file name
 //
 // !DESCRIPTION:
-//      Write the contents of an {\tt ESMC\_Array} to disk.
+//      Write the contents of an {\tt ESMC\_InternArray} to disk.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -1676,7 +1676,7 @@
         }
     }
 
-    fprintf(ffile, "ArrayWrite: Array at address 0x%08lx:  ", 
+    fprintf(ffile, "ArrayWrite: InternArray at address 0x%08lx:  ", 
                            (unsigned long)this);
     fprintf(ffile, "rank = %d, type = %d, kind = %d\n", 
                              this->rank, this->type, this->kind);
@@ -1968,7 +1968,7 @@
 // !IROUTINE:  ESMC_ArraySerialize - Turn array information into a byte stream
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArraySerialize(
+      int ESMC_InternArray::ESMC_ArraySerialize(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1988,11 +1988,11 @@
     char *cp;
     struct ESMC_AxisIndex *ap;
 
-    fixedpart = sizeof(ESMC_Array) + byte_count;
+    fixedpart = sizeof(ESMC_InternArray) + byte_count;
     if ((*length - *offset) < fixedpart) {
         
          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
-                               "Buffer too short to add an Array object", &rc);
+                               "Buffer too short to add an InternArray object", &rc);
          return ESMF_FAILURE;
 
         //buffer = (char *)realloc((void *)buffer, 
@@ -2038,7 +2038,7 @@
 // !IROUTINE:  ESMC_ArrayDeserialize - Turn a byte stream into an object
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayDeserialize(
+      int ESMC_InternArray::ESMC_ArrayDeserialize(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2095,7 +2095,7 @@
 // !IROUTINE:  ESMC_ArraySerializeNoData - Turn array information into a byte stream
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArraySerializeNoData(
+      int ESMC_InternArray::ESMC_ArraySerializeNoData(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2117,10 +2117,10 @@
     char *cp;
     int i, *ip;
 
-    fixedpart = sizeof(ESMC_Array);
+    fixedpart = sizeof(ESMC_InternArray);
     if ((*length - *offset) < fixedpart) {
          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
-                               "Buffer too short to add an Array object", &rc);
+                               "Buffer too short to add an InternArray object", &rc);
          return ESMF_FAILURE;
         //buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
         //*length += 2 * fixedpart;
@@ -2165,7 +2165,7 @@
 // !IROUTINE:  ESMC_ArrayDeserializeNoData - Turn a byte stream into an object
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayDeserializeNoData(
+      int ESMC_InternArray::ESMC_ArrayDeserializeNoData(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2217,12 +2217,12 @@
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Array()"
+#define ESMC_METHOD "ESMC_InternArray()"
 //BOP
-// !IROUTINE:  ESMC_Array - native C++ constructor
+// !IROUTINE:  ESMC_InternArray - native C++ constructor
 //
 // !INTERFACE:
-      ESMC_Array::ESMC_Array(
+      ESMC_InternArray::ESMC_InternArray(
 //
 // !RETURN VALUE:
 //    none
@@ -2241,16 +2241,16 @@
 //  code goes here
 //
 
- } // end ESMC_Array
+ } // end ESMC_InternArray
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "~ESMC_Array()"
+#define ESMC_METHOD "~ESMC_InternArray()"
 //BOP
-// !IROUTINE:  ~ESMC_Array - native C++ destructor
+// !IROUTINE:  ~ESMC_InternArray - native C++ destructor
 //
 // !INTERFACE:
-      ESMC_Array::~ESMC_Array(void) {
+      ESMC_InternArray::~ESMC_InternArray(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -2268,6 +2268,6 @@
 //  code goes here
 //
 
- } // end ~ESMC_Array
+ } // end ~ESMC_InternArray
 
 

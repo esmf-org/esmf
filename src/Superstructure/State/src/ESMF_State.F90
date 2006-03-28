@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.91 2006/02/01 16:20:30 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.92 2006/03/28 21:52:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,8 +39,8 @@
       use ESMF_BaseMod
       use ESMF_IOSpecMod
       use ESMF_VMMod
-      use ESMF_ArrayMod
-      use ESMF_ArrayGetMod
+      use ESMF_InternArrayMod
+      use ESMF_InternArrayGetMod
       use ESMF_FieldMod
       use ESMF_BundleMod
       use ESMF_XformMod
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.91 2006/02/01 16:20:30 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.92 2006/03/28 21:52:32 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -339,7 +339,7 @@ end interface
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_InternArray), intent(in) :: array
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -365,7 +365,7 @@ end interface
 !
 !EOP
 
-      type(ESMF_Array) :: temp_list(1)
+      type(ESMF_InternArray) :: temp_list(1)
       integer :: localrc
 
       call ESMF_StateValidate(state, rc=localrc)
@@ -392,7 +392,7 @@ end interface
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state 
       integer, intent(in) :: arrayCount
-      type(ESMF_Array), dimension(:), intent(in) :: arrayList
+      type(ESMF_InternArray), dimension(:), intent(in) :: arrayList
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -870,7 +870,7 @@ end interface
       type(ESMF_StateType), intent(in), optional :: statetype
       type(ESMF_Bundle), dimension(:), intent(in), optional :: bundleList
       type(ESMF_Field), dimension(:), intent(in), optional :: fieldList
-      type(ESMF_Array), dimension(:), intent(in), optional :: arrayList
+      type(ESMF_InternArray), dimension(:), intent(in), optional :: arrayList
       type(ESMF_State), dimension(:), intent(in), optional :: nestedStateList
       character(len=*), dimension(:), intent(in), optional :: nameList
       integer, intent(in), optional :: itemCount
@@ -1135,7 +1135,7 @@ end interface
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
       character (len=*), intent(in) :: arrayName
-      type(ESMF_Array), intent(out) :: array
+      type(ESMF_InternArray), intent(out) :: array
       character (len=*), intent(in), optional :: nestedStateName
       integer, intent(out), optional :: rc             
 
@@ -3774,7 +3774,7 @@ end interface
       type(ESMF_StateType), intent(in), optional :: statetype
       type(ESMF_Bundle), dimension(:), intent(in), optional :: bundles
       type(ESMF_Field), dimension(:), intent(in), optional :: fields
-      type(ESMF_Array), dimension(:), intent(in), optional :: arrays
+      type(ESMF_InternArray), dimension(:), intent(in), optional :: arrays
       type(ESMF_State), dimension(:), intent(in), optional :: states
       character(len=*), dimension(:), intent(in), optional :: names
       integer, intent(in), optional :: itemcount
@@ -4095,7 +4095,7 @@ end interface
 ! !ARGUMENTS:
       type(ESMF_StateClass), pointer :: stypep
       integer, intent(in) :: acount
-      type(ESMF_Array), dimension(:), intent(in) :: arrays
+      type(ESMF_InternArray), dimension(:), intent(in) :: arrays
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -4167,7 +4167,7 @@ end interface
       ! For each array...
       do i=1, acount
 
-        call ESMF_ArrayValidate(arrays(i), rc=localrc)
+        call ESMF_InternArrayValidate(arrays(i), rc=localrc)
         if (localrc .ne. ESMF_SUCCESS) then
             write(errmsg, *) "item", i
             call ESMF_LogMsgSetError(localrc, errmsg, &
@@ -4175,7 +4175,7 @@ end interface
             deallocate(atodo, stat=localrc)
             return
         endif
-        call ESMF_ArrayGet(arrays(i), name=aname, rc=localrc)
+        call ESMF_InternArrayGet(arrays(i), name=aname, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
@@ -4239,7 +4239,7 @@ end interface
             nextitem%otype = ESMF_STATEITEM_ARRAY
 
             ! Add name
-            call ESMF_ArrayGet(arrays(i), name=nextitem%namep, rc=localrc)
+            call ESMF_InternArrayGet(arrays(i), name=nextitem%namep, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, "getting name from array", &
                                       ESMF_CONTEXT, rc)) return
 
@@ -5429,7 +5429,7 @@ end interface
                                        length, offset, localrc)
               continue ! TODO: serialize
             case (ESMF_STATEITEM_ARRAY%ot)
-             call c_ESMC_ArraySerializeNoData(sip%datap%ap, buffer(1), &
+             call c_ESMC_IArraySerializeNoData(sip%datap%ap, buffer(1), &
                                        length, offset, localrc)
               continue ! TODO: serialize
             case (ESMF_STATEITEM_STATE%ot)
@@ -5545,7 +5545,7 @@ end interface
               sip%datap%fp = ESMF_FieldDeserialize(vm, buffer, offset, localrc)
               continue ! TODO: deserialize
             case (ESMF_STATEITEM_ARRAY%ot)
-              call c_ESMC_ArrayDeserializeNoData(sip%datap%ap, buffer, &
+              call c_ESMC_IArrayDeserializeNoData(sip%datap%ap, buffer, &
                                                  offset, localrc)
               continue ! TODO: deserialize
             case (ESMF_STATEITEM_STATE%ot)

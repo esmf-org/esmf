@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.16 2005/07/01 16:39:02 nscollins Exp $
+! $Id: user_model2.F90,v 1.17 2006/03/28 21:52:35 theurich Exp $
 !
 ! System test for Exclusive Components, user-written component 2.
 
@@ -207,7 +207,7 @@
 
 !   ! Local variables
       type(ESMF_Field) :: humidity2, pressure2
-      type(ESMF_Array) :: array1, array2
+!      type(ESMF_Array) :: array1, array2
       integer :: status
 
       status = ESMF_FAILURE
@@ -218,8 +218,8 @@
       call ESMF_StateGetField(importState, "pressure2", pressure2, rc=status)
     
       ! This is where the model specific computation goes.
-      call ESMF_FieldGetArray(humidity2, array1, rc=status)
-      call ESMF_FieldGetArray(pressure2, array2, rc=status)
+!      call ESMF_FieldGetArray(humidity2, array1, rc=status)
+!      call ESMF_FieldGetArray(pressure2, array2, rc=status)
 
       !print *, "User Comp Run returning"
 
@@ -281,8 +281,6 @@
       ! Local variables
       integer :: status, i, j, myDE, counts(2)
       type(ESMF_RelLoc) :: relloc
-      type(ESMF_Array) :: array
-      type(ESMF_Array), dimension(:), pointer :: coordArray
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8) :: pi, error, maxError, maxPerError
       real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue
@@ -293,22 +291,20 @@
       pi = 3.14159
 
       ! get the grid and coordinates
-      allocate(coordArray(2))
       call ESMF_FieldGet(humidity, grid=grid, horzRelloc=relloc, rc=status)
       call ESMF_GridGetDELocalInfo(grid, myDE=myDE, &
                                    localCellCountPerDim=counts, &
                                    horzRelLoc=relloc, rc=status)
       if (counts(1)*counts(2).ne.0) then
-        call ESMF_GridGetCoord(grid, horzRelloc=relloc, &
-                               centerCoord=coordArray, rc=status)
-        call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
-        call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
+        call ESMF_GridGetCoord(grid, dim=1, horzRelloc=relloc, &
+                               centerCoord=coordX, rc=status)
+        call ESMF_GridGetCoord(grid, dim=2, horzRelloc=relloc, &
+                               centerCoord=coordY, rc=status)
       endif
 
       ! update field values here
-      call ESMF_FieldGetArray(humidity, array, rc=status)
       ! Get a pointer to the start of the data
-      call ESMF_ArrayGetData(array, data, ESMF_DATA_REF, rc=status)
+      call ESMF_FieldGetDataPointer(humidity, data, ESMF_DATA_REF, rc=status)
       !print *, "rc from array get data = ", status
 
       ! allocate array for computed results and fill it
@@ -343,8 +339,6 @@
         enddo
         deallocate(calc)
       endif
-
-      deallocate(coordArray)
 
       write(*,*) "Results for DE #", myDE, ":"
       write(*,*) "   minimum regridded value = ", minDValue

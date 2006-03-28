@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.98 2006/03/23 01:14:40 theurich Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.99 2006/03/28 21:52:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -40,10 +40,10 @@
       use ESMF_LogErrMod
       use ESMF_BaseMod
       use ESMF_LocalArrayMod
-      use ESMF_ArrayDataMapMod
-      use ESMF_ArrayMod
-      use ESMF_ArrayCreateMod
-      use ESMF_ArrayGetMod
+      use ESMF_InternArrayDataMapMod
+      use ESMF_InternArrayMod
+      use ESMF_InternArrayCreateMod
+      use ESMF_InternArrayGetMod
       use ESMF_PhysCoordMod
 
       implicit none
@@ -62,14 +62,14 @@
 !      private
         type(ESMF_Base)    :: base      ! ESMF Base object, including name
         ! One array per number of dimensions:
-        type(ESMF_Array), dimension(:), pointer :: compLocations
+        type(ESMF_InternArray), dimension(:), pointer :: compLocations
                                         ! the coordinates for each point in the
                                         ! grid.  If the coordinates are aligned,
                                         ! then this array is a simple vector of
                                         ! values along the axis.  Otherwise the
                                         ! Array must have the coordinates for
                                         ! all points in the Grid.
-        type(ESMF_Array), dimension(:), pointer :: totalLocations
+        type(ESMF_InternArray), dimension(:), pointer :: totalLocations
                                         ! same as above, but with an additional
                                         ! boundary layer of coordinates.  Only
                                         ! used internally, for example during
@@ -109,14 +109,14 @@
                                   ! if variable, set this to the largest number.
                                   ! Vertices can be degenerate.
         ! One array per number of dimensions:
-        type(ESMF_Array), dimension(:), pointer :: vertices
+        type(ESMF_InternArray), dimension(:), pointer :: vertices
                                   ! coordinates in each direction for each corner
                                   ! of each region.
-        type(ESMF_Array), dimension(:), pointer :: bbox 
+        type(ESMF_InternArray), dimension(:), pointer :: bbox 
                                   ! bounding box for each region to aid search
                                   ! methods.
 
-        type(ESMF_Array), dimension(2) :: ellipse
+        type(ESMF_InternArray), dimension(2) :: ellipse
                                   ! parameters of ellipse describing region
                                   ! around each point.  Note that the values can
                                   ! be equal, describing a circle or sphere
@@ -146,7 +146,7 @@
         type(ESMF_Base) :: base   ! ESMF Base class object
         type(ESMF_GridMaskType) :: maskType
                                   ! type of mask
-        type(ESMF_Array) :: data  ! mask data at each grid point
+        type(ESMF_InternArray) :: data  ! mask data at each grid point
       end type
 
 !------------------------------------------------------------------------------
@@ -207,7 +207,7 @@
                                   ! given.  Region IDs can be encoded as a mask
                                   ! as well.
         integer :: numMetrics
-        type(ESMF_Array), dimension(:), pointer :: metrics
+        type(ESMF_InternArray), dimension(:), pointer :: metrics
                                   ! A place to store metrics for the grid.  
                                   ! There is no support for the Framework to use
                                   ! these metrics, but they can be set and
@@ -324,7 +324,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.98 2006/03/23 01:14:40 theurich Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.99 2006/03/28 21:52:31 theurich Exp $'
 
 !==============================================================================
 !
@@ -633,7 +633,7 @@
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc)) return
         
-              call ESMF_ArrayDestroy(physgrid%ptr%masks(i)%data, rc=localrc)
+              call ESMF_InternArrayDestroy(physgrid%ptr%masks(i)%data, rc=localrc)
               if (ESMF_LogMsgFoundError(localrc, &
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc)) return
@@ -649,7 +649,7 @@
       if (physgrid%ptr%numMetrics .gt. 0) then
           do i=1, physgrid%ptr%numMetrics
 
-              call ESMF_ArrayDestroy(physgrid%ptr%metrics(i), rc=localrc)
+              call ESMF_InternArrayDestroy(physgrid%ptr%metrics(i), rc=localrc)
               if (ESMF_LogMsgFoundError(localrc, &
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc)) return
@@ -666,7 +666,7 @@
       ! clean up location related storage
       if (associated(physgrid%ptr%locations%compLocations)) then
           do i=1, size(physgrid%ptr%locations%compLocations)
-              call ESMF_ArrayDestroy(physgrid%ptr%locations%compLocations(i), rc=localrc)
+              call ESMF_InternArrayDestroy(physgrid%ptr%locations%compLocations(i), rc=localrc)
               if (ESMF_LogMsgFoundError(localrc, &
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc)) return
@@ -679,7 +679,7 @@
 
       if (associated(physgrid%ptr%locations%totalLocations)) then
           do i=1, size(physgrid%ptr%locations%totalLocations)
-              call ESMF_ArrayDestroy(physgrid%ptr%locations%totalLocations(i), rc=localrc)
+              call ESMF_InternArrayDestroy(physgrid%ptr%locations%totalLocations(i), rc=localrc)
               if (ESMF_LogMsgFoundError(localrc, &
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc)) return
@@ -698,7 +698,7 @@
       ! clean up region related storage
       if (associated(physgrid%ptr%regions%vertices)) then
           do i=1, size(physgrid%ptr%regions%vertices)
-              call ESMF_ArrayDestroy(physgrid%ptr%regions%vertices(i), rc=localrc)
+              call ESMF_InternArrayDestroy(physgrid%ptr%regions%vertices(i), rc=localrc)
               if (ESMF_LogMsgFoundError(localrc, &
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc)) return
@@ -711,7 +711,7 @@
 
       if (associated(physgrid%ptr%regions%bbox)) then
           do i=1, size(physgrid%ptr%regions%bbox)
-              call ESMF_ArrayDestroy(physgrid%ptr%regions%bbox(i), rc=localrc)
+              call ESMF_InternArrayDestroy(physgrid%ptr%regions%bbox(i), rc=localrc)
               if (ESMF_LogMsgFoundError(localrc, &
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc)) return
@@ -1064,7 +1064,7 @@
 ! !ARGUMENTS:
       type(ESMF_PhysGrid), intent(in) :: physgrid
       character(*), intent(out), optional :: name
-      type(ESMF_Array), dimension(:), intent(inout), optional :: locationArray 
+      type(ESMF_InternArray), dimension(:), intent(inout), optional :: locationArray 
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc            
 !
@@ -1133,7 +1133,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGrid), intent(inout) :: physgrid
-      type(ESMF_Array), dimension(:), pointer :: locationArray
+      type(ESMF_InternArray), dimension(:), pointer :: locationArray
       character(*), intent(in), optional :: name
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc            
@@ -1215,8 +1215,8 @@
       type(ESMF_RegionType), intent(in) :: regionType
       character(*), intent(in), optional :: name
       integer, intent(in), optional :: numVertices
-      type(ESMF_Array), dimension(:), pointer, optional :: vertexArray
-      type(ESMF_Array), dimension(2), intent(in), optional :: ellipseArray
+      type(ESMF_InternArray), dimension(:), pointer, optional :: vertexArray
+      type(ESMF_InternArray), dimension(2), intent(in), optional :: ellipseArray
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
@@ -1332,9 +1332,9 @@
       type(ESMF_RegionType), intent(inout), optional :: regionType
       character(*), intent(inout), optional :: name
       integer, intent(inout), optional :: numVertices
-      type(ESMF_Array), dimension(:), intent(inout), optional :: vertexArray
-      type(ESMF_Array), dimension(2), intent(inout), optional :: ellipseArray
-      type(ESMF_Array), dimension(:), intent(inout), optional :: bboxArray
+      type(ESMF_InternArray), dimension(:), intent(inout), optional :: vertexArray
+      type(ESMF_InternArray), dimension(2), intent(inout), optional :: ellipseArray
+      type(ESMF_InternArray), dimension(:), intent(inout), optional :: bboxArray
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
@@ -1456,8 +1456,8 @@
       ! for some reason the pgi compiler does not like intent(in)
       ! on the next line.  it says the types do not match.
       ! i will just take it out for now.   nsc 15oct03
-      !type(ESMF_Array), intent(in) :: maskArray
-      type(ESMF_Array) :: maskArray
+      !type(ESMF_InternArray), intent(in) :: maskArray
+      type(ESMF_InternArray) :: maskArray
       type(ESMF_GridMaskType), intent(in) :: maskType
       character(*), intent(in), optional :: name
       integer, intent(out), optional :: id
@@ -1568,7 +1568,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGrid), intent(in) :: physgrid
-      type(ESMF_Array), intent(out) :: maskArray
+      type(ESMF_InternArray), intent(out) :: maskArray
       character(*), intent(in), optional :: name
       integer, intent(in), optional :: id
       integer, intent(out), optional :: rc
@@ -1670,7 +1670,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGrid), intent(inout) :: physgrid
-      type(ESMF_Array), intent(inout) :: metricArray
+      type(ESMF_InternArray), intent(inout) :: metricArray
       character(*), intent(in) :: name
       integer, intent(out), optional :: id
       integer, intent(out), optional :: rc
@@ -1700,7 +1700,7 @@
       ! local variables
       integer :: n, numMetricOld, numMetricNew
       integer :: localrc                             ! Error status
-      type(ESMF_Array), dimension(:), allocatable :: tempMetric
+      type(ESMF_InternArray), dimension(:), allocatable :: tempMetric
                                                      ! temporary array of metrics
 
       ! Initialize return code; assume failure until success is certain
@@ -1751,7 +1751,7 @@
       if (present(id)) id = numMetricNew
       physgrid%ptr%numMetrics = numMetricNew
 
-      call ESMF_ArraySet(physgrid%ptr%metrics(numMetricNew), name=name, &
+      call ESMF_InternArraySet(physgrid%ptr%metrics(numMetricNew), name=name, &
                          rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1774,7 +1774,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGrid), intent(in) :: physgrid
-      type(ESMF_Array), intent(out) :: metricArray
+      type(ESMF_InternArray), intent(out) :: metricArray
       character(*), intent(in), optional :: name
       integer, intent(in), optional :: id
       integer, intent(out), optional :: rc
@@ -1832,7 +1832,7 @@
         found = .false.
         name_loop: do n=1,physgrid%ptr%numMetrics
             
-          call ESMF_ArrayGet(physgrid%ptr%metrics(n), name=name_tmp, rc=localrc)
+          call ESMF_InternArrayGet(physgrid%ptr%metrics(n), name=name_tmp, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -2171,10 +2171,10 @@
       ! initialize destination address to zero
       dstAdd = 0
 
-      call ESMF_ArrayGetData(physgrid%ptr%regions%vertices(1), cornerX, &
-                             ESMF_DATA_REF, rc)
-      call ESMF_ArrayGetData(physgrid%ptr%regions%vertices(2), cornerY, &
-                             ESMF_DATA_REF, rc)
+      call ESMF_InternArrayGetData(physgrid%ptr%regions%vertices(1), cornerX, &
+                             ESMF_DATA_REF, rc=rc)
+      call ESMF_InternArrayGetData(physgrid%ptr%regions%vertices(2), cornerY, &
+                             ESMF_DATA_REF, rc=rc)
 
       ! extract local minima and maxima from the vertex arrays
       localMinX = minval(cornerX)
@@ -2287,10 +2287,10 @@
       dstAdd = 0
       if (option.eq.'min') dstAdd = 12345678
 
-      call ESMF_ArrayGetData(physgrid%ptr%regions%vertices(1), cornerX, &
-                             ESMF_DATA_REF, rc)
-      call ESMF_ArrayGetData(physgrid%ptr%regions%vertices(2), cornerY, &
-                             ESMF_DATA_REF, rc)
+      call ESMF_InternArrayGetData(physgrid%ptr%regions%vertices(1), cornerX, &
+                             ESMF_DATA_REF, rc=rc)
+      call ESMF_InternArrayGetData(physgrid%ptr%regions%vertices(2), cornerY, &
+                             ESMF_DATA_REF, rc=rc)
 
       ! extract local minima and maxima from the vertex arrays
       localMinX = minval(cornerX)

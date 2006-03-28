@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.81 2005/10/19 23:33:21 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.82 2006/03/28 21:52:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research, 
@@ -43,10 +43,10 @@
       
       use ESMF_LogErrMod
       use ESMF_IOSpecMod
-      use ESMF_ArrayDataMapMod
+      use ESMF_InternArrayDataMapMod
       use ESMF_GridTypesMod
       use ESMF_GridMod
-      use ESMF_ArrayMod
+      use ESMF_InternArrayMod
       use ESMF_FieldDataMapMod
       use ESMF_FieldMod
       use ESMF_BundleDataMapMod
@@ -124,7 +124,7 @@
       type ESMF_LocalBundle
       sequence
       !private
-        type(ESMF_Array) :: packed_data               ! local packed array
+        type(ESMF_InternArray) :: packed_data               ! local packed array
         type(ESMF_Status) :: gridstatus
         type(ESMF_Status) :: arraystatus
         integer :: accesscount
@@ -1919,7 +1919,7 @@ end function
       type(ESMF_BundleCongruentData) :: pattern    ! values to compare against
       type(ESMF_BundleCongruentData) :: candidate  ! values being compared
       type(ESMF_Field), pointer :: fieldp
-      type(ESMF_Array) :: array
+      type(ESMF_InternArray) :: array
       type(ESMF_FieldDataMap) :: datamap
 
       ! Initialize return code; assume failure until success is certain
@@ -1950,7 +1950,7 @@ end function
 
         ! if you get here, this field has an array.  check it for 
         ! data types, etc.
-        call ESMF_ArrayGet(array, rank=pattern%datarank, &
+        call ESMF_InternArrayGet(array, rank=pattern%datarank, &
                            type=pattern%datatype, kind=pattern%datakind, &
                            rc=status)
         if (status .ne. ESMF_SUCCESS) cycle
@@ -1986,7 +1986,7 @@ end function
 
         ! if you get here, this field has an array.  check it for 
         ! data types, etc.
-        call ESMF_ArrayGet(array, rank=candidate%datarank, &
+        call ESMF_InternArrayGet(array, rank=candidate%datarank, &
                            type=candidate%datatype, kind=candidate%datakind, &
                            rc=status)
         if (status .ne. ESMF_SUCCESS) return
@@ -2542,7 +2542,7 @@ end function
 
       integer :: status                           ! Error status
       !integer :: i                               ! temp var
-      !type(ESMF_Array) :: pkarray                ! Array for packed data
+      !type(ESMF_InternArray) :: pkarray                ! Array for packed data
       type(ESMF_BundleType), pointer :: btype     ! internal data
 
       ! Initialize return code.  Assume failure until success assured.
@@ -3716,7 +3716,7 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle
-      type(ESMF_Array), pointer, optional :: subarray
+      type(ESMF_InternArray), pointer, optional :: subarray
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc
 !
@@ -4047,7 +4047,7 @@ end function
 
 
       integer :: status                           ! Error status
-      !type(ESMF_Array) :: pkarray                 ! Array for packed data
+      !type(ESMF_InternArray) :: pkarray                 ! Array for packed data
 
       ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE

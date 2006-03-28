@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_AllocMacros.h,v 1.1 2006/03/24 16:33:28 theurich Exp $
+! $Id: ESMF_AllocMacros.h,v 1.2 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
         ! (Since I am not sure if these are used, set offsets to 0 for now.) @\
         offsets = 0 @\
  @\
-        call c_ESMC_ArraySetInfo(array, l##mrank##D##mtypekind, & @\
+        call c_ESMC_IArraySetInfo(array, l##mrank##D##mtypekind, & @\
                         ESMF_DATA_ADDRESS(l##mrank##D##mtypekind % ptr##mrank##D##mtypekind (mloc) ), & @\
                         counts, lb, ub, offsets, & @\
                         ESMF_TRUE, ESMF_TRUE, hwidth, status) @\
@@ -50,7 +50,7 @@
 #endif
 #define AllocDeallocateMacro(mtypekind, mrank) \
 ! <Created by macro - do not edit directly >  @\
-        call c_ESMC_ArrayGetF90Ptr(array, l##mrank##D##mtypekind, status) @\
+        call c_ESMC_IArrayGetF90Ptr(array, l##mrank##D##mtypekind, status) @\
         deallocate(l##mrank##D##mtypekind % ptr##mrank##D##mtypekind, stat=status)  @\
         nullify(l##mrank##D##mtypekind % ptr##mrank##D##mtypekind) @\
 ! < End macro - do not edit directly >  @\

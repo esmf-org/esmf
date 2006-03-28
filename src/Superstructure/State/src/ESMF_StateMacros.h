@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StateMacros.h,v 1.8 2004/06/23 10:45:28 nscollins Exp $
+! $Id: ESMF_StateMacros.h,v 1.9 2006/03/28 21:52:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
         ! Local variables @\
         !!type (ESMF_Bundle) :: bundle        ! bundle object @\
         type (ESMF_Field) :: field          ! field object @\
-        type (ESMF_Array) :: array          ! array object @\
+        type(ESMF_InternArray) :: array          ! array object @\
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
  @\
@@ -132,7 +132,7 @@
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
-        call ESMF_ArrayGetData(array, dataPointer, copyflag, rc=status) @\
+        call ESMF_InternArrayGetData(array, dataPointer, copyflag, rc=status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\

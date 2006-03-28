@@ -1,4 +1,4 @@
-! $Id: ESMF.F90,v 1.30 2006/03/23 01:18:58 theurich Exp $
+! $Id: ESMF.F90,v 1.31 2006/03/28 21:52:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@ module ESMF_Mod
 
     use ESMF_ArraySpecMod
     use ESMF_LocalArrayMod
-    use ESMF_ArrayDataMapMod
+    use ESMF_InternArrayDataMapMod
     
     use ESMF_VMMod 
     use ESMF_DELayoutMod
@@ -39,9 +39,9 @@ module ESMF_Mod
     use ESMF_ConfigMod
     ! use ESMF_PerfProf
 
-    use ESMF_ArrayMod
-    use ESMF_ArrayCreateMod
-    use ESMF_ArrayGetMod
+    use ESMF_InternArrayMod
+    use ESMF_InternArrayCreateMod
+    use ESMF_InternArrayGetMod
 
     use ESMF_InternDGMod
     use ESMF_PhysCoordMod
@@ -57,7 +57,7 @@ module ESMF_Mod
     use ESMF_RHandleMod
 
     use ESMF_FieldDataMapMod
-    use ESMF_ArrayCommMod
+    use ESMF_InternArrayCommMod
 
     use ESMF_FieldMod
     use ESMF_FieldGetMod

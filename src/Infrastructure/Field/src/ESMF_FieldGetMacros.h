@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.5 2004/10/26 16:24:49 nscollins Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.6 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -79,15 +79,16 @@
 ! <Created by macro - do not edit directly > @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldGetDataPointer" @\
-      subroutine ESMF_FieldGetDataPointer##mrank##D##mtypekind(field, ptr, copyflag, rc) @\
+      subroutine ESMF_FieldGetDataPointer##mrank##D##mtypekind(field, ptr, copyflag, counts, rc) @\
  @\
       type(ESMF_Field), intent(in) :: field @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: ptr @\
       type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
+      integer, intent(out), optional :: counts(:) @\
       integer, intent(out), optional :: rc   @\
 @\
         ! Local variables @\
-        type (ESMF_Array) :: array          ! array object @\
+        type(ESMF_InternArray) :: array          ! array object @\
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
  @\
@@ -115,10 +116,16 @@
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
-        call ESMF_ArrayGetData(array, ptr, copyflag, rc=status) @\
+        call ESMF_InternArrayGetData(array, ptr, copyflag, rc=status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
+        if (present(counts)) then @\
+          call ESMF_InternArrayGet(array, counts=counts, rc=status) @\
+          if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
+        endif @\
  @\
         if (rcpresent) rc = status @\
  @\

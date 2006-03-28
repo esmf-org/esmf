@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.27 2005/05/31 17:39:54 nscollins Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.28 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
       use ESMF_BaseMod
       use ESMF_LogErrMod
       use ESMF_IOSpecMod
-      use ESMF_ArrayDataMapMod
+      use ESMF_InternArrayDataMapMod
 
 ! !PUBLIC TYPES:
       implicit none
@@ -75,7 +75,7 @@
 #else
         type(ESMF_Status) :: status 
 #endif
-        type(ESMF_ArrayDataMap) :: adm
+        type(ESMF_InternArrayDataMap) :: adm
 
         ! plus the additional information we need about vector ordering
         ! on individual data items and the relative locations of the data
@@ -114,7 +114,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.27 2005/05/31 17:39:54 nscollins Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.28 2006/03/28 21:52:26 theurich Exp $'
 !------------------------------------------------------------------------------
 
 

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.20 2006/03/20 22:40:46 theurich Exp $
+! $Id: user_model1.F90,v 1.21 2006/03/28 21:52:36 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -103,7 +103,6 @@
         type(ESMF_VM) :: vm
         type(ESMF_DELayout) :: layout
         type(ESMF_Grid) :: grid1
-        type(ESMF_Array) :: array1
         type(ESMF_ArraySpec) :: arrayspec
         integer, dimension(:,:), pointer :: idata
         real(ESMF_KIND_R8) :: g_min(2), g_max(2)
@@ -154,9 +153,7 @@
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Get the allocated array back and get an F90 array pointer
-        call ESMF_FieldGetArray(humidity, array1, rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_ArrayGetData(array1, idata, rc=status)
+        call ESMF_FieldGetDataPointer(humidity, idata, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set initial data values over exclusive domain to the de identifier
@@ -187,7 +184,6 @@
 
 !     ! Local variables
         type(ESMF_Field) :: humidity
-        type(ESMF_Array) :: array1
         integer, dimension(:,:), pointer :: idata
         integer :: status
         type(mylocaldata), pointer :: mydatablock
@@ -207,10 +203,8 @@
 
       
         ! update field values here
-        call ESMF_FieldGetArray(humidity, array1, rc=status) 
-        if (status .ne. ESMF_SUCCESS) goto 10
         ! Get a pointer to the start of the data
-        call ESMF_ArrayGetData(array1, idata, ESMF_DATA_REF, rc=status)
+        call ESMF_FieldGetDataPointer(humidity, idata, ESMF_DATA_REF, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! increment data values in place
@@ -221,7 +215,7 @@
         if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_FieldPrint(humidity, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_ArrayPrint(array1, "", rc=status)
+!        call ESMF_ArrayPrint(array1, "", rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
  
         print *, "User Comp Run returning"

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.91 2006/03/22 22:35:49 theurich Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.92 2006/03/28 21:52:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,9 +37,9 @@
       use ESMF_LogErrMod
       use ESMF_BaseMod        ! ESMF base   class
       use ESMF_LocalArrayMod
-      use ESMF_ArrayDataMapMod
-      use ESMF_ArrayMod       ! ESMF array  class
-      use ESMF_ArrayGetMod    ! ESMF array  class
+      use ESMF_InternArrayDataMapMod
+      use ESMF_InternArrayMod ! ESMF internal array  class
+      use ESMF_InternArrayGetMod    ! ESMF array  class
       use ESMF_PhysCoordMod   ! ESMF physical grid domain class
       use ESMF_PhysGridMod    ! ESMF physical grid class
       use ESMF_GridMod        ! ESMF grid   class
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.91 2006/03/22 22:35:49 theurich Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.92 2006/03/28 21:52:31 theurich Exp $'
 
 !==============================================================================
 
@@ -89,11 +89,11 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Routehandle),  intent(inout) :: rh
-      type(ESMF_Array),        intent(in   ) :: srcArray
+      type(ESMF_InternArray),        intent(in   ) :: srcArray
       type(ESMF_Grid),         intent(in   ) :: srcGrid
       type(ESMF_FieldDataMap), intent(in   ) :: srcDataMap
       logical,                 intent(in   ) :: hasSrcData
-      type(ESMF_Array),        intent(in   ) :: dstArray
+      type(ESMF_InternArray),        intent(in   ) :: dstArray
       type(ESMF_Grid),         intent(in   ) :: dstGrid
       type(ESMF_FieldDataMap), intent(in   ) :: dstDataMap
       logical,                 intent(in   ) :: hasDstData
@@ -148,9 +148,9 @@
       real(ESMF_KIND_R8), dimension(:,:), pointer :: dstLocalCoordX, &
                                                      dstLocalCoordY
       type(ESMF_CoordSystem) :: coordSystem
-      type(ESMF_Array) :: srcMaskArray
-      type(ESMF_Array), dimension(:), pointer :: dstLocalCoordArray
-      type(ESMF_Array), dimension(:), pointer :: srcLocalCoordArray
+      type(ESMF_InternArray) :: srcMaskArray
+      type(ESMF_InternArray), dimension(:), pointer :: dstLocalCoordArray
+      type(ESMF_InternArray), dimension(:), pointer :: srcLocalCoordArray
       type(ESMF_DomainList) :: recvDomainList, recvDomainListTot
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
       type(ESMF_Route) :: route, tempRoute
@@ -195,7 +195,7 @@
 !                               ESMF_CONTEXT, rc)) return
 
       ! get dataRank and allocate rank-sized arrays
-      call ESMF_ArrayGet(srcArray, rank=dataRank, rc=localrc)
+      call ESMF_InternArrayGet(srcArray, rank=dataRank, rc=localrc)
       allocate(dataOrder(dataRank), &
                  lbounds(dataRank), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "dataRank arrays", &
@@ -233,9 +233,9 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        call ESMF_ArrayGetData(dstLocalCoordArray(1), dstLocalCoordX, &
+        call ESMF_InternArrayGetData(dstLocalCoordArray(1), dstLocalCoordX, &
                                ESMF_DATA_REF, localrc)
-        call ESMF_ArrayGetData(dstLocalCoordArray(2), dstLocalCoordY, &
+        call ESMF_InternArrayGetData(dstLocalCoordArray(2), dstLocalCoordY, &
                                ESMF_DATA_REF, localrc)
       endif
 
@@ -265,13 +265,13 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        call ESMF_ArrayGetData(srcLocalCoordArray(1), srcLocalCoordX, &
+        call ESMF_InternArrayGetData(srcLocalCoordArray(1), srcLocalCoordX, &
                                ESMF_DATA_REF, localrc)
-        call ESMF_ArrayGetData(srcLocalCoordArray(2), srcLocalCoordY, &
+        call ESMF_InternArrayGetData(srcLocalCoordArray(2), srcLocalCoordY, &
                                ESMF_DATA_REF, localrc)
         call ESMF_GridGetCellMask(srcGrid, srcMaskArray, relloc=srcRelLoc, &
                                   rc=localrc)
-        call ESMF_ArrayGetData(srcMaskArray, srcLocalMask, ESMF_DATA_REF, &
+        call ESMF_InternArrayGetData(srcMaskArray, srcLocalMask, ESMF_DATA_REF, &
                                localrc)
 !      else    ! TODO -- is this necessary?
 !        allocate(srcLocalCoordX(srcCounts(1),srcCounts(2)), &
@@ -410,7 +410,7 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_ArrayGet(dstArray, haloWidth=haloWidth, lbounds=lbounds, &
+      call ESMF_InternArrayGet(dstArray, haloWidth=haloWidth, lbounds=lbounds, &
                          rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &

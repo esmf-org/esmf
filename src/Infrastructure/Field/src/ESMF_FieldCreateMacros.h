@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.8 2006/02/08 15:40:07 nscollins Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.9 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -116,7 +116,7 @@
 @\
         ! Local variables @\
         type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field @\
-        type (ESMF_Array) :: array          ! array object @\
+        type(ESMF_InternArray) :: array          ! array object @\
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
  @\
@@ -137,7 +137,7 @@
                                 ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
-        array = ESMF_ArrayCreate(fptr, copyflag, haloWidth, rc=status) @\
+        array = ESMF_InternArrayCreate(fptr, copyflag, haloWidth, rc=status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
@@ -314,7 +314,7 @@
         ! Set return value, and then get pointer back. @\
         ESMF_FieldCreateEPtr##mrank##D##mtypekind%ftypep => ftype  @\
         call ESMF_FieldGetDataPointer(ESMF_FieldCreateEPtr##mrank##D##mtypekind, & @\
-                                      fptr, ESMF_DATA_REF, status) @\
+                                      fptr, ESMF_DATA_REF, rc=status) @\
  @\
         if (rcpresent) rc = status @\
  @\

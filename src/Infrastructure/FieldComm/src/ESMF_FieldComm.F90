@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.82 2006/03/20 22:18:06 theurich Exp $
+! $Id: ESMF_FieldComm.F90,v 1.83 2006/03/28 21:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,11 +45,11 @@
       use ESMF_VMMod
       use ESMF_DELayoutMod    ! ESMF layout class
       use ESMF_LocalArrayMod
-      use ESMF_ArrayMod
+      use ESMF_InternArrayMod
       use ESMF_RHandleMod
       use ESMF_RouteMod
-      use ESMF_ArrayCommMod
-      use ESMF_ArrayDataMapMod
+      use ESMF_InternArrayCommMod
+      use ESMF_InternArrayDataMapMod
       use ESMF_GridTypesMod
       use ESMF_GridMod
       use ESMF_FieldDataMapMod
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.82 2006/03/20 22:18:06 theurich Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.83 2006/03/28 21:52:26 theurich Exp $'
 
 !==============================================================================
 !
@@ -196,7 +196,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field                 
-      type(ESMF_Array), intent(out) :: array
+      type(ESMF_InternArray), intent(out) :: array
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
@@ -276,7 +276,7 @@
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field                 
       integer, intent(in) :: dstPET
-      type(ESMF_Array), intent(out) :: array
+      type(ESMF_InternArray), intent(out) :: array
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
@@ -710,7 +710,7 @@
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_ArrayGet(ftypep%localfield%localdata, counts=counts, &
+      call ESMF_InternArrayGet(ftypep%localfield%localdata, counts=counts, &
                          rank=datarank, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1298,7 +1298,7 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      call ESMF_ArrayGet(srcFtypep%localfield%localdata, counts=counts, &
+      call ESMF_InternArrayGet(srcFtypep%localfield%localdata, counts=counts, &
                          rank=datarank, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1309,7 +1309,7 @@
          totalcount = totalcount * counts(i)
       enddo
       
-      call ESMF_ArrayGet(dstFtypep%localfield%localdata, counts=counts, &
+      call ESMF_InternArrayGet(dstFtypep%localfield%localdata, counts=counts, &
                          rank=datarank, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1604,7 +1604,7 @@
       integer :: localrc                          ! Error status
       logical :: hasSrcData        ! does this DE contain localdata from src?
       logical :: hasDstData        ! does this DE contain localdata from dst?
-      type(ESMF_Array) :: srcArray, dstArray
+      type(ESMF_InternArray) :: srcArray, dstArray
       type(ESMF_Grid) :: srcGrid, dstGrid
       type(ESMF_FieldDataMap) :: srcDatamap, dstDatamap
       ! debug only
@@ -1663,7 +1663,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       if (hasSrcData) then
-        call ESMF_ArrayGet(srcArray, counts=counts, rank=datarank, rc=localrc)
+        call ESMF_InternArrayGet(srcArray, counts=counts, rank=datarank, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1678,7 +1678,7 @@
       endif
       
       if (hasDstData) then
-        call ESMF_ArrayGet(dstArray, counts=counts, rank=datarank, rc=localrc)
+        call ESMF_InternArrayGet(dstArray, counts=counts, rank=datarank, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1814,7 +1814,7 @@
 ! !REQUIREMENTS: 
 
       integer :: localrc              ! Error status
-      type(ESMF_Array) :: srcArray, dstArray
+      type(ESMF_InternArray) :: srcArray, dstArray
       type(ESMF_FieldDataMap) :: srcDatamap, dstDatamap
       type(ESMF_Grid) :: srcGrid, dstGrid
    
@@ -1920,7 +1920,7 @@
       integer :: localrc                          ! Error status
       logical :: hasSrcData        ! does this DE contain localdata from src?
       logical :: hasDstData        ! does this DE contain localdata from dst?
-      type(ESMF_Array) :: srcArray, dstArray
+      type(ESMF_InternArray) :: srcArray, dstArray
       type(ESMF_Grid) :: srcGrid, dstGrid
       type(ESMF_FieldDataMap) :: srcDatamap, dstDatamap
       ! debug only
@@ -1972,7 +1972,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       if (hasSrcData) then
-        call ESMF_ArrayGet(srcArray, counts=counts, rank=datarank, rc=localrc)
+        call ESMF_InternArrayGet(srcArray, counts=counts, rank=datarank, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1987,7 +1987,7 @@
       endif
       
       if (hasDstData) then
-        call ESMF_ArrayGet(dstArray, counts=counts, rank=datarank, rc=localrc)
+        call ESMF_InternArrayGet(dstArray, counts=counts, rank=datarank, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2025,7 +2025,7 @@
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: array
+      type(ESMF_InternArray), intent(inout) :: array
       integer, intent(in) :: srcDe
       type(ESMF_Field), intent(inout) :: field                 
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
@@ -2077,7 +2077,7 @@
       logical :: rcpresent                        ! Return code present
       type(ESMF_FieldType), pointer :: ftypep     ! field type info
       type(ESMF_DELayout) :: delayout             ! layout
-      type(ESMF_Array) :: dstarray                ! Destination array
+      type(ESMF_InternArray) :: dstarray                ! Destination array
       integer :: i, datarank, numDims
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
@@ -2110,7 +2110,7 @@
       decomps(2) = 2
 
       ! And get the Array sizes
-      call ESMF_ArrayGet(ftypep%localfield%localdata, rank=datarank, &
+      call ESMF_InternArrayGet(ftypep%localfield%localdata, rank=datarank, &
                          counts=dimlengths, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2240,7 +2240,7 @@
                                   ESMF_CONTEXT, rc)) return
 
       ! And get the Array sizes
-      call ESMF_ArrayGet(ftypep%localfield%localdata, rank=datarank, &
+      call ESMF_InternArrayGet(ftypep%localfield%localdata, rank=datarank, &
                          counts=dimlengths, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &

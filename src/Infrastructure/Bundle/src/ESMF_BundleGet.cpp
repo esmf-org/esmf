@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleGet.cpp,v 1.7 2005/05/31 17:39:51 nscollins Exp $
+! $Id: ESMF_BundleGet.cpp,v 1.8 2006/03/28 21:52:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,8 +32,8 @@
       use ESMF_BaseMod
       use ESMF_LogErrMod
       use ESMF_LocalArrayMod
-      use ESMF_ArrayMod
-      use ESMF_ArrayGetMod
+      use ESMF_InternArrayMod
+      use ESMF_InternArrayGetMod
       use ESMF_FieldMod
       use ESMF_BundleMod
       implicit none
@@ -50,7 +50,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleGet.cpp,v 1.7 2005/05/31 17:39:51 nscollins Exp $'
+      '$Id: ESMF_BundleGet.cpp,v 1.8 2006/03/28 21:52:25 theurich Exp $'
 
 !==============================================================================
 ! 

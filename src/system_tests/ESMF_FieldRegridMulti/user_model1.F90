@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.24 2006/03/20 22:40:44 theurich Exp $
+! $Id: user_model1.F90,v 1.25 2006/03/28 21:52:35 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -103,7 +103,6 @@
         type(ESMF_DELayout) :: delayout
         type(ESMF_FieldDataMap) :: datamap
         type(ESMF_Grid) :: grid1
-        type(ESMF_Array) :: array1
         type(ESMF_ArraySpec) :: arrayspec
         real(ESMF_KIND_R8), dimension(:,:,:), pointer :: idata
         real(ESMF_KIND_R8) :: min(2), max(2)
@@ -167,9 +166,7 @@
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Get the allocated array back and get an F90 array pointer
-        call ESMF_FieldGetArray(humidity, array1, rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_ArrayGetData(array1, idata, rc=status)
+        call ESMF_FieldGetDataPointer(humidity, idata, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set initial data values over whole array to our de id
@@ -200,8 +197,6 @@
        ! Local variables
         type(ESMF_Field) :: humidity
         type(ESMF_RelLoc) :: relloc
-        type(ESMF_Array) :: array1
-        type(ESMF_Array), dimension(:), pointer :: coordArray
         type(ESMF_Grid) :: grid
         real(ESMF_KIND_R8) :: pi
         real(ESMF_KIND_R8), dimension(:,:,:), pointer :: idata
@@ -226,26 +221,20 @@
 
       
         ! get the grid and coordinates
-        allocate(coordArray(2))
         call ESMF_FieldGet(humidity, grid=grid, horzRelloc=relloc, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_GridGetCoord(grid, horzRelloc=relloc, &
-                               centerCoord=coordArray, rc=status)
+        call ESMF_GridGetCoord(grid, dim=1, horzRelloc=relloc, &
+                               centerCoord=coordX, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
-        if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
+        call ESMF_GridGetCoord(grid, dim=2, horzRelloc=relloc, &
+                               centerCoord=coordY, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! update field values here
         ! call ESMF_StateGetDataPointer(exportState, "humidity", idata, rc=status)
-        call ESMF_FieldGetArray(humidity, array1, rc=status) 
-        if (status .ne. ESMF_SUCCESS) goto 10
-        ! get size of local array
-        call ESMF_ArrayGet(array1, counts=counts, rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 10
         ! Get a pointer to the start of the data
-        call ESMF_ArrayGetData(array1, idata, ESMF_DATA_REF, status)
+        call ESMF_FieldGetDataPointer(humidity, idata, ESMF_DATA_REF, &
+          counts=counts, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! increment data values in place - where do i get the third dim?

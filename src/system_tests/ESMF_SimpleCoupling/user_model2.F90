@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.20 2006/03/20 22:40:46 theurich Exp $
+! $Id: user_model2.F90,v 1.21 2006/03/28 21:52:36 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -97,7 +97,6 @@
         type(ESMF_VM) :: vm
         type(ESMF_DELayout) :: layout
         type(ESMF_Grid) :: grid1
-        type(ESMF_Array) :: array1
         type(ESMF_ArraySpec) :: arrayspec
         integer, dimension(:,:), pointer :: idata
         real(ESMF_KIND_R8) :: g_min(2), g_max(2)
@@ -149,9 +148,7 @@
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Get the allocated array back and get an F90 array pointer
-        call ESMF_FieldGetArray(humidity, array1, rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_ArrayGetData(array1, idata, rc=status)
+        call ESMF_FieldGetDataPointer(humidity, idata, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set initial data values over exclusive domain to the de identifier
@@ -182,7 +179,6 @@
 
 !     ! Local variables
         type(ESMF_Field) :: humidity
-        type(ESMF_Array) :: array1
         integer :: status
 
         print *, "User Comp Run starting"
@@ -197,10 +193,10 @@
     
 
         ! This is where the model specific computation goes.
-        call ESMF_FieldGetArray(humidity, array1, rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 10
+!        call ESMF_FieldGetArray(humidity, array1, rc=status)
+!        if (status .ne. ESMF_SUCCESS) goto 10
         print *, "Imported Array in user model 2:"
-        call ESMF_ArrayPrint(array1, "", rc=status)
+!        call ESMF_ArrayPrint(array1, "", rc=status)
 
  
         print *, "User Comp Run returning"

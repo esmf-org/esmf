@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.24 2006/03/20 22:40:45 theurich Exp $
+! $Id: InjectorMod.F90,v 1.25 2006/03/28 21:52:36 theurich Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -262,7 +262,6 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       ! Local variables
         type(ESMF_Field) :: thisfield
         type(ESMF_Field) :: local_sie, local_v, local_rho, local_flag
-        type(ESMF_Array) :: array_sie, array_v, array_rho, array_flag
         real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: data_sie, data_v
         real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: data_rho, data_flag
         type(ESMF_Time) :: currtime
@@ -303,17 +302,13 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       
         ! Get the Field and Bundle data from the State, and a pointer to
         !  the existing data (not a copy).
-        call ESMF_FieldGetArray(local_sie, array_sie, rc=rc) 
-        call ESMF_ArrayGetData(array_sie, data_sie, ESMF_DATA_REF, rc)
+        call ESMF_FieldGetDataPointer(local_sie, data_sie, ESMF_DATA_REF, rc=rc)
             
-        call ESMF_FieldGetArray(local_v, array_v, rc=rc) 
-        call ESMF_ArrayGetData(array_v, data_v, ESMF_DATA_REF, rc)
+        call ESMF_FieldGetDataPointer(local_v, data_v, ESMF_DATA_REF, rc=rc)
       
-        call ESMF_FieldGetArray(local_rho, array_rho, rc=rc) 
-        call ESMF_ArrayGetData(array_rho, data_rho, ESMF_DATA_REF, rc)
+        call ESMF_FieldGetDataPointer(local_rho, data_rho, ESMF_DATA_REF, rc=rc)
       
-        call ESMF_FieldGetArray(local_flag, array_flag, rc=rc) 
-        call ESMF_ArrayGetData(array_flag, data_flag, ESMF_DATA_REF, rc)
+        call ESMF_FieldGetDataPointer(local_flag, data_flag, ESMF_DATA_REF, rc=rc)
           
         !! DEBUG.
         ! Debug checks for data pointers, exclusive region only
@@ -437,7 +432,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       integer :: status
       logical :: rcpresent
       integer :: de_id
-      type(ESMF_Array) :: outarray
+      type(ESMF_InternArray) :: outarray
       type(ESMF_Grid) :: grid
       type(ESMF_DELayout) :: layout
       character(len=ESMF_MAXSTR) :: filename
@@ -465,30 +460,30 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       call ESMF_FieldGather(field_sie, 0, outarray, rc=status)
       if (de_id .eq. 0) then
         write(filename, 20)  "SIE", file_no
-        call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
-        call ESMF_ArrayDestroy(outarray, status)
+        call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
+        call ESMF_InternArrayDestroy(outarray, rc=status)
       endif
 
       call ESMF_FieldGather(field_u, 0, outarray, rc=status)
       if (de_id .eq. 0) then
         write(filename, 20)  "U_velocity", file_no
-        call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
-        call ESMF_ArrayDestroy(outarray, status)
+        call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
+        call ESMF_InternArrayDestroy(outarray, rc=status)
       endif
 
       call ESMF_FieldGather(field_v, 0, outarray, rc=status)
       if (de_id .eq. 0) then
         write(filename, 20)  "V_velocity", file_no
-        call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
-        call ESMF_ArrayDestroy(outarray, status)
+        call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
+        call ESMF_InternArrayDestroy(outarray, rc=status)
       endif
 
       if(file_no .eq. 1) then
         call ESMF_FieldGather(field_flag, 0, outarray, rc=status)
         if (de_id .eq. 0) then
           write(filename, 20)  "FLAG", file_no
-          call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
-          call ESMF_ArrayDestroy(outarray, status)
+          call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
+          call ESMF_InternArrayDestroy(outarray, rc=status)
         endif
       endif
 

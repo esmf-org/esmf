@@ -1,4 +1,4 @@
-! $Id: ESMF_ArbitraryDistSTest.F90,v 1.3 2006/03/20 22:40:44 theurich Exp $
+! $Id: ESMF_ArbitraryDistSTest.F90,v 1.4 2006/03/28 21:52:35 theurich Exp $
 !
 ! System test ArbitraryDistribution
 !  Description on Sourceforge under System Test #XXXXX
@@ -46,8 +46,6 @@
      real(ESMF_KIND_R8) :: pi = 3.1416d0
      real(ESMF_KIND_R8), dimension(:,:), pointer :: coordX, coordY
      real(ESMF_KIND_R8), dimension(:,:), pointer :: srcdata, resdata
-     type(ESMF_Array) :: array1, array2, array3
-     type(ESMF_Array), dimension(:), pointer :: coordArray
      type(ESMF_ArraySpec) :: arrayspec1, arrayspec2
      type(ESMF_DELayout) :: delayout1, delayout2
      type(ESMF_Field) :: humidity1, humidity2, humidity3
@@ -194,32 +192,22 @@
                                 routehandle=rh23, rc=status)
 
     ! get coordinate arrays available for setting the source data array
-    allocate(coordArray(2))
-    call ESMF_GridGetCoord(grid1, horzRelloc=ESMF_CELL_CENTER, &
-                           centerCoord=coordArray, rc=status)
+    call ESMF_GridGetCoord(grid1, dim=1, horzRelloc=ESMF_CELL_CENTER, &
+                           centerCoord=coordX, localCounts=localCounts, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
-    if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
+    call ESMF_GridGetCoord(grid1, dim=2, horzRelloc=ESMF_CELL_CENTER, &
+                           centerCoord=coordY, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
 
     ! Get pointers to the data and set it up
-    call ESMF_FieldGetArray(humidity1, array1, status)
+    call ESMF_FieldGetDataPointer(humidity1, srcdata, ESMF_DATA_REF, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArrayGetData(array1, srcdata, ESMF_DATA_REF, status)
-    if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldGetArray(humidity3, array3, status)
-    if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArrayGetData(array3, resdata, ESMF_DATA_REF, status)
+    call ESMF_FieldGetDataPointer(humidity3, resdata, ESMF_DATA_REF, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
 
     ! initialize data arrays
     srcdata = 0.0
     resdata = 0.0
-
-    ! get sizes of local pieces of the coordinate arrays
-    call ESMF_ArrayGet(coordArray(1), counts=localCounts, rc=status)
-    if (status .ne. ESMF_SUCCESS) goto 20
 
     ! set data array to a function of coordinates (in the computational part
     ! of the array only, not the halo region)
@@ -231,7 +219,6 @@
     enddo
 
     print *, "Initial data, before Redistribution:"
-    call ESMF_ArrayPrint(array1, "foo", status)
     if (status .ne. ESMF_SUCCESS) goto 20
 
     ! No deallocate() is needed for array data, it will be freed when the
@@ -249,22 +236,22 @@
     ! Call redistribution method here, output ends up in humidity2
     call ESMF_FieldRedist(humidity1, humidity2, rh12, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldGetArray(humidity2, array2, status)
+!    call ESMF_FieldGetArray(humidity2, array2, status)
     if (status .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after Transpose:"
-    call ESMF_ArrayPrint(array2, "", status)
+!    call ESMF_ArrayPrint(array2, "", status)
     if (status .ne. ESMF_SUCCESS) goto 20
 
     ! Redistribute back so we can compare contents
     ! output ends up in humidity3
     call ESMF_FieldRedist(humidity2, humidity3, rh23, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldGetArray(humidity3, array3, status)
+!    call ESMF_FieldGetArray(humidity3, array3, status)
     if (status .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after second Redistribution, should match original:"
-    call ESMF_ArrayPrint(array3, "", status)
+!    call ESMF_ArrayPrint(array3, "", status)
     if (status .ne. ESMF_SUCCESS) goto 20
 
     print *, "Run section finished"

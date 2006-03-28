@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap_C.F90,v 1.7 2005/05/31 17:39:51 nscollins Exp $
+! $Id: ESMF_BundleDataMap_C.F90,v 1.8 2006/03/28 21:52:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 !==============================================================================
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_BundleDataMap_C.F90,v 1.7 2005/05/31 17:39:51 nscollins Exp $'
+!      '$Id: ESMF_BundleDataMap_C.F90,v 1.8 2006/03/28 21:52:25 theurich Exp $'
 !==============================================================================
 ! 
 !------------------------------------------------------------------------------
@@ -43,7 +43,7 @@
     subroutine f_esmf_bundledatamapsetdefault(bdmp, btype, rc)
       use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
-      use ESMF_ArrayDataMapMod
+      use ESMF_InternArrayDataMapMod
       use ESMF_BundleDataMapMod
 
       type(ESMF_BundleDataMap), pointer :: bdmp
@@ -60,7 +60,7 @@
     subroutine f_esmf_bundledatamapget(bdmp, btype, rc)
       use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
-      use ESMF_ArrayDataMapMod
+      use ESMF_InternArrayDataMapMod
       use ESMF_BundleDataMapMod
 
       type(ESMF_BundleDataMap), pointer :: bdmp
@@ -76,7 +76,7 @@
     subroutine f_esmf_bundledatamapset(bdmp, btype, rc)
       use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
-      use ESMF_ArrayDataMapMod
+      use ESMF_InternArrayDataMapMod
       use ESMF_BundleDataMapMod
 
       type(ESMF_BundleDataMap), pointer :: bdmp
