@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.156 2006/03/20 20:13:18 tjcnrl Exp $
+#  $Id: common.mk,v 1.157 2006/03/28 21:50:44 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2216,7 +2216,7 @@ endif
 #-------------------------------------------------------------------------------
 # Suffixes
 #-------------------------------------------------------------------------------
-.SUFFIXES: .f .f90 .F .F90 $(SUFFIXES) .C .cc .cpp .r .rm .so
+.SUFFIXES: .f .f90 .F .F90 $(SUFFIXES) .C .cc .cpp .r .rm .so .cppF90
 
 #-------------------------------------------------------------------------------
 #  Compile rules for F90, C++, and c files for both to .o and .a files
@@ -2301,6 +2301,10 @@ ifeq ($(origin CPPRULES),undefined)
 .cpp.F90:
 	$(CPP) -E -P -I$(ESMF_INCDIR) $(FPPDEFS) $< | tr "@^" "\n#" | \
               $(SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@)
+
+
+.cppF90.F90:
+	cp $< $<.cpp; $(CPP) -E -P -I$(ESMF_INCDIR) $(FPPDEFS) $<.cpp | tr "@^" "\n#" | $(SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@); rm -f $<.cpp
 
 
 .cpp.o:
