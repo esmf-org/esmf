@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.1.2.2 2005/07/07 20:03:59 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.1.2.3 2006/03/29 21:53:46 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -712,7 +712,7 @@ end subroutine ESMF_LogGet
     endif
     ESMF_LogDefault%LOG_ENTRY => localbuf
     
-    call c_ESMC_LogInitialize(fname,ESMF_LogDefault%petnum,rc2)
+    call c_ESMC_LogInitialize(fname,ESMF_LogDefault%petnum,ESMF_LogDefault%logNone,rc2)
     if (present(rc)) rc=ESMF_SUCCESS
 	
 end subroutine ESMF_LogInitialize
