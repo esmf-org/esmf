@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.206.2.2 2006/03/29 21:29:38 svasquez Exp $
+! $Id: ESMF_Field.F90,v 1.206.2.3 2006/03/29 23:50:49 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -285,7 +285,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.206.2.2 2006/03/29 21:29:38 svasquez Exp $'
+      '$Id: ESMF_Field.F90,v 1.206.2.3 2006/03/29 23:50:49 svasquez Exp $'
 
 !==============================================================================
 !
@@ -3188,7 +3188,7 @@
                   ! TODO: for now the halo is added to all axes in the array,
                   ! not just those which correspond to the grid.  when we fix
                   ! this, then change this test to ignore halo widths.
-                  if (abs(arraycounts(i) .ne. (otheraxes(j) + (2*halo))) > 1 ) then
+                  if ((abs(arraycounts(i)) .ne. (otheraxes(j) + (2*halo))) > 1 ) then
                       if (arraycounts(i) .eq. otheraxes(j)) then
                        write(msgbuf,*) "array index", i, "(", arraycounts(i), &
                                        ") != datamap index", j, &
