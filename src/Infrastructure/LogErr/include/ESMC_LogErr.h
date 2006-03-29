@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.55 2005/01/13 06:25:57 cpboulder Exp $
+// $Id: ESMC_LogErr.h,v 1.55.4.1 2006/03/29 21:34:25 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,6 +100,7 @@ private:
     FILE *ESMC_LogFile;
     char nameLogErrFile[32];
     int *pet_num;
+    int logNone;
 
   private:
 // !PRIVATE MEMBER FUNCIONS:
