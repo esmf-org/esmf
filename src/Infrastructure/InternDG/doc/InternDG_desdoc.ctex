@@ -1,4 +1,4 @@
-% $Id: InternDG_desdoc.ctex,v 1.1 2006/03/23 01:29:43 theurich Exp $
+% $Id: InternDG_desdoc.ctex,v 1.2 2006/03/29 22:25:57 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,7 +20,7 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{\bf DistGrid Design}
+\newcommand{\mytitle}{\bf InternDG Design}
 \newcommand{\myauthors}{\it Phil Jones and Jon Wolfe}
 #endif
 
@@ -42,120 +42,120 @@
 
 \section{Synopsis}
 #ifdef STANDALONE
-\input{DistGrid_syn}
+\input{InternDG_syn}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DistGrid/doc/DistGrid_syn}
+\input{../Infrastructure/InternDG/doc/InternDG_syn}
 #endif
 
 %\section{Algorithmic Description}
 #ifdef STANDALONE
-%\input{DistGrid_alg}
+%\input{InternDG_alg}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/DistGrid/doc/DistGrid_alg}
+%\input{../Infrastructure/InternDG/doc/InternDG_alg}
 #endif
 
 \section{Object Model}
 #ifdef STANDALONE
-\input{DistGrid_obj}
+\input{InternDG_obj}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DistGrid/doc/DistGrid_obj}
+\input{../Infrastructure/InternDG/doc/InternDG_obj}
 #endif
 
 % \section{Global Parameters and Definitions}
 % #ifdef STANDALONE
-% \input{DistGrid_param}
+% \input{InternDG_param}
 % #elif defined(CONSTITUENT)
-% \input{../Infrastructure/DistGrid/doc/DistGrid_param}
+% \input{../Infrastructure/InternDG/doc/InternDG_param}
 % #endif
 
-\section{DistGrid Design}
+\section{InternDG Design}
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{DistGrid_desc}
+\input{InternDG_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DistGrid/doc/DistGrid_desc}
+\input{../Infrastructure/InternDG/doc/InternDG_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
-\input{DistGrid_design}
+\input{InternDG_design}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DistGrid/doc/DistGrid_design}
+\input{../Infrastructure/InternDG/doc/InternDG_design}
 #endif
 
-\subsubsection{DistGrid Definition}
+\subsubsection{InternDG Definition}
 #ifdef STANDALONE
-\input{DistGrid_def}
+\input{InternDG_def}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DistGrid/doc/DistGrid_def}
+\input{../Infrastructure/InternDG/doc/InternDG_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
-\input{DistGrid_rest}
+\input{InternDG_rest}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DistGrid/doc/DistGrid_rest}
+\input{../Infrastructure/InternDG/doc/InternDG_rest}
 #endif
 
-\section{DistGrid Fortran Interface}
+\section{InternDG Fortran Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{DistGrid_fex}
+\input{InternDG_fex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DistGrid/doc/DistGrid_fex}
+\input{../Infrastructure/InternDG/doc/InternDG_fex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
-\input{DistGrid_fparam}
+\input{InternDG_fparam}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DistGrid/doc/DistGrid_fparam}
+\input{../Infrastructure/InternDG/doc/InternDG_fparam}
 #endif
 
-%\subsection{DistGrid API}
+%\subsection{InternDG API}
 #ifdef STANDALONE
-\input{ESMF_DistGrid_fapi}
+\input{ESMF_InternDG_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DistGrid/doc/ESMF_DistGrid_fapi}
+\input{../Infrastructure/InternDG/doc/ESMF_InternDG_fapi}
 #endif
 
-\section{DistGrid C++ Interface}
+\section{InternDG C++ Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{DistGrid_ccex}
+\input{InternDG_ccex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DistGrid/doc/DistGrid_ccex}
+\input{../Infrastructure/InternDG/doc/InternDG_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
-\input{DistGrid_ccparam}
+\input{InternDG_ccparam}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DistGrid/doc/DistGrid_ccparam}
+\input{../Infrastructure/InternDG/doc/InternDG_ccparam}
 #endif
 
 % %\subsection{Class API}
 % #ifdef STANDALONE
-% \input{DistGrid_ccapi}
+% \input{InternDG_ccapi}
 % #elif defined(CONSTITUENT)
-% \input{../Infrastructure/DistGrid/doc/DistGrid_ccapi}
+% \input{../Infrastructure/InternDG/doc/InternDG_ccapi}
 % #endif
 
 \section{<Name2> Design}
 
-% Subsections same as DistGrid Design ...
+% Subsections same as InternDG Design ...
 
 #ifdef STANDALONE
 \section{Review Status}
-\input{DistGrid_desrev}
+\input{InternDG_desrev}
 #endif
 
 #ifdef STANDALONE
 %\section{Glossary}
-\input{DistGrid_glos}
+\input{InternDG_glos}
 #endif
 
 #ifdef STANDALONE
