@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.206.2.1 2005/10/26 21:40:55 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.206.2.2 2006/03/29 21:29:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -285,7 +285,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.206.2.1 2005/10/26 21:40:55 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.206.2.2 2006/03/29 21:29:38 svasquez Exp $'
 
 !==============================================================================
 !
@@ -3042,7 +3042,9 @@
 ! !DESCRIPTION:
 !      Validates that the {\tt field} is internally consistent.
 !      Currently this method determines if the {\tt field} is uninitialized 
-!      or already destroyed.  The method returns an error code if problems 
+!      or already destroyed.  The code also checks if the data and grid sizes agree.
+!      Currently we allow for 1 point mismatch to accommodate different staggerings.
+!      The method returns an error code if problems 
 !      are found.  
 !
 !     The arguments are:
@@ -3186,7 +3188,7 @@
                   ! TODO: for now the halo is added to all axes in the array,
                   ! not just those which correspond to the grid.  when we fix
                   ! this, then change this test to ignore halo widths.
-                  if (arraycounts(i) .ne. (otheraxes(j) + (2*halo))) then
+                  if (abs(arraycounts(i) .ne. (otheraxes(j) + (2*halo))) > 1 ) then
                       if (arraycounts(i) .eq. otheraxes(j)) then
                        write(msgbuf,*) "array index", i, "(", arraycounts(i), &
                                        ") != datamap index", j, &
@@ -3210,7 +3212,7 @@
                   ! maplist is not 0, so this axes does correspond to the grid.
                   ! the sizes must match, taking into account the halo widths
                   ! and the index reordering.
-                  if (arraycounts(i) .ne. (gridcounts(maplist(i)) + (2*halo))) then
+                  if (abs(arraycounts(i) - (gridcounts(maplist(i)) + (2*halo))) > 1 ) then
                       write(msgbuf,*) "array index", i, "(", arraycounts(i), &
                                       ") != grid index", maplist(i), "(", &
                                       gridcounts(maplist(i)) + (2*halo), ")"
