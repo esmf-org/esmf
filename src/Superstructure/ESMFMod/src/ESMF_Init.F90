@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.31.2.2 2005/11/01 21:08:00 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.31.2.3 2006/03/29 21:56:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !
 ! !INTERFACE:
       subroutine ESMF_Initialize(defaultConfigFileName, defaultCalendar, &
-                                 defaultLogFileName, defaultLogType, vm, rc)
+                                 defaultLogFileName, defaultLogType, vm, lognone, rc)
 !
 ! !ARGUMENTS:
       character(len=*),        intent(in),  optional :: defaultConfigFileName
@@ -103,6 +103,7 @@
       character(len=*),        intent(in),  optional :: defaultLogFileName
       type(ESMF_LogType),      intent(in),  optional :: defaultLogType  
       type(ESMF_VM),           intent(out), optional :: vm   
+      integer, intent(in),optional		        :: lognone  
       integer,                 intent(out), optional :: rc     
 
 !
@@ -151,7 +152,7 @@
 
       call ESMF_FrameworkInternalInit(ESMF_MAIN_F90, defaultConfigFileName, &
                                       defaultCalendar, defaultLogFileName, &
-                                      defaultLogType, rc)
+                                      defaultLogType, lognone, rc)
       call ESMF_VMGetGlobal(localvm, rc)
       if (present(vm)) vm = localvm
 
@@ -168,7 +169,7 @@
 ! !INTERFACE:
       subroutine ESMF_FrameworkInternalInit(lang, defaultConfigFileName, &
                                        defaultCalendar, defaultLogFileName, &
-                                       defaultLogType, rc)
+                                       defaultLogType, lognone, rc)
 !
 ! !ARGUMENTS:
       integer,                 intent(in)            :: lang     
@@ -176,6 +177,7 @@
       type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar     
       character(len=*),        intent(in),  optional :: defaultLogFileName
       type(ESMF_LogType),      intent(in),  optional :: defaultLogType  
+      integer, intent(in),optional		        :: lognone  
       integer,                 intent(out), optional :: rc     
 
 !
@@ -247,14 +249,14 @@
 
       if (present(defaultLogFileName)) then
          if (len_trim(defaultLogFileName).ne.0) then
-           call ESMF_LogInitialize(defaultLogFileName, logType=defaultLogTypeUse, &
+           call ESMF_LogInitialize(defaultLogFileName, lognone, logType=defaultLogTypeUse, &
                                   rc=status)
          else
-           call ESMF_LogInitialize("ESMF_LogFile", logType=defaultLogTypeUse, &
+           call ESMF_LogInitialize("ESMF_LogFile", lognone, logType=defaultLogTypeUse, &
                                      rc=status)
          endif
       else
-         call ESMF_LogInitialize("ESMF_LogFile", logType=defaultLogTypeUse, &
+         call ESMF_LogInitialize("ESMF_LogFile", lognone, logType=defaultLogTypeUse, &
                                    rc=status)
       endif
       if (status .ne. ESMF_SUCCESS) then
