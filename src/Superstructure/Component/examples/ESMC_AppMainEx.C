@@ -1,10 +1,10 @@
-// $Id: ESMC_AppMainEx.C,v 1.16 2006/02/10 22:12:54 nscollins Exp $
+// $Id: ESMC_AppMainEx.C,v 1.17 2006/04/04 22:04:15 theurich Exp $
 //
 // Example code which creates a main Application program.
 // This is the cap component which creates other components below it.
 
 //-------------------------------------------------------------------------
-// !x_EXAMPLE        String used by test script to count examples.
+// !EXAMPLE        String used by test script to count examples.
 //-------------------------------------------------------------------------
 
 
