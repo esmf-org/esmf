@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.55 2006/03/28 21:52:25 theurich Exp $
+! $Id: ESMF_BundleComm.F90,v 1.56 2006/04/04 23:47:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.55 2006/03/28 21:52:25 theurich Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.56 2006/04/04 23:47:49 theurich Exp $'
 
 !==============================================================================
 !
@@ -234,7 +234,7 @@
       btypep => bundle%btypep
 
       ! Call Array method to perform actual work
-      call ESMF_ArrayAllGather(btypep%flist(1)%ftypep%localfield%localdata, btypep%grid, &
+      call ESMF_IArrayAllGather(btypep%flist(1)%ftypep%localfield%localdata, btypep%grid, &
                                btypep%flist(1)%ftypep%mapping, array, status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
@@ -317,7 +317,7 @@
 
       do i=1, btypep%field_count
           ! Call Array method to perform actual work
-          call ESMF_ArrayGather(btypep%flist(i)%ftypep%localfield%localdata, &
+          call ESMF_IArrayGather(btypep%flist(i)%ftypep%localfield%localdata, &
                                 btypep%grid, btypep%flist(i)%ftypep%mapping, &
                                 destinationDE, arrayList(i), status)
           if (ESMF_LogMsgFoundError(status, &
@@ -445,7 +445,7 @@
           ! one route per source field; loop here.
           do i=1, btypep%field_count
 
-            call ESMF_ArrayHalo(btypep%flist(i)%ftypep%localfield%localdata, &
+            call ESMF_IArrayHalo(btypep%flist(i)%ftypep%localfield%localdata, &
                                 routehandle, i, blocking, commhandle, rc=status)
             if (ESMF_LogMsgFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
@@ -479,7 +479,7 @@
             enddo
     
     
-            call ESMF_ArrayHalo(arrayList, routehandle, 1,  &
+            call ESMF_IArrayHalo(arrayList, routehandle, 1,  &
                                   blocking, commhandle, rc=status)
     
           else
@@ -487,7 +487,7 @@
             ! loop here.
             do i=1, btypep%field_count
   
-              call ESMF_ArrayHalo(btypep%flist(i)%ftypep%localfield%localdata, &
+              call ESMF_IArrayHalo(btypep%flist(i)%ftypep%localfield%localdata, &
                                 routehandle, 1, blocking, commhandle, rc=status)
               if (ESMF_LogMsgFoundError(status, &
                                         ESMF_ERR_PASSTHRU, &
@@ -622,7 +622,7 @@
 
       ! if all fields are identical, they can share a route
       if (ESMF_BundleIsCongruent(bundle, rc=status) .and. bundlepack) then
-        call ESMF_ArrayHaloStore( &
+        call ESMF_IArrayHaloStore( &
                                   btypep%flist(1)%ftypep%localfield%localdata, &
                                   1, ESMF_ALLTO1HANDLEMAP, 1, &
                                   btypep%grid, &
@@ -636,7 +636,7 @@
         ! routes inside a single handle.  set the map to be 1 to 1.
         do i=1, btypep%field_count
  
-          call ESMF_ArrayHaloStore( &
+          call ESMF_IArrayHaloStore( &
                                   btypep%flist(i)%ftypep%localfield%localdata, &
                                   i, ESMF_1TO1HANDLEMAP, btypep%field_count, &
                                   btypep%grid, &
@@ -916,7 +916,7 @@
         do i = 1, stypep%field_count
 
          ! routehandle now internally stores multiple routes
-         call ESMF_ArrayRedist(stypep%flist(i)%ftypep%localfield%localdata, &
+         call ESMF_IArrayRedist(stypep%flist(i)%ftypep%localfield%localdata, &
                                dtypep%flist(i)%ftypep%localfield%localdata, &
                                routehandle, i, blocking, commhandle, &
                                routeOptions, status)
@@ -950,7 +950,7 @@
                 dstArrayList(i) = dtypep%flist(i)%ftypep%localfield%localdata
             enddo
       
-            call ESMF_ArrayRedist(srcArrayList, dstArrayList, &
+            call ESMF_IArrayRedist(srcArrayList, dstArrayList, &
                                   routehandle, 1, blocking, commhandle, &
                                   routeOptions, status)
             if (ESMF_LogMsgFoundError(status, &
@@ -966,7 +966,7 @@
             ! single route.
             do i=1, stypep%field_count
   
-              call ESMF_ArrayRedist( &
+              call ESMF_IArrayRedist( &
                                  stypep%flist(i)%ftypep%localfield%localdata, &
                                  dtypep%flist(i)%ftypep%localfield%localdata, &
                                  routehandle, 1, blocking, commhandle, &
@@ -1121,7 +1121,7 @@
 
       ! if all fields are identical, they can share a route
       if ((condition .eq. ESMF_BUNDLECOMM_CONGRUENT) .and. bundlepack) then 
-         call ESMF_ArrayRedistStore( &
+         call ESMF_IArrayRedistStore( &
                                  stypep%flist(1)%ftypep%localfield%localdata, &
                                  stypep%grid, &
                                  stypep%flist(1)%ftypep%mapping, &
@@ -1139,7 +1139,7 @@
         ! match, so we can use either field count safely here.
         do i=1, stypep%field_count
  
-           call ESMF_ArrayRedistStore( &
+           call ESMF_IArrayRedistStore( &
                                stypep%flist(i)%ftypep%localfield%localdata, &
                                stypep%grid, &
                                stypep%flist(i)%ftypep%mapping, &
@@ -1496,7 +1496,7 @@
             hasDstData = ESMF_RegridHasData(dtypep%grid, &
                                           dtypep%flist(i)%ftypep%mapping)
 
-            call ESMF_ArrayRegrid(stypep%flist(i)%ftypep%localfield%localdata, &
+            call ESMF_IArrayRegrid(stypep%flist(i)%ftypep%localfield%localdata, &
                                   stypep%flist(i)%ftypep%mapping, hasSrcData, &
                                   dtypep%flist(i)%ftypep%localfield%localdata, &
                                   dtypep%flist(i)%ftypep%mapping, hasDstData, &
@@ -1539,7 +1539,7 @@
                                               dtypep%flist(1)%ftypep%mapping)
     
               ! TODO: do the datamaps have to go in as lists as well?
-              call ESMF_ArrayRegrid(srcArrayList, & 
+              call ESMF_IArrayRegrid(srcArrayList, & 
                                  stypep%flist(1)%ftypep%mapping, hasSrcData, &
                                  dstArrayList, &
                                  dtypep%flist(1)%ftypep%mapping, hasDstData, &
@@ -1561,7 +1561,7 @@
                 hasDstData = ESMF_RegridHasData(dtypep%grid, &
                                               dtypep%flist(i)%ftypep%mapping)
 
-                call ESMF_ArrayRegrid( &
+                call ESMF_IArrayRegrid( &
                                   stypep%flist(i)%ftypep%localfield%localdata, &
                                   stypep%flist(i)%ftypep%mapping, hasSrcData, &
                                   dtypep%flist(i)%ftypep%localfield%localdata, &
@@ -1721,7 +1721,7 @@
       ! weights for each field. 
 
       if ((condition .eq. ESMF_BUNDLECOMM_CONGRUENT) .and. bundlepack) then
-          call ESMF_ArrayRegridStore( &
+          call ESMF_IArrayRegridStore( &
                                  stypep%flist(1)%ftypep%localfield%localdata, &
                                  stypep%grid, &
                                  stypep%flist(1)%ftypep%mapping, &
@@ -1738,7 +1738,7 @@
       else
         ! each field must be treated separately.
         do i=1, stypep%field_count
-            call ESMF_ArrayRegridStore( &
+            call ESMF_IArrayRegridStore( &
                                  stypep%flist(i)%ftypep%localfield%localdata, &
                                  stypep%grid, &
                                  stypep%flist(i)%ftypep%mapping, &
@@ -1870,7 +1870,7 @@
 
       ! Call Array method to perform actual work
       call ESMF_GridGet(btypep%grid, delayout=delayout, rc=status)
-      call ESMF_ArrayScatter(array, delayout, decompids, sourceDE, dstarray, &
+      call ESMF_IArrayScatter(array, delayout, decompids, sourceDE, dstarray, &
                              status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &

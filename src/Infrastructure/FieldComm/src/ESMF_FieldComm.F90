@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.83 2006/03/28 21:52:26 theurich Exp $
+! $Id: ESMF_FieldComm.F90,v 1.84 2006/04/04 23:47:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.83 2006/03/28 21:52:26 theurich Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.84 2006/04/04 23:47:49 theurich Exp $'
 
 !==============================================================================
 !
@@ -249,7 +249,7 @@
       ftypep => field%ftypep
 
       ! Call Array method to perform actual work
-      call ESMF_ArrayAllGather(ftypep%localfield%localdata, ftypep%grid, &
+      call ESMF_IArrayAllGather(ftypep%localfield%localdata, ftypep%grid, &
                                ftypep%mapping, array, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -343,7 +343,7 @@
  
       ftypep => field%ftypep
 
-      call ESMF_ArrayGather(ftypep%localfield%localdata, &
+      call ESMF_IArrayGather(ftypep%localfield%localdata, &
                             ftypep%grid, ftypep%mapping, dstPET, &
                             array, status)
       if (ESMF_LogMsgFoundError(status, &
@@ -472,7 +472,7 @@
 
 
       ! real call.
-      call ESMF_ArrayHalo(ftypep%localfield%localdata, routehandle, 1, &
+      call ESMF_IArrayHalo(ftypep%localfield%localdata, routehandle, 1, &
                           blockingflag, commhandle, routeOptions, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
@@ -600,7 +600,7 @@
       endif
 
 
-      call ESMF_ArrayHaloStore(ftypep%localfield%localdata, ftypep%grid, &
+      call ESMF_IArrayHaloStore(ftypep%localfield%localdata, ftypep%grid, &
                                ftypep%mapping, routehandle, &
                                halodirection, routeOptions, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -830,7 +830,7 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_ArrayRedist(srcFtypep%localfield%localdata, &
+      call ESMF_IArrayRedist(srcFtypep%localfield%localdata, &
                             dstFtypep%localfield%localdata, &
                             routehandle, 1, blockingflag, commhandle, &
                             routeOptions, localrc)
@@ -944,7 +944,7 @@
       endif
 
 
-      call ESMF_ArrayRedist(srcFtypep%localfield%localdata, &
+      call ESMF_IArrayRedist(srcFtypep%localfield%localdata, &
                             dstFtypep%localfield%localdata, &
                             routehandle, 1, blockingflag, commhandle, &
                             routeOptions, localrc)
@@ -1090,7 +1090,7 @@
       srcFtypep => srcField%ftypep
 
 
-      call ESMF_ArrayRedistStore(srcFtypep%localfield%localdata, &
+      call ESMF_IArrayRedistStore(srcFtypep%localfield%localdata, &
                                  srcFtypep%grid, &
                                  srcFtypep%mapping, &
                                  dstFtypep%localfield%localdata, &
@@ -1204,7 +1204,7 @@
       ! dstField = ESMF_FieldCreate ...  TODO: pass in any other needed arguments
       ! dstFtypep => dstField%ftypep
 
-      call ESMF_ArrayRedistStore(srcFtypep%localfield%localdata, &
+      call ESMF_IArrayRedistStore(srcFtypep%localfield%localdata, &
                                  srcFtypep%grid, &
                                  srcFtypep%mapping, &
                                  dstFtypep%localfield%localdata, &
@@ -1700,7 +1700,7 @@
       !                          ESMF_CONTEXT, rc)) return
       ! debug end
 
-      call ESMF_ArrayRegrid(srcArray, srcDatamap, hasSrcData, &
+      call ESMF_IArrayRegrid(srcArray, srcDatamap, hasSrcData, &
                             dstArray, dstDatamap, hasDstData, &
                             routehandle, 1, srcMask, dstMask, &
                             blockingflag, commhandle, routeOptions, localrc)
@@ -1852,7 +1852,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Call the code which does the actual work.
-      call ESMF_ArrayRegridStore(srcArray, srcGrid, srcDatamap, & 
+      call ESMF_IArrayRegridStore(srcArray, srcGrid, srcDatamap, & 
                                  dstArray, dstGrid, dstDatamap, &
                                  parentVM, routehandle, &
                                  regridmethod, regridnorm, &    
@@ -2123,7 +2123,7 @@
 
       ! Call Array method to perform actual work
       call ESMF_GridGet(ftypep%grid, delayout=delayout, rc=status)
-      call ESMF_ArrayScatter(array, delayout, decompids, srcDe, dstarray, &
+      call ESMF_IArrayScatter(array, delayout, decompids, srcDe, dstarray, &
                              status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2268,7 +2268,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! set up things we need to find a cached route or precompute one
-      call ESMF_ArrayGetAllAxisIndices(ftypep%localfield%localdata, ftypep%grid, &
+      call ESMF_IArrayGetAllAxisIndices(ftypep%localfield%localdata, ftypep%grid, &
                                        ftypep%mapping, totalindex=dst_AI, &
                                        compindex=src_AI, rc=status)       
 
