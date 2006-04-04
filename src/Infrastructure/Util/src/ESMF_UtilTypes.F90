@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.14 2006/03/23 01:14:41 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.15 2006/04/04 23:40:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -448,6 +448,21 @@
         ESMF_MODE_REVERSE = ESMF_Direction(2)
 
 !------------------------------------------------------------------------------
+!     ! ESMF_IndexFlag
+!
+!     ! Interface flag for setting index bounds
+
+      type ESMF_IndexFlag
+      sequence
+      private
+        integer :: i_type
+      end type
+
+      type(ESMF_IndexFlag), parameter ::  &
+                               ESMF_INDEX_DELOCAL  = ESMF_IndexFlag(0), &
+                               ESMF_INDEX_GLOBAL = ESMF_IndexFlag(1)
+
+!------------------------------------------------------------------------------
 !BOPI
 !
 ! !PUBLIC TYPES:
@@ -476,6 +491,8 @@
       public ESMF_Logical, ESMF_TRUE, ESMF_FALSE
 
       public ESMF_Direction, ESMF_MODE_FORWARD, ESMF_MODE_REVERSE
+
+      public ESMF_IndexFlag, ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL
 
       public ESMF_ReduceFlag, ESMF_SUM, ESMF_MIN, ESMF_MAX
       public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_VASBLOCKING, &
@@ -531,43 +548,44 @@
  
 
 interface operator (.eq.)
- module procedure ESMF_sfeq
- module procedure ESMF_dteq
- module procedure ESMF_dkeq
- module procedure ESMF_pteq
- module procedure ESMF_tfeq
- module procedure ESMF_aieq
- module procedure ESMF_bfeq
- module procedure ESMF_ctfeq
- module procedure ESMF_tnfeq
- module procedure ESMF_freq
- module procedure ESMF_lgeq
- module procedure ESMF_dmeq
+  module procedure ESMF_sfeq
+  module procedure ESMF_dteq
+  module procedure ESMF_dkeq
+  module procedure ESMF_pteq
+  module procedure ESMF_tfeq
+  module procedure ESMF_aieq
+  module procedure ESMF_bfeq
+  module procedure ESMF_ctfeq
+  module procedure ESMF_tnfeq
+  module procedure ESMF_freq
+  module procedure ESMF_lgeq
+  module procedure ESMF_dmeq
+  module procedure ESMF_ifeq
 end interface
 
 interface operator (.ne.)
- module procedure ESMF_sfne
- module procedure ESMF_dtne
- module procedure ESMF_dkne
- module procedure ESMF_ptne
- module procedure ESMF_tfne
- module procedure ESMF_aine
- module procedure ESMF_bfne
- module procedure ESMF_ctfne
- module procedure ESMF_tnfne
- module procedure ESMF_frne
- module procedure ESMF_lgne
- module procedure ESMF_dmne
+  module procedure ESMF_sfne
+  module procedure ESMF_dtne
+  module procedure ESMF_dkne
+  module procedure ESMF_ptne
+  module procedure ESMF_tfne
+  module procedure ESMF_aine
+  module procedure ESMF_bfne
+  module procedure ESMF_ctfne
+  module procedure ESMF_tnfne
+  module procedure ESMF_frne
+  module procedure ESMF_lgne
+  module procedure ESMF_dmne
 end interface
 
 interface assignment (=)
- module procedure ESMF_bfas
- module procedure ESMF_dtas
- module procedure ESMF_dkas
- module procedure ESMF_tfas
- module procedure ESMF_ptas
- module procedure ESMF_ptas2
-end interface
+  module procedure ESMF_bfas
+  module procedure ESMF_dtas
+  module procedure ESMF_dkas
+  module procedure ESMF_tfas
+  module procedure ESMF_ptas
+  module procedure ESMF_ptas2
+end interface  
 
 !------------------------------------------------------------------------------
 
@@ -826,6 +844,17 @@ function ESMF_dmne(dm1, dm2)
 
  ESMF_dmne = (dm1%value .ne. dm2%value)
 end function
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_IndexFlag types
+
+function ESMF_ifeq(if1, if2)
+  logical ESMF_ifeq
+  type(ESMF_IndexFlag), intent(in) :: if1, if2
+
+  ESMF_ifeq = (if1%i_type .eq. if2%i_type)
+end function
+
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
