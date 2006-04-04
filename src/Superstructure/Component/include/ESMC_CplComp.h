@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.h,v 1.10 2004/05/26 14:23:56 nscollins Exp $
+// $Id: ESMC_CplComp.h,v 1.11 2006/04/04 22:07:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@
  class ESMC_CplComp {    // just a cover for the F90 class, no need for Base
 
   private:
-    void *fortranclass;
+    ESMC_F90ClassHolder fortranclass;
     
 // !PUBLIC MEMBER FUNCTIONS:
 //

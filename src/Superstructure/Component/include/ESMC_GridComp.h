@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.14 2006/01/18 17:17:36 tjcnrl Exp $
+// $Id: ESMC_GridComp.h,v 1.15 2006/04/04 22:07:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@
  class ESMC_GridComp {    // do *not* inherit from Base
 
   private:
-    void *fortranclass;
+    ESMC_F90ClassHolder fortranclass;
     
 // !PUBLIC MEMBER FUNCTIONS:
 //
