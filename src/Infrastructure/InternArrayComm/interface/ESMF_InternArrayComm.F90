@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayComm.F90,v 1.2 2006/03/28 21:52:26 theurich Exp $
+! $Id: ESMF_InternArrayComm.F90,v 1.3 2006/04/04 23:49:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
-#define ESMF_FILENAME "ESMF_ArrayComm.F90"
+#define ESMF_FILENAME "ESMF_IArrayComm.F90"
 !
 !     ESMF Array Comm module
       module ESMF_InternArrayCommMod
@@ -25,7 +25,7 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !MODULE: ESMF_ArrayCommMod - Data communication routines at the Array level
+! !MODULE: ESMF_IArrayCommMod - Data communication routines at the Array level
 !
 ! !DESCRIPTION:
 !
@@ -62,24 +62,24 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_ArrayGetAllAxisIndices
+      public ESMF_IArrayGetAllAxisIndices
 
-      public ESMF_ArrayHaloStore, ESMF_ArrayHalo, ESMF_ArrayHaloRelease
-      public ESMF_ArrayRedistStore, ESMF_ArrayRedist, ESMF_ArrayRedistRelease
-      public ESMF_ArrayHaloValidate, ESMF_ArrayRedistValidate
+      public ESMF_IArrayHaloStore, ESMF_IArrayHalo, ESMF_IArrayHaloRelease
+      public ESMF_IArrayRedistStore, ESMF_IArrayRedist, ESMF_IArrayRedistRelease
+      public ESMF_IArrayHaloValidate, ESMF_IArrayRedistValidate
       ! Regrid methods are in ESMF_Regrid.F90
 
-      public ESMF_ArrayGather, ESMF_ArrayScatter
-      !!public ESMF_ArrayAllGather
-      !!public ESMF_ArrayReduce, ESMF_ArrayAllReduce
-      !!public ESMF_ArrayBroadcast, ESMF_ArrayAlltoAll
+      public ESMF_IArrayGather, ESMF_IArrayScatter
+      !!public ESMF_IArrayAllGather
+      !!public ESMF_IArrayReduce, ESMF_IArrayAllReduce
+      !!public ESMF_IArrayBroadcast, ESMF_IArrayAlltoAll
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_InternArrayComm.F90,v 1.2 2006/03/28 21:52:26 theurich Exp $'
+      '$Id: ESMF_InternArrayComm.F90,v 1.3 2006/04/04 23:49:20 theurich Exp $'
 !
 !==============================================================================
 !
@@ -87,14 +87,14 @@
 !
 !==============================================================================
 !BOPI
-! !IROUTINE: ESMF_ArrayHaloStore - Compute info to Halo a distributed array
+! !IROUTINE: ESMF_IArrayHaloStore - Compute info to Halo a distributed array
 !
 ! !INTERFACE:
-      interface ESMF_ArrayHaloStore
+      interface ESMF_IArrayHaloStore
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_ArrayHaloStoreOne
-          module procedure ESMF_ArrayHaloStoreIndex
+          module procedure ESMF_IArrayHaloStoreOne
+          module procedure ESMF_IArrayHaloStoreIndex
 
 ! !DESCRIPTION:
 !     This interface provides for calling halo on 
@@ -105,14 +105,14 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayHalo - Halo a distributed array
+! !IROUTINE: ESMF_IArrayHalo - Halo a distributed array
 !
 ! !INTERFACE:
-      interface ESMF_ArrayHalo
+      interface ESMF_IArrayHalo
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_ArrayHaloOne
-          module procedure ESMF_ArrayHaloList
+          module procedure ESMF_IArrayHaloOne
+          module procedure ESMF_IArrayHaloList
 
 ! !DESCRIPTION:
 !     This interface provides for calling Halo on a 
@@ -123,14 +123,14 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayHaloValidate - Validate a Halo
+! !IROUTINE: ESMF_IArrayHaloValidate - Validate a Halo
 !
 ! !INTERFACE:
-      interface ESMF_ArrayHaloValidate
+      interface ESMF_IArrayHaloValidate
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_ArrayHaloValidateOne
-          module procedure ESMF_ArrayHaloValidateList
+          module procedure ESMF_IArrayHaloValidateOne
+          module procedure ESMF_IArrayHaloValidateList
 
 ! !DESCRIPTION:
 !     This interface provides for calling halo validate on a 
@@ -141,14 +141,14 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayRedistStore - Compute info to Redistribute an Array
+! !IROUTINE: ESMF_IArrayRedistStore - Compute info to Redistribute an Array
 !
 ! !INTERFACE:
-      interface ESMF_ArrayRedistStore
+      interface ESMF_IArrayRedistStore
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_ArrayRedistStoreOne
-          module procedure ESMF_ArrayRedistStoreIndex
+          module procedure ESMF_IArrayRedistStoreOne
+          module procedure ESMF_IArrayRedistStoreIndex
 
 ! !DESCRIPTION:
 !     This interface provides for
@@ -160,14 +160,14 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayRedist - Redistribute an Array
+! !IROUTINE: ESMF_IArrayRedist - Redistribute an Array
 !
 ! !INTERFACE:
-      interface ESMF_ArrayRedist
+      interface ESMF_IArrayRedist
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_ArrayRedistOne
-          module procedure ESMF_ArrayRedistList
+          module procedure ESMF_IArrayRedistOne
+          module procedure ESMF_IArrayRedistList
 
 ! !DESCRIPTION:
 !     This interface provides for
@@ -179,14 +179,14 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayRedistValidate - Validate a Redistribution
+! !IROUTINE: ESMF_IArrayRedistValidate - Validate a Redistribution
 !
 ! !INTERFACE:
-      interface ESMF_ArrayRedistValidate
+      interface ESMF_IArrayRedistValidate
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_ArrayRedistValidateOne
-          module procedure ESMF_ArrayRedistValidateList
+          module procedure ESMF_IArrayRedistValidateOne
+          module procedure ESMF_IArrayRedistValidateList
 
 ! !DESCRIPTION:
 !     This interface provides for
@@ -199,14 +199,14 @@
 #if 0
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayAllGather - Gather a distributed array to all DEs
+! !IROUTINE: ESMF_IArrayAllGather - Gather a distributed array to all DEs
 !
 ! !INTERFACE:
-      interface ESMF_ArrayAllGather
+      interface ESMF_IArrayAllGather
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_ArrayAllGatherGrid
-          module procedure ESMF_ArrayAllGatherList
+          module procedure ESMF_IArrayAllGatherGrid
+          module procedure ESMF_IArrayAllGatherList
 
 ! !DESCRIPTION:
 !     This interface provides both the revised entry point for
@@ -228,11 +228,11 @@
 #if 0
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayAllGather - Gather an Array and put results on all DEs
+! !IROUTINE: ESMF_IArrayAllGather - Gather an Array and put results on all DEs
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayAllGather
-      subroutine ESMF_ArrayAllGatherList(array, delayout, decompids, &
+      ! Private name; call using ESMF_IArrayAllGather
+      subroutine ESMF_IArrayAllGatherList(array, delayout, decompids, &
                                          localAxisLengths, globalDimLengths, &
                                          local_maxlengths, gatheredArray, rc)
 !
@@ -272,14 +272,14 @@
         ! set return code if user specified it
         if (present(rc)) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayAllGatherList
+        end subroutine ESMF_IArrayAllGatherList
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayGather - Gather a distributed Array
+! !IROUTINE: ESMF_IArrayGather - Gather a distributed Array
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayGather(array, delayout, decompids, &
+      subroutine ESMF_IArrayGather(array, delayout, decompids, &
                                   global_dimlengths, local_maxlengths, deid, &
                                   gatheredArray, rc)
 !
@@ -319,17 +319,17 @@
         ! set return code if user specified it
         if (present(rc)) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayGather
+        end subroutine ESMF_IArrayGather
 #endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayGather"
+#define ESMF_METHOD "ESMF_IArrayGather"
 !BOP
-! !IROUTINE: ESMF_ArrayGather - Gather an Array onto one DE
+! !IROUTINE: ESMF_IArrayGather - Gather an Array onto one DE
 !
 ! !INTERFACE:
-    subroutine ESMF_ArrayGather(array, grid, datamap, rootDE, gatheredArray, rc)
+    subroutine ESMF_IArrayGather(array, grid, datamap, rootDE, gatheredArray, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(in) :: array
@@ -464,16 +464,16 @@
     ! set return code if user specified it
     if (present(rc)) rc = ESMF_SUCCESS
 
-    end subroutine ESMF_ArrayGather
+    end subroutine ESMF_IArrayGather
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayGetAIsAllDEs"
+#define ESMF_METHOD "ESMF_IArrayGetAIsAllDEs"
 !BOPI
-! !IROUTINE: ESMF_ArrayGetAIsAllDEs - Get AxisIndex list for all DEs in a distributed Array
+! !IROUTINE: ESMF_IArrayGetAIsAllDEs - Get AxisIndex list for all DEs in a distributed Array
 !
 ! !INTERFACE:
-    subroutine ESMF_ArrayGetAIsAllDEs(array, grid, datamap, &
+    subroutine ESMF_IArrayGetAIsAllDEs(array, grid, datamap, &
                                       localGlobalFlag, domainTypeFlag, &
                                       AIListPerDEPerRank, rc)
 !
@@ -620,16 +620,16 @@
 
       if (present(rc)) rc = localrc
 
-      end subroutine ESMF_ArrayGetAIsAllDEs
+      end subroutine ESMF_IArrayGetAIsAllDEs
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayGetGlobalAIs"
+#define ESMF_METHOD "ESMF_IArrayGetGlobalAIs"
 !BOPI
-! !IROUTINE: ESMF_ArrayGetGlobalAIs - Get AIs for local chunk in global index space
+! !IROUTINE: ESMF_IArrayGetGlobalAIs - Get AIs for local chunk in global index space
 !
 ! !INTERFACE:
-    subroutine ESMF_ArrayGetGlobalAIs(array, grid, datamap, &
+    subroutine ESMF_IArrayGetGlobalAIs(array, grid, datamap, &
                                       domainTypeFlag, globalAIPerRank, rc)
 !
 ! !ARGUMENTS:
@@ -716,16 +716,16 @@
 
       if (present(rc)) rc = localrc
 
-      end subroutine ESMF_ArrayGetGlobalAIs
+      end subroutine ESMF_IArrayGetGlobalAIs
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayGetAllAxisIndices"
+#define ESMF_METHOD "ESMF_IArrayGetAllAxisIndices"
 !BOPI
-! !IROUTINE: ESMF_ArrayGetAllAxisIndices - Get all AIs associated with a Grid
+! !IROUTINE: ESMF_IArrayGetAllAxisIndices - Get all AIs associated with a Grid
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayGetAllAxisIndices(array, grid, datamap, &
+      subroutine ESMF_IArrayGetAllAxisIndices(array, grid, datamap, &
                                              totalindex, compindex, exclindex, &
                                              AICountPerDE, rc)
 !
@@ -878,17 +878,17 @@
 
       if (present(rc)) rc = status 
 
-      end subroutine ESMF_ArrayGetAllAxisIndices
+      end subroutine ESMF_IArrayGetAllAxisIndices
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayHaloList"
+#define ESMF_METHOD "ESMF_IArrayHaloList"
 !BOP
-! !IROUTINE: ESMF_ArrayHalo - Halo a list of Arrays
+! !IROUTINE: ESMF_IArrayHalo - Halo a list of Arrays
 !
 ! !INTERFACE:
-    ! Private name; call using ESMF_ArrayHalo()
-    subroutine ESMF_ArrayHaloList(arrayList, routehandle, routeIndex, &
+    ! Private name; call using ESMF_IArrayHalo()
+    subroutine ESMF_IArrayHaloList(arrayList, routehandle, routeIndex, &
                                   blocking, commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
@@ -989,17 +989,17 @@
 
       ! last call to routerun set rc
 
-      end subroutine ESMF_ArrayHaloList
+      end subroutine ESMF_IArrayHaloList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayHaloOne"
+#define ESMF_METHOD "ESMF_IArrayHaloOne"
 !BOP
-! !IROUTINE: ESMF_ArrayHalo - Halo an Array
+! !IROUTINE: ESMF_IArrayHalo - Halo an Array
 !
 ! !INTERFACE:
-    ! Private name; call using ESMF_ArrayHalo()
-    subroutine ESMF_ArrayHaloOne(array, routehandle, routeIndex, &
+    ! Private name; call using ESMF_IArrayHalo()
+    subroutine ESMF_IArrayHaloOne(array, routehandle, routeIndex, &
                                  blocking, commhandle, routeOptions, rc)
 !
 ! !ARGUMENTS:
@@ -1088,16 +1088,16 @@
 
       ! last call to logerr already set rc
 
-      end subroutine ESMF_ArrayHaloOne
+      end subroutine ESMF_IArrayHaloOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayHaloRelease"
+#define ESMF_METHOD "ESMF_IArrayHaloRelease"
 !BOP
-! !IROUTINE: ESMF_ArrayHaloRelease - Release resources stored for halo operation
+! !IROUTINE: ESMF_IArrayHaloRelease - Release resources stored for halo operation
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayHaloRelease(routehandle, rc)
+      subroutine ESMF_IArrayHaloRelease(routehandle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_RouteHandle), intent(inout) :: routehandle
@@ -1119,17 +1119,17 @@
 
       call ESMF_RouteHandleDestroy(routehandle, rc=rc)
 
-      end subroutine ESMF_ArrayHaloRelease
+      end subroutine ESMF_IArrayHaloRelease
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayHaloStoreOne"
+#define ESMF_METHOD "ESMF_IArrayHaloStoreOne"
 !BOP
-! !IROUTINE: ESMF_ArrayHaloStore - Store resources for a halo operation
+! !IROUTINE: ESMF_IArrayHaloStore - Store resources for a halo operation
 !
 ! !INTERFACE:
-      ! Private interface; call using ESMF_ArrayHaloStore()
-      subroutine ESMF_ArrayHaloStoreOne(array, grid, datamap, routehandle, &
+      ! Private interface; call using ESMF_IArrayHaloStore()
+      subroutine ESMF_IArrayHaloStoreOne(array, grid, datamap, routehandle, &
                                      halodirection, routeOptions, rc)
 !
 ! !ARGUMENTS:
@@ -1185,21 +1185,21 @@
       ! or make a temporary here and do an assignment before returning.
 
       ! passthru call, setting index to 1 and type 1-to-1
-      call ESMF_ArrayHaloStoreIndex(array, 1, ESMF_1TO1HANDLEMAP, 1, &
+      call ESMF_IArrayHaloStoreIndex(array, 1, ESMF_1TO1HANDLEMAP, 1, &
                                 grid, datamap, &
                                 routehandle, halodirection, routeOptions, rc)
 
-      end subroutine ESMF_ArrayHaloStoreOne
+      end subroutine ESMF_IArrayHaloStoreOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayHaloStoreIndex"
+#define ESMF_METHOD "ESMF_IArrayHaloStoreIndex"
 !BOPI
-! !IROUTINE: ESMF_ArrayHaloStoreIndex - Store resources for a halo operation
+! !IROUTINE: ESMF_IArrayHaloStoreIndex - Store resources for a halo operation
 !
 ! !INTERFACE:
       ! Internal routine, intended to be called directly by Bundle code only
-      subroutine ESMF_ArrayHaloStoreIndex(array, index, rmaptype, maxindex, &
+      subroutine ESMF_IArrayHaloStoreIndex(array, index, rmaptype, maxindex, &
                                       grid, datamap, routehandle, &
                                       halodirection, routeOptions, rc)
 !
@@ -1371,7 +1371,7 @@
       ! TODO: apply dimorder and decompids to get mapping of array to data
 
       ! set up things we need to find a cached route or precompute one
-      call ESMF_ArrayGetAllAxisIndices(array, grid, datamap, totalindex=dst_AI, &
+      call ESMF_IArrayGetAllAxisIndices(array, grid, datamap, totalindex=dst_AI, &
                                        compindex=src_AI, rc=status)
 
       ! translate AI's into global numbering
@@ -1450,17 +1450,17 @@
       ! set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_ArrayHaloStoreIndex
+      end subroutine ESMF_IArrayHaloStoreIndex
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayHaloValidateList"
+#define ESMF_METHOD "ESMF_IArrayHaloValidateList"
 !BOP
-! !IROUTINE: ESMF_ArrayHaloValidate - Validate a list of Arrays
+! !IROUTINE: ESMF_IArrayHaloValidate - Validate a list of Arrays
 !
 ! !INTERFACE:
-    ! Private name; call using ESMF_ArrayHaloValidate()
-    subroutine ESMF_ArrayHaloValidateList(arrayList, routehandle, routeIndex, &
+    ! Private name; call using ESMF_IArrayHaloValidate()
+    subroutine ESMF_IArrayHaloValidateList(arrayList, routehandle, routeIndex, &
                                           rc)
 !
 ! !ARGUMENTS:
@@ -1548,17 +1548,17 @@
       ! do NOT error check this; preserve the rc returned from validate.
 
 
-      end subroutine ESMF_ArrayHaloValidateList
+      end subroutine ESMF_IArrayHaloValidateList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayHaloValidateOne"
+#define ESMF_METHOD "ESMF_IArrayHaloValidateOne"
 !BOP
-! !IROUTINE: ESMF_ArrayHaloValidate - Validate an Array
+! !IROUTINE: ESMF_IArrayHaloValidate - Validate an Array
 !
 ! !INTERFACE:
-    ! Private name; call using ESMF_ArrayHaloValidate()
-    subroutine ESMF_ArrayHaloValidateOne(array, routehandle, routeIndex, rc)
+    ! Private name; call using ESMF_IArrayHaloValidate()
+    subroutine ESMF_IArrayHaloValidateOne(array, routehandle, routeIndex, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_InternArray), intent(inout) :: array
@@ -1633,17 +1633,17 @@
 
       ! last call to logerr already set rc
 
-      end subroutine ESMF_ArrayHaloValidateOne
+      end subroutine ESMF_IArrayHaloValidateOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedistList"
+#define ESMF_METHOD "ESMF_IArrayRedistList"
 !BOP
-! !IROUTINE: ESMF_ArrayRedist - Redistribute a list of Arrays
+! !IROUTINE: ESMF_IArrayRedist - Redistribute a list of Arrays
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayRedist()
-      subroutine ESMF_ArrayRedistList(srcArrayList, dstArrayList, routehandle, &
+      ! Private name; call using ESMF_IArrayRedist()
+      subroutine ESMF_IArrayRedistList(srcArrayList, dstArrayList, routehandle, &
                                       routeIndex, blocking, &
                                       commhandle, routeOptions, rc) 
 !
@@ -1773,17 +1773,17 @@
 
       ! rc has been set from previous call
 
-      end subroutine ESMF_ArrayRedistList
+      end subroutine ESMF_IArrayRedistList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedistOne"
+#define ESMF_METHOD "ESMF_IArrayRedistOne"
 !BOP
-! !IROUTINE: ESMF_ArrayRedist - Redistribute an Array
+! !IROUTINE: ESMF_IArrayRedist - Redistribute an Array
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayRedist()
-      subroutine ESMF_ArrayRedistOne(srcArray, dstArray, routehandle, &
+      ! Private name; call using ESMF_IArrayRedist()
+      subroutine ESMF_IArrayRedistOne(srcArray, dstArray, routehandle, &
                                      routeIndex, blocking, &
                                      commhandle, routeOptions, rc) 
 !
@@ -1883,16 +1883,16 @@
 
       ! rc has already been set by logerr call above
 
-      end subroutine ESMF_ArrayRedistOne
+      end subroutine ESMF_IArrayRedistOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedistRelease"
+#define ESMF_METHOD "ESMF_IArrayRedistRelease"
 !BOP
-! !IROUTINE: ESMF_ArrayRedistRelease - Release resources stored for redist operation
+! !IROUTINE: ESMF_IArrayRedistRelease - Release resources stored for redist operation
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayRedistRelease(routehandle, rc)
+      subroutine ESMF_IArrayRedistRelease(routehandle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_RouteHandle), intent(inout) :: routehandle
@@ -1915,17 +1915,17 @@
 
       call ESMF_RouteHandleDestroy(routehandle, rc=rc)
 
-      end subroutine ESMF_ArrayRedistRelease
+      end subroutine ESMF_IArrayRedistRelease
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedistStoreOne"
+#define ESMF_METHOD "ESMF_IArrayRedistStoreOne"
 !BOP
-! !IROUTINE: ESMF_ArrayRedistStore - Store resources for a redist operation
+! !IROUTINE: ESMF_IArrayRedistStore - Store resources for a redist operation
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayRedistStore()
-      subroutine ESMF_ArrayRedistStoreOne(srcArray, srcGrid, srcDataMap, &
+      ! Private name; call using ESMF_IArrayRedistStore()
+      subroutine ESMF_IArrayRedistStoreOne(srcArray, srcGrid, srcDataMap, &
                                        dstArray, dstGrid, dstDataMap, &
                                        parentVM, routeOptions, routehandle, rc)
 !
@@ -1988,23 +1988,23 @@
     ! if problems compiling, see the comment in HaloStore() for
     ! suggestions regarding intent(out) vs intent(inout).
 
-    call ESMF_ArrayRedistStoreIndex(srcArray, srcGrid, srcDataMap, &
+    call ESMF_IArrayRedistStoreIndex(srcArray, srcGrid, srcDataMap, &
                                dstArray, dstGrid, dstDataMap, &
                                1, ESMF_1TO1HANDLEMAP, 1, &
                                parentVM, routehandle, routeOptions, rc)
 
 
-    end subroutine ESMF_ArrayRedistStoreOne
+    end subroutine ESMF_IArrayRedistStoreOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedistStoreIndex"
+#define ESMF_METHOD "ESMF_IArrayRedistStoreIndex"
 !BOPI
-! !IROUTINE: ESMF_ArrayRedistStoreIndex - Store resources for a redist operation
+! !IROUTINE: ESMF_IArrayRedistStoreIndex - Store resources for a redist operation
 !
 ! !INTERFACE:
       ! internal use only; called by Bundle code for multi-fields
-      subroutine ESMF_ArrayRedistStoreIndex(srcArray, srcGrid, srcDataMap, &
+      subroutine ESMF_IArrayRedistStoreIndex(srcArray, srcGrid, srcDataMap, &
                                        dstArray, dstGrid, dstDataMap, &
                                        index, rmaptype, maxindex, &
                                        parentVM, routehandle, routeOptions, rc)
@@ -2188,7 +2188,7 @@
       ! for now, branch out if arbitrary storage
       if (dstStorage.eq.ESMF_GRID_STORAGE_ARBITRARY .OR. &
           srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
-        call ESMF_ArrayRedistStoreIndexArb(srcArray, srcGrid, srcDataMap, &
+        call ESMF_IArrayRedistStoreIndexArb(srcArray, srcGrid, srcDataMap, &
                                           dstArray, dstGrid, dstDataMap, &
                                           index, rmaptype, maxindex, &
                                           parentVM, routehandle, &
@@ -2245,7 +2245,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! get all of the AIs -- that mean for all of the DEs
-      call ESMF_ArrayGetAIsAllDEs(dstArray, dstGrid, dstDataMap, &
+      call ESMF_IArrayGetAIsAllDEs(dstArray, dstGrid, dstDataMap, &
                                   ESMF_GLOBAL, ESMF_DOMAIN_COMPUTATIONAL, &
                                   dstGlobalCompAIperDEperRank, &
                                   rc=status)
@@ -2253,7 +2253,7 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_ArrayGetAIsAllDEs(srcArray, srcGrid, srcDataMap, &
+      call ESMF_IArrayGetAIsAllDEs(srcArray, srcGrid, srcDataMap, &
                                   ESMF_GLOBAL, ESMF_DOMAIN_COMPUTATIONAL, &
                                   srcGlobalCompAIperDEperRank, &
                                   rc=status)
@@ -2262,10 +2262,10 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! TODO: make GlobalTotalAI arrays
-      call ESMF_ArrayGetGlobalAIs(dstArray, dstGrid, dstDataMap, &
+      call ESMF_IArrayGetGlobalAIs(dstArray, dstGrid, dstDataMap, &
                                   ESMF_DOMAIN_TOTAL, &
                                   myDstGlobalTotalAIPerRank, rc=status)
-      call ESMF_ArrayGetGlobalAIs(srcArray, srcGrid, srcDataMap, &
+      call ESMF_IArrayGetGlobalAIs(srcArray, srcGrid, srcDataMap, &
                                   ESMF_DOMAIN_TOTAL, &
                                   mySrcGlobalTotalAIPerRank, rc=status)
 
@@ -2310,17 +2310,17 @@
 
       ! rc has been set by the calls above, just return here.
 
-      end subroutine ESMF_ArrayRedistStoreIndex
+      end subroutine ESMF_IArrayRedistStoreIndex
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedistStoreIndexArb"
+#define ESMF_METHOD "ESMF_IArrayRedistStoreIndexArb"
 !BOPI
-! !IROUTINE: ESMF_ArrayRedistStoreIndexArb - Store resources for a redist operation
+! !IROUTINE: ESMF_IArrayRedistStoreIndexArb - Store resources for a redist operation
 !
 ! !INTERFACE:
       ! internal use only; called by Bundle code for multi-fields
-      subroutine ESMF_ArrayRedistStoreIndexArb(srcArray, srcGrid, srcDataMap, &
+      subroutine ESMF_IArrayRedistStoreIndexArb(srcArray, srcGrid, srcDataMap, &
                                        dstArray, dstGrid, dstDataMap, &
                                        index, rmaptype, maxindex, &
                                        parentVM, routehandle, routeOptions, rc)
@@ -2596,7 +2596,7 @@
 
       ! set up things we need to precompute a route
       if (dstStorage.eq.ESMF_GRID_STORAGE_LOGRECT) then
-        call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+        call ESMF_IArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
                                          compindex =dstCLocalAI, &
                                          totalindex=dstTLocalAI, rc=status)
         if (ESMF_LogMsgFoundError(status, &
@@ -2622,13 +2622,13 @@
                                   ESMF_CONTEXT, rc)) return
 
       elseif (dstStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
-        call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+        call ESMF_IArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
                                          compindex=dstCompAI, &
                                          AICountPerDE=dstAICountPerDE, rc=status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+        call ESMF_IArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
                                          compindex=dstTotalAI, &
                                          AICountPerDE=dstAICountPerDE, rc=status)
         if (ESMF_LogMsgFoundError(status, &
@@ -2638,7 +2638,7 @@
 
       ! now the source grid
       if (srcStorage.eq.ESMF_GRID_STORAGE_LOGRECT) then
-        call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+        call ESMF_IArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
                                          compindex =srcCLocalAI, &
                                          totalindex=srcTLocalAI, rc=status)
         if (ESMF_LogMsgFoundError(status, &
@@ -2662,13 +2662,13 @@
                                   ESMF_CONTEXT, rc)) return
 
       elseif (srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
-        call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+        call ESMF_IArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
                                          compindex=srcCompAI, &
                                          AICountPerDE=srcAICountPerDE, rc=status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+        call ESMF_IArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
                                          compindex=srcTotalAI, &
                                          AICountPerDE=srcAICountPerDE, rc=status)
         if (ESMF_LogMsgFoundError(status, &
@@ -2725,17 +2725,17 @@
       ! set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_ArrayRedistStoreIndexArb
+      end subroutine ESMF_IArrayRedistStoreIndexArb
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedistValidateList"
+#define ESMF_METHOD "ESMF_IArrayRedistValidateList"
 !BOP
-! !IROUTINE: ESMF_ArrayRedistValidate - Validate Redist for a list of Arrays
+! !IROUTINE: ESMF_IArrayRedistValidate - Validate Redist for a list of Arrays
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayRedistValidate()
-      subroutine ESMF_ArrayRedistValidateList(srcArrayList, dstArrayList, &
+      ! Private name; call using ESMF_IArrayRedistValidate()
+      subroutine ESMF_IArrayRedistValidateList(srcArrayList, dstArrayList, &
                                               routehandle, routeIndex, rc)
 !
 ! !ARGUMENTS:
@@ -2843,17 +2843,17 @@
 
       ! rc has already been set, just return
 
-      end subroutine ESMF_ArrayRedistValidateList
+      end subroutine ESMF_IArrayRedistValidateList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRedistValidateOne"
+#define ESMF_METHOD "ESMF_IArrayRedistValidateOne"
 !BOP
-! !IROUTINE: ESMF_ArrayRedistValidate - Validate an Array Redist
+! !IROUTINE: ESMF_IArrayRedistValidate - Validate an Array Redist
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ArrayRedistValidate()
-      subroutine ESMF_ArrayRedistValidateOne(srcArray, dstArray, routehandle, &
+      ! Private name; call using ESMF_IArrayRedistValidate()
+      subroutine ESMF_IArrayRedistValidateOne(srcArray, dstArray, routehandle, &
                                              routeIndex, rc)
 !
 ! !ARGUMENTS:
@@ -2938,16 +2938,16 @@
 
       ! preserve the rc and return it
 
-      end subroutine ESMF_ArrayRedistValidateOne
+      end subroutine ESMF_IArrayRedistValidateOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayScatter"
+#define ESMF_METHOD "ESMF_IArrayScatter"
 !BOPI
-! !IROUTINE: ESMF_ArrayScatter - Scatter a single Array across multiple DEs
+! !IROUTINE: ESMF_IArrayScatter - Scatter a single Array across multiple DEs
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayScatter(array, delayout, decompids, rootDE, &
+      subroutine ESMF_IArrayScatter(array, delayout, decompids, rootDE, &
                                    scatteredArray, rc)
 !
 ! !ARGUMENTS:
@@ -2999,7 +2999,7 @@
         ! set return code if user specified it
         if (present(rc)) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayScatter
+        end subroutine ESMF_IArrayScatter
 
        end module ESMF_InternArrayCommMod
 
