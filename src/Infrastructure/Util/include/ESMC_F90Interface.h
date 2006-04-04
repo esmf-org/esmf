@@ -1,4 +1,4 @@
-// $Id: ESMC_F90Interface.h,v 1.1 2005/05/31 17:27:19 nscollins Exp $
+// $Id: ESMC_F90Interface.h,v 1.2 2006/04/04 22:00:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -17,16 +17,33 @@
  // these lines prevent this file from being read more than once if it
  // ends up being included multiple times
 
- #ifndef ESMC_INTERFACE_H
- #define ESMC_INTERFACE_H
+ #ifndef ESMC_F90INTERFACE_H
+ #define ESMC_F90INTERFACE_H
 
 //-------------------------------------------------------------------------
 //BOP
 //
 // !DESCRIPTION:
-// These macros are used in the F90-to-C++ interface's C-glue-code.
+// This file contains types and macros that are used on the C++ side to
+// deal with the C++-to-F90 and F90-to-C++ interface.
 //-------------------------------------------------------------------------
 //EOP
+
+//-------------------------------------------------------------------------
+// Struct that is used in C++ classes to interface with deep F90 classes,
+// e.g. for the C++-to-F90 interface
+//-------------------------------------------------------------------------
+
+typedef struct{
+  void *memoryHolder[8];  // reserve 8 times the space of a void pointer
+                          // this value has been determined empirically to work
+                          // on the supported platforms.
+}ESMC_F90ClassHolder;
+
+
+//-------------------------------------------------------------------------
+// Macros that are used in the C glue code for F90-to-C++
+//-------------------------------------------------------------------------
 
 // Pass not-present F90 optional argument through to C++ as NULL, otherwise
 // leave unchanged.
