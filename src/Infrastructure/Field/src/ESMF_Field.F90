@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.212 2006/03/28 21:52:26 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.213 2006/04/04 23:43:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_UtilTypesMod    ! ESMF base class
+      use ESMF_UtilTypesMod
       use ESMF_UtilMod
       use ESMF_BaseMod
       use ESMF_VMMod
@@ -98,21 +98,6 @@
       type(ESMF_AllocFlag), parameter ::  &
                                ESMF_ALLOC = ESMF_AllocFlag(0), &
                                ESMF_NO_ALLOC = ESMF_AllocFlag(1)
-
-!------------------------------------------------------------------------------
-!     ! ESMF_IndexFlag
-!
-!     ! Interface flag for setting whether Field data has global index bounds
-
-      type ESMF_IndexFlag
-      sequence
-      private
-        integer :: i_type
-      end type
-
-      type(ESMF_IndexFlag), parameter ::  &
-                               ESMF_INDEX_DELOCAL  = ESMF_IndexFlag(0), &
-                               ESMF_INDEX_GLOBAL = ESMF_IndexFlag(1)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_LocalField
@@ -182,7 +167,6 @@
       public ESMF_Field, ESMF_Access
       public ESMF_FieldType, ESMF_LocalField  ! for internal lib use only
       public ESMF_AllocFlag, ESMF_NO_ALLOC, ESMF_ALLOC
-      public ESMF_IndexFlag, ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL
 
 !------------------------------------------------------------------------------
 !
@@ -285,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.212 2006/03/28 21:52:26 theurich Exp $'
+      '$Id: ESMF_Field.F90,v 1.213 2006/04/04 23:43:16 theurich Exp $'
 
 !==============================================================================
 !
@@ -3362,7 +3346,7 @@
 
         ! Output to file, from de_id 0 only
 !!$        call ESMF_FieldAllGather(field, out_array, rc=status)
-        call ESMF_ArrayGather(field%ftypep%localfield%localdata, &
+        call ESMF_IArrayGather(field%ftypep%localfield%localdata, &
                               field%ftypep%grid, field%ftypep%mapping, &
                               0, out_array, rc=status)
 
@@ -4235,7 +4219,7 @@
                              filename=trim(name), rc=status)
 
         ! Output to file, from de_id 0 only
-        call ESMF_ArrayGather(field%ftypep%localfield%localdata, &
+        call ESMF_IArrayGather(field%ftypep%localfield%localdata, &
                               field%ftypep%grid, field%ftypep%mapping, &
                               0, outarray, rc=status)
         if (ESMF_LogMsgFoundError(status, &
