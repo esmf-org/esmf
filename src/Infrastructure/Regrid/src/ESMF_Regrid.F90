@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.102 2006/03/28 21:52:31 theurich Exp $
+! $Id: ESMF_Regrid.F90,v 1.103 2006/04/05 03:47:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -83,7 +83,7 @@
     !  and we are not exposing an externally visible "regrid" object, 
     !  these routines must exist to be consistent with the other interfaces.  
     ! 
-    public ESMF_ArrayRegridStore, ESMF_ArrayRegrid, ESMF_ArrayRegridRelease
+    public ESMF_IArrayRegridStore, ESMF_IArrayRegrid, ESMF_IArrayRegridRelease
     public ESMF_RegridDestroy    ! deallocate memory associated with a regrid
     public ESMF_RegridValidate   ! Error checking and validation
     public ESMF_RegridPrint      ! Prints various regrid info
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.102 2006/03/28 21:52:31 theurich Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.103 2006/04/05 03:47:39 theurich Exp $'
 
 !==============================================================================
 !
@@ -104,14 +104,14 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayRegridStore
+! !IROUTINE: ESMF_IArrayRegridStore
 !
 ! !INTERFACE:
-      interface ESMF_ArrayRegridStore
+      interface ESMF_IArrayRegridStore
   
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_ArrayRegridStoreOne
-        module procedure ESMF_ArrayRegridStoreIndex
+        module procedure ESMF_IArrayRegridStoreOne
+        module procedure ESMF_IArrayRegridStoreIndex
 
 ! !DESCRIPTION:
 !    This interface provides an entry point for methods that compute
@@ -127,14 +127,14 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayRegrid
+! !IROUTINE: ESMF_IArrayRegrid
 !
 ! !INTERFACE:
-      interface ESMF_ArrayRegrid
+      interface ESMF_IArrayRegrid
   
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_ArrayRegridRunOne
-        module procedure ESMF_ArrayRegridRunList
+        module procedure ESMF_IArrayRegridRunOne
+        module procedure ESMF_IArrayRegridRunList
 
 ! !DESCRIPTION:
 !    This interface provides an entry point for methods that execute
@@ -628,7 +628,7 @@
         select case(rank)
   
         ! TODO: apply the weights from src to destination
-        ! does this need a nested loop and an array of ESMF_Arrays, one
+        ! does this need a nested loop and an array of ESMF_IArrays, one
         ! for each DE which sends data?  i think the answer is not for now
         ! because all data has been pushed into a single array.  but eventually
         ! if we want to start supporting vectors or other complicated data 
@@ -970,7 +970,7 @@
         select case(rank)
   
         ! TODO: apply the weights from src to destination
-        ! does this need a nested loop and an array of ESMF_Arrays, one
+        ! does this need a nested loop and an array of ESMF_IArrays, one
         ! for each DE which sends data?  i think the answer is not for now
         ! because all data has been pushed into a single array.  but eventually
         ! if we want to start supporting vectors or other complicated data 
@@ -1328,11 +1328,11 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRegridStoreOne"
+#define ESMF_METHOD "ESMF_IArrayRegridStoreOne"
 !BOP
 ! !INTERFACE:
-      ! Private interface; call using ESMF_ArrayRegridStore()
-      subroutine ESMF_ArrayRegridStoreOne(srcArray, srcGrid, srcDatamap, &
+      ! Private interface; call using ESMF_IArrayRegridStore()
+      subroutine ESMF_IArrayRegridStoreOne(srcArray, srcGrid, srcDatamap, &
                                           dstArray, dstGrid, dstDatamap, &
                                           parentVM, routehandle, &
                                           regridmethod, regridnorm, &
@@ -1405,22 +1405,22 @@
 ! !REQUIREMENTS:
 
 
-      call ESMF_ArrayRegridStoreIndex(srcArray, srcGrid, srcDatamap, &
+      call ESMF_IArrayRegridStoreIndex(srcArray, srcGrid, srcDatamap, &
                                       dstArray, dstGrid, dstDatamap, &
                                       parentVM, routehandle, &
                                       1, ESMF_1TO1HANDLEMAP, 1, &
                                       regridmethod, regridnorm, &
                                       srcmask, dstmask, routeOptions, rc) 
 
-      end subroutine ESMF_ArrayRegridStoreOne
+      end subroutine ESMF_IArrayRegridStoreOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRegridStoreIndex"
+#define ESMF_METHOD "ESMF_IArrayRegridStoreIndex"
 !BOP
 ! !INTERFACE:
-      ! Private interface; call using ESMF_ArrayRegridStore()
-      subroutine ESMF_ArrayRegridStoreIndex(srcArray, srcGrid, srcDatamap, &
+      ! Private interface; call using ESMF_IArrayRegridStore()
+      subroutine ESMF_IArrayRegridStoreIndex(srcArray, srcGrid, srcDatamap, &
                                            dstArray, dstGrid, dstDatamap, &
                                            parentVM, routehandle, routeIndex, &
                                            handleMaptype, routeCount, &
@@ -1580,15 +1580,15 @@
     ! set return code if user specified it
     if (present(rc)) rc = ESMF_SUCCESS
 
-    end subroutine ESMF_ArrayRegridStoreIndex
+    end subroutine ESMF_IArrayRegridStoreIndex
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRegridRunOne"
+#define ESMF_METHOD "ESMF_IArrayRegridRunOne"
 !BOP
 ! !INTERFACE:
-      ! Private interface; call using ESMF_ArrayRegrid()
-      subroutine ESMF_ArrayRegridRunOne(srcArray, srcDataMap, hasSrcData, &
+      ! Private interface; call using ESMF_IArrayRegrid()
+      subroutine ESMF_IArrayRegridRunOne(srcArray, srcDataMap, hasSrcData, &
                                         dstArray, dstDataMap, hasDstData, &
                                         routehandle, routeIndex, &
                                         srcmask, dstmask, &
@@ -1741,15 +1741,15 @@
       ! Set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_ArrayRegridRunOne
+      end subroutine ESMF_IArrayRegridRunOne
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRegridRunList"
+#define ESMF_METHOD "ESMF_IArrayRegridRunList"
 !BOP
 ! !INTERFACE:
-      ! Private interface; call using ESMF_ArrayRegrid()
-      subroutine ESMF_ArrayRegridRunList(srcArrayList, srcDataMap, hasSrcData, &
+      ! Private interface; call using ESMF_IArrayRegrid()
+      subroutine ESMF_IArrayRegridRunList(srcArrayList, srcDataMap, hasSrcData, &
                                          dstArrayList, dstDataMap, hasDstData, &
                                          routehandle, routeIndex, &
                                          srcmask, dstmask, &
@@ -1899,14 +1899,14 @@
       ! Set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_ArrayRegridRunList
+      end subroutine ESMF_IArrayRegridRunList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayRegridRelease"
+#define ESMF_METHOD "ESMF_IArrayRegridRelease"
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayRegridRelease(routehandle, rc)
+      subroutine ESMF_IArrayRegridRelease(routehandle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_RouteHandle), intent(inout) :: routehandle
@@ -1939,7 +1939,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_ArrayRegridRelease
+      end subroutine ESMF_IArrayRegridRelease
 
 
 !------------------------------------------------------------------------------
