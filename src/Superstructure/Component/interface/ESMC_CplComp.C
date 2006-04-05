@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.C,v 1.6 2004/05/26 14:23:56 nscollins Exp $
+// $Id: ESMC_CplComp.C,v 1.7 2006/04/05 20:37:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_CplComp.C,v 1.6 2004/05/26 14:23:56 nscollins Exp $";
+           "$Id: ESMC_CplComp.C,v 1.7 2006/04/05 20:37:20 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -87,9 +87,12 @@
     ESMC_CplComp *comp;
 
     // the null is because we have no C++ interfaces to the config object yet
+    // the null must be given in form of a variable in order to satisfy
+    // fortran's pass by reference! *gjt*
+    void *null = NULL;
     comp = new ESMC_CplComp;
-    FTN(f_esmf_cplcompcreate)(comp, name, NULL, configFile, clock,
-                             rc, strlen(name), strlen(configFile));
+    FTN(f_esmf_cplcompcreate)(comp, name, (ESMC_Config*)null, configFile, clock,
+      rc, strlen(name), strlen(configFile));
 
     return comp;
 
