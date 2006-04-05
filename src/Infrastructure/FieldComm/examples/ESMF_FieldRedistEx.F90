@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.7 2006/03/20 22:18:06 theurich Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.8 2006/04/05 04:40:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,6 @@
      ! instantiate two grids, two fields, and two arrays
      type(ESMF_Grid)  ::  grid1,  grid2
      type(ESMF_Field) :: field1, field2
-     type(ESMF_Array) :: array1
 
      ! Local variables
      integer :: finalrc, rc
@@ -42,7 +41,6 @@
      real(ESMF_KIND_R8) :: pi = 3.1416d0
      real(ESMF_KIND_R8), dimension(:,:), pointer :: coordX, coordY
      real(ESMF_KIND_R8), dimension(:,:), pointer :: srcdata
-     type(ESMF_Array), dimension(:), pointer :: coordArray
      type(ESMF_ArraySpec) :: arrayspec1D, arrayspec2D
      type(ESMF_DELayout) :: delayout1, delayout2
      type(ESMF_GridHorzStagger) :: horz_stagger
@@ -185,27 +183,19 @@
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
      ! get coordinate arrays available for setting the source data array
-     allocate(coordArray(2))
-     call ESMF_GridGetCoord(grid1, horzRelloc=ESMF_CELL_CENTER, &
-                            centerCoord=coordArray, rc=rc)
+     call ESMF_GridGetCoord(grid1, dim=1, horzRelloc=ESMF_CELL_CENTER, &
+                            centerCoord=coordX, localCounts=localCounts, rc=rc)
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-     call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-     call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, rc)
+     call ESMF_GridGetCoord(grid1, dim=2, horzRelloc=ESMF_CELL_CENTER, &
+                            centerCoord=coordY, rc=rc)
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
      ! Get pointers to the data and set it up
-     call ESMF_FieldGetArray(field1, array1, rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-     call ESMF_ArrayGetData(array1, srcdata, ESMF_DATA_REF, rc)
+     call ESMF_FieldGetDataPointer(field1, srcdata, ESMF_DATA_REF, rc=rc)
      if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
      ! initialize data arrays
      srcdata = 0.0
-
-     ! get sizes of local pieces of the coordinate arrays
-     call ESMF_ArrayGet(coordArray(1), counts=localCounts, rc=rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
      ! set data array to a function of coordinates (in the computational part
      ! of the array only, not the halo region)

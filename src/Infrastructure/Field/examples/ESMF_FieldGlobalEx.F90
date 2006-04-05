@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGlobalEx.F90,v 1.4 2005/02/28 16:22:11 nscollins Exp $
+! $Id: ESMF_FieldGlobalEx.F90,v 1.5 2006/04/05 04:40:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
     integer :: dataIndexList(3), lbounds(3), localCount(3), ubounds(3)
     real (ESMF_KIND_R8), dimension(:,:,:), pointer :: f90ptr1
     real (ESMF_KIND_R8), dimension(2) :: origin
-    type(ESMF_Array)        :: array1
+    type(ESMF_InternArray)        :: iarray1
     type(ESMF_DELayout)     :: layout
     type(ESMF_Field)        :: field1
     type(ESMF_FieldDataMap) :: datamap
@@ -119,17 +119,17 @@
                      lbounds(3):ubounds(3)))
 
     ! create the array from the F90 pointer and haloWidth
-    array1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, haloWidth=haloWidth, rc=rc)
+    iarray1 = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_REF, haloWidth=haloWidth, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_ArrayPrint(array1, rc=rc)
+    call ESMF_InternArrayPrint(iarray1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Field Create with Grid, DataMap and Array}
+!\subsubsection{Field Create with Grid, DataMap and InternArray}
 
 !  The user has already created an {\tt ESMF\_Grid} and an
-!  {\tt ESMF\_Array} with data.  The user creates a FieldDataMap, and then this
+!  {\tt ESMF\_InternArray} with data.  The user creates a FieldDataMap, and then this
 !  create associates the two objects.
 !EOE
 
@@ -137,7 +137,7 @@
     call ESMF_FieldDataMapSetDefault(datamap, dataRank=3, &
                                      dataIndexList=dataIndexList, &
                                      counts=localCount(1:1), rc=rc)
-    field1 = ESMF_FieldCreate(grid, array1, horzRelloc=ESMF_CELL_CENTER, &
+    field1 = ESMF_FieldCreate(grid, iarray1, horzRelloc=ESMF_CELL_CENTER, &
                               datamap=datamap, name="pressure", rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

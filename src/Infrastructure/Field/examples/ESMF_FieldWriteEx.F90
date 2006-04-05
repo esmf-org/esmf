@@ -37,7 +37,6 @@
   real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: u2
   type(ESMF_Field) :: field_u2
   type(ESMF_ArraySpec) :: arrayspec
-  type(ESMF_Array) :: array_temp
   type(ESMF_Time) :: timestamp
   type(ESMF_IOSpec) :: iospec
 !EOC
@@ -141,17 +140,10 @@
      finalrc = ESMF_FAILURE
   endif
 
-!!$  call ESMF_FieldGetDataPointer(field_u2, u2, rc=status)
-  call ESMF_FieldGetArray( field_u2, array_temp, rc=status)
+  call ESMF_FieldGetDataPointer(field_u2, u2, ESMF_DATA_REF, rc=status)
   if (status.NE.ESMF_SUCCESS) then
      finalrc = ESMF_FAILURE
-     print*, "'call ESMF_FieldGetArray( field_u2, array_temp, rc=status)' failed"
-  endif
-
-  call ESMF_ArrayGetData(array_temp, u2, ESMF_DATA_REF, status)
-  if (status.NE.ESMF_SUCCESS) then
-     finalrc = ESMF_FAILURE
-     print*, "'call ESMF_ArrayGetData(array_temp, u2, ESMF_DATA_REF, status)' failed"
+     print*, "'call ESMF_FieldGetDataPointer(field_u2, array_temp, ESMF_DATA_REF, rc=status)' failed"
   endif
 
 !BOC

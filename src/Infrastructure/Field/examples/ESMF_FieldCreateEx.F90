@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.31 2005/02/28 16:22:00 nscollins Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.32 2006/04/05 04:40:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
     integer :: gridCount(2)
     type(ESMF_Grid) :: grid
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_Array) :: array1, array2
+    type(ESMF_InternArray) :: iarray1, iarray2
     type(ESMF_DELayout) :: layout
     type(ESMF_VM) :: vm
     !type(ESMF_RelLoc) :: relativelocation
@@ -52,7 +52,7 @@
 !   ! Example 1:
 !   !
 !   !  The user has already created a Grid and has Field data
-!   !  stored in an Array object.  This version of create simply
+!   !  stored in an InternArray object.  This version of create simply
 !   !  associates the data with the Grid.  The data is referenced
 !   !  by default.  The DataMap is created with defaults.
  
@@ -63,30 +63,29 @@
                                     deltaPerDim=(/ 1.0d0, 1.0d0 /), &
                                     name="atmgrid", rc=rc)
     call ESMF_GridDistribute(grid, delayout=layout, rc=rc)
-
-    ! Array size has to match the Grid (plus any halo width), so query grid for
+    ! InternArray size has to match the Grid (plus any halo width), so query grid for
     ! local cell counts to determine allocation
     call ESMF_GridGetDELocalInfo(grid, horzrelloc=ESMF_CELL_CENTER, &
                                  localCellCountPerDim=gridCount, rc=rc)
 
     allocate(f90ptr1(gridCount(1),gridCount(2)))
 
-    array1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
+    iarray1 = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_ArrayPrint(array1, rc=rc)
+    call ESMF_InternArrayPrint(iarray1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Field Create with Grid and Array}
+!\subsubsection{Field Create with Grid and InternArray}
       
 !  The user has already created an {\tt ESMF\_Grid} and an
-!  {\tt ESMF\_Array} with data.  This create associates the
+!  {\tt ESMF\_InterArray} with data.  This create associates the
 !  two objects.  An {\tt ESMF\_FieldDataMap} is created with all defaults.
 !EOE
       
 !BOC
-    field1 = ESMF_FieldCreate(grid, array1, &
+    field1 = ESMF_FieldCreate(grid, iarray1, &
                          horzRelloc=ESMF_CELL_CENTER, name="pressure", rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -132,18 +131,18 @@
 !   !  pointer to the old data array; the set call passes in the 
 !   !  pointer to the new array.
 
-    call ESMF_FieldGetArray(field1, array=array1, rc=rc)
+    call ESMF_FieldGetArray(field1, array=iarray1, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! the size of the data in the array still has to line up with the Grid
     ! and its decomposition
     allocate(f90ptr2(gridCount(1),gridCount(2)))
-    array2 = ESMF_ArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)  
+    iarray2 = ESMF_InternArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)  
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldSetArray(field1, array=array2, rc=rc)
+    call ESMF_FieldSetArray(field1, array=iarray2, rc=rc)
     print *, "Field example 3 returned"
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -153,7 +152,7 @@
 !\subsubsection{Empty Field Create}
 
 !  The user creates an empty {\tt ESMF\_Field} object.
-!  The {\tt ESMF\_Grid}, {\tt ESMF\_Array}, and {\tt ESMF\_FieldDataMap}
+!  The {\tt ESMF\_Grid}, {\tt ESMF\_InternArray}, and {\tt ESMF\_FieldDataMap}
 !  can be added later using the set methods.
 !EOE
 
