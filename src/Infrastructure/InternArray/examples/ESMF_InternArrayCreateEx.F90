@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayCreateEx.F90,v 1.1 2006/03/24 16:33:28 theurich Exp $
+! $Id: ESMF_InternArrayCreateEx.F90,v 1.2 2006/04/05 04:40:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_ArrayCreateEx
 
 !-------------------------------------------------------------------------------
-!EXAMPLE        String used by test script to count examples.
+!x_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_ArrayCreateEx - Examples of Array Creation
