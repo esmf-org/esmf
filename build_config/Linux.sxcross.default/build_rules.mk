@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.4 2006/04/11 17:42:37 svasquez Exp $
+# $Id: build_rules.mk,v 1.5 2006/04/11 18:09:47 theurich Exp $
 # 
 #  NEC SX build, cross compiler on a Linux front end
 #
@@ -60,10 +60,12 @@ endif
 
 # the SX does not have support for 1 byte integers, and
 # i believe 2 byte ints were also problematic.  
-#these disable their creation in the code.
-# the SX does not support memory mappping
+# these disable their creation in the code.
 
-FPPDEFS += -DESMF_NO_INTEGER_1_BYTE -DESMF_NO_INTEGER_2_BYTE -DESMF_NOPOSIXIPC
+FPPDEFS += -DESMF_NO_INTEGER_1_BYTE -DESMF_NO_INTEGER_2_BYTE
+
+# the SX does not support POSIX IPC (memory mappped files)
+CFLAGS     += -DESMF_NOPOSIXIPC
 
 ############################################################
 #
