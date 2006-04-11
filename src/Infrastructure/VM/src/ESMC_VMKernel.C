@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.64 2006/03/22 01:00:12 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.65 2006/04/11 16:25:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,12 +40,14 @@
 #undef _XOPEN_SOURCE_EXTENDED
 #endif
 
+// VMKernel can be compiled stand-alone outside of ESMF 
 #ifdef VMK_STANDALONE
 #include <pthread.h>
 #else
 #include "ESMF_Pthread.h"
 #endif
 
+// Standard headers
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,7 +56,9 @@
 #include <float.h>
 #include <math.h>
 
-#include <sys/mman.h>
+// Memory mapped files may not be available on all systems
+//#include <sys/mman.h>
+
 #include <fcntl.h>
 
 #define MPICH_IGNORE_CXX_SEEK
@@ -499,6 +503,12 @@ void ESMC_VMK::vmk_construct(void *ssarg){
   this->firsthandle=NULL;
   // preference dependent settings
   if (pref_intra_ssi == PREF_INTRA_SSI_POSIXIPC){
+#ifdef ESMF_NOPOSIXIPC
+    fprintf(stderr, "PREF_INTRA_SSI_POSIXIPC not supported on this platform!\n"
+      "-> default into PREF_INTRA_SSI_MPI1.\n");
+    sarg->pref_intra_ssi = PREF_INTRA_SSI_MPI1;
+    pref_intra_ssi = PREF_INTRA_SSI_MPI1;
+#else
     // now set up the POSIX IPC shared memory resources between pets
     // that run within the same SSI but different PID
     for (int i=0; i<npets; i++){
@@ -559,6 +569,7 @@ void ESMC_VMK::vmk_construct(void *ssarg){
         }
       }
     }
+#endif
   }
 #ifdef ESMF_MPIUNI
   // don't set mpionly flag so that comm call check for commtype
@@ -635,6 +646,8 @@ void ESMC_VMK::vmk_destruct(void){
 #endif          
           delete shmp;
         }else if (commarray[pet1][pet2].comm_type==VM_COMM_TYPE_POSIXIPC){
+#ifdef ESMF_NOPOSIXIPC
+#else
           // this means that mypet is either pet1 or pet2
           pipc_mp *pipcmp=commarray[pet1][pet2].pipcmp;
           char shm_name[80];
@@ -644,7 +657,8 @@ void ESMC_VMK::vmk_destruct(void){
 #if (VERBOSITY > 9)
           printf("deleting pipcmp=%p (%s) for pet1=%d, pet2=%d, mypet=%d\n", 
             pipcmp, shm_name, pet1, pet2, mypet);
-#endif          
+#endif
+#endif
         }
       }
       delete [] commarray[pet1];
