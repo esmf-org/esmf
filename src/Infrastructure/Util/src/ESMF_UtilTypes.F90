@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.16 2006/04/05 17:19:10 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.17 2006/04/12 17:35:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -179,7 +179,11 @@
                    ESMF_KIND_I2 = selected_int_kind(4), &
 #endif
                    ESMF_KIND_I4 = selected_int_kind(9), &
+#ifndef ESMF_NEC_KIND_I8
                    ESMF_KIND_I8 = selected_int_kind(18), &
+#else
+                   ESMF_KIND_I8 = selected_int_kind(15), &
+#endif
                    ESMF_KIND_R4 = selected_real_kind(3,25), &
                    ESMF_KIND_R8 = selected_real_kind(6,45), &
                    ESMF_KIND_C8 = selected_real_kind(3,25), &
@@ -474,8 +478,8 @@
       public ESMF_DATA_INTEGER, ESMF_DATA_REAL, &
              ESMF_DATA_LOGICAL, ESMF_DATA_CHARACTER, ESMF_DATA_COMPLEX
 
-      public ESMF_I1, ESMF_I2, ESMF_I4, ESMF_I8, & 
-             ESMF_R4, ESMF_R8, ESMF_C8, ESMF_C16, ESMF_NOKIND
+      public ESMF_I4, ESMF_I8, ESMF_R4, ESMF_R8, ESMF_C8, &
+             ESMF_C16, ESMF_NOKIND
 
 #ifndef ESMF_NO_INTEGER_1_BYTE 
       public ESMF_KIND_I1
