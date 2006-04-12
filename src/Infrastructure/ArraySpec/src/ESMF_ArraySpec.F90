@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.11 2005/08/16 21:57:45 nscollins Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.12 2006/04/12 18:02:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -82,7 +82,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArraySpec.F90,v 1.11 2005/08/16 21:57:45 nscollins Exp $'
+      '$Id: ESMF_ArraySpec.F90,v 1.12 2006/04/12 18:02:55 svasquez Exp $'
 
 !==============================================================================
 !
@@ -320,10 +320,14 @@
         ! illegal values, so no additional validity tests are needed.
         arrayspec%kind = typekind
         select case (typekind%dkind)
+#ifndef ESMF_NO_INTEGER_1_BYTE
           case (ESMF_I1%dkind)
             arrayspec%type = ESMF_DATA_INTEGER
+#endif
+#ifndef ESMF_NO_INTEGER_2_BYTE
           case (ESMF_I2%dkind)
             arrayspec%type = ESMF_DATA_INTEGER
+#endif
           case (ESMF_I4%dkind)
             arrayspec%type = ESMF_DATA_INTEGER
           case (ESMF_I8%dkind)
