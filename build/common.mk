@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.157 2006/03/28 21:50:44 theurich Exp $
+#  $Id: common.mk,v 1.158 2006/04/12 20:32:35 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2299,7 +2299,7 @@ endif
 
 ifeq ($(origin CPPRULES),undefined)
 .cpp.F90:
-	$(CPP) -E -P -I$(ESMF_INCDIR) $(FPPDEFS) $< | tr "@^" "\n#" | \
+	$(CPP) -E -P -I$(ESMF_INCDIR) $< | tr "@^" "\n#" | \
               $(SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@)
 
 
