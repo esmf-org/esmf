@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.3 2005/12/01 20:08:34 nscollins Exp $
+! $Id: ESMF_Util.F90,v 1.4 2006/04/12 17:49:48 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.3 2005/12/01 20:08:34 nscollins Exp $'
+               '$Id: ESMF_Util.F90,v 1.4 2006/04/12 17:49:48 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -901,9 +901,12 @@
 !
 !
 !EOPI
-
+#ifndef ESMF_NO_INTEGER_1_BYTE
       if (datakind .eq. ESMF_I1)  string = "Integer*1"
+#endif
+#ifndef ESMF_NO_INTEGER_2_BYTE
       if (datakind .eq. ESMF_I2)  string = "Integer*2"
+#endif
       if (datakind .eq. ESMF_I4)  string = "Integer*4"
       if (datakind .eq. ESMF_I8)  string = "Integer*8"
       if (datakind .eq. ESMF_R4)  string = "Real*4"
