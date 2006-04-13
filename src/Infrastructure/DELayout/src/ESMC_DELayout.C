@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.44 2006/03/20 23:35:34 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.45 2006/04/13 23:08:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,12 +28,12 @@
 #include <string.h>
 
 // include ESMF headers
-#include <ESMC_Start.h>
-#include <ESMC_Base.h>  
-#include <ESMC_VM.h>  
+#include "ESMC_Start.h"
+#include "ESMC_Base.h" 
+#include "ESMC_VM.h"
 
 // include associated class definition
-#include <ESMC_DELayout.h>
+#include "ESMC_DELayout.h"
 
 // LogErr
 #include "ESMC_LogErr.h"
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.44 2006/03/20 23:35:34 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.45 2006/04/13 23:08:17 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -131,11 +131,9 @@ ESMC_DELayout *ESMC_DELayoutCreate(
 // !ARGUMENTS:
 //
   int *deCountArg,          // (in) number of DEs
-  int *deGrouping,          // (in) deGrouping vector
-  int deGroupingCount,      // (in) number of elements in deGrouping vector
+  ESMC_InterfaceIntArray *deGrouping,// (in) deGrouping vector
   ESMC_DePinFlag *dePinFlag,// (in) type of resources DEs are pinned to
-  int *petList,             // (in) list of PETs to be used in delayout
-  int petListCount,         // (in) number of PETs in petList
+  ESMC_InterfaceIntArray *petListArg,// (in) list of PETs to be used in delayout
   ESMC_VM *vm,              // (in) VM context
   int *rc){                 // (out) return code
 //
@@ -179,7 +177,9 @@ ESMC_DELayout *ESMC_DELayoutCreate(
   
   // check deGrouping input
   int deGroupingFlag = 0; // reset
-  if (deGrouping != ESMC_NULL_POINTER && deGroupingCount > 0){
+  int deGroupingCount = 0;
+  if (deGrouping != ESMC_NULL_POINTER && deGrouping->extent[0] > 0){
+    deGroupingCount = deGrouping->extent[0];
     deGroupingFlag = 1;   // set
     if (deGroupingCount != deCount){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
@@ -191,9 +191,13 @@ ESMC_DELayout *ESMC_DELayoutCreate(
   // check petList input
   int petListDeleteFlag = 0;  // reset
   int petListFlag = 0;        // reset
-  if (petList != ESMC_NULL_POINTER && petListCount > 0)
+  int petListCount = 0;
+  int *petList;
+  if (petListArg != ESMC_NULL_POINTER && petListArg->extent[0] > 0){
+    petListCount=petListArg->extent[0];
     petListFlag = 1;        // set
-  else{
+    petList = petListArg->array;
+  }else{
     petListDeleteFlag = 1;  // set
     petListCount = petCount;
     petList = new int[petListCount];
@@ -230,10 +234,10 @@ ESMC_DELayout *ESMC_DELayoutCreate(
           // this petMap entry has not been filled yet
           petMap[i] = petList[j];
           // find all DEs in this deGroup and fill with same PET
-          int deGroup = deGrouping[i];
+          int deGroup = deGrouping->array[i];
           if (deGroup != -1)
             for (int k=i+1; k<deCount; k++)
-              if (deGrouping[k] == deGroup)
+              if (deGrouping->array[k] == deGroup)
                 petMap[k] = petList[j];
           ++j;
         }

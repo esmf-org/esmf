@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.20 2006/03/20 21:53:30 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.21 2006/04/13 23:06:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -177,9 +177,9 @@ class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
 
 ESMC_DELayout *ESMC_DELayoutCreate(int *petMap, int petMapCount,
   ESMC_DePinFlag *dePinFlag, ESMC_VM *vm=NULL, int *rc=NULL);
-ESMC_DELayout *ESMC_DELayoutCreate(int *deCount, int *deGrouping, 
-  int deGroupingCount, ESMC_DePinFlag *dePinFlag, int *petList, 
-  int petListCount, ESMC_VM *vm=NULL, int *rc=NULL);
+ESMC_DELayout *ESMC_DELayoutCreate(int *deCount=NULL, 
+  ESMC_InterfaceIntArray *deGrouping=NULL, ESMC_DePinFlag *dePinFlag=NULL,
+  ESMC_InterfaceIntArray *petList=NULL, ESMC_VM *vm=NULL, int *rc=NULL);
 int ESMC_DELayoutDestroy(ESMC_DELayout **layout);
   
 
