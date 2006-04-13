@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBandingUTest.F90,v 1.2 2006/04/13 18:27:47 samsoncheung Exp $
+! $Id: ESMF_RegridBandingUTest.F90,v 1.3 2006/04/13 21:04:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridBandingUTest.F90,v 1.2 2006/04/13 18:27:47 samsoncheung Exp $'
+      '$Id: ESMF_RegridBandingUTest.F90,v 1.3 2006/04/13 21:04:16 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -64,7 +64,6 @@
     real (ESMF_KIND_R8), dimension(:,:), pointer :: x_coords, y_coords
     real (ESMF_KIND_R8), dimension(:,:), pointer :: x_coords2, y_coords2
     real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
-    type (ESMF_InternArray), dimension(2) :: ESMF_coords, ESMF_coords2
 
 !------------------------------------------------------------------------------
 !   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -163,20 +162,14 @@
     !get the cell-centeredcoordinates of the source grid
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting the c-c coordinate ESMF array of the source grid"
-    call ESMF_GridGetCoord(srcgrid, horzRelLoc=ESMF_CELL_CENTER,  &
-                           centercoord=ESMF_coords, rc=rc)
+    call ESMF_GridGetCoord(srcgrid, dim=1, horzRelLoc=ESMF_CELL_CENTER,  &
+                           centercoord=x_coords, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
    !===========================
     !NEX_UTest
-    !NEX_UTest
-    !get the actual values of the x and y coordinate arrays
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Getting the actual values of the ESMF x and y coordinate ", &
-                   "arrays"
-    call ESMF_InternArrayGetData(ESMF_coords(1), x_coords, ESMF_DATA_COPY, rc=rc)
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    call ESMF_InternArrayGetData(ESMF_coords(2), y_coords, ESMF_DATA_COPY, rc=rc)
+    !get the cell-centeredcoordinates of the source grid
+    call ESMF_GridGetCoord(srcgrid, dim=2, horzRelLoc=ESMF_CELL_CENTER,  &
+                           centercoord=y_coords, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     lb(:) = lbound(f90ptr1)
@@ -253,10 +246,10 @@
     print *, localPet,'In grid 2 lb=',lb,'  ub=',ub
   !  print *, localPet,'Array after re-gridding is ',f90ptr2
 
-    call ESMF_GridGetCoord(dstgrid,horzRelLoc=ESMF_CELL_CENTER,  &
-           centercoord=ESMF_coords2,rc=rc)
-    call ESMF_InternArrayGetData(ESMF_coords2(1), x_coords2, ESMF_DATA_COPY, rc=rc)
-    call ESMF_InternArrayGetData(ESMF_coords2(2), y_coords2, ESMF_DATA_COPY, rc=rc)
+    call ESMF_GridGetCoord(dstgrid, dim=1, horzRelLoc=ESMF_CELL_CENTER,  &
+           centercoord=x_coords2, rc=rc)
+    call ESMF_GridGetCoord(dstgrid, dim=2, horzRelLoc=ESMF_CELL_CENTER,  &
+           centercoord=y_coords2, rc=rc)
 
    loop_rc=ESMF_SUCCESS
    do j=lb(2),ub(2)
