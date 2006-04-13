@@ -1,4 +1,4 @@
-// $Id: ESMC_F90Interface.h,v 1.2 2006/04/04 22:00:48 theurich Exp $
+// $Id: ESMC_F90Interface.h,v 1.3 2006/04/13 23:17:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,6 +28,21 @@
 // deal with the C++-to-F90 and F90-to-C++ interface.
 //-------------------------------------------------------------------------
 //EOP
+
+//-------------------------------------------------------------------------
+// Class that helps with F90 arrays arguments on the interface
+//-------------------------------------------------------------------------
+
+class ESMC_InterfaceIntArray{
+  public: // this thin class is public to make it's usage uncomplicated
+    int *array;
+    int dimCount;
+    int extent[7];    // size 7 reflects the Fortran limit
+  public:
+    ESMC_InterfaceIntArray(void);   // native constructor
+    ESMC_InterfaceIntArray(int *arrayArg, int dimArg, int *lenArg);//n. cnstr.
+    ~ESMC_InterfaceIntArray(void);  // native destructor
+};
 
 //-------------------------------------------------------------------------
 // Struct that is used in C++ classes to interface with deep F90 classes,
