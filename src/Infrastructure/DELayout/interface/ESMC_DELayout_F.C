@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.26 2006/03/20 21:53:30 theurich Exp $
+// $Id: ESMC_DELayout_F.C,v 1.27 2006/04/13 23:05:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,8 +59,8 @@ extern "C" {
   }
 
   void FTN(c_esmc_delayoutcreatedefault)(ESMC_DELayout **ptr, int *deCount,
-    int *deGrouping, int *deGroupingCount, ESMC_DePinFlag *dePinFlag, 
-    int *petList, int *petListCount, ESMC_VM **vm, int *rc){
+    ESMC_InterfaceIntArray **deGrouping, ESMC_DePinFlag *dePinFlag, 
+    ESMC_InterfaceIntArray **petList, ESMC_VM **vm, int *rc){
     int localrc;
     ESMC_VM *opt_vm;
 #undef  ESMC_METHOD
@@ -71,9 +71,9 @@ extern "C" {
     // call into C++
     *ptr = ESMC_DELayoutCreate(
       ESMC_NOT_PRESENT_FILTER(deCount), 
-      deGrouping, *deGroupingCount, 
+      *deGrouping, 
       ESMC_NOT_PRESENT_FILTER(dePinFlag),
-      petList, *petListCount, opt_vm, &localrc);
+      *petList, opt_vm, &localrc);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
