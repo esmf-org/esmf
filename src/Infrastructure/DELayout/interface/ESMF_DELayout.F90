@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.53 2006/03/22 04:55:01 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.54 2006/04/13 23:03:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,6 +38,7 @@ module ESMF_DELayoutMod
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LogErrMod        ! ESMF error handling
   use ESMF_VMMod            ! ESMF VM
+  use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
   
   implicit none
 
@@ -130,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.53 2006/03/22 04:55:01 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.54 2006/04/13 23:03:58 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -266,43 +267,40 @@ end function
 !------------------------------------------------------------------------------
     integer                 :: status       ! local error status
     type(ESMF_DELayout)     :: delayout     ! opaque pointer to new C++ DELayout  
-    integer, target         :: dummy(0)     ! used to satisfy the C interface...
-    integer, pointer        :: opt_deGrouping(:)  ! optional deGrouping
-    integer                 :: len_deGrouping ! number of elements in deGrouping
-    integer, pointer        :: opt_petList(:)     ! optional petList
-    integer                 :: len_petList  ! number of elements in petList
+    type(ESMF_InterfaceIntArray):: deGroupingArg
+    type(ESMF_InterfaceIntArray):: petListArg
 
     ! initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
     ! Deal with optional array arguments
-    if (present(deGrouping)) then
-      len_deGrouping = size(deGrouping)
-      opt_deGrouping => deGrouping
-    else
-      len_deGrouping = 0
-      opt_deGrouping => dummy
-    endif
-    if (present(petList)) then
-      len_petList = size(petList)
-      opt_petList => petList
-    else
-      len_petList = 0
-      opt_petList => dummy
-    endif
-
+    deGroupingArg = ESMF_InterfaceIntArrayCreate(deGrouping, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    petListArg = ESMF_InterfaceIntArrayCreate(petList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
     ! mark this DELayout as invalid
     delayout%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DELayoutCreateDefault(delayout, deCount, opt_deGrouping, &
-      len_deGrouping, dePinFlag, opt_petList, len_petList, vm, status)
+    call c_ESMC_DELayoutCreateDefault(delayout, deCount, deGroupingArg, &
+      dePinFlag, petListArg, vm, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! set return value
     ESMF_DELayoutCreateDefault = delayout 
+    
+    ! garbage collection
+    call ESMF_InterfaceIntArrayDestroy(deGroupingArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(petListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -482,45 +480,42 @@ end function
 !------------------------------------------------------------------------------
     integer                 :: status       ! local error status
     type(ESMF_DELayout)     :: delayout     ! opaque pointer to new C++ DELayout  
-    integer, target         :: dummy(0)     ! used to satisfy the C interface...
-    integer, pointer        :: opt_deGrouping(:)  ! optional deGrouping
-    integer                 :: len_deGrouping ! number of elements in deGrouping
-    integer, pointer        :: opt_petList(:)     ! optional petList
-    integer                 :: len_petList  ! number of elements in petList
+    type(ESMF_InterfaceIntArray):: deGroupingArg
+    type(ESMF_InterfaceIntArray):: petListArg
 
     ! initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
     ! Deal with optional array arguments
-    if (present(deGrouping)) then
-      len_deGrouping = size(deGrouping)
-      opt_deGrouping => deGrouping
-    else
-      len_deGrouping = 0
-      opt_deGrouping => dummy
-    endif
-    if (present(petList)) then
-      len_petList = size(petList)
-      opt_petList => petList
-    else
-      len_petList = 0
-      opt_petList => dummy
-    endif
-
+    deGroupingArg = ESMF_InterfaceIntArrayCreate(deGrouping, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    petListArg = ESMF_InterfaceIntArrayCreate(petList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
     ! mark this DELayout as invalid
     delayout%this = ESMF_NULL_POINTER
 
   !TODO: use the correct C++ implementation once it is available
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DELayoutCreateDefault(delayout, deCount, opt_deGrouping, &
-      len_deGrouping, dePinFlag, opt_petList, len_petList, vm, status)
+    call c_ESMC_DELayoutCreateDefault(delayout, deCount, deGroupingArg, &
+      dePinFlag, petListArg, vm, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! set return value
     ESMF_DELayoutCreateHintWeights = delayout 
+ 
+    ! garbage collection
+    call ESMF_InterfaceIntArrayDestroy(deGroupingArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(petListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
