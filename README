@@ -148,13 +148,18 @@ csh/tcsh example :  setenv ESMF_DIR /home/joeuser/esmf
 
 ESMF_COMPILER
 
+Check the "Downloads & Documentation" link on the ESMF web site for a 
+current list of supported platforms.
+
 On any platform which does not come with a single vendor's Fortran compiler
 installed (e.g. Linux or Mac OS X) ESMF_COMPILER must be set to select
-which Fortran compiler has been installed.  To see valid values for 
+which Fortran compiler has been installed.  To see possible values for 
 ESMF_COMPILER, cd to $ESMF_DIR/build_config and list the directories there.
 The first part of each directory name corresponds to the output of 
-'uname -s' for this platform.  The second part contains valid values 
-for ESMF_COMPILER.
+'uname -s' for this platform.  The second part contains possible values 
+for ESMF_COMPILER.  Directories showing architectures and compilers
+that are not listed on the "Downloads & Documentation" page may not
+be complete or tested, and may not work correctly.  
 
 ESMF_COMM
 
@@ -205,7 +210,7 @@ There are other environment variables which can be set to customize
 the ESMF make process.  The ESMF User's Guide documents these in detail.
 
 
-Supported makefile Targets
+Supported Makefile Targets
 --------------------------
 
  info    : print out extensive system configuration information about what
@@ -284,15 +289,6 @@ test:            Contains unit and system test executables and output.
 examples:	 Contains examples executables and output.
 
 doc:             Contains documentation (if built).
-
-
-Supported Platforms
--------------------
-
-Check the "Downloads & Documentation" link on the ESMF web site for a 
-current list of supported platforms.  You can also list the build_config
-directory to see exactly which platforms and compiler combinations have 
-makefiles supplied already.
 
 ================================================================================
 ================================================================================
@@ -534,4 +530,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.70 2006/04/05 16:42:37 theurich Exp $
+ $Id: README,v 1.71 2006/04/13 20:09:54 cdeluca Exp $
