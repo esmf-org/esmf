@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.1 2006/04/13 23:26:14 theurich Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.2 2006/04/13 23:57:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -1195,5 +1195,12 @@ program ESMF_DistGridEx
 
 
   call ESMF_Finalize(rc=rc)
+  
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (finalrc==ESMF_SUCCESS) then
+    print *, "PASS: ESMF_DistGridEx.F90"
+  else
+    print *, "FAIL: ESMF_DistGridEx.F90"
+  endif
 
 end program
