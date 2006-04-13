@@ -1,0 +1,1567 @@
+// $Id: ESMC_DistGrid.C,v 1.1 2006/04/13 23:26:16 theurich Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// NASA Goddard Space Flight Center.
+// Licensed under the GPL.
+//
+//==============================================================================
+#define ESMC_FILENAME "ESMC_DistGrid.C"
+//==============================================================================
+//
+// ESMC DistGrid method implementation (body) file
+//
+//-----------------------------------------------------------------------------
+//
+// !DESCRIPTION:
+//
+// The code in this file implements the C++ DistGrid methods declared
+// in the companion file ESMC_DistGrid.h
+//
+//-----------------------------------------------------------------------------
+
+// include higher level, 3rd party or system headers
+#include <stdio.h>
+#include <string.h>
+
+// include ESMF headers
+#include "ESMC_Start.h"
+#include "ESMC_Base.h" 
+#include "ESMC_VM.h"
+#include "ESMC_DELayout.h"
+
+// include associated class definition
+#include "ESMC_DistGrid.h"
+
+// LogErr
+#include "ESMC_LogErr.h"
+#include "ESMF_LogMacros.inc"
+
+
+//-----------------------------------------------------------------------------
+ // leave the following line as-is; it will insert the cvs ident string
+ // into the object file for tracking purposes.
+ static const char *const version = "$Id: ESMC_DistGrid.C,v 1.1 2006/04/13 23:26:16 theurich Exp $";
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
+// This section includes all the DistGrid routines
+//
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
+// external Create and Destroy functions
+//
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridCreate()"
+//BOP
+// !IROUTINE:  ESMC_DistGridCreate
+//
+// !INTERFACE:
+ESMC_DistGrid *ESMC_DistGridCreate(
+//
+// !RETURN VALUE:
+//    ESMC_DistGrid * to newly allocated ESMC_DistGrid
+//
+// !ARGUMENTS:
+//
+  ESMC_InterfaceIntArray *minCorner,          // (in)
+  ESMC_InterfaceIntArray *maxCorner,          // (in)
+  ESMC_InterfaceIntArray *regDecomp,          // (in)
+  ESMC_DecompFlag *decompflag,                // (in)
+  int decompflagCount,                        // (in)
+  ESMC_InterfaceIntArray *deLabelList,        // (in)
+  ESMC_IndexFlag *indexflag,                  // (in)
+  ESMC_InterfaceIntArray *connectionList,     // (in)
+  ESMC_InterfaceIntArray *connectionTransformList, // (in)
+  ESMC_DELayout *delayout,                    // (in)
+  ESMC_VM *vm,                                // (in)
+  int *rc                                     // (out) return code
+  ){
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int status;                 // local error status
+   
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  if (rc!=NULL)
+    *rc = ESMF_FAILURE;
+  
+  // allocate the new DistGrid object
+  ESMC_DistGrid *distgrid;
+  try{
+    distgrid = new ESMC_DistGrid;
+  }catch(...){
+     // allocation error
+     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMC_DistGrid.", rc);  
+     return ESMC_NULL_POINTER;
+  }
+
+  // check the input and get the information together to call DistGridConstruct
+  if (minCorner == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to minCorner array", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (maxCorner == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to maxCorner array", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (minCorner->dimCount != 1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- minCorner array must be of rank 1", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (maxCorner->dimCount != 1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- maxCorner array must be of rank 1", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  int dimCount = minCorner->extent[0];
+  if (maxCorner->extent[0] != dimCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- minCorner and maxCorner array mismatch", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (vm == ESMC_NULL_POINTER){
+    // vm was not provided -> get the current VM
+    vm = ESMC_VMGetCurrent(&status);  // get current VM for default
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+  }
+  int petCount;
+  status=vm->ESMC_VMGet(NULL, &petCount, NULL, NULL, NULL);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  int deCount=1;  // reset
+  if (regDecomp != ESMC_NULL_POINTER){
+    if (regDecomp->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- regDecomp array must be of rank 1", rc);
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+    if (regDecomp->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 1st dimension of regDecomp array must be of size dimCount", rc);
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+    // regDecomp was provided -> determine number of DEs according to regDecomp
+    for (int i=0; i<regDecomp->extent[0]; i++)
+      deCount *= regDecomp->array[i]; 
+  }else{
+    // regDecomp was not provided -> set deCount = petCount for default
+    deCount = petCount;
+  }
+  if (delayout == ESMC_NULL_POINTER){
+    // delayout was not provided -> create default DELayout with deCount DEs
+    delayout = ESMC_DELayoutCreate(&deCount, NULL, NULL, NULL, vm, &status);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+  }
+  int *dummy;
+  int regDecompDeleteFlag = 0;  // reset
+  if (regDecomp == ESMC_NULL_POINTER){
+    // regDecomp was not provided -> create a temporary default regDecomp
+    regDecompDeleteFlag = 1;  // set
+    dummy = new int[dimCount];
+    // set default decomposition
+    dummy[0] = deCount;
+    for (int i=1; i<dimCount; i++)
+      dummy[i] = 1;
+    regDecomp = new ESMC_InterfaceIntArray(dummy, 1, &dimCount);
+  }
+  if (regDecomp->dimCount != 1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- regDecomp array must be of rank 1", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  int decompflagDeleteFlag = 0; // reset
+  if (decompflagCount==0){
+    // decompflag was not provided -> set up default decompflag
+    decompflagDeleteFlag = 1; // set
+    decompflagCount = dimCount;
+    decompflag = new ESMC_DecompFlag[dimCount];
+    for (int i=0; i<dimCount; i++)
+      decompflag[i] = ESMF_DECOMP_DEFAULT;
+  }
+  if (decompflagCount != dimCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- decompflag array mismatches minCorner and maxCorner arrays", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  int deLabelListDeleteFlag = 0;  // reset
+  if (deLabelList == ESMC_NULL_POINTER){
+    // deLabelList was not provided -> create a temporary default deLabelList
+    deLabelListDeleteFlag = 1;  // set
+    dummy = new int[deCount];
+    // set default sequence
+    for (int i=0; i<deCount; i++)
+      dummy[i] = i;
+    deLabelList = new ESMC_InterfaceIntArray(dummy, 1, &deCount);
+  }
+  if (deLabelList->dimCount != 1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- deLabelList array must be of rank 1", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (deLabelList->extent[0] < deCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- deLabelList array must provide deCount DE labels", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  for (int i=0; i<deCount; i++){
+    if (deLabelList->array[i] < 0 || deLabelList->array[i] >= deCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        "- deLabelList array contains invalid DE labels", rc);
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+  }
+  
+  // setup temporary dimExtent and indexList arrays for DistGridConstruct()
+  int *dimExtent = new int[dimCount*deCount];
+  int **indexList = new int*[dimCount*deCount];
+  int deDivider = 1;  // reset
+  for (int i=0; i<dimCount; i++){
+    int dimLength = maxCorner->array[i] - minCorner->array[i] + 1;
+    int chunkLength = dimLength/regDecomp->array[i];  // basic chunk size
+    int chunkRest = dimLength%regDecomp->array[i];    // left over points
+    int de, decompChunk, extentIndex;
+    switch (decompflag[i]){
+      case ESMF_DECOMP_DEFAULT:
+      case ESMF_DECOMP_HOMOGEN:
+        for (int j=0; j<deCount; j++){
+          de = deLabelList->array[j];
+          extentIndex = de*dimCount+i;  // index into dimExtent array
+          dimExtent[extentIndex] = chunkLength;
+          decompChunk = (j/deDivider)%regDecomp->array[i];
+          if (decompChunk < chunkRest) ++dimExtent[extentIndex]; // distr. rest
+          indexList[extentIndex] = new int[dimExtent[extentIndex]];
+          // fill the indexList for this dimension and DE
+          int indexStart = minCorner->array[i] + decompChunk * chunkLength;
+          if (decompChunk < chunkRest) indexStart += decompChunk;
+          else indexStart += chunkRest;
+          for (int k=0; k<dimExtent[extentIndex]; k++){
+            indexList[extentIndex][k] = indexStart + k; // block structure
+          }
+        }
+        break;
+      case ESMF_DECOMP_RESTLAST:
+        for (int j=0; j<deCount; j++){
+          de = deLabelList->array[j];
+          extentIndex = de*dimCount+i;  // index into dimExtent array
+          dimExtent[extentIndex] = chunkLength;
+          decompChunk = (j/deDivider)%regDecomp->array[i];
+          if (decompChunk == regDecomp->array[i]-1) 
+            dimExtent[extentIndex] += chunkRest; // add rest to last chunk
+          indexList[extentIndex] = new int[dimExtent[extentIndex]];
+          // fill the indexList for this dimension and DE
+          int indexStart = minCorner->array[i] + decompChunk * chunkLength;
+          for (int k=0; k<dimExtent[extentIndex]; k++){
+            indexList[extentIndex][k] = indexStart + k; // block structure
+          }
+        }
+        break;
+      case ESMF_DECOMP_RESTFIRST:
+        for (int j=0; j<deCount; j++){
+          de = deLabelList->array[j];
+          extentIndex = de*dimCount+i;  // index into dimExtent array
+          dimExtent[extentIndex] = chunkLength;
+          decompChunk = (j/deDivider)%regDecomp->array[i];
+          if (decompChunk == 0) 
+            dimExtent[extentIndex] += chunkRest; // add rest to first chunk
+          indexList[extentIndex] = new int[dimExtent[extentIndex]];
+          // fill the indexList for this dimension and DE
+          int indexStart = minCorner->array[i] + decompChunk * chunkLength;
+          if (decompChunk > 0) indexStart += chunkRest;
+          for (int k=0; k<dimExtent[extentIndex]; k++){
+            indexList[extentIndex][k] = indexStart + k; // block structure
+          }
+        }
+        break;
+      case ESMF_DECOMP_CYCLIC:
+        for (int j=0; j<deCount; j++){
+          de = deLabelList->array[j];
+          extentIndex = de*dimCount+i;  // index into dimExtent array
+          dimExtent[extentIndex] = chunkLength;
+          decompChunk = (j/deDivider)%regDecomp->array[i];
+          if (decompChunk < chunkRest) ++dimExtent[extentIndex]; // distr. rest
+          indexList[extentIndex] = new int[dimExtent[extentIndex]];
+          // fill the indexList for this dimension and DE
+          int indexStart = minCorner->array[i] + decompChunk;
+          for (int k=0; k<dimExtent[extentIndex]; k++){
+            indexList[extentIndex][k] = indexStart + k * chunkLength; // cyclic
+          }
+        }
+        break;
+      default:
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+          "- this decompflag is currently not implemented", rc);
+        delete distgrid;
+        distgrid = ESMC_NULL_POINTER;
+        return ESMC_NULL_POINTER;
+        break;
+    }
+    deDivider *= regDecomp->array[i];
+  }
+        
+  // call into DistGridConstruct
+  status = distgrid->ESMC_DistGridConstruct(dimCount, 1, dimExtent, indexList,
+    ESMF_TRUE, connectionList, delayout, vm);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  
+  // garbage collection
+  delete [] dimExtent;
+  for (int i=0; i<dimCount*deCount; i++)
+    delete [] indexList[i];
+  delete [] indexList;
+  if (regDecompDeleteFlag){
+    delete [] regDecomp->array;
+    delete regDecomp;
+  }
+  if (decompflagDeleteFlag){
+    delete [] decompflag;
+  }
+  if (deLabelListDeleteFlag){
+    delete [] deLabelList->array;
+    delete deLabelList;
+  }
+  
+  // return successfully
+  *rc = ESMF_SUCCESS;
+  return distgrid;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridCreate()"
+//BOP
+// !IROUTINE:  ESMC_DistGridCreate
+//
+// !INTERFACE:
+ESMC_DistGrid *ESMC_DistGridCreate(
+//
+// !RETURN VALUE:
+//    ESMC_DistGrid * to newly allocated ESMC_DistGrid
+//
+// !ARGUMENTS:
+//
+  ESMC_InterfaceIntArray *minCorner,          // (in)
+  ESMC_InterfaceIntArray *maxCorner,          // (in)
+  ESMC_InterfaceIntArray *deBlockList,        // (in)
+  ESMC_InterfaceIntArray *deLabelList,        // (in)
+  ESMC_IndexFlag *indexflag,                  // (in)
+  ESMC_InterfaceIntArray *connectionList,     // (in)
+  ESMC_InterfaceIntArray *connectionTransformList, // (in)
+  ESMC_DELayout *delayout,                    // (in)
+  ESMC_VM *vm,                                // (in)
+  int *rc                                     // (out) return code
+  ){
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int status;                 // local error status
+   
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  if (rc!=NULL)
+    *rc = ESMF_FAILURE;
+  
+  // allocate the new DistGrid object
+  ESMC_DistGrid *distgrid;
+  try{
+    distgrid = new ESMC_DistGrid;
+  }catch(...){
+     // allocation error
+     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMC_DistGrid.", rc);  
+     return ESMC_NULL_POINTER;
+  }
+
+  // check the input and get the information together to call DistGridConstruct
+  if (minCorner == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to minCorner array", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (maxCorner == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to maxCorner array", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (minCorner->dimCount != 1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- minCorner array must be of rank 1", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (maxCorner->dimCount != 1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- maxCorner array must be of rank 1", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  int dimCount = minCorner->extent[0];
+  if (maxCorner->extent[0] != dimCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- minCorner and maxCorner array mismatch", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (vm == ESMC_NULL_POINTER){
+    // vm was not provided -> get the current VM
+    vm = ESMC_VMGetCurrent(&status);  // get current VM for default
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+  }
+  int petCount;
+  status=vm->ESMC_VMGet(NULL, &petCount, NULL, NULL, NULL);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (deBlockList == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to deBlockList array", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (deBlockList->dimCount != 3){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- deBlockList array must be of rank 3", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (deBlockList->extent[0] < dimCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- deBlockList array must provide dimCount elements in first dimension",
+      rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (deBlockList->extent[1] < 2){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- deBlockList array must provide 2 elements in second dimension", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  int deCount = deBlockList->extent[2]; // the 3rd dimension runs through DEs
+  if (delayout == ESMC_NULL_POINTER){
+    // delayout was not provided -> create default DELayout with deCount DEs
+    delayout = ESMC_DELayoutCreate(&deCount, NULL, NULL, NULL, vm, &status);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+  }
+  int *dummy;
+  int deLabelListDeleteFlag = 0;  // reset
+  if (deLabelList == ESMC_NULL_POINTER){
+    // deLabelList was not provided -> create a temporary default deLabelList
+    deLabelListDeleteFlag = 1;  // set
+    dummy = new int[deCount];
+    // set default sequence
+    for (int i=0; i<deCount; i++)
+      dummy[i] = i;
+    deLabelList = new ESMC_InterfaceIntArray(dummy, 1, &deCount);
+  }
+  if (deLabelList->dimCount != 1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- deLabelList array must be of rank 1", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (deLabelList->extent[0] < deCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- deLabelList array must provide deCount DE labels", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  for (int i=0; i<deCount; i++){
+    if (deLabelList->array[i] < 0 || deLabelList->array[i] >= deCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        "- deLabelList array contains invalid DE labels", rc);
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+  }
+  
+  // setup temporary dimExtent and indexList arrays for DistGridConstruct()
+  int *dimExtent = new int[dimCount*deCount];
+  int **indexList = new int*[dimCount*deCount];
+  for (int i=0; i<dimCount; i++){
+    int dimLength = maxCorner->array[i] - minCorner->array[i] + 1;
+    int de, extentIndex, deBlockIndexMin, deBlockIndexMax;
+    for (int j=0; j<deCount; j++){
+      de = deLabelList->array[j];
+      extentIndex = de*dimCount+i;  // index into dimExtent array
+      deBlockIndexMin = j*deBlockList->extent[0]*deBlockList->extent[1] + i;
+      deBlockIndexMax = deBlockIndexMin + deBlockList->extent[0];
+      dimExtent[extentIndex] = deBlockList->array[deBlockIndexMax]
+        - deBlockList->array[deBlockIndexMin] + 1;
+      indexList[extentIndex] = new int[dimExtent[extentIndex]];
+      for (int k=0; k<dimExtent[extentIndex]; k++)
+        indexList[extentIndex][k] =  deBlockList->array[deBlockIndexMin] + k;
+    }
+  }
+  // todo: check for overlapping deBlocks!!
+  // call into DistGridConstruct
+  status = distgrid->ESMC_DistGridConstruct(dimCount, 1, dimExtent, indexList,
+    ESMF_FALSE, connectionList, delayout, vm);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+    
+  // garbage collection
+  delete [] dimExtent;
+  for (int i=0; i<dimCount*deCount; i++)
+    delete [] indexList[i];
+  delete [] indexList;
+  if (deLabelListDeleteFlag){
+    delete [] deLabelList->array;
+    delete deLabelList;
+  }
+  
+  // return successfully
+  *rc = ESMF_SUCCESS;
+  return distgrid;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridCreate()"
+//BOP
+// !IROUTINE:  ESMC_DistGridCreate
+//
+// !INTERFACE:
+ESMC_DistGrid *ESMC_DistGridCreate(
+//
+// !RETURN VALUE:
+//    ESMC_DistGrid * to newly allocated ESMC_DistGrid
+//
+// !ARGUMENTS:
+//
+  ESMC_InterfaceIntArray *minCorner,          // (in)
+  ESMC_InterfaceIntArray *maxCorner,          // (in)
+  ESMC_InterfaceIntArray *regDecomp,          // (in)
+  ESMC_DecompFlag *decompflag,                // (in)
+  int decompflagCount,                        // (in)
+  ESMC_InterfaceIntArray *deLabelList,        // (in)
+  ESMC_IndexFlag *indexflag,                  // (in)
+  ESMC_InterfaceIntArray *connectionList,     // (in)
+  ESMC_InterfaceIntArray *connectionTransformList, // (in)
+  int fastAxis,                               // (in)
+  ESMC_VM *vm,                                // (in)
+  int *rc                                     // (out) return code
+  ){
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int status;                 // local error status
+   
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  if (rc!=NULL)
+    *rc = ESMF_FAILURE;
+  
+  // create a DELayout according to fastAxis argument
+  // todo: once DELayout functions exist to determine communication capabilities
+  // this is the place to use it to create a DELayout according to fastAxis. For
+  // now indicate that a default DELayout is to be created in the following call
+  ESMC_DELayout *delayout = NULL;
+  
+  // use DistGridCreate() with DELayout to create a suitable DistGrid object
+  ESMC_DistGrid *distgrid = 
+    ESMC_DistGridCreate(minCorner, maxCorner, regDecomp, decompflag,
+      decompflagCount, deLabelList, indexflag, connectionList,
+      connectionTransformList, delayout, vm, &status);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+    return distgrid;
+  
+  // return successfully
+  *rc = ESMF_SUCCESS;
+  return distgrid;
+}
+//-----------------------------------------------------------------------------
+
+  
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridCreate()"
+//BOP
+// !IROUTINE:  ESMC_DistGridCreate
+//
+// !INTERFACE:
+ESMC_DistGrid *ESMC_DistGridCreate(
+//
+// !RETURN VALUE:
+//    ESMC_DistGrid * to newly allocated ESMC_DistGrid
+//
+// !ARGUMENTS:
+//
+  ESMC_InterfaceIntArray *minCorner,          // (in)
+  ESMC_InterfaceIntArray *maxCorner,          // (in)
+  ESMC_InterfaceIntArray *regDecomp,          // (in)
+  ESMC_DecompFlag *decompflag,                // (in)
+  int decompflagCount1,                       // (in)
+  int decompflagCount2,                       // (in)
+  ESMC_InterfaceIntArray *deLabelList,        // (in)
+  ESMC_IndexFlag *indexflag,                  // (in)
+  ESMC_InterfaceIntArray *connectionList,     // (in)
+  ESMC_InterfaceIntArray *connectionTransformList, // (in)
+  ESMC_DELayout *delayout,                    // (in)
+  ESMC_VM *vm,                                // (in)
+  int *rc                                     // (out) return code
+  ){
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int status;                 // local error status
+   
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  if (rc!=NULL)
+    *rc = ESMF_FAILURE;
+  
+  // allocate the new DistGrid object
+  ESMC_DistGrid *distgrid;
+  try{
+    distgrid = new ESMC_DistGrid;
+  }catch(...){
+     // allocation error
+     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMC_DistGrid.", rc);  
+     return ESMC_NULL_POINTER;
+  }
+
+  // check the input and get the information together to call DistGridConstruct
+  if (minCorner == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to minCorner array", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (maxCorner == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to maxCorner array", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (minCorner->dimCount != 2){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- minCorner array must be of rank 2", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (maxCorner->dimCount != 2){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- maxCorner array must be of rank 2", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  int dimCount = minCorner->extent[0];
+  if (maxCorner->extent[0] != dimCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- minCorner and maxCorner array mismatch in dimCount", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  int patchCount = minCorner->extent[1];
+  if (maxCorner->extent[1] != patchCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- minCorner and maxCorner array mismatch in patchCount", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (vm == ESMC_NULL_POINTER){
+    // vm was not provided -> get the current VM
+    vm = ESMC_VMGetCurrent(&status);  // get current VM for default
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+  }
+  int petCount;
+  status=vm->ESMC_VMGet(NULL, &petCount, NULL, NULL, NULL);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  int deCount=0;  // reset
+  int *deCountPPatch;
+  if (regDecomp != ESMC_NULL_POINTER){
+    if (regDecomp->dimCount != 2){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- regDecomp array must be of rank 2", rc);
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+    if (regDecomp->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 1st dimension of regDecomp array must be of size dimCount", rc);
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+    if (regDecomp->extent[1] != patchCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 2nd dimension of regDecomp array must be of size patchCount", rc);
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+    // regDecomp was provided -> determine number of DEs according to regDecomp
+    deCountPPatch = new int[patchCount];
+    for (int i=0; i<patchCount; i++){
+      int localProduct = 1; // reset
+      for (int j=0; j<dimCount; j++)
+        localProduct *= regDecomp->array[i*dimCount+j];
+      deCountPPatch[i] = localProduct;
+      deCount += localProduct;
+    }
+  }else{
+    // regDecomp was not provided -> set deCount = patchCount for default
+    deCountPPatch = new int[patchCount];
+    for (int i=0; i<patchCount; i++)
+      deCountPPatch[i] = 1;
+    deCount = patchCount;
+  }
+  if (delayout == ESMC_NULL_POINTER){
+    // delayout was not provided -> create default DELayout with deCount DEs
+    delayout = ESMC_DELayoutCreate(&deCount, NULL, NULL, NULL, vm, &status);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+  }
+  int *dummy, dummyLen[2];
+  int regDecompDeleteFlag = 0;  // reset
+  if (regDecomp == ESMC_NULL_POINTER){
+    // regDecomp was not provided -> create a temporary default regDecomp
+    regDecompDeleteFlag = 1;  // set
+    dummy = new int[dimCount*patchCount];
+    // set default decomposition
+    for (int i=0; i<dimCount*patchCount; i++)
+      dummy[i] = 1;
+    dummyLen[0] = dimCount;
+    dummyLen[1] = patchCount;
+    regDecomp = new ESMC_InterfaceIntArray(dummy, 2, dummyLen);
+  }
+  if (regDecomp->dimCount != 2){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- regDecomp array must be of rank 2", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  int decompflagDeleteFlag = 0; // reset
+  if (decompflagCount1==0 || decompflagCount2==0){
+    // decompflag was not provided -> set up default decompflag
+    decompflagDeleteFlag = 1; // set
+    decompflagCount1 = dimCount;
+    decompflagCount2 = patchCount;
+    decompflag = new ESMC_DecompFlag[dimCount*patchCount];
+    for (int i=0; i<dimCount*patchCount; i++)
+      decompflag[i] = ESMF_DECOMP_DEFAULT;
+  }
+  if (decompflagCount1 != dimCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- decompflag array mismatches minCorner and maxCorner arrays", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (decompflagCount2 != patchCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- decompflag array mismatches minCorner and maxCorner arrays", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  int deLabelListDeleteFlag = 0;  // reset
+  if (deLabelList == ESMC_NULL_POINTER){
+    // deLabelList was not provided -> create a temporary default deLabelList
+    deLabelListDeleteFlag = 1;  // set
+    dummy = new int[deCount];
+    // set default sequence
+    for (int i=0; i<deCount; i++)
+      dummy[i] = i;
+    deLabelList = new ESMC_InterfaceIntArray(dummy, 1, &deCount);
+  }
+  if (deLabelList->dimCount != 1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- deLabelList array must be of rank 1", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  if (deLabelList->extent[0] < deCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- deLabelList array must provide deCount DE labels", rc);
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  for (int i=0; i<deCount; i++){
+    if (deLabelList->array[i] < 0 || deLabelList->array[i] >= deCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        "- deLabelList array contains invalid DE labels", rc);
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+  }
+    
+  // setup temporary dimExtent and indexList arrays for DistGridConstruct()
+  int *dimExtent = new int[dimCount*deCount];
+  int **indexList = new int*[dimCount*deCount];
+  
+  // the following differs from the single patch case in that there is an
+  // extra outer loop over patches. The dimExtent and indexList arrays are
+  // on DE basis, independent of patches.
+
+  int dePatchStart = 0;  // reset  
+  for (int patch=0; patch<patchCount; patch++){  
+    
+    int deDivider = 1;  // reset
+    for (int ii=0; ii<dimCount; ii++){
+      int i = patch*dimCount + ii;  // work in the current patch
+      int dimLength = maxCorner->array[i] - minCorner->array[i] + 1;
+      int chunkLength = dimLength/regDecomp->array[i];  // basic chunk size
+      int chunkRest = dimLength%regDecomp->array[i];    // left over points
+      int de, decompChunk, extentIndex;
+      switch (decompflag[i]){
+        case ESMF_DECOMP_DEFAULT:
+        case ESMF_DECOMP_HOMOGEN:
+          for (int jj=0; jj<deCountPPatch[patch]; jj++){
+            int j = dePatchStart + jj;
+            de = deLabelList->array[j];
+            extentIndex = de*dimCount+ii;  // index into dimExtent array
+            dimExtent[extentIndex] = chunkLength;
+            decompChunk = (jj/deDivider)%regDecomp->array[i];
+            if (decompChunk < chunkRest) ++dimExtent[extentIndex]; //distr. rest
+            indexList[extentIndex] = new int[dimExtent[extentIndex]];
+            // fill the indexList for this dimension and DE
+            int indexStart = minCorner->array[i] + decompChunk * chunkLength;
+            if (decompChunk < chunkRest) indexStart += decompChunk;
+            else indexStart += chunkRest;
+            for (int k=0; k<dimExtent[extentIndex]; k++){
+              indexList[extentIndex][k] = indexStart + k; // block structure
+            }
+          }
+          break;
+        case ESMF_DECOMP_RESTLAST:
+          for (int jj=0; jj<deCountPPatch[patch]; jj++){
+            int j = dePatchStart + jj;
+            de = deLabelList->array[j];
+            extentIndex = de*dimCount+ii;  // index into dimExtent array
+            dimExtent[extentIndex] = chunkLength;
+            decompChunk = (jj/deDivider)%regDecomp->array[i];
+            if (decompChunk == regDecomp->array[i]-1) 
+              dimExtent[extentIndex] += chunkRest; // add rest to last chunk
+            indexList[extentIndex] = new int[dimExtent[extentIndex]];
+            // fill the indexList for this dimension and DE
+            int indexStart = minCorner->array[i] + decompChunk * chunkLength;
+            for (int k=0; k<dimExtent[extentIndex]; k++){
+              indexList[extentIndex][k] = indexStart + k; // block structure
+            }
+          }
+          break;
+        case ESMF_DECOMP_RESTFIRST:
+          for (int jj=0; jj<deCountPPatch[patch]; jj++){
+            int j = dePatchStart + jj;
+            de = deLabelList->array[j];
+            extentIndex = de*dimCount+ii;  // index into dimExtent array
+            dimExtent[extentIndex] = chunkLength;
+            decompChunk = (jj/deDivider)%regDecomp->array[i];
+            if (decompChunk == 0) 
+              dimExtent[extentIndex] += chunkRest; // add rest to first chunk
+            indexList[extentIndex] = new int[dimExtent[extentIndex]];
+            // fill the indexList for this dimension and DE
+            int indexStart = minCorner->array[i] + decompChunk * chunkLength;
+            if (decompChunk > 0) indexStart += chunkRest;
+            for (int k=0; k<dimExtent[extentIndex]; k++){
+              indexList[extentIndex][k] = indexStart + k; // block structure
+            }
+          }
+          break;
+        case ESMF_DECOMP_CYCLIC:
+          for (int jj=0; jj<deCountPPatch[patch]; jj++){
+            int j = dePatchStart + jj;
+            de = deLabelList->array[j];
+            extentIndex = de*dimCount+ii;  // index into dimExtent array
+            dimExtent[extentIndex] = chunkLength;
+            decompChunk = (jj/deDivider)%regDecomp->array[i];
+            if (decompChunk < chunkRest) ++dimExtent[extentIndex]; //distr. rest
+            indexList[extentIndex] = new int[dimExtent[extentIndex]];
+            // fill the indexList for this dimension and DE
+            int indexStart = minCorner->array[i] + decompChunk;
+            for (int k=0; k<dimExtent[extentIndex]; k++){
+              indexList[extentIndex][k] = indexStart + k * chunkLength; //cyclic
+            }
+          }
+          break;
+        default:
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+            "- this decompflag is currently not implemented", rc);
+          delete distgrid;
+          distgrid = ESMC_NULL_POINTER;
+          return ESMC_NULL_POINTER;
+          break;
+      }
+      deDivider *= regDecomp->array[i];
+    } // i-loop
+    dePatchStart += deCountPPatch[patch];
+  } // patch-loop
+        
+  // call into DistGridConstruct
+  status = distgrid->ESMC_DistGridConstruct(dimCount, patchCount, dimExtent,
+    indexList, ESMF_TRUE, connectionList, delayout, vm);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+    delete distgrid;
+    distgrid = ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER;
+  }
+  
+  // garbage collection
+  delete [] deCountPPatch;
+  delete [] dimExtent;
+  for (int i=0; i<dimCount*deCount; i++)
+    delete [] indexList[i];
+  delete [] indexList;
+  if (regDecompDeleteFlag){
+    delete [] regDecomp->array;
+    delete regDecomp;
+  }
+  if (decompflagDeleteFlag){
+    delete [] decompflag;
+  }
+  if (deLabelListDeleteFlag){
+    delete [] deLabelList->array;
+    delete deLabelList;
+  }
+  
+  // return successfully
+  *rc = ESMF_SUCCESS;
+  return distgrid;
+}
+//-----------------------------------------------------------------------------
+  
+  //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridDestroy()"
+//BOP
+// !IROUTINE:  ESMC_DistGridDestroy
+//
+// !INTERFACE:
+int ESMC_DistGridDestroy(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  ESMC_DistGrid **distgrid){  // in - ESMC_DistGrid to destroy
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // automatic variable for local return code
+  int *rc = &localrc;         // pointer to localrc
+  int status;                 // local error status
+
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  if (rc!=NULL)
+    *rc = ESMF_FAILURE;
+
+  // return with errors for NULL pointer
+  if (distgrid == ESMC_NULL_POINTER || *distgrid == ESMC_NULL_POINTER){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to DistGrid", rc);
+    return localrc;
+  }
+
+  // destruct and delete DistGrid object
+  status = (*distgrid)->ESMC_DistGridDestruct();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+    return localrc;
+  delete *distgrid;
+  *distgrid = ESMC_NULL_POINTER;
+  
+  // return successfully
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
+// Construct and Destruct class methods
+//
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridConstruct()"
+//BOP
+// !IROUTINE:  ESMC_DistGridConstruct
+//
+// !INTERFACE:
+int ESMC_DistGrid::ESMC_DistGridConstruct(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  int dimCountArg,              // (in)
+  int patchCountArg,            // (in)
+  int *dimExtentArg,            // (in)
+  int **indexListArg,           // (in)
+  ESMC_Logical regDecompFlagArg,// (in)
+  ESMC_InterfaceIntArray *connectionList,     // (in)
+  ESMC_DELayout *delayoutArg,   // (in) DELayout
+  ESMC_VM *vmArg                // (in) VM context
+  ){
+//
+// !DESCRIPTION:
+//    Construct the internal information structure of an ESMC\_DistGrid object.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // automatic variable for local return code
+  int *rc = &localrc;         // pointer to localrc
+  int status;                 // local error status
+
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  if (rc!=NULL)
+    *rc = ESMF_FAILURE;
+
+  // fill in the DistGrid object
+  dimCount = dimCountArg;
+  patchCount = patchCountArg;
+  regDecompFlag = regDecompFlagArg;
+  if (connectionList != NULL){
+    // connectionList was provided
+    int elementSize = 2*dimCount+2;
+    if (connectionList->dimCount != 2){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- connectionList array must be of rank 2", rc);
+      return localrc;
+    }
+    if (connectionList->extent[0] != elementSize){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 1st dimension of connectionList array must be of size "
+        "(2*dimCount+2)", rc);
+      return localrc;
+    }
+    // fill in the connectionElementList member
+    connectionElementCount = connectionList->extent[1];
+    connectionElementList = new int*[connectionElementCount];
+    for (int i=0; i<connectionElementCount; i++){
+      connectionElementList[i] = new int[elementSize];
+      memcpy(connectionElementList[i],
+        &(connectionList->array[elementSize*i]), sizeof(int)*elementSize);
+    }
+  }else{
+    // connectionList was not provided -> nullify
+    connectionElementCount = 0;
+    connectionElementList = NULL;
+  }
+  delayout = delayoutArg;
+  vm = vmArg;
+  // fill in cached values
+  status=delayout->ESMC_DELayoutGet(NULL, &deCount, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+    return localrc;
+  }
+  status=vm->ESMC_VMGet(&localPet, &petCount, NULL, NULL, NULL);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+    return localrc;
+  }
+  // fill in the rest
+  dimExtent = new int[dimCount*deCount];
+  memcpy(dimExtent, dimExtentArg, sizeof(int)*dimCount*deCount);
+  indexList = new int*[dimCount*deCount];
+  for (int i=0; i<dimCount*deCount; i++){
+    indexList[i] = new int[dimExtent[i]];
+    memcpy(indexList[i], indexListArg[i], sizeof(int)*dimExtent[i]);
+  }
+  
+  // return successfully
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridDestruct()"
+//BOP
+// !IROUTINE:  ESMC_DistGridDestruct
+//
+// !INTERFACE:
+int ESMC_DistGrid::ESMC_DistGridDestruct(void){
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//    Destruct the internal information structure of an ESMC\_DistGrid object.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // automatic variable for local return code
+  int *rc = &localrc;         // pointer to localrc
+  int status;                 // local error status
+
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  if (rc!=NULL)
+    *rc = ESMF_FAILURE;
+  
+  // garbage collection
+  delete [] dimExtent;
+  for (int i=0; i<dimCount*deCount; i++)
+    delete [] indexList[i];
+  delete [] indexList;
+  for (int i=0; i<connectionElementCount; i++)
+    delete [] connectionElementList[i];
+  if (connectionElementList)
+    delete [] connectionElementList;
+
+  // return successfully
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
+// print and validation class methods
+//
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridPrint()"
+//BOP
+// !IROUTINE:  ESMC_DistGridPrint
+//
+// !INTERFACE:
+int ESMC_DistGrid::ESMC_DistGridPrint(){
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//    Print details of DistGrid object 
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // automatic variable for local return code
+  int *rc = &localrc;         // pointer to localrc
+  int status;                 // local error status
+
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  *rc = ESMF_FAILURE;
+
+  // return with errors for NULL pointer
+  if (this == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to DistGrid", rc);
+    return localrc;
+  }
+
+  // print info about the ESMC_DistGrid object
+  printf("--- ESMC_DistGridPrint start ---\n");
+  printf("dimCount = %d\n", dimCount);
+  printf("patchCount = %d\n", patchCount);
+  printf("regDecompFlag = %s\n", ESMC_LogicalString(regDecompFlag));
+  printf("indexList:\n");
+  for (int i=0; i<deCount; i++){
+    printf("DE %d - ", i);
+    for (int j=0; j<dimCount; j++){
+      printf(" (");
+      for (int k=0; k<dimExtent[i*dimCount+j]; k++){
+        if (k!=0) printf(", ");
+        printf("%d", indexList[i*dimCount+j][k]);
+      }
+      printf(") /");
+    }
+    printf("\n");
+  }
+  printf("connectionElementCount = %d\n", connectionElementCount);
+  printf("~ cached values ~\n");
+  printf("deCount = %d\n", deCount);
+  printf("localPet = %d\n", localPet);
+  printf("petCount = %d\n", petCount);
+  printf("--- ESMC_DistGridPrint end ---\n");
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
+// get class methods
+//
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridGet()"
+//BOP
+// !IROUTINE:  ESMC_DistGridGet
+//
+// !INTERFACE:
+int ESMC_DistGrid::ESMC_DistGridGet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  ESMC_DELayout **delayoutArg,          // out - DELayout object
+  ESMC_InterfaceIntArray *patchList,    // out - list of patch ID numbers
+  int  *dimCountArg,                    // out - DistGrid rank
+  ESMC_InterfaceIntArray *dimExtentArg, // out - extents per dim per DE
+  ESMC_Logical *regDecompFlagArg        // out - flag indicating regular decomp.
+  ){    
+//
+// !DESCRIPTION:
+//    Get information about a DistGrid object
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // automatic variable for local return code
+  int *rc = &localrc;         // pointer to localrc
+  int status;                 // local error status
+
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  if (rc!=NULL)
+    *rc = ESMF_FAILURE;
+  
+  // fill simple return values
+  if (delayoutArg != NULL)
+    *delayoutArg = delayout;
+  if (dimCountArg != ESMC_NULL_POINTER)
+    *dimCountArg = dimCount;
+  if (regDecompFlagArg != ESMC_NULL_POINTER)
+    *regDecompFlagArg = regDecompFlag;
+
+  // fill dimExtent
+  if (dimExtentArg != NULL){
+    // dimExtentArg was provided -> do some error checking
+    if (dimExtentArg->dimCount != 2){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- dimExtentArg array must be of rank 2", rc);
+      return localrc;
+    }
+    if (dimExtentArg->extent[0] < dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 1st dimension of dimExtentArg array must be of size 'dimCount'", rc);
+      return localrc;
+    }
+    if (dimExtentArg->extent[1] < deCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 2nd dimension of dimExtentArg array must be of size 'deCount'", rc);
+      return localrc;
+    }
+    // fill in the values: The interface allows to pass in dimExtentArg arrays
+    // which are larger than dimCount x deCount. Consequently it is necessary
+    // to memcpy strips of contiguous data since it cannot be assumed that
+    // all data ends up contiguous in the dimExtentArg array.
+    for (int i=0; i<deCount; i++)
+      memcpy(&(dimExtentArg->array[i*dimExtentArg->extent[0]]),
+        &(dimExtent[i*dimCount]), sizeof(int)*dimCount);
+  }
+  
+  // return successfully
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridGet()"
+//BOP
+// !IROUTINE:  ESMC_DistGridGet
+//
+// !INTERFACE:
+int ESMC_DistGrid::ESMC_DistGridGet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  int de,                               // in  - DE   = {0, ..., deCount-1}
+  int dim,                              // in  - dim  = {1, ..., dimCount}
+  ESMC_InterfaceIntArray *indexListArg  // out - list of indices per DE per dim
+  ){    
+//
+// !DESCRIPTION:
+//    Get information about a DistGrid object
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // automatic variable for local return code
+  int *rc = &localrc;         // pointer to localrc
+  int status;                 // local error status
+
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  if (rc!=NULL)
+    *rc = ESMF_FAILURE;
+  
+  // fill indexListArg
+  if (indexListArg != NULL){
+    // indexListArg was provided -> do some error checking
+    if (indexListArg->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- indexListArg array must be of rank 1", rc);
+      return localrc;
+    }
+    if (indexListArg->extent[0] < dimExtent[de*dimCount+(dim-1)]){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 1st dimension of indexListArg array size insufficiently", rc);
+      return localrc;
+    }
+    // fill in the values
+    memcpy(indexListArg->array, indexList[de*dimCount+(dim-1)],
+      sizeof(int)*dimExtent[de*dimCount+(dim-1)]);
+  }
+  
+  // return successfully
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
+// ConnectionElement functions
+//
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ConnectionElementConstruct()"
+//BOP
+// !IROUTINE:  ESMC_ConnectionElementConstruct
+//
+// !INTERFACE:
+int ESMC_ConnectionElementConstruct(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  ESMC_InterfaceIntArray *connectionElement,  // out -
+  int patchIndexA,                            // in  -
+  int patchIndexB,                            // in  -
+  ESMC_InterfaceIntArray *positionVector,     // in -
+  ESMC_InterfaceIntArray *orientationVector   // in -
+  ){    
+//
+// !DESCRIPTION:
+//    Construct a connection element
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // automatic variable for local return code
+  int *rc = &localrc;         // pointer to localrc
+  int status;                 // local error status
+
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  if (rc!=NULL)
+    *rc = ESMF_FAILURE;
+  
+  // check connetionElement argument
+  if (connectionElement == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to connectionElement array", rc);
+    return localrc;
+  }
+  if (connectionElement->dimCount != 1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- connectionElement array must be of rank 1", rc);
+    return localrc;
+  }
+  int dimCount = (connectionElement->extent[0]-2)/2;
+  if (dimCount <= 0){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- 1st dimension of connectionElement array must be of size "
+      "(2 * dimCount + 2)", rc);
+    return localrc;
+  }
+  
+  // fill in the patch indices
+  connectionElement->array[0] = patchIndexA;
+  connectionElement->array[1] = patchIndexB;
+  
+  // check positionVector argument
+  if (positionVector == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to positionVector array", rc);
+    return localrc;
+  }
+  if (positionVector->dimCount != 1){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- positionVector array must be of rank 1", rc);
+    return localrc;
+  }
+  if (positionVector->extent[0] != dimCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      "- 1st dimension of positionVector array must be of size dimCount", rc);
+    return localrc;
+  }
+  
+  // fill in the positionVector
+  memcpy(&(connectionElement->array[2]), positionVector->array,
+    sizeof(int)*dimCount);
+  
+  // check on orientationVector
+  if (orientationVector != NULL){
+    // orientationVector was provided
+    if (orientationVector->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- orientationVector array must be of rank 1", rc);
+      return localrc;
+    }
+    if (orientationVector->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 1st dimension of orientationVector array must be of size dimCount",
+        rc);
+      return localrc;
+    }
+    // fill in the orientationVector
+    memcpy(&(connectionElement->array[2+dimCount]), orientationVector->array,
+      sizeof(int)*dimCount);
+  }else{
+    // orientationVector was not provided -> fill in default orientation
+    for (int i=0; i<dimCount; i++)
+      connectionElement->array[2+dimCount+i] = i+1;
+  }
+  
+  // return successfully
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------

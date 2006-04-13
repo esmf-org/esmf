@@ -1,0 +1,2566 @@
+! $Id: ESMF_DistGrid.F90,v 1.1 2006/04/13 23:26:16 theurich Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+! Laboratory, University of Michigan, National Centers for Environmental 
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!
+!==============================================================================
+#define ESMF_FILENAME "ESMF_DistGrid.F90"
+!==============================================================================
+!
+! ESMF DistGrid Module
+module ESMF_DistGridMod
+!
+!==============================================================================
+!
+! This file contains the F90 wrapper code for the C++ implementation of
+!  the DistGrid class.
+!
+!------------------------------------------------------------------------------
+! INCLUDES
+#include "ESMF.h"
+
+!==============================================================================
+!BOPI
+! !MODULE: ESMF_DistGridMod
+!
+
+!   F90 API wrapper of C++ implemenation of DistGrid
+!
+!------------------------------------------------------------------------------
+
+! !USES:
+  use ESMF_UtilTypesMod     ! ESMF utility types
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_VMMod            ! ESMF VM
+  use ESMF_DELayoutMod      ! ESMF DELayout
+  use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
+  
+  implicit none
+
+!------------------------------------------------------------------------------
+! !PRIVATE TYPES:
+  private
+      
+!------------------------------------------------------------------------------
+!     ! ESMF_DistGrid
+!
+!------------------------------------------------------------------------------
+
+  ! F90 class type to hold pointer to C++ object
+  type ESMF_DistGrid
+  sequence
+  private
+#ifndef ESMF_NO_INITIALIZERS
+    type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
+#else
+    type(ESMF_Pointer) :: this
+#endif
+  end type
+
+!------------------------------------------------------------------------------
+
+  ! type for decomp flag
+  type ESMF_DecompFlag
+  private
+    integer :: value
+  end type
+
+  type(ESMF_DecompFlag), parameter:: &
+    ESMF_DECOMP_DEFAULT   = ESMF_DecompFlag(1), &
+    ESMF_DECOMP_HOMOGEN   = ESMF_DecompFlag(2), &
+    ESMF_DECOMP_RESTFIRST = ESMF_DecompFlag(3), &
+    ESMF_DECOMP_RESTLAST  = ESMF_DecompFlag(4), &
+    ESMF_DECOMP_CYCLIC    = ESMF_DecompFlag(5)
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+! !PUBLIC TYPES:
+  public ESMF_DistGrid
+  public ESMF_DecompFlag, ESMF_DECOMP_DEFAULT, &
+    ESMF_DECOMP_HOMOGEN, ESMF_DECOMP_RESTFIRST, ESMF_DECOMP_RESTLAST, &
+    ESMF_DECOMP_CYCLIC
+  
+!------------------------------------------------------------------------------
+!
+! !PUBLIC MEMBER FUNCTIONS:
+
+! - ESMF-public methods:
+  public ESMF_DistGridCreate
+  public ESMF_DistGridDestroy
+  
+  public ESMF_DistGridGet
+  public ESMF_DistGridPrint
+  
+  public ESMF_ConnectionElementConstruct
+  public ESMF_ConnectionTransformElementConstruct  
+!EOPI
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+      character(*), parameter, private :: version = &
+      '$Id: ESMF_DistGrid.F90,v 1.1 2006/04/13 23:26:16 theurich Exp $'
+
+!==============================================================================
+! 
+! INTERFACE BLOCKS
+!
+!==============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_DELayoutCreate -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_DistGridCreate
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_DistGridCreateRegDecomp
+      module procedure ESMF_DistGridCreateDeBlocks
+      module procedure ESMF_DistGridCreateRegDecompFA
+      module procedure ESMF_DistGridCreateDeBlocksFA      
+      module procedure ESMF_DistGridCreateRegDecompPatch
+      module procedure ESMF_DistGridCreateDeBlocksPatch
+      module procedure ESMF_DistGridCreateRegDecompPatchFA
+      module procedure ESMF_DistGridCreateDeBlocksPatchFA
+!      module procedure ESMF_DistGridCreateDecount
+!      module procedure ESMF_DistGridCreateDecountPatch
+!      module procedure ESMF_DistGridCreateDelayout
+!      module procedure ESMF_DistGridCreatePatch
+      
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_DistGridCreate} functions.   
+!EOPI 
+      end interface
+!==============================================================================
+      
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_DELayoutGet -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_DistGridGet
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_DistGridGet
+      module procedure ESMF_DistGridGetPDe
+      module procedure ESMF_DistGridGetPDePDim
+      module procedure ESMF_DistGridGetLinksPDe
+      
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_DistGridGet} functions.   
+!EOPI 
+      end interface
+!==============================================================================
+      
+
+contains
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateRegDecomp()"
+!BOP
+! !IROUTINE: ESMF_DistGridCreateRegDecomp - Create DistGrid with regular decomposition
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  
+  function ESMF_DistGridCreateRegDecomp(minCorner, maxCorner, regDecomp, &
+    decompflag, deLabelList, indexflag, connectionList, connectionTransformList, &
+    delayout, vm, rc)
+!
+! !ARGUMENTS:
+    integer,                      intent(in)            :: minCorner(:)
+    integer,                      intent(in)            :: maxCorner(:)
+    integer, target,              intent(in), optional  :: regDecomp(:)
+    type(ESMF_DecompFlag), target,intent(in), optional  :: decompflag(:)
+    integer, target,              intent(in), optional  :: deLabelList(:)
+    type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
+    integer, target,              intent(in), optional  :: connectionList(:,:)
+    integer, target,              intent(in), optional  :: connectionTransformList(:,:)
+    type(ESMF_DELayout),          intent(in), optional  :: delayout
+    type(ESMF_VM),                intent(in), optional  :: vm
+    integer,                      intent(out),optional  :: rc
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateRegDecomp
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
+!     domain with regular decomposition. A regular decomposition is of the same 
+!     rank as the domain and decomposes each dimension into a fixed number of 
+!     DEs. A regular decomposition of a single LR domain is expressed by a 
+!     single {\tt regDecomp} list of DE counts in each dimension.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[minCorner]
+!          Global coordinate tuple of the lower corner of the global domain.
+!     \item[maxCorner]
+!          Global coordinate tuple of the upper corner of the global domain.
+!     \item[{[regDecomp]}]
+!          List of DE counts for each dimension. The default decomposition will
+!          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
+!          {\tt deCount} for a default DELayout equals {\tt petCount}, i.e. the
+!          default decomposition will be into as many DEs as there are 
+!          PETs and the distribution will be 1 DE per PET.
+!     \item[{[decompflag]}]
+!          List of decomposition flags indicating how each dimension of the
+!          global domain is to be divided between the DEs. The default setting
+!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. See section ?? for a 
+!          list of valid decomposition flag options.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the column major order of the {\tt regDecomp}
+!          argument.
+!     \item[{[indexflag]}]
+!          Indicates whether the indices provided by the {\tt minCorner} and
+!          {\tt maxCorner} arguments are to be interpreted to form a flat
+!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
+!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!     \item[{[connectionList]}]
+!          List of connections between patches in index space. The second dimension
+!          of {\tt connectionList} steps through the connection interface elements, 
+!          defined by the first index. The first index must be of size
+!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
+!          decomposed index space. Each {\tt connectionList} element specifies
+!          the connection interface in the format
+!
+!         {\tt (/patchIndex\_A,
+!          patchIndex\_B, positionVector, orientationVector/)} where:
+!          \begin{itemize}
+!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
+!                index of the two connected patches respectively,
+!          \item {\tt positionVector} is the vector that points from patch A's
+!                minCorner to patch B's minCorner.
+!          \item {\tt orientationVector} associates each dimension of patch A
+!                with a dimension in patch B's index space. Negative index
+!                values may be used to indicate a reversal in index orientation.
+!          \end{itemize}
+!     \item[{[connectionTransformList]}]
+!          List of transforms associated with patch connections defined in 
+!          {\tt connectionList}. The second dimension of {\tt connectionTransformList}
+!          steps through the connection transforms, defined by the first index. The
+!          first index must be of size {\tt 5 + dimCount}, where {\tt dimCount}
+!          is the rank of the decomposed index space. Each 
+!          {\tt connectionTransformList} element specifies a connection transform 
+!          by a list of integer values in the format {\tt (/connectionIndex,
+!          direction, staggerSrc, staggerDst, offsetDst, signVector/)}, where
+!          \begin{itemize}
+!          \item {\tt connectionIndex} corresponds to the index of the connection in
+!                {\tt connectionList},
+!          \item {\tt direction} can be {\tt +1} to specify forward direction,
+!                i.e. source patch of the transform is patch\_A and destination
+!                patch is patch\_B of the corresponding connection, or {\tt -1}
+!                to indicate reverse direction through the connection. The only
+!                other valid {\tt direction} value is {\tt 0} which indicates a 
+!                bidirectional connection with source and destination definitions
+!                as in the forward case. 
+!          \item {\tt staggerSrc} and {\tt staggerDst} indicate staggering location
+!                in the source and destination patch interface, respectively,
+!          \item {\tt offsetDst} is a vector of size {\tt dimCount} that 
+!                specifies the index offset on the destination side of 
+!                this connection,
+!          \item {\tt signVector} is of size {\tt dimCount} with elements either
+!                {\tt +1} or {\tt -1} to indicate optional sign change of vector
+!                components along the respective directions.
+!          \end{itemize}
+!     \item[{[delayout]}]
+!          Optional {\tt ESMF\_DELayout} object to be used. By default a new
+!          DELayout object will be created with the correct number of DEs. If
+!          a DELayout object is specified its number of DEs must match the 
+!          number indicated by {\tt regDecomp}.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object of the current context. Providing the
+!          VM of the current context will lower the method's overhead.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer                 :: status     ! local error status
+    type(ESMF_DistGrid)     :: distgrid   ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterfaceIntArray):: minCornerArg ! helper variable
+    type(ESMF_InterfaceIntArray):: maxCornerArg ! helper variable
+    type(ESMF_InterfaceIntArray):: regDecompArg ! helper variable
+    type(ESMF_DecompFlag), target:: dummyDf(0)  ! used to satisfy the C interf.
+    type(ESMF_DecompFlag), pointer::  opt_decompflag(:) ! optional arg helper
+    integer                 :: len_decompflag ! helper variable
+    type(ESMF_InterfaceIntArray):: deLabelListArg ! helper variable
+    type(ESMF_InterfaceIntArray):: connectionListArg ! helper variable
+    type(ESMF_InterfaceIntArray):: connectionTransformListArg ! helper variable
+
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Deal with (optional) array arguments
+    minCornerArg = ESMF_InterfaceIntArrayCreate(minCorner, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    maxCornerArg = ESMF_InterfaceIntArrayCreate(maxCorner, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    regDecompArg = ESMF_InterfaceIntArrayCreate(regDecomp, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(decompflag)) then
+      len_decompflag = size(decompflag)
+      opt_decompflag => decompflag
+    else
+      len_decompflag = 0
+      opt_decompflag => dummyDf
+    endif
+    deLabelListArg = ESMF_InterfaceIntArrayCreate(deLabelList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    connectionListArg = &
+      ESMF_InterfaceIntArrayCreate(farray2D=connectionList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    connectionTransformListArg = &
+      ESMF_InterfaceIntArrayCreate(farray2D=connectionTransformList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! mark this DistGrid as invalid
+    distgrid%this = ESMF_NULL_POINTER
+
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_DistGridCreateRegDecomp(distgrid, minCornerArg, maxCornerArg, &
+      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
+      connectionListArg, connectionTransformListArg, delayout, vm, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! garbage collection
+    call ESMF_InterfaceIntArrayDestroy(minCornerArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(maxCornerArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(regDecompArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(deLabelListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(connectionListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(connectionTransformListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! set return value
+    ESMF_DistGridCreateRegDecomp = distgrid 
+ 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end function ESMF_DistGridCreateRegDecomp
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateDeBlocks()"
+!BOP
+! !IROUTINE: ESMF_DistGridCreateDeBlocks - Create DistGrid with DE blocks
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  
+  function ESMF_DistGridCreateDeBlocks(minCorner, maxCorner, deBlockList, &
+    deLabelList, indexflag, connectionList, connectionTransformList, delayout, &
+    vm, rc)
+!
+! !ARGUMENTS:
+    integer,                      intent(in)            :: minCorner(:)
+    integer,                      intent(in)            :: maxCorner(:)
+    integer,                      intent(in)            :: deBlockList(:,:,:)
+    integer,                      intent(in), optional  :: deLabelList(:)
+    type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
+    integer,                      intent(in), optional  :: connectionList(:,:)
+    integer,                      intent(in), optional  :: connectionTransformList(:,:)
+    type(ESMF_DELayout),          intent(in), optional  :: delayout
+    type(ESMF_VM),                intent(in), optional  :: vm
+    integer,                      intent(out),optional  :: rc
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDeBlocks
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
+!     domain with decomposition specified by {\tt deBlockList}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[minCorner]
+!          Global coordinate tuple of the lower corner of the global domain.
+!     \item[maxCorner]
+!          Global coordinate tuple of the upper corner of the global domain.
+!     \item[deBlockList]
+!          List of DE-local LR blocks. The third index of {\tt deBlockList}
+!          steps through the deBlock elements, which are defined by the first
+!          two indices. The first index must be of size {\tt dimCount} and the 
+!          second index must be of size 2. Each 2D element of {\tt deBlockList}
+!          defined by the first two indices hold the following information.
+!          \begin{verbatim}
+!                   +---------------------------------------> 2nd index
+!                   |    1               2           
+!                   | 1  minCorner(1)    maxCorner(1)
+!                   | 2  minCorner(2)    maxCorner(2)
+!                   | .  minCorner(.)    maxCorner(.)
+!                   | .
+!                   v
+!                  1st index
+!          \end{verbatim}
+!          It is required that there be no overlap between the LR segments
+!          defined by deBlockList.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the column major order of the {\tt regDecomp}
+!          argument.
+!     \item[{[indexflag]}]
+!          Indicates whether the indices provided by the {\tt minCorner} and
+!          {\tt maxCorner} arguments are to be interpreted to form a flat
+!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
+!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!     \item[{[connectionList]}]
+!          List of connections between patches in index space. The second dimension
+!          of {\tt connectionList} steps through the connection interface elements, 
+!          defined by the first index. The first index must be of size
+!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
+!          decomposed index space. Each {\tt connectionList} element specifies
+!          the connection interface in the format
+!
+!         {\tt (/patchIndex\_A,
+!          patchIndex\_B, positionVector, orientationVector/)} where:
+!          \begin{itemize}
+!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
+!                index of the two connected patches respectively,
+!          \item {\tt positionVector} is the vector that points from patch A's
+!                minCorner to patch B's minCorner.
+!          \item {\tt orientationVector} associates each dimension of patch A
+!                with a dimension in patch B's index space. Negative index
+!                values may be used to indicate a reversal in index orientation.
+!          \end{itemize}
+!     \item[{[connectionTransformList]}]
+!          List of transforms associated with patch connections defined in 
+!          {\tt connectionList}. The second dimension of {\tt connectionTransformList}
+!          steps through the connection transforms, defined by the first index. The
+!          first index must be of size {\tt 5 + dimCount}, where {\tt dimCount}
+!          is the rank of the decomposed index space. Each 
+!          {\tt connectionTransformList} element specifies a connection transform 
+!          by a list of integer values in the format {\tt (/connectionIndex,
+!          direction, staggerSrc, staggerDst, offsetDst, signVector/)}, where
+!          \begin{itemize}
+!          \item {\tt connectionIndex} corresponds to the index of the connection in
+!                {\tt connectionList},
+!          \item {\tt direction} can be {\tt +1} to specify forward direction,
+!                i.e. source patch of the transform is patch\_A and destination
+!                patch is patch\_B of the corresponding connection, or {\tt -1}
+!                to indicate reverse direction through the connection. The only
+!                other valid {\tt direction} value is {\tt 0} which indicates a 
+!                bidirectional connection with source and destination definitions
+!                as in the forward case. 
+!          \item {\tt staggerSrc} and {\tt staggerDst} indicate staggering location
+!                in the source and destination patch interface, respectively,
+!          \item {\tt offsetDst} is a vector of size {\tt dimCount} that 
+!                specifies the index offset on the destination side of 
+!                this connection,
+!          \item {\tt signVector} is of size {\tt dimCount} with elements either
+!                {\tt +1} or {\tt -1} to indicate optional sign change of vector
+!                components along the respective directions.
+!          \end{itemize}
+!     \item[{[delayout]}]
+!          Optional {\tt ESMF\_DELayout} object to be used. By default a new
+!          DELayout object will be created with the correct number of DEs. If
+!          a DELayout object is specified its number of DEs must match the 
+!          number indicated by {\tt regDecomp}.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object of the current context. Providing the
+!          VM of the current context will lower the method's overhead.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer                 :: status     ! local error status
+    type(ESMF_DistGrid)     :: distgrid   ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterfaceIntArray):: minCornerArg ! helper variable
+    type(ESMF_InterfaceIntArray):: maxCornerArg ! helper variable
+    type(ESMF_InterfaceIntArray):: deBlockListArg ! helper variable
+    type(ESMF_InterfaceIntArray):: deLabelListArg ! helper variable
+    type(ESMF_InterfaceIntArray):: connectionListArg ! helper variable
+    type(ESMF_InterfaceIntArray):: connectionTransformListArg ! helper variable
+
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Deal with (optional) array arguments
+    minCornerArg = ESMF_InterfaceIntArrayCreate(minCorner, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    maxCornerArg = ESMF_InterfaceIntArrayCreate(maxCorner, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    deBlockListArg = ESMF_InterfaceIntArrayCreate(farray3D=deBlockList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    deLabelListArg = ESMF_InterfaceIntArrayCreate(deLabelList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    connectionListArg = &
+      ESMF_InterfaceIntArrayCreate(farray2D=connectionList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    connectionTransformListArg = &
+      ESMF_InterfaceIntArrayCreate(farray2D=connectionTransformList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! mark this DistGrid as invalid
+    distgrid%this = ESMF_NULL_POINTER
+
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_DistGridCreateDeBlocks(distgrid, minCornerArg, maxCornerArg, &
+      deBlockListArg, deLabelListArg, indexflag, &
+      connectionListArg, connectionTransformListArg, delayout, vm, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! garbage collection
+    call ESMF_InterfaceIntArrayDestroy(minCornerArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(maxCornerArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(deBlockListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(deLabelListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(connectionListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(connectionTransformListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! set return value
+    ESMF_DistGridCreateDeBlocks = distgrid 
+ 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end function ESMF_DistGridCreateDeBlocks
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateRegDecompFA()"
+!BOP
+! !IROUTINE: ESMF_DistGridCreateRegDecompFA - Create DistGrid with regular decomposition and fast axis
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreateRegDecompFA(minCorner, maxCorner, &
+    regDecomp, decompflag, deLabelList, indexflag, connectionList, &
+    connectionTransformList, fastAxis, vm, rc)
+!
+! !ARGUMENTS:
+    integer,                      intent(in)            :: minCorner(:)
+    integer,                      intent(in)            :: maxCorner(:)
+    integer,                      intent(in), optional  :: regDecomp(:)
+    type(ESMF_DecompFlag),target, intent(in), optional  :: decompflag(:)
+    integer,                      intent(in), optional  :: deLabelList(:)
+    type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
+    integer,                      intent(in), optional  :: connectionList(:,:)
+    integer,                      intent(in), optional  :: connectionTransformList(:,:)
+    integer,                      intent(in)            :: fastAxis
+    type(ESMF_VM),                intent(in), optional  :: vm
+    integer,                      intent(out),optional  :: rc
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateRegDecompFA
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
+!     domain with regular decomposition. A regular
+!     decomposition is of the same rank as the global domain and decomposes
+!     each dimension into a fixed number of DEs. A regular decomposition of a
+!     single LR domain is expressed by a single {\tt regDecomp} list of DE counts
+!     in each dimension.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[minCorner]
+!          Global coordinate tuple of the lower corner of the global domain.
+!     \item[maxCorner]
+!          Global coordinate tuple of the upper corner of the global domain.
+!     \item[{[regDecomp]}]
+!          List of DE counts for each dimension. The default decomposition will
+!          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
+!          {\tt deCount} for a default DELayout equals {\tt petCount}, i.e. the
+!          default decomposition will be into as many DEs as there are 
+!          PETs and the distribution will be 1 DE per PET.
+!     \item[{[decompflag]}]
+!          List of decomposition flags indicating how each dimension of the
+!          global domain is to be divided between the DEs. The default setting
+!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. See section ?? for a 
+!          list of valid decomposition flag options.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the column major order of the {\tt regDecomp}
+!          argument.
+!     \item[{[indexflag]}]
+!          Indicates whether the indices provided by the {\tt minCorner} and
+!          {\tt maxCorner} arguments are to be interpreted to form a flat
+!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
+!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!     \item[{[connectionList]}]
+!          List of connections between patches in index space. The second dimension
+!          of {\tt connectionList} steps through the connection interface elements, 
+!          defined by the first index. The first index must be of size
+!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
+!          decomposed index space. Each {\tt connectionList} element specifies
+!          the connection interface in the format
+!
+!         {\tt (/patchIndex\_A,
+!          patchIndex\_B, positionVector, orientationVector/)} where:
+!          \begin{itemize}
+!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
+!                index of the two connected patches respectively,
+!          \item {\tt positionVector} is the vector that points from patch A's
+!                minCorner to patch B's minCorner.
+!          \item {\tt orientationVector} associates each dimension of patch A
+!                with a dimension in patch B's index space. Negative index
+!                values may be used to indicate a reversal in index orientation.
+!          \end{itemize}
+!     \item[{[connectionTransformList]}]
+!          List of transforms associated with patch connections defined in 
+!          {\tt connectionList}. The second dimension of {\tt connectionTransformList}
+!          steps through the connection transforms, defined by the first index. The
+!          first index must be of size {\tt 5 + dimCount}, where {\tt dimCount}
+!          is the rank of the decomposed index space. Each 
+!          {\tt connectionTransformList} element specifies a connection transform 
+!          by a list of integer values in the format {\tt (/connectionIndex,
+!          direction, staggerSrc, staggerDst, offsetDst, signVector/)}, where
+!          \begin{itemize}
+!          \item {\tt connectionIndex} corresponds to the index of the connection in
+!                {\tt connectionList},
+!          \item {\tt direction} can be {\tt +1} to specify forward direction,
+!                i.e. source patch of the transform is patch\_A and destination
+!                patch is patch\_B of the corresponding connection, or {\tt -1}
+!                to indicate reverse direction through the connection. The only
+!                other valid {\tt direction} value is {\tt 0} which indicates a 
+!                bidirectional connection with source and destination definitions
+!                as in the forward case. 
+!          \item {\tt staggerSrc} and {\tt staggerDst} indicate staggering location
+!                in the source and destination patch interface, respectively,
+!          \item {\tt offsetDst} is a vector of size {\tt dimCount} that 
+!                specifies the index offset on the destination side of 
+!                this connection,
+!          \item {\tt signVector} is of size {\tt dimCount} with elements either
+!                {\tt +1} or {\tt -1} to indicate optional sign change of vector
+!                components along the respective directions.
+!          \end{itemize}
+!     \item[fastAxis]
+!          Integer value indicating along which axis fast communication is
+!          requested. This hint will be used during DELayout creation.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object of the current context. Providing the
+!          VM of the current context will lower the method's overhead.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer                 :: status     ! local error status
+    type(ESMF_DistGrid)     :: distgrid   ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterfaceIntArray):: minCornerArg ! helper variable
+    type(ESMF_InterfaceIntArray):: maxCornerArg ! helper variable
+    type(ESMF_InterfaceIntArray):: regDecompArg ! helper variable
+    type(ESMF_DecompFlag), target:: dummyDf(0)  ! used to satisfy the C interf.
+    type(ESMF_DecompFlag), pointer::  opt_decompflag(:) ! optional arg helper
+    integer                 :: len_decompflag ! helper variable
+    type(ESMF_InterfaceIntArray):: deLabelListArg ! helper variable
+    type(ESMF_InterfaceIntArray):: connectionListArg ! helper variable
+    type(ESMF_InterfaceIntArray):: connectionTransformListArg ! helper variable
+
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Deal with (optional) array arguments
+    minCornerArg = ESMF_InterfaceIntArrayCreate(minCorner, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    maxCornerArg = ESMF_InterfaceIntArrayCreate(maxCorner, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    regDecompArg = ESMF_InterfaceIntArrayCreate(regDecomp, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(decompflag)) then
+      len_decompflag = size(decompflag)
+      opt_decompflag => decompflag
+    else
+      len_decompflag = 0
+      opt_decompflag => dummyDf
+    endif
+    deLabelListArg = ESMF_InterfaceIntArrayCreate(deLabelList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    connectionListArg = &
+      ESMF_InterfaceIntArrayCreate(farray2D=connectionList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    connectionTransformListArg = &
+      ESMF_InterfaceIntArrayCreate(farray2D=connectionTransformList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! mark this DistGrid as invalid
+    distgrid%this = ESMF_NULL_POINTER
+
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_DistGridCreateRegDecompFA(distgrid, minCornerArg, maxCornerArg, &
+      regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
+      connectionListArg, connectionTransformListArg, fastAxis, vm, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! garbage collection
+    call ESMF_InterfaceIntArrayDestroy(minCornerArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(maxCornerArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(regDecompArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(deLabelListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(connectionListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(connectionTransformListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! set return value
+    ESMF_DistGridCreateRegDecompFA = distgrid 
+ 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end function ESMF_DistGridCreateRegDecompFA
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateDeBlocksFA()"
+!BOP
+! !IROUTINE: ESMF_DistGridCreateDeBlocksFA - Create DistGrid with DE blocks and fast axis
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreateDeBlocksFA(minCorner, maxCorner, &
+    deBlockList, deLabelList, indexflag, connectionList, &
+    connectionTransformList, fastAxis, vm, rc)
+!
+! !ARGUMENTS:
+    integer,                      intent(in)            :: minCorner(:)
+    integer,                      intent(in)            :: maxCorner(:)
+    integer,                      intent(in)            :: deBlockList(:,:,:)
+    integer,                      intent(in), optional  :: deLabelList(:)
+    type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
+    integer,                      intent(in), optional  :: connectionList(:,:)
+    integer,                      intent(in), optional  :: connectionTransformList(:,:)
+    integer,                      intent(in)            :: fastAxis
+    type(ESMF_VM),                intent(in), optional  :: vm
+    integer,                      intent(out),optional  :: rc
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDeBlocksFA
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
+!     domain with decomposition specified by {\tt deBlockList}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[minCorner]
+!          Global coordinate tuple of the lower corner of the global domain.
+!     \item[maxCorner]
+!          Global coordinate tuple of the upper corner of the global domain.
+!     \item[deBlockList]
+!          List of DE-local LR blocks. The third index of {\tt deBlockList}
+!          steps through the deBlock elements, which are defined by the first
+!          two indices. The first index must be of size {\tt dimCount} and the 
+!          second index must be of size 3. Each 2D element of {\tt deBlockList}
+!          defined by the first two indices hold the following information.
+!          \begin{verbatim}
+!                   +---------------------------------------> 2nd index
+!                   |    1               2              3
+!                   | 1  minCorner(1)    maxCorner(1)   patchID
+!                   | 2  minCorner(2)    maxCorner(2)   (not used)
+!                   | .  minCorner(.)    maxCorner(.)   (not used)
+!                   | .
+!                   v
+!                  1st index
+!          \end{verbatim}
+!          It is required that there be no overlap between the LR segments
+!          defined by deBlockList.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the column major order of the {\tt regDecomp}
+!          argument.
+!     \item[{[indexflag]}]
+!          Indicates whether the indices provided by the {\tt minCorner} and
+!          {\tt maxCorner} arguments are to be interpreted to form a flat
+!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
+!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!     \item[{[connectionList]}]
+!          List of connections between patches in index space. The second dimension
+!          of {\tt connectionList} steps through the connection interface elements, 
+!          defined by the first index. The first index must be of size
+!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
+!          decomposed index space. Each {\tt connectionList} element specifies
+!          the connection interface in the format
+!
+!         {\tt (/patchIndex\_A,
+!          patchIndex\_B, positionVector, orientationVector/)} where:
+!          \begin{itemize}
+!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
+!                index of the two connected patches respectively,
+!          \item {\tt positionVector} is the vector that points from patch A's
+!                minCorner to patch B's minCorner.
+!          \item {\tt orientationVector} associates each dimension of patch A
+!                with a dimension in patch B's index space. Negative index
+!                values may be used to indicate a reversal in index orientation.
+!          \end{itemize}
+!     \item[{[connectionTransformList]}]
+!          List of transforms associated with patch connections defined in 
+!          {\tt connectionList}. The second dimension of {\tt connectionTransformList}
+!          steps through the connection transforms, defined by the first index. The
+!          first index must be of size {\tt 5 + dimCount}, where {\tt dimCount}
+!          is the rank of the decomposed index space. Each 
+!          {\tt connectionTransformList} element specifies a connection transform 
+!          by a list of integer values in the format {\tt (/connectionIndex,
+!          direction, staggerSrc, staggerDst, offsetDst, signVector/)}, where
+!          \begin{itemize}
+!          \item {\tt connectionIndex} corresponds to the index of the connection in
+!                {\tt connectionList},
+!          \item {\tt direction} can be {\tt +1} to specify forward direction,
+!                i.e. source patch of the transform is patch\_A and destination
+!                patch is patch\_B of the corresponding connection, or {\tt -1}
+!                to indicate reverse direction through the connection. The only
+!                other valid {\tt direction} value is {\tt 0} which indicates a 
+!                bidirectional connection with source and destination definitions
+!                as in the forward case. 
+!          \item {\tt staggerSrc} and {\tt staggerDst} indicate staggering location
+!                in the source and destination patch interface, respectively,
+!          \item {\tt offsetDst} is a vector of size {\tt dimCount} that 
+!                specifies the index offset on the destination side of 
+!                this connection,
+!          \item {\tt signVector} is of size {\tt dimCount} with elements either
+!                {\tt +1} or {\tt -1} to indicate optional sign change of vector
+!                components along the respective directions.
+!          \end{itemize}
+!     \item[fastAxis]
+!          Integer value indicating along which axis fast communication is
+!          requested. This hint will be used during DELayout creation.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object of the current context. Providing the
+!          VM of the current context will lower the method's overhead.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
+    
+    ! Print current subroutine name
+    print *, ">>ESMF_DistGridCreateDeBlocksFA<<"
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
+!      virtualdepinflag, vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! set return value
+    ESMF_DistGridCreateDeBlocksFA = distgrid 
+ 
+  end function ESMF_DistGridCreateDeBlocksFA
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateRegDecompPatch()"
+!BOP
+! !IROUTINE: ESMF_DistGridCreateRegDecompPatch - Create DistGrid from patch work with regular decomposition
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreateRegDecompPatch(minCorner, maxCorner, regDecomp,&
+    decompflag, deLabelList, indexflag, connectionList, connectionTransformList,&
+    delayout, vm, rc)
+!
+! !ARGUMENTS:
+    integer,                      intent(in)            :: minCorner(:,:)
+    integer,                      intent(in)            :: maxCorner(:,:)
+    integer,                      intent(in), optional  :: regDecomp(:,:)
+    type(ESMF_DecompFlag),target, intent(in), optional  :: decompflag(:,:)
+    integer,                      intent(in), optional  :: deLabelList(:)
+    type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
+    integer,                      intent(in), optional  :: connectionList(:,:)
+    integer,                      intent(in), optional  :: connectionTransformList(:,:)
+    type(ESMF_DELayout),          intent(in), optional  :: delayout
+    type(ESMF_VM),                intent(in), optional  :: vm
+    integer,                      intent(out),optional  :: rc
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateRegDecompPatch
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DistGrid} from a patch work of logically 
+!     rectangular (LR) domains with regular decomposition. A regular
+!     decomposition is of the same rank as the global domain and decomposes
+!     each dimension into a fixed number of DEs. A regular decomposition of a
+!     patch work of LR domains is expressed by a list of DE count vectors, one
+!     vector for each patch domain. Each vector contained in the 
+!     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
+!     erroneous to provide more domain patches than there are DEs.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[minCorner]
+!          The first index provides the global coordinate tuple of the lower 
+!          corner of a global domain patch. The second index indicates the 
+!          patch number.
+!     \item[maxCorner]
+!          The first index provides the global coordinate tuple of the upper
+!          corner of a global domain patch. The second index indicates the 
+!          patch number.
+!     \item[{[regDecomp]}]
+!          List of DE counts for each dimension. The second 
+!          index indicates the patch number. The default decomposition will
+!          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
+!          {\tt deCount} for a default DELayout equals {\tt petCount}, i.e. the
+!          default decomposition will be into as many DEs as there are 
+!          PETs and the distribution will be 1 DE per PET.
+!     \item[{[decompflag]}]
+!          List of decomposition flags indicating how each dimension of each
+!          patch domain is to be divided between the DEs. The default setting
+!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all patches. 
+!          See section ?? for a list of valid decomposition flag options. The 
+!          second index indicates the patch number.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the column major order of the {\tt regDecomp}
+!          elements in the sequence as they appear following the patch index.
+!     \item[{[indexflag]}]
+!          Indicates whether the indices provided by the {\tt minCorner} and
+!          {\tt maxCorner} arguments are to be interpreted to form a flat
+!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
+!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!     \item[{[connectionList]}]
+!          List of connections between patches in index space. The second dimension
+!          of {\tt connectionList} steps through the connection interface elements, 
+!          defined by the first index. The first index must be of size
+!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
+!          decomposed index space. Each {\tt connectionList} element specifies
+!          the connection interface in the format
+!
+!         {\tt (/patchIndex\_A,
+!          patchIndex\_B, positionVector, orientationVector/)} where:
+!          \begin{itemize}
+!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
+!                index of the two connected patches respectively,
+!          \item {\tt positionVector} is the vector that points from patch A's
+!                minCorner to patch B's minCorner.
+!          \item {\tt orientationVector} associates each dimension of patch A
+!                with a dimension in patch B's index space. Negative index
+!                values may be used to indicate a reversal in index orientation.
+!          \end{itemize}
+!     \item[{[connectionTransformList]}]
+!          List of transforms associated with patch connections defined in 
+!          {\tt connectionList}. The second dimension of {\tt connectionTransformList}
+!          steps through the connection transforms, defined by the first index. The
+!          first index must be of size {\tt 5 + dimCount}, where {\tt dimCount}
+!          is the rank of the decomposed index space. Each 
+!          {\tt connectionTransformList} element specifies a connection transform 
+!          by a list of integer values in the format {\tt (/connectionIndex,
+!          direction, staggerSrc, staggerDst, offsetDst, signVector/)}, where
+!          \begin{itemize}
+!          \item {\tt connectionIndex} corresponds to the index of the connection in
+!                {\tt connectionList},
+!          \item {\tt direction} can be {\tt +1} to specify forward direction,
+!                i.e. source patch of the transform is patch\_A and destination
+!                patch is patch\_B of the corresponding connection, or {\tt -1}
+!                to indicate reverse direction through the connection. The only
+!                other valid {\tt direction} value is {\tt 0} which indicates a 
+!                bidirectional connection with source and destination definitions
+!                as in the forward case. 
+!          \item {\tt staggerSrc} and {\tt staggerDst} indicate staggering location
+!                in the source and destination patch interface, respectively,
+!          \item {\tt offsetDst} is a vector of size {\tt dimCount} that 
+!                specifies the index offset on the destination side of 
+!                this connection,
+!          \item {\tt signVector} is of size {\tt dimCount} with elements either
+!                {\tt +1} or {\tt -1} to indicate optional sign change of vector
+!                components along the respective directions.
+!          \end{itemize}
+!     \item[{[delayout]}]
+!          Optional {\tt ESMF\_DELayout} object to be used. By default a new
+!          DELayout object will be created with the correct number of DEs. If
+!          a DELayout object is specified its number of DEs must match the 
+!          number indicated by {\tt regDecomp}.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object of the current context. Providing the
+!          VM of the current context will lower the method's overhead.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer                 :: status     ! local error status
+    type(ESMF_DistGrid)     :: distgrid   ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterfaceIntArray):: minCornerArg ! helper variable
+    type(ESMF_InterfaceIntArray):: maxCornerArg ! helper variable
+    type(ESMF_InterfaceIntArray):: regDecompArg ! helper variable
+    type(ESMF_DecompFlag), target:: dummyDf(0,0)  ! used to satisfy the C interf.
+    type(ESMF_DecompFlag), pointer::  opt_decompflag(:,:) ! optional arg helper
+    integer                 :: len1_decompflag ! helper variable
+    integer                 :: len2_decompflag ! helper variable
+    type(ESMF_InterfaceIntArray):: deLabelListArg ! helper variable
+    type(ESMF_InterfaceIntArray):: connectionListArg ! helper variable
+    type(ESMF_InterfaceIntArray):: connectionTransformListArg ! helper variable
+
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Deal with (optional) array arguments
+    minCornerArg = ESMF_InterfaceIntArrayCreate(farray2D=minCorner, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    maxCornerArg = ESMF_InterfaceIntArrayCreate(farray2D=maxCorner, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    regDecompArg = ESMF_InterfaceIntArrayCreate(farray2D=regDecomp, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(decompflag)) then
+      len1_decompflag = size(decompflag, 1)
+      len2_decompflag = size(decompflag, 2)
+      opt_decompflag => decompflag
+    else
+      len1_decompflag = 0
+      len2_decompflag = 0
+      opt_decompflag => dummyDf
+    endif
+    deLabelListArg = ESMF_InterfaceIntArrayCreate(deLabelList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    connectionListArg = &
+      ESMF_InterfaceIntArrayCreate(farray2D=connectionList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    connectionTransformListArg = &
+      ESMF_InterfaceIntArrayCreate(farray2D=connectionTransformList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! mark this DistGrid as invalid
+    distgrid%this = ESMF_NULL_POINTER
+
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_DistGridCreateRegDecompPatch(distgrid, minCornerArg, &
+      maxCornerArg, regDecompArg, opt_decompflag, len1_decompflag, &
+      len2_decompflag, deLabelListArg, indexflag, &
+      connectionListArg, connectionTransformListArg, delayout, vm, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! garbage collection
+    call ESMF_InterfaceIntArrayDestroy(minCornerArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(maxCornerArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(regDecompArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(deLabelListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(connectionListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(connectionTransformListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! set return value
+    ESMF_DistGridCreateRegDecompPatch = distgrid 
+ 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end function ESMF_DistGridCreateRegDecompPatch
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateDeBlocksPatch()"
+!BOP
+! !IROUTINE: ESMF_DistGridCreateDeBlocksPatch - Create DistGrid from patch work with regular decomposition
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreateDeBlocksPatch(minCorner, maxCorner, &
+    deBlockList, deLabelList, indexflag, connectionList, &
+    connectionTransformList, delayout, vm, rc)
+!
+! !ARGUMENTS:
+    integer,                      intent(in)            :: minCorner(:,:)
+    integer,                      intent(in)            :: maxCorner(:,:)
+    integer,                      intent(in)            :: deBlockList(:,:,:)
+    integer,                      intent(in), optional  :: deLabelList(:)
+    type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
+    integer,                      intent(in), optional  :: connectionList(:,:)
+    integer,                      intent(in), optional  :: connectionTransformList(:,:)
+    type(ESMF_DELayout),          intent(in), optional  :: delayout
+    type(ESMF_VM),                intent(in), optional  :: vm
+    integer,                      intent(out),optional  :: rc
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDeBlocksPatch
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DistGrid} from a patch work of logically 
+!     rectangular (LR) domains with regular decomposition. A regular
+!     decomposition is of the same rank as the global domain and decomposes
+!     each dimension into a fixed number of DEs. A regular decomposition of a
+!     patch work of LR domains is expressed by a list of DE count vectors, one
+!     vector for each patch domain. Each vector contained in the 
+!     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
+!     erroneous to provide more domain patches than there are DEs.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[minCorner]
+!          The first index provides the global coordinate tuple of the lower 
+!          corner of a global domain patch. The second index indicates the 
+!          patch number.
+!     \item[maxCorner]
+!          The first index provides the global coordinate tuple of the upper
+!          corner of a global domain patch. The second index indicates the 
+!          patch number.
+!     \item[deBlockList]
+!          List of DE-local LR blocks. The third index of {\tt deBlockList}
+!          steps through the deBlock elements, which are defined by the first
+!          two indices. The first index must be of size {\tt dimCount} and the 
+!          second index must be of size 3. Each 2D element of {\tt deBlockList}
+!          defined by the first two indices hold the following information.
+!          \begin{verbatim}
+!                   +---------------------------------------> 2nd index
+!                   |    1               2              3
+!                   | 1  minCorner(1)    maxCorner(1)   patchID
+!                   | 2  minCorner(2)    maxCorner(2)   (not used)
+!                   | .  minCorner(.)    maxCorner(.)   (not used)
+!                   | .
+!                   v
+!                  1st index
+!          \end{verbatim}
+!          It is required that there be no overlap between the LR segments
+!          defined by deBlockList.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the column major order of the {\tt regDecomp}
+!          elements in the sequence as they appear following the patch index.
+!     \item[{[indexflag]}]
+!          Indicates whether the indices provided by the {\tt minCorner} and
+!          {\tt maxCorner} arguments are to be interpreted to form a flat
+!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
+!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!     \item[{[connectionList]}]
+!          List of connections between patches in index space. The second dimension
+!          of {\tt connectionList} steps through the connection interface elements, 
+!          defined by the first index. The first index must be of size
+!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
+!          decomposed index space. Each {\tt connectionList} element specifies
+!          the connection interface in the format
+!
+!         {\tt (/patchIndex\_A,
+!          patchIndex\_B, positionVector, orientationVector/)} where:
+!          \begin{itemize}
+!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
+!                index of the two connected patches respectively,
+!          \item {\tt positionVector} is the vector that points from patch A's
+!                minCorner to patch B's minCorner.
+!          \item {\tt orientationVector} associates each dimension of patch A
+!                with a dimension in patch B's index space. Negative index
+!                values may be used to indicate a reversal in index orientation.
+!          \end{itemize}
+!     \item[{[connectionTransformList]}]
+!          List of transforms associated with patch connections defined in 
+!          {\tt connectionList}. The second dimension of {\tt connectionTransformList}
+!          steps through the connection transforms, defined by the first index. The
+!          first index must be of size {\tt 5 + dimCount}, where {\tt dimCount}
+!          is the rank of the decomposed index space. Each 
+!          {\tt connectionTransformList} element specifies a connection transform 
+!          by a list of integer values in the format {\tt (/connectionIndex,
+!          direction, staggerSrc, staggerDst, offsetDst, signVector/)}, where
+!          \begin{itemize}
+!          \item {\tt connectionIndex} corresponds to the index of the connection in
+!                {\tt connectionList},
+!          \item {\tt direction} can be {\tt +1} to specify forward direction,
+!                i.e. source patch of the transform is patch\_A and destination
+!                patch is patch\_B of the corresponding connection, or {\tt -1}
+!                to indicate reverse direction through the connection. The only
+!                other valid {\tt direction} value is {\tt 0} which indicates a 
+!                bidirectional connection with source and destination definitions
+!                as in the forward case. 
+!          \item {\tt staggerSrc} and {\tt staggerDst} indicate staggering location
+!                in the source and destination patch interface, respectively,
+!          \item {\tt offsetDst} is a vector of size {\tt dimCount} that 
+!                specifies the index offset on the destination side of 
+!                this connection,
+!          \item {\tt signVector} is of size {\tt dimCount} with elements either
+!                {\tt +1} or {\tt -1} to indicate optional sign change of vector
+!                components along the respective directions.
+!          \end{itemize}
+!     \item[{[delayout]}]
+!          Optional {\tt ESMF\_DELayout} object to be used. By default a new
+!          DELayout object will be created with the correct number of DEs. If
+!          a DELayout object is specified its number of DEs must match the 
+!          number indicated by {\tt regDecomp}.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object of the current context. Providing the
+!          VM of the current context will lower the method's overhead.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
+
+    ! Print current subroutine name
+    print *, ">>ESMF_DistGridCreateDeBlocksPatch<<"
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
+!      virtualdepinflag, vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! set return value
+    ESMF_DistGridCreateDeBlocksPatch = distgrid 
+ 
+  end function ESMF_DistGridCreateDeBlocksPatch
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateRegDecompPatchFA()"
+!BOP
+! !IROUTINE: ESMF_DistGridCreateRegDecompPatchFA - Create DistGrid from patch work with regular decomposition and fast axis
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreateRegDecompPatchFA(minCorner, maxCorner, &
+    regDecomp, decompflag, deLabelList, indexflag, connectionList, &
+    connectionTransformList, fastAxis, vm, rc)
+!
+! !ARGUMENTS:
+    integer,                      intent(in)            :: minCorner(:,:)
+    integer,                      intent(in)            :: maxCorner(:,:)
+    integer,                      intent(in), optional  :: regDecomp(:,:)
+    type(ESMF_DecompFlag),target, intent(in), optional  :: decompflag(:,:)
+    integer,                      intent(in), optional  :: deLabelList(:)
+    type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
+    integer,                      intent(in), optional  :: connectionList(:,:)
+    integer,                      intent(in), optional  :: connectionTransformList(:,:)
+    integer,                      intent(in)            :: fastAxis
+    type(ESMF_VM),                intent(in), optional  :: vm
+    integer,                      intent(out),optional  :: rc
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateRegDecompPatchFA
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DistGrid} from a patch work of logically 
+!     rectangular (LR) domains with regular decomposition. A regular
+!     decomposition is of the same rank as the global domain and decomposes
+!     each dimension into a fixed number of DEs. A regular decomposition of a
+!     patch work of LR domains is expressed by a list of DE count vectors, one
+!     vector for each patch domain. Each vector contained in the 
+!     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
+!     erroneous to provide more domain patches than there are DEs.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[minCorner]
+!          The first index provides the global coordinate tuple of the lower 
+!          corner of a global domain patch. The second index indicates the 
+!          patch number.
+!     \item[maxCorner]
+!          The first index provides the global coordinate tuple of the upper
+!          corner of a global domain patch. The second index indicates the 
+!          patch number.
+!     \item[{[regDecomp]}]
+!          List of DE counts for each dimension. The second 
+!          index indicates the patch number. The default decomposition will
+!          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
+!          {\tt deCount} for a default DELayout equals {\tt petCount}, i.e. the
+!          default decomposition will be into as many DEs as there are 
+!          PETs and the distribution will be 1 DE per PET.
+!     \item[{[decompflag]}]
+!          List of decomposition flags indicating how each dimension of each
+!          patch domain is to be divided between the DEs. The default setting
+!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all patches. 
+!          See section ?? for a list of valid decomposition flag options. The 
+!          second index indicates the patch number.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the column major order of the {\tt regDecomp}
+!          elements in the sequence as they appear following the patch index.
+!     \item[{[indexflag]}]
+!          Indicates whether the indices provided by the {\tt minCorner} and
+!          {\tt maxCorner} arguments are to be interpreted to form a flat
+!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
+!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!     \item[{[connectionList]}]
+!          List of connections between patches in index space. The second dimension
+!          of {\tt connectionList} steps through the connection interface elements, 
+!          defined by the first index. The first index must be of size
+!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
+!          decomposed index space. Each {\tt connectionList} element specifies
+!          the connection interface in the format
+!
+!         {\tt (/patchIndex\_A,
+!          patchIndex\_B, positionVector, orientationVector/)} where:
+!          \begin{itemize}
+!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
+!                index of the two connected patches respectively,
+!          \item {\tt positionVector} is the vector that points from patch A's
+!                minCorner to patch B's minCorner.
+!          \item {\tt orientationVector} associates each dimension of patch A
+!                with a dimension in patch B's index space. Negative index
+!                values may be used to indicate a reversal in index orientation.
+!          \end{itemize}
+!     \item[{[connectionTransformList]}]
+!          List of transforms associated with patch connections defined in 
+!          {\tt connectionList}. The second dimension of {\tt connectionTransformList}
+!          steps through the connection transforms, defined by the first index. The
+!          first index must be of size {\tt 5 + dimCount}, where {\tt dimCount}
+!          is the rank of the decomposed index space. Each 
+!          {\tt connectionTransformList} element specifies a connection transform 
+!          by a list of integer values in the format {\tt (/connectionIndex,
+!          direction, staggerSrc, staggerDst, offsetDst, signVector/)}, where
+!          \begin{itemize}
+!          \item {\tt connectionIndex} corresponds to the index of the connection in
+!                {\tt connectionList},
+!          \item {\tt direction} can be {\tt +1} to specify forward direction,
+!                i.e. source patch of the transform is patch\_A and destination
+!                patch is patch\_B of the corresponding connection, or {\tt -1}
+!                to indicate reverse direction through the connection. The only
+!                other valid {\tt direction} value is {\tt 0} which indicates a 
+!                bidirectional connection with source and destination definitions
+!                as in the forward case. 
+!          \item {\tt staggerSrc} and {\tt staggerDst} indicate staggering location
+!                in the source and destination patch interface, respectively,
+!          \item {\tt offsetDst} is a vector of size {\tt dimCount} that 
+!                specifies the index offset on the destination side of 
+!                this connection,
+!          \item {\tt signVector} is of size {\tt dimCount} with elements either
+!                {\tt +1} or {\tt -1} to indicate optional sign change of vector
+!                components along the respective directions.
+!          \end{itemize}
+!     \item[fastAxis]
+!          Integer value indicating along which axis fast communication is
+!          requested. This hint will be used during DELayout creation.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object of the current context. Providing the
+!          VM of the current context will lower the method's overhead.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
+
+    ! Print current subroutine name
+    print *, ">>ESMF_DistGridCreateRegDecompPatchFA<<"
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
+!      virtualdepinflag, vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! set return value
+    ESMF_DistGridCreateRegDecompPatchFA = distgrid
+ 
+  end function ESMF_DistGridCreateRegDecompPatchFA
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateDeBlocksPatchFA()"
+!BOP
+! !IROUTINE: ESMF_DistGridCreateDeBlocksPatchFA - Create DistGrid from patch work with DE blocks and fast axis
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreateDeBlocksPatchFA(minCorner, maxCorner, &
+    deBlockList, deLabelList, indexflag, connectionList, &
+    connectionTransformList, fastAxis, vm, rc)
+!
+! !ARGUMENTS:
+    integer,                      intent(in)            :: minCorner(:,:)
+    integer,                      intent(in)            :: maxCorner(:,:)
+    integer,                      intent(in)            :: deBlockList(:,:,:)
+    integer,                      intent(in), optional  :: deLabelList(:)
+    type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
+    integer,                      intent(in), optional  :: connectionList(:,:)
+    integer,                      intent(in), optional  :: connectionTransformList(:,:)
+    integer,                      intent(in)            :: fastAxis
+    type(ESMF_VM),                intent(in), optional  :: vm
+    integer,                      intent(out),optional  :: rc
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDeBlocksPatchFA
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DistGrid} from a patch work of logically 
+!     rectangular (LR) domains with decomposition specified by {\tt deBlockList}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[minCorner]
+!          The first index provides the global coordinate tuple of the lower 
+!          corner of a global domain patch. The second index indicates the 
+!          patch number.
+!     \item[maxCorner]
+!          The first index provides the global coordinate tuple of the upper
+!          corner of a global domain patch. The second index indicates the 
+!          patch number.
+!     \item[deBlockList]
+!          List of DE-local LR blocks. The third index of {\tt deBlockList}
+!          steps through the deBlock elements, which are defined by the first
+!          two indices. The first index must be of size {\tt dimCount} and the 
+!          second index must be of size 3. Each 2D element of {\tt deBlockList}
+!          defined by the first two indices hold the following information.
+!          \begin{verbatim}
+!                   +---------------------------------------> 2nd index
+!                   |    1               2              3
+!                   | 1  minCorner(1)    maxCorner(1)   patchID
+!                   | 2  minCorner(2)    maxCorner(2)   (not used)
+!                   | .  minCorner(.)    maxCorner(.)   (not used)
+!                   | .
+!                   v
+!                  1st index
+!          \end{verbatim}
+!          It is required that there be no overlap between the LR segments
+!          defined by deBlockList.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the column major order of the {\tt regDecomp}
+!          elements in the sequence as they appear following the patch index.
+!     \item[{[indexflag]}]
+!          Indicates whether the indices provided by the {\tt minCorner} and
+!          {\tt maxCorner} arguments are to be interpreted to form a flat
+!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
+!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!     \item[{[connectionList]}]
+!          List of connections between patches in index space. The second dimension
+!          of {\tt connectionList} steps through the connection interface elements, 
+!          defined by the first index. The first index must be of size
+!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
+!          decomposed index space. Each {\tt connectionList} element specifies
+!          the connection interface in the format
+!
+!         {\tt (/patchIndex\_A,
+!          patchIndex\_B, positionVector, orientationVector/)} where:
+!          \begin{itemize}
+!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
+!                index of the two connected patches respectively,
+!          \item {\tt positionVector} is the vector that points from patch A's
+!                minCorner to patch B's minCorner.
+!          \item {\tt orientationVector} associates each dimension of patch A
+!                with a dimension in patch B's index space. Negative index
+!                values may be used to indicate a reversal in index orientation.
+!          \end{itemize}
+!     \item[{[connectionTransformList]}]
+!          List of transforms associated with patch connections defined in 
+!          {\tt connectionList}. The second dimension of {\tt connectionTransformList}
+!          steps through the connection transforms, defined by the first index. The
+!          first index must be of size {\tt 5 + dimCount}, where {\tt dimCount}
+!          is the rank of the decomposed index space. Each 
+!          {\tt connectionTransformList} element specifies a connection transform 
+!          by a list of integer values in the format {\tt (/connectionIndex,
+!          direction, staggerSrc, staggerDst, offsetDst, signVector/)}, where
+!          \begin{itemize}
+!          \item {\tt connectionIndex} corresponds to the index of the connection in
+!                {\tt connectionList},
+!          \item {\tt direction} can be {\tt +1} to specify forward direction,
+!                i.e. source patch of the transform is patch\_A and destination
+!                patch is patch\_B of the corresponding connection, or {\tt -1}
+!                to indicate reverse direction through the connection. The only
+!                other valid {\tt direction} value is {\tt 0} which indicates a 
+!                bidirectional connection with source and destination definitions
+!                as in the forward case. 
+!          \item {\tt staggerSrc} and {\tt staggerDst} indicate staggering location
+!                in the source and destination patch interface, respectively,
+!          \item {\tt offsetDst} is a vector of size {\tt dimCount} that 
+!                specifies the index offset on the destination side of 
+!                this connection,
+!          \item {\tt signVector} is of size {\tt dimCount} with elements either
+!                {\tt +1} or {\tt -1} to indicate optional sign change of vector
+!                components along the respective directions.
+!          \end{itemize}
+!     \item[fastAxis]
+!          Integer value indicating along which axis fast communication is
+!          requested. This hint will be used during DELayout creation.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object of the current context. Providing the
+!          VM of the current context will lower the method's overhead.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
+
+    ! Print current subroutine name
+    print *, ">>ESMF_DistGridCreateDeBlocksPatchFA<<"
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
+!      virtualdepinflag, vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! set return value
+    ESMF_DistGridCreateDeBlocksPatchFA = distgrid
+ 
+  end function ESMF_DistGridCreateDeBlocksPatchFA
+!------------------------------------------------------------------------------
+
+#if 0
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateDecount()"
+!BOPI
+! !IROUTINE: ESMF_DistGridCreateDecount - Create DistGrid with deCount
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreateDecount(minCorner, maxCorner, decount, &
+    deLabelList, connectionList, fastAxis, vm, rc)
+!
+! !ARGUMENTS:
+    integer,                      intent(in)            :: minCorner(:)
+    integer,                      intent(in)            :: maxCorner(:)
+    integer,                      intent(in)            :: deCount
+    integer,                      intent(in), optional  :: deLabelList(:)
+    integer,                      intent(in), optional  :: connectionList(:,:)
+    integer,                      intent(in), optional  :: fastAxis
+    type(ESMF_VM),                intent(in), optional  :: vm
+    integer,                      intent(out),optional  :: rc
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDecount
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
+!     domain with a specified number of DEs.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[minCorner]
+!          Global coordinate tuple of the lower corner of the global domain.
+!     \item[maxCorner]
+!          Global coordinate tuple of the upper corner of the global domain.
+!     \item[deCount]
+!          Number of requested DEs.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the internally used algorithm to decompose the
+!          global domain (todo: describe the sequence once implemented).
+!     \item[{[connectionList]}]
+!          List of connection interfaces expressed in global index space 
+!          coordinates. This argument allows to augment the naturally 
+!          defined interfaces in global index space by those not derivable
+!          from global index space relations. The second
+!          dimension of {\tt connectionList} steps through the connection interface
+!          elements. The first index must be twice the size of the number of 
+!          dimensions of the global domain. Each {\tt connectionList} element
+!          specifies the connection interface in the format (/minCornerInterface\_A,
+!          maxCornerInterface\_A, minCornerInterface\_B, maxCornerInterface\_B/).
+!          Only edges of the global domain may serve as connection interfaces.
+!     \item[{[fastAxis]}]
+!          Optional integer value indicating along which axis fast 
+!          communication is requested. This hint will be used during DELayout 
+!          creation.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object of the current context. Providing the
+!          VM of the current context will lower the method's overhead.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
+
+    ! Print current subroutine name
+    print *, ">>ESMF_DistGridCreateDecount<<"
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
+!      virtualdepinflag, vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! set return value
+    ESMF_DistGridCreateDecount = distgrid 
+ 
+  end function ESMF_DistGridCreateDecount
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateDecountPatch()"
+!BOPI
+! !IROUTINE: ESMF_DistGridCreateDecountPatch - Create DistGrid with deCount
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreateDecountPatch(minCorner, maxCorner, decount, &
+    deLabelList, connectionList, fastAxis, vm, rc)
+!
+! !ARGUMENTS:
+    integer,                      intent(in)            :: minCorner(:,:)
+    integer,                      intent(in)            :: maxCorner(:,:)
+    integer,                      intent(in)            :: deCount
+    integer,                      intent(in), optional  :: deLabelList(:)
+    integer,                      intent(in), optional  :: connectionList(:,:)
+    integer,                      intent(in), optional  :: fastAxis
+    type(ESMF_VM),                intent(in), optional  :: vm
+    integer,                      intent(out),optional  :: rc
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDecountPatch
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DistGrid} from a patch work of logically 
+!     rectangular (LR) domains with a specified number of DEs. If the number of
+!     DEs specified by the {\tt deCount} argument equals the number of domain
+!     patches provided the domain patches will be associated one by one with the
+!     DEs, defining the default DE sequence for this case. It is erroneous to 
+!     provide more domain patches than there are DEs.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[minCorner]
+!          The first index provides the global coordinate tuple of the lower 
+!          corner of a global domain patch. The second index indicates the 
+!          patch number.
+!     \item[maxCorner]
+!          The first index provides the global coordinate tuple of the upper
+!          corner of a global domain patch. The second index indicates the 
+!          patch number.
+!     \item[deCount]
+!          Number of requested DEs.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the internally used algorithm to decompose the
+!          global domain (todo: describe the sequence once implemented).
+!     \item[{[connectionList]}]
+!          List of connection interfaces expressed in global index space 
+!          coordinates. This argument allows to augment the naturally 
+!          defined interfaces in global index space by those not derivable
+!          from global index space relations. The second
+!          dimension of {\tt connectionList} steps through the connection interface
+!          elements. The first index must be twice the size of the number of 
+!          dimensions of the global domain. Each {\tt connectionList} element
+!          specifies the connection interface in the format (/minCornerInterface\_A,
+!          maxCornerInterface\_A, minCornerInterface\_B, maxCornerInterface\_B/).
+!          Only edges of the global domain may serve as connection interfaces.
+!     \item[{[fastAxis]}]
+!          Optional integer value indicating along which axis fast 
+!          communication is requested. This hint will be used during DELayout 
+!          creation.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object of the current context. Providing the
+!          VM of the current context will lower the method's overhead.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
+
+    ! Print current subroutine name
+    print *, ">>ESMF_DistGridCreateDecountPatch<<"
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
+!      virtualdepinflag, vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! set return value
+    ESMF_DistGridCreateDecountPatch = distgrid 
+ 
+  end function ESMF_DistGridCreateDecountPatch
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateDelayout()"
+!BOPI
+! !IROUTINE: ESMF_DistGridCreateDelayout - Create DistGrid with specified Delayout
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreateDelayout(minCorner, maxCorner, &
+    deLabelList, connectionList, delayout, vm, rc)
+!
+! !ARGUMENTS:
+    integer,                      intent(in)            :: minCorner(:)
+    integer,                      intent(in)            :: maxCorner(:)
+    integer,                      intent(in), optional  :: deLabelList(:)
+    integer,                      intent(in), optional  :: connectionList(:,:)
+    type(ESMF_DELayout),          intent(in)            :: delayout
+    type(ESMF_VM),                intent(in), optional  :: vm
+    integer,                      intent(out),optional  :: rc
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDelayout
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
+!     domain with a specified DELayout.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[minCorner]
+!          Global coordinate tuple of the lower corner of the global domain.
+!     \item[maxCorner]
+!          Global coordinate tuple of the upper corner of the global domain.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the internally used algorithm to decompose the
+!          global domain (todo: describe the sequence once implemented).
+!     \item[{[connectionList]}]
+!          List of connection interfaces expressed in global index space 
+!          coordinates. This argument allows to augment the naturally 
+!          defined interfaces in global index space by those not derivable
+!          from global index space relations. The second
+!          dimension of {\tt connectionList} steps through the connection interface
+!          elements. The first index must be twice the size of the number of 
+!          dimensions of the global domain. Each {\tt connectionList} element
+!          specifies the connection interface in the format (/minCornerInterface\_A,
+!          maxCornerInterface\_A, minCornerInterface\_B, maxCornerInterface\_B/).
+!          Only edges of the global domain may serve as connection interfaces.
+!     \item[delayout]
+!          The {\tt ESMF\_DELayout} object to be used.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object of the current context. Providing the
+!          VM of the current context will lower the method's overhead.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
+
+    ! Print current subroutine name
+    print *, ">>ESMF_DistGridCreateDelayout<<"
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
+!      virtualdepinflag, vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! set return value
+    ESMF_DistGridCreateDelayout = distgrid 
+ 
+  end function ESMF_DistGridCreateDelayout
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreatePatch()"
+!BOPI
+! !IROUTINE: ESMF_DistGridCreatePatch - Create DistGrid from patch work
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreatePatch(minCorner, maxCorner, &
+    deLabelList, connectionList, delayout, vm, rc)
+!
+! !ARGUMENTS:
+    integer,                      intent(in)            :: minCorner(:,:)
+    integer,                      intent(in)            :: maxCorner(:,:)
+    integer,                      intent(in), optional  :: deLabelList(:)
+    integer,                      intent(in), optional  :: connectionList(:,:)
+    type(ESMF_DELayout),          intent(in), optional  :: delayout
+    type(ESMF_VM),                intent(in), optional  :: vm
+    integer,                      intent(out),optional  :: rc
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreatePatch
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DistGrid} from a patch work of logically 
+!     rectangular (LR) domains. A DELayout may be specified optionally. In this
+!     case the number of DEs is specified by the DELayout. If the number of DEs
+!     is equal to the number of provided domain patches or if no DELayout 
+!     argument was specified, the domain patches will be associated one by one 
+!     with the DEs, defining the default DE sequence for this case. It is 
+!     erroneous to provide more domain patches than there are DEs.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[minCorner]
+!          The first index provides the global coordinate tuple of the lower 
+!          corner of a global domain patch. The second index indicates the 
+!          patch number.
+!     \item[maxCorner]
+!          The first index provides the global coordinate tuple of the upper
+!          corner of a global domain patch. The second index indicates the 
+!          patch number.
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the internally used algorithm to decompose the
+!          global domain (todo: describe the sequence once implemented).
+!     \item[{[connectionList]}]
+!          List of connection interfaces expressed in global index space 
+!          coordinates. This argument allows to augment the naturally 
+!          defined interfaces in global index space by those not derivable
+!          from global index space relations. The second
+!          dimension of {\tt connectionList} steps through the connection interface
+!          elements. The first index must be twice the size of the number of 
+!          dimensions of the global domain. Each {\tt connectionList} element
+!          specifies the connection interface in the format (/minCornerInterface\_A,
+!          maxCornerInterface\_A, minCornerInterface\_B, maxCornerInterface\_B/).
+!          Only edges of the global domain may serve as connection interfaces.
+!     \item[{[delayout]}]
+!          Optional {\tt ESMF\_DELayout} object to be used. By default a new
+!          DELayout object will be created with as many DEs as there are
+!          patches.
+!     \item[{[vm]}]
+!          Optional {\tt ESMF\_VM} object of the current context. Providing the
+!          VM of the current context will lower the method's overhead.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
+
+    ! Print current subroutine name
+    print *, ">>ESMF_DistGridCreatePatch<<"
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap, len_petMap, &
+!      virtualdepinflag, vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! set return value
+    ESMF_DistGridCreatePatch = distgrid 
+ 
+  end function ESMF_DistGridCreatePatch
+!------------------------------------------------------------------------------
+#endif
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridDestroy()"
+!BOP
+! !IROUTINE: ESMF_DistGridDestroy - Destroy DistGrid object
+
+! !INTERFACE:
+  subroutine ESMF_DistGridDestroy(distgrid, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid), intent(inout)           :: distgrid
+    integer,             intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Destroy an {\tt ESMF\_DistGrid} object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          {\tt ESMF\_DistGrid} object to be destroyed.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer                 :: status       ! local error status
+
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_DistGridDestroy(distgrid, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! mark this DistGrid as invalid
+    distgrid%this = ESMF_NULL_POINTER
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DistGridDestroy
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridGet()"
+!BOP
+! !IROUTINE: ESMF_DistGridGet - Get information about DistGrid object
+
+! !INTERFACE:
+  subroutine ESMF_DistGridGet(distgrid, delayout, patchList, dimCount, &
+    dimExtent, regDecompFlag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid),    intent(in)            :: distgrid
+    type(ESMF_DELayout),    intent(out), optional :: delayout
+    integer,                intent(out), optional :: patchList(:)
+    integer,                intent(out), optional :: dimCount
+    integer,                intent(out), optional :: dimExtent(:,:)
+    type(ESMF_Logical),     intent(out), optional :: regDecompFlag
+    integer,                intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     Get internal DistGrid information.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!        Queried {\tt ESMF\_DistGrid} object.
+!     \item[{[delayout]}]
+!        Upon return this holds the {\tt ESMF\_DELayout} object associated with
+!        this DistGrid object.
+!     \item[{[patchList]}]
+!        Upon return this holds a list of patch id numbers, one for each DE.
+!     \item[{[dimCount]}]
+!        Upon return this holds the number dimensions (or rank) of the
+!        DistGrid object.
+!     \item[{[dimExtent]}]
+!        Upon return this array holds the extents for all dimensions of the
+!        DE-local LR boxes for all DEs. The supplied variable must be at least
+!        of size {\tt (/dimCount, deCount/)}.
+!     \item[{[regDecompFlag]}]
+!        Upon return this flag indicates regular decompositions by {\tt
+!        ESMF\_TRUE} and other decompositions by {\tt ESMF\_FALSE}.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer                     :: status         ! local error status
+    type(ESMF_InterfaceIntArray):: patchListArg   ! helper variable
+    type(ESMF_InterfaceIntArray):: dimExtentArg   ! helper variable
+
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Deal with (optional) array arguments
+    patchListArg = ESMF_InterfaceIntArrayCreate(patchList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    dimExtentArg = ESMF_InterfaceIntArrayCreate(farray2D=dimExtent, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_DistGridGet(distgrid, delayout, patchListArg, dimCount, &
+      dimExtentArg, regDecompFlag, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! garbage collection
+    call ESMF_InterfaceIntArrayDestroy(patchListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(dimExtentArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_DistGridGet
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridGetPDe()"
+!BOP
+! !IROUTINE: ESMF_DistGridGetPDe - Get DE local information about DistGrid
+
+! !INTERFACE:
+  subroutine ESMF_DistGridGetPDe(distgrid, de, patch, dimExtent, & 
+    regDecompDeCoord, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid), intent(in)            :: distgrid
+    integer,                intent(in)            :: de
+    integer,                intent(out), optional :: patch
+    integer, target,        intent(out), optional :: dimExtent(:)
+    integer, target,        intent(out), optional :: regDecompDeCoord(:)
+    integer,                intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     Get internal DistGrid information.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!        Queried {\tt ESMF\_DistGrid} object.
+!     \item[de] 
+!        Queried DE.
+!     \item[{[dimExtent]}]
+!        Upon return this number identifies the patch on which the DE is defined.
+!     \item[{[regDecompDeCoord]}]
+!        For regular decompositions upon return this array holds the coordinate
+!        tuple of the specified DE with respect to the local patch. For other
+!        decompositions a run-time warning will be issued if 
+!        {\tt regDecompDeCoord} is requested.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    type(ESMF_DELayout):: dummy
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_DELayoutGetVM(delayout, vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_DistGridGetPDe
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridGetPDePDim()"
+!BOP
+! !IROUTINE: ESMF_DistGridGetPDePDim - Get DE local information for dimension about DistGrid
+
+! !INTERFACE:
+  subroutine ESMF_DistGridGetPDePDim(distgrid, de, dim, indexList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid),    intent(in)            :: distgrid
+    integer,                intent(in)            :: de
+    integer,                intent(in)            :: dim
+    integer,                intent(out), optional :: indexList(:)
+    integer,                intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     Get internal DistGrid information.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!        Queried {\tt ESMF\_DistGrid} object.
+!     \item[de] 
+!        Queried DE.
+!     \item[dim] 
+!        Queried dimension.
+!     \item[{[indexList]}]
+!        Upon return this array holds the indices that lie in {\tt de}'s
+!        DE-local LR domain along dimension {\tt dim}. The supplied variable 
+!        must be at least of size {\tt dimExtent(dim, de)}.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer                     :: status         ! local error status
+    type(ESMF_InterfaceIntArray):: indexListArg   ! helper variable
+
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Deal with (optional) array arguments
+    indexListArg = ESMF_InterfaceIntArrayCreate(indexList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_DistGridGetPDePDim(distgrid, de, dim, indexListArg, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! garbage collection
+    call ESMF_InterfaceIntArrayDestroy(indexListArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_DistGridGetPDePDim
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridGetLinksPDe()"
+!BOP
+! !IROUTINE: ESMF_DistGridGetLinksPDe - Get DE local information about links
+
+! !INTERFACE:
+  subroutine ESMF_DistGridGetLinksPDe(distgrid, de, staggerLoc, lVecInner, &
+    uVecInner, lVecOuter, uVecOuter, linkCount, linkList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid),    intent(in)            :: distgrid
+    integer,                intent(in)            :: de
+    integer,                intent(in)            :: staggerLoc
+    integer,                intent(in)            :: lVecInner(:)
+    integer,                intent(in)            :: uVecInner(:)
+    integer,                intent(in)            :: lVecOuter(:)
+    integer,                intent(in)            :: uVecOuter(:)
+    integer,                intent(out)           :: linkCount
+    integer, target,        intent(out), optional :: linkList(:,:)
+    integer,                intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     Query an {\tt ESMF\_DistGrid} object about the index space topology
+!     around a DE.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!        Queried {\tt ESMF\_DistGrid} object.
+!     \item[de] 
+!        Queried DE.
+!     \item[staggerLoc] 
+!        Queried staggering location.
+!     \item[{[linkList]}]
+!        Upon return this array holds {\tt linkCount} link elements. The second
+!        index of {\tt linkList} steps through the link elements which are
+!        defined by the first index. The first index must be of size
+!        {\tt 5*dimCount + 2} and provides the link element information in the 
+!        format {\tt (/minCorner, maxCorner, partnerDe, partnerStaggerLoc, 
+!        partnerStartCorner, partnerEndCorner, partnerIndexOrder, 
+!        signChangeVector/)}.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    type(ESMF_DELayout):: dummy
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_DELayoutGetVM(delayout, vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_DistGridGetLinksPDe
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridPrint()"
+!BOP
+! !IROUTINE: ESMF_DistGridPrint - Print DistGrid internals
+
+! !INTERFACE:
+  subroutine ESMF_DistGridPrint(distgrid, options, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid),  intent(in)              :: distgrid
+    character(len=*),     intent(in),   optional  :: options
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!   Prints internal information about the specified {\tt ESMF\_DistGrid} 
+!   object to {\tt stdout}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Specified {\tt ESMF\_DistGrid} object.
+!     \item[{[options]}] 
+!          Print options are not yet supported.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer                 :: status       ! local error status
+
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_DistGridPrint(distgrid, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DistGridPrint
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConnectionElementConstruct()"
+!BOP
+! !IROUTINE: ESMF_ConnectionElementConstruct - Construct a connection element
+! !INTERFACE:
+  subroutine ESMF_ConnectionElementConstruct(connectionElement, &
+    patchIndexA, patchIndexB, positionVector, orientationVector, rc)
+!
+! !ARGUMENTS:
+    integer,                intent(out)           :: connectionElement(:)
+    integer,                intent(in)            :: patchIndexA
+    integer,                intent(in)            :: patchIndexB
+    integer,                intent(in)            :: positionVector(:)
+    integer,                intent(in),  optional :: orientationVector(:)
+    integer,                intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     This call helps to construct a {\tt connectionElement},
+!     which is a simple vector of integers, out of its components.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[connectionElement] 
+!        Element to be constructed. The provided {\tt connectionElement} must 
+!        be dimensioned to hold exactly the number of integers that result from
+!        the input information.
+!     \item[patchIndexA] 
+!        Index of one of the two patches that are to be connected.
+!     \item[patchIndexB] 
+!        Index of one of the two patches that are to be connected.
+!     \item[positionVector] 
+!        Position of patch B's minCorner with respect to patch A's minCorner.
+!     \item[{[orientationVector]}]
+!        Associates each dimension of patch A with a dimension in patch B's 
+!        index space. Negative index values may be used to indicate a 
+!        reversal in index orientation. It is erroneous to associate multiple
+!        dimensions of patch A with the same index in patch B.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer                 :: status     ! local error status
+    type(ESMF_InterfaceIntArray):: connectionElementArg ! helper variable
+    type(ESMF_InterfaceIntArray):: positionVectorArg ! helper variable
+    type(ESMF_InterfaceIntArray):: orientationVectorArg ! helper variable
+
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Deal with (optional) array arguments
+    connectionElementArg = ESMF_InterfaceIntArrayCreate(connectionElement, &
+      rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    positionVectorArg = ESMF_InterfaceIntArrayCreate(positionVector, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    orientationVectorArg = ESMF_InterfaceIntArrayCreate(orientationVector, &
+      rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ConnectionElementConstruct(connectionElementArg, &
+      patchIndexA, patchIndexB, positionVectorArg, orientationVectorArg, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! garbage collection
+    call ESMF_InterfaceIntArrayDestroy(connectionElementArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(positionVectorArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntArrayDestroy(orientationVectorArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_ConnectionElementConstruct
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConnectionTransformElementConstruct()"
+!BOP
+! !IROUTINE: ESMF_ConnectionTransformElementConstruct - Construct a connection transform element
+! !INTERFACE:
+  subroutine ESMF_ConnectionTransformElementConstruct(connectionTransformElement,&
+    connectionIndex, direction, staggerSrc, staggerDst, indexOffsetVector, &
+    signChangeVector, rc)
+!
+! !ARGUMENTS:
+    integer,                intent(out)           :: connectionTransformElement(:)
+    integer,                intent(in)            :: connectionIndex
+    integer,                intent(in)            :: direction
+    integer,                intent(in)            :: staggerSrc
+    integer,                intent(in)            :: staggerDst
+    integer,                intent(in),  optional :: indexOffsetVector(:)
+    integer,                intent(in),  optional :: signChangeVector(:)
+    integer,                intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!     This call helps to construct a {\tt connectionTransformElement},
+!     which is a simple vector of integers, out of its components.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[connectionTransformElement] 
+!        Element to be constructed. The provided {\tt connectionTransformElement} 
+!        must be dimensioned to hold exactly the number of integers that result
+!        from the input information.
+!     \item[connectionIndex] 
+!        Index of the corresponding connection element in {\tt connectionList}
+!     \item[direction] 
+!        A {\tt +1} indicates forward direction, i.e. source patch is patch A
+!        and destination patch is patch B of the corresponding connection
+!        element. A value of {\tt -1} indicates reverse direction and a value of
+!        {\tt 0} referes to a bidirectional transformation.
+!     \item[staggerSrc] 
+!        Stagger location in source patch
+!     \item[staggerDst] 
+!        Stagger location in destination patch
+!     \item[{[indexOffsetVector]}]
+!        This vector of size {\tt dimCount} specifies the index offset on the 
+!        destination side of the connection that needs to be applied in addition
+!        to the index transformation defined by the connection element.
+!        Default is a null vector.
+!     \item[{[signChangeVector]}]
+!        This vector of size {\tt dimCount} specifies potential sign changes
+!        of data that is aligned along certain directions. The interpretation
+!        of this vector lies outside the scope of the {\tt DistGrid} class which 
+!        provides storage of this information for convenience sake.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_DELayoutGetVM(delayout, vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_ConnectionTransformElementConstruct
+!------------------------------------------------------------------------------
+
+end module ESMF_DistGridMod
