@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.13 2006/03/20 22:31:35 theurich Exp $
+// $Id: ESMC_Util.h,v 1.14 2006/04/13 23:14:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -73,6 +73,10 @@ enum ESMC_DePinFlag { ESMF_DE_PIN_PET=1,
 // direction type
 enum ESMC_Direction { ESMF_MODE_FORWARD=1,
                       ESMF_MODE_REVERSE};
+
+// indexflag type
+enum ESMC_IndexFlag { ESMF_INDEX_DELOCAL=0,
+                      ESMF_INDEX_GLOBAL};
 
 // ESMF data types and kinds.
 // this is demented, frankly.  There should be a "TypeKind" single
