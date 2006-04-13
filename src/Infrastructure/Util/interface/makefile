@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2005/05/31 17:27:20 nscollins Exp $ 
+# $Id: makefile,v 1.2 2006/04/13 23:16:39 theurich Exp $ 
 
 ALL: build_here 
 
@@ -7,8 +7,8 @@ ALL: build_here
 CFLAGS    += -I$(ESMF_DIR)/src/Infrastructure/LogErr/include ${MPI_INCLUDE}
 FFLAGS    =
 
-SOURCEC	  = ESMC_Util_F.C
-SOURCEF	  = ESMF_Util.F90 ESMF_Util_C.F90
+SOURCEC	  = ESMC_Util_F.C ESMC_F90Interface_F.C
+SOURCEF	  = ESMF_Util.F90 ESMF_Util_C.F90 ESMF_F90Interface.F90
 SOURCEH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
