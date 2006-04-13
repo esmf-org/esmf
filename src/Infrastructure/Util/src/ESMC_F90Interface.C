@@ -1,0 +1,38 @@
+// $Id: ESMC_F90Interface.C,v 1.1 2006/04/13 23:20:02 theurich Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// NASA Goddard Space Flight Center.
+// Licensed under the GPL.
+//
+//==============================================================================
+#define ESMC_FILENAME "ESMC_F90Interface.C"
+//==============================================================================
+
+#include "ESMC_Start.h"
+#include "ESMC_LogErr.h"                  // for LogErr
+#include "ESMC_F90Interface.h"
+
+ESMC_InterfaceIntArray::ESMC_InterfaceIntArray(void){
+  // native constructor
+  array = NULL;
+  dimCount = 0;
+}
+
+ESMC_InterfaceIntArray::ESMC_InterfaceIntArray(int *arrayArg, int dimArg,
+  int *lenArg){
+  // native constructor
+  array = arrayArg;
+  dimCount = dimArg;
+  for (int i=0; i<dimCount; i++)
+    extent[i]=lenArg[i];
+}
+
+ESMC_InterfaceIntArray::~ESMC_InterfaceIntArray(void){
+  // native destructor
+  array = NULL;
+  dimCount = 0;
+}
