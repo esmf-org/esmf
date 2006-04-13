@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayGatherUTest.F90,v 1.1 2006/03/24 16:33:28 theurich Exp $
+! $Id: ESMF_InternArrayGatherUTest.F90,v 1.2 2006/04/13 18:27:47 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,14 +35,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayGatherUTest.F90,v 1.1 2006/03/24 16:33:28 theurich Exp $'
+      '$Id: ESMF_InternArrayGatherUTest.F90,v 1.2 2006/04/13 18:27:47 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
     type(ESMF_VM):: vm
     integer:: localPet, petCount
     integer:: nlen, nsize, i, rootDE
-    type(ESMF_Array) :: array1
+    type(ESMF_InternArray) :: array1
     ! type(ESMF_Array) ::  array2
     integer(ESMF_KIND_I4), dimension(:), pointer :: f90ptr1
     ! integer(ESMF_KIND_I4), dimension(:), pointer :: f90ptr2
@@ -148,7 +148,7 @@
    !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Get the Data Pointer Test"
-    call ESMF_ArrayGetData(array1, f90ptr1, ESMF_DATA_REF, rc=rc)
+    call ESMF_InternArrayGetData(array1, f90ptr1, ESMF_DATA_REF, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
    !-------------------------------------------------------------------------------
@@ -167,7 +167,7 @@
     !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Print an Array Test"
-    call ESMF_ArrayPrint(array1, rc=rc)
+    call ESMF_InternArrayPrint(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
    !-------------------------------------------------------------------------------
@@ -204,9 +204,9 @@
 
      !-------------------------------------------------------------------------------
      ! Destroy all
-       call ESMF_ArrayDestroy(array1, rc)
+       call ESMF_InternArrayDestroy(array1, rc)
       ! if (localPet==rootDE) then
-       	!call ESMF_ArrayDestroy(array2, rc)
+       	!call ESMF_InternArrayDestroy(array2, rc)
        !endif
        call ESMF_FieldDestroy(field, rc)
        call ESMF_GridDestroy(grid, rc)

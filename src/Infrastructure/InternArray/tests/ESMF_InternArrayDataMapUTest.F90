@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayDataMapUTest.F90,v 1.1 2006/03/24 16:33:28 theurich Exp $
+! $Id: ESMF_InternArrayDataMapUTest.F90,v 1.2 2006/04/13 18:27:47 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,12 +31,14 @@
 ! !USES:
       use ESMF_TestMod     ! test methods
       use ESMF_Mod         ! the ESMF framework, including the class to test
+      use ESMF_InternArrayMod
+      use ESMF_InternArrayDataMapMod
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayDataMapUTest.F90,v 1.1 2006/03/24 16:33:28 theurich Exp $'
+      '$Id: ESMF_InternArrayDataMapUTest.F90,v 1.2 2006/04/13 18:27:47 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -61,7 +63,7 @@
       !integer :: value_set, value_get
 
       ! instantiate a ESMF_ArrayDataMap
-      type(ESMF_ArrayDataMap) :: ArrayDataMap
+      type(ESMF_InternArrayDataMap) :: ArrayDataMap
 
       !------------------------------------------------------------------------
       ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests

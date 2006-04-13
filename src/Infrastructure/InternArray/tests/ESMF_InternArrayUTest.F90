@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayUTest.F90,v 1.1 2006/03/24 16:33:28 theurich Exp $
+! $Id: ESMF_InternArrayUTest.F90,v 1.2 2006/04/13 18:27:47 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,11 +35,11 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayUTest.F90,v 1.1 2006/03/24 16:33:28 theurich Exp $'
+      '$Id: ESMF_InternArrayUTest.F90,v 1.2 2006/04/13 18:27:47 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
-    type(ESMF_Array) :: array1
+    type(ESMF_InternArray) :: array1
     real(ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1
     integer :: width, attribute
     integer :: counts(2), lbounds(2), ubounds(2)
@@ -67,7 +67,7 @@
     allocate(f90ptr1(10,20))
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Create Array Test"
-    array1 =  ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
+    array1 =  ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -76,7 +76,7 @@
     !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Destroy Array Test"
-    call ESMF_ArrayDestroy(array1, rc=rc)
+    call ESMF_InternArrayDestroy(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -117,7 +117,7 @@
     allocate(f90ptr1(10,20))
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Create Array Test"
-    array1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
+    array1 = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -144,7 +144,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Destroy Array Test"
-    call ESMF_ArrayDestroy(array1, rc=rc)
+    call ESMF_InternArrayDestroy(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -393,7 +393,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Destroy Array Test"
-    call ESMF_ArrayDestroy(array1, rc=rc)
+    call ESMF_InternArrayDestroy(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -444,7 +444,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Destroy Array Test"
-    call ESMF_ArrayDestroy(array1, rc=rc)
+    call ESMF_InternArrayDestroy(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -489,7 +489,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Destroy Array Test"
-    call ESMF_ArrayDestroy(array1, rc=rc)
+    call ESMF_InternArrayDestroy(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------

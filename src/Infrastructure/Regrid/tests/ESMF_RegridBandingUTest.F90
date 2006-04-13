@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBandingUTest.F90,v 1.1 2005/10/20 22:35:52 svasquez Exp $
+! $Id: ESMF_RegridBandingUTest.F90,v 1.2 2006/04/13 18:27:47 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridBandingUTest.F90,v 1.1 2005/10/20 22:35:52 svasquez Exp $'
+      '$Id: ESMF_RegridBandingUTest.F90,v 1.2 2006/04/13 18:27:47 samsoncheung Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -64,7 +64,7 @@
     real (ESMF_KIND_R8), dimension(:,:), pointer :: x_coords, y_coords
     real (ESMF_KIND_R8), dimension(:,:), pointer :: x_coords2, y_coords2
     real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
-    type (ESMF_Array), dimension(2) :: ESMF_coords, ESMF_coords2
+    type (ESMF_InternArray), dimension(2) :: ESMF_coords, ESMF_coords2
 
 !------------------------------------------------------------------------------
 !   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -174,9 +174,9 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting the actual values of the ESMF x and y coordinate ", &
                    "arrays"
-    call ESMF_ArrayGetData(ESMF_coords(1), x_coords, ESMF_DATA_COPY, rc=rc)
+    call ESMF_InternArrayGetData(ESMF_coords(1), x_coords, ESMF_DATA_COPY, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    call ESMF_ArrayGetData(ESMF_coords(2), y_coords, ESMF_DATA_COPY, rc=rc)
+    call ESMF_InternArrayGetData(ESMF_coords(2), y_coords, ESMF_DATA_COPY, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     lb(:) = lbound(f90ptr1)
@@ -255,8 +255,8 @@
 
     call ESMF_GridGetCoord(dstgrid,horzRelLoc=ESMF_CELL_CENTER,  &
            centercoord=ESMF_coords2,rc=rc)
-    call ESMF_ArrayGetData(ESMF_coords2(1), x_coords2, ESMF_DATA_COPY, rc=rc)
-    call ESMF_ArrayGetData(ESMF_coords2(2), y_coords2, ESMF_DATA_COPY, rc=rc)
+    call ESMF_InternArrayGetData(ESMF_coords2(1), x_coords2, ESMF_DATA_COPY, rc=rc)
+    call ESMF_InternArrayGetData(ESMF_coords2(2), y_coords2, ESMF_DATA_COPY, rc=rc)
 
    loop_rc=ESMF_SUCCESS
    do j=lb(2),ub(2)

@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.3 2006/03/20 22:33:04 theurich Exp $
+! $Id: FlowSolverMod.F90,v 1.4 2006/04/13 18:27:48 samsoncheung Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -1600,7 +1600,7 @@
       logical :: rcpresent
       integer :: i, j, pet_id
       integer(kind=ESMF_KIND_I8) :: frame
-      type(ESMF_Array) :: outarray
+      type(ESMF_InternArray) :: outarray
       type(ESMF_VM) :: vm
       character(len=ESMF_MAXSTR) :: filename
 !
@@ -1630,22 +1630,22 @@
       call ESMF_FieldGather(field_u, 0, outarray, rc=status)
       if (pet_id .eq. 0) then
         write(filename, 20)  "U_velocity", file_no
-        call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
-        call ESMF_ArrayDestroy(outarray, status)
+        call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
+        call ESMF_InternArrayDestroy(outarray, status)
       endif
 
       call ESMF_FieldGather(field_v, 0, outarray, rc=status)
       if (pet_id .eq. 0) then
         write(filename, 20)  "V_velocity", file_no
-        call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
-        call ESMF_ArrayDestroy(outarray, status)
+        call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
+        call ESMF_InternArrayDestroy(outarray, status)
       endif
 
       call ESMF_FieldGather(field_sie, 0, outarray, rc=status)
       if (pet_id .eq. 0) then
         write(filename, 20)  "SIE", file_no
-        call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
-        call ESMF_ArrayDestroy(outarray, status)
+        call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
+        call ESMF_InternArrayDestroy(outarray, status)
       endif
 !
 ! First time through output two more files
@@ -1654,8 +1654,8 @@
         call ESMF_FieldGather(field_flag, 0, outarray, rc=status)
         if (pet_id .eq. 0) then
           write(filename, 20)  "FLAG", file_no
-          call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
-          call ESMF_ArrayDestroy(outarray, status)
+          call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
+          call ESMF_InternArrayDestroy(outarray, status)
         endif
 
         do j = jmin, jmax
@@ -1666,8 +1666,8 @@
         call ESMF_FieldGather(field_de, 0, outarray, rc=status)
         if (pet_id .eq. 0) then
           write(filename, 20)  "DE", file_no
-          call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
-          call ESMF_ArrayDestroy(outarray, status)
+          call ESMF_InternArrayWrite(outarray, filename=filename, rc=status)
+          call ESMF_InternArrayDestroy(outarray, status)
         endif
       endif
 
