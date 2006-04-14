@@ -1,4 +1,4 @@
-// $Id: ESMC_F90Interface_F.C,v 1.1 2006/04/13 23:20:01 theurich Exp $
+// $Id: ESMC_F90Interface_F.C,v 1.2 2006/04/14 16:17:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,37 +20,37 @@
 extern "C" {
 
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  // ESMC_InterfaceIntArray interfaces
+  // ESMC_InterfaceInt interfaces
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-  void FTN(c_esmc_interfaceintarraycreate1d)(ESMC_InterfaceIntArray **array, 
+  void FTN(c_esmc_interfaceintcreate1d)(ESMC_InterfaceInt **array, 
     int *farray, int *len, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_interfaceintarraycreate1d()"
-    *array = new ESMC_InterfaceIntArray(farray, 1, len);
+#define ESMC_METHOD "c_esmc_interfaceintcreate1d()"
+    *array = new ESMC_InterfaceInt(farray, 1, len);
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_interfaceintarraycreate2d)(ESMC_InterfaceIntArray **array, 
+  void FTN(c_esmc_interfaceintcreate2d)(ESMC_InterfaceInt **array, 
     int *farray, int *len, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_interfaceintarraycreate2d()"
-    *array = new ESMC_InterfaceIntArray(farray, 2, len);
+#define ESMC_METHOD "c_esmc_interfaceintcreate2d()"
+    *array = new ESMC_InterfaceInt(farray, 2, len);
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_interfaceintarraycreate3d)(ESMC_InterfaceIntArray **array, 
+  void FTN(c_esmc_interfaceintcreate3d)(ESMC_InterfaceInt **array, 
     int *farray, int *len, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_interfaceintarraycreate3d()"
-    *array = new ESMC_InterfaceIntArray(farray, 3, len);
+#define ESMC_METHOD "c_esmc_interfaceintcreate3d()"
+    *array = new ESMC_InterfaceInt(farray, 3, len);
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_interfaceintarraydestroy)(ESMC_InterfaceIntArray **array,
+  void FTN(c_esmc_interfaceintdestroy)(ESMC_InterfaceInt **array,
     int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_interfaceintarraydestroy()"
+#define ESMC_METHOD "c_esmc_interfaceintdestroy()"
     delete *array;
     *rc = ESMF_SUCCESS;
   }

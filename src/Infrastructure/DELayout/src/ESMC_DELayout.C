@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.45 2006/04/13 23:08:17 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.46 2006/04/14 16:17:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.45 2006/04/13 23:08:17 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.46 2006/04/14 16:17:15 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -131,9 +131,9 @@ ESMC_DELayout *ESMC_DELayoutCreate(
 // !ARGUMENTS:
 //
   int *deCountArg,          // (in) number of DEs
-  ESMC_InterfaceIntArray *deGrouping,// (in) deGrouping vector
+  ESMC_InterfaceInt *deGrouping,// (in) deGrouping vector
   ESMC_DePinFlag *dePinFlag,// (in) type of resources DEs are pinned to
-  ESMC_InterfaceIntArray *petListArg,// (in) list of PETs to be used in delayout
+  ESMC_InterfaceInt *petListArg,// (in) list of PETs to be used in delayout
   ESMC_VM *vm,              // (in) VM context
   int *rc){                 // (out) return code
 //

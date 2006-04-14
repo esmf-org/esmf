@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.27 2006/04/13 23:05:05 theurich Exp $
+// $Id: ESMC_DELayout_F.C,v 1.28 2006/04/14 16:17:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,8 +59,8 @@ extern "C" {
   }
 
   void FTN(c_esmc_delayoutcreatedefault)(ESMC_DELayout **ptr, int *deCount,
-    ESMC_InterfaceIntArray **deGrouping, ESMC_DePinFlag *dePinFlag, 
-    ESMC_InterfaceIntArray **petList, ESMC_VM **vm, int *rc){
+    ESMC_InterfaceInt **deGrouping, ESMC_DePinFlag *dePinFlag, 
+    ESMC_InterfaceInt **petList, ESMC_VM **vm, int *rc){
     int localrc;
     ESMC_VM *opt_vm;
 #undef  ESMC_METHOD

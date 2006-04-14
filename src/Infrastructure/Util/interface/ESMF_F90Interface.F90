@@ -1,4 +1,4 @@
-! $Id: ESMF_F90Interface.F90,v 1.1 2006/04/13 23:20:01 theurich Exp $
+! $Id: ESMF_F90Interface.F90,v 1.2 2006/04/14 16:17:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,17 +31,18 @@ module ESMF_F90InterfaceMod
 ! !PRIVATE TYPES:
   private
       
-  public ESMF_InterfaceIntArray
-  public ESMF_InterfaceIntArrayCreate, ESMF_InterfaceIntArrayDestroy
+  public ESMF_InterfaceInt
+  public ESMF_InterfaceIntCreate, ESMF_InterfaceIntDestroy
   
   
 !------------------------------------------------------------------------------
-!     ! ESMF_OptionalIntArray
+!     ! ESMF_InterfaceInt (helps handling [optional] integer arrays on the
+!                          F90-to-C++ interface)
 !
 !------------------------------------------------------------------------------
 
   ! F90 class type to hold pointer to C++ object
-  type ESMF_InterfaceIntArray
+  type ESMF_InterfaceInt
   sequence
   private
 #ifndef ESMF_NO_INITIALIZERS
@@ -58,12 +59,12 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InterfaceIntArrayCreate()"
+#define ESMF_METHOD "ESMF_InterfaceIntCreate()"
 !BOP
-! !IROUTINE: ESMF_InterfaceIntArrayCreate - Create InterfaceIntArray
+! !IROUTINE: ESMF_InterfaceIntCreate - Create InterfaceInt
 
 ! !INTERFACE:
-  function ESMF_InterfaceIntArrayCreate(farray1D, farray2D, farray3D, rc)
+  function ESMF_InterfaceIntCreate(farray1D, farray2D, farray3D, rc)
 !
 ! !ARGUMENTS:
     integer,                      intent(in), optional  :: farray1D(:)
@@ -72,15 +73,19 @@ contains
     integer,                      intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_InterfaceIntArray) :: ESMF_InterfaceIntArrayCreate
+    type(ESMF_InterfaceInt) :: ESMF_InterfaceIntCreate
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_InterfaceIntArray} from optional F90 array.
+!     Create an {\tt ESMF\_InterfaceInt} from optional F90 array.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[farray]}]
-!          F90 array.
+!     \item[{[farray1D]}]
+!          1D F90 array.
+!     \item[{[farray2D]}]
+!          2D F90 array.
+!     \item[{[farray3D]}]
+!          3D F90 array.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -88,22 +93,22 @@ contains
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer                 :: status       ! local error status
-    type(ESMF_InterfaceIntArray)     :: array     ! opaque pointer to new C++ DistGrid  
+    integer                 :: status     ! local error status
+    type(ESMF_InterfaceInt) :: array      ! opaque pointer to new C++ object
     integer, allocatable    :: len(:)
     
     ! initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
-    ! mark this InterfaceIntArray as invalid
+    ! mark this InterfaceInt as invalid
     array%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, depending on whether or not farray is present
     if (present(farray1D)) then
       allocate(len(1))
       len = shape(farray1D)
-      call c_ESMC_InterfaceIntArrayCreate1D(array, farray1D(1), len, status)
+      call c_ESMC_InterfaceIntCreate1D(array, farray1D(1), len, status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(len)
@@ -111,7 +116,7 @@ contains
     if (present(farray2D)) then
       allocate(len(2))
       len = shape(farray2D)
-      call c_ESMC_InterfaceIntArrayCreate2D(array, farray2D(1,1), len, status)
+      call c_ESMC_InterfaceIntCreate2D(array, farray2D(1,1), len, status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(len)
@@ -119,104 +124,43 @@ contains
     if (present(farray3D)) then
       allocate(len(3))
       len = shape(farray3D)
-      call c_ESMC_InterfaceIntArrayCreate3D(array, farray3D(1,1,1), len, status)
+      call c_ESMC_InterfaceIntCreate3D(array, farray3D(1,1,1), len, status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(len)
     endif
     
     ! set return value
-    ESMF_InterfaceIntArrayCreate = array
+    ESMF_InterfaceIntCreate = array
  
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end function ESMF_InterfaceIntArrayCreate
+  end function ESMF_InterfaceIntCreate
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InterfaceIntArrayCreate2D()"
+#define ESMF_METHOD "ESMF_InterfaceIntDestroy()"
 !BOP
-! !IROUTINE: ESMF_InterfaceIntArrayCreate2D - Create InterfaceIntArray
+! !IROUTINE: ESMF_InterfaceIntDestroy - Destroy InterfaceInt
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_InterfaceIntArrayCreate()
-  
-  function ESMF_InterfaceIntArrayCreate2D(farray, rc)
+  subroutine ESMF_InterfaceIntDestroy(array, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in), optional  :: farray(:,:)
-    integer,                      intent(out),optional  :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_InterfaceIntArray) :: ESMF_InterfaceIntArrayCreate2D
-!
-! !DESCRIPTION:
-!     Create an {\tt ESMF\_InterfaceIntArray} from optional F90 array.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{[farray]}]
-!          F90 array.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    integer                 :: status       ! local error status
-    type(ESMF_InterfaceIntArray)     :: array     ! opaque pointer to new C++ DistGrid  
-    integer                 :: len(2)
-    
-    ! initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
-    
-    ! mark this InterfaceIntArray as invalid
-    array%this = ESMF_NULL_POINTER
-
-    ! call into the C++ interface, depending on whether or not farray is present
-    if (present(farray)) then
-      len = shape(farray)
-      call c_ESMC_InterfaceIntArrayCreate2D(array, farray, len, status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-    
-    ! set return value
-    ESMF_InterfaceIntArrayCreate2D = array
- 
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
- 
-  end function ESMF_InterfaceIntArrayCreate2D
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InterfaceIntArrayDestroy()"
-!BOP
-! !IROUTINE: ESMF_InterfaceIntArrayDestroy - Destroy InterfaceIntArray
-
-! !INTERFACE:
-  subroutine ESMF_InterfaceIntArrayDestroy(array, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_InterfaceIntArray)     :: array
-    integer,                      intent(out),optional  :: rc
+    type(ESMF_InterfaceInt)           :: array
+    integer,  intent(out),  optional  :: rc
 !         
 !
 ! !DESCRIPTION:
-!     Destroy an {\tt ESMF\_InterfaceIntArray} object.
+!     Destroy an {\tt ESMF\_InterfaceInt} object.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[array]
-!          {\tt ESMF\_InterfaceIntArray} object.
+!          {\tt ESMF\_InterfaceInt} object.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -231,14 +175,14 @@ contains
     if (present(rc)) rc = ESMF_FAILURE
     
     ! call into the C++ interface
-    call c_ESMC_InterfaceIntArrayDestroy(array, status)
+    call c_ESMC_InterfaceIntDestroy(array, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_InterfaceIntArrayDestroy
+  end subroutine ESMF_InterfaceIntDestroy
 !------------------------------------------------------------------------------
 
 

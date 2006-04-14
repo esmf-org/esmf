@@ -1,4 +1,4 @@
-// $Id: ESMC_F90Interface.C,v 1.1 2006/04/13 23:20:02 theurich Exp $
+// $Id: ESMC_F90Interface.C,v 1.2 2006/04/14 16:17:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -16,13 +16,13 @@
 #include "ESMC_LogErr.h"                  // for LogErr
 #include "ESMC_F90Interface.h"
 
-ESMC_InterfaceIntArray::ESMC_InterfaceIntArray(void){
+ESMC_InterfaceInt::ESMC_InterfaceInt(void){
   // native constructor
   array = NULL;
   dimCount = 0;
 }
 
-ESMC_InterfaceIntArray::ESMC_InterfaceIntArray(int *arrayArg, int dimArg,
+ESMC_InterfaceInt::ESMC_InterfaceInt(int *arrayArg, int dimArg,
   int *lenArg){
   // native constructor
   array = arrayArg;
@@ -31,7 +31,7 @@ ESMC_InterfaceIntArray::ESMC_InterfaceIntArray(int *arrayArg, int dimArg,
     extent[i]=lenArg[i];
 }
 
-ESMC_InterfaceIntArray::~ESMC_InterfaceIntArray(void){
+ESMC_InterfaceInt::~ESMC_InterfaceInt(void){
   // native destructor
   array = NULL;
   dimCount = 0;

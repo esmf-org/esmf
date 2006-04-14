@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.1 2006/04/13 23:26:16 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.2 2006/04/14 16:17:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.1 2006/04/13 23:26:16 theurich Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.2 2006/04/14 16:17:27 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -294,28 +294,28 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: status     ! local error status
     type(ESMF_DistGrid)     :: distgrid   ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceIntArray):: minCornerArg ! helper variable
-    type(ESMF_InterfaceIntArray):: maxCornerArg ! helper variable
-    type(ESMF_InterfaceIntArray):: regDecompArg ! helper variable
+    type(ESMF_InterfaceInt):: minCornerArg ! helper variable
+    type(ESMF_InterfaceInt):: maxCornerArg ! helper variable
+    type(ESMF_InterfaceInt):: regDecompArg ! helper variable
     type(ESMF_DecompFlag), target:: dummyDf(0)  ! used to satisfy the C interf.
     type(ESMF_DecompFlag), pointer::  opt_decompflag(:) ! optional arg helper
     integer                 :: len_decompflag ! helper variable
-    type(ESMF_InterfaceIntArray):: deLabelListArg ! helper variable
-    type(ESMF_InterfaceIntArray):: connectionListArg ! helper variable
-    type(ESMF_InterfaceIntArray):: connectionTransformListArg ! helper variable
+    type(ESMF_InterfaceInt):: deLabelListArg ! helper variable
+    type(ESMF_InterfaceInt):: connectionListArg ! helper variable
+    type(ESMF_InterfaceInt):: connectionTransformListArg ! helper variable
 
     ! initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
     ! Deal with (optional) array arguments
-    minCornerArg = ESMF_InterfaceIntArrayCreate(minCorner, rc=status)
+    minCornerArg = ESMF_InterfaceIntCreate(minCorner, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxCornerArg = ESMF_InterfaceIntArrayCreate(maxCorner, rc=status)
+    maxCornerArg = ESMF_InterfaceIntCreate(maxCorner, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompArg = ESMF_InterfaceIntArrayCreate(regDecomp, rc=status)
+    regDecompArg = ESMF_InterfaceIntCreate(regDecomp, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (present(decompflag)) then
@@ -325,15 +325,15 @@ contains
       len_decompflag = 0
       opt_decompflag => dummyDf
     endif
-    deLabelListArg = ESMF_InterfaceIntArrayCreate(deLabelList, rc=status)
+    deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionListArg = &
-      ESMF_InterfaceIntArrayCreate(farray2D=connectionList, rc=status)
+      ESMF_InterfaceIntCreate(farray2D=connectionList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionTransformListArg = &
-      ESMF_InterfaceIntArrayCreate(farray2D=connectionTransformList, rc=status)
+      ESMF_InterfaceIntCreate(farray2D=connectionTransformList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -348,22 +348,22 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntArrayDestroy(minCornerArg, rc=status)
+    call ESMF_InterfaceIntDestroy(minCornerArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(maxCornerArg, rc=status)
+    call ESMF_InterfaceIntDestroy(maxCornerArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(regDecompArg, rc=status)
+    call ESMF_InterfaceIntDestroy(regDecompArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(deLabelListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(deLabelListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(connectionListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(connectionListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(connectionTransformListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(connectionTransformListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -506,36 +506,36 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: status     ! local error status
     type(ESMF_DistGrid)     :: distgrid   ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceIntArray):: minCornerArg ! helper variable
-    type(ESMF_InterfaceIntArray):: maxCornerArg ! helper variable
-    type(ESMF_InterfaceIntArray):: deBlockListArg ! helper variable
-    type(ESMF_InterfaceIntArray):: deLabelListArg ! helper variable
-    type(ESMF_InterfaceIntArray):: connectionListArg ! helper variable
-    type(ESMF_InterfaceIntArray):: connectionTransformListArg ! helper variable
+    type(ESMF_InterfaceInt):: minCornerArg ! helper variable
+    type(ESMF_InterfaceInt):: maxCornerArg ! helper variable
+    type(ESMF_InterfaceInt):: deBlockListArg ! helper variable
+    type(ESMF_InterfaceInt):: deLabelListArg ! helper variable
+    type(ESMF_InterfaceInt):: connectionListArg ! helper variable
+    type(ESMF_InterfaceInt):: connectionTransformListArg ! helper variable
 
     ! initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
     ! Deal with (optional) array arguments
-    minCornerArg = ESMF_InterfaceIntArrayCreate(minCorner, rc=status)
+    minCornerArg = ESMF_InterfaceIntCreate(minCorner, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxCornerArg = ESMF_InterfaceIntArrayCreate(maxCorner, rc=status)
+    maxCornerArg = ESMF_InterfaceIntCreate(maxCorner, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    deBlockListArg = ESMF_InterfaceIntArrayCreate(farray3D=deBlockList, rc=status)
+    deBlockListArg = ESMF_InterfaceIntCreate(farray3D=deBlockList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    deLabelListArg = ESMF_InterfaceIntArrayCreate(deLabelList, rc=status)
+    deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionListArg = &
-      ESMF_InterfaceIntArrayCreate(farray2D=connectionList, rc=status)
+      ESMF_InterfaceIntCreate(farray2D=connectionList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionTransformListArg = &
-      ESMF_InterfaceIntArrayCreate(farray2D=connectionTransformList, rc=status)
+      ESMF_InterfaceIntCreate(farray2D=connectionTransformList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -550,22 +550,22 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntArrayDestroy(minCornerArg, rc=status)
+    call ESMF_InterfaceIntDestroy(minCornerArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(maxCornerArg, rc=status)
+    call ESMF_InterfaceIntDestroy(maxCornerArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(deBlockListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(deBlockListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(deLabelListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(deLabelListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(connectionListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(connectionListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(connectionTransformListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(connectionTransformListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -703,28 +703,28 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: status     ! local error status
     type(ESMF_DistGrid)     :: distgrid   ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceIntArray):: minCornerArg ! helper variable
-    type(ESMF_InterfaceIntArray):: maxCornerArg ! helper variable
-    type(ESMF_InterfaceIntArray):: regDecompArg ! helper variable
+    type(ESMF_InterfaceInt):: minCornerArg ! helper variable
+    type(ESMF_InterfaceInt):: maxCornerArg ! helper variable
+    type(ESMF_InterfaceInt):: regDecompArg ! helper variable
     type(ESMF_DecompFlag), target:: dummyDf(0)  ! used to satisfy the C interf.
     type(ESMF_DecompFlag), pointer::  opt_decompflag(:) ! optional arg helper
     integer                 :: len_decompflag ! helper variable
-    type(ESMF_InterfaceIntArray):: deLabelListArg ! helper variable
-    type(ESMF_InterfaceIntArray):: connectionListArg ! helper variable
-    type(ESMF_InterfaceIntArray):: connectionTransformListArg ! helper variable
+    type(ESMF_InterfaceInt):: deLabelListArg ! helper variable
+    type(ESMF_InterfaceInt):: connectionListArg ! helper variable
+    type(ESMF_InterfaceInt):: connectionTransformListArg ! helper variable
 
     ! initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
     ! Deal with (optional) array arguments
-    minCornerArg = ESMF_InterfaceIntArrayCreate(minCorner, rc=status)
+    minCornerArg = ESMF_InterfaceIntCreate(minCorner, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxCornerArg = ESMF_InterfaceIntArrayCreate(maxCorner, rc=status)
+    maxCornerArg = ESMF_InterfaceIntCreate(maxCorner, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompArg = ESMF_InterfaceIntArrayCreate(regDecomp, rc=status)
+    regDecompArg = ESMF_InterfaceIntCreate(regDecomp, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (present(decompflag)) then
@@ -734,15 +734,15 @@ contains
       len_decompflag = 0
       opt_decompflag => dummyDf
     endif
-    deLabelListArg = ESMF_InterfaceIntArrayCreate(deLabelList, rc=status)
+    deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionListArg = &
-      ESMF_InterfaceIntArrayCreate(farray2D=connectionList, rc=status)
+      ESMF_InterfaceIntCreate(farray2D=connectionList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionTransformListArg = &
-      ESMF_InterfaceIntArrayCreate(farray2D=connectionTransformList, rc=status)
+      ESMF_InterfaceIntCreate(farray2D=connectionTransformList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -757,22 +757,22 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntArrayDestroy(minCornerArg, rc=status)
+    call ESMF_InterfaceIntDestroy(minCornerArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(maxCornerArg, rc=status)
+    call ESMF_InterfaceIntDestroy(maxCornerArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(regDecompArg, rc=status)
+    call ESMF_InterfaceIntDestroy(regDecompArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(deLabelListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(deLabelListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(connectionListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(connectionListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(connectionTransformListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(connectionTransformListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1072,29 +1072,29 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: status     ! local error status
     type(ESMF_DistGrid)     :: distgrid   ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterfaceIntArray):: minCornerArg ! helper variable
-    type(ESMF_InterfaceIntArray):: maxCornerArg ! helper variable
-    type(ESMF_InterfaceIntArray):: regDecompArg ! helper variable
+    type(ESMF_InterfaceInt):: minCornerArg ! helper variable
+    type(ESMF_InterfaceInt):: maxCornerArg ! helper variable
+    type(ESMF_InterfaceInt):: regDecompArg ! helper variable
     type(ESMF_DecompFlag), target:: dummyDf(0,0)  ! used to satisfy the C interf.
     type(ESMF_DecompFlag), pointer::  opt_decompflag(:,:) ! optional arg helper
     integer                 :: len1_decompflag ! helper variable
     integer                 :: len2_decompflag ! helper variable
-    type(ESMF_InterfaceIntArray):: deLabelListArg ! helper variable
-    type(ESMF_InterfaceIntArray):: connectionListArg ! helper variable
-    type(ESMF_InterfaceIntArray):: connectionTransformListArg ! helper variable
+    type(ESMF_InterfaceInt):: deLabelListArg ! helper variable
+    type(ESMF_InterfaceInt):: connectionListArg ! helper variable
+    type(ESMF_InterfaceInt):: connectionTransformListArg ! helper variable
 
     ! initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
     ! Deal with (optional) array arguments
-    minCornerArg = ESMF_InterfaceIntArrayCreate(farray2D=minCorner, rc=status)
+    minCornerArg = ESMF_InterfaceIntCreate(farray2D=minCorner, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxCornerArg = ESMF_InterfaceIntArrayCreate(farray2D=maxCorner, rc=status)
+    maxCornerArg = ESMF_InterfaceIntCreate(farray2D=maxCorner, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompArg = ESMF_InterfaceIntArrayCreate(farray2D=regDecomp, rc=status)
+    regDecompArg = ESMF_InterfaceIntCreate(farray2D=regDecomp, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (present(decompflag)) then
@@ -1106,15 +1106,15 @@ contains
       len2_decompflag = 0
       opt_decompflag => dummyDf
     endif
-    deLabelListArg = ESMF_InterfaceIntArrayCreate(deLabelList, rc=status)
+    deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionListArg = &
-      ESMF_InterfaceIntArrayCreate(farray2D=connectionList, rc=status)
+      ESMF_InterfaceIntCreate(farray2D=connectionList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionTransformListArg = &
-      ESMF_InterfaceIntArrayCreate(farray2D=connectionTransformList, rc=status)
+      ESMF_InterfaceIntCreate(farray2D=connectionTransformList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1130,22 +1130,22 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntArrayDestroy(minCornerArg, rc=status)
+    call ESMF_InterfaceIntDestroy(minCornerArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(maxCornerArg, rc=status)
+    call ESMF_InterfaceIntDestroy(maxCornerArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(regDecompArg, rc=status)
+    call ESMF_InterfaceIntDestroy(regDecompArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(deLabelListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(deLabelListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(connectionListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(connectionListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(connectionTransformListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(connectionTransformListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -2117,18 +2117,18 @@ contains
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer                     :: status         ! local error status
-    type(ESMF_InterfaceIntArray):: patchListArg   ! helper variable
-    type(ESMF_InterfaceIntArray):: dimExtentArg   ! helper variable
+    type(ESMF_InterfaceInt):: patchListArg   ! helper variable
+    type(ESMF_InterfaceInt):: dimExtentArg   ! helper variable
 
     ! initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
     ! Deal with (optional) array arguments
-    patchListArg = ESMF_InterfaceIntArrayCreate(patchList, rc=status)
+    patchListArg = ESMF_InterfaceIntCreate(patchList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    dimExtentArg = ESMF_InterfaceIntArrayCreate(farray2D=dimExtent, rc=status)
+    dimExtentArg = ESMF_InterfaceIntCreate(farray2D=dimExtent, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2139,10 +2139,10 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
-    call ESMF_InterfaceIntArrayDestroy(patchListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(patchListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(dimExtentArg, rc=status)
+    call ESMF_InterfaceIntDestroy(dimExtentArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2252,14 +2252,14 @@ contains
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer                     :: status         ! local error status
-    type(ESMF_InterfaceIntArray):: indexListArg   ! helper variable
+    type(ESMF_InterfaceInt):: indexListArg   ! helper variable
 
     ! initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
     ! Deal with (optional) array arguments
-    indexListArg = ESMF_InterfaceIntArrayCreate(indexList, rc=status)
+    indexListArg = ESMF_InterfaceIntCreate(indexList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2269,7 +2269,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
-    call ESMF_InterfaceIntArrayDestroy(indexListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(indexListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2444,23 +2444,23 @@ contains
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer                 :: status     ! local error status
-    type(ESMF_InterfaceIntArray):: connectionElementArg ! helper variable
-    type(ESMF_InterfaceIntArray):: positionVectorArg ! helper variable
-    type(ESMF_InterfaceIntArray):: orientationVectorArg ! helper variable
+    type(ESMF_InterfaceInt):: connectionElementArg ! helper variable
+    type(ESMF_InterfaceInt):: positionVectorArg ! helper variable
+    type(ESMF_InterfaceInt):: orientationVectorArg ! helper variable
 
     ! initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
     ! Deal with (optional) array arguments
-    connectionElementArg = ESMF_InterfaceIntArrayCreate(connectionElement, &
+    connectionElementArg = ESMF_InterfaceIntCreate(connectionElement, &
       rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    positionVectorArg = ESMF_InterfaceIntArrayCreate(positionVector, rc=status)
+    positionVectorArg = ESMF_InterfaceIntCreate(positionVector, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    orientationVectorArg = ESMF_InterfaceIntArrayCreate(orientationVector, &
+    orientationVectorArg = ESMF_InterfaceIntCreate(orientationVector, &
       rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2472,13 +2472,13 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntArrayDestroy(connectionElementArg, rc=status)
+    call ESMF_InterfaceIntDestroy(connectionElementArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(positionVectorArg, rc=status)
+    call ESMF_InterfaceIntDestroy(positionVectorArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(orientationVectorArg, rc=status)
+    call ESMF_InterfaceIntDestroy(orientationVectorArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     

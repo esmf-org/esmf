@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.5 2006/04/13 23:26:15 theurich Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.6 2006/04/14 16:17:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,12 +43,12 @@ extern "C" {
   // - ESMF-public methods:
         
   void FTN(c_esmc_distgridcreateregdecomp)(ESMC_DistGrid **ptr, 
-    ESMC_InterfaceIntArray **minCorner, ESMC_InterfaceIntArray **maxCorner,
-    ESMC_InterfaceIntArray **regDecomp,
+    ESMC_InterfaceInt **minCorner, ESMC_InterfaceInt **maxCorner,
+    ESMC_InterfaceInt **regDecomp,
     ESMC_DecompFlag *decompflag, int *decompflagCount, 
-    ESMC_InterfaceIntArray **deLabelList, ESMC_IndexFlag *indexflag, 
-    ESMC_InterfaceIntArray **connectionList,
-    ESMC_InterfaceIntArray **connectionTransformList,
+    ESMC_InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMC_InterfaceInt **connectionList,
+    ESMC_InterfaceInt **connectionTransformList,
     ESMC_DELayout **delayout, ESMC_VM **vm, int *rc){
     int localrc;
     ESMC_DELayout *opt_delayout;
@@ -72,11 +72,11 @@ extern "C" {
   }
   
   void FTN(c_esmc_distgridcreatedeblocks)(ESMC_DistGrid **ptr, 
-    ESMC_InterfaceIntArray **minCorner, ESMC_InterfaceIntArray **maxCorner,
-    ESMC_InterfaceIntArray **deBlockList,
-    ESMC_InterfaceIntArray **deLabelList, ESMC_IndexFlag *indexflag, 
-    ESMC_InterfaceIntArray **connectionList,
-    ESMC_InterfaceIntArray **connectionTransformList,
+    ESMC_InterfaceInt **minCorner, ESMC_InterfaceInt **maxCorner,
+    ESMC_InterfaceInt **deBlockList,
+    ESMC_InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMC_InterfaceInt **connectionList,
+    ESMC_InterfaceInt **connectionTransformList,
     ESMC_DELayout **delayout, ESMC_VM **vm, int *rc){
     int localrc;
     ESMC_DELayout *opt_delayout;
@@ -100,12 +100,12 @@ extern "C" {
   }
   
   void FTN(c_esmc_distgridcreateregdecompfa)(ESMC_DistGrid **ptr, 
-    ESMC_InterfaceIntArray **minCorner, ESMC_InterfaceIntArray **maxCorner,
-    ESMC_InterfaceIntArray **regDecomp,
+    ESMC_InterfaceInt **minCorner, ESMC_InterfaceInt **maxCorner,
+    ESMC_InterfaceInt **regDecomp,
     ESMC_DecompFlag *decompflag, int *decompflagCount, 
-    ESMC_InterfaceIntArray **deLabelList, ESMC_IndexFlag *indexflag, 
-    ESMC_InterfaceIntArray **connectionList,
-    ESMC_InterfaceIntArray **connectionTransformList,
+    ESMC_InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMC_InterfaceInt **connectionList,
+    ESMC_InterfaceInt **connectionTransformList,
     int *fastAxis, ESMC_VM **vm, int *rc){
     int localrc;
     ESMC_VM *opt_vm;
@@ -125,12 +125,12 @@ extern "C" {
   }
   
   void FTN(c_esmc_distgridcreateregdecomppatch)(ESMC_DistGrid **ptr, 
-    ESMC_InterfaceIntArray **minCorner, ESMC_InterfaceIntArray **maxCorner,
-    ESMC_InterfaceIntArray **regDecomp,
+    ESMC_InterfaceInt **minCorner, ESMC_InterfaceInt **maxCorner,
+    ESMC_InterfaceInt **regDecomp,
     ESMC_DecompFlag *decompflag, int *decompflagCount1, int *decompflagCount2, 
-    ESMC_InterfaceIntArray **deLabelList, ESMC_IndexFlag *indexflag, 
-    ESMC_InterfaceIntArray **connectionList,
-    ESMC_InterfaceIntArray **connectionTransformList,
+    ESMC_InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
+    ESMC_InterfaceInt **connectionList,
+    ESMC_InterfaceInt **connectionTransformList,
     ESMC_DELayout **delayout, ESMC_VM **vm, int *rc){
     int localrc;
     ESMC_DELayout *opt_delayout;
@@ -163,8 +163,8 @@ extern "C" {
   }
 
   void FTN(c_esmc_distgridget)(ESMC_DistGrid **ptr, ESMC_DELayout **delayout,
-    ESMC_InterfaceIntArray **patchList, int *dimCount,
-    ESMC_InterfaceIntArray **dimExtent, ESMC_Logical *regDecompFlag, int *rc){
+    ESMC_InterfaceInt **patchList, int *dimCount,
+    ESMC_InterfaceInt **dimExtent, ESMC_Logical *regDecompFlag, int *rc){
     ESMC_DELayout **opt_delayout;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridget()"
@@ -183,7 +183,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_distgridgetpdepdim)(ESMC_DistGrid **ptr, int *de, int *dim,
-    ESMC_InterfaceIntArray **indexList, int *rc){
+    ESMC_InterfaceInt **indexList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetpdepdim()"
     // call into C++, dealing with optional arguments 
@@ -203,9 +203,9 @@ extern "C" {
   }
   
   void FTN(c_esmc_connectionelementconstruct)(
-    ESMC_InterfaceIntArray **connectionElement, int *patchIndexA,
-    int *patchIndexB, ESMC_InterfaceIntArray **positionVector,
-    ESMC_InterfaceIntArray **orientationVector, int *rc){
+    ESMC_InterfaceInt **connectionElement, int *patchIndexA,
+    int *patchIndexB, ESMC_InterfaceInt **positionVector,
+    ESMC_InterfaceInt **orientationVector, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_connectionelementconstruct()"
     // call into C++

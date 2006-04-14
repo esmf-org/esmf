@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.1 2006/04/13 23:26:16 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.2 2006/04/14 16:17:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DistGrid.C,v 1.1 2006/04/13 23:26:16 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DistGrid.C,v 1.2 2006/04/14 16:17:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -76,15 +76,15 @@ ESMC_DistGrid *ESMC_DistGridCreate(
 //
 // !ARGUMENTS:
 //
-  ESMC_InterfaceIntArray *minCorner,          // (in)
-  ESMC_InterfaceIntArray *maxCorner,          // (in)
-  ESMC_InterfaceIntArray *regDecomp,          // (in)
+  ESMC_InterfaceInt *minCorner,          // (in)
+  ESMC_InterfaceInt *maxCorner,          // (in)
+  ESMC_InterfaceInt *regDecomp,          // (in)
   ESMC_DecompFlag *decompflag,                // (in)
   int decompflagCount,                        // (in)
-  ESMC_InterfaceIntArray *deLabelList,        // (in)
+  ESMC_InterfaceInt *deLabelList,        // (in)
   ESMC_IndexFlag *indexflag,                  // (in)
-  ESMC_InterfaceIntArray *connectionList,     // (in)
-  ESMC_InterfaceIntArray *connectionTransformList, // (in)
+  ESMC_InterfaceInt *connectionList,     // (in)
+  ESMC_InterfaceInt *connectionTransformList, // (in)
   ESMC_DELayout *delayout,                    // (in)
   ESMC_VM *vm,                                // (in)
   int *rc                                     // (out) return code
@@ -207,7 +207,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     dummy[0] = deCount;
     for (int i=1; i<dimCount; i++)
       dummy[i] = 1;
-    regDecomp = new ESMC_InterfaceIntArray(dummy, 1, &dimCount);
+    regDecomp = new ESMC_InterfaceInt(dummy, 1, &dimCount);
   }
   if (regDecomp->dimCount != 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
@@ -240,7 +240,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     // set default sequence
     for (int i=0; i<deCount; i++)
       dummy[i] = i;
-    deLabelList = new ESMC_InterfaceIntArray(dummy, 1, &deCount);
+    deLabelList = new ESMC_InterfaceInt(dummy, 1, &deCount);
   }
   if (deLabelList->dimCount != 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
@@ -400,13 +400,13 @@ ESMC_DistGrid *ESMC_DistGridCreate(
 //
 // !ARGUMENTS:
 //
-  ESMC_InterfaceIntArray *minCorner,          // (in)
-  ESMC_InterfaceIntArray *maxCorner,          // (in)
-  ESMC_InterfaceIntArray *deBlockList,        // (in)
-  ESMC_InterfaceIntArray *deLabelList,        // (in)
+  ESMC_InterfaceInt *minCorner,          // (in)
+  ESMC_InterfaceInt *maxCorner,          // (in)
+  ESMC_InterfaceInt *deBlockList,        // (in)
+  ESMC_InterfaceInt *deLabelList,        // (in)
   ESMC_IndexFlag *indexflag,                  // (in)
-  ESMC_InterfaceIntArray *connectionList,     // (in)
-  ESMC_InterfaceIntArray *connectionTransformList, // (in)
+  ESMC_InterfaceInt *connectionList,     // (in)
+  ESMC_InterfaceInt *connectionTransformList, // (in)
   ESMC_DELayout *delayout,                    // (in)
   ESMC_VM *vm,                                // (in)
   int *rc                                     // (out) return code
@@ -535,7 +535,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     // set default sequence
     for (int i=0; i<deCount; i++)
       dummy[i] = i;
-    deLabelList = new ESMC_InterfaceIntArray(dummy, 1, &deCount);
+    deLabelList = new ESMC_InterfaceInt(dummy, 1, &deCount);
   }
   if (deLabelList->dimCount != 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
@@ -620,15 +620,15 @@ ESMC_DistGrid *ESMC_DistGridCreate(
 //
 // !ARGUMENTS:
 //
-  ESMC_InterfaceIntArray *minCorner,          // (in)
-  ESMC_InterfaceIntArray *maxCorner,          // (in)
-  ESMC_InterfaceIntArray *regDecomp,          // (in)
+  ESMC_InterfaceInt *minCorner,          // (in)
+  ESMC_InterfaceInt *maxCorner,          // (in)
+  ESMC_InterfaceInt *regDecomp,          // (in)
   ESMC_DecompFlag *decompflag,                // (in)
   int decompflagCount,                        // (in)
-  ESMC_InterfaceIntArray *deLabelList,        // (in)
+  ESMC_InterfaceInt *deLabelList,        // (in)
   ESMC_IndexFlag *indexflag,                  // (in)
-  ESMC_InterfaceIntArray *connectionList,     // (in)
-  ESMC_InterfaceIntArray *connectionTransformList, // (in)
+  ESMC_InterfaceInt *connectionList,     // (in)
+  ESMC_InterfaceInt *connectionTransformList, // (in)
   int fastAxis,                               // (in)
   ESMC_VM *vm,                                // (in)
   int *rc                                     // (out) return code
@@ -681,16 +681,16 @@ ESMC_DistGrid *ESMC_DistGridCreate(
 //
 // !ARGUMENTS:
 //
-  ESMC_InterfaceIntArray *minCorner,          // (in)
-  ESMC_InterfaceIntArray *maxCorner,          // (in)
-  ESMC_InterfaceIntArray *regDecomp,          // (in)
+  ESMC_InterfaceInt *minCorner,          // (in)
+  ESMC_InterfaceInt *maxCorner,          // (in)
+  ESMC_InterfaceInt *regDecomp,          // (in)
   ESMC_DecompFlag *decompflag,                // (in)
   int decompflagCount1,                       // (in)
   int decompflagCount2,                       // (in)
-  ESMC_InterfaceIntArray *deLabelList,        // (in)
+  ESMC_InterfaceInt *deLabelList,        // (in)
   ESMC_IndexFlag *indexflag,                  // (in)
-  ESMC_InterfaceIntArray *connectionList,     // (in)
-  ESMC_InterfaceIntArray *connectionTransformList, // (in)
+  ESMC_InterfaceInt *connectionList,     // (in)
+  ESMC_InterfaceInt *connectionTransformList, // (in)
   ESMC_DELayout *delayout,                    // (in)
   ESMC_VM *vm,                                // (in)
   int *rc                                     // (out) return code
@@ -839,7 +839,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
       dummy[i] = 1;
     dummyLen[0] = dimCount;
     dummyLen[1] = patchCount;
-    regDecomp = new ESMC_InterfaceIntArray(dummy, 2, dummyLen);
+    regDecomp = new ESMC_InterfaceInt(dummy, 2, dummyLen);
   }
   if (regDecomp->dimCount != 2){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
@@ -880,7 +880,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     // set default sequence
     for (int i=0; i<deCount; i++)
       dummy[i] = i;
-    deLabelList = new ESMC_InterfaceIntArray(dummy, 1, &deCount);
+    deLabelList = new ESMC_InterfaceInt(dummy, 1, &deCount);
   }
   if (deLabelList->dimCount != 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
@@ -1117,7 +1117,7 @@ int ESMC_DistGrid::ESMC_DistGridConstruct(
   int *dimExtentArg,            // (in)
   int **indexListArg,           // (in)
   ESMC_Logical regDecompFlagArg,// (in)
-  ESMC_InterfaceIntArray *connectionList,     // (in)
+  ESMC_InterfaceInt *connectionList,     // (in)
   ESMC_DELayout *delayoutArg,   // (in) DELayout
   ESMC_VM *vmArg                // (in) VM context
   ){
@@ -1331,9 +1331,9 @@ int ESMC_DistGrid::ESMC_DistGridGet(
 // !ARGUMENTS:
 //
   ESMC_DELayout **delayoutArg,          // out - DELayout object
-  ESMC_InterfaceIntArray *patchList,    // out - list of patch ID numbers
+  ESMC_InterfaceInt *patchList,    // out - list of patch ID numbers
   int  *dimCountArg,                    // out - DistGrid rank
-  ESMC_InterfaceIntArray *dimExtentArg, // out - extents per dim per DE
+  ESMC_InterfaceInt *dimExtentArg, // out - extents per dim per DE
   ESMC_Logical *regDecompFlagArg        // out - flag indicating regular decomp.
   ){    
 //
@@ -1409,7 +1409,7 @@ int ESMC_DistGrid::ESMC_DistGridGet(
 //
   int de,                               // in  - DE   = {0, ..., deCount-1}
   int dim,                              // in  - dim  = {1, ..., dimCount}
-  ESMC_InterfaceIntArray *indexListArg  // out - list of indices per DE per dim
+  ESMC_InterfaceInt *indexListArg  // out - list of indices per DE per dim
   ){    
 //
 // !DESCRIPTION:
@@ -1472,11 +1472,11 @@ int ESMC_ConnectionElementConstruct(
 //
 // !ARGUMENTS:
 //
-  ESMC_InterfaceIntArray *connectionElement,  // out -
+  ESMC_InterfaceInt *connectionElement,  // out -
   int patchIndexA,                            // in  -
   int patchIndexB,                            // in  -
-  ESMC_InterfaceIntArray *positionVector,     // in -
-  ESMC_InterfaceIntArray *orientationVector   // in -
+  ESMC_InterfaceInt *positionVector,     // in -
+  ESMC_InterfaceInt *orientationVector   // in -
   ){    
 //
 // !DESCRIPTION:

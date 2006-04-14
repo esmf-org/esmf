@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.54 2006/04/13 23:03:58 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.55 2006/04/14 16:17:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.54 2006/04/13 23:03:58 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.55 2006/04/14 16:17:15 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -267,18 +267,18 @@ end function
 !------------------------------------------------------------------------------
     integer                 :: status       ! local error status
     type(ESMF_DELayout)     :: delayout     ! opaque pointer to new C++ DELayout  
-    type(ESMF_InterfaceIntArray):: deGroupingArg
-    type(ESMF_InterfaceIntArray):: petListArg
+    type(ESMF_InterfaceInt) :: deGroupingArg
+    type(ESMF_InterfaceInt) :: petListArg
 
     ! initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
     ! Deal with optional array arguments
-    deGroupingArg = ESMF_InterfaceIntArrayCreate(deGrouping, rc=status)
+    deGroupingArg = ESMF_InterfaceIntCreate(deGrouping, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    petListArg = ESMF_InterfaceIntArrayCreate(petList, rc=status)
+    petListArg = ESMF_InterfaceIntCreate(petList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -295,10 +295,10 @@ end function
     ESMF_DELayoutCreateDefault = delayout 
     
     ! garbage collection
-    call ESMF_InterfaceIntArrayDestroy(deGroupingArg, rc=status)
+    call ESMF_InterfaceIntDestroy(deGroupingArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(petListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(petListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -480,18 +480,18 @@ end function
 !------------------------------------------------------------------------------
     integer                 :: status       ! local error status
     type(ESMF_DELayout)     :: delayout     ! opaque pointer to new C++ DELayout  
-    type(ESMF_InterfaceIntArray):: deGroupingArg
-    type(ESMF_InterfaceIntArray):: petListArg
+    type(ESMF_InterfaceInt) :: deGroupingArg
+    type(ESMF_InterfaceInt) :: petListArg
 
     ! initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
     
     ! Deal with optional array arguments
-    deGroupingArg = ESMF_InterfaceIntArrayCreate(deGrouping, rc=status)
+    deGroupingArg = ESMF_InterfaceIntCreate(deGrouping, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    petListArg = ESMF_InterfaceIntArrayCreate(petList, rc=status)
+    petListArg = ESMF_InterfaceIntCreate(petList, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -510,10 +510,10 @@ end function
     ESMF_DELayoutCreateHintWeights = delayout 
  
     ! garbage collection
-    call ESMF_InterfaceIntArrayDestroy(deGroupingArg, rc=status)
+    call ESMF_InterfaceIntDestroy(deGroupingArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntArrayDestroy(petListArg, rc=status)
+    call ESMF_InterfaceIntDestroy(petListArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  

@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.4 2006/04/13 23:26:15 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.5 2006/04/14 16:17:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -72,14 +72,14 @@ class ESMC_DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     // Construct and Destruct
     int ESMC_DistGridConstruct(int dimCount, int patchCount, int *dimExtent, 
       int **indexList, ESMC_Logical regDecompFlagArg, 
-      ESMC_InterfaceIntArray *connectionList,
+      ESMC_InterfaceInt *connectionList,
       ESMC_DELayout *delayout, ESMC_VM *vm);
     int ESMC_DistGridDestruct(void);
     // Get, Set
     int ESMC_DistGridGet(ESMC_DELayout **delayoutArg,
-      ESMC_InterfaceIntArray *patchList, int *dimCountArg,
-      ESMC_InterfaceIntArray *dimExtentArg, ESMC_Logical *regDecompFlagArg);
-    int ESMC_DistGridGet(int de, int dim, ESMC_InterfaceIntArray *indexList);
+      ESMC_InterfaceInt *patchList, int *dimCountArg,
+      ESMC_InterfaceInt *dimExtentArg, ESMC_Logical *regDecompFlagArg);
+    int ESMC_DistGridGet(int de, int dim, ESMC_InterfaceInt *indexList);
     // IO and validation
     int ESMC_DistGridPrint(void);
       
@@ -87,40 +87,40 @@ class ESMC_DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
 
 
 // external methods:
-ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceIntArray *minCorner,
-  ESMC_InterfaceIntArray *maxCorner, ESMC_InterfaceIntArray *regDecomp, 
+ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceInt *minCorner,
+  ESMC_InterfaceInt *maxCorner, ESMC_InterfaceInt *regDecomp, 
   ESMC_DecompFlag *decompflag, int decompflagCount,
-  ESMC_InterfaceIntArray *deLabelList, ESMC_IndexFlag *indexflag, 
-  ESMC_InterfaceIntArray *connectionList,
-  ESMC_InterfaceIntArray *connectionTransformList, 
+  ESMC_InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
+  ESMC_InterfaceInt *connectionList,
+  ESMC_InterfaceInt *connectionTransformList, 
   ESMC_DELayout *delayout=NULL, ESMC_VM *vm=NULL, int *rc=NULL);
-ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceIntArray *minCorner,
-  ESMC_InterfaceIntArray *maxCorner, ESMC_InterfaceIntArray *deBlockList, 
-  ESMC_InterfaceIntArray *deLabelList, ESMC_IndexFlag *indexflag, 
-  ESMC_InterfaceIntArray *connectionList,
-  ESMC_InterfaceIntArray *connectionTransformList, 
+ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceInt *minCorner,
+  ESMC_InterfaceInt *maxCorner, ESMC_InterfaceInt *deBlockList, 
+  ESMC_InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
+  ESMC_InterfaceInt *connectionList,
+  ESMC_InterfaceInt *connectionTransformList, 
   ESMC_DELayout *delayout=NULL, ESMC_VM *vm=NULL, int *rc=NULL);
-ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceIntArray *minCorner,
-  ESMC_InterfaceIntArray *maxCorner, ESMC_InterfaceIntArray *regDecomp, 
+ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceInt *minCorner,
+  ESMC_InterfaceInt *maxCorner, ESMC_InterfaceInt *regDecomp, 
   ESMC_DecompFlag *decompflag, int decompflagCount,
-  ESMC_InterfaceIntArray *deLabelList, ESMC_IndexFlag *indexflag, 
-  ESMC_InterfaceIntArray *connectionList,
-  ESMC_InterfaceIntArray *connectionTransformList, 
+  ESMC_InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
+  ESMC_InterfaceInt *connectionList,
+  ESMC_InterfaceInt *connectionTransformList, 
   int fastAxis, ESMC_VM *vm=NULL, int *rc=NULL);
-ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceIntArray *minCorner,
-  ESMC_InterfaceIntArray *maxCorner, ESMC_InterfaceIntArray *regDecomp, 
+ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceInt *minCorner,
+  ESMC_InterfaceInt *maxCorner, ESMC_InterfaceInt *regDecomp, 
   ESMC_DecompFlag *decompflag, int decompflagCount1, int decompflagCount2,
-  ESMC_InterfaceIntArray *deLabelList, ESMC_IndexFlag *indexflag, 
-  ESMC_InterfaceIntArray *connectionList,
-  ESMC_InterfaceIntArray *connectionTransformList, 
+  ESMC_InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
+  ESMC_InterfaceInt *connectionList,
+  ESMC_InterfaceInt *connectionTransformList, 
   ESMC_DELayout *delayout=NULL, ESMC_VM *vm=NULL, int *rc=NULL);
 int ESMC_DistGridDestroy(ESMC_DistGrid **distgrid);
   
 
 int ESMC_ConnectionElementConstruct(
-  ESMC_InterfaceIntArray *connectionElement, int patchIndexA, int patchIndexB,
-  ESMC_InterfaceIntArray *positionVector,
-  ESMC_InterfaceIntArray *orientationVector);
+  ESMC_InterfaceInt *connectionElement, int patchIndexA, int patchIndexB,
+  ESMC_InterfaceInt *positionVector,
+  ESMC_InterfaceInt *orientationVector);
 
 
 #endif  // ESMC_DistGrid_H
