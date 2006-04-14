@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.3 2006/04/14 18:27:50 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.4 2006/04/14 20:57:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DistGrid.C,v 1.3 2006/04/14 18:27:50 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DistGrid.C,v 1.4 2006/04/14 20:57:36 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -191,6 +191,15 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   if (delayout == ESMC_NULL_POINTER){
     // delayout was not provided -> create default DELayout with deCount DEs
     delayout = ESMC_DELayoutCreate(&deCount, NULL, NULL, NULL, vm, &status);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+  }else{
+    // delayout was provided -> check deCount
+    status=delayout->ESMC_DELayoutGet(NULL, &deCount, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
       delete distgrid;
       distgrid = ESMC_NULL_POINTER;
@@ -525,6 +534,15 @@ ESMC_DistGrid *ESMC_DistGridCreate(
       distgrid = ESMC_NULL_POINTER;
       return ESMC_NULL_POINTER;
     }
+  }else{
+    // delayout was provided -> check deCount
+    status=delayout->ESMC_DELayoutGet(NULL, &deCount, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
   }
   int *dummy;
   int deLabelListDeleteFlag = 0;  // reset
@@ -822,6 +840,15 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   if (delayout == ESMC_NULL_POINTER){
     // delayout was not provided -> create default DELayout with deCount DEs
     delayout = ESMC_DELayoutCreate(&deCount, NULL, NULL, NULL, vm, &status);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+  }else{
+    // delayout was provided -> check deCount
+    status=delayout->ESMC_DELayoutGet(NULL, &deCount, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
       delete distgrid;
       distgrid = ESMC_NULL_POINTER;
