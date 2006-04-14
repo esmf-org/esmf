@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.2 2006/04/14 16:17:27 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.3 2006/04/14 18:27:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -97,15 +97,15 @@ module ESMF_DistGridMod
   public ESMF_DistGridGet
   public ESMF_DistGridPrint
   
-  public ESMF_ConnectionElementConstruct
-  public ESMF_ConnectionTransformElementConstruct  
+  public ESMF_Connection
+  public ESMF_ConnectionTransform
 !EOPI
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.2 2006/04/14 16:17:27 theurich Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.3 2006/04/14 18:27:50 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2399,15 +2399,15 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ConnectionElementConstruct()"
+#define ESMF_METHOD "ESMF_Connection()"
 !BOP
-! !IROUTINE: ESMF_ConnectionElementConstruct - Construct a connection element
+! !IROUTINE: ESMF_Connection - Construct a connection element
 ! !INTERFACE:
-  subroutine ESMF_ConnectionElementConstruct(connectionElement, &
-    patchIndexA, patchIndexB, positionVector, orientationVector, rc)
+  subroutine ESMF_Connection(connection, patchIndexA, patchIndexB, &
+    positionVector, orientationVector, rc)
 !
 ! !ARGUMENTS:
-    integer,                intent(out)           :: connectionElement(:)
+    integer,                intent(out)           :: connection(:)
     integer,                intent(in)            :: patchIndexA
     integer,                intent(in)            :: patchIndexB
     integer,                intent(in)            :: positionVector(:)
@@ -2416,13 +2416,13 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!     This call helps to construct a {\tt connectionElement},
+!     This call helps to construct a {\tt connection},
 !     which is a simple vector of integers, out of its components.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[connectionElement] 
-!        Element to be constructed. The provided {\tt connectionElement} must 
+!     \item[connection] 
+!        Element to be constructed. The provided {\tt connection} must 
 !        be dimensioned to hold exactly the number of integers that result from
 !        the input information.
 !     \item[patchIndexA] 
@@ -2444,7 +2444,7 @@ contains
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer                 :: status     ! local error status
-    type(ESMF_InterfaceInt):: connectionElementArg ! helper variable
+    type(ESMF_InterfaceInt):: connectionArg ! helper variable
     type(ESMF_InterfaceInt):: positionVectorArg ! helper variable
     type(ESMF_InterfaceInt):: orientationVectorArg ! helper variable
 
@@ -2453,8 +2453,7 @@ contains
     if (present(rc)) rc = ESMF_FAILURE
     
     ! Deal with (optional) array arguments
-    connectionElementArg = ESMF_InterfaceIntCreate(connectionElement, &
-      rc=status)
+    connectionArg = ESMF_InterfaceIntCreate(connection, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     positionVectorArg = ESMF_InterfaceIntCreate(positionVector, rc=status)
@@ -2466,13 +2465,13 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ConnectionElementConstruct(connectionElementArg, &
+    call c_ESMC_Connection(connectionArg, &
       patchIndexA, patchIndexB, positionVectorArg, orientationVectorArg, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(connectionElementArg, rc=status)
+    call ESMF_InterfaceIntDestroy(connectionArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(positionVectorArg, rc=status)
@@ -2485,22 +2484,22 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_ConnectionElementConstruct
+  end subroutine ESMF_Connection
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ConnectionTransformElementConstruct()"
+#define ESMF_METHOD "ESMF_ConnectionTransform()"
 !BOP
-! !IROUTINE: ESMF_ConnectionTransformElementConstruct - Construct a connection transform element
+! !IROUTINE: ESMF_ConnectionTransform - Construct a connection transform element
 ! !INTERFACE:
-  subroutine ESMF_ConnectionTransformElementConstruct(connectionTransformElement,&
+  subroutine ESMF_ConnectionTransform(connectionTransform,&
     connectionIndex, direction, staggerSrc, staggerDst, indexOffsetVector, &
     signChangeVector, rc)
 !
 ! !ARGUMENTS:
-    integer,                intent(out)           :: connectionTransformElement(:)
+    integer,                intent(out)           :: connectionTransform(:)
     integer,                intent(in)            :: connectionIndex
     integer,                intent(in)            :: direction
     integer,                intent(in)            :: staggerSrc
@@ -2511,13 +2510,13 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!     This call helps to construct a {\tt connectionTransformElement},
+!     This call helps to construct a {\tt connectionTransform},
 !     which is a simple vector of integers, out of its components.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[connectionTransformElement] 
-!        Element to be constructed. The provided {\tt connectionTransformElement} 
+!     \item[connectionTransform] 
+!        Element to be constructed. The provided {\tt connectionTransform} 
 !        must be dimensioned to hold exactly the number of integers that result
 !        from the input information.
 !     \item[connectionIndex] 
@@ -2560,7 +2559,7 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-  end subroutine ESMF_ConnectionTransformElementConstruct
+  end subroutine ESMF_ConnectionTransform
 !------------------------------------------------------------------------------
 
 end module ESMF_DistGridMod

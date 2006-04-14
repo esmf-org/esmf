@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.5 2006/04/14 16:17:26 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.6 2006/04/14 18:27:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -57,8 +57,8 @@ class ESMC_DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int *dimExtent;               // extent of indexList held by DE per dim
     int **indexList;              // indices held by DE per dim
     ESMC_Logical regDecompFlag;   // flag indicating regular decomposition
-    int **connectionElementList;  // list of connection elements
-    int connectionElementCount;   // number of elements in connection elem. list
+    int **connectionList;         // list of connection elements
+    int connectionCount;          // number of elements in connection list
     // lower level objects
     ESMC_DELayout *delayout;
     ESMC_VM *vm;    
@@ -117,8 +117,8 @@ ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceInt *minCorner,
 int ESMC_DistGridDestroy(ESMC_DistGrid **distgrid);
   
 
-int ESMC_ConnectionElementConstruct(
-  ESMC_InterfaceInt *connectionElement, int patchIndexA, int patchIndexB,
+int ESMC_Connection(
+  ESMC_InterfaceInt *connection, int patchIndexA, int patchIndexB,
   ESMC_InterfaceInt *positionVector,
   ESMC_InterfaceInt *orientationVector);
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.6 2006/04/14 16:17:26 theurich Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.7 2006/04/14 18:27:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -202,15 +202,15 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_connectionelementconstruct)(
-    ESMC_InterfaceInt **connectionElement, int *patchIndexA,
+  void FTN(c_esmc_connection)(
+    ESMC_InterfaceInt **connection, int *patchIndexA,
     int *patchIndexB, ESMC_InterfaceInt **positionVector,
     ESMC_InterfaceInt **orientationVector, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_connectionelementconstruct()"
+#define ESMC_METHOD "c_esmc_connection()"
     // call into C++
     ESMC_LogDefault.ESMC_LogMsgFoundError(
-      ESMC_ConnectionElementConstruct(*connectionElement, *patchIndexA,
+      ESMC_Connection(*connection, *patchIndexA,
       *patchIndexB, *positionVector, *orientationVector), 
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));

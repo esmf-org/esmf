@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.2 2006/04/14 16:17:27 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.3 2006/04/14 18:27:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DistGrid.C,v 1.2 2006/04/14 16:17:27 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DistGrid.C,v 1.3 2006/04/14 18:27:50 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1117,7 +1117,7 @@ int ESMC_DistGrid::ESMC_DistGridConstruct(
   int *dimExtentArg,            // (in)
   int **indexListArg,           // (in)
   ESMC_Logical regDecompFlagArg,// (in)
-  ESMC_InterfaceInt *connectionList,     // (in)
+  ESMC_InterfaceInt *connectionListArg,     // (in)
   ESMC_DELayout *delayoutArg,   // (in) DELayout
   ESMC_VM *vmArg                // (in) VM context
   ){
@@ -1141,32 +1141,32 @@ int ESMC_DistGrid::ESMC_DistGridConstruct(
   dimCount = dimCountArg;
   patchCount = patchCountArg;
   regDecompFlag = regDecompFlagArg;
-  if (connectionList != NULL){
+  if (connectionListArg != NULL){
     // connectionList was provided
     int elementSize = 2*dimCount+2;
-    if (connectionList->dimCount != 2){
+    if (connectionListArg->dimCount != 2){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-        "- connectionList array must be of rank 2", rc);
+        "- connectionListArg array must be of rank 2", rc);
       return localrc;
     }
-    if (connectionList->extent[0] != elementSize){
+    if (connectionListArg->extent[0] != elementSize){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-        "- 1st dimension of connectionList array must be of size "
+        "- 1st dimension of connectionListArg array must be of size "
         "(2*dimCount+2)", rc);
       return localrc;
     }
-    // fill in the connectionElementList member
-    connectionElementCount = connectionList->extent[1];
-    connectionElementList = new int*[connectionElementCount];
-    for (int i=0; i<connectionElementCount; i++){
-      connectionElementList[i] = new int[elementSize];
-      memcpy(connectionElementList[i],
-        &(connectionList->array[elementSize*i]), sizeof(int)*elementSize);
+    // fill in the connectionList member
+    connectionCount = connectionListArg->extent[1];
+    connectionList = new int*[connectionCount];
+    for (int i=0; i<connectionCount; i++){
+      connectionList[i] = new int[elementSize];
+      memcpy(connectionList[i],
+        &(connectionListArg->array[elementSize*i]), sizeof(int)*elementSize);
     }
   }else{
     // connectionList was not provided -> nullify
-    connectionElementCount = 0;
-    connectionElementList = NULL;
+    connectionCount = 0;
+    connectionList = NULL;
   }
   delayout = delayoutArg;
   vm = vmArg;
@@ -1228,10 +1228,10 @@ int ESMC_DistGrid::ESMC_DistGridDestruct(void){
   for (int i=0; i<dimCount*deCount; i++)
     delete [] indexList[i];
   delete [] indexList;
-  for (int i=0; i<connectionElementCount; i++)
-    delete [] connectionElementList[i];
-  if (connectionElementList)
-    delete [] connectionElementList;
+  for (int i=0; i<connectionCount; i++)
+    delete [] connectionList[i];
+  if (connectionList)
+    delete [] connectionList;
 
   // return successfully
   return ESMF_SUCCESS;
@@ -1298,7 +1298,7 @@ int ESMC_DistGrid::ESMC_DistGridPrint(){
     }
     printf("\n");
   }
-  printf("connectionElementCount = %d\n", connectionElementCount);
+  printf("connectionCount = %d\n", connectionCount);
   printf("~ cached values ~\n");
   printf("deCount = %d\n", deCount);
   printf("localPet = %d\n", localPet);
@@ -1453,26 +1453,26 @@ int ESMC_DistGrid::ESMC_DistGridGet(
 
 //-----------------------------------------------------------------------------
 //
-// ConnectionElement functions
+// Connection functions
 //
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_ConnectionElementConstruct()"
+#define ESMC_METHOD "ESMC_Connection()"
 //BOP
-// !IROUTINE:  ESMC_ConnectionElementConstruct
+// !IROUTINE:  ESMC_Connection
 //
 // !INTERFACE:
-int ESMC_ConnectionElementConstruct(
+int ESMC_Connection(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
 //
-  ESMC_InterfaceInt *connectionElement,  // out -
+  ESMC_InterfaceInt *connection,  // out -
   int patchIndexA,                            // in  -
   int patchIndexB,                            // in  -
   ESMC_InterfaceInt *positionVector,     // in -
@@ -1494,28 +1494,28 @@ int ESMC_ConnectionElementConstruct(
   if (rc!=NULL)
     *rc = ESMF_FAILURE;
   
-  // check connetionElement argument
-  if (connectionElement == NULL){
+  // check connetion argument
+  if (connection == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to connectionElement array", rc);
+      "- Not a valid pointer to connection array", rc);
     return localrc;
   }
-  if (connectionElement->dimCount != 1){
+  if (connection->dimCount != 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-      "- connectionElement array must be of rank 1", rc);
+      "- connection array must be of rank 1", rc);
     return localrc;
   }
-  int dimCount = (connectionElement->extent[0]-2)/2;
+  int dimCount = (connection->extent[0]-2)/2;
   if (dimCount <= 0){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-      "- 1st dimension of connectionElement array must be of size "
+      "- 1st dimension of connection array must be of size "
       "(2 * dimCount + 2)", rc);
     return localrc;
   }
   
   // fill in the patch indices
-  connectionElement->array[0] = patchIndexA;
-  connectionElement->array[1] = patchIndexB;
+  connection->array[0] = patchIndexA;
+  connection->array[1] = patchIndexB;
   
   // check positionVector argument
   if (positionVector == NULL){
@@ -1535,7 +1535,7 @@ int ESMC_ConnectionElementConstruct(
   }
   
   // fill in the positionVector
-  memcpy(&(connectionElement->array[2]), positionVector->array,
+  memcpy(&(connection->array[2]), positionVector->array,
     sizeof(int)*dimCount);
   
   // check on orientationVector
@@ -1553,12 +1553,12 @@ int ESMC_ConnectionElementConstruct(
       return localrc;
     }
     // fill in the orientationVector
-    memcpy(&(connectionElement->array[2+dimCount]), orientationVector->array,
+    memcpy(&(connection->array[2+dimCount]), orientationVector->array,
       sizeof(int)*dimCount);
   }else{
     // orientationVector was not provided -> fill in default orientation
     for (int i=0; i<dimCount; i++)
-      connectionElement->array[2+dimCount+i] = i+1;
+      connection->array[2+dimCount+i] = i+1;
   }
   
   // return successfully

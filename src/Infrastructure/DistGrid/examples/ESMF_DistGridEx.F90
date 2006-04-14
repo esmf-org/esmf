@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.2 2006/04/13 23:57:05 theurich Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.3 2006/04/14 18:27:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -520,7 +520,7 @@ program ESMF_DistGridEx
 ! element.
 !EOE
 !BOC
-  call ESMF_ConnectionElementConstruct(connectionElement=connectionList(:,1), &
+  call ESMF_Connection(connection=connectionList(:,1), &
      patchIndexA=1, patchIndexB=1, &
      positionVector=(/5, 0/), &
      orientationVector=(/1, 2/), rc=rc)
@@ -730,9 +730,9 @@ program ESMF_DistGridEx
 ! Setup of the first two connectionList elements is straight forward:
 !EOE
 !BOC
-  call ESMF_ConnectionElementConstruct(connectionElement=connectionList(:,1), &
+  call ESMF_Connection(connection=connectionList(:,1), &
      patchIndexA=1, patchIndexB=2, positionVector=(/0, 10/), rc=rc)   ! 1 <-> 2
-  call ESMF_ConnectionElementConstruct(connectionElement=connectionList(:,2), &
+  call ESMF_Connection(connection=connectionList(:,2), &
      patchIndexA=2, patchIndexB=3, positionVector=(/-10, 0/), rc=rc)  ! 2 <-> 3
 !EOC
 !BOE
@@ -740,7 +740,7 @@ program ESMF_DistGridEx
 ! characteristics of the cubed sphere topology:
 !EOE
 !BOC
-  call ESMF_ConnectionElementConstruct(connectionElement=connectionList(:,3), &
+  call ESMF_Connection(connection=connectionList(:,3), &
      patchIndexA=1, patchIndexB=3, positionVector=(/-1, 0/), &
      orientationVector=(/-2, 1/), rc=rc)
 !EOC
@@ -761,10 +761,10 @@ program ESMF_DistGridEx
 ! the connectionTransformList elements for this example are:
 !BOC
   allocate(connectionTransformList(5+2,2))  ! (4+2*dimCount, number of transforms)
-  call ESMF_ConnectionTransformElementConstruct(connectionTransformList(:,1), &
+  call ESMF_ConnectionTransform(connectionTransformList(:,1), &
     connectionIndex=3, direction=0, staggerSrc=1, staggerDst=2, &
     indexOffsetVector=(/0,0/), signChangeVector=(/-1,+1/))   ! N face -> E face
-  call ESMF_ConnectionTransformElementConstruct(connectionTransformList(:,2), &
+  call ESMF_ConnectionTransform(connectionTransformList(:,2), &
     connectionIndex=3, direction=0, staggerSrc=2, staggerDst=1, &
     indexOffsetVector=(/+1,0/), signChangeVector=(/-1,+1/))  ! E face -> N face
 !EOC
@@ -926,7 +926,7 @@ program ESMF_DistGridEx
 !EOE
 !BOC
   allocate(connectionList(2*2+2, 1))  ! (2*dimCount+2, number of connections)
-  call ESMF_ConnectionElementConstruct(connectionElement=connectionList(:,1), &
+  call ESMF_Connection(connection=connectionList(:,1), &
      patchIndexA=1, patchIndexB=1, positionVector=(/10, 0/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
