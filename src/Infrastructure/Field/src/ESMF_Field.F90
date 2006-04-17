@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.213 2006/04/04 23:43:16 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.214 2006/04/17 18:49:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.213 2006/04/04 23:43:16 theurich Exp $'
+      '$Id: ESMF_Field.F90,v 1.214 2006/04/17 18:49:05 theurich Exp $'
 
 !==============================================================================
 !
@@ -725,7 +725,8 @@
 !
 ! !INTERFACE:
       subroutine ESMF_FieldGet(field, grid, array, datamap, horzRelloc, &
-                               vertRelloc, haloWidth, iospec, name, rc)
+                               vertRelloc, haloWidth, iospec, type, kind, &
+                               rank, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field    
@@ -736,6 +737,9 @@
       type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
       integer, intent(out), optional :: haloWidth
       type(ESMF_IOSpec), intent(out), optional :: iospec 
+      type(ESMF_DataType), intent(out), optional :: type
+      type(ESMF_DataKind), intent(out), optional :: kind
+      integer, intent(out), optional :: rank
       character(len=*), intent(out), optional :: name
       integer, intent(out), optional :: rc     
 !
@@ -766,7 +770,12 @@
 !           {\tt ESMF\_Array} object.
 !     \item [{[iospec]}]
 !           {\tt ESMF\_IOSpec} object which contains settings for options
-!           related to I/O. 
+!     \item [{[type]}]
+!           Type of Field.
+!     \item [{[kind]}]
+!           Kind specifyer for type of Field.
+!     \item [{[rank]}]
+!           Rank of Field data.
 !     \item [{[name]}]
 !           Name of queried item.
 !     \item [{[rc]}]
@@ -848,6 +857,45 @@
             endif
             call ESMF_InternArrayGet(ftype%localfield%localdata, &
                                haloWidth=haloWidth, rc=rc)
+            if (ESMF_LogMsgFoundError(rc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+        endif
+
+        if (present(type)) then
+            if (ftype%datastatus .ne. ESMF_STATUS_READY) then
+                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                 "Cannot return haloWidth because no data attached to Field", &
+                                 ESMF_CONTEXT, rc)) return
+            endif
+            call ESMF_InternArrayGet(ftype%localfield%localdata, &
+                               type=type, rc=rc)
+            if (ESMF_LogMsgFoundError(rc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+        endif
+
+        if (present(kind)) then
+            if (ftype%datastatus .ne. ESMF_STATUS_READY) then
+                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                 "Cannot return haloWidth because no data attached to Field", &
+                                 ESMF_CONTEXT, rc)) return
+            endif
+            call ESMF_InternArrayGet(ftype%localfield%localdata, &
+                               kind=kind, rc=rc)
+            if (ESMF_LogMsgFoundError(rc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+        endif
+
+        if (present(rank)) then
+            if (ftype%datastatus .ne. ESMF_STATUS_READY) then
+                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                 "Cannot return haloWidth because no data attached to Field", &
+                                 ESMF_CONTEXT, rc)) return
+            endif
+            call ESMF_InternArrayGet(ftype%localfield%localdata, &
+                               rank=rank, rc=rc)
             if (ESMF_LogMsgFoundError(rc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
