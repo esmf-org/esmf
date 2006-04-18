@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.158 2006/04/12 20:32:35 svasquez Exp $
+#  $Id: common.mk,v 1.159 2006/04/18 19:11:23 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -381,12 +381,23 @@ G_FFLAGS = -g
 
 # optimize option - adjust if ESMF_OPTLEVEL is set
 ifdef ESMF_OPTLEVEL
-O_CFLAGS = -O$(ESMF_OPTLEVEL)
-O_FFLAGS = -O$(ESMF_OPTLEVEL)
+# if NEC, insert option before -O
+ifeq ($(ESMF_COMPILER),sxcross)
+O_FFLAGS =  -Wf" -O $(ESMF_OPTLEVEL)"
 else
-O_CFLAGS = -O
+O_FFLAGS =  -O$(ESMF_OPTLEVEL)
+endif
+O_CFLAGS = -O$(ESMF_OPTLEVEL)
+else
+# if NEC, insert option before -O
+ifeq ($(ESMF_COMPILER),sxcross)
+O_FFLAGS = -Wf -O
+else
 O_FFLAGS = -O
 endif
+O_CFLAGS = -O
+endif
+
 
 #-------------------------------------------------------------------------------
 # Up to here there have only been definitions, no targets.  This is the 
