@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGather1DUTest.F90,v 1.4 2006/03/20 22:18:07 theurich Exp $
+! $Id: ESMF_FieldGather1DUTest.F90,v 1.5 2006/04/19 21:31:04 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldGather1DUTest.F90,v 1.4 2006/03/20 22:18:07 theurich Exp $'
+      '$Id: ESMF_FieldGather1DUTest.F90,v 1.5 2006/04/19 21:31:04 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -62,8 +62,6 @@
       real(ESMF_KIND_R8), dimension(:,:), pointer :: srcData, gatheredData
       type(ESMF_GridHorzStagger) :: horzStagger
       type(ESMF_ArraySpec) :: arrayspec
-      type(ESMF_Array) :: array1, array2
-      type(ESMF_Array), dimension(:), pointer :: coordArray
       type(ESMF_Grid)  ::  grid
       type(ESMF_Field) :: field
       type(ESMF_VM):: vm
@@ -149,9 +147,8 @@
       !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Grid Get Corrd Test"
-      allocate(coordArray(2))
-      call ESMF_GridGetCoord(grid, horzRelloc=ESMF_CELL_CENTER, &
-                             centerCoord=coordArray, rc=rc)
+      call ESMF_GridGetCoord(grid, dim=1, horzRelloc=ESMF_CELL_CENTER, &
+                             centerCoord=coordX, localCounts=localCounts, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
@@ -159,41 +156,17 @@
 !-----------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Array Get Data Test"
-      call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, rc)
+      write(name, *) "Grid Get Corrd Test"
+      call ESMF_GridGetCoord(grid, dim=2, horzRelloc=ESMF_CELL_CENTER, &
+                             centerCoord=coordY, localCounts=localCounts, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
 !-----------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Array Get Data Test"
-      call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      if (rc .ne. ESMF_SUCCESS) goto 20
-
-!-----------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Array Get Test"
-      call ESMF_ArrayGet(coordArray(1), counts=localCounts, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      if (rc .ne. ESMF_SUCCESS) goto 20
-
-!-----------------------------------------------------------------------------
-      ! Get pointers to the data and set it up
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Field Get Array Test"
-      call ESMF_FieldGetArray(field, array1, rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      if (rc .ne. ESMF_SUCCESS) goto 20
-
-!-----------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Array Get Data Test"
-      call ESMF_ArrayGetData(array1, srcData, ESMF_DATA_REF, rc)
+      write(name, *) "Field Get Data Test"
+      call ESMF_FieldGetDataPointer(field, srcData, ESMF_DATA_REF, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
@@ -218,13 +191,6 @@
 !
 
 !-----------------------------------------------------------------------------
-      ! Call gather method here, output ends up in array2 on DE0
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Field Gather Test"
-      call ESMF_FieldGather(field, 0, array2, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      if (rc .ne. ESMF_SUCCESS) goto 20
 
 !-----------------------------------------------------------------------------
       ! check results, at least if the values are in the global computational
@@ -238,7 +204,7 @@
 !-----------------------------------------------------------------------------
       ok = .true.
       if (myDE.eq.0) then
-        call ESMF_ArrayGetData(array2, gatheredData, ESMF_DATA_REF, rc)
+        call ESMF_FieldGetDataPointer(field, gatheredData, ESMF_DATA_REF, rc)
         if (rc .ne. ESMF_SUCCESS) goto 20
         minGather =  9999999.
         maxGather = -9999999.

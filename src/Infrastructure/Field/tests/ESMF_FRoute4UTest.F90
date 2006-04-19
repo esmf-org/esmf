@@ -1,4 +1,4 @@
-! $Id: ESMF_FRoute4UTest.F90,v 1.13 2006/03/20 22:15:34 theurich Exp $
+! $Id: ESMF_FRoute4UTest.F90,v 1.14 2006/04/19 21:31:04 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRoute4UTest.F90,v 1.13 2006/03/20 22:15:34 theurich Exp $'
+      '$Id: ESMF_FRoute4UTest.F90,v 1.14 2006/04/19 21:31:04 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -50,7 +50,7 @@
 
 !     !LOCAL VARIABLES:
       type(ESMF_Grid) :: grid1, grid2, grid3
-      type(ESMF_Array) :: arr1, arr2
+      type(ESMF_ArraySpec) :: arrayspec
       integer, dimension(ESMF_MAXDIM) :: g1_cells, g2_cells
       integer, dimension(:,:), pointer :: f90ptr1, f90ptr2
       type(ESMF_FieldDataMap) :: dm
@@ -221,20 +221,8 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      allocate(f90ptr1(g1_cells(1), g1_cells(2)))
-      f90ptr1 = 10+myde
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating a src Test Array"
-      arr1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Print Array Test"
-      call ESMF_ArrayPrint(arr1)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -246,19 +234,17 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      allocate(f90ptr2(g2_cells(1), g2_cells(2)))
-      f90ptr2 = -1
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating a dst Test Array"
-      arr2 = ESMF_ArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Print Array Test"
-      call ESMF_ArrayPrint(arr2)
+      !EX_UTest
+      ! Test requirement FLD1.1.1
+      ! Fields may be created by specifying attributes, a grid, data array
+      ! dimensions and descriptors, optional masks (e.g. for active cells),
+      ! and an optional I/O specification. In this case a field will
+      ! allocate its own data. The grid passed into the argument list
+      ! is referenced and not copied.
+      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_DATA_REAL, ESMF_R4, rc=rc)
+      write(name, *) "Creating an ArraySpec Test "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -273,7 +259,7 @@
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a Field with a Grid and Array Test"
-      f1 = ESMF_FieldCreate(grid1, arr1, ESMF_DATA_REF, ESMF_CELL_CENTER, &
+      f1 = ESMF_FieldCreate(grid1, arrayspec, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -282,7 +268,7 @@
       ! second field
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a Field with a Grid and Array Test"
-      f2 = ESMF_FieldCreate(grid2, arr2, ESMF_DATA_REF, ESMF_CELL_CENTER, &
+      f2 = ESMF_FieldCreate(grid2, arrayspec, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 1, dm, "Field 1", ios, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -328,11 +314,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Array Print Test"
-      call ESMF_ArrayPrint(arr2, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -362,19 +343,6 @@
       call ESMF_GridDestroy(grid2, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Array Destroy Test"
-      call ESMF_ArrayDestroy(arr1, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Array Destroy Test"
-      call ESMF_ArrayDestroy(arr2, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 

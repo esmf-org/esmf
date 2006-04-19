@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridTimeUTest.F90,v 1.1 2005/12/01 18:33:37 svasquez Exp $'
+      '$Id: ESMF_RegridTimeUTest.F90,v 1.2 2006/04/19 21:31:04 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
     integer :: lrc,iFunction
@@ -174,7 +174,6 @@
     integer :: npetsXY(2)
     type(ESMF_ArraySpec) :: arrayspec
     real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
-    type (ESMF_Array), dimension(2) :: ESMF_coords, ESMF_coords2
     real (ESMF_KIND_R8), dimension(:,:), pointer :: x_coords,y_coords
     real (ESMF_KIND_R8), dimension(:,:), pointer :: x_coords2,y_coords2
     real (ESMF_KIND_R8), dimension(:,:), allocatable :: SolnOnTarget
@@ -242,17 +241,16 @@
    !===============================================
     call ESMF_FieldGetDataPointer(field1, f90ptr1, ESMF_DATA_REF, rc=rc)
 
-   !Get the coordinates of the source grid
-   !======================================
-    call ESMF_GridGetCoord(srcgrid,horzRelLoc=ESMF_CELL_NECORNER,  &
-           centercoord=ESMF_coords,rc=rc)
 
    !Get the actual values of the x and y coordinate arrays
    !======================================================
-    call ESMF_ArrayGetData(ESMF_coords(1), x_coords, ESMF_DATA_COPY, rc=rc)
 
-    !======================
-    call ESMF_ArrayGetData(ESMF_coords(2), y_coords, ESMF_DATA_COPY, rc=rc)
+    call ESMF_GridGetCoord(srcgrid, dim=1, horzRelLoc=ESMF_CELL_NECORNER,  &
+           centercoord=x_coords, rc=rc)
+
+    call ESMF_GridGetCoord(srcgrid, dim=2, horzRelLoc=ESMF_CELL_NECORNER,  &
+           centercoord=y_coords, rc=rc)
+
 
     !Assign values to the source field data (4 case choices) via pointer
     lb(:) = lbound(f90ptr1)
@@ -341,10 +339,11 @@
     !---------------------------------------------------------------------------
     allocate( SolnOnTarget( lb(1):ub(1) , lb(2):ub(2) ) )
 
-    call ESMF_GridGetCoord(dstgrid,horzRelLoc=ESMF_CELL_CENTER,  &
-           centercoord=ESMF_coords2,rc=rc)
-    call ESMF_ArrayGetData(ESMF_coords2(1), x_coords2, ESMF_DATA_COPY, rc=rc)
-    call ESMF_ArrayGetData(ESMF_coords2(2), y_coords2, ESMF_DATA_COPY, rc=rc)
+    call ESMF_GridGetCoord(dstgrid, dim=1, horzRelLoc=ESMF_CELL_CENTER,  &
+           centercoord=x_coords2, rc=rc)
+    call ESMF_GridGetCoord(dstgrid, dim=2, horzRelLoc=ESMF_CELL_CENTER,  &
+           centercoord=y_coords2, rc=rc)
+
 
     !Solution values at the target grid -- 4 cases
     select case (FieldChoice)

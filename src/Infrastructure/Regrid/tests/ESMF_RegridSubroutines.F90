@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.14 2006/03/23 22:27:12 donstark Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.15 2006/04/19 21:31:04 samsoncheung Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -457,7 +457,6 @@ contains
     integer ::  n_cells(2), sub_rc
     type(ESMF_ArraySpec) :: arrayspec
     real(ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
-    type(ESMF_Array), dimension(2) :: ESMF_coords
     ! type(ESMF_Array), dimension(2) :: ESMF_coords2
     real(ESMF_KIND_R8), dimension(:,:), pointer :: x_coords,y_coords
     real(ESMF_KIND_R8), dimension(:,:), pointer :: x_coords2,y_coords2
@@ -862,25 +861,20 @@ contains
 
    !Get the coordinates of the grid
    !===============================
-    call ESMF_GridGetCoord(grid,horzRelLoc=LocChoice,  &
-           centercoord=ESMF_coords,rc=local_rc)
+    call ESMF_GridGetCoord(grid,dim=1,horzRelLoc=LocChoice,  &
+           centercoord=xCoor,rc=local_rc)
 
    if (local_rc.ne.ESMF_SUCCESS) then 
 	rc = ESMF_FAILURE
-        print *, "ESMF_GridGetCoord failed"
+        print *, "ESMF_GridGetCoord xCoor failed"
    end if
 
-   !Get the actual values of the x and y coordinate arrays
-   !======================================================
-    call ESMF_ArrayGetData(ESMF_coords(1), xCoor, ESMF_DATA_COPY, rc=local_rc)
-   if (local_rc.ne.ESMF_SUCCESS) then 
-	rc = ESMF_FAILURE
-        print *, "ESMF_ArrayGetData 1 failed"
-   end if
-    call ESMF_ArrayGetData(ESMF_coords(2), yCoor, ESMF_DATA_COPY, rc=local_rc)
-   if (local_rc.ne.ESMF_SUCCESS) then 
-	rc = ESMF_FAILURE
-        print *, "ESMF_ArrayGetData 2 failed"
+    call ESMF_GridGetCoord(grid,dim=2,horzRelLoc=LocChoice,  &
+           centercoord=yCoor,rc=local_rc)
+                                                                                                                      
+   if (local_rc.ne.ESMF_SUCCESS) then
+        rc = ESMF_FAILURE
+        print *, "ESMF_GridGetCoord yCoor failed"
    end if
 
     return

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridOptionsUTest.F90,v 1.6 2006/03/20 22:28:10 theurich Exp $
+! $Id: ESMF_RegridOptionsUTest.F90,v 1.7 2006/04/19 21:31:04 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_RegridOptionsUTest.F90,v 1.6 2006/03/20 22:28:10 theurich Exp $'
+      '$Id: ESMF_RegridOptionsUTest.F90,v 1.7 2006/04/19 21:31:04 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -562,7 +562,6 @@ contains
       ! Local variables
       integer :: i, j, k, status
       type(ESMF_Grid) :: grid
-      type(ESMF_Array) :: array1, coordArray(2)
       integer :: counts(ESMF_MAXGRIDDIM)
       real(ESMF_KIND_R8), pointer :: coordX(:,:), coordY(:,:), idata(:,:,:)
       type(ESMF_RelLoc) :: relloc
@@ -572,24 +571,20 @@ contains
 
       ! get the grid and coordinates
       call ESMF_FieldGet(userfield, grid=grid, horzRelloc=relloc, &
-                         array=array1, rc=status)
+                         rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_GridGetCoord(grid, horzRelloc=relloc, &
-                             centerCoord=coordArray, rc=status)
+      call ESMF_GridGetCoord(grid, dim=1, horzRelloc=relloc, &
+                             centerCoord=coordX, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
+      call ESMF_GridGetCoord(grid, dim=2, horzRelloc=relloc, &
+                             centerCoord=coordY, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
-      if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
-      if (status .ne. ESMF_SUCCESS) goto 10
 
       ! get a pointer to the start of the loca data block
-      call ESMF_FieldGetDataPointer(userfield, idata, ESMF_DATA_REF, rc=status) 
-      if (status .ne. ESMF_SUCCESS) goto 10
-
-      ! Get the size of the local decomposition
-      call ESMF_ArrayGet(array1, counts=counts, rc=status)
+      call ESMF_FieldGetDataPointer(userfield, idata, ESMF_DATA_REF, &
+                                    counts=counts,  rc=status) 
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! increment data values in place - where do i get the third dim?
@@ -625,8 +620,6 @@ contains
       ! Local variables
       integer :: status, i, j, k, myDE, counts(2)
       type(ESMF_RelLoc) :: relloc
-      type(ESMF_Array) :: array
-      type(ESMF_Array), dimension(:), pointer :: coordArray
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8) :: pi, error, maxError, maxPerError
       real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue
@@ -637,11 +630,6 @@ contains
       pi = 3.14159
 
       ! get the grid and coordinates
-      allocate(coordArray(2), stat=status)
-      if (status .ne. 0) then 
-           status = ESMF_FAILURE
-           goto 10
-      endif
 
       call ESMF_FieldGet(userfield, grid=grid, horzRelloc=relloc, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
@@ -650,19 +638,16 @@ contains
                                    localCellCountPerDim=counts, &
                                    horzRelloc=ESMF_CELL_CENTER, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridGetCoord(grid, horzRelloc=relloc, &
-                             centerCoord=coordArray, rc=status)
+
+      call ESMF_GridGetCoord(grid, dim=1, horzRelloc=relloc, &
+                             centerCoord=coordX, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
-      if (status .ne. ESMF_SUCCESS) goto 10
-      call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
+      call ESMF_GridGetCoord(grid, dim=2, horzRelloc=relloc, &
+                             centerCoord=coordY, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      ! update field values here
-      call ESMF_FieldGetArray(userfield, array, rc=status)
-      if (status .ne. ESMF_SUCCESS) goto 10
       ! Get a pointer to the start of the data
-      call ESMF_ArrayGetData(array, data, ESMF_DATA_REF, rc=status)
+      call ESMF_FieldGetDataPointer(userfield, data, ESMF_DATA_REF, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! allocate array for computed results and fill it
@@ -673,12 +658,6 @@ contains
                            + 2.0*sin(coordY(i,j)/50.0*pi)
         enddo
       enddo
-
-      deallocate(coordArray, stat=status)
-      if (status .ne. 0) then 
-           status = ESMF_FAILURE
-           goto 10
-      endif
 
       ! calculate data error from computed results
       maxError    = 0.0

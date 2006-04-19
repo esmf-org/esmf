@@ -1,4 +1,4 @@
-! $Id: ESMF_HaloHelpers.F90,v 1.6 2006/03/20 22:29:28 theurich Exp $
+! $Id: ESMF_HaloHelpers.F90,v 1.7 2006/04/19 21:31:04 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -785,15 +785,14 @@ subroutine Cleanup(field1, field2, rc)
     
     ! Local variables
     type(ESMF_Grid) :: srcgrid, dstgrid
-    type(ESMF_Array) :: srcarray, dstarray
 
     rc = ESMF_FAILURE
 
     ! query for grids
-    call ESMF_FieldGet(field1, grid=srcgrid, array=srcarray, rc=rc)
+    call ESMF_FieldGet(field1, grid=srcgrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
-    call ESMF_FieldGet(field2, grid=dstgrid, array=dstarray, rc=rc)
+    call ESMF_FieldGet(field2, grid=dstgrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
     ! plus arrays need cleanup
@@ -808,12 +807,6 @@ subroutine Cleanup(field1, field2, rc)
     if (rc.NE.ESMF_SUCCESS) return
 
     call ESMF_GridDestroy(dstgrid, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
-
-    call ESMF_ArrayDestroy(srcarray, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
-
-    call ESMF_ArrayDestroy(dstarray, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
     rc = ESMF_SUCCESS

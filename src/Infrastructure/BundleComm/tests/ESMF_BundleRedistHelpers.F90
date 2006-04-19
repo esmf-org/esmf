@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistHelpers.F90,v 1.12 2006/03/14 18:38:20 theurich Exp $
+! $Id: ESMF_BundleRedistHelpers.F90,v 1.13 2006/04/19 21:31:04 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -501,7 +501,6 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
     integer, intent(out), optional :: rc
     
     ! Local variables
-    type(ESMF_Array) :: array
     type(ESMF_DataKind) :: dk
     integer :: rank, kind
 
@@ -530,10 +529,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
         
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
-    call ESMF_FieldGet(field, array=array, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
-
-    call ESMF_ArrayGet(array, rank=rank, kind=dk, rc=rc)
+    call ESMF_FieldGet(field, rank=rank, kind=dk, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
     ! force to integer so they can be used below in select cases.
@@ -1017,7 +1013,6 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
     integer :: i, j, k, l, m
     integer :: lb(7), ub(7), halo
 
-    type(ESMF_Array) :: array
     type(ESMF_DataKind) :: dk
     integer :: rank, kind
 
@@ -1044,10 +1039,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
     ! need a query here to be sure our data pointer is the same t/k/r
     ! as what is in the field.
 
-    call ESMF_FieldGet(field, haloWidth=halo, array=array, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
-
-    call ESMF_ArrayGet(array, rank=rank, kind=dk, rc=rc)
+    call ESMF_FieldGet(field, haloWidth=halo, rank=rank, kind=dk, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
     ! force to integer so they can be used below in select cases.
@@ -1822,66 +1814,38 @@ subroutine FieldCleanup(field1, field2, field3, field4, field5, dogrid, rc)
     
     ! Local variables
     type(ESMF_Grid) :: grid
-    type(ESMF_Array) :: array
 
     if (present(rc)) rc = ESMF_FAILURE
 
     ! query for grid and data.  field1 is required; all other fields test
     ! first to be sure it is present
-    call ESMF_FieldGet(field1, grid=grid, array=array, rc=rc)
+    call ESMF_FieldGet(field1, grid=grid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
     call ESMF_FieldDestroy(field1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) return
 
-    call ESMF_ArrayDestroy(array, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) return
-
     ! query for data only; grid is shared and will be deleted last.
     if (present(field2)) then
-        call ESMF_FieldGet(field2, array=array, rc=rc)
-        if (rc.NE.ESMF_SUCCESS) return
-
         call ESMF_FieldDestroy(field2, rc=rc)
-        if (rc.NE.ESMF_SUCCESS) return
-
-        call ESMF_ArrayDestroy(array, rc=rc)
         if (rc.NE.ESMF_SUCCESS) return
     endif
 
     ! query for data only; grid is shared and will be deleted last.
     if (present(field3)) then
-        call ESMF_FieldGet(field3, array=array, rc=rc)
-        if (rc.NE.ESMF_SUCCESS) return
-
         call ESMF_FieldDestroy(field3, rc=rc)
-        if (rc.NE.ESMF_SUCCESS) return
-
-        call ESMF_ArrayDestroy(array, rc=rc)
         if (rc.NE.ESMF_SUCCESS) return
     endif
 
     ! query for data only; grid is shared and will be deleted last.
     if (present(field4)) then
-        call ESMF_FieldGet(field4, array=array, rc=rc)
-        if (rc.NE.ESMF_SUCCESS) return
-
         call ESMF_FieldDestroy(field4, rc=rc)
-        if (rc.NE.ESMF_SUCCESS) return
-
-        call ESMF_ArrayDestroy(array, rc=rc)
         if (rc.NE.ESMF_SUCCESS) return
     endif
 
     ! query for data only; grid is shared and will be deleted last.
     if (present(field5)) then
-        call ESMF_FieldGet(field5, array=array, rc=rc)
-        if (rc.NE.ESMF_SUCCESS) return
-
         call ESMF_FieldDestroy(field5, rc=rc)
-        if (rc.NE.ESMF_SUCCESS) return
-
-        call ESMF_ArrayDestroy(array, rc=rc)
         if (rc.NE.ESMF_SUCCESS) return
     endif
 
@@ -2104,14 +2068,14 @@ function CreateDataField(name, grid, layout, relloc, r4value, r8value, rc)
 
   ! initialize the data field
   if (use_r8) then
-      call ESMF_FieldGetDataPointer(CreateDataField, r8data, ESMF_DATA_REF, rc)
+      call ESMF_FieldGetDataPointer(CreateDataField, r8data, ESMF_DATA_REF, rc=rc)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
  
       r8data(:,:) = thisr8data
   else 
-      call ESMF_FieldGetDataPointer(CreateDataField, r4data, ESMF_DATA_REF, rc)
+      call ESMF_FieldGetDataPointer(CreateDataField, r4data, ESMF_DATA_REF, rc=rc)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10

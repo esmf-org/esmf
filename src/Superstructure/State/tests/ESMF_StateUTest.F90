@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.37 2005/11/28 15:28:08 nscollins Exp $
+! $Id: ESMF_StateUTest.F90,v 1.38 2006/04/19 21:31:04 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.37 2005/11/28 15:28:08 nscollins Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.38 2006/04/19 21:31:04 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -45,7 +45,7 @@
       type(ESMF_Field) :: field1, field2, field3(3), field4, field5(3), nofield
       type(ESMF_Bundle) :: bundle1, bundle2(1), bundle3, bundle5, nobundle
       type(ESMF_State) :: state1, state2, state3, nostate
-      type(ESMF_Array) :: array1, array2(2), array3, array3a, noarray
+      type(ESMF_InternArray) :: array1, array2(2), array3, array3a, noarray
       type(ESMF_StateItemType) :: stateItemType
       type(ESMF_NeededFlag) :: needed
       real, dimension(:,:), pointer :: f90ptr1
@@ -102,8 +102,8 @@
       call ESMF_BundleDestroy(nobundle, rc=rc)
       nofield = ESMF_FieldCreateNoData(rc=rc)
       call ESMF_FieldDestroy(nofield, rc=rc)
-      noarray = ESMF_ArrayCreate(1,ESMF_DATA_REAL,ESMF_R8,(/1/),rc=rc)
-      call ESMF_ArrayDestroy(noarray, rc=rc)
+      noarray = ESMF_InternArrayCreate(1,ESMF_DATA_REAL,ESMF_R8,(/1/),rc=rc)
+      call ESMF_InternArrayDestroy(noarray, rc=rc)
 
 
       !------------------------------------------------------------------------
@@ -301,7 +301,7 @@
       !EX_UTest
       ! Test adding an Array to a State
       allocate(f90ptr1(10,20))
-      array1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
+      array1 = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -311,7 +311,7 @@
 
       !EX_UTest
       ! Test setting an array name
-      call ESMF_ArraySet(array1, name="ArrayOne", rc=rc)  
+      call ESMF_InternArraySet(array1, name="ArrayOne", rc=rc)  
       write(failMsg, *) ""
       write(name, *) "Setting an Array Name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -321,7 +321,7 @@
 
       !EX_UTest
       ! Test getting a name from an array
-      call ESMF_ArrayGet(array1, name=aname, rc=rc)  ! get the name for later
+      call ESMF_InternArrayGet(array1, name=aname, rc=rc)  ! get the name for later
       write(failMsg, *) ""
       write(name, *) "Getting an Array Name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -577,7 +577,7 @@
 
       !EX_UTest
       !Test getting Array name
-      call ESMF_ArrayGet(array1, name=arrayname, rc=rc)
+      call ESMF_InternArrayGet(array1, name=arrayname, rc=rc)
       write(failMsg, *) "Wrong Array name  and/or did not return ESMF_SUCCESS"
       write(name, *) "Verifying that the Array has correct name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(arrayname.eq.aname), &
@@ -822,7 +822,7 @@
       call  ESMF_StatePrint(state2, rc=rc)
       !------------------------------------------------------------------------
 
-      call ESMF_ArrayPrint(array1, rc=rc)
+      call ESMF_InternArrayPrint(array1, rc=rc)
       call  ESMF_StatePrint(state1, rc=rc)
 
       !EX_UTest
@@ -848,8 +848,8 @@
       statename = "Export State"
       x  = 2
       allocate(f90ptr1(10,20))
-      array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
-      array2(2) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
+      array2(1) = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
+      array2(2) = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
       state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
                                 arrayList=array2, itemcount=x, rc=rc)
       write(failMsg, *) ""

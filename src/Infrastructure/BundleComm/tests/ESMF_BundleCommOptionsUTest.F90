@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.2 2005/06/24 23:00:19 nscollins Exp $
+! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.3 2006/04/19 21:31:03 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.2 2005/06/24 23:00:19 nscollins Exp $'
+      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.3 2006/04/19 21:31:03 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -774,7 +774,6 @@ contains
       ! Local variables
       integer :: i, j, k, status
       type(ESMF_Grid) :: grid
-      type(ESMF_Array) :: array1, coordArray(2)
       integer :: counts(ESMF_MAXGRIDDIM), ranksize
       real(ESMF_KIND_R8), pointer :: coordX(:,:), coordY(:,:)
       real(ESMF_KIND_R8), pointer :: idata2(:,:), idata3(:,:,:)
@@ -784,32 +783,28 @@ contains
 
       ! get the grid and coordinates
       call ESMF_FieldGet(userfield, grid=grid, horzRelloc=relloc, &
-                         array=array1, rc=status)
+                         rank=ranksize, rc=status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
-      call ESMF_GridGetCoord(grid, horzRelloc=relloc, &
-                             centerCoord=coordArray, rc=status)
+      call ESMF_GridGetCoord(grid, dim=1, horzRelloc=relloc, &
+                             centerCoord=coordX, rc=status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
-      call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) goto 10
-      call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) goto 10
-
-      ! Get the size of the local decomposition
-      call ESMF_ArrayGet(array1, counts=counts, rank=ranksize, rc=status)
+      call ESMF_GridGetCoord(grid, dim=2, horzRelloc=relloc, &
+                             centerCoord=coordy, rc=status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
+      write(*,*)"init cheung ranksize", ranksize
       ! get a pointer to the start of the local data block
       if (ranksize .eq. 2) then
-          call ESMF_FieldGetDataPointer(userfield, idata2, ESMF_DATA_REF, rc=status) 
+          call ESMF_FieldGetDataPointer(userfield, idata2, ESMF_DATA_REF, &
+                                        counts=counts, rc=status) 
       else if (ranksize .eq. 3) then
-          call ESMF_FieldGetDataPointer(userfield, idata3, ESMF_DATA_REF, rc=status) 
+          call ESMF_FieldGetDataPointer(userfield, idata3, ESMF_DATA_REF, &
+                                        counts=counts, rc=status) 
       else
          print *, "Unexpected rank", ranksize
          status = ESMF_FAILURE
@@ -865,8 +860,6 @@ contains
       ! Local variables
       integer :: status, i, j, k, myDE, counts(2), acounts(3), ranksize
       type(ESMF_RelLoc) :: relloc
-      type(ESMF_Array) :: array
-      type(ESMF_Array), dimension(:), pointer :: coordArray
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8) :: pi = 3.14159
       real(ESMF_KIND_R8) :: error, maxError, maxPerError
@@ -876,14 +869,8 @@ contains
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: data3
 
 
-      ! get the grid and coordinates
-      allocate(coordArray(2), stat=status)
-      if (status .ne. 0) then 
-           status = ESMF_FAILURE
-           goto 10
-      endif
-
-      call ESMF_FieldGet(userfield, grid=grid, horzRelloc=relloc, rc=status)
+      call ESMF_FieldGet(userfield, grid=grid, horzRelloc=relloc, &
+                         rank=ranksize, rc=status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
@@ -892,32 +879,23 @@ contains
                                    horzRelloc=ESMF_CELL_CENTER, rc=status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
-      call ESMF_GridGetCoord(grid, horzRelloc=relloc, &
-                             centerCoord=coordArray, rc=status)
+      call ESMF_GridGetCoord(grid, dim=1, horzRelloc=relloc, &
+                             centerCoord=coordX, rc=status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
-      call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) goto 10
-      call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) goto 10
-
-      ! update field values here
-      call ESMF_FieldGetArray(userfield, array, rc=status)
+      call ESMF_GridGetCoord(grid, dim=2, horzRelloc=relloc, &
+                             centerCoord=coordY, rc=status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
-      ! Get size of array here, and rank
-      call ESMF_ArrayGet(array, counts=acounts, rank=ranksize, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) goto 10
 
       ! Get a pointer to the start of the data
       if (ranksize .eq. 2) then
-        call ESMF_ArrayGetData(array, data2, ESMF_DATA_REF, rc=status)
+        call ESMF_FieldGetDataPointer(userfield, data2, ESMF_DATA_REF, &
+                                      counts=acounts, rc=status)
       else if (ranksize .eq. 3) then
-        call ESMF_ArrayGetData(array, data3, ESMF_DATA_REF, rc=status)
+        call ESMF_FieldGetDataPointer(userfield, data3, ESMF_DATA_REF, &
+                                      counts=acounts, rc=status)
       else
         print *, "unexpected rank", ranksize
         status = ESMF_FAILURE
@@ -925,6 +903,7 @@ contains
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
+      write(*,*)"ver cheung ranksize", ranksize
       print *, "counts = ", counts
       print *, "acounts = ", acounts
 
@@ -938,11 +917,6 @@ contains
         enddo
       enddo
 
-      deallocate(coordArray, stat=status)
-      if (status .ne. 0) then 
-           status = ESMF_FAILURE
-           goto 10
-      endif
 
       ! calculate data error from computed results
       maxError    = -99999.0

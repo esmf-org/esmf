@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.81 2005/07/07 19:44:17 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.82 2006/04/19 21:31:04 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.81 2005/07/07 19:44:17 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.82 2006/04/19 21:31:04 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -55,7 +55,6 @@
       type(ESMF_DELayout) :: delayout
       type(ESMF_VM) :: vm
       type(ESMF_Grid) :: grid, grid2, grid3, grid4, grid5, nogrid
-      type(ESMF_Array) :: arr, arr2
       type(ESMF_ArraySpec) :: arrayspec
       real, dimension(:,:), pointer :: f90ptr1, f90ptr2, f90ptr3, f90ptr4, f90ptr5
       real(ESMF_KIND_R8) :: minCoord(2), deltas(10)
@@ -299,26 +298,9 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Verifing that an Array can be created
-      allocate(f90ptr1(cellCounts(1),cellCounts(2)))
-      arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creating an Array for use in Field Tests"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
       f4 = ESMF_FieldCreateNoData(rc=rc) 
       write(failMsg, *) ""
       write(name, *) "Creating a Field with no data Test Req. FLD1.1.3"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Setting a data Array associated with Field
-      call ESMF_FieldSetArray(f4, arr, rc=rc) 
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting a data Array associated with Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -380,10 +362,11 @@
       ! Requirement FLD1.1.2 Creation with external data 
       ! Fields may be created as in FLD1.1.1 with a data array passed into 
       ! the argument list. The data array is referenced and not copied.
-      ! Verifing that a Field can be created with a Grid and Array
+      ! Verifing that a Field can be created with a Grid and DataMap
       call ESMF_FieldDataMapSetDefault(dm, ESMF_INDEX_IJ)
-      f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                            ESMF_CELL_CELL, 2, dm, "Field 0", ios, rc)
+      f3 = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+                        vertRelloc=ESMF_CELL_CENTER, 2, dm, "Field 0", ios, rc)
+
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test FLD1.1.2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -407,8 +390,8 @@
      
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Try to create a Field with a Grid and Array of the wrong sizes
-      f6 = ESMF_FieldCreate(grid4, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
+      ! Try to create a Field with a Grid and ArraySpec of the wrong sizes
+      f6 = ESMF_FieldCreate(grid4, arrayspec, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 2, dm, "Field 1", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a mismatched Grid/Array"
@@ -469,7 +452,7 @@
 #ifdef ESMF_NO_INITIALIZERS
       grid2 = nogrid
 #endif
-      f3 = ESMF_FieldCreate(grid2, arr2, ESMF_DATA_REF, ESMF_CELL_CENTER, &
+      f3 = ESMF_FieldCreate(grid2, arrayspec, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 3, dm, "Field 0", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with an uninitialized Grid and Array"
@@ -491,7 +474,7 @@
       ! A field shall be able to return a reference to its grid.
       ! f3 gets created here and used thru the rest of the tests.
       gname="oceangrid"
-      f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
+      f3 = ESMF_FieldCreate(grid, arrayspec, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
       call ESMF_FieldGet(f3, grid=grid3, rc=rc)
       write(failMsg, *) ""
@@ -513,36 +496,10 @@
       call ESMF_Test((associated(f90ptr2)), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
-      ! Req. xxx - setting an array with the wrong halo size.
-      ! this should fail to create.
-      allocate(f90ptr3(cellCounts(1),cellCounts(2)))
-      arr = ESMF_ArrayCreate(f90ptr3, ESMF_DATA_REF, haloWidth=3, rc=rc)
-      f7 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                            ESMF_CELL_CELL, 3, dm, "Field 0", ios, rc)
-      write(failMsg, *) ""
-      write(name, *) "Setting the wrong size Array (no halo space) in Field"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      deallocate(f90ptr3, stat=rc)
 
       !------------------------------------------------------------------------
-      !EX_UTest
-      ! Req. xxx - Creating a Field with halo regions, this should be ok.
-      allocate(f90ptr3(cellCounts(1)+(3*2),cellcounts(2)+(3*2)))
-      arr = ESMF_ArrayCreate(f90ptr3, ESMF_DATA_REF, haloWidth=3, rc=rc)
-      f7 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                            ESMF_CELL_CELL, 3, dm, "Field 0", ios, rc)
-      write(failMsg, *) ""
-      write(name, *) "Creating Field with non-zero haloWidth"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
-      ! Req. xxx - getting the haloWidth back from a field
-      call ESMF_FieldGet(f7, haloWidth=i, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Getting haloWidth back from a Field"
-      call ESMF_Test((i .eq. 3), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
