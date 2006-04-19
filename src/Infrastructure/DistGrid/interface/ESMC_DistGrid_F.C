@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.7 2006/04/14 18:27:50 theurich Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.8 2006/04/19 19:25:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@ extern "C" {
 
   // - ESMF-public methods:
         
-  void FTN(c_esmc_distgridcreateregdecomp)(ESMC_DistGrid **ptr, 
+  void FTN(c_esmc_distgridcreaterd)(ESMC_DistGrid **ptr, 
     ESMC_InterfaceInt **minCorner, ESMC_InterfaceInt **maxCorner,
     ESMC_InterfaceInt **regDecomp,
     ESMC_DecompFlag *decompflag, int *decompflagCount, 
@@ -54,7 +54,7 @@ extern "C" {
     ESMC_DELayout *opt_delayout;
     ESMC_VM *opt_vm;
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_distgridcreateregdecomp()"
+#define ESMC_METHOD "c_esmc_distgridcreaterd()"
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
       opt_delayout = NULL;
@@ -71,7 +71,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_distgridcreatedeblocks)(ESMC_DistGrid **ptr, 
+  void FTN(c_esmc_distgridcreatedb)(ESMC_DistGrid **ptr, 
     ESMC_InterfaceInt **minCorner, ESMC_InterfaceInt **maxCorner,
     ESMC_InterfaceInt **deBlockList,
     ESMC_InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
@@ -82,7 +82,7 @@ extern "C" {
     ESMC_DELayout *opt_delayout;
     ESMC_VM *opt_vm;
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_distgridcreatedeblocks()"
+#define ESMC_METHOD "c_esmc_distgridcreatedb()"
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
       opt_delayout = NULL;
@@ -99,7 +99,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_distgridcreateregdecompfa)(ESMC_DistGrid **ptr, 
+  void FTN(c_esmc_distgridcreaterdfa)(ESMC_DistGrid **ptr, 
     ESMC_InterfaceInt **minCorner, ESMC_InterfaceInt **maxCorner,
     ESMC_InterfaceInt **regDecomp,
     ESMC_DecompFlag *decompflag, int *decompflagCount, 
@@ -110,7 +110,7 @@ extern "C" {
     int localrc;
     ESMC_VM *opt_vm;
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_distgridcreateregdecompfa()"
+#define ESMC_METHOD "c_esmc_distgridcreaterdfa()"
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
@@ -124,7 +124,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_distgridcreateregdecomppatch)(ESMC_DistGrid **ptr, 
+  void FTN(c_esmc_distgridcreaterdp)(ESMC_DistGrid **ptr, 
     ESMC_InterfaceInt **minCorner, ESMC_InterfaceInt **maxCorner,
     ESMC_InterfaceInt **regDecomp,
     ESMC_DecompFlag *decompflag, int *decompflagCount1, int *decompflagCount2, 
@@ -136,7 +136,7 @@ extern "C" {
     ESMC_DELayout *opt_delayout;
     ESMC_VM *opt_vm;
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_distgridcreateregdecomp()"
+#define ESMC_METHOD "c_esmc_distgridcreaterdp()"
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
       opt_delayout = NULL;

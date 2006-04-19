@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.3 2006/04/14 18:27:50 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.4 2006/04/19 19:25:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.3 2006/04/14 18:27:50 theurich Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.4 2006/04/19 19:25:03 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -122,14 +122,14 @@ module ESMF_DistGridMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_DistGridCreateRegDecomp
-      module procedure ESMF_DistGridCreateDeBlocks
-      module procedure ESMF_DistGridCreateRegDecompFA
-      module procedure ESMF_DistGridCreateDeBlocksFA      
-      module procedure ESMF_DistGridCreateRegDecompPatch
-      module procedure ESMF_DistGridCreateDeBlocksPatch
-      module procedure ESMF_DistGridCreateRegDecompPatchFA
-      module procedure ESMF_DistGridCreateDeBlocksPatchFA
+      module procedure ESMF_DistGridCreateRD
+      module procedure ESMF_DistGridCreateDB
+      module procedure ESMF_DistGridCreateRDFA
+      module procedure ESMF_DistGridCreateDBFA      
+      module procedure ESMF_DistGridCreateRDP
+      module procedure ESMF_DistGridCreateDBP
+      module procedure ESMF_DistGridCreateRDPFA
+      module procedure ESMF_DistGridCreateDBPFA
 !      module procedure ESMF_DistGridCreateDecount
 !      module procedure ESMF_DistGridCreateDecountPatch
 !      module procedure ESMF_DistGridCreateDelayout
@@ -170,14 +170,14 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateRegDecomp()"
+#define ESMF_METHOD "ESMF_DistGridCreateRD()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreateRegDecomp - Create DistGrid with regular decomposition
+! !IROUTINE: ESMF_DistGridCreateRD - Create DistGrid with regular decomposition
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
   
-  function ESMF_DistGridCreateRegDecomp(minCorner, maxCorner, regDecomp, &
+  function ESMF_DistGridCreateRD(minCorner, maxCorner, regDecomp, &
     decompflag, deLabelList, indexflag, connectionList, connectionTransformList, &
     delayout, vm, rc)
 !
@@ -195,7 +195,7 @@ contains
     integer,                      intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateRegDecomp
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateRD
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
@@ -341,7 +341,7 @@ contains
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateRegDecomp(distgrid, minCornerArg, maxCornerArg, &
+    call c_ESMC_DistGridCreateRD(distgrid, minCornerArg, maxCornerArg, &
       regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
       connectionListArg, connectionTransformListArg, delayout, vm, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -368,25 +368,25 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! set return value
-    ESMF_DistGridCreateRegDecomp = distgrid 
+    ESMF_DistGridCreateRD = distgrid 
  
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end function ESMF_DistGridCreateRegDecomp
+  end function ESMF_DistGridCreateRD
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateDeBlocks()"
+#define ESMF_METHOD "ESMF_DistGridCreateDB()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreateDeBlocks - Create DistGrid with DE blocks
+! !IROUTINE: ESMF_DistGridCreateDB - Create DistGrid with DE blocks
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
   
-  function ESMF_DistGridCreateDeBlocks(minCorner, maxCorner, deBlockList, &
+  function ESMF_DistGridCreateDB(minCorner, maxCorner, deBlockList, &
     deLabelList, indexflag, connectionList, connectionTransformList, delayout, &
     vm, rc)
 !
@@ -403,7 +403,7 @@ contains
     integer,                      intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDeBlocks
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDB
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
@@ -543,7 +543,7 @@ contains
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateDeBlocks(distgrid, minCornerArg, maxCornerArg, &
+    call c_ESMC_DistGridCreateDB(distgrid, minCornerArg, maxCornerArg, &
       deBlockListArg, deLabelListArg, indexflag, &
       connectionListArg, connectionTransformListArg, delayout, vm, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -570,24 +570,24 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! set return value
-    ESMF_DistGridCreateDeBlocks = distgrid 
+    ESMF_DistGridCreateDB = distgrid 
  
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end function ESMF_DistGridCreateDeBlocks
+  end function ESMF_DistGridCreateDB
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateRegDecompFA()"
+#define ESMF_METHOD "ESMF_DistGridCreateRDFA()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreateRegDecompFA - Create DistGrid with regular decomposition and fast axis
+! !IROUTINE: ESMF_DistGridCreateRDFA - Create DistGrid with regular decomposition and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateRegDecompFA(minCorner, maxCorner, &
+  function ESMF_DistGridCreateRDFA(minCorner, maxCorner, &
     regDecomp, decompflag, deLabelList, indexflag, connectionList, &
     connectionTransformList, fastAxis, vm, rc)
 !
@@ -605,7 +605,7 @@ contains
     integer,                      intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateRegDecompFA
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDFA
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
@@ -750,7 +750,7 @@ contains
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateRegDecompFA(distgrid, minCornerArg, maxCornerArg, &
+    call c_ESMC_DistGridCreateRDFA(distgrid, minCornerArg, maxCornerArg, &
       regDecompArg, opt_decompflag, len_decompflag, deLabelListArg, indexflag, &
       connectionListArg, connectionTransformListArg, fastAxis, vm, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -777,24 +777,24 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! set return value
-    ESMF_DistGridCreateRegDecompFA = distgrid 
+    ESMF_DistGridCreateRDFA = distgrid 
  
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end function ESMF_DistGridCreateRegDecompFA
+  end function ESMF_DistGridCreateRDFA
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateDeBlocksFA()"
+#define ESMF_METHOD "ESMF_DistGridCreateDBFA()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreateDeBlocksFA - Create DistGrid with DE blocks and fast axis
+! !IROUTINE: ESMF_DistGridCreateDBFA - Create DistGrid with DE blocks and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDeBlocksFA(minCorner, maxCorner, &
+  function ESMF_DistGridCreateDBFA(minCorner, maxCorner, &
     deBlockList, deLabelList, indexflag, connectionList, &
     connectionTransformList, fastAxis, vm, rc)
 !
@@ -811,7 +811,7 @@ contains
     integer,                      intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDeBlocksFA
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBFA
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
@@ -915,7 +915,7 @@ contains
     type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
     
     ! Print current subroutine name
-    print *, ">>ESMF_DistGridCreateDeBlocksFA<<"
+    print *, ">>ESMF_DistGridCreateDBFA<<"
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
@@ -932,21 +932,21 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! set return value
-    ESMF_DistGridCreateDeBlocksFA = distgrid 
+    ESMF_DistGridCreateDBFA = distgrid 
  
-  end function ESMF_DistGridCreateDeBlocksFA
+  end function ESMF_DistGridCreateDBFA
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateRegDecompPatch()"
+#define ESMF_METHOD "ESMF_DistGridCreateRDP()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreateRegDecompPatch - Create DistGrid from patch work with regular decomposition
+! !IROUTINE: ESMF_DistGridCreateRDP - Create DistGrid from patch work with regular decomposition
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateRegDecompPatch(minCorner, maxCorner, regDecomp,&
+  function ESMF_DistGridCreateRDP(minCorner, maxCorner, regDecomp,&
     decompflag, deLabelList, indexflag, connectionList, connectionTransformList,&
     delayout, vm, rc)
 !
@@ -964,7 +964,7 @@ contains
     integer,                      intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateRegDecompPatch
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDP
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a patch work of logically 
@@ -1122,7 +1122,7 @@ contains
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateRegDecompPatch(distgrid, minCornerArg, &
+    call c_ESMC_DistGridCreateRDPatch(distgrid, minCornerArg, &
       maxCornerArg, regDecompArg, opt_decompflag, len1_decompflag, &
       len2_decompflag, deLabelListArg, indexflag, &
       connectionListArg, connectionTransformListArg, delayout, vm, status)
@@ -1150,24 +1150,24 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! set return value
-    ESMF_DistGridCreateRegDecompPatch = distgrid 
+    ESMF_DistGridCreateRDP = distgrid 
  
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end function ESMF_DistGridCreateRegDecompPatch
+  end function ESMF_DistGridCreateRDP
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateDeBlocksPatch()"
+#define ESMF_METHOD "ESMF_DistGridCreateDBP()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreateDeBlocksPatch - Create DistGrid from patch work with regular decomposition
+! !IROUTINE: ESMF_DistGridCreateDBP - Create DistGrid from patch work with regular decomposition
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDeBlocksPatch(minCorner, maxCorner, &
+  function ESMF_DistGridCreateDBP(minCorner, maxCorner, &
     deBlockList, deLabelList, indexflag, connectionList, &
     connectionTransformList, delayout, vm, rc)
 !
@@ -1184,7 +1184,7 @@ contains
     integer,                      intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDeBlocksPatch
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBP
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a patch work of logically 
@@ -1300,7 +1300,7 @@ contains
     type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
 
     ! Print current subroutine name
-    print *, ">>ESMF_DistGridCreateDeBlocksPatch<<"
+    print *, ">>ESMF_DistGridCreateDBP<<"
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
@@ -1317,21 +1317,21 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! set return value
-    ESMF_DistGridCreateDeBlocksPatch = distgrid 
+    ESMF_DistGridCreateDBP = distgrid 
  
-  end function ESMF_DistGridCreateDeBlocksPatch
+  end function ESMF_DistGridCreateDBP
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateRegDecompPatchFA()"
+#define ESMF_METHOD "ESMF_DistGridCreateRDPFA()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreateRegDecompPatchFA - Create DistGrid from patch work with regular decomposition and fast axis
+! !IROUTINE: ESMF_DistGridCreateRDPFA - Create DistGrid from patch work with regular decomposition and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateRegDecompPatchFA(minCorner, maxCorner, &
+  function ESMF_DistGridCreateRDPFA(minCorner, maxCorner, &
     regDecomp, decompflag, deLabelList, indexflag, connectionList, &
     connectionTransformList, fastAxis, vm, rc)
 !
@@ -1349,7 +1349,7 @@ contains
     integer,                      intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateRegDecompPatchFA
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDPFA
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a patch work of logically 
@@ -1458,7 +1458,7 @@ contains
     type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
 
     ! Print current subroutine name
-    print *, ">>ESMF_DistGridCreateRegDecompPatchFA<<"
+    print *, ">>ESMF_DistGridCreateRDPFA<<"
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
@@ -1475,21 +1475,21 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! set return value
-    ESMF_DistGridCreateRegDecompPatchFA = distgrid
+    ESMF_DistGridCreateRDPFA = distgrid
  
-  end function ESMF_DistGridCreateRegDecompPatchFA
+  end function ESMF_DistGridCreateRDPFA
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateDeBlocksPatchFA()"
+#define ESMF_METHOD "ESMF_DistGridCreateDBPFA()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreateDeBlocksPatchFA - Create DistGrid from patch work with DE blocks and fast axis
+! !IROUTINE: ESMF_DistGridCreateDBPFA - Create DistGrid from patch work with DE blocks and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDeBlocksPatchFA(minCorner, maxCorner, &
+  function ESMF_DistGridCreateDBPFA(minCorner, maxCorner, &
     deBlockList, deLabelList, indexflag, connectionList, &
     connectionTransformList, fastAxis, vm, rc)
 !
@@ -1506,7 +1506,7 @@ contains
     integer,                      intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDeBlocksPatchFA
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBPFA
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a patch work of logically 
@@ -1614,7 +1614,7 @@ contains
     type(ESMF_DistGrid):: distgrid   ! opaque pointer to new C++ DistGrid
 
     ! Print current subroutine name
-    print *, ">>ESMF_DistGridCreateDeBlocksPatchFA<<"
+    print *, ">>ESMF_DistGridCreateDBPFA<<"
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
@@ -1631,9 +1631,9 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! set return value
-    ESMF_DistGridCreateDeBlocksPatchFA = distgrid
+    ESMF_DistGridCreateDBPFA = distgrid
  
-  end function ESMF_DistGridCreateDeBlocksPatchFA
+  end function ESMF_DistGridCreateDBPFA
 !------------------------------------------------------------------------------
 
 #if 0
@@ -2160,15 +2160,15 @@ contains
 ! !IROUTINE: ESMF_DistGridGetPDe - Get DE local information about DistGrid
 
 ! !INTERFACE:
-  subroutine ESMF_DistGridGetPDe(distgrid, de, patch, dimExtent, & 
-    regDecompDeCoord, rc)
+  subroutine ESMF_DistGridGetPDe(distgrid, de, dimExtent, regDecompDeCoord, &
+    patch, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DistGrid), intent(in)            :: distgrid
+    type(ESMF_DistGrid),    intent(in)            :: distgrid
     integer,                intent(in)            :: de
-    integer,                intent(out), optional :: patch
     integer, target,        intent(out), optional :: dimExtent(:)
     integer, target,        intent(out), optional :: regDecompDeCoord(:)
+    integer,                intent(out), optional :: patch
     integer,                intent(out), optional :: rc
 !         
 !
