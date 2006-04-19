@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.4 2006/04/19 19:25:03 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.5 2006/04/19 19:57:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.4 2006/04/19 19:25:03 theurich Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.5 2006/04/19 19:57:43 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1122,7 +1122,7 @@ contains
     distgrid%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridCreateRDPatch(distgrid, minCornerArg, &
+    call c_ESMC_DistGridCreateRDP(distgrid, minCornerArg, &
       maxCornerArg, regDecompArg, opt_decompflag, len1_decompflag, &
       len2_decompflag, deLabelListArg, indexflag, &
       connectionListArg, connectionTransformListArg, delayout, vm, status)
