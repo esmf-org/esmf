@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.27 2006/04/13 23:33:11 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.28 2006/04/19 19:34:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -180,7 +180,7 @@ module ESMF_ArrayMod
   public ESMF_ArrayBundleRedist
   public ESMF_ArrayBundleRedistStore
   public ESMF_ArrayBundleRedistRun
-  public ESMF_ArrayBundleSparseMatMulStore
+  public ESMF_ArrayBundleSparseMatMulStr
   public ESMF_ArrayBundleSparseMatMulRun
 
 !EOPI
@@ -189,7 +189,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.27 2006/04/13 23:33:11 theurich Exp $'
+      '$Id: ESMF_Array.F90,v 1.28 2006/04/19 19:34:22 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -3356,12 +3356,12 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleSparseMatMulStore"
+#define ESMF_METHOD "ESMF_ArrayBundleSparseMatMulStr"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSparseMatMulStore - Store an ArrayBundle sparse matrix multiplication operation
+! !IROUTINE: ESMF_ArrayBundleSparseMatMulStr - Store an ArrayBundle sparse matrix multiplication operation
 !
 ! !INTERFACE:
-    subroutine ESMF_ArrayBundleSparseMatMulStore(srcArrayBundle, dstArrayBundle, &
+    subroutine ESMF_ArrayBundleSparseMatMulStr(srcArrayBundle, dstArrayBundle, &
       factorList, factorIndexList, rootPET, routehandle, rc)
 !
 ! !ARGUMENTS:
@@ -3419,7 +3419,7 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-  end subroutine ESMF_ArrayBundleSparseMatMulStore
+  end subroutine ESMF_ArrayBundleSparseMatMulStr
 !------------------------------------------------------------------------------
 
 
