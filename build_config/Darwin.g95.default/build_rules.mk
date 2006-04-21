@@ -1,8 +1,7 @@
-# $Id: build_rules.mk,v 1.1 2006/03/03 16:15:56 nscollins Exp $
+# $Id: build_rules.mk,v 1.2 2006/04/21 18:41:41 tjcnrl Exp $
 #
 #  Darwin.g95.default
-#  T. Wainwright, April 2005, based on Linux.pgi.default
-#  updated by nancy collins, after massive makefile updates
+#  T. Campbell, April 2006, based on Linux.g95.default
 #
 
 #
@@ -18,12 +17,13 @@ ifeq ($(ESMF_COMM),lam)
 MPI_LIB        += -lmpi -llam
 endif
 
-ifeq ($(ESMF_COMM),mpich)
-# with mpich installed:
-MPI_LIB        += -lmpich
-MPI_INCLUDE    += -DESMF_MPICH
-MPIRUN         += $(ESMF_NODES)
-endif
+#TJC: these are not needed with MPICH2
+#ifeq ($(ESMF_COMM),mpich)
+## with mpich installed:
+#MPI_LIB        += -lmpich
+#MPI_INCLUDE    += -DESMF_MPICH
+#MPIRUN         += $(ESMF_NODES)
+#endif
 
 THREAD_LIB     = -lpthread
 
@@ -38,8 +38,9 @@ endif
 
 ifeq ($(ESMF_COMM),mpich)
 C_CC    	= mpicc
-# MPICH_IGNORE_CXX_SEEK is workaround for MPI-2 bug (see MPICH2 docs)
-C_CXX   	= mpiCC -DMPICH_IGNORE_CXX_SEEK
+#TJC: MPICH_IGNORE_CXX_SEEK is workaround for MPI-2 bug (see MPICH2 docs)
+#TJC: The MPICH2 C++ script is mpicxx instead of mpiCC
+C_CXX   	= mpicxx -DMPICH_IGNORE_CXX_SEEK
 C_FC    	= mpif90
 endif
 
@@ -48,10 +49,6 @@ C_CXXV		= ${C_CXX} -dumpversion
 C_FCV           = ${C_FC} -dumpversion
 
 FFLAGS          = -fno-second-underscore
-ifeq ($(ESMF_PREC),64)
-CFLAGS         += -march=k8 -m64 -mcmodel=medium
-FFLAGS         += -march=k8 -m64 -mcmodel=medium
-endif
 F_FREECPP       = -cpp -ffree-form
 F_FIXCPP        = -cpp -ffixed-form
 F_FREENOCPP     = -ffree-form
@@ -69,15 +66,17 @@ ifneq ($(origin LD_LIBRARY_PATH), environment)
 CXXLIB_PATHS   = -L/usr/lib
 F90LIB_PATHS   = -L/usr/lib
 C_LIB_PATHS      = ${CXXLIB_PATHS} ${F90LIB_PATHS}
-C_LD_PATHS       = ${CXXLIB_PATHS} ${F90LIB_PATHS}
+#TJC: Comment next line since shared libs are not built
+#C_LD_PATHS       = ${CXXLIB_PATHS} ${F90LIB_PATHS}
 else
 C_LIB_PATHS      = $(ENV_LIB_PATHS)
-C_LD_PATHS       = $(ENV_LD_PATHS)
+#TJC: Comment next line since shared libs are not built
+#C_LD_PATHS       = $(ENV_LD_PATHS)
 endif
 
 
-C_F90CXXLIBS    = -lrt -lc -lstdc++
-C_CXXF90LIBS    = -lrt -lf95 -lstdc++
+C_F90CXXLIBS    = -lc -lstdc++
+C_CXXF90LIBS    = -lf95
 
 
 PARCH	        = mac_osx
