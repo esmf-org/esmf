@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2006/04/13 23:33:11 theurich Exp $
+# $Id: makefile,v 1.16 2006/04/24 21:39:21 theurich Exp $
 
 # leave alone.
 ALL: build_here
@@ -10,8 +10,7 @@ CFLAGS    =
 FFLAGS    =
 
 # If you have C files in this directory, list them all on the line below.
-#SOURCEC	  = ESMC_Array_F.C
-SOURCEC   =
+SOURCEC	  = ESMC_Array_F.C
 # If you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = ESMF_Array.F90
 # If you have .h include files in this dir, list them all on the line below.
