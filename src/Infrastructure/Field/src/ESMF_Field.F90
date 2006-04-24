@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.214 2006/04/17 18:49:05 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.215 2006/04/24 17:14:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -269,7 +269,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.214 2006/04/17 18:49:05 theurich Exp $'
+      '$Id: ESMF_Field.F90,v 1.215 2006/04/24 17:14:51 theurich Exp $'
 
 !==============================================================================
 !
@@ -726,7 +726,7 @@
 ! !INTERFACE:
       subroutine ESMF_FieldGet(field, grid, array, datamap, horzRelloc, &
                                vertRelloc, haloWidth, iospec, type, kind, &
-                               rank, name, rc)
+                               rank, lbounds, ubounds, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field    
@@ -740,6 +740,8 @@
       type(ESMF_DataType), intent(out), optional :: type
       type(ESMF_DataKind), intent(out), optional :: kind
       integer, intent(out), optional :: rank
+      integer, dimension(:), intent(out), optional :: lbounds
+      integer, dimension(:), intent(out), optional :: ubounds
       character(len=*), intent(out), optional :: name
       integer, intent(out), optional :: rc     
 !
@@ -896,6 +898,32 @@
             endif
             call ESMF_InternArrayGet(ftype%localfield%localdata, &
                                rank=rank, rc=rc)
+            if (ESMF_LogMsgFoundError(rc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+        endif
+
+        if (present(lbounds)) then
+            if (ftype%datastatus .ne. ESMF_STATUS_READY) then
+                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                 "Cannot return haloWidth because no data attached to Field", &
+                                 ESMF_CONTEXT, rc)) return
+            endif
+            call ESMF_InternArrayGet(ftype%localfield%localdata, &
+                               lbounds=lbounds, rc=rc)
+            if (ESMF_LogMsgFoundError(rc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+        endif
+
+        if (present(ubounds)) then
+            if (ftype%datastatus .ne. ESMF_STATUS_READY) then
+                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                 "Cannot return haloWidth because no data attached to Field", &
+                                 ESMF_CONTEXT, rc)) return
+            endif
+            call ESMF_InternArrayGet(ftype%localfield%localdata, &
+                               ubounds=ubounds, rc=rc)
             if (ESMF_LogMsgFoundError(rc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
