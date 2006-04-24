@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.C,v 1.11 2005/11/08 22:44:05 nscollins Exp $
+// $Id: ESMC_RHandle.C,v 1.12 2006/04/24 21:29:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,20 +22,21 @@
 //
 //-----------------------------------------------------------------------------
 //
- // insert any higher level, 3rd party or system includes here
- #include "ESMC_Start.h"
- #include <stdio.h>
- #include <stdlib.h>
+// insert any higher level, 3rd party or system includes here
+#include "ESMC_Start.h"
+#include <stdio.h>
+#include <stdlib.h>
 
- // associated class definition file
- #include "ESMC_RHandle.h"
- #include "ESMC_LogErr.h"
+// associated class definition file
+#include "ESMC_RHandle.h"
+#include "ESMC_Array.h"
+#include "ESMC_LogErr.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-       "$Id: ESMC_RHandle.C,v 1.11 2005/11/08 22:44:05 nscollins Exp $";
+       "$Id: ESMC_RHandle.C,v 1.12 2006/04/24 21:29:42 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -169,9 +170,18 @@
 //
 //EOP
 
+    // call into the respective distributed data class to release route handle
+    switch (htype){
+      case ESMC_ARRAYSPARSEMATMULHANDLE:
+        ESMC_ArraySparseMatMulRelease(this);
+        break;
+      default:
+        break;
+    }
+
     if (routes != NULL) delete [] routes;
     if (tvalues != NULL) delete [] tvalues;
-
+    
     return ESMF_SUCCESS;
 
  } // end ESMC_RouteHandleDestruct
