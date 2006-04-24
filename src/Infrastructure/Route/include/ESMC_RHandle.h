@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.h,v 1.6 2005/11/08 22:44:05 nscollins Exp $
+// $Id: ESMC_RHandle.h,v 1.7 2006/04/24 21:26:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -58,7 +58,8 @@ typedef enum {
     ESMC_HALOHANDLE=1, 
     ESMC_REDISTHANDLE, 
     ESMC_REGRIDHANDLE, 
-    ESMC_UNINITIALIZEDHANDLE
+    ESMC_UNINITIALIZEDHANDLE,
+    ESMC_ARRAYSPARSEMATMULHANDLE
 } ESMC_HandleType;
 
 // how many route tables are there inside a single handle?  one to one means
@@ -96,6 +97,9 @@ typedef enum {
      ESMC_TransformValues *tvalues; // array of 'ntvalues' tvalues
      int *tvmap;                    // if indirect, the actual map
      char *label;                   // for debug, info, etc.
+     //gjt: the following member can be used to attach any information to
+     //a routehandle, e.g. temporary storage needed in new Array communications
+     void *storage;                 // storage used by specific communication
  
 // !PUBLIC MEMBER FUNCTIONS:
 //
@@ -151,6 +155,16 @@ typedef enum {
         strcpy(label, l);
         return ESMF_SUCCESS; }
 
+    void *ESMC_RouteHandleGetStorage(void) const{
+      return storage;
+    }
+    int ESMC_RouteHandleSetStorage(void *ptr){
+      storage = ptr;
+      return ESMF_SUCCESS;
+    }
+        
+        
+        
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_RouteHandleValidate(const char *options) const;
     int ESMC_RouteHandlePrint(const char *options) const;
