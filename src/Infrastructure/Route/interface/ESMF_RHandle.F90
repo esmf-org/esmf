@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.26 2005/11/08 22:44:05 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.27 2006/04/24 21:32:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,7 +80,8 @@
       integer, parameter :: ESMF_HALOHANDLE=1, &
                             ESMF_REDISTHANDLE=2, &
                             ESMF_REGRIDHANDLE=3, &
-                            ESMF_UNINITIALIZEDHANDLE=4
+                            ESMF_UNINITIALIZEDHANDLE=4, &
+                            ESMF_ARRAYSPARSEMATMULHANDLE=5
 
 !------------------------------------------------------------------------------
 !     !  ESMF_RouteMappingType
@@ -134,6 +135,8 @@
  
       public ESMF_RouteHandleCreate               ! interface only, deep class
       public ESMF_RouteHandleDestroy              ! interface only, deep class
+      
+      public ESMF_RouteHandleRelease
 
       public ESMF_RouteHandleGet                  ! get and set values
       public ESMF_RouteHandleSet
@@ -146,7 +149,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.26 2005/11/08 22:44:05 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.27 2006/04/24 21:32:30 theurich Exp $'
 
 !==============================================================================
 
@@ -738,6 +741,37 @@
         if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_RouteHandleDestroy
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandleRelease"
+!BOPI
+! !IROUTINE: ESMF_RouteHandleRelease - Release all RouteHandle resources
+
+! !INTERFACE:
+      subroutine ESMF_RouteHandleRelease(routehandle, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_RouteHandle), intent(inout) :: routehandle   
+      integer, intent(out), optional :: rc        
+!
+! !DESCRIPTION:
+!     Same as {\tt ESMF\_RouteHandleDestroy}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[routehandle] 
+!          The {\tt ESMF\_RouteHandle} to be released.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+        call ESMF_RouteHandleDestroy(routehandle, rc)
+
+        end subroutine ESMF_RouteHandleRelease
 
 
 !------------------------------------------------------------------------------
