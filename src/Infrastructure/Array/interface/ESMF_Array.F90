@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.28 2006/04/19 19:34:22 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.29 2006/04/24 21:38:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,9 +43,8 @@ module ESMF_ArrayMod
   use ESMF_DELayoutMod
   use ESMF_DistGridMod
   use ESMF_RHandleMod
+  use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
   
-  use ESMF_FieldMod ! only to get type(ESMF_IndexFlag) which should move to Util
-
   implicit none
 
 !------------------------------------------------------------------------------
@@ -166,10 +165,8 @@ module ESMF_ArrayMod
   public ESMF_ArrayRedistStore
   public ESMF_ArrayRedistRun
   public ESMF_ArraySparseMatMulStore
-  public ESMF_ArraySparseMatMulRun
+  public ESMF_ArraySparseMatMul
   public ESMF_ArrayWait
-  
-  public ESMF_RouteHandleRelease
   
   public ESMF_ArrayBundleCreate
   public ESMF_ArrayBundleDestroy
@@ -181,7 +178,7 @@ module ESMF_ArrayMod
   public ESMF_ArrayBundleRedistStore
   public ESMF_ArrayBundleRedistRun
   public ESMF_ArrayBundleSparseMatMulStr
-  public ESMF_ArrayBundleSparseMatMulRun
+  public ESMF_ArrayBundleSparseMatMul
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -189,7 +186,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.28 2006/04/19 19:34:22 theurich Exp $'
+      '$Id: ESMF_Array.F90,v 1.29 2006/04/24 21:38:41 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -490,7 +487,7 @@ contains
 !
 ! !ARGUMENTS:
        real(ESMF_KIND_R8),      intent(in), target      :: farray(:,:)
-       type(ESMF_DistGrid),  intent(in)              :: distgrid
+       type(ESMF_DistGrid),     intent(in)              :: distgrid
        integer,                 intent(in),   optional  :: dimmap(:)
        integer,                 intent(in),   optional  :: computationalLWidth(:)
        integer,                 intent(in),   optional  :: computationalUWidth(:)
@@ -601,7 +598,7 @@ contains
 !
 ! !ARGUMENTS:
        type(ESMF_LocalArray),   intent(in)              :: larray
-       type(ESMF_DistGrid),  intent(in)              :: distgrid
+       type(ESMF_DistGrid),     intent(in)              :: distgrid
        integer,                 intent(in),   optional  :: dimmap(:)
        integer,                 intent(in),   optional  :: computationalLWidth(:)
        integer,                 intent(in),   optional  :: computationalUWidth(:)
@@ -712,7 +709,7 @@ contains
 !
 ! !ARGUMENTS:
        type(ESMF_LocalArray),   intent(in)              :: larrayList(:)
-       type(ESMF_DistGrid),  intent(in)              :: distgrid
+       type(ESMF_DistGrid),     intent(in)              :: distgrid
        integer,                 intent(in),   optional  :: dimmap(:)
        integer,                 intent(in),   optional  :: computationalLWidth(:)
        integer,                 intent(in),   optional  :: computationalUWidth(:)
@@ -822,17 +819,17 @@ contains
     indexflag, staggerLoc, vectorDim, rc)
 !
 ! !ARGUMENTS:
-       type(ESMF_ArraySpec),    intent(in)              :: arrayspec
-       type(ESMF_DistGrid),  intent(in)              :: distgrid
-       integer,                 intent(in),   optional  :: dimmap(:)
-       integer,                 intent(in),   optional  :: computationalLWidth(:)
-       integer,                 intent(in),   optional  :: computationalUWidth(:)
-       integer,                 intent(in),   optional  :: totalLWidth(:)
-       integer,                 intent(in),   optional  :: totalUWidth(:)
-       type(ESMF_IndexFlag),    intent(in),   optional  :: indexflag
-       integer,                 intent(in),   optional  :: staggerLoc
-       integer,                 intent(in),   optional  :: vectorDim
-       integer,                 intent(out),  optional  :: rc
+       type(ESMF_ArraySpec),  intent(in)              :: arrayspec
+       type(ESMF_DistGrid),   intent(in)              :: distgrid
+       integer,               intent(in),   optional  :: dimmap(:)
+       integer,               intent(in),   optional  :: computationalLWidth(:)
+       integer,               intent(in),   optional  :: computationalUWidth(:)
+       integer,               intent(in),   optional  :: totalLWidth(:)
+       integer,               intent(in),   optional  :: totalUWidth(:)
+       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+       integer,               intent(in),   optional  :: staggerLoc
+       integer,               intent(in),   optional  :: vectorDim
+       integer,               intent(out),  optional  :: rc
 !     
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateAllDecomp
@@ -896,10 +893,69 @@ contains
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: status     ! local error status
+    type(ESMF_Array)        :: array      ! opaque pointer to new C++ Array
+    type(ESMF_InterfaceInt) :: dimmapArg              ! helper variable
+    type(ESMF_InterfaceInt) :: computationalLWidthArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalUWidthArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalLWidthArg         ! helper variable
+    type(ESMF_InterfaceInt) :: totalUWidthArg         ! helper variable
+
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Deal with (optional) array arguments
+    dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalLWidthArg = ESMF_InterfaceIntCreate(computationalLWidth, &
+      rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUWidthArg = ESMF_InterfaceIntCreate(computationalUWidth, &
+      rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalLWidthArg = ESMF_InterfaceIntCreate(totalLWidth, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalUWidthArg = ESMF_InterfaceIntCreate(totalUWidth, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! mark this DistGrid as invalid
+    array%this = ESMF_NULL_POINTER
+
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayCreateAllDecomp(array, arrayspec, distgrid, dimmapArg, &
+      computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
+      totalUWidthArg, indexflag, staggerLoc, vectorDim, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(dimmapArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalLWidthArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalUWidthArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! set return value
-!    ESMF_ArrayCreateAllDecomp = array
+    ESMF_ArrayCreateAllDecomp = array 
+ 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_ArrayCreateAllDecomp
 !------------------------------------------------------------------------------
@@ -919,7 +975,7 @@ contains
 !
 ! !ARGUMENTS:
        type(ESMF_ArraySpec),    intent(in)              :: arrayspec
-       type(ESMF_DistGrid),  intent(in)              :: distgrid
+       type(ESMF_DistGrid),     intent(in)              :: distgrid
        integer,                 intent(in),   optional  :: dimmap(:)
        integer,                 intent(in),   optional  :: computationalLWidth(:)
        integer,                 intent(in),   optional  :: computationalUWidth(:)
@@ -1019,8 +1075,8 @@ contains
   subroutine ESMF_ArrayDestroy(array, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),  intent(inout)           :: array
-    integer,              intent(out),  optional  :: rc  
+    type(ESMF_Array), intent(inout)           :: array
+    integer,          intent(out),  optional  :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -1037,17 +1093,22 @@ contains
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: status       ! local error status
 
-    ! Assume failure until success
-!    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
 
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayDestroy(array, localrc)
+    call c_ESMC_ArrayDestroy(array, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! mark this Array as invalid
+    array%this = ESMF_NULL_POINTER
 
-    ! Use LogErr to handle return code
-!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_ArrayDestroy
 !------------------------------------------------------------------------------
@@ -1060,17 +1121,19 @@ contains
 ! !IROUTINE: ESMF_ArrayGet - Get Array internals
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayGet(array, distgrid, delayout, rank, localArrayList, &
-    indexflag, dimmap, inverseDimmap, exclusiveLBound, exclusiveUBound, &
+  subroutine ESMF_ArrayGet(array, type, kind, rank, localArrayList, distgrid, &
+    delayout, indexflag, dimmap, inverseDimmap, exclusiveLBound, exclusiveUBound,&
     computationalLBound, computationalUBound, totalLBound, totalUBound, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)            :: array
-    type(ESMF_DistGrid),        intent(out), optional :: distgrid
-    type(ESMF_DELayout),           intent(out), optional :: delayout
+    type(ESMF_Array),              intent(in)            :: array
+    type(ESMF_DataType),           intent(out), optional :: type
+    type(ESMF_DataKind),           intent(out), optional :: kind
     integer,                       intent(out), optional :: rank
     type(ESMF_LocalArray), target, intent(out), optional :: localArrayList(:)
+    type(ESMF_DistGrid),           intent(out), optional :: distgrid
+    type(ESMF_DELayout),           intent(out), optional :: delayout
     type(ESMF_IndexFlag),          intent(out), optional :: indexflag
     integer, target,               intent(out), optional :: dimmap(:)
     integer, target,               intent(out), optional :: inverseDimmap(:)
@@ -1154,96 +1217,34 @@ contains
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                       :: status         ! local error status
+    type(ESMF_LocalArray), target :: dummy(0)      ! helper variable
+    type(ESMF_LocalArray), pointer:: opt_localArrayList(:) ! helper variable
+    integer                       :: len_localArrayList    ! helper variable
 
-!    type(ESMF_LocalArray), target:: dummy(0)! used to satisfy the C interface...
-!    type(ESMF_LocalArray), pointer :: opt_localArrayList(:)
-!    integer :: len_localArrayList
-!    
-!    integer, target:: idummy(0,0)! used to satisfy the C interface...
-!    integer, pointer :: opt_globalFullLBound(:,:)
-!    integer:: len_globalFullLBound(2)
-!    integer, pointer :: opt_globalFullUBound(:,:)
-!    integer:: len_globalFullUBound(2)
-!    integer, pointer :: opt_globalDataLBound(:,:)
-!    integer:: len_globalDataLBound(2)
-!    integer, pointer :: opt_globalDataUBound(:,:)
-!    integer:: len_globalDataUBound(2)
-!    integer, pointer :: opt_localDataLBound(:,:)
-!    integer:: len_localDataLBound(2)
-!    integer, pointer :: opt_localDataUBound(:,:)
-!    integer:: len_localDataUBound(2)
-!
-!    ! Assume failure until success
-!    if (present(rc)) rc = ESMF_FAILURE
-!
-!    ! Deal with optional array arguments
-!    ! TODO: make sure that this pointer, target stuff is a portable way of 
-!    ! TODO: dealing with multiple optional arrays and the F90/C++ interface.
-!    if (present(localArrayList)) then
-!      len_localArrayList = size(localArrayList)
-!      opt_localArrayList => localArrayList
-!    else
-!      len_localArrayList = 0
-!      opt_localArrayList => dummy
-!    endif
-!    if (present(globalFullLBound)) then
-!      len_globalFullLBound = size(globalFullLBound)
-!      opt_globalFullLBound => globalFullLBound
-!    else
-!      len_globalFullLBound = (/0,0/)
-!      opt_globalFullLBound => idummy
-!    endif
-!    if (present(globalFullUBound)) then
-!      len_globalFullUBound = size(globalFullUBound)
-!      opt_globalFullUBound => globalFullUBound
-!    else
-!      len_globalFullUBound = (/0,0/)
-!      opt_globalFullUBound => idummy
-!    endif
-!    if (present(globalDataLBound)) then
-!      len_globalDataLBound = size(globalDataLBound)
-!      opt_globalDataLBound => globalDataLBound
-!    else
-!      len_globalDataLBound = (/0,0/)
-!      opt_globalDataLBound => idummy
-!    endif
-!    if (present(globalDataUBound)) then
-!      len_globalDataUBound = size(globalDataUBound)
-!      opt_globalDataUBound => globalDataUBound
-!    else
-!      len_globalDataUBound = (/0,0/)
-!      opt_globalDataUBound => idummy
-!    endif
-!    if (present(localDataLBound)) then
-!      len_localDataLBound = size(localDataLBound)
-!      opt_localDataLBound => localDataLBound
-!    else
-!      len_localDataLBound = (/0,0/)
-!      opt_localDataLBound => idummy
-!    endif
-!    if (present(localDataUBound)) then
-!      len_localDataUBound = size(localDataUBound)
-!      opt_localDataUBound => localDataUBound
-!    else
-!      len_localDataUBound = (/0,0/)
-!      opt_localDataUBound => idummy
-!    endif
-!
-!    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayGet(array, rank, delayout, &
-!      opt_localArrayList, len_localArrayList, &
-!      opt_globalFullLBound, len_globalFullLBound, &
-!      opt_globalFullUBound, len_globalFullUBound, &
-!      opt_globalDataLBound, len_globalDataLBound, &
-!      opt_globalDataUBound, len_globalDataUBound, &
-!      opt_localDataLBound, len_localDataLBound, &
-!      opt_localDataUBound, len_localDataUBound, &
-!      localrc)
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Deal with (optional) array arguments
+    if (present(localArrayList)) then
+      len_localArrayList = size(localArrayList)
+      opt_localArrayList => localArrayList
+    else
+      len_localArrayList = 0
+      opt_localArrayList => dummy
+    endif
 
-    ! Use LogErr to handle return code
-!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayGet(array, type, kind, rank, opt_localArrayList, &
+      len_localArrayList, distgrid, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! garbage collection
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArrayGet
 !------------------------------------------------------------------------------
@@ -1613,9 +1614,9 @@ contains
   subroutine ESMF_ArrayPrint(array, options, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),  intent(in)              :: array
-    character(len=*),     intent(in),   optional  :: options
-    integer,              intent(out),  optional  :: rc  
+    type(ESMF_Array), intent(in)              :: array
+    character(len=*), intent(in),   optional  :: options
+    integer,          intent(out),  optional  :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -1635,18 +1636,20 @@ contains
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: status       ! local error status
 
-    ! Assume failure until success
-!    if (present(rc)) rc = ESMF_FAILURE
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
 
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayPrint(array, localrc)
-    
-    ! Use LogErr to handle return code
-!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
+    call c_ESMC_ArrayPrint(array, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
   end subroutine ESMF_ArrayPrint
 !------------------------------------------------------------------------------
 
@@ -1898,13 +1901,13 @@ contains
       factorList, factorIndexList, rootPET, routehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array), intent(in)                 :: srcArray
-    type(ESMF_Array), intent(inout)              :: dstArray
-    real(ESMF_KIND_R8),  intent(in), optional       :: factorList(:)
-    integer,             intent(in), optional       :: factorIndexList(:,:)
-    integer,             intent(in)                 :: rootPET
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    integer, intent(out), optional                  :: rc
+    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: dstArray
+    real(ESMF_KIND_R8), target, intent(in),   optional  :: factorList(:)
+    integer,                    intent(in),   optional  :: factorIndexList(:,:)
+    integer,                    intent(in)              :: rootPet
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    integer,                    intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Store an Array sparse matrix multiplication operation from {\tt srcArray} 
@@ -1941,7 +1944,7 @@ contains
 !         factorIndexList(1,:)} indicates the index in the source Array and
 !         {\tt factorIndexList(2,:)} indicates the index in the destination
 !         Array. Only rootPET must provide a valid {\tt factorIndexList}.
-!     \item[rootPET]
+!     \item[rootPet]
 !          PET on which weights are provided.
 !   \item [routehandle]
 !         Handle to the Route that stores the precomputed operation.
@@ -1951,24 +1954,58 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
+    integer                       :: status         ! local error status
+    real(ESMF_KIND_R8), target    :: dummy(0)       ! helper variable
+    real(ESMF_KIND_R8), pointer   :: opt_factorList(:) ! helper variable
+    integer                       :: len_factorList    ! helper variable
+    type(ESMF_InterfaceInt):: factorIndexListArg    ! helper variable
+
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! Deal with (optional) array arguments
+    if (present(factorList)) then
+      len_factorList = size(factorList)
+      opt_factorList => factorList
+    else
+      len_factorList = 0
+      opt_factorList => dummy
+    endif
+    factorIndexListArg = &
+      ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, opt_factorList, &
+      len_factorList, factorIndexListArg, rootPet, routehandle, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! garbage collection
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
   end subroutine ESMF_ArraySparseMatMulStore
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySparseMatMulRun"
+#define ESMF_METHOD "ESMF_ArraySparseMatMul"
 !BOP
-! !IROUTINE: ESMF_ArraySparseMatMulRun - Execute an Array sparse matrix multiplication operation
+! !IROUTINE: ESMF_ArraySparseMatMul - Execute an Array sparse matrix multiplication operation
 !
 ! !INTERFACE:
-    subroutine ESMF_ArraySparseMatMulRun(srcArray, dstArray, routehandle, rc)
+    subroutine ESMF_ArraySparseMatMul(srcArray, dstArray, routehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array), intent(in)                 :: srcArray
-    type(ESMF_Array), intent(inout)              :: dstArray
+    type(ESMF_Array),       intent(in)              :: srcArray
+    type(ESMF_Array),       intent(inout)           :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    integer, intent(out), optional                  :: rc
+    integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Execute an Array sparse matrix operation from {\tt srcArray} to
@@ -1992,7 +2029,21 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-  end subroutine ESMF_ArraySparseMatMulRun
+    integer                       :: status         ! local error status
+
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArraySparseMatMul(srcArray, dstArray, routehandle, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArraySparseMatMul
 !------------------------------------------------------------------------------
 
 
@@ -2891,36 +2942,6 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RouteHandleRelease"
-!BOP
-! !IROUTINE: ESMF_RouteHandleRelease - Release Route associated with RouteHandle
-!
-! !INTERFACE:
-    subroutine ESMF_RouteHandleRelease(routehandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(inout)       :: routehandle
-    integer, intent(out), optional              :: rc
-!
-! !DESCRIPTION:
-!   Release the Route associated withe the {\tt routehandle} input.
-!
-!   \begin{description}
-!   \item [routehandle]
-!         Handle to the Route that stores the halo operation to be performed.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-  end subroutine ESMF_RouteHandleRelease
-!------------------------------------------------------------------------------
-
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleCreate"
 !BOP
 ! !IROUTINE: ESMF_ArrayBundleCreate - Create an ArrayBundle from a list of Arrays
@@ -3425,12 +3446,12 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleSparseMatMulRun"
+#define ESMF_METHOD "ESMF_ArrayBundleSparseMatMul"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSparseMatMulRun - Execute an ArrayBundle sparse matrix multiplication operation
+! !IROUTINE: ESMF_ArrayBundleSparseMatMul - Execute an ArrayBundle sparse matrix multiplication operation
 !
 ! !INTERFACE:
-    subroutine ESMF_ArrayBundleSparseMatMulRun(srcArrayBundle, dstArrayBundle, routehandle, rc)
+    subroutine ESMF_ArrayBundleSparseMatMul(srcArrayBundle, dstArrayBundle, routehandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)           :: srcArrayBundle
@@ -3461,7 +3482,7 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-  end subroutine ESMF_ArrayBundleSparseMatMulRun
+  end subroutine ESMF_ArrayBundleSparseMatMul
 !------------------------------------------------------------------------------
 
 
