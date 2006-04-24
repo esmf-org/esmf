@@ -1,0 +1,429 @@
+// $Id: ESMC_Array_F.C,v 1.38 2006/04/24 21:41:29 theurich Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// NASA Goddard Space Flight Center.
+// Licensed under the GPL.
+//
+//==============================================================================
+#define ESMC_FILENAME "ESMC_Array_F.C"
+//==============================================================================
+//
+// This file contains the Fortran interface code to link F90 and C++.
+//
+//------------------------------------------------------------------------------
+// INCLUDES
+//------------------------------------------------------------------------------
+#include "ESMC_Start.h"
+#include "ESMC_Base.h"
+#include "ESMC_VM.h"
+#include "ESMC_DistGrid.h"
+#include "ESMC_ArraySpec.h"
+#include "ESMC_RHandle.h"
+
+#include "ESMC_Array.h"
+
+#include "ESMC_LogErr.h"                  // for LogErr
+#include "ESMF_LogMacros.inc"             // for LogErr
+//------------------------------------------------------------------------------
+//BOP
+// !DESCRIPTION:
+//
+// The code in this file implements the inter-language code which
+//  allows F90 to call C++ for supporting {\tt Array} class functions.
+//
+//EOP
+//-------------------------------------------------------------------------
+
+
+
+// the interface subroutine names MUST be in lower case by ESMF convention
+extern "C" {
+
+  // - ESMF-public methods:
+        
+  void FTN(c_esmc_arraycreatealldecomp)(ESMC_Array **ptr, 
+    ESMC_ArraySpec *arrayspec, ESMC_DistGrid **distgrid,
+    ESMC_InterfaceInt **dimmap, ESMC_InterfaceInt **computationalLWidthArg,
+    ESMC_InterfaceInt **computationalUWidthArg, 
+    ESMC_InterfaceInt **totalLWidthArg, ESMC_InterfaceInt **totalUWidthArg,
+    ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim, int *rc){
+    int localrc;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraycreatealldecomp()"
+    // call into C++
+    *ptr = ESMC_ArrayCreate(arrayspec, *distgrid, *dimmap,
+      *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
+      *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag),
+      ESMC_NOT_PRESENT_FILTER(staggerLoc), ESMC_NOT_PRESENT_FILTER(vectorDim),
+      &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN(c_esmc_arraydestroy)(ESMC_Array **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraydestroy()"
+    // call into C++
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_ArrayDestroy(ptr),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  
+  void FTN(c_esmc_arrayget)(ESMC_Array **ptr, ESMC_DataType *type,
+    ESMC_DataKind *kind, int *rank, ESMC_LocalArray **opt_localArrayList,
+    int *len_localArrayList, ESMC_DistGrid **distgrid, int *rc){
+    ESMC_DistGrid **opt_distgrid;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayget()"
+    // deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(distgrid) == ESMC_NULL_POINTER)
+      opt_distgrid = NULL;
+    else opt_distgrid = distgrid;
+    // call into C++, dealing with optional arguments 
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_ArrayGet(
+      ESMC_NOT_PRESENT_FILTER(type), ESMC_NOT_PRESENT_FILTER(kind),
+      ESMC_NOT_PRESENT_FILTER(rank), opt_localArrayList, *len_localArrayList,
+      opt_distgrid), 
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+
+  void FTN(c_esmc_arrayprint)(ESMC_Array **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayprint()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_ArrayPrint(),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+
+  void FTN(c_esmc_arraysparsematmulstore)(ESMC_Array **srcArray,
+    ESMC_Array **dstArray, double *factorList, int *factorListCount,
+    ESMC_InterfaceInt **factorIndexList, int *rootPet,
+    ESMC_RouteHandle **routehandle, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraysparsematmulstore()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_ArraySparseMatMulStore(
+      *srcArray, *dstArray, factorList, *factorListCount, *factorIndexList,
+      *rootPet, routehandle),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+
+    void FTN(c_esmc_arraysparsematmul)(ESMC_Array **srcArray,
+    ESMC_Array **dstArray, ESMC_RouteHandle **routehandle, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraysparsematmul()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_ArraySparseMatMul(
+      *srcArray, *dstArray, routehandle),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+    
+  
+#undef  ESMC_METHOD
+}
+
+
+
+
+
+
+//-------------------------------------------------------------------------
+// The following glue code is for a first newArray prototype which I used
+// to check out some communication ideas: DE-nonblocking paradigm!
+//-------------------------------------------------------------------------
+
+
+
+// the interface subroutine names MUST be in lower case
+extern "C" {
+
+  // - ESMF-public methods:
+
+  void FTN(c_esmc_newarraycreate)(ESMC_newArray **ptr, ESMC_LocalArray **larray,
+    int *haloWidth, int *len_haloWidth, int *deCount, int *rootPET, int *rc){
+    int localrc;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_newarraycreate()"
+    // Deal with optional arguments
+    ESMC_LocalArray *opt_larray;
+    if (ESMC_NOT_PRESENT_FILTER(larray) == ESMC_NULL_POINTER) opt_larray = NULL;
+    else opt_larray = *larray;
+    int *opt_haloWidth = NULL;
+    if (*len_haloWidth) opt_haloWidth = haloWidth;
+    int opt_deCount;
+    if (ESMC_NOT_PRESENT_FILTER(deCount) == ESMC_NULL_POINTER) opt_deCount = 0;
+    else opt_deCount = *deCount;
+    *ptr = ESMC_newArrayCreate(opt_larray, opt_haloWidth, opt_deCount, *rootPET,
+      &localrc);
+    // Use LogErr to handle return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_newarraydestroy)(ESMC_newArray **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_newarraydestroy()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_newArrayDestroy(ptr),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN(c_esmc_newarrayprint)(ESMC_newArray **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_newarrayprint()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayPrint(),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN(c_esmc_newarrayget)(ESMC_newArray **ptr, int *rank,
+    ESMC_DELayout **delayout, ESMC_LocalArray **localArrays, 
+    int *len_localArrays, int *globalFullLBound, int *len_globalFullLBound,
+    int *globalFullUBound, int *len_globalFullUBound,
+    int *globalDataLBound, int *len_globalDataLBound,
+    int *globalDataUBound, int *len_globalDataUBound,
+    int *localDataLBound, int *len_localDataLBound,
+    int *localDataUBound, int *len_localDataUBound,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_newarrayget()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayGet(
+      ESMC_NOT_PRESENT_FILTER(rank), ESMC_NOT_PRESENT_FILTER(delayout),
+      localArrays, *len_localArrays, globalFullLBound, len_globalFullLBound,
+      globalFullUBound, len_globalFullUBound, 
+      globalDataLBound, len_globalDataLBound,
+      globalDataUBound, len_globalDataUBound,
+      localDataLBound, len_localDataLBound, 
+      localDataUBound, len_localDataUBound),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  void FTN(c_esmc_newarrayscatterb)(ESMC_newArray **ptr, 
+    ESMC_LocalArray **larray, int *rootPET, ESMC_VM **vm, int *rc){
+    // PET-based blocking scatter
+    int localrc;
+    ESMC_LocalArray *opt_larray;
+    ESMC_VM *opt_vm;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_newarrayscatterb()"
+    // Deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(larray) == ESMC_NULL_POINTER) opt_larray = NULL;
+    else opt_larray = *larray;
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
+    else opt_vm = *vm;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayScatter(
+      opt_larray, *rootPET, opt_vm),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_newarrayscatternbroot)(ESMC_newArray **ptr, 
+    ESMC_LocalArray **larray, int *rootPET, ESMC_newArrayCommHandle **commh,
+    ESMC_VM **vm, int *rc){
+    // DE-based non-blocking scatter (root call)
+    int localrc;
+    ESMC_LocalArray *opt_larray;
+    ESMC_VM *opt_vm;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_newarrayscatternbroot()"
+    // Deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(larray) == ESMC_NULL_POINTER) opt_larray = NULL;
+    else opt_larray = *larray;
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) 
+      opt_vm = ESMC_VMGetCurrent(&localrc);
+    else opt_vm = *vm;
+    // check if this is rootPET
+    int localPET;
+    opt_vm->ESMC_VMGet(&localPET, NULL, NULL, NULL, NULL);
+    // if this is not the rootPET then exit because this is root side of scatter
+    if (localPET != *rootPET){
+      if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
+      return; // bail out
+    }
+#ifndef ESMF_NO_INITIALIZERS
+    if (*commh != ESMC_NULL_POINTER){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      " - a previously used commhandle has not been deleted",
+      ESMC_NOT_PRESENT_FILTER(rc));
+      return; // bail out
+    }
+#endif
+    // Allocate a new commhandle
+    *commh = new ESMC_newArrayCommHandle;
+    (*commh)->commhandleCount = 0;  // reset
+    (*commh)->pthidCount = 0;       // reset
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayScatter(
+      opt_larray, *rootPET, *commh, opt_vm),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_newarrayscatternb)(ESMC_newArray **ptr, 
+    ESMC_LocalArray **larray, int *rootPET, int *de, ESMC_VM **vm, int *rc){
+    // DE-based non-blocking scatter
+    int localrc;
+    ESMC_LocalArray *opt_larray;
+    ESMC_VM *opt_vm;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_newarrayscatternb()"
+    // Deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(larray) == ESMC_NULL_POINTER) opt_larray = NULL;
+    else opt_larray = *larray;
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
+    else opt_vm = *vm;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayScatter(
+      opt_larray, *rootPET, *de, opt_vm),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_newarrayreducescalarb)(ESMC_newArray **ptr, void *result,
+    ESMC_DataKind *dtk, ESMC_Operation *op, int *rootPET, ESMC_VM **vm, 
+    int *rc){
+    // PET-based blocking scalar reduce
+    int localrc;
+    ESMC_VM *opt_vm;    
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_newarrayreducescalarb()"
+    // Deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
+    else opt_vm = *vm;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayScalarReduce(
+      result, *dtk, *op, *rootPET, opt_vm),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_newarrayreducescalarnbroot)(ESMC_newArray **ptr, void *result,
+    ESMC_DataKind *dtk, ESMC_Operation *op, int *rootPET,
+    ESMC_newArrayCommHandle **commh, ESMC_VM **vm, int *rc){
+    // DE-based non-blocking reduce (root call)
+    int localrc;
+    ESMC_VM *opt_vm;    
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_newarrayreducescalarnbroot()"
+    // Deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) 
+      opt_vm = ESMC_VMGetCurrent(&localrc);
+    else opt_vm = *vm;
+    // check if this is rootPET
+    int localPET;
+    opt_vm->ESMC_VMGet(&localPET, NULL, NULL, NULL, NULL);
+    // if this is not the rootPET then exit because this is root side of scatter
+    if (localPET != *rootPET){
+      if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
+      return; // bail out
+    }
+#ifndef ESMF_NO_INITIALIZERS
+    if (*commh != ESMC_NULL_POINTER){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      " - a previously used commhandle has not been deleted",
+      ESMC_NOT_PRESENT_FILTER(rc));
+      return; // bail out
+    }
+#endif
+    // Allocate a new commhandle
+    *commh = new ESMC_newArrayCommHandle;
+    (*commh)->commhandleCount = 0;  // reset
+    (*commh)->pthidCount = 0;       // reset
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayScalarReduce(
+      result, *dtk, *op, *rootPET, *commh, opt_vm),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_newarrayreducescalarnb)(ESMC_newArray **ptr, void *result,
+    ESMC_DataKind *dtk, ESMC_Operation *op, int *rootPET, int *de, ESMC_VM **vm,
+    int *rc){
+    // PET-based blocking scalar reduce
+    int localrc;
+    ESMC_VM *opt_vm;    
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_newarrayreducescalarnb()"
+    // Deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
+    else opt_vm = *vm;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayScalarReduce(
+      result, *dtk, *op, *rootPET, *de, opt_vm),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  
+// ---- Wait methods ---  
+  
+  void FTN(c_esmc_newarraywaitroot)(ESMC_newArray **ptr, int *rootPET,
+    ESMC_newArrayCommHandle **commh, ESMC_VM **vm, int *rc){
+    int localrc;
+    ESMC_VM *opt_vm;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_newarrayscatter()"
+    // Deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) 
+      opt_vm = ESMC_VMGetCurrent(&localrc);
+    else opt_vm = *vm;
+    // check if this is rootPET
+    int localPET;
+    opt_vm->ESMC_VMGet(&localPET, NULL, NULL, NULL, NULL);
+    // if this is not the rootPET then exit because this is root side of scatter
+    if (localPET != *rootPET){
+      if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
+      return; // bail out
+    }
+    // Check if a valid commhandle was provided
+    if (*commh == ESMC_NULL_POINTER){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      " - a valid commhandle must be provided",
+      ESMC_NOT_PRESENT_FILTER(rc));
+      return; // bail out
+    }
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayWait(
+      *rootPET, *commh, opt_vm),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+    // delete the commhandle and set to NULL
+    delete *commh;
+    *commh = ESMC_NULL_POINTER;
+  }
+  
+  void FTN(c_esmc_newarraywaitde)(ESMC_newArray **ptr, int *de, ESMC_VM **vm, 
+    int *rc){
+    int localrc;
+    ESMC_VM *opt_vm;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_newarrayscatter()"
+    // Deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
+    else opt_vm = *vm;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayWait(
+      *de, opt_vm),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+#undef  ESMC_METHOD
+}
