@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.4 2006/04/14 20:57:36 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.5 2006/04/24 21:35:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DistGrid.C,v 1.4 2006/04/14 20:57:36 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DistGrid.C,v 1.5 2006/04/24 21:35:39 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -361,10 +361,15 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     }
     deDivider *= regDecomp->array[i];
   }
-        
+  // set up patchDeLookup
+  int *patchDeLookup = new int[deCount];
+  for (int i=0; i<deCount; i++)
+    patchDeLookup[i] = 1;
+  
   // call into DistGridConstruct
-  status = distgrid->ESMC_DistGridConstruct(dimCount, 1, dimExtent, indexList,
-    ESMF_TRUE, connectionList, delayout, vm);
+  status = distgrid->ESMC_DistGridConstruct(dimCount, 1, patchDeLookup,
+    minCorner->array, maxCorner->array, dimExtent, indexList, ESMF_TRUE,
+    connectionList, delayout, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
@@ -387,7 +392,8 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     delete [] deLabelList->array;
     delete deLabelList;
   }
-  
+  delete [] patchDeLookup;
+    
   // return successfully
   *rc = ESMF_SUCCESS;
   return distgrid;
@@ -597,10 +603,16 @@ ESMC_DistGrid *ESMC_DistGridCreate(
         indexList[extentIndex][k] =  deBlockList->array[deBlockIndexMin] + k;
     }
   }
+  // set up patchDeLookup
+  int *patchDeLookup = new int[deCount];
+  for (int i=0; i<deCount; i++)
+    patchDeLookup[i] = 1;
+
   // todo: check for overlapping deBlocks!!
   // call into DistGridConstruct
-  status = distgrid->ESMC_DistGridConstruct(dimCount, 1, dimExtent, indexList,
-    ESMF_FALSE, connectionList, delayout, vm);
+  status = distgrid->ESMC_DistGridConstruct(dimCount, 1, patchDeLookup, 
+    minCorner->array, maxCorner->array, dimExtent, indexList, ESMF_FALSE,
+    connectionList, delayout, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
@@ -616,6 +628,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     delete [] deLabelList->array;
     delete deLabelList;
   }
+  delete [] patchDeLookup;
   
   // return successfully
   *rc = ESMF_SUCCESS;
@@ -942,8 +955,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
   // on DE basis, independent of patches.
 
   int dePatchStart = 0;  // reset  
-  for (int patch=0; patch<patchCount; patch++){  
-    
+  for (int patch=0; patch<patchCount; patch++){
     int deDivider = 1;  // reset
     for (int ii=0; ii<dimCount; ii++){
       int i = patch*dimCount + ii;  // work in the current patch
@@ -1034,10 +1046,22 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     } // i-loop
     dePatchStart += deCountPPatch[patch];
   } // patch-loop
-        
+  // set up patchDeLookup
+  dePatchStart = 0;  // reset  
+  int *patchDeLookup = new int[deCount];
+  for (int patch=0; patch<patchCount; patch++){
+    for (int jj=0; jj<deCountPPatch[patch]; jj++){
+      int j = dePatchStart + jj;
+      int de = deLabelList->array[j];
+      patchDeLookup[de] = patch;
+    }
+    dePatchStart += deCountPPatch[patch];
+  }
+
   // call into DistGridConstruct
-  status = distgrid->ESMC_DistGridConstruct(dimCount, patchCount, dimExtent,
-    indexList, ESMF_TRUE, connectionList, delayout, vm);
+  status = distgrid->ESMC_DistGridConstruct(dimCount, patchCount, patchDeLookup,
+    minCorner->array, maxCorner->array, dimExtent, indexList, ESMF_TRUE,
+    connectionList, delayout, vm);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete distgrid;
     distgrid = ESMC_NULL_POINTER;
@@ -1061,6 +1085,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(
     delete [] deLabelList->array;
     delete deLabelList;
   }
+  delete [] patchDeLookup;
   
   // return successfully
   *rc = ESMF_SUCCESS;
@@ -1141,6 +1166,9 @@ int ESMC_DistGrid::ESMC_DistGridConstruct(
 //
   int dimCountArg,              // (in)
   int patchCountArg,            // (in)
+  int *patchDeLookupArg,        // (in)
+  int *minCornerArg,            // (in)
+  int *maxCornerArg,            // (in)
   int *dimExtentArg,            // (in)
   int **indexListArg,           // (in)
   ESMC_Logical regDecompFlagArg,// (in)
@@ -1208,12 +1236,26 @@ int ESMC_DistGrid::ESMC_DistGridConstruct(
     return localrc;
   }
   // fill in the rest
+  minCorner = new int[dimCount*patchCount];
+  memcpy(minCorner, minCornerArg, sizeof(int)*dimCount*patchCount);
+  maxCorner = new int[dimCount*patchCount];
+  memcpy(maxCorner, maxCornerArg, sizeof(int)*dimCount*patchCount);
   dimExtent = new int[dimCount*deCount];
   memcpy(dimExtent, dimExtentArg, sizeof(int)*dimCount*deCount);
   indexList = new int*[dimCount*deCount];
   for (int i=0; i<dimCount*deCount; i++){
     indexList[i] = new int[dimExtent[i]];
     memcpy(indexList[i], indexListArg[i], sizeof(int)*dimExtent[i]);
+  }
+  patchDeLookup = new int[deCount];
+  memcpy(patchDeLookup, patchDeLookupArg, sizeof(int)*deCount);
+  // determine the patchCellCount
+  patchCellCount = new int[patchCount];
+  for (int i=0; i<patchCount; i++){
+    patchCellCount[i] = 1;  // reset
+    for (int j=0; j<dimCount; j++)
+      patchCellCount[i] *=
+        (maxCorner[i*dimCount+j] - minCorner[i*dimCount+j] + 1);
   }
   
   // return successfully
@@ -1252,6 +1294,10 @@ int ESMC_DistGrid::ESMC_DistGridDestruct(void){
   
   // garbage collection
   delete [] dimExtent;
+  delete [] minCorner;
+  delete [] maxCorner;
+  delete [] patchCellCount;
+  delete [] patchDeLookup;
   for (int i=0; i<dimCount*deCount; i++)
     delete [] indexList[i];
   delete [] indexList;
@@ -1474,6 +1520,189 @@ int ESMC_DistGrid::ESMC_DistGridGet(
   
   // return successfully
   return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridGet()"
+//BOP
+// !IROUTINE:  ESMC_DistGridGet
+//
+// !INTERFACE:
+int ESMC_DistGrid::ESMC_DistGridGet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  int de,                               // in  - DE   = {0, ..., deCount-1}
+  int *cellCount                        // out
+  ){    
+//
+// !DESCRIPTION:
+//    Get information about a DistGrid object
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // automatic variable for local return code
+  int *rc = &localrc;         // pointer to localrc
+  int status;                 // local error status
+
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  if (rc!=NULL)
+    *rc = ESMF_FAILURE;
+  
+  //
+  *cellCount = 1; // reset
+  for (int i=0; i<dimCount; i++)
+    *cellCount *= dimExtent[de*dimCount+i];
+  
+  // return successfully
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridGetSequenceIndex()"
+//BOP
+// !IROUTINE:  ESMC_DistGridGetSequenceIndex
+//
+// !INTERFACE:
+int ESMC_DistGrid::ESMC_DistGridGetSequenceIndex(
+//
+// !RETURN VALUE:
+//    int sequence index
+//
+// !ARGUMENTS:
+//
+  int de,                           // in - DE
+  int *index                        // in - DE-local index tupple in exclusive
+                                    //      region basis 0
+  ){    
+//
+// !DESCRIPTION:
+//    Get sequential index
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // automatic variable for local return code
+  int *rc = &localrc;         // pointer to localrc
+  int status;                 // local error status
+
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  if (rc!=NULL)
+    *rc = ESMF_FAILURE;
+  
+  // determine the sequentialized index
+  int patch = patchDeLookup[de];  // patches are basis 1 !!!!
+  int seqindex = indexList[de*dimCount+(dimCount-1)][index[dimCount-1]]
+    - minCorner[(patch-1)*dimCount+(dimCount-1)]; // initialize
+  for (int i=dimCount-2; i>=0; i--){
+    // add cells in the patch in which DE is located
+    seqindex *= maxCorner[(patch-1)*dimCount+i] 
+      - minCorner[(patch-1)*dimCount+i] + 1;
+    seqindex += indexList[de*dimCount+i][index[i]] 
+      - minCorner[(patch-1)*dimCount+i];
+  }
+  for (int i=0; i<patchDeLookup[de]-2; i++)
+    seqindex += patchCellCount[i];  // add all the cells of previous patches
+  
+  return seqindex+1;  // shift sequentialized index to basis 1 !!!!
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridGetDe()"
+//BOP
+// !IROUTINE:  ESMC_DistGridGetDe
+//
+// !INTERFACE:
+int ESMC_DistGrid::ESMC_DistGridGetDe(
+//
+// !RETURN VALUE:
+//    int DE that covers sequential index
+//
+// !ARGUMENTS:
+//
+  int seqindex                      // in - sequential index basis 1
+  ){    
+//
+// !DESCRIPTION:
+//    Get DE that covers sequential index
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // automatic variable for local return code
+  int *rc = &localrc;         // pointer to localrc
+  int status;                 // local error status
+
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  if (rc!=NULL)
+    *rc = ESMF_FAILURE;
+  
+  // determine the DE that covers sequentialized index
+  
+  // find that patch that contains seqindex
+  int cellSum=0; // reset
+  int p;          // this will be patch index basis 0
+  for (p=0; p<patchCount; p++)
+    if (seqindex <= cellSum + patchCellCount[p]) break;
+  if (p >= patchCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
+      "- Could not find seqindex in DistGrid", rc);
+    return -1;  // indicate problem
+  }
+  seqindex -= cellSum;  // shift into patch-local sequential index
+  seqindex -= 1;        // shift into basis 0
+  // find the patch-local index tuple for seqindex
+  int *ii = new int[dimCount];
+  for (int i=dimCount-1; i>=0; i--){
+    int delta = 1; // reset
+    for (int j=0; j<i; j++)
+      delta *= maxCorner[p*dimCount+j] - minCorner[p*dimCount+j] + 1;
+    ii[i] = seqindex / delta;
+    seqindex = seqindex % delta;
+  }
+  // shift origin of ii[] onto patch origin
+  for (int i=0; i<dimCount; i++)
+    ii[i] += minCorner[p*dimCount+i];
+  // find the DE that covers this patch-local index tuple
+  int de;
+  for (de=0; de<deCount; de++){
+    if (patchDeLookup[de] != p+1) continue; // DE not in correct patch
+    int dim;
+    for (dim=0; dim<dimCount; dim++){
+      int i;
+      for (i=0; i<dimExtent[de*dimCount+dim]; i++){
+        if (indexList[de*dimCount+dim][i] == ii[dim]) break;  // dim match
+      }
+      if (i==dimExtent[de*dimCount+dim])break; // did not find dim match
+    }
+    if (dim==dimCount) break; // found matching DE
+  }
+  // garbage collection
+  delete [] ii;
+  // error checking
+  if (de == deCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
+      "- Could not find DE in DistGrid that covers seqindex", rc);
+    return -1;  // indicate problem
+  }
+    
+  return de;
 }
 //-----------------------------------------------------------------------------
 

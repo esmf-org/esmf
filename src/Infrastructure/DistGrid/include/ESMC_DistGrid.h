@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.6 2006/04/14 18:27:50 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.7 2006/04/24 21:35:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -54,6 +54,10 @@ class ESMC_DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
   private:
     int dimCount;                 // rank of DistGrid
     int patchCount;               // number of patches in DistGrid
+    int *patchCellCount;          // number of cells for each patch
+    int *patchDeLookup;           // patch index per DE
+    int *minCorner;               // minCorner for all patches
+    int *maxCorner;               // maxCorner for all patches
     int *dimExtent;               // extent of indexList held by DE per dim
     int **indexList;              // indices held by DE per dim
     ESMC_Logical regDecompFlag;   // flag indicating regular decomposition
@@ -70,9 +74,9 @@ class ESMC_DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
         
   public:
     // Construct and Destruct
-    int ESMC_DistGridConstruct(int dimCount, int patchCount, int *dimExtent, 
-      int **indexList, ESMC_Logical regDecompFlagArg, 
-      ESMC_InterfaceInt *connectionList,
+    int ESMC_DistGridConstruct(int dimCount, int patchCount, int *patchDeLookup,
+      int *minCorner, int *maxCorner, int *dimExtent, int **indexList,
+      ESMC_Logical regDecompFlagArg, ESMC_InterfaceInt *connectionList,
       ESMC_DELayout *delayout, ESMC_VM *vm);
     int ESMC_DistGridDestruct(void);
     // Get, Set
@@ -80,6 +84,9 @@ class ESMC_DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
       ESMC_InterfaceInt *patchList, int *dimCountArg,
       ESMC_InterfaceInt *dimExtentArg, ESMC_Logical *regDecompFlagArg);
     int ESMC_DistGridGet(int de, int dim, ESMC_InterfaceInt *indexList);
+    int ESMC_DistGridGet(int de, int *cellCount);
+    int ESMC_DistGridGetSequenceIndex(int de, int *index);
+    int ESMC_DistGridGetDe(int seqindex);
     // IO and validation
     int ESMC_DistGridPrint(void);
       
