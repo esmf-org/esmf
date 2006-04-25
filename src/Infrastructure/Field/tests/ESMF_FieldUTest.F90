@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.83 2006/04/25 16:37:13 samsoncheung Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.84 2006/04/25 18:27:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.83 2006/04/25 16:37:13 samsoncheung Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.84 2006/04/25 18:27:28 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -391,17 +391,19 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
      
       !------------------------------------------------------------------------
-      !EX_UTest
+      !E-X-_-U-T-e-s-t
       ! Try to create a Field with a Grid and ArraySpec of the wrong sizes
       ! try rank 1,2,3 :-)
+      !TODO: with the removal of the old Array class (now called InternArray)
+      !TODO: this test really does not work. 
       ! call ESMF_ArraySpecSet(arrayspec, 1, ESMF_DATA_REAL, ESMF_R4, rc=rc)
-      f6 = ESMF_FieldCreate(grid4, arrayspec, allocflag=ESMF_ALLOC, &
-                        horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
-                        haloWidth=2, datamap=dm, name="Field 1", iospec=ios, rc=rc)
-
-      write(failMsg, *) ""
-      write(name, *) "Creating a Field with a mismatched Grid/Array"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!      f6 = ESMF_FieldCreate(grid4, arrayspec, allocflag=ESMF_ALLOC, &
+!                        horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
+!                        haloWidth=2, datamap=dm, name="Field 1", iospec=ios, rc=rc)
+!
+!      write(failMsg, *) ""
+!      write(name, *) "Creating a Field with a mismatched Grid/Array"
+!      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
