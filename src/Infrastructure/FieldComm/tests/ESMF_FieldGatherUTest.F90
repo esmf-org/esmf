@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.9 2006/04/19 21:31:04 samsoncheung Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.10 2006/04/25 16:37:13 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldGatherUTest.F90,v 1.9 2006/04/19 21:31:04 samsoncheung Exp $'
+      '$Id: ESMF_FieldGatherUTest.F90,v 1.10 2006/04/25 16:37:13 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -167,7 +167,7 @@
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field Get Data Test"
-      call ESMF_FieldGetDataPointer(field, srcData, ESMF_DATA_REF, rc)
+      call ESMF_FieldGetDataPointer(field, srcData, copyflag=ESMF_DATA_REF, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
@@ -205,7 +205,7 @@
 !-----------------------------------------------------------------------------
       ok = .true.
       if (myDE.eq.0) then
-        call ESMF_FieldGetDataPointer(field, gatheredData, ESMF_DATA_REF, rc)
+        call ESMF_FieldGetDataPointer(field, gatheredData, copyflag=ESMF_DATA_REF, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 20
         minGather =  9999999.
         maxGather = -9999999.

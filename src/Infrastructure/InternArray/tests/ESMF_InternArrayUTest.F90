@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayUTest.F90,v 1.2 2006/04/13 18:27:47 samsoncheung Exp $
+! $Id: ESMF_InternArrayUTest.F90,v 1.3 2006/04/25 16:37:13 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayUTest.F90,v 1.2 2006/04/13 18:27:47 samsoncheung Exp $'
+      '$Id: ESMF_InternArrayUTest.F90,v 1.3 2006/04/25 16:37:13 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -126,7 +126,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set Array Name Test"
-    call ESMF_ArraySet(array1, name="SAM", rc=rc)
+    call ESMF_InternArraySet(array1, name="SAM", rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -135,7 +135,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS or returned wrong name" 
     write(name, *) "Get Array Name Test"
-    call ESMF_ArrayGet(array1, name=array_name, rc=rc)
+    call ESMF_InternArrayGet(array1, name=array_name, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS.and.array_name.eq."SAM"), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -166,7 +166,7 @@
     f90ptr1(:,:) = 1.0
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Create Array with HaloWidth Test"
-    array1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, haloWidth=2, rc=rc)
+    array1 = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_COPY, haloWidth=2, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -174,7 +174,7 @@
  
     !EX_UTest
     write(name, *) "Get Array HaloWidth Test"
-    call ESMF_ArrayGet(array1, haloWidth=width, rc=rc)
+    call ESMF_InternArrayGet(array1, haloWidth=width, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !EX_UTest
@@ -188,7 +188,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Print an Array Test"
-    call ESMF_ArrayPrint(array1, rc=rc)
+    call ESMF_InternArrayPrint(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -198,7 +198,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
-    call ESMF_ArrayGetAttributeCount(array1, attribute, rc=rc)
+    call ESMF_IArrayGetAttributeCount(array1, attribute, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -215,7 +215,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
-    call ESMF_ArraySetAttribute(array1, "test_attribute", 123456789, rc=rc)
+    call ESMF_IArraySetAttribute(array1, "test_attribute", 123456789, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -224,7 +224,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
-    call ESMF_ArraySetAttribute(array1, "test_attribute1", 0, rc=rc)
+    call ESMF_IArraySetAttribute(array1, "test_attribute1", 0, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -233,7 +233,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
-    call ESMF_ArraySetAttribute(array1, "test_attribute2", 0.0, rc=rc)
+    call ESMF_IArraySetAttribute(array1, "test_attribute2", 0.0, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -242,7 +242,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
-    call ESMF_ArraySetAttribute(array1, "test_attribute3", 6789, rc=rc)
+    call ESMF_IArraySetAttribute(array1, "test_attribute3", 6789, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -251,7 +251,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Set an Attribute in an Array Test"
-    call ESMF_ArraySetAttribute(array1, "test_attribute4", 5.87, rc=rc)
+    call ESMF_IArraySetAttribute(array1, "test_attribute4", 5.87, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -260,7 +260,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get an Attribute from an Array Test"
-    call ESMF_ArrayGetAttributeCount(array1, attribute, rc=rc)
+    call ESMF_IArrayGetAttributeCount(array1, attribute, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -277,7 +277,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get an Attribute from an Array Test"
-    call ESMF_ArrayGetAttribute(array1, "test_attribute", attribute, rc=rc)
+    call ESMF_IArrayGetAttribute(array1, "test_attribute", attribute, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -293,7 +293,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get Attribute Info from an Array Test"
-    call ESMF_ArrayGetAttributeInfo(array1, "test_attribute", &
+    call ESMF_IArrayGetAttributeInfo(array1, "test_attribute", &
                                     datatype=att_datatype, &
                                     datakind=att_datakind, &
                                     count=att_count, rc=rc)
@@ -329,7 +329,7 @@
     !EX_UTest
     write(failMsg, *) "Should not return ESMF_SUCCESS" 
     write(name, *) "Get a Wrong Data type Attribute from an Array Test"
-    call ESMF_ArrayGetAttribute(array1, "test_attribute4", attribute, rc=rc)
+    call ESMF_IArrayGetAttribute(array1, "test_attribute4", attribute, rc=rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -338,7 +338,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get an Attribute from an Array Test"
-    call ESMF_ArrayGetAttribute(array1, "test_attribute4", attribute4, rc=rc)
+    call ESMF_IArrayGetAttribute(array1, "test_attribute4", attribute4, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -356,7 +356,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Get Attribute Info from an Array Test"
-    call ESMF_ArrayGetAttributeInfo(array1, "test_attribute4", &
+    call ESMF_IArrayGetAttributeInfo(array1, "test_attribute4", &
                                     datatype=att_datatype, &
                                     datakind=att_datakind, &
                                     count=att_count, rc=rc)
@@ -426,7 +426,7 @@
     counts(2) = 20
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Create Array with data allocated by framework"
-    array1 = ESMF_ArrayCreate(f90ptr1, counts, haloWidth=2, rc=rc)
+    array1 = ESMF_InternArrayCreate(f90ptr1, counts, haloWidth=2, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -435,7 +435,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Print an Array Test"
-    call ESMF_ArrayPrint(array1, rc=rc)
+    call ESMF_InternArrayPrint(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -471,7 +471,7 @@
     width = 3
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Create Array with data allocated by framework"
-    array1 = ESMF_ArrayCreate(f90ptr1, counts, width, lbounds, ubounds, rc=rc)
+    array1 = ESMF_InternArrayCreate(f90ptr1, counts, width, lbounds, ubounds, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
@@ -480,7 +480,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Print an Array Test"
-    call ESMF_ArrayPrint(array1, rc=rc)
+    call ESMF_InternArrayPrint(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------

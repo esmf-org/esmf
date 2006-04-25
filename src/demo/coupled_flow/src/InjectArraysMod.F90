@@ -1,4 +1,4 @@
-! $Id: InjectArraysMod.F90,v 1.10 2006/04/13 18:27:48 samsoncheung Exp $
+! $Id: InjectArraysMod.F90,v 1.11 2006/04/25 16:37:14 samsoncheung Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -81,7 +81,6 @@
       logical :: rcpresent
       integer :: haloWidth
       type(ESMF_ArraySpec) :: arrayspec
-      type(ESMF_InternArray) :: array_temp
       integer, dimension(2) :: lb, ub
 !
 ! Set initial values
@@ -147,11 +146,10 @@
         return
       endif
 !
-! set some of the scalars from array information
+! set some of the scalars from Field information
 !      
-      call ESMF_FieldGetArray(field_flag, array_temp, rc=status)
-      call ESMF_InternArrayGet(array_temp, lbounds=lb, ubounds=ub, &
-                         haloWidth=haloWidth, rc=rc)
+      call ESMF_FieldGet(field_flag, haloWidth=haloWidth, lbounds=lb, &
+                         ubounds=ub, rc=rc)
 
       ! Computational region: data unique to this DE
       imin = lb(1) + haloWidth

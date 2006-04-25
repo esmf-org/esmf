@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.38 2006/04/19 21:31:04 samsoncheung Exp $
+! $Id: ESMF_StateUTest.F90,v 1.39 2006/04/25 16:37:14 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.38 2006/04/19 21:31:04 samsoncheung Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.39 2006/04/25 16:37:14 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -45,7 +45,6 @@
       type(ESMF_Field) :: field1, field2, field3(3), field4, field5(3), nofield
       type(ESMF_Bundle) :: bundle1, bundle2(1), bundle3, bundle5, nobundle
       type(ESMF_State) :: state1, state2, state3, nostate
-      type(ESMF_InternArray) :: array1, array2(2), array3, array3a, noarray
       type(ESMF_StateItemType) :: stateItemType
       type(ESMF_NeededFlag) :: needed
       real, dimension(:,:), pointer :: f90ptr1
@@ -102,8 +101,6 @@
       call ESMF_BundleDestroy(nobundle, rc=rc)
       nofield = ESMF_FieldCreateNoData(rc=rc)
       call ESMF_FieldDestroy(nofield, rc=rc)
-      noarray = ESMF_InternArrayCreate(1,ESMF_DATA_REAL,ESMF_R8,(/1/),rc=rc)
-      call ESMF_InternArrayDestroy(noarray, rc=rc)
 
 
       !------------------------------------------------------------------------
@@ -297,52 +294,24 @@
       write(name, *) "Verifying unknown item info from a State Test"
       call ESMF_Test((stateItemType.eq.ESMF_STATEITEM_NOTFOUND), &
                       name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
-      !EX_UTest
       ! Test adding an Array to a State
-      allocate(f90ptr1(10,20))
-      array1 = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creating an Array Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
-      !EX_UTest
       ! Test setting an array name
-      call ESMF_InternArraySet(array1, name="ArrayOne", rc=rc)  
-      write(failMsg, *) ""
-      write(name, *) "Setting an Array Name Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
-      !EX_UTest
       ! Test getting a name from an array
-      call ESMF_InternArrayGet(array1, name=aname, rc=rc)  ! get the name for later
-      write(failMsg, *) ""
-      write(name, *) "Getting an Array Name Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
       !Test adding an Array to a State
-      call ESMF_StateAddArray(state1, array1, rc)
-      write(name, *) "Adding an Array to a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
       ! Test getting an Array from a State
-      call ESMF_StateGetArray(state1, arrayname=aname, array=array3, rc=rc)
-      write(failMsg, *) "DId not return ESMF_SUCCESS"
-      write(name, *) "Getting an Array from a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test printing of State
@@ -522,14 +491,7 @@
       print *, "IsNeeded = ", IsNeeded
       !------------------------------------------------------------------------
 
-      !EX_UTest
       ! Test State for Array being needed
-      IsNeeded = ESMF_StateIsNeeded(state1, aname, rc)
-      write(failMsg, *) ""
-      write(name, *) "Query if Array is needed in a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(IsNeeded), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      print *, "IsNeeded = ", IsNeeded
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -549,13 +511,7 @@
       print *, "IsNeeded = ", IsNeeded
       !------------------------------------------------------------------------
 
-      !EX_UTest
       ! Test setting Array as not needed in a State
-      call ESMF_StateSetNeeded(state1, aname, ESMF_NOTNEEDED, rc)
-      write(failMsg, *) ""
-      write(name, *) "Set Array as not needed in a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -566,22 +522,10 @@
       print *, "IsNeeded = ", IsNeeded
       !------------------------------------------------------------------------
 
-      !EX_UTest
       ! Test getting Array from State
-      call  ESMF_StateGetArray(state1, aname, array3, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Getting Arrray from a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
       !Test getting Array name
-      call ESMF_InternArrayGet(array1, name=arrayname, rc=rc)
-      write(failMsg, *) "Wrong Array name  and/or did not return ESMF_SUCCESS"
-      write(name, *) "Verifying that the Array has correct name Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(arrayname.eq.aname), &
-                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
@@ -635,21 +579,9 @@
       print *, "IsNeeded = ", IsNeeded
       !------------------------------------------------------------------------
 
-      !EX_UTest
       ! Test setting Array as needed in a State
-      call ESMF_StateSetNeeded(state1, aname, ESMF_NEEDED, rc)
-      write(failMsg, *) ""
-      write(name, *) "Set Array as needed in a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
-      IsNeeded = ESMF_StateIsNeeded(state1, aname, rc)
-      write(name, *) "Test if Array is needed in a State Test"
-      call ESMF_Test((IsNeeded), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      print *, "IsNeeded = ", IsNeeded
       !------------------------------------------------------------------------
  
       !EX_UTest
@@ -683,17 +615,7 @@
                        name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
       ! Test adding an uninitialized Array to a State
-#ifdef ESMF_NO_INITIALIZERS
-      array3a = noarray
-#endif
-      call ESMF_StateAddArray(state1, array3a, rc)
-      write(name, *) "Adding an uninitialized Array to a State Test"
-      print *, "rc = ", rc
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-                        name, failMsg, result, ESMF_SRCLINE)
-      print *, "rc = ", rc
 
       !------------------------------------------------------------------------
 
@@ -791,38 +713,16 @@
       call  ESMF_StatePrint(state2, rc=rc)
       !------------------------------------------------------------------------
 
-      !EX_UTest
       ! Test Creation of an export State with an array
-      statename = "Export State"
-      x  = 1
-      allocate(f90ptr1(10,20))
-      array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
-      state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
-                                arrayList=array2(1:1), itemcount=x, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creating an export State with a Array Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                        name, failMsg, result, ESMF_SRCLINE)
-      call  ESMF_StatePrint(state2, rc=rc)
+      !------------------------------------------------------------------------
+      !state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
+      !                          arrayList=array2(1:1), itemcount=x, rc=rc)
+
+      ! Test Creation of an export State with an array
+      !state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
+      !                          arrayList=array2, itemcount=x, rc=rc)
       !------------------------------------------------------------------------
 
-      !EX_UTest
-      ! Test Creation of an export State with an array
-      statename = "Export State"
-      x  = 2
-      allocate(f90ptr1(10,20))
-      array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
-      array2(2) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
-      state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
-                                arrayList=array2, itemcount=x, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creating an export State with a Array list Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                        name, failMsg, result, ESMF_SRCLINE)
-      call  ESMF_StatePrint(state2, rc=rc)
-      !------------------------------------------------------------------------
-
-      call ESMF_InternArrayPrint(array1, rc=rc)
       call  ESMF_StatePrint(state1, rc=rc)
 
       !EX_UTest
@@ -843,20 +743,9 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
       ! Test Creation of an export State with an array list
-      statename = "Export State"
-      x  = 2
-      allocate(f90ptr1(10,20))
-      array2(1) = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
-      array2(2) = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
-      state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
-                                arrayList=array2, itemcount=x, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creating an export State with a Array list Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                        name, failMsg, result, ESMF_SRCLINE)
-      call  ESMF_StatePrint(state2, rc=rc)
+      !state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
+      !                          arrayList=array2, itemcount=x, rc=rc)
       !------------------------------------------------------------------------
 
       !EX_UTest

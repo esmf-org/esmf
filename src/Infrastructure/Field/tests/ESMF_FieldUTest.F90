@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.82 2006/04/19 21:31:04 samsoncheung Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.83 2006/04/25 16:37:13 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.82 2006/04/19 21:31:04 samsoncheung Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.83 2006/04/25 16:37:13 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -363,9 +363,11 @@
       ! Fields may be created as in FLD1.1.1 with a data array passed into 
       ! the argument list. The data array is referenced and not copied.
       ! Verifing that a Field can be created with a Grid and DataMap
+      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4, rc=rc)
       call ESMF_FieldDataMapSetDefault(dm, ESMF_INDEX_IJ)
-      f3 = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                        vertRelloc=ESMF_CELL_CENTER, 2, dm, "Field 0", ios, rc)
+      f3 = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_ALLOC, &
+                        horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
+                        haloWidth=2, datamap=dm, name="Field 0", iospec=ios, rc=rc)
 
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test FLD1.1.2"
@@ -391,8 +393,12 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Try to create a Field with a Grid and ArraySpec of the wrong sizes
-      f6 = ESMF_FieldCreate(grid4, arrayspec, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                            ESMF_CELL_CELL, 2, dm, "Field 1", ios, rc)
+      ! try rank 1,2,3 :-)
+      ! call ESMF_ArraySpecSet(arrayspec, 1, ESMF_DATA_REAL, ESMF_R4, rc=rc)
+      f6 = ESMF_FieldCreate(grid4, arrayspec, allocflag=ESMF_ALLOC, &
+                        horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
+                        haloWidth=2, datamap=dm, name="Field 1", iospec=ios, rc=rc)
+
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a mismatched Grid/Array"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -452,8 +458,10 @@
 #ifdef ESMF_NO_INITIALIZERS
       grid2 = nogrid
 #endif
-      f3 = ESMF_FieldCreate(grid2, arrayspec, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                            ESMF_CELL_CELL, 3, dm, "Field 0", ios, rc)
+      f3 = ESMF_FieldCreate(grid2, arrayspec, allocflag=ESMF_ALLOC, &
+                        horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
+                        haloWidth=3, datamap=dm, name="Field 0", iospec=ios, rc=rc)
+
       write(failMsg, *) ""
       write(name, *) "Creating a Field with an uninitialized Grid and Array"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -474,8 +482,9 @@
       ! A field shall be able to return a reference to its grid.
       ! f3 gets created here and used thru the rest of the tests.
       gname="oceangrid"
-      f3 = ESMF_FieldCreate(grid, arrayspec, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                            ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
+      f3 = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_ALLOC, &
+                        horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
+                        haloWidth=1, datamap=dm, name="Field 0", iospec=ios, rc=rc)
       call ESMF_FieldGet(f3, grid=grid3, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a Grid from a Field created with no data Test"

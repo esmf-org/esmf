@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.3 2006/04/19 21:31:03 samsoncheung Exp $
+! $Id: ESMF_BundleCommOptionsUTest.F90,v 1.4 2006/04/25 16:37:13 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.3 2006/04/19 21:31:03 samsoncheung Exp $'
+      '$Id: ESMF_BundleCommOptionsUTest.F90,v 1.4 2006/04/25 16:37:13 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -797,7 +797,6 @@ contains
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
-      write(*,*)"init cheung ranksize", ranksize
       ! get a pointer to the start of the local data block
       if (ranksize .eq. 2) then
           call ESMF_FieldGetDataPointer(userfield, idata2, ESMF_DATA_REF, &
@@ -903,7 +902,6 @@ contains
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
-      write(*,*)"ver cheung ranksize", ranksize
       print *, "counts = ", counts
       print *, "acounts = ", acounts
 

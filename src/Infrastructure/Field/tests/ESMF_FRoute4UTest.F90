@@ -1,4 +1,4 @@
-! $Id: ESMF_FRoute4UTest.F90,v 1.14 2006/04/19 21:31:04 samsoncheung Exp $
+! $Id: ESMF_FRoute4UTest.F90,v 1.15 2006/04/25 16:37:13 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRoute4UTest.F90,v 1.14 2006/04/19 21:31:04 samsoncheung Exp $'
+      '$Id: ESMF_FRoute4UTest.F90,v 1.15 2006/04/25 16:37:13 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -243,7 +243,7 @@
       ! and an optional I/O specification. In this case a field will
       ! allocate its own data. The grid passed into the argument list
       ! is referenced and not copied.
-      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_DATA_REAL, ESMF_R4, rc=rc)
+      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4, rc=rc)
       write(name, *) "Creating an ArraySpec Test "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -259,8 +259,9 @@
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a Field with a Grid and Array Test"
-      f1 = ESMF_FieldCreate(grid1, arrayspec, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                            ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
+      f1 = ESMF_FieldCreate(grid1, arrayspec, allocflag=ESMF_ALLOC, &
+                            horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CELL, &
+                            datamap=dm, haloWidth=1, name="Field 0", iospec=ios, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -268,8 +269,9 @@
       ! second field
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a Field with a Grid and Array Test"
-      f2 = ESMF_FieldCreate(grid2, arrayspec, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                            ESMF_CELL_CELL, 1, dm, "Field 1", ios, rc)
+      f2 = ESMF_FieldCreate(grid2, arrayspec, allocflag=ESMF_ALLOC, &
+                            horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CELL, &
+                            datamap=dm, haloWidth=1, name="Field 1", iospec=ios, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------

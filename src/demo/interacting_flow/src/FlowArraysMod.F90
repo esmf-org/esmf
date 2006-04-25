@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.3 2006/04/13 18:27:48 samsoncheung Exp $ 
+! $Id: FlowArraysMod.F90,v 1.4 2006/04/25 16:37:14 samsoncheung Exp $ 
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -83,7 +83,6 @@
       logical :: rcpresent
       integer :: haloWidth
       type(ESMF_ArraySpec) :: arrayspec
-      type(ESMF_InternArray) :: array_temp
       integer, dimension(2) :: lb, ub
 !
 ! Set initial values
@@ -175,11 +174,10 @@
         return
       endif
 !
-! set some of the scalars from array information
+! set some of the scalars from Field information
 !
-      call ESMF_FieldGetArray(field_de, array_temp, rc=status)
-      call ESMF_InternArrayGet(array_temp, lbounds=lb, ubounds=ub, &
-                         haloWidth=haloWidth, rc=rc)
+      call ESMF_FieldGet(field_de, haloWidth=haloWidth, lbounds=lb, &
+                         ubounds=ub, rc=status)
 
       ! Computational region: data unique to this DE
       imin = lb(1) + haloWidth

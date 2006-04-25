@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.21 2006/04/13 18:27:48 samsoncheung Exp $
+! $Id: InjectorMod.F90,v 1.22 2006/04/25 16:37:14 samsoncheung Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -389,7 +389,6 @@
       ! Local variables
         type(ESMF_Field) :: thisfield
         type(ESMF_Field) :: local_sie, local_v, local_rho, local_flag
-        type(ESMF_InternArray) :: array_sie, array_v, array_rho, array_flag
         real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: data_sie, data_v
         real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: data_rho, data_flag
         type(ESMF_Time) :: currtime
@@ -423,17 +422,13 @@
       
         ! Get the Field and Bundle data from the State, and a pointer to
         !  the existing data (not a copy).
-        call ESMF_FieldGetArray(local_sie, array_sie, rc=rc) 
-        call ESMF_InternArrayGetData(array_sie, data_sie, ESMF_DATA_REF, rc)
+        call ESMF_FieldGetDataPointer(local_sie, data_sie, ESMF_DATA_REF, rc=rc)
             
-        call ESMF_FieldGetArray(local_v, array_v, rc=rc) 
-        call ESMF_InternArrayGetData(array_v, data_v, ESMF_DATA_REF, rc)
+        call ESMF_FieldGetDataPointer(local_v, data_v, ESMF_DATA_REF, rc=rc)
       
-        call ESMF_FieldGetArray(local_rho, array_rho, rc=rc) 
-        call ESMF_InternArrayGetData(array_rho, data_rho, ESMF_DATA_REF, rc)
+        call ESMF_FieldGetDataPointer(local_rho, data_rho, ESMF_DATA_REF, rc=rc)
       
-        call ESMF_FieldGetArray(local_flag, array_flag, rc=rc) 
-        call ESMF_InternArrayGetData(array_flag, data_flag, ESMF_DATA_REF, rc)
+        call ESMF_FieldGetDataPointer(local_flag, data_flag, ESMF_DATA_REF, rc=rc)
           
         ! Update values.  Flag = 10 means override values with our own.
 
