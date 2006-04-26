@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.47 2006/04/24 21:41:29 theurich Exp $
+// $Id: ESMC_Array.C,v 1.48 2006/04/26 17:19:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.47 2006/04/24 21:41:29 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Array.C,v 1.48 2006/04/26 17:19:45 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2054,8 +2054,10 @@ int ESMC_newArray::ESMC_newArrayScatter(
   // create the ScatterThread for this DE
   pthread_t *pthid =
     &(commhArray[localDe].pthid[(commhArray[localDe].pthidCount)++]);
-  pthread_create(pthid, NULL, ESMC_newArrayScatterThread,
-    &(thargArray[localDe]));
+// took the following call out so the rest would compile: 
+// mpCC on AIX has trouble with friend func namespaces
+//  pthread_create(pthid, NULL, ESMC_newArrayScatterThread,
+//    &(thargArray[localDe]));
     
   return ESMF_SUCCESS;
 }
@@ -2375,7 +2377,9 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   
   // create the ScalarReduceThread for rootPET
   pthread_t *pthid = &(commh->pthid[(commh->pthidCount)++]);
-  pthread_create(pthid, NULL, ESMC_newArrayScalarReduceThread, &thargRoot);
+// took the following call out so the rest would compile: 
+// mpCC on AIX has trouble with friend func namespaces
+//  pthread_create(pthid, NULL, ESMC_newArrayScalarReduceThread, &thargRoot);
     
   return ESMF_SUCCESS;
 }
