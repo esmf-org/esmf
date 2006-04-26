@@ -1,10 +1,12 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.13 2004/03/08 16:03:26 nscollins Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.33.4.1 2006/04/26 17:31:20 theurich Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
 
 !-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!SYSTEM_____TEST__DISABLED        String used by test script to count system tests.
+! Until the newArray becomes available this system tests has been disabled
+!=========================================================================
 
 !BOP
 !
@@ -25,24 +27,21 @@
     implicit none
     
     ! Local variables
-    integer :: nx, ny, i, j, ni, nj, rc
-    integer, dimension(2) :: delist
+    integer :: i, j, ij, rc
     integer :: row_to_reduce
-    integer :: timestep, rowlen, rowi, rstart, rend
-    integer :: result, len, de_id, ndes, rightvalue 
-    integer :: counts(2)
-    type(ESMF_GridKind) :: horz_gridkind, vert_gridkind
-    type(ESMF_GridStagger) :: horz_stagger, vert_stagger
-    type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
-    integer :: status
+    integer :: rowlen
+    integer :: result, pet_id, npets, rightvalue 
+    integer :: counts(2), localCount(2)
+    type(ESMF_GridHorzStagger) :: horz_stagger
     real(ESMF_KIND_R8) :: min(2), max(2)
-    integer(ESMF_KIND_I4), dimension(:), pointer :: idata, ldata, rowdata
-    type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
+    integer(ESMF_KIND_I4), dimension(:), pointer :: ldata, rowdata, oneDdata
+    integer(ESMF_KIND_I4), dimension(:,:), pointer :: idata, rdata
     character(len=ESMF_MAXSTR) :: cname, gname, fname
-    type(ESMF_DELayout) :: layout1 
+    type(ESMF_DELayout) :: delayout1 
     type(ESMF_Grid) :: grid1
     type(ESMF_Array) :: array1, array2
     type(ESMF_Field) :: field1
+    type(ESMF_VM) :: vm
         
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
@@ -66,13 +65,17 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    call ESMF_Initialize(rc)
+
+    ! Initialize the framework and query for the default VM
+    call ESMF_Initialize(vm=vm, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+    ! Find out how many PETs we were started with
+    call ESMF_VMGet(vm, petCount=npets, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Create a default 1 x N DELayout 
-    layout1 = ESMF_DELayoutCreate(rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
+    delayout1 = ESMF_DELayoutCreate(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test DELayoutRowReduce"
@@ -91,58 +94,70 @@
 
       counts(1) = 41
       counts(2) = 20
-      min(1) = 0.0
-      max(1) = 20.5
-      min(2) = 0.0
-      max(2) = 5.0
-      horz_gridkind = ESMF_GridKind_XY
-      horz_stagger = ESMF_GridStagger_A
-      horz_coord_system = ESMF_CoordSystem_Cartesian
+      min(1) = 0.0d0
+      max(1) = 20.5d0
+      min(2) = 0.0d0
+      max(2) = 5.0d0
+      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
       gname = "test grid 1"
 
-      grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+      print *, "right before grid create"
+      grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
-                              layout=layout1, &
-                              horzGridKind=horz_gridkind, &
                               horzStagger=horz_stagger, &
-                              horzCoordSystem=horz_coord_system, &
-                              name=gname, rc=status)
+                              name=gname, rc=rc)
+      print *, "Grid Create returned ", rc,  "(0=SUCCESS, -1=FAILURE)"
 
-      print *, "Grid Create returned ", status,  "(0=SUCCESS, -1=FAILURE)"
+      call ESMF_GridDistribute(grid1, delayout=delayout1, rc=rc)
+      print *, "Grid Distribute returned ", rc,  "(0=SUCCESS, -1=FAILURE)"
 
 
     ! figure out our local processor id
-    call ESMF_DELayoutGetDEID(layout1, de_id, rc)
+    call ESMF_VMGet(vm, localPet=pet_id, rc=rc)
 
     ! Allocate and set initial data values.  These are different on each DE.
-    call ESMF_GridGetDE(grid1, localCellCount=ni, &
-                        horzRelloc=ESMF_CELL_CENTER, rc=rc)
+    call ESMF_GridGetDELocalInfo(grid1, localCellCountPerDim=localCount, &
+                                 horzRelloc=ESMF_CELL_CENTER, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    print *, "allocating", ni, " cells on DE", de_id
-    allocate(idata(ni))
-    allocate(ldata(ni))
+    print *, "allocating", localCount(1)*localCount(2), " cells on PET", pet_id
+    allocate(idata(localCount(1), localCount(2)))
+    allocate(ldata(localCount(1) * localCount(2)))
+    allocate(oneDdata(localCount(1) * localCount(2)))
 
     ! set original values to 0; local to global call below will overwrite
     ! this with global index numbers
-    idata(:) = 0
+    idata = 0
     
     ! Generate global cell numbers.  First set to local number and
     ! then translate to global index.
-    do i=1,ni
-       ldata(i) = i
+    do j=1,localcount(2)
+      do i=1,localcount(1)
+        ij = ((j-1) * localcount(1)) + i
+        ldata(ij) = ij
+      enddo
     enddo
+  
     print *, "size local1D", size(ldata)
     print *, "size global1D", size(idata)
-    call ESMF_GridLocalToGlobalIndex(grid1, local1D=ldata, global1D=idata, &
-                                     horzRelloc=ESMF_CELL_CENTER, rc=rc) 
+    ! TODO: there should be a 2D version of this call.
+    call ESMF_GridDELocalToGlobalIndex(grid1, local1D=ldata, global1D=oneDdata, &
+                                       horzRelloc=ESMF_CELL_CENTER, rc=rc) 
     if (rc .ne. ESMF_SUCCESS) goto 10
 
+    do j=1,localcount(2)
+      do i=1,localcount(1)
+        ij = ((j-1) * localcount(1)) + i
+        idata(i,j) = oneDdata(ij)
+      enddo
+    enddo
+  
     print *, "after local to global"
     print *, "ldata was = ", ldata
     print *, "idata now = ", idata
     ! Delete local cell number array, not needed anymore.
     deallocate(ldata, stat=rc)
+    deallocate(oneDdata, stat=rc)
 
     !  Create Array based on an existing, allocated F90 pointer.
     !  Data is type Integer, 1D.
@@ -179,39 +194,37 @@
     row_to_reduce = 5
 
     ! Get a pointer to the data Array in the Field
-    call ESMF_FieldGetData(field1, array2, rc=rc)
+    call ESMF_FieldGetArray(field1, array2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_ArrayValidate(array2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_ArrayPrint(array2, "foo", rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    ! Get a pointer to the start of the data
-    call ESMF_ArrayGetData(array2, ldata, ESMF_DATA_REF, rc)
+    ! Get a pointer to the start of the result data
+    call ESMF_ArrayGetData(array2, rdata, ESMF_DATA_REF, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Get the mapping between local and global indices for this DE
     !   and count of row size
-    call ESMF_GridGetDE(grid1, globalAIPerDim=index, &
-                        horzRelloc=ESMF_CELL_CENTER, rc=rc)
+    call ESMF_GridGetDELocalInfo(grid1, localCellCountPerDim=localCount, &
+                                 horzRelloc=ESMF_CELL_CENTER, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
  
     ! Create a new Fortran array for just the part of this row on this DE
-    rowlen = index(1)%max - index(1)%min + 1
-    rstart = ((row_to_reduce-1) * rowlen) + 1
-    rend = (row_to_reduce) * rowlen
+    rowlen = localCount(1)
     
     ! make space for row
     allocate(rowdata(rowlen))
 
     ! and copy over the data row
-    rowdata = ldata(rstart:rend)
+    rowdata = rdata(:,row_to_reduce)
     print *, "rowlen = ", rowlen
-    print *, "rstart, rend = ", rstart, rend
     print *, "row data = ", rowdata
 
     ! Call the Reduce code
-    call ESMF_DELayoutAllReduce(layout1, rowdata, result, rowlen, ESMF_SUM, rc)
+    call ESMF_DELayoutAllFullReduce(delayout1, rowdata, result, rowlen, &
+                                    ESMF_SUM, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Row Reduction operation called"
 
@@ -230,7 +243,7 @@
 
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
-    print *, "Row Reduction operation returned ", result, " on DE ", de_id
+    print *, "Row Reduction operation returned ", result, " on PET ", pet_id
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
 
@@ -249,7 +262,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_ArrayDestroy(array1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_DELayoutDestroy(layout1, rc)
+    call ESMF_DELayoutDestroy(delayout1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "All Destroy routines done"
 
@@ -257,25 +270,25 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10     print *, "System Test DELayoutRowReduce complete!"
+10     print *, "System Test DELayoutRowReduce complete."
 
 
     ! Only print on DE 0 for success, or any DE with an error
-    if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+    if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
       write(failMsg, *)  "Row Reduction value incorrect"
       write(testname, *) "System Test DELayoutRowReduce: Row Reduction"
 
       rightvalue = 0
-      if (ndes .eq. 1) rightvalue = 7585
-      if (ndes .eq. 2) rightvalue = 12205
+      if (npets .eq. 1) rightvalue = 7585
+      if (npets .eq. 2) rightvalue = 12205
       
       call ESMF_Test((result .eq. rightvalue) .and. (rc.eq.ESMF_SUCCESS), &
                         testname, failMsg, testresult, ESMF_SRCLINE)
 
       ! Separate message to console for quick confirmation of success/failure
       if ((result .eq. rightvalue) .and. (rc .eq. ESMF_SUCCESS)) then
-        write(finalMsg, *) "SUCCESS!! Row reduction value (", rightvalue, &
-                           ") is correct"
+        write(finalMsg, *) "SUCCESS: Row reduction value (", rightvalue, &
+                           ") is correct."
       else
         write(finalMsg, *) "System Test did not succeed. ", &
                                "Row reduction result", result, "not equal ", &
@@ -288,7 +301,7 @@
 
     endif
     
-    call ESMF_Finalize(rc)
+    call ESMF_Finalize(rc=rc)
 
     end program DELayoutRowReduce
     
