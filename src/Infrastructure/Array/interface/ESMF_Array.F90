@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.29 2006/04/24 21:38:41 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.30 2006/04/27 17:47:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -186,7 +186,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.29 2006/04/24 21:38:41 theurich Exp $'
+      '$Id: ESMF_Array.F90,v 1.30 2006/04/27 17:47:28 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -207,8 +207,7 @@ module ESMF_ArrayMod
       module procedure ESMF_ArrayCreateAssumedShape
       module procedure ESMF_ArrayCreateLocalArray
       module procedure ESMF_ArrayCreateLocalArrayList
-      module procedure ESMF_ArrayCreateAllDecomp
-      module procedure ESMF_ArrayCreateTensor
+      module procedure ESMF_ArrayCreateAllocate
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -228,7 +227,8 @@ module ESMF_ArrayMod
 !
       module procedure ESMF_ArrayGet
       module procedure ESMF_ArrayGetHalo
-      module procedure ESMF_ArrayGetFarray
+      module procedure ESMF_ArrayGetFarray2R8
+      module procedure ESMF_ArrayGetFarray3R8
       module procedure ESMF_ArrayGetLarray
       module procedure ESMF_ArrayGetTotalCellMask1D
       module procedure ESMF_ArrayGetTotalCellMask2D
@@ -297,7 +297,8 @@ module ESMF_ArrayMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_ArrayScatter
+      module procedure ESMF_ArrayScatter2R8
+      module procedure ESMF_ArrayScatter3R8
 
       module procedure ESMF_ArrayScatterB        !1st prototype
       module procedure ESMF_ArrayScatterNBRoot   !1st prototype
@@ -367,7 +368,7 @@ contains
 
 
 
-! --- Old-style Array!
+! --- Old-style newArray!
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayCreateFromLA()"
@@ -808,15 +809,15 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayCreateAllDecomp()"
+#define ESMF_METHOD "ESMF_ArrayCreateAllocate()"
 !BOP
-! !IROUTINE: ESMF_ArrayCreateAllDecomp - Simple create for Arrays that only contain decomposable dimensions
+! !IROUTINE: ESMF_ArrayCreateAllocate - Create Array and allocate memory
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateAllDecomp(arrayspec, distgrid, dimmap, &
+  function ESMF_ArrayCreateAllocate(arrayspec, distgrid, dimmap, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
-    indexflag, staggerLoc, vectorDim, rc)
+    indexflag, staggerLoc, vectorDim, lbounds, ubounds, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_ArraySpec),  intent(in)              :: arrayspec
@@ -829,179 +830,20 @@ contains
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: staggerLoc
        integer,               intent(in),   optional  :: vectorDim
+       integer,               intent(in),   optional  :: lbounds(:)
+       integer,               intent(in),   optional  :: ubounds(:)
        integer,               intent(out),  optional  :: rc
 !     
 ! !RETURN VALUE:
-    type(ESMF_Array) :: ESMF_ArrayCreateAllDecomp
+    type(ESMF_Array) :: ESMF_ArrayCreateAllocate
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
-! according to arrayspec and distgrid. This special interface requires that
-! all Array dimensions be decomposable, which means that the rank indicated
-! by {\tt arrayspec} must match the rank of {\tt distgrid}. Each PET must issue
+! according to arrayspec and distgrid. Each PET must issue
 ! this call with identical arguments in order to create a consistent Array 
 ! object. DE-local allocations are made according to the total region defined
 ! by the arguments to this call: {\tt distgrid} and the optional {\tt Width} 
 ! arguments.
-!
-! The return value is the new {\tt ESMF\_Array}.
-!
-! The arguments are:
-! \begin{description}
-! \item[arrayspec] 
-!     {\tt ESMF\_ArraySpec} object containing the type/kind/rank information.
-! \item[distgrid]
-!      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
-!      distributed over DEs. The dimCount of distgrid must be smaller or equal
-!      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
-!      raised.
-! \item[{[dimmap]}]
-!      List that has as many elements as is indicated by distgrids's dimCount
-!      value. The elements map each dimension of distgrid to a dimension in
-!      arrayspec. The default is to map all of distgrid's dimensions against the
-!      lower dimension of arrayspec in sequence.
-! \item[{[computationalLWidth]}] 
-!      This vector argument must have dimCount elements, where dimCount is
-!      specified in distgrid. It specifies the lower corner of the computational
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[computationalUWidth]}] 
-!      This vector argument must have dimCount elements, where dimCount is
-!      specified in distgrid. It specifies the upper corner of the computational
-!      region with respect to the upper corner of the exclusive region.
-! \item[{[totalMemoryLWidth]}] 
-!      This vector argument must have dimCount elements, where dimCount is
-!      specified in distgrid. It specifies the lower corner of the total memory
-!      region with respect to the lower corner of the exclusive region.
-! \item[{[totalMemoryUWidth]}] 
-!      This vector argument must have dimCount elements, where dimCount is
-!      specified in distgrid. It specifies the upper corner of the total memory
-!      region with respect to the upper corner of the exclusive region.
-! \item[{[indexflag]}]
-!      Flag that indicates how the DE-local indices are to be defined.
-! \item[{[staggerLoc]}]
-!      Stagger location is an arbitrary integer index.
-! \item[{[vectorDim]}]
-!      If the data stored in this Array object is a component of a vector field
-!      then the {\tt vectorDim} argument may be used to identify the dimension
-!      along which the vector component is aligned. This information is used to
-!      correctly apply the {\tt signChangeVector} defined in the connection
-!      transformations of the corresponding DistGrid.
-! \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    integer                 :: status     ! local error status
-    type(ESMF_Array)        :: array      ! opaque pointer to new C++ Array
-    type(ESMF_InterfaceInt) :: dimmapArg              ! helper variable
-    type(ESMF_InterfaceInt) :: computationalLWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: computationalUWidthArg ! helper variable
-    type(ESMF_InterfaceInt) :: totalLWidthArg         ! helper variable
-    type(ESMF_InterfaceInt) :: totalUWidthArg         ! helper variable
-
-    ! initialize return code; assume failure until success is certain
-    status = ESMF_FAILURE
-    if (present(rc)) rc = ESMF_FAILURE
-    
-    ! Deal with (optional) array arguments
-    dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalLWidthArg = ESMF_InterfaceIntCreate(computationalLWidth, &
-      rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    computationalUWidthArg = ESMF_InterfaceIntCreate(computationalUWidth, &
-      rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    totalLWidthArg = ESMF_InterfaceIntCreate(totalLWidth, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    totalUWidthArg = ESMF_InterfaceIntCreate(totalUWidth, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! mark this DistGrid as invalid
-    array%this = ESMF_NULL_POINTER
-
-    ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayCreateAllDecomp(array, arrayspec, distgrid, dimmapArg, &
-      computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
-      totalUWidthArg, indexflag, staggerLoc, vectorDim, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-      
-    ! garbage collection
-    call ESMF_InterfaceIntDestroy(dimmapArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalLWidthArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(totalUWidthArg, rc=status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! set return value
-    ESMF_ArrayCreateAllDecomp = array 
- 
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
- 
-  end function ESMF_ArrayCreateAllDecomp
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayCreateTensor()"
-!BOP
-! !IROUTINE: ESMF_ArrayCreateTensor - Create for Arrays with tensor dimensions
-
-! !INTERFACE:
-  ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateTensor(arrayspec, distgrid, dimmap, &
-    computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
-    indexflag, staggerLoc, vectorDim, lbounds, ubounds, rc)
-!
-! !ARGUMENTS:
-       type(ESMF_ArraySpec),    intent(in)              :: arrayspec
-       type(ESMF_DistGrid),     intent(in)              :: distgrid
-       integer,                 intent(in),   optional  :: dimmap(:)
-       integer,                 intent(in),   optional  :: computationalLWidth(:)
-       integer,                 intent(in),   optional  :: computationalUWidth(:)
-       integer,                 intent(in),   optional  :: totalLWidth(:)
-       integer,                 intent(in),   optional  :: totalUWidth(:)
-       type(ESMF_IndexFlag),    intent(in),   optional  :: indexflag
-       integer,                 intent(in),   optional  :: staggerLoc
-       integer,                 intent(in),   optional  :: vectorDim
-       integer,                 intent(in)              :: lbounds(:)
-       integer,                 intent(in)              :: ubounds(:)
-       integer,                 intent(out),  optional  :: rc
-!     
-! !RETURN VALUE:
-    type(ESMF_Array) :: ESMF_ArrayCreateTensor
-!
-! !DESCRIPTION:
-! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
-! according to arrayspec and distgrid. This special interface requires that
-! all Array dimensions be decomposable, which means that the rank indicated
-! by {\tt arrayspec} must match the rank of {\tt distgrid}. Each PET must issue
-! this call with identical arguments in order to create a consistent Array 
-! object. DE-local allocations are made according to the total region defined
-! by the arguments to this call: {\tt distgrid} and the optional {\tt Width} 
-! arguments.
-!
-! This interface works for any number of DEs per PET.
 !
 ! The return value is the new {\tt ESMF\_Array}.
 !
@@ -1056,12 +898,80 @@ contains
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                 :: status     ! local error status
+    type(ESMF_Array)        :: array      ! opaque pointer to new C++ Array
+    type(ESMF_InterfaceInt) :: dimmapArg              ! helper variable
+    type(ESMF_InterfaceInt) :: computationalLWidthArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalUWidthArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalLWidthArg         ! helper variable
+    type(ESMF_InterfaceInt) :: totalUWidthArg         ! helper variable
+    type(ESMF_InterfaceInt) :: lboundsArg             ! helper variable
+    type(ESMF_InterfaceInt) :: uboundsArg             ! helper variable
+
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! deal with (optional) array arguments
+    dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalLWidthArg = ESMF_InterfaceIntCreate(computationalLWidth, &
+      rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUWidthArg = ESMF_InterfaceIntCreate(computationalUWidth, &
+      rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalLWidthArg = ESMF_InterfaceIntCreate(totalLWidth, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalUWidthArg = ESMF_InterfaceIntCreate(totalUWidth, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    lboundsArg = ESMF_InterfaceIntCreate(lbounds, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    uboundsArg = ESMF_InterfaceIntCreate(ubounds, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! mark this DistGrid as invalid
+    array%this = ESMF_NULL_POINTER
+
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayCreateAllocate(array, arrayspec, distgrid, dimmapArg, &
+      computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
+      totalUWidthArg, indexflag, staggerLoc, vectorDim, lboundsArg, &
+      uboundsArg, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(dimmapArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalLWidthArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalUWidthArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! set return value
-!    ESMF_ArrayCreateTensor = array
+    ESMF_ArrayCreateAllocate = array 
  
-  end function ESMF_ArrayCreateTensor
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end function ESMF_ArrayCreateAllocate
 !------------------------------------------------------------------------------
 
 
@@ -1135,18 +1045,18 @@ contains
     type(ESMF_DistGrid),           intent(out), optional :: distgrid
     type(ESMF_DELayout),           intent(out), optional :: delayout
     type(ESMF_IndexFlag),          intent(out), optional :: indexflag
-    integer, target,               intent(out), optional :: dimmap(:)
-    integer, target,               intent(out), optional :: inverseDimmap(:)
-    integer, target,               intent(out), optional :: exclusiveLBound(:,:)
-    integer, target,               intent(out), optional :: exclusiveUBound(:,:)
-    integer, target,               intent(out), optional :: computationalLBound(:,:)
-    integer, target,               intent(out), optional :: computationalUBound(:,:)
-    integer, target,               intent(out), optional :: totalLBound(:,:)
-    integer, target,               intent(out), optional :: totalUBound(:,:)
-    integer, target,               intent(out), optional :: computationalLWidth(:,:)
-    integer, target,               intent(out), optional :: computationalUWidth(:,:)
-    integer, target,               intent(out), optional :: totalLWidth(:,:)
-    integer, target,               intent(out), optional :: totalUWidth(:,:)
+    integer,                       intent(out), optional :: dimmap(:)
+    integer,                       intent(out), optional :: inverseDimmap(:)
+    integer,                       intent(out), optional :: exclusiveLBound(:,:)
+    integer,                       intent(out), optional :: exclusiveUBound(:,:)
+    integer,                       intent(out), optional :: computationalLBound(:,:)
+    integer,                       intent(out), optional :: computationalUBound(:,:)
+    integer,                       intent(out), optional :: totalLBound(:,:)
+    integer,                       intent(out), optional :: totalUBound(:,:)
+    integer,                       intent(out), optional :: computationalLWidth(:,:)
+    integer,                       intent(out), optional :: computationalUWidth(:,:)
+    integer,                       intent(out), optional :: totalLWidth(:,:)
+    integer,                       intent(out), optional :: totalUWidth(:,:)
     integer,                       intent(out), optional :: rc  
 !         
 !
@@ -1159,57 +1069,63 @@ contains
 !     \begin{description}
 !     \item[array] 
 !        Queried {\tt ESMF\_Array} object.
+!     \item[{[type]}]
+!        Type of the Array object.
+!     \item[{[kind]}]
+!        Kind of the Array object.
 !     \item[{[rank]}]
 !        Rank of the Array object.
-!     \item[{[delayout]}]
-!        Upon return this holds the associated {\tt ESMF\_DELayout} object.
 !     \item[{[localArrayList]}]
 !        Upon return this holds a list of the associated {\tt ESMC\_LocalArray}
 !        objects. {\tt localArrayList} must be allocated to be at least of size
 !        {\tt localDeCount}, i.e. the number of DEs associated with the calling
 !        PET.`
+!     \item[{[distgrid]}]
+!        Upon return this holds the associated {\tt ESMF\_DistGrid} object.
+!     \item[{[delayout]}]
+!        Upon return this holds the associated {\tt ESMF\_DELayout} object.
 !     \item[{[indexflag]}]
 !       Upon return this flag indicates how the DE-local indices are defined.
 !     \item[{[exclusiveLBound]}]
 !        Upon return this holds the lower bounds of the exclusive regions for
 !        all PET-local DEs. {\tt exclusiveLBound} must be allocated to be
-!        of size (rank, localDeCount).
+!        of size (dimCount, localDeCount).
 !     \item[{[exclusiveUBound]}]
 !        Upon return this holds the upper bounds of the exclusive regions for
 !        all PET-local DEs. {\tt exclusiveUBound} must be allocated to be
-!        of size (rank, localDeCount).
+!        of size (dimCount, localDeCount).
 !     \item[{[computationalLBound]}]
 !        Upon return this holds the lower bounds of the computational regions for
 !        all PET-local DEs. {\tt computationalLBound} must be allocated to be
-!        of size (rank, localDeCount).
+!        of size (dimCount, localDeCount).
 !     \item[{[computationalUBound]}]
 !        Upon return this holds the upper bounds of the computational regions for
 !        all PET-local DEs. {\tt computationalUBound} must be allocated to be
-!        of size (rank, localDeCount).
+!        of size (dimCount, localDeCount).
 !     \item[{[totalLBound]}]
 !        Upon return this holds the lower bounds of the total regions for
 !        all PET-local DEs. {\tt totalLBound} must be allocated to be
-!        of size (rank, localDeCount).
+!        of size (dimCount, localDeCount).
 !     \item[{[totalUBound]}]
 !        Upon return this holds the upper bounds of the total regions for
 !        all PET-local DEs. {\tt totalUBound} must be allocated to be
-!        of size (rank, localDeCount).
+!        of size (dimCount, localDeCount).
 !     \item[{[computationalLWidth]}]
 !        Upon return this holds the lower width of the computational regions for
 !        all PET-local DEs. {\tt computationalLWidth} must be allocated to be
-!        of size (rank, localDeCount).
+!        of size (dimCount, localDeCount).
 !     \item[{[computationalUWidth]}]
 !        Upon return this holds the upper width of the computational regions for
 !        all PET-local DEs. {\tt computationalUWidth} must be allocated to be
-!        of size (rank, localDeCount).
+!        of size (dimCount, localDeCount).
 !     \item[{[totalLWidth]}]
 !        Upon return this holds the lower width of the total memory regions for
 !        all PET-local DEs. {\tt computationalUWidth} must be allocated to be
-!        of size (rank, localDeCount).
+!        of size (dimCount, localDeCount).
 !     \item[{[totalUWidth]}]
 !        Upon return this holds the upper width of the total memory regions for
 !        all PET-local DEs. {\tt totalUWidth} must be allocated to be
-!        of size (rank, localDeCount).
+!        of size (dimCount, localDeCount).
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1218,9 +1134,13 @@ contains
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer                       :: status         ! local error status
-    type(ESMF_LocalArray), target :: dummy(0)      ! helper variable
-    type(ESMF_LocalArray), pointer:: opt_localArrayList(:) ! helper variable
-    integer                       :: len_localArrayList    ! helper variable
+    type(ESMF_LocalArray), target :: dummy(0)       ! helper variable
+    type(ESMF_LocalArray), pointer:: opt_localArrayList(:)  ! helper variable
+    integer                       :: len_localArrayList     ! helper variable
+    type(ESMF_InterfaceInt)       :: dimmapArg              ! helper variable
+    type(ESMF_InterfaceInt)       :: inverseDimmapArg       ! helper variable
+    type(ESMF_InterfaceInt)       :: exclusiveLBoundArg     ! helper variable
+    type(ESMF_InterfaceInt)       :: exclusiveUBoundArg     ! helper variable
 
     ! initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
@@ -1234,10 +1154,25 @@ contains
       len_localArrayList = 0
       opt_localArrayList => dummy
     endif
+    dimmapArg = ESMF_InterfaceIntCreate(dimmap, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    inverseDimmapArg = ESMF_InterfaceIntCreate(inverseDimmap, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveLBoundArg = ESMF_InterfaceIntCreate(farray2D=exclusiveLBound, &
+      rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveUBoundArg = ESMF_InterfaceIntCreate(farray2D=exclusiveUBound, &
+      rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayGet(array, type, kind, rank, opt_localArrayList, &
-      len_localArrayList, distgrid, status)
+      len_localArrayList, distgrid, delayout, indexflag, dimmapArg, &
+      inverseDimmapArg, exclusiveLBoundArg, exclusiveUBoundArg, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1309,12 +1244,12 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayGetFarray()"
+#define ESMF_METHOD "ESMF_ArrayGetFarray2R8()"
 !BOP
 ! !IROUTINE: ESMF_ArrayGetFarray - Get Fortran90 pointer to memory region
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayGetFarray(array, farrayPtr, rc)
+  subroutine ESMF_ArrayGetFarray2R8(array, farrayPtr, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)            :: array
@@ -1342,7 +1277,46 @@ contains
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-  end subroutine ESMF_ArrayGetFarray
+  end subroutine ESMF_ArrayGetFarray2R8
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetFarray3R8()"
+!BOP
+! !IROUTINE: ESMF_ArrayGetFarray - Get Fortran90 pointer to memory region
+
+! !INTERFACE:
+  subroutine ESMF_ArrayGetFarray3R8(array, farrayPtr, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),           intent(in)            :: array
+    real(ESMF_KIND_R8), pointer                          :: farrayPtr(:,:,:)
+    integer,                       intent(out), optional :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Get Fortran90 pointer to DE-local memory regions in Array object.
+!
+! This interface requires that exactly 1 DE is associated with the calling PET.
+! An error will be returned if this condition is not met.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!        Queried {\tt ESMF\_Array} object.
+!     \item[{[larrayRef]}] 
+!        Returned ESMF\_LocalArray holding reference to PET-local allocation.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+  end subroutine ESMF_ArrayGetFarray3R8
 !------------------------------------------------------------------------------
 
 
@@ -2336,16 +2310,16 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayScatter()"
+#define ESMF_METHOD "ESMF_ArrayScatter2R8()"
 !BOP
 ! !IROUTINE: ESMF_ArrayScatter - Scatter a Fortran90 array across Array
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayScatter(array, farray, patch, rootPET, vm, rc)
+  subroutine ESMF_ArrayScatter2R8(array, farray, patch, rootPET, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),        intent(inout)           :: array
-    real(ESMF_KIND_R8), target, intent(in),   optional  :: farray(:,:)
+    real(ESMF_KIND_R8), target, intent(in)  :: farray(:,:)
     integer,                    intent(in),   optional  :: patch
     integer,                    intent(in)              :: rootPET
     type(ESMF_VM),              intent(in),   optional  :: vm
@@ -2399,9 +2373,76 @@ contains
 !    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
 
-  end subroutine ESMF_ArrayScatter
+  end subroutine ESMF_ArrayScatter2R8
 !------------------------------------------------------------------------------
 
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayScatter3R8()"
+!BOP
+! !IROUTINE: ESMF_ArrayScatter - Scatter a Fortran90 array across Array
+
+! !INTERFACE:
+  subroutine ESMF_ArrayScatter3R8(array, farray, patch, rootPET, vm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),        intent(inout)           :: array
+    real(ESMF_KIND_R8), target, intent(in)           :: farray(:,:,:)
+    integer,                    intent(in),   optional  :: patch
+    integer,                    intent(in)              :: rootPET
+    type(ESMF_VM),              intent(in),   optional  :: vm
+    integer,                    intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Scatter the data of {\tt farray} located on {\tt rootPET} 
+!     across an {ESMF\_Array} object. A single {\tt farray} must be
+!     scattered across a single DistGrid patch in Array. The optional {\tt patch}
+!     argument allows selection of the patch. For Arrays defined on a single 
+!     patch DistGrid the default selection (patch 1) will be correct. The 
+!     shape of {\tt farray} must match the shape of the patch in Array.
+!
+!     This version of the interface 
+!     implements the PET-based blocking paradigm: Each PET of the VM must issue
+!     this call exactly once for {\em all} of its DEs. The
+!     call will block until all PET-local data objects are accessible.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array] 
+!        The {\tt ESMF\_Array} object across which data will be scattered.
+!     \item[{[farray]}]
+!        The Fortran90 array that is to be scattered. Only root
+!        must provide a valid {\tt farray}.
+!     \item[{[patch]}]
+!        The DistGrid patch in {\tt array} into which to scatter {\tt farray}.
+!        By default {\tt farray} will be scattered into patch 1.
+!     \item[rootPET]
+!          PET that holds the valid data in {\tt farray}.
+!     \item[{[vm]}]
+!        Optional {\tt ESMF\_VM} object of the current context. Providing the
+!        VM of the current context will lower the method's overhead.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+!    call c_ESMC_ArrayScatterB(array, larray, rootPET, vm, localrc)
+
+    ! Use LogErr to handle return code
+!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_ArrayScatter3R8
+!------------------------------------------------------------------------------
 
 
 
