@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.39 2006/04/24 21:56:56 theurich Exp $
+// $Id: ESMC_Array.h,v 1.40 2006/04/27 18:07:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -62,6 +62,12 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     void **larrayBaseAddrList;
     int *exclusiveLBound;
     int *exclusiveUBound;
+    int tensorCount;
+    int *lbounds;
+    int *ubounds;
+    int *dimmap;
+    int *inverseDimmap;
+    ESMC_IndexFlag indexflag;
     // lower level objects
     ESMC_DistGrid *distgrid;
     ESMC_DELayout *delayout;
@@ -77,12 +83,18 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     // Construct and Destruct
     int ESMC_ArrayConstruct(ESMC_DataType type, ESMC_DataKind kind, int rank,
       ESMC_LocalArray **larrayList, ESMC_DistGrid *distgrid, 
-      int *exclusiveLBound, int *exclusiveUBound);
+      int *exclusiveLBound, int *exclusiveUBound, int tensorCount,
+      int *lboundsArray, int *uboundsArray, int *dimmapArray, 
+      int *inverseDimmapArray, ESMC_IndexFlag indexflagArg);
     int ESMC_ArrayDestruct(void);
     // Get, Set
     int ESMC_ArrayGet(ESMC_DataType *type, ESMC_DataKind *kind, int *rank,
       ESMC_LocalArray **localArrayList, int localArrayListCount,
-      ESMC_DistGrid **distgridArg);
+      ESMC_DistGrid **distgridArg, ESMC_DELayout **delayoutArg,
+      ESMC_IndexFlag *indexflag, ESMC_InterfaceInt *dimmapArg,
+      ESMC_InterfaceInt *inverseDimmapArg,
+      ESMC_InterfaceInt *exclusiveLBoundArg,
+      ESMC_InterfaceInt *exclusiveUBoundArg);
     int ESMC_ArrayGetLinearIndexExclusive(int localDe, int *index);
     // IO and validation
     int ESMC_ArrayPrint(void);
@@ -104,7 +116,8 @@ ESMC_Array *ESMC_ArrayCreate(ESMC_ArraySpec *arrayspec, ESMC_DistGrid *distgrid,
   ESMC_InterfaceInt *dimmap, ESMC_InterfaceInt *computationalLWidthArg,
   ESMC_InterfaceInt *computationalUWidthArg, ESMC_InterfaceInt *totalLWidthArg,
   ESMC_InterfaceInt *totalUWidthArg, ESMC_IndexFlag *indexflag, int *staggerLoc,
-  int *vectorDim, int *rc);
+  int *vectorDim, ESMC_InterfaceInt *lboundsArg, ESMC_InterfaceInt *uboundsArg,
+  int *rc);
 
 int ESMC_ArrayDestroy(ESMC_Array **array);
 

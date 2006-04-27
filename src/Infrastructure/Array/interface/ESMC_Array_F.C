@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.38 2006/04/24 21:41:29 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.39 2006/04/27 18:02:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,12 +45,13 @@ extern "C" {
 
   // - ESMF-public methods:
         
-  void FTN(c_esmc_arraycreatealldecomp)(ESMC_Array **ptr, 
+  void FTN(c_esmc_arraycreateallocate)(ESMC_Array **ptr, 
     ESMC_ArraySpec *arrayspec, ESMC_DistGrid **distgrid,
     ESMC_InterfaceInt **dimmap, ESMC_InterfaceInt **computationalLWidthArg,
     ESMC_InterfaceInt **computationalUWidthArg, 
     ESMC_InterfaceInt **totalLWidthArg, ESMC_InterfaceInt **totalUWidthArg,
-    ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim, int *rc){
+    ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim, 
+    ESMC_InterfaceInt **lboundsArg, ESMC_InterfaceInt **uboundsArg, int *rc){
     int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraycreatealldecomp()"
@@ -59,7 +60,7 @@ extern "C" {
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
       *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag),
       ESMC_NOT_PRESENT_FILTER(staggerLoc), ESMC_NOT_PRESENT_FILTER(vectorDim),
-      &localrc);
+      *lboundsArg, *uboundsArg, &localrc);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -76,19 +77,27 @@ extern "C" {
   
   void FTN(c_esmc_arrayget)(ESMC_Array **ptr, ESMC_DataType *type,
     ESMC_DataKind *kind, int *rank, ESMC_LocalArray **opt_localArrayList,
-    int *len_localArrayList, ESMC_DistGrid **distgrid, int *rc){
+    int *len_localArrayList, ESMC_DistGrid **distgrid, ESMC_DELayout **delayout,
+    ESMC_IndexFlag *indexflag, ESMC_InterfaceInt **dimmap, 
+    ESMC_InterfaceInt **inverseDimmap, ESMC_InterfaceInt **exclusiveLBound,
+    ESMC_InterfaceInt **exclusiveUBound, int *rc){
     ESMC_DistGrid **opt_distgrid;
+    ESMC_DELayout **opt_delayout;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayget()"
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(distgrid) == ESMC_NULL_POINTER)
       opt_distgrid = NULL;
     else opt_distgrid = distgrid;
+    if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER)
+      opt_delayout = NULL;
+    else opt_delayout = delayout;
     // call into C++, dealing with optional arguments 
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_ArrayGet(
       ESMC_NOT_PRESENT_FILTER(type), ESMC_NOT_PRESENT_FILTER(kind),
       ESMC_NOT_PRESENT_FILTER(rank), opt_localArrayList, *len_localArrayList,
-      opt_distgrid), 
+      opt_distgrid, opt_delayout, ESMC_NOT_PRESENT_FILTER(indexflag),
+      *dimmap, *inverseDimmap, *exclusiveLBound, *exclusiveUBound),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.1 2006/04/24 21:41:29 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.2 2006/04/27 18:07:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -195,15 +195,10 @@ program ESMF_ArrayEx
     call ESMF_LocalArrayGetData(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
     myF90Array = 0.
   enddo
-  deallocate(larrayList)
 !EOC
 
 !  call ESMF_ArrayPrint(array, rc=rc)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-!!!! UNTIL FURTHER IMPLEMENTATION SKIP THE REST OF THE EXAMPLE >>>>>>>>>>>>>>>>>
-#ifdef SKIP   
-!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 !BOE
 ! \subsubsection{Regions and default bounds}
@@ -384,27 +379,27 @@ program ESMF_ArrayEx
 !
 !
 !BOC
-  allocate(exclusiveUBound(localDeCount, 2))  ! rank=2
-  allocate(exclusiveLBound(localDeCount, 2))  ! rank=2
+  allocate(exclusiveUBound(2, localDeCount))  ! dimCount=2
+  allocate(exclusiveLBound(2, localDeCount))  ! dimCount=2
   call ESMF_ArrayGet(array, indexflag=indexflag, &
     exclusiveLBound=exclusiveLBound, exclusiveUBound=exclusiveUBound, rc=rc)
   if (indexflag == ESMF_INDEX_DELOCAL) then
-    ! DE-local exclusive regions start at (1,1)
+    print *, "DE-local exclusive regions start at (1,1)"
     do de=1, localDeCount
       call ESMF_LocalArrayGetData(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
-      do i=1, exclusiveUBound(de, 1)
-        do j=1, exclusiveUBound(de, 2)
+      do i=1, exclusiveUBound(1, de)
+        do j=1, exclusiveUBound(2, de)
           print *, "DE-local exclusive region for PET-local DE=", de, &
             ": array(",i,",",j,")=", myF90Array(i,j)
         enddo
       enddo
     enddo
   else
-    ! DE-local exclusive regions of this Array have global bounds 
+    print *, "DE-local exclusive regions of this Array have global bounds"
     do de=1, localDeCount
       call ESMF_LocalArrayGetData(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
-      do i=exclusiveLBound(de, 1), exclusiveUBound(de, 1)
-        do j=exclusiveLBound(de, 2), exclusiveUBound(de, 2)
+      do i=exclusiveLBound(1, de), exclusiveUBound(1, de)
+        do j=exclusiveLBound(2, de), exclusiveUBound(2, de)
           print *, "DE-local exclusive region for PET-local DE=", de, &
             ": array(",i,",",j,")=", myF90Array(i,j)
         enddo
@@ -412,6 +407,13 @@ program ESMF_ArrayEx
     enddo
   endif
 !EOC
+
+  deallocate(larrayList)
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!!!! UNTIL FURTHER IMPLEMENTATION SKIP THE REST OF THE EXAMPLE >>>>>>>>>>>>>>>>>
+#ifdef SKIP   
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 
 !BOE
 ! Obviously the second branch of this simple code will work for either case, 
@@ -1188,8 +1190,16 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_RouteHandleRelease(routehandle=sparseMatMulHandle, rc=rc)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
 !call ESMF_ArrayPrint(array1, rc=rc)
-call ESMF_ArrayPrint(array2, rc=rc)
+!call ESMF_ArrayPrint(array2, rc=rc)
+  
+  call ESMF_ArrayDestroy(array1, rc=rc) ! finally destroy the array object
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_ArrayDestroy(array2, rc=rc) ! finally destroy the array object
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 !!!! UNTIL FURTHER IMPLEMENTATION SKIP THE REST OF THE EXAMPLE >>>>>>>>>>>>>>>>>
 #ifdef SKIP   
@@ -1673,6 +1683,10 @@ call ESMF_ArrayPrint(array2, rc=rc)
   enddo
 !EOC
 
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#endif
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 !BOE
 !
 ! \subsubsection{Array and DistGrid rank -- 2D+1 Arrays}
@@ -1727,8 +1741,16 @@ call ESMF_ArrayPrint(array2, rc=rc)
 !EOE
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    totalLWidth=(/0,1/), totalUWidth=(/0,1/), staggerLoc=1,  &
+    totalLWidth=(/0,1/), totalUWidth=(/0,1/), staggerLoc=1, &
     lbounds=(/1/), ubounds=(/2/), rc=rc)
+    
+!  call ESMF_ArrayPrint(array, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!!!! UNTIL FURTHER IMPLEMENTATION SKIP THE REST OF THE EXAMPLE >>>>>>>>>>>>>>>>>
+#ifdef SKIP   
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 !EOC
 !BOE
 ! This will create {\tt array} with 2+1 dimensions, i.e. a 2D DistGrid is used
