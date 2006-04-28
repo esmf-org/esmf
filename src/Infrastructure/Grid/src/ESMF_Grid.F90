@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.229 2006/03/28 21:52:26 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.230 2006/04/28 22:37:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.229 2006/03/28 21:52:26 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.230 2006/04/28 22:37:22 theurich Exp $'
 
 !==============================================================================
 !
@@ -2897,7 +2897,8 @@
 
 ! !INTERFACE:
       subroutine ESMF_GridGetCoordByDim(grid, dim, horzrelloc, vertrelloc, &
-        centerCoord, cornerCoord, faceCoord, reorder, total, localCounts, rc)
+        centerCoord, cornerCoord, faceCoord, reorder, total, localCounts, &
+        docopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -2910,6 +2911,7 @@
       logical, intent(in), optional :: reorder
       logical, intent(in), optional :: total
       integer, intent(out), optional :: localCounts(2)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -2999,15 +3001,15 @@
         endif
         if (present(centerCoord)) then
           call ESMF_InternArrayGetData(localCenterCoord(dim), centerCoord, &
-            ESMF_DATA_REF, rc=rc)
+            docopy, rc=rc)
         endif
         if (present(cornerCoord)) then
-          call ESMF_InternArrayGetData(localCornerCoord(1), cornerCoord, &
-            ESMF_DATA_REF, rc=rc)
+          call ESMF_InternArrayGetData(localCornerCoord(dim), cornerCoord, &
+            docopy, rc=rc)
         endif
         if (present(faceCoord)) then
-          call ESMF_InternArrayGetData(localFaceCoord(1), faceCoord,&
-            ESMF_DATA_REF, rc=rc)
+          call ESMF_InternArrayGetData(localFaceCoord(dim), faceCoord,&
+            docopy, rc=rc)
         endif
         deallocate(localCenterCoord)
         deallocate(localCornerCoord)
