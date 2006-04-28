@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.40 2006/04/27 18:07:25 theurich Exp $
+// $Id: ESMC_Array.h,v 1.41 2006/04/28 22:52:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -62,9 +62,15 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     void **larrayBaseAddrList;
     int *exclusiveLBound;
     int *exclusiveUBound;
+    int *computationalLBound;
+    int *computationalUBound;
+    int *totalLBound;
+    int *totalUBound;
     int tensorCount;
     int *lbounds;
     int *ubounds;
+    int *staggerLoc;
+    int *vectorDim;
     int *dimmap;
     int *inverseDimmap;
     ESMC_IndexFlag indexflag;
@@ -83,9 +89,11 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     // Construct and Destruct
     int ESMC_ArrayConstruct(ESMC_DataType type, ESMC_DataKind kind, int rank,
       ESMC_LocalArray **larrayList, ESMC_DistGrid *distgrid, 
-      int *exclusiveLBound, int *exclusiveUBound, int tensorCount,
-      int *lboundsArray, int *uboundsArray, int *dimmapArray, 
-      int *inverseDimmapArray, ESMC_IndexFlag indexflagArg);
+      int *exclusiveLBound, int *exclusiveUBound, 
+      int *computationalLBound, int *computationalUBound, 
+      int *totalLBound, int *totalUBound, int tensorCount,
+      int *lboundsArray, int *uboundsArray, int *staggerLoc, int *vectorDim,
+      int *dimmapArray, int *inverseDimmapArray, ESMC_IndexFlag indexflagArg);
     int ESMC_ArrayDestruct(void);
     // Get, Set
     int ESMC_ArrayGet(ESMC_DataType *type, ESMC_DataKind *kind, int *rank,
@@ -94,7 +102,13 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
       ESMC_IndexFlag *indexflag, ESMC_InterfaceInt *dimmapArg,
       ESMC_InterfaceInt *inverseDimmapArg,
       ESMC_InterfaceInt *exclusiveLBoundArg,
-      ESMC_InterfaceInt *exclusiveUBoundArg);
+      ESMC_InterfaceInt *exclusiveUBoundArg,
+      ESMC_InterfaceInt *computationalLBoundArg,
+      ESMC_InterfaceInt *computationalUBoundArg,
+      ESMC_InterfaceInt *totalLBoundArg, ESMC_InterfaceInt *totalUBoundArg,
+      ESMC_InterfaceInt *computationalLWidthArg,
+      ESMC_InterfaceInt *computationalUWidthArg,
+      ESMC_InterfaceInt *totalLWidthArg, ESMC_InterfaceInt *totalUWidthArg);
     int ESMC_ArrayGetLinearIndexExclusive(int localDe, int *index);
     // IO and validation
     int ESMC_ArrayPrint(void);

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.39 2006/04/27 18:02:57 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.40 2006/04/28 22:52:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,9 +78,15 @@ extern "C" {
   void FTN(c_esmc_arrayget)(ESMC_Array **ptr, ESMC_DataType *type,
     ESMC_DataKind *kind, int *rank, ESMC_LocalArray **opt_localArrayList,
     int *len_localArrayList, ESMC_DistGrid **distgrid, ESMC_DELayout **delayout,
-    ESMC_IndexFlag *indexflag, ESMC_InterfaceInt **dimmap, 
+    ESMC_IndexFlag *indexflag, ESMC_InterfaceInt **dimmap,
     ESMC_InterfaceInt **inverseDimmap, ESMC_InterfaceInt **exclusiveLBound,
-    ESMC_InterfaceInt **exclusiveUBound, int *rc){
+    ESMC_InterfaceInt **exclusiveUBound,
+    ESMC_InterfaceInt **computationalLBound,
+    ESMC_InterfaceInt **computationalUBound,
+    ESMC_InterfaceInt **totalLBound, ESMC_InterfaceInt **totalUBound,
+    ESMC_InterfaceInt **computationalLWidth,
+    ESMC_InterfaceInt **computationalUWidth,
+    ESMC_InterfaceInt **totalLWidth, ESMC_InterfaceInt **totalUWidth, int *rc){
     ESMC_DistGrid **opt_distgrid;
     ESMC_DELayout **opt_delayout;
 #undef  ESMC_METHOD
@@ -97,7 +103,9 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(type), ESMC_NOT_PRESENT_FILTER(kind),
       ESMC_NOT_PRESENT_FILTER(rank), opt_localArrayList, *len_localArrayList,
       opt_distgrid, opt_delayout, ESMC_NOT_PRESENT_FILTER(indexflag),
-      *dimmap, *inverseDimmap, *exclusiveLBound, *exclusiveUBound),
+      *dimmap, *inverseDimmap, *exclusiveLBound, *exclusiveUBound,
+      *computationalLBound, *computationalUBound, *totalLBound, *totalUBound,
+      *computationalLWidth, *computationalUWidth, *totalLWidth, *totalUWidth),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

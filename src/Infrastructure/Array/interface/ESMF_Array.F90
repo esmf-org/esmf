@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.30 2006/04/27 17:47:28 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.31 2006/04/28 22:52:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -186,7 +186,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.30 2006/04/27 17:47:28 theurich Exp $'
+      '$Id: ESMF_Array.F90,v 1.31 2006/04/28 22:52:45 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -964,6 +964,12 @@ contains
     call ESMF_InterfaceIntDestroy(totalUWidthArg, rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(lboundsArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(uboundsArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! set return value
     ESMF_ArrayCreateAllocate = array 
@@ -1141,6 +1147,14 @@ contains
     type(ESMF_InterfaceInt)       :: inverseDimmapArg       ! helper variable
     type(ESMF_InterfaceInt)       :: exclusiveLBoundArg     ! helper variable
     type(ESMF_InterfaceInt)       :: exclusiveUBoundArg     ! helper variable
+    type(ESMF_InterfaceInt)       :: computationalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt)       :: computationalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt)       :: totalLBoundArg         ! helper variable
+    type(ESMF_InterfaceInt)       :: totalUBoundArg         ! helper variable
+    type(ESMF_InterfaceInt)       :: computationalLWidthArg ! helper variable
+    type(ESMF_InterfaceInt)       :: computationalUWidthArg ! helper variable
+    type(ESMF_InterfaceInt)       :: totalLWidthArg         ! helper variable
+    type(ESMF_InterfaceInt)       :: totalUWidthArg         ! helper variable
 
     ! initialize return code; assume failure until success is certain
     status = ESMF_FAILURE
@@ -1168,11 +1182,43 @@ contains
       rc=status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalLBoundArg = &
+      ESMF_InterfaceIntCreate(farray2D=computationalLBound, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUBoundArg = &
+      ESMF_InterfaceIntCreate(farray2D=computationalUBound, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalLBoundArg = ESMF_InterfaceIntCreate(farray2D=totalLBound, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalUBoundArg = ESMF_InterfaceIntCreate(farray2D=totalUBound, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalLWidthArg = &
+      ESMF_InterfaceIntCreate(farray2D=computationalLWidth, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUWidthArg = &
+      ESMF_InterfaceIntCreate(farray2D=computationalUWidth, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalLWidthArg = ESMF_InterfaceIntCreate(farray2D=totalLWidth, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalUWidthArg = ESMF_InterfaceIntCreate(farray2D=totalUWidth, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayGet(array, type, kind, rank, opt_localArrayList, &
       len_localArrayList, distgrid, delayout, indexflag, dimmapArg, &
-      inverseDimmapArg, exclusiveLBoundArg, exclusiveUBoundArg, status)
+      inverseDimmapArg, exclusiveLBoundArg, exclusiveUBoundArg, &
+      computationalLBoundArg, computationalUBoundArg, &
+      totalLBoundArg, totalUBoundArg, &
+      computationalLWidthArg, computationalUWidthArg, &
+      totalLWidthArg, totalUWidthArg, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     

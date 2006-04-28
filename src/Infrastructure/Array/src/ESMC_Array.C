@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.49 2006/04/27 18:07:25 theurich Exp $
+// $Id: ESMC_Array.C,v 1.50 2006/04/28 22:52:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.49 2006/04/27 18:07:25 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Array.C,v 1.50 2006/04/28 22:52:46 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -78,8 +78,8 @@ ESMC_Array *ESMC_ArrayCreate(
   ESMC_InterfaceInt *totalLWidthArg,          // (in)
   ESMC_InterfaceInt *totalUWidthArg,          // (in)
   ESMC_IndexFlag *indexflagArg,               // (in)
-  int *staggerLoc,                            // (in)
-  int *vectorDim,                             // (in)
+  int *staggerLocArg,                         // (in)
+  int *vectorDimArg,                          // (in)
   ESMC_InterfaceInt *lboundsArg,              // (in)
   ESMC_InterfaceInt *uboundsArg,              // (in)
   int *rc                                     // (out) return code
@@ -278,35 +278,240 @@ ESMC_Array *ESMC_ArrayCreate(
   }
   // optionally shift origin of exclusive region to pseudo global index space
   if (indexflag == ESMF_INDEX_GLOBAL){
-    //todo: get the indexList for each localDE and dim and shift exlusive
-    //todo: bounds by indexList->array[0].
+    for (int i=0; i<localDeCount; i++){
+      int de = localDeList[i];
+      for (int j=0; j<dimCount; j++){
+        // obtain indexList for this DE and dim
+        int *indexList = new int[dimExtent[de*dimCount+j]];
+        ESMC_InterfaceInt *indexListArg =
+          new ESMC_InterfaceInt(indexList, 1, &(dimExtent[de*dimCount+j]));
+        status = distgrid->ESMC_DistGridGet(de, j+1, indexListArg);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+          rc)){
+          delete array;
+          array = ESMC_NULL_POINTER;
+          return ESMC_NULL_POINTER;
+        }
+        // check that this dim has a contiguous index list
+        for (int k=1; k<dimExtent[de*dimCount+j]; k++){
+          if (indexList[k] != indexList[k-1]+1){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID,
+              "- Cannot use non-contiguous decomposition for pseudo global"
+              " index space", rc);
+            delete array;
+            array = ESMC_NULL_POINTER;
+            return ESMC_NULL_POINTER;
+          }
+        }
+        // shift bounds of exclusive region to match indexList[0]
+        int shift = indexList[0] - exclusiveLBound[i*dimCount+j];
+        exclusiveLBound[i*dimCount+j] += shift;
+        exclusiveUBound[i*dimCount+j] += shift;
+        // clean-up
+        delete [] indexList;
+        delete indexListArg;
+      } // j
+    } // i
   }
-  // allocate LocalArrays for all the PET-local DEs
+  // deal with computational widths
+  int *computationalLBound = new int[dimCount*localDeCount];
+  int *computationalUBound = new int[dimCount*localDeCount];
+  if (computationalLWidthArg != NULL){
+    if (computationalLWidthArg->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- computationalLWidth array must be of rank 1", rc);
+      delete array;
+      array = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+    if (computationalLWidthArg->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- computationalLWidth and distgrid mismatch", rc);
+      delete array;
+      array = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+    for (int i=0; i<dimCount; i++){
+      if (computationalLWidthArg->array[i] < 0){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- computationalLWidth may only contain positive values", rc);
+        delete array;
+        array = ESMC_NULL_POINTER;
+        return ESMC_NULL_POINTER;
+      }
+      for (int j=0; j<localDeCount; j++)
+        computationalLBound[j*dimCount+i] = exclusiveLBound[j*dimCount+i]
+          - computationalLWidthArg->array[i];
+    }
+  }else{
+    // set default
+    memcpy(computationalLBound, exclusiveLBound,
+      localDeCount*dimCount*sizeof(int));
+  }
+  if (computationalUWidthArg != NULL){
+    if (computationalUWidthArg->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- computationalUWidth array must be of rank 1", rc);
+      delete array;
+      array = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+    if (computationalUWidthArg->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- computationalUWidth and distgrid mismatch", rc);
+      delete array;
+      array = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+    for (int i=0; i<dimCount; i++){
+      if (computationalUWidthArg->array[i] < 0){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- computationalUWidth may only contain positive values", rc);
+        delete array;
+        array = ESMC_NULL_POINTER;
+        return ESMC_NULL_POINTER;
+      }
+      for (int j=0; j<localDeCount; j++)
+        computationalUBound[j*dimCount+i] = exclusiveUBound[j*dimCount+i]
+          + computationalUWidthArg->array[i];
+    }
+  }else{
+    // set default
+    memcpy(computationalUBound, exclusiveUBound,
+      localDeCount*dimCount*sizeof(int));
+  }
+  // deal with total widths
+  int *totalLBound = new int[dimCount*localDeCount];
+  int *totalUBound = new int[dimCount*localDeCount];
+  if (totalLWidthArg != NULL){
+    if (totalLWidthArg->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- totalLWidth array must be of rank 1", rc);
+      delete array;
+      array = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+    if (totalLWidthArg->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- totalLWidth and distgrid mismatch", rc);
+      delete array;
+      array = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+    for (int i=0; i<dimCount; i++){
+      if (totalLWidthArg->array[i] < 0){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- totalLWidth may only contain positive values", rc);
+        delete array;
+        array = ESMC_NULL_POINTER;
+        return ESMC_NULL_POINTER;
+      }
+      for (int j=0; j<localDeCount; j++){
+        totalLBound[j*dimCount+i] = exclusiveLBound[j*dimCount+i]
+          - totalLWidthArg->array[i];
+        if (totalLBound[j*dimCount+i] > computationalLBound[j*dimCount+i]){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+            "- totalLWidth / computationaLWidth mismatch", rc);
+          delete array;
+          array = ESMC_NULL_POINTER;
+          return ESMC_NULL_POINTER;
+        }
+      }
+    }
+  }else{
+    // set default
+    memcpy(totalLBound, computationalLBound,
+      localDeCount*dimCount*sizeof(int));
+  }
+  if (totalUWidthArg != NULL){
+    if (totalUWidthArg->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- totalUWidth array must be of rank 1", rc);
+      delete array;
+      array = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+    if (totalUWidthArg->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- totalUWidth and distgrid mismatch", rc);
+      delete array;
+      array = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
+    for (int i=0; i<dimCount; i++){
+      if (totalUWidthArg->array[i] < 0){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- totalUWidth may only contain positive values", rc);
+        delete array;
+        array = ESMC_NULL_POINTER;
+        return ESMC_NULL_POINTER;
+      }
+      for (int j=0; j<localDeCount; j++){
+        totalUBound[j*dimCount+i] = exclusiveUBound[j*dimCount+i]
+          + totalUWidthArg->array[i];
+        if (totalUBound[j*dimCount+i] < computationalUBound[j*dimCount+i]){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+            "- totalUWidth / computationaUWidth mismatch", rc);
+          delete array;
+          array = ESMC_NULL_POINTER;
+          return ESMC_NULL_POINTER;
+        }
+      }
+    }
+  }else{
+    // set default
+    memcpy(totalUBound, computationalUBound,
+      localDeCount*dimCount*sizeof(int));
+  }
+  // prepare temporary staggerLoc and vectorDim arrays
+  int *staggerLoc = new int[tensorCount];
+  if (staggerLocArg)
+    for (int i=0; i<tensorCount; i++)
+      staggerLoc[i] = *staggerLocArg;
+  else
+    for (int i=0; i<tensorCount; i++)
+      staggerLoc[i] = 0;
+  int *vectorDim = new int[tensorCount];
+  if (vectorDimArg)
+    for (int i=0; i<tensorCount; i++)
+      vectorDim[i] = *vectorDimArg;
+  else
+    for (int i=0; i<tensorCount; i++)
+      vectorDim[i] = 1;
+  
+  // allocate LocalArray list that holds all PET-local DEs
   ESMC_LocalArray **larrayList = new ESMC_LocalArray*[localDeCount];
   int *temp_counts = new int[rank];
+  int *temp_lbounds = new int[rank];
+  int *temp_ubounds = new int[rank];
   for (int i=0; i<localDeCount; i++){
-    // todo: must take computational and total widths into account!!!!
     int jjj=0;  // reset
     for (int jj=0; jj<rank; jj++){
       if (inverseDimmapArray[jj]){
         // distributed dimension
         int j = inverseDimmapArray[jj] - 1; // shift to basis 0
         temp_counts[jj] =
-          exclusiveUBound[i*dimCount+j] - exclusiveLBound[i*dimCount+j] + 1;
+          totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1;
+        temp_lbounds[jj] = totalLBound[i*dimCount+j];
+        temp_ubounds[jj] = totalUBound[i*dimCount+j];
       }else{
         // non-distributed dimension
         temp_counts[jj] = uboundsArray[jjj] - lboundsArray[jjj] + 1;
+        temp_lbounds[jj] = lboundsArray[jjj];
+        temp_ubounds[jj] = uboundsArray[jjj];
         ++jjj;
       }
     }
-    //todo: need a LocalArrayCreate() that allows to specify origin!
-    larrayList[i] = ESMC_LocalArrayCreate(rank, type, kind, temp_counts);
+    // allocate LocalArray object with specific lbounds and ubounds
+    larrayList[i] = ESMC_LocalArrayCreate(rank, type, kind, temp_counts,
+      temp_lbounds, temp_ubounds);
   }
   
   // call into ArrayConstruct
   status = array->ESMC_ArrayConstruct(type, kind, rank, larrayList, distgrid,
-    exclusiveLBound, exclusiveUBound, tensorCount, lboundsArray, uboundsArray,
-    dimmapArray, inverseDimmapArray, indexflag);
+    exclusiveLBound, exclusiveUBound, computationalLBound, computationalUBound,
+    totalLBound, totalUBound, tensorCount, lboundsArray, uboundsArray,
+    staggerLoc, vectorDim, dimmapArray, inverseDimmapArray, indexflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)){
     delete array;
     array = ESMC_NULL_POINTER;
@@ -318,10 +523,18 @@ ESMC_Array *ESMC_ArrayCreate(
   delete [] dimExtent;
   delete dimExtentArg;
   delete [] temp_counts;
+  delete [] temp_lbounds;
+  delete [] temp_ubounds;
   delete [] exclusiveLBound;
   delete [] exclusiveUBound;
+  delete [] computationalLBound;
+  delete [] computationalUBound;
+  delete [] totalLBound;
+  delete [] totalUBound;
   delete [] dimmapArray;
   delete [] inverseDimmapArray;
+  delete [] staggerLoc;
+  delete [] vectorDim;
   
   // return successfully
   *rc = ESMF_SUCCESS;
@@ -408,9 +621,15 @@ int ESMC_Array::ESMC_ArrayConstruct(
   ESMC_DistGrid *distgridArg,             // (in)
   int *exclusiveLBoundArg,                // (in)
   int *exclusiveUBoundArg,                // (in)
+  int *computationalLBoundArg,            // (in)
+  int *computationalUBoundArg,            // (in)
+  int *totalLBoundArg,                    // (in)
+  int *totalUBoundArg,                    // (in)
   int tensorCountArg,                     // (in)
   int *lboundsArray,                      // (in)
   int *uboundsArray,                      // (in)
+  int *staggerLocArray,                   // (in)
+  int *vectorDimArray,                    // (in)
   int *dimmapArray,                       // (in)
   int *inverseDimmapArray,                // (in)
   ESMC_IndexFlag indexflagArg             // (in)
@@ -455,17 +674,36 @@ int ESMC_Array::ESMC_ArrayConstruct(
   larrayBaseAddrList = new void*[localDeCount];
   for (int i=0; i<localDeCount; i++)
     larrayList[i]->ESMC_LocalArrayGetBaseAddr((void **)&larrayBaseAddrList[i]);
-  // copy the PET-local bounds arrays
-  exclusiveLBound = new int[rank*localDeCount];
-  memcpy(exclusiveLBound, exclusiveLBoundArg, rank*localDeCount*sizeof(int));
-  exclusiveUBound = new int[rank*localDeCount];
-  memcpy(exclusiveUBound, exclusiveUBoundArg, rank*localDeCount*sizeof(int));
+  // copy the PET-local bound arrays
+  exclusiveLBound = new int[dimCount*localDeCount];
+  memcpy(exclusiveLBound, exclusiveLBoundArg,
+    dimCount*localDeCount*sizeof(int));
+  exclusiveUBound = new int[dimCount*localDeCount];
+  memcpy(exclusiveUBound, exclusiveUBoundArg,
+    dimCount*localDeCount*sizeof(int));
+  computationalLBound = new int[dimCount*localDeCount];
+  memcpy(computationalLBound, computationalLBoundArg,
+    dimCount*localDeCount*sizeof(int));
+  computationalUBound = new int[dimCount*localDeCount];
+  memcpy(computationalUBound, computationalUBoundArg,
+    dimCount*localDeCount*sizeof(int));
+  totalLBound = new int[dimCount*localDeCount];
+  memcpy(totalLBound, totalLBoundArg,
+    dimCount*localDeCount*sizeof(int));
+  totalUBound = new int[dimCount*localDeCount];
+  memcpy(totalUBound, totalUBoundArg,
+    dimCount*localDeCount*sizeof(int));
   // tensor dimensions
   tensorCount = tensorCountArg;
   lbounds = new int[tensorCountArg];
   memcpy(lbounds, lboundsArray, tensorCountArg * sizeof(int));
   ubounds = new int[tensorCountArg];
   memcpy(ubounds, uboundsArray, tensorCountArg * sizeof(int));
+  // staggerLoc and vectorDim
+  staggerLoc = new int[tensorCountArg];
+  memcpy(staggerLoc, staggerLocArray, tensorCountArg * sizeof(int));
+  vectorDim = new int[tensorCountArg];
+  memcpy(vectorDim, vectorDimArray, tensorCountArg * sizeof(int));
   // dimmap and inverseDimmap
   dimmap = new int[dimCount];
   memcpy(dimmap, dimmapArray, dimCount * sizeof(int));
@@ -515,9 +753,16 @@ int ESMC_Array::ESMC_ArrayDestruct(void){
   delete [] larrayList;
   delete [] exclusiveLBound;
   delete [] exclusiveUBound;
+  delete [] computationalLBound;
+  delete [] computationalUBound;
+  delete [] totalLBound;
+  delete [] totalUBound;
   delete [] lbounds;
   delete [] ubounds;
-    
+  delete [] staggerLoc;
+  delete [] vectorDim;
+  delete [] dimmap;
+  delete [] inverseDimmap;
   
   // return successfully
   return ESMF_SUCCESS;
@@ -558,7 +803,15 @@ int ESMC_Array::ESMC_ArrayGet(
   ESMC_InterfaceInt *dimmapArg,           // out - dimmap
   ESMC_InterfaceInt *inverseDimmapArg,    // out - inverseDimmap
   ESMC_InterfaceInt *exclusiveLBoundArg,  // out -
-  ESMC_InterfaceInt *exclusiveUBoundArg   // out -
+  ESMC_InterfaceInt *exclusiveUBoundArg,  // out -
+  ESMC_InterfaceInt *computationalLBoundArg,  // out -
+  ESMC_InterfaceInt *computationalUBoundArg,  // out -
+  ESMC_InterfaceInt *totalLBoundArg,      // out -
+  ESMC_InterfaceInt *totalUBoundArg,      // out -
+  ESMC_InterfaceInt *computationalLWidthArg,  // out -
+  ESMC_InterfaceInt *computationalUWidthArg,  // out -
+  ESMC_InterfaceInt *totalLWidthArg,      // out -
+  ESMC_InterfaceInt *totalUWidthArg       // out -
   ){    
 //
 // !DESCRIPTION:
@@ -693,6 +946,232 @@ int ESMC_Array::ESMC_ArrayGet(
         &(exclusiveUBound[i*dimCount]), dimCount*sizeof(int));
   }
 
+  // fill computationalLBound
+  if (computationalLBoundArg != NULL){
+    // computationalLBoundArg was provided -> do some error checking
+    if (computationalLBoundArg->dimCount != 2){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- computationalLBoundArg array must be of rank 2", rc);
+      return localrc;
+    }
+    if (computationalLBoundArg->extent[0] < dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 1st dimension of computationalLBoundArg must be of size 'dimCount'",
+        rc);
+      return localrc;
+    }
+    if (computationalLBoundArg->extent[1] < localDeCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 2nd dimension of computationalLBoundArg must be of size"
+        " 'localDeCount'", rc);
+      return localrc;
+    }
+    // fill in the values: The interface allows to pass in
+    // computationalLBoundArg
+    // arrays which are larger than dimCount x localDeCount. Consequently it is
+    // necessary to memcpy strips of contiguous data since it cannot be assumed
+    // that all data ends up contiguous in the computationalLBoundArg array.
+    for (int i=0; i<localDeCount; i++)
+      memcpy(
+        &(computationalLBoundArg->array[i*computationalLBoundArg->extent[0]]),
+        &(computationalLBound[i*dimCount]), dimCount*sizeof(int));
+  }
+  
+  // fill computationalUBound
+  if (computationalUBoundArg != NULL){
+    // computationalUBoundArg was provided -> do some error checking
+    if (computationalUBoundArg->dimCount != 2){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- computationalUBoundArg array must be of rank 2", rc);
+      return localrc;
+    }
+    if (computationalUBoundArg->extent[0] < dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 1st dimension of computationalUBoundArg must be of size 'dimCount'",
+        rc);
+      return localrc;
+    }
+    if (computationalUBoundArg->extent[1] < localDeCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 2nd dimension of computationalUBoundArg must be of size"
+        " 'localDeCount'", rc);
+      return localrc;
+    }
+    // fill in the values: The interface allows to pass in    
+    // computationalUBoundArg
+    // arrays which are larger than dimCount x localDeCount. Consequently it is
+    // necessary to memcpy strips of contiguous data since it cannot be assumed
+    // that all data ends up contiguous in the computationalUBoundArg array.
+    for (int i=0; i<localDeCount; i++)
+      memcpy(
+        &(computationalUBoundArg->array[i*computationalUBoundArg->extent[0]]),
+        &(computationalUBound[i*dimCount]), dimCount*sizeof(int));
+  }
+
+  // fill totalLBound
+  if (totalLBoundArg != NULL){
+    // totalLBoundArg was provided -> do some error checking
+    if (totalLBoundArg->dimCount != 2){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- totalLBoundArg array must be of rank 2", rc);
+      return localrc;
+    }
+    if (totalLBoundArg->extent[0] < dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 1st dimension of totalLBoundArg must be of size 'dimCount'", rc);
+      return localrc;
+    }
+    if (totalLBoundArg->extent[1] < localDeCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 2nd dimension of totalLBoundArg must be of size 'localDeCount'",
+        rc);
+      return localrc;
+    }
+    // fill in the values: The interface allows to pass in totalLBoundArg
+    // arrays which are larger than dimCount x localDeCount. Consequently it is
+    // necessary to memcpy strips of contiguous data since it cannot be assumed
+    // that all data ends up contiguous in the totalLBoundArg array.
+    for (int i=0; i<localDeCount; i++)
+      memcpy(&(totalLBoundArg->array[i*totalLBoundArg->extent[0]]),
+        &(totalLBound[i*dimCount]), dimCount*sizeof(int));
+  }
+  
+  // fill totalUBound
+  if (totalUBoundArg != NULL){
+    // totalUBoundArg was provided -> do some error checking
+    if (totalUBoundArg->dimCount != 2){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- totalUBoundArg array must be of rank 2", rc);
+      return localrc;
+    }
+    if (totalUBoundArg->extent[0] < dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 1st dimension of totalUBoundArg must be of size 'dimCount'", rc);
+      return localrc;
+    }
+    if (totalUBoundArg->extent[1] < localDeCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 2nd dimension of totalUBoundArg must be of size 'localDeCount'",
+        rc);
+      return localrc;
+    }
+    // fill in the values: The interface allows to pass in totalUBoundArg
+    // arrays which are larger than dimCount x localDeCount. Consequently it is
+    // necessary to memcpy strips of contiguous data since it cannot be assumed
+    // that all data ends up contiguous in the totalUBoundArg array.
+    for (int i=0; i<localDeCount; i++)
+      memcpy(&(totalUBoundArg->array[i*totalUBoundArg->extent[0]]),
+        &(totalUBound[i*dimCount]), dimCount*sizeof(int));
+  }
+
+  // fill computationalLWidth
+  if (computationalLWidthArg != NULL){
+    // computationalLWidthArg was provided -> do some error checking
+    if (computationalLWidthArg->dimCount != 2){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- computationalLWidthArg array must be of rank 2", rc);
+      return localrc;
+    }
+    if (computationalLWidthArg->extent[0] < dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 1st dimension of computationalLWidthArg must be of size 'dimCount'",
+        rc);
+      return localrc;
+    }
+    if (computationalLWidthArg->extent[1] < localDeCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 2nd dimension of computationalLWidthArg must be of size"
+        " 'localDeCount'", rc);
+      return localrc;
+    }
+    // fill in values
+    for (int i=0; i<localDeCount; i++)
+      for (int j=0; j<dimCount; j++)
+        computationalLWidthArg->array[i*computationalLWidthArg->extent[0]+j] =
+          exclusiveLBound[i*dimCount+j] - computationalLBound[i*dimCount+j];
+  }
+  
+  // fill computationalUWidth
+  if (computationalUWidthArg != NULL){
+    // computationalUWidthArg was provided -> do some error checking
+    if (computationalUWidthArg->dimCount != 2){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- computationalUWidthArg array must be of rank 2", rc);
+      return localrc;
+    }
+    if (computationalUWidthArg->extent[0] < dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 1st dimension of computationalUWidthArg must be of size 'dimCount'",
+        rc);
+      return localrc;
+    }
+    if (computationalUWidthArg->extent[1] < localDeCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 2nd dimension of computationalUWidthArg must be of size"
+        " 'localDeCount'", rc);
+      return localrc;
+    }
+    // fill in values
+    for (int i=0; i<localDeCount; i++)
+      for (int j=0; j<dimCount; j++)
+        computationalUWidthArg->array[i*computationalUWidthArg->extent[0]+j] =
+          computationalUBound[i*dimCount+j] - exclusiveUBound[i*dimCount+j];
+  }
+  
+  // fill totalLWidth
+  if (totalLWidthArg != NULL){
+    // totalLWidthArg was provided -> do some error checking
+    if (totalLWidthArg->dimCount != 2){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- totalLWidthArg array must be of rank 2", rc);
+      return localrc;
+    }
+    if (totalLWidthArg->extent[0] < dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 1st dimension of totalLWidthArg must be of size 'dimCount'",
+        rc);
+      return localrc;
+    }
+    if (totalLWidthArg->extent[1] < localDeCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 2nd dimension of totalLWidthArg must be of size"
+        " 'localDeCount'", rc);
+      return localrc;
+    }
+    // fill in values
+    for (int i=0; i<localDeCount; i++)
+      for (int j=0; j<dimCount; j++)
+        totalLWidthArg->array[i*totalLWidthArg->extent[0]+j] =
+          exclusiveLBound[i*dimCount+j] - totalLBound[i*dimCount+j];
+  }
+  
+  // fill totalUWidth
+  if (totalUWidthArg != NULL){
+    // totalUWidthArg was provided -> do some error checking
+    if (totalUWidthArg->dimCount != 2){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- totalUWidthArg array must be of rank 2", rc);
+      return localrc;
+    }
+    if (totalUWidthArg->extent[0] < dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 1st dimension of totalUWidthArg must be of size 'dimCount'",
+        rc);
+      return localrc;
+    }
+    if (totalUWidthArg->extent[1] < localDeCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 2nd dimension of totalUWidthArg must be of size"
+        " 'localDeCount'", rc);
+      return localrc;
+    }
+    // fill in values
+    for (int i=0; i<localDeCount; i++)
+      for (int j=0; j<dimCount; j++)
+        totalUWidthArg->array[i*totalUWidthArg->extent[0]+j] =
+          totalUBound[i*dimCount+j] - exclusiveUBound[i*dimCount+j];
+  }
+  
   // return successfully
   return ESMF_SUCCESS;
 }
@@ -734,16 +1213,14 @@ int ESMC_Array::ESMC_ArrayGetLinearIndexExclusive(
     *rc = ESMF_FAILURE;
   
   // determine the linearized index
-  //todo: right now the Array only accounts for the exclusive region
-  //todo: thus it is assumed that data array starts at origin of excl. region
-  //todo: this needs to be fixed when other regions are being implemented
   //todo: the following assumes rank==dimCount -> will need to skip over not
-  //todo: distributed dimensions when implemented
+  //      distributed dimensions when implemented
   int joff = localDe*rank;  // offset according to localDe index
-  int linindex = index[rank-1];  // initialize
+  int linindex = exclusiveLBound[rank-1] - totalLBound[rank-1]
+    + index[rank-1];  // initialize
   for (int j=rank-2; j>=0; j--){
-    linindex *= exclusiveUBound[joff+j] - exclusiveLBound[joff+j] + 1;
-    linindex += index[j];
+    linindex *= totalUBound[joff+j] - totalLBound[joff+j] + 1;
+    linindex += exclusiveLBound[j] - totalLBound[j] + index[j];
   }
       
   return linindex;    // leave this index basis 0
@@ -1034,8 +1511,8 @@ int ESMC_ArraySparseMatMulStore(
   
   // determine the cells for each local DE in the dstArray that will be updated
   //todo: the following depends on rank == dimCount, i.e. all dims decomposed
-  //todo: use the dimmap in dstArray and srcArray to skip over not decomposed
-  //todo: dimensions
+  //      use the dimmap in dstArray and srcArray to skip over not decomposed
+  //      dimensions
   // prepare temporary storage to hold info for all active local dst cells
   int totalLocalCellCount = 0; // reset
   for (int i=0; i<dstArray->localDeCount; i++){
