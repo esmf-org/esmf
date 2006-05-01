@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.230 2006/04/28 22:37:22 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.231 2006/05/01 16:20:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.230 2006/04/28 22:37:22 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.231 2006/05/01 16:20:42 theurich Exp $'
 
 !==============================================================================
 !
@@ -1518,6 +1518,14 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD
+          "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+      
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
         call ESMF_LogWrite("trying to query an uninitialized grid", &
