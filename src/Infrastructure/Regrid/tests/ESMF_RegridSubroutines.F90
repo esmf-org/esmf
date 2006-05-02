@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.15 2006/04/19 21:31:04 samsoncheung Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.16 2006/05/02 18:11:52 samsoncheung Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -862,7 +862,7 @@ contains
    !Get the coordinates of the grid
    !===============================
     call ESMF_GridGetCoord(grid,dim=1,horzRelLoc=LocChoice,  &
-           centercoord=xCoor,rc=local_rc)
+           centercoord=xCoor,docopy=ESMF_DATA_COPY,rc=local_rc)
 
    if (local_rc.ne.ESMF_SUCCESS) then 
 	rc = ESMF_FAILURE
@@ -870,7 +870,7 @@ contains
    end if
 
     call ESMF_GridGetCoord(grid,dim=2,horzRelLoc=LocChoice,  &
-           centercoord=yCoor,rc=local_rc)
+           centercoord=yCoor,docopy=ESMF_DATA_COPY,rc=local_rc)
                                                                                                                       
    if (local_rc.ne.ESMF_SUCCESS) then
         rc = ESMF_FAILURE
