@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.84 2006/04/25 18:27:28 theurich Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.85 2006/05/02 18:25:52 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.84 2006/04/25 18:27:28 theurich Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.85 2006/05/02 18:25:52 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -456,11 +456,13 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Verifing that a Field cannot be created with an uninitialized Grid 
-      ! and Array.  f3 is *not* created here and should be invalid.
+      ! and Array.  f6 is *not* created here and should be invalid.
 #ifdef ESMF_NO_INITIALIZERS
       grid2 = nogrid
 #endif
-      f3 = ESMF_FieldCreate(grid2, arrayspec, allocflag=ESMF_ALLOC, &
+      grid2 = ESMF_GridCreate(rc=rc)
+      call ESMF_GridDestroy(grid2, rc=rc)
+      f6 = ESMF_FieldCreate(grid2, arrayspec, allocflag=ESMF_ALLOC, &
                         horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
                         haloWidth=3, datamap=dm, name="Field 0", iospec=ios, rc=rc)
 
@@ -484,6 +486,7 @@
       ! A field shall be able to return a reference to its grid.
       ! f3 gets created here and used thru the rest of the tests.
       gname="oceangrid"
+      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4, rc=rc)
       f3 = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_ALLOC, &
                         horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
                         haloWidth=1, datamap=dm, name="Field 0", iospec=ios, rc=rc)
