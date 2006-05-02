@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.233 2006/05/02 18:23:06 samsoncheung Exp $
+! $Id: ESMF_Grid.F90,v 1.234 2006/05/02 20:40:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.233 2006/05/02 18:23:06 samsoncheung Exp $'
+      '$Id: ESMF_Grid.F90,v 1.234 2006/05/02 20:40:05 theurich Exp $'
 
 !==============================================================================
 !
@@ -1520,7 +1520,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -1741,7 +1742,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -1884,7 +1886,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -1955,7 +1958,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -2029,7 +2033,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -2101,7 +2106,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -2174,7 +2180,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -2244,7 +2251,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -2317,7 +2325,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -2388,7 +2397,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -2461,7 +2471,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -2532,7 +2543,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -2605,7 +2617,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -2667,7 +2680,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -2750,7 +2764,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -2843,7 +2858,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -2942,7 +2958,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -3090,7 +3107,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -3263,7 +3281,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -3422,7 +3441,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -3578,7 +3598,8 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+          "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
