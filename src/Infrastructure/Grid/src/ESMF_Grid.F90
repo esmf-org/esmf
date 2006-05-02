@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.232 2006/05/02 04:29:05 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.233 2006/05/02 18:23:06 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.232 2006/05/02 04:29:05 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.233 2006/05/02 18:23:06 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -1520,8 +1520,7 @@
 
       ! check if grid%ptr is associated
       if (.not. associated(grid%ptr)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
-          "Uninitialized Grid argument", &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
           ESMF_CONTEXT, rc)
         return
       endif
@@ -1740,6 +1739,13 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
         call ESMF_LogWrite("trying to query an uninitialized grid", &
@@ -1876,6 +1882,13 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
         call ESMF_LogWrite("trying to query an uninitialized grid", &
@@ -1939,6 +1952,13 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
@@ -2006,6 +2026,14 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
         call ESMF_LogWrite("trying to query an uninitialized grid", &
@@ -2070,6 +2098,13 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
@@ -2137,6 +2172,13 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
         call ESMF_LogWrite("trying to query an uninitialized grid", &
@@ -2199,6 +2241,13 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
@@ -2266,6 +2315,13 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
         call ESMF_LogWrite("trying to query an uninitialized grid", &
@@ -2329,6 +2385,13 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
@@ -2396,6 +2459,13 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
         call ESMF_LogWrite("trying to query an uninitialized grid", &
@@ -2459,6 +2529,13 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
@@ -2526,6 +2603,13 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
         call ESMF_LogWrite("trying to query an uninitialized grid", &
@@ -2580,6 +2664,13 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
@@ -2656,6 +2747,13 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
@@ -2742,6 +2840,13 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
@@ -2834,6 +2939,13 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
@@ -2975,6 +3087,13 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
@@ -3142,6 +3261,13 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
         call ESMF_LogWrite("trying to query an uninitialized grid", &
@@ -3294,6 +3420,13 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
         call ESMF_LogWrite("trying to query an uninitialized grid", &
@@ -3442,6 +3575,13 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check if grid%ptr is associated
+      if (.not. associated(grid%ptr)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Uninitialized Grid argument", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
