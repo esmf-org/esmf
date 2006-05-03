@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.22 2006/05/03 04:41:56 theurich Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.23 2006/05/03 18:47:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -468,14 +468,16 @@
 ! !IROUTINE: ESMF_LocalArrayAdjust<rank><type><kind> - Adjust the bounds of the Fortran pointer member according to the proper T/K/R @\
 ! @\
 ! !INTERFACE: @\
-!      subroutine ESMF_LocalArrayAdjust<rank><type><kind>(array, counts, lb, ub, fshape, rc) @\
+!      recursive subroutine ESMF_LocalArrayAdjust<rank><type><kind>(array,&@\
+!  counts, lb, ub, fshape, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !      type(ESMF_LocalArray), intent(inout) :: array @\
 !      integer, dimension(:), intent(in) :: counts @\
 !      integer, dimension(:), intent(in), optional :: lb @\
 !      integer, dimension(:), intent(in), optional :: ub @\
-!      mname (ESMF_KIND_##mtypekind), dimension(mdim), target, optional :: fshape(mrng) @\
+!      mname (ESMF_KIND_##mtypekind), dimension(mdim), target, optional ::&@\
+! fshape(mrng) @\
 !      integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
@@ -485,7 +487,7 @@
 ! dummy argument. On this interface the bounds meta data for the dummy argument @\
 ! is not those of the actual argument but is reset to the bounds specified @\
 ! on the subroutine interface. Using macros the bounds on the callee side are @\
-! set to match those of the LocalArray object meta data. Finally the internal
+! set to match those of the LocalArray object meta data. Finally the internal @\
 ! F90 array pointer is reset to reflect the desired bounds in the F90 dope @\
 ! vector. The risk of data copy on this interface should be minimal because @\
 ! the shape is not changed and the dummy argument has the target attribute. @\
@@ -499,13 +501,15 @@
 !define ESMF_METHOD "ESMF_LocalArrayAdjust##mrank##D##mtypekind" @\
 ^define ESMF_METHOD "ESMF_LocalArrayAdjust" @\
  @\
-      recursive subroutine ESMF_LocalArrayAdjust##mrank##D##mtypekind(array, counts, lb, ub, fshape, rc) @\
+      recursive subroutine ESMF_LocalArrayAdjust##mrank##D##mtypekind(array,&@\
+        counts, lb, ub, fshape, rc) @\
  @\
       type(ESMF_LocalArray), intent(inout) :: array @\
       integer, dimension(:), intent(in) :: counts @\
       integer, dimension(:), intent(in) :: lb @\
       integer, dimension(:), intent(in) :: ub @\
-      mname (ESMF_KIND_##mtypekind), dimension(mdim), target, optional :: fshape(mrng) @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), target, optional :: &@\
+  fshape(mrng) @\
       integer, intent(out), optional :: rc   @\
  @\
         ! Local variables @\
