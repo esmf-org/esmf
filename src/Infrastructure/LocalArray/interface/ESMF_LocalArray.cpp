@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.cpp,v 1.23 2006/03/03 20:39:39 nscollins Exp $
+! $Id: ESMF_LocalArray.cpp,v 1.24 2006/05/03 04:40:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -152,13 +152,15 @@ AllTypesMacro(LocalArrayType)
  
       public ESMF_LocalArrayValidate
       public ESMF_LocalArrayPrint
+      
+      public ESMF_LocalArrayAdjust
 !EOPI
       public operator(.eq.), operator(.ne.)
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.cpp,v 1.23 2006/03/03 20:39:39 nscollins Exp $'
+      '$Id: ESMF_LocalArray.cpp,v 1.24 2006/05/03 04:40:33 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -923,6 +925,12 @@ DeclarationMacro(LocalArrayCreateByFlPtr)
 
 !! < start of macros which become actual function bodies after expansion >
 DeclarationMacro(LocalArrConstrF90Ptr)
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+!! < start of macros which become actual function bodies after expansion >
+DeclarationMacro(LocalArrayAdjust)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -2317,5 +2325,352 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
        end subroutine ESMF_LocalArrayPrint
 
 
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_LocalArrayAdjust"
+!BOPI
+! !IROUTINE: ESMF_LocalArrayAdjust - Adjust bounds of F90 array member
+!
+! !INTERFACE:
+      subroutine ESMF_LocalArrayAdjust(array, counts, rank, type, kind, &
+        lbounds, ubounds, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_LocalArray), intent(inout) :: array
+      integer, dimension(:), intent(in) :: counts
+      integer, intent(in) :: rank
+      type(ESMF_DataType), intent(in) :: type
+      type(ESMF_DataKind), intent(in) :: kind
+      integer, dimension(:), intent(in) :: lbounds
+      integer, dimension(:), intent(in) :: ubounds
+      integer, intent(out), optional :: rc 
+
+!
+! !DESCRIPTION:
+!      Adjust bounds of F90 array member in {\tt ESMF\_LocalArray} object.
+!
+!EOPI
+
+        ! Local vars
+        integer :: status                   ! local error status
+        integer :: localkind, localtype
+
+        status = ESMF_FAILURE
+
+        localtype = type%dtype
+        localkind = kind%dkind
+
+        
+        ! Call a T/K/R specific interface
+
+        select case (localtype)
+          case (ESMF_DATA_INTEGER%dtype)
+            select case (rank)
+              case (1)
+                select case (localkind)
+^ifndef ESMF_NO_INTEGER_1_BYTE
+                  case (ESMF_I1%dkind)
+                    call ESMF_LocalArrayAdjust1DI1(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+^endif
+^ifndef ESMF_NO_INTEGER_2_BYTE
+                  case (ESMF_I2%dkind)
+                    call ESMF_LocalArrayAdjust1DI2(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+^endif
+                  case (ESMF_I4%dkind)
+                    call ESMF_LocalArrayAdjust1DI4(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case (ESMF_I8%dkind)
+                    call ESMF_LocalArrayAdjust1DI8(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case default
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", & 
+                                 ESMF_CONTEXT, rc)) return
+                                 
+                end select
+    
+              case (2)
+                select case (localkind)
+^ifndef ESMF_NO_INTEGER_1_BYTE
+                  case (ESMF_I1%dkind)
+                    call ESMF_LocalArrayAdjust2DI1(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+^endif
+^ifndef ESMF_NO_INTEGER_2_BYTE
+                  case (ESMF_I2%dkind)
+                    call ESMF_LocalArrayAdjust2DI2(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+^endif
+                  case (ESMF_I4%dkind)
+                    call ESMF_LocalArrayAdjust2DI4(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case (ESMF_I8%dkind)
+                    call ESMF_LocalArrayAdjust2DI8(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case default
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", & 
+                                 ESMF_CONTEXT, rc)) return
+                end select
+    
+              case (3)
+                select case (localkind)
+^ifndef ESMF_NO_INTEGER_1_BYTE
+                  case (ESMF_I1%dkind)
+                    call ESMF_LocalArrayAdjust3DI1(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+^endif
+^ifndef ESMF_NO_INTEGER_2_BYTE
+                  case (ESMF_I2%dkind)
+                    call ESMF_LocalArrayAdjust3DI2(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+^endif
+                  case (ESMF_I4%dkind)
+                    call ESMF_LocalArrayAdjust3DI4(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case (ESMF_I8%dkind)
+                    call ESMF_LocalArrayAdjust3DI8(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case default
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", & 
+                                 ESMF_CONTEXT, rc)) return
+                end select
+    
+              case (4)
+                select case (localkind)
+^ifndef ESMF_NO_INTEGER_1_BYTE
+                  case (ESMF_I1%dkind)
+                    call ESMF_LocalArrayAdjust4DI1(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+^endif
+^ifndef ESMF_NO_INTEGER_2_BYTE
+                  case (ESMF_I2%dkind)
+                    call ESMF_LocalArrayAdjust4DI2(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+^endif
+                  case (ESMF_I4%dkind)
+                    call ESMF_LocalArrayAdjust4DI4(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case (ESMF_I8%dkind)
+                    call ESMF_LocalArrayAdjust4DI8(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case default
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", & 
+                                 ESMF_CONTEXT, rc)) return
+                end select
+    
+^ifndef ESMF_NO_GREATER_THAN_4D
+              case (5)
+                select case (localkind)
+^ifndef ESMF_NO_INTEGER_1_BYTE
+                  case (ESMF_I1%dkind)
+                    call ESMF_LocalArrayAdjust5DI1(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+^endif
+^ifndef ESMF_NO_INTEGER_2_BYTE
+                  case (ESMF_I2%dkind)
+                    call ESMF_LocalArrayAdjust5DI2(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+^endif
+                  case (ESMF_I4%dkind)
+                    call ESMF_LocalArrayAdjust5DI4(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case (ESMF_I8%dkind)
+                    call ESMF_LocalArrayAdjust5DI8(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case default
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", & 
+                                 ESMF_CONTEXT, rc)) return
+                end select
+    
+              case (6)
+                select case (localkind)
+^ifndef ESMF_NO_INTEGER_1_BYTE
+                  case (ESMF_I1%dkind)
+                    call ESMF_LocalArrayAdjust6DI1(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+^endif
+^ifndef ESMF_NO_INTEGER_2_BYTE
+                  case (ESMF_I2%dkind)
+                    call ESMF_LocalArrayAdjust6DI2(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+^endif
+                  case (ESMF_I4%dkind)
+                    call ESMF_LocalArrayAdjust6DI4(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case (ESMF_I8%dkind)
+                    call ESMF_LocalArrayAdjust6DI8(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case default
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", & 
+                                 ESMF_CONTEXT, rc)) return
+                end select
+    
+              case (7)
+                select case (localkind)
+^ifndef ESMF_NO_INTEGER_1_BYTE
+                  case (ESMF_I1%dkind)
+                    call ESMF_LocalArrayAdjust7DI1(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+^endif
+^ifndef ESMF_NO_INTEGER_2_BYTE
+                  case (ESMF_I2%dkind)
+                    call ESMF_LocalArrayAdjust7DI2(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+^endif
+                  case (ESMF_I4%dkind)
+                    call ESMF_LocalArrayAdjust7DI4(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case (ESMF_I8%dkind)
+                    call ESMF_LocalArrayAdjust7DI8(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case default
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", & 
+                                 ESMF_CONTEXT, rc)) return
+                end select
+^endif
+    
+              case default
+                if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported rank", & 
+                                 ESMF_CONTEXT, rc)) return
+            end select
+    
+           case (ESMF_DATA_REAL%dtype)
+            select case (rank)
+              case (1)
+                select case (localkind)
+                  case (ESMF_R4%dkind)
+                    call ESMF_LocalArrayAdjust1DR4(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case (ESMF_R8%dkind)
+                    call ESMF_LocalArrayAdjust1DR8(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case default
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", & 
+                                 ESMF_CONTEXT, rc)) return
+                end select
+    
+              case (2)
+                select case (localkind)
+                  case (ESMF_R4%dkind)
+                    call ESMF_LocalArrayAdjust2DR4(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case (ESMF_R8%dkind)
+                    call ESMF_LocalArrayAdjust2DR8(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case default
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", & 
+                                 ESMF_CONTEXT, rc)) return
+                end select
+    
+              case (3)
+                select case (localkind)
+                  case (ESMF_R4%dkind)
+                    call ESMF_LocalArrayAdjust3DR4(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case (ESMF_R8%dkind)
+                    call ESMF_LocalArrayAdjust3DR8(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case default
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", & 
+                                 ESMF_CONTEXT, rc)) return
+                end select
+    
+              case (4)
+                select case (localkind)
+                  case (ESMF_R4%dkind)
+                    call ESMF_LocalArrayAdjust4DR4(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case (ESMF_R8%dkind)
+                    call ESMF_LocalArrayAdjust4DR8(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case default
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", & 
+                                 ESMF_CONTEXT, rc)) return
+                end select
+    
+^ifndef ESMF_NO_GREATER_THAN_4D
+              case (5)
+                select case (localkind)
+                  case (ESMF_R4%dkind)
+                    call ESMF_LocalArrayAdjust5DR4(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case (ESMF_R8%dkind)
+                    call ESMF_LocalArrayAdjust5DR8(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case default
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", & 
+                                 ESMF_CONTEXT, rc)) return
+                end select
+    
+              case (6)
+                select case (localkind)
+                  case (ESMF_R4%dkind)
+                    call ESMF_LocalArrayAdjust6DR4(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case (ESMF_R8%dkind)
+                    call ESMF_LocalArrayAdjust6DR8(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case default
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", & 
+                                 ESMF_CONTEXT, rc)) return
+                end select
+    
+              case (7)
+                select case (localkind)
+                  case (ESMF_R4%dkind)
+                    call ESMF_LocalArrayAdjust7DR4(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case (ESMF_R8%dkind)
+                    call ESMF_LocalArrayAdjust7DR8(array, counts, &
+                                    lb=lbounds, ub=ubounds, rc=status)
+                  case default
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", & 
+                                 ESMF_CONTEXT, rc)) return
+                end select
+^endif
+    
+              case default
+                if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported rank", & 
+                                 ESMF_CONTEXT, rc)) return
+            end select
+          case default
+            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported type", & 
+                                 ESMF_CONTEXT, rc)) return
+         end select
+
+       ! check status for errors
+       if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+       ! return successfully
+       if (present(rc)) rc = ESMF_SUCCESS
+
+       end subroutine ESMF_LocalArrayAdjust
+
+
+
+
+
+
+!------------------------------------------------------------------------------
         end module ESMF_LocalArrayMod
 
