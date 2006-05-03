@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.15 2006/04/28 22:40:57 theurich Exp $
+// $Id: ESMC_LocalArray.h,v 1.16 2006/05/03 04:37:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -82,12 +82,15 @@ typedef enum {
 
 // private static data - address of fortran callback funcs
 extern "C" {
- void FTN(f_esmf_localarrayf90allocate)(ESMC_LocalArray**, int *, 
-                                        ESMC_DataType*, ESMC_DataKind*, 
-                                        int *, int *, int *, int *);
- void FTN(f_esmf_localarrayf90deallocate)(ESMC_LocalArray**, int*, 
-                                          ESMC_DataType*, ESMC_DataKind *, 
-                                          int *);
+
+  void FTN(f_esmf_localarrayf90allocate)(ESMC_LocalArray**, int *, 
+    ESMC_DataType*, ESMC_DataKind*, int *, int *, int *, int *);
+ 
+  void FTN(f_esmf_localarrayf90deallocate)(ESMC_LocalArray**, int*, 
+    ESMC_DataType*, ESMC_DataKind *, int *);
+ 
+  void FTN(f_esmf_localarrayadjust)(ESMC_LocalArray**, int *,
+    ESMC_DataType*, ESMC_DataKind*, int *, int *, int *, int *);
 }
 
 
@@ -128,6 +131,8 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
             ESMC_DataCopy docopy, ESMC_Logical dflag, char *name,
             int *lbounds, int *ubounds, int *offsets);
     int ESMC_LocalArrayDestruct(void);
+
+    ESMC_LocalArray *ESMC_LocalArrayAdjust(int *lbounds, int *ubounds, int *rc);
 
  // accessor methods for class members
     //int ESMC_ArrayGet<Value>(<value type> *value) const;
@@ -191,6 +196,9 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
                                                    return ESMF_SUCCESS;}
     int ESMC_LocalArrayGetUbounds(int n, int *u) { for (int i = 0; i < n; i++)
                                                       u[i] = this->ubound[i];
+                                                   return ESMF_SUCCESS;}
+    int ESMC_LocalArrayGetCounts(int n, int *c) { for (int i = 0; i < n; i++)
+                                                      c[i] = this->counts[i];
                                                    return ESMF_SUCCESS;}
 
     int ESMC_LocalArraySetName(char *name) { return ESMC_BaseSetName(name, "LocalArray"); }
