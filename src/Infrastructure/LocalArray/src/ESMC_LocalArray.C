@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.15 2006/04/28 22:41:55 theurich Exp $
+// $Id: ESMC_LocalArray.C,v 1.16 2006/05/03 04:43:29 theurich Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -40,7 +40,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.15 2006/04/28 22:41:55 theurich Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.16 2006/05/03 04:43:29 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -477,6 +477,73 @@
 
  } // end ESMC_LocalArrayDestruct
 //-----------------------------------------------------------------------------
+
+ 
+ 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_LocalArrayAdjust"
+//BOP
+// !IROUTINE:  ESMC_LocalArrayAdjust - adjust an already allocated LocalArray
+//
+// !INTERFACE:
+      ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayAdjust(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_LocalArray
+//
+// !ARGUMENTS:
+    int *lbounds,               // lower index number per dim
+    int *ubounds,               // upper index number per dim
+    int *rc                     // return code
+    ){
+//
+// !DESCRIPTION:
+//      ESMF routine which adjusts the contents of an already allocated
+//      {\tt ESMF\_LocalArray} object.
+//
+//EOP
+// !REQUIREMENTS:  
+  // local vars
+  int status;                 // local error status
+  
+  // allocate memory for new LocalArray object
+  ESMC_LocalArray *larray = new ESMC_LocalArray;
+  
+  // copy the contents
+  *larray = *this;
+  
+  // mark this copy not to be responsible for deallocation
+  larray->needs_dealloc = ESMF_FALSE;
+
+  // adjust the lbound and ubound members while checking counts
+  for (int i=0; i<rank; i++){
+    if (larray->counts[i] != ubounds[i] - lbounds[i] + 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID,
+        "- Mismatch of lbounds, ubounds and counts", rc);
+      return NULL;
+    }
+    larray->lbound[i] = lbounds[i];
+    larray->ubound[i] = ubounds[i];
+  }
+
+  // adjust the F90 dope vector to reflect the new bounds
+  FTN(f_esmf_localarrayadjust)(&larray, &rank, &type, &kind, counts, lbound,  
+    ubound, &status);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+    return NULL;
+
+  // return successfully 
+  if (rc) *rc = ESMF_SUCCESS;
+  return larray;
+
+} // end ESMC_LocalArrayAdjust
+
+ 
+ 
+ 
+ 
+ 
 //-----------------------------------------------------------------------------
 
 
