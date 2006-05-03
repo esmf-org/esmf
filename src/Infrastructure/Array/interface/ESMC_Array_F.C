@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.40 2006/04/28 22:52:45 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.41 2006/05/03 04:47:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,6 +45,26 @@ extern "C" {
 
   // - ESMF-public methods:
         
+  void FTN(c_esmc_arraycreatelocalarray)(ESMC_Array **ptr, 
+    ESMC_LocalArray **larrayList, int *larrayCount, ESMC_DistGrid **distgrid,
+    ESMC_InterfaceInt **dimmap, ESMC_InterfaceInt **computationalLWidthArg,
+    ESMC_InterfaceInt **computationalUWidthArg, 
+    ESMC_InterfaceInt **totalLWidthArg, ESMC_InterfaceInt **totalUWidthArg,
+    ESMC_IndexFlag *indexflag, int *staggerLoc, int *vectorDim, 
+    ESMC_InterfaceInt **lboundsArg, ESMC_InterfaceInt **uboundsArg, int *rc){
+    int localrc;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraycreatealldecomp()"
+    // call into C++
+    *ptr = ESMC_ArrayCreate(larrayList, *larrayCount, *distgrid, *dimmap,
+      *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
+      *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag),
+      ESMC_NOT_PRESENT_FILTER(staggerLoc), ESMC_NOT_PRESENT_FILTER(vectorDim),
+      *lboundsArg, *uboundsArg, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
   void FTN(c_esmc_arraycreateallocate)(ESMC_Array **ptr, 
     ESMC_ArraySpec *arrayspec, ESMC_DistGrid **distgrid,
     ESMC_InterfaceInt **dimmap, ESMC_InterfaceInt **computationalLWidthArg,

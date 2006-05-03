@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.41 2006/04/28 22:52:45 theurich Exp $
+// $Id: ESMC_Array.h,v 1.42 2006/05/03 04:47:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -88,8 +88,8 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
   public:
     // Construct and Destruct
     int ESMC_ArrayConstruct(ESMC_DataType type, ESMC_DataKind kind, int rank,
-      ESMC_LocalArray **larrayList, ESMC_DistGrid *distgrid, 
-      int *exclusiveLBound, int *exclusiveUBound, 
+      ESMC_LocalArray **larrayList,
+      ESMC_DistGrid *distgrid, int *exclusiveLBound, int *exclusiveUBound, 
       int *computationalLBound, int *computationalUBound, 
       int *totalLBound, int *totalUBound, int tensorCount,
       int *lboundsArray, int *uboundsArray, int *staggerLoc, int *vectorDim,
@@ -128,6 +128,14 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
 
 ESMC_Array *ESMC_ArrayCreate(ESMC_ArraySpec *arrayspec, ESMC_DistGrid *distgrid,
   ESMC_InterfaceInt *dimmap, ESMC_InterfaceInt *computationalLWidthArg,
+  ESMC_InterfaceInt *computationalUWidthArg, ESMC_InterfaceInt *totalLWidthArg,
+  ESMC_InterfaceInt *totalUWidthArg, ESMC_IndexFlag *indexflag, int *staggerLoc,
+  int *vectorDim, ESMC_InterfaceInt *lboundsArg, ESMC_InterfaceInt *uboundsArg,
+  int *rc);
+
+ESMC_Array *ESMC_ArrayCreate(ESMC_LocalArray **larrayList, int larrayCount, 
+  ESMC_DistGrid *distgrid, ESMC_InterfaceInt *dimmap,
+  ESMC_InterfaceInt *computationalLWidthArg,
   ESMC_InterfaceInt *computationalUWidthArg, ESMC_InterfaceInt *totalLWidthArg,
   ESMC_InterfaceInt *totalUWidthArg, ESMC_IndexFlag *indexflag, int *staggerLoc,
   int *vectorDim, ESMC_InterfaceInt *lboundsArg, ESMC_InterfaceInt *uboundsArg,

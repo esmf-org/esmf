@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.3 2006/04/28 22:52:45 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.4 2006/05/03 04:47:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -180,7 +180,7 @@ program ESMF_ArrayEx
 !EOE  
 !BOC
   allocate(larrayList(localDeCount))
-  call ESMF_ArrayGet(array, localArrayList=larrayList, rc=rc)
+  call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
 !EOC
 !BOE
 ! Now each PET can loop through its local list of DEs and access the associated
@@ -454,7 +454,7 @@ program ESMF_ArrayEx
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
-  call ESMF_ArrayGet(array, localArrayList=larrayList, rc=rc)
+  call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
@@ -1036,7 +1036,7 @@ program ESMF_ArrayEx
   call ESMF_DistGridGet(distgrid1, delayout=delayout, rc=rc)
   call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
   allocate(larrayList(localDeCount))
-  call ESMF_ArrayGet(array1, localArrayList=larrayList, rc=rc)
+  call ESMF_ArrayGet(array1, larrayList=larrayList, rc=rc)
   do de=1, localDeCount
     call ESMF_LocalArrayGetData(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
     myF90Array = 1.5 + 2.3 * de
@@ -1051,7 +1051,7 @@ program ESMF_ArrayEx
   call ESMF_DistGridGet(distgrid2, delayout=delayout, rc=rc)
   call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
   allocate(larrayList(localDeCount))
-  call ESMF_ArrayGet(array2, localArrayList=larrayList, rc=rc)
+  call ESMF_ArrayGet(array2, larrayList=larrayList, rc=rc)
   do de=1, localDeCount
     call ESMF_LocalArrayGetData(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
     myF90Array = 1.5 - 0.9 * de
@@ -1397,9 +1397,9 @@ program ESMF_ArrayEx
   call ESMF_DistGridGet(distgrid, delayout=delayout, rc=rc)
   call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
   allocate(larrayList1(localDeCount))
-  call ESMF_ArrayGet(array1, localArrayList=larrayList1, rc=rc)
+  call ESMF_ArrayGet(array1, larrayList=larrayList1, rc=rc)
   allocate(larrayList2(localDeCount))
-  call ESMF_ArrayGet(array2, localArrayList=larrayList2, rc=rc)
+  call ESMF_ArrayGet(array2, larrayList=larrayList2, rc=rc)
   allocate(computationalLBound(localDeCount, 2))  ! rank=2
   allocate(computationalUBound(localDeCount, 2))  ! rank=2
   call ESMF_ArrayGet(array1, computationalLBound=computationalLBound, &
@@ -1695,9 +1695,9 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
   allocate(larrayList1(localDeCount))
-  call ESMF_ArrayGet(array3D, localArrayList=larrayList1, rc=rc)
+  call ESMF_ArrayGet(array3D, larrayList=larrayList1, rc=rc)
   allocate(larrayList2(localDeCount))
-  call ESMF_ArrayGet(array2D, localArrayList=larrayList2, rc=rc)
+  call ESMF_ArrayGet(array2D, larrayList=larrayList2, rc=rc)
   do de=1, localDeCount
     call ESMF_LocalArrayGetData(larrayList1(de), myF90Array3D, ESMF_DATA_REF, &
       rc=rc)
