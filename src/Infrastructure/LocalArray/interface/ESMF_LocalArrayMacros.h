@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.21 2006/03/28 21:52:31 theurich Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.22 2006/05/03 04:41:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -448,6 +448,97 @@
         if (rcpresent) rc = status @\
  @\
         end subroutine ESMF_LocalArrConstrF90Ptr##mrank##D##mtypekind  @\
+ @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------ @\
+
+#if 0
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+! Adjust the bounds of the Fortran pointer member in a LocalArray object
+! First the documentation macro, followed by Macro which contains code to be
+! expanded for each T/K/R.
+!------------------------------------------------------------------------------
+#endif
+
+#define LocalArrayAdjustDoc() \
+!------------------------------------------------------------------------------ @\
+! <Created by macro - do not edit directly > @\
+!BOPI @\
+! !IROUTINE: ESMF_LocalArrayAdjust<rank><type><kind> - Adjust the bounds of the Fortran pointer member according to the proper T/K/R @\
+! @\
+! !INTERFACE: @\
+!      subroutine ESMF_LocalArrayAdjust<rank><type><kind>(array, counts, lb, ub, fshape, rc) @\
+! @\
+! !ARGUMENTS: @\
+!      type(ESMF_LocalArray), intent(inout) :: array @\
+!      integer, dimension(:), intent(in) :: counts @\
+!      integer, dimension(:), intent(in), optional :: lb @\
+!      integer, dimension(:), intent(in), optional :: ub @\
+!      mname (ESMF_KIND_##mtypekind), dimension(mdim), target, optional :: fshape(mrng) @\
+!      integer, intent(out), optional :: rc   @\
+! @\
+! !DESCRIPTION: @\
+! Each LocalArray object internally keeps a reference to an F90 array pointer. @\
+! This call modifies the meta-data associated with this F90 array pointer @\
+! by passing the F90 array pointer into a F90 subroutine with an explicit shape @\
+! dummy argument. On this interface the bounds meta data for the dummy argument @\
+! is not those of the actual argument but is reset to the bounds specified @\
+! on the subroutine interface. Using macros the bounds on the callee side are @\
+! set to match those of the LocalArray object meta data. Finally the internal
+! F90 array pointer is reset to reflect the desired bounds in the F90 dope @\
+! vector. The risk of data copy on this interface should be minimal because @\
+! the shape is not changed and the dummy argument has the target attribute. @\
+!EOPI @\
+ @\
+
+#define LocalArrayAdjustMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!------------------------------------------------------------------------------ @\
+! <Created by macro - do not edit directly > @\
+^undef  ESMF_METHOD @\
+!define ESMF_METHOD "ESMF_LocalArrayAdjust##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_LocalArrayAdjust" @\
+ @\
+      recursive subroutine ESMF_LocalArrayAdjust##mrank##D##mtypekind(array, counts, lb, ub, fshape, rc) @\
+ @\
+      type(ESMF_LocalArray), intent(inout) :: array @\
+      integer, dimension(:), intent(in) :: counts @\
+      integer, dimension(:), intent(in) :: lb @\
+      integer, dimension(:), intent(in) :: ub @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), target, optional :: fshape(mrng) @\
+      integer, intent(out), optional :: rc   @\
+ @\
+        ! Local variables @\
+        integer :: status                   ! local error status @\
+ @\
+        type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap ! to pass f90 ptr to C++ @\
+        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr  @\
+ @\
+        ! Initialize return code; assume failure until success is certain @\
+        status = ESMF_FAILURE @\
+ @\
+        ! Recursive branch @\
+        if (present(fshape)) then @\
+          ! second recursion -> set the member in LocalArray @\
+!print *, "Second recursion: ", lbound(fshape), ubound(fshape) @\
+!call c_esmc_vmpointerprint(fshape) @\
+          wrap%ptr##mrank##D##mtypekind => fshape @\
+          call c_ESMC_LocalArraySetF90Ptr(array, wrap, status) @\
+        else @\
+          ! first recursion -> get F90ptr member and call subr. recursively @\
+          call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) @\
+          if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
+          fptr => wrap%ptr##mrank##D##mtypekind @\
+!print *, "First recursion: ", lbound(fptr), ubound(fptr) @\
+!call c_esmc_vmpointerprint(fptr) @\
+          call ESMF_LocalArrayAdjust##mrank##D##mtypekind(array, counts, lb, ub, fptr, rc=status) @\
+        endif @\
+ @\
+        if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+        end subroutine ESMF_LocalArrayAdjust##mrank##D##mtypekind  @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
