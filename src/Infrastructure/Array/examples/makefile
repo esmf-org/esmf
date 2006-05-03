@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2006/05/03 04:47:31 theurich Exp $
+# $Id: makefile,v 1.13 2006/05/03 19:05:58 theurich Exp $
 
 ALL: build_examples
 run: run_examples
@@ -59,7 +59,7 @@ LOCDIR	  = src/Infrastructure/Array/examples
 # depend on this naming convention being followed.
 #
 
-EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_ArrayFromF90Array1DePerPetEx $(ESMF_EXDIR)/ESMF_ArrayFarrayHaloEx $(ESMF_EXDIR)/ESMF_ArrayLarrayEx $(ESMF_EXDIR)/ESMF_ArrayEx
+EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_ArrayFarrayEx $(ESMF_EXDIR)/ESMF_ArrayFarrayHaloEx $(ESMF_EXDIR)/ESMF_ArrayLarrayEx $(ESMF_EXDIR)/ESMF_ArrayEx
 
 #
 # List the example run targets in EXAMPLES_RUN and 
@@ -67,7 +67,7 @@ EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_ArrayFromF90Array1DePerPetEx $(ESMF_EXDIR
 # in this makefile.
 #
 
-EXAMPLES_RUN      = run_ESMF_ArrayFromF90Array1DePerPetEx run_ESMF_ArrayFarrayHaloEx run_ESMF_ArrayLarrayEx run_ESMF_ArrayEx
+EXAMPLES_RUN      = run_ESMF_ArrayFarrayEx run_ESMF_ArrayFarrayHaloEx run_ESMF_ArrayLarrayEx run_ESMF_ArrayEx
 
 EXAMPLES_RUN_UNI  =
 
@@ -92,5 +92,5 @@ run_ESMF_ArrayLarrayEx:
 run_ESMF_ArrayFarrayHaloEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArrayFarrayHaloEx > $(ESMF_EXDIR)/ESMF_ArrayFarrayHaloEx.stdout
 
-run_ESMF_ArrayFromF90Array1DePerPetEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArrayFromF90Array1DePerPetEx > $(ESMF_EXDIR)/ESMF_ArrayFromF90Array1DePerPetEx.stdout
+run_ESMF_ArrayFarrayEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArrayFarrayEx > $(ESMF_EXDIR)/ESMF_ArrayFarrayEx.stdout
