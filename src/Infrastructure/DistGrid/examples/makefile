@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.11 2006/04/13 23:26:14 theurich Exp $
+# $Id: makefile,v 1.12 2006/05/04 20:17:05 theurich Exp $
 
 ALL: build_examples
+run: run_examples
 
 #
 #  makefile for examples directory.
