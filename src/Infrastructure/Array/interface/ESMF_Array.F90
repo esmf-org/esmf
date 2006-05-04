@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.32 2006/05/03 04:47:31 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.33 2006/05/04 03:35:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -186,7 +186,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.32 2006/05/03 04:47:31 theurich Exp $'
+      '$Id: ESMF_Array.F90,v 1.33 2006/05/04 03:35:49 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2440,8 +2440,8 @@ contains
   subroutine ESMF_ArrayScatter2R8(array, farray, patch, rootPET, vm, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),        intent(inout)           :: array
-    real(ESMF_KIND_R8), target, intent(in)  :: farray(:,:)
+    type(ESMF_Array),           intent(inout)           :: array
+    real(ESMF_KIND_R8), target, intent(in)              :: farray(:,:)
     integer,                    intent(in),   optional  :: patch
     integer,                    intent(in)              :: rootPET
     type(ESMF_VM),              intent(in),   optional  :: vm
@@ -2483,17 +2483,27 @@ contains
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                       :: status         ! local error status
+    integer                       :: counts(2)      ! counts vector
+    integer                       :: i
 
-    ! Assume failure until success
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayScatterB(array, larray, rootPET, vm, localrc)
-
-    ! Use LogErr to handle return code
-!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! prepare counts vector
+    do i=1, 2
+      counts(i) = size(farray, i)
+    enddo
+    
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayScatter(array, farray(1,1), ESMF_DATA_REAL, ESMF_R8, &
+      2, counts, patch, rootPet, vm, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArrayScatter2R8
 !------------------------------------------------------------------------------
@@ -2505,13 +2515,13 @@ contains
 ! !IROUTINE: ESMF_ArrayScatter - Scatter a Fortran90 array across Array
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayScatter3R8(array, farray, patch, rootPET, vm, rc)
+  subroutine ESMF_ArrayScatter3R8(array, farray, patch, rootPet, vm, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),        intent(inout)           :: array
-    real(ESMF_KIND_R8), target, intent(in)           :: farray(:,:,:)
+    type(ESMF_Array),           intent(inout)           :: array
+    real(ESMF_KIND_R8), target, intent(in)              :: farray(:,:,:)
     integer,                    intent(in),   optional  :: patch
-    integer,                    intent(in)              :: rootPET
+    integer,                    intent(in)              :: rootPet
     type(ESMF_VM),              intent(in),   optional  :: vm
     integer,                    intent(out),  optional  :: rc  
 !         
@@ -2539,7 +2549,7 @@ contains
 !     \item[{[patch]}]
 !        The DistGrid patch in {\tt array} into which to scatter {\tt farray}.
 !        By default {\tt farray} will be scattered into patch 1.
-!     \item[rootPET]
+!     \item[rootPet]
 !          PET that holds the valid data in {\tt farray}.
 !     \item[{[vm]}]
 !        Optional {\tt ESMF\_VM} object of the current context. Providing the
@@ -2551,17 +2561,27 @@ contains
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                       :: status         ! local error status
+    integer                       :: counts(3)      ! counts vector
+    integer                       :: i
 
-    ! Assume failure until success
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayScatterB(array, larray, rootPET, vm, localrc)
-
-    ! Use LogErr to handle return code
-!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! prepare counts vector
+    do i=1, 3
+      counts(i) = size(farray, i)
+    enddo
+    
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayScatter(array, farray(1,1,1), ESMF_DATA_REAL, ESMF_R8, &
+      3, counts, patch, rootPet, vm, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArrayScatter3R8
 !------------------------------------------------------------------------------

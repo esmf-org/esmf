@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.51 2006/05/03 04:47:31 theurich Exp $
+// $Id: ESMC_Array.C,v 1.52 2006/05/04 03:35:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.51 2006/05/03 04:47:31 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Array.C,v 1.52 2006/05/04 03:35:49 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -177,7 +177,7 @@ ESMC_Array *ESMC_ArrayCreate(
   }
   // check for lbounds and ubounds arguments and that they match dimCount, rank
 //todo: provide a default here that leaves the bounds of the incoming LocalArray
-//      unchanged for tensor dimensions  
+//      unchanged for tensor dimensions and don't require these arguments
   int tensorCount = rank - dimCount;  // number of tensor dimensions
   if (tensorCount > 0 && lboundsArg == NULL){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1886,6 +1886,228 @@ int ESMC_Array::ESMC_ArrayPrint(){
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
+// communication calls (internal)
+//
+//-----------------------------------------------------------------------------
+
+    int ESMC_ArrayScatter(void *farray, ESMC_DataType type, ESMC_DataKind kind,
+      int rank, int *counts, int *patch, int rootPet, ESMC_VM *vm);
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArrayScatter()"
+//BOP
+// !IROUTINE:  ESMC_ArrayScatter
+//
+// !INTERFACE:
+int ESMC_Array::ESMC_ArrayScatter(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void *farrayArg,                      // in -
+  ESMC_DataType typeArg,                // in -
+  ESMC_DataKind kindArg,                // in -
+  int rankArg,                          // in -
+  int *counts,                          // in -
+  int *patch,                           // in -
+  int rootPet,                          // in -
+  ESMC_VM *vm                           // in -
+  ){    
+//
+//
+// !DESCRIPTION:
+//    Scatter native array across Array object 
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // automatic variable for local return code
+  int *rc = &localrc;         // pointer to localrc
+  int status;                 // local error status
+
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  *rc = ESMF_FAILURE;
+
+  // return with errors for NULL pointer
+  if (this == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to Array", rc);
+    return localrc;
+  }
+
+  // by default use the currentVM for vm
+  if (vm == ESMC_NULL_POINTER){
+    vm = ESMC_VMGetCurrent(&status);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+    return localrc;
+  }
+
+  // query the VM for localPet and petCount
+  int localPet, petCount;
+  vm->ESMC_VMGet(&localPet, &petCount, NULL, NULL, NULL);
+  
+//printf("gjt in ArrayScatter: type/kind/rank: %s / %s / %d \n",
+//ESMC_DataTypeString(typeArg), ESMC_DataKindString(kindArg), rankArg);
+//printf("gjt in ArrayScatter: counts: %d, %d, %d\n", counts[0], counts[1],
+//counts[2]);
+  
+  
+  // todo: error checking!!!!
+  
+  int dataSize = ESMC_DataKindSize(kindArg);
+
+  // scatter here
+  vmk_commhandle **commh = new vmk_commhandle*; // used by all comm calls
+  // all PET may be receivers
+  for (int i=0; i<localDeCount; i++){
+    int de = localDeList[i];
+    int cellCount = 1;  // reset
+    for (int j=0; j<dimCount; j++)
+      cellCount *= exclusiveUBound[i*dimCount+j] 
+        - exclusiveLBound[i*dimCount+j] + 1;
+    for (int j=0; j<tensorCount; j++)
+      cellCount *= ubounds[j] - lbounds[j] + 1;
+//printf("gjt in ArrayScatter: receiver DE %d - cellCount: %d \n", de, cellCount);
+    *commh = NULL; // invalidate
+    //todo: the following assumes that the exclusive region is contiguous
+    //      actually this should be broken into as many vmk_recv() calls as
+    //      there are contiguous chunks
+    vm->vmk_recv(larrayBaseAddrList[i], cellCount*dataSize, rootPet, commh);
+  }
+  // rootPet is the only sender
+  char *farray = (char *)farrayArg;
+  char **sendBuffer;
+  if (localPet == rootPet){
+    // need to run through all DEs of the Array and memcpy together a single
+    // sendBuffer for each DE and then send it non-blocking. 
+    
+    // distgrid -> dimExtent[]
+    int *dimExtent = new int[dimCount*deCount];
+    int dummyLen[2];
+    dummyLen[0] = dimCount;
+    dummyLen[1] = deCount;
+    ESMC_InterfaceInt *dimExtentArg =
+      new ESMC_InterfaceInt(dimExtent, 2, dummyLen);
+    status = distgrid->ESMC_DistGridGet(NULL, NULL, NULL, dimExtentArg, NULL);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+      return localrc;
+    delete dimExtentArg;
+    sendBuffer = new char*[deCount]; // contiguous sendBuffer
+    int *ii = new int[dimCount];     // index tuple basis 0
+    int *iiEnd = new int[dimCount];
+    for (int i=0; i<deCount; i++){
+      int cellCount = 1;  // reset
+      int de = i;
+      int **indexList = new int*[dimCount];
+      int *indexContigFlag = new int[dimCount];
+      for (int j=0; j<dimCount; j++){
+        // calculate cellCount
+        cellCount *= dimExtent[de*dimCount+j];
+        // obtain indexList for this DE and dim
+        indexList[j] = new int[dimExtent[de*dimCount+j]];
+        ESMC_InterfaceInt *indexListArg =
+          new ESMC_InterfaceInt(indexList[j], 1, &(dimExtent[de*dimCount+j]));
+        status = distgrid->ESMC_DistGridGet(de, j+1, indexListArg);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, 
+          rc))
+          return localrc;
+        // check that this dim has a contiguous index list
+        indexContigFlag[j] = 1; // set
+        for (int k=1; k<dimExtent[de*dimCount+j]; k++){
+          if (indexList[j][k] != indexList[j][k-1]+1){
+            indexContigFlag[j] = 0; // reset
+            break;
+          }
+        }
+        // clean-up
+        delete indexListArg;
+      } // j
+      sendBuffer[i] = new char[cellCount*dataSize]; // contiguous sendBuffer
+      
+//printf("gjt in ArrayScatter: sender DE %d - cellCount: %d \n", de, cellCount);
+      
+      int sendBufferIndex = 0;  // reset
+      // reset counters
+      for (int j=0; j<dimCount; j++){
+        ii[j] = 0;  // reset
+        iiEnd[j] = dimExtent[de*dimCount+j];
+      }
+      // loop over all cells in exclusive region for this DE
+      while(ii[dimCount-1] < iiEnd[dimCount-1]){        
+        // determine linear for this cell index into farray
+        int linearIndex = indexList[dimCount-1][ii[dimCount-1]] - 1;  // init
+        for (int j=dimCount-2; j>=0; j--){
+          linearIndex *= counts[j];
+          linearIndex += indexList[j][ii[j]] - 1; // shift basis 1 -> basis 0
+        }
+        
+//        printf("DE = %d  - (", de);
+//        int jjj;
+//        for (jjj=0; jjj<dimCount-1; jjj++)
+//          printf("%d, ", ii[jjj]);
+//        printf("%d) - linearIndex: %d\n", ii[jjj], linearIndex);
+        
+        // copy this element into the contiguous sendBuffer
+//printf("gjt in ArrayScatter: DE %d: copy linearIndex %d to sendBufferIndex %d, dataSize=%d\n", de, linearIndex, sendBufferIndex, dataSize);
+        
+        memcpy(sendBuffer[i]+sendBufferIndex*dataSize,
+          farray+linearIndex*dataSize, dataSize);
+        ++sendBufferIndex;
+        
+        // multi-dim index increment
+        ++ii[0];
+        for (int j=0; j<dimCount-1; j++){
+          if (ii[j] == iiEnd[j]){
+            ii[j] = 0;  // reset
+            ++ii[j+1];
+          }
+        }
+      }
+    
+      // ready to send the sendBuffer
+      int dstPet;
+      delayout->ESMC_DELayoutGetDEMatchPET(de, *vm, NULL, &dstPet, 1);
+      *commh = NULL; // invalidate
+      vm->vmk_send(sendBuffer[i], cellCount*dataSize, dstPet, commh);
+      
+      // clean-up
+      for (int j=0; j<dimCount; j++)
+        delete [] indexList[j];
+      delete [] indexList;
+      delete [] indexContigFlag;
+    } // i
+    delete [] ii;
+    delete [] iiEnd;
+    
+  }
+  
+  // todo: separate receive and send commhandles and separately wait!
+  // wait until all the local receives are complete
+  // wait until all the local sends are complete
+  // for now wait on _all_ outstanding non-blocking comms for this PET
+  vm->vmk_waitqueue();
+    
+  // garbage collection
+  // -> delete all the sendBuffer!!!
+  if (localPet == rootPet){
+    for (int i=0; i<deCount; i++)
+      delete [] sendBuffer[i];
+    delete [] sendBuffer;
+  }
+  
+  // return successfully
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
 
 
 //-----------------------------------------------------------------------------

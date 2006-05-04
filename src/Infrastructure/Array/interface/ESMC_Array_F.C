@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.41 2006/05/03 04:47:31 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.42 2006/05/04 03:35:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ extern "C" {
   }
   
 
-    void FTN(c_esmc_arraysparsematmul)(ESMC_Array **srcArray,
+  void FTN(c_esmc_arraysparsematmul)(ESMC_Array **srcArray,
     ESMC_Array **dstArray, ESMC_RouteHandle **routehandle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysparsematmul()"
@@ -166,7 +166,25 @@ extern "C" {
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
-    
+
+  
+  void FTN(c_esmc_arrayscatter)(ESMC_Array **array, void *farray,
+    ESMC_DataType *type, ESMC_DataKind *kind, int *rank, int *counts,
+    int *patch, int *rootPet, ESMC_VM **vm, int *rc){
+    ESMC_VM *opt_vm;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayscatter()"
+    // deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
+    else opt_vm = *vm;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->ESMC_ArrayScatter(
+      farray, *type, *kind, *rank, counts, ESMC_NOT_PRESENT_FILTER(patch),
+      *rootPet, opt_vm),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+      
   
 #undef  ESMC_METHOD
 }

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.1 2006/05/03 21:54:33 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.2 2006/05/04 03:35:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.1 2006/05/03 21:54:33 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.2 2006/05/04 03:35:49 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -85,7 +85,7 @@ program ESMF_ArrayScatterUTest
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
   
   farrayPtr = real(localPet)  ! initialize each DE-local data chunk of Array
-  print *, "farrayPtr:", farrayPtr
+!print *, "farrayPtr:", farrayPtr
   
   ! prepare srcfarray on all PETs -> serves as ref. in comparison after scatter
   allocate(srcfarray(1:15, 1:23))
@@ -95,7 +95,7 @@ program ESMF_ArrayScatterUTest
     enddo
   enddo
   
-  print *, "srcfarray:", srcfarray
+!print *, "srcfarray:", srcfarray
 
 
   !------------------------------------------------------------------------

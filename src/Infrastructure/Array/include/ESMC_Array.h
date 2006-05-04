@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.42 2006/05/03 04:47:31 theurich Exp $
+// $Id: ESMC_Array.h,v 1.43 2006/05/04 03:35:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -112,6 +112,10 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_ArrayGetLinearIndexExclusive(int localDe, int *index);
     // IO and validation
     int ESMC_ArrayPrint(void);
+    
+    // comm methods
+    int ESMC_ArrayScatter(void *farray, ESMC_DataType type, ESMC_DataKind kind,
+      int rank, int *counts, int *patch, int rootPet, ESMC_VM *vm);
     
     // external friend functions
     friend int ESMC_ArraySparseMatMulStore(ESMC_Array *srcArray, 
