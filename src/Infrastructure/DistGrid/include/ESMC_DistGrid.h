@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.7 2006/04/24 21:35:39 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.8 2006/05/05 22:19:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,12 +81,14 @@ class ESMC_DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_DistGridDestruct(void);
     // Get, Set
     int ESMC_DistGridGet(ESMC_DELayout **delayoutArg,
-      ESMC_InterfaceInt *patchList, int *dimCountArg,
+      int *patchCount, ESMC_InterfaceInt *patchList, int *dimCountArg,
       ESMC_InterfaceInt *dimExtentArg, ESMC_Logical *regDecompFlagArg);
     int ESMC_DistGridGet(int de, int dim, ESMC_InterfaceInt *indexList);
     int ESMC_DistGridGet(int de, int *cellCount);
     int ESMC_DistGridGetSequenceIndex(int de, int *index);
-    int ESMC_DistGridGetDe(int seqindex);
+    int ESMC_DistGridGetSequenceDe(int seqindex);
+    int ESMC_DistGridGetPatchMinMaxCorner(int patch, int *minCorner, int
+      *maxCorner);
     // IO and validation
     int ESMC_DistGridPrint(void);
       

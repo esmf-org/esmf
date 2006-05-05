@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.5 2006/04/24 21:35:39 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.6 2006/05/05 22:19:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DistGrid.C,v 1.5 2006/04/24 21:35:39 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DistGrid.C,v 1.6 2006/05/05 22:19:11 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1403,11 +1403,12 @@ int ESMC_DistGrid::ESMC_DistGridGet(
 //
 // !ARGUMENTS:
 //
-  ESMC_DELayout **delayoutArg,          // out - DELayout object
+  ESMC_DELayout **delayoutArg,     // out - DELayout object
+  int  *patchCountArg,             // out - number of patches in DistGrid
   ESMC_InterfaceInt *patchList,    // out - list of patch ID numbers
-  int  *dimCountArg,                    // out - DistGrid rank
+  int  *dimCountArg,               // out - DistGrid rank
   ESMC_InterfaceInt *dimExtentArg, // out - extents per dim per DE
-  ESMC_Logical *regDecompFlagArg        // out - flag indicating regular decomp.
+  ESMC_Logical *regDecompFlagArg   // out - flag indicating regular decomp.
   ){    
 //
 // !DESCRIPTION:
@@ -1428,6 +1429,8 @@ int ESMC_DistGrid::ESMC_DistGridGet(
   // fill simple return values
   if (delayoutArg != NULL)
     *delayoutArg = delayout;
+  if (patchCountArg != ESMC_NULL_POINTER)
+    *patchCountArg = patchCount;
   if (dimCountArg != ESMC_NULL_POINTER)
     *dimCountArg = dimCount;
   if (regDecompFlagArg != ESMC_NULL_POINTER)
@@ -1460,6 +1463,23 @@ int ESMC_DistGrid::ESMC_DistGridGet(
         &(dimExtent[i*dimCount]), sizeof(int)*dimCount);
   }
   
+  // fill patchList
+  if (patchList != NULL){
+    // patchList was provided -> do some error checking
+    if (patchList->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- patchList array must be of rank 1", rc);
+      return localrc;
+    }
+    if (patchList->extent[0] < deCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- 1st dimension of patchList array must be of size 'deCount'", rc);
+      return localrc;
+    }
+    // fill in values
+    memcpy(patchList->array, patchDeLookup, sizeof(int)*deCount);
+  }
+
   // return successfully
   return ESMF_SUCCESS;
 }
@@ -1623,12 +1643,12 @@ int ESMC_DistGrid::ESMC_DistGridGetSequenceIndex(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DistGridGetDe()"
+#define ESMC_METHOD "ESMC_DistGridGetSequenceDe()"
 //BOP
-// !IROUTINE:  ESMC_DistGridGetDe
+// !IROUTINE:  ESMC_DistGridGetSequenceDe
 //
 // !INTERFACE:
-int ESMC_DistGrid::ESMC_DistGridGetDe(
+int ESMC_DistGrid::ESMC_DistGridGetSequenceDe(
 //
 // !RETURN VALUE:
 //    int DE that covers sequential index
@@ -1703,6 +1723,58 @@ int ESMC_DistGrid::ESMC_DistGridGetDe(
   }
     
   return de;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridGetPatchMinMaxCorner()"
+//BOP
+// !IROUTINE:  ESMC_DistGridGetPatchMinMaxCorner
+//
+// !INTERFACE:
+int ESMC_DistGrid::ESMC_DistGridGetPatchMinMaxCorner(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  int patch,                            // in  - DE   = {1, ..., patchCount}
+  int *minCornerArg,                    // out
+  int *maxCornerArg                     // out
+  ){    
+//
+// !DESCRIPTION:
+//    Get information about a DistGrid object
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int localrc;                // automatic variable for local return code
+  int *rc = &localrc;         // pointer to localrc
+  int status;                 // local error status
+
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  if (rc!=NULL)
+    *rc = ESMF_FAILURE;
+  
+  if (patch < 1 || patch > patchCount){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_FAILURE,
+      "- Specified patch out of bounds", rc);
+    return localrc;
+  }
+
+  //
+  if (minCornerArg)
+    memcpy(minCornerArg, &minCorner[(patch-1)*dimCount], dimCount*sizeof(int));
+  if (maxCornerArg)
+    memcpy(maxCornerArg, &maxCorner[(patch-1)*dimCount], dimCount*sizeof(int));
+  
+  // return successfully
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 

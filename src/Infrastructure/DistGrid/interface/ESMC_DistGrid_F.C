@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid_F.C,v 1.8 2006/04/19 19:25:03 theurich Exp $
+// $Id: ESMC_DistGrid_F.C,v 1.9 2006/05/05 22:19:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -163,7 +163,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_distgridget)(ESMC_DistGrid **ptr, ESMC_DELayout **delayout,
-    ESMC_InterfaceInt **patchList, int *dimCount,
+    int *patchCount, ESMC_InterfaceInt **patchList, int *dimCount,
     ESMC_InterfaceInt **dimExtent, ESMC_Logical *regDecompFlag, int *rc){
     ESMC_DELayout **opt_delayout;
 #undef  ESMC_METHOD
@@ -174,7 +174,7 @@ extern "C" {
     else opt_delayout = delayout;
     // call into C++, dealing with optional arguments 
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DistGridGet(
-      opt_delayout, *patchList,
+      opt_delayout, ESMC_NOT_PRESENT_FILTER(patchCount), *patchList,
       ESMC_NOT_PRESENT_FILTER(dimCount),
       *dimExtent,
       ESMC_NOT_PRESENT_FILTER(regDecompFlag)), 

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.5 2006/04/19 19:57:43 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.6 2006/05/05 22:19:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.5 2006/04/19 19:57:43 theurich Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.6 2006/05/05 22:19:11 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2074,12 +2074,13 @@ contains
 ! !IROUTINE: ESMF_DistGridGet - Get information about DistGrid object
 
 ! !INTERFACE:
-  subroutine ESMF_DistGridGet(distgrid, delayout, patchList, dimCount, &
-    dimExtent, regDecompFlag, rc)
+  subroutine ESMF_DistGridGet(distgrid, delayout, patchCount, patchList, &
+    dimCount, dimExtent, regDecompFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),    intent(in)            :: distgrid
     type(ESMF_DELayout),    intent(out), optional :: delayout
+    integer,                intent(out), optional :: patchCount
     integer,                intent(out), optional :: patchList(:)
     integer,                intent(out), optional :: dimCount
     integer,                intent(out), optional :: dimExtent(:,:)
@@ -2097,6 +2098,9 @@ contains
 !     \item[{[delayout]}]
 !        Upon return this holds the {\tt ESMF\_DELayout} object associated with
 !        this DistGrid object.
+!     \item[{[patchCount]}]
+!        Upon return this holds the number of patches the DistGrid object is
+!        composed of.
 !     \item[{[patchList]}]
 !        Upon return this holds a list of patch id numbers, one for each DE.
 !     \item[{[dimCount]}]
@@ -2133,8 +2137,8 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridGet(distgrid, delayout, patchListArg, dimCount, &
-      dimExtentArg, regDecompFlag, status)
+    call c_ESMC_DistGridGet(distgrid, delayout, patchCount, patchListArg, &
+      dimCount, dimExtentArg, regDecompFlag, status)
     if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
