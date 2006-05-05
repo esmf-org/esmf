@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.33 2006/05/04 03:35:49 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.34 2006/05/05 22:22:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -186,7 +186,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.33 2006/05/04 03:35:49 theurich Exp $'
+      '$Id: ESMF_Array.F90,v 1.34 2006/05/05 22:22:17 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1254,16 +1254,17 @@ contains
 ! !IROUTINE: ESMF_ArrayGetHalo - Get information about a stored halo operation
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_Get()
   subroutine ESMF_ArrayGetHalo(array, routehandle, regionflag, &
     haloLDepth, haloUDepth, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),            intent(in)             :: array
-    type(ESMF_RouteHandle),         intent(in)             :: routehandle
-    type(ESMF_RegionFlag),          intent(out),  optional :: regionflag
-    integer,                        intent(out),  optional :: haloLDepth(:)
-    integer,                        intent(out),  optional :: haloUDepth(:)
-    integer,                        intent(out),  optional :: rc  
+    type(ESMF_Array),       intent(in)             :: array
+    type(ESMF_RouteHandle), intent(in)             :: routehandle
+    type(ESMF_RegionFlag),  intent(out),  optional :: regionflag
+    integer,                intent(out),  optional :: haloLDepth(:)
+    integer,                intent(out),  optional :: haloUDepth(:)
+    integer,                intent(out),  optional :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -1311,6 +1312,7 @@ contains
 ! !IROUTINE: ESMF_ArrayGetFarray - Get Fortran90 pointer to memory region
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_Get()
   subroutine ESMF_ArrayGetFarray2R8(array, farrayPtr, rc)
 !
 ! !ARGUMENTS:
@@ -1329,10 +1331,11 @@ contains
 !     \begin{description}
 !     \item[array] 
 !        Queried {\tt ESMF\_Array} object.
-!     \item[{[larrayRef]}] 
-!        Returned ESMF\_LocalArray holding reference to PET-local allocation.
+!     \item[{[farrayPtr]}] 
+!        Upon return {\tt farrayPtr} points to the DE-local data allocation of
+!        {\tt array}.
 !     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
@@ -1357,7 +1360,7 @@ contains
     ! check that there is exactly one DE associated with this PET
     if (localDeCount /= 1) then
       call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, &
-        "Uninitialized Grid argument", &
+        "- Multiple DEs per PET prohibits request", &
         ESMF_CONTEXT, rc)
       return
     endif
@@ -1380,12 +1383,13 @@ contains
 ! !IROUTINE: ESMF_ArrayGetFarray - Get Fortran90 pointer to memory region
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_Get()
   subroutine ESMF_ArrayGetFarray3R8(array, farrayPtr, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)            :: array
-    real(ESMF_KIND_R8), pointer                          :: farrayPtr(:,:,:)
-    integer,                       intent(out), optional :: rc  
+    real(ESMF_KIND_R8), pointer                       :: farrayPtr(:,:,:)
+    integer,                    intent(out), optional :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -1398,16 +1402,47 @@ contains
 !     \begin{description}
 !     \item[array] 
 !        Queried {\tt ESMF\_Array} object.
-!     \item[{[larrayRef]}] 
-!        Returned ESMF\_LocalArray holding reference to PET-local allocation.
+!     \item[{[farrayPtr]}] 
+!        Upon return {\tt farrayPtr} points to the DE-local data allocation of
+!        {\tt array}.
 !     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer                             :: status         ! local error status
+    type(ESMF_DELayout)                 :: delayout
+    integer                             :: localDeCount
+    type(ESMF_LocalArray), allocatable  :: larrayList(:)
+    
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+    
+    ! use general Get() method to obtain information
+    call ESMF_ArrayGet(array, delayout=delayout, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! check that there is exactly one DE associated with this PET
+    if (localDeCount /= 1) then
+      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, &
+        "- Multiple DEs per PET prohibits request", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
+    allocate(larrayList(localDeCount))
+    call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
+    call ESMF_LocalArrayGetData(larrayList(1), farrayPtr, ESMF_DATA_REF, rc=rc)
+    deallocate(larrayList)
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    
   end subroutine ESMF_ArrayGetFarray3R8
 !------------------------------------------------------------------------------
 
@@ -1419,6 +1454,7 @@ contains
 ! !IROUTINE: ESMF_ArrayGetLarray - Get Array internals
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_Get()
   subroutine ESMF_ArrayGetLarray(array, larray, rc)
 !
 ! !ARGUMENTS:
@@ -1437,10 +1473,11 @@ contains
 !     \begin{description}
 !     \item[array] 
 !        Queried {\tt ESMF\_Array} object.
-!     \item[larrayRef] 
-!        Returned ESMF\_LocalArray holding reference to PET-local allocation.
+!     \item[larray] 
+!        Upon return {\tt larray} refers to the DE-local data allocation of
+!        {\tt array}.
 !     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
@@ -1488,6 +1525,7 @@ contains
 ! !IROUTINE: ESMF_ArrayGetTotalCellMask1D - Get Array internals for local DE
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_Get()
   subroutine ESMF_ArrayGetTotalCellMask1D(array, routehandlelist, localDe, &
     totalCellMask, rc)
 !
@@ -1522,6 +1560,7 @@ contains
 ! !IROUTINE: ESMF_ArrayGetTotalCellMask2D - Get Array internals for local DE
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_Get()
   subroutine ESMF_ArrayGetTotalCellMask2D(array, routehandlelist, localDe, &
     totalCellMask, rc)
 !
@@ -1556,6 +1595,7 @@ contains
 ! !IROUTINE: ESMF_ArrayGetTotalCellMask3D - Get Array internals for local DE
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_Get()
   subroutine ESMF_ArrayGetTotalCellMask3D(array, routehandlelist, localDe, &
     totalCellMask, rc)
 !

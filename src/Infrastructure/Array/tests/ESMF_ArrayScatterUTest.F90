@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.2 2006/05/04 03:35:49 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.3 2006/05/05 22:22:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.2 2006/05/04 03:35:49 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.3 2006/05/05 22:22:17 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -49,6 +49,7 @@ program ESMF_ArrayScatterUTest
   character(ESMF_MAXSTR) :: name
 
   !LOCAL VARIABLES:
+  real(ESMF_KIND_R8), parameter :: double_min = 1d-37
   type(ESMF_VM):: vm
   integer:: petCount, localPet, i, j
   type(ESMF_ArraySpec)  :: arrayspec
@@ -56,6 +57,11 @@ program ESMF_ArrayScatterUTest
   type(ESMF_Array)      :: array
   real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)     ! matching F90 array pointer
   real(ESMF_KIND_R8), allocatable :: srcfarray(:,:)
+#ifdef ESMF_EXHAUSTIVE
+  integer:: k, kk
+  real(ESMF_KIND_R8), pointer :: farrayPtr3d(:,:,:) ! matching F90 array pointer
+  real(ESMF_KIND_R8), allocatable :: srcfarray3d(:,:,:)
+#endif
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -66,42 +72,42 @@ program ESMF_ArrayScatterUTest
 ! added to allow a script to count the number and types of unit tests.
 !------------------------------------------------------------------------------- 
 
+  !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
+  !------------------------------------------------------------------------
   
+  !------------------------------------------------------------------------
   ! preparations
-
   call ESMF_VMGetGlobal(vm, rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
-      
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R8, rank=2, &
     rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
     regDecomp=(/2,2/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     indexflag=ESMF_INDEX_GLOBAL, rc=rc)
-
-!  call ESMF_ArrayPrint(array)
-
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!call ESMF_ArrayPrint(array)
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
-  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   farrayPtr = real(localPet)  ! initialize each DE-local data chunk of Array
 !print *, "farrayPtr:", farrayPtr
-  
   ! prepare srcfarray on all PETs -> serves as ref. in comparison after scatter
   allocate(srcfarray(1:15, 1:23))
   do j=1, 23
     do i=1, 15
-      srcfarray(i,j) = 123. * sin(real(i)) + 321. * cos(real(j))
+      srcfarray(i,j) = 123.*sin(real(i)) + 321.*cos(real(j))
     enddo
   enddo
-  
 !print *, "srcfarray:", srcfarray
-
-
   !------------------------------------------------------------------------
   !NEX_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "ArrayScatter() Test"
+  write(name, *) "2D ArrayScatter() Test"
   call ESMF_ArrayScatter(array, srcfarray, rootPet=0, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -109,11 +115,12 @@ program ESMF_ArrayScatterUTest
   !NEX_UTest
   ! Verify srcfarray data after scatter
   write(failMsg, *) "Source data was modified."
-  write(name, *) "Verifying srcfarray data after scatter Test"
+  write(name, *) "Verifying srcfarray data after 2D ArrayScatter() Test"
   rc = ESMF_SUCCESS
   do j=1, 23
     do i=1, 15
-      if (srcfarray(i,j)/=123. * sin(real(i)) + 321. * cos(real(j))) &
+      if (abs(srcfarray(i,j) &
+        - (123.*sin(real(i)) + 321.*cos(real(j)))) > double_min) &
         rc = ESMF_FAILURE
     enddo
   enddo
@@ -123,18 +130,104 @@ program ESMF_ArrayScatterUTest
   !NEX_UTest
   ! Verify Array data after scatter
   write(failMsg, *) "Array data wrong."
-  write(name, *) "Verifying Array data after scatter Test"
+  write(name, *) "Verifying Array data after 2D ArrayScatter() Test"
   rc = ESMF_SUCCESS
   do j=lbound(farrayPtr,2), ubound(farrayPtr,2)
     do i=lbound(farrayPtr,1), ubound(farrayPtr,1)
-      if (farrayPtr(i,j) /= srcfarray(i,j)) rc = ESMF_FAILURE
+      if (abs(farrayPtr(i,j) - srcfarray(i,j)) > double_min) rc = ESMF_FAILURE
+    enddo
+  enddo
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  ! cleanup  
+  call ESMF_ArrayDestroy(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  deallocate(srcfarray)
+  
+#ifdef ESMF_EXHAUSTIVE
+  !------------------------------------------------------------------------
+  ! preparations for testing ArrayScatter() for a 
+  ! 2D+1 Array, i.e. an Array with 3D data rank but 2D decomposition
+  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R8, rank=3, &
+    rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_GLOBAL, lbounds=(/-5/), ubounds=(/4/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!call ESMF_ArrayPrint(array)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3d, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  farrayPtr3d = real(localPet)  ! initialize each DE-local data chunk of Array
+!print *, "farrayPtr3d:", farrayPtr3d
+  ! prepare srcfarray on all PETs -> serves as ref. in comparison after scatter
+  allocate(srcfarray3d(1:15, 1:23, 10))
+  do k=lbound(srcfarray3d,3), ubound(srcfarray3d,3)
+    do j=lbound(srcfarray3d,2), ubound(srcfarray3d,2)
+      do i=lbound(srcfarray3d,1), ubound(srcfarray3d,1)
+        srcfarray3d(i,j,k) = 123.*sin(real(i)) + 321.*cos(real(j)) + 20.*real(k)
+      enddo
+    enddo
+  enddo
+!print *, "srcfarray3d:", srcfarray3d
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "2D+1 ArrayScatter() Test"
+  call ESMF_ArrayScatter(array, srcfarray3d, rootPet=0, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  ! Verify srcfarray3d data after scatter
+  write(failMsg, *) "Source data was modified."
+  write(name, *) "Verifying srcfarray3d data after 2D+1 ArrayScatter() Test"
+  rc = ESMF_SUCCESS
+  do k=lbound(srcfarray3d,3), ubound(srcfarray3d,3)
+    do j=lbound(srcfarray3d,2), ubound(srcfarray3d,2)
+      do i=lbound(srcfarray3d,1), ubound(srcfarray3d,1)
+        if (abs(srcfarray3d(i,j,k) &
+          - (123.*sin(real(i)) + 321.*cos(real(j)) + 20.*real(k))) >double_min)&
+          rc = ESMF_FAILURE
+        enddo
     enddo
   enddo
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+  !------------------------------------------------------------------------
+  !EX_UTest
+  ! Verify Array data after scatter
+  write(failMsg, *) "Array data wrong."
+  write(name, *) "Verifying Array data after 2D+1 ArrayScatter() Test"
+  rc = ESMF_SUCCESS
+  do k=lbound(farrayPtr3d,3), ubound(farrayPtr3d,3)
+    kk = k - lbound(farrayPtr3d,3) + lbound(srcfarray3d,3)
+    do j=lbound(farrayPtr3d,2), ubound(farrayPtr3d,2)
+      do i=lbound(farrayPtr3d,1), ubound(farrayPtr3d,1)
+        if (abs(farrayPtr3d(i,j,k) - srcfarray3d(i,j,kk)) > double_min) then
+          rc = ESMF_FAILURE
+        endif
+      enddo
+    enddo
+  enddo
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+  !------------------------------------------------------------------------
+  ! cleanup  
+  call ESMF_ArrayDestroy(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  deallocate(srcfarray3d)
+#endif
   
+  !------------------------------------------------------------------------
+  ! cleanup  
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  !------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
+  !------------------------------------------------------------------------
 
 
 end program ESMF_ArrayScatterUTest
