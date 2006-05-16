@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.159 2006/04/18 19:11:23 svasquez Exp $
+#  $Id: common.mk,v 1.160 2006/05/16 17:58:12 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1446,7 +1446,7 @@ build_use_test_cases: reqfile_libesmf reqdir_lib chkdir_tests
 	$(MAKE) ACTION=tree_build_use_test_cases tree ; \
 	echo "ESMF use test cases built successfully."
 
-tree_build_use_test_cases: $(USE_TEST_CASES_BUILD)
+tree_build_use_test_cases: chkdir_tests $(USE_TEST_CASES_BUILD)
 
 
 #

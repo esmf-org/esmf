@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.2 2006/03/22 21:42:32 theurich Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.3 2006/05/16 17:58:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -195,7 +195,7 @@ program ESMF_DELayoutWQUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX___UTest Disabled see bug 1489171
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Run work queue without threads Test"
   call ESMF_VMWtime(timeStart)
@@ -220,7 +220,7 @@ program ESMF_DELayoutWQUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
  
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX___UTest Disabled see bug 1489171
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Run work queue with threads Test"
   call ESMF_VMWtime(timeStart)

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.53 2006/05/05 22:22:17 theurich Exp $
+// $Id: ESMC_Array.C,v 1.54 2006/05/16 17:58:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.53 2006/05/05 22:22:17 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Array.C,v 1.54 2006/05/16 17:58:13 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -1299,7 +1299,59 @@ int ESMC_Array::ESMC_ArrayConstruct(
   memcpy(inverseDimmap, inverseDimmapArray, rank * sizeof(int));
   // indexflag
   indexflag = indexflagArg;
+  // determine contiguous flag
+  contiguousFlag = new int[localDeCount];
+  
+  int *dimExtent = new int[dimCount*deCount];
+  int dummyLen[2];
+  dummyLen[0] = dimCount;
+  dummyLen[1] = deCount;
+  ESMC_InterfaceInt *dimExtentArg =
+    new ESMC_InterfaceInt(dimExtent, 2, dummyLen);
+  status = distgrid->ESMC_DistGridGet(NULL, NULL, NULL, NULL, dimExtentArg,
+    NULL);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+    return localrc;
+  delete dimExtentArg;
+  
+  for (int i=0; i<localDeCount; i++){
+    int de = localDeList[i];
+
+    contiguousFlag[i] = 1;  // initialize as contiguous
     
+    for (int jj=0; jj<rank; jj++){
+      int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor dims
+      if (j){
+        // decomposed dimension 
+        --j;  // shift to basis 0
+        if (totalLBound[i*dimCount+j] != exclusiveLBound[i*dimCount+j]
+          || totalUBound[i*dimCount+j] != exclusiveUBound[i*dimCount+j]){
+          contiguousFlag[i] = 0; // reset
+          break;
+        }
+        // obtain indexList for this DE and dim
+        int *indexList = new int[dimExtent[de*dimCount+j]];
+        ESMC_InterfaceInt *indexListArg = new ESMC_InterfaceInt(indexList, 1,
+          &(dimExtent[de*dimCount+j]));
+        status = distgrid->ESMC_DistGridGet(de, j+1, indexListArg);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, 
+          rc)) return localrc;
+        // check if this dim has a contiguous index list
+        for (int k=1; k<dimExtent[de*dimCount+j]; k++){
+          if (indexList[k] != indexList[k-1]+1){
+            contiguousFlag[i] = 0; // reset
+            break;
+          }
+        }
+        // clean-up
+        delete indexListArg;
+        delete indexList;
+      }
+    } // jj
+        
+  }
+  delete [] dimExtent; 
+   
   // return successfully
   return ESMF_SUCCESS;
 }
@@ -1351,6 +1403,7 @@ int ESMC_Array::ESMC_ArrayDestruct(void){
   delete [] vectorDim;
   delete [] dimmap;
   delete [] inverseDimmap;
+  delete [] contiguousFlag;
   
   // return successfully
   return ESMF_SUCCESS;
@@ -1978,6 +2031,12 @@ int ESMC_Array::ESMC_ArrayScatter(
 
   // check consistency of input information: shape = (type, kind, rank, extents)
   int *minCorner, *maxCorner;
+  minCorner = new int[dimCount];
+  maxCorner = new int[dimCount];
+  status = distgrid->ESMC_DistGridGetPatchMinMaxCorner(patch, minCorner,
+    maxCorner);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+    return localrc;
   if (localPet == rootPet){
     if (typeArg != type){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -1994,12 +2053,6 @@ int ESMC_Array::ESMC_ArrayScatter(
         "- Type mismatch between farray argument and Array object", rc);
       return localrc;
     }
-    minCorner = new int[dimCount];
-    maxCorner = new int[dimCount];
-    status = distgrid->ESMC_DistGridGetPatchMinMaxCorner(patch, minCorner,
-      maxCorner);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
-      return localrc;
 //for (int i=0; i<dimCount; i++)
 //  printf("patchExtent[%d] = %d\n", i, maxCorner[i]-minCorner[i]+1);
     int tensorIndex=0;  // reset
@@ -2030,25 +2083,6 @@ int ESMC_Array::ESMC_ArrayScatter(
 
   // prepare for comms
   vmk_commhandle **commh = new vmk_commhandle*; // used by all comm calls
-  
-  // all PETs may be receivers
-  for (int i=0; i<localDeCount; i++){
-    int de = localDeList[i];
-    int cellCount = 1;  // reset
-    for (int j=0; j<dimCount; j++)
-      cellCount *= exclusiveUBound[i*dimCount+j] 
-        - exclusiveLBound[i*dimCount+j] + 1;
-    for (int j=0; j<tensorCount; j++)
-      cellCount *= ubounds[j] - lbounds[j] + 1;
-//printf("gjt in ArrayScatter: receiver DE %d - cellCount: %d \n", 
-//  de, cellCount);
-    *commh = NULL; // invalidate
-    //todo: the following assumes that the exclusive region is contiguous
-    //      actually this should be broken into as many vmk_recv() calls as
-    //      there are contiguous chunks in order to allow for padding around
-    //      exclusive region!!!
-    vm->vmk_recv(larrayBaseAddrList[i], cellCount*dataSize, rootPet, commh);
-  }
   
   // rootPet is the only sender
   char *farray = (char *)farrayArg;
@@ -2144,15 +2178,7 @@ int ESMC_Array::ESMC_ArrayScatter(
           linearIndex += indexList[j][ii[j]];
         }
         
-//        printf("DE = %d  - (", de);
-//        int jjj;
-//        for (jjj=0; jjj<rank-1; jjj++)
-//          printf("%d, ", ii[jjj]);
-//        printf("%d) - linearIndex: %d\n", ii[jjj], linearIndex);
-        
         // copy this element into the contiguous sendBuffer
-//printf("gjt in ArrayScatter: DE %d: copy linearIndex %d to sendBufferIndex %d, dataSize=%d\n", de, linearIndex, sendBufferIndex, dataSize);
-        
         if (indexContigFlag[0]){
           // contiguous data in first dimension
           memcpy(sendBuffer[i]+sendBufferIndex*dataSize,
@@ -2166,7 +2192,7 @@ int ESMC_Array::ESMC_ArrayScatter(
           ++ii[0];
           ++sendBufferIndex;
         }
-        
+                
         // multi-dim index increment
         for (int j=0; j<rank-1; j++){
           if (ii[j] == iiEnd[j]){
@@ -2192,16 +2218,181 @@ int ESMC_Array::ESMC_ArrayScatter(
     delete [] iiEnd;
   }
   
+    
+  // all PETs may be receivers
+  char **recvBuffer = new char*[localDeCount];
+  for (int i=0; i<localDeCount; i++){
+    int de = localDeList[i];
+    int cellCount = 1;  // reset
+    for (int j=0; j<dimCount; j++)
+      cellCount *= exclusiveUBound[i*dimCount+j] 
+        - exclusiveLBound[i*dimCount+j] + 1;
+    for (int j=0; j<tensorCount; j++)
+      cellCount *= ubounds[j] - lbounds[j] + 1;
+//printf("gjt in ArrayScatter: receiver DE %d - cellCount: %d \n", 
+//  de, cellCount);
+    recvBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
+    if (!contiguousFlag[i])
+      recvBuffer[i] = new char[cellCount*dataSize];
+    *commh = NULL; // invalidate
+    // receive data into recvBuffer
+    vm->vmk_recv(recvBuffer[i], cellCount*dataSize, rootPet, commh);
+  }
+
   // todo: separate receive and send commhandles and separately wait!
   // wait until all the local receives are complete
   // wait until all the local sends are complete
   // for now wait on _all_ outstanding non-blocking comms for this PET
   vm->vmk_waitqueue();
     
+  // distribute received data into non-contiguous exclusive regions
+  for (int i=0; i<localDeCount; i++){
+    int de = localDeList[i];
+    if (!contiguousFlag[i]){
+      // copy contiguous receive buffer into DE-local array segment
+//printf("gjt in ArrayScatter: non-contiguous Array segment copy\n");
+      char *larrayBaseAddr = (char *)larrayBaseAddrList[i];
+      // get dimExtent
+      int *dimExtent = new int[dimCount*deCount];
+      int dummyLen[2];
+      dummyLen[0] = dimCount;
+      dummyLen[1] = deCount;
+      ESMC_InterfaceInt *dimExtentArg =
+        new ESMC_InterfaceInt(dimExtent, 2, dummyLen);
+      status = distgrid->ESMC_DistGridGet(NULL, NULL, NULL, NULL, dimExtentArg,
+        NULL);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+        return localrc;
+      delete dimExtentArg;
+      // get indexList
+      int **indexList = new int*[rank];
+      int tensorIndex=0;  // reset
+      int *indexContigFlag = new int[rank];
+      for (int jj=0; jj<rank; jj++){
+        int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor dims
+        if (j){
+          // decomposed dimension 
+          --j;  // shift to basis 0
+          // obtain indexList for this DE and dim
+          indexList[jj] = new int[dimExtent[de*dimCount+j]];
+          ESMC_InterfaceInt *indexListArg =
+            new ESMC_InterfaceInt(indexList[jj], 1,
+              &(dimExtent[de*dimCount+j]));
+          status = distgrid->ESMC_DistGridGet(de, j+1, indexListArg);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, 
+            rc)) return localrc;
+          // shift basis -> basis 0
+          for (int k=0; k<dimExtent[de*dimCount+j]; k++)
+            indexList[jj][k] -= minCorner[j];
+          // check that this dim has a contiguous index list
+          indexContigFlag[jj] = 1; // set
+          for (int k=1; k<dimExtent[de*dimCount+j]; k++){
+            if (indexList[jj][k] != indexList[jj][k-1]+1){
+              indexContigFlag[jj] = 0; // reset
+              break;
+            }
+          }
+          // clean-up
+          delete indexListArg;
+        }else{
+          // tensor dimension
+          int extent = ubounds[tensorIndex] - lbounds[tensorIndex] + 1;
+          indexList[jj] = new int[extent];
+          for (int k=0; k<extent; k++)
+            indexList[jj][k] = k;   // basis 0
+          indexContigFlag[jj] = 1;  // set
+          ++tensorIndex;
+        }
+      } // jj      
+      // reset counters
+      int *ii = new int[rank];        // index tuple basis 0
+      int *iiSrt = new int[rank];
+      int *iiEnd = new int[rank];
+      tensorIndex=0;  // reset
+      for (int jj=0; jj<rank; jj++){
+        int j = inverseDimmap[jj];// j is dimIndex basis 1, or 0 for tensor dims
+        if (j){
+          // decomposed dimension 
+          --j;  // shift to basis 0
+          iiSrt[jj] = exclusiveLBound[i*dimCount+j] - totalLBound[i*dimCount+j];
+          iiEnd[jj] = exclusiveUBound[i*dimCount+j] - totalLBound[i*dimCount+j]
+            + 1;
+        }else{
+          // tensor dimension
+          iiSrt[jj] = 0;
+          iiEnd[jj] = ubounds[tensorIndex] - lbounds[tensorIndex] + 1;
+          ++tensorIndex;
+        }
+        ii[jj] = iiSrt[jj];
+      }
+      // loop over all cells in exclusive region for this DE and memcpy data
+      int recvBufferIndex = 0;  // reset
+      while(ii[rank-1] < iiEnd[rank-1]){        
+        // determine linear index for this cell into larrayBaseAddrList[i]
+        int linearIndex = ii[rank-1];  // init
+        for (int jj=rank-2; jj>=0; jj--){
+          int j = inverseDimmap[jj];
+          if (j){
+            // decomposed dimension 
+            --j;  // shift to basis 0
+            linearIndex *= totalUBound[i*dimCount+j]
+              - totalLBound[i*dimCount+j] + 1;
+          }else{
+            // tensor dimension
+            linearIndex *= counts[jj];
+          }
+          linearIndex += ii[jj];
+        }
+        
+//        printf("DE = %d  - (", de);
+//        int jjj;
+//        for (jjj=0; jjj<rank-1; jjj++)
+//          printf("%d, ", ii[jjj]);
+//        printf("%d) - linearIndex in Excl.Region: %d\n", ii[jjj], linearIndex);
+        
+        // copy this element from the contiguous recvBuffer into excl. region
+        if (indexContigFlag[0]){
+          // contiguous data in first dimension
+          memcpy(larrayBaseAddr+linearIndex*dataSize,
+            recvBuffer[i]+recvBufferIndex*dataSize, 
+              (iiEnd[0]-iiSrt[0])*dataSize);
+          ii[0] = iiEnd[0];
+          recvBufferIndex += iiEnd[0] - iiSrt[0];
+        }else{
+          // non-contiguous data in first dimension
+          memcpy(larrayBaseAddr+linearIndex*dataSize,
+            recvBuffer[i]+recvBufferIndex*dataSize, dataSize);
+          ++ii[0];
+          ++recvBufferIndex;
+        }
+        
+        // multi-dim index increment
+        for (int j=0; j<rank-1; j++){
+          if (ii[j] == iiEnd[j]){
+            ii[j] = iiSrt[j];  // reset
+            ++ii[j+1];
+          }
+        }
+      } // while
+
+      // clean-up
+      delete [] recvBuffer[i];
+      delete [] ii;
+      delete [] iiEnd;
+      delete [] iiSrt;
+      for (int j=0; j<rank; j++)
+        delete [] indexList[j];
+      delete [] indexList;
+      delete [] indexContigFlag;
+      delete [] dimExtent;
+    } // if contig
+  } // i
+    
   // garbage collection
+  delete [] minCorner;
+  delete [] maxCorner;
+  delete [] recvBuffer;
   if (localPet == rootPet){
-    delete [] minCorner;
-    delete [] maxCorner;
     for (int i=0; i<deCount; i++)
       delete [] sendBuffer[i];
     delete [] sendBuffer;

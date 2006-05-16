@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.4 2006/05/03 04:47:31 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.5 2006/05/16 17:58:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -66,6 +66,8 @@ program ESMF_ArrayEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+  if (petCount /= 4) goto 10 ! TODO: use EXAMPLES_MULTI_ONLY once available
   
 !BOE
 ! \subsubsection{Array creation with automatic memory allocation}
@@ -555,14 +557,15 @@ program ESMF_ArrayEx
     enddo
   enddo
 !EOC
-!BOE
 
   deallocate(larrayList)
+  
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 !!!! UNTIL FURTHER IMPLEMENTATION SKIP SECTIONS OF THIS EXAMPLE >>>>>>>>>>>>>>>>
 #ifdef SKIP   
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+!BOE
 ! 
 ! The index space topology of this example is very simple. The DistGrid is
 ! defined by a single LR patch and does not contain any extra connections.
@@ -980,10 +983,11 @@ program ESMF_ArrayEx
   call ESMF_ArrayDestroy(array, rc=rc) ! finally destroy the array object
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
+
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #endif
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!BOE
 !
 ! \subsubsection{SparseMatMul communication}
 ! 
@@ -1578,13 +1582,11 @@ program ESMF_ArrayEx
   call ESMF_ArrayDestroy(array1, rc=rc)
   call ESMF_ArrayDestroy(array2, rc=rc)
 !EOC
-!BOE
-
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #endif
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
+!BOE
 ! \subsubsection{1D and 3D Arrays}
 ! All previous examples were written for the 2D case. There is, however, no
 ! restriction within the Array or DistGrid class that limits the dimensionality
@@ -1780,13 +1782,13 @@ program ESMF_ArrayEx
     
   call ESMF_ArrayPrint(array, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!EOC
     
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 !!!! UNTIL FURTHER IMPLEMENTATION SKIP SECTIONS OF THIS EXAMPLE >>>>>>>>>>>>>>>>
 #ifdef SKIP   
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-!EOC
 !BOE
 ! This will create {\tt array} with 2+1 dimensions, i.e. a 2D DistGrid is used
 ! to describe the index space and decomposition into DEs and an extra Array 
@@ -2050,7 +2052,7 @@ program ESMF_ArrayEx
 #endif
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-
+10 continue
   call ESMF_Finalize(rc=rc)
   
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

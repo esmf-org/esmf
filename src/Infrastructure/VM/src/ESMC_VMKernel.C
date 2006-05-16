@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.66 2006/04/11 18:27:03 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.67 2006/05/16 17:58:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -249,7 +249,11 @@ void ESMC_VMK::vmk_init(void){
   // initialize the physical machine and a default (all MPI) virtual machine
   // initialize signal handling -> this MUST happen before MPI_Init is called!!
   struct sigaction action;
+#ifdef _SX
+  action.sa_handler = (void (*)())SIG_DFL;
+#else
   action.sa_handler = SIG_DFL;
+#endif
   sigemptyset (&(action.sa_mask));
   sigaction(VM_SIG1, &action, NULL);  // restore default handle for VM_SIG1
   sigset_t sigs_to_block;
@@ -344,7 +348,11 @@ void ESMC_VMK::vmk_init(void){
   for (int i=0; i<ncores; i++){
     cpuid[i]=i;                 // hardcoded assumption of single-core CPUs
     if (i==rank){
+#ifdef _SX
+      temp_ssiid[i]=i;
+#else
       temp_ssiid[i]=gethostid();
+#endif
     }
     MPI_Bcast(&temp_ssiid[i], sizeof(long int), MPI_BYTE, i, mpi_c);
   }
@@ -3855,7 +3863,10 @@ void ESMC_VMK::vmk_wait(vmk_commhandle **commhandle, int nanopause){
             if (mpi_mutex_flag)
               pthread_mutex_unlock(pth_mutex);
             if (completeFlag) break;
+#ifdef _SX
+#else
             nanosleep(&dt, NULL);
+#endif
           }
         }else{
           if (mpi_mutex_flag)
@@ -4085,5 +4096,3 @@ void sync_reset(shmsync *shms){
   for (int i=0; i<SYNC_NBUFFERS; i++)
     *(shms->buffer_done[i]) = 0;
 }
-
-

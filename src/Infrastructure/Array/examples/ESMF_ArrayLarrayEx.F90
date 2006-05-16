@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayLarrayEx.F90,v 1.1 2006/05/03 04:47:31 theurich Exp $
+! $Id: ESMF_ArrayLarrayEx.F90,v 1.2 2006/05/16 17:58:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -65,6 +65,7 @@ program ESMF_ArrayLarrayEx
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
+  if (petCount /= 4) goto 10 ! TODO: use EXAMPLES_MULTI_ONLY once available
 !EOC
 !BOE
 ! DistGrid and array allocation remains unchanged.
@@ -282,11 +283,12 @@ program ESMF_ArrayLarrayEx
 !BOE
 ! With that ESMF can be shut down cleanly.
 !EOE
+10 continue
 !BOC
 
-    
   call ESMF_Finalize(rc=rc)
   
+!EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
     print *, "PASS: ESMF_ArrayLarrayEx.F90"
@@ -294,5 +296,6 @@ program ESMF_ArrayLarrayEx
     print *, "FAIL: ESMF_ArrayLarrayEx.F90"
   endif
 
+!BOC
 end program
 !EOC

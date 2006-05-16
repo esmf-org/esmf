@@ -1,9 +1,14 @@
-# $Id: build_rules.mk,v 1.6 2006/04/12 17:40:53 svasquez Exp $
+# $Id: build_rules.mk,v 1.7 2006/05/16 17:58:13 theurich Exp $
 # 
 #  NEC SX build, cross compiler on a Linux front end
 #
 
 export ESMF_PREC := 64
+
+
+AR = sxar
+LD = sxld
+
 
 #
 # Default MPI setting.
@@ -79,7 +84,7 @@ C_CC		   = sxmpic++ -Xa
 C_CXX		   = sxmpic++ -K exceptions
 C_FC		   = sxmpif90 -EP -dW
 
-C_CLINKER	   = sxmpic++ -Xa
+C_CLINKER	   = sxmpic++ 
 C_FLINKER	   = sxmpif90
 
 #
@@ -87,8 +92,8 @@ C_CCV              = sxmpic++ -Xa -V
 C_CXXV		   = sxmpic++ -K exceptions -V
 C_FCV		   = sxmpif90 -EP -dW -V
 
-C_CXXF90LIBS       =
-C_F90CXXLIBS       = -lpthread
+C_CXXF90LIBS       = -lpthread -lf90sxe -lm90sxe -li90sx -lC++_eh -lm
+C_F90CXXLIBS       = -lpthread -lC++_eh -lcpp
 
 endif
 
@@ -102,5 +107,3 @@ PARCH		   = sxcross
 # second to the proper link/load flags to create a shared lib.
 SL_LIBS_TO_MAKE =
 C_SL_LIBOPTS  =
-
-

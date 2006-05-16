@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2006/03/03 21:52:47 nscollins Exp $ 
+# $Id: makefile,v 1.17 2006/05/16 17:58:13 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -25,7 +25,7 @@ TESTS_RUN     = RUN_ESMF_GridUTest \
                 RUN_ESMF_GridCreateUTest
 
 TESTS_RUN_UNI = RUN_ESMF_GridUTestUNI \
-                RUN_ESMF_GridWrapUTest \
+                RUN_ESMF_GridWrapUTestUNI \
                 RUN_ESMF_GridCreateUTestUNI
 
 

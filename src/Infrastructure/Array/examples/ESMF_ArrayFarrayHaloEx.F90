@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.1 2006/05/03 04:47:31 theurich Exp $
+! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.2 2006/05/16 17:58:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -44,6 +44,9 @@ program ESMF_ArrayFarrayHaloEx
   real                        :: localSum
   
 !EOC
+  type(ESMF_VM):: vm
+  integer:: petCount
+  
   ! result code
   integer :: finalrc
   
@@ -54,6 +57,13 @@ program ESMF_ArrayFarrayHaloEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
 !EOC
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+  if (petCount /= 4) goto 10 ! TODO: use EXAMPLES_MULTI_ONLY once available
+
 !BOE
 ! The Array is to cover the exact same index space as in the previous
 ! example. Furthermore decomposition and distribution are also kept the same.
@@ -133,7 +143,10 @@ print *, "localSum=", localSum
   call ESMF_ArrayDestroy(array, rc=rc)
   deallocate(farrayA)
   call ESMF_DistGridDestroy(distgrid, rc=rc)
+!EOC
   
+10 continue
+!BOC
   call ESMF_Finalize(rc=rc)
 !EOC
   

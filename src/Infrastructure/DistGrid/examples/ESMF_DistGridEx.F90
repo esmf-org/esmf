@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.3 2006/04/14 18:27:50 theurich Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.4 2006/05/16 17:58:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -42,6 +42,7 @@ program ESMF_DistGridEx
   call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
+  if (petCount /= 4) goto 10 ! TODO: use EXAMPLES_MULTI_ONLY once available
 
 !BOE
 ! \subsubsection{2D DistGrid with simple LR domain and regular
@@ -1194,8 +1195,8 @@ program ESMF_DistGridEx
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
+10 continue
   call ESMF_Finalize(rc=rc)
-  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
     print *, "PASS: ESMF_DistGridEx.F90"

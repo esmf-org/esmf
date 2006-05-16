@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2006/03/22 04:34:41 theurich Exp $ 
+# $Id: makefile,v 1.12 2006/05/16 17:58:13 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -16,14 +16,15 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/DELayout/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_DELayoutUTest \
-                $(ESMF_TESTDIR)/ESMF_DELayoutWorkQueueUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_DELayoutUTest
+#                $(ESMF_TESTDIR)/ESMF_DELayoutWorkQueueUTest
+# disabled see bug 148171
 
-TESTS_RUN     = RUN_ESMF_DELayoutUTest \
-                RUN_ESMF_DELayoutWorkQueueUTest
+TESTS_RUN     = RUN_ESMF_DELayoutUTest
+#                RUN_ESMF_DELayoutWorkQueueUTest
 
-TESTS_RUN_UNI = RUN_ESMF_DELayoutUTestUNI \
-                RUN_ESMF_DELayoutWorkQueueUTestUNI
+TESTS_RUN_UNI = RUN_ESMF_DELayoutUTestUNI
+#                RUN_ESMF_DELayoutWorkQueueUTestUNI
 
 
 include ${ESMF_DIR}/makefile

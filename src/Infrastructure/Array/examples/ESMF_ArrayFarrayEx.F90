@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.1 2006/05/03 19:05:58 theurich Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.2 2006/05/16 17:58:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -101,6 +101,9 @@ program ESMF_ArrayFarrayEx
   integer                     :: rc
   
 !EOC
+  type(ESMF_VM):: vm
+  integer:: petCount
+  
   ! result code
   integer :: finalrc
   
@@ -110,6 +113,13 @@ program ESMF_ArrayFarrayEx
   call ESMF_Initialize(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !EOC
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+  if (petCount /= 4) goto 10 ! TODO: use EXAMPLES_MULTI_ONLY once available
+
 !BOE
 ! On each PET {\tt farrayE} can be accessed directly to initialize the entire
 ! PET-local array.
@@ -246,7 +256,9 @@ program ESMF_ArrayFarrayEx
 
   call ESMF_DistGridDestroy(distgrid, rc=rc) ! destroy the DistGrid
   
-
+!EOC
+10 continue
+!BOC
   call ESMF_Finalize(rc=rc)
 !EOC
   

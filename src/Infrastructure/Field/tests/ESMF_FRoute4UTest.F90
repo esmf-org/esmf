@@ -1,4 +1,4 @@
-! $Id: ESMF_FRoute4UTest.F90,v 1.15 2006/04/25 16:37:13 samsoncheung Exp $
+! $Id: ESMF_FRoute4UTest.F90,v 1.16 2006/05/16 17:58:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRoute4UTest.F90,v 1.15 2006/04/25 16:37:13 samsoncheung Exp $'
+      '$Id: ESMF_FRoute4UTest.F90,v 1.16 2006/05/16 17:58:13 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -236,7 +236,7 @@
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Test requirement FLD1.1.1
       ! Fields may be created by specifying attributes, a grid, data array
       ! dimensions and descriptors, optional masks (e.g. for active cells),
