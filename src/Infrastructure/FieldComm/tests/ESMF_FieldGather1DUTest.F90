@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGather1DUTest.F90,v 1.6 2006/04/25 16:37:13 samsoncheung Exp $
+! $Id: ESMF_FieldGather1DUTest.F90,v 1.7 2006/05/17 22:24:52 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldGather1DUTest.F90,v 1.6 2006/04/25 16:37:13 samsoncheung Exp $'
+      '$Id: ESMF_FieldGather1DUTest.F90,v 1.7 2006/05/17 22:24:52 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -62,6 +62,7 @@
       real(ESMF_KIND_R8), dimension(:,:), pointer :: srcData, gatheredData
       type(ESMF_GridHorzStagger) :: horzStagger
       type(ESMF_ArraySpec) :: arrayspec
+      type(ESMF_InternArray) :: array2
       type(ESMF_Grid)  ::  grid
       type(ESMF_Field) :: field
       type(ESMF_VM):: vm
@@ -189,6 +190,13 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
+      ! Call gather method here, output ends up in array2 on DE0
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Field Gather Test"
+      call ESMF_FieldGather(field, 0, array2, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      if (rc .ne. ESMF_SUCCESS) goto 20
 
 !-----------------------------------------------------------------------------
 
