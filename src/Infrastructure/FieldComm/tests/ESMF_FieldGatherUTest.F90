@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.11 2006/05/17 22:24:38 samsoncheung Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.12 2006/05/18 02:47:40 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldGatherUTest.F90,v 1.11 2006/05/17 22:24:38 samsoncheung Exp $'
+      '$Id: ESMF_FieldGatherUTest.F90,v 1.12 2006/05/18 02:47:40 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -179,8 +179,8 @@
       ! of the array only, not the halo region)
       do j   = 1,localCounts(2)
         do i = 1,localCounts(1)
-          srcData(i+hWidth,j+hWidth) = 10.0 + 5.0*sin(coordX(i,j)/61.0*pi) &
-                                            + 2.0*sin(coordY(i,j)/53.0*pi) 
+          srcData(i,j) = 10.0 + 5.0*sin(coordX(i,j)/61.0*pi) &
+                              + 2.0*sin(coordY(i,j)/53.0*pi) 
         enddo
       enddo
 
@@ -213,7 +213,7 @@
 !-----------------------------------------------------------------------------
       ok = .true.
       if (myDE.eq.0) then
-        call ESMF_FieldGetDataPointer(field, gatheredData, copyflag=ESMF_DATA_REF, rc=rc)
+        call ESMF_InternArrayGetData(array2, gatheredData, ESMF_DATA_REF, rc)
         if (rc .ne. ESMF_SUCCESS) goto 20
         minGather =  9999999.
         maxGather = -9999999.
@@ -221,13 +221,13 @@
           jfld = j+hWidth
           do i = 1,counts(1)-2*hwidth
             ifld = i+hWidth
-            if (minGather.lt.gatheredData(ifld,jfld)) &
+            if (minGather.gt.gatheredData(ifld,jfld)) &
                 minGather =  gatheredData(ifld,jfld)
-            if (maxGather.gt.gatheredData(ifld,jfld)) &
+            if (maxGather.lt.gatheredData(ifld,jfld)) &
                 maxGather =  gatheredData(ifld,jfld)
           enddo
         enddo
-        ok = (minGather.ge.10.0 .AND. maxGather.le.32.0)
+        ok = (minGather.ge.10.0 .AND. maxGather.le.17.0)
       endif
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not calculate correct results"
