@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.6 2006/05/05 22:19:11 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.7 2006/05/18 15:07:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.6 2006/05/05 22:19:11 theurich Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.7 2006/05/18 15:07:25 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -582,7 +582,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateRDFA()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridCreateRDFA - Create DistGrid with regular decomposition and fast axis
 
 ! !INTERFACE:
@@ -698,7 +698,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer                 :: status     ! local error status
@@ -789,7 +789,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBFA()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridCreateDBFA - Create DistGrid with DE blocks and fast axis
 
 ! !INTERFACE:
@@ -907,7 +907,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -1162,7 +1162,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBP()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridCreateDBP - Create DistGrid from patch work with regular decomposition
 
 ! !INTERFACE:
@@ -1292,7 +1292,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -1326,7 +1326,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateRDPFA()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridCreateRDPFA - Create DistGrid from patch work with regular decomposition and fast axis
 
 ! !INTERFACE:
@@ -1450,7 +1450,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -1484,7 +1484,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBPFA()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridCreateDBPFA - Create DistGrid from patch work with DE blocks and fast axis
 
 ! !INTERFACE:
@@ -1606,7 +1606,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -2160,7 +2160,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridGetPDe()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridGetPDe - Get DE local information about DistGrid
 
 ! !INTERFACE:
@@ -2196,7 +2196,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -2287,7 +2287,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridGetLinksPDe()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridGetLinksPDe - Get DE local information about links
 
 ! !INTERFACE:
@@ -2331,7 +2331,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -2495,7 +2495,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConnectionTransform()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ConnectionTransform - Construct a connection transform element
 ! !INTERFACE:
   subroutine ESMF_ConnectionTransform(connectionTransform,&
@@ -2548,7 +2548,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code

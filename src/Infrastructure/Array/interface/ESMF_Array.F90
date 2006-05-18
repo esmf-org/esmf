@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.34 2006/05/05 22:22:17 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.35 2006/05/18 15:07:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -186,7 +186,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.34 2006/05/05 22:22:17 theurich Exp $'
+      '$Id: ESMF_Array.F90,v 1.35 2006/05/18 15:07:25 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -1250,7 +1250,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayGetHalo()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayGetHalo - Get information about a stored halo operation
 
 ! !INTERFACE:
@@ -1297,7 +1297,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -1521,7 +1521,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayGetTotalCellMask1D()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayGetTotalCellMask1D - Get Array internals for local DE
 
 ! !INTERFACE:
@@ -1545,7 +1545,7 @@ contains
 !     \item[array] 
 !        Queried {\tt ESMF\_Array} object.
 !     \end{description}
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -1556,7 +1556,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayGetTotalCellMask2D()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayGetTotalCellMask2D - Get Array internals for local DE
 
 ! !INTERFACE:
@@ -1580,7 +1580,7 @@ contains
 !     \item[array] 
 !        Queried {\tt ESMF\_Array} object.
 !     \end{description}
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -1591,7 +1591,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayGetTotalCellMask3D()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayGetTotalCellMask3D - Get Array internals for local DE
 
 ! !INTERFACE:
@@ -1615,7 +1615,7 @@ contains
 !     \item[array] 
 !        Queried {\tt ESMF\_Array} object.
 !     \end{description}
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -1627,7 +1627,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySetAllDecompAllDe()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArraySetAllDecompAllDe - Set Array internals
 
 ! !INTERFACE:
@@ -1667,7 +1667,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -1683,7 +1683,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySetTensorAllDe()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArraySetTensorAllDe - Set Array internals
 
 ! !INTERFACE:
@@ -1727,7 +1727,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -1798,7 +1798,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayGather()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayGather - Gather a Array into a Fortran90 array
 
 ! !INTERFACE:
@@ -1845,7 +1845,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -1867,7 +1867,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayHalo"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayHalo - Halo an Array
 !
 ! !INTERFACE:
@@ -1917,7 +1917,7 @@ contains
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
   end subroutine ESMF_ArrayHalo
 !------------------------------------------------------------------------------
@@ -1926,7 +1926,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayHaloStore"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayHaloStore - Store an ArrayHalo operation
 !
 ! !INTERFACE:
@@ -1981,7 +1981,7 @@ contains
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
   end subroutine ESMF_ArrayHaloStore
 !------------------------------------------------------------------------------
@@ -1990,7 +1990,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayHaloRun"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayHaloRun - Execute an ArrayHalo operation
 !
 ! !INTERFACE:
@@ -2020,7 +2020,7 @@ contains
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
   end subroutine ESMF_ArrayHaloRun
 !------------------------------------------------------------------------------
@@ -2186,7 +2186,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayRedist"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayRedist - Redistribute data from srcArray to dstArray
 !
 ! !INTERFACE:
@@ -2227,7 +2227,7 @@ contains
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
   end subroutine ESMF_ArrayRedist
 !------------------------------------------------------------------------------
@@ -2236,7 +2236,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayRedistStore"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayRedistStore - Store an ArrayRedist() operation
 !
 ! !INTERFACE:
@@ -2272,7 +2272,7 @@ contains
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
   end subroutine ESMF_ArrayRedistStore
 !------------------------------------------------------------------------------
@@ -2281,7 +2281,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayRedistRun"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayRedistRun - Execute a stored ArrayRedist() operation
 !
 ! !INTERFACE:
@@ -2313,7 +2313,7 @@ contains
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
   end subroutine ESMF_ArrayRedistRun
 !------------------------------------------------------------------------------
@@ -2322,7 +2322,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayReduce()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayReduce
 
 ! !INTERFACE:
@@ -2367,7 +2367,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -2389,7 +2389,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayReduce()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayReduce
 
 ! !INTERFACE:
@@ -2450,7 +2450,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -3166,7 +3166,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleCreate"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayBundleCreate - Create an ArrayBundle from a list of Arrays
 !
 ! !INTERFACE:
@@ -3199,7 +3199,7 @@ contains
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
   end function ESMF_ArrayBundleCreate
 !------------------------------------------------------------------------------
@@ -3208,7 +3208,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleDestroy()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayBundleDestroy - Destroy ArrayBundle object
 
 ! !INTERFACE:
@@ -3232,7 +3232,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -3255,7 +3255,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleGet"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayBundleGet - Get list of Arrays out of an ArrayBundle
 !
 ! !INTERFACE:
@@ -3283,7 +3283,7 @@ contains
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
   end subroutine ESMF_ArrayBundleGet
 !------------------------------------------------------------------------------
@@ -3292,7 +3292,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleHalo"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayBundleHalo - Halo an ArrayBundle
 !
 ! !INTERFACE:
@@ -3346,7 +3346,7 @@ contains
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
   end subroutine ESMF_ArrayBundleHalo
 !------------------------------------------------------------------------------
@@ -3355,7 +3355,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleHaloStore"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayBundleHaloStore - Store an ArrayBundleHalo operation
 !
 ! !INTERFACE:
@@ -3413,7 +3413,7 @@ contains
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
   end subroutine ESMF_ArrayBundleHaloStore
 !------------------------------------------------------------------------------
@@ -3422,7 +3422,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleHaloRun"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayBundleHaloRun - Execute an ArrayBundleHalo operation
 !
 ! !INTERFACE:
@@ -3452,7 +3452,7 @@ contains
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
   end subroutine ESMF_ArrayBundleHaloRun
 !------------------------------------------------------------------------------
@@ -3461,7 +3461,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRedist"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayBundleRedist - Redistribute data from srcArrayBundle to dstArrayBundle
 !
 ! !INTERFACE:
@@ -3504,7 +3504,7 @@ contains
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
   end subroutine ESMF_ArrayBundleRedist
 !------------------------------------------------------------------------------
@@ -3513,7 +3513,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRedistStore"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayBundleRedistStore - Store an ArrayBundleRedist() operation
 !
 ! !INTERFACE:
@@ -3550,7 +3550,7 @@ contains
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
   end subroutine ESMF_ArrayBundleRedistStore
 !------------------------------------------------------------------------------
@@ -3559,7 +3559,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRedistRun"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayBundleRedistRun - Execute a stored ArrayBundleRedist() operation
 !
 ! !INTERFACE:
@@ -3592,7 +3592,7 @@ contains
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
   end subroutine ESMF_ArrayBundleRedistRun
 !------------------------------------------------------------------------------
@@ -3601,7 +3601,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleSparseMatMulStr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayBundleSparseMatMulStr - Store an ArrayBundle sparse matrix multiplication operation
 !
 ! !INTERFACE:
@@ -3661,7 +3661,7 @@ contains
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
   end subroutine ESMF_ArrayBundleSparseMatMulStr
 !------------------------------------------------------------------------------
@@ -3670,7 +3670,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleSparseMatMul"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayBundleSparseMatMul - Execute an ArrayBundle sparse matrix multiplication operation
 !
 ! !INTERFACE:
@@ -3703,7 +3703,7 @@ contains
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
   end subroutine ESMF_ArrayBundleSparseMatMul
 !------------------------------------------------------------------------------
