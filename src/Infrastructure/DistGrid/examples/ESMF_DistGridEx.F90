@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.4 2006/05/16 17:58:13 theurich Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.5 2006/05/18 22:47:35 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -705,7 +705,7 @@ program ESMF_DistGridEx
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-!BOE
+!BOEI
 ! \subsubsection{2D patchwork DistGrid with explicitly defined connections}
 !
 ! This section will demonstrate how the {\tt connectionList} and 
@@ -723,30 +723,30 @@ program ESMF_DistGridEx
 ! have no concept of connections between the patches. In order to form one half of
 ! the cubed sphere topology it is necessary to close two inner edges (between
 ! patch 1 and 2 and between 2 and 3) and one outer edge between patch 1 and 3.
-!EOE
-!BOC
+!EOEI
+!BOCI
   allocate(connectionList(2*2+2,3))  ! (2*dimCount+2, number of connections)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Setup of the first two connectionList elements is straight forward:
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_Connection(connection=connectionList(:,1), &
      patchIndexA=1, patchIndexB=2, positionVector=(/0, 10/), rc=rc)   ! 1 <-> 2
   call ESMF_Connection(connection=connectionList(:,2), &
      patchIndexA=2, patchIndexB=3, positionVector=(/-10, 0/), rc=rc)  ! 2 <-> 3
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! The connection between patch 1 and 3 is a bit more involved and reflects the 
 ! characteristics of the cubed sphere topology:
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_Connection(connection=connectionList(:,3), &
      patchIndexA=1, patchIndexB=3, positionVector=(/-1, 0/), &
      orientationVector=(/-2, 1/), rc=rc)
-!EOC
+!EOCI
 !
-!BOE
+!BOEI
 ! Besides topology information the {\tt DistGrid} object must also store
 ! information about the operations that are necessary when data is transfered
 ! through patch connections. These transformation rules are in general stagger 
@@ -760,7 +760,7 @@ program ESMF_DistGridEx
 ! each staggering location. Assuming an application with two staggering locations
 ! that are being transformed into each other when going through the connection
 ! the connectionTransformList elements for this example are:
-!BOC
+!BOCI
   allocate(connectionTransformList(5+2,2))  ! (4+2*dimCount, number of transforms)
   call ESMF_ConnectionTransform(connectionTransformList(:,1), &
     connectionIndex=3, direction=0, staggerSrc=1, staggerDst=2, &
@@ -768,8 +768,8 @@ program ESMF_DistGridEx
   call ESMF_ConnectionTransform(connectionTransformList(:,2), &
     connectionIndex=3, direction=0, staggerSrc=2, staggerDst=1, &
     indexOffsetVector=(/+1,0/), signChangeVector=(/-1,+1/))  ! E face -> N face
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! The first {\tt connectionTransformList} element indicates that staggering 
 ! location 1 will map to staggering location 2 when going through connection 3,
 ! which corresponds to a patch 1 to patch 3 interface according to 
@@ -797,22 +797,22 @@ program ESMF_DistGridEx
 ! Finally, the {\tt DistGrid} object with the correct index space topology 
 ! can be created using the {\tt connectionList} and {\tt connectionTransformList} 
 ! arguments in the following way:
-!EOE
-!BOC
+!EOEI
+!BOCI
   distgrid = ESMF_DistGridCreate(minCorner=minCorner, maxCorner=maxCorner, &
     regDecomp=regDecomp, connectionList=connectionList, &
     connectionTransformList=connectionTransformList, rc=rc)
-!EOC  
+!EOCI  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !  call ESMF_DistGridDestroy(distgrid, rc=rc)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOC
+!BOCI
   deallocate(connectionList)
   deallocate(connectionTransformList)
-!EOC  
+!EOCI  
 
 
-!BOE
+!BOEI
 ! \subsubsection{Index space topology around DEs}
 !  
 ! The previous sections detailed how a DistGrid can be created by
@@ -838,31 +838,31 @@ program ESMF_DistGridEx
 ! A first query call is necessary to determine the number of links that
 ! connect to cells in the rim defined by the {\tt lVecInner}, {\tt uVecInner},
 ! {\tt lVecOuter} and {\tt uVecOuter} arguments.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_DistGridGet(distgrid, de=2, staggerLoc=1, &
     lVecInner=(/0,0/), uVecInner=(/0,0/), & ! inner rim edge is same as DE LR box
     lVecOuter=(/-1,-1/), uVecOuter=(/1,1/), & ! outer rim edge is one cell wider than DE LR box
     linkCount=linkCount, rc=rc)
-!EOC
+!EOCI
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
+!BOEI
 ! The value returned for {\tt linkCount} will be 6 because there are six index
 ! space blocks in the 1 cell wide rim around the DE-local region that connect
 ! to exclusive DE-local regions. Now the {\tt linkList} argument can be
 ! allocated and a second query will return the complete information about
 ! the links:
-!EOE
-!BOC
+!EOEI
+!BOCI
   allocate(linkList(5*2+2,6)) ! (5*dimCount+2, linkCount)
   call ESMF_DistGridGet(distgrid, de=2, staggerLoc=1, &
     lVecInner=(/0,0/), uVecInner=(/0,0/), & ! inner rim edge is same as DE LR box
     lVecOuter=(/-1,-1/), uVecOuter=(/1,1/), & ! outer rim edge is one cell wider than DE LR box
     linkCount=linkCount, linkList=linkList, rc=rc)
-!EOC
+!EOCI
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   deallocate(linkList)
-!BOE
+!BOEI
 ! The contents of {\tt linkList} for the above example looks as follows:
 ! \begin{verbatim}
 !  i  |  linkList(:,i)
@@ -875,12 +875,11 @@ program ESMF_DistGridEx
 !  6  |  (/10,5,  10,5,  7,   2,      5,11,    5,11,  1,0,         -1,1/)
 !        (/minC., maxC., pDe, pStLoc, pStrtC., pEndC, pIndexOrder, signChangeVector/)
 ! \end{verbatim}
-!EOE
+!EOEI
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-
-!BOE
+!BOEI
 ! \subsubsection{Flat pseudo global index space}
 ! 
 ! The example of the previous sections showed for the cubed sphere case how a
@@ -895,15 +894,15 @@ program ESMF_DistGridEx
 ! The following call demonstrates the effects of setting the {\tt indexflag}
 ! to {\tt ESMF\_INDEX\_GLOBAL} for the previous three patch example, but
 ! now without explicit connections:
-!EOE
-!BOC
+!EOEI
+!BOCI
   distgrid = ESMF_DistGridCreate(minCorner=minCorner, maxCorner=maxCorner, &
     regDecomp=regDecomp, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
-!EOC  
+!EOCI  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
+!BOEI
 ! When the same {\tt ESMF\_DistGridGet()} call of the previous section is
 ! used on the above defined {\tt DistGrid} object it shows how the global 
 ! index space option affects the index space topology. The contents of 
@@ -924,23 +923,23 @@ program ESMF_DistGridEx
 ! conditions. The following calls demonstrate such a pseudo global index space
 ! topology by imposing periodic boundary conditions along the first dimension 
 ! of patch 1 for the otherwise unchanged previous example:
-!EOE
-!BOC
+!EOEI
+!BOCI
   allocate(connectionList(2*2+2, 1))  ! (2*dimCount+2, number of connections)
   call ESMF_Connection(connection=connectionList(:,1), &
      patchIndexA=1, patchIndexB=1, positionVector=(/10, 0/), rc=rc)
-!EOC
+!EOCI
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOC
+!BOCI
   distgrid = ESMF_DistGridCreate(minCorner=minCorner, maxCorner=maxCorner, &
     regDecomp=regDecomp, indexflag=ESMF_INDEX_GLOBAL, &
     connectionList=connectionList, rc=rc)
-!EOC  
+!EOCI  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   deallocate(connectionList)
-!BOE
+!BOEI
 ! The result of the previous {\tt ESMF\_DistGridGet()} call then contains two
 ! more links:
 ! \begin{verbatim}
@@ -955,25 +954,25 @@ program ESMF_DistGridEx
 !  7  |  (/10,5,  10,5,  1,   1,      20,5,    20,5,  0,1,          1,1/)
 !        (/minC., maxC., pDe, pStLoc, pStrtC., pEndC, pIndexOrder, signChangeVector/)
 ! \end{verbatim}
-!EOE
+!EOEI
   
   
   
-!BOE
+!BOEI
 ! \subsubsection{3D DistGrid and shared DELayout}
 ! 
 ! The APIs of DistGrid and DELayout are both formulated to be general in
 ! rank. In this section a 3D DistGrid will be created that represents a 
 ! single LR domain to show the similarity to the 2D case.
-!EOE
-!BOC
+!EOEI
+!BOCI
   distgrid = ESMF_DistGridCreate(minCorner=(/-10,1,5/), &
     maxCorner=(/10,10,15/), regDecomp=(/3,2,2/), rc=rc)
-!EOC  
+!EOCI  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
+!BOEI
 ! This will decompose the global domain into 3 x 2 x 2 = 12 DEs. The default DE
 ! labeling again follows column major order with respect to the {\tt regDecomp}
 ! argument but can be overwritten by optionally providing {\tt deLabelList}. The
@@ -996,40 +995,40 @@ program ESMF_DistGridEx
 ! during the 3D DistGrid creation and will be deleted when the 3D DistGrid
 ! is destroyed. The order of lines is critical!
 !
-!BOC
+!BOCI
   distgrid3D = ESMF_DistGridCreate(minCorner=(/-10,1,5/), &
     maxCorner=(/10,10,15/), regDecomp=(/3,2,2/), rc=rc)
-!EOC
+!EOCI
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOC
+!BOCI
   call ESMF_DistGridGet(distgrid3D, delayout=delayout, rc=rc)
-!EOC
+!EOCI
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOC
+!BOCI
   distgrid2D = ESMF_DistGridCreate(minCorner=(/1,5/), maxCorner=(/10,15/), &
     regDecomp=(/2,2/), deLabelList=(/1, 4, 7, 10/), delayout=delayout, rc=rc)
-!EOC
+!EOCI
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOC
+!BOCI
   call ESMF_DistGridDestroy(distgrid2D, rc=rc)
-!EOC
+!EOCI
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOC
+!BOCI
   call ESMF_DistGridDestroy(distgrid3D, rc=rc)
-!EOC
+!EOCI
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !
-!BOE
+!BOEI
 ! Using the shared DELayout in the previous example ensures that the data
 ! associated with {\tt distgrid2D} is distributed the same way as the 
 ! interacting portion of the data associated with {\tt distgrid3D}. Ensuring
 ! data locality with shared DELayouts will in most cases be simpler than
 ! going down to the PET level, constructing DELayouts from petMaps
 ! and accomplishing the same.
-!EOE
+!EOEI
 
 
-!BOE
+!BOEI
 ! \subsubsection{Special coordinate queries for regular decompositions}
 ! 
 ! Regular decompositions, i.e. decompositions that specify a {\tt regDecomp}
@@ -1037,11 +1036,11 @@ program ESMF_DistGridEx
 ! coordination to the DEs within its patch. The following lines 
 ! demonstrate how this coordinate information can be obtained by querying 
 ! a DistGrid object.
-!EOE
+!EOEI
   distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/5,5/), &
     regDecomp=(/2,3/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOC
+!BOCI
   call ESMF_DistGridGet(distgrid, dimCount=dimCount, &
     regDecompFlag=regDecompFlag, rc=rc)
   if (regDecompFlag == ESMF_TRUE) then
@@ -1055,7 +1054,7 @@ program ESMF_DistGridEx
     ! this distgrid does not hold a regular decomposition
   endif
     
-!EOC  
+!EOCI  
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 

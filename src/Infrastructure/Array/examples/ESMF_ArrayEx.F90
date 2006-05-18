@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.5 2006/05/16 17:58:13 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.6 2006/05/18 22:47:35 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -565,7 +565,7 @@ program ESMF_ArrayEx
 #ifdef SKIP   
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-!BOE
+!BOEI
 ! 
 ! The index space topology of this example is very simple. The DistGrid is
 ! defined by a single LR patch and does not contain any extra connections.
@@ -640,11 +640,11 @@ program ESMF_ArrayEx
 !
 ! Now a simple halo operation shall be carried out for {\tt array} that updates
 ! all the extra cells in the total region for each DE.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayHalo(array, regionflag=ESMF_REGION_EXCLUSIVE, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! The {\tt regionflag=ESMF\_REGION\_EXCLUSIVE} indicates that the halo operation 
 ! is to be relative to the exclusive region, i.e. it includes computational 
 ! cells as is the case during the spin up phase of some models.
@@ -658,11 +658,11 @@ program ESMF_ArrayEx
 ! Next only the cells outside the computational region shall be updated. This
 ! is the default for ArrayHalo() and the number of arguments that need to be
 ! specified is minimal.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayHalo(array, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! (The same could have been accomplished with calling ArrayHalo() with
 ! {\tt regionflag=ESMF\_REGION\_COMPUTATIONAL}.)
 ! 
@@ -670,11 +670,11 @@ program ESMF_ArrayEx
 ! of the DE-local region. In the following example the {\tt haloLDepth} and 
 ! {\tt haloUDepth} arguments are used to halo a maximum of 1 cell around the
 ! computational region of each DE.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayHalo(array, haloLDepth=(/1,1/), haloUDepth=(/1,1/), rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! It is not an error to request a halo depth greater than some of the DE-local 
 ! total regions can accommodate. This situation must be supported since it is 
 ! possible to define different computational widths and/or total widths for each 
@@ -690,51 +690,51 @@ program ESMF_ArrayEx
 ! ArrayHalo() call and store the information as a precomputed communication
 ! pattern or {\em Route}. A handle to the Route is provided to the user via the 
 ! {\tt routehandle} argument which accepts {\tt ESMF\_RouteHandle} objects.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayHaloStore(array, haloLDepth=(/1,1/), haloUDepth=(/1,1/), &
     routehandle=haloHandle, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! The RouteHandle object {\tt haloHandle} can now be used to invoke the 
 ! associated halo operation with a much reduced overhead. The only input 
 ! ArrayHaloRun() needs is the Array object on which to perform the halo 
 ! operation together with the RouteHandle object.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayHaloRun(array, routehandle=haloHandle, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Multiple halo operations for the same Array object can be stored and are 
 ! available to run when needed. For example a halo update for cells in positive
 ! second dimension of {\tt array} may be stored without loosing the previously
 ! precomputed operation by supplying a separate RouteHandle object.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayHaloStore(array, haloLDepth=(/0,0/), haloUDepth=(/0,1/), &
     routehandle=haloHandle2, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Details of stored halo operations, such as halo depths, are stored within the
 ! Route object referenced by the RouteHandles. This information can be accessed
 ! through the overloaded {\tt ESMF\_ArrayGet()} interface that accepts 
 ! a RouteHandle object in addition to the Array object.
-!EOE
-!BOC
+!EOEI
+!BOCI
   allocate(haloLDepth(2), haloUDepth(2))
   call ESMF_ArrayGet(array, routehandle=haloHandle2, &
     haloLDepth=haloLDepth, haloUDepth=haloUDepth, rc=rc)
   print *, haloLDepth, haloUDepth
   deallocate(haloLDepth, haloUDepth)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Finally the RouteHandles can be used to release the associated Routes.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_RouteHandleRelease(routehandle=haloHandle, rc=rc)
   call ESMF_RouteHandleRelease(routehandle=haloHandle2, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! The Array object used to precompute the Routes can be destroyed before or 
 ! after the Routes have been released.
 !
@@ -756,18 +756,18 @@ program ESMF_ArrayEx
 !
 ! For the {\tt array} object created in the previous section the total cell mask
 ! for DE 1 would need to be allocated as
-!EOE
-!BOC
+!EOEI
+!BOCI
   allocate(totalCellMask(3:8, -3:3))              ! rank=2
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Then, assuming that DE 1 was localDE 1 on the PET issuing the following
 ! call the mask can be obtained in the following manner.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayGet(array, localDe=1, totalCellMask=totalCellMask, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Now the {\tt totalCellMask} variable contains the mask for the total
 ! region for DE 1 for {\tt array}. For the example the mask will contain the
 ! following values:
@@ -824,23 +824,23 @@ program ESMF_ArrayEx
 ! mask specifically for a particular Array communication pattern or a whole
 ! set thereof. The following lines of code demonstrate this aspect for one of 
 ! the Array halo operations used in the previous section.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayHaloStore(array, haloLDepth=(/0,0/), haloUDepth=(/0,1/), &
     routehandle=haloHandle2, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! The same {\tt totalCellMask} variable may be used to obtain the specific total
 ! cell mask. Only difference is that the {\tt routehandle} must be provided
 ! as an additional input parameter. Since specific total cell masks may be 
 ! required as an "OR" over a whole set of communication operations the optional
 ! input parameter is defined as a list of RouteHandles.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayGet(array, routehandlelist=(/haloHandle2/), &
     localDe=1, totalCellMask=totalCellMask, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Now {\tt totalCellMask} holds the total cell mask for {\tt array} specifically
 ! for the Route referenced by {\tt haloHandle2}. For DE1 the output will look
 ! as follows:
@@ -887,14 +887,14 @@ program ESMF_ArrayEx
 ! computational region are affected by {\tt haloHandle2}.
 !
 ! After usage it is the user's responsibility to clean up.
-!EOE
-!BOC
+!EOEI
+!BOCI
   deallocate(totalCellMask)
   call ESMF_RouteHandleRelease(routehandle=haloHandle2, rc=rc)
   call ESMF_ArrayDestroy(array, rc=rc) ! destroy array object
-!EOC  
+!EOCI  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
+!BOEI
 ! 
 !
 !
@@ -911,13 +911,13 @@ program ESMF_ArrayEx
 ! example also shows how the computational region may change during the compute
 ! cycle. Again the same {\tt arrayspec} and {\tt distgrid} arguments as before 
 ! are used.
-!EOE
-!BOC
+!EOEI
+!BOCI
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     totalLWidth=(/3,3/), totalUWidth=(/3,3/), rc=rc)
-!EOC  
+!EOCI  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
+!BOEI
 ! This {\tt array} has DE-local total regions that are three cells wider in 
 ! each direction than the corresponding exclusive region. The default
 ! computational region for each DE is equal to the DE's exclusive region. The
@@ -931,8 +931,8 @@ program ESMF_ArrayEx
 ! compuitational kernel that will access cells from (i-1,j-1) to (i+1,j+1). 
 ! After the computational width has reached 0 a new halo updated needs to be
 ! performed.
-!EOE
-!BOC
+!EOEI
+!BOCI
   do j=1, 10
     call ESMF_ArrayHalo(array, rc=rc)
     do k=2, 0, -1
@@ -941,14 +941,14 @@ program ESMF_ArrayEx
       ! call second_order_kernel(array)  ! will access (i-1) and (i+1) cells
     enddo
   enddo
-!EOC
-!BOC
+!EOCI
+!BOCI
   call ESMF_ArrayDestroy(array, rc=rc) ! finally destroy the array object
-!EOC  
+!EOCI  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
-!EOC
-!BOE
+!BOEI
+!EOCI
+!BOEI
 ! Sometimes it may be desirable to add extra memory padding around the DE-local
 ! data cells, e.g. to prevent false sharing on shared memory architectures. 
 ! For this the total region can be chosen larger than is needed by the 
@@ -960,13 +960,13 @@ program ESMF_ArrayEx
 ! must be used. With that a 5 - 3 = 2 cell wide memory padding has been placed
 ! around the cells used by each DE.
 !
-!EOE
-!BOC
+!EOEI
+!BOCI
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     totalLWidth=(/5,5/), totalUWidth=(/5,5/), rc=rc)
-!EOC  
+!EOCI  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOC
+!BOCI
   do j=1, 10
     call ESMF_ArrayHalo(array, haloLDepth=(/3,3/), haloUDepth=(/3,3/), rc=rc)
     do k=2, 0, -1
@@ -975,13 +975,13 @@ program ESMF_ArrayEx
       ! call second_order_kernel(array)  ! will access (i-1) and (i+1) cells
     enddo
   enddo
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Done, {\tt array} can be destroyed.
-!EOE
-!BOC  
+!EOEI
+!BOCI  
   call ESMF_ArrayDestroy(array, rc=rc) ! finally destroy the array object
-!EOC  
+!EOCI  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -1236,7 +1236,7 @@ program ESMF_ArrayEx
 !!!! UNTIL FURTHER IMPLEMENTATION SKIP SECTIONS OF THIS EXAMPLE >>>>>>>>>>>>>>>>
 #ifdef SKIP   
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-!BOE
+!BOEI
 !
 !
 !
@@ -1300,8 +1300,8 @@ program ESMF_ArrayEx
 ! First a suitable DistGrid must be created to define the index space and its
 ! topology. In this example the index space is a  {\tt 20 x 100} grid with
 ! the second dimension having a periodic boundary.
-!EOE
-!BOC
+!EOEI
+!BOCI
   allocate(connectionList(2*2+2,1))
   call ESMF_ConnectionElementConstruct(connectionElement=connectionList(:,1), &
     patchIndexA=1, patchIndexB=1, &
@@ -1309,8 +1309,8 @@ program ESMF_ArrayEx
   call ESMF_VMGet(vm, petCount=petCount, rc=rc)
   distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/20,100/), &
     regDecomp=(/1,2*petCount/), connectionList=connectionList, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Now {\tt distgrid} defines the index space for the problem. It also contains
 ! the decomposition description and decomposes the index space into twice as
 ! many DEs along the peripheral direction (second dimension) as there are PETs 
@@ -1320,12 +1320,12 @@ program ESMF_ArrayEx
 ! segments for the first quantity defined on {\tt distgrid}. The {\tt arrayspec}
 ! of the previous sections is suitable for a 2D Array of double precision real 
 ! numbers.
-!EOE
-!BOC
+!EOEI
+!BOCI
   array1 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     totalLWidth=(/0,1/), totalUWidth=(/0,1/), staggerLoc=1, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Each DE in {\tt array1} will have allocated enough memory to hold the 
 ! exclusive region of cells (which is determined by the decomposition) plus
 ! a halo of one cell in positive and negative peripheral direction. Furthermore
@@ -1338,12 +1338,12 @@ program ESMF_ArrayEx
 ! decomposition. However, {\tt array2} will have one more cell along the 
 ! negative peripheral direction in its computational region and no extra space
 ! for a halo.
-!EOE
-!BOC
+!EOEI
+!BOCI
   array2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     computationalLWidth=(/0,1/), staggerLoc=2, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! This puts {\tt array2} to be on stagger location "2" and distinguishes it from
 ! the stagger location given to {\tt array1}. The following diagram shows how the 
 ! application writer may interpret the current situation physically. But keep
@@ -1396,8 +1396,8 @@ program ESMF_ArrayEx
 ! matches, as long as the same setting for {\tt indexflag} has been used. 
 ! For {\tt array1} and {\tt array2} this means that the following loop is well 
 ! defined.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_DistGridGet(distgrid, delayout=delayout, rc=rc)
   call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
   allocate(larrayList1(localDeCount))
@@ -1422,8 +1422,8 @@ program ESMF_ArrayEx
       enddo
     enddo
   enddo
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! 
 !
 !
@@ -1450,11 +1450,11 @@ program ESMF_ArrayEx
 ! to have a single object that can be used to reference both Arrays. The 
 ! {\tt ESMF\_ArrayBundle} class allows to create a single ArrayBundle object
 ! from a whole list of index space congruent Arrays.
-!EOE
-!BOC
+!EOEI
+!BOCI
   arrayBundle = ESMF_ArrayBundleCreate(arrayList=(/array1, array2/), rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! The communication calls that are available for ArrayBundles are:
 ! \begin{itemize}
 ! \item Halo
@@ -1463,25 +1463,25 @@ program ESMF_ArrayEx
 ! \end{itemize}
 ! It is for example possible to halo both
 ! {\tt array1} and {\tt array2} in a single operation.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayBundleHalo(arrayBundle, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Communication operations can be precomputed and RouteHandles are available
 ! to use precomputed Routes in subsequent ArrayBundle communication calls.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayBundleHaloStore(arrayBundle, routehandle=haloHandle, rc=rc)
   call ESMF_ArrayBundleHaloRun(arrayBundle, routehandle=haloHandle, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! An ArrayBundle is destroyed calling the ArrayBundleDestroy method.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayBundleDestroy(arrayBundle, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! The individual Arrays that make up the bundle remain valid objects, i.e.
 ! ArrayBundleDestroy does not destroy or deallocate {\tt array1} and {\tt
 ! array2} of the current example.
@@ -1511,21 +1511,21 @@ program ESMF_ArrayEx
 ! simple topology of the last section. Stagger locations are unaffected
 ! by the connection that was used to enforce periodic boundary conditions. Both
 ! Arrays can be haloed independent of each other:
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayHalo(array1, rc=rc)
   call ESMF_ArrayHalo(array2, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! This will change when a more complicated DistGrid is used instead.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayDestroy(array1, rc=rc)
   call ESMF_ArrayDestroy(array2, rc=rc)
   call ESMF_DistGridDestroy(distgrid, rc=rc)
-!EOC  
+!EOCI  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOC
+!BOCI
   allocate(connectionTransformList(4+2*2,1))
   call ESMF_ConnectionTransformElementConstruct(connectionTransformList(:,1), &
     connectionIndex=1, direction=0, staggerSrc=2, staggerDst=1, &
@@ -1537,8 +1537,8 @@ program ESMF_ArrayEx
     totalLWidth=(/0,1/), totalUWidth=(/0,1/), staggerLoc=1, rc=rc)
   array2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     computationalLWidth=(/0,1/), staggerLoc=2, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Now when the first or last DE of {\tt array1} performs a halo update it will 
 ! need to fill part of the halo region with data from {\tt array2} because 
 ! stagger location "2" maps to stagger location "1" following the connection 
@@ -1552,17 +1552,17 @@ program ESMF_ArrayEx
 ! In order to completely halo {\tt array1} it is necessary to construct a 
 ! self-contained ArrayBundle. In the current case this means that {\tt array1}
 ! and {\tt array2} must be bundled together
-!EOE
-!BOC
+!EOEI
+!BOCI
   arrayBundle = ESMF_ArrayBundleCreate(arrayList=(/array1, array2/), rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! before the halo operation can be carried out.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayBundleHalo(arrayBundle, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! In the above case only {\tt array1} will have been haloed because {\tt array2}
 ! does not define any cells used by default to halo (the total region is 
 ! identical to the computational region). If, however, {\tt array2} had been
@@ -1570,18 +1570,18 @@ program ESMF_ArrayEx
 ! would try to update the halo regions of both arrays. The optional argument
 ! {\tt arrayIndex} can then be used to indicate which Array is supposed to be
 ! haloed.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayBundleHalo(arrayBundle, arrayIndex=1, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Finally the objects used in this section can be destroyed.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArrayBundleDestroy(arrayBundle, rc=rc)
   call ESMF_ArrayDestroy(array1, rc=rc)
   call ESMF_ArrayDestroy(array2, rc=rc)
-!EOC
+!EOCI
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #endif
@@ -1919,7 +1919,7 @@ program ESMF_ArrayEx
   enddo
 !EOC
 
-!BOE
+!BOEI
 !
 ! \subsubsection{Array for a bipolar DistGrid}
 !
@@ -1939,8 +1939,8 @@ program ESMF_ArrayEx
 ! fold} is along $j=50$. Two equal sized patches of each 180 x 50 cells need
 ! to be connected in a way that corresponds to the bipolar topology.
 ! 
-!EOE
-!BOC
+!EOEI
+!BOCI
   allocate(connectionList(2*2+2,1))   ! 1 connection: the bipolar fold
   call ESMF_ConnectionElementConstruct(connectionElement=connectionList(:,1), &
     patchIndexA=1, patchIndexB=2, &
@@ -1955,14 +1955,14 @@ program ESMF_ArrayEx
   call ESMF_ConnectionTransformElementConstruct(connectionTransformList(:,3), &
     connectionIndex=1, direction=0, staggerSrc=3, staggerDst=3, &
     indexOffsetVector=(/-1,0/), signChangeVector=(/-1,-1/), rc=rc) ! E face
-!EOC  
-!BOE
+!EOCI  
+!BOEI
 ! With this {\tt connectionList} and {\tt connectionTransformList} it is now
 ! possible to define a DistGrid object that captures the index space topology
 ! for a bipolar grid. The DistGrid consists of two patches which need to be
 ! provided in {\tt minCorner} and {\tt maxCorner} list arguments.
-!EOE
-!BOC
+!EOEI
+!BOCI
   allocate(minCorner(2,2), maxCorner(2,2), regDecomp(2,2))
   minCorner(:,1) = (/1,1/)              ! first patch
   maxCorner(:,1) = (/180,50/)           ! first patch
@@ -1974,9 +1974,9 @@ program ESMF_ArrayEx
   distgrid = ESMF_DistGridCreate(minCorner=minCorner, maxCorner=maxCorner, &
     regDecomp=regDecomp, connectionList=connectionList, &
     connectionTransformList=connectionTransformList, rc=rc)
-!EOC  
+!EOCI  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-!BOE
+!BOEI
 ! The decomposition described by {\tt regDecomp} assumes that there is an even 
 ! number of PETs available in the current context. The decomposition will be 
 ! into as many DEs as PETs. Half of the DEs handle the first patch and the other
@@ -1984,12 +1984,12 @@ program ESMF_ArrayEx
 !
 ! In order to create a 2D Array on this DistGrid for single precision
 ! real data the ArraySpec variable must be set correctly.
-!EOE
-!BOC
+!EOEI
+!BOCI
   call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R4, rank=2, &
     rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Finally the Array objects can be created for this {\tt arrayspec} and {\tt 
 ! distgrid}. The specification of the {\tt staggerLoc} argument will determine
 ! the connection transformation that will apply for the data stored in the 
@@ -2002,34 +2002,34 @@ program ESMF_ArrayEx
 ! be used in this case because "0" (the default) has not been used for any other
 ! stagger location in the definitions of the connection transformations. The 
 ! trace Array is created without halo cells.
-!EOE
-!BOC
+!EOEI
+!BOCI
   arrayTracer = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Next an Array is created for a scalar living at the north face. The
 ! connection transformation corresponding to the north face was tagged with
 ! stagger location index "1" so the {\tt staggerLoc} for the Array must be set
 ! accordingly. Space for a halo width of one cell in each direction will be 
 ! provided for this quantity. 
-!EOE
-!BOC
+!EOEI
+!BOCI
   arrayNScalar = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     totalLWidth=(/1,1/), totalUWidth=(/1,1/), staggerLoc=1, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Finally Arrays for the horizontal velocity components are created at the 
 ! NE cell corner. The transformation behavior of this point is defined in 
 ! the DistGrid for stagger location index "2". Again space for a halo of one 
 ! cell in each direction is taken into account when creating the Arrays.
-!EOE
-!BOC
+!EOEI
+!BOCI
   arrayNEu = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     totalLWidth=(/1,1/), totalUWidth=(/1,1/), staggerLoc=2, vectorDim=1, rc=rc)
   arrayNEv = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     totalLWidth=(/1,1/), totalUWidth=(/1,1/), staggerLoc=2, vectorDim=2, rc=rc)
-!EOC
-!BOE
+!EOCI
+!BOEI
 ! Here the optional {\tt vectorDim} argument has been used to indicate that 
 ! these Arrays store components of a vector field. The information about which 
 ! vector component an Array contains is used to apply the correct
@@ -2046,7 +2046,7 @@ program ESMF_ArrayEx
 ! Furthermore redundant cells in exclusive regions will also be taken into 
 ! account in Array reduce operations.
 !
-!EOE
+!EOEI
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #endif
