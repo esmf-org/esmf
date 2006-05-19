@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.6 2006/05/05 22:19:11 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.7 2006/05/19 02:19:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DistGrid.C,v 1.6 2006/05/05 22:19:11 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DistGrid.C,v 1.7 2006/05/19 02:19:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1781,10 +1781,196 @@ int ESMC_DistGrid::ESMC_DistGridGetPatchMinMaxCorner(
 
 //-----------------------------------------------------------------------------
 //
-// Connection functions
+// Serialize/Deserialize functions
 //
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridSerialize"
+//BOPI
+// !IROUTINE:  ESMC_DistGridSerialize - Turn distgrid information into a byte stream
+//
+// !INTERFACE:
+int ESMC_DistGrid::ESMC_DistGridSerialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // inout - byte stream to fill
+      int *length,           // inout - buf length; realloc'd here if needed
+      int *offset) {         // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn info in distgrid object into a stream of bytes.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+    int fixedpart, nbytes, rc;
+    int i, j;
+    char *cp;
+    int *ip;
+    ESMC_Logical *lp;
+    ESMC_VM **vp;
+    ESMC_DePinFlag *dp;
+    de_type *dep;
+
+    // TODO: we cannot reallocate from C++ if the original buffer is
+    //  allocated on the f90 side.  change the code to make the allocate
+    //  happen in C++; then this will be fine.  (for now make sure buffer
+    //  is always big enough so realloc is not needed.)
+    fixedpart = sizeof(ESMC_DistGrid);
+    if ((*length - *offset) < fixedpart) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                             "Buffer too short to add a DistGrid object", &rc);
+        return ESMF_FAILURE; 
+    }
+
+    // fixedpart = sizeof(ESMC_DELayout);
+    // if ((*length - *offset) < fixedpart) {
+    //     buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
+    //     *length += 2 * fixedpart;
+    //  }
+
+    // first set the base part of the object
+    rc = this->ESMC_Base::ESMC_Serialize(buffer, length, offset);
+    // serialize the DELayout
+    rc = delayout->ESMC_DELayoutSerialize(buffer, length, offset);
+    
+    // figure current position in buffer
+    cp = (char *)(buffer + *offset);
+    
+    // serialize scalar members
+    ip = (int *)cp;
+    *ip++ = dimCount;
+    *ip++ = patchCount;
+    *ip++ = connectionCount;
+    *ip++ = deCount;
+    lp = (ESMC_Logical *)ip;
+    *lp++ = regDecompFlag;
+    
+    // serialize array members
+    ip = (int *)lp;
+    for (int i=0; i<patchCount; i++)
+      *ip++ = patchCellCount[i];
+    for (int i=0; i<deCount; i++)
+      *ip++ = patchDeLookup[i];
+    for (int i=0; i<dimCount*patchCount; i++)
+      *ip++ = minCorner[i];
+    for (int i=0; i<dimCount*patchCount; i++)
+      *ip++ = maxCorner[i];
+    for (int i=0; i<dimCount*deCount; i++)
+      *ip++ = dimExtent[i];
+    for (int i=0; i<dimCount*deCount; i++)
+      for (int k=0; k<dimExtent[i]; k++)
+        *ip++ = indexList[i][k];
+
+    cp = (char *)ip;
+    *offset = (cp - buffer);
+   
+    return ESMF_SUCCESS;
+
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DistGridDeserialize"
+//BOPI
+// !IROUTINE:  ESMC_DistGridDeserialize - Turn a byte stream into an object
+//
+// !INTERFACE:
+ESMC_DistGrid *ESMC_DistGridDeserialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // in - byte stream to read
+      int *offset) {         // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn a stream of bytes into an object.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+    ESMC_DistGrid *a = new ESMC_DistGrid;
+    int fixedpart, nbytes, rc;
+    int i, j;
+    char *cp;
+    int *ip;
+    ESMC_Logical *lp;
+    ESMC_VM **vp;
+    ESMC_DePinFlag *dp;
+    de_type *dep;
+
+    // first get the base part of the object
+    rc = a->ESMC_Base::ESMC_Deserialize(buffer, offset);
+    a->delayout = ESMC_DELayoutDeserialize(buffer, offset);
+    a->vm = NULL; // VM must be reset
+
+    // now the rest
+    cp = (char *)(buffer + *offset);
+    
+    // deserialize scalar members
+    ip = (int *)cp;
+    a->dimCount = *ip++;
+    a->patchCount = *ip++;
+    a->connectionCount = *ip++;
+    a->deCount = *ip++;
+    lp = (ESMC_Logical *)ip;
+    a->regDecompFlag = *lp++;
+    
+    // set scalars that must be reset here
+    a->localPet = -1;   // reset
+    a->petCount = -1;   // reset
+    
+    // deserialize array members
+    ip = (int *)lp;
+    a->patchCellCount = new int[a->patchCount];
+    for (int i=0; i<a->patchCount; i++)
+      a->patchCellCount[i] = *ip++;
+    a->patchDeLookup = new int[a->deCount];
+    for (int i=0; i<a->deCount; i++)
+      a->patchDeLookup[i] = *ip++;
+    a->minCorner = new int[a->dimCount*a->patchCount];
+    for (int i=0; i<a->dimCount*a->patchCount; i++)
+      a->minCorner[i] = *ip++;
+    a->maxCorner = new int[a->dimCount*a->patchCount];
+    for (int i=0; i<a->dimCount*a->patchCount; i++)
+      a->maxCorner[i] = *ip++;
+    a->dimExtent = new int[a->dimCount*a->deCount];
+    for (int i=0; i<a->dimCount*a->deCount; i++)
+      a->dimExtent[i] = *ip++;
+    a->indexList = new int*[a->dimCount*a->deCount];
+    for (int i=0; i<a->dimCount*a->deCount; i++){
+      a->indexList[i] = new int[a->dimExtent[i]];
+      for (int k=0; k<a->dimExtent[i]; k++)
+        a->indexList[i][k] = *ip++;
+    }
+
+    cp = (char *)ip;
+    *offset = (cp - buffer);
+   
+    return a;
+}
+//-----------------------------------------------------------------------------
+
+
+
+
+
+
+//-----------------------------------------------------------------------------
+//
+// Connection functions
+//
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

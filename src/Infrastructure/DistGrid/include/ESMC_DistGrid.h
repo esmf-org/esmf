@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.8 2006/05/05 22:19:11 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.9 2006/05/19 02:19:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,7 +91,8 @@ class ESMC_DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
       *maxCorner);
     // IO and validation
     int ESMC_DistGridPrint(void);
-      
+    int ESMC_DistGridSerialize(char *buffer, int *length, int *offset);
+    friend ESMC_DistGrid *ESMC_DistGridDeserialize(char *buffer, int *offset);
 };  // end class ESMC_DistGrid
 
 
@@ -125,6 +126,7 @@ ESMC_DistGrid *ESMC_DistGridCreate(ESMC_InterfaceInt *minCorner,
   ESMC_DELayout *delayout=NULL, ESMC_VM *vm=NULL, int *rc=NULL);
 int ESMC_DistGridDestroy(ESMC_DistGrid **distgrid);
   
+ESMC_DistGrid *ESMC_DistGridDeserialize(char *buffer, int *offset);
 
 int ESMC_Connection(
   ESMC_InterfaceInt *connection, int patchIndexA, int patchIndexB,
