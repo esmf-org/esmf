@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.2 2006/05/19 03:01:19 theurich Exp $
+! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.3 2006/05/19 21:35:53 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !SYSTEM_TEST        String used by test script to count system tests.
@@ -11,8 +11,8 @@
 !    Two gridded components and one coupler component, one-way coupling.
 !
 !    First gridded component runs on 4 PETs and defines a 2D source Array 
-!    100x200. Second gridded component defines a destination Array also 
-!    100x200 but runs on only 2 PETs. Both gridded components use DELayouts 
+!    100x150. Second gridded component defines a destination Array also 
+!    100x150 but runs on only 2 PETs. Both gridded components use DELayouts 
 !    with 1 DE per PET. The decomposition of the source Array is defined as 
 !    (petCount x 1) = (4 x 1) while the destination Array is decomposed as 
 !    (1 x petCount) = (1 x 2).

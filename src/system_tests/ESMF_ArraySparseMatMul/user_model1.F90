@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1 2006/05/18 18:32:44 theurich Exp $
+! $Id: user_model1.F90,v 1.2 2006/05/19 21:35:53 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -86,7 +86,7 @@ module user_model1
     call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R8, &
       rank=2, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 10
-    distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/100,200/), &
+    distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/100,150/), &
       regDecomp=(/petCount,1/), rc=status)
     if (status .ne. ESMF_SUCCESS) goto 10
     array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
@@ -138,7 +138,7 @@ module user_model1
       do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
         farrayPtr(i,j) = 10.0d0 &
           + 5.0d0 * sin(real(i)/100.d0*pi) &
-          + 2.0d0 * sin(real(j)/200.d0*pi)
+          + 2.0d0 * sin(real(j)/150.d0*pi)
       enddo
     enddo
  

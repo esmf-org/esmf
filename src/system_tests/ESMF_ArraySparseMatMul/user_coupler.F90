@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1 2006/05/18 18:32:44 theurich Exp $
+! $Id: user_coupler.F90,v 1.2 2006/05/19 21:35:53 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -74,8 +74,8 @@ module user_coupler
     integer :: itemcount
     type(ESMF_Array) :: srcArray, dstArray
     type(ESMF_VM) :: vm
-    real(ESMF_KIND_R8):: factorList(20000)
-    integer:: i, factorIndexList(2,20000)
+    real(ESMF_KIND_R8):: factorList(15000)
+    integer:: i, factorIndexList(2,15000)
 
     print *, "User Coupler Init starting"
 
@@ -97,7 +97,7 @@ module user_coupler
 
     ! Setup identity sparse matrix
     factorList = 1.d0
-    factorIndexList(1,:) = (/(i,i=1,20000)/)
+    factorIndexList(1,:) = (/(i,i=1,15000)/)
     factorIndexList(2,:) = factorIndexList(1,:)
 
     ! Precompute and store an ArraySparseMatMul operation
