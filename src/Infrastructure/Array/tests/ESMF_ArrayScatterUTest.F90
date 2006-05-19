@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.4 2006/05/16 17:58:13 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.5 2006/05/19 19:22:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.4 2006/05/16 17:58:13 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.5 2006/05/19 19:22:10 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -49,7 +49,7 @@ program ESMF_ArrayScatterUTest
   character(ESMF_MAXSTR) :: name
 
   !LOCAL VARIABLES:
-  real(ESMF_KIND_R8), parameter :: double_min = 1d-37
+  real(ESMF_KIND_R8), parameter :: double_min = 1d-10
   type(ESMF_VM):: vm
   integer:: petCount, localPet, i, j
   type(ESMF_ArraySpec)  :: arrayspec
@@ -130,8 +130,12 @@ program ESMF_ArrayScatterUTest
     do i=1, 15
       value = 123.d0*sin(real(i)) + 321.d0*cos(real(j))
       value = srcfarray(i,j) / value - 1.d0
-      if (abs(value) > double_min) rc = ESMF_FAILURE
-    enddo
+print *, value
+      if (abs(value) > double_min) then
+print *, "Found large value"
+        rc = ESMF_FAILURE
+      endif
+   enddo
   enddo
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
