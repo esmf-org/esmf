@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.44 2006/05/16 17:58:13 theurich Exp $
+// $Id: ESMC_Array.h,v 1.45 2006/05/19 02:23:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,6 +52,7 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     ESMC_DataType type;
     ESMC_DataKind kind;
     int rank;
+    ESMC_IndexFlag indexflag;
     //todo: the LocalArray pointers should be shared between PETs in the same
     //todo: VAS as to allow shared memory operations. Even the LocalArray
     //todo: pointers for Arrays instances on other VAS' may be good to keep
@@ -73,7 +74,6 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     int *vectorDim;
     int *dimmap;
     int *inverseDimmap;
-    ESMC_IndexFlag indexflag;
     int *contiguousFlag;
     // lower level objects
     ESMC_DistGrid *distgrid;
@@ -97,6 +97,12 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
       int *dimmapArray, int *inverseDimmapArray, ESMC_IndexFlag indexflagArg);
     int ESMC_ArrayDestruct(void);
     // Get, Set
+    int ESMC_ArraySet(char *name){
+      return ESMC_BaseSetName(name, "Array");
+    }
+    char *ESMC_ArrayGet(void){
+      return ESMC_BaseGetName();
+    }
     int ESMC_ArrayGet(ESMC_DataType *type, ESMC_DataKind *kind, int *rank,
       ESMC_LocalArray **localArrayList, int localArrayListCount,
       ESMC_DistGrid **distgridArg, ESMC_DELayout **delayoutArg,
@@ -113,6 +119,9 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_ArrayGetLinearIndexExclusive(int localDe, int *index);
     // IO and validation
     int ESMC_ArrayPrint(void);
+    // serialize/deserialize
+    int ESMC_ArraySerialize(char *buffer, int *length, int *offset) const;
+    int ESMC_ArrayDeserialize(char *buffer, int *offset);
     
     // comm methods
     int ESMC_ArrayScatter(void *farray, ESMC_DataType type, ESMC_DataKind kind,
@@ -125,7 +134,7 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
       ESMC_RouteHandle **routehandle);
     friend int ESMC_ArraySparseMatMul(ESMC_Array *srcArray, 
       ESMC_Array *dstArray, ESMC_RouteHandle **routehandle);
-
+    
 };  // end class ESMC_Array
 
 
