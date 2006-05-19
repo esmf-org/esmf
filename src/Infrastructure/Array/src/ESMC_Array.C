@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.54 2006/05/16 17:58:13 theurich Exp $
+// $Id: ESMC_Array.C,v 1.55 2006/05/19 02:21:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Array.C,v 1.54 2006/05/16 17:58:13 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Array.C,v 1.55 2006/05/19 02:21:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -1351,6 +1351,9 @@ int ESMC_Array::ESMC_ArrayConstruct(
         
   }
   delete [] dimExtent; 
+  
+  // invalidate the name for this Array object in the Base class
+  ESMC_BaseSetName(NULL, "Array");
    
   // return successfully
   return ESMF_SUCCESS;
@@ -1941,9 +1944,171 @@ int ESMC_Array::ESMC_ArrayPrint(){
     }
   }
   printf("--- ESMC_ArrayPrint end ---\n");
+  // return successfully
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
+// serialize/deserialize class methods
+//
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_ArraySerialize"
+//BOPI
+// !IROUTINE:  ESMC_ArraySerialize - Turn array information into a byte stream
+//
+// !INTERFACE:
+int ESMC_Array::ESMC_ArraySerialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+  char *buffer,          // inout - byte stream to fill
+  int *length,           // inout - buf length
+  int *offset) const {   // inout - original offset, updated to point 
+                         //         to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn info in array class into a stream of bytes.
+//
+//EOPI
+  // local vars
+  int localrc;                // automatic variable for local return code
+  int *rc = &localrc;         // pointer to localrc
+  int status;                 // local error status
+
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  *rc = ESMF_FAILURE;
+
+  char *cp;
+  int *ip;
+  ESMC_DataType *dtp;
+  ESMC_DataKind *dkp;
+  ESMC_IndexFlag *ifp;
+
+  if ((*length - *offset) < sizeof(ESMC_Array)){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      "Buffer too short to add an Array object", rc);
+    return localrc;
+  }
+
+  // First, serialize the base class,
+  status = ESMC_Base::ESMC_Serialize(buffer, length, offset);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+    return localrc;
+  // Serialize the DistGrid
+  status = distgrid->ESMC_DistGridSerialize(buffer, length, offset);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+    return localrc;
+  // Then, serialize Array meta data
+  dtp = (ESMC_DataType *)(buffer + *offset);
+  *dtp++ = type;
+  dkp = (ESMC_DataKind *)dtp;
+  *dkp++ = kind;
+  ip = (int *)dkp;
+  *ip++ = rank;
+  ifp = (ESMC_IndexFlag *)ip;
+  *ifp++ = indexflag;
+  ip = (int *)ifp;
+  *ip++ = dimCount;
+  *ip++ = deCount;
+  
+  // fix offset  
+  cp = (char *)ip;
+  *offset = (cp - buffer);
+  
+  // return successfully
+  return ESMF_SUCCESS;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Deserialize"
+//BOPI
+// !IROUTINE:  ESMC_ArrayDeserialize - Turn a byte stream into an object
+//
+// !INTERFACE:
+int ESMC_Array::ESMC_ArrayDeserialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+  char *buffer,          // in - byte stream to read
+  int *offset) {         // inout - original offset, updated to point 
+                         //         to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn a stream of bytes into an object.
+//
+//EOPI
+  // local vars
+  int localrc;                // automatic variable for local return code
+  int *rc = &localrc;         // pointer to localrc
+  int status;                 // local error status
+
+  // initialize return code; assume failure until success is certain
+  status = ESMF_FAILURE;
+  *rc = ESMF_FAILURE;
+
+  char *cp;
+  int *ip;
+  ESMC_DataType *dtp;
+  ESMC_DataKind *dkp;
+  ESMC_IndexFlag *ifp;
+
+  // First, deserialize the base class
+  status = ESMC_Base::ESMC_Deserialize(buffer, offset);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+    return localrc;
+  // Deserialize the DistGrid
+  distgrid = ESMC_DistGridDeserialize(buffer, offset);
+  // Pull DELayout out of DistGrid
+  status = distgrid->ESMC_DistGridGet(&delayout, NULL, NULL, NULL, NULL, NULL);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc))
+    return localrc;
+  
+  // Then, deserialize Array meta data
+  dtp = (ESMC_DataType *)(buffer + *offset);
+  type = *dtp++;
+  dkp = (ESMC_DataKind *)dtp;
+  kind = *dkp++;
+  ip = (int *)dkp;
+  rank = *ip++;
+  ifp = (ESMC_IndexFlag *)ip;
+  indexflag = *ifp++;
+  ip = (int *)ifp;
+  dimCount = *ip++;
+  deCount = *ip++;
+  
+  // fix offset
+  cp = (char *)ip;
+  *offset = (cp - buffer);
+  
+  // setting constant values for proxy objects
+  localDeCount = 0;
+  localDeList = NULL;
+  larrayList = new ESMC_LocalArray*[localDeCount];
+  larrayBaseAddrList = new void*[localDeCount];
+  for (int i=0; i<localDeCount; i++){
+    larrayList[i] = NULL;
+    larrayBaseAddrList[i] = NULL;
+  }
+  
+  // return successfully
+  return ESMF_SUCCESS;
+}
+
+
+
 
 
 //-----------------------------------------------------------------------------
