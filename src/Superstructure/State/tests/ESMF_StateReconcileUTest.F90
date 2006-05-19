@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.4 2006/02/07 18:49:31 nscollins Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.5 2006/05/19 02:17:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -8,7 +8,7 @@
 ! NASA Goddard Space Flight Center.
 ! Licensed under the GPL.
 !
-!==============================================================================
+!============================================================================== 
 !
     program ESMF_StateReconcileUTest
 
@@ -33,7 +33,7 @@
     ! Interface blocks for subroutines at end of program
     interface
       subroutine comp_dummy(gcomp, rc)
-        use ESMF_MOd
+        use ESMF_Mod
         type(ESMF_GridComp), intent(inout) :: gcomp
         integer, intent(out) :: rc
       end subroutine comp_dummy
@@ -65,23 +65,26 @@
     integer :: rc
     type(ESMF_State) :: state1
     type(ESMF_GridComp) :: comp1, comp2
-    type(ESMF_VM) :: vm, vmsub1, vmsub2
+    type(ESMF_VM) :: vm
     character(len=ESMF_MAXSTR) :: comp1name, comp2name, statename
+    type(ESMF_Array):: array
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
-    integer :: result = 0
+    integer :: result = 0, localPet
 
     !-------------------------------------------------------------------------
 
-    call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+    call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize()
 
     if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) goto 10
 
 
     ! Get the global VM for this job.
     call ESMF_VMGetGlobal(vm=vm, rc=rc)
+    
+    call ESMF_VMGet(vm, localPet=localPet, rc=rc)
 
     !-------------------------------------------------------------------------
     ! exclusive component test section
@@ -98,24 +101,10 @@
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompGet(comp1, vm=vmsub1, rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Getting VM from Gridded Component"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
     comp2name = "Ocean"
     comp2 = ESMF_GridCompCreate(name=comp2name, petList=(/ 2, 3 /), rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompGet(comp2, vm=vmsub2, rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Getting VM from Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
@@ -127,7 +116,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
-    ! This is where the VM for each component is initialized.
+    ! In SetServices() the VM for each component is initialized.
     ! Normally you would call SetEntryPoint inside set services,
     ! but to make this test very short, they are called inline below.
 
@@ -196,7 +185,6 @@
     write(name, *) "Calling StateValidate"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompDestroy(comp1, rc=rc)
@@ -221,7 +209,7 @@
 
     !-------------------------------------------------------------------------
     !-------------------------------------------------------------------------
-
+#ifdef NOSKIP
     !-------------------------------------------------------------------------
     ! sequential component test section
     !-------------------------------------------------------------------------
@@ -251,7 +239,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
-    ! This is where the VM for each component is initialized.
+    ! In SetServices() the VM for each component is initialized.
     ! Normally you would call SetEntryPoint inside set services,
     ! but to make this test very short, they are called inline below.
 
@@ -378,7 +366,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
-    ! This is where the VM for each component is initialized.
+    ! In SetServices() the VM for each component is initialized.
     ! Normally you would call SetEntryPoint inside set services,
     ! but to make this test very short, they are called inline below.
 
@@ -470,12 +458,12 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
-
+#endif
 
 !-------------------------------------------------------------------------
 10  continue
 
-    call ESMF_TestEnd(result, ESMF_SRCLINE)
+    call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize()
 
 end program ESMF_StateReconcileUTest
 
@@ -489,13 +477,24 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
     integer, intent(out) :: rc
 
     type(ESMF_Field) :: field1
+    type(ESMF_ArraySpec)  :: arrayspec
+    type(ESMF_DistGrid)   :: distgrid
+    type(ESMF_Array)      :: array
     integer :: localrc
 
     print *, "i am comp1_init"
 
     field1 = ESMF_FieldCreateNoData(name="Comp1 Field", rc=localrc)
-  
     call ESMF_StateAddField(istate, field1, rc=localrc)
+    
+    call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R8, &
+      rank=2, rc=localrc)
+    distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
+      regDecomp=(/2,2/), rc=localrc)
+    array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+      indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+    call ESMF_ArraySet(array, name="Comp1 Array", rc=localrc)
+    call ESMF_StateAddArray(istate, array, rc)
     
     rc = localrc
 
@@ -510,14 +509,25 @@ subroutine comp2_init(gcomp, istate, ostate, clock, rc)
     integer, intent(out) :: rc
 
     type(ESMF_Field) :: field2
+    type(ESMF_ArraySpec)  :: arrayspec
+    type(ESMF_DistGrid)   :: distgrid
+    type(ESMF_Array)      :: array
     integer :: localrc
 
     print *, "i am comp2_init"
 
     field2 = ESMF_FieldCreateNoData(name="Comp2 Field", rc=localrc)
-    
     call ESMF_StateAddField(istate, field2, rc=localrc)
 
+    call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R8, &
+      rank=2, rc=localrc)
+    distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/9,4/), &
+      regDecomp=(/2,2/), rc=localrc)
+    array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+      indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+    call ESMF_ArraySet(array, name="Comp2 Array", rc=localrc)
+    call ESMF_StateAddArray(istate, array, rc)
+    
     rc = localrc
 
 end subroutine comp2_init

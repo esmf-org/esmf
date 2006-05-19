@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.39 2006/04/25 16:37:14 samsoncheung Exp $
+! $Id: ESMF_StateUTest.F90,v 1.40 2006/05/19 02:17:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.39 2006/04/25 16:37:14 samsoncheung Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.40 2006/05/19 02:17:32 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -48,6 +48,11 @@
       type(ESMF_StateItemType) :: stateItemType
       type(ESMF_NeededFlag) :: needed
       real, dimension(:,:), pointer :: f90ptr1
+      
+      type(ESMF_ArraySpec)  :: arrayspec
+      type(ESMF_DistGrid)   :: distgrid
+      type(ESMF_Array)      :: array, array2
+
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -295,22 +300,53 @@
       call ESMF_Test((stateItemType.eq.ESMF_STATEITEM_NOTFOUND), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      !------------------------------------------------------------------------
-      ! Test adding an Array to a State
+  !------------------------------------------------------------------------
+  ! Test adding an Array to a State
+  call ESMF_ArraySpecSet(arrayspec, type=ESMF_DATA_REAL, kind=ESMF_R8, rank=2, &
+    rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  distgrid = ESMF_DistGridCreate(minCorner=(/1,1/), maxCorner=(/15,23/), &
+    regDecomp=(/2,2/), rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+!call ESMF_ArrayPrint(array)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_ArraySet(array, name="testArray", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+  !------------------------------------------------------------------------
+  !EX_UTest
+  call ESMF_ArrayGet(array, name=aname, rc=rc)
+  write(failMsg, *) "Wrong Array name "
+  write(name, *) "Verifying that the Array has correct name Test"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(aname.eq."testArray"), name, failMsg,&
+    result, ESMF_SRCLINE)
 
-      !------------------------------------------------------------------------
+  !------------------------------------------------------------------------
+  !EX_UTest
+  call ESMF_StateAddArray(state1, array, rc)
+  write(name, *) "Adding an Array to a State Test"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
+    ESMF_SRCLINE)
 
-      ! Test setting an array name
+  !------------------------------------------------------------------------
+  !EX_UTest 
+  ! Test Get Item Info from State 
+  call ESMF_StateGetItemInfo(state1, name="testArray", stateitemtype=stateItemType, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Getting Array item info from State Test"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
+    ESMF_SRCLINE)
 
-      !------------------------------------------------------------------------
+  !------------------------------------------------------------------------
+  !EX_UTest 
+  ! Test Verifying Item Info from a State 
+  write(failMsg, *) "Item info incorrect"
+  write(name, *) "Verifying Array item info from a State Test"
+  call ESMF_Test((stateItemType.eq.ESMF_STATEITEM_ARRAY), name, failMsg, &
+    result, ESMF_SRCLINE)
 
-      ! Test getting a name from an array
-
-      !------------------------------------------------------------------------
-      !Test adding an Array to a State
-      !------------------------------------------------------------------------
-
-      ! Test getting an Array from a State
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -320,8 +356,8 @@
       write(name, *) "Printing of a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
 
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test Adding a name to a State
       call ESMF_StateAddNameOnly(state1, name="StateOne", rc=rc)
@@ -338,8 +374,11 @@
       write(name, *) "Printing of a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
       !------------------------------------------------------------------------
 
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test getting Attribute Count from a state
       call  ESMF_StateGetAttributeCount(state1, num, rc=rc)
@@ -358,8 +397,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-     !------------------------------------------------------------------------
-      
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test Get Attribute Item Info from State
       call ESMF_StateGetItemInfo(state1, name="newAttribute", stateitemtype=stateItemType, rc=rc)
@@ -367,6 +405,7 @@
       write(name, *) "Getting unknown item info from State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
                       name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test Verifying Attribute Item Info from a State
@@ -376,7 +415,6 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-
       !EX_UTest
       ! Test getting an Attribute from a state
       call  ESMF_StateGetAttribute(state1, name="newAttribute", value=num, rc=rc)
@@ -385,8 +423,8 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(num.eq.12345), &
                       name, failMsg, result, ESMF_SRCLINE)
       print *, "Attribute num =", num
-      !------------------------------------------------------------------------
 
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test getting Attribute Count from a state
       call  ESMF_StateGetAttributeCount(state1, num, rc=rc)
@@ -397,7 +435,6 @@
       print *, "Attribute count =", num
 
       !------------------------------------------------------------------------
-
       !EX_UTest
       ! Test getting Attribute Info from a state
       call  ESMF_StateGetAttributeInfo(state1, name="newAttribute", count=number, rc=rc)
@@ -408,33 +445,58 @@
       print *, "Attribute count =", number
 
       !------------------------------------------------------------------------
-      !EX_UTest
-      ! Test getting Bundle from State
-      call  ESMF_StateGetBundle(state1, bundlename, bundle2(1), rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Getting Bundle from a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      call ESMF_BundleGet(bundle2(1), name=bname, rc=rc)
-      write(failMsg, *) "Bundle name not 'Temperature'"
-      write(name, *) "Verifying that the Bundle has correct name Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bname.eq."Temperature"), &
-                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test State for Bundle being needed
       IsNeeded = ESMF_StateIsNeeded(state1, "Temperature", rc)
       write(failMsg, *) ""
       write(name, *) "Query if Bundle is needed in a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(IsNeeded), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(IsNeeded), name, failMsg, &
+        result, ESMF_SRCLINE)
       print *, "IsNeeded = ", IsNeeded
-      !------------------------------------------------------------------------
 
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test setting Bundle as not needed in a State
+      call ESMF_StateSetNeeded(state1, "Temperature", ESMF_NOTNEEDED, rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Set Bundle as not needed in a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test State for Bundle NOT being needed
+      IsNeeded = ESMF_StateIsNeeded(state1, "Temperature", rc)
+      write(name, *) "Test if Bundle is NOT needed in a State Test"
+      call ESMF_Test((.not.IsNeeded), name, failMsg, result, &
+        ESMF_SRCLINE)
+      print *, "IsNeeded = ", IsNeeded
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test getting Bundle from State
+      call  ESMF_StateGetBundle(state1, bundlename, bundle2(1), rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting Bundle from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
+        ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test name of Bundle from State
+      call ESMF_BundleGet(bundle2(1), name=bname, rc=rc)
+      write(failMsg, *) "Bundle name not 'Temperature'"
+      write(name, *) "Verifying that the Bundle has correct name Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bname.eq."Temperature"), name, &
+        failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+      
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test State for Field being needed
       IsNeeded = ESMF_StateIsNeeded(state1, "Humidity", rc)
@@ -443,146 +505,189 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(IsNeeded), &
                       name, failMsg, result, ESMF_SRCLINE)
       print *, "IsNeeded = ", IsNeeded
-      !------------------------------------------------------------------------
 
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test State for Field being needed
       call ESMF_StateGetNeeded(state1, "Humidity", needed, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Query if Field is needed in a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(needed.eq.ESMF_NEEDED), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Test State for Field being needed
-      IsNeeded = ESMF_StateIsNeeded(state1, "Humidity", rc)
-      write(failMsg, *) ""
-      write(name, *) "Query if Field is needed in a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      print *, "IsNeeded = ", IsNeeded
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(needed.eq.ESMF_NEEDED), name, &
+        failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-
       !EX_UTest
       ! Test State for non-existant Field being needed
       IsNeeded = ESMF_StateIsNeeded(state1, "Humidty", rc)
-      write(failMsg, *) ""
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Query if non existant Field is needed in a State Test"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, &
+        ESMF_SRCLINE)
       print *, "IsNeeded = ", IsNeeded
-      !------------------------------------------------------------------------
 
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test setting Field as not needed in a State
       call ESMF_StateSetNeeded(state1, "Humidity", ESMF_NOTNEEDED, rc)
-      write(failMsg, *) ""
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Set Field as not needed in a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
+        ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
       !EX_UTest
+      ! Test State for Field NOT being needed
       IsNeeded = ESMF_StateIsNeeded(state1, "Humidity", rc)
-      write(name, *) "Test if Field is not needed in a State Test"
-      call ESMF_Test((.not.IsNeeded), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      print *, "IsNeeded = ", IsNeeded
-      !------------------------------------------------------------------------
-
-      ! Test State for Array being needed
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Test setting Bundle as not needed in a State
-      call ESMF_StateSetNeeded(state1, "Temperature", ESMF_NOTNEEDED, rc)
       write(failMsg, *) ""
-      write(name, *) "Set Bundle as not needed in a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      IsNeeded = ESMF_StateIsNeeded(state1, "Temperature", rc)
-      write(name, *) "Test if Bundle is not needed in a State Test"
-      call ESMF_Test((.not.IsNeeded), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Test if Field is NOT needed in a State Test"
+      call ESMF_Test((.not.IsNeeded), name, failMsg, result, &
+        ESMF_SRCLINE)
       print *, "IsNeeded = ", IsNeeded
-      !------------------------------------------------------------------------
-
-      ! Test setting Array as not needed in a State
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      IsNeeded = ESMF_StateIsNeeded(state1, aname, rc)
-      write(name, *) "Test if Array is not needed in a State Test"
-      call ESMF_Test((.not.IsNeeded), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      print *, "IsNeeded = ", IsNeeded
-      !------------------------------------------------------------------------
-
-      ! Test getting Array from State
-      !------------------------------------------------------------------------
-
-      !Test getting Array name
 
       !------------------------------------------------------------------------
-
       !EX_UTest
       ! Test getting Field from State
       call  ESMF_StateGetField(state1, fieldname, field2, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting Field from a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
+        ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
+      ! Test name of Field from State
       call ESMF_FieldGet(field2, name=fname, rc=rc)
       write(failMsg, *) "Wrong Field name "
       write(name, *) "Verifying that the Field has correct name Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname.eq."Humidity"), &
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname.eq."Humidity"), name, &
+        failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test State for Array being needed
+      IsNeeded = ESMF_StateIsNeeded(state1, "testArray", rc)
+      write(failMsg, *) ""
+      write(name, *) "Query if Array is needed in a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(IsNeeded), &
                       name, failMsg, result, ESMF_SRCLINE)
+      print *, "IsNeeded = ", IsNeeded
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test State for Array being needed
+      call ESMF_StateGetNeeded(state1, "testArray", needed, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Query if Array is needed in a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(needed.eq.ESMF_NEEDED), name, &
+        failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test setting Array as not needed in a State
+      call ESMF_StateSetNeeded(state1, "testArray", ESMF_NOTNEEDED, rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Set Array as not needed in a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
+        ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test State for Array NOT being needed
+      IsNeeded = ESMF_StateIsNeeded(state1, "testArray", rc)
+      write(failMsg, *) ""
+      write(name, *) "Test if Array is NOT needed in a State Test"
+      call ESMF_Test((.not.IsNeeded), name, failMsg, result, &
+        ESMF_SRCLINE)
+      print *, "IsNeeded = ", IsNeeded
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test getting Array from State
+      call  ESMF_StateGetArray(state1, "testArray", array2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting Array from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
+        ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test name of Array from State
+      call ESMF_ArrayGet(array2, name=aname, rc=rc)
+      write(failMsg, *) "Wrong Array name "
+      write(name, *) "Verifying that the Array has correct name Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(aname.eq."testArray"), name, &
+        failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+
       !------------------------------------------------------------------------
       call  ESMF_StatePrint(state1, rc=rc)
+      !------------------------------------------------------------------------
 
+
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test setting Bundle as needed in a State
       call ESMF_StateSetNeeded(state1, "Temperature", ESMF_NEEDED, rc)
       write(failMsg, *) ""
       write(name, *) "Set Bundle as needed in a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
+        ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
       !EX_UTest
+      ! Test State for Bundle being needed
       IsNeeded = ESMF_StateIsNeeded(state1, "Temperature", rc)
+      write(failMsg, *) ""
       write(name, *) "Test if Bundle is needed in a State Test"
-      call ESMF_Test((IsNeeded), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((IsNeeded), name, failMsg, result, &
+        ESMF_SRCLINE)
       print *, "IsNeeded = ", IsNeeded
-      !------------------------------------------------------------------------
 
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test setting Field as needed in a State
       call ESMF_StateSetNeeded(state1, "Humidity", ESMF_NEEDED, rc)
       write(failMsg, *) ""
       write(name, *) "Set Field as needed in a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
+        ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
       !EX_UTest
+      ! Test State for Field being needed
       IsNeeded = ESMF_StateIsNeeded(state1, "Temperature", rc)
+      write(failMsg, *) ""
       write(name, *) "Test if Field is needed in a State Test"
-      call ESMF_Test((IsNeeded), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((IsNeeded), name, failMsg, result, &
+        ESMF_SRCLINE)
       print *, "IsNeeded = ", IsNeeded
       !------------------------------------------------------------------------
 
-      ! Test setting Array as needed in a State
       !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test setting Array as needed in a State
+      call ESMF_StateSetNeeded(state1, "testArray", ESMF_NEEDED, rc)
+      write(failMsg, *) ""
+      write(name, *) "Set Array as needed in a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
+        ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test State for Array being needed
+      IsNeeded = ESMF_StateIsNeeded(state1, "testArray", rc)
+      write(failMsg, *) ""
+      write(name, *) "Test if Array is needed in a State Test"
+      call ESMF_Test((IsNeeded), name, failMsg, result, &
+        ESMF_SRCLINE)
+      print *, "IsNeeded = ", IsNeeded
+      !------------------------------------------------------------------------
+
  
       !EX_UTest
 #ifdef ESMF_NO_INITIALIZERS
@@ -753,8 +858,8 @@
       write(failMsg, *) "Returned ESMF_SUCCESS"
       write(name, *) "Destruction of a destroyed State Test"
       call  ESMF_StateDestroy(state1, rc)
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, &
+        ESMF_SRCLINE)
       print *, "rc = ", rc
 
 #endif
