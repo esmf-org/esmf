@@ -1,6 +1,8 @@
-% $Id: Array_rest.tex,v 1.3 2006/05/16 17:58:13 theurich Exp $
+% $Id: Array_rest.tex,v 1.4 2006/05/19 02:44:39 theurich Exp $
 
 %\subsubsection{Restrictions and Future Work}
 \begin{itemize}
-\item Non-blocking communications, PET-based and DE-based, has not been formulated in this document.
+\item Currently all native Fortran90 entry points to the Array API are severely limited with respect to type/kind/rank: only 2D and 3D 
+{\tt real(ESMF\_KIND\_R8)} interfaces are implemented.
+\item Non-blocking communication, PET-based and DE-based, has not been formulated or implemented.
 \end{itemize}
