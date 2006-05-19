@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.5 2006/05/19 02:17:32 theurich Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.6 2006/05/19 16:22:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -209,7 +209,7 @@
 
     !-------------------------------------------------------------------------
     !-------------------------------------------------------------------------
-#ifdef NOSKIP
+
     !-------------------------------------------------------------------------
     ! sequential component test section
     !-------------------------------------------------------------------------
@@ -458,8 +458,6 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
-#endif
-
 !-------------------------------------------------------------------------
 10  continue
 
@@ -555,18 +553,20 @@ subroutine StateDestroyAll(state, rc)
    call ESMF_StateGet(state, itemCount=itemCount, itemNameList=nameList, rc=rc)
    if (rc .ne. ESMF_SUCCESS) return
 
-   do i=1, itemCount
-       call ESMF_StateGetField(state, nameList(i), field(i),  rc=rc)
-       if (rc .ne. ESMF_SUCCESS) return
-   enddo
+!todo: taking this out will cause this test to memory leak, but now that
+!      Arrays are included in this test the destroy routine must be re-written!
+!   do i=1, itemCount
+!       call ESMF_StateGetField(state, nameList(i), field(i),  rc=rc)
+!       if (rc .ne. ESMF_SUCCESS) return
+!   enddo
 
    call ESMF_StateDestroy(state, rc=rc)
    if (rc .ne. ESMF_SUCCESS) return
   
-   do i=1, itemCount
-       call ESMF_FieldDestroy(field(i),  rc=rc)
-       if (rc .ne. ESMF_SUCCESS) return
-   enddo
+!   do i=1, itemCount
+!       call ESMF_FieldDestroy(field(i),  rc=rc)
+!       if (rc .ne. ESMF_SUCCESS) return
+!   enddo
 
    rc = ESMF_SUCCESS
    return
