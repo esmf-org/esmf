@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.9 2006/03/28 21:52:35 theurich Exp $
+! $Id: ESMF_StateTypes.F90,v 1.10 2006/05/19 02:16:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,6 +39,7 @@
       use ESMF_BaseMod
       use ESMF_IOSpecMod
       use ESMF_VMMod
+      use ESMF_ArrayMod
       use ESMF_InternArrayMod
       use ESMF_InternArrayGetMod
       use ESMF_FieldMod
@@ -86,7 +87,8 @@
                 ESMF_STATEITEM_NAME = ESMF_StateItemType(105), &
                 ESMF_STATEITEM_INDIRECT = ESMF_StateItemType(106), &
                 ESMF_STATEITEM_UNKNOWN = ESMF_StateItemType(107), &
-                ESMF_STATEITEM_NOTFOUND = ESMF_StateItemType(108)
+                ESMF_STATEITEM_NOTFOUND = ESMF_StateItemType(108), &
+                ESMF_STATEITEM_INTERNARRAY = ESMF_StateItemType(109)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_NeededFlag
@@ -164,7 +166,8 @@
       !private
           type(ESMF_Bundle) :: bp
           type(ESMF_Field)  :: fp 
-          type(ESMF_InternArray)  :: ap
+          type(ESMF_InternArray)  :: iap
+          type(ESMF_Array)  :: ap
           type(ESMF_StateClass), pointer  :: spp
       end type
 
@@ -232,8 +235,8 @@
 ! !PUBLIC TYPES:
       public ESMF_State
       public ESMF_StateItemType, ESMF_STATEITEM_BUNDLE, ESMF_STATEITEM_FIELD, &
-                                   ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_STATE, &
-                                   ESMF_STATEITEM_NAME, ESMF_STATEITEM_NOTFOUND
+        ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_STATE, ESMF_STATEITEM_NAME, &
+        ESMF_STATEITEM_NOTFOUND, ESMF_STATEITEM_INTERNARRAY
       public ESMF_StateType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
                                    ESMF_STATE_UNSPECIFIED
       public ESMF_NeededFlag, ESMF_NEEDED, &
@@ -258,7 +261,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.9 2006/03/28 21:52:35 theurich Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.10 2006/05/19 02:16:52 theurich Exp $'
 
 !==============================================================================
 ! 
