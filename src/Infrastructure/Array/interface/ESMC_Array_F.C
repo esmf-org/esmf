@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.42 2006/05/04 03:35:49 theurich Exp $
+// $Id: ESMC_Array_F.C,v 1.43 2006/05/19 02:24:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -184,7 +184,33 @@ extern "C" {
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
-      
+
+  
+  void FTN(c_esmc_arrayserialize)(ESMC_Array **array, char *buf, int *length,
+    int *offset, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayserialize()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->ESMC_ArraySerialize(
+      buf, length, offset),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+
+  void FTN(c_esmc_arraydeserialize)(ESMC_Array **array, char *buf,
+    int *offset, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraydeserialize()"
+    *array = new ESMC_Array;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->ESMC_ArrayDeserialize(
+      buf, offset),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
+  
   
 #undef  ESMC_METHOD
 }

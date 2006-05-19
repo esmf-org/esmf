@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.35 2006/05/18 15:07:25 cdeluca Exp $
+! $Id: ESMF_Array.F90,v 1.36 2006/05/19 02:24:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -186,7 +186,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.35 2006/05/18 15:07:25 cdeluca Exp $'
+      '$Id: ESMF_Array.F90,v 1.36 2006/05/19 02:24:27 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -249,6 +249,7 @@ module ESMF_ArrayMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
+      module procedure ESMF_ArraySet
       module procedure ESMF_ArraySetAllDecompAllDe
       module procedure ESMF_ArraySetTensorAllDe
       
@@ -1056,7 +1057,8 @@ contains
   subroutine ESMF_ArrayGet(array, type, kind, rank, larrayList, distgrid, &
     delayout, indexflag, dimmap, inverseDimmap, exclusiveLBound, exclusiveUBound,&
     computationalLBound, computationalUBound, totalLBound, totalUBound, &
-    computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, rc)
+    computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
+    name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
@@ -1079,6 +1081,7 @@ contains
     integer,                       intent(out), optional :: computationalUWidth(:,:)
     integer,                       intent(out), optional :: totalLWidth(:,:)
     integer,                       intent(out), optional :: totalUWidth(:,:)
+    character(len=ESMF_MAXSTR),    intent(out), optional :: name
     integer,                       intent(out), optional :: rc  
 !         
 !
@@ -1148,6 +1151,8 @@ contains
 !        Upon return this holds the upper width of the total memory regions for
 !        all PET-local DEs. {\tt totalUWidth} must be allocated to be
 !        of size (dimCount, localDeCount).
+!     \item [{[name]}]
+!        Name of the Array object.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1239,6 +1244,49 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
+    call ESMF_InterfaceIntDestroy(dimmapArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(inverseDimmapArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalLWidthArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalUWidthArg, rc=status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! special call to get name out of Base class
+    if (present(name)) then
+      call c_ESMC_GetName(array, name, status)
+      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1636,12 +1684,12 @@ contains
       computationalLWidth, computationalUWidth, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),  intent(in)              :: array
-    integer,              intent(in),   optional  :: staggerLoc
-    integer,              intent(in),   optional  :: vectorDim
-    integer,              intent(in),   optional  :: computationalLWidth(:)
-    integer,              intent(in),   optional  :: computationalUWidth(:)
-    integer,              intent(out),  optional  :: rc  
+    type(ESMF_Array), intent(in)              :: array
+    integer,          intent(in),   optional  :: staggerLoc
+    integer,          intent(in),   optional  :: vectorDim
+    integer,          intent(in),   optional  :: computationalLWidth(:)
+    integer,          intent(in),   optional  :: computationalUWidth(:)
+    integer,          intent(out),  optional  :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -2625,6 +2673,57 @@ contains
 
   end subroutine ESMF_ArrayScatter3R8
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySet"
+!BOP
+! !IROUTINE: ESMF_ArraySet - Set Array properties
+!
+! !INTERFACE:
+  subroutine ESMF_ArraySet(array, name, rc)
+
+!
+! !ARGUMENTS:
+  type(ESMF_Array),    intent(inout)         :: array
+  character (len = *), intent(in)            :: name
+  integer,             intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Sets the name of the {\tt ESMF\_Array} object.
+!     Note: Unlike most other ESMF objects there are very few items which can 
+!     be changed once an {\tt ESMF\_Array} object has been created.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array}.
+!     \item [name]
+!           The Array name.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer                       :: status         ! local error status
+
+    ! initialize return code; assume failure until success is certain
+    status = ESMF_FAILURE
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! set the name in Base object
+    call c_ESMC_SetName(array, "Array", name, status)
+    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArraySet
 
 
 
