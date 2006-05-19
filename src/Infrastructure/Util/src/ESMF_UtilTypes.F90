@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.19 2006/05/18 16:27:20 svasquez Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.20 2006/05/19 02:13:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -253,6 +253,7 @@
          ESMF_ID_GRIDCOMPONENT = ESMF_ObjectID(33, "ESMF_GridComponent"), &
          ESMF_ID_CPLCOMPONENT = ESMF_ObjectID(34, "ESMF_CplComponent"), &
          ESMF_ID_COMPONENT = ESMF_ObjectID(35, "ESMF_Component"), &
+         ESMF_ID_INTERNARRAY = ESMF_ObjectID(36, "ESMF_InternArray"), &
          ESMF_ID_NONE = ESMF_ObjectID(99, "ESMF_None")
 
 
@@ -524,7 +525,8 @@
       public ESMF_ID_CALENDAR, ESMF_ID_TIMEINTERVAL, ESMF_ID_ALARM
       public ESMF_ID_CLOCK, ESMF_ID_ARRAYSPEC, ESMF_ID_LOCALARRAY
       public ESMF_ID_ARRAYDATAMAP, ESMF_ID_VM, ESMF_ID_DELAYOUT
-      public ESMF_ID_CONFIG, ESMF_ID_PERFPROF, ESMF_ID_ARRAY, ESMF_ID_INTERNDG
+      public ESMF_ID_CONFIG, ESMF_ID_PERFPROF, ESMF_ID_ARRAY
+      public ESMF_ID_INTERNARRAY, ESMF_ID_INTERNDG
       public ESMF_ID_PHYSGRID, ESMF_ID_GRID, ESMF_ID_EXCHANGEPACKET
       public ESMF_ID_COMMTABLE, ESMF_ID_ROUTETABLE, ESMF_ID_ROUTE
       public ESMF_ID_ROUTEHANDLE, ESMF_ID_FIELDDATAMAP, ESMF_ID_FIELD
