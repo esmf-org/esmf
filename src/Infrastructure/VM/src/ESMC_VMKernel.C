@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.67 2006/05/16 17:58:13 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.68 2006/05/19 02:11:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1348,20 +1348,23 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
               // todo: and that new_npets == 1 
               new_commarray[pet1][pet2].comm_type = VM_COMM_TYPE_MPIUNI;
 #else
-              if (vmp->pref_intra_process == PREF_INTRA_PROCESS_SHMHACK){
-                new_commarray[pet1][pet2].comm_type = VM_COMM_TYPE_SHMHACK;
-              }else if(vmp->pref_intra_process == PREF_INTRA_PROCESS_PTHREAD){
-                new_commarray[pet1][pet2].comm_type = VM_COMM_TYPE_PTHREAD;
-                // initialize pthread variables in shared_mp
-                pthread_mutex_init(&(new_commarray[pet1][pet2].shmp->mutex1),
-                  NULL);
-                pthread_cond_init(&(new_commarray[pet1][pet2].shmp->cond1),
-                  NULL);
-                pthread_mutex_init(&(new_commarray[pet1][pet2].shmp->mutex2),
-                  NULL);
-                pthread_cond_init(&(new_commarray[pet1][pet2].shmp->cond2),
-                  NULL);
-                new_commarray[pet1][pet2].shmp->tcounter = 0;
+              if (pet1 != pet2){
+                // don't modify intra-PET comm_type
+                if (vmp->pref_intra_process == PREF_INTRA_PROCESS_SHMHACK){
+                  new_commarray[pet1][pet2].comm_type = VM_COMM_TYPE_SHMHACK;
+                }else if(vmp->pref_intra_process == PREF_INTRA_PROCESS_PTHREAD){
+                  new_commarray[pet1][pet2].comm_type = VM_COMM_TYPE_PTHREAD;
+                  // initialize pthread variables in shared_mp
+                  pthread_mutex_init(&(new_commarray[pet1][pet2].shmp->mutex1),
+                    NULL);
+                  pthread_cond_init(&(new_commarray[pet1][pet2].shmp->cond1),
+                    NULL);
+                  pthread_mutex_init(&(new_commarray[pet1][pet2].shmp->mutex2),
+                    NULL);
+                  pthread_cond_init(&(new_commarray[pet1][pet2].shmp->cond2),
+                    NULL);
+                  new_commarray[pet1][pet2].shmp->tcounter = 0;
+                }
               }
 #endif
             }
