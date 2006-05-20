@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.cpp,v 1.24 2006/05/03 04:40:33 theurich Exp $
+! $Id: ESMF_LocalArray.cpp,v 1.25 2006/05/20 22:59:43 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -160,7 +160,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.cpp,v 1.24 2006/05/03 04:40:33 theurich Exp $'
+      '$Id: ESMF_LocalArray.cpp,v 1.25 2006/05/20 22:59:43 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -168,7 +168,7 @@ AllTypesMacro(LocalArrayType)
 !
 !==============================================================================
 
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_LocalArrayCreate -- Generic interface to create an LocalArray
 
 ! !INTERFACE:
@@ -181,7 +181,7 @@ AllTypesMacro(LocalArrayType)
         module procedure ESMF_LocalArrayCreateBySpec  ! specify ArraySpec
    
         ! Plus interfaces for each T/K/R expanded by macro.
-!EOPI
+!EOP
         
        ! < interfaces for each T/K/R >
 InterfaceMacro(LocalArrCreateByMTPtr)
@@ -190,7 +190,7 @@ InterfaceMacro(LocalArrCreateByMTPtr)
 InterfaceMacro(LocalArrCreateByFlPtr)
 
 
-!BOPI
+!BOP
 ! !DESCRIPTION: 
 ! This interface provides a single (heavily overloaded) entry point for 
 !  the various types of {\tt ESMF\_LocalArrayCreate} functions.   
@@ -235,11 +235,11 @@ InterfaceMacro(LocalArrCreateByFlPtr)
 !  subsequent {\tt ESMF\_LocalArray} Create calls.
 !  
 end interface
-!EOPI
+!EOP
 
 !------------------------------------------------------------------------------
 
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_LocalArrayGetData -- Get an F90 pointer to the data contents
 
 ! !INTERFACE:
@@ -254,7 +254,7 @@ InterfaceMacro(LocalArrayGetData)
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_LocalArrayGetData} functions.   
 !  
-!EOPI
+!EOP
 end interface
 
 !------------------------------------------------------------------------------
@@ -367,7 +367,7 @@ end function
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_LocalArrayCreateByList"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_LocalArrayCreate -- Create an LocalArray specifying all options.
 
 ! !INTERFACE:
@@ -414,7 +414,7 @@ end function
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 
         ! Local vars
         type (ESMF_LocalArray) :: array     ! new C++ LocalArray
@@ -463,7 +463,7 @@ end function
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_LocalArrayCreateBySpec"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_LocalArrayCreate -- Create a new LocalArray from an ArraySpec
 
 ! !INTERFACE:
@@ -499,7 +499,7 @@ end function
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
-!EOPI
+!EOP
 
         ! Local vars
         type (ESMF_LocalArray) :: array     ! new C++ LocalArray
@@ -956,7 +956,7 @@ DeclarationMacro(LocalArrayDeallocate)
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_LocalArrayDestroy"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_LocalArrayDestroy - Remove a LocalArray
 !
 ! !INTERFACE:
@@ -984,7 +984,7 @@ DeclarationMacro(LocalArrayDeallocate)
 !   Otherwise we would need to make a nested call back into F90 from C++ to do
 !   the deallocate() during the object delete.
 !
-!EOPI
+!EOP
 
         ! Local vars
         integer :: status                   ! local error status
