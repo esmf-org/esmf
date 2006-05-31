@@ -1,18 +1,4 @@
-Settings for Linux, using the g95 fortran project (non-gnu),
-and the gnu gcc compiler.  (See gfortran for the gnu compiler.)
-
-Contact:  Tom Wainwright, NOAA Fisheries, thomas.wainwright@noaa.gov
-
-These configurations are based on the PGI configurations.  They have not
-been optimized.  They have been tested only in single-processor mode.  They
-have been tested only with ESMF_NO_IOCODE.
-
-Test system:
-
-Linux 2.6.5-7.151-default i686 (SuSE 9.1)
-gcc 3.3.3
-g95 (GCC 4.0.0 20050129 (experimental) (g95!) Apr 14 2005)
-ESMF_VERSION_STRING "2.1.0rp2"
+Settings for Linux, using the g95 fortran project and the GCC C and C++ compilers. (See gfortran for the Fortran 90 compiler distributed with GCC.)
 
 Requires the following environment settings:
 
