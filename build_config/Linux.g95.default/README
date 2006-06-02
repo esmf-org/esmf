@@ -1,4 +1,5 @@
-Settings for Linux, using the g95 fortran project and the GCC C and C++ compilers. (See gfortran for the Fortran 90 compiler distributed with GCC.)
+Settings for Linux, using the g95 fortran project and the GCC C and C++
+compilers. (See gfortran for the Fortran 90 compiler distributed with GCC.)
 
 Requires the following environment settings:
 
