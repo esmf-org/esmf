@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.48 2005/12/06 23:02:52 jwolfe Exp $
+# $Id: build_rules.mk,v 1.49 2006/06/05 21:09:57 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -180,36 +180,15 @@ F_FIXCPP           = -fpp
 F_FREENOCPP        = -fpp0 -FR
 F_FIXNOCPP         = -fpp0
 
+# use the Intel -print-file-name option to determine location of stdc++,
+# Intel cprts and Fortran libraries and thus define the C_LIB_PATHS
+C_LIB_PATHS     := -L$(dir $(shell $(C_CXX) -print-file-name=libstdc++.so)) \
+  -L$(dir $(shell $(C_FC) -dryrun '2>&1' | grep for_main.o | sed 's/\\//g')) \
+  -Wl,-rpath,$(dir $(shell $(C_FC) -dryrun '2>&1' | grep for_main.o | sed 's/\\//g'))
 
-# by default append each directory which is in LD_LIBRARY_PATH to
-# the -L flag and also to the run-time load flag.  (on systems which
-# support the 'module' command, that is how it works - by adding dirs
-# to LD_LIBRARY_PATH.)  if it is not set, default to where the intel
-# compilers try to install themselves.  if your compiler is someplace else
-# either set LD_LIBRARY_PATH first, or make a site specific file and
-# edit the paths explicitly.
-
-# first, include the esmf lib dir, then add on either LD_LIBRARY_PATH
-# or the default locations the libs are installed.
-C_LD_PATHS = $(C_SLFLAG)$(LDIR)
-
-ifneq ($(origin LD_LIBRARY_PATH), environment)
-# if env var not set, try this because they are the intel default locations.
-ifeq ($(ESMF_COMPILER_VERSION),80)
-C_LIB_PATHS       = -L/opt/intel_cc_80/lib
-C_LD_PATHS       += $(C_SLFLAG)/opt/intel_cc_80/lib
-else
-C_LIB_PATHS       = -L/opt/intel_cc_81/lib
-C_LD_PATHS       += $(C_SLFLAG)/opt/intel_cc_81/lib
-endif
-else
-# add the values from the environment
-C_LIB_PATHS  += $(ENV_LIB_PATHS)
-C_LD_PATHS   += $(ENV_LD_PATHS)
-endif
-
-
+# flags required to link against libesmf.a using the F90 linker front-end
 C_F90CXXLIBS    = $(INTEL_C_LIB_NEEDED) -limf -lm -lcxa -lunwind -lrt -ldl
+# flags required to link against libesmf.a using the C++ linker front-end
 C_CXXF90LIBS    = $(INTEL_C_LIB_NEEDED) -lifcoremt -lunwind -lrt -ldl
 
 # conditionally add pthread compiler flags to the LIBS variable
