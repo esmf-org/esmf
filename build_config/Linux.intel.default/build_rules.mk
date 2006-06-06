@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.49 2006/06/05 21:09:57 theurich Exp $
+# $Id: build_rules.mk,v 1.50 2006/06/06 04:32:50 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -182,9 +182,9 @@ F_FIXNOCPP         = -fpp0
 
 # use the Intel -print-file-name option to determine location of stdc++,
 # Intel cprts and Fortran libraries and thus define the C_LIB_PATHS
-C_LIB_PATHS     := -L$(dir $(shell $(C_CXX) -print-file-name=libstdc++.so)) \
-  -L$(dir $(shell $(C_FC) -dryrun '2>&1' | grep for_main.o | sed 's/\\//g')) \
-  -Wl,-rpath,$(dir $(shell $(C_FC) -dryrun '2>&1' | grep for_main.o | sed 's/\\//g'))
+C_LIB_PATHS     := -L$(dir $(shell gcc -print-file-name=libstdc++.so)) \
+  -L$(dir $(shell $(ESMF_DIR)/scripts/ifort-libpath $(C_FC))) \
+  -Wl,-rpath,$(dir $(shell $(ESMF_DIR)/scripts/ifort-libpath $(C_FC)))
 
 # flags required to link against libesmf.a using the F90 linker front-end
 C_F90CXXLIBS    = $(INTEL_C_LIB_NEEDED) -limf -lm -lcxa -lunwind -lrt -ldl
