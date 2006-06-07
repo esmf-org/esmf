@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1 2006/06/02 17:24:57 theurich Exp $
+# $Id: build_rules.mk,v 1.2 2006/06/07 20:51:50 theurich Exp $
 #
 #  Linux.gfortran.default
 #
@@ -30,13 +30,21 @@ MPIRUN         += $(ESMF_NODES)
 MPIMPMDRUN      = mpiexec
 endif
 
+ifeq ($(ESMF_COMM),openmpi)
+# with mpich installed:
+MPI_LIB        += -lmpi_cxx
+MPI_INCLUDE    +=
+MPIRUN         += $(ESMF_NODES)
+MPIMPMDRUN      = mpiexec
+endif
+
 THREAD_LIB     =
 
 # straight compilers front-ends
 ifneq ($(ESMF_COMM),mpich)
 C_CC		= gcc 
 C_CXX		= g++
-C_FC		= g95
+C_FC		= gfortran
 endif
 
 # mpich compiler front-end wrappers
@@ -51,6 +59,13 @@ ifeq ($(ESMF_COMM),mpich2)
 C_CC    	= mpicc
 # MPICH_IGNORE_CXX_SEEK is workaround for MPI-2 bug (see MPICH2 docs)
 C_CXX   	= mpicxx -DMPICH_IGNORE_CXX_SEEK
+C_FC    	= mpif90
+endif
+
+# OpenMPI compiler front-end wrappers
+ifeq ($(ESMF_COMM),openmpi)
+C_CC    	= mpicc
+C_CXX   	= mpicxx
 C_FC    	= mpif90
 endif
 
@@ -77,7 +92,7 @@ F_FIXNOCPP      = -ffixed-form
 # use the GCC -print-file-name option to determine location of stdc++ and 
 # Fortran libraries and thus define the C_LIB_PATHS
 C_LIB_PATHS     := -L$(dir $(shell $(C_CXX) -print-file-name=libstdc++.so)) \
-  -L$(dir $(shell $(C_FC) -print-file-name=libf95.a))
+  -L$(dir $(shell $(C_FC) -print-file-name=libgfortran.so))
 
 # flags required to link against libesmf.a using the F90 linker front-end
 C_F90CXXLIBS    = -lrt -lstdc++
