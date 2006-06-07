@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.50 2006/06/06 04:32:50 theurich Exp $
+# $Id: build_rules.mk,v 1.51 2006/06/07 22:22:20 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -88,6 +88,12 @@ MPIRUN         += $(ESMF_NODES)
 MPIMPMDRUN      = mpiexec
 endif
 
+ifeq ($(ESMF_COMM),openmpi)
+MPI_LIB        += -lmpi_cxx
+MPI_INCLUDE    +=
+MPIRUN         += $(ESMF_NODES)
+MPIMPMDRUN      = mpiexec
+endif
 
 #
 # ################## Compilers, Linkers, and Loaders ########################
@@ -127,6 +133,13 @@ ifeq ($(ESMF_COMM),intelmpi)
 C_CC       = mpiicc
 C_CXX      = mpiicpc
 C_FC       = mpiifort
+endif
+
+# OpenMPI compiler front-end wrappers
+ifeq ($(ESMF_COMM),openmpi)
+C_CC    	= mpicc
+C_CXX   	= mpicxx
+C_FC    	= mpif90
 endif
 
 # on some architectures we may need gcc flags to set to 64 bit, but those will be
