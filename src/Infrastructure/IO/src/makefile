@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2005/07/15 21:29:53 jwolfe Exp $
+# $Id: makefile,v 1.17 2006/06/08 13:27:50 tjcnrl Exp $
 
 ALL: build_here
 
@@ -8,7 +8,7 @@ SOURCEC   =
 ifeq ($(ESMF_NO_IOCODE),true)
 SOURCEF   = wrf_io.F90
 else
-SOURCEF   = wrf_io.F90 field_routines.F90 module_wrf_error.F wrf_abort.F
+SOURCEF   = wrf_io.F90 field_routines.F90 module_wrf_error.f90 wrf_abort.f90
 endif
 STOREH    = 
 
