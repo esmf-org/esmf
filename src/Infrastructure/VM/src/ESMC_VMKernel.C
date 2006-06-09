@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.69 2006/06/02 22:31:33 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.70 2006/06/09 15:48:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -3778,6 +3778,59 @@ void ESMC_VMK::vmk_allgather(void *in, void *out, int len,
   for (int root=0; root<npets; root++){
     // Each PET is considered the root PET once for a non-blocking gather
     vmk_gather(in, out, len, root, &((*commhandle)->handles[root]));
+  }
+}
+
+
+void ESMC_VMK::vmk_alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
+  int *outCounts, int *outOffsets, vmType type){
+  if (mpionly){
+    // Find corresponding MPI data type
+    MPI_Datatype mpitype;
+    switch (type){
+    case vmI4:
+      mpitype = MPI_INT;
+      break;
+    case vmR4:
+      mpitype = MPI_FLOAT;
+      break;
+    case vmR8:
+      mpitype = MPI_DOUBLE;
+      break;
+    }
+    MPI_Alltoallv(in, inCounts, inOffsets, mpitype, out, outCounts, outOffsets,
+      mpitype, mpi_c);
+  }else{
+    // This is a very simplistic, probably very bad peformance implementation.
+    int size=0;
+    switch (type){
+    case vmI4:
+      size=4;
+      break;
+    case vmR4:
+      size=4;
+      break;
+    case vmR8:
+      size=8;
+      break;
+    }
+    char *inC = (char *)in;
+    char *outC = (char *)out;
+    // send to all PETs with id smaller than mypet
+    for (int i=0; i<mypet; i++)
+      vmk_send(inC+inOffsets[i]*size, inCounts[i]*size, i);
+    // memcpy the local chunk
+    memcpy(outC+outOffsets[mypet]*size, inC+inOffsets[mypet]*size,
+      inCounts[mypet]*size);
+    // receive the data from all Pets with id larger than mypet
+    for (int i=mypet+1; i<npets; i++)
+      vmk_recv(outC+outOffsets[i]*size, outCounts[i]*size, i);
+    // send to all PETs with larger than mypet
+    for (int i=mypet+1; i<npets; i++)
+      vmk_send(inC+inOffsets[i]*size, inCounts[i]*size, i);
+    // receive the data from all Pets with id smaller than mypet
+    for (int i=0; i<mypet; i++)
+      vmk_recv(outC+outOffsets[i]*size, outCounts[i]*size, i);
   }
 }
 

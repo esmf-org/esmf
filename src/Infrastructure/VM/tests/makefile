@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2005/12/14 20:01:55 theurich Exp $ 
+# $Id: makefile,v 1.29 2006/06/09 15:48:48 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -26,6 +26,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_VMUTest \
 		$(ESMF_TESTDIR)/ESMF_VMGatherUTest \
 		$(ESMF_TESTDIR)/ESMF_VMAllGatherUTest \
 		$(ESMF_TESTDIR)/ESMF_VMBroadcastUTest \
+		$(ESMF_TESTDIR)/ESMF_VMAllToAllVUTest \
 		$(ESMF_TESTDIR)/ESMF_VMBarrierUTest
 
 TESTS_RUN     = RUN_ESMF_VMUTest \
@@ -38,6 +39,7 @@ TESTS_RUN     = RUN_ESMF_VMUTest \
                 RUN_ESMF_VMGatherUTest \
                 RUN_ESMF_VMAllGatherUTest \
 		RUN_ESMF_VMBroadcastUTest \
+                RUN_ESMF_VMAllToAllVUTest \
 		RUN_ESMF_VMBarrierUTest
 
 TESTS_RUN_UNI = RUN_ESMF_VMUTestUNI \
@@ -50,6 +52,7 @@ TESTS_RUN_UNI = RUN_ESMF_VMUTestUNI \
                 RUN_ESMF_VMGatherUTestUNI \
                 RUN_ESMF_VMAllGatherUTestUNI \
                 RUN_ESMF_VMBroadcastUTestUNI \
+                RUN_ESMF_VMAllToAllVUTestUNI \
                 RUN_ESMF_VMBarrierUTestUNI
 
 
@@ -151,6 +154,15 @@ RUN_ESMF_VMBroadcastUTest:
 
 RUN_ESMF_VMBroadcastUTestUNI:
 	$(MAKE) TNAME=VMBroadcast NP=1 ftest
+
+#
+# VM AllToAllV
+#
+RUN_ESMF_VMAllToAllVUTest:
+	$(MAKE) TNAME=VMAllToAllV NP=4 ftest
+
+RUN_ESMF_VMAllToAllVUTestUNI:
+	$(MAKE) TNAME=VMAllToAllV NP=1 ftest
 
 #
 # VM Barrier
