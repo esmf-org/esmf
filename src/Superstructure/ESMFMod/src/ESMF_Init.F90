@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.35 2005/11/01 21:08:35 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.36 2006/06/16 21:14:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -146,25 +146,32 @@
 !     \end{description}
 !
 !EOP
-      
-      type(ESMF_VM):: localvm
+      integer       :: localrc                        ! local return code
+      type(ESMF_VM) :: localvm
+
+      ! assume failure until success
+      if (present(rc)) rc = ESMF_FAILURE
 
       call ESMF_FrameworkInternalInit(ESMF_MAIN_F90, defaultConfigFileName, &
-                                      defaultCalendar, defaultLogFileName, &
-                                      defaultLogType, rc)
-      if (rc .ne. ESMF_SUCCESS) then
-          print *, "Error initializing framework"
-          return 
+        defaultCalendar, defaultLogFileName, defaultLogType, rc=localrc)
+                                      
+      ! LogErr not yet initialized -> explicit print on error
+      if (localrc .ne. ESMF_SUCCESS) then
+        print *, "Error initializing framework"
+        return 
       endif 
+      ! LogErr is assumed to be functioning
+      
+      ! obtain global VM
+      call ESMF_VMGetGlobal(localvm, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (present(vm)) vm=localvm
 
-      call ESMF_VMGetGlobal(localvm, rc)
-      if (ESMF_LogMsgFoundError(rc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(vm)) vm = localvm
-
-      call ESMF_VMBarrier(localvm, rc)
+      ! block on all PETs
+      call ESMF_VMBarrier(localvm, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       end subroutine ESMF_Initialize
 
