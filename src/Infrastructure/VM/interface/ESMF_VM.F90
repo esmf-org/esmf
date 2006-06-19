@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.74 2006/06/09 15:48:48 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.75 2006/06/19 21:53:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -169,7 +169,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.74 2006/06/09 15:48:48 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.75 2006/06/19 21:53:41 theurich Exp $"
 
 !==============================================================================
 
@@ -5363,16 +5363,19 @@ module ESMF_VMMod
 ! !IROUTINE: ESMF_VMFinalize - Finalize Global VM
 
 ! !INTERFACE:
-  subroutine ESMF_VMFinalize(rc)
+  subroutine ESMF_VMFinalize(keepMpiFlag, rc)
 !
 ! !ARGUMENTS:
-    integer, intent(out), optional :: rc           
+    type(ESMF_Logical), intent(in), optional  :: keepMpiFlag
+    integer, intent(out), optional            :: rc
 !
 ! !DESCRIPTION:
 !   Finalize Global VM.\newline
 !
 !   The arguments are:
 !   \begin{description}
+!   \item[{[keepMpiFlag]}] 
+!        Indicate whether MPI_Finalize() should be called or not.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5386,7 +5389,7 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMFinalize(localrc)
+    call c_ESMC_VMFinalize(keepMpiFlag, localrc)
     
     ! Use LogErr to handle return code
     !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5409,7 +5412,7 @@ module ESMF_VMMod
   subroutine ESMF_VMAbort(rc)
 !
 ! !ARGUMENTS:
-    integer, intent(out), optional :: rc           
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Abort Global VM.\newline

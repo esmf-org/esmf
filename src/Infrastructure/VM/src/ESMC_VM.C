@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.40 2006/02/22 05:01:20 theurich Exp $
+// $Id: ESMC_VM.C,v 1.41 2006/06/19 21:53:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.40 2006/02/22 05:01:20 theurich Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.41 2006/06/19 21:53:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -949,6 +949,7 @@ void ESMC_VMFinalize(
 //
 // !ARGUMENTS:
 //
+  ESMC_Logical *keepMpiFlag,
   int *rc){   // return code
 //
 // !DESCRIPTION:
@@ -961,7 +962,11 @@ void ESMC_VMFinalize(
     ESMC_LogDefault.ESMC_LogWrite("invalid GlobalVM", ESMC_LOG_ERROR);
     return; // bail out
   }
-  GlobalVM->vmk_finalize();
+  int finalizeMpi = 1;  // set
+  if (keepMpiFlag){
+    if (*keepMpiFlag==ESMF_TRUE) finalizeMpi = 0; // reset
+  }
+  GlobalVM->vmk_finalize(finalizeMpi);
   matchArray_count = 0;
   // delete the VM association table
 //gjtNotYet  delete [] matchArray_tid;

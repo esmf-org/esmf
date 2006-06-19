@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.36 2006/06/16 21:14:24 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.37 2006/06/19 21:53:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -356,7 +356,8 @@
 !           Specify mode of termination. The default is {\tt ESMF\_FINAL}
 !           which waits for all PETs of the global VM to reach 
 !           {\tt ESMF\_Finalize()} before termination. See section 
-!           \ref{app:terminationflag} for a complete list of valid flags.
+!           \ref{app:terminationflag} for a complete list and description of
+!           valid flags.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -365,6 +366,7 @@
 
       logical :: rcpresent                        ! Return code present
       logical :: abortFlag
+      type(ESMF_Logical) :: keepMpiFlag
       integer :: status
       logical, save :: already_final = .false.    ! Static, maintains state.
 
@@ -404,20 +406,22 @@
       endif
 
       abortFlag = .false.
+      keepMpiFlag = ESMF_FALSE
       if (present(terminationflag)) then
         if (terminationflag==ESMF_ABORT) abortFlag = .true.
+        if (terminationflag==ESMF_KEEPMPI) keepMpiFlag = ESMF_TRUE
       endif
       
       if (abortFlag) then
         ! Abort the VM
-        call ESMF_VMAbort(status)
+        call ESMF_VMAbort(rc=status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Error aborting VM"
           return
         endif
       else
         ! Finalize the VM
-        call ESMF_VMFinalize(status)
+        call ESMF_VMFinalize(keepMpiFlag=keepMpiFlag, rc=status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Error finalizing VM"
           return
