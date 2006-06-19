@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.3 2004/03/05 19:45:18 theurich Exp $
+// $Id: ESMC_VM.h,v 1.29.2.1 2006/06/19 21:54:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,53 +30,90 @@
 // The companion file {\tt ESMC\_VM.C} contains the full code (bodies) 
 // for the methods.
 //
-// Currently class {\tt ESMC\_VM} is derived from base class {\tt vmachine}
-// and class {\tt ESMC\_VMPlan} is derived from base class {\tt vmplan}. There
-// are only very few new features that the derived classes add to their base
-// classes, thus most of the implementing code is located in {vmachine.C}.
+// Currently class {\tt ESMC\_VM} is derived from base class {\tt ESMC_VMK}
+// and class {\tt ESMC\_VMPlan} is derived from base class {\tt ESMC_VMKPlan}.
+// There are only very few new features that the derived classes add to their
+// base classes, thus most of the implementing code is located in 
+// {\tt ESMC_VMKernel.C}.
 //
 ///EOP
 //-------------------------------------------------------------------------
 
-#include <ESMC_Base.h>  
-#include <vmachine.h>   // inherit from vmachine class
+#include <ESMC_VMKernel.h>    // inherit from ESMC_VMK class
+
+
+typedef struct{
+  char *vmKey;    // bit-pattern that identifies VM VAS context
+  int localID;    // local ID of the VM within VAS context
+}ESMC_VMId;
+
+#include <ESMC_Base.h>        // cannot move Base.h before def. of ESMC_VMId 
+
+// external ESMC_VMId methods:
+ESMC_VMId ESMC_VMIdCreate(int *rc);      // allocates memory for vmKey member
+void ESMC_VMIdDestroy(ESMC_VMId *vmID, int *rc); // frees memory for vmKey memb
+void ESMC_VMIdPrint(ESMC_VMId *vmID);
+ESMC_Logical ESMC_VMIdCompare(ESMC_VMId *vmID1, ESMC_VMId *vmID2);
+int ESMC_VMIdCopy(ESMC_VMId *vmIDdst, ESMC_VMId *vmIDsrc);
+
 
 class ESMC_VM;
 class ESMF_VMPlan;
 
+
 // class definition
-class ESMC_VM : public vmachine {   // inherits from vmachine class
+class ESMC_VM : public ESMC_VMK {   // inherits from ESMC_VMK class
   // This is the ESMF derived virtual machine class.
   public:
-    // Get method that supports the F90 optional arguments interface
+    void *ESMC_VMStartup(class ESMC_VMPlan *vmp, void *(fctp)(void *, void *),
+      void *cargo, int *rc);
+    int ESMC_VMEnter(class ESMC_VMPlan *vmp, void *info, void *cargo);
     int ESMC_VMGet(
-      ESMF_KIND_I4 *mypet,          // out - petid
-      ESMF_KIND_I4 *npets,          // out - number of PETs
-      ESMF_KIND_I4 *npes,           // out - number of PEs
-      int          *mpic,           // out - MPI Intracommunicator for VM
-      ESMC_Logical *ok_openmp);     // out - user-level OpenMP o.k.?
-    // GetPET method that supports the F90 optional arguments interface
-    int ESMC_VMGetPET(
-      ESMF_KIND_I4 *petid,          // in  - petid for this PET
-      ESMF_KIND_I4 *npes,           // out - number of PEs for this PET
-      ESMF_KIND_I4 *ssiid,          // out - ssid for this PET
-      ESMF_KIND_I4 *mthpet,         // out - thread master pet for this PET
-      ESMF_KIND_I4 *nthpet,         // out - number of treads in group with PET
-      ESMF_KIND_I4 *tidpet);        // out - thread id for this PET
-    // ESMC_VMFillFromVmachine allows to "copy" a vmachine object into a 
-    // ESMC_VM object. This is necessary because calling vmachine_enter on 
-    // a ESMC_VM object returns the child vmachine object and NOT an ESMC_VM
-    // object!
-    void ESMC_VMFillFromVmachine(vmachine &vmach);
+      // Get method that supports the F90 optional arguments interface
+      int          *localPet,       // out - id of local PET
+      int          *petCount,       // out - number of PETs
+      int          *peCount,        // out - number of PEs
+      MPI_Comm     *mpiCommunicator,// out - MPI Intracommunicator for VM
+      ESMC_Logical *okOpenMpFlag);  // out - flag whether user-level OpenMP o.k.
+    int ESMC_VMGetPETLocalInfo(
+      // GetPETLocalInfo method that supports the F90 optional args interface
+      int pet,            // in  - id of specified PET
+      int *peCount,       // out - number of PEs for specified PET
+      int *ssiId,         // out - ssiid for specified PET
+      int *threadCount,   // out - number of treads in thread group with PET
+      int *threadId,      // out - thread id for specified PET
+      int *vas);          // out - virtual address space of the specified PET
+    int ESMC_VMGetPETMatchPET(
+      // match PET in current VM against PETs of another VM
+      int pet,                      // in  - id of specified PET
+      ESMC_VM &vmMatch,             // in  - vm to match against
+      int *petMatchCount,           // out - number of matching PETs in vmMatch
+      int *petMatchList,            // out - list of matching PETs in vmMatch
+      int len_petMatchList);        // in  - size of petMatchList
+    ESMC_VMId *ESMC_VMGetVMId(int *rc);   // Return VMId of the VM context.
+    int ESMC_VMSendVMId(ESMC_VMId *vmid, int dest);
+    int ESMC_VMRecvVMId(ESMC_VMId *vmid, int source);
+    void ESMC_VMPrint(void);
 };// end class ESMC_VM
 
 // external ESMC_VM methods:
-ESMC_VM *ESMC_VMInitialize(int *rc);  // Initialize global vmachine
-void ESMC_VMFinalize(int *rc);        // Shut down and clean up global vmachine
-
+void     ESMC_VMGetArgs(int *argc, char ***argv, int *rc);  // Command line args
+ESMC_VM *ESMC_VMGetGlobal(int *rc);   // Return pointer to global VM
+ESMC_VM *ESMC_VMGetCurrent(int *rc);  // Return pointer to VM of current context
+ESMC_VMId *ESMC_VMGetCurrentID(int *rc);// Return ID of the current VM context.
+ESMC_VM *ESMC_VMInitialize(int *rc);  // Initialize global ESMC_VMK
+void     ESMC_VMFinalize(ESMC_Logical *keepMpiFlag, int *rc); // Shut down and
+                                                 // clean up global ESMC_VMK
+void     ESMC_VMAbort(int *rc);       // Abort and clean up global ESMC_VMK
+    
 
 // class definition
-class ESMC_VMPlan : public vmplan {   // inherits from vmplan class
+class ESMC_VMPlan : public ESMC_VMKPlan {   // inherits from ESMC_VMKPlan class
+  public:
+    int nspawn;           // number of PETs this PET will spawn
+    ESMC_VM **myvms;      // pointer array of ESMC_VM instances for this PET
+    ESMC_VMK **myvmachs;  // pointer array of ESMC_VMK instances for this PET
 };// end class ESMC_VMPlan
+
 
 #endif  // ESMC_VM_H

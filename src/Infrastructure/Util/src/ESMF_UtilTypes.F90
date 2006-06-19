@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.12.2.1 2006/06/19 20:34:04 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.12.2.2 2006/06/19 21:54:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -417,7 +417,8 @@
 
       type(ESMF_TerminationFlag), parameter:: &
         ESMF_FINAL        = ESMF_TerminationFlag(1), &
-        ESMF_ABORT        = ESMF_TerminationFlag(2)
+        ESMF_KEEPMPI      = ESMF_TerminationFlag(2), &
+        ESMF_ABORT        = ESMF_TerminationFlag(3)
 
 !------------------------------------------------------------------------------
 !
@@ -467,7 +468,7 @@
       public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_VASBLOCKING, &
              ESMF_NONBLOCKING
       public ESMF_ContextFlag, ESMF_CHILD_IN_NEW_VM, ESMF_CHILD_IN_PARENT_VM
-      public ESMF_TerminationFlag, ESMF_FINAL, ESMF_ABORT
+      public ESMF_TerminationFlag, ESMF_FINAL, ESMF_KEEPMPI, ESMF_ABORT
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR
