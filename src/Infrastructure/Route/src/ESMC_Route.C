@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.153 2006/03/20 22:29:28 theurich Exp $
+//$Id: ESMC_Route.C,v 1.154 2006/06/22 20:18:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.153 2006/03/20 22:29:28 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.154 2006/06/22 20:18:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1221,10 +1221,14 @@
       } else {
         madeSendBufList = madeRecvBufList = NULL;
       }
+
 // -----------------------------------------------------------------------
-// For asynchronous communications we have separate loops to send and recv
-// Send loop first, which includes the packing:
+// For asynchronous communications we have two separate loops:
+//  loop #1: issue non-blocking sendrecv() calls
+//  loop #2: wait for local non-blocking comms to finish
+// --> loop #1 follows:      
 // -----------------------------------------------------------------------
+
       // reset request counter
       int req=0;
 
@@ -1582,8 +1586,10 @@
       }            // communication (PET) loop, variable i
 
 // -----------------------------------------------------------------------
-// For asynchronous communications we have separate loops to send and recv
-// Receive loop next, which includes any unpacking:
+// For asynchronous communications we have two separate loops:
+//  loop #1: issue non-blocking sendrecv() calls
+//  loop #2: wait for local non-blocking comms to finish
+// --> loop #2 follows:      
 // -----------------------------------------------------------------------
 
       // reset request counter
