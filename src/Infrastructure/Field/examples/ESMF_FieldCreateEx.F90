@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.32 2006/04/05 04:40:15 theurich Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.33 2006/06/27 20:58:57 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
     integer :: gridCount(2)
     type(ESMF_Grid) :: grid
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_InternArray) :: iarray1, iarray2
+    type(ESMF_LocalArray) :: iarray1, iarray2
     type(ESMF_DELayout) :: layout
     type(ESMF_VM) :: vm
     !type(ESMF_RelLoc) :: relativelocation
@@ -70,10 +70,10 @@
 
     allocate(f90ptr1(gridCount(1),gridCount(2)))
 
-    iarray1 = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
+    iarray1 = ESMF_LocalArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_InternArrayPrint(iarray1, rc=rc)
+    call ESMF_LocalArrayPrint(iarray1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
@@ -138,7 +138,7 @@
     ! the size of the data in the array still has to line up with the Grid
     ! and its decomposition
     allocate(f90ptr2(gridCount(1),gridCount(2)))
-    iarray2 = ESMF_InternArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)  
+    iarray2 = ESMF_LocalArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

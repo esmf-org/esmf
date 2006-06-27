@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGlobalEx.F90,v 1.5 2006/04/05 04:40:15 theurich Exp $
+! $Id: ESMF_FieldGlobalEx.F90,v 1.6 2006/06/27 20:58:43 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
     integer :: dataIndexList(3), lbounds(3), localCount(3), ubounds(3)
     real (ESMF_KIND_R8), dimension(:,:,:), pointer :: f90ptr1
     real (ESMF_KIND_R8), dimension(2) :: origin
-    type(ESMF_InternArray)        :: iarray1
+    type(ESMF_LocalArray)        :: iarray1
     type(ESMF_DELayout)     :: layout
     type(ESMF_Field)        :: field1
     type(ESMF_FieldDataMap) :: datamap
@@ -117,19 +117,20 @@
     allocate(f90ptr1(lbounds(1):ubounds(1), &
                      lbounds(2):ubounds(2), &
                      lbounds(3):ubounds(3)))
+    f90ptr1(:,:,:) = 0.0        ! Good idea to initialize an array
 
     ! create the array from the F90 pointer and haloWidth
-    iarray1 = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_REF, haloWidth=haloWidth, rc=rc)
+    iarray1 = ESMF_LocalArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_InternArrayPrint(iarray1, rc=rc)
+    call ESMF_LocalArrayPrint(iarray1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Field Create with Grid, DataMap and InternArray}
+!\subsubsection{Field Create with Grid, DataMap and LocalArray}
 
 !  The user has already created an {\tt ESMF\_Grid} and an
-!  {\tt ESMF\_InternArray} with data.  The user creates a FieldDataMap, and then this
+!  {\tt ESMF\_LocalArray} with data.  The user creates a FieldDataMap, and then this
 !  create associates the two objects.
 !EOE
 
@@ -138,7 +139,7 @@
                                      dataIndexList=dataIndexList, &
                                      counts=localCount(1:1), rc=rc)
     field1 = ESMF_FieldCreate(grid, iarray1, horzRelloc=ESMF_CELL_CENTER, &
-                              datamap=datamap, name="pressure", rc=rc)
+                    datamap=datamap, haloWidth=haloWidth, name="pressure", rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
