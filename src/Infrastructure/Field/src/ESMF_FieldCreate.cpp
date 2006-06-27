@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.12 2006/03/28 21:52:26 theurich Exp $
+! $Id: ESMF_FieldCreate.cpp,v 1.13 2006/06/27 20:55:08 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.12 2006/03/28 21:52:26 theurich Exp $'
+      '$Id: ESMF_FieldCreate.cpp,v 1.13 2006/06/27 20:55:08 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -224,7 +224,7 @@ InterfaceMacro(FieldCreateEPtr)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid                
-      type(ESMF_InternArray), intent(in) :: array              
+      type(ESMF_LocalArray), intent(in) :: array              
       type(ESMF_CopyFlag), intent(in), optional :: copyflag       
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
@@ -297,7 +297,7 @@ InterfaceMacro(FieldCreateEPtr)
       ! Call construction method to allocate and initialize field internals.
       call ESMF_FieldConstruct(ftype, grid, array, horzRelloc, &
                                        vertRelloc, datamap, name, &
-                                       iospec, status)
+                                       iospec, haloWidth, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
