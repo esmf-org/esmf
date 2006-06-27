@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_BundleGetMacros.h,v 1.5 2006/03/28 21:52:25 theurich Exp $
+! $Id: ESMF_BundleGetMacros.h,v 1.6 2006/06/27 20:51:02 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -121,7 +121,7 @@
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
-        call ESMF_FieldGetArray(field, array, rc=status) @\
+        call ESMF_FieldGetInternArray(field, array, rc=status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
