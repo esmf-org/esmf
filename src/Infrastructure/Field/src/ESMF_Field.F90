@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.215 2006/04/24 17:14:51 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.216 2006/06/27 20:56:20 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -108,6 +108,7 @@
       type ESMF_LocalField
         sequence
         type(ESMF_InternArray) :: localdata           ! local data for this DE
+        type(ESMF_LocalArray) :: localarray      !cheung
         type (ESMF_Mask) :: mask                 ! may belong in Grid
         type (ESMF_ArraySpec) :: arrayspec       ! so field can allocate
 
@@ -131,11 +132,13 @@
         type (ESMF_Status) :: fieldstatus = ESMF_STATUS_UNINIT
         type (ESMF_Status) :: gridstatus = ESMF_STATUS_UNINIT
         type (ESMF_Status) :: datastatus = ESMF_STATUS_UNINIT
+        type (ESMF_Status) :: arraystatus = ESMF_STATUS_UNINIT
         type (ESMF_Status) :: datamapstatus = ESMF_STATUS_UNINIT
 #else
         type (ESMF_Status) :: fieldstatus
         type (ESMF_Status) :: gridstatus
         type (ESMF_Status) :: datastatus
+        type (ESMF_Status) :: arraystatus
         type (ESMF_Status) :: datamapstatus
 #endif
         type (ESMF_Grid) :: grid
@@ -144,6 +147,7 @@
         type (ESMF_IOSpec) :: iospec         ! iospec values
         type (ESMF_Status) :: iostatus       ! if unset, inherit from gcomp
 
+        integer :: haloinfo                  ! haloWidth
       end type
 
 !------------------------------------------------------------------------------
@@ -181,7 +185,8 @@
    public ESMF_FieldGetGlobalGridInfo  ! Return global Grid info
    public ESMF_FieldGetLocalGridInfo   ! Return local Grid info
 
-   public ESMF_FieldGetArray           ! Return the data Array
+   public ESMF_FieldGetInternArray     ! Return the data Array
+   public ESMF_FieldGetArray           ! Return the Local Array
    public ESMF_FieldGetGlobalDataInfo  ! Return global data info
    public ESMF_FieldGetLocalDataInfo   ! Return local data info
 
@@ -206,6 +211,7 @@
    public ESMF_FieldWrite              ! Write data and grid from a Field
 
    public ESMF_FieldConstruct          ! Only public for internal use
+   public ESMF_FieldConstructIA        ! Only public for internal use
    public ESMF_FieldSerialize
    public ESMF_FieldDeserialize
 
@@ -269,7 +275,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.215 2006/04/24 17:14:51 theurich Exp $'
+      '$Id: ESMF_Field.F90,v 1.216 2006/06/27 20:56:20 samsoncheung Exp $'
 
 !==============================================================================
 !
@@ -295,6 +301,24 @@
 !     The variations allow an {\tt ESMF\_Grid} to be specified or not, and for
 !     the data description to be specified or not.
  
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldConstructIA - Construct the internals of a new Field
+!
+! !INTERFACE:
+      interface ESMF_FieldConstructIA
+
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_FieldConstructIANew
+        module procedure ESMF_FieldConstructIANewArray
+
+! !DESCRIPTION:
+!     This interface provides an entry point for methods that construct a
+!     complete {\tt ESMF\_Field}.
+
 !EOPI
       end interface
 !
@@ -947,10 +971,74 @@
 #define ESMF_METHOD "ESMF_FieldGetArray"
 
 !BOP
-! !IROUTINE: ESMF_FieldGetArray - Get data Array associated with the Field
+! !IROUTINE: ESMF_FieldGetArray - Get Local Array associated with the Field
 !
 ! !INTERFACE:
       subroutine ESMF_FieldGetArray(field, array, rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field
+      type(ESMF_LocalArray), intent(out) :: array
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Get data in {\tt ESMF\_Array} form.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [{[array]}]
+!           Field {\tt ESMF\_Array}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+
+      integer :: status                           ! Error status
+      !character(len=ESMF_MAXSTR) :: str
+      type(ESMF_FieldType), pointer :: ftypep
+
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Validate first
+      call ESMF_FieldValidate(field, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ftypep => field%ftypep
+
+      if (ftypep%arraystatus .ne. ESMF_STATUS_READY) then
+           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "No data associated with Field", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      !call ESMF_StatusString(ftypep%arraystatus, str, rc)
+      !print *, "getting array data, status = ", trim(str)
+      array = ftypep%localfield%localarray
+
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldGetArray
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetInternArray"
+
+!BOP
+! !IROUTINE: ESMF_FieldGetInternArray - Get data Array associated with the Field
+!
+! !INTERFACE:
+      subroutine ESMF_FieldGetInternArray(field, array, rc)
 
 !
 ! !ARGUMENTS:
@@ -983,11 +1071,12 @@
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
 
-      ! Validate first
-      call ESMF_FieldValidate(field, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+      !cheung turn off for now
+      !! Validate first
+      !call ESMF_FieldValidate(field, rc=status)
+      !if (ESMF_LogMsgFoundError(status, &
+      !                          ESMF_ERR_PASSTHRU, &
+      !                          ESMF_CONTEXT, rc)) return
 
       ftypep => field%ftypep
 
@@ -1004,7 +1093,7 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldGetArray
+      end subroutine ESMF_FieldGetInternArray
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2078,7 +2167,7 @@
         write(*, *)  "Data status = ", trim(str)
         !TODO: add code here to print more info
         if (fp%datastatus .eq. ESMF_STATUS_READY) then 
-           call ESMF_InternArrayPrint(fp%localfield%localdata, "", status)
+           call ESMF_LocalArrayPrint(fp%localfield%localarray, "", status)
         endif
 
         call ESMF_StatusString(fp%datamapstatus, str, status)
@@ -2220,7 +2309,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field      
-      type(ESMF_InternArray), intent(in) :: array
+      type(ESMF_LocalArray), intent(in) :: array
       integer, intent(out), optional :: rc           
 
 !
@@ -2257,14 +2346,14 @@
       ftypep => field%ftypep
 
       ! TODO: do we allow this?  if so, do we just destroy the old array?
-      !if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
+      !if (ftypep%arraystatus .eq. ESMF_STATUS_READY) then
       !   if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
       !                          "Data already associated with Field", &
       !                           ESMF_CONTEXT, rc)) return
       !endif
 
-      ftypep%localfield%localdata = array
-      ftypep%datastatus = ESMF_STATUS_READY
+      ftypep%localfield%localarray = array
+      ftypep%arraystatus = ESMF_STATUS_READY
    
       ! Now revalidate to be sure the grid and datamap, if they exist, are
       ! consistent with the new array.
@@ -3203,11 +3292,14 @@
       endif
 
       ! make sure there is data before asking it questions.
-      if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
+      if (ftypep%arraystatus .eq. ESMF_STATUS_READY) then
 
           ! get array counts and other info
-          call ESMF_InternArrayGet(ftypep%localfield%localdata, counts=arraycounts, &
-                             haloWidth=halo, rank=arrayrank, rc=status)
+          !cheung
+          call ESMF_LocalArrayGet(ftypep%localfield%localarray, counts=arraycounts, &
+                              rank=arrayrank, rc=status)
+          halo = ftypep%haloinfo
+
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -4366,6 +4458,293 @@
 ! This section includes all Field internal methods.
 !
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldConstructIANew"
+
+!BOPI
+! !IROUTINE: ESMF_FieldConstructIANew - Construct the internals of a Field
+
+! !INTERFACE:
+      subroutine ESMF_FieldConstructIANew(ftype, grid, arrayspec, allocflag, &
+                                        horzRelloc, vertRelloc, haloWidth, &
+                                        datamap, name, iospec, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldType), pointer :: ftype 
+      type(ESMF_Grid) :: grid               
+      type(ESMF_ArraySpec), intent(in) :: arrayspec     
+      type(ESMF_AllocFlag), intent(in), optional :: allocflag
+      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
+      integer, intent(in), optional :: haloWidth
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap           
+      character (len=*), intent(in), optional :: name
+      type(ESMF_IOSpec), intent(in), optional :: iospec 
+      integer, intent(out), optional :: rc              
+!
+! !DESCRIPTION:
+! 
+!     Constructs all {\tt ESMF\_Field} internals, including the allocation
+!     of a data {\tt ESMF\_Array}.   TODO: this is missing a counts argument,
+!     which is required if the arrayspec rank is greater than the grid rank.
+!     Either that, or we must enforce that a datamap comes in, and it
+!     contains the counts for non-grid dims.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [ftype]
+!           Pointer to an {\tt ESMF\_Field} object.
+!     \item [grid] 
+!           Pointer to an {\tt ESMF\_Grid} object. 
+!     \item [arrayspec]
+!           Data specification. 
+!     \item [{[allocflag]}]
+!           Allocate space for data array or not.  For possible values
+!           see Section~\ref{opt:allocflag}.
+!     \item [{[horzRelloc]}] 
+!           Relative location of data per grid cell/vertex in the horizontal
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
+!     \item [{[vertRelloc]}] 
+!           Relative location of data per grid cell/vertex in the vertical
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
+!     \item [{[haloWidth]}] 
+!           Maximum halo depth along all edges.  Default is 0.
+!     \item [{[datamap]}]
+!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
+!           data to the {\tt ESMF\_Grid}.
+!     \item [{[name]}] 
+!           {\tt ESMF\_Field} name. 
+!     \item [{[iospec]}] 
+!           I/O specification. 
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!EOPI
+
+
+      integer :: status                           ! Error status
+      type(ESMF_InternArray) :: array                   ! New array
+      type(ESMF_RelLoc) :: hRelLoc, vRelLoc
+      type(ESMF_FieldDataMap) :: dmap
+      integer, dimension(ESMF_MAXDIM) :: gridcounts, arraycounts
+      integer, dimension(ESMF_MAXDIM) :: dimorder, counts
+      integer :: hwidth, minRank
+      integer :: i, j, arrayRank, gridRank, baseGridRank
+
+      ! Initialize return code   
+      status = ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! make sure hwidth has a value here.
+      if (present(haloWidth)) then
+          hwidth = haloWidth
+      else
+          hwidth = 0
+      endif
+
+      ! construct a reasonable datamap first before calling field construct
+      call ESMF_ArraySpecGet(arrayspec, rank=arrayRank, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      call ESMF_GridGet(grid, distDimCount=gridRank, dimCount=baseGridRank, &
+                        rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      minRank = min(arrayRank, gridRank)
+      if (present(datamap)) then
+          dmap = datamap
+      else
+          call ESMF_FieldDataMapSetDefault(dmap, minRank, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      endif
+
+      ! this sets the grid status, and the datamap status
+      call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
+                                      dmap, name, &
+                                      iospec, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      ! make sure hRelLoc has a value before GridGetDELocalInfo call
+      if (present(horzRelLoc)) then
+          hRelLoc = horzRelloc
+      else
+          if (present(datamap)) then
+              call ESMF_FieldDataMapGet(datamap, horzRelLoc=hRelLoc, rc=status)
+          else
+               if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                       "no valid RelLoc in either argument list or datamap", &
+                                 ESMF_CONTEXT, rc)) return
+          endif
+      endif
+      if (present(vertRelLoc)) then
+          vRelLoc = vertRelloc
+      else
+          if (present(datamap)) then
+              call ESMF_FieldDataMapGet(datamap, vertRelLoc=vRelLoc, rc=status)
+          else
+              if (baseGridRank .le. 2) then
+                  vRelLoc = ESMF_CELL_UNDEFINED
+              else
+                  if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+               "no valid vertical RelLoc in either argument list or datamap", &
+                                            ESMF_CONTEXT, rc)) return
+              endif
+          endif
+      endif
+      call ESMF_GridGetDELocalInfo(ftype%grid, horzRelLoc=hRelLoc, &
+                                   vertRelLoc=vRelLoc, &
+                                   localCellCountPerDim=gridcounts(1:gridRank), &
+                                   rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      ! get information back from datamap
+      call ESMF_FieldDataMapGet(ftype%mapping, dataIndexList=dimorder, &
+                                counts=counts, rc=status)
+
+      arraycounts(:) = 1
+      j = 1
+      do i=1, arrayRank
+         if (dimorder(i) .eq. 0) then
+            arraycounts(i) = counts(j) 
+            j = j + 1
+         else
+            !! TODO: decide if the counts going into ArrayCreate do or do not
+            !! include either halo widths or allocation widths.  If so, this
+            !! is the right count.  If not, then add hwidths plus awidths.
+            !!arraycounts(i) = gridcounts(dimorder(i))
+            arraycounts(i) = gridcounts(dimorder(i)) + (2 * hwidth)
+         endif
+      enddo
+
+      array = ESMF_InternArrayCreate(arrayspec, arraycounts, hwidth, rc=status) 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      ftype%localfield%localdata = array
+      ftype%datastatus = ESMF_STATUS_READY
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldConstructIANew
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldConstructIANewArray"
+
+!BOPI
+! !IROUTINE: ESMF_FieldConstructIANewArray - Construct the internals of a Field
+
+! !INTERFACE:
+      subroutine ESMF_FieldConstructIANewArray(ftype, grid, array, horzRelloc, &
+                                             vertRelloc, datamap, &
+                                             name, iospec, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldType), pointer :: ftype 
+      type(ESMF_Grid) :: grid               
+      type(ESMF_InternArray), intent(in) :: array     
+      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap           
+      character (len=*), intent(in), optional :: name
+      type(ESMF_IOSpec), intent(in), optional :: iospec 
+      integer, intent(out), optional :: rc              
+!
+! !DESCRIPTION:
+! 
+!     Constructs all {\tt ESMF\_Field} internals, including the allocation
+!     of a data {\tt ESMF\_Array}.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [ftype]
+!           Pointer to an {\tt ESMF\_Field} object.
+!     \item [grid] 
+!           Pointer to an {\tt ESMF\_Grid} object. 
+!     \item [array]
+!           Data. 
+!     \item [{[horzRelloc]}] 
+!           Relative location of data per grid cell/vertex in the horizontal
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
+!     \item [{[vertRelloc]}] 
+!           Relative location of data per grid cell/vertex in the vertical
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
+!     \item [{[datamap]}]
+!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
+!           data to the {\tt ESMF\_Grid}.
+!     \item [{[name]}] 
+!           {\tt ESMF\_Field} name. 
+!     \item [{[iospec]}] 
+!           I/O specification. 
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+
+      integer :: status                           ! Error status
+      type(ESMF_Field) :: tfield                  ! temp field for error check
+
+      ! Initialize return code   
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! this validates the grid already, no need to validate it first.
+      call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
+                                      datamap=datamap, name=name, &
+                                      iospec=iospec, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      ! make sure the array is a valid object first.
+      call ESMF_InternArrayValidate(array, "", status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+
+      ftype%localfield%localdata = array
+      ftype%datastatus = ESMF_STATUS_READY
+
+      ! instead of adding error checking all over the place, call the
+      ! validate routine to check sizes of array vs grid to be sure
+      ! they are consistent.  the tfield is a temp wrapper so we can
+      ! call the user level validate
+      tfield%ftypep => ftype
+      call ESMF_FieldValidate(tfield, "", status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) then
+          ! rc is already set, we just need to mark that the array
+          ! is not valid.
+          ftype%datastatus = ESMF_STATUS_INVALID
+          return
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldConstructIANewArray
+
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldConstructNew"
 
@@ -4560,17 +4939,18 @@
 ! !INTERFACE:
       subroutine ESMF_FieldConstructNewArray(ftype, grid, array, horzRelloc, &
                                              vertRelloc, datamap, &
-                                             name, iospec, rc)
+                                             name, iospec, haloWidth, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldType), pointer :: ftype 
       type(ESMF_Grid) :: grid               
-      type(ESMF_InternArray), intent(in) :: array     
+      type(ESMF_LocalArray), intent(in) :: array     
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       type(ESMF_FieldDataMap), intent(in), optional :: datamap           
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
+      integer, intent(in), optional :: haloWidth
       integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -4623,14 +5003,21 @@
                                   ESMF_CONTEXT, rc)) return
 
       ! make sure the array is a valid object first.
-      call ESMF_InternArrayValidate(array, "", status)
+      call ESMF_LocalArrayValidate(array, "", status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
 
-      ftype%localfield%localdata = array
-      ftype%datastatus = ESMF_STATUS_READY
+      ftype%localfield%localarray = array
+      ftype%arraystatus = ESMF_STATUS_READY
+
+      ! cheung
+      if(present(haloWidth)) then
+         ftype%haloinfo = haloWidth
+      else
+         ftype%haloinfo = 0
+      endif
 
       ! instead of adding error checking all over the place, call the
       ! validate routine to check sizes of array vs grid to be sure
@@ -4643,7 +5030,7 @@
                                   ESMF_CONTEXT, rc)) then
           ! rc is already set, we just need to mark that the array
           ! is not valid.
-          ftype%datastatus = ESMF_STATUS_INVALID
+          ftype%arraystatus = ESMF_STATUS_INVALID
           return
       endif
 
