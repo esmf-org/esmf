@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.9 2006/03/28 21:52:26 theurich Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.10 2006/06/27 20:53:57 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -148,7 +148,7 @@
                                        ESMF_CONTEXT, rc)) return @\
  @\
         ! Construction method allocates and initializes field internals. @\
-        call ESMF_FieldConstruct(ftype, grid, array, & @\
+        call ESMF_FieldConstructIA(ftype, grid, array, & @\
                                     horzRelloc, vertRelloc, & @\
                                     datamap, name, iospec, status) @\
         if (ESMF_LogMsgFoundError(status, & @\
@@ -304,7 +304,7 @@
                                        ESMF_CONTEXT, rc)) return @\
  @\
         ! Construction method allocates and initializes field internals. @\
-        call ESMF_FieldConstruct(ftype, grid, arrayspec, allocflag, & @\
+        call ESMF_FieldConstructIA(ftype, grid, arrayspec, allocflag, & @\
                                     horzRelloc, vertRelloc, haloWidth, & @\
                                     datamap, name, iospec, status) @\
         if (ESMF_LogMsgFoundError(status, & @\
