@@ -1,7 +1,13 @@
-# $Id: build_rules.mk,v 1.48.2.2 2006/07/12 06:56:21 theurich Exp $
+# $Id: build_rules.mk,v 1.48.2.3 2006/07/12 18:09:08 theurich Exp $
 #
 # Linux.intel.default
 #
+
+############################################################
+# Default compiler setting.
+#
+ESMF_F90DEFAULT         = ifort
+ESMF_CXXDEFAULT         = icpc
 
 ############################################################
 # Default MPI setting.
@@ -10,15 +16,12 @@ ifeq ($(ESMF_COMM),default)
 export ESMF_COMM := mpiuni
 endif
 
-
 ############################################################
 # MPI dependent settings.
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90DEFAULT         = ifort
 ESMF_F90LINKLIBS       += -lmpiuni
-ESMF_CXXDEFAULT         = icpc
 ESMF_CXXCOMPILEOPTS    += -DESMF_MPIUNI
 ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_CXXLINKLIBS       += -lmpiuni
@@ -26,9 +29,7 @@ ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
-ESMF_F90DEFAULT         = ifort
 ESMF_F90LINKLIBS       += -lmpi -lmpi++
-ESMF_CXXDEFAULT         = icpc
 ESMF_CXXLINKLIBS       += -lmpi -lmpi++
 ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpirun
@@ -68,7 +69,11 @@ ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
+ifeq ($(ESMF_COMM),user)
+# User specified flags -------------------------------------
+else
 $(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
 endif
 endif
 endif
@@ -106,7 +111,7 @@ endif
 
 ############################################################
 #
-# To compile with intel icpc but link with GCC's stdc++ lib
+# To compile with Intel's icpc but link with GCC's stdc++ lib
 # set ESMF_STDCXX_LIBRARY to gcc before building
 ifeq ($(ESMF_STDCXX_LIBRARY),gcc)
 ESMF_F90LINKPATHS   += -L$(dir $(shell gcc -print-file-name=libstdc++.so))
@@ -131,7 +136,7 @@ endif
 
 ############################################################
 #
-# How to print versions
+# Compiler options to print version string
 ESMF_CXXVOPT        = -V -v
 ESMF_F90VOPT        = -V -v
 

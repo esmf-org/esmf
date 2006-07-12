@@ -1,7 +1,13 @@
-# $Id: build_rules.mk,v 1.1.2.3 2006/07/12 06:53:51 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.4 2006/07/12 18:09:09 theurich Exp $
 #
 # Linux.intelgcc.default
 #
+
+############################################################
+# Default compiler setting.
+#
+ESMF_F90DEFAULT         = ifort
+ESMF_CXXDEFAULT         = g++
 
 ############################################################
 # Default MPI setting.
@@ -10,15 +16,12 @@ ifeq ($(ESMF_COMM),default)
 export ESMF_COMM := mpiuni
 endif
 
-
 ############################################################
 # MPI dependent settings.
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90DEFAULT         = ifort
 ESMF_F90LINKLIBS       += -lmpiuni
-ESMF_CXXDEFAULT         = g++
 ESMF_CXXCOMPILEOPTS    += -DESMF_MPIUNI
 ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_CXXLINKLIBS       += -lmpiuni
@@ -26,9 +29,7 @@ ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
-ESMF_F90DEFAULT         = ifort
 ESMF_F90LINKLIBS       += -lmpi -lmpi++
-ESMF_CXXDEFAULT         = g++
 ESMF_CXXLINKLIBS       += -lmpi -lmpi++
 ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpirun
@@ -68,7 +69,11 @@ ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
+ifeq ($(ESMF_COMM),user)
+# User specified flags -------------------------------------
+else
 $(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
 endif
 endif
 endif
@@ -104,7 +109,7 @@ endif
 
 ############################################################
 #
-# Link against GCC;s stdc++ library (because g++ is used)
+# Link against GCC's stdc++ library (because g++ is used)
 ESMF_F90LINKPATHS += -L$(dir $(shell gcc -print-file-name=libstdc++.so))
 ESMF_F90LINKLIBS  += -lstdc++
 
@@ -120,7 +125,7 @@ endif
 
 ############################################################
 #
-# How to print versions
+# Compiler options to print version string
 ESMF_CXXVOPT        = --version
 ESMF_F90VOPT        = -V -v
 
