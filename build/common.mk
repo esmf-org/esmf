@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.2 2006/07/12 06:56:21 theurich Exp $
+#  $Id: common.mk,v 1.155.2.3 2006/07/12 18:10:42 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -834,7 +834,7 @@ ESMF_LINKFLAGS    = $(LINKOPTS)
 ESMF_LINKLIBS     = $(FLINKLIBS)
 
 ESMF_CC            = $(CC)
-ESMF_CXX           = $(CXX)
+#ESMF_CXX           = $(CXX) #gjt: this conflicts with enhanced build system
 ESMF_CCOMPILEFLAGS = $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS) $(ESMF_INCLUDE)
 ESMF_CLINKER       = $(CLINKER)
 ESMF_CLINKFLAGS    = $(LINKOPTS)
