@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.1 2006/06/22 17:25:43 theurich Exp $
+#  $Id: common.mk,v 1.155.2.2 2006/07/12 06:56:21 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -400,6 +400,100 @@ endif
 
 
 #-------------------------------------------------------------------------------
+# Set default ESMF_ variables which may be appended to or overridden in 
+# platform specific build_rules.mk files.
+#-------------------------------------------------------------------------------
+# - F90COMPILER
+ifneq ($(origin ESMF_F90COMPILER), environment)
+ifeq ($(origin ESMF_F90), environment)
+ESMF_F90COMPILER = $(ESMF_F90)
+else
+ESMF_F90COMPILER = $(ESMF_F90COMPILERDEFAULT)
+ESMF_F90COMPILERDEFAULT = $(ESMF_F90DEFAULT)
+endif
+endif
+ifneq ($(origin ESMF_F90IMOD), environment)
+ESMF_F90IMOD = -I
+endif
+ifneq ($(origin ESMF_F90MODDIR), environment)
+ESMF_F90MODDIR = $(ESMF_MODDIR)
+endif
+ifneq ($(origin ESMF_F90OPTFLAG), environment)
+ESMF_F90OPTFLAG = $(FOPTFLAGS)
+endif
+ESMF_F90COMPILEOPTS += $(ESMF_F90OPTFLAG)
+ESMF_F90COMPILEPATHS += $(ESMF_F90IMOD)$(ESMF_F90MODDIR)
+ifneq ($(ESMF_SITE),default)
+ESMF_F90COMPILEPATHS += -I$(ESMF_SITEDIR)
+endif
+ESMF_F90COMPILEPATHS += -I$(ESMF_CONFDIR) -I$(ESMF_INCDIR)
+ESMF_F90COMPILEFREECPP +=
+ESMF_F90COMPILEFREENOCPP +=
+ESMF_F90COMPILEFIXCPP +=
+ESMF_F90COMPILEFIXNOCPP +=
+ESMF_F90COMPILECPPFLAGS += $(PCONF) $(ESMC_PARCH) $(FPPFLAGS)
+# - CXXCOMPILER
+ifneq ($(origin ESMF_CXXCOMPILER), environment)
+ifeq ($(origin ESMF_CXX), environment)
+ESMF_CXXCOMPILER = $(ESMF_CXX)
+else
+ESMF_CXXCOMPILER = $(ESMF_CXXCOMPILERDEFAULT)
+ESMF_CXXCOMPILERDEFAULT = $(ESMF_CXXDEFAULT)
+endif
+endif
+ifneq ($(origin ESMF_CXXOPTFLAG), environment)
+ESMF_CXXOPTFLAG = $(COPTFLAGS)
+endif
+ESMF_CXXCOMPILEOPTS += $(ESMF_CXXOPTFLAG)
+ESMF_CXXCOMPILEPATHS += -I$(ESMF_TOP_DIR)/$(LOCDIR)
+ESMF_CXXCOMPILEPATHS += -I$(ESMF_TOP_DIR)/$(LOCDIR)/../include 
+ifneq ($(ESMF_SITE),default)
+ESMF_CXXCOMPILEPATHS += -I$(ESMF_SITEDIR)
+endif
+ESMF_CXXCOMPILEPATHS += -I$(ESMF_CONFDIR) -I$(ESMF_INCDIR)
+ESMF_CXXCOMPILEPATHS += -I$(ESMF_DIR)/src/Infrastructure/stubs/pthread
+ESMF_CXXCOMPILECPPFLAGS += $(PCONF) $(ESMC_PARCH) $(CPPFLAGS) -D__SDIR__='"$(LOCDIR)"'
+# - F90LINKER
+ifneq ($(origin ESMF_F90LINKER), environment)
+ifeq ($(origin ESMF_F90), environment)
+ESMF_F90LINKER = $(ESMF_F90)
+else
+ESMF_F90LINKER = $(ESMF_F90LINKERDEFAULT)
+ESMF_F90LINKERDEFAULT = $(ESMF_F90DEFAULT)
+endif
+endif
+ESMF_F90LINKOPTS +=
+ESMF_F90LINKPATHS += -L$(LDIR)
+ESMF_F90LINKRPATHS += $(SLFLAG)$(LDIR)
+ESMF_F90LINKLIBS += -lesmf
+# - CXXLINKER
+ifneq ($(origin ESMF_CXXLINKER), environment)
+ifeq ($(origin ESMF_CXX), environment)
+ESMF_CXXLINKER = $(ESMF_CXX)
+else
+ESMF_CXXLINKER = $(ESMF_CXXLINKERDEFAULT)
+ESMF_CXXLINKERDEFAULT = $(ESMF_CXXDEFAULT)
+endif
+endif
+ESMF_CXXLINKOPTS +=
+ESMF_CXXLINKPATHS += -L$(LDIR)
+ESMF_CXXLINKRPATHS += $(SLFLAG)$(LDIR)
+ESMF_CXXLINKLIBS += -lesmf
+# - MPIRUN
+ifneq ($(origin ESMF_MPIRUN), environment)
+ESMF_MPIRUN = $(ESMF_MPIRUNDEFAULT)
+endif
+
+
+#-------------------------------------------------------------------------------
+# Set aux. variables of how to obtain version string from F90 and C++ compilers
+#-------------------------------------------------------------------------------
+C_CXXV		   = ${ESMF_CXXCOMPILER} $(ESMF_CXXVOPT)
+C_FCV              = ${ESMF_F90COMPILER} $(ESMF_F90VOPT)
+
+
+
+#-------------------------------------------------------------------------------
 # Up to here there have only been definitions, no targets.  This is the 
 # first (and therefore default) target.  The definition of what "all" is
 # differs for the framework, for the implementation report, and for the
@@ -446,14 +540,14 @@ endif
 #
 # the default link options if you are compiling with the mpiuni bypass library.
 
-ifeq ($(ESMF_COMM),mpiuni)
-CPPFLAGS       += -DESMF_MPIUNI
+#ifeq ($(ESMF_COMM),mpiuni)
+#CPPFLAGS       += -DESMF_MPIUNI
 
-MPI_HOME       = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
-MPI_INCLUDE    = -I$(MPI_HOME)
-MPI_LIB        = -lmpiuni
-MPIRUN         = $(MPI_HOME)/mpirun
-endif
+#MPI_HOME       = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+#MPI_INCLUDE    = -I$(MPI_HOME)
+#MPI_LIB        = -lmpiuni
+#MPIRUN         = $(MPI_HOME)/mpirun
+#endif
 
 #-------------------------------------------------------------------------------
 
@@ -1874,13 +1968,19 @@ tree_build_examples: $(EXAMPLES_BUILD)
 #
 #  Examples Link commands
 #
+#$(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(ESMFLIB)
+#	$(FLINKER) $(LINKOPTS) -o $@ $(EXAMPLE_$(*)_OBJS) $< $(FLINKLIBS)
+#	$(RM) -f *.o *.mod
 $(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(ESMFLIB)
-	$(FLINKER) $(LINKOPTS) -o $@ $(EXAMPLE_$(*)_OBJS) $< $(FLINKLIBS)
+	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(EXAMPLE_$(*)_OBJS) $< $(ESMF_F90LINKLIBS)
 	$(RM) -f *.o *.mod
 
 
+#$(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
+#	$(CLINKER) $(LINKOPTS) -o $@ $(EXAMPLE_$(*)_OBJS) $< $(CLINKLIBS)
+#	$(RM) $<
 $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
-	$(CLINKER) $(LINKOPTS) -o $@ $(EXAMPLE_$(*)_OBJS) $< $(CLINKLIBS)
+	$(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) -o $@ $(EXAMPLE_$(*)_OBJS) $< $(ESMF_CXXLINKLIBS)
 	$(RM) $<
 
 #
@@ -1913,20 +2013,20 @@ tree_run_examples_uni: $(EXAMPLES_RUN_UNI)
 #
 exfrun:
 	-@if [ $(ESMF_BATCH) = "true" ] ; then \
-	  echo $(MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex ; \
-	  $(MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex ; \
 	else \
-	  echo $(MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex \> $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex.stdout 2\>\&1 ; \
-	  $(MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex > $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex.stdout 2>&1 ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex \> $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex > $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex.stdout 2>&1 ; \
 	fi 
 
 excrun:
 	-@if [ $(ESMF_BATCH) = "true" ] ; then \
-	  echo $(MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex ; \
-	  $(MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex ; \
 	else \
-	  echo $(MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex \> $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex.stdout 2\>\&1 ; \
-	  $(MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex > $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex.stdout 2>&1 ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex \> $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex > $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex.stdout 2>&1 ; \
 	fi 
 
 #
@@ -2241,56 +2341,74 @@ endif
 # TODO more: add CXXFLAGS
 
 .F90.o:
-	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
-           $(F_FREECPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $<
+	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREECPP) $(ESMF_F90COMPILECPPFLAGS) $<
 
+#.F.o:
+#	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
+#           $(F_FREENOCPP) $<
 .F.o:
-	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
-           $(F_FREENOCPP) $<
+	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREENOCPP) $<
 
+#.f90.o:
+#	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
+#           $(F_FIXCPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $<
 .f90.o:
-	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
-           $(F_FIXCPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $<
+	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFIXCPP) $(ESMF_F90COMPILECPPFLAGS) $<
 
+#.f.o:
+#	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) $(F_FIXNOCPP) $<
 .f.o:
-	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) $(F_FIXNOCPP) $<
+	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFIXNOCPP) $<
 
+#.c.o:
+#	$(CC) -c $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS) $(ESMF_INCLUDE) $<
 .c.o:
-	$(CC) -c $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS) $(ESMF_INCLUDE) $<
+	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
 
 .C.o:
-	$(CXX) -c $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS) $(ESMF_INCLUDE) $<
+	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
 
+#.F90.a:
+#	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
+#           $(F_FREECPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $<
 .F90.a:
-	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
-           $(F_FREECPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $<
+	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREECPP) $(ESMF_F90COMPILECPPFLAGS) $<
 	$(AR) $(AR_FLAGS) $(LIBNAME) $*.o
 	$(RM) $*.o
 
+#.F.a:
+#	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
+#           $(F_FREENOCPP) $<
 .F.a:
-	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
-           $(F_FREENOCPP) $<
+	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREENOCPP) $<
 	$(AR) $(AR_FLAGS) $(LIBNAME) $*.o
 	$(RM) $*.o
 
+#.f90.a:
+#	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
+#           $(F_FIXCPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $<
 .f90.a:
-	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
-           $(F_FIXCPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $<
+	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFIXCPP) $(ESMF_F90COMPILECPPFLAGS) $<
 	$(AR) $(AR_FLAGS) $(LIBNAME) $*.o
 	$(RM) $*.o
 
+#.f.a:
+#	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) $(F_FIXNOCPP) $<
 .f.a:
-	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) $(F_FIXNOCPP) $<
+	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFIXNOCPP) $<
 	$(AR) $(AR_FLAGS) $(LIBNAME) $*.o
 	$(RM) $*.o
 
-.c.a:
-	$(CC) -c $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS) $(ESMF_INCLUDE) $<
+#.c.a:
+#	$(CC) -c $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS) $(ESMF_INCLUDE) $<
+	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
 	$(AR) $(AR_FLAGS) $(LIBNAME) $*.o
 	$(RM) $*.o
 
+#.C.a:
+#	$(CXX) -c $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS) $(ESMF_INCLUDE) $<
 .C.a:
-	$(CXX) -c $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS) $(ESMF_INCLUDE) $<
+	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
 	$(AR) $(AR_FLAGS) $(LIBNAME) $*.o
 	$(RM) $*.o
 
@@ -2320,11 +2438,11 @@ ifeq ($(origin CPPRULES),undefined)
 	cp $< $<.cpp; $(CPP) -E -P -I$(ESMF_INCDIR) $(FPPDEFS) $<.cpp | tr "@^" "\n#" | $(SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@); rm -f $<.cpp
 
 
-.cpp.o:
-	$(CPP) -E -P -I$(ESMF_INCDIR) $(FPPDEFS) $< | tr "@^" "\n#" | \
-              $(SED) -e '/^#pragma GCC/d' > $(dir $<)$(basename $@).F90
-	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
-          $(F_FREECPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $(dir $<)$(basename $@).F90
+#.cpp.o:
+#	$(CPP) -E -P -I$(ESMF_INCDIR) $(FPPDEFS) $< | tr "@^" "\n#" | \
+#              $(SED) -e '/^#pragma GCC/d' > $(dir $<)$(basename $@).F90
+#	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
+#          $(F_FREECPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $(dir $<)$(basename $@).F90
 endif
 
 
