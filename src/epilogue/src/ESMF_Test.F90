@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.3 2005/06/28 15:14:44 nscollins Exp $
+! $Id: ESMF_Test.F90,v 1.4 2006/07/13 20:19:28 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,13 +43,14 @@
       public ESMF_TestNumPETs
       public ESMF_TestMinPETs
       public ESMF_TestMaxPETs
+      public ESMF_TestResultsGather
       public ESMF_TestStart
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.3 2005/06/28 15:14:44 nscollins Exp $'
+      '$Id: ESMF_Test.F90,v 1.4 2006/07/13 20:19:28 svasquez Exp $'
 
 !==============================================================================
 
@@ -367,6 +368,97 @@
       return
 
       end function ESMF_TestNumPETs
+
+
+!------------------------------------------------------------------------------
+!BOP
+!
+! !IROUTINE:  ESMF_TestResultsGather - Gathers test results from all Pets and prints out a PASS/FAIL message
+!
+! !INTERFACE:
+      subroutine ESMF_TestResultsGather(vm, localPet, petCount, testResults, file, line, unit,  rc)
+
+! !ARGUMENTS:
+      type(ESMF_VM), intent(in) :: vm     ! the vm of this pet
+      integer, intent(in) :: localPet     ! number of this pet
+      integer, intent(in) :: petCount     ! number of pets
+      integer, intent(in) :: testResults  ! test results for this pet
+      character(*), intent(in) :: file  ! test file name
+      integer, intent(in) :: line           ! test file line number
+      integer, intent(in), optional :: unit ! additional output unit number
+      integer, intent(out), optional :: rc ! return code
+
+! !DESCRIPTION:
+!     The gatherPet gathers the test results, PASS/FAIl, from all other
+!     Pets and prints out a PASS/FAIL Message . This subroutine should
+!     be called at the end of system tests and use test cases.
+!
+!EOP
+!-------------------------------------------------------------------------------
+      character(ESMF_MAXSTR) :: msg, failMsg
+      integer, allocatable:: array1(:), array2(:)	
+      integer:: finalrc, gatherRoot, i, localrc
+
+      allocate(array1(petCount))
+      allocate(array2(1))
+      ! Store test results
+      array2(1) = testResults
+      gatherRoot = petCount - 1
+
+      ! Don't Gather until all pets are done
+      call ESMF_VMBarrier(vm, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) then
+          write(msg, *) " FAIL  ESMF_VMBarrier failed.  Error code ", localrc
+          print *, trim(msg)
+          if (present(unit)) write(unit, *) trim(msg)
+          if (present(rc)) rc = localrc
+          return
+      endif
+
+      
+
+      ! Gather test results
+      call ESMF_VMGather(vm, sendData=array2, recvData=array1, count=petCount, &
+      root=gatherRoot, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) then
+          write(msg, *) " FAIL  ESMF_VMGather failed.  Error code ", localrc
+          print *, trim(msg)
+          if (present(unit)) write(unit, *) trim(msg)
+          if (present(rc)) rc = localrc
+          return
+      endif
+
+
+      ! assume success
+      finalrc=ESMF_SUCCESS
+
+      ! The gather pet checks the results and prints out PASS/FAIL message.
+      if (localPet==gatherRoot) then
+        do i=1, petCount
+                if (array1(i).EQ.ESMF_FAILURE) finalrc = ESMF_FAILURE
+        enddo
+        if (finalrc.EQ.ESMF_SUCCESS) then
+            print *, " PASS: ", trim(file)
+        else
+            print *, " FAIL: ", trim(file)
+        endif
+      endif
+      deallocate(array1)
+      deallocate(array2)
+
+      ! Don't end test until all pets are done
+      call ESMF_VMBarrier(vm, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) then
+          write(msg, *) " FAIL  ESMF_VMBarrier failed.  Error code ", localrc
+          print *, trim(msg)
+          if (present(unit)) write(unit, *) trim(msg)
+          if (present(rc)) rc = localrc
+          return
+      endif
+      rc=ESMF_SUCCESS
+      return
+                                                 
+      end subroutine ESMF_TestResultsGather
 
 !------------------------------------------------------------------------------
 !BOP
