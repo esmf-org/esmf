@@ -1,6 +1,6 @@
-# $Id: build_rules.mk,v 1.1.2.1 2006/07/17 18:19:27 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.2 2006/07/17 18:24:07 theurich Exp $
 #
-#  Linux.pgi.default
+#  Linux.pgigcc.default
 #
 
 ############################################################
