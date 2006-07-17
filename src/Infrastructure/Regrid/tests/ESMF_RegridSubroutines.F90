@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.16 2006/05/02 18:11:52 samsoncheung Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.17 2006/07/17 19:49:51 svasquez Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -55,7 +55,7 @@ contains
     type(testArguments) :: testArgs
 
     rc = ESMF_SUCCESS ! assume success
-    opensStatus = 0
+    openStatus = 0
     startTesting = 1 ! Don't start reading the test list strings until the start of test string is found.
     testCount = 0
 
