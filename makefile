@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.69.2.2 2006/07/13 21:46:37 theurich Exp $
+# $Id: makefile,v 1.69.2.3 2006/07/19 23:42:41 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -56,7 +56,7 @@ script_info:
 	-@echo "C++ Compiler version:" ; $(C_CXXV) ; echo "" 
 	-@echo "Fortran Compiler version:" ; $(C_FCV) ; echo "" 
 	-@if [ -f $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h ] ; then \
-	  fgrep ESMF_VERSION_STRING $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(SED) "s/^#define //" ; fi
+	  fgrep ESMF_VERSION_STRING $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) "s/^#define //" ; fi
 	-@echo " "
 	-@echo "------------------------------------------"
 	-@echo "Using ESMF environment variables:"
@@ -98,7 +98,7 @@ info:   script_info
 	-@echo " "
 	-@echo "------------------------------------------"
 	-@echo "Compilers, Linkers, Flags, and Libraries:"
-	-@echo "Location of the preprocessor: " `which $(word 1, $(CPP))`
+	-@echo "Location of the preprocessor: " `which $(word 1, $(ESMF_CPP))`
 	-@echo "Location of the Fortran compiler: " `which $(word 1, $(ESMF_F90COMPILER))`
 	-@echo "Location of the Fortran linker: " `which $(word 1, $(ESMF_F90LINKER))`
 	-@echo "Location of the C++ compiler: " `which $(word 1, $(ESMF_CXXCOMPILER))`
@@ -139,7 +139,7 @@ info_h:
 	-@$(RM) MINFO $(MINFO)
 	-@echo  "static char *machineinfo = \"  " >> MINFO
 	-@$(MAKE) -s info >> MINFO 2>&1  
-	-@cat MINFO | $(SED) -e 's/$$/  \\n\\/' > $(MINFO)
+	-@cat MINFO | $(ESMF_SED) -e 's/$$/  \\n\\/' > $(MINFO)
 	-@echo  " \"; " >> $(MINFO)
 	-@$(RM) MINFO
 
