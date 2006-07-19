@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5.2.2 2006/07/17 22:32:38 theurich Exp $
+# $Id: build_rules.mk,v 1.5.2.3 2006/07/19 18:08:11 theurich Exp $
 #
 #  Linux.g95.default
 #
@@ -86,14 +86,14 @@ endif
 # BLAS_LIB         = -latlas -lscs
 
 ############################################################
-#
 # Fortran symbol convention must match other libraries used
+#
 ESMF_F90COMPILEOPTS       += -fno-second-underscore
 ESMF_F90LINKOPTS          += -fno-second-underscore
 
 ############################################################
-#
 # On IA64 set long and pointer types to 64-bit
+#
 ifeq ($(ESMF_PREC),64)
 ESMF_CXXCOMPILEOPTS       += -march=k8 -m64 -mcmodel=medium
 ESMF_CXXLINKOPTS          += -march=k8 -m64 -mcmodel=medium
@@ -102,45 +102,44 @@ ESMF_F90LINKOPTS          += -march=k8 -m64 -mcmodel=medium
 endif
 
 ############################################################
-#
 # Compiler options to print version string
+#
 ESMF_CXXVOPT        = -dumpversion
 ESMF_F90VOPT        = -dumpversion
 
 ############################################################
-#
 # Need this until the file convention is fixed (then remove these two lines)
+#
 ESMF_F90COMPILEFREENOCPP = -ffree-form
 ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 
 ############################################################
-#
 # Determine where gcc's libraries are located
+#
 ESMF_F90LINKPATHS += \
   -L$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.so))
 ESMF_F90LINKRPATHS += \
   -Wl,-rpath,$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.so))
 
 ############################################################
-#
 # Determine where g95's libraries are located
+#
 ESMF_CXXLINKPATHS += \
   -L$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a))
 ESMF_CXXLINKRPATHS += \
   -Wl,-rpath,$(dir $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a))
 
 ############################################################
-#
 # Link against libesmf.a using the F90 linker front-end
+#
 ESMF_F90LINKLIBS += -lrt -lstdc++
 
 ############################################################
-#
 # Link against libesmf.a using the C++ linker front-end
+#
 ESMF_CXXLINKLIBS += -lrt -lf95
 
-###############################################################################
-
-SL_LIBS_TO_MAKE = 
-C_SL_LIBOPTS  =
-
+############################################################
+# Blank out shared library options
+#
+ESMF_SL_LIBS_TO_MAKE  =

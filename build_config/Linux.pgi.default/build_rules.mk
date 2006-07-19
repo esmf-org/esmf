@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.25.2.1 2006/07/17 18:05:34 theurich Exp $
+# $Id: build_rules.mk,v 1.25.2.2 2006/07/19 18:08:43 theurich Exp $
 #
 #  Linux.pgi.default
 #
@@ -85,44 +85,42 @@ endif
 # BLAS_LIB         = -latlas -lscs
 
 ############################################################
-#
 # Compiler options to print version string
+#
 ESMF_CXXVOPT        = -V -v
 ESMF_F90VOPT        = -V -v
 
 ############################################################
-#
 # Need this until the file convention is fixed (then remove these two lines)
+#
 ESMF_F90COMPILEFREENOCPP = -Mfreeform
 ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform
 
 ############################################################
-#
 # Determine where pgf90's libraries are located
+#
 ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/pgf90-libpath $(ESMF_F90COMPILER)))
 ESMF_CXXLINKRPATHS += \
   -Wl,-rpath,$(dir $(shell $(ESMF_DIR)/scripts/pgf90-libpath $(ESMF_F90COMPILER)))
 
 ############################################################
-#
 # Determine where pgCC's libraries are located
+#
 ESMF_F90LINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/pgCC-libpath $(ESMF_CXXCOMPILER)))
 ESMF_F90LINKRPATHS += \
   -Wl,-rpath,$(dir $(shell $(ESMF_DIR)/scripts/pgCC-libpath $(ESMF_CXXCOMPILER)))
 
 ############################################################
-#
 # Link against libesmf.a using the F90 linker front-end
+#
 ESMF_F90LINKLIBS += -lrt -lC -lc
 
 ############################################################
-#
 # Link against libesmf.a using the C++ linker front-end
+#
 ESMF_CXXLINKLIBS += -lrt -lC -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
 
-###############################################################################
-
-SL_LIBS_TO_MAKE = 
-C_SL_LIBOPTS  = -shared
-
-
+############################################################
+# Blank out shared library options
+#
+ESMF_SL_LIBS_TO_MAKE  =

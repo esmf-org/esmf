@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1.2.4 2006/07/12 18:09:09 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.5 2006/07/19 18:03:27 theurich Exp $
 #
 # Linux.intelgcc.default
 #
@@ -100,22 +100,22 @@ endif
 # BLAS_LIB         = -latlas -lscs
 
 ############################################################
-#
 # On IA64 set long and pointer types to 64-bit
+#
 ifeq ($(ESMF_PREC),64)
 ESMF_F90COMPILEOPTS       += -size_lp64
 ESMF_F90LINKOPTS          += -size_lp64
 endif
 
 ############################################################
-#
 # Link against GCC's stdc++ library (because g++ is used)
+#
 ESMF_F90LINKPATHS += -L$(dir $(shell gcc -print-file-name=libstdc++.so))
 ESMF_F90LINKLIBS  += -lstdc++
 
 ############################################################
-#
 # Conditionally add pthread compiler and linker flags
+#
 ifeq ($(ESMF_PTHREADS),ON)
 ESMF_F90COMPILEOPTS +=  -threads
 ESMF_CXXCOMPILEOPTS +=  -pthread
@@ -124,39 +124,38 @@ ESMF_CXXLINKOPTS    += -pthread
 endif
 
 ############################################################
-#
 # Compiler options to print version string
+#
 ESMF_CXXVOPT        = --version
 ESMF_F90VOPT        = -V -v
 
 ############################################################
-#
 # Need this until the file convention is fixed (then remove these two lines)
+#
 ESMF_F90COMPILEFREENOCPP = -fpp0 -FR
 ESMF_F90COMPILEFIXCPP    = -fpp
 
 ############################################################
-#
 # Determine where ifort's libraries are located
+#
 ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/ifort-libpath $(ESMF_F90COMPILER)))
 ESMF_CXXLINKRPATHS += \
   -Wl,-rpath,$(dir $(shell $(ESMF_DIR)/scripts/ifort-libpath $(ESMF_F90COMPILER)))
 
 ############################################################
-#
 # Link against libesmf.a using the F90 linker front-end
+#
 ESMF_F90LINKLIBS += -limf -lm -lcxa -lunwind -lrt -ldl
 
 ############################################################
-#
 # Link against libesmf.a using the C++ linker front-end
+#
 ESMF_CXXLINKLIBS += -lifcoremt -lunwind -lrt -ldl
 ifeq ($(ESMF_PREC),64)
 ESMF_CXXLINKLIBS += -lipr
 endif
 
-###############################################################################
-
-SL_LIBS_TO_MAKE = 
-C_SL_LIBOPTS  =
-
+############################################################
+# Blank out shared library options
+#
+ESMF_SL_LIBS_TO_MAKE  =
