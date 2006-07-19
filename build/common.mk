@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.6 2006/07/19 18:13:12 theurich Exp $
+#  $Id: common.mk,v 1.155.2.7 2006/07/19 23:43:07 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -222,12 +222,6 @@ ifeq ($(ESMF_BOPT),default)
 export ESMF_BOPT = O
 endif
 
-# default settings for enhanced common.mk
-ESMF_ARDEFAULT              = ar
-ESMF_ARCREATEFLAGSDEFAULT   = cr
-ESMF_RANLIBDEFAULT          = ranlib
-
-
 # common commands and flags.  override in the platform specific include
 # files if they differ.
 AR		   = ar
@@ -411,6 +405,8 @@ endif
 ESMF_ARDEFAULT              = ar
 ESMF_ARCREATEFLAGSDEFAULT   = cr
 ESMF_RANLIBDEFAULT          = ranlib
+ESMF_SEDDEFAULT             = sed
+ESMF_CPPDEFAULT             = gcc
 
 ESMF_F90OPTFLAG_X           =
 ESMF_CXXOPTFLAG_X           =
@@ -527,7 +523,7 @@ ESMF_CXXLINKOPTS +=
 ESMF_CXXLINKPATHS += -L$(LDIR)
 ESMF_CXXLINKRPATHS += $(SLFLAG)$(LDIR)
 ESMF_CXXLINKLIBS += -lesmf
-# - AR + RANLIB
+# - tools: AR + RANLIB + ...
 ifneq ($(origin ESMF_AR), environment)
 ESMF_AR = $(ESMF_ARDEFAULT)
 endif
@@ -536,6 +532,12 @@ ESMF_ARCREATEFLAGS = $(ESMF_ARCREATEFLAGSDEFAULT)
 endif
 ifneq ($(origin ESMF_RANLIB), environment)
 ESMF_RANLIB = $(ESMF_RANLIBDEFAULT)
+endif
+ifneq ($(origin ESMF_CPP), environment)
+ESMF_CPP = $(ESMF_CPPDEFAULT)
+endif
+ifneq ($(origin ESMF_SED), environment)
+ESMF_SED = $(ESMF_SEDDEFAULT)
 endif
 # - Shared library
 ESMF_SL_SUFFIX        = so
@@ -1819,7 +1821,7 @@ run_unit_tests:  reqdir_tests verify_exhaustive_flag
 	  $(MAKE) err ; \
 	fi 
 	@if [ -f $(TESTS_CONFIG) ] ; then \
-	   $(SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Multiprocessor/' $(TESTS_CONFIG) > $(TESTS_CONFIG).temp; \
+	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Multiprocessor/' $(TESTS_CONFIG) > $(TESTS_CONFIG).temp; \
            $(MV) $(TESTS_CONFIG).temp $(TESTS_CONFIG); \
         fi
 	-$(MAKE) ACTION=tree_run_unit_tests tree
@@ -1832,7 +1834,7 @@ tree_run_unit_tests: $(TESTS_RUN)
 #
 run_unit_tests_uni:  reqdir_tests verify_exhaustive_flag
 	@if [ -f $(TESTS_CONFIG) ] ; then \
-	   $(SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(TESTS_CONFIG) > $(TESTS_CONFIG).temp; \
+	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(TESTS_CONFIG) > $(TESTS_CONFIG).temp; \
            $(MV) $(TESTS_CONFIG).temp $(TESTS_CONFIG); \
         fi
 	-$(MAKE) ACTION=tree_run_unit_tests_uni tree 
@@ -1880,7 +1882,7 @@ endif
 
 exhaustive_flag_check:
 	@if [ -s $(TESTS_CONFIG) -a \
-	     `$(SED) -ne '/$(UNIT_TEST_STRING)/p' $(TESTS_CONFIG) | $(WC) -l` -ne 1 ] ; then \
+	     `$(ESMF_SED) -ne '/$(UNIT_TEST_STRING)/p' $(TESTS_CONFIG) | $(WC) -l` -ne 1 ] ; then \
 	  echo "The ESMF_EXHAUSTIVE environment variable is a compile-time control for" ;\
           echo "whether a basic set or an exhaustive set of tests are built." ;\
 	  echo "" ;\
@@ -1888,7 +1890,7 @@ exhaustive_flag_check:
 	  echo "is not the same as when the unit tests were last built." ;\
 	  echo "(This is based on the contents of the file:" ;\
           echo "$(TESTS_CONFIG) ";\
-	  echo "which contains: `$(SED) -e '1d' $(TESTS_CONFIG)` )." ;\
+	  echo "which contains: `$(ESMF_SED) -e '1d' $(TESTS_CONFIG)` )." ;\
 	  echo "" ;\
 	  echo "To rebuild and run the unit tests with the current ESMF_EXHAUSTIVE value, run:" ;\
 	  echo "   $(MAKE) clean_unit_tests unit_tests"  ;\
@@ -1907,7 +1909,7 @@ endif
 
 exhaustive_flag_clobber:
 	@if [ -s $(TESTS_CONFIG) -a \
-	     `$(SED) -ne '/$(UNIT_TEST_STRING)/p' $(TESTS_CONFIG) | $(WC) -l` -ne 1 ] ; then \
+	     `$(ESMF_SED) -ne '/$(UNIT_TEST_STRING)/p' $(TESTS_CONFIG) | $(WC) -l` -ne 1 ] ; then \
 	  $(MAKE) clean_unit_tests ;\
 	fi
 
@@ -2508,19 +2510,19 @@ endif
 # versions of gcc and confuse the fortran compiler when trying to compile
 # the newly generated file.
 
-ifeq ($(origin CPPRULES),undefined)
+ifeq ($(origin ESMF_CPPRULES),undefined)
 .cpp.F90:
-	$(CPP) -E -P -I$(ESMF_INCDIR) $< | tr "@^" "\n#" | \
-              $(SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@)
+	$(ESMF_CPP) -E -P -I$(ESMF_INCDIR) $< | tr "@^" "\n#" | \
+              $(ESMF_SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@)
 
 
 .cppF90.F90:
-	cp $< $<.cpp; $(CPP) -E -P -I$(ESMF_INCDIR) $(FPPDEFS) $<.cpp | tr "@^" "\n#" | $(SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@); rm -f $<.cpp
+	cp $< $<.cpp; $(ESMF_CPP) -E -P -I$(ESMF_INCDIR) $(FPPDEFS) $<.cpp | tr "@^" "\n#" | $(ESMF_SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@); rm -f $<.cpp
 
 
 #.cpp.o:
-#	$(CPP) -E -P -I$(ESMF_INCDIR) $(FPPDEFS) $< | tr "@^" "\n#" | \
-#              $(SED) -e '/^#pragma GCC/d' > $(dir $<)$(basename $@).F90
+#	$(ESMF_CPP) -E -P -I$(ESMF_INCDIR) $(FPPDEFS) $< | tr "@^" "\n#" | \
+#              $(ESMF_SED) -e '/^#pragma GCC/d' > $(dir $<)$(basename $@).F90
 #	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
 #          $(F_FREECPP) $(FCPPFLAGS) $(ESMF_INCLUDE) $(dir $<)$(basename $@).F90
 endif
