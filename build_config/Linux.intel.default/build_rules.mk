@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.48.2.3 2006/07/12 18:09:08 theurich Exp $
+# $Id: build_rules.mk,v 1.48.2.4 2006/07/19 17:53:13 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -100,8 +100,8 @@ endif
 # BLAS_LIB         = -latlas -lscs
 
 ############################################################
-#
 # On IA64 set long and pointer types to 64-bit
+#
 ifeq ($(ESMF_PREC),64)
 ESMF_CXXCOMPILEOPTS       += -size_lp64
 ESMF_CXXLINKOPTS          += -size_lp64
@@ -110,9 +110,9 @@ ESMF_F90LINKOPTS          += -size_lp64
 endif
 
 ############################################################
-#
 # To compile with Intel's icpc but link with GCC's stdc++ lib
 # set ESMF_STDCXX_LIBRARY to gcc before building
+#
 ifeq ($(ESMF_STDCXX_LIBRARY),gcc)
 ESMF_F90LINKPATHS   += -L$(dir $(shell gcc -print-file-name=libstdc++.so))
 ESMF_F90LINKLIBS    += -lstdc++
@@ -125,8 +125,8 @@ ESMF_CXXLINKOPTS    += -cxxlib-icc
 endif
 
 ############################################################
-#
 # Conditionally add pthread compiler and linker flags
+#
 ifeq ($(ESMF_PTHREADS),ON)
 ESMF_F90COMPILEOPTS +=  -threads
 ESMF_CXXCOMPILEOPTS +=  -pthread
@@ -135,36 +135,35 @@ ESMF_CXXLINKOPTS    += -pthread
 endif
 
 ############################################################
-#
 # Compiler options to print version string
+#
 ESMF_CXXVOPT        = -V -v
 ESMF_F90VOPT        = -V -v
 
 ############################################################
-#
 # Need this until the file convention is fixed (then remove these two lines)
+#
 ESMF_F90COMPILEFREENOCPP = -fpp0 -FR
 ESMF_F90COMPILEFIXCPP    = -fpp
 
 ############################################################
-#
 # Determine where ifort's libraries are located
+#
 ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/ifort-libpath $(ESMF_F90COMPILER)))
 ESMF_CXXLINKRPATHS += \
   -Wl,-rpath,$(dir $(shell $(ESMF_DIR)/scripts/ifort-libpath $(ESMF_F90COMPILER)))
 
 ############################################################
-#
 # Link against libesmf.a using the F90 linker front-end
+#
 ESMF_F90LINKLIBS += -limf -lm -lcxa -lunwind -lrt -ldl
 
 ############################################################
-#
 # Link against libesmf.a using the C++ linker front-end
+#
 ESMF_CXXLINKLIBS += -lifcoremt -lunwind -lrt -ldl
 
-###############################################################################
-
-SL_LIBS_TO_MAKE = 
-C_SL_LIBOPTS  =
-
+############################################################
+# Blank out shared library options
+#
+ESMF_SL_LIBS_TO_MAKE  =
