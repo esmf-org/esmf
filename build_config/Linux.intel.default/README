@@ -1,0 +1,12 @@
+Settings for Linux, using the commercial Intel ifort
+and icpc comilers.
+(This is also the correct configuration for an SGI Altix cluster.)
+
+Requires the following environment settings:
+
+ESMF_COMPILER intel
+
+Defaults to 64 bit, can compile on 32-bit systems with:
+
+ESMF_PREC 32
+
