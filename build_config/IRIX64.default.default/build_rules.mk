@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.26.2.1 2006/07/20 21:46:41 theurich Exp $
+# $Id: build_rules.mk,v 1.26.2.2 2006/07/20 22:20:46 theurich Exp $
 # 
 # IRIX64.default.default
 #
@@ -98,6 +98,7 @@ ESMF_CXXVOPT        = -version
 # Special optimization flags
 #
 ESMF_CXXOPTFLAG_O       += -OPT:Olimit=6500
+ESMF_F90OPTFLAG_O       += -OPT:Olimit=6500
 
 ############################################################
 # Help f90 to understand Fortran suffices
