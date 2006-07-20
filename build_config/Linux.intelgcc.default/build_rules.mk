@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1.2.5 2006/07/19 18:03:27 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.6 2006/07/20 23:24:05 theurich Exp $
 #
 # Linux.intelgcc.default
 #
@@ -138,9 +138,9 @@ ESMF_F90COMPILEFIXCPP    = -fpp
 ############################################################
 # Determine where ifort's libraries are located
 #
-ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/ifort-libpath $(ESMF_F90COMPILER)))
+ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
 ESMF_CXXLINKRPATHS += \
-  -Wl,-rpath,$(dir $(shell $(ESMF_DIR)/scripts/ifort-libpath $(ESMF_F90COMPILER)))
+  $(ESMF_RPATHPREFIX)$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
