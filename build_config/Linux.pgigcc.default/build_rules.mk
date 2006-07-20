@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1.2.3 2006/07/19 18:10:10 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.4 2006/07/20 23:27:59 theurich Exp $
 #
 #  Linux.pgigcc.default
 #
@@ -105,9 +105,9 @@ ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform
 ############################################################
 # Determine where pgf90's libraries are located
 #
-ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/pgf90-libpath $(ESMF_F90COMPILER)))
+ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.pgf90 $(ESMF_F90COMPILER)))
 ESMF_CXXLINKRPATHS += \
-  -Wl,-rpath,$(dir $(shell $(ESMF_DIR)/scripts/pgf90-libpath $(ESMF_F90COMPILER)))
+  $(ESMF_RPATHPREFIX)$(dir $(shell $(ESMF_DIR)/scripts/libpath.pgf90 $(ESMF_F90COMPILER)))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
