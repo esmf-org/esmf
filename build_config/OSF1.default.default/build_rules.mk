@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.31.2.1 2006/07/20 20:13:24 theurich Exp $
+#  $Id: build_rules.mk,v 1.31.2.2 2006/07/20 21:46:30 theurich Exp $
 #
 #  OSF1.default.default
 #
@@ -96,7 +96,7 @@ ESMF_F90COMPILEFIXCPP    = -cpp -extend_source
 ESMF_F90COMPILEFIXNOCPP  = -extend_source
 
 ############################################################
-# Blank out variables to prevent rpath encoding into f90
+# Prefix for rpath option
 #
 ESMF_RPATHPREFIX      = -rpath 
 
