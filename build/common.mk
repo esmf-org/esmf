@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.8 2006/07/20 16:57:39 theurich Exp $
+#  $Id: common.mk,v 1.155.2.9 2006/07/20 20:13:03 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -430,6 +430,7 @@ endif
 ESMF_CXXOPTFLAG_O = -O
 endif
 
+ESMF_RPATHPREFIX     = -Wl,-rpath,
 
 #-------------------------------------------------------------------------------
 # Set default ESMF_ variables which may be appended to or overridden in 
@@ -508,7 +509,7 @@ endif
 endif
 ESMF_F90LINKOPTS +=
 ESMF_F90LINKPATHS += -L$(LDIR)
-ESMF_F90LINKRPATHS += $(SLFLAG)$(LDIR)
+ESMF_F90LINKRPATHS += $(ESMF_RPATHPREFIX)$(LDIR)
 ESMF_F90LINKLIBS +=
 ESMF_F90ESMFLINKLIBS += -lesmf $(ESMF_F90LINKLIBS)
 # - CXXLINKER
@@ -522,7 +523,7 @@ endif
 endif
 ESMF_CXXLINKOPTS +=
 ESMF_CXXLINKPATHS += -L$(LDIR)
-ESMF_CXXLINKRPATHS += $(SLFLAG)$(LDIR)
+ESMF_CXXLINKRPATHS += $(ESMF_RPATHPREFIX)$(LDIR)
 ESMF_CXXLINKLIBS +=
 ESMF_CXXESMFLINKLIBS += -lesmf $(ESMF_CXXLINKLIBS)
 # - tools: AR + RANLIB + ...
