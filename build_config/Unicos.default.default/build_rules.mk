@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.8.2.1 2006/07/19 23:43:25 theurich Exp $
+# $Id: build_rules.mk,v 1.8.2.2 2006/07/20 22:14:43 theurich Exp $
 # 
 # Unicos.default.default
 #
@@ -59,6 +59,11 @@ endif
 # HDF_LIB          = -L/usr/local/lib/ -lmfhdf -ldf -ljpeg -lz
 # BLAS_INCLUDE     = 
 # BLAS_LIB         = -latlas -lscs
+
+############################################################
+# Unicos optimization level must be > 1 else no optimization
+#
+ESMF_OPTLEVELDEFAULT  = 2
 
 ############################################################
 # Compiler options to print version string
