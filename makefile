@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.69.2.3 2006/07/19 23:42:41 theurich Exp $
+# $Id: makefile,v 1.69.2.4 2006/07/20 16:57:39 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -114,6 +114,7 @@ info:   script_info
 	-@echo "ESMF_F90LINKPATHS: $(ESMF_F90LINKPATHS)"
 	-@echo "ESMF_F90LINKRPATHS: $(ESMF_F90LINKRPATHS)"
 	-@echo "ESMF_F90LINKLIBS: $(ESMF_F90LINKLIBS)"
+	-@echo "ESMF_F90ESMFLINKLIBS: $(ESMF_F90ESMFLINKLIBS)"
 	-@echo ""
 	-@echo "C++ compiler flags:"
 	-@echo "ESMF_CXXCOMPILEOPTS: $(ESMF_CXXCOMPILEOPTS)"
@@ -125,6 +126,7 @@ info:   script_info
 	-@echo "ESMF_CXXLINKPATHS: $(ESMF_CXXLINKPATHS)"
 	-@echo "ESMF_CXXLINKRPATHS: $(ESMF_CXXLINKRPATHS)"
 	-@echo "ESMF_CXXLINKLIBS: $(ESMF_CXXLINKLIBS)"
+	-@echo "ESMF_CXXESMFLINKLIBS: $(ESMF_CXXESMFLINKLIBS)"
 	-@echo ""
 	-@echo ""
 	-@echo "------------------------------------------"
@@ -172,6 +174,7 @@ info_mk:
 	-@echo "ESMF_F90LINKPATHS=$(ESMF_F90LINKPATHS)" >> $(MKINFO)
 	-@echo "ESMF_F90LINKRPATHS=$(ESMF_F90LINKRPATHS)" >> $(MKINFO)
 	-@echo "ESMF_F90LINKLIBS=$(ESMF_F90LINKLIBS)" >> $(MKINFO)
+	-@echo "ESMF_F90ESMFLINKLIBS=$(ESMF_F90ESMFLINKLIBS)" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "ESMF_CXXCOMPILER=$(ESMF_CXXCOMPILER)" >> $(MKINFO)
 	-@echo "ESMF_CXXLINKER=$(ESMF_CXXLINKER)" >> $(MKINFO)
@@ -184,6 +187,7 @@ info_mk:
 	-@echo "ESMF_CXXLINKPATHS=$(ESMF_CXXLINKPATHS)" >> $(MKINFO)
 	-@echo "ESMF_CXXLINKRPATHS=$(ESMF_CXXLINKRPATHS)" >> $(MKINFO)
 	-@echo "ESMF_CXXLINKLIBS=$(ESMF_CXXLINKLIBS)" >> $(MKINFO)
+	-@echo "ESMF_CXXESMFLINKLIBS=$(ESMF_CXXESMFLINKLIBS)" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "#" >> $(MKINFO)
 	-@echo "# !!! The following options were used on this ESMF build !!!" >> $(MKINFO)
