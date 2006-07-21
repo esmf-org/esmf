@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.20.2.2 2006/07/21 21:12:52 theurich Exp $
+# $Id: build_rules.mk,v 1.20.2.3 2006/07/21 21:20:31 theurich Exp $
 #
 # Linux.lahey.default
 #
@@ -109,7 +109,13 @@ ESMF_RPATHPREFIXFIXED := $(ESMF_RPATHPREFIX)
 ESMF_CXXLINKRPATHS += $(addprefix $(ESMF_RPATHPREFIXFIXED), $(shell $(ESMF_DIR)/scripts/libpath.lf95 $(ESMF_F90COMPILER)))
 
 ############################################################
-# Set the F90 rpath to find lf95 system libs
+# Link against GCC's stdc++ library (because g++ is used)
+#
+ESMF_F90LINKPATHS += -L$(dir $(shell gcc -print-file-name=libstdc++.so))
+ESMF_F90LINKLIBS  += -lstdc++
+
+############################################################
+# Determine where lf95's libraries are located as to find it during runtime
 #
 ESMF_F90LINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.lf95 $(ESMF_F90COMPILER)))
 ESMF_RPATHPREFIXFIXED := $(ESMF_RPATHPREFIX)
@@ -118,7 +124,7 @@ ESMF_F90LINKRPATHS += $(addprefix $(ESMF_RPATHPREFIXFIXED), $(shell $(ESMF_DIR)/
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lstdc++ -lgcc -lrt
+ESMF_F90LINKLIBS += -lrt
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
