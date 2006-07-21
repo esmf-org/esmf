@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1.2.5 2006/07/21 02:50:40 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.6 2006/07/21 17:34:48 theurich Exp $
 #
 #  Linux.pgigcc.default
 #
@@ -105,9 +105,8 @@ ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform
 ############################################################
 # Determine where pgf90's libraries are located
 #
-ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.pgf90 $(ESMF_F90COMPILER)))
-ESMF_CXXLINKRPATHS += \
-  $(ESMF_RPATHPREFIX)$(dir $(shell $(ESMF_DIR)/scripts/libpath.pgf90 $(ESMF_F90COMPILER)))
+ESMF_CXXLINKPATHS += -L$(shell $(ESMF_DIR)/scripts/libpath.pgf90 $(ESMF_F90COMPILER))
+ESMF_CXXLINKRPATHS += $(ESMF_RPATHPREFIX)$(shell $(ESMF_DIR)/scripts/libpath.pgf90 $(ESMF_F90COMPILER))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
@@ -117,7 +116,7 @@ ESMF_F90LINKLIBS += -lrt -lC -lc
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt -lC -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
+ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.pgf90 $(ESMF_F90COMPILER))
 
 ############################################################
 # Blank out shared library options
