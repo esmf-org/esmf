@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.20.2.1 2006/07/21 21:00:12 theurich Exp $
+# $Id: build_rules.mk,v 1.20.2.2 2006/07/21 21:12:52 theurich Exp $
 #
 # Linux.lahey.default
 #
@@ -118,12 +118,12 @@ ESMF_F90LINKRPATHS += $(addprefix $(ESMF_RPATHPREFIXFIXED), $(shell $(ESMF_DIR)/
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-#ESMF_F90LINKLIBS += -lrt -lC $(shell $(ESMF_DIR)/scripts/libs.pgCC $(ESMF_CXXCOMPILER))
+ESMF_F90LINKLIBS += -lstdc++ -lgcc -lrt
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.lf95 $(ESMF_F90COMPILER))
+ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.lf95 $(ESMF_F90COMPILER))
 
 ############################################################
 # Shared library options
