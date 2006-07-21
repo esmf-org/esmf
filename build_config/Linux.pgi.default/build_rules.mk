@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.25.2.3 2006/07/20 23:27:59 theurich Exp $
+# $Id: build_rules.mk,v 1.25.2.4 2006/07/21 02:50:40 theurich Exp $
 #
 #  Linux.pgi.default
 #
@@ -87,8 +87,8 @@ endif
 ############################################################
 # Compiler options to print version string
 #
-ESMF_CXXVOPT        = -V -v
-ESMF_F90VOPT        = -V -v
+ESMF_F90VOPT        = -V -v -c
+ESMF_CXXVOPT        = -V -v -c
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)

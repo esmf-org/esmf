@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1.2.4 2006/07/20 23:27:59 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.5 2006/07/21 02:50:40 theurich Exp $
 #
 #  Linux.pgigcc.default
 #
@@ -93,8 +93,8 @@ ESMF_F90LINKLIBS  += -lstdc++
 ############################################################
 # Compiler options to print version string
 #
+ESMF_F90VOPT        = -V -v -c
 ESMF_CXXVOPT        = -V -v
-ESMF_F90VOPT        = -V -v
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
