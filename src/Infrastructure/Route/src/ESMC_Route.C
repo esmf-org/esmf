@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.152.2.1 2006/06/22 20:20:28 theurich Exp $
+//$Id: ESMC_Route.C,v 1.152.2.2 2006/07/24 19:20:49 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,14 +28,41 @@
  // associated class definition file
  #include <ESMC_Route.h>
  #include <ESMC_LogErr.h>
+ #include <mpi.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.152.2.1 2006/06/22 20:20:28 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.152.2.2 2006/07/24 19:20:49 samsoncheung Exp $";
 //-----------------------------------------------------------------------------
+class permuteLocal {
+public:
+   int index, offset;
+};
 
+class permuteGlobal {
+public:
+   int index, de, offset;
+};
+
+int compare1(const void *item1, const void *item2) {
+  permuteLocal *a, *b;
+
+  a = (permuteLocal*)item1;
+  b = (permuteLocal*)item2;
+
+  return(a->offset - b->offset);
+}
+
+int compare2(const void *item1, const void *item2) {
+  permuteGlobal *a, *b;
+
+  a = (permuteGlobal*)item1;
+  b = (permuteGlobal*)item2;
+
+  return(a->offset - b->offset);
+}
 
 //
 //-----------------------------------------------------------------------------
@@ -170,7 +197,8 @@
     ct = ESMC_CommTableCreate(mypet, npets, &rc);
     if (rc == ESMF_FAILURE)
        return rc;
-
+    
+    timer1 = timer2 = timer3 = 0.0;
     return ESMF_SUCCESS;
 
  } // end ESMC_RouteConstruct
@@ -289,8 +317,7 @@
     return rc;
 
  } // end ESMC_RouteSetRecv
- 
- 
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_RouteSetOptions"
@@ -332,8 +359,6 @@
     return ESMF_SUCCESS;
 
  } // end ESMC_RouteSetOptions
-
- 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -570,7 +595,8 @@
 // !ARGUMENTS:
     void *sendAddr,         // in, single local send buffer base address
     void *recvAddr,         // in, single local receive buffer base address
-    ESMC_DataKind dk) {     // in, data kind for both src & dest
+    ESMC_DataKind dk,       // in, data kind for both src & dest
+    ESMC_DataType dt) {     // in, data type for both src & dest
 //
 // !DESCRIPTION:
 //     Calls the communications routines to send/recv the information
@@ -585,7 +611,7 @@
      sendAddrList[0] = sendAddr;
      recvAddrList[0] = recvAddr;
 
-     return ESMC_RouteRun(sendAddrList, recvAddrList, dk, 1);
+     return ESMC_RouteRun(sendAddrList, recvAddrList, dk, dt, 1);
 }
 
 //-----------------------------------------------------------------------------
@@ -604,6 +630,7 @@
       void **sendAddr,       // in, list of local send buffer base addresses
       void **recvAddr,       // in, list of local receive buffer base addresses
       ESMC_DataKind dk,      // in, data kind for both src & dest
+      ESMC_DataType dt,      // in, data type for both src & dest
       int numAddrs) {        // in, count of src and dst addresses (must be = )
 //
 // !DESCRIPTION:
@@ -649,9 +676,12 @@
     char *sendBuffer, *recvBuffer;
     char **sendBufferList, **recvBufferList;
     vmk_commhandle **handle;
+    
+    // Timing
+    double starttime, endtime;
 
     // debug
-    //ESMC_RoutePrint();
+    // ESMC_RoutePrint();
 
     VMType = 0;   // TODO: unused so far, here for future use
     nbytes = ESMC_DataKindSize(dk);
@@ -669,7 +699,6 @@
         ((useOptions & ESMC_ROUTE_OPTION_PACK_NOPACK) == 0))
      useOptions = (ESMC_RouteOptions)(useOptions | ESMC_ROUTE_OPTION_PACK_PET);
 
-
 // -----------------------------------------------------------
 // TODO:
 // New branch needed here for the list of src and dst blocks
@@ -684,6 +713,7 @@
 // -----------------------------------------------------------
 
     if (useOptions & ESMC_ROUTE_OPTION_SYNC) {
+      //printf("useOption is ESMC_ROUTE_OPTION_SYNC\n");
       maxReqCount = 1;
 
       myPET = vm->vmk_mypet();
@@ -718,6 +748,7 @@
         // First up is packing on a PET-level, where all the data that must be
         // exchanged between PETs is loaded up into single buffers for exchange
         if (useOptions & ESMC_ROUTE_OPTION_PACK_PET) {
+	  //printf("useOption is ESMC_ROUTE_OPTION_PACK_PET\n");
 
           // get corresponding send/recv xpackets from the rtable
           if (sendXPCount > 0)
@@ -740,10 +771,13 @@
           // create the buffer to hold the sending data, and pack it 
           rc = ESMC_XPacketMakeBuffer(sendXPCount, sendXPList, nbytes, numAddrs,
                                       &sendBuffer, &sendBufferSize);
-          rc = ESMC_XPacketPackBuffer(sendXPCount, sendXPList, nbytes, numAddrs,
+          starttime = MPI_Wtime();
+          rc = ESMC_XPacketPackBuffer(sendXPCount, sendXPList, dt, nbytes, numAddrs,
                                       sendAddr, sendBuffer);
+          timer1 += MPI_Wtime()-starttime;
+          printf("PET %d: timer1: %f\n", timer1);
 
-          // if my PET is both the sender and receiver, there is no need
+	  // if my PET is both the sender and receiver, there is no need
           // to allocate a separate buffer; just point both at the single
           // send buffer.
           if (myPET == theirPET) {
@@ -754,15 +788,21 @@
             rc = ESMC_XPacketMakeBuffer(recvXPCount, recvXPList, nbytes, numAddrs,
                                         &recvBuffer, &recvBufferSize);
 
+	    starttime = MPI_Wtime();
             vm->vmk_sendrecv(sendBuffer, sendBufferSize, theirPET,
                              recvBuffer, recvBufferSize, theirPET);
+	    timer2 += MPI_Wtime()-starttime;
+	    printf("PET %d: timer2: %f\n", timer2);
+
           }
 
           // whether myPET = theirPET or not, we still have to unpack the 
           // receive buffer to move the data into the final location.
-          rc = ESMC_XPacketUnpackBuffer(recvXPCount, recvXPList, nbytes, 
+          starttime = MPI_Wtime();
+          rc = ESMC_XPacketUnpackBuffer(recvXPCount, recvXPList, dt, nbytes, 
                                         numAddrs, recvBuffer, recvAddr);
-
+          timer3 += MPI_Wtime()-starttime;
+          printf("PET %d: timer3: %f\n", timer3);
           // delete the lists of pointers, plus the local packing buffers
           // allocated during this loop.
           delete [] sendXPList;
@@ -782,6 +822,7 @@
         // exchanged between PETs loops over all the XPs that must be exchanged,
         // communicating them one at a time.
         if (useOptions & ESMC_ROUTE_OPTION_PACK_XP) {
+	  // printf("useOption is ESMC_ROUTE_OPTION_PACK_XP\n");
 
           // loop over the XPs
           for (m=0, ixs=0, ixr=0; m<maxXPCount; m++, ixs++, ixr++){
@@ -808,7 +849,7 @@
                   sendContig = false;
                   rc = ESMC_XPacketMakeBuffer(1, &sendXP, nbytes, numAddrs,
                                               &sendBuffer, &sendBufferSize);
-                  rc = ESMC_XPacketPackBuffer(1, &sendXP, nbytes, numAddrs,
+                  rc = ESMC_XPacketPackBuffer(1, &sendXP, dt, nbytes, numAddrs,
                                               sendAddr, sendBuffer);
                   madeSendBuf = true;
               }
@@ -876,7 +917,7 @@
             // now if the receive buffer is not contig, we still need to
             //  unpack the receive buffer
             if ((recvBufferSize > 0) && (!recvContig)) {
-              rc = ESMC_XPacketUnpackBuffer(1, &recvXP, nbytes, numAddrs,
+              rc = ESMC_XPacketUnpackBuffer(1, &recvXP, dt, nbytes, numAddrs,
                                             recvBuffer, recvAddr);
             }
  
@@ -895,6 +936,7 @@
 // -----------------------------------------------------------
 
         if (useOptions & ESMC_ROUTE_OPTION_PACK_VECTOR) {
+	   // printf("useOption is ESMC_ROUTE_OPTION_PACK_VECTOR\n");
            // if you wanted to send multiple XPs with one communication call 
            // using the MPI-Vector equivalent, you would need code here which
            // could take an array of VMTypes instead of a single one.
@@ -912,6 +954,7 @@
         // Next is no packing, which means that each contiguous chunk of data
         // described by an XP is sent as a separate communication.
         if (useOptions & ESMC_ROUTE_OPTION_PACK_NOPACK) {
+	 // printf("useOption is ESMC_ROUTE_OPTION_PACK_NOPACK\n");
 
          // loop over the addresses, doing the send/recv loops for each one
          for (n=0; n<numAddrs; n++) {
@@ -1135,6 +1178,7 @@
 // -----------------------------------------------------------
 
     if (useOptions & ESMC_ROUTE_OPTION_ASYNC) {
+      // printf("useOption is ESMC_ROUTE_OPTION_ASYNC\n");
 
       // this section computes how many possible outstanding communications
       // request we are going to generate, which is different for each 
@@ -1160,6 +1204,7 @@
       // either send or receive by PETs.  This logic has been moved into
       // a rather specialized counting method.
       if (useOptions & ESMC_ROUTE_OPTION_PACK_XP) {
+	//printf("useOption is ESMC_ROUTE_OPTION_PACK_XP\n");
         rc = ESMC_RouteGetSumMaxXPsPerPET(&maxReqCount);
       }
 
@@ -1167,6 +1212,7 @@
       // strided handle which describes the layout in memory and does
       // no actual packing before calling the communication routines.
       if (useOptions & ESMC_ROUTE_OPTION_PACK_VECTOR) {
+	//printf("useOption is ESMC_ROUTE_OPTION_PACK_VECTOR\n");
           // TODO: use same code as PACK_XP case for number of possible
           // outstanding requests possible?
           maxReqCount = 0;
@@ -1176,6 +1222,7 @@
       // by each XP must be sent individually.  This logic has been moved
       // into a rather specialized counting method.
       if (useOptions & ESMC_ROUTE_OPTION_PACK_NOPACK) {
+	//printf("useOption is ESMC_ROUTE_OPTION_PACK_NOPACK\n");
         rc = ESMC_RouteGetSumMaxRegionsPerXP(&maxReqCount);
         maxReqCount *= numAddrs;
       }
@@ -1221,14 +1268,12 @@
       } else {
         madeSendBufList = madeRecvBufList = NULL;
       }
-
 // -----------------------------------------------------------------------
 // For asynchronous communications we have two separate loops:
 //  loop #1: issue non-blocking sendrecv() calls
 //  loop #2: wait for local non-blocking comms to finish
-// --> loop #1 follows:      
+// --> loop #1 follows: 
 // -----------------------------------------------------------------------
-
       // reset request counter
       int req=0;
 
@@ -1268,6 +1313,7 @@
         // exchanged between PETs is loaded up into single buffers for exchange
         if (useOptions & ESMC_ROUTE_OPTION_PACK_PET) {
 
+	  starttime = MPI_Wtime();
           // get corresponding send/recv xpackets from the rtable
           if (sendXPCount > 0)
             sendXPList = new ESMC_XPacket*[sendXPCount];
@@ -1289,8 +1335,10 @@
           // create the buffer to hold the sending data, and pack it 
           rc = ESMC_XPacketMakeBuffer(sendXPCount, sendXPList, nbytes, numAddrs,
                                       &sendBufferList[req], &sendBufferSize);
-          rc = ESMC_XPacketPackBuffer(sendXPCount, sendXPList, nbytes, numAddrs,
+          rc = ESMC_XPacketPackBuffer(sendXPCount, sendXPList, dt, nbytes, numAddrs,
                                       sendAddr, sendBufferList[req]);
+
+	  timer1 += MPI_Wtime()-starttime;
 
           // if my PET is both the sender and receiver, there is no need
           // to allocate a separate buffer; just point both at the single
@@ -1304,9 +1352,14 @@
             rc = ESMC_XPacketMakeBuffer(recvXPCount, recvXPList, nbytes, numAddrs,
                                         &recvBufferList[req], &recvBufferSize);
 
+	    starttime = MPI_Wtime();
+
+	    // printf("PET %d: Sendbuffersize: %d, PET %d: Recvbuffersize: %d\n", 
+            //	   myPET, theirPET, sendBufferSize, recvBufferSize);
             vm->vmk_sendrecv(sendBufferList[req], sendBufferSize, theirPET,
                              recvBufferList[req], recvBufferSize, theirPET,
                              &handle[req]);
+	    timer2 += MPI_Wtime()-starttime;
           }
 
           req++;
@@ -1316,7 +1369,7 @@
           delete [] sendXPList;
           delete [] recvXPList;
 
-	}        // packing branch
+	}       // packing branch
 
 // -----------------------------------------------------------
 // Branching still on packing option
@@ -1327,6 +1380,7 @@
         // exchanged between PETs loops over all the XPs that must be exchanged,
         // communicating them one at a time.
         if (useOptions & ESMC_ROUTE_OPTION_PACK_XP) {
+	  // printf("useOption is ESMC_ROUTE_OPTION_PACK_XP\n");
 
           // loop over the XPs
           for (m=0, ixs=0, ixr=0; m<maxXPCount; m++, ixs++, ixr++){
@@ -1353,7 +1407,7 @@
                   sendContig = false;
                   rc = ESMC_XPacketMakeBuffer(1, &sendXP, nbytes, numAddrs,
                                               &sendBufferList[req], &sendBufferSize);
-                  rc = ESMC_XPacketPackBuffer(1, &sendXP, nbytes, numAddrs,
+                  rc = ESMC_XPacketPackBuffer(1, &sendXP, dt, nbytes, numAddrs,
                                               sendAddr, sendBufferList[req]);
                   madeSendBufList[req] = true;
               }
@@ -1429,6 +1483,7 @@
 // -----------------------------------------------------------
 
         if (useOptions & ESMC_ROUTE_OPTION_PACK_VECTOR) {
+	   // printf("useOption is ESMC_ROUTE_OPTION_PACK_VECTOR\n");
            // if you wanted to send multiple XPs with one communication call 
            // using the MPI-Vector equivalent, you would need code here which
            // could take an array of VMTypes instead of a single one.
@@ -1446,6 +1501,7 @@
         // Next is no packing, which means that each contiguous chunk of data
         // described by an XP is sent as a separate communication.
         if (useOptions & ESMC_ROUTE_OPTION_PACK_NOPACK) {
+	  printf("useOption is ESMC_ROUTE_OPTION_PACK_NOPACK\n");
 
          // loop over the addresses, doing the send/recv loops for each one
          for (n=0; n<numAddrs; n++) {
@@ -1589,7 +1645,7 @@
 // For asynchronous communications we have two separate loops:
 //  loop #1: issue non-blocking sendrecv() calls
 //  loop #2: wait for local non-blocking comms to finish
-// --> loop #2 follows:      
+// --> loop #2 follows: 
 // -----------------------------------------------------------------------
 
       // reset request counter
@@ -1622,7 +1678,7 @@
         // First up is packing on a PET-level, where all the data that must be
         // exchanged between PETs is loaded up into single buffers for exchange
         if (useOptions & ESMC_ROUTE_OPTION_PACK_PET) {
-
+	  starttime = MPI_Wtime();
           // get corresponding send/recv xpackets from the rtable
           if (recvXPCount > 0)
             recvXPList = new ESMC_XPacket*[recvXPCount];
@@ -1640,12 +1696,15 @@
           if (myPET != theirPET) {
             vm->vmk_wait(&handle[req]);
           }
-
+	  endtime = MPI_Wtime();
+	  timer2 += endtime-starttime;
           // whether myPET = theirPET or not, we still have to unpack the 
           // receive buffer to move the data into the final location.
-          rc = ESMC_XPacketUnpackBuffer(recvXPCount, recvXPList, nbytes,
+          starttime = endtime;
+          rc = ESMC_XPacketUnpackBuffer(recvXPCount, recvXPList, dt, nbytes,
                                        numAddrs, recvBufferList[req], recvAddr);
 
+	  timer3 += MPI_Wtime()-starttime;
           // delete the individual buffers for this transfer
           delete [] recvXPList;
           delete [] sendBufferList[req];
@@ -1654,7 +1713,7 @@
 
           req++;
 
-        }
+	}
 
 // -----------------------------------------------------------
 // Branching still on packing option
@@ -1665,6 +1724,7 @@
         // exchanged between PETs loops over all the XPs that must be exchanged,
         // communicating them one at a time.
         if (useOptions & ESMC_ROUTE_OPTION_PACK_XP) {
+	  // printf("useOption is ESMC_ROUTE_OPTION_PACK_XP\n");
 
           // loop over the XPs
           for (m=0, ixs=0, ixr=0; m<maxXPCount; m++, ixs++, ixr++){
@@ -1700,7 +1760,7 @@
             // if the receive buffer is not contig, we still need to unpack
             // the data from the receive buffer into the final location.
             if (!recvContig) {
-              rc = ESMC_XPacketUnpackBuffer(1, &recvXP, nbytes, numAddrs,
+              rc = ESMC_XPacketUnpackBuffer(1, &recvXP, dt, nbytes, numAddrs,
                                             recvBufferList[req], recvAddr);
             }
 
@@ -1738,6 +1798,7 @@
         // Next is no packing, which means that each contiguous chunk of data
         // described by an XP is sent as a separate communication.
         if (useOptions & ESMC_ROUTE_OPTION_PACK_NOPACK) {
+	 // printf("useOption is ESMC_ROUTE_OPTION_PACK_NOPACK\n");
 
          // loop over the addresses, doing the send/recv loops for each one
          for (n=0; n<numAddrs; n++) {
@@ -2368,7 +2429,8 @@
     int myGlobalStart[ESMF_MAXDIM];
     int i, k, m, n, rc;
     int myDEStartCount, theirDEStartCount;
-    int theirDE, theirMatchingPET, theirDECount;
+    int theirDE, *theirMatchingPET, theirDECount;
+    int total=0;
 
     // set this here, because if neither send or recv are > 0 then we
     // do nothing here.
@@ -2385,6 +2447,15 @@
       // get the number of destination DEs 
       dstdeLayout->ESMC_DELayoutGet(&theirDECount, NULL, NULL, NULL, 0,  
                                     NULL, NULL, NULL, NULL, 0); 
+
+      theirMatchingPET = new int[theirDECount];
+      for (i=0; i<theirDECount; i++) {
+	// get the parent DE identifier for this DE in the src layout
+	dstdeLayout->ESMC_DELayoutGetDEMatchPET(i, *vm, NULL,
+						&theirMatchingPET[i], 1);
+	if (theirMatchingPET[i] != i)
+	  printf("theirDE = %d, parentDE = %d\n", i, theirMatchingPET[i]);
+      }
 
       // get the starting count in the AI list for myDE
       myDEStartCount = 0;
@@ -2413,12 +2484,6 @@
         for (i=0; i<theirDECount; i++) {
           theirDE = i;
     
-          // get the parent PET identifier for this DE in the rcv layout
-          dstdeLayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, NULL,
-                                                  &theirMatchingPET, 1);
-          if (theirMatchingPET != theirDE)
-             printf("theirDE = %d, parentDE = %d\n", theirDE, theirMatchingPET);
-    
           // loop over the number of AI's for their DE
           for (m=0; m<dstAICountPerDE[theirDE]; m++) {
 
@@ -2434,15 +2499,19 @@
                                            NULL, &theirXP, &theirXPCount);
 
             // calculate the intersection
-            intersectXP.ESMC_XPacketIntersect(&myXP[0], &theirXP[0]);
+            if (intersectXP.ESMC_XPacketIntersect(&myXP[0], &theirXP[0])==ESMF_FAILURE) {
+	      delete [] theirXP;
+	      continue;
+	    }
 
             // if there's no intersection, no need to add an entry here
             if (intersectXP.ESMC_XPacketIsEmpty()) {
               // free XPs allocated by XPacketFromAxisIndex() routine above
               delete [] theirXP;
             continue;         // TODO: loop on m -- is this continue
-          }
+	    }
 
+	    total++;
             // translate from global to local data space
             if (srcVector == ESMF_FALSE)
               intersectXP.ESMC_XPacketGlobalToLocal(&intersectXP, myTotalAI,
@@ -2451,8 +2520,8 @@
               intersectXP.ESMC_XPacketSetOffset(n);
 
             // load the intersecting XPacket into the sending RTable
-            sendRT->ESMC_RTableSetEntry(theirMatchingPET, &intersectXP);
-            ct->ESMC_CommTableSetPartner(theirMatchingPET);
+            sendRT->ESMC_RTableSetEntry(theirMatchingPET[i], &intersectXP);
+            ct->ESMC_CommTableSetPartner(theirMatchingPET[i]);
 
             // free XPs allocated by XPacketFromAxisIndex() routine above
             delete [] theirXP;
@@ -2466,9 +2535,11 @@
 
       }     // next AI for myDE
 
+      delete [] theirMatchingPET;
     }       // end of sending table
+    printf("DE %d: total intersction in sending table: %d\n", srcMyDE,total);
 
-            
+    total=0;            
     // Calculate the receiving table.  If this DE is not part of the receiving
     // layout skip this loop completely.
     if (hasDstData == ESMF_TRUE) {
@@ -2476,6 +2547,16 @@
       // get the number of source DEs
       srcdeLayout->ESMC_DELayoutGet(&theirDECount, NULL, NULL, NULL, 0, 
                                     NULL, NULL, NULL, NULL, 0);
+
+      theirMatchingPET = new int[theirDECount];
+
+      for (i=0; i<theirDECount; i++) {
+	// get the parent DE identifier for this DE in the src layout
+	srcdeLayout->ESMC_DELayoutGetDEMatchPET(i, *vm, NULL,
+						&theirMatchingPET[i], 1);
+	if (theirMatchingPET[i] != i)
+	  printf("theirDE = %d, parentDE = %d\n", i, theirMatchingPET[i]);
+      }
 
       // get the starting count in the AI list for myDE
       myDEStartCount = 0;
@@ -2502,12 +2583,6 @@
         for (i=0; i<theirDECount; i++) {
           theirDE = i;
 
-          // get the parent DE identifier for this DE in the src layout
-          srcdeLayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, NULL,
-                                                  &theirMatchingPET, 1);
-          if (theirMatchingPET != theirDE)
-             printf("theirDE = %d, parentDE = %d\n", theirDE, theirMatchingPET);
-
           // loop over the number of AI's for their DE
           for (m=0; m<srcAICountPerDE[theirDE]; m++) {
 
@@ -2523,7 +2598,10 @@
                                            NULL, &theirXP, &theirXPCount);
 
             // calculate the intersection
-            intersectXP.ESMC_XPacketIntersect(&myXP[0], &theirXP[0]);
+            if (intersectXP.ESMC_XPacketIntersect(&myXP[0], &theirXP[0])==ESMF_FAILURE) {
+	      delete [] theirXP;
+	      continue;
+	    }
 
             // if there's no intersection, no need to add an entry here
             if (intersectXP.ESMC_XPacketIsEmpty()) {
@@ -2532,6 +2610,7 @@
             continue;
           }
 
+	    total++;
             // translate from global to local
             if (dstVector==ESMF_FALSE)
               intersectXP.ESMC_XPacketGlobalToLocal(&intersectXP, myTotalAI,
@@ -2540,8 +2619,8 @@
               intersectXP.ESMC_XPacketSetOffset(n);
 
             // load the intersecting XPacket into the receiving RTable
-            recvRT->ESMC_RTableSetEntry(theirMatchingPET, &intersectXP);
-            ct->ESMC_CommTableSetPartner(theirMatchingPET);
+            recvRT->ESMC_RTableSetEntry(theirMatchingPET[i], &intersectXP);
+            ct->ESMC_CommTableSetPartner(theirMatchingPET[i]);
 
             // free XPs allocated by XPacketFromAxisIndex() routine above
             delete [] theirXP;
@@ -2555,10 +2634,290 @@
 
       }     // next AI for myDE
 
+      delete [] theirMatchingPET;
+
     }       // end of recv table
+    printf("DE %d: total intersction in receiving table: %d\n", dstMyDE,total);
             
     return rc;
  } // end ESMC_RoutePrecomputeRedistV
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RoutePrecomputeRedistA2A"
+//BOP
+// !IROUTINE:  ESMC_RoutePrecomputeRedistA2A - initialize a Route
+//
+// !INTERFACE:
+      int ESMC_Route::ESMC_RoutePrecomputeRedistA2A(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int rank,                   // in  - rank of data in both Fields
+      ESMC_Logical  hasDstData,   // in  - has destination data on this DE?
+      int dstMyDE,                // in  - DE identifier in the DELayout of
+                                  //       the destination Field
+      ESMC_AxisIndex *dstCompAI,  // in  - array of axis indices for all DE's
+                                  //       in the DELayout for the destination
+                                  //       Field covering the computational
+                                  //       domain
+      int dstAICount,             // in  - number of sets of AI's in the dst
+                                  //       array
+      int *dstAICountPerDE,       // in  - array of the number of AI's per DE
+                                  //       in the destination field
+      int *dstGlobalStart,        // in  - array of global starting indices
+                                  //       for all DE's in the DELayout and in
+                                  //       each direction for the destination
+                                  //       Field
+      int dstGSCount,             // in -  number of sets of global counts
+      int *dstGlobalCount,        // in  - array of global strides for each
+                                  //       direction for the receiving Field
+      ESMC_DELayout *dstdeLayout, // in  - pointer to the rcv DELayout
+      ESMC_Logical  hasSrcData,   // in  - has source data on this DE?
+      int srcMyDE,                // in  - DE identifier in the DELayout of
+                                  //       the source Field
+      ESMC_AxisIndex *srcCompAI,  // in  - array of axis indices for all DE's
+                                  //       in the DELayout for the source
+                                  //       Field covering the computational
+                                  //       domain
+      int srcAICount,             // in  - number of sets of AI's in the src
+                                  //       array
+      int *srcAICountPerDE,       // in  - array of the number of AI's per DE
+                                  //       in the source field
+      int *srcGlobalStart,        // in  - array of global starting indices
+                                  //       for all DE's in the DELayout and in
+                                  //       each direction for the source
+                                  //       Field
+      int srcGSCount,             // in -  number of sets of global counts
+      int *srcGlobalCount,        // in  - array of global strides for each
+                                  //       direction for the source Field
+      ESMC_DELayout *srcdeLayout) { // in  - pointer to the src DELayout
+
+//
+// !DESCRIPTION:
+//      Initializes a Route with send and receive RouteTables.
+//      This routine differs from PrecomputeRedist mostly in that there can
+//      be an array of AxisIndices per DE.
+//      Returns error code if problems are found.
+//
+//EOP
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    ESMC_AxisIndex myAI[ESMF_MAXDIM];
+    ESMC_XPacket *theirXP = NULL;
+    ESMC_XPacket intersectXP;
+    int myXPCount, theirXPCount;
+    int myGlobalStart[ESMF_MAXDIM];
+    int i, k, m, n, rc;
+    int myDEStartCount, theirDEStartCount;
+    int theirDE, *theirMatchingPET, theirDECount;
+    int total=0, myCount, lastmatch, totalAI;
+    permuteLocal *myOffsetTbl;
+    permuteGlobal *dstOffsetTbl, *srcOffsetTbl;
+
+    // set this here, because if neither send or recv are > 0 then we
+    // do nothing here.
+    rc = ESMF_SUCCESS;
+
+    // Set a different default value for this route
+    this->ESMC_RouteSetOptions((ESMC_RouteOptions) (ESMC_ROUTE_OPTION_ASYNC |
+                               ESMC_ROUTE_OPTION_PACK_PET));
+
+    // Calculate the sending table.  If this DE is not part of the sending
+    // layout skip this loop.
+    if (hasSrcData == ESMF_TRUE) {
+
+      // get the number of destination DEs
+      dstdeLayout->ESMC_DELayoutGet(&theirDECount, NULL, NULL, NULL, 0,
+                                    NULL, NULL, NULL, NULL, 0);
+
+      theirMatchingPET = new int[theirDECount];
+      for (i=0; i<theirDECount; i++) {
+        // get the parent DE identifier for this DE in the src layout
+        dstdeLayout->ESMC_DELayoutGetDEMatchPET(i, *vm, NULL,
+                                                &theirMatchingPET[i], 1);
+        if (theirMatchingPET[i] != i)
+          printf("theirDE = %d, parentDE = %d\n", i, theirMatchingPET[i]);
+      }
+
+      // get the starting count in the AI list for myDE
+      myDEStartCount = 0;
+      for (i=0; i<srcMyDE; i++) myDEStartCount += srcAICountPerDE[i];
+
+      // extract indices for the local grid, calculate the offset and sort them
+      myCount = srcAICountPerDE[srcMyDE];
+      myOffsetTbl = new permuteLocal[myCount];
+      for (n=0, m=myDEStartCount; n< myCount; n++, m++) {
+          myOffsetTbl[n].offset = srcCompAI[m].min+
+          srcCompAI[m+srcAICount].min*srcGlobalCount[0];
+          myOffsetTbl[n].index=n;
+      }
+
+      // Sort the offset in ascending order,
+      qsort(myOffsetTbl,myCount, sizeof(permuteLocal), compare1);
+
+      // totalAI count for the destination grid
+      totalAI = 0;
+      for (i=0; i<theirDECount; i++) totalAI += dstAICountPerDE[i];
+      dstOffsetTbl = new permuteGlobal[totalAI];
+
+      // Calculate offsets from dstIndicesArry and sort them, keep the dest. de
+      // and local index in the dest de.
+      for (n=0, i=0; n<theirDECount; n++) {
+          for (m=0; m<dstAICountPerDE[n]; m++,i++) {
+              dstOffsetTbl[i].offset = dstCompAI[i].min+
+              dstCompAI[i+dstAICount].min*dstGlobalCount[0];
+              dstOffsetTbl[i].index=m;
+              dstOffsetTbl[i].de=n;
+          }
+      }
+
+      qsort(dstOffsetTbl, totalAI, sizeof(permuteGlobal), compare2);
+
+      //      printf("DE %d: myOffetTbl %d %d %d, dstOffsetTbl %d %d %d\n",srcMyDE,
+      //     myOffsetTbl[0].offset, myOffsetTbl[1].offset, myOffsetTbl[2].offset,
+      //     dstOffsetTbl[0].offset,dstOffsetTbl[1].offset,dstOffsetTbl[2].offset);
+
+      // Find intersection between myOffsetTbl and dstOffsetTbl (both are
+      // sorted by offset
+      lastmatch=0;
+      for (n=0; n<myCount; n++) {
+         for (m=lastmatch; m<totalAI; m++) {
+           if (myOffsetTbl[n].offset < dstOffsetTbl[m].offset) {
+             lastmatch=m;
+             break;
+           } else if (myOffsetTbl[n].offset == dstOffsetTbl[m].offset) {
+               lastmatch = m+1;
+               total++;
+               for (k=0; k<rank; k++) {
+                 myAI[k]= srcCompAI[myOffsetTbl[n].index + myDEStartCount +
+                          k*srcAICount];
+               }
+               ESMC_XPacketFromAxisIndex(myAI, rank, srcGlobalCount,
+                                         NULL, &theirXP, &theirXPCount);
+               theirXP[0].ESMC_XPacketSetOffset(myOffsetTbl[n].index);
+               theirXP[0].ESMC_XPacketSetIndex(dstOffsetTbl[m].index);
+               // load the intersecting XPacket into the sending RTable
+               i = dstOffsetTbl[m].de;
+               sendRT->ESMC_RTableSetEntry(theirMatchingPET[i],
+                                           &theirXP[0]);
+               ct->ESMC_CommTableSetPartner(theirMatchingPET[i]);
+               delete [] theirXP;
+               break;
+           }
+         }
+      }
+
+      // Need to sort the sendRT so that the XPackets are ordered in the sequence of
+      // of the destination grid.
+      sendRT->ESMC_RTableSort();
+
+      delete [] theirMatchingPET;
+      delete [] myOffsetTbl;
+      delete [] dstOffsetTbl;
+
+    }       // end of sending table
+
+
+    //printf("DE %d: total intersction in sending table: %d\n", srcMyDE,total);
+
+    total=0;
+    // Calculate the receiving table.  If this DE is not part of the receiving
+    // layout skip this loop completely.
+    if (hasDstData == ESMF_TRUE) {
+
+      // get the number of source DEs
+      srcdeLayout->ESMC_DELayoutGet(&theirDECount, NULL, NULL, NULL, 0,
+                                    NULL, NULL, NULL, NULL, 0);
+
+      theirMatchingPET = new int[theirDECount];
+
+      for (i=0; i<theirDECount; i++) {
+        // get the parent DE identifier for this DE in the src layout
+        srcdeLayout->ESMC_DELayoutGetDEMatchPET(i, *vm, NULL,
+                                                &theirMatchingPET[i], 1);
+        if (theirMatchingPET[i] != i)
+          printf("theirDE = %d, parentDE = %d\n", i, theirMatchingPET[i]);
+      }
+
+      // get the starting count in the AI list for myDE
+      myDEStartCount = 0;
+      for (i=0; i<dstMyDE; i++) myDEStartCount += dstAICountPerDE[i];
+
+      // extract indices for the local grid, calculate the offset and sort them
+      myCount = dstAICountPerDE[dstMyDE];
+      myOffsetTbl = new permuteLocal[myCount];
+      for (n=0, m=myDEStartCount; n< myCount; n++, m++) {
+          myOffsetTbl[n].offset = dstCompAI[m].min*dstGlobalCount[0]+
+          dstCompAI[m+dstAICount].min;
+          myOffsetTbl[n].index=n;
+      }
+
+      // Sort the offset in ascending order,
+      qsort(myOffsetTbl,myCount, sizeof(permuteLocal), compare1);
+
+      // totalAI count for the source grid
+      totalAI = 0;
+      for (i=0; i<theirDECount; i++) totalAI += srcAICountPerDE[i];
+      srcOffsetTbl = new permuteGlobal[totalAI];
+
+      // Calculate offsets from srcCompAI and sort them, keep the dest. de
+      // and local index in the dest de.
+      for (n=0, i=0; n<theirDECount; n++) {
+          for (m=0; m<srcAICountPerDE[n]; m++,i++) {
+              srcOffsetTbl[i].offset = srcCompAI[i].min*srcGlobalCount[0]+
+              srcCompAI[i+srcAICount].min;
+              srcOffsetTbl[i].index=m;
+              srcOffsetTbl[i].de=n;
+          }
+      }
+
+      qsort(srcOffsetTbl, totalAI, sizeof(permuteGlobal), compare2);
+
+      // Find intersection between myOffsetTbl and srcOffsetTbl (both are
+      // sorted by offset
+      lastmatch=0;
+      for (n=0; n<myCount; n++) {
+         for (m=lastmatch; m<totalAI; m++) {
+           if (myOffsetTbl[n].offset < srcOffsetTbl[m].offset) {
+             lastmatch=m;
+             break;
+           } else if (myOffsetTbl[n].offset == srcOffsetTbl[m].offset) {
+               lastmatch = m+1;
+               total++;
+               for (k=0; k<rank; k++) {
+                 myAI[k]= dstCompAI[myOffsetTbl[n].index + myDEStartCount +
+                          k*srcAICount];
+               }
+               ESMC_XPacketFromAxisIndex(myAI, rank, srcGlobalCount,
+                                         NULL, &theirXP, &theirXPCount);
+               theirXP[0].ESMC_XPacketSetOffset(myOffsetTbl[n].index);
+               theirXP[0].ESMC_XPacketSetIndex(myOffsetTbl[n].index);
+               // load the intersecting XPacket into the sending RTable
+               i = srcOffsetTbl[m].de;
+               recvRT->ESMC_RTableSetEntry(theirMatchingPET[i],
+                                           &theirXP[0]);
+               ct->ESMC_CommTableSetPartner(theirMatchingPET[i]);
+               delete [] theirXP;
+               break;
+            }
+         }
+      }
+
+      // Need to sort the sendRT so that the XPackets are ordered in the sequence of
+      // of the destination grid.
+      recvRT->ESMC_RTableSort();
+
+      delete [] theirMatchingPET;
+      delete [] myOffsetTbl;
+      delete [] srcOffsetTbl;
+    }       // end of recving table
+    //printf("DE %d: total intersction in recving table: %d\n", srcMyDE,total);
+
+    return rc;
+ } // end ESMC_RoutePrecomputeRedistA2A
 
 
 //-----------------------------------------------------------------------------
@@ -2930,6 +3289,7 @@
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
     int rc;
+
     int i, j, k;
     int npets, xpcount;
     int minitem, maxitem;
@@ -3009,7 +3369,6 @@
 
  } // end ESMC_RouteValidate
 
-
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_RoutePrint"
@@ -3050,6 +3409,9 @@
     sprintf(msgbuf," Recv item count: %d\n", recvitems);
     //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
+
+    printf("Timing: Packing %lf, SendRecv: %lf, Unpack: %lf\n", 
+    	   timer1*1000, timer2*1000, timer3*1000);
 
     if (options == NULL) return ESMF_SUCCESS;
 
@@ -3105,7 +3467,7 @@
 // !REQUIREMENTS:
 
   // default constructor is fine.
-
+  
  } // end ESMC_Route
 
 //-----------------------------------------------------------------------------
