@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.25.2.5 2006/07/21 17:34:48 theurich Exp $
+# $Id: build_rules.mk,v 1.25.2.6 2006/07/24 21:52:37 theurich Exp $
 #
 #  Linux.pgi.default
 #
@@ -33,6 +33,7 @@ ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKLIBS       += -lpmpich++ -lmpich
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_CXXCOMPILEOPTS    += -DESMF_MPICH
+ESMF_CXXLINKLIBS       += -lmpich
 ESMF_MPIRUNDEFAULT      = mpirun
 else
 ifeq ($(ESMF_COMM),mpich2)
