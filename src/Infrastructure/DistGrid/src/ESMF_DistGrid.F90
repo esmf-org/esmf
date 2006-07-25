@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.144.2.1 2006/07/24 19:32:39 samsoncheung Exp $
+! $Id: ESMF_DistGrid.F90,v 1.144.2.2 2006/07/25 01:09:12 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -222,7 +222,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.144.2.1 2006/07/24 19:32:39 samsoncheung Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.144.2.2 2006/07/25 01:09:12 peggyli Exp $'
 
 !==============================================================================
 !
@@ -2420,33 +2420,6 @@
       call MPI_AllGatherV(indices, 2*me%localCellCount,MPI_INTEGER, &
 	 	globalIndices, bufsize, disp, &
 		MPI_INTEGER, comm, localrc)
-
-#if 0
-      if (myDE .eq. 0) then 
-        open (unit=40, file="gather.dat", form="FORMATTED")
-        i1 = 0
-        do j  = 1,nDEs
-          write(unit=40,fmt='("PE:",I4)') j
-          i2 = i1*2
-          do i = 1,glob%cellCountPerDE(j)
-            i1 = i1 + 1
-            i2 = i2 + 1
-	    i3 = i2 + glob%cellCountPerDE(j)
-  	    write (unit=40,FMT='(2I8)') globalIndices(i2), globalIndices(i3)
-    	  enddo
-        enddo
-	close(40)
-      endif
-         
-      ! Check if the data is correct 
-      badcount = 0
-      i1 = disp(myDE+1)+1
-      do i = 1, me%localCellCount*2
-	if (globalIndices(i1) .ne. indices(i)) badcount = badcount +1
-	i1 = i1+1
-      enddo
-      print *, "PET ", myDE, "DistGrid badcount ", badcount
-#endif
 
       i1 = 0
       do j  = 1,nDEs
