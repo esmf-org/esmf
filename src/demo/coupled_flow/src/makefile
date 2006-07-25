@@ -1,6 +1,8 @@
-# $Id: makefile,v 1.6 2004/02/18 18:24:47 nscollins Exp $
+# $Id: makefile,v 1.13.2.1 2006/07/25 18:00:52 theurich Exp $
 
-ALL: demo
+ALL: tree_build_demos
+
+run:  tree_run_demos
 
 CFLAGS    =
 FFLAGS    =
@@ -14,21 +16,21 @@ LIBBASE	  =
 LOCDIR	  = src/demo/coupled_flow/src
 
 
-DEMO_BUILD    = $(ESMC_TESTDIR)/CoupledFlowApp
+DEMOS_BUILD    = $(ESMF_TESTDIR)/CoupledFlowApp
 
 # Object files other than main that the
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
-DEMO_OBJ      = FlowArraysMod.o InjectArraysMod.o \
-                FlowSolverMod.o InjectorMod.o CouplerMod.o \
-                CoupledFlowApp.o
+DEMOS_OBJ      = FlowArraysMod.o InjectArraysMod.o \
+                 FlowSolverMod.o InjectorMod.o CouplerMod.o \
+                 CoupledFlowApp.o
 
-DEMO_RUN      = RUN_CoupledFlowApp  
+DEMOS_RUN      = RUN_CoupledFlowApp  
 
-DEMO_RUN_UNI  = RUN_CoupledFlowAppUNI
+DEMOS_RUN_UNI  = RUN_CoupledFlowAppUNI
 
-DEMO_RM       = ESMF_CoupledFlowApp.rm
+DEMOS_RM       = ESMF_CoupledFlowApp.rm
 
 FlowSolverMod.o:: FlowArraysMod.o
 
@@ -43,22 +45,35 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   =
-CLEANFILES  = *.o *.mod
+CLEANFILES  = SIE.* U_velocity.* V_velocity.* FLAG.* DE.* \
+              $(DEMOS_BUILD).stdout
 CLOBBERDIRS =
 
 RUN_CoupledFlowApp:
 	-@rm -f testlog stdlog.* logfile.* 
 	@echo "Ready to run the ESMF Coupled Flow Demo Application.  This may take several minutes."
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/CoupledFlowApp >$(ESMC_TESTDIR)/CoupledFlowApp.stdout
-	@echo "ESMF Coupled Flow Demo Application complete.  Please look in " $(ESMC_TESTDIR)/CoupledFlowApp.stdout " for status results."
+	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	  echo ${ESMF_MPIRUN} -np 4 $(ESMF_TESTDIR)/CoupledFlowApp ; \
+	  ${ESMF_MPIRUN} -np 4 $(ESMF_TESTDIR)/CoupledFlowApp ; \
+	else \
+	  echo ${ESMF_MPIRUN} -np 4 $(ESMF_TESTDIR)/CoupledFlowApp \>$(ESMF_TESTDIR)/CoupledFlowApp.stdout ; \
+	  ${ESMF_MPIRUN} -np 4 $(ESMF_TESTDIR)/CoupledFlowApp >$(ESMF_TESTDIR)/CoupledFlowApp.stdout ; \
+	fi ; 
+	@echo "ESMF Coupled Flow Demo Application complete.  Please look in " $(ESMF_TESTDIR)/CoupledFlowApp.stdout " for status results."
 	@echo "Look in " `pwd` " for output data files."
 
 
 RUN_CoupledFlowAppUNI:
 	-@rm -f testlog stdlog.* logfile.* 
 	@echo "Ready to run the ESMF Coupled Flow Demo Application.  This may take several minutes."
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/CoupledFlowApp >$(ESMC_TESTDIR)/CoupledFlowApp.stdout
-	@echo "ESMF Coupled Flow Demo Application complete.  Please look in " $(ESMC_TESTDIR)/CoupledFlowApp.stdout " for status results."
+	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	  echo ${ESMF_MPIRUN} -np 1 $(ESMF_TESTDIR)/CoupledFlowApp ; \
+	  ${ESMF_MPIRUN} -np 1 $(ESMF_TESTDIR)/CoupledFlowApp ; \
+	else \
+	  echo ${ESMF_MPIRUN} -np 1 $(ESMF_TESTDIR)/CoupledFlowApp >$(ESMF_TESTDIR)/CoupledFlowApp.stdout ; \
+	  ${ESMF_MPIRUN} -np 1 $(ESMF_TESTDIR)/CoupledFlowApp >$(ESMF_TESTDIR)/CoupledFlowApp.stdout ; \
+	fi ; 
+	@echo "ESMF Coupled Flow Demo Application complete.  Please look in " $(ESMF_TESTDIR)/CoupledFlowApp.stdout " for status results."
 	@echo "Look in " `pwd` " for output data files."
 
 
