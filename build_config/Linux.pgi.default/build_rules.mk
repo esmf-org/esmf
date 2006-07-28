@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.25.2.6 2006/07/24 21:52:37 theurich Exp $
+# $Id: build_rules.mk,v 1.25.2.7 2006/07/28 18:26:18 theurich Exp $
 #
 #  Linux.pgi.default
 #
@@ -66,6 +66,13 @@ endif
 endif
 endif
 endif
+endif
+
+############################################################
+# Set ESMF_MPIRUNDEFAULT according to ESMF_BATCH setting
+#
+ifeq ($(ESMF_BATCH),lsf.ibmpjl)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
 endif
 
 ############################################################
