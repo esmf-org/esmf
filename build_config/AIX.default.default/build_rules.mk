@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.24.2.1 2006/07/19 18:16:44 theurich Exp $
+#  $Id: build_rules.mk,v 1.24.2.2 2006/07/28 18:45:50 theurich Exp $
 #
 #  AIX.default.default
 #
@@ -33,12 +33,9 @@ ESMF_F90DEFAULT         = mpxlf90_r
 ESMF_F90LINKLIBS       += -lmpi_r
 ESMF_CXXDEFAULT         = mpCC_r
 ESMF_CXXLINKLIBS       += -lmpi_r
-ifeq ($(ESMF_BATCHQUEUE),lsf)
-ESMF_MPIRUNDEFAULT      = ${ESMF_TOP_DIR}/scripts/mpirun.aixlsf
-export ESMF_BATCH := true
-else
 ESMF_MPIRUNDEFAULT      = ${ESMF_TOP_DIR}/scripts/mpirun.rs6000_sp
-export ESMF_BATCH := false
+ifeq ($(ESMF_BATCH),lsf.ibmpjl)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
 endif
 else
 ifeq ($(ESMF_COMM),user)
@@ -47,6 +44,13 @@ else
 $(error Invalid ESMF_COMM setting: $(ESMF_COMM))
 endif
 endif
+endif
+
+############################################################
+# Set ESMF_MPIRUNDEFAULT according to ESMF_BATCH setting
+#
+ifeq ($(ESMF_BATCH),lsf.ibmpjl)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
 endif
 
 ############################################################

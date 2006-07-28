@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.25.2.7 2006/07/28 18:26:18 theurich Exp $
+# $Id: build_rules.mk,v 1.25.2.8 2006/07/28 18:45:50 theurich Exp $
 #
 #  Linux.pgi.default
 #
@@ -35,6 +35,9 @@ ESMF_CXXDEFAULT         = mpiCC
 ESMF_CXXCOMPILEOPTS    += -DESMF_MPICH
 ESMF_CXXLINKLIBS       += -lmpich
 ESMF_MPIRUNDEFAULT      = mpirun
+ifeq ($(ESMF_BATCH),lsf.ibmpjl)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
+endif
 else
 ifeq ($(ESMF_COMM),mpich2)
 # Mpich2 ---------------------------------------------------
@@ -49,6 +52,9 @@ ESMF_F90DEFAULT         = mpif77
 ESMF_CXXDEFAULT         = mpic++
 ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+ifeq ($(ESMF_BATCH),lsf.ibmpjl)
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
+endif
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
@@ -66,13 +72,6 @@ endif
 endif
 endif
 endif
-endif
-
-############################################################
-# Set ESMF_MPIRUNDEFAULT according to ESMF_BATCH setting
-#
-ifeq ($(ESMF_BATCH),lsf.ibmpjl)
-ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
 endif
 
 ############################################################
