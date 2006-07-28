@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.42.2.1 2006/07/24 19:27:24 samsoncheung Exp $
+// $Id: ESMC_Route_F.C,v 1.42.2.2 2006/07/28 16:52:51 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,6 @@ extern "C" {
            void *src_base_addr = NULL;
            void *dst_base_addr = NULL;
            ESMC_DataKind sdk, ddk;
-           ESMC_DataType sdt, ddt;
 
            sdk = ESMF_NOKIND;
            ddk = ESMF_NOKIND;
@@ -102,19 +101,16 @@ extern "C" {
 	       ((long int)*src != 0) && ((long int)*src != -1)) {
                (*src)->ESMC_LocalArrayGetBaseAddr(&src_base_addr);
                sdk = (*src)->ESMC_LocalArrayGetKind();
-               sdt = (*src)->ESMC_LocalArrayGetType();
                // allow destination to be optional; if not specified, use the
                // src as both src and dst.
                dst_base_addr = src_base_addr;
                ddk = sdk;
-               ddt = sdt;
            }
 
 	   if (((long int)dst != 0) && ((long int)dst != -1) &&
 	       ((long int)*dst != 0) && ((long int)*dst != -1)) {
                (*dst)->ESMC_LocalArrayGetBaseAddr(&dst_base_addr);
                ddk = (*dst)->ESMC_LocalArrayGetKind();
-               ddt = (*dst)->ESMC_LocalArrayGetType();
            }
 
            if (sdk != ddk) {
@@ -122,7 +118,7 @@ extern "C" {
                      "; source & destination datatypes not the same", status);
                return;
            }
-           *status = (*ptr)->ESMC_RouteRun(src_base_addr, dst_base_addr, sdk, sdt);
+           *status = (*ptr)->ESMC_RouteRun(src_base_addr, dst_base_addr, sdk);
        }
 #undef ESMC_METHOD
 
@@ -134,7 +130,6 @@ extern "C" {
            void **src_base_addr = NULL;
            void **dst_base_addr = NULL;
            ESMC_DataKind sdk, ddk;
-           ESMC_DataType sdt, ddt;
            bool hasdst;
            int n;
 
@@ -162,10 +157,8 @@ extern "C" {
                    // into arrays of data types, and if they are not all
                    // identical, then in routerun the outer loop must be
                    // by block, and no packing is allowed between blocks.
-                   if (n==0) {
+                   if (n==0)
                        sdk = (src[n])->ESMC_LocalArrayGetKind();
-                       sdt = (src[n])->ESMC_LocalArrayGetType();
-                       }
                    else {
                        if (sdk != (src[n])->ESMC_LocalArrayGetKind()) {
                            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
@@ -192,10 +185,8 @@ extern "C" {
                    // get the data start address for each array in the list   
                    (dst[n])->ESMC_LocalArrayGetBaseAddr(dst_base_addr+n);
                    // TODO: ditto comment above about lists of ddks
-                   if (n==0) {
+                   if (n==0)
                        ddk = (dst[n])->ESMC_LocalArrayGetKind();
-                       ddt = (dst[n])->ESMC_LocalArrayGetType();
-                       }
                    else {
                        if (ddk != (dst[n])->ESMC_LocalArrayGetKind()) {
                            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
@@ -223,13 +214,13 @@ extern "C" {
 
            if (hasdst) {
                *status = (*ptr)->ESMC_RouteRun(src_base_addr, dst_base_addr, 
-                                               sdk, sdt, *srcCount);
+                                               sdk, *srcCount);
 
                delete [] dst_base_addr;
 
            } else {
                *status = (*ptr)->ESMC_RouteRun(src_base_addr, src_base_addr, 
-                                               sdk, sdt, *srcCount);
+                                               sdk, *srcCount);
            }
 
            delete [] src_base_addr;
@@ -240,9 +231,7 @@ extern "C" {
 
        void FTN(c_esmc_routerunna)(ESMC_Route **ptr, void *src,
                                    void *dst, ESMC_DataKind *dk, int *status) {
-           ESMC_DataType  ddt;     // dummy DataType
-           ddt = ESMF_DATA_REAL;
-           *status = (*ptr)->ESMC_RouteRun(src, dst, *dk, ddt);
+           *status = (*ptr)->ESMC_RouteRun(src, dst, *dk);
        }
 
        void FTN(c_esmc_routeprecomputeregrid)(ESMC_Route **ptr, int *rank, 
