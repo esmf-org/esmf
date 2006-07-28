@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.152.2.3 2006/07/25 01:08:15 peggyli Exp $
+//$Id: ESMC_Route.C,v 1.152.2.4 2006/07/28 16:55:08 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.152.2.3 2006/07/25 01:08:15 peggyli Exp $";
+               "$Id: ESMC_Route.C,v 1.152.2.4 2006/07/28 16:55:08 samsoncheung Exp $";
 //-----------------------------------------------------------------------------
 class permuteLocal {
 public:
@@ -595,8 +595,7 @@ int compare2(const void *item1, const void *item2) {
 // !ARGUMENTS:
     void *sendAddr,         // in, single local send buffer base address
     void *recvAddr,         // in, single local receive buffer base address
-    ESMC_DataKind dk,       // in, data kind for both src & dest
-    ESMC_DataType dt) {     // in, data type for both src & dest
+    ESMC_DataKind dk) {     // in, data kind for both src & dest
 //
 // !DESCRIPTION:
 //     Calls the communications routines to send/recv the information
@@ -611,7 +610,7 @@ int compare2(const void *item1, const void *item2) {
      sendAddrList[0] = sendAddr;
      recvAddrList[0] = recvAddr;
 
-     return ESMC_RouteRun(sendAddrList, recvAddrList, dk, dt, 1);
+     return ESMC_RouteRun(sendAddrList, recvAddrList, dk, 1);
 }
 
 //-----------------------------------------------------------------------------
@@ -630,7 +629,6 @@ int compare2(const void *item1, const void *item2) {
       void **sendAddr,       // in, list of local send buffer base addresses
       void **recvAddr,       // in, list of local receive buffer base addresses
       ESMC_DataKind dk,      // in, data kind for both src & dest
-      ESMC_DataType dt,      // in, data type for both src & dest
       int numAddrs) {        // in, count of src and dst addresses (must be = )
 //
 // !DESCRIPTION:
@@ -770,7 +768,7 @@ int compare2(const void *item1, const void *item2) {
           rc = ESMC_XPacketMakeBuffer(sendXPCount, sendXPList, nbytes, numAddrs,
                                       &sendBuffer, &sendBufferSize);
           //starttime = MPI_Wtime();
-          rc = ESMC_XPacketPackBuffer(sendXPCount, sendXPList, dt, nbytes, numAddrs,
+          rc = ESMC_XPacketPackBuffer(sendXPCount, sendXPList, dk, nbytes, numAddrs,
                                       sendAddr, sendBuffer);
           //timer1 += MPI_Wtime()-starttime;
 
@@ -794,7 +792,7 @@ int compare2(const void *item1, const void *item2) {
           // whether myPET = theirPET or not, we still have to unpack the 
           // receive buffer to move the data into the final location.
           //starttime = MPI_Wtime();
-          rc = ESMC_XPacketUnpackBuffer(recvXPCount, recvXPList, dt, nbytes, 
+          rc = ESMC_XPacketUnpackBuffer(recvXPCount, recvXPList, dk, nbytes, 
                                         numAddrs, recvBuffer, recvAddr);
           //timer3 += MPI_Wtime()-starttime;
           // delete the lists of pointers, plus the local packing buffers
@@ -842,7 +840,7 @@ int compare2(const void *item1, const void *item2) {
                   sendContig = false;
                   rc = ESMC_XPacketMakeBuffer(1, &sendXP, nbytes, numAddrs,
                                               &sendBuffer, &sendBufferSize);
-                  rc = ESMC_XPacketPackBuffer(1, &sendXP, dt, nbytes, numAddrs,
+                  rc = ESMC_XPacketPackBuffer(1, &sendXP, dk, nbytes, numAddrs,
                                               sendAddr, sendBuffer);
                   madeSendBuf = true;
               }
@@ -910,7 +908,7 @@ int compare2(const void *item1, const void *item2) {
             // now if the receive buffer is not contig, we still need to
             //  unpack the receive buffer
             if ((recvBufferSize > 0) && (!recvContig)) {
-              rc = ESMC_XPacketUnpackBuffer(1, &recvXP, dt, nbytes, numAddrs,
+              rc = ESMC_XPacketUnpackBuffer(1, &recvXP, dk, nbytes, numAddrs,
                                             recvBuffer, recvAddr);
             }
  
@@ -1322,7 +1320,7 @@ int compare2(const void *item1, const void *item2) {
           // create the buffer to hold the sending data, and pack it 
           rc = ESMC_XPacketMakeBuffer(sendXPCount, sendXPList, nbytes, numAddrs,
                                       &sendBufferList[req], &sendBufferSize);
-          rc = ESMC_XPacketPackBuffer(sendXPCount, sendXPList, dt, nbytes, numAddrs,
+          rc = ESMC_XPacketPackBuffer(sendXPCount, sendXPList, dk, nbytes, numAddrs,
                                       sendAddr, sendBufferList[req]);
 
 	  //timer1 += MPI_Wtime()-starttime;
@@ -1390,7 +1388,7 @@ int compare2(const void *item1, const void *item2) {
                   sendContig = false;
                   rc = ESMC_XPacketMakeBuffer(1, &sendXP, nbytes, numAddrs,
                                               &sendBufferList[req], &sendBufferSize);
-                  rc = ESMC_XPacketPackBuffer(1, &sendXP, dt, nbytes, numAddrs,
+                  rc = ESMC_XPacketPackBuffer(1, &sendXP, dk, nbytes, numAddrs,
                                               sendAddr, sendBufferList[req]);
                   madeSendBufList[req] = true;
               }
@@ -1682,7 +1680,7 @@ int compare2(const void *item1, const void *item2) {
           // whether myPET = theirPET or not, we still have to unpack the 
           // receive buffer to move the data into the final location.
           starttime = endtime;
-          rc = ESMC_XPacketUnpackBuffer(recvXPCount, recvXPList, dt, nbytes,
+          rc = ESMC_XPacketUnpackBuffer(recvXPCount, recvXPList, dk, nbytes,
                                        numAddrs, recvBufferList[req], recvAddr);
 
 	  timer3 += MPI_Wtime()-starttime;
@@ -1740,7 +1738,7 @@ int compare2(const void *item1, const void *item2) {
             // if the receive buffer is not contig, we still need to unpack
             // the data from the receive buffer into the final location.
             if (!recvContig) {
-              rc = ESMC_XPacketUnpackBuffer(1, &recvXP, dt, nbytes, numAddrs,
+              rc = ESMC_XPacketUnpackBuffer(1, &recvXP, dk, nbytes, numAddrs,
                                             recvBufferList[req], recvAddr);
             }
 
