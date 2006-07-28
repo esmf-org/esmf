@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.38.2.1 2006/07/24 19:23:53 samsoncheung Exp $
+// $Id: ESMC_XPacket.h,v 1.38.2.2 2006/07/28 16:47:33 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -163,10 +163,10 @@
     friend int ESMC_XPacketMakeBuffer(int xpCount, ESMC_XPacket **xpList,
                                       int nbytes, int numAddrs, char **buffer,
                                       int *bufferSize);
-    friend int ESMC_XPacketPackBuffer(int xpCount, ESMC_XPacket **xpList, ESMC_DataType dt,
+    friend int ESMC_XPacketPackBuffer(int xpCount, ESMC_XPacket **xpList, ESMC_DataKind dk,
                                       int nbytes, int numAddrs, void **dataAddr,
                                       char *buffer);
-    friend int ESMC_XPacketUnpackBuffer(int xpCount, ESMC_XPacket **xpList, ESMC_DataType dt,
+    friend int ESMC_XPacketUnpackBuffer(int xpCount, ESMC_XPacket **xpList, ESMC_DataKind dk,
                                       int nbytes, char *buffer,
                                       int numAddrs, void **dataAddr);
     friend int ESMC_XPacketDoBuffer(ESMC_PackUnpackFlag packflag, 
@@ -196,10 +196,10 @@
     int ESMC_XPacketMakeBuffer(int xpCount, ESMC_XPacket **xpList,
                                int nbytes, int numAddrs, 
                                char **buffer, int *bufferSize);
-    int ESMC_XPacketPackBuffer(int xpCount, ESMC_XPacket **xpList, ESMC_DataType dt,
+    int ESMC_XPacketPackBuffer(int xpCount, ESMC_XPacket **xpList, ESMC_DataKind dk,
                                int nbytes, int numAddrs, 
                                void **dataAddr, char *buffer);
-    int ESMC_XPacketUnpackBuffer(int xpCount, ESMC_XPacket **xpList, ESMC_DataType dt,
+    int ESMC_XPacketUnpackBuffer(int xpCount, ESMC_XPacket **xpList, ESMC_DataKind dk,
                                  int nbytes, int numAddrs, 
                                  char *buffer, void **dataAddr);
     int ESMC_XPacketDoBuffer(ESMC_PackUnpackFlag packflag, 
