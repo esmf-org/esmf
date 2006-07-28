@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.59.2.2 2006/07/28 16:59:18 samsoncheung Exp $
+// $Id: ESMC_XPacket.C,v 1.59.2.3 2006/07/28 23:36:34 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.59.2.2 2006/07/28 16:59:18 samsoncheung Exp $";
+              "$Id: ESMC_XPacket.C,v 1.59.2.3 2006/07/28 23:36:34 samsoncheung Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -836,31 +836,37 @@
        case ESMF_I1: 
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
+        break;
 
        case ESMF_I2:
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
+        break;
 
        case ESMF_I4:
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
+        break;
 
        case ESMF_I8:
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
+        break;
 
        case ESMF_R4:
         return ESMC_XPacketDoRBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
+        break;
 
        case ESMF_R8:
-        printf(" cheung Real 8 \n");
         return ESMC_XPacketDoRBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
+        break;
 
        //case ESMF_C16:
        // return ESMC_XPacketDoCBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
        //                           nbytes, numAddrs, dataAddr, buffer);
+       // break;
 
        default:
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
@@ -903,30 +909,37 @@
        case ESMF_I1:
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
+        break;
 
        case ESMF_I2:
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
+        break;
 
        case ESMF_I4:
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
+        break;
 
        case ESMF_I8:
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
+        break;
 
        case ESMF_R4:
         return ESMC_XPacketDoRBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
+        break;
 
        case ESMF_R8:
         return ESMC_XPacketDoRBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
+        break;
 
        //case ESMF_C16:
        // return ESMC_XPacketDoCBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
        //                           nbytes, numAddrs, dataAddr, buffer);
+       // break;
 
        default:
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
