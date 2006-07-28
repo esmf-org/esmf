@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.59.2.1 2006/07/24 19:21:08 samsoncheung Exp $
+// $Id: ESMC_XPacket.C,v 1.59.2.2 2006/07/28 16:59:18 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.59.2.1 2006/07/24 19:21:08 samsoncheung Exp $";
+              "$Id: ESMC_XPacket.C,v 1.59.2.2 2006/07/28 16:59:18 samsoncheung Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -503,16 +503,16 @@
 	    if (packflag == ESMC_BUFFER_PACK)  {
 	      // slow   memcpy(bufPtr, dataPtr, nbytes);
               if (nbytes == 8)
-                 *(double *)bufPtr = *(double * )dataPtr;
+                 *(ESMF_KIND_R8 *)bufPtr = *(ESMF_KIND_R8 * )dataPtr;
               if (nbytes == 4)
-                 *(float *)bufPtr = *(float * )dataPtr;
+                 *(ESMF_KIND_R4 *)bufPtr = *(ESMF_KIND_R4 * )dataPtr;
               }
 	    else  {
 	      // slow   memcpy(dataPtr, bufPtr, nbytes);
               if (nbytes == 8)
-                 *(double *)dataPtr = *(double * )bufPtr;
+                 *(ESMF_KIND_R8 *)dataPtr = *(ESMF_KIND_R8 * )bufPtr;
               if (nbytes == 4)
-                 *(float *)dataPtr = *(float * )bufPtr;
+                 *(ESMF_KIND_R4 *)dataPtr = *(ESMF_KIND_R4 * )bufPtr;
               }
 	    bufPtr += nbytes;
 	  }
@@ -569,9 +569,9 @@
                     // Proposed replacement :
                     // for (i=0; i<contigLength; i++) {
                     //   if (nbytes == 8)
-                    //     *(double *)bufPtr = *(double * )dataPtr; 
+                    //     *(ESMF_KIND_R8 *)bufPtr = *(ESMF_KIND_R8 * )dataPtr; 
                     //   if (nbytes == 4)
-                    //     *(float *)bufPtr = *(float * )dataPtr;
+                    //     *(ESMF_KIND_R4 *)bufPtr = *(ESMF_KIND_R4 * )dataPtr;
                     //   bufPtr += nbytes;
                     //   dataPtr += nbytes;
                     // }
@@ -584,9 +584,9 @@
                     // Proposed replacement :
                     // for (i=0; i<contigLength; i++) {
                     //   if (nbytes == 8)
-                    //     *(double *)dataPtr = *(double * )bufPtr;
+                    //     *(ESMF_KIND_R8 *)dataPtr = *(ESMF_KIND_R8 * )bufPtr;
                     //   if (nbytes == 4)
-                    //     *(float *)dataPtr = *(float * )bufPtr;
+                    //     *(ESMF_KIND_R4 *)dataPtr = *(ESMF_KIND_R4 * )bufPtr;
                     //   bufPtr += nbytes;
                     //   dataPtr += nbytes;
                     // }
@@ -675,10 +675,24 @@
 	    dataPtr = (char *)dataAddr[l] + (offset*nbytes);
 	    if (packflag == ESMC_BUFFER_PACK)
 	      // slow   memcpy(bufPtr, dataPtr, nbytes);
-              *(int *)bufPtr = *(int * )dataPtr;
+              if (nbytes == 1)
+                 *(ESMF_KIND_I1 *)bufPtr = *(ESMF_KIND_I1 * )dataPtr;
+              if (nbytes == 2)
+                 *(ESMF_KIND_I2 *)bufPtr = *(ESMF_KIND_I2 * )dataPtr;
+              if (nbytes == 4)
+                 *(ESMF_KIND_I4 *)bufPtr = *(ESMF_KIND_I4 * )dataPtr;
+              if (nbytes == 8)
+                 *(ESMF_KIND_I8 *)bufPtr = *(ESMF_KIND_I8 * )dataPtr;
 	    else
 	      // slow   memcpy(dataPtr, bufPtr, nbytes);
-              *(int *)dataPtr = *(int * )bufPtr;
+              if (nbytes == 1)
+                 *(ESMF_KIND_I1 *)dataPtr = *(ESMF_KIND_I1 * )bufPtr;
+              if (nbytes == 2)
+                 *(ESMF_KIND_I2 *)dataPtr = *(ESMF_KIND_I2 * )bufPtr;
+              if (nbytes == 4)
+                 *(ESMF_KIND_I4 *)dataPtr = *(ESMF_KIND_I4 * )bufPtr;
+              if (nbytes == 8)
+                 *(ESMF_KIND_I8 *)dataPtr = *(ESMF_KIND_I8 * )bufPtr;
 	    bufPtr += nbytes;
 	  }
 	  continue;
@@ -733,7 +747,14 @@
                     //
                     // Proposed replacement :
                     // for (i=0; i<contigLength; i++) {
-                    //   *(int *)bufPtr = *(int * )dataPtr;
+                    //   if (nbytes == 1)
+                    //   *(ESMF_KIND_I1 *)bufPtr = *(ESMF_KIND_I1 * )dataPtr;
+                    //   if (nbytes == 2)
+                    //   *(ESMF_KIND_I2 *)bufPtr = *(ESMF_KIND_I2 * )dataPtr;
+                    //   if (nbytes == 4)
+                    //   *(ESMF_KIND_I4 *)bufPtr = *(ESMF_KIND_I4 * )dataPtr;
+                    //   if (nbytes == 8)
+                    //   *(ESMF_KIND_I8 *)bufPtr = *(ESMF_KIND_I8 * )dataPtr;
                     //   bufPtr += nbytes;
                     //   dataPtr += nbytes;
                     // }
@@ -745,7 +766,14 @@
                     //
                     // Proposed replacement :
                     // for (i=0; i<contigLength; i++) {
-                    //   *(int *)dataPtr = *(int * )bufPtr;
+                    //   if (nbytes == 1)
+                    //   *(ESMF_KIND_I1 *)dataPtr = *(ESMF_KIND_I1 * )bufPtr;
+                    //   if (nbytes == 2)
+                    //   *(ESMF_KIND_I2 *)dataPtr = *(ESMF_KIND_I2 * )bufPtr;
+                    //   if (nbytes == 4)
+                    //   *(ESMF_KIND_I4 *)dataPtr = *(ESMF_KIND_I4 * )bufPtr;
+                    //   if (nbytes == 8)
+                    //   *(ESMF_KIND_I8 *)dataPtr = *(ESMF_KIND_I8 * )bufPtr;
                     //   bufPtr += nbytes;
                     //   dataPtr += nbytes;
                     // }
@@ -779,324 +807,6 @@
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_XPacketDoCBuffer"
-//BOPI
-// !IROUTINE:  ESMC_XPacketDoCBuffer - pack or unpack a flat buffer from/to XPs
-//
-// !INTERFACE:
-      int ESMC_XPacketDoCBuffer(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_PackUnpackFlag packflag,  // in  - move XPs from/to the buffer
-      int xpCount,                   // in  - count of XPs to pack/unpack
-      ESMC_XPacket **xpList,         // in  - list of XPs to pack/unpack
-      int nbytes,                    // in  - number of bytes per item
-      int numAddrs,                  // in  - number of addrs to apply this to
-      void **dataAddr,               // in  - list of addresses to be un/packed
-      char *buffer) {                // in  - buffer to pack/unpack into
-//
-// !DESCRIPTION:
-//    Packs an already allocated buffer with data described by one or more XPs.
-//
-//EOPI
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    int rc = ESMF_FAILURE;
-    int i, j, k, l, m;
-    int xpItemCount, totalRepCount;
-    int rank, offset, contigLength, stride[ESMF_MAXDIM], repCount[ESMF_MAXDIM];
-    int itemPtr, contigBytes, index[ESMF_MAXDIM], bufindex;
-    char *dataPtr, *bufPtr;
-    char msgbuf[ESMF_MAXSTR];
-
-    if ((xpCount == 0) || (xpList == NULL))
-        return ESMF_SUCCESS;
-
-    // make a local pointer we can increment without affecting the original.
-    bufPtr = buffer;
-
-    // outer loop:  does nothing if there is only 1 address.  however
-    // if you want to pack all the xpackets for one address together before
-    // moving on to the next address, then change this loop to be 
-    // from 1 to numAddrs.  right now this is a no-op.
-    for (m=0; m<1; m++) {
-
-      // loop over the XPs, packing the data into the buffer or unpacking the
-      // buffer into multiple memory regions described by the XPs.
-      for (i=0; i<xpCount; i++) {
-
-	if (xpList[i]->ESMC_XPacketIsSingle()) {
-	  offset = xpList[i]->ESMC_XPacketGetOffset();
-	  for (l=0; l<numAddrs; l++) {
-	    dataPtr = (char *)dataAddr[l] + (offset*nbytes);
-	    if (packflag == ESMC_BUFFER_PACK)
-	      // slow   memcpy(bufPtr, dataPtr, nbytes);
-                 *(char *)bufPtr = *(char * )dataPtr;
-	    else
-	      // slow   memcpy(dataPtr, bufPtr, nbytes);
-                 *(char *)dataPtr = *(char * )bufPtr;
-	    bufPtr += nbytes;
-	  }
-	  continue;
-	}
-    
-        // make sure this XP isn't empty before proceeding.
-        if (xpList[i]->ESMC_XPacketIsEmpty())
-            continue;
-  
-        rc = xpList[i]->ESMC_XPacketGet(&rank, &offset, &contigLength,
-                                        stride, repCount, &bufindex);
-  
-        // loops for all ranks collapsed into a single master loop
-        // if timing shows an advantage, the inner-most loop could be unrolled
-        // to give the optimizer some help.
-  
-        // total number of contig regions which will be moved
-        totalRepCount = 1; 
-        for (k=0; k<rank-1; k++) {
-            totalRepCount *= repCount[k];
-            index[k] = 0;
-        }
-  
-        // initial value for item offset, plus size of contig buffer in 
-        // bytes (xp values are computed and stored as number of items)
-        itemPtr = offset;
-        contigBytes = contigLength * nbytes;
-  
-        // for each contig region which must be moved...
-        for (k=0; k<totalRepCount; k++) {
-  
-            // inner loop:  this configuration of loops packs each xpacket
-            // across all addresses before moving on to the next xpacket.
-            // it saves the computations of repcount and contig length, but
-            // it also hopscotches across memory more - so it isn't clear
-            // which loop configuration is the win.  this routine could be
-            // configured to take a flag saying whether to pack with the
-            // outer loop or the inner loop.   to pack at the outer loop,
-            // set the upper m limit to numAddrs and set the following l limit
-            // to 1.     the other change is the dataAddr[] index must change
-            // from l to m.
-
-            // for each address in our list, apply the xpacket. 
-            for (l=0; l<numAddrs; l++) {
-  
-                // move data into the buffer or out of the buffer
-                dataPtr = (char *)dataAddr[l] + (itemPtr*nbytes);
-                if (packflag == ESMC_BUFFER_PACK) {
-                    // Using memcpy may be slow but lack of data
-                    // set to test; so keep the memcpy for now.
-                    memcpy(bufPtr, dataPtr, contigBytes);
-                    //
-                    // Proposed replacement :
-                    // for (i=0; i<contigLength; i++) {
-                    //   *(char *)bufPtr = *(char * )dataPtr;
-                    //   bufPtr += nbytes;
-                    //   dataPtr += nbytes;
-                    // }
-                    }
-                else {
-                    // Using memcpy may be slow but lack of data
-                    // set to test; so keep the memcpy for now.
-                    memcpy(dataPtr, bufPtr, contigBytes);
-                    //
-                    // Proposed replacement :
-                    // for (i=0; i<contigLength; i++) {
-                    //   *(char *)dataPtr = *(char * )bufPtr;
-                    //   bufPtr += nbytes;
-                    //   dataPtr += nbytes;
-                    // }
-                    }
-                bufPtr += contigBytes;     // take off when use the replacement
-            }
-  
-            // increment the innermost counter 
-            index[0]++;
-            itemPtr += stride[0];
-  
-            // and now roll up the index, thru all ranks
-            // at the end of a loop for one rank, roll back the pointer to
-            // the start of the previous loop and add in the next stride.
-            for (j=0; (j<rank-2) && (index[j] >= repCount[j]); j++) {
-                index[j] = 0;
-                index[j+1]++;
-                itemPtr -= (repCount[j]*stride[j]);
-                itemPtr += stride[j+1];
-            }   // end of j (per-rank, "odometer-rollover" or "carry-bit") loop
-  
-        }     // end of k (total rep count) loop
-      }     // end of i (XP) loop
-    }     // end of m (numAddr) loop
-
-    rc = ESMF_SUCCESS;
-    return rc;
-
- } // end ESMC_XPacketDoCBuffer
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_XPacketDoLBuffer"
-//BOPI
-// !IROUTINE:  ESMC_XPacketDoLBuffer - pack or unpack a flat buffer from/to XPs
-//
-// !INTERFACE:
-      int ESMC_XPacketDoLBuffer(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_PackUnpackFlag packflag,  // in  - move XPs from/to the buffer
-      int xpCount,                   // in  - count of XPs to pack/unpack
-      ESMC_XPacket **xpList,         // in  - list of XPs to pack/unpack
-      int nbytes,                    // in  - number of bytes per item
-      int numAddrs,                  // in  - number of addrs to apply this to
-      void **dataAddr,               // in  - list of addresses to be un/packed
-      char *buffer) {                // in  - buffer to pack/unpack into
-//
-// !DESCRIPTION:
-//    Packs an already allocated buffer with data described by one or more XPs.
-//
-//EOPI
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    int rc = ESMF_FAILURE;
-    int i, j, k, l, m;
-    int xpItemCount, totalRepCount;
-    int rank, offset, contigLength, stride[ESMF_MAXDIM], repCount[ESMF_MAXDIM];
-    int itemPtr, contigBytes, index[ESMF_MAXDIM], bufindex;
-    char *dataPtr, *bufPtr;
-    char msgbuf[ESMF_MAXSTR];
-
-    if ((xpCount == 0) || (xpList == NULL))
-        return ESMF_SUCCESS;
-
-    // make a local pointer we can increment without affecting the original.
-    bufPtr = buffer;
-
-    // outer loop:  does nothing if there is only 1 address.  however
-    // if you want to pack all the xpackets for one address together before
-    // moving on to the next address, then change this loop to be 
-    // from 1 to numAddrs.  right now this is a no-op.
-    for (m=0; m<1; m++) {
-
-      // loop over the XPs, packing the data into the buffer or unpacking the
-      // buffer into multiple memory regions described by the XPs.
-      for (i=0; i<xpCount; i++) {
-
-	if (xpList[i]->ESMC_XPacketIsSingle()) {
-	  offset = xpList[i]->ESMC_XPacketGetOffset();
-	  for (l=0; l<numAddrs; l++) {
-	    dataPtr = (char *)dataAddr[l] + (offset*nbytes);
-	    if (packflag == ESMC_BUFFER_PACK)
-	      // slow   memcpy(bufPtr, dataPtr, nbytes);
-                 *(bool *)bufPtr = *(bool * )dataPtr;
-	    else
-	      // slow   memcpy(dataPtr, bufPtr, nbytes);
-                 *(bool *)dataPtr = *(bool * )bufPtr;
-	    bufPtr += nbytes;
-	  }
-	  continue;
-	}
-    
-        // make sure this XP isn't empty before proceeding.
-        if (xpList[i]->ESMC_XPacketIsEmpty())
-            continue;
-  
-        rc = xpList[i]->ESMC_XPacketGet(&rank, &offset, &contigLength,
-                                        stride, repCount, &bufindex);
-  
-        // loops for all ranks collapsed into a single master loop
-        // if timing shows an advantage, the inner-most loop could be unrolled
-        // to give the optimizer some help.
-  
-        // total number of contig regions which will be moved
-        totalRepCount = 1; 
-        for (k=0; k<rank-1; k++) {
-            totalRepCount *= repCount[k];
-            index[k] = 0;
-        }
-  
-        // initial value for item offset, plus size of contig buffer in 
-        // bytes (xp values are computed and stored as number of items)
-        itemPtr = offset;
-        contigBytes = contigLength * nbytes;
-  
-        // for each contig region which must be moved...
-        for (k=0; k<totalRepCount; k++) {
-  
-            // inner loop:  this configuration of loops packs each xpacket
-            // across all addresses before moving on to the next xpacket.
-            // it saves the computations of repcount and contig length, but
-            // it also hopscotches across memory more - so it isn't clear
-            // which loop configuration is the win.  this routine could be
-            // configured to take a flag saying whether to pack with the
-            // outer loop or the inner loop.   to pack at the outer loop,
-            // set the upper m limit to numAddrs and set the following l limit
-            // to 1.     the other change is the dataAddr[] index must change
-            // from l to m.
-
-            // for each address in our list, apply the xpacket. 
-            for (l=0; l<numAddrs; l++) {
-  
-                // move data into the buffer or out of the buffer
-                dataPtr = (char *)dataAddr[l] + (itemPtr*nbytes);
-                if (packflag == ESMC_BUFFER_PACK) {
-                    // Using memcpy may be slow but lack of data
-                    // set to test; so keep the memcpy for now.
-                    memcpy(bufPtr, dataPtr, contigBytes);
-                    //
-                    // Proposed replacement :
-                    // for (i=0; i<contigLength; i++) {
-                    //   *(bool *)bufPtr = *(bool * )dataPtr;
-                    //   bufPtr += nbytes;
-                    //   dataPtr += nbytes;
-                    // }
-                    }
-                else {
-                    // Using memcpy may be slow but lack of data
-                    // set to test; so keep the memcpy for now.
-                    memcpy(dataPtr, bufPtr, contigBytes);
-                    //
-                    // Proposed replacement :
-                    // for (i=0; i<contigLength; i++) {
-                    //   *(bool *)dataPtr = *(bool * )bufPtr;
-                    //   bufPtr += nbytes;
-                    //   dataPtr += nbytes;
-                    // }
-                    }
-                bufPtr += contigBytes;     // take off when use the replacement
-            }
-  
-            // increment the innermost counter 
-            index[0]++;
-            itemPtr += stride[0];
-  
-            // and now roll up the index, thru all ranks
-            // at the end of a loop for one rank, roll back the pointer to
-            // the start of the previous loop and add in the next stride.
-            for (j=0; (j<rank-2) && (index[j] >= repCount[j]); j++) {
-                index[j] = 0;
-                index[j+1]++;
-                itemPtr -= (repCount[j]*stride[j]);
-                itemPtr += stride[j+1];
-            }   // end of j (per-rank, "odometer-rollover" or "carry-bit") loop
-  
-        }     // end of k (total rep count) loop
-      }     // end of i (XP) loop
-    }     // end of m (numAddr) loop
-
-    rc = ESMF_SUCCESS;
-    return rc;
-
- } // end ESMC_XPacketDoLBuffer
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_XPacketPackBuffer"
 //BOPI
 // !IROUTINE:  ESMC_XPacketPackBuffer - pack a buffer with data described by XPs
@@ -1110,7 +820,7 @@
 // !ARGUMENTS
       int xpCount,               // in  - count of xp's to pack
       ESMC_XPacket **xpList,     // in  - list of xp's to pack
-      ESMC_DataType dt,          // in  - data type
+      ESMC_DataKind dk,          // in  - data kind
       int nbytes,                // in  - number of bytes per item
       int numAddrs,              // in  - number of addrs to apply this to
       void **dataAddr,           // in  - list of addresses to be packed
@@ -1121,26 +831,38 @@
 //
 //EOPI
 // !REQUIREMENTS:  XXXn.n, YYYn.n
-    const char *datatype;
-    datatype = ESMC_DataTypeString(dt);
 
-    if (strcmp(datatype, "Real")) {
-        return ESMC_XPacketDoRBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
-                                  nbytes, numAddrs, dataAddr, buffer);
-        }
-    else if (strcmp(datatype, "Integer"))  {
+    switch (dk) {
+       case ESMF_I1: 
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
-        }
-    else if (strcmp(datatype, "Character"))  {
-        return ESMC_XPacketDoCBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
+
+       case ESMF_I2:
+        return ESMC_XPacketDoIBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
-        }
-    else if (strcmp(datatype, "Logical"))  {
-        return ESMC_XPacketDoLBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
+
+       case ESMF_I4:
+        return ESMC_XPacketDoIBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
-        }
-    else {
+
+       case ESMF_I8:
+        return ESMC_XPacketDoIBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
+                                  nbytes, numAddrs, dataAddr, buffer);
+
+       case ESMF_R4:
+        return ESMC_XPacketDoRBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
+                                  nbytes, numAddrs, dataAddr, buffer);
+
+       case ESMF_R8:
+        printf(" cheung Real 8 \n");
+        return ESMC_XPacketDoRBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
+                                  nbytes, numAddrs, dataAddr, buffer);
+
+       //case ESMF_C16:
+       // return ESMC_XPacketDoCBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
+       //                           nbytes, numAddrs, dataAddr, buffer);
+
+       default:
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                                      "Unknown DataType", NULL);
         return NULL;
@@ -1164,7 +886,7 @@
 // !ARGUMENTS:
       int xpCount,            // in  - count of xp's to unpack
       ESMC_XPacket **xpList,  // in  - list of xp's to unpack
-      ESMC_DataType dt,       // in  - data type 
+      ESMC_DataKind dk,       // in  - data kind 
       int nbytes,             // in  - number of bytes per item
       int numAddrs,           // in  - number of addrs to apply this to
       char *buffer,           // in  - raw buffer to unpack
@@ -1176,26 +898,37 @@
 //
 //EOPI
 // !REQUIREMENTS:  XXXn.n, YYYn.n
-      const char *datatype;
-      datatype = ESMC_DataTypeString(dt);
 
-      if (strcmp(datatype, "Real")) {
-        return ESMC_XPacketDoRBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
-                                  nbytes, numAddrs, dataAddr, buffer);
-        }
-      else if (strcmp(datatype, "Integer"))  {
+    switch (dk) {
+       case ESMF_I1:
         return ESMC_XPacketDoIBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
-        }
-      else if (strcmp(datatype, "Character"))  {
-        return ESMC_XPacketDoCBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
+
+       case ESMF_I2:
+        return ESMC_XPacketDoIBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
-        }
-      else if (strcmp(datatype, "Logical"))  {
-        return ESMC_XPacketDoLBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
+
+       case ESMF_I4:
+        return ESMC_XPacketDoIBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
                                   nbytes, numAddrs, dataAddr, buffer);
-        }
-      else {
+
+       case ESMF_I8:
+        return ESMC_XPacketDoIBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
+                                  nbytes, numAddrs, dataAddr, buffer);
+
+       case ESMF_R4:
+        return ESMC_XPacketDoRBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
+                                  nbytes, numAddrs, dataAddr, buffer);
+
+       case ESMF_R8:
+        return ESMC_XPacketDoRBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
+                                  nbytes, numAddrs, dataAddr, buffer);
+
+       //case ESMF_C16:
+       // return ESMC_XPacketDoCBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
+       //                           nbytes, numAddrs, dataAddr, buffer);
+
+       default:
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                                      "Unknown DataType", NULL);
         return NULL;
