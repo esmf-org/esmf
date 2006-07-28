@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.61.2.1 2006/07/24 19:23:53 samsoncheung Exp $
+// $Id: ESMC_Route.h,v 1.61.2.2 2006/07/28 16:48:17 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -165,8 +165,8 @@
     // most frequently used interface is the first; the second one allows
     // a list of src and dst addrs to be passed in.
 
-    int ESMC_RouteRun(void *srcaddr, void *dstaddr, ESMC_DataKind dk, ESMC_DataType dt);
-    int ESMC_RouteRun(void **srcaddr, void **dstaddr, ESMC_DataKind dk, ESMC_DataType dt, 
+    int ESMC_RouteRun(void *srcaddr, void *dstaddr, ESMC_DataKind dk);
+    int ESMC_RouteRun(void **srcaddr, void **dstaddr, ESMC_DataKind dk, 
                            int numAddrs=1);
 
  // required methods inherited and overridden from the ESMC_Base class
