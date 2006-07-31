@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: cm.tex,v 1.1 2005/05/05 22:55:21 nscollins Exp $
+% CVS $Id: cm.tex,v 1.2 2006/07/31 23:50:25 cdeluca Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/Attic/cm.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -17,14 +17,17 @@ The SourceForge site has instructions for checking out code.  Other CVS
 documentation is available at: \newline
 \htmladdnormallink{{\bf http://www.gnu.org/manual/cvs/html\_node/cvs\_toc.html}}{http://www.gnu.org/manual/cvs/html_node/cvs_toc.html} \\
 
-All documents, source code, test and other scripts, and ESMF website
-files are stored in the central ESMF CVS repository.  For code releases 
+All ESMF documents, source code and test and other scripts are stored
+in the central ESMF CVS repository.  For code releases 
 test scripts will be available for download from the ESMF website along 
 with the framework source code.  Some data sets may be too large to store 
 in the this 
 repository and will be stored on the ESMF testbed system.  The ESMF
 website will include a link to download these datasets once they are
 available.
+
+The SourceForge repository contains only the ESMF framework.  Components
+that use ESMF are stored in repositories at their home institutions.\\
 
 \subsection{Procedures for the ESMF SourceForge Repository}
 
@@ -75,44 +78,6 @@ after an evaluation period, which will be posted on the ESMF web site.
 Application components are tagged following the conventions of their
 home institution.
 
-\subsection{Document Naming and Tagging Conventions}
-
-The following labeling convention is used for ESMF document tagging:
-
-{\tt <NAME>\_<DOC TYPE>\_<STATUS>\_<TARGET MILESTONE>\_<SUFFIX>}
-
-\noindent Valid {\tt <NAME>} values are the abbreviations for each functionality 
-class - e.g., {\tt TMG} for Time Manager.  The value {\tt ESMF} is used 
-for general documents.
-
-\noindent Valid <DOC TYPE> values are:
-\begin{description}
-  \item {\tt REQ} - requirements 
-  \item {\tt ARCH} - architecture
-  \item {\tt DES} - design
-  \item {\tt REF} - reference manual
-  \item {\tt USR} - user's manual
-  \item {\tt POL} - policies 
-\end{description}
-
-\noindent Valid {\tt <STATUS>} values are:
-\begin{description}
-  \item {\tt DRAFT} - draft, prior to any review 
-  \item {\tt REVIEW} - version subject to team review
-  \item {\tt SIGNOFF} - stable, signoff version
-  \item {\tt RELEASE} - version released for a milestone
-\end{description}
-
-\noindent {\tt <SUFFIX>}es are as follows:
-\begin{description}
-  \item For {\tt DRAFT} tags: {\tt <SUFFIX> = <REVNUMBER>}
-  \item For {\tt REVIEW} tags: {\tt <SUFFIX> = <MAJOR REVNUMBER>\_<MINOR REVNUMBER>}
-  \item For {\tt SIGNOFF} tags: {\tt <SUFFIX> = <MAJOR REVNUMBER>\_<MINOR REVNUMBER>}
-  \item For {\tt RELEASE} tags: {\tt <SUFFIX> = <REVNUMBER>}
-
-  {\tt MAJOR REVNUMBER}s begin at 1 and {\tt MINOR REVNUMBERS} begin at 0.
-\end{description}
-
 \subsection{Backups}
 
 The ESMF SourceForge repository is backed up nightly.  The tarball
@@ -128,7 +93,7 @@ backups will be made.
 \subsection{Contact Information}
 
 If there are any questions or concerns about the SourceForge CVS 
-repository, mail should be sent to \htmladdnormallink{esmf@ucar.edu}
+repository, mail should be sent to \htmladdnormallink{esmf\_support@ucar.edu}
 {mailto:esmf@ucar.edu}.
 
 

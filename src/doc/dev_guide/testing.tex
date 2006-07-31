@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: testing.tex,v 1.2 2006/07/31 22:10:47 cdeluca Exp $
+% CVS $Id: testing.tex,v 1.3 2006/07/31 23:50:25 cdeluca Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/testing.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -41,7 +41,6 @@ website. This webpage includes:
 \item Links to the {\it Developer's Guide}, SourceForge Tracker, Requirements 
 Spreadsheet, and any other pertinent information.
 \item Separate webpage for automated regression test information and results.
-\item Separate webpages for EVA Suite tests.
 \end{itemize}
 
 Our software testing will be both {\it fault-directed}, where the intent 
@@ -209,55 +208,6 @@ and Beta testers for the ESMF software.  We will not arrange for Alpha
 and Beta testers outside our group for the code releases at Milestones
 F (April 2003) or G (April 2004).  For Milestone K (January 2005) we
 have committed to supporting one new group beyond our collaboration.
-
-\subsection{EVA Suite Tests}
-
-The ESMF VAlidation (EVA) suite shall be used to test the ESMF software. There
-are seven codes in the collection representive of those used in climate,
-weather, and data assimilation applications. They are based on real,
-working research and operational codes that have been stripped of
-extraneous details but retain their basic computational 
-characteristics.  Initially, the EVA Suite will utilize the
-drivers, coupling tools and utilities native to the institutions and
-groups that developed the applications.  As the ESMF project
-progresses, the framework will replace the codes' native infrastructure.  This
-will enables ESMF developers to monitor the evolution of functionality
-and performance in the framework in a controlled environment.  It also
-will provide clear examples of framework usage for application
-groups directly involved in ESMF development, and for the
-broader community of Earth science researchers.  Thus
-the EVA Suite codes will be used throughout the
-ESMF project for prototyping ESMF software, for benchmarking its
-performance, and for demonstrating to framework users how the
-ESMF works. The results of the EVA Suite tests shall be documented on
-the {\bf Test and Validation} website in the same manner as the
-other system tests.
-
-Currently the EVA codes (3dvar, coupled\_mpmd, coupled\_spmd, gridpoint, land, and spectral) are 
-built weekly on a Compaq SC (halem), the 
-\htmladdnormallink{log file}
-{https://www.esmf.ucar.edu/test/eva\_test/eva\_builds.html} of the builds
-is accessable on the {\bf Test and Validation} website.
-Log files of the build results are also stored at {\tt /fs/projects/css/esmf/esmf\_test/eva\_tests} on the NCAR fileserver.
-The log files are kept on a monthly basis in
-separate directories. For example, the January 2003 directory is named {\tt 0301\_test}. The
-directory contains an {\tt eva\-builds} file which has a one line entry for each code on
-which the build was attempted indicating whether the build was successful or not.
-EVA jobs are submitted for the codes that build successfully.
-
-If a build is not successful, then a file containing the build output is stored in
-the directory. The file naming convention for the build output file is
-{\tt build\_CODE(day)(platform)ESMF\_ARCH}. For example, if the build fails on halem on the 19th of the month with {\tt CODE=land}, the file
-would be called {\tt build\_land19halemalpha}. 
-Email is sent weekly to the ESMF core team listing all the codes on which the build was attempted with a {\tt PASS/FAIL} indication. 
-
-The EVA Suite is part of the {\it Joint Milestone
-Codeset}, a set of twenty-two applications that will be delivered
-with the public release of the framework.  Unlike the synthetic,
-functionally frozen EVA codes, the other codes in the JMC will
-be under active development while the ESMF project is underway.
-Each of the JMC codes is tagged with an identifier and
-is described on the ESMF website under the {\bf Applications} link.
 
 \subsection{Bug Tracking}
 
