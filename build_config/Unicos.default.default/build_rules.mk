@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.8.2.2 2006/07/20 22:14:43 theurich Exp $
+# $Id: build_rules.mk,v 1.8.2.3 2006/07/31 19:05:35 theurich Exp $
 # 
 # Unicos.default.default
 #
@@ -111,6 +111,12 @@ ESMF_CXXLINKLIBS +=
 ESMF_SL_LIBS_TO_MAKE  =
 
 ############################################################
+# Exclude I1 and I2 data kinds
+#
+ESMF_F90COMPILECPPFLAGS += -DESMF_NO_INTEGER_1_BYTE
+ESMF_F90COMPILECPPFLAGS += -DESMF_NO_INTEGER_2_BYTE
+
+############################################################
 # Define CPPRULES here instead of using those in common.mk
 #
 ESMF_CPPRULES         = defined
@@ -122,4 +128,3 @@ ESMF_CPPDEFAULT       = cpp
 # fix leading space that seems to show up on some lines
 %.F90 : %.cpp
 	${ESMF_CPP} -E -I${ESMF_INCDIR} $< | tr "@^" "\n#" | sed -e 's/^ //' -e '/^#line/d' -e 's/ \. /./g' -e 's/\. not\./.not./g' -e 's/= >/=>/g' > $(dir$<)$(notdir $@)
-
