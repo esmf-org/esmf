@@ -1,5 +1,5 @@
 %============================================================================
-% CVS $Id: life_cycle.tex,v 1.1 2005/05/05 22:55:21 nscollins Exp $
+% CVS $Id: life_cycle.tex,v 1.2 2006/07/31 22:10:47 cdeluca Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/Attic/life_cycle.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -82,253 +82,137 @@ The first section of the {\it ESMF Requirements Document} outlines
 the major ESMF capabilities necessary to meet project milestones and achieve 
 project goals.  The second part of the document is a detailed 
 requirements specification for each functionality class included in 
-the framework.  
+the framework.  This document also includes a discussion of the 
+process that was used to initially collect requirements.
 
-\subsubsection{Community Input}
-We encourage input from the community on requirements.
-An open community meeting was held on May 30, 2002 in order to obtain
-feedback on the requirements assembled by the ESMF team and to elicit
-additional requirements.  Hardcopy and web-based requirements submission
-forms were made available to community members to facilitate the collection
-process.  Additional requirements received are catalogued and viewable 
-on the ESMF website, via the {\bf Development} link on the navigation bar.
+\subsection{Software Design and Reviews}
 
-To submit a requirement or comment on an existing requirement on-line,
-visit the ESMF website and click on the {\bf Development} link.
-Instructions for submitting forms are available on this page.
+These guidelines apply to core team developers and outside contributors
+who will be checking code into the main ESMF repository.
 
-We place highest priority on the requirements imposed by our contractual
-obligation to NASA as described in our milestones, and by the needs of
-the codes in the JMC codeset.  We will consider adding additional software
-features desired or required by the community on a case-by-case basis.
-Factors we would consider in making such a decision would include value
-to the community overall and resources required to implement the feature.
+All design and code reviews are telecons held with the ESMF Joint
+Specification Team (JST). The JST includes core team developers and
+contributors, and customers who are interested in development issues.
+Telecons are scheduled with the core team manager, put on the ESMF
+calendar on the home page of the ESMF website, and announced on the
+esmf\_jst@ucar.edu list.
 
-\subsubsection{Requirements Review Teams and Procedures}
+\subsubsection{Telecon Etiquette}
 
-At the beginning of the requirements process for each functionality 
-class, the ESMF Deployment Team shall be polled to find out which 
-JMC codes plan to 
-use the functionality.  These listings are included in the  
-{\it ESMF Requirements Document}.  The review teams for requirements
-{\it must include at minimum a representative for each JMC code that 
-is planning to use the class or utility}.  
+When you call in, it's nice to give your name at the first opportunity.
+Telecon hosts will make an effort to introduce people on the JST calls,
+especially first-timers. Please don't put the telecon on hold (we sometimes
+get telecon-stopping music this way).
 
-Generally the review process will include at least two reviews 
-conducted via email on the esmf\_tech@ucar.edu list, and at least
-one teleconference or live review.
+Within a week after the telecon, the host (the developer if it's a design
+or code review) is expected to send out a summary to esmf\_jst@ucar.edu
+with the date of the call, the participants, and notes or conclusions.
 
-Reviews continue until they are done, or until common sense dictates that
-the process should stop.  We are to a large extent constrained by the 
-timetable specified in our milestones.
+\subsubsection{Design Reviews}
 
-Typically the first documents of a given type take longer to prepare than
-subsequent documents, since we use the initial documents to refine format
-and process.  The ESMF technical leads prepare review schedules based on
-factors such as the maturity of the document format, imminent milestones,
-and concurrent activities.  A signoff review is held when a document is
-deemed complete or when additional work on it is not likely to be as 
-productive as proceeding with another task.  For example,
-we may temporarily halt work on a design document in order to 
-engage in an associated prototyping activity.  
-The appropriate time for signoff is decided by consensus.
-
-\subsubsection{Requirements Document Organization and Conventions}
-
-Requirements documents shall be organized so that specific requirements are
-listed under a titled topic.  For example, under the title {\bf Platforms}, 
-the ability to run on an SGI Origin, IBM SP, Compaq ES, etc. are 
-listed as individual and separately numbered requirements.   
-
-Templates for requirements documents are available in the ESMF document
-template set (see Section~\ref{sec:doc_templates}).
-
-\subsubsection{Attributes of Requirements}
-
-Each specific requirement possesses the following attributes:  priority, 
-source, verification, status, and notes, the last of which is optional.  
-These are typical for requirements
-analysis ~\cite{wiegers}.  We'll now look at them in more detail.
-
-\begin{description}
-\item [Priority] The purpose of the priority attribute is to associate
-each requirement with the milestones and longer term project goals that 
-it satisfies.  Each requirement is assigned a number from 1-3, with
-values defined as follows:
 \begin{enumerate}
-
-\item This capability is directly required for a milestone OR
-half or more of the JMC applications that could use the utility or class
-in which this capability is embedded would require this
-capability in order to maintain their existing functionality;
- 
-\item Less than half of the JMC applications that could use
-the utility or class in which this capability is embedded 
-would require this capability in order to maintain their existing
-functionality.
-
-\item This capability is desired in order to extend the existing 
-functionality of one or more JMC codes.
-
-\end{enumerate}
-
-If some capability merits additional explanation to describe 
-its priority, those preparing requirements are encouraged 
-to elaborate.
-
-Changes to requirements' priorities during development will be
-reviewed by the technical leads and other members of the Joint
-Specification Team on an as-needed basis.  General requirements 
-will be reviewed overall before being updated and submitted for 
-Milestones F, G and K.  This occurs on roughly a yearly basis.
- 
-\item [Source] The source attribute traces each capability
-to the applications to which it applies.  In addition to applications
-particular people or organizations may be noted.   This attribute 
-helps to identify those that can provide further 
-information and who may also be potential testers and users.  It
-prevents the inclusion of features that have little likelihood of
-being used.
-
-\item [Verification] The verification attribute specifies an objective
-and quantitive strategy for assessing whether a requirement is
-satisfied.  Typical values include {\it code inspection}, 
-{\it unit test} and {\it system test}.
-Some capabilities may require the preparation of special data sets.
-
-\item [Status] Throughout the course of this project it will be 
-useful for us to track what has been accomplished and to archive 
-ideas for extensions and improvements.  The status attribute identifies
-each capability as:
+\item Introductory telecon(s). The point here is to scope out the problem
+at hand. These calls cover the following, as they apply.
 \begin{itemize}
-\item {\bf proposed}; this indicates an item that has been accepted as useful, but
-that is not scheduled for implementation.
-\item {\bf approved-1}; this indicates an item approved for implementation as part
-of the 1st code release at Milestone F
-\item {\bf approved-2}; this indicates an item approved for implementation as part 
-of the 2nd code release at Milestone G
-\item {\bf implemented}
-\item {\bf verified}
-\item {\bf rejected} (with reason cited); this indicates an item that has been actively rejected by
-the review team 
+\item Understand the capability needed and review requirements.
+\item Discuss design alternatives.
+\item Survey and discuss any existing packages that cover the new functionality.
+\item Discuss potential use test cases.
+\item Figure out which customers will be involved in use test case development and identify customers that are likely to provide important input
+(sometimes we offer a friendly reminder service to these folks before relevant
+telecons).
 \end{itemize}
-Whether the cabability exists in other packages or models
-is also helpful to note.
 
-\item [Notes] This is a catch-all for additional information such
-as background, references, related design and implementation issues, 
-risk factors, and so on.
+For these introductory discussions, any form of material is fine - diagrams,
+slides, plain text ramblings, lists of questions, ...
 
-\end{description}
+\item Initial design review(s). The document presented should be in the format
+of the ESMF Reference Manual, either in plain text or in latex/ProTeX.
+This is so the document can be incorporated into project documentation
+after implementation. The initial review document should include at least
+the following sections:
+\begin{itemize}
+\item Class description.
+\item Use and Examples. Here the examples begin with the very simplest
+cases.
+\item API sufficient to cover the examples. This is because it can be difficult
+to follow the examples (e.g. tell what arguments and options are) without the
+basic API entries accompanying them.
+\end{itemize}
 
-\subsection{Architectural Design}
+This step is iterated until developers and customers converge.
 
-The architecture of the framework is presented in an {\it ESMF 
-Architecture Document} in terms of an object model \cite{bib:ESMFarchdoc}.  This document describes 
-how the functionality specified in the {\it ESMF Requirements Document} is 
-apportioned into classes, and how those classes interact.  It also
-describes the overall layering strategy for the framework, the machine 
-model and the programming model.  The glossary of ESMF terms started in the 
-{\it ESMF Requirements Document} was refined and extended in this 
-document.
+\item Full telecon review(s). The developer should prepare the API specification
+using latex and ProTex following the conventions in the Reference Manual.
+Most of the Reference Manual section(s) for the new or modified class(es),
+including Class Options and Restrictions and Future Work, should be available
+at the time of this review. Diagrams should be ready here too.
 
-The architecture document was reviewed by all members of the Joint
-Specification Team, and by an ESMF Peer Review Board.
+\item Use test case telecon review. For each major piece of functionality, a use
+test case is prepared in collaboration with customers and executed before
+release. The use test case is performed on a realistic number of processors
+and with realistic input data sets.
 
-The comments received back on the {\it Architecture Document}, informally and
-from the Peer Review Board, indicated that the presentation of the document
-was ineffective at conveying how the ESMF worked. Although the 
-document was full of detailed and complex diagrams, the terminology and 
-diagrams were oriented to software engineers and were not especially
-scientist-friendly.  The detailed diagrams also made the document difficult 
-to maintain.  The lessons learned during this stage of development will
-influence the strategy for presentation of subsequent documents.  
-
-\subsection{Detailed Design}
-
-Users interact with the ESMF through its Application Programming
-Interface (API).  The clarity, consistency, and functionality
-embodied by the API is a primary factor in determining
-whether users will be willing and able to adopt the ESMF.  
-As such, it is exceedingly important that the design - and in
-particular, the API - be thoroughly reviewed by the ESMF application 
-team before the framework is widely deployed.  These reviews require
-iteration.  The ESMF API will change rapidly over the first year of 
-development, as we integrate and standardize classes
-developed by different developers, and as implementation reveals 
-what parts of the design do and do not work well.   
-
-\subsubsection{Community Input}
-
-As with requirements, the ESMF team encourages design input from the community.
-Comments on the emerging ESMF API were solicited at the community meeting 
-held on May 15, 2003.  Submit comments on design by sending mail 
-to \htmladdnormallink{\bf esmf\_support@ucar.edu}
-{mailto://esmf\_support@ucar.edu}.
-
-\subsubsection{Initial Design Reviews}
-
-Initial design reviews were held in the early prototype
-stage of new classes, typically a few months after design began and 
-when some prototype code was available.  The design documents prepared
-included descriptions and, as appropriate, diagrams of classes, 
-showing class relationships and interactions.  The documents 
-also included API specifications for all class methods, and 
-descriptions of data structures.  Where feasible at this stage
-of development, discussion of design options was included.  To facilitate
-document development and standardization, a design template was prepared 
-for use by all developers, and included in the set of ESMF document 
-templates (see Section~\ref{sec:doc_templates}).  
-
-As with the {\it ESMF Requirements Document}, members of the Joint 
-Specification Team prepared and reviewed the design documents. 
-
-The initial set of design reviews established general outlines for 
-code construction.  In most cases, designs changed dramatically as
-implementation got underway, and as ideas were prototyped.  Object 
-models were found to be ineffective compared to API inspection and 
-code examples in conveying how a particular piece of code would work.
-
-\subsubsection{Final Interface Reviews}
-
-It is clear that another round of intensive class API reviews
-shall be necessary.  These shall occur when the implementation 
-of a class is complete, or close to it.  Each ESMF application group 
-shall review 
-and sign off on the final interfaces for each class.  The intent 
-of these reviews is to ensure that the interfaces are adequate 
-and easy to use, and to bring the interfaces into line so 
-that they follow standard ESMF conventions for design policies, 
-method names, and documentation procedures.  
-
-The review procedure for each class shall be as follows:
-
-\begin{enumerate}
-\item A telecon review shall be held in which the full class API 
-and examples of use are provided.  
-
-\item The reviewed material and a summary of requested changes will
-be posted to the esmf\_tech@ucar.edu list.  Comments will be
-collected for a week, and should be sent to the same list.
-The commentary period may be extended as necessary.
-
-\item Code and documentation will be modified to reflect the review
-results.  
-
-\item Modified examples and documentation for the class will be
-posted to a webpage maintained by the Core Team.  The material
-posted will be the section of the Reference Manual that 
-describes the class.  Each application group will have two weeks 
-to do a final review and sign off on the interfaces.
- 
+It doesn't have to work (and probably won't) before it's reviewed, but it
+needs to work before the functionality appears in a release. The developer
+checks it into the top-level use\_test\_case directory on SourceForge and
+prepares a html page outlining it for the Test \& Validation page on the
+ESMF website. Unlike unit and system tests, use test cases aren't
+distributed with the ESMF source.
 \end{enumerate}
 
-\subsection {Code Construction and Unit Testing}
+\subsubsection{Implementation and Test Before Internal Release}
+
+There is an internal release checklist on the Test \& Validation page of the
+ESMF website that contains an exhaustive listing of develop and tester
+responsibilities for releases.
+
+The developer is responsible for working with the tester(s) to make sure
+that the following are present before an internal release:
+\begin{itemize}
+\item 100% unit and system test coverage of new interfaces, with the exception
+of interfaces where type/kind/rank is heavily overloaded. All arguments tested
+at least once.
+\item Use test cases work
+\end{itemize}
+
+\subsubsection{Implementation and Test Before Public Release}
+
+There is a public release checklist on the Test \& Validation page of the ESMF
+website that contains an exhaustive listing of develop and tester responsibilities for releases.
+
+Same as for internal release, plus:
+\begin{itemize}
+\item Design and Implementation Notes section for Reference Manual complete.
+\item Developer and tester ensure that test coverage for new interfaces is sufficient, implementing any additional tests to make it so. This includes testing of options and tests for error handling and recovery.
+\end{itemize}
+
+\subsubsection{Code Check-In}
+\begin{enumerate}
+\item Both core and contributors should test on at least three platforms before commit.
+\item For core team developers, a mail should go out to esmf\_core@ucar.edu
+before check-in for very large commits and for commits that will break the
+HEAD. For contributors a mail should go out to esmf\_core@ucar.edu before
+ANY commit.
+\item Core team developers should be set up to receive email from SourceForge
+for every check-in.
+\end{enumerate}
+
+\subsubsection{Code Reviews}
+\begin{enumerate}
+\item All significant chunks of externally contributed code are reviewed by the JST. It's usual to do the code review after check-in. The code review should
+be scheduled with the core team manager when the code is checked in, and
+the code review held before the next release.
+\item We also do code reviews with core team members, as desired/required
+by the JST. 
+\end{enumerate}
+
+\subsubsection {Code Construction and Testing}
 
 Code shall be written in accordance with the interface specifications
 presented in design documents and the coding conventions described in 
 Section ~\ref{sec:code_conv}.  Code reviews shall be conducted by members 
-of the Core Team.
+of the Joint Specification Team.
 
 Each class shall be accompanied by a suite of unit tests.  The user
 shall have the option to build either ``sanity check'' type tests or an 
@@ -339,39 +223,26 @@ example, the software has been installed correctly.  The NASA Computational
 Technologies team will review and supplement the unit tests to ensure 
 that software requirements are met.
 
-\subsection {System Testing }
+\subsubsection {System Testing }
 
 System testing and integration shall be performed incrementally on the 
 evolving body of ESMF software, in accordance with the {\it Build and Test 
-Plan}.
-
-The ESMF VAlidation (EVA) suite shall be used to test the use of the 
-ESMF system as portions of it become available.  For additional discussion
+Plan}.  For additional discussion
 of test and validation procedures, see Section~\ref{sec:testing}.
 
 \subsection {Release and Iteration }
 
-The ESMF project has two major public software releases, one scheduled for 
-April 2003 and one scheduled for April 2004.  There are internal software 
-releases monthly.  The tagging convention for public and internal releases 
-is described in Section~\ref{sec:tagging}.
+The tagging convention for public and internal releases is
+described in Section~\ref{sec:tagging}.
 
 Major releases shall be accompanied by thorough documentation, including an 
 {\it ESMF User's Guide} and {\it ESMF Reference Manual}.  User documentation
 shall include code excerpts, examples to demonstrate ideas, existing bugs,
-and restrictions. Detailed test documentation will be made available to
-the NASA evaluation team, to allow team members to understand the extent of
-testing, plan deviations, and links to requirements.
+and restrictions. 
 
-In addition, Milestone K (January 2005) includes the provision of
-a tutorial application that is part of the ESMF VAlidation (EVA) Suite.  The 
-entire EVA Suite
-itself shall be available for download via SourceForge and the ESMF 
-website to users who wish to experiment with other application examples.  
-Releases shall be announced via
-mailing lists, on the ESMF website, and at community meetings.  Source
-code shall be available for download from the ESMF website and from the 
-SourceForge site.
+ESMF releases shall be announced via mailing lists, on the ESMF
+website, and at community meetings.  Source code shall be available
+for download from the ESMF website and from the SourceForge site.
 
 At the close of both internal and public release cycles, we plan to 
 iterate on requirements, architecture, design, and implementation in 
@@ -392,19 +263,6 @@ January 2005 will provide instructions for routine extensions of
 the framework -- for example, adding support for an additional grid.
 Other extensions to the framework will be facilitated by the system
 documentation provided in the {\it User's Guide} and {\it Reference Manual}.  
-
-We will consider open source contributions after our first mature 
-software release at Milestone G (April 2004).  We anticipate that if we 
-accept code contributions from others not in our collaboration the
-contributors will interact with a Change Review Board.  We feel that
-it is premature to detail those interactions at this time.  We will
-upate this document with the specifics such interactions in the
-Milestone G timeframe.
-
-NCAR has committed to providing ongoing support for maintenance and 
-development of the framework, but the magnitude of that support, and
-whether it will be supplemented by contributions from other institutions
-or agencies, is unknown.  
 
 
 
