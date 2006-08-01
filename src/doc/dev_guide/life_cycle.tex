@@ -1,5 +1,5 @@
 %============================================================================
-% CVS $Id: life_cycle.tex,v 1.2 2006/07/31 22:10:47 cdeluca Exp $
+% CVS $Id: life_cycle.tex,v 1.3 2006/08/01 22:02:59 cdeluca Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/Attic/life_cycle.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -7,20 +7,17 @@
 \section{Software Development Cycle}
 \label{sec:life_cycle}
 
-The development environment for the ESMF project has 
-several defining characteristics.  First, the ESMF development team, the Joint
-Specification Team, is distributed.  This makes incorporating simple, 
-efficient communication mechanisms into the development process essential.  
-Second, the development team is large, diverse, and mostly self-managed.  
-Procedures and conventions must be clear and well documented in order for
-the whole team to adopt them.  Third, the initial set of target 
-applications for the ESMF, referred to as the Joint Milestone 
-Codeset (JMC), is known.  Many of those who developed the JMC are 
-active participants in the ESMF project.  We therefore have the 
-opportunity to guarantee the ESMF's viability by allowing future users 
-and real codes to guide framework development.  For example, we 
-prioritize requirements based on the number of JMC applications 
-that need a capability.  
+The ESMF development environment has several defining characteristics.
+First, both the ESMF Core Team and the JST are distributed.  This makes
+incorporating simple, efficient communication mechanisms into the
+development process essential.  Second, the JST and Core Team work on
+a range of different platforms, at sites that don't have the time, resources,
+or inclination to install demanding packages.  We seek out collaboration
+tools that require no purchase or installation before use.
+Finally, we are committed to open development.  As much as possible, we
+try to keep the workings of the ESMF project - metrics,
+support and bug lists, schedules, task lists, source code, you name it -
+visible to the broad community.
 
 \subsection{Software Process Model}
 
@@ -55,44 +52,51 @@ of the software, beginning of maintenance phase.
 
 \end{enumerate}
 
-We have customized and extended this standard model to suit the ESMF project.  
-Subsequent sections describe how the ESMF team shall implement each development step.
-It is essential for process definition to be an ongoing:  developers must 
-be able to abandon processes that are not working, and to refine processes
-as lessons are learned during development.  We therefore anticipate a 
-period of process refinement prior to each major stage of development.
-We shall expedite development overall by advancing the progress of a small 
-subset of the framework functionality before the rest.  This shall allow 
-us to experiment with document templates and procedures for a particular
-stage, such as detailed design, before undertaking that stage wholesale.
+We have customized and extended this standard model to suit the ESMF project.
+At this stage of ESMF development, we are in the iterative design/implement/release
+cycle.  Below are a few notes on earlier stages.  
 
-\subsection{Software Concept}
+\subsection{ESMF Process History}
 
-The first step in the standard staged development cycle consists of 
-collecting and itemizing the high-level requirements of the software, and 
-identifying the basic functions that it must perform.  Participants in
-the ESMF project completed this exercise in the process of developing
-a unified set of proposals.  A summary of the high-level requirements
-of ESMF -- a statement of project scope and vision -- is included 
-in the {\it General Requirements} part of the {\it ESMF Requirements Document}\cite{bib:ESMFreqdoc}.
+\subsubsection{Software Concept}
+Participants in the ESMF project completed the Software Concept
+stage in the process of developing a unified set of proposals.
+A summary of the high-level requirements of ESMF - a statement of project
+scope and vision - is included in the {\it General Requirements}
+part of the {\it ESMF Requirements Document}\cite{bib:ESMFreqdoc}.
+This was an successful effort in defining the scope of the project
+and agreeing to an overall design strategy.
 
-\subsection {Requirements Analysis}
-
+\subsubsection {Requirements Analysis}
+The ESMF Team spent about six months on Requirements Analysis at
+the start of the project.
 The first section of the {\it ESMF Requirements Document} outlines 
 the major ESMF capabilities necessary to meet project milestones and achieve 
 project goals.  The second part of the document is a detailed 
 requirements specification for each functionality class included in 
 the framework.  This document also includes a discussion of the 
 process that was used to initially collect requirements.
+The {\it Requirements Document} was a useful reference for the development
+team, especially for new developers coming in from outside of the
+Earth science domain.
 
-\subsection{Software Design and Reviews}
+\subsubsection{Architectural Design}
+The project had difficulty preparing an {\it Architecture Document}.  
+The comments received back on the completed work, informally and
+from a peer review body, indicated that the presentation of the document
+was ineffective at conveying how the ESMF worked. Although the
+document was full of detailed and complex diagrams, the terminology and
+diagrams were oriented to software engineers and were not especially
+scientist-friendly.  The detailed diagrams also made the document difficult
+to maintain.  
 
-These guidelines apply to core team developers and outside contributors
+\subsection{Iterative Design and Review}
+
+The following are processes we are actively following.  These
+guidelines apply to core team developers and outside contributors
 who will be checking code into the main ESMF repository.
 
-All design and code reviews are telecons held with the ESMF Joint
-Specification Team (JST). The JST includes core team developers and
-contributors, and customers who are interested in development issues.
+All design and code reviews are telecons held with the JST. 
 Telecons are scheduled with the core team manager, put on the ESMF
 calendar on the home page of the ESMF website, and announced on the
 esmf\_jst@ucar.edu list.

@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: intro.tex,v 1.3 2006/07/31 23:50:25 cdeluca Exp $
+% CVS $Id: intro.tex,v 1.4 2006/08/01 22:02:59 cdeluca Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/intro.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -7,43 +7,61 @@
 \section{Introduction}
 \label{sec:intro}
 
+\subsection{About this Document}
 The Earth System Modeling Framework (ESMF) {\it Software Developer's Guide},
 or simply the {\it Guide}, is the reference handbook that describes
-the development practices, standards, and conventions recommended 
-for ESMF core software.
+the practices, standards, and conventions recommended for ESMF core software
+development.  It is updated as needed.
 
-The ESMF software implementation is led by a Core Team based in the 
-Scientific Computing Division (SCD) of the NSF National Center for
-Atmospheric Research (NCAR).  Members of the Core Team and the ESMF
-user base are collectively referred to as the {\it ESMF Joint
-Specification Team}.
+Suggestions on how to improve the {\it Guide} should be sent to 
+\htmladdnormallink{esmf\_support@ucar.edu}{mailto:esmf\_support@ucar.edu}.
 
-Much of this document was derived from the \htmladdnormallink{{\it GFDL 
-Flexible Modeling System Developers' Manual}}{http://www.gfdl.gov/\~{}vb/FMSManual}
-\cite{FMSdevguide} and the \htmladdnormallink{{\it Community Climate System Model Software
-  Developer's Guide}}{http://www.ccsm.ucar.edu/csm/working\_groups/Software/dev\_guide/dev\_guide}
-\cite{CCSMdevguide}, and has been adapted with the permission of the respective authors.
-
-This is an evolving document.  We will continue to explore and refine
-processes and conventions in response to changes in computational 
-environment, growth in project maturity and scope, and lessons learned
-through experience.
-
+\subsection{Supplementary Information}
 An important source of supplementary information is the ESMF website:
 \begin{center}
 \htmladdnormallink{{\bf http://www.esmf.ucar.edu}}{http://www.esmf.ucar.edu}
 \end{center}
 This website is referred to throughout the {\it Guide}.  
-It includes a {\bf Test \& Validation} page, a link to the ESMF
-CVS repository, task lists, and many other types of project information.
+It includes a link to the ESMF CVS repository, the current release
+schedule, task lists, and many other types of project information.
 
-A specification of what an application developer must implement in
-order to utilize the framework is provided in the draft {\it ESMF
-User's Guide}\cite{bib:ESMFusrdoc}, available on the ESMF website, 
-via the {\bf Downloads \& Documentation} link on the navigation bar.
+The {\it Guide} doesn't contain instructions on how to adapt user
+codes for ESMF.  This information is included in the {\it ESMF User's
+Guide}\cite{bib:ESMFusrdoc}, which is available via the {\bf Downloads \& Documentation} link on the ESMF website navigation bar.
 
-Suggestions on how to improve the {\it Guide} should be sent to 
-\htmladdnormallink{esmf\_support@ucar.edu}{mailto:esmf\_support@ucar.edu}.
+\subsection{Acknowledgements}
+Sections of this document were derived from the \htmladdnormallink{{\it GFDL 
+Flexible Modeling System Developers' Manual}}{http://www.gfdl.gov/\~{}vb/FMSManual}
+\cite{FMSdevguide} and the \htmladdnormallink{{\it Community Climate System Model Software
+  Developer's Guide}}{http://www.ccsm.ucar.edu/csm/working\_groups/Software/dev\_guide/dev\_guide}
+\cite{CCSMdevguide}.  These have been adapted with the permission of the respective authors.
+
+\section{Groups Involved in ESMF Development}
+
+For more detail on the groups below, including their Terms of
+Reference, see the {\it ESMF Project Plan}.
+
+\subsection{Core Team}
+ESMF software implementation is led by a {\bf Core Team} based in the 
+Scientific Computing Division (SCD) of the National Center for
+Atmospheric Research (NCAR).  The Core Team relies on close interaction
+with customers, and the work of many contributors.  Core Team
+activities are open to active ESMF developers.
+
+\subsection{Joint Specification Team (JST)}
+The Core Team, along with contributors, customers, technical
+managers, and other stakeholders in development, are collectively
+referred to as the {\bf ESMF Joint Specification Team}, or {\bf JST}.  
+JST membership is open to members of the science, computing, and
+related communities.
+
+ESMF development priorities and schedules are set by a 
+{\bf Change Review Board}. or {\bf CRB} that consists of individuals
+associated with major ESMF initiatives and applications.  
+Members of the CRB are chosen by the ESMF Executive Management.
+
+
+
 
 
 
