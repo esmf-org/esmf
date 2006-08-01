@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.10 2006/07/20 22:14:43 theurich Exp $
+#  $Id: common.mk,v 1.155.2.11 2006/08/01 18:36:43 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1382,8 +1382,9 @@ system_tests: chkdir_tests
 	  echo "run system_tests_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
-	fi
-	$(MAKE) ACTION=tree_system_tests tree
+          exit ; \
+	fi ; \
+	$(MAKE) ACTION=tree_system_tests tree ; \
 	$(MAKE) check_system_tests
 
 tree_system_tests: tree_build_system_tests tree_run_system_tests
@@ -1401,8 +1402,8 @@ system_tests_uni: chkdir_tests
               exit; \
 	   fi; \
 	   echo current working directory is now `pwd` ; \
-	fi
-	$(MAKE) ACTION=tree_system_tests_uni tree
+	fi ; \
+	$(MAKE) ACTION=tree_system_tests_uni tree ; \
 	$(MAKE) check_system_tests
 
 tree_system_tests_uni: tree_build_system_tests tree_run_system_tests_uni
@@ -1420,8 +1421,8 @@ build_system_tests: reqfile_libesmf reqdir_lib chkdir_tests
               exit; \
 	   fi; \
 	   echo current working directory is now `pwd` ; \
-        fi;
-	$(MAKE) ACTION=tree_build_system_tests tree ;
+        fi ; \
+	$(MAKE) ACTION=tree_build_system_tests tree ; \
 	echo "ESMF system tests built successfully."
 
 tree_build_system_tests: $(SYSTEM_TESTS_BUILD) 
@@ -1503,6 +1504,7 @@ run_system_tests:  reqdir_tests
 	  echo "run run_system_tests_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
+          exit ; \
 	fi; \
 	$(MAKE) ACTION=tree_run_system_tests tree ; \
 	$(MAKE) check_system_tests
@@ -1575,6 +1577,7 @@ use_test_cases: chkdir_tests
 	  echo "run use_test_cases_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
+          exit ; \
 	fi; \
 	$(MAKE) ACTION=tree_use_test_cases tree ; \
 	$(MAKE) check_use_test_cases
@@ -1695,6 +1698,7 @@ run_use_test_cases:  reqdir_tests
 	  echo "run run_use_test_cases_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
+          exit ; \
 	fi; \
 	$(MAKE) ACTION=tree_run_use_test_cases tree ; \
 	$(MAKE) check_use_test_cases
