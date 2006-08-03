@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.144.2.3 2006/08/03 21:52:22 peggyli Exp $
+! $Id: ESMF_DistGrid.F90,v 1.144.2.4 2006/08/03 23:38:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,9 +45,7 @@
       use ESMF_LogErrMod
       use ESMF_DELayoutMod
       use ESMF_VMMod
-      ! Cray X1 doesn't like it --  use mpi
       implicit none
-#include "mpif.h"
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
@@ -67,7 +65,7 @@
 
         ! single values for this DE:
 
-        integer :: MyDE                     ! identifer for this DE
+        integer :: MyDE                     ! identifier for this DE
         integer :: localCellCount           ! total number of cells for this DE
 
         ! one value per axis/dimension of the Grid:
@@ -222,7 +220,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.144.2.3 2006/08/03 21:52:22 peggyli Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.144.2.4 2006/08/03 23:38:40 theurich Exp $'
 
 !==============================================================================
 !
@@ -1843,7 +1841,7 @@
 ! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
-      integer :: j, thisCount(1), nDEs, myDE, thisDE, comm
+      integer :: j, thisCount(1), nDEs, myDE, thisDE
       type(ESMF_DistGridGlobal), pointer :: glob
       type(ESMF_VM) :: vm
       integer, dimension(:), allocatable :: allCounts
@@ -1876,14 +1874,12 @@
 #if 1
       ! collective call to gather count from all DEs
       ! New implementation (P. Li, 7/2006) -- This implementation calls
-      ! MPI_AllGather instead of ESMF_VMBroadcast() to collect count 
+      ! ESMF_VMAllGather instead of ESMF_VMBroadcast() to collect count 
       ! We have to allocate a temperary array allCount to store the values
-       allocate(allCounts(nDEs), stat=localrc)
-      call ESMF_VMGet(vm, mpiCommunicator=comm)
+      allocate(allCounts(nDEs), stat=localrc)
       thisCount(1) = myCount
-      call MPI_AllGather(thisCount, 1, MPI_INTEGER, allCounts, 1, MPI_INTEGER, &
-	 	comm, localrc)
-      do j     = 1,nDEs
+      call ESMF_VMAllGather(vm, thisCount, allCounts, 1, rc=localrc)
+      do j = 1,nDEs
         glob%cellCountPerDE(j)         = allCounts(j)
         glob%cellCountPerDEPerDim(j,1) = allCounts(j)
       enddo
@@ -1893,7 +1889,7 @@
       ! Old implementation -- This implementation calls n ESMF_VMBroadcast()
       ! (n is total number of DEs) in order to collect the count from all DEs.
       ! It performs very poorly on Cray X1 system.  
-      do j     = 1,nDEs
+      do j = 1,nDEs
         thisDE = j - 1
         if (myDE.eq.thisDE) then
           thisCount(1) = myCount
@@ -1904,7 +1900,7 @@
       enddo
 #endif
       if (present(rc)) rc = ESMF_SUCCESS
-       end subroutine ESMF_DistGridSetCountsArb
+      end subroutine ESMF_DistGridSetCountsArb
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2354,7 +2350,7 @@
 
       integer :: localrc                          ! Error status
       integer :: i, i1, i2, i3, j, badcount
-      integer :: nDEs, myDE, thisDE, comm
+      integer :: nDEs, myDE, thisDE
       integer, dimension(:), allocatable :: indices, globalIndices
       integer, dimension(:), allocatable :: disp, bufsize
       type(ESMF_DistGridGlobal), pointer :: glob
@@ -2409,7 +2405,7 @@
       enddo
 #else
       ! globalIndices is a global indices array used by MPI_AllGatherV
-      ! New implementation (P.Li - 7/2006):  Use MPI_AllGatherV() to replace
+      ! New implementation (P.Li - 7/2006):  Use ESMF_VMAllGatherV() to replace
       ! a loop of ESMF_VMBroadcast().  This implementation requires more
       ! memory space to hold the global Indices.  The performance of this
       ! implementation on IBM cluster and Cray X1 is better than the old
@@ -2434,10 +2430,8 @@
         bufsize(j) = glob%cellCountPerDE(j)*2
       enddo
   
-      call ESMF_VMGet(vm, mpiCommunicator=comm)
-      call MPI_AllGatherV(indices, 2*me%localCellCount,MPI_INTEGER, &
-	 	globalIndices, bufsize, disp, &
-		MPI_INTEGER, comm, localrc)
+      call ESMF_VMAllGatherV(vm, indices, 2*me%localCellCount, &
+	 	globalIndices, bufsize, disp, rc=localrc)
 
       i1 = 0
       do j  = 1,nDEs
