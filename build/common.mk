@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.12 2006/08/03 17:44:57 theurich Exp $
+#  $Id: common.mk,v 1.155.2.13 2006/08/03 21:38:35 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -101,6 +101,12 @@ endif
 # If not set, the default for EXHAUSTIVE is OFF
 ifndef ESMF_EXHAUSTIVE
 export ESMF_EXHAUSTIVE = OFF
+endif
+
+
+# If not set, the default for BATCHQUEUE is default
+ifndef ESMF_BATCHDEPRECATED
+export ESMF_BATCHDEPRECATED = false
 endif
 
 
@@ -1524,7 +1530,7 @@ tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 # relying on the mpirun script to redirect stdout from inside the batch script.
 #
 stest:
-	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	-@if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)STest ; \
 	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)STest ; \
 	else \
@@ -1719,7 +1725,7 @@ tree_run_use_test_cases_uni: $(USE_TEST_CASES_RUN_UNI)
 # relying on the mpirun script to redirect stdout from inside the batch script.
 #
 uctest:
-	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	-@if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase ; \
 	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase ; \
 	else \
@@ -1945,7 +1951,7 @@ check_unit_tests:
 ftest:
 	-@cd $(ESMF_TESTDIR) ; \
 	$(RM) ./PET*$(TNAME)UTest.Log ; \
-	if [ $(ESMF_BATCH) = "true" ] ; then \
+	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest ; \
 	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest ; \
 	else \
@@ -1958,7 +1964,7 @@ ftest:
 ctest:
 	-@cd $(ESMF_TESTDIR) ; \
 	$(RM) ./PET*$(TNAME)UTest.Log ; \
-	if [ $(ESMF_BATCH) = "true" ] ; then \
+	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest ; \
 	  $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest ; \
 	else \
@@ -2091,7 +2097,7 @@ tree_run_examples_uni: $(EXAMPLES_RUN_UNI)
 # relying on the mpirun script to redirect stdout from inside the batch script.
 #
 exfrun:
-	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	-@if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex ; \
 	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMF_$(EXNAME)Ex ; \
 	else \
@@ -2100,7 +2106,7 @@ exfrun:
 	fi 
 
 excrun:
-	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	-@if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex ; \
 	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_EXDIR)/ESMC_$(EXNAME)Ex ; \
 	else \
