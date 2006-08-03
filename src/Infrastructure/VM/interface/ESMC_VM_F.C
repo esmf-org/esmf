@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.52.2.1 2006/06/19 21:54:02 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.52.2.2 2006/08/03 23:37:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,6 +89,35 @@ extern "C" {
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
+  void FTN(c_esmc_vmallgatherv)(ESMC_VM **vm, void *sendData, int *sendCount,
+    void *recvData, int *recvCounts, int *recvOffsets, ESMC_DataKind *dtk, 
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmallgatherv()"
+    // start assuming local success
+    int localrc = ESMF_SUCCESS;
+    // need to type cast or transform dtk and op into ESMC_VMK types
+    vmType vmt;
+    switch (*dtk){
+    case ESMF_I4:
+      vmt = vmI4;
+      break;
+    case ESMF_R4:
+      vmt = vmR4;
+      break;
+    case ESMF_R8:
+      vmt = vmR8;
+      break;
+    default:
+      localrc = ESMF_FAILURE;
+    }
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "Unsupported data type.",
+      rc)) return;
+    (*vm)->vmk_allgatherv(sendData, *sendCount, recvData, recvCounts,
+      recvOffsets, vmt);
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+  }
+  
   void FTN(c_esmc_vmallreduce)(ESMC_VM **vm, void *input, void *output, 
     int *count, ESMC_DataKind *dtk, ESMC_Operation *op, int *rc){
 #undef  ESMC_METHOD

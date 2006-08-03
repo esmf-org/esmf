@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.62.2.1 2006/06/19 21:54:03 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.62.2.2 2006/08/03 23:37:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -3681,6 +3681,72 @@ void ESMC_VMK::vmk_allgather(void *in, void *out, int len,
   for (int root=0; root<npets; root++){
     // Each PET is considered the root PET once for a non-blocking gather
     vmk_gather(in, out, len, root, &((*commhandle)->handles[root]));
+  }
+}
+
+
+void ESMC_VMK::vmk_allgatherv(void *in, int inCount, void *out, 
+  int *outCounts, int *outOffsets, vmType type){
+  if (mpionly){
+    // Find corresponding MPI data type
+    MPI_Datatype mpitype;
+    switch (type){
+    case vmI4:
+      mpitype = MPI_INT;
+      break;
+    case vmR4:
+      mpitype = MPI_FLOAT;
+      break;
+    case vmR8:
+      mpitype = MPI_DOUBLE;
+      break;
+    }
+    MPI_Allgatherv(in, inCount, mpitype, out, outCounts, outOffsets, mpitype,
+      mpi_c);
+  }else{
+    // This is a very simplistic, probably very bad peformance implementation.
+    int size=0;
+    switch (type){
+    case vmI4:
+      size=4;
+      break;
+    case vmR4:
+      size=4;
+      break;
+    case vmR8:
+      size=8;
+      break;
+    }
+    int root = 0; // arbitrary root, 0 always exists!
+    if (mypet==root){
+      // I am root -> receive chunks from all other PETs
+      int len;
+      char *rootout;
+      for (int i=0; i<root; i++){
+        len = outCounts[i] * size;
+        rootout = (char *)out + outOffsets[i] * size;
+        vmk_recv(rootout, len, i);
+      }
+      // memcpy root's chunk
+      len = outCounts[root] * size;
+      rootout = (char *)out + outOffsets[root] * size;
+      memcpy(rootout, in, len);
+      // keep sending chunks
+      for (int i=root+1; i<npets; i++){
+        len = outCounts[i] * size;
+        rootout = (char *)out + outOffsets[i] * size;
+        vmk_recv(rootout, len, i);
+      }
+    }else{
+      // all other PETs send their chunk
+      int len = inCount * size;
+      vmk_send(in, len, root);
+    }
+    // now broadcast root's out to all other PETs
+    int len=0;
+    for (int i=0; i<npets; i++)
+      len += outCounts[i] * size;
+    vmk_broadcast(out, len, root);
   }
 }
 
