@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.144.2.2 2006/07/25 01:09:12 peggyli Exp $
+! $Id: ESMF_DistGrid.F90,v 1.144.2.3 2006/08/03 21:52:22 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -222,7 +222,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.144.2.2 2006/07/25 01:09:12 peggyli Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.144.2.3 2006/08/03 21:52:22 peggyli Exp $'
 
 !==============================================================================
 !
@@ -1873,7 +1873,12 @@
                                 ESMF_CONTEXT, rc)) return
       call ESMF_DELayoutGetVM(delayout, vm, localrc)
  
-      allocate(allCounts(nDEs), stat=localrc)
+#if 1
+      ! collective call to gather count from all DEs
+      ! New implementation (P. Li, 7/2006) -- This implementation calls
+      ! MPI_AllGather instead of ESMF_VMBroadcast() to collect count 
+      ! We have to allocate a temperary array allCount to store the values
+       allocate(allCounts(nDEs), stat=localrc)
       call ESMF_VMGet(vm, mpiCommunicator=comm)
       thisCount(1) = myCount
       call MPI_AllGather(thisCount, 1, MPI_INTEGER, allCounts, 1, MPI_INTEGER, &
@@ -1882,8 +1887,12 @@
         glob%cellCountPerDE(j)         = allCounts(j)
         glob%cellCountPerDEPerDim(j,1) = allCounts(j)
       enddo
-#if 0
+      deallocate(allCounts, stat=localrc)
+#else
       ! collective call to gather count from all DEs
+      ! Old implementation -- This implementation calls n ESMF_VMBroadcast()
+      ! (n is total number of DEs) in order to collect the count from all DEs.
+      ! It performs very poorly on Cray X1 system.  
       do j     = 1,nDEs
         thisDE = j - 1
         if (myDE.eq.thisDE) then
@@ -1895,8 +1904,7 @@
       enddo
 #endif
       if (present(rc)) rc = ESMF_SUCCESS
-      deallocate(allCounts, stat=localrc)
-      end subroutine ESMF_DistGridSetCountsArb
+       end subroutine ESMF_DistGridSetCountsArb
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2371,7 +2379,10 @@
       call ESMF_VMGet(vm, localPet=myDE, rc=localrc)   ! fix this
 
 #if 0
-      i1    = 0
+      ! This is the old implementation that uses a loop of ESMF_VMBroadcast to
+      ! collect the localIndices from all the DEs and put them into the AI
+      ! array.  It performs very poorly on Cray X1.
+       i1    = 0
       do j  = 1,nDEs
         thisDE = j - 1
         if (myDE.eq.thisDE) then
@@ -2396,9 +2407,16 @@
           AI(i1,2)%stride = glob%globalCellCountPerDim(2)
         enddo
       enddo
-#endif
-
+#else
       ! globalIndices is a global indices array used by MPI_AllGatherV
+      ! New implementation (P.Li - 7/2006):  Use MPI_AllGatherV() to replace
+      ! a loop of ESMF_VMBroadcast().  This implementation requires more
+      ! memory space to hold the global Indices.  The performance of this
+      ! implementation on IBM cluster and Cray X1 is better than the old
+      ! implementation. However, it is memory inefficient when a large number
+      ! of processors is used.  Therefore, we might want to consider using
+      ! a loop of asynchronized send and recv calls instead of a global
+      ! call. 
       allocate(globalIndices(2*glob%globalCellCount), stat=localrc)
       allocate(bufsize(nDEs), stat=localrc)
       allocate(disp(nDEs), stat=localrc)
@@ -2438,7 +2456,6 @@
         enddo
       enddo
 
-
       ! clean up
       deallocate(indices, stat=localrc)
       deallocate(globalIndices, stat=localrc)
@@ -2446,6 +2463,7 @@
       deallocate(bufsize, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
                                      ESMF_CONTEXT, rc)) return
+#endif
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridGetAllAIArb
