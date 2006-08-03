@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.69.2.5 2006/08/03 17:44:57 theurich Exp $
+# $Id: makefile,v 1.69.2.6 2006/08/03 21:07:37 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -207,7 +207,10 @@ info_mk:
 	-@echo "# ESMF_COMM: $(ESMF_COMM)" >> $(MKINFO)
 	-@echo "# ESMF_SITE: $(ESMF_SITE)" >> $(MKINFO)
 	-@echo "# ESMF_EXHAUSTIVE: $(ESMF_EXHAUSTIVE)" >> $(MKINFO)
-	-@echo "# ESMF_BATCHQUEUE: $(ESMF_BATCHQUEUE)" >> $(MKINFO)
+	-@if [ -n "$(ESMF_BATCH)" ] ; then \
+	  echo "# ESMF_BATCH: $(ESMF_BATCH)" >> $(MKINFO) ; fi
+	-@if [ -n "$(ESMF_BATCHOPTIONS)" ] ; then \
+	  echo "# ESMF_BATCHOPTIONS: $(ESMF_BATCHOPTIONS)" >> $(MKINFO) ; fi
 	-@if [ -n "$(ESMF_STDCXX_LIBRARY)" ] ; then \
 	  echo "# ESMF_STDCXX_LIBRARY: $(ESMF_STDCXX_LIBRARY)" >> $(MKINFO) ; fi
 	-@echo "# ESMF_PTHREADS: $(ESMF_PTHREADS)" >> $(MKINFO)
