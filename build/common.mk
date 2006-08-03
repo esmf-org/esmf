@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.11 2006/08/01 18:36:43 theurich Exp $
+#  $Id: common.mk,v 1.155.2.12 2006/08/03 17:44:57 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -101,17 +101,6 @@ endif
 # If not set, the default for EXHAUSTIVE is OFF
 ifndef ESMF_EXHAUSTIVE
 export ESMF_EXHAUSTIVE = OFF
-endif
-
-
-# If not set, the default for BATCHQUEUE is default
-ifndef ESMF_BATCHQUEUE
-export ESMF_BATCHQUEUE = default
-endif
-
-# If not set, the default for BATCH is false
-ifndef ESMF_BATCH
-export ESMF_BATCH = false
 endif
 
 
