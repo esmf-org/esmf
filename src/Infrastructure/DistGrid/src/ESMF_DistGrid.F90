@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.144.2.4 2006/08/03 23:38:40 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.144.2.5 2006/08/04 03:34:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -220,7 +220,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.144.2.4 2006/08/03 23:38:40 theurich Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.144.2.5 2006/08/04 03:34:59 theurich Exp $'
 
 !==============================================================================
 !
@@ -2451,13 +2451,20 @@
       enddo
 
       ! clean up
-      deallocate(indices, stat=localrc)
       deallocate(globalIndices, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                     ESMF_CONTEXT, rc)) return
       deallocate(disp, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                     ESMF_CONTEXT, rc)) return
       deallocate(bufsize, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
                                      ESMF_CONTEXT, rc)) return
 #endif
+      deallocate(indices, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                     ESMF_CONTEXT, rc)) return
+                                     
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridGetAllAIArb
