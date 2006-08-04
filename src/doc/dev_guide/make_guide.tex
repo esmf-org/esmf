@@ -1,6 +1,6 @@
-% CVS $Id: make_guide.tex,v 1.1 2005/05/05 22:55:21 nscollins Exp $
+% CVS $Id: make_guide.tex,v 1.2 2006/08/04 22:20:49 cdeluca Exp $
 
-\section{Makefile Conventions} 	 
+\subsection{Makefile Conventions} 	 
 
 The makefiles use GNU standard target names when possible.
 The default rule is to remake the ESMF library.  Targets exist
@@ -11,7 +11,7 @@ For more details on targets, refer to the README file in the top
 level ESMF directory, and also the {\it ESMF User's Guide}.
 
 
-\subsection{Code Building Rules} 
+\subsubsection{Code Building Rules} 
 During software development it is advantageous to recompile a portion of
 ESMF and not build the entire framework when testing localized software
 modifications.  The makefiles are configured to compile only files in the
@@ -35,7 +35,7 @@ occurs.
 \item [clean\_examples] remove the example executables
 \end{description} 
 
-\subsection{Document Building Rules} 
+\subsubsection{Document Building Rules} 
 The makefile rules for building the
 reference, requirements and design documents are now located in:
 \begin{verbatim} build/common.mk \end{verbatim} 
@@ -69,7 +69,7 @@ The makefiles targets work from both local directory and from ESMF\_DIR:
 \end{description}
 
 
-\subsection{Include Files} 
+\subsubsection{Include Files} 
 At the highest directory level, the "include"
 directory will contain public include files intended to be used in
 user-written code.  They will be broken up into separate files, with a

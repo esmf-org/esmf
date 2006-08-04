@@ -1,10 +1,10 @@
 %============================================================================
-% CVS $Id: life_cycle.tex,v 1.4 2006/08/04 21:03:06 cdeluca Exp $
+% CVS $Id: life_cycle.tex,v 1.5 2006/08/04 22:20:49 cdeluca Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/Attic/life_cycle.tex,v $
 % CVS $Name:  $
 %===============================================================================
 
-\section{Software Development Cycle}
+\section{Processes}
 \label{sec:life_cycle}
 
 The ESMF development environment has several defining characteristics.
@@ -92,14 +92,14 @@ to maintain.  This experience helped to guide the ESMF project
 towards more user-oriented documents, but it also left a gap in the 
 documentation that has taken time to fill.
 
-\subsection{Iterative Design and Review}
+\subsection{Ongoing Development}
 
 The following are processes we are actively following.  These
 guidelines apply to core team developers and outside contributors
 who will be checking code into the main ESMF repository.
 
 All design and code reviews are telecons held with the JST. 
-Telecons are scheduled with the core team manager, put on the ESMF
+Telecons are scheduled with the Core Team Manager, put on the ESMF
 calendar on the home page of the ESMF website, and announced on the
 esmf\_jst@ucar.edu list.
 
@@ -169,14 +169,19 @@ distributed with the ESMF source.
 
 \subsubsection{Implementation and Test Before Internal Release}
 
+Code should be written in accordance with the interface specifications
+agreed to during design reviews and the coding conventions described in 
+Section ~\ref{sec:code_conv}.  
+
 There is an internal release checklist on the Test \& Validation page of the
 ESMF website that contains an exhaustive listing of develop and tester
-responsibilities for releases.
+responsibilities for releases.  For additional discussion
+of test and validation procedures, see Section~\ref{sec:testing}.
 
 The developer is responsible for working with the tester(s) to make sure
 that the following are present before an internal release:
 \begin{itemize}
-\item 100% unit and system test coverage of new interfaces, with the exception
+\item 100\% unit and system test coverage of new interfaces, with the exception
 of interfaces where type/kind/rank is heavily overloaded. All arguments tested
 at least once.
 \item Use test cases work
@@ -185,7 +190,9 @@ at least once.
 \subsubsection{Implementation and Test Before Public Release}
 
 There is a public release checklist on the Test \& Validation page of the ESMF
-website that contains an exhaustive listing of develop and tester responsibilities for releases.
+website that contains an exhaustive listing of develop and tester
+responsibilities for releases.  For additional discussion
+of test and validation procedures, see Section~\ref{sec:testing}.
 
 Same as for internal release, plus:
 \begin{itemize}
@@ -208,68 +215,20 @@ for every check-in, by writing esmf\_support@ucar.edu with the request.
 \begin{enumerate}
 \item All significant chunks of externally contributed code are reviewed
 by the JST. It's usual to do the code review after check-in. The code review should
-be scheduled with the core team manager when the code is checked in, and
+be scheduled with the Core Team Manager when the code is checked in, and
 the code review held before the next release.
 \item We also do code reviews with core team members, as desired/required
 by the JST. 
 \end{enumerate}
 
-\subsubsection {Code Construction and Testing}
-
-Code shall be written in accordance with the interface specifications
-presented in design documents and the coding conventions described in 
-Section ~\ref{sec:code_conv}.  Code reviews shall be conducted by members 
-of the Joint Specification Team.
-
-Each class shall be accompanied by a suite of unit tests.  The user
-shall have the option to build either ``sanity check'' type tests or an 
-exhaustive suite.  The exhaustive tests will include tests of all
-functionalities and a variety of valid and invalid input values. The
-sanity tests will be a minumum set of tests to indicate whether, for
-example, the software has been installed correctly.  The NASA Computational 
-Technologies team will review and supplement the unit tests to ensure 
-that software requirements are met.
-
-\subsubsection {System Testing }
-
-System testing and integration shall be performed incrementally on the 
-evolving body of ESMF software, in accordance with the {\it Build and Test 
-Plan}.  For additional discussion
-of test and validation procedures, see Section~\ref{sec:testing}.
-
-\subsection {Release and Iteration }
+\subsubsection {Releases}
 
 The tagging convention for public and internal releases is
-described in Section~\ref{sec:tagging}.
+described in Section~\ref{sec:tagging}.  ESMF releases are announced
+on the esmf\_jst@ucar.edu mailing list and are posted on the ESMF
+website.  Source code is available for download from the ESMF
+website and from the main ESMF SourceForge site.
 
-Major releases shall be accompanied by thorough documentation, including an 
-{\it ESMF User's Guide} and {\it ESMF Reference Manual}.  User documentation
-shall include code excerpts, examples to demonstrate ideas, existing bugs,
-and restrictions. 
-
-ESMF releases shall be announced via mailing lists, on the ESMF
-website, and at community meetings.  Source code shall be available
-for download from the ESMF website and from the SourceForge site.
-
-At the close of both internal and public release cycles, we plan to 
-iterate on requirements, architecture, design, and implementation in 
-order to refine and extend the ESMF software and documentation.  The
-goal will be to maintain a close-to-deliverable system throughout 
-development, with functionality and optimization increasing
-over time.
-
-\subsection {Maintenance and Extension} 
-
-Routine maintenance of the framework will include ports to new 
-platforms and modifications for new compilers.  Extensions to the 
-framework may occur at a wide range of different scales, from adding
-a new performance optimization to creating an extensive library
-of tools for advanced support of data assimilation systems.  
-The version of the {\it ESMF User's Guide} delivered in 
-January 2005 will provide instructions for routine extensions of 
-the framework -- for example, adding support for an additional grid.
-Other extensions to the framework will be facilitated by the system
-documentation provided in the {\it User's Guide} and {\it Reference Manual}.  
 
 
 

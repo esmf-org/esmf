@@ -1,34 +1,12 @@
 %===============================================================================
-% CVS $Id: projectinfo.tex,v 1.1 2006/08/04 21:03:06 cdeluca Exp $
-% CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/Attic/projectinfo.tex,v $
+% CVS $Id: communication.tex,v 1.1 2006/08/04 22:20:49 cdeluca Exp $
+% CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/communication.tex,v $
 % CVS $Name:  $
 %===============================================================================
 
-\section{Groups Involved in ESMF Development}
+\section{Collaboration Environment and Communication}
 
-For more detail on the groups below, including their Terms of
-Reference, see the {\it ESMF Project Plan}.
-
-\subsection{Core Team}
-ESMF software implementation is led by a {\bf Core Team} based in the 
-Scientific Computing Division (SCD) of the National Center for
-Atmospheric Research (NCAR).  The Core Team relies on close interaction
-with customers, and the work of many contributors.  Core Team
-activities are open to active ESMF developers.
-
-\subsection{Joint Specification Team (JST)}
-The Core Team, along with contributors, customers, technical
-managers, and other stakeholders in development, are collectively
-referred to as the {\bf ESMF Joint Specification Team}, or {\bf JST}.  
-JST membership is open to members of the science, computing, and
-related communities.
-
-ESMF development priorities and schedules are set by a 
-{\bf Change Review Board}. or {\bf CRB} that consists of individuals
-associated with major ESMF initiatives and applications.  
-Members of the CRB are chosen by the ESMF Executive Management.
-
-\section{ESMF Mailing Lists}
+\subsection{Mailing Lists}
 
 The main ESMF technical mailing list is:
 \begin{center}
@@ -72,7 +50,7 @@ describing ESMF achievements and events.
 To subscribe to any of these lists on-line, see the {\bf User
 Support \& Community} link on the ESMF website.
 
-\section{Meetings and Telecons}
+\subsection{Meetings and Telecons}
 
 ESMF JST telecons are held as needed, typically on a weekly basis.
 Normal telecon times are 1:00pm MT Thursdays, and sometimes Tuesdays.
@@ -91,14 +69,14 @@ to each CRB meeting a JST telecon is devoted to collecting comments,
 requrements, and priorities from JST members for consideration by
 the CRB.
 
-\section{SourceForge Open Source Development Environment}
+\subsection{SourceForge Open Source Development Environment}
 The ESMF project utilizes the SourceForge open source development
 environment.  It provides a variety of tools as well as web-browsable
 repositories.
 
-\subsection{The Main ESMF Site and Repository}
+\subsubsection{The Main ESMF Site and Repository}
 
-The main ESMF SourceForge site and repository is at:
+The main ESMF SourceForge site is at:
 \begin{center}
 \htmladdnormallink{{\bf http://sourceforge.net/projects/esmf}}{http://sourceforge.net/projects/esmf}
 \end{center}
@@ -120,17 +98,30 @@ The source code and tools on this site are maintained by the
 ESMF Core Team, and contributions and changes cannot be made to
 them without coordination with the Core Team.
 
-\subsection{The ESMF Contributions Site and Repository}
-A second SourceForge site and repository is at:
+The main ESMF CVS repository is web-accessible at: \newline
+\htmladdnormallink{{\bf http://sourceforge.net/cvs/?group\_id=38089}}
+{http://sourceforge.net/cvs/?group_id=38089} 
+
+The SourceForge site has instructions for checking out code.
+Other CVS documentation is available at: \newline
+\htmladdnormallink{{\bf http://www.gnu.org/manual/cvs/html\_node/cvs\_toc.html}}{http://www.gnu.org/manual/cvs/html_node/cvs_toc.html} 
+
+All ESMF documents, source code and test and other scripts are stored
+in the main repository.  
+
+The SourceForge repository contains only the ESMF framework.  Components
+that use ESMF are stored in repositories at their home institutions.
+
+\subsubsection{The ESMF Contributions Site and Repository}
+A second ESMF SourceForge site and repository is at:
 \begin{center}
 \htmladdnormallink{{\bf http://sourceforge.net/projects/esmfcontrib}}{http://sourceforge.net/projects/esmfcontrib}
 \end{center}
 
 Friendly contributors in the broader community can use this site
 to archive and share code related to ESMF.  Coordination is 
-not required with the ESMF Core Team in order to check in to this
-repository.
-
+not required with the ESMF Core Team in order to check in to the
+contributions repository.
 
 
 
