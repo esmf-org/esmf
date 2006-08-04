@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: qa.tex,v 1.1 2005/05/05 22:55:21 nscollins Exp $
+% CVS $Id: qa.tex,v 1.2 2006/08/04 21:03:06 cdeluca Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/Attic/qa.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -7,41 +7,28 @@
 \section{Quality Assurance}
 \label{sec:qa}
 
-Collective reviews and the intelligence and attentiveness of project
-staff are the primary mechanisms for software quality assurance.  
-Requirements documents, design and architecture documents, code including
-test scripts, code documentation, the {\it Build and Test Plan}
-(see Sections~\ref{sec:build} and~\ref{sec:testing}), system test
-results, and this {\it Developer's Guide} and the procedures specified
-therein shall be reviewed by appropriate members of the Joint Specification 
-Team.  The purpose of the reviews is to look for inconsistencies,
-errors, and inefficiencies, and to increase coordination and awareness
-within the project.
+Collective public reviews and the intelligence and attentiveness of
+project staff are the two primary mechanisms for software quality assurance.  
 
-The primary author of the item to be reviewed leads the review and is
-responsible for modifying the item as per reviewer comments within a 
-reasonable time frame.  The ESMF technical leads set up a review schedule
-and monitor the review process overall.
+Requirements, design, code, and project documents such as plans
+are subject to public review.  The purpose of the reviews is
+to look for inconsistencies, errors, inefficiencies, and areas
+for improvement, and to increase coordination and awareness within
+the ESMF project.
 
-In addition to the above we will designate one person - the integrator/
-gatekeeper on the core development team - the quality assurance lead.
-The quality assurance lead:
-\begin{itemize}
-\item tracks consistency between documentation and source code before
-      releases;
-\item ensures that tests are executed and problem reports written;
-\item verifies that problem reports are resolved and the tracker updated;
-\item monitors major violations of coding standards;
-\item attends reviews.
-\end{itemize}
+The Integrator on the core team ensures that support requests
+and bugs are reported, tracked, and resolved, and that automated
+test and backup scripts are operating correctly.
 
-As part of this person's integration and testing function, he/she also
-evaluates the ESMF software via system tests before it is released.
+The Core Team Manager works with team to ensure that documentation
+is sufficient, tracks consistency between documentation and source
+code before releases, and monitors conformance to coding and
+documentation standards.  The Core Team Manager is also responsible
+for ensuring the quality and accuracy of the ESMF source code
+distribution overall, through the implementation and documentation of
+development, test, and release procedures.
 
-Tasks may be added to the QA list above as the ESMF project proceeds.
-Tasks may also be removed if it is apparent that one or more other people 
-on the development team can more appropriately or more effectively perform 
-a quality assurance function.
+
 
 
 
