@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.82.2.1 2006/07/24 19:31:02 samsoncheung Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.82.2.2 2006/08/04 17:18:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -79,7 +79,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.82.2.1 2006/07/24 19:31:02 samsoncheung Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.82.2.2 2006/08/04 17:18:09 theurich Exp $'
 !
 !==============================================================================
 !
@@ -2590,6 +2590,7 @@
 
       ! TODO: apply dimorder and decompids to get mapping of array to data
 
+      ! check if arbitrary-to-arbitrary optimization is to be used
       if (dstStorage.eq.ESMF_GRID_STORAGE_ARBITRARY .and. &
 	  srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
         call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
@@ -2604,93 +2605,94 @@
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-	goto 100
-      endif
+                                  
+      else ! at least one side is block distributed
 
-      ! set up things we need to precompute a route
-      if (dstStorage.eq.ESMF_GRID_STORAGE_LOGRECT) then
-        call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+        ! set up things we need to precompute a route
+        if (dstStorage.eq.ESMF_GRID_STORAGE_LOGRECT) then
+          call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
                                          compindex =dstCLocalAI, &
                                          totalindex=dstTLocalAI, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        ! translate AI's into global numbering
-        call ESMF_GridDELocalToGlobalAI(dstGrid, &
+          ! translate AI's into global numbering
+          call ESMF_GridDELocalToGlobalAI(dstGrid, &
                                         horzRelLoc=dstHorzRelLoc, &
                                         vertRelLoc=dstVertRelLoc, &
                                         localAI2D=dstCLocalAI, &
                                         globalAI2D=dstCompAI, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        call ESMF_GridDELocalToGlobalAI(dstGrid, &
+          call ESMF_GridDELocalToGlobalAI(dstGrid, &
                                         horzRelLoc=dstHorzRelLoc, &
                                         vertRelLoc=dstVertRelLoc, &
                                         localAI2D=dstTLocalAI, &
                                         globalAI2D=dstTotalAI, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      elseif (dstStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
-        call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+        elseif (dstStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
+          call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
                                          compindex=dstCompAI, &
                                          AICountPerDE=dstAICountPerDE, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+          call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
                                          compindex=dstTotalAI, &
                                          AICountPerDE=dstAICountPerDE, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-      endif
+        endif
 
-      ! now the source grid
-      if (srcStorage.eq.ESMF_GRID_STORAGE_LOGRECT) then
-        call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+        ! now the source grid
+        if (srcStorage.eq.ESMF_GRID_STORAGE_LOGRECT) then
+          call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
                                          compindex =srcCLocalAI, &
                                          totalindex=srcTLocalAI, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        call ESMF_GridDELocalToGlobalAI(srcGrid, &
+          call ESMF_GridDELocalToGlobalAI(srcGrid, &
                                         horzRelLoc=srcHorzRelLoc, &
                                         vertRelLoc=srcVertRelLoc, &
                                         localAI2D=srcCLocalAI, &
                                         globalAI2D=srcCompAI, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        call ESMF_GridDELocalToGlobalAI(srcGrid, &
+          call ESMF_GridDELocalToGlobalAI(srcGrid, &
                                         horzRelLoc=srcHorzRelLoc, &
                                         vertRelLoc=srcVertRelLoc, &
                                         localAI2D=srcTLocalAI, &
                                         globalAI2D=srcTotalAI, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      elseif (srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
-        call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+        elseif (srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
+          call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
                                          compindex=srcCompAI, &
                                          AICountPerDE=srcAICountPerDE, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+          call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
                                          compindex=srcTotalAI, &
                                          AICountPerDE=srcAICountPerDE, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+        endif
       endif
 
       ! Create the route object.
- 100   route = ESMF_RouteCreate(parentVM, rc)
+      route = ESMF_RouteCreate(parentVM, rc)
 
       if (dstStorage.eq.ESMF_GRID_STORAGE_ARBITRARY .and. &
 	  srcStorage.eq.ESMF_GRID_STORAGE_ARBITRARY) then
