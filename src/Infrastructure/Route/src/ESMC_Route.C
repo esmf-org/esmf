@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.152.2.4 2006/07/28 16:55:08 samsoncheung Exp $
+//$Id: ESMC_Route.C,v 1.152.2.5 2006/08/04 18:16:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,13 +28,12 @@
  // associated class definition file
  #include <ESMC_Route.h>
  #include <ESMC_LogErr.h>
- #include <mpi.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.152.2.4 2006/07/28 16:55:08 samsoncheung Exp $";
+               "$Id: ESMC_Route.C,v 1.152.2.5 2006/08/04 18:16:20 theurich Exp $";
 //-----------------------------------------------------------------------------
 class permuteLocal {
 public:
@@ -198,7 +197,9 @@ int compare2(const void *item1, const void *item2) {
     if (rc == ESMF_FAILURE)
        return rc;
     
-    timer1 = timer2 = timer3 = 0.0;
+    // uncomment for profiling
+    // timer1 = timer2 = timer3 = 0.0;
+    
     return ESMF_SUCCESS;
 
  } // end ESMC_RouteConstruct
@@ -675,8 +676,8 @@ int compare2(const void *item1, const void *item2) {
     char **sendBufferList, **recvBufferList;
     vmk_commhandle **handle;
     
-    // Timing
-    double starttime, endtime;
+    // uncomment for profiling
+    // double time, starttime;
 
     // debug
     // ESMC_RoutePrint();
@@ -767,12 +768,15 @@ int compare2(const void *item1, const void *item2) {
           // create the buffer to hold the sending data, and pack it 
           rc = ESMC_XPacketMakeBuffer(sendXPCount, sendXPList, nbytes, numAddrs,
                                       &sendBuffer, &sendBufferSize);
-          //starttime = MPI_Wtime();
-          rc = ESMC_XPacketPackBuffer(sendXPCount, sendXPList, dk, nbytes, numAddrs,
-                                      sendAddr, sendBuffer);
-          //timer1 += MPI_Wtime()-starttime;
+          // uncomment for profiling
+          // vmk_wtime(&starttime);
+          rc = ESMC_XPacketPackBuffer(sendXPCount, sendXPList, dk, nbytes,
+            numAddrs, sendAddr, sendBuffer);
+          // uncomment for profiling
+          // vmk_wtime(&time);
+          // timer1 += time-starttime;
 
-	  // if my PET is both the sender and receiver, there is no need
+          // if my PET is both the sender and receiver, there is no need
           // to allocate a separate buffer; just point both at the single
           // send buffer.
           if (myPET == theirPET) {
@@ -780,21 +784,27 @@ int compare2(const void *item1, const void *item2) {
           } else {
             // time to exchange data
             // create the buffer to hold the receiving data
-            rc = ESMC_XPacketMakeBuffer(recvXPCount, recvXPList, nbytes, numAddrs,
-                                        &recvBuffer, &recvBufferSize);
+            rc = ESMC_XPacketMakeBuffer(recvXPCount, recvXPList, nbytes,
+              numAddrs, &recvBuffer, &recvBufferSize);
 
-	    //starttime = MPI_Wtime();
+            // uncomment for profiling
+            // vmk_wtime(&starttime);
             vm->vmk_sendrecv(sendBuffer, sendBufferSize, theirPET,
                              recvBuffer, recvBufferSize, theirPET);
-	    //timer2 += MPI_Wtime()-starttime;
+            // uncomment for profiling
+            // vmk_wtime(&time);
+            // timer2 += time-starttime;
           }
 
           // whether myPET = theirPET or not, we still have to unpack the 
           // receive buffer to move the data into the final location.
-          //starttime = MPI_Wtime();
+          // uncomment for profiling
+          // vmk_wtime(&starttime);
           rc = ESMC_XPacketUnpackBuffer(recvXPCount, recvXPList, dk, nbytes, 
                                         numAddrs, recvBuffer, recvAddr);
-          //timer3 += MPI_Wtime()-starttime;
+          // uncomment for profiling
+          // vmk_wtime(&time);
+          // timer3 += time-starttime;
           // delete the lists of pointers, plus the local packing buffers
           // allocated during this loop.
           delete [] sendXPList;
@@ -1253,12 +1263,14 @@ int compare2(const void *item1, const void *item2) {
       } else {
         madeSendBufList = madeRecvBufList = NULL;
       }
+      
 // -----------------------------------------------------------------------
 // For asynchronous communications we have two separate loops:
 //  loop #1: issue non-blocking sendrecv() calls
 //  loop #2: wait for local non-blocking comms to finish
-// --> loop #1 follows: 
+// --> loop #1 follows:
 // -----------------------------------------------------------------------
+      
       // reset request counter
       int req=0;
 
@@ -1298,7 +1310,8 @@ int compare2(const void *item1, const void *item2) {
         // exchanged between PETs is loaded up into single buffers for exchange
         if (useOptions & ESMC_ROUTE_OPTION_PACK_PET) {
 
-	  //starttime = MPI_Wtime();
+          // uncomment for profiling
+          // vmk_wtime(&starttime);
           // get corresponding send/recv xpackets from the rtable
           if (sendXPCount > 0)
             sendXPList = new ESMC_XPacket*[sendXPCount];
@@ -1320,10 +1333,12 @@ int compare2(const void *item1, const void *item2) {
           // create the buffer to hold the sending data, and pack it 
           rc = ESMC_XPacketMakeBuffer(sendXPCount, sendXPList, nbytes, numAddrs,
                                       &sendBufferList[req], &sendBufferSize);
-          rc = ESMC_XPacketPackBuffer(sendXPCount, sendXPList, dk, nbytes, numAddrs,
-                                      sendAddr, sendBufferList[req]);
+          rc = ESMC_XPacketPackBuffer(sendXPCount, sendXPList, dk, nbytes,
+            numAddrs, sendAddr, sendBufferList[req]);
 
-	  //timer1 += MPI_Wtime()-starttime;
+          // uncomment for profiling
+          // vmk_wtime(&time);
+          // timer1 += time-starttime;
 
           // if my PET is both the sender and receiver, there is no need
           // to allocate a separate buffer; just point both at the single
@@ -1334,14 +1349,17 @@ int compare2(const void *item1, const void *item2) {
           } else {
             // time to exchange data
             // create the buffer to hold the receiving data
-            rc = ESMC_XPacketMakeBuffer(recvXPCount, recvXPList, nbytes, numAddrs,
-                                        &recvBufferList[req], &recvBufferSize);
+            rc = ESMC_XPacketMakeBuffer(recvXPCount, recvXPList, nbytes,
+              numAddrs, &recvBufferList[req], &recvBufferSize);
 
-	    //starttime = MPI_Wtime();
+            // uncomment for profiling
+            // vmk_wtime(&starttime);
             vm->vmk_sendrecv(sendBufferList[req], sendBufferSize, theirPET,
                              recvBufferList[req], recvBufferSize, theirPET,
                              &handle[req]);
-	    //timer2 += MPI_Wtime()-starttime;
+            // uncomment for profiling
+            // vmk_wtime(&time);
+            // timer2 += time-starttime;
           }
 
           req++;
@@ -1387,7 +1405,7 @@ int compare2(const void *item1, const void *item2) {
               } else {
                   sendContig = false;
                   rc = ESMC_XPacketMakeBuffer(1, &sendXP, nbytes, numAddrs,
-                                              &sendBufferList[req], &sendBufferSize);
+                    &sendBufferList[req], &sendBufferSize);
                   rc = ESMC_XPacketPackBuffer(1, &sendXP, dk, nbytes, numAddrs,
                                               sendAddr, sendBufferList[req]);
                   madeSendBufList[req] = true;
@@ -1624,7 +1642,7 @@ int compare2(const void *item1, const void *item2) {
 // For asynchronous communications we have two separate loops:
 //  loop #1: issue non-blocking sendrecv() calls
 //  loop #2: wait for local non-blocking comms to finish
-// --> loop #2 follows: 
+// --> loop #2 follows:
 // -----------------------------------------------------------------------
 
       // reset request counter
@@ -1650,14 +1668,17 @@ int compare2(const void *item1, const void *item2) {
 
         // reset options only for packing by PET and if the maximum XPCount is 1
         if ((useOptions & ESMC_ROUTE_OPTION_PACK_PET) && (maxXPCount == 1)) {
-          useOptions = (ESMC_RouteOptions)(useOptions ^ ESMC_ROUTE_OPTION_PACK_PET);
-          useOptions = (ESMC_RouteOptions)(useOptions | ESMC_ROUTE_OPTION_PACK_XP);
+          useOptions = (ESMC_RouteOptions)
+            (useOptions ^ ESMC_ROUTE_OPTION_PACK_PET);
+          useOptions = (ESMC_RouteOptions)
+            (useOptions | ESMC_ROUTE_OPTION_PACK_XP);
         }
 
         // First up is packing on a PET-level, where all the data that must be
         // exchanged between PETs is loaded up into single buffers for exchange
         if (useOptions & ESMC_ROUTE_OPTION_PACK_PET) {
-	  starttime = MPI_Wtime();
+          // uncomment for profiling
+          // vmk_wtime(&starttime);
           // get corresponding send/recv xpackets from the rtable
           if (recvXPCount > 0)
             recvXPList = new ESMC_XPacket*[recvXPCount];
@@ -1675,15 +1696,20 @@ int compare2(const void *item1, const void *item2) {
           if (myPET != theirPET) {
             vm->vmk_wait(&handle[req]);
           }
-	  endtime = MPI_Wtime();
-	  timer2 += endtime-starttime;
+          // uncomment for profiling
+          // vmk_wtime(&time);
+          // timer2 += time-starttime;
+          // starttime = time;
+
           // whether myPET = theirPET or not, we still have to unpack the 
           // receive buffer to move the data into the final location.
-          starttime = endtime;
           rc = ESMC_XPacketUnpackBuffer(recvXPCount, recvXPList, dk, nbytes,
                                        numAddrs, recvBufferList[req], recvAddr);
 
-	  timer3 += MPI_Wtime()-starttime;
+          // uncomment for profiling
+          // vmk_wtime(&time);
+          // timer3 += time-starttime;
+          
           // delete the individual buffers for this transfer
           delete [] recvXPList;
           delete [] sendBufferList[req];
@@ -1692,7 +1718,7 @@ int compare2(const void *item1, const void *item2) {
 
           req++;
 
-	}
+        }
 
 // -----------------------------------------------------------
 // Branching still on packing option
@@ -2485,7 +2511,7 @@ int compare2(const void *item1, const void *item2) {
               // free XPs allocated by XPacketFromAxisIndex() routine above
               delete [] theirXP;
             continue;         // TODO: loop on m -- is this continue
-	    }
+            }
 
             // translate from global to local data space
             if (srcVector == ESMF_FALSE)
@@ -3250,7 +3276,6 @@ int compare2(const void *item1, const void *item2) {
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
     int rc;
-
     int i, j, k;
     int npets, xpcount;
     int minitem, maxitem;
@@ -3371,7 +3396,8 @@ int compare2(const void *item1, const void *item2) {
     //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
 
-    //printf("Timing: Packing %lf, SendRecv: %lf, Unpack: %lf\n", 
+    // uncomment for profiling
+    // printf("Timing: Packing %lf, SendRecv: %lf, Unpack: %lf\n", 
     //	   timer1*1000, timer2*1000, timer3*1000);
 
     if (options == NULL) return ESMF_SUCCESS;
