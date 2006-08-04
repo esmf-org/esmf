@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.21.2.1 2006/08/02 23:35:32 theurich Exp $
+#  $Id: build_rules.mk,v 1.21.2.2 2006/08/04 06:42:03 theurich Exp $
 #
 #  Linux.absoft.default makefile fragment
 #
@@ -97,7 +97,7 @@ ESMF_F90IMOD        = -p
 ############################################################
 # Force Fortran symbols lower case
 #
-ESMF_F90COMPILEOPTS += -YEXT_NAMES=LCS
+ESMF_F90COMPILEOPTS += -YEXT_NAMES=LCS -YEXT_SFX=_
 
 ############################################################
 # Compiler options to print version string
