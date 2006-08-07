@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7.2.2 2006/07/25 18:07:52 theurich Exp $
+# $Id: makefile,v 1.7.2.3 2006/08/07 17:10:42 theurich Exp $
 
 ALL: tree_build_demos
 
@@ -52,7 +52,7 @@ CLOBBERDIRS =
 RUN_InteractingFlowApp:
 	-@rm -f testlog stdlog.* logfile.* 
 	@echo "Ready to run the ESMF Interacting Flow Demo Application.  This may take several minutes."
-	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	-@if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo ${ESMF_MPIRUN} -np 4 $(ESMF_TESTDIR)/InteractingFlowApp ; \
 	  ${ESMF_MPIRUN} -np 4 $(ESMF_TESTDIR)/InteractingFlowApp ; \
 	else \
@@ -66,7 +66,7 @@ RUN_InteractingFlowApp:
 RUN_InteractingFlowAppUNI:
 	-@rm -f testlog stdlog.* logfile.* 
 	@echo "Ready to run the ESMF Interacting Flow Demo Application.  This may take several minutes."
-	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	-@if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo ${ESMF_MPIRUN} -np 1 $(ESMF_TESTDIR)/InteractingFlowApp ; \
 	  ${ESMF_MPIRUN} -np 1 $(ESMF_TESTDIR)/InteractingFlowApp ; \
 	else \

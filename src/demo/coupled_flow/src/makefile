@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13.2.1 2006/07/25 18:00:52 theurich Exp $
+# $Id: makefile,v 1.13.2.2 2006/08/07 17:10:42 theurich Exp $
 
 ALL: tree_build_demos
 
@@ -52,7 +52,7 @@ CLOBBERDIRS =
 RUN_CoupledFlowApp:
 	-@rm -f testlog stdlog.* logfile.* 
 	@echo "Ready to run the ESMF Coupled Flow Demo Application.  This may take several minutes."
-	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	-@if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo ${ESMF_MPIRUN} -np 4 $(ESMF_TESTDIR)/CoupledFlowApp ; \
 	  ${ESMF_MPIRUN} -np 4 $(ESMF_TESTDIR)/CoupledFlowApp ; \
 	else \
@@ -66,7 +66,7 @@ RUN_CoupledFlowApp:
 RUN_CoupledFlowAppUNI:
 	-@rm -f testlog stdlog.* logfile.* 
 	@echo "Ready to run the ESMF Coupled Flow Demo Application.  This may take several minutes."
-	-@if [ $(ESMF_BATCH) = "true" ] ; then \
+	-@if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo ${ESMF_MPIRUN} -np 1 $(ESMF_TESTDIR)/CoupledFlowApp ; \
 	  ${ESMF_MPIRUN} -np 1 $(ESMF_TESTDIR)/CoupledFlowApp ; \
 	else \
