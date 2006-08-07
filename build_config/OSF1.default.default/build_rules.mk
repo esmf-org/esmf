@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.31.2.2 2006/07/20 21:46:30 theurich Exp $
+#  $Id: build_rules.mk,v 1.31.2.3 2006/08/07 17:41:15 theurich Exp $
 #
 #  OSF1.default.default
 #
@@ -31,7 +31,7 @@ ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
 ESMF_F90LINKLIBS       += -lmpi
 ESMF_CXXLINKLIBS       += -lmpi
-ESMF_MPIRUNDEFAULT      = ${ESMF_DIR}/scripts/mpirun.alpha
+ESMF_MPIRUNDEFAULT      = ${ESMF_DIR}/scripts/mpirun.lsf.rms
 ESMF_MPIMPMDRUNDEFAULT  = ${ESMF_DIR}/scripts/mpimpmdrun.alpha
 else
 ifeq ($(ESMF_COMM),user)
