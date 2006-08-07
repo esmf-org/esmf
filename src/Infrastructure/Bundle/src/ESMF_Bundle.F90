@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.82 2006/03/28 21:52:25 theurich Exp $
+! $Id: ESMF_Bundle.F90,v 1.83 2006/08/07 23:47:16 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research, 
@@ -973,6 +973,51 @@ end function
 
       end subroutine ESMF_BundleGetAllFields
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_BundleGetAttribute(bundle, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!     type(ESMF_Bundle), intent(in) :: bundle  
+!     character (len = *), intent(in) :: name
+!     <value argument>, see below for supported values
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Returns an attribute from the {\tt bundle}.
+!     Supported values for <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(out) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(out) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
+!     \item type(ESMF\_Logical), intent(out) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
+!     \item character (len = *), intent(out), value
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [<value argument>]
+!           The value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2829,6 +2874,54 @@ end function
       end subroutine ESMF_BundleReorder
 
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleSetAttribute - Set an attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_BundleSetAttribute(bundle, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!     type(ESMF_Bundle), intent(in) :: bundle  
+!     character (len = *), intent(in) :: name
+!     <value argument>, see below for supported values
+!     integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches an attribute to the {\tt bundle}.  
+!     The attribute has a {\tt name} and either a {\tt value} or a 
+!     {\tt valueList}.
+!     Supported values for the <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(in) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(in) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
+!     \item type(ESMF\_Logical), intent(in) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
+!     \item character (len = *), intent(in), value
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [<value argument>]
+!           The value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetInt4Attr"
 !BOPI
@@ -2862,7 +2955,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -2889,7 +2982,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetInt4ListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleSetAttribute - Set a 4-byte integer list attribute
 !
 ! !INTERFACE:
@@ -2925,7 +3018,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
       integer :: status 
       integer :: limit
 
@@ -2959,7 +3052,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetInt8Attr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleSetAttribute - Set an 8-byte integer attribute
 !
 ! !INTERFACE:
@@ -2990,7 +3083,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -3017,7 +3110,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetInt8ListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleSetAttribute - Set an 8-byte integer list attribute
 !
 ! !INTERFACE:
@@ -3053,7 +3146,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
       integer :: status
       integer :: limit
 
@@ -3087,7 +3180,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetReal4Attr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleSetAttribute - Set a 4-byte real attribute
 !
 ! !INTERFACE:
@@ -3118,7 +3211,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -3145,7 +3238,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetReal8Attr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleSetAttribute - Set an 8-byte real attribute
 !
 ! !INTERFACE:
@@ -3176,7 +3269,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -3203,7 +3296,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetReal4ListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleSetAttribute - Set a 4-byte real list attribute
 !
 ! !INTERFACE:
@@ -3239,7 +3332,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
       integer :: limit
       integer :: status                           ! Error status
 
@@ -3273,7 +3366,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetReal8ListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleSetAttribute - Set an 8-byte real list attribute
 !
 ! !INTERFACE:
@@ -3309,7 +3402,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
       integer :: limit
       integer :: status                           ! Error status
 
@@ -3343,7 +3436,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetLogicalAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleSetAttribute - Set a logical attribute
 !
 ! !INTERFACE:
@@ -3374,7 +3467,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -3401,7 +3494,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetLogicalListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleSetAttribute - Set a logical list attribute
 !
 ! !INTERFACE:
@@ -3437,7 +3530,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
       integer :: limit
       integer :: status                           ! Error status
 
@@ -3471,7 +3564,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleSetCharAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleSetAttribute - Set a character attribute
 !
 ! !INTERFACE:
@@ -3502,7 +3595,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 

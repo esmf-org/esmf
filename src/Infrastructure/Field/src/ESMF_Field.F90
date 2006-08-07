@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.216 2006/06/27 20:56:20 samsoncheung Exp $
+! $Id: ESMF_Field.F90,v 1.217 2006/08/07 23:47:16 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -275,7 +275,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.216 2006/06/27 20:56:20 samsoncheung Exp $'
+      '$Id: ESMF_Field.F90,v 1.217 2006/08/07 23:47:16 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1096,10 +1096,55 @@
       end subroutine ESMF_FieldGetInternArray
 
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldGetAttribute  - Retrieve an attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_FieldGetAttribute(field, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!     type(ESMF_Field), intent(in) :: field  
+!     character (len = *), intent(in) :: name
+!     <value argument>, see below for supported values
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Returns an attribute from the {\tt field}.
+!     Supported values for <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(out) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(out) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
+!     \item type(ESMF\_Logical), intent(out) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
+!     \item character (len = *), intent(out), value
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [<value argument>]
+!           The value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldGetInt4Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetAttribute  - Retrieve a 4-byte integer attribute
 !
 ! !INTERFACE:
@@ -1111,7 +1156,6 @@
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I4), intent(out) :: value
       integer, intent(out), optional :: rc   
-
 !
 ! !DESCRIPTION:
 !     Returns an integer attribute from the {\tt field}.
@@ -1129,7 +1173,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -1151,7 +1195,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldGetInt4ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a 4-byte integer list attribute
 !
 ! !INTERFACE:
@@ -1185,7 +1229,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -1215,7 +1259,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldGetInt8Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetAttribute  - Retrieve an 8-byte integer attribute
 !
 ! !INTERFACE:
@@ -1245,7 +1289,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -1264,7 +1308,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldGetInt8ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve an 8-byte integer list attribute
 !
 ! !INTERFACE:
@@ -1298,7 +1342,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -1325,7 +1369,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldGetReal4Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a 4-byte real attribute
 !
 ! !INTERFACE:
@@ -1355,7 +1399,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -1373,7 +1417,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldGetReal4ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a 4-byte real list attribute
 !
 ! !INTERFACE:
@@ -1407,7 +1451,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -1434,7 +1478,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldGetReal8Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve an 8-byte real attribute
 !
 ! !INTERFACE:
@@ -1464,7 +1508,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -1482,7 +1526,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldGetReal8ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve an 8-byte real list attribute
 !
 ! !INTERFACE:
@@ -1516,7 +1560,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -1543,7 +1587,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldGetLogicalAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a logical attribute
 !
 ! !INTERFACE:
@@ -1573,7 +1617,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -1592,7 +1636,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldGetLogicalListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a logical list attribute
 !
 ! !INTERFACE:
@@ -1626,7 +1670,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -1653,7 +1697,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldGetCharAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a character attribute
 !
 ! !INTERFACE:
@@ -1683,7 +1727,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -2368,10 +2412,57 @@
       end subroutine ESMF_FieldSetArray
 
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldSetAttribute - Set an attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_FieldSetAttribute(field, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!     type(ESMF_Field), intent(inout) :: field  
+!     character (len = *), intent(in) :: name
+!     <value argument>, see below for supported values
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Attaches an attribute to the {\tt field}.
+!     The attribute has a {\tt name} and either a {\tt value} or a 
+!     {\tt valueList}.
+!     Supported values for the <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(in) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(in) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
+!     \item type(ESMF\_Logical), intent(in) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
+!     \item character (len = *), intent(in), value
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [<value argument>]
+!           The value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSetInt4Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSetAttribute - Set a 4-byte integer attribute
 !
 ! !INTERFACE:
@@ -2402,7 +2493,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -2421,7 +2512,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSetInt4ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSetAttribute - Set a 4-byte integer list attribute
 !
 ! !INTERFACE:
@@ -2457,7 +2548,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -2484,7 +2575,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSetInt8Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSetAttribute - Set an 8-byte integer attribute
 !
 ! !INTERFACE:
@@ -2515,7 +2606,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -2534,7 +2625,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSetInt8ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSetAttribute - Set an 8-byte integer list attribute
 !
 ! !INTERFACE:
@@ -2570,7 +2661,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -2597,7 +2688,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSetReal4Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSetAttribute - Set a 4-byte real attribute
 !
 ! !INTERFACE:
@@ -2628,7 +2719,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -2646,7 +2737,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSetReal4ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSetAttribute - Set a 4-byte real list attribute
 !
 ! !INTERFACE:
@@ -2682,7 +2773,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -2709,7 +2800,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSetReal8Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSetAttribute - Set an 8-byte real attribute
 !
 ! !INTERFACE:
@@ -2740,7 +2831,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -2758,7 +2849,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSetReal8ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSetAttribute - Set an 8-byte real list attribute
 !
 ! !INTERFACE:
@@ -2794,7 +2885,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -2821,7 +2912,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSetLogicalAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSetAttribute - Set a logical attribute
 !
 ! !INTERFACE:
@@ -2852,7 +2943,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -2871,7 +2962,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSetLogicalListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSetAttribute - Set a logical list attribute
 !
 ! !INTERFACE:
@@ -2907,7 +2998,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -2934,7 +3025,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSetCharAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSetAttribute - Set a character attribute
 !
 ! !INTERFACE:
@@ -2965,7 +3056,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
