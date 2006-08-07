@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: testing.tex,v 1.6 2006/08/07 16:51:03 cdeluca Exp $
+% CVS $Id: testing.tex,v 1.7 2006/08/07 18:49:28 cdeluca Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/testing.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -17,7 +17,7 @@ sizes (e.g., large data sets, processor counts, grids).
 \item Beta testing through preliminary releases.
 \end{enumerate}
 Unit tests, system tests, and examples are distributed with the
-ESMF software.  Use test cases, because of their size, are 
+ESMF software.  UTCs, because of their size, are 
 stored and distributed separately.  Tests are run nightly,
 following a weekly schedule, on a wide variety of platforms.  
 Beta testing of ESMF software is done by providing an Internal Release
@@ -42,15 +42,15 @@ configurations, and is required to interoperate with many combinations
 of application software. Thus our test strategy includes the following.
 
 \begin{itemize}
-\item Tests shall be executed on as many target platforms as possible. 
-\item Tests shall be executed on a variety of programming paradigms
+\item Tests are executed on as many target platforms as possible. 
+\item Tests are executed on a variety of programming paradigms
 (e.g pure shared memory, pure distributed memory and a mix of both).
-\item Tests shall be executed in multiple configurations (e.g. uni-processor,
+\item Tests are executed in multiple configurations (e.g. uni-processor,
 multi-processor).
 \item The result of each test is a {\tt PASS/FAIL}.  
 \item In some cases, for floating point comparisons, an epsilon value
 will be used.
-\item Unit tests will be implemented for each language interface that is 
+\item Tests are implemented for each language interface that is 
 supported.
 \end{itemize}
 
@@ -63,7 +63,7 @@ framework {\tt make} system will have an option to build and run unit tests.
 The user has the option of building either a "sanity check" type test
 or an exhaustive suite. The exhaustive tests include tests of many 
 functionalities and a variety of valid and invalid input values. The sanity 
-tests are a minumum set of tests to indicate whether, for example, the 
+check tests are a minumum set of tests to indicate whether, for example, the 
 software has been installed correctly. It is the responsiblity of the 
 software developer to write and execute the unit tests. Unit tests 
 are distributed with the framework software.
@@ -74,38 +74,34 @@ To achieve adequate unit testing, developers shall attempt to meet the following
 \item Individual procedures will be evaluated with at least one unit
 test function.  However, as many test functions as necessary will be
 implemented to assure that each procedure works properly.  
-\item Developers will unit test their code to the degree possible  
+\item Developers should unit test their code to the degree possible  
 before it is checked into the repository.  It is assumed that 
 developers will use stubs as necessary.
-\item Variables will be tested for acceptable range and precision.
-\item Variables will be tested for a range of valid values, including boundary
+\item Variables are tested for acceptable range and precision.
+\item Variables are tested for a range of valid values, including boundary
 values.
-\item Unit tests will verify that error handling works correctly.
+\item Unit tests should verify that error handling works correctly.
 \end{itemize}
 
 \subsubsection{System Tests}
 
 System tests are written to test functionality that spans several 
-classes.  The following areas are given special
-consideration during our system testing.
+classes.  The following areas should be addressed in system testing.
 
 \begin{itemize}
 \item Design omissions (e.g. incomplete or incorrect behaviors).
 \item Associations between objects (e.g. fields, grids, bundles).
-\item Control and Infrastructure. (e.g. couplers, time management, error handling).
+\item Control and infrastructure. (e.g. couplers, time management, error handling).
 \item Feature interactions or side effects when multiple features are used
 simultaneously.
-\item Compatibility between previously working software releases and new releases.
-\item Different behaviors among different platforms.
-\item Language interfaces.
 \end{itemize}
 
-The system tester shall issue a test log after each software release is tested,
-which shall be recorded on the {\bf Test and Validation} webpage. The test 
+The system tester should issue a test log after each software release is tested,
+which is recorded on the {\bf Test and Validation} webpage. The test 
 log shall
 include: a test ID number, a software release ID number, testing environment 
 descriptions, a list of test cases executed, results, and any unexpected 
-events. Bugs will be documented in the \htmladdnormallink{{\it SourceForge Bug 
+events. Bugs should be documented in the \htmladdnormallink{{\it SourceForge Bug 
 Tracker}}{https://sourceforge.net/tracker/?group\_id=38089&atid=421185} and 
 any bug fixes shall be validated.
 
@@ -133,21 +129,25 @@ The purpose of regression testing is to reveal faults caused by new
 or modified software (e.g. side effects, incompatibility between 
 releases, and bad bug fixes).  
 Regression tests regularly exercise all interfaces of the code on 
-all target platforms.  The Integrator (see Section~\ref{sec:cm}) runs 
+all target platforms.  The Integrator runs 
 automated nightly builds on a wide variety of machines, listed on the
-{\bf Test and Validation} website. 
-Log files of the build results are stored at {\tt /fs/projects/css/esmf/esmf\_test/daily\_builds} on the NCAR fileserver. 
+{\bf Test and Validation} website. This site stores log files of the
+build results.
 The log files are kept on a monthly basis in 
 separate directories. For example, the December 2002 directory is named {\tt 0212\_test}. The 
 directory contains an {\tt ESMFdailyLog} file which has a one line entry for each platform on 
 which the build was attempted indicating whether the build was successful or not. 
 
-The \htmladdnormallink{{\tt ESMFdailyLog}}
-{https://www.esmf.ucar.edu/test/daily\_test/ESMFdailyLog} file for the current month is available on the {\bf Test and Validation} website.
+The {\tt ESMFdailyLog} file for the current month is available on the {\bf Test and Validation} website.
 
 If the build is not successful, then a file containing the build output is stored in 
-the {\tt /fs/projects/css/esmf/esmf\_test/daily\_builds} directory on the NCAR fileserver. The file naming convention for the build output file is 
-{\tt build\_BOPT\_(day)(platform)ESMF\_ARCH}. For example, if the build fails on longs on the 19th of the month with {\tt BOPT=g}, the file would be called {\tt build\_g\_19longslinux\_lf95}. 
+the:\\
+{\tt /fs/projects/css/esmf/esmf\_test/daily\_builds}\\
+directory on the NCAR fileserver. The file naming convention for the build output file is:\\
+{\tt build\_BOPT\_(day)(platform)ESMF\_ARCH}.\\
+For example, if the build fails on longs on the 19th of the month with {\tt BOPT=g},
+the file would be called:\\
+{\tt build\_g\_19longslinux\_lf95}. 
 
 Email is sent daily to the ESMF core team listing all the platforms on which the build was attempted with a {\tt PASS/FAIL} indication. 
 

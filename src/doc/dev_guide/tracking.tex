@@ -1,4 +1,4 @@
-% $Id: tracking.tex,v 1.3 2006/08/04 22:20:50 cdeluca Exp $
+% $Id: tracking.tex,v 1.4 2006/08/07 18:49:28 cdeluca Exp $
 
 \section{Tracking and Metrics}
 \label{sec:tracking}
@@ -48,31 +48,22 @@ the Support Request tracker.
 {http://www.sourceforge.net/projects/esmf}, under {\bf Bugs}
 on the menu bar.
 
-
-All software bugs found during testing are recorded
-in a tracker on the ESMF SourceForge site called Bugs.
-
 When a bug is identified, the tester opens a bug report on SourceForge, giving as much detail
 about the bug as possible to help the developer reproduce the problem. When the developer
 fixes the bug, he/she logs into SourceForge, adds a note to the bug report, and changes the status
 to Pending. This triggers SourceForge to send an email to the originator of the bug report. It is
 the responsibility of the originator to verify that the bug has been fixed and close the bug report.
 
-CVS allows projects to be developed on several branches simultaneously. The ongoing development
-is done on the main trunk, and as software releases are identified, branches are created and tagged. Once this
-occurs, software development may continue on separate versions of the code. 
-
 When a bug is found, it may exist on the trunk, a branch or both. The originator of the bug report
-must state where the bug was found in the bug report.  A bug that exists on both the trunk and a 
-branch, will generally be fixed only on the trunk. If the bug is fixed on both the trunk and branch, the 
+should state where the bug was found in the bug report.  A bug that exists on both the trunk and a 
+branch will generally be fixed only on the trunk. If the bug is fixed on both the trunk and branch, the 
 developer must state this explicitly in the bug report.  Customer queries about known problems for a 
 release will be directed to the developers.
 
 \subsection{Metrics}
 
-The NCAR core team integrator is responsible for tracking the
-various aspects of the ESMF project to measure the implementation and
-testing progress.
+The Integrator is responsible for tracking various aspects of the
+ESMF project to measure the implementation and testing progress.
 \subsubsection{Unit and System Tests Coverage}
 Throughout the ESMF software development process, the software is constantly
 being unit and system tested. It is essential to know the percentage of the
@@ -88,14 +79,14 @@ which requirements have been implemented and of these which have been tested.
 \subsubsection{Source Lines of Code, SLOC}
 The ESMF SLOC information is provided in an internal ESMF webpage. The
 SLOC data is presented in graph form with the following columns:
-\begin{description}
+\begin{enumerate}
 \item[Fortran] 
 \item[C++] 
 \item[c] 
 \item[Makefiles] 
 \item[SLOC Total] 
 \item[Lines of text] 
-\end{description}
+\end{enumerate}
 
 The graphs are a monthly breakdown from January 1, 2002 to the present.
 
