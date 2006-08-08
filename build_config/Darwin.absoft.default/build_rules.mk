@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.19.2.1 2006/08/07 22:26:10 theurich Exp $
+#  $Id: build_rules.mk,v 1.19.2.2 2006/08/08 06:46:04 theurich Exp $
 #
 #  Darwin.absoft.default
 #
@@ -95,9 +95,9 @@ endif
 ESMF_F90IMOD        = -p
 
 ############################################################
-# Force Fortran symbols lower case
+# Force Fortran symbols lower case with trailing underscore
 #
-ESMF_F90COMPILEOPTS += -YEXT_NAMES=LCS
+ESMF_F90COMPILEOPTS += -YEXT_NAMES=LCS -YEXT_SFX=_
 
 ############################################################
 # Compiler options to print version string
