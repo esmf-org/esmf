@@ -1,161 +1,135 @@
-#  $Id: build_rules.mk,v 1.5 2004/03/16 18:00:52 nscollins Exp $
+#  $Id: build_rules.mk,v 1.17.4.1 2006/08/09 19:07:17 theurich Exp $
 #
-#  Darwin.nag.default.mk
+#  Darwin.nag.default
 #
 
+############################################################
+# Default compiler setting.
+#
+ESMF_F90DEFAULT         = f95
+ESMF_CXXDEFAULT         = g++
 
-#
-#  Make sure that ESMF_PREC is set to 32
-#
-ESMF_PREC = 32
-
-#
+############################################################
 # Default MPI setting.
 #
-ifndef ESMF_COMM
-export ESMF_COMM := mpiuni
-endif
 ifeq ($(ESMF_COMM),default)
 export ESMF_COMM := mpiuni
 endif
 
-
 ############################################################
-# Location of MPI (Message Passing Interface) software
-
-# comment in one or the other, depending on whether you have
-# installed the mpich library.  (the first section assumes
-# it is installed under /usr/local - change MPI_HOME if other dir.)
-
-ifeq ($(ESMF_COMM),lam)
-# with lam-mpi installed in /usr/local:
-MPI_HOME       = 
-MPI_LIB        = -lmpi -llam 
-MPI_INCLUDE    = 
-MPIRUN         =  mpirun
-endif
-
-ifeq ($(ESMF_COMM),mpich)
-# with mpich installed in /usr/local:
-ESMC_MPIRUN      = mpirun
-MPI_HOME       =  /usr/local
-MPI_LIB        = -lmpich -lpmpich
-MPI_INCLUDE    = -I${MPI_HOME}/include -DESMF_MPICH=1
-MPIRUN         =  ${MPI_HOME}/bin/mpirun
-endif
-
+# MPI dependent settings.
+#
 ifeq ($(ESMF_COMM),mpiuni)
-# without mpich installed:
-MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/mpiuni
-MPI_LIB        = -lmpiuni
-MPI_INCLUDE    = -I${MPI_HOME}
-MPIRUN         =  ${MPI_HOME}/mpirun
+# MPI stub library -----------------------------------------
+ESMF_F90LINKLIBS       += -lmpiuni
+ESMF_CXXCOMPILEOPTS    += -DESMF_MPIUNI
+ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_CXXLINKLIBS       += -lmpiuni
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
+else
+ifeq ($(ESMF_COMM),mpich)
+# Mpich ----------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_F90LINKLIBS       += 
+ESMF_CXXDEFAULT         = mpiCC
+ESMF_CXXCOMPILEOPTS    += -DESMF_MPICH
+ESMF_MPIRUNDEFAULT      = mpirun
+else
+ifeq ($(ESMF_COMM),mpich2)
+# Mpich2 ---------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
+ifeq ($(ESMF_COMM),lam)
+# LAM (assumed to be built with nag f95) ----------------
+ESMF_F90DEFAULT         = mpif77
+ESMF_CXXDEFAULT         = mpic++
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
+ifeq ($(ESMF_COMM),openmpi)
+# OpenMPI --------------------------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+else
+ifeq ($(ESMF_COMM),user)
+# User specified flags -------------------------------------
+else
+$(error Invalid ESMF_COMM setting: $(ESMF_COMM))
 endif
-
-# if you are using esmf with any VTK (visualization tool kit) code, set
-# ESMF_VTK to include these libraries.
-ifeq ($(ESMF_VTK),1)
-MPI_LIB += -L/usr/local/lib/vtk -L/usr/X11R6/lib -lvtkRendering -lvtkIO \
-           -lvtkGraphics -lvtkImaging -lSM -lICE \
-           -lX11 -lXext -framework Carbon -lvtkftgl \
-           -framework AGL -framework OpenGL -lvtkfreetype \
-           -lXt -lvtkFiltering -lvtkCommon -framework AppKit -lpthread \
-           -lm -lvtkpng -lvtktiff -lvtkzlib -lvtkjpeg -lvtkexpat 
 endif
-
-# MP_LIB is for openMP
-#MP_LIB          = 
-#MP_INCLUDE      = 
-# For pthreads (or omp)
-THREAD_LIB      = 
-
+endif
+endif
+endif
+endif
 
 ############################################################
 #
-AR		   = ar
-AR_FLAGS	   = cr
-AR_EXTRACT         = -x
-RM		   = rm -f
-OMAKE		   = ${MAKE}
-RANLIB		   = ranlib -s
-SHELL		   = /bin/sh
-SED		   = /usr/bin/sed
-SH_LD		   = cc
-#
-# C and Fortran compiler
-#
-C_CC		   = cc
-C_FC		   = f95 
-CXX_CC		   = g++ -fPIC
-CXX_FC		   = f95 -YEXT_NAMES=LCS -s 
+# location of external libs.  if you want to use any of these,
+# define ESMF_SITE to my_site so the build system can find it,
+# copy this file into Linux.intel.my_site, and uncomment the
+# libs you want included.  remove the rest of this file since
+# both this file and the site file will be included.
 
-C_FC_MOD           = -I
-C_CLINKER_SLFLAG   = -Wl,-rpath,
-C_FLINKER_SLFLAG   = -Wl,-rpath,
-C_CLINKER	   = ${C_CC}
-C_FLINKER	   = ${C_FC}
-C_CCV		   = ${C_CC} --version
-C_FCV              = ${C_FC} -V 
-C_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
-# Add /usr/lib/libf2c.a if that's what your f77 uses.
-# ---------------------------- BOPT - g options ----------------------------
-G_COPTFLAGS	   = -g 
-G_FOPTFLAGS	   = -g 
-# ----------------------------- BOPT - O options -----------------------------
-O_COPTFLAGS	   = -O 
-O_FOPTFLAGS	   = -O
+# LAPACK_INCLUDE   = 
+# LAPACK_LIB       = -L/usr/local/lib -llapack
+# NETCDF_INCLUDE   = -I/usr/local/include/netcdf
+# NETCDF_LIB       = -L/usr/local/lib -lnetcdf
+# HDF_INCLUDE      = -I/usr/local/include/hdf
+# HDF_LIB          = -L/usr/local/lib/ -lmfhdf -ldf -ljpeg -lz
+# BLAS_INCLUDE     = 
+# BLAS_LIB         = -latlas -lscs
+
+############################################################
+# Compiler flag to produce position independent code for shared object
 #
-# Fortran compiler 
+#ESMF_CXXCOMPILEOPTS       += -fPIC
+
+############################################################
+# Set kind numbering system to "byte"
 #
-FFLAGS          = -w=x77 -kind=byte -dusty -mismatch_all-gline
-F_FREECPP       = -ffree -fpp
-F_FIXCPP        = -ffixed -fpp
-F_FREENOCPP     = -ffree
-F_FIXNOCPP      = -ffixed
+ESMF_F90COMPILEOPTS += -kind=byte
+
+############################################################
+# Set f95 to be more premissive and issue warning before error
 #
-# C++ compiler
+ESMF_F90COMPILEOPTS += -dusty
+
+############################################################
+# Compiler options to print version string
 #
-CXX_CLINKER_SLFLAG = -Wl,-rpath,
-CXX_FLINKER_SLFLAG = -Wl,-rpath,
-CXX_CLINKER	   = ${CXX_CC}
-CXX_FLINKER	   = ${CXX_CC}
-CXX_CCV		   = ${CXX_CC} --version
-LOCAL_INCLUDE      =
-CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
-C_F90CXXLD         = ${CXX_CC}
-C_F90CXXLIBS       = ${MPI_LIB} -lstdc++ -lf90math -lfio -lf77math
-C_CXXF90LD         = ${CXX_CC}
-C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -lf90math -lfio -lf77math
-# ------------------------- BOPT - g_c++ options ------------------------------
-GCXX_COPTFLAGS	   = -g 
-GCXX_FOPTFLAGS	   = -g
-# ------------------------- BOPT - O_c++ options ------------------------------
-OCXX_COPTFLAGS	   = -O 
-OCXX_FOPTFLAGS	   = -O
-# -------------------------- BOPT - g_complex options ------------------------
-GCOMP_COPTFLAGS	   = -g
-GCOMP_FOPTFLAGS	   = -g
-# --------------------------- BOPT - O_complex options -------------------------
-OCOMP_COPTFLAGS	   = -O
-OCOMP_FOPTFLAGS	   = -O
-###############################################################################
+ESMF_F90VOPT        = -v -V -dryrun
+ESMF_CXXVOPT        = -v --version
 
-PARCH		   = mac_osx
-
-SL_SUFFIX   = 
-SL_LIBOPTS  = 
-SL_LINKOPTS = 
-SL_F_LINKER = $(F90CXXLD)
-SL_C_LINKER = $(CXXF90LD)
-SL_LIB_LINKER = $(CXXF90LD)
-SL_LIBS_TO_MAKE = libesmf 
-
-
-#############
+############################################################
+# Need this until the file convention is fixed (then remove these two lines)
 #
-# Set shared dependent on build_shared to build .so lib.
+ESMF_F90COMPILEFREECPP   = -free -fpp
+ESMF_F90COMPILEFREENOCPP = -free
+ESMF_F90COMPILEFIXCPP    = -fixed -fpp
+ESMF_F90COMPILEFIXNOCPP  = -fixed
+
+############################################################
+# Blank out variables to prevent rpath encoding
 #
-shared: 
+ESMF_F90LINKRPATHS      =
+ESMF_CXXLINKRPATHS      =
 
+############################################################
+# Link against libesmf.a using the F90 linker front-end
+#
+ESMF_F90LINKLIBS += -lstdc++
 
+############################################################
+# Link against libesmf.a using the C++ linker front-end
+#
+ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.nag $(ESMF_F90COMPILER))
 
+############################################################
+# Blank out shared library options
+#
+ESMF_SL_LIBS_TO_MAKE  =
