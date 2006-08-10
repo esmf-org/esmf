@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.93 2006/05/19 02:16:52 theurich Exp $
+! $Id: ESMF_State.F90,v 1.94 2006/08/10 18:59:54 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.93 2006/05/19 02:16:52 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.94 2006/08/10 18:59:54 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -1462,9 +1462,54 @@ end interface
       end subroutine ESMF_StateGetArray
 
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve an attribute 
+!
+! !INTERFACE:
+!      subroutine ESMF_StateGetAttribute(state, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_State), intent(in) :: state  
+!      character (len = *), intent(in) :: name
+!      <value argument>, see below for supported values
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Returns an attribute from the {\tt state}.
+!     Supported values for <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(out) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(out) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
+!     \item type(ESMF\_Logical), intent(out) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
+!     \item character (len = *), intent(out), value
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!      An {\tt ESMF\_State} object.
+!     \item [name]
+!      The name of the attribute to retrieve.
+!     \item [<value argument>]
+!      The value of the named attribute.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetInt4Attr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve a 4-byte integer attribute 
 !
 ! !INTERFACE:
@@ -1493,7 +1538,7 @@ end interface
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
 
@@ -1519,7 +1564,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetInt4ListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve a 4-byte integer list attribute
 !
 ! !INTERFACE:
@@ -1553,7 +1598,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
       integer :: limit
@@ -1587,7 +1632,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetInt8Attr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve an 8-byte integer attribute 
 !
 ! !INTERFACE:
@@ -1616,7 +1661,7 @@ end interface
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
 
@@ -1642,7 +1687,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetInt8ListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve an 8-byte integer list attribute
 !
 ! !INTERFACE:
@@ -1676,7 +1721,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
       integer :: limit
@@ -1710,7 +1755,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetReal4Attr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve a 4-byte real attribute
 !
 ! !INTERFACE:
@@ -1740,7 +1785,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
 
@@ -1765,7 +1810,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetReal4ListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve a 4-byte real list attribute
 !
 ! !INTERFACE:
@@ -1799,7 +1844,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
       integer :: limit
@@ -1833,7 +1878,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetReal8Attr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve an 8-byte real attribute
 !
 ! !INTERFACE:
@@ -1863,7 +1908,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
 
@@ -1888,7 +1933,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetReal8ListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve an 8-byte real list attribute
 !
 ! !INTERFACE:
@@ -1922,7 +1967,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
       integer :: limit
@@ -1956,7 +2001,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetLogicalAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve a logical attribute
 !
 ! !INTERFACE:
@@ -1986,7 +2031,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
 
@@ -2012,7 +2057,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetLogicalListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve a logical list attribute
 !
 ! !INTERFACE:
@@ -2046,7 +2091,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
       integer :: limit
@@ -2080,7 +2125,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetCharAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve a character attribute
 !
 ! !INTERFACE:
@@ -2110,7 +2155,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
 
@@ -3033,9 +3078,57 @@ end interface
         end function ESMF_StateReadRestart
 
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateSetAttribute - Set an attribute
+!
+! !INTERFACE:
+!      subroutine ESMF_StateSetAttribute(state, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_State), intent(in) :: state  
+!      character (len = *), intent(in) :: name
+!      <value argument>, see below for supported values
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Attaches an attribute to the {\tt state}.
+!     The attribute has a {\tt name} and either a {\tt value} or a 
+!     {\tt valueList}.
+!     Supported values for the <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(in) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(in) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
+!     \item type(ESMF\_Logical), intent(in) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
+!     \item character (len = *), intent(in), value
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [name]
+!       The name of the attribute to set.
+!     \item [<value argument>]
+!       The value of the attribute to set.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateSetInt4Attr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateSetAttribute - Set a 4-byte integer attribute
 !
 ! !INTERFACE:
@@ -3066,7 +3159,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                          ! Error status
 
@@ -3092,7 +3185,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateSetInt4ListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateSetAttribute - Set a 4-byte integer list attribute
 !
 ! !INTERFACE:
@@ -3128,7 +3221,7 @@ end interface
 !      \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                          ! Error status
       integer :: limit
@@ -3162,7 +3255,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateSetInt8Attr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateSetAttribute - Set an 8-byte integer attribute
 !
 ! !INTERFACE:
@@ -3193,7 +3286,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                          ! Error status
 
@@ -3219,7 +3312,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateSetInt8ListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateSetAttribute - Set an 8-byte integer list attribute
 !
 ! !INTERFACE:
@@ -3255,7 +3348,7 @@ end interface
 !      \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                          ! Error status
       integer :: limit
@@ -3289,7 +3382,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateSetReal4Attr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateSetAttribute - Set a 4-byte real attribute
 !
 ! !INTERFACE:
@@ -3321,7 +3414,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                          ! Error status
 
@@ -3346,7 +3439,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateSetReal4ListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateSetAttribute - Set a 4-byte real list attribute
 !
 ! !INTERFACE:
@@ -3382,7 +3475,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
       integer :: limit
@@ -3416,7 +3509,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateSetReal8Attr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateSetAttribute - Set an 8-byte real attribute
 !
 ! !INTERFACE:
@@ -3448,7 +3541,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                          ! Error status
 
@@ -3473,7 +3566,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateSetReal8ListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateSetAttribute - Set an 8-byte real list attribute
 !
 ! !INTERFACE:
@@ -3509,7 +3602,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
       integer :: limit
@@ -3543,7 +3636,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateSetLogicalAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateSetAttribute - Set a logical attribute 
 !
 ! !INTERFACE:
@@ -3574,7 +3667,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
 
@@ -3600,7 +3693,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateSetLogicalListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateSetAttribute - Set a logical list attribute
 !
 ! !INTERFACE:
@@ -3636,7 +3729,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
       integer :: limit
@@ -3670,7 +3763,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateSetCharAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateSetAttribute - Set a character attribute
 !
 ! !INTERFACE:
@@ -3701,7 +3794,7 @@ end interface
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
 

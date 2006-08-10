@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.83 2006/08/07 23:47:16 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.84 2006/08/10 18:59:54 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research, 
@@ -1022,7 +1022,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetInt4Attr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 4-byte integer attribute
 !
 ! !INTERFACE:
@@ -1052,7 +1052,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -1079,7 +1079,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetInt4ListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 4-byte integer list attribute
 !
 ! !INTERFACE:
@@ -1113,7 +1113,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -1148,7 +1148,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetInt8Attr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an 8-byte integer attribute
 !
 ! !INTERFACE:
@@ -1178,7 +1178,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -1205,7 +1205,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetInt8ListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an 8-byte integer list attribute
 !
 ! !INTERFACE:
@@ -1239,7 +1239,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -1274,7 +1274,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetReal4Attr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 4-byte real attribute
 !
 ! !INTERFACE:
@@ -1303,7 +1303,7 @@ end function
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -1329,7 +1329,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetReal4ListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a 4-byte real list attribute
 !
 ! !INTERFACE:
@@ -1363,7 +1363,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -1398,7 +1398,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetReal8Attr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an 8-byte real attribute
 !
 ! !INTERFACE:
@@ -1427,7 +1427,7 @@ end function
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -1453,7 +1453,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetReal8ListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an 8-byte real list attribute
 !
 ! !INTERFACE:
@@ -1487,7 +1487,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -1522,7 +1522,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetLogicalAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a logical attribute
 !
 ! !INTERFACE:
@@ -1552,7 +1552,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -1580,7 +1580,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetLogicalListAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a logical list attribute
 !
 ! !INTERFACE:
@@ -1614,7 +1614,7 @@ end function
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       integer :: limit
@@ -1650,7 +1650,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetCharAttr"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a character attribute
 !
 ! !INTERFACE:
@@ -1680,7 +1680,7 @@ end function
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
 
@@ -2885,7 +2885,7 @@ end function
 !     character (len = *), intent(in) :: name
 !     <value argument>, see below for supported values
 !     integer, intent(out), optional :: rc   
-
+!
 !
 ! !DESCRIPTION:
 !     Attaches an attribute to the {\tt bundle}.  
@@ -2917,7 +2917,6 @@ end function
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!
 !
 !EOP
 
