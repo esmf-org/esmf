@@ -1,0 +1,9 @@
+#!/bin/sh
+# this script expects the xlc command (or a wrapper to xlc, e.g. mpic++)
+# and returns the path of the xlc system libraries
+# tested for xlc compiler version: 6.0
+COMPILER=`echo $1 | grep xl`
+if [ ${COMPILER}x = "x" ]; then
+COMPILER=`$1 -show | awk '{ print$1 }'`
+fi
+which $COMPILER | sed "s/bin\/$COMPILER/lib/g"
