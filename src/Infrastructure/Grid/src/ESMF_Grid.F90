@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.234 2006/05/02 20:40:05 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.235 2006/08/10 19:16:47 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.234 2006/05/02 20:40:05 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.235 2006/08/10 19:16:47 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1845,10 +1845,54 @@
       end subroutine ESMF_GridGetWithRelloc
 
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridGetAttribute  - Retrieve an attribute
+!
+! !INTERFACE:
+!      subroutine ESMF_GridGetAttribute(grid, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_Grid), intent(in) :: grid
+!      character (len = *), intent(in) :: name
+!      <value argument>, see below for supported values
+!      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Returns an attribute from the {\tt grid}.
+!      Supported values for <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(out) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(out) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
+!     \item type(ESMF\_Logical), intent(out) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
+!     \item character (len = *), intent(out), value
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [<value argument>]
+!           The value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetInt4Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetAttribute  - Retrieve a 4-byte integer attribute
 !
 ! !INTERFACE:
@@ -1876,7 +1920,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -1915,7 +1959,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetInt4ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetAttribute - Retrieve a 4-byte integer list attribute
 !
 ! !INTERFACE:
@@ -1947,7 +1991,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -1994,7 +2038,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetInt8Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetAttribute  - Retrieve an 8-byte integer attribute
 !
 ! !INTERFACE:
@@ -2023,7 +2067,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -2062,7 +2106,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetIntList8Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetAttribute - Retrieve an 8-byte integer list attribute
 !
 ! !INTERFACE:
@@ -2095,7 +2139,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -2142,7 +2186,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetReal4Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetAttribute - Retrieve a 4-byte real attribute
 !
 ! !INTERFACE:
@@ -2170,7 +2214,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -2208,7 +2252,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetReal4ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetAttribute - Retrieve a 4-byte real list attribute
 !
 ! !INTERFACE:
@@ -2240,7 +2284,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -2287,7 +2331,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetReal8Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetAttribute - Retrieve an 8-byte real attribute
 !
 ! !INTERFACE:
@@ -2315,7 +2359,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -2353,7 +2397,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetReal8ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetAttribute - Retrieve an 8-byte real list attribute
 !
 ! !INTERFACE:
@@ -2386,7 +2430,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -2433,7 +2477,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetLogicalAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetAttribute - Retrieve a logical attribute
 !
 ! !INTERFACE:
@@ -2461,7 +2505,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -2500,7 +2544,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetLogicalListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetAttribute - Retrieve a logical list attribute
 !
 ! !INTERFACE:
@@ -2532,7 +2576,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -2579,7 +2623,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCharAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetAttribute - Retrieve a character attribute
 !
 ! !INTERFACE:
@@ -2607,7 +2651,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -3877,10 +3921,56 @@
       end subroutine ESMF_GridSet
 
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridSetAttribute - Set an attribute
+!
+! !INTERFACE:
+!      subroutine ESMF_GridSetAttribute(grid, name, <value argument>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_Grid), intent(inout) :: grid
+!      character (len = *), intent(in) :: name
+!      <value argument>, see below for supported values    
+!      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attaches an attribute to the {\tt grid}.
+!     The attribute has a {\tt name} and either a {\tt value} or a
+!     {\tt valueList}.
+!     Supported values for the <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R4), intent(in) :: value
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R8), intent(in) :: value
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
+!     \item type(ESMF\_Logical), intent(in) :: value
+!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
+!     \item character (len = *), intent(in), value
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [<value argument>]
+!           The value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetInt4Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSetAttribute - Set a 4-byte integer attribute
 !
 ! !INTERFACE:
@@ -3909,7 +3999,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -3932,7 +4022,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetInt4ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSetAttribute - Set a 4-byte integer list attribute
 !
 ! !INTERFACE:
@@ -3966,7 +4056,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -3997,7 +4087,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetInt8Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSetAttribute - Set an 8-byte integer attribute
 !
 ! !INTERFACE:
@@ -4026,7 +4116,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -4049,7 +4139,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetInt8ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSetAttribute - Set an 8-byte integer list attribute
 !
 ! !INTERFACE:
@@ -4083,7 +4173,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -4114,7 +4204,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetReal4Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSetAttribute - Set a 4-byte real attribute
 !
 ! !INTERFACE:
@@ -4143,7 +4233,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -4165,7 +4255,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetReal4ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSetAttribute - Set a 4-byte real list attribute
 !
 ! !INTERFACE:
@@ -4199,7 +4289,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -4230,7 +4320,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetReal8Attr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSetAttribute - Set an 8-byte real attribute
 !
 ! !INTERFACE:
@@ -4259,7 +4349,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -4281,7 +4371,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetReal8ListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSetAttribute - Set an 8-byte real list attribute
 !
 ! !INTERFACE:
@@ -4315,7 +4405,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -4346,7 +4436,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetLogicalAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSetAttribute - Set a logical attribute
 !
 ! !INTERFACE:
@@ -4375,7 +4465,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -4398,7 +4488,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetLogicalListAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSetAttribute - Set a logical list attribute
 !
 ! !INTERFACE:
@@ -4432,7 +4522,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
@@ -4463,7 +4553,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetCharAttr"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSetAttribute - Set a character attribute
 !
 ! !INTERFACE:
@@ -4492,8 +4582,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
-! !REQUIREMENTS:
+!EOPI
 
       integer :: localrc                          ! local error status
       
