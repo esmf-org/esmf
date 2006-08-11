@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.43 2006/03/15 20:58:51 svasquez Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.44 2006/08/11 22:27:29 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.43 2006/03/15 20:58:51 svasquez Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.44 2006/08/11 22:27:29 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -59,15 +59,15 @@
 
       ! instantiate timestep, start and stop times
       type(ESMF_TimeInterval) :: timeStep, timeStep2, timeStep3
-      type(ESMF_Time) :: startTime
+      type(ESMF_Time) :: startTime, time1, time2
       type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, &
                              julianDayCalendar, &
                              noLeapCalendar, day360Calendar
-      type(ESMF_TimeInterval) :: absoluteTime
+      type(ESMF_TimeInterval) :: absoluteTime, diffTime
       type(ESMF_TimeInterval) :: timeInterval1, timeInterval2, timeInterval3, &
                                  timeInterval4, timeInterval5, timeInterval6
       integer(ESMF_KIND_I8) :: days2
-      real(ESMF_KIND_R8) :: ratio
+      real(ESMF_KIND_R8) :: ratio, days_r8
 
 
 !-------------------------------------------------------------------------------
@@ -874,7 +874,7 @@
       call ESMF_TimeIntervalSet(timeStep2, d=10, &
                                 calendar=gregorianCalendar, rc=rc)
       ratio = timeStep / timeStep2
-      call ESMF_Test((abs(ratio-.5) < 1e-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-.5) < 1d-6 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "ratio, rc = ", ratio, rc
@@ -888,7 +888,7 @@
       call ESMF_TimeIntervalSet(timeStep2, yy=12, &
                                 calendar=gregorianCalendar, rc=rc)
       ratio = timeStep / timeStep2
-      call ESMF_Test((abs(ratio-.25) < 1e-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-.25) < 1d-6 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "ratio, rc = ", ratio, rc
@@ -902,7 +902,7 @@
       call ESMF_TimeIntervalSet(timeStep2, mm=8, &
                                 calendar=gregorianCalendar, rc=rc)
       ratio = timeStep / timeStep2
-      call ESMF_Test((abs(ratio-.75) < 1e-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-.75) < 1d-6 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "ratio, rc = ", ratio, rc
@@ -916,10 +916,32 @@
       call ESMF_TimeIntervalSet(timeStep2, mm=24, &
                                 calendar=gregorianCalendar, rc=rc)
       ratio = timeStep / timeStep2
-      call ESMF_Test((abs(ratio-1.5) < 1e-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-1.5) < 1d-6 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "ratio, rc = ", ratio, rc
+
+      ! ----------------------------------------------------------------------------
+      ! TimeintervalGet(*_r8) floating point tests
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Suggested by Erik Kluzek/CCSM in Support Request #1518335
+      write(name, *) "Get floating point days"
+      write(failMsg, *) " Did not return 722502.253518553"
+
+      ! 1978 2/22 time 06:05:04.003002001 Z
+      call ESMF_TimeSet(time1, yy=1978, mm=2, dd=22, h=6, m=5, s=4, &
+                               ms=3, us=2, ns=1, &
+                               calendar=gregorianCalendar, rc=rc)
+      ! 0000 1/01 time 00:00:00 Z
+      call ESMF_TimeSet(time2, yy=0, mm=1, dd=1, &
+                               calendar=gregorianCalendar, rc=rc)
+      diffTime = time1 - time2
+      call ESMF_TimeIntervalGet(diffTime, d_r8=days_r8, rc=rc)
+      call ESMF_Test((abs(days_r8 - 722502.253518553d0) < 1d-6 .and. &
+                     rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "Diff time in floating point days = ", days_r8, " rc = ", rc
 
       ! ----------------------------------------------------------------------------
       ! Julian Leap year 1900 tests
@@ -1645,7 +1667,7 @@
       call ESMF_TimeIntervalSet(timeStep2, d=10, &
                                 calendar=julianCalendar, rc=rc)
       ratio = timeStep / timeStep2
-      call ESMF_Test((abs(ratio-.5) < 1e-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-.5) < 1d-6 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "ratio, rc = ", ratio, rc
@@ -1659,7 +1681,7 @@
       call ESMF_TimeIntervalSet(timeStep2, yy=12, &
                                 calendar=julianCalendar, rc=rc)
       ratio = timeStep / timeStep2
-      call ESMF_Test((abs(ratio-.25) < 1e-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-.25) < 1d-6 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "ratio, rc = ", ratio, rc
@@ -1673,7 +1695,7 @@
       call ESMF_TimeIntervalSet(timeStep2, mm=8, &
                                 calendar=julianCalendar, rc=rc)
       ratio = timeStep / timeStep2
-      call ESMF_Test((abs(ratio-.75) < 1e-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-.75) < 1d-6 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "ratio, rc = ", ratio, rc
@@ -1687,7 +1709,7 @@
       call ESMF_TimeIntervalSet(timeStep2, mm=24, &
                                 calendar=julianCalendar, rc=rc)
       ratio = timeStep / timeStep2
-      call ESMF_Test((abs(ratio-1.5) < 1e-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-1.5) < 1d-6 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "ratio, rc = ", ratio, rc
@@ -2475,7 +2497,7 @@
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
       absoluteTime=ESMF_TimeIntervalAbsValue(timeStep)
-      call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
+      !call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
       write(name, *) "Print Absolute Time Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -2591,7 +2613,7 @@
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
       absoluteTime=ESMF_TimeIntervalAbsValue(timeStep)
-      call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
+      !call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
       write(name, *) "Print Absolute Time Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -2637,7 +2659,7 @@
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
       absoluteTime=ESMF_TimeIntervalAbsValue(timeStep)
-      call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
+      !call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
       write(name, *) "Print Absolute Time Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -2649,7 +2671,7 @@
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
       absoluteTime=ESMF_TimeIntervalNegAbsValue(timeStep)
-      call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
+      !call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
       write(name, *) "Print Neg. Absolute Time Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -2754,7 +2776,7 @@
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
       absoluteTime=ESMF_TimeIntervalAbsValue(timeStep)
-      call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
+      !call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
       write(name, *) "Print Absolute Time Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -2765,7 +2787,7 @@
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
       absoluteTime=ESMF_TimeIntervalAbsValue(timeStep2)
-      call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
+      !call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
       write(name, *) "Print Absolute Time Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -2786,7 +2808,7 @@
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
       absoluteTime=ESMF_TimeIntervalAbsValue(timeStep)
-      call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
+      !call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
       write(name, *) "Print Absolute Time Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -2798,7 +2820,7 @@
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
       absoluteTime=ESMF_TimeIntervalNegAbsValue(timeStep)
-      call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
+      !call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
       write(name, *) "Print Neg. Absolute Time Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -2833,7 +2855,7 @@
       call ESMF_Test((timeStep.eq.timeStep2), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      call ESMF_TimeIntervalPrint(timeStep2, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeStep2, rc=rc)
       ! ----------------------------------------------------------------------------
 
 
@@ -2843,7 +2865,7 @@
       write(name, *) "Time Step initialization with nothing set Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_TimeIntervalPrint(timeStep2, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeStep2, rc=rc)
 
       ! ----------------------------------------------------------------------------
 
@@ -3216,7 +3238,7 @@
       call ESMF_TimeIntervalSet(timeInterval1, s=10, sN=2, sD=3, rc=rc)
       call ESMF_TimeIntervalSet(timeInterval2, s=3, sN=7, sD=11, rc=rc)
       ratio = timeInterval1 / timeInterval2
-      call ESMF_Test((abs(ratio-2.93333333) < 1e-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-2.93333333) < 1d-6 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       print *, "ratio, rc = ", ratio, rc
 
