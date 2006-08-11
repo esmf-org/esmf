@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.35 2004/03/10 03:06:37 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.42.2.1 2006/08/11 22:42:11 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,6 +25,7 @@
  // put any constants or macros which apply to the whole component in this file.
  // anything public or esmf-wide should be up higher at the top level
  // include files.
+ #include <ESMC_Start.h>
  #include <ESMF_TimeMgr.inc>
 
 //-------------------------------------------------------------------------
@@ -52,10 +53,6 @@
 // adds its associated {\tt Calendar} and local Timezone attributes to
 // {\tt BaseTime}.
 //
-// A time value of zero (both whole and numerator) will correspond
-// to the Julian date of zero UTC.  This will ease conversions 
-// between Julian and Gregorian calendars.
-//
 //-------------------------------------------------------------------------
 //
 // !USES:
@@ -75,8 +72,8 @@
                                           // TODO: (& ESMC_Base class when
                                           // fully aligned with F90 equiv)
   private:   // corresponds to F90 module 'type ESMF_Time' members 
-    class ESMC_Calendar *calendar;    // associated calendar
-    int timeZone;                     // Offset from UTC
+    ESMC_Calendar *calendar;    // associated calendar
+    int timeZone;               // Offset from UTC
 
 // !PUBLIC MEMBER FUNCTIONS:
 
@@ -100,7 +97,9 @@
                      ESMF_KIND_R8 *ms_r8=0, ESMF_KIND_R8 *us_r8=0,
                      ESMF_KIND_R8 *ns_r8=0,
                      ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0,
-                     ESMC_Calendar *calendar=0, int *timeZone=0);
+                     ESMC_Calendar **calendar=0, 
+                     ESMC_CalendarType *calendarType=0, 
+                     int *timeZone=0);
 
     int ESMC_TimeGet(ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
                      int *mm=0, int *dd=0,
@@ -114,9 +113,15 @@
                      ESMF_KIND_R8 *ms_r8=0, ESMF_KIND_R8 *us_r8=0,
                      ESMF_KIND_R8 *ns_r8=0,
                      ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0,
-                     ESMC_Calendar **calendar=0, int *timeZone=0,
+                     ESMC_Calendar **calendar=0, 
+                     ESMC_CalendarType *calendarType=0, 
+                     int *timeZone=0,
                      int timeStringLen=0, int *tempTimeStringLen=0,
-                     char *tempTimeString=0, int *dayOfWeek=0,
+                     char *tempTimeString=0,
+                     int timeStringLenISOFrac=0,
+                     int *tempTimeStringLenISOFrac=0,
+                     char *tempTimeStringISOFrac=0,
+                     int *dayOfWeek=0,
                      ESMC_Time *midMonth=0,
                      ESMF_KIND_I4 *dayOfYear=0,
                      ESMF_KIND_R8 *dayOfYear_r8=0,
@@ -134,20 +139,21 @@
     int ESMC_TimeSet(const char *timeList, ...);
     // e.g. ESMC_TimeSet("s" , (double) s);
 
-    bool ESMC_TimeIsSameCalendar(ESMC_Time *time, int *rc) const;
+    bool ESMC_TimeIsLeapYear(int *rc=0) const;
+    bool ESMC_TimeIsSameCalendar(const ESMC_Time *time, int *rc=0) const;
 
     // to support ESMC_Clock::SyncToWallClock() and TMG 2.5.7
     int ESMC_TimeSyncToRealTime(void);
 
     // override BaseTime +/- operators in order to copy ESMC_Time-only
     // properties (calendar & timeZone) to the result
-    ESMC_Time operator+(const ESMC_TimeInterval &) const; // time + timeInterval
-    ESMC_Time operator-(const ESMC_TimeInterval &) const; // time - timeInterval
-    ESMC_Time& operator+=(const ESMC_TimeInterval &); // time += timeInterval
-    ESMC_Time& operator-=(const ESMC_TimeInterval &); // time -= timeInterval
+    ESMC_Time operator+(const ESMC_TimeInterval &) const; // time + timeinterval
+    ESMC_Time operator-(const ESMC_TimeInterval &) const; // time - timeinterval
+    ESMC_Time& operator+=(const ESMC_TimeInterval &); // time += timeinterval
+    ESMC_Time& operator-=(const ESMC_TimeInterval &); // time -= timeinterval
 
     // override 2nd BaseTime (-) operator because 1st (-) operator is overridden
-    // (compiler can't find 2nd (-) operator at BaseTime!)
+    // (compiler can't find 2nd (-) operator at ESMC_Fraction!)
     ESMC_TimeInterval operator-(const ESMC_Time&) const;  // time1 - time2
 
     // TODO: ? override BaseTime arithmetic operators with same operators
@@ -170,8 +176,17 @@
 
     // native C++ constructors/destructors
     ESMC_Time(void);
-    ESMC_Time(ESMF_KIND_I8 s, int sN, int sD, ESMC_Calendar *calendar,
+    ESMC_Time(ESMF_KIND_I8 s, int sN=0, int sD=1, ESMC_Calendar *calendar=0,
+              ESMC_CalendarType calendarType=(ESMC_CalendarType)0,
               int timeZone=0);
+    int ESMC_TimeSet(ESMF_KIND_I8 s, int sN=0, int sD=1,
+                     ESMC_Calendar *calendar=0,
+                     ESMC_CalendarType calendarType=(ESMC_CalendarType)0,
+                     int timeZone=0);
+                                   // used internally instead of constructor
+                                   // to cover case of initial entry from F90,
+                                   // to avoid automatic destructor invocation
+                                   // when leaving scope to return to F90.
     ~ESMC_Time(void);
 
  // < declare the rest of the public interface methods here >
@@ -180,7 +195,7 @@
 //
   private:
     // return in string format (TMG 2.4.7)
-    int ESMC_TimeGetString(char *timeString) const;
+    int ESMC_TimeGetString(char *timeString, const char *options=0) const;
 
     int ESMC_TimeGetDayOfWeek(int *dayOfWeek) const;    // (TMG 2.5.3)
     int ESMC_TimeGetMidMonth(ESMC_Time *midMonth) const;
@@ -189,6 +204,7 @@
     int ESMC_TimeGetDayOfYear(ESMF_KIND_R8 *dayOfYear) const; // (TMG 2.5.2)
     int ESMC_TimeGetDayOfYear(ESMC_TimeInterval *dayOfYear) const;
 
+    friend class ESMC_TimeInterval;
     friend class ESMC_Calendar;
                                                         // (TMG 2.5.5)
 //
