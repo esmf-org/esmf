@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.74 2005/08/05 17:38:30 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.75 2006/08/11 22:20:46 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -123,7 +123,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.74 2005/08/05 17:38:30 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.75 2006/08/11 22:20:46 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1002,7 +1002,7 @@
       integer(ESMF_KIND_I4),   intent(out), optional :: ms
       integer(ESMF_KIND_I4),   intent(out), optional :: us
       integer(ESMF_KIND_I4),   intent(out), optional :: ns
-      real(ESMF_KIND_R8),      intent(out), optional :: d_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: d_r8
       real(ESMF_KIND_R8),      intent(out), optional :: h_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: m_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: s_r8  ! not implemented
@@ -1196,7 +1196,7 @@
       integer(ESMF_KIND_I4),   intent(out), optional :: ms
       integer(ESMF_KIND_I4),   intent(out), optional :: us
       integer(ESMF_KIND_I4),   intent(out), optional :: ns
-      real(ESMF_KIND_R8),      intent(out), optional :: d_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: d_r8
       real(ESMF_KIND_R8),      intent(out), optional :: h_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: m_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: s_r8  ! not implemented
@@ -1398,7 +1398,7 @@
       integer(ESMF_KIND_I4),   intent(out), optional :: ms
       integer(ESMF_KIND_I4),   intent(out), optional :: us
       integer(ESMF_KIND_I4),   intent(out), optional :: ns
-      real(ESMF_KIND_R8),      intent(out), optional :: d_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: d_r8
       real(ESMF_KIND_R8),      intent(out), optional :: h_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: m_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: s_r8  ! not implemented
@@ -1602,7 +1602,7 @@
       integer(ESMF_KIND_I4),   intent(out), optional :: ms
       integer(ESMF_KIND_I4),   intent(out), optional :: us
       integer(ESMF_KIND_I4),   intent(out), optional :: ns
-      real(ESMF_KIND_R8),      intent(out), optional :: d_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: d_r8
       real(ESMF_KIND_R8),      intent(out), optional :: h_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: m_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: s_r8  ! not implemented
