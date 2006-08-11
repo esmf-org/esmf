@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.1.2.1 2006/08/11 21:28:31 theurich Exp $
+#  $Id: build_rules.mk,v 1.1.2.2 2006/08/11 22:00:12 theurich Exp $
 #
 #  Darwin.xlfgcc.default
 
@@ -98,7 +98,6 @@ ESMF_FPPPREFIX           = -WF,
 # Special debug flags
 #
 ESMF_F90OPTFLAG_G       += -qcheck -qfullpath
-ESMF_CXXOPTFLAG_G       += -qcheck -qfullpath
 
 ############################################################
 # Blank out variables to prevent rpath encoding
@@ -122,7 +121,7 @@ ESMF_CXXLINKPATHS += -L$(shell $(ESMF_DIR)/scripts/libpath.xl $(ESMF_F90COMPILER
 ############################################################
 # Determine where g++'s libraries are located
 #
-ESMF_F90LINKPATHS += -L$(dir $(shell gcc -print-file-name=libstdc++.so))
+ESMF_F90LINKPATHS += -L$(dir $(shell gcc -print-file-name=libstdc++.a))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
@@ -132,7 +131,7 @@ ESMF_F90LINKLIBS += -lstdc++
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lxlf90_r -lxlfmath
+ESMF_CXXLINKLIBS += -lxlf90_r -lxlfmath -lxl
 
 ############################################################
 # Blank out shared library options
