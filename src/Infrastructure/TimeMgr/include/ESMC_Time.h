@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.42 2006/02/17 17:04:42 nscollins Exp $
+// $Id: ESMC_Time.h,v 1.43 2006/08/11 22:06:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -140,7 +140,7 @@
     // e.g. ESMC_TimeSet("s" , (double) s);
 
     bool ESMC_TimeIsLeapYear(int *rc=0) const;
-    bool ESMC_TimeIsSameCalendar(ESMC_Time *time, int *rc=0) const;
+    bool ESMC_TimeIsSameCalendar(const ESMC_Time *time, int *rc=0) const;
 
     // to support ESMC_Clock::SyncToWallClock() and TMG 2.5.7
     int ESMC_TimeSyncToRealTime(void);
