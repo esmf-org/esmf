@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.82 2006/01/26 18:51:31 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.83 2006/08/11 22:11:19 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.82 2006/01/26 18:51:31 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.83 2006/08/11 22:11:19 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -694,8 +694,8 @@
 //    bool true if same calendars, false if different calendars
 //
 // !ARGUMENTS:
-      ESMC_Time *time,    // in - Time to compare Calendar types against
-      int *rc) const {    // out - return code
+      const ESMC_Time *time,    // in  - Time to compare Calendar types against
+      int *rc) const {          // out - return code
 //
 // !DESCRIPTION:
 //      Compares given {\tt Time}'s {\tt Calendar} type with this {\tt Time}'s
@@ -932,15 +932,21 @@
 //                          Visibility into ESMC_Fraction is lost; if not
 //                          defined here, the compiler won't see the 2nd (-)
 //                          operator defined at ESMC_Fraction!
-//
-// TODO: override the Fraction (-) method to first check if the two
-// times' calendars are the same before performing the difference.
-// The F90 interface will then call this overridden method, rather
-// than the ESMC_Fraction method.
 
+    // the calendars of the two times must be the same
+    int rc;
+    if (!ESMC_TimeIsSameCalendar(&time, &rc)) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
+        "; The calendars of the two times to difference are not the same", &rc);
+      return(rc);
+    }
+
+    // given times' calendars are the same, so set difference time interval's
+    //   calendar to be the same
     ESMC_TimeInterval diff;
+    diff.calendar = this->calendar;
 
-    // perform the decrement using the ESMC_Fraction operator
+    // perform the difference using the ESMC_Fraction operator
     diff = ESMC_Fraction::operator-(time);
 
     return(diff);
