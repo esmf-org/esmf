@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.79 2005/06/17 21:51:33 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.80 2006/08/11 22:16:43 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.79 2005/06/17 21:51:33 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.80 2006/08/11 22:16:43 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -740,8 +740,20 @@
         *d_i8 = days;  // >= 64-bit
       }
       if (d_r8 != ESMC_NULL_POINTER) {
+        if (tiToConvert.calendar->secondsPerDay == 0) {
+          char logMsg[ESMF_MAXSTR];
+          sprintf(logMsg, "; can't get d_r8; must specify a calendar or "
+             "calendarType which defines days (non-zero seconds per day), "
+             "e.g. ESMC_CAL_GREGORIAN, ESMC_CAL_JULIAN, ESMC_CAL_JULIANDAY, "
+             "ESMC_CAL_NOLEAP, ESMC_CAL_360DAY");
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_DIV_ZERO, logMsg, &rc);
+          return(rc);
+        }
+        // TODO: put floating point seconds calculation into Fraction class
         *d_r8 = (ESMF_KIND_R8) days +
-                ((ESMF_KIND_R8) tiToConvert.ESMC_FractionGetw() /
+                (((ESMF_KIND_R8) tiToConvert.ESMC_FractionGetw() + 
+                 (ESMF_KIND_R8) tiToConvert.ESMC_FractionGetn() /
+                 (ESMF_KIND_R8) tiToConvert.ESMC_FractionGetd()) /
                  (ESMF_KIND_R8) tiToConvert.calendar->secondsPerDay);
       }
     }
