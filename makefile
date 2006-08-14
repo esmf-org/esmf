@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.69.2.6 2006/08/03 21:07:37 theurich Exp $
+# $Id: makefile,v 1.69.2.7 2006/08/14 23:35:44 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -6,23 +6,18 @@
 # (ESMF) utilities.  
 #===============================================================================
 
-
-#
-# Build update 
-# Aug 19, 2003
-#
+#-------------------------------------------------------------------------------
+# The ESMF_DIR environment variable MUST be set by user!!!
+#-------------------------------------------------------------------------------
 
 ifndef ESMF_DIR
 $(error ESMF_DIR needs to be set to the top ESMF directory)
 endif
 
-# name of directory containing the ESMF source
-ESMF_TOP_DIR   = $(ESMF_DIR)
-
 # default target in common.mk is 'lib'
 
 # all common rules, definitions are here
-include $(ESMF_TOP_DIR)/build/common.mk
+include $(ESMF_DIR)/build/common.mk
 
 # things specific to framework build
 
@@ -60,15 +55,16 @@ script_info:
 	-@echo " "
 	-@echo "------------------------------------------"
 	-@echo "Using ESMF environment variables:"
-	-@echo "ESMF_DIR: $(ESMF_TOP_DIR)"
-	-@if [ "$(ESMF_BUILD)" != "$(ESMF_TOP_DIR)" ] ; then \
+	-@echo "ESMF_DIR: $(ESMF_DIR)"
+	-@if [ "$(ESMF_BUILD)" != "$(ESMF_DIR)" ] ; then \
 	  echo "ESMF_BUILD: $(ESMF_BUILD)" ; fi
-	-@echo "ESMF_ARCH: $(ESMF_ARCH)"
+	-@echo "ESMF_OS: $(ESMF_OS)"
+	-@echo "ESMF_MACHINE: $(ESMF_MACHINE)"
+	-@echo "ESMF_ABI: $(ESMF_ABI)"
 	-@echo "ESMF_COMPILER: $(ESMF_COMPILER)"
 	-@echo "ESMF_BOPT: $(ESMF_BOPT)"
 	-@if [ -n "$(ESMF_OPTLEVEL)" ] ; then \
 	  echo "ESMF_OPTLEVEL: $(ESMF_OPTLEVEL)" ; fi
-	-@echo "ESMF_PREC: $(ESMF_PREC)"
 	-@echo "ESMF_COMM: $(ESMF_COMM)"
 	-@echo "ESMF_SITE: $(ESMF_SITE)"
 	-@echo "ESMF_EXHAUSTIVE: $(ESMF_EXHAUSTIVE)"
@@ -139,7 +135,7 @@ info:   script_info
 	-@echo " "
 #
 #
-MINFO = $(ESMF_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/machineinfo.h
+MINFO = $(ESMF_DIR)/build_config/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_SITE)/machineinfo.h
 info_h:
 	-@$(RM) MINFO $(MINFO)
 	-@echo  "static char *machineinfo = \"  " >> MINFO
@@ -195,15 +191,16 @@ info_mk:
 	-@echo "#" >> $(MKINFO)
 	-@echo "# !!! The following options were used on this ESMF build !!!" >> $(MKINFO)
 	-@echo "#" >> $(MKINFO)
-	-@echo "# ESMF_DIR: $(ESMF_TOP_DIR)" >> $(MKINFO)
-	-@if [ "$(ESMF_BUILD)" != "$(ESMF_TOP_DIR)" ] ; then \
+	-@echo "# ESMF_DIR: $(ESMF_DIR)" >> $(MKINFO)
+	-@if [ "$(ESMF_BUILD)" != "$(ESMF_DIR)" ] ; then \
 	  echo "# ESMF_BUILD: $(ESMF_BUILD)" >> $(MKINFO) ; fi
-	-@echo "# ESMF_ARCH: $(ESMF_ARCH)" >> $(MKINFO)
+	-@echo "# ESMF_OS: $(ESMF_OS)" >> $(MKINFO)
+	-@echo "# ESMF_MACHINE: $(ESMF_MACHINE)" >> $(MKINFO)
+	-@echo "# ESMF_ABI: $(ESMF_ABI)" >> $(MKINFO)
 	-@echo "# ESMF_COMPILER: $(ESMF_COMPILER)" >> $(MKINFO)
 	-@echo "# ESMF_BOPT: $(ESMF_BOPT)" >> $(MKINFO)
 	-@if [ -n "$(ESMF_OPTLEVEL)" ] ; then \
 	  echo "# ESMF_OPTLEVEL: $(ESMF_OPTLEVEL)" >> $(MKINFO) ; fi
-	-@echo "# ESMF_PREC: $(ESMF_PREC)" >> $(MKINFO)
 	-@echo "# ESMF_COMM: $(ESMF_COMM)" >> $(MKINFO)
 	-@echo "# ESMF_SITE: $(ESMF_SITE)" >> $(MKINFO)
 	-@echo "# ESMF_EXHAUSTIVE: $(ESMF_EXHAUSTIVE)" >> $(MKINFO)
@@ -300,12 +297,12 @@ GNUmakefile:
 makefile:
 	@echo ;
 
-$(ESMF_TOP_DIR)/makefile:
+$(ESMF_DIR)/makefile:
 	@echo ;
 
-$(ESMF_TOP_DIR)/build/common.mk:
+$(ESMF_DIR)/build/common.mk:
 	@echo ;
 
-$(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk:
+$(ESMF_DIR)/build_config/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk:
 	@echo ;
 
