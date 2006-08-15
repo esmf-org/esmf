@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.14 2006/08/14 23:35:44 theurich Exp $
+#  $Id: common.mk,v 1.155.2.15 2006/08/15 04:04:13 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -285,14 +285,14 @@ export ESMF_BATCHDEPRECATED = false
 #AR		   = ar
 #AR_FLAGS	   = cr
 #AR_EXTRACT         = -x
-#R32_64            = $(AR)
+#AR32_64            = $(AR)
 #RM		   = rm -f
 #MV 		   = mv -f
 #RANLIB		   = ranlib
 #M4	           = m4
-#ED		   = sed 
+#SED		   = sed 
 #WC		   = wc 
-#REPV		   = grep -v
+#GREPV		   = grep -v
 
 #OMAKE		   = $(MAKE)
 #SHELL		   = /bin/sh
@@ -473,9 +473,15 @@ endif
 #-------------------------------------------------------------------------------
 ESMF_ARDEFAULT              = ar
 ESMF_ARCREATEFLAGSDEFAULT   = cr
+ESMF_AREXTRACTFLAGSDEFAULT  = -x
 ESMF_RANLIBDEFAULT          = ranlib
 ESMF_SEDDEFAULT             = sed
 ESMF_CPPDEFAULT             = gcc
+
+ESMF_RM                     = rm -f
+ESMF_MV                     = mv -f
+ESMF_WC                     = wc 
+ESMF_GREPV                  = grep -v
 
 ESMF_F90OPTFLAG_X           =
 ESMF_CXXOPTFLAG_X           =
@@ -606,6 +612,9 @@ ESMF_AR = $(ESMF_ARDEFAULT)
 endif
 ifneq ($(origin ESMF_ARCREATEFLAGS), environment)
 ESMF_ARCREATEFLAGS = $(ESMF_ARCREATEFLAGSDEFAULT)
+endif
+ifneq ($(origin ESMF_AREXTRACTFLAGS), environment)
+ESMF_AREXTRACTFLAGS = $(ESMF_AREXTRACTFLAGSDEFAULT)
 endif
 ifneq ($(origin ESMF_RANLIB), environment)
 ESMF_RANLIB = $(ESMF_RANLIBDEFAULT)
@@ -1209,7 +1218,7 @@ esmflib:: chkdir_lib $(SOURCE)
 	    $(MAKE) -f $(MAKEFILE)  libf; fi
 	@if [ "$(OBJS)" != "" -a "$(OBJS)" != " " ] ; then \
 		$(ESMF_RANLIB) $(LIBNAME); \
-		$(RM) $(OBJS); \
+		$(ESMF_RM) $(OBJS); \
 	fi
 	@if [ "$(QUICKSTART)" != "" ] ; then \
 	   $(MAKE) -f $(MAKEFILE) tree_build_quick_start; fi
@@ -1296,7 +1305,7 @@ clobber:
 	$(MAKE) clean 
 	@for DIR in $(CLOBBERDIRS) foo ; do \
 	   if [ $$DIR != "foo" ] ; then \
-	      $(RM) -r $$DIR ;\
+	      $(ESMF_RM) -r $$DIR ;\
 	   fi ;\
 	done
 
@@ -1305,10 +1314,10 @@ clobber:
 tree_clean:
 	@for DIR in $(CLEANDIRS) $(CLEAN_DEFDIRS) foo ; do \
 	   if [ $$DIR != "foo" ] ; then \
-	      $(RM) -r $$DIR ;\
+	      $(ESMF_RM) -r $$DIR ;\
 	   fi ;\
 	done
-	$(RM) $(CLEANFILES) $(CLEAN_DEFAULTS)
+	$(ESMF_RM) $(CLEANFILES) $(CLEAN_DEFAULTS)
 
 # target which does a light cleaning - remove files only under the src dir 
 #  (logfiles, doc files, test output files, files made by preprocessing, etc)
@@ -1532,10 +1541,10 @@ tree_build_system_tests: $(SYSTEM_TESTS_BUILD)
 #
 #$(ESMF_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
 #	$(FLINKER) $(LINKOPTS) -o $@ $(SYSTEM_TESTS_OBJ) $< $(FLINKLIBS)
-#	$(RM) -f *.o *.mod
+#	$(ESMF_RM) -f *.o *.mod
 $(ESMF_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(SYSTEM_TESTS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
-	$(RM) -f *.o *.mod
+	$(ESMF_RM) -f *.o *.mod
 
 
 # debugging aid:  link the executable, standard output, and log file to
@@ -1544,7 +1553,7 @@ $(ESMF_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
 # better if the current directory is the source dir, not the executable dir.)
 # example use:  gmake TNAME=FieldExcl system_test_links
 system_test_links:
-	$(RM) t s l
+	$(ESMF_RM) t s l
 	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)STest t
 	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)STest.stdout s
 	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)STest.Log l
@@ -1563,7 +1572,7 @@ $(ESMF_TESTDIR)/ESMF_%STestD : $(SYSTEM_TESTS_OBJ_D) $(ESMFLIB) ESMF_%STestD.o
 $(ESMF_TESTDIR)/ESMF_%STestE : $(SYSTEM_TESTS_OBJ_E) $(ESMFLIB) ESMF_%STestE.o 
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(SYSTEM_TESTS_OBJ_E) ESMF_$*STestE.o $(ESMF_F90ESMFLINKLIBS)
 MPMDCLEANUP:
-	$(RM) -f *.o *.mod
+	$(ESMF_RM) -f *.o *.mod
 
 #
 # run_system_tests
@@ -1627,7 +1636,7 @@ stest:
 # this target deletes only the system test related files from the test subdir
 #
 clean_system_tests:
-	$(RM) $(ESMF_TESTDIR)/*STest* 
+	$(ESMF_RM) $(ESMF_TESTDIR)/*STest* 
 
 #
 # report statistics on system tests
@@ -1727,10 +1736,10 @@ tree_build_use_test_cases: chkdir_tests $(USE_TEST_CASES_BUILD)
 #
 #$(ESMF_TESTDIR)/ESMF_%UseTestCase : ESMF_%UseTestCase.o $(USE_TEST_CASES_OBJ) $(ESMFLIB)
 #	$(FLINKER) $(LINKOPTS) -o $@ $(USE_TEST_CASES_OBJ) $< $(FLINKLIBS)
-#	$(RM) -f *.o *.mod
+#	$(ESMF_RM) -f *.o *.mod
 $(ESMF_TESTDIR)/ESMF_%UseTestCase : ESMF_%UseTestCase.o $(USE_TEST_CASES_OBJ) $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(USE_TEST_CASES_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
-	$(RM) -f *.o *.mod
+	$(ESMF_RM) -f *.o *.mod
 
 
 # debugging aid:  link the executable, standard output, and log file to
@@ -1739,7 +1748,7 @@ $(ESMF_TESTDIR)/ESMF_%UseTestCase : ESMF_%UseTestCase.o $(USE_TEST_CASES_OBJ) $(
 # better if the current directory is the source dir, not the executable dir.)
 # example use:  gmake TNAME=FieldExcl system_test_links
 use_test_cases_links:
-	$(RM) t s l
+	$(ESMF_RM) t s l
 	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase t
 	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase.stdout s
 	ln -s $(ESMF_TESTDIR)/ESMF_$(TNAME)UseTestCase.Log l
@@ -1822,7 +1831,7 @@ uctest:
 # this target deletes only the use test cases related files from the test subdir
 #
 clean_use_test_cases:
-	$(RM) $(ESMF_TESTDIR)/*UseTestCase* 
+	$(ESMF_RM) $(ESMF_TESTDIR)/*UseTestCase* 
 
 #
 # report statistics on system tests
@@ -1878,18 +1887,18 @@ tree_build_unit_tests: $(TESTS_BUILD)
 
 #$(ESMF_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o $(ESMFLIB)
 #	$(FLINKER) $(LINKOPTS) -o $@  $(UTEST_$(*)_OBJS) $< $(FLINKLIBS)
-#	$(RM) -f *.o *.mod
+#	$(ESMF_RM) -f *.o *.mod
 $(ESMF_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(UTEST_$(*)_OBJS) $< $(ESMF_F90ESMFLINKLIBS)
-	$(RM) -f *.o *.mod
+	$(ESMF_RM) -f *.o *.mod
 
 
 #$(ESMF_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)
 #	$(CLINKER) $(LINKOPTS) -o $@  $(UTEST_$(*)_OBJS) $< $(CLINKLIBS)
-#	$(RM) -f *.o *.mod
+#	$(ESMF_RM) -f *.o *.mod
 $(ESMF_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)
 	$(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) -o $@ $(UTEST_$(*)_OBJS) $< $(ESMF_CXXESMFLINKLIBS)
-	$(RM) -f *.o *.mod
+	$(ESMF_RM) -f *.o *.mod
 
 # debugging aid:  link the executable, standard output, and log file to
 # temporary names in the current directory (they are built in the test
@@ -1914,7 +1923,7 @@ run_unit_tests:  reqdir_tests verify_exhaustive_flag
 	fi 
 	@if [ -f $(TESTS_CONFIG) ] ; then \
 	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Multiprocessor/' $(TESTS_CONFIG) > $(TESTS_CONFIG).temp; \
-           $(MV) $(TESTS_CONFIG).temp $(TESTS_CONFIG); \
+           $(ESMF_MV) $(TESTS_CONFIG).temp $(TESTS_CONFIG); \
         fi
 	-$(MAKE) ACTION=tree_run_unit_tests tree
 	$(MAKE) check_unit_tests
@@ -1927,7 +1936,7 @@ tree_run_unit_tests: $(TESTS_RUN)
 run_unit_tests_uni:  reqdir_tests verify_exhaustive_flag
 	@if [ -f $(TESTS_CONFIG) ] ; then \
 	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(TESTS_CONFIG) > $(TESTS_CONFIG).temp; \
-           $(MV) $(TESTS_CONFIG).temp $(TESTS_CONFIG); \
+           $(ESMF_MV) $(TESTS_CONFIG).temp $(TESTS_CONFIG); \
         fi
 	-$(MAKE) ACTION=tree_run_unit_tests_uni tree 
 	$(MAKE) check_unit_tests
@@ -1974,7 +1983,7 @@ endif
 
 exhaustive_flag_check:
 	@if [ -s $(TESTS_CONFIG) -a \
-	     `$(ESMF_SED) -ne '/$(UNIT_TEST_STRING)/p' $(TESTS_CONFIG) | $(WC) -l` -ne 1 ] ; then \
+	     `$(ESMF_SED) -ne '/$(UNIT_TEST_STRING)/p' $(TESTS_CONFIG) | $(ESMC_WC) -l` -ne 1 ] ; then \
 	  echo "The ESMF_EXHAUSTIVE environment variable is a compile-time control for" ;\
           echo "whether a basic set or an exhaustive set of tests are built." ;\
 	  echo "" ;\
@@ -2001,7 +2010,7 @@ endif
 
 exhaustive_flag_clobber:
 	@if [ -s $(TESTS_CONFIG) -a \
-	     `$(ESMF_SED) -ne '/$(UNIT_TEST_STRING)/p' $(TESTS_CONFIG) | $(WC) -l` -ne 1 ] ; then \
+	     `$(ESMF_SED) -ne '/$(UNIT_TEST_STRING)/p' $(TESTS_CONFIG) | $(ESMF_WC) -l` -ne 1 ] ; then \
 	  $(MAKE) clean_unit_tests ;\
 	fi
 
@@ -2010,7 +2019,7 @@ exhaustive_flag_clobber:
 # so we can rebuild them with the proper flags if that is what is needed.
 #
 clean_unit_tests:
-	$(RM) $(ESMF_TESTDIR)/*UTest* $(TESTS_CONFIG)
+	$(ESMF_RM) $(ESMF_TESTDIR)/*UTest* $(TESTS_CONFIG)
 
 
 #
@@ -2035,7 +2044,7 @@ check_unit_tests:
 #
 ftest:
 	-@cd $(ESMF_TESTDIR) ; \
-	$(RM) ./PET*$(TNAME)UTest.Log ; \
+	$(ESMF_RM) ./PET*$(TNAME)UTest.Log ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest ; \
 	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest ; \
@@ -2044,11 +2053,11 @@ ftest:
 	  $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
 	fi ; \
 	cat ./PET*$(TNAME)UTest.Log > ./ESMF_$(TNAME)UTest.Log ; \
-	$(RM) ./PET*$(TNAME)UTest.Log
+	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
 
 ctest:
 	-@cd $(ESMF_TESTDIR) ; \
-	$(RM) ./PET*$(TNAME)UTest.Log ; \
+	$(ESMF_RM) ./PET*$(TNAME)UTest.Log ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
 	  echo $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest ; \
 	  $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest ; \
@@ -2057,7 +2066,7 @@ ctest:
 	  $(ESMF_MPIRUN) -np $(NP) ./ESMC_$(TNAME)UTest 1> ./ESMC_$(TNAME)UTest.stdout 2>&1 ; \
 	fi ; \
 	cat ./PET*$(TNAME)UTest.Log > ./ESMC_$(TNAME)UTest.Log ; \
-	$(RM) ./PET*$(TNAME)UTest.Log
+	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
 
 
 #-------------------------------------------------------------------------------
@@ -2140,18 +2149,18 @@ tree_build_examples: $(EXAMPLES_BUILD)
 #
 #$(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(ESMFLIB)
 #	$(FLINKER) $(LINKOPTS) -o $@ $(EXAMPLE_$(*)_OBJS) $< $(FLINKLIBS)
-#	$(RM) -f *.o *.mod
+#	$(ESMF_RM) -f *.o *.mod
 $(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(EXAMPLE_$(*)_OBJS) $< $(ESMF_F90ESMFLINKLIBS)
-	$(RM) -f *.o *.mod
+	$(ESMF_RM) -f *.o *.mod
 
 
 #$(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
 #	$(CLINKER) $(LINKOPTS) -o $@ $(EXAMPLE_$(*)_OBJS) $< $(CLINKLIBS)
-#	$(RM) $<
+#	$(ESMF_RM) $<
 $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
 	$(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) -o $@ $(EXAMPLE_$(*)_OBJS) $< $(ESMF_CXXESMFLINKLIBS)
-	$(RM) $<
+	$(ESMF_RM) $<
 
 #
 # run_examples
@@ -2203,7 +2212,7 @@ excrun:
 # this target deletes only the example related files from the example subdir
 #
 clean_examples:
-	$(RM) $(ESMF_EXDIR)/*
+	$(ESMF_RM) $(ESMF_EXDIR)/*
 
 #
 # report statistics on examples
@@ -2246,10 +2255,10 @@ tree_build_demos: $(DEMOS_BUILD)
 
 #$(ESMF_TESTDIR)/%App : %Demo.o $(DEMOS_OBJ) $(ESMFLIB)
 #	$(FLINKER) $(LINKOPTS) -o $@ $(DEMOS_OBJ) $< $(FLINKLIBS)
-#	$(RM) -f *.o *.mod
+#	$(ESMF_RM) -f *.o *.mod
 $(ESMF_TESTDIR)/%App : %Demo.o $(DEMOS_OBJ) $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(DEMOS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
-	$(RM) -f *.o *.mod
+	$(ESMF_RM) -f *.o *.mod
 
 
 #
@@ -2277,7 +2286,7 @@ tree_run_demos_uni: $(DEMOS_RUN_UNI)
 # this target deletes only the demos and output files created by the demos
 #
 clean_demos:
-	$(RM) $(ESMF_TESTDIR)/*App 
+	$(ESMF_RM) $(ESMF_TESTDIR)/*App 
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
 	$(MAKE) clean
 	
@@ -2547,7 +2556,7 @@ endif
 .F90.a:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREECPP) $(ESMF_F90COMPILECPPFLAGS) $<
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
-	$(RM) $*.o
+	$(ESMF_RM) $*.o
 
 #.F.a:
 #	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
@@ -2555,7 +2564,7 @@ endif
 .F.a:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREENOCPP) $<
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
-	$(RM) $*.o
+	$(ESMF_RM) $*.o
 
 #.f90.a:
 #	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) \
@@ -2563,28 +2572,28 @@ endif
 .f90.a:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFIXCPP) $(ESMF_F90COMPILECPPFLAGS) $<
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
-	$(RM) $*.o
+	$(ESMF_RM) $*.o
 
 #.f.a:
 #	$(FC) -c $(FC_MOD)$(ESMF_MODDIR) $(FOPTFLAGS) $(FFLAGS) $(F_FIXNOCPP) $<
 .f.a:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFIXNOCPP) $<
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
-	$(RM) $*.o
+	$(ESMF_RM) $*.o
 
 #.c.a:
 #	$(CC) -c $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS) $(ESMF_INCLUDE) $<
 .c.a:
 	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
-	$(RM) $*.o
+	$(ESMF_RM) $*.o
 
 #.C.a:
 #	$(CXX) -c $(COPTFLAGS) $(CFLAGS) $(CCPPFLAGS) $(ESMF_INCLUDE) $<
 .C.a:
 	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
-	$(RM) $*.o
+	$(ESMF_RM) $*.o
 
 # The rules below generate a valid Fortran file using gcc as a preprocessor.
 # The -P option prevents putting #line directives in the output, and
@@ -2627,18 +2636,18 @@ shared:
 	@if [ "$(ESMF_SL_LIBS_TO_MAKE)" != "" ] ; then \
 		echo making shared libraries in $(LDIR); \
 		cd $(LDIR) ; \
-		$(RM) -r tmp_* ; \
+		$(ESMF_RM) -r tmp_* ; \
 		for NEXTLIB in $(ESMF_SL_LIBS_TO_MAKE) foo ;\
 		do \
 		if [ -f $$NEXTLIB.a ] ; then \
-		    $(RM) $$NEXTLIB.$(ESMF_SL_SUFFIX) ; \
+		    $(ESMF_RM) $$NEXTLIB.$(ESMF_SL_SUFFIX) ; \
 		    echo Converting $$NEXTLIB.a to $$NEXTLIB.$(ESMF_SL_SUFFIX) ;\
 		    mkdir tmp_$$NEXTLIB ;\
 		    cd tmp_$$NEXTLIB  ;\
-	            $(ESMF_AR) $(AR_EXTRACT) ../$$NEXTLIB.a ;\
+	            $(ESMF_AR) $(ESMF_AREXTRACTFLAGS) ../$$NEXTLIB.a ;\
 		    $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(LDIR)/$$NEXTLIB.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) ;\
 		    cd .. ;\
-		    $(RM) -r tmp_$$NEXTLIB ;\
+		    $(ESMF_RM) -r tmp_$$NEXTLIB ;\
 		fi ;\
 		done ; \
 	fi \
@@ -2787,8 +2796,8 @@ $(ESMF_DOCDIR)/%_desdoc: %_desdoc.ctex $(DESDOC_DEP_FILES)
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
 	fi;
 	$(DO_L2H) $* des
-	$(RM) .latex2html-init
-	$(MV) -f $(@F) $(ESMF_DOCDIR)
+	$(ESMF_RM) .latex2html-init
+	$(ESMF_MV) -f $(@F) $(ESMF_DOCDIR)
 
 
 $(ESMF_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
@@ -2799,8 +2808,8 @@ $(ESMF_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
 	fi;
 	$(DO_L2H) $* ref
-	$(RM) .latex2html-init
-	$(MV) $(@F) $(ESMF_DOCDIR)
+	$(ESMF_RM) .latex2html-init
+	$(ESMF_MV) $(@F) $(ESMF_DOCDIR)
 
 $(ESMF_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 	@echo "========================================="
@@ -2810,14 +2819,14 @@ $(ESMF_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
 	fi;
 	$(DO_L2H) $* req
-	$(RM) .latex2html-init
-	$(MV) $(@F) $(ESMF_DOCDIR)
+	$(ESMF_RM) .latex2html-init
+	$(ESMF_MV) $(@F) $(ESMF_DOCDIR)
 
 #-------------------------------------------------------------------------------
 #  These rules are for compiling the test examples.
 #-------------------------------------------------------------------------------
 .cpp.rm .cc.rm .C.rm .F.rm .f.rm .c.rm:
-	-@$(RM) $* *.o $*.mon.* gmon.out mon.out
+	-@$(ESMF_RM) $* *.o $*.mon.* gmon.out mon.out
 
 
 #-------------------------------------------------------------------------------

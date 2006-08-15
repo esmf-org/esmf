@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.10.4.1 2006/08/15 04:04:13 theurich Exp $ 
+# $Id: makefile,v 1.3.4.1 2006/08/15 04:04:13 theurich Exp $ 
 
 # by default, this makefile builds the executable named "Application"
 ALL:  executable
 
-LOCDIR	  = src/Superstructure/AppDriver/seq_pairwise_fdriver_spmd
+LOCDIR	  = src/Superstructure/AppDriver/concur_pairwise_fdriver_spmd
 
 # this includes all the ESMF definitions that we use below.
 include $(ESMF_DIR)/makefile

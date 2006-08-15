@@ -1,6 +1,7 @@
-# $Id: makefile,v 1.16 2004/03/05 23:28:24 svasquez Exp $ 
+# $Id: makefile,v 1.38.2.1 2006/08/15 04:04:13 theurich Exp $ 
 
-ALL:  build_tests
+ALL:  build_unit_tests
+run:  run_unit_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -14,87 +15,113 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Superstructure/Component/tests
 
-TESTS_BUILD   =	$(ESMC_TESTDIR)/ESMF_CompCreate \
-		$(ESMC_TESTDIR)/ESMF_CompCreateUTest \
-		$(ESMC_TESTDIR)/ESMC_CompCreate \
-		$(ESMC_TESTDIR)/ESMF_CompRun \
-		$(ESMC_TESTDIR)/ESMC_CompRun 
+# TODO: these are very old tests which predate the current unit test
+#  conventions for file names and for using the test macros.
+#  when someone has the time, these files should be renamed
+#  to have UTest in the names, and should have the standard test macros
+#  handle the testing and results.  until then, i have removed them from
+#  the build list because the results are not tabulated and the files are
+#  simply left around and not cleaned out when unit tests are cleaned.
+#
+#TESTS_BUILD   =
+#		$(ESMF_TESTDIR)/ESMC_CompCreate \
+#		$(ESMF_TESTDIR)/ESMF_CompRun \
+#		$(ESMF_TESTDIR)/ESMC_CompRun \
+#TESTS_RUN     =
+#		RUN_ESMC_CompCreate \
+#		RUN_ESMF_CompRun \
+#		RUN_ESMC_CompRun
+#TESTS_RUN_UNI =
+#		RUN_ESMC_CompCreateUNI \
+#		RUN_ESMF_CompRunUNI \
+#		RUN_ESMC_CompRunUNI
+#
 
-TESTS_RUN     =	RUN_ESMF_CompCreate \
-		RUN_ESMF_CompCreateUTest \
-		RUN_ESMC_CompCreate \
-		RUN_ESMF_CompRun \
-		RUN_ESMC_CompRun 
+TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_ComponentUTest \
+		$(ESMF_TESTDIR)/ESMF_GridCompCreateUTest \
+		$(ESMF_TESTDIR)/ESMF_CompSetServUTest \
+		$(ESMF_TESTDIR)/ESMF_CplCompCreateUTest
 
-TESTS_RUN_UNI =	RUN_ESMF_CompCreateUNI \
-		RUN_ESMF_CompCreateUTestUNI \
-		RUN_ESMC_CompCreateUNI \
-		RUN_ESMF_CompRunUNI \
-		RUN_ESMC_CompRunUNI 
+TESTS_RUN     =	RUN_ESMF_ComponentUTest \
+		RUN_ESMF_GridCompCreateUTest \
+		RUN_ESMF_CompSetServUTest \
+		RUN_ESMF_CplCompCreateUTest
 
-TESTS_RM      =	ESMF_CompCreate.rm \
-		ESMF_CompCreateUTest.rm \
-		ESMC_CompCreate.rm \
-		ESMF_CompRun.rm \
-		ESMC_CompRun.rm 
+TESTS_RUN_UNI =	RUN_ESMF_ComponentUTestUNI \
+		RUN_ESMF_GridCompCreateUTestUNI \
+		RUN_ESMF_CompSetServUTestUNI \
+		RUN_ESMF_CplCompCreateUTestUNI
+
 
 include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   =
-CLEANFILES  = *.o *.mod 
+CLEANDIRS   = 
+CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
+
+# 
+ESMF_CompSetServUTest.o: ESMF_SetServCode.o
+
+UTEST_CompSetServ_OBJS = ESMF_SetServCode.o
+
 
 #
 # Components
 #
-$(ESMC_TESTDIR)/ESMF_CompCreate: ESMF_CompCreate.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_CompCreate ESMF_CompCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} -f ESMF_CompCreate.o
+RUN_ESMF_ComponentUTest:
+	cp -f grid.rc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=Component NP=4 ftest
 
-RUN_ESMF_CompCreate:
-	-@rm -f testlog stdlog.* logfile.* ESMF_CompCreate.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CompCreate > $(ESMC_TESTDIR)/ESMF_CompCreate.stdout
-
-RUN_ESMF_CompCreateUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_CompCreate.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CompCreate > $(ESMC_TESTDIR)/ESMF_CompCreate.stdout
-
-ESMF_CompCreate.rm:
-	echo "ESMF_CompCreate.rm target called here."
-
-$(ESMC_TESTDIR)/ESMF_CompCreateUTest: ESMF_CompCreateUTest.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_CompCreateUTest ESMF_CompCreateUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} -f ESMF_CompCreateUTest.o
-
-RUN_ESMF_CompCreateUTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_CompCreateUTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CompCreateUTest > $(ESMC_TESTDIR)/ESMF_CompCreateUTest.stdout
-
-RUN_ESMF_CompCreateUTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_CompCreateUTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CompCreateUTest > $(ESMC_TESTDIR)/ESMF_CompCreateUTest.stdout
-
-ESMF_CompCreateUTest.rm:
-	echo "ESMF_CompCreate.rm target called here."
+RUN_ESMF_ComponentUTestUNI:
+	cp -f grid.rc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=Component NP=1 ftest
 
 
+RUN_ESMF_GridCompCreateUTest:
+	cp -f grid.rc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=GridCompCreate NP=4 ftest
+
+RUN_ESMF_GridCompCreateUTestUNI:
+	cp -f grid.rc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=GridCompCreate NP=1 ftest
+
+
+RUN_ESMF_CplCompCreateUTest:
+	cp -f grid.rc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=CplCompCreate NP=4 ftest
+
+RUN_ESMF_CplCompCreateUTestUNI:
+	cp -f grid.rc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=CplCompCreate NP=1 ftest
+
+
+RUN_ESMF_CompSetServUTest:
+	cp -f grid.rc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=CompSetServ NP=4 ftest
+
+RUN_ESMF_CompSetServUTestUNI:
+	cp -f grid.rc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=CompSetServ NP=1 ftest
+
+#
+# older tests
+#
 
 $(ESMC_TESTDIR)/ESMC_CompCreate: ESMC_CompCreate.o
-	-$(SL_C_LINKER) -o $(ESMC_TESTDIR)/ESMC_CompCreate ESMC_CompCreate.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} -f ESMC_CompCreate.o
+	-$(CLINKER) $(LINKOPTS) -o $(ESMC_TESTDIR)/ESMC_CompCreate \
+         ESMC_CompCreate.o $(CLINKLIBS)
+	${ESMF_RM} -f ESMC_CompCreate.o
 
 RUN_ESMC_CompCreate:
-	-@rm -f testlog stdlog.* logfile.* ESMC_CompCreate.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_CompCreate > $(ESMC_TESTDIR)/ESMC_CompCreate.stdout
+	cp -f grid.rc $(ESMF_TESTDIR)
+	-${ESMF_MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_CompCreate > $(ESMC_TESTDIR)/ESMC_CompCreate.stdout
 
 RUN_ESMC_CompCreateUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMC_CompCreate.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_CompCreate > $(ESMC_TESTDIR)/ESMC_CompCreate.stdout
+	cp -f grid.rc $(ESMF_TESTDIR)
+	-${ESMF_MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_CompCreate > $(ESMC_TESTDIR)/ESMC_CompCreate.stdout
 
-ESMC_CompCreate.rm:
-	echo "ESMC_CompCreate.rm target called here."
 
 #
 #
@@ -102,21 +129,18 @@ ESMC_CompCreate.rm:
 ESMF_UserRun.o: ESMF_UserGComp.o 
 
 $(ESMC_TESTDIR)/ESMF_CompRun: ESMF_UserGComp.o ESMF_CompRun.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_CompRun ESMF_CompRun.o \
-         ESMF_UserGComp.o -lesmf ${F90CXXLIBS} ${MPI_LIB} \
-         ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} -f ESMF_CompRun.o
+	-$(FLINKER) $(LINKOPTS) -o $(ESMC_TESTDIR)/ESMF_CompRun ESMF_CompRun.o \
+         ESMF_UserGComp.o $(FLINKLIBS)
+	${ESMF_RM} -f ESMF_CompRun.o
 
 RUN_ESMF_CompRun:
-	-@rm -f testlog stdlog.* logfile.* ESMF_CompRun.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CompRun > $(ESMC_TESTDIR)/ESMF_CompRun.stdout
+	cp -f grid.rc $(ESMF_TESTDIR)
+	-${ESMF_MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CompRun > $(ESMC_TESTDIR)/ESMF_CompRun.stdout
 
 RUN_ESMF_CompRunUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_CompRun.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CompRun > $(ESMC_TESTDIR)/ESMF_CompRun.stdout
+	cp -f grid.rc $(ESMF_TESTDIR)
+	-${ESMF_MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CompRun > $(ESMC_TESTDIR)/ESMF_CompRun.stdout
 
-ESMF_CompRun.rm:
-	echo "ESMF_CompRun.rm target called here."
 
 
 #
@@ -126,19 +150,16 @@ ESMC_UserRun.o: ESMF_UserGComp.o ESMF_UserCComp.o ESMF_UserGComp_F.o
 ESMF_UserGComp_F.o : ESMF_UserGComp.o
 
 $(ESMC_TESTDIR)/ESMC_CompRun: ESMF_UserGComp.o ESMF_UserGComp_F.o ESMC_CompRun.o
-	-$(SL_C_LINKER) -o $(ESMC_TESTDIR)/ESMC_CompRun ESMC_CompRun.o \
-         ESMF_UserGComp.o ESMF_UserGComp_F.o -lesmf ${F90CXXLIBS} ${MPI_LIB} \
-         ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} -f ESMC_CompRun.o ESMF_UserGComp_F.o ESMF_UserGComp.o
+	-$(CLINKER) $(LINKOPTS) -o $(ESMC_TESTDIR)/ESMC_CompRun \
+         ESMC_CompRun.o ESMF_UserGComp.o ESMF_UserGComp_F.o $(CLINKLIBS)
+	${ESMF_RM} -f ESMC_CompRun.o ESMF_UserGComp_F.o ESMF_UserGComp.o
 
 RUN_ESMC_CompRun:
-	-@rm -f testlog stdlog.* logfile.* ESMC_CompRun.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_CompRun > $(ESMC_TESTDIR)/ESMC_CompRun.stdout
+	cp -f grid.rc $(ESMF_TESTDIR)
+	-${ESMF_MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_CompRun > $(ESMC_TESTDIR)/ESMC_CompRun.stdout
 
 RUN_ESMC_CompRunUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMC_CompRun.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_CompRun > $(ESMC_TESTDIR)/ESMC_CompRun.stdout
+	cp -f grid.rc $(ESMF_TESTDIR)
+	-${ESMF_MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_CompRun > $(ESMC_TESTDIR)/ESMC_CompRun.stdout
 
-ESMC_CompRun.rm:
-	echo "ESMC_CompRun.rm target called here."
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.69.2.7 2006/08/14 23:35:44 theurich Exp $
+# $Id: makefile,v 1.69.2.8 2006/08/15 04:04:13 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -137,18 +137,18 @@ info:   script_info
 #
 MINFO = $(ESMF_DIR)/build_config/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_SITE)/machineinfo.h
 info_h:
-	-@$(RM) MINFO $(MINFO)
+	-@$(ESMF_RM) MINFO $(MINFO)
 	-@echo  "static char *machineinfo = \"  " >> MINFO
 	-@$(MAKE) -s info >> MINFO 2>&1  
 	-@cat MINFO | $(ESMF_SED) -e 's/$$/  \\n\\/' > $(MINFO)
 	-@echo  " \"; " >> $(MINFO)
-	-@$(RM) MINFO
+	-@$(ESMF_RM) MINFO
 
 #
 #
 MKINFO = $(ESMF_LIBDIR)/esmf.mk
 info_mk:
-	-@$(RM) $(MKINFO)
+	-@$(ESMF_RM) $(MKINFO)
 	-@echo "# ESMF application makefile fragment" > $(MKINFO)
 	-@echo "#" >> $(MKINFO)
 	-@echo "# Use the following ESMF_ variables to compile and link" >> $(MKINFO)
@@ -230,11 +230,11 @@ info_mk:
 
 # Ranlib on the libraries
 ranlib:
-	$(RANLIB) $(ESMF_LIBDIR)/*.a
+	$(ESMF_RANLIB) $(ESMF_LIBDIR)/*.a
 
 # Deletes ESMF libraries
 deletelibs: chkopts_basic
-	-$(RM) $(ESMF_LIBDIR)/*
+	-$(ESMF_RM) $(ESMF_LIBDIR)/*
 
 # ESMF_COUPLED_FLOW/demo target.
 ESMF_COUPLED_FLOW: chkopts build_libs chkdir_tests
