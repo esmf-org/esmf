@@ -1,0 +1,7 @@
+#!/bin/sh
+# this script returns the correct value for environment variable ESMF_OS
+esmf_os=`uname -s`
+if [ $esmf_os = UNICOS/mp ]; then
+esmf_os=Unicos
+fi
+echo $esmf_os
