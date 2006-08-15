@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.3 2004/02/25 02:58:31 eschwab Exp $"
+"$Id: ESMC_Conf.h,v 1.7.2.1 2006/08/15 00:09:32 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -35,7 +35,6 @@ Licensed under the GPL.
 #define FTN(func) func##_
 
 
-#define ESMC_POINTER_SIZE 4
 #define ESMC_HAVE_OMP_THREADS 1
 
 #define ESMC_HAVE_MPI 1
@@ -58,19 +57,25 @@ Licensed under the GPL.
 
 #define ESMC_HAVE_SYS_UTSNAME_H
 
-#define ESMF_NO_INITIALIZERS 1
-
 #define ESMC_PRESENT(arg) ( (arg) != 0 )
 
 #if S32
 #define ESMF_IS_32BIT_MACHINE 1
-#define ESMF_F90_PTR_BASE_SIZE 44 
+#define ESMF_F90_PTR_BASE_SIZE 36 
 #define ESMF_F90_PTR_PLUS_RANK 12
+#define ESMC_POINTER_SIZE 4
 #endif
-#if S64
+#if S32_ia64
+#define ESMF_IS_32BIT_MACHINE 1
+#define ESMF_F90_PTR_BASE_SIZE 36
+#define ESMF_F90_PTR_PLUS_RANK 12
+#define ESMC_POINTER_SIZE 4
+#endif
+#if S64_ia64
 #define ESMF_IS_64BIT_MACHINE 1
-#define ESMF_F90_PTR_BASE_SIZE 88 
+#define ESMF_F90_PTR_BASE_SIZE 72 
 #define ESMF_F90_PTR_PLUS_RANK 24
+#define ESMC_POINTER_SIZE 8
 #endif
 
 #endif
