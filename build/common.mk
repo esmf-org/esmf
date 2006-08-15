@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.15 2006/08/15 04:04:13 theurich Exp $
+#  $Id: common.mk,v 1.155.2.16 2006/08/15 04:27:29 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -640,8 +640,8 @@ endif
 #-------------------------------------------------------------------------------
 # Set aux. variables of how to obtain version string from F90 and C++ compilers
 #-------------------------------------------------------------------------------
-C_CXXV		   = ${ESMF_CXXCOMPILER} $(ESMF_CXXVOPT)
-C_FCV              = ${ESMF_F90COMPILER} $(ESMF_F90VOPT)
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} $(ESMF_CXXVOPT)
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} $(ESMF_F90VOPT)
 
 
 
