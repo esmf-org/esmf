@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.69.2.9 2006/08/15 04:27:29 theurich Exp $
+# $Id: makefile,v 1.69.2.10 2006/08/15 19:05:33 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -9,18 +9,21 @@
 #-------------------------------------------------------------------------------
 # The ESMF_DIR environment variable MUST be set by user!!!
 #-------------------------------------------------------------------------------
-
 ifndef ESMF_DIR
 $(error ESMF_DIR needs to be set to the top ESMF directory)
 endif
+#-------------------------------------------------------------------------------
 
-# default target in common.mk is 'lib'
-
-# all common rules, definitions are here
+#-------------------------------------------------------------------------------
+# all common rules, definitions are in common.mk
+#-------------------------------------------------------------------------------
 include $(ESMF_DIR)/build/common.mk
+# default target inherited from common.mk is 'lib'
+#-------------------------------------------------------------------------------
 
+#-------------------------------------------------------------------------------
 # things specific to framework build
-
+#-------------------------------------------------------------------------------
 DIRS = src
 
 CLEANDIRS = $(ESMF_LIBDIR) $(ESMF_MODDIR) $(ESMF_TESTDIR) $(ESMF_EXDIR) \
@@ -29,7 +32,7 @@ CLOBBERDIRS = $(ESMF_BUILD)/lib $(ESMF_BUILD)/mod \
 	      $(ESMF_BUILD)/test $(ESMF_BUILD)/quick_start \
               $(ESMF_BUILD)/release $(ESMF_BUILD)/examples \
               $(ESMF_BUILD)/doc
-
+#-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
 # Basic targets to build ESMF libraries.
@@ -47,14 +50,14 @@ all:  lib build_unit_tests build_examples build_system_tests build_demos
 script_info:
 	-@echo " "
 	-@echo "------------------------------------------"
-	-@echo "Version information: "
-	-@echo "C++ Compiler version:" ; $(ESMF_CXXCOMPILER_VERSION) ; echo "" 
-	-@echo " "
-	-@echo "Fortran Compiler version:" ; $(ESMF_F90COMPILER_VERSION) ; echo "" 
+	-@echo "C++ Compiler version:"; $(ESMF_CXXCOMPILER_VERSION); echo "" 
+	-@echo "------------------------------------------"
+	-@echo "Fortran Compiler version:"; $(ESMF_F90COMPILER_VERSION); echo ""
+	-@echo "------------------------------------------"
 	-@if [ -f $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h ] ; then \
 	  fgrep ESMF_VERSION_STRING $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) "s/^#define //" ; fi
-	-@echo " "
 	-@echo "------------------------------------------"
+	-@echo " "
 	-@echo "Using ESMF environment variables:"
 	-@echo "ESMF_DIR: $(ESMF_DIR)"
 	-@if [ "$(ESMF_BUILD)" != "$(ESMF_DIR)" ] ; then \
