@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.16 2006/08/15 04:27:29 theurich Exp $
+#  $Id: common.mk,v 1.155.2.17 2006/08/15 18:47:13 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -160,8 +160,7 @@ export ESMF_BUILD := $(ESMF_DIR)
 endif
 
 ifeq ($(ESMF_OS),default)
-# ESMF_OS cannot contain "/" characters
-export ESMF_OS := $(shell uname -s | awk 'BEGIN { FS="/"}; {print $1}')
+export ESMF_OS := $(shell $(ESMF_DIR)/scripts/esmf_os)
 endif
 
 ifeq ($(ESMF_OS),Linux)
