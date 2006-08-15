@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.24.2.2 2006/07/28 18:45:50 theurich Exp $
+#  $Id: build_rules.mk,v 1.24.2.3 2006/08/15 17:23:46 theurich Exp $
 #
 #  AIX.default.default
 #
@@ -33,7 +33,7 @@ ESMF_F90DEFAULT         = mpxlf90_r
 ESMF_F90LINKLIBS       += -lmpi_r
 ESMF_CXXDEFAULT         = mpCC_r
 ESMF_CXXLINKLIBS       += -lmpi_r
-ESMF_MPIRUNDEFAULT      = ${ESMF_TOP_DIR}/scripts/mpirun.rs6000_sp
+ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.rs6000_sp
 ifeq ($(ESMF_BATCH),lsf.ibmpjl)
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
 endif
