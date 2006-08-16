@@ -1,8 +1,7 @@
+Settings for Linux, using the commercial NAGware Fortran compiler and the
+GCC C++ compiler.
 
- This is where build-dependent information can be placed about
-this particular platform and compiler combination.
+Requires the following environment settings:
 
- This version has been tested on the Jazz linux cluster at argonne.
-
-
+ESMF_COMPILER nag
 

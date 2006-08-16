@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.48.2.5 2006/07/20 23:24:05 theurich Exp $
+# $Id: build_rules.mk,v 1.48.2.6 2006/08/16 20:09:12 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -102,7 +102,7 @@ endif
 ############################################################
 # On IA64 set long and pointer types to 64-bit
 #
-ifeq ($(ESMF_PREC),64)
+ifeq ($(ESMF_ABI),64)
 ESMF_CXXCOMPILEOPTS       += -size_lp64
 ESMF_CXXLINKOPTS          += -size_lp64
 ESMF_F90COMPILEOPTS       += -size_lp64

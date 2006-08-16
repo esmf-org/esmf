@@ -1,11 +1,11 @@
-#  $Id: build_rules.mk,v 1.5.4.1 2006/08/15 17:23:46 theurich Exp $
+#  $Id: build_rules.mk,v 1.5.4.2 2006/08/16 20:09:13 theurich Exp $
 #
 #  Linux.xlf.default - which currently means Blue Gene L
 #   which is the only semi-Linux platform which runs xlf.
 #
 
 # Blue Gene L is only 32:
-ESMF_PREC=32
+ESMF_ABI=32
 
 #
 # Default MPI setting.

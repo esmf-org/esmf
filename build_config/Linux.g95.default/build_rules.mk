@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5.2.3 2006/07/19 18:08:11 theurich Exp $
+# $Id: build_rules.mk,v 1.5.2.4 2006/08/16 20:09:12 theurich Exp $
 #
 #  Linux.g95.default
 #
@@ -94,7 +94,7 @@ ESMF_F90LINKOPTS          += -fno-second-underscore
 ############################################################
 # On IA64 set long and pointer types to 64-bit
 #
-ifeq ($(ESMF_PREC),64)
+ifeq ($(ESMF_ABI),64)
 ESMF_CXXCOMPILEOPTS       += -march=k8 -m64 -mcmodel=medium
 ESMF_CXXLINKOPTS          += -march=k8 -m64 -mcmodel=medium
 ESMF_F90COMPILEOPTS       += -march=k8 -m64 -mcmodel=medium

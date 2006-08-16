@@ -1,4 +1,4 @@
-#  $Id: link_rules,v 1.1 2003/11/10 22:38:46 svasquez Exp $
+#  $Id: link_rules,v 1.1.8.1 2006/08/16 20:09:13 theurich Exp $
 #
 #  link_rules
 #
@@ -9,9 +9,9 @@ called "myModel".
 
 It is assumed that the ESMF libraries have been built successfully at ESMF_DIR 
 with the following environment variables:
-ESMF_ARCH = Linux
+ESMF_OS = Linux
 ESMF_COMPILER = intel
-ESMF_PREC = 64 or 32
+ESMF_ABI = 64 or 32
 ESMF_SITE = default
 ESMF_COMM = lam or mpich
 ESMF_BOPT = g or O

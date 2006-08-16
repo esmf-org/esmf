@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.5.4.1 2006/07/31 22:32:40 theurich Exp $
+#  $Id: build_rules.mk,v 1.5.4.2 2006/08/16 20:09:13 theurich Exp $
 #
 #  Linux.pathscale.default makefile
 #
@@ -94,19 +94,13 @@ endif
 ############################################################
 # Chose ABI flags
 #
-ifeq ($(ESMF_PREC),32)
+ifeq ($(ESMF_ABI),32)
 ESMF_CXXCOMPILEOPTS       += -m32
 ESMF_CXXLINKOPTS          += -m64
 ESMF_F90COMPILEOPTS       += -m64
 ESMF_F90LINKOPTS          += -m64
 endif
-ifeq ($(ESMF_PREC),64)
-ESMF_CXXCOMPILEOPTS       += -m64
-ESMF_CXXLINKOPTS          += -m64
-ESMF_F90COMPILEOPTS       += -m64
-ESMF_F90LINKOPTS          += -m64
-endif
-ifeq ($(ESMF_PREC),64x86)
+ifeq ($(ESMF_ABI),64)
 ESMF_CXXCOMPILEOPTS       += -m64
 ESMF_CXXLINKOPTS          += -m64
 ESMF_F90COMPILEOPTS       += -m64

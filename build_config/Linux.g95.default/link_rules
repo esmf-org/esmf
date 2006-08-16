@@ -1,4 +1,4 @@
-#  $Id: link_rules,v 1.1.8.1 2006/08/16 20:09:13 theurich Exp $
+#  $Id: link_rules,v 1.1.4.1 2006/08/16 20:09:12 theurich Exp $
 #
 #  link_rules
 #
@@ -10,7 +10,7 @@ called "myModel".
 It is assumed that the ESMF libraries have been built successfully at ESMF_DIR 
 with the following environment variables:
 ESMF_OS = Linux
-ESMF_COMPILER = lahey
+ESMF_COMPILER = gnu
 ESMF_ABI = 32
 ESMF_SITE = default
 ESMF_COMM = mpiuni
@@ -18,13 +18,15 @@ ESMF_BOPT = g or O
 
 To simplify the link rules, first define MODDIR and LIBDIR.
 
-MODDIR = ${ESMF_DIR}/mod/mod${ESMF_BOPT}/Linux.lahey.32.default
-LIBDIR = ${ESMF_DIR}/lib/lib${ESMF_BOPT}/Linux.lahey.32.default
+MODDIR = ${ESMF_DIR}/mod/mod${ESMF_BOPT}/Linux.gnu.32.default
+LIBDIR = ${ESMF_DIR}/lib/lib${ESMF_BOPT}/Linux.gnu.32.default
 
-Also define:
-LD_LIBRARY_PATH=/usr/local/lf9560/lib:$LIBDIR
+Also define: (Probably not needed; g95 should find it!)
+LD_LIBRARY_PATH=/local/g95/linux86/lib
 
 The link rules are:
 
-lf95 -I${MODDIR} -o myModel myModel.F  -L${LIBDIR} -lesmf -lmpiuni
+g95 -I${MODDIR} -o myModel myModel.F -L${LIBDIR} \
+  -lesmf -lmpiuni -lpthread -lnetcdf_stubs  -lrt -lc -lstdc++
+
 

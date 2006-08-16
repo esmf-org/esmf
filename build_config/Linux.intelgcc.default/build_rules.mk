@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1.2.6 2006/07/20 23:24:05 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.7 2006/08/16 20:09:13 theurich Exp $
 #
 # Linux.intelgcc.default
 #
@@ -102,7 +102,7 @@ endif
 ############################################################
 # On IA64 set long and pointer types to 64-bit
 #
-ifeq ($(ESMF_PREC),64)
+ifeq ($(ESMF_ABI),64)
 ESMF_F90COMPILEOPTS       += -size_lp64
 ESMF_F90LINKOPTS          += -size_lp64
 endif
@@ -151,7 +151,7 @@ ESMF_F90LINKLIBS += -limf -lm -lcxa -lunwind -lrt -ldl
 # Link against libesmf.a using the C++ linker front-end
 #
 ESMF_CXXLINKLIBS += -lifcoremt -lunwind -lrt -ldl
-ifeq ($(ESMF_PREC),64)
+ifeq ($(ESMF_ABI),64)
 ESMF_CXXLINKLIBS += -lipr
 endif
 

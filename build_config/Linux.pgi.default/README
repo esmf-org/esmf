@@ -1,5 +1,4 @@
-Settings for Linux, using the commercial Portland Group PGI Fortran
-and C++ compilers.
+Settings for Linux, using the commercial Portland Group PGI Fortran and C++ compilers.
 
 Requires the following environment settings:
 

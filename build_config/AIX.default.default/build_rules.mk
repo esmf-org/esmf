@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.24.2.3 2006/08/15 17:23:46 theurich Exp $
+#  $Id: build_rules.mk,v 1.24.2.4 2006/08/16 20:09:11 theurich Exp $
 #
 #  AIX.default.default
 #
@@ -71,15 +71,15 @@ endif
 # BLAS_LIB         = -latlas -lscs
 
 ############################################################
-# On 32- vs. 64-bit
+# 32- vs. 64-bit ABI
 #
-ifeq ($(ESMF_PREC),32)
+ifeq ($(ESMF_ABI),32)
 ESMF_CXXCOMPILEOPTS       +=
 ESMF_CXXLINKOPTS          +=
 ESMF_F90COMPILEOPTS       +=
 ESMF_F90LINKOPTS          +=
 endif
-ifeq ($(ESMF_PREC),64)
+ifeq ($(ESMF_ABI),64)
 ESMF_CXXCOMPILEOPTS       += -q64
 ESMF_CXXLINKOPTS          += -q64
 ESMF_F90COMPILEOPTS       += -q64
@@ -133,6 +133,6 @@ ESMF_CXXLINKLIBS += -lm_r -lxlf90_r -lC_r
 # Shared library options
 #
 ESMF_SL_LIBOPTS  += -G -qmkshrobj
-ifeq ($(ESMF_PREC),64)
+ifeq ($(ESMF_ABI),64)
 ESMF_SL_LIBOPTS  += -q64
 endif

@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.26.2.2 2006/07/20 22:20:46 theurich Exp $
+# $Id: build_rules.mk,v 1.26.2.3 2006/08/16 20:09:12 theurich Exp $
 # 
 # IRIX64.default.default
 #
@@ -60,15 +60,15 @@ endif
 # BLAS_LIB         = -latlas -lscs
 
 ############################################################
-# 32- vs. 64-bit
+# 32- vs. 64-bit ABI
 #
-ifeq ($(ESMF_PREC),32)
+ifeq ($(ESMF_ABI),32)
 ESMF_CXXCOMPILEOPTS       += -n32
 ESMF_CXXLINKOPTS          += -n32
 ESMF_F90COMPILEOPTS       += -n32
 ESMF_F90LINKOPTS          += -n32
 endif
-ifeq ($(ESMF_PREC),64)
+ifeq ($(ESMF_ABI),64)
 ESMF_CXXCOMPILEOPTS       += -64
 ESMF_CXXLINKOPTS          += -64
 ESMF_F90COMPILEOPTS       += -64
