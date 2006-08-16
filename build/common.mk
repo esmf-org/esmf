@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.17 2006/08/15 18:47:13 theurich Exp $
+#  $Id: common.mk,v 1.155.2.18 2006/08/16 17:26:59 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -37,7 +37,7 @@ $(error Deprecated environment variable ESMF_TOP_DIR detected. Please see README
 endif
 
 ifeq ($(origin MPI_HOME), environment)
-$(error Deprecated environment variable MPI_HOME detected. Please see README.)
+$(warning Deprecated environment variable MPI_HOME detected. Please see README.)
 endif
 
 ifeq ($(origin ESMF_NODES), environment)
