@@ -153,7 +153,8 @@ compiler executables! ESMF_COMPILER (together with ESMC_COMM) does affect the
 name that is expected for the compiler executables. However, the user's PATH
 environment variable must be set correctly to located the desired executable
 on the system. (There are advanced ESMF environment variables that can be used
-to select specific compiler executables. Please see the User's Guide for details.) Main purpose of the ESMF_COMPILER setting is to help the ESMF build
+to select specific compiler executables. Please see the User's Guide for 
+details.) Main purpose of the ESMF_COMPILER setting is to help the ESMF build
 system to pick matching compiler flags.
 
 To see possible values for ESMF_COMPILER, cd to $ESMF_DIR/build_config and list
@@ -167,7 +168,9 @@ compiler is used in combination with GCC's g++ compiler.
 
 ESMF_ABI
 
-If this system supports 32-bit and 64-bit (pointer wordsize) application binary interfaces (ABIs), this variable can be set to select which ABI to use. Valid values are '32' or '64'. By default the most common ABI is chosen.
+If a system supports 32-bit and 64-bit (pointer wordsize) application binary
+interfaces (ABIs), this variable can be set to select which ABI to use. Valid 
+values are '32' or '64'. By default the most common ABI is chosen.
 
 
 Supported Makefile Targets
@@ -266,7 +269,7 @@ Overview
 
 If the build_config directory does not already contain a directory for your
 platform/compiler, or if your platform/compiler is already supported but you
-need to make some adaptions for your local system, this section should help
+need to make some adaptations for your local system, this section should help
 you get started.
 
 The top level makefile is $ESMF_DIR/makefile. It should not need to be
@@ -389,8 +392,9 @@ AIX systems - Those using LoadLeveler will generally need to set the
 MP_RMPOOL environment variable, and generally 1 will be a good value.
 See your own system admins for more help on this if 1 doesn't work.
 On those IBM systems running LSF instead of POE set ESMF_BATCH to 'lsf.ibmpjl'
-before running any of the test targets; this will select the proper run script for the test and example programs. Also set ESMF_BATCHOPTIONS to any flags
-your LSF system requires, such as -q<queue>, -W<time> .
+before running any of the test targets; this will select the proper run
+script for the test and example programs. Also set ESMF_BATCHOPTIONS to any 
+flags your LSF system requires, such as -q<queue>, -W<time> .
 
 On OSF1 (HP/Compaq) systems running LSF set ESMF_BATCHOPTIONS to any flags
 your LSF system requires, such as -q<queue>, -P<project> .
@@ -425,4 +429,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.69.2.3 2006/08/15 21:40:05 theurich Exp $
+ $Id: README,v 1.69.2.4 2006/08/16 22:38:00 theurich Exp $
