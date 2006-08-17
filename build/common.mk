@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.18 2006/08/16 17:26:59 theurich Exp $
+#  $Id: common.mk,v 1.155.2.19 2006/08/17 23:46:28 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1982,7 +1982,7 @@ endif
 
 exhaustive_flag_check:
 	@if [ -s $(TESTS_CONFIG) -a \
-	     `$(ESMF_SED) -ne '/$(UNIT_TEST_STRING)/p' $(TESTS_CONFIG) | $(ESMC_WC) -l` -ne 1 ] ; then \
+	     `$(ESMF_SED) -ne '/$(UNIT_TEST_STRING)/p' $(TESTS_CONFIG) | $(ESMF_WC) -l` -ne 1 ] ; then \
 	  echo "The ESMF_EXHAUSTIVE environment variable is a compile-time control for" ;\
           echo "whether a basic set or an exhaustive set of tests are built." ;\
 	  echo "" ;\
