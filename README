@@ -89,6 +89,8 @@ Steps of the build procedure:
     d) 'gmake examples' to build and run the examples
     e) 'gmake demos' to build and run the demos
     f) 'gmake all_tests' to build and run all available tests and demos
+    Please consult the "Platform Specific Notes Related to Executing Test 
+    Targets" below before attempting to use any of these targets.
 
 ================================================================================
 
@@ -145,17 +147,28 @@ library set ESMF_COMM equal to "mpiuni".
 
 ESMF_COMPILER
 
-On platforms that don't come with a single vendor supplied compiler suite
+The ESMF library build requires a working Fortran90 and C++ compiler. On 
+platforms that don't come with a single vendor supplied compiler suite
 (e.g. Linux or Darwin) ESMF_COMPILER must be set to select which Fortran and
-C++ compiler is being used to build the ESMF library. Notice that setting the
-ESMF_COMPILER variables does _not_ change the PATH that is used to locate the
-compiler executables! ESMF_COMPILER (together with ESMC_COMM) does affect the
-name that is expected for the compiler executables. However, the user's PATH
-environment variable must be set correctly to located the desired executable
-on the system. (There are advanced ESMF environment variables that can be used
-to select specific compiler executables. Please see the User's Guide for 
-details.) Main purpose of the ESMF_COMPILER setting is to help the ESMF build
-system to pick matching compiler flags.
+C++ compilers are being used to build the ESMF library. Notice that setting the
+ESMF_COMPILER variable does _not_ affect how the compiler executables are
+located on the system. ESMF_COMPILER (together with ESMC_COMM) affect the
+name that is expected for the compiler executables. Furthermore, the 
+ESMF_COMPILER setting is used to select compiler and linker flags consistent
+with the compilers indicated.
+
+By default Fortran and C++ compiler executables are expected to be located in
+a location contained in the user's PATH environment variable. This means that
+if you cannot locate the correct compiler executable via the "which" command
+on the shell prompt the ESMF build system won't find it either!
+
+There are advanced ESMF environment variables that can be used to select 
+specific compiler executables by specifying the full path. This can be used to
+pick specific compiler executables without having to modify the PATH environment
+variable. Please see the User's Guide for details.
+
+Use 'gmake info' to see which compiler executables the ESMF build system will
+be using according to your environment variable settings.
 
 To see possible values for ESMF_COMPILER, cd to $ESMF_DIR/build_config and list
 the directories there. The first part of each directory name corresponds to the
@@ -164,7 +177,10 @@ for ESMF_COMPILER. In some cases multiple combinations of Fortran and C++
 compilers are possible, e.g. there is "intel" and "intelgcc" available for
 Linux. Setting ESMF_COMPILER to "intel" indicates that both Intel Fortran and
 C++ compilers are used, whereas "intelgcc" indicates that the Intel Fortran
-compiler is used in combination with GCC's g++ compiler.
+compiler is used in combination with GCC's C++ compiler.
+
+If you do not find a configuration that matches your situation you will need to
+port ESMF. Please see the "PORTING" section below for help.
 
 ESMF_ABI
 
@@ -221,41 +237,84 @@ Note:
  'uninstall' target.  They will be added in a future release of ESMF.
 
 
+Platform Specific Notes Related to Executing Test Targets
+---------------------------------------------------------
 
-Directories
------------
+After the ESMF library has been built successfully it is a good idea to test
+its functional integrity by building and executing a range of test applications.
+It is important to use the same environment settings for the ESMF gmake test 
+targets as were used during the library built.
 
-application:     Contains a simple ESMF application and Makefile to demonstrate
-                 the use of the esmf.mk makefile fragment.
+The ESMF library sources come with 4 flavors of test codes:
+- unit_tests:   separately test the functionality of individual ESMF code units
+- system_tests: test the interplay of multiple ESMF code units
+- examples:     demonstrate features of individual ESMF code units. Example
+                sources are quoted in the ESMF Reference Manual.
+- demos:        more complex applications to demonstrate ESMF's capabilities
 
-build_config:    Contains makefile fragments that can be customized by the 
-                 user for specific platforms, compilers, and sites.
-                 See the README in this directory for help with porting to
-                 new platforms or compilers.
+Unless the ESMF library was built in MPI-bypass mode (mpiuni) all applications
+compiled and linked against ESMF automatically become MPI applications and must
+be executed as such. Details of how to execute MPI applications vary widely from
+system to system. The ESMF gmake test targets hide a good portion of this
+complexity. The remaining differences are given here on a per platform basis:
 
-build:           Contains the generic portion of the build that a
-                 user would not be expected to modify.  Also contains a 
-                 sample user makefile.
-
-scripts:         Contains scripts for testing and uniprocessor runs, and some
-                 templates.
-
-src:             Contains the source code.
-
-
-The following directories are created during the building and testing stages:
-
-lib:             Contains the ESMF libraries.
-
-mod:             Contains the Fortran module files.
-
-quick_start:     Contains skeleton application files to use as a template.
-
-test:            Contains unit and system test executables and output.
-
-examples:	 Contains examples executables and output.
-
-doc:             Contains documentation (if built).
+IBM      -    The ESMF AIX configuration assumes the use of LoadLeveler by
+ AIX &        default. In general this means that the user must set the
+ Linux        MP_RMPOOL environment variable to a valid setting in order to
+              successfully start MPI applications. In our experience "1" will
+              be a good value, but see your own system documentation for more
+              help on this.
+              IBM systems running LSF (i.e. new AIX systems as well as IBM/AMD64
+              Linux clusters) require that the ESMF_BATCH environment variable
+              is set to "lsf.ibmpjl". This will ensure that each ESMF test
+              application runs as a separate LSF job and uses the IBM parallel
+              job launcher facility for LSF. Details about the LSF setup, such
+              as queues, limits and project ids, are site dependent. These
+              options must be specified via the associated environment variable
+              ESMF_BATCHOPTIONS and will be used by the ESMF makefile in
+              conjunction with the LSF bsub command. (E.g. on NCAR's bluevista
+              machine you may want to set ESMF_BATCHOPTIONS="-qdebug -W10".)
+              The test targets expect to be run from within a queue that allows
+              interactive mode. Please consult your system documentation for
+              more help on this.
+              
+OSF1     -    The default assumed for the HP/Compaq Sierra Cluster is to run
+              test targets through the LSF batch system. Each ESMF test
+              application runs as a separate LSF job and uses the RMS prun
+              facility to start parallel execution. Details about the LSF setup,
+              such as queues, limits and project ids, are site dependent. These
+              options must be specified via the associated environment variable
+              ESMF_BATCHOPTIONS and will be used by the ESMF makefile in
+              conjunction with the LSF bsub command. (E.g. on GSFC's halem
+              machine you may want to set ESMF_BATCHOPTIONS="-qgeneral
+              -P<your_project_id>".) 
+              The test targets expect to be run from within a queue that
+              allows interactive mode. Please consult your system documentation
+              for more help on this.
+              
+Darwin   -    The ESMF Darwin configurations assume that resources to run the
+              test applications have been made available prior to calling ESMF
+              gmake test targets. The ESMF makefile uses the MPI startup 
+              script according to the ESMF_COMM setting in order to launch
+              parallel execution.
+              
+IRIX64   -    The ESMF IRIX64 configuration assumes that resources to run the
+              test applications have been made available prior to calling ESMF
+              gmake test targets. The ESMF makefile uses SGI's MPI startup 
+              script in order to launch parallel execution.
+              
+Linux    -    The ESMF Linux configurations assume that resources to run the
+              test applications have been made available prior to calling ESMF
+              gmake test targets. The ESMF makefile uses the MPI startup 
+              script according to the ESMF_COMM setting in order to launch
+              parallel execution. Only exception to this rule are IBM/Linux
+              clusters. Please see the IBM section for details.
+              
+Unicos   -    The ESMF Unicos configuration assumes that resources to run the
+              test applications have been made available prior to calling ESMF
+              gmake test targets. The ESMF makefile uses Cray's MPI startup 
+              script in order to launch parallel execution.
+              
 
 ================================================================================
 ================================================================================
@@ -385,20 +444,40 @@ Adding a New Platform
    email esmf_support@ucar.edu so we can include it in our next release.
 
 
-Platform Specific Notes Related to Executing Test Targets
----------------------------------------------------------
+Directories
+-----------
 
-AIX systems - Those using LoadLeveler will generally need to set the
-MP_RMPOOL environment variable, and generally 1 will be a good value.
-See your own system admins for more help on this if 1 doesn't work.
-On those IBM systems running LSF instead of POE set ESMF_BATCH to 'lsf.ibmpjl'
-before running any of the test targets; this will select the proper run
-script for the test and example programs. Also set ESMF_BATCHOPTIONS to any 
-flags your LSF system requires, such as -q<queue>, -W<time> .
+application:     Contains a simple ESMF application and Makefile to demonstrate
+                 the use of the esmf.mk makefile fragment.
 
-On OSF1 (HP/Compaq) systems running LSF set ESMF_BATCHOPTIONS to any flags
-your LSF system requires, such as -q<queue>, -P<project> .
+build_config:    Contains makefile fragments that can be customized by the 
+                 user for specific platforms, compilers, and sites.
+                 See the README in this directory for help with porting to
+                 new platforms or compilers.
 
+build:           Contains the generic portion of the build that a
+                 user would not be expected to modify.  Also contains a 
+                 sample user makefile.
+
+scripts:         Contains scripts for testing and uniprocessor runs, and some
+                 templates.
+
+src:             Contains the source code.
+
+
+The following directories are created during the building and testing stages:
+
+lib:             Contains the ESMF libraries.
+
+mod:             Contains the Fortran module files.
+
+quick_start:     Contains skeleton application files to use as a template.
+
+test:            Contains unit and system test executables and output.
+
+examples:	 Contains examples executables and output.
+
+doc:             Contains documentation (if built).
 
 ================================================================================
 
@@ -429,4 +508,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.69.2.4 2006/08/16 22:38:00 theurich Exp $
+ $Id: README,v 1.69.2.5 2006/08/17 21:09:27 theurich Exp $
