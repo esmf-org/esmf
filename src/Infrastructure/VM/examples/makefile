@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17.2.1 2006/06/19 21:54:02 theurich Exp $
+# $Id: makefile,v 1.17.2.2 2006/08/18 16:20:04 theurich Exp $
 
 ALL: build_examples
 
@@ -87,7 +87,7 @@ run_ESMF_VMAllFullReduceEx:
 	$(MAKE) EXNAME=VMAllFullReduce NP=4 exfrun
 
 run_ESMF_VMAllFullReduceEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx > $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx.stdout
+	$(MAKE) EXNAME=VMAllFullReduce NP=1 exfrun
 
 run_ESMF_VMComponentEx:
 	$(MAKE) EXNAME=VMComponent NP=4 exfrun
