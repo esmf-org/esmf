@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.5.4.3 2006/08/17 23:13:45 svasquez Exp $
+#  $Id: build_rules.mk,v 1.5.4.4 2006/08/18 22:30:04 svasquez Exp $
 #
 #  AIX.default.default
 #
@@ -77,7 +77,12 @@ ifeq ($(ESMF_ABI),32)
 ESMF_CXXCOMPILEOPTS       +=  -I/bgl/BlueLight/ppcfloor/bglsys/include
 ESMF_CXXLINKOPTS          +=  -L/bgl/BlueLight/ppcfloor/bglsys/lib -lmpich.rts -lmsglayer.rts -lrts.rts -ldevices.rts
 ESMF_F90COMPILEOPTS       +=  -I/bgl/BlueLight/ppcfloor/bglsys/include
-ESMF_F90LINKOPTS          +=  -L/bgl/BlueLight/ppcfloor/bglsys/lib -lmpich.rts -lmsglayer.rts -lrts.rts -ldevices.rts
+#ESMF_F90LINKOPTS          +=  -L/bgl/BlueLight/ppcfloor/bglsys/lib -lmpich.rts -lmsglayer.rts -lrts.rts -ldevices.rts
+ESMF_F90LINKOPTS          +=  -L/bgl/BlueLight/ppcfloor/bglsys/lib \
+                              -L/opt/ibmcmp/vacpp/bg/8.0/blrts_lib -libmc++ -lxlopt -lxl \
+                              -lstdc++ -lm -lc -lgcc -lcxxmpich.rts -lmpich.rts \
+			      -lmsglayer.rts -lrts.rts -ldevices.rts
+
 endif
 ifeq ($(ESMF_ABI),64)
 ESMF_CXXCOMPILEOPTS       += -q64
