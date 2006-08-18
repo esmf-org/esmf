@@ -1,6 +1,8 @@
-# $Id: makefile,v 1.3 2004/02/09 17:58:43 nscollins Exp $ 
+# $Id: makefile,v 1.9.2.1 2006/08/18 22:33:08 theurich Exp $ 
 
-ALL: build_system_tests
+ALL: tree_build_system_tests
+
+run: tree_run_system_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -27,7 +29,6 @@ SYSTEM_TESTS_RUN      = RUN_FlowWithCoupling
 
 SYSTEM_TESTS_RUN_UNI  = RUN_FlowWithCouplingUNI
 
-SYSTEM_TESTS_RM       = FlowWithCoupling.rm
 
 ESMF_FlowWithCouplingSTest.o: $(SYSTEM_TESTS_OBJ)
 
@@ -35,20 +36,14 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod *.txt core $(SYSTEM_TESTS_BUILD)
+CLEANDIRS   = 
+CLEANFILES  = $(SYSTEM_TESTS_BUILD) SIE* V_velocity.* U_velocity.* FLAG.*
 CLOBBERDIRS =
 
 RUN_FlowWithCoupling:
-	-@rm -f testlog stdlog.* logfile.* FlowWithCoupling.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest >$(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest.stdout
+	$(MAKE) TNAME=FlowWithCoupling NP=4 stest
 
 RUN_FlowWithCouplingUNI:
-	-@rm -f testlog stdlog.* logfile.* FlowWithCoupling.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest >$(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest.stdout
-
-FlowWithCoupling.rm:
-	echo "FlowWithCoupling.rm target called here."
-
+	$(MAKE) TNAME=FlowWithCoupling NP=1 stest
 
 

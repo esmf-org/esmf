@@ -1,6 +1,9 @@
-# $Id: makefile,v 1.3 2004/02/13 15:40:42 nscollins Exp $ 
+# $Id: makefile,v 1.8.2.1 2006/08/18 22:33:07 theurich Exp $ 
 
-ALL: build_system_tests
+
+ALL: tree_build_system_tests
+
+run: tree_run_system_tests
 
 CFLAGS    =
 FFLAGS    =
@@ -27,7 +30,6 @@ SYSTEM_TESTS_RUN     = RUN_CompCreate
 
 SYSTEM_TESTS_RUN_UNI = RUN_CompCreateUNI
 
-SYSTEM_TESTS_RM      = CompCreate.rm
 
 ESMF_CompCreateSTest.o : user_model.o
 
@@ -36,20 +38,16 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod *.txt core $(SYSTEM_TESTS_BUILD)
+CLEANDIRS   = 
+CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 RUN_CompCreate:
-	-@rm -f testlog stdlog.* logfile.* CompCreate.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CompCreateSTest > $(ESMC_TESTDIR)/ESMF_CompCreateSTest.stdout
+	$(MAKE) TNAME=CompCreate NP=4 stest
 
 RUN_CompCreateUNI:
-	-@rm -f testlog stdlog.* logfile.* CompCreate.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CompCreateSTest > $(ESMC_TESTDIR)/ESMF_CompCreateSTest.stdout
+	$(MAKE) TNAME=CompCreate NP=1 stest
 
-CompCreate.rm:
-	echo "CompCreate.rm target called here."
 
 
 
