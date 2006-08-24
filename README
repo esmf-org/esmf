@@ -152,7 +152,7 @@ platforms that don't come with a single vendor supplied compiler suite
 (e.g. Linux or Darwin) ESMF_COMPILER must be set to select which Fortran and
 C++ compilers are being used to build the ESMF library. Notice that setting the
 ESMF_COMPILER variable does _not_ affect how the compiler executables are
-located on the system. ESMF_COMPILER (together with ESMC_COMM) affect the
+located on the system. ESMF_COMPILER (together with ESMF_COMM) affect the
 name that is expected for the compiler executables. Furthermore, the 
 ESMF_COMPILER setting is used to select compiler and linker flags consistent
 with the compilers indicated.
@@ -508,4 +508,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.69.2.5 2006/08/17 21:09:27 theurich Exp $
+ $Id: README,v 1.69.2.6 2006/08/24 19:42:21 theurich Exp $
