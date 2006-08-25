@@ -1,80 +1,80 @@
-% $Id: ESMF_use.tex,v 1.16 2003/11/12 22:17:27 svasquez Exp $
+% $Id: ESMF_use.tex,v 1.22.2.1 2006/08/25 05:46:35 theurich Exp $
 
 \subsection{Using the ESMF}
 \label{UsingLibrary}
 
-To use ESMF from Fortran, add the directory that contains
-the ESMF {\tt *.mod} file(s),
+To use an ESMF library to compile and link your application against you will
+need to tell the compiler where the ESMF module and ESMF library files
+are located. If this has already been documented by the installer of the ESMF
+library, follow the directions given. However, if not, then you must add the
+correct compiler and linker flags yourself.
+
+In order to compile a Fortran application against ESMF add the directory that
+contains the ESMF {\tt *.mod} file(s):
 
 \begin{verbatim}
-$ESMF_DIR/mod/mod$ESMF_BOPT/$ESMF_ARCH.$ESMF_COMPILER.$ESMF_PREC.$ESMF_SITE
+$ESMF_DIR/mod/mod$ESMF_BOPT/$ESMF_OS.$ESMF_COMPILER.$ESMF_ABI.$ESMF_SITE
 \end{verbatim} 
 
-to your search path for {\tt *.mod} files.  For most compilers this path 
-is identified either with a {\tt -I} or a {\tt -M}.  You must also link 
-with the ESMF shared object library.  This is a file called 
-{\tt libesmf.so} that is located in the following directory:
+For most Fortran compilers this path is identified either with a {\tt -I} or a
+{\tt -M}. Linking against the ESMF library is a bit more complex because of
+ESMF's dependency on the Fortran90 {\em and} C++ runtime libraries. Generally
+it is not enough to sepcify the location of the ESMF library:
 
 \begin{verbatim}
-$ESMF_DIR/lib/lib$ESMF_BOPT/$ESMF_ARCH.$ESMF_COMPILER.$ESMF_PREC.$ESMF_SITE
+$ESMF_DIR/lib/lib$ESMF_BOPT/$ESMF_OS.$ESMF_COMPILER.$ESMF_ABI.$ESMF_SITE
 \end{verbatim} 
 
-The details of how to link on specific platforms are included in the 
-next section.
+via the {\tt -L} flag followed by {\tt -lesmf}! However, ESMF provides a 
+file called {\tt esmf.mk} that is generated during the library build and
+stored in the same location as the ESMF library (see path just above). This
+makefile fragment defines several variables indicating compiler options, include
+paths, library paths and libraries necessary to compile and link against ESMF
+with Fortran or C++ compilers. Look at "esmf.mk" to pull out the necessary flags
+to compile and link your own code against the installed ESMF library.
 
-There is a single ESMF module, called {\tt ESMF\_Mod}, that should be 
-included in applications with the Fortran {\tt USE} statement.  It 
-is not necessary to include any header files in Fortran.
+Alternatively, you may want to include "esmf.mk" from within your own build
+system. All of the variables defined in "esmf.mk" have prefix "ESMF\_"
+as to prevent name space conflicts with users' makefiles. Notice that "esmf.mk"
+is a self-contained file and is not affected by environment variables. It is
+not necessary to set any ESMF\_ environment variables to use an ESMF library
+that has been installed on your system!
 
-To use ESMF from C/C++, link with the ESMF shared object library 
-and include the {\tt ESMC.h} file. 
+When building the ESMF libraries on platforms that support both
+32 and 64 bit application binary interfaces, verify that the ESMF\_ABI
+environment variable is set to match the compile option that was specified 
+to build your application.
 
-If you prefer standard libraries, a {\tt *.a} file is provided  
-in the same library directory as the shared object file.  
+\subsubsection{Shared Object Libraries}
 
-\subsubsection{Shared Object Libraries and Linking}
-
+On some platforms, a shared object library is created in addition to the
+standard {\tt .a} archive library.
 Shared object libraries are libraries that are loaded by the first program 
 that uses them. All programs that start afterwards automatically use the 
 existing shared library. The library is kept in memory as long as any 
 active program is still using it. 
 
-Since shared object libraries are pre-linked to system libraries, using them
-simplifies life for the user when a variety of system libraries are
-required or when system libraries vary a great deal on a 
-platform-to-platform basis.  ESMF requires linking to both Fortran90 and
-C++ libraries on a set of very non-standardized platforms, and using
-shared objects helps to hide some of this complexity.
+Shared object libraries can be pre-linked to system libraries and using them
+can simplify dealing with ESMF's dependency on Fortran90 and C++ runtime 
+libraries. 
 
-The order in which shared libraries are presented to 
-the linker is important. Library routines must be called before they are 
-defined. So, if a library {\bf A} uses functionality provided by library 
-{\bf B}, then library {\bf A} must appear before library {\bf B} on the link line. 
+\subsubsection{Customized SITE Files}
 
-To link a Fortran90 application to the ESMF shared libraries please refer to the
-{\tt link\_rules} files found in the following directories:
-
+In an effort to provide platform specific information for building ESMF 
+and linking the libraries with your application, a SourceForge 
+site, {\tt esmfcontrib}, has been created.
+To locate the platform makefiles for a specific institution, check out 
+the {\tt build\_config\_files} using the appropriate CVSROOT.
+The URL for the {\tt esmfcontrib} SourceForge site is:
 
 \begin{verbatim}
-	$ESMF_DIR/build_config/AIX.default.default
-	$ESMF_DIR/build_config/IRIX64.default.default
-	$ESMF_DIR/build_config/Linux.intel.default
-	$ESMF_DIR/build_config/OSF1.default.default
+        http://sourceforge.net/projects/esmfcontrib/
 \end{verbatim}
 
-In an effort to provide platform specific information for building ESMF and linking the
-shared libraries with your application, a new sourceforge site, esmfcontrib, has been created.
-To locate the platforms makefiles for specific institutions checkout the {\tt build\_config\_files}
-using the appropriate CVSROOT.
-The URL for the esmfcontrib Sourceforge site is:
-
-\begin{verbatim}
-	http://sourceforge.net/cvs/?group_id=90647
-\end{verbatim}
-
-Additionally, you may checkout all the platforms makefile fragments for a particular institution
-from the esmfcontrib. For example to checkout the makefile fragments for the platforms at the
-National Center for Atmospheric Research, ncar, change directories to
+Additionally, you may check out all the platform makefile fragments 
+for a particular institution from the {\tt esmfcontrib} site. For example, 
+to check out the available makefile fragments for platforms at the
+National Center for Atmospheric Research, {\tt ncar}, change directories to
 
 \begin{verbatim}
  	$ESMF_DIR/build_config
@@ -89,24 +89,26 @@ and use the following CVS command:
 The following directories will be checked out:
 
 \begin{verbatim}
-	AIX.default.blackforest
 	AIX.default.bluesky
 	Linux.lahey.longs
 \end{verbatim}
 
-To build using these makefiles you must set the environment variable ESMF\_SITE, to blackforest, bluesky, or longs.
+To build using these makefiles you must set the environment 
+variable {\tt ESMF\_SITE} to {\tt bluesky}, or {\tt longs}.
 
 At the present time, we have files for the following institutions:
 
 \begin{verbatim}
-	anl  - Argonne National Labratories
-	cola - Center for Ocean Land and Atmosphere
-	gsfc - Goddard Space Flight Center
-	ncar - National Center for Atmospheric Research
+anl  - Argonne National Laboratory
+cola - Center for Ocean-Land-Atmosphere Studies
+gsfc - Goddard Space Flight Center
+mit  - Massachusetts Institute of Technology
+ncar - National Center for Atmospheric Research
 \end{verbatim}
 
 
-Users are encouraged to contribute pertinent information to the esmfcontrib respository.
+Users are encouraged to contribute pertinent information to the 
+{\tt esmfcontrib} respository.
 
 
 
