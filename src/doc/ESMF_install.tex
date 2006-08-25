@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.49.2.2 2006/08/25 04:51:38 theurich Exp $
+% $Id: ESMF_install.tex,v 1.49.2.3 2006/08/25 06:26:00 theurich Exp $
 
 %\section{Installing and Building the ESMF}
 \subsection{ESMF Download Options}
@@ -85,7 +85,7 @@ the default for Linux and Darwin systems. To force the use of this bypass
 library set {\tt ESMF\_COMM} equal to "mpiuni".
 
 \item[ESMF\_COMPILER]
-Possible value: {\em system-dependen}
+Possible value: {\em system-dependent}
 
 The ESMF library build requires a working Fortran90 and C++ compiler. On 
 platforms that don't come with a single vendor supplied compiler suite
@@ -123,6 +123,52 @@ compiler is used in combination with GCC's C++ compiler.
 If you do not find a configuration that matches your situation you will need to
 port ESMF.
 
+\item[ESMF\_CXX]
+Possible value: {\em executable}
+
+This variable can be used to override the default C++ compiler and linker
+front-end executables. The executable may be specified with absolute path
+overriding the location determined by default from the user's PATH variable.
+
+\item[ESMF\_CXXCOMPILEOPTS]
+Possible value: {\em flag}
+
+This variable can be used to prepend flags to default compiler flags.
+
+\item[ESMF\_CXXCOMPILER]
+Possible value: {\em executable}
+
+This variable can be used to override the default C++ compiler
+front-end executables. The executable may be specified with absolute path
+overriding the location determined by default from the user's PATH variable.
+
+\item[ESMF\_CXXLINKDIRS]
+Possible value: {\em flag}
+
+This variable can be used to prepend directories to default linker directories.
+
+\item[ESMF\_CXXLINKLIBS]
+Possible value: {\em flag}
+
+This variable can be used to prepend libraries to default linker libraries.
+
+\item[ESMF\_CXXLINKOPTS]
+Possible value: {\em flag}
+
+This variable can be used to prepend flags to default linker flags.
+
+\item[ESMF\_CXXLINKER]
+Possible value: {\em executable}
+
+This variable can be used to override the default C++ linker
+front-end executables. The executable may be specified with absolute path
+overriding the location determined by default from the user's PATH variable.
+
+\item[ESMF\_CXXOPTFLAG]
+Possible value: {\em flag}
+
+This variable can be used to override the default C++ optimization flag.
+
 \item[ESMF\_EXHAUSTIVE] 
 Possible value: {\tt ON}, {\tt OFF} (default)
 
@@ -131,6 +177,73 @@ then all unit tests will be compiled and will be executed when the test is
 run.  If unset or set to any other value, only a subset of the unit tests
 will be included to verify basic functions. Note that this is a compile-time
 selection, not a run-time option.
+
+\item[ESMF\_F90]
+Possible value: {\em executable}
+
+This variable can be used to override the default Fortran90 compiler and linker
+front-end executables. The executable may be specified with absolute path
+overriding the location determined by default from the user's PATH variable.
+
+\item[ESMF\_F90COMPILEOPTS]
+Possible value: {\em flag}
+
+This variable can be used to prepend flags to default compiler flags.
+
+\item[ESMF\_F90COMPILER]
+Possible value: {\em executable}
+
+This variable can be used to override the default Fortran90 compiler
+front-end executables. The executable may be specified with absolute path
+overriding the location determined by default from the user's PATH variable.
+
+\item[ESMF\_F90IMOD]
+Possible value: {\em flag}
+
+This variable can be used to override the default flag used to specify the F90
+module directory.
+
+\item[ESMF\_F90LINKDIRS]
+Possible value: {\em flag}
+
+This variable can be used to prepend directories to default linker directories.
+
+\item[ESMF\_F90LINKLIBS]
+Possible value: {\em flag}
+
+This variable can be used to prepend libraries to default linker libraries.
+
+\item[ESMF\_F90LINKOPTS]
+Possible value: {\em flag}
+
+This variable can be used to prepend flags to default linker flags.
+
+\item[ESMF\_F90LINKER]
+Possible value: {\em executable}
+
+This variable can be used to override the default Fortran90 linker
+front-end executables. The executable may be specified with absolute path
+overriding the location determined by default from the user's PATH variable.
+
+\item[ESMF\_F90OPTFLAG]
+Possible value: {\em flag}
+
+This variable can be used to override the default  Fortran90 optimization flag.
+
+\item[ESMF\_MACHINE]
+Possible value: output of {\tt uname -m} where available.
+
+Not normally set by user. This variable indicates achitectual details about
+the machine on which the ESMF library is being built. The value of this 
+variable will affect which ABI settings are available and what they mean. 
+{\tt ESMF\_MACHINE} is set automatically.
+
+\item[ESMF\_MPIRUN]
+Possible value: {\em executable}
+
+This variable can be used to override the default utility used to launch
+parallel execution of ESMF test applications. The executable in 
+{\tt ESMF\_MPIRUN} may be specified with path.
 
 \item[ESMF\_NO\_INTEGER\_1\_BYTE]
 Possible value: {\tt TRUE}, {\tt FALSE} (default)
@@ -147,6 +260,11 @@ Same as {\tt ESMF\_NO\_INTEGER\_1\_BYTE} but for 2-byte integers.
 Possible value: {\tt FALSE} (default)
 
 Currently ESMF does not support {\tt netCDF} I/O support.
+
+\item[ESMF\_OPTLEVEL] 
+Possible value: {\em numerical value}
+
+See {\tt ESMF\_BOPT} for details.
 
 \item[ESMF\_OS]
 Possible value: output of {\tt uname -s} except for {\tt UNICOS/mp} where
@@ -196,6 +314,12 @@ and you wish to use it, download the corresponding files into the
 (which corresponds to the last part of the directory name).  See the 
 Sourceforge site {\tt http://sourceforge.net/projects/esmfcontrib} for more 
 information.
+
+\item[ESMF\_STDCXX\_LIBRARY]
+Possible value: {\tt gcc}
+
+When {\tt ESMF\_COMPILER} is set to {\tt intel} this variable can be used to
+indicate the use of GCC's standard C++ library instead of Intel's.
 
 \item[ESMF\_TESTWITHTHREADS]
 Possible value: {\tt ON}, {\tt OFF} (default)
