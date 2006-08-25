@@ -1,4 +1,4 @@
-% $Id: ESMF_testing.tex,v 1.16 2003/11/12 23:09:48 svasquez Exp $
+% $Id: ESMF_testing.tex,v 1.20.4.1 2006/08/25 04:51:38 theurich Exp $
 
 \subsection{Running ESMF Self-Tests}
 \label{testing}
@@ -48,7 +48,7 @@ unit tests are being tracked and corrected by the ESMF development team.
 
 The results of running the unit tests can be found in the following location:
 \begin{verbatim}
-${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_COMPILER}.${ESMF_PREC}.${ESMF_SITE}
+${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_OS}.${ESMF_COMPILER}.${ESMF_ABI}.${ESMF_SITE}
 \end{verbatim}
 
 For example, if your esmf source files have been placed in: 
@@ -90,23 +90,65 @@ The following is a sample from the script output:
 
 \begin{verbatim}
 
-Unit Tests stdout files found: 
--rw-r--r--    1 svasquez scd           576 Apr 25 10:31 ESMF_ArrayBasicUTest.stdout
--rw-r--r--    1 svasquez scd           960 Apr 25 10:31 ESMF_ArrayF90PtrUTest.stdout
--rw-r--r--    1 svasquez scd          7791 Apr 25 10:31 ESMF_ArrayUTest.stdout
--rw-r--r--    1 svasquez scd            99 Apr 25 10:31 ESMF_BaseUTest.stdout
--rw-r--r--    1 svasquez scd          1690 Apr 25 10:31 ESMF_BundleUTest.stdout
--rw-r--r--    1 svasquez scd         73209 Apr 25 10:31 ESMF_ClockUTest.stdout
--rw-r--r--    1 svasquez scd          2585 Apr 25 10:31 ESMF_FieldUTest.stdout
--rw-r--r--    1 svasquez scd           399 Apr 25 10:31 ESMF_GridUTest.stdout
--rw-r--r--    1 svasquez scd          6484 Apr 25 10:32 ESMF_StateUTest.stdout
+There are a total of 1224 exhaustive multi processor unit tests, 1220 pass and 4 fail.
 
-Unit test stdout files of zero length indicate that the unit test
-did not run because it failed to compile or it failed to execute. 
+The unit tests in the following files all pass:
 
-112  Unit Tests passed 
+src/Infrastructure/Array/tests/ESMF_ArrayUTest.F90
+src/Infrastructure/ArrayDataMap/tests/ESMF_ArrayDataMapUTest.F90
+src/Infrastructure/Base/tests/ESMF_BaseUTest.F90
+src/Infrastructure/Bundle/tests/ESMF_BundleUTest.F90
+src/Infrastructure/BundleDataMap/tests/ESMF_BundleDataMapUTest.F90
+src/Infrastructure/Config/tests/ESMF_ConfigUTest.F90
+src/Infrastructure/DELayout/tests/ESMF_DELayoutUTest.F90
+src/Infrastructure/Field/tests/ESMF_FRoute4UTest.F90
+src/Infrastructure/Field/tests/ESMF_FieldUTest.F90
+src/Infrastructure/FieldComm/tests/ESMF_FieldGatherUTest.F90
+src/Infrastructure/FieldDataMap/tests/ESMF_FieldDataMapUTest.F90
+src/Infrastructure/Grid/tests/ESMF_GridUTest.F90
+src/Infrastructure/IOSpec/tests/ESMF_IOSpecUTest.F90
+src/Infrastructure/LocalArray/tests/ESMF_ArrayDataUTest.F90
+src/Infrastructure/LocalArray/tests/ESMF_ArrayF90PtrUTest.F90
+src/Infrastructure/LocalArray/tests/ESMF_LocalArrayUTest.F90
+src/Infrastructure/LogErr/tests/ESMF_LogErrUTest.F90
+src/Infrastructure/Regrid/tests/ESMF_Regrid1UTest.F90
+src/Infrastructure/Regrid/tests/ESMF_RegridUTest.F90
+src/Infrastructure/TimeMgr/tests/ESMF_AlarmUTest.F90
+src/Infrastructure/TimeMgr/tests/ESMF_CalRangeUTest.F90
+src/Infrastructure/TimeMgr/tests/ESMF_ClockUTest.F90
+src/Infrastructure/TimeMgr/tests/ESMF_TimeIntervalUTest.F90
+src/Infrastructure/TimeMgr/tests/ESMF_TimeUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMBarrierUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMBroadcastUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMGatherUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMScatterUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMSendVMRecvUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMUTest.F90
+src/Superstructure/Component/tests/ESMF_CplCompCreateUTest.F90
+src/Superstructure/Component/tests/ESMF_GridCompCreateUTest.F90
+src/Superstructure/State/tests/ESMF_StateUTest.F90
 
-No Unit Tests Failed.
+
+The following unit test files failed to build, failed to execute or crashed during execution:
+
+src/Infrastructure/TimeMgr/tests/ESMF_CalendarUTest.F90
+src/Infrastructure/VM/tests/ESMF_VMSendRecvUTest.F90
+
+
+The following unit test files had failed unit tests:
+
+src/Infrastructure/Field/tests/ESMF_FRoute8UTest.F90
+src/Infrastructure/Grid/tests/ESMF_GridCreateUTest.F90
+
+
+The following individual unit tests fail:
+
+  FAIL  DELayout Get Test, ESMF_FRoute8UTest.F90, line 139                                                                                                                                                                                                       
+  FAIL  Grid Distribute Test, ESMF_GridCreateUTest.F90, line 198                                                                                                                                                                                                 
+
+
+The stdout files for the unit tests can be found at:
+/home/bluedawn/svasquez/script_dirs/daily_builds/esmf/test/testO/AIX.default.64.default
 
 \end{verbatim}
 
@@ -132,14 +174,16 @@ tests are no longer compatible with the current API, but are included
 in the release for completeness.  A complete description of each
 available system test and its current compatibility status can be
 found at the ESMF website,
-\htmladdnormallink{http://www.esmf.ucar.edu}{http://www.esmf.ucar.edu}.  The testing
-and validation page is accessible from the {\bf Development} link on the navigation bar.
+\htmladdnormallink{http://www.esmf.ucar.edu}{http://www.esmf.ucar.edu}.  
+The testing
+and validation page is accessible from the {\bf Development} 
+link on the navigation bar.
 
 The following commands are used to build and run the system tests:
 
 \begin{verbatim}
-        gmake [SYSTEM_TEST=NNNNN] system_tests
-        gmake [SYSTEM_TEST=NNNNN] system_tests_uni
+        gmake [SYSTEM_TEST=xxx] system_tests
+        gmake [SYSTEM_TEST=xxx] system_tests_uni
 \end{verbatim}
 
 The {\tt system\_tests\_uni} target runs the tests on a single processor. 
@@ -150,7 +194,7 @@ are built and run.
 
 The results of the test can be found in the following location:
 \begin{verbatim}
-${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_COMPILER}.${ESMF_PREC}.${ESMF_SITE}
+${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_OS}.${ESMF_COMPILER}.${ESMF_ABI}.${ESMF_SITE}
 \end{verbatim}
 
 For example, if your ESMF source files have been placed in your home directory:
@@ -182,15 +226,43 @@ The results will be in:
 ~/esmf/test/testO/OSF1.default.64.default/ESMF_SimpleCouplingSTest.stdout
 \end{verbatim}
 
-\subsubsection{Running the ESMF VAlidation (EVA) Suite}
-\label{EVATestDescription}
+At the end of system test execution a script runs to analyze the results.
 
-The ESMF VAlidation(EVA) Suite is a collection of seven codes
-representative of those used in climate, weather, and data
-assimulation. These codes are currently used for ESMF prototyping.
-They will eventually provide the basis for ESMF tutorial examples.
+The script output indicates whether there are any system test failures.
+The following is a sample from the script output:
 
-The {\it EVA Suite User's Guide} and source code can be downloaded from the {\bf
-User Links and Downloads} link on the ESMF website, 
-\htmladdnormallink{http://www.esmf.ucar.edu}{http://www.esmf.ucar.edu}.
+\begin{verbatim}
+There are 14 system tests, 12 passed and 2 failed.
+
+
+The following system tests passed:
+
+
+src/system_tests/ESMF_CompCreate/ESMF_CompCreateSTest.F90
+src/system_tests/ESMF_FieldExcl/ESMF_FieldExclSTest.F90
+src/system_tests/ESMF_FieldHalo/ESMF_FieldHaloSTest.F90
+src/system_tests/ESMF_FieldHaloPer/ESMF_FieldHaloPerSTest.F90
+src/system_tests/ESMF_FieldRedist/ESMF_FieldRedistSTest.F90
+src/system_tests/ESMF_FieldRegrid/ESMF_FieldRegridSTest.F90
+src/system_tests/ESMF_FieldRegridMulti/ESMF_FieldRegridMultiSTest.F90
+src/system_tests/ESMF_FieldRegridOrder/ESMF_FieldRegridOrderSTest.F90
+src/system_tests/ESMF_FlowComp/ESMF_FlowCompSTest.F90
+src/system_tests/ESMF_FlowWithCoupling/ESMF_FlowWithCouplingSTest.F90
+src/system_tests/ESMF_SimpleCoupling/ESMF_SimpleCouplingSTest.F90
+src/system_tests/ESMF_VectorStorage/ESMF_VectorStorageSTest.F90
+
+
+The following system tests failed, did not build, or did not execute:
+
+
+src/system_tests/ESMF_FieldRegridConserv/ESMF_FieldRegridConsrvSTest.F90
+src/system_tests/ESMF_RowReduce/ESMF_RowReduceSTest.F90
+
+
+
+
+The stdout files for the system_tests can be found at:
+/home/bluedawn/svasquez/script_dirs/daily_builds/esmf/test/testO/AIX.default.64.default
+
+\end{verbatim}
 
