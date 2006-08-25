@@ -1,24 +1,72 @@
-% $Id: user_arch.tex,v 1.10 2003/11/12 22:57:47 svasquez Exp $
+% $Id: user_arch.tex,v 1.16.4.1 2006/08/25 04:31:55 theurich Exp $
 
 % List of architectures supported.  This file is 
 % meant to be included in a user doc.
 
-The following table lists the environment variable settings used by
-the ESMF build system for supported platforms. \vspace{1ex}
+The following two tables list various combinations of environment 
+variable settings used by the ESMF build system. A {\tt default}
+value in the compiler column indicates the vendor compiler. A {\tt mpi}
+value in the comm column indicates the vendor MPI implementation.
+
+The first table lists the exact combinations which are tested regularly and are
+fully supported. The second table lists all possible combinations which are 
+included in the build system.
+
+\vspace{1ex}
+{\bf Fully tested combinations}:
+\vspace{1ex}
 
 \begin{tabular}{lcccc}
-  &{\bfseries ESMF\_ARCH} &{\bfseries ESMF\_COMPILER} & {\bfseries ESMF\_SITE} & {\bfseries ESMF\_PREC} \\
+  &{\bfseries ESMF\_OS} &{\bfseries ESMF\_COMPILER} & {\bfseries ESMF\_COMM} & {\bfseries ESMF\_ABI} \\
 
-Alpha       &  OSF1    &  default &  default &  64 \\
-SGI         &  IRIX64  &  default &  default &  64 \\
-SGI         &  IRIX64  &  default &  default &  32 \\
-IBM RS6000  &  AIX     &  default &  default &  64 \\
-IBM RS6000  &  AIX     &  default &  default &  32 \\ 
-Linux 	    &  Linux   &  intel   &  default &  64 \\
-Linux 	    &  Linux   &  intel   &  default &  32 
-
+IBM SP      &  AIX     &  default      &  mpi         &  32,64  \\
+Mac         &  Darwin  &  absoft       &  lam,mpiuni  &  32  \\
+Mac         &  Darwin  &  nag          &  lam,mpiuni  &  32  \\
+Mac         &  Darwin  &  xlf          &  lam,mpiuni  &  32  \\
+Mac         &  Darwin  &  xlfgcc       &  lam,mpiuni  &  32  \\
+SGI Mips    &  IRIX64  &  default      &  mpi         &  32,64  \\
+PC          &  Linux   &  absoft       &  mpich       &  32  \\
+HP IA64     &  Linux   &  intel        &  lam         &  64 \\
+SGI Altix   &  Linux   &  intel        &  mpi         &  64 \\
+PC          &  Linux   &  intel        &  mpich       &  32  \\
+PC 	    &  Linux   &  lahey        &  mpich,mpiuni&  32  \\
+PC 	    &  Linux   &  nag          &  mpich       &  32  \\
+IBM Opteron &  Linux   &  pathscale    &  mpich       &  64  \\
+IBM Opteron &  Linux   &  pgi          &  mpich       &  64  \\
+PC 	    &  Linux   &  pgi          &  mpich,mpiuni&  32  \\
+HP/Compaq   &  OSF1    &  default      &  mpi         &  64  \\
+Cray X1     &  Unicos  &  default      &  mpi         &  64
 \end{tabular}
 
 \vspace{1ex}
 
+{\bf All possible options}. Where multiple options exist 
+and the default is independent of {\tt ESMF\_MACHINE} the default value is in bold:
+
+\vspace{1ex}
+
+
+\begin{tabular}{lcccc}
+  {\bfseries ESMF\_OS} &{\bfseries ESMF\_COMPILER} & {\bfseries ESMF\_COMM} & {\bfseries ESMF\_ABI} \\
+
+AIX     &  default      &  {\bf mpi},mpiuni,user         &  32,{\bf 64}  \\
+Darwin  &  absoft       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
+Darwin  &  nag          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
+Darwin  &  xlf          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
+Darwin  &  xlfgcc       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
+IRIX64  &  default      &  {\bf mpi},mpiuni,user         &  32,{\bf 64}  \\
+Linux   &  absoft       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
+Linux   &  intel        &  {\bf mpiuni},mpich,mpich2,intelmpi,lam,openmpi,user  &  32, 64 \\
+Linux   &  intelgcc     &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32, 64 \\
+Linux   &  lahey        &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
+Linux   &  nag          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
+Linux   &  pathscale    &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  64  \\
+Linux   &  pgi          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32, 64  \\
+Linux   &  pgigcc       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32, 64  \\
+OSF1    &  default      &  {\bf mpi},mpiuni,user         &  64  \\
+Unicos  &  default      &  {\bf mpi},mpiuni,user         &  64
+
+\end{tabular}
+
+\vspace{1ex}
 
