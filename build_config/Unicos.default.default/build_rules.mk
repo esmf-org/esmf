@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.8.2.3 2006/07/31 19:05:35 theurich Exp $
+# $Id: build_rules.mk,v 1.8.2.4 2006/08/25 22:19:04 theurich Exp $
 # 
 # Unicos.default.default
 #
@@ -61,7 +61,7 @@ endif
 # BLAS_LIB         = -latlas -lscs
 
 ############################################################
-# Unicos optimization level must be > 1 else no optimization
+# on X1 optimization level must be > 1 else no optimization
 #
 ESMF_OPTLEVELDEFAULT  = 2
 
@@ -91,7 +91,7 @@ ESMF_F90COMPILEFIXNOCPP  = -f fixed -N 132
 ESMF_F90IMOD        = -em -J
 
 ############################################################
-# Unicos does not have a ranlib -> "true" is a noop command
+# X1 does not have a ranlib -> "true" is a noop command
 #
 ESMF_RANLIBDEFAULT         = true
 
