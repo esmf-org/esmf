@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.1.4.1 2006/08/25 04:51:38 theurich Exp $
+%  $Id: ESMF_builddetail.tex,v 1.1.4.2 2006/08/28 20:37:33 theurich Exp $
 
 % there is a separate copy of this under build/doc which is
 % now used only by the implementation report.  this was separated
@@ -138,10 +138,10 @@ The ESMF build system provides preprocessor directives in
 that are included in the source code.  The path to these files is
 
 \begin{verbatim}
-    build_config/ESMF_OS.ESMF_COMPILER.ESMF_SITE
+    build_config/ESMF_OS.ESMF_COMPILER.ESMF_ABI.ESMF_SITE
 \end{verbatim}
 
-Where ESMF\_OS, ESMF\_COMPILER, and ESMF\_SITE are
+Where ESMF\_OS, ESMF\_COMPILER, ESMF\_ABI and ESMF\_SITE are
 environment variables set by the user or given default values be the
 build system.  Based on the settings of these environment variables,
 the build system provides a path to the correct files during

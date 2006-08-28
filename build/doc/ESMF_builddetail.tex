@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.10 2003/11/12 22:39:02 svasquez Exp $
+%  $Id: ESMF_builddetail.tex,v 1.20.2.1 2006/08/28 20:37:33 theurich Exp $
 
 
 \subsection{Make System}
@@ -17,6 +17,7 @@ syntax defining build rules and actions, but do not constitute a
 complete build system.
 
 The main components of the make system are:
+\label{sec:BuildOptions}
 \begin{itemize}
 \item{{\bf Build directories}}
 
@@ -33,10 +34,10 @@ The {\tt build\_config} directory contains makefile fragments for each
 supported platform defining compilers, compiler flags, and the various
 other definitions that are necessary to build on each platform.  Files
 can also be added to this directory for specific machines where the
-build settings are different from the standards of the architecture.
+build settings are different from the standards of the platform.
 One of the files in this directory will be included by the
 build/common.mk file depending the values of the environment variables
-ESMF\_ARCH, ESMF\_COMPILER and ESMF\_SITE.  See below for more details
+ESMF\_OS, ESMF\_COMPILER and ESMF\_SITE.  See below for more details
 on environment variables.
 
 \item{{\bf Environment Variables}}
@@ -69,53 +70,90 @@ of an ESMF source code tree.
 
 \end{description}
 
-There are six other variables that the build system uses.  If they
+There are several other variables that the build system uses.  If they
 are not set, then the build system will assign default values to
-them.  In most cases the default values will be fine.
+them. In most cases the default values will be fine.
 
 \begin{description}
 
-\item{ESMF\_ARCH} 
+\item[ESMF\_DIR]
+The environment variable {\tt ESMF\_DIR} must be set to the full pathname 
+of the top level ESMF directory before building the framework.  This is the 
+only environment variable which is required to be set on all platforms under 
+all conditions.
 
-Defines the current architecture. Default value is the value returned
-by the command uname -s.  There should be almost no reason for
-ESMF\_ARCH to be set by a user.
+\item[ESMF\_BOPT]
+This environment variable controls the build option. To make a debuggable
+version of the library set {\tt ESMF\_BOPT} to {\tt g} before building. The
+default is {\tt O} (capital oh) which builds an optimized version of the 
+library. If {\tt ESMF\_BOPT} is {\tt O}, {\tt ESMF\_OPTLEVEL} can also be set
+to a numeric value between 0 and 4 to select a specific optimization level.
 
-\item{ESMF\_COMPILER}
+\item[ESMF\_COMM]
+On systems with a vendor-supplied MPI communications library the vendor library 
+is chosen by default for communications and {\tt ESMF\_COMM} need not be set.
+For other systems (e.g. Linux or Darwin) a multitude of MPI implementations is
+available and {\tt ESMF\_COMM} must be set to indicate which implementation is
+used to build the ESMF library. Set {\tt ESMF\_COMM} according to your situation
+to: {\tt mpich, mpich2, lam, openmpi} or {\tt intelmpi}. {\tt ESMF\_COMM} may
+also be set to {\tt user} indicating that the user will set all the required
+flags using advanced ESMF environment variables.
 
-Variable specifying which compiler to use.  Value can be default,
-absoft, intel, lahey or nag.  If the value is default or the
-ESMF\_COMPILER is left unset, then the default compiler will be
-used. Exceptions for default values: On Linux machines the default
-value is lahey and on Darwin machines it is absoft.
+Alternatively, ESMF comes with a single-processor MPI-bypass library which is
+the default for Linux and Darwin systems. To force the use of this bypass
+library set {\tt ESMF\_COMM} equal to "mpiuni".
 
-\item{ESMF\_PREC}
+\item[ESMF\_COMPILER]
+The ESMF library build requires a working Fortran90 and C++ compiler. On 
+platforms that don't come with a single vendor supplied compiler suite
+(e.g. Linux or Darwin) {\tt ESMF\_COMPILER} must be set to select which Fortran
+and C++ compilers are being used to build the ESMF library. Notice that setting
+the {\tt ESMF\_COMPILER} variable does {\em not} affect how the compiler
+executables are located on the system. {\tt ESMF\_COMPILER} (together with
+{\tt ESMF\_COMM}) affect the name that is expected for the compiler executables.
+Furthermore, the {\tt ESMF\_COMPILER} setting is used to select compiler and
+linker flags consistent with the compilers indicated.
 
-Variable specifying the precession build arguments.  Value can be 32
-or 64.  When possible the default value will be 64, otherwise it will
-be 32.
+By default Fortran and C++ compiler executables are expected to be located in
+a location contained in the user's {\tt PATH} environment variable. This means
+that if you cannot locate the correct compiler executable via the {\tt which}
+command on the shell prompt the ESMF build system won't find it either!
 
+There are advanced ESMF environment variables that can be used to select 
+specific compiler executables by specifying the full path. This can be used to
+pick specific compiler executables without having to modify the {\tt PATH}
+environment variable.
 
-\item{ESMF\_SITE}
+Use 'gmake info' to see which compiler executables the ESMF build system will
+be using according to your environment variable settings.
 
-If ESMF\_SITE is not set or has the value of default, default build
-settings for the current machine architecture and compiler will be
-used.  Values are created from a machine's name.
+To see possible values for {\tt ESMF\_COMPILER}, cd to 
+{\tt \$ESMF\_DIR/build\_config} and list the directories there. The first part 
+of each directory name corresponds to the output of 'uname -s' for this 
+platform. The second part contains possible values for {\tt ESMF\_COMPILER}. In
+some cases multiple combinations of Fortran and C++ compilers are possible, e.g.
+there is {\tt intel} and {\tt intelgcc} available for Linux. Setting 
+{\tt ESMF\_COMPILER} to {\tt intel} indicates that both Intel Fortran and 
+C++ compilers are used, whereas {\tt intelgcc} indicates that the Intel Fortran
+compiler is used in combination with GCC's C++ compiler.
 
-\item{ESMF\_COMM}
+If you do not find a configuration that matches your situation you will need to
+port ESMF.
 
-Defines which MPI communications library to use.  Many times a machine
-will come with its own MPI library and in those cases the default
-setting will be mpi.  Otherwise the default setting will be mpiuni so
-that the mpiuni library will be used.  Other possible settings are
-mpich and lam.
+\item[ESMF\_ABI]
+If a system supports 32-bit and 64-bit (pointer wordsize) application binary
+interfaces (ABIs), this variable can be set to select which ABI to use. Valid 
+values are {\tt 32} or {\tt 64}. By default the most common ABI is chosen.
 
-\item{ESMF\_BOPT} 
+\item[ESMF\_SITE]
+The Sourceforge {\tt esmfcontrib} repository contains makefiles which have 
+already been customized for certain machines.  If one exists for your site 
+and you wish to use it, download the corresponding files into the 
+{\tt build\_contrib} directory and set {\tt ESMF\_SITE} to your location
+(which corresponds to the last part of the directory name).  See the 
+Sourceforge site {\tt http://sourceforge.net/projects/esmfcontrib} for more 
+information.
 
-Variable specifying that the build system use either debugging or
-optimization options.  Value of g specifies the debugging options.
-Value of O (capital oh) specifies optimization options.  Default value
-is O.
 
 \end{description}
 
@@ -128,7 +166,7 @@ The top level makefile contains makefile settings specific for the
 source code that it is found in.
 
 Each directory in the source tree contains a makefile which includes
-the top level makefile.  These local Makefiles include definitions that
+the top level makefile.  These local makefiles include definitions that
 allow the local files and documents to be built.
 \end{itemize}
 
@@ -139,34 +177,33 @@ constitutes a complete set of build rules and settings.  Starting from
 the local makefile, successive include commands are used to string
 together makefiles and makefile fragments to create a complete system
 of build rules and settings.  Configuration of the build system is
-done by including a configuration makefile fragment.  The build
-system can be configured for a machine's architecture or, if needed,
-for a particular machine and its compiler. A configuration for a
+done by including a configuration makefile fragment. A configuration for a
 specific machine or compiler is referred to as a site configuration.
 
 The string of files included is fairly short.  Makefiles below the top
 level makefile include the top level makefile. The top level makefile
 includes build/common.mk and then build/common.mk includes a
 configuration file from the build\_config directory.  The configuration
-files in the build\_config directory contain the architecture and site
-specific build settings.  The architecture, compiler and site that a file
+files in the build\_config directory contain the platform and site
+specific build settings.  The os, compiler and site that a file
 configures is determined by its name.  The configuration makefile
 fragments follow this naming convention:
 
 \begin{verbatim}
-    ESMF_ARCH.ESMF_COMPILER.ESMF_SITE/build_rules.mk
+    ESMF_OS.ESMF_COMPILER.ESMF_SITE/build_rules.mk
 \end{verbatim}
 
-Where ESMF\_ARCH, ESMF\_COPMILER, and ESMF\_SITE are environment
+Where ESMF\_OS, ESMF\_COMPILER, and ESMF\_SITE are environment
 variables either set by the user or given default values by the build
-system. ESMF\_ARCH is the current architecture and will have the value
-returned by the command uname -s.  ESMF\_COMPILER is the compiler
-name.  ESMF\_SITE is the current machine name. If there are no site
-specific files for a particular architecture, then ESMF\_COMPILER and
-ESMF\_SITE will be set to default values.  Examples:
+system. ESMF\_OS is the current operating system on which the build is
+performed and will have the value returned by the command {\tt uname -s}.
+ESMF\_COMPILER is the compiler name. ESMF\_SITE, if set, is generally the
+current machine name, the location, or the organization (e.g. mit, cola).  If
+there are no site specific files for a particular platform, then 
+ESMF\_COMPILER and ESMF\_SITE will be set to {\tt default}.  Examples:
 
 \begin{verbatim}
-    AIX.default.default/build_rules.mk      ! Default configuation for RS6000.
+    AIX.default.default/build_rules.mk      ! Default configuation for IBM SP
     Linux.lahey.default/build_rules.mk      ! Linux configuation using lahey compilers.
 \end{verbatim}
 
@@ -180,33 +217,36 @@ is compiled.  The directives are used to determine among other things,
 the memory requirements of variable types and the system resources
 that are available.
 
-The ESMF build system provides preprocessor directives in conf.h files
-that are included in the source code.  The path to the conf.h files is
+The ESMF build system provides preprocessor directives in 
+{\tt ESMC\_Conf.h} and {\tt ESMF\_Conf.inc} files
+that are included in the source code.  The path to these files is
 
 \begin{verbatim}
-    build_config/ESMF_ARCH.ESMF_COMPILER.ESMF_PREC.ESMF_SITE/conf.h
+    build_config/ESMF_OS.ESMF_COMPILER.ESMF_ABI.ESMF_SITE
 \end{verbatim}
 
-Where ESMF\_ARCH, ESMF\_COMPIELR, ESMF\_PREC and ESMF\_SITE are
+Where ESMF\_OS, ESMF\_COMPILER, ESMF\_ABI and ESMF\_SITE are
 environment variables set by the user or given default values be the
 build system.  Based on the settings of these environment variables,
-the build system provides a path to the correct conf.h file during
+the build system provides a path to the correct files during
 source code compiles.
 
 \subsubsection{Building on New Platforms}
 
 The build system can be ported to other Unix platforms by adding new
-makefile fragment and conf.h files.  The new makefile fragment file has to follow the naming
+makefile fragments and configuration files.  The new makefile fragment 
+file has to follow the naming
 convention used by the existing makefile fragment files and be created in the
 directory build\_config.  The new file will also have to define
 the same makefile variables as the existing makefile fragment files.
 
-Porting to a new machine will require a new conf.h as well. 
-New conf.h files have to define the same machine attributes as
-existing conf.h files. Example:
+Porting to a new machine will require new configuration files as well. 
+New configuration files have to define the same machine attributes as
+existing configuration files. Example:
 
 \begin{verbatim}
       build_config/Linux.pgi.mysite/build_rules.mk
-      build_config/Linux.pgi.mysite/conf.h
+      build_config/Linux.pgi.mysite/ESMF_Conf.inc
+      build_config/Linux.pgi.mysite/ESMC_Conf.h
 \end{verbatim}
 
