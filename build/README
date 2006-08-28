@@ -1,4 +1,4 @@
- $Id: README,v 1.6 2003/10/14 17:11:26 cdeluca Exp $
+$Id: README,v 1.7.2.1 2006/08/28 16:48:23 theurich Exp $
 
 ================================================================================
 
@@ -6,21 +6,13 @@
 
 ================================================================================
 
-Besides this README file, the only other file that should be in this
-directory is the makefile fragment common.mk.  The file common.mk
+This directory contains a single file "common.mk". The file common.mk
 contains GNU makefile code used by the esmf build system across
 all platforms.  Users should have no reason to edit common.mk.
 
-The only directory that should be here is a doc directory.  This 
+The only directory that should be here is a doc directory. This 
 directory contains tex files used for build system documentation.
 
 See README files at the top level of this distribution and in 
-build_config for documentation on the build system.  The ESMF User's 
+build_config for documentation on the build system. The ESMF User's 
 Guide also contains build system documentation.
-
-
-
- 
-
-
-
