@@ -1,4 +1,4 @@
-% $Id: user_arch.tex,v 1.16.4.1 2006/08/25 04:31:55 theurich Exp $
+% $Id: user_arch.tex,v 1.16.4.2 2006/08/28 20:37:13 theurich Exp $
 
 % List of architectures supported.  This file is 
 % meant to be included in a user doc.
@@ -34,6 +34,7 @@ PC 	    &  Linux   &  nag          &  mpich       &  32  \\
 IBM Opteron &  Linux   &  pathscale    &  mpich       &  64  \\
 IBM Opteron &  Linux   &  pgi          &  mpich       &  64  \\
 PC 	    &  Linux   &  pgi          &  mpich,mpiuni&  32  \\
+Cray X1     &  Linux   &  x1cross      &  mpi         &  64
 HP/Compaq   &  OSF1    &  default      &  mpi         &  64  \\
 Cray X1     &  Unicos  &  default      &  mpi         &  64
 \end{tabular}
@@ -56,13 +57,14 @@ Darwin  &  xlf          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
 Darwin  &  xlfgcc       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
 IRIX64  &  default      &  {\bf mpi},mpiuni,user         &  32,{\bf 64}  \\
 Linux   &  absoft       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
-Linux   &  intel        &  {\bf mpiuni},mpich,mpich2,intelmpi,lam,openmpi,user  &  32, 64 \\
-Linux   &  intelgcc     &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32, 64 \\
+Linux   &  intel        &  {\bf mpiuni},mpi,mpich,mpich2,intelmpi,lam,openmpi,user  &  32, 64 \\
+Linux   &  intelgcc     &  {\bf mpiuni},mpi,mpich,mpich2,lam,openmpi,user  &  32, 64 \\
 Linux   &  lahey        &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
 Linux   &  nag          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32  \\
 Linux   &  pathscale    &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  64  \\
 Linux   &  pgi          &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32, 64  \\
 Linux   &  pgigcc       &  {\bf mpiuni},mpich,mpich2,lam,openmpi,user  &  32, 64  \\
+Linux   &  x1cross      &  {\bf mpi},mpiuni,mpich,mpich2,lam,openmpi,user  &  32, 64  \\
 OSF1    &  default      &  {\bf mpi},mpiuni,user         &  64  \\
 Unicos  &  default      &  {\bf mpi},mpiuni,user         &  64
 
