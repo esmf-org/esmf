@@ -1,16 +1,15 @@
-# $Id: makefile,v 1.5 2004/03/16 21:01:09 nscollins Exp $
+# $Id: makefile,v 1.10.6.1 2006/08/29 21:56:49 theurich Exp $
 
 # leave alone.
 ALL: build_here 
 
-# if you have C files in this directory, list them all on the line below.
+AUTOGEN   = ESMF_LocalArrayCreate.F90 ESMF_LocalArrayGet.F90
+
 SOURCEC	  = ESMC_LocalArray_F.C 
-# if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  ESMF_LocalArray.F90 ESMF_LocalAlloc_C.F90
-# if you have .h include files in this dir, list them all on the line below.
+SOURCEF	  = $(AUTOGEN) ESMF_LocalArray.F90 ESMF_LocalAlloc_C.F90
 SOURCEH	  = 
-# include files which go into the public src dir
 STOREH	  = 
+CPPFILES  = $(AUTOGEN)
 
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
@@ -30,17 +29,17 @@ include $(ESMF_DIR)/makefile
 # on the absoft compiler on the mac, files in this dir have to have
 # > 16 bit internal jump tables.  see the absoft faq's for more info.
 ifeq ($(ESMF_COMPILER),absoft)
-FFLAGS += -N11
+ESMF_F90COMPILEOPTS += -N11
 endif
 
 # leave the following line blank.
 DIRS	  = 
 
 CLEANDIRS   =
-CLEANFILES  = ESMF_LocalArray.F90
+CLEANFILES  = $(AUTOGEN)
 CLOBBERDIRS =
 
-ESMF_LocalArray.F90: ESMF_LocalArray.cpp ESMF_LocalArrayMacros.h
+ESMF_LocalArrayCreate.F90: ESMF_LocalArrayCreate.cpp ESMF_LocalArrayMacros.h ESMF_LocalAllocMacros.h
 
-
+ESMF_LocalArrayGet.F90: ESMF_LocalArrayGet.cpp ESMF_LocalArrayMacros.h ESMF_LocalAllocMacros.h
 
