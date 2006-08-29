@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2004/03/16 18:02:19 nscollins Exp $
+# $Id: makefile,v 1.13.6.1 2006/08/29 21:49:50 theurich Exp $
 
 # leave alone.
 ALL: build_here 
@@ -9,17 +9,18 @@ ALL: build_here
 CFLAGS    = ${MPI_INCLUDE}
 FFLAGS    =
 
-# if you have C files in this directory, list them all on the line below.
+# files which are generated from .cpp files
+AUTOGEN   = ESMF_ArrayCreate.F90 ESMF_ArrayGet.F90
+
 SOURCEC	  = ESMC_Array_F.C
-# if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  ESMF_ArrayBase.F90 ESMF_ArrayCreate.F90 \
-             ESMF_ArrayGet.F90 ESMF_Alloc_C.F90
-# if you have .h include files in this dir, list them all on the line below.
+SOURCEF	  =  ESMF_Array.F90 $(AUTOGEN) ESMF_Alloc_C.F90
 SOURCEH	  =
+CPPFILES  = $(AUTOGEN)
 
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
+TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
 
 # is MANSEC something about documentation?
 MANSEC	  = Arrayobj
@@ -37,33 +38,17 @@ include $(ESMF_DIR)/makefile
 # on the mac, you have to give this additional flag so the file uses > 16 bit
 # offsets internally in the file.
 ifeq ($(ESMF_COMPILER),absoft)
-FFLAGS += -N11
+ESMF_F90COMPILEOPTS += -N11
 endif
 
 # leave the following line blank.
 DIRS	  = 
 
 CLEANDIRS   =
-CLEANFILES  = ESMF_ArrayCreate.F90 ESMF_ArrayGet.F90
+CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
 CLOBBERDIRS =
 
-ESMF_ArrayCreate.o: ESMF_ArrayCreate.F90
+ESMF_ArrayCreate.o: ESMF_ArrayCreate.cpp ESMF_ArrayCreateMacros.h ESMF_Array.o
 
-# rule for making ESMF_Array.F90 from ESMF_Array_F90.cpp:
-# either use the F90 with cpp only, or gcc and ignore the
-# warnings about the fortran syntax, depending what is possible on each
-# architecture.  this needs to run on each arch.  nsc 10feb03
-#
-# The rules below work on the mac with gcc and absoft fortran.
-# The -P option prevents putting #line directives in the output, and
-# -E stops after preprocessing.  The 'tr' command substitutes one-for-one,
-# translating @s into newlines to separate multiline macros, and
-# also translate ^ into # so that other include files are ready to
-# be processed by the second runthru of the preprocessor during the 
-# actual compile. (These lines are: ^include "fred" in the
-# original source to shield them from the first preprocess pass.)
-#
-ESMF_ArrayCreate.F90: ESMF_ArrayCreate.cpp ESMF_ArrayCreateMacros.h
-#	gcc -E -P ESMF_ArrayExpand_F90.cpp|tr "@^" "\n#" >ESMF_ArrayExpand.F90
-#
+ESMF_ArrayGet.o: ESMF_ArrayGet.cpp ESMF_ArrayGetMacros.h ESMF_ArrayCreate.o
 
