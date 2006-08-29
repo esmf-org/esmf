@@ -1,3 +1,12 @@
+! $Id: ESMF_Blk2BlkFldRedistSTest.F90,v 1.1.2.2 2006/08/29 21:46:44 samsoncheung Exp $
+!
+! System test ESMF_FieldBlk2BlkRedist
+!  Description on Sourceforge under System Test #XXXXX
+
+!-------------------------------------------------------------------------
+!SYSTEM_TEST        String used by test script to count system tests.
+!=========================================================================
+
 !BOP
 !
 ! !DESCRIPTION:

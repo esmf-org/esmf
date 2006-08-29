@@ -1,3 +1,12 @@
+! $Id: ESMF_Arb2ArbFldRedistSTest.F90,v 1.1.2.2 2006/08/29 21:45:34 samsoncheung Exp $
+!
+! System test ESMF_FieldArb2ArbRedist
+!  Description on Sourceforge under System Test #XXXXX
+
+!-------------------------------------------------------------------------
+!SYSTEM_TEST        String used by test script to count system tests.
+!=========================================================================
+
 !BOP
 !
 ! !DESCRIPTION:
