@@ -1,6 +1,6 @@
-! $Id: ESMF_Blk2BlkBunRedistSTest.F90,v 1.1.2.2 2006/08/29 21:44:38 samsoncheung Exp $
+! $Id: ESMF_BundleRedistBlk2BlkSTest.F90,v 1.1.2.1 2006/08/30 22:26:52 samsoncheung Exp $
 !
-! System test ESMF_BundleBlk2BlkRedist
+! System test ESMF_BundleRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
 
 !-------------------------------------------------------------------------
@@ -68,7 +68,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-     print *, "System Test BundleBlk2BlkRedist."
+     print *, "System Test ESMF_BundleRedistBlk2Blk."
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -334,11 +334,11 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-20    print *, "System Test BundleBlk2BlkRedist complete."
+20    print *, "System Test ESMF_BundleRedistBlk2Blk complete."
 
     if ((myPet .eq. 0) .or. (status .ne. ESMF_SUCCESS)) then
       write(failMsg, *)  "Redistribution back not same as original"
-      write(testname, *) "System Test BundleBlk2BlkRedist: Bundle Redistribute"
+      write(testname, *) "System Test ESMF_BundleRedistBlk2Blk: Bundle Redistribute"
 
       call ESMF_Test((miscount.eq.0) .and. (status.eq.ESMF_SUCCESS), &
                      testname, failMsg, testresult, ESMF_SRCLINE)

@@ -12,9 +12,9 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/system_tests/ESMF_BundleBlk2BlkRedist
+LOCDIR	  = src/system_tests/ESMF_BundleRedistBlk2Blk
 
-SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_Blk2BlkBunRedistSTest
+SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_BundleRedistBlk2BlkSTest
 
 # Object files other than %STest.o that the
 # system tests executable will depend on.
@@ -22,9 +22,9 @@ SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_Blk2BlkBunRedistSTest
 # are to be compiled/created.
 SYSTEM_TESTS_OBJ     =
 
-SYSTEM_TESTS_RUN     = RUN_BundleBlk2BlkRedist
+SYSTEM_TESTS_RUN     = RUN_BundleRedistBlk2Blk
 
-SYSTEM_TESTS_RUN_UNI = RUN_BundleBlk2BlkRedistUNI
+SYSTEM_TESTS_RUN_UNI = RUN_BundleRedistBlk2BlkUNI
 
 
 include $(ESMF_DIR)/makefile
@@ -46,11 +46,11 @@ CLEANDIRS   =
 CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
-RUN_BundleBlk2BlkRedist:
-	$(MAKE) TNAME=Blk2BlkBunRedist NP=6 stest
+RUN_BundleRedistBlk2Blk:
+	$(MAKE) TNAME=BundleRedistBlk2Blk NP=6 stest
 
-RUN_BundleBlk2BlkRedistUNI:
-	$(MAKE) TNAME=Blk2BlkBunRedist NP=1 stest
+RUN_BundleRedistBlk2BlkUNI:
+	$(MAKE) TNAME=BundleRedistBlk2Blk NP=1 stest
 
 
 
