@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleRedistArb2ArbSTest.F90,v 1.1.2.1 2006/08/30 22:05:12 samsoncheung Exp $
+! $Id: ESMF_BundleRedistArb2ArbSTest.F90,v 1.1.2.2 2006/08/30 22:19:23 samsoncheung Exp $
 !
 ! System test ESMF_BundleArb2ArbRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -10,7 +10,7 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test BundleArb2ArbRedist.
+! System test BundleRedistArb2Arb.
 !
 ! This system test checks the functionality of the grid distribution
 ! routines by redistributing data from one Bundle arbitrarily distributed
@@ -71,7 +71,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-     print *, "System Test BundleArb2ArbRedist."
+     print *, "System Test BundleRedistArb2Arb."
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -383,11 +383,11 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-20    print *, "System Test BundleArb2ArbRedist complete."
+20    print *, "System Test BundleRedistArb2Arb complete."
 
     if ((myPet .eq. 0) .or. (status .ne. ESMF_SUCCESS)) then
       write(failMsg, *)  "Redistribution back not same as original"
-      write(testname, *) "System Test BundleArb2ArbRedist: Bundle Redistribute"
+      write(testname, *) "System Test BundleRedistArb2Arb: Bundle Redistribute"
 
       call ESMF_Test((miscount.eq.0) .and. (status.eq.ESMF_SUCCESS), &
                      testname, failMsg, testresult, ESMF_SRCLINE)
