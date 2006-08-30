@@ -46,10 +46,10 @@ CLEANDIRS   =
 CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
-RUN_BundleBlk2ArbRedist:
+RUN_BundleRedistBlk2Arb:
 	$(MAKE) TNAME=BundleRedistBlk2Arb NP=6 stest
 
-RUN_BundleBlk2ArbRedistUNI:
+RUN_BundleRedistBlk2ArbUNI:
 	$(MAKE) TNAME=BundleRedistBlk2Arb NP=1 stest
 
 
