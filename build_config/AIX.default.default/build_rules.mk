@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.24.2.5 2006/08/30 06:56:35 theurich Exp $
+#  $Id: build_rules.mk,v 1.24.2.6 2006/08/30 07:18:02 theurich Exp $
 #
 #  AIX.default.default
 #
@@ -78,6 +78,8 @@ ESMF_CXXCOMPILEOPTS       += -q32
 ESMF_CXXLINKOPTS          += -q32
 ESMF_F90COMPILEOPTS       += -q32
 ESMF_F90LINKOPTS          += -q32
+ESMF_ARDEFAULT             = ar -X32
+ESMF_RANLIBDEFAULT         = ranlib -X32
 endif
 ifeq ($(ESMF_ABI),64)
 ESMF_CXXCOMPILEOPTS       += -q64
