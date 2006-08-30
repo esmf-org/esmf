@@ -1,34 +1,46 @@
-# $Id: makefile,v 1.10 2004/03/16 18:04:07 nscollins Exp $ 
+# $Id: makefile,v 1.17.6.1 2006/08/30 05:37:43 theurich Exp $ 
 
 #
 ALL: build_here 
 
+AUTOGEN   = ESMF_FieldGet.F90 ESMF_FieldSet.F90 ESMF_FieldCreate.F90
 CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 
-SOURCEF	  = ESMF_Field.F90 ESMF_FieldGet.F90
+SOURCEF	  = ESMF_Field.F90 $(AUTOGEN)
 SOURCEH	  = 
+CPPFILES  = $(AUTOGEN)
+
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
+TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
+
 
 MANSEC	  = Fieldobj
 LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/Field/src
 
-
 include $(ESMF_DIR)/makefile
+
+# on AIX with the new XLF compiler (version 10.1) there is a
+# problem compiling the local files with optimization ->
+# solution: turn optimization off for AIX
+ifeq ($(ESMF_OS),AIX)
+ESMF_OPTLEVEL = 0
+endif
 
 DIRS	  = 
 
 CLEANDIRS   =
-CLEANFILES  = ESMF_FieldGet.F90
+CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
 CLOBBERDIRS =
 
 
-ESMF_Bundle.o:	        ESMF_Field.o
+ESMF_FieldGet.o: ESMF_Field.o ESMF_FieldGet.cpp ESMF_FieldGetMacros.h
 
-ESMF_FieldGet.F90: ESMF_FieldGet.cpp ESMF_FieldMacros.h
+ESMF_FieldSet.o: ESMF_Field.o ESMF_FieldSet.cpp ESMF_FieldSetMacros.h
 
-
+ESMF_FieldCreate.o: ESMF_Field.o ESMF_FieldGet.o ESMF_FieldSet.o \
+                    ESMF_FieldCreate.cpp ESMF_FieldCreateMacros.h
 
 
