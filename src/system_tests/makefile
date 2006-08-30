@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20.4.2 2006/08/30 15:33:11 samsoncheung Exp $ 
+# $Id: makefile,v 1.20.4.3 2006/08/30 22:55:42 samsoncheung Exp $ 
 
 ALL: build_system_tests
 
@@ -16,12 +16,12 @@ DIRS     = \
            ESMF_FieldRegridConserv \
            ESMF_FieldRegridMulti \
            ESMF_FieldRegridOrder \
-           ESMF_BundleArb2ArbRedist \
-           ESMF_BundleBlk2ArbRedist \
-           ESMF_BundleBlk2BlkRedist \
-           ESMF_FieldArb2ArbRedist \
-           ESMF_FieldBlk2ArbRedist \
-           ESMF_FieldBlk2BlkRedist \
+           ESMF_BundleRedistArb2Arb \
+           ESMF_BundleRedistBlk2Arb \
+           ESMF_BundleRedistBlk2Blk \
+           ESMF_FieldRedistArb2Arb \
+           ESMF_FieldRedistBlk2Arb \
+           ESMF_FieldRedistBlk2Blk \
            ESMF_FieldExcl \
            ESMF_SimpleCoupling \
            ESMF_FlowComp \
