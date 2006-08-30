@@ -1,6 +1,6 @@
-! $Id: ESMF_BundleRedistArb2ArbSTest.F90,v 1.1.2.2 2006/08/30 22:19:23 samsoncheung Exp $
+! $Id: ESMF_BundleRedistArb2ArbSTest.F90,v 1.1.2.3 2006/08/30 23:01:45 samsoncheung Exp $
 !
-! System test ESMF_BundleArb2ArbRedist
+! System test BundleRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
 
 !-------------------------------------------------------------------------
