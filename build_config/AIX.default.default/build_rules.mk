@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.24.2.4 2006/08/16 20:09:11 theurich Exp $
+#  $Id: build_rules.mk,v 1.24.2.5 2006/08/30 06:56:35 theurich Exp $
 #
 #  AIX.default.default
 #
@@ -74,10 +74,10 @@ endif
 # 32- vs. 64-bit ABI
 #
 ifeq ($(ESMF_ABI),32)
-ESMF_CXXCOMPILEOPTS       +=
-ESMF_CXXLINKOPTS          +=
-ESMF_F90COMPILEOPTS       +=
-ESMF_F90LINKOPTS          +=
+ESMF_CXXCOMPILEOPTS       += -q32
+ESMF_CXXLINKOPTS          += -q32
+ESMF_F90COMPILEOPTS       += -q32
+ESMF_F90LINKOPTS          += -q32
 endif
 ifeq ($(ESMF_ABI),64)
 ESMF_CXXCOMPILEOPTS       += -q64
