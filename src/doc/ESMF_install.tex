@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.49.2.3 2006/08/25 06:26:00 theurich Exp $
+% $Id: ESMF_install.tex,v 1.49.2.4 2006/08/31 19:17:44 theurich Exp $
 
 %\section{Installing and Building the ESMF}
 \subsection{ESMF Download Options}
@@ -268,11 +268,17 @@ See {\tt ESMF\_BOPT} for details.
 
 \item[ESMF\_OS]
 Possible value: output of {\tt uname -s} except for {\tt UNICOS/mp} where
-{\tt ESMF\_OS} is {\tt Unicos}.
+{\tt ESMF\_OS} is {\tt Unicos} or when cross-compiling.
 
-Not normally set by user. This variable indicates the system on which the ESMF
-library is being built. For cross-compiling systems this may be different from 
-the OS of the target platform. {\tt ESMF\_OS} is set automatically.
+Not normally set by user unless cross-compiling. This variable indicates the
+target system for which the ESMF library is being built. Under normal
+circumstances, i.e. ESMF is being build on the target system, {\tt ESMF\_OS} is
+set automatically. However, when cross-compiling for a different target system
+{\tt ESMF\_OS} must be set to the respective target OS. For example, when
+compiling for the Cray X1 on an interactive X1 node {\tt ESMF\_OS} will be set
+automatically. However, when ESMF is being cross-compiled for the X1 on a Linux
+host the user must set {\tt ESMF\_OS} to {\tt Unicos} manually in order to
+indicate the intended target platform.
 
 \item[ESMF\_PTHREADS]
 Possible value: {\tt ON} (default), {\tt OFF}

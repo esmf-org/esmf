@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.20.2.1 2006/08/28 20:37:33 theurich Exp $
+%  $Id: ESMF_builddetail.tex,v 1.20.2.2 2006/08/31 19:17:44 theurich Exp $
 
 
 \subsection{Make System}
@@ -195,11 +195,11 @@ fragments follow this naming convention:
 
 Where ESMF\_OS, ESMF\_COMPILER, and ESMF\_SITE are environment
 variables either set by the user or given default values by the build
-system. ESMF\_OS is the current operating system on which the build is
-performed and will have the value returned by the command {\tt uname -s}.
-ESMF\_COMPILER is the compiler name. ESMF\_SITE, if set, is generally the
-current machine name, the location, or the organization (e.g. mit, cola).  If
-there are no site specific files for a particular platform, then 
+system. ESMF\_OS is the target operating system. If the build is performed
+on the target system ESMF\_OS will typically have the value returned by the
+command {\tt uname -s}. ESMF\_COMPILER is the compiler name. ESMF\_SITE, if set,
+is generally the current machine name, the location, or the organization (e.g.
+mit, cola).  If there are no site specific files for a particular platform, then
 ESMF\_COMPILER and ESMF\_SITE will be set to {\tt default}.  Examples:
 
 \begin{verbatim}
