@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.49.2.4 2006/08/31 19:17:44 theurich Exp $
+% $Id: ESMF_install.tex,v 1.49.2.5 2006/08/31 21:53:52 theurich Exp $
 
 %\section{Installing and Building the ESMF}
 \subsection{ESMF Download Options}
@@ -244,6 +244,11 @@ Possible value: {\em executable}
 This variable can be used to override the default utility used to launch
 parallel execution of ESMF test applications. The executable in 
 {\tt ESMF\_MPIRUN} may be specified with path.
+
+\item[ESMF\_MPIRUNOPTIONS]
+Possible value: {\em flags}
+
+This variable can be used to provide additional options to {\tt ESMF\_MPIRUN}. 
 
 \item[ESMF\_NO\_INTEGER\_1\_BYTE]
 Possible value: {\tt TRUE}, {\tt FALSE} (default)
