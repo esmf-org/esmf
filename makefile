@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.69.2.10 2006/08/15 19:05:33 theurich Exp $
+# $Id: makefile,v 1.69.2.11 2006/08/31 20:12:20 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -76,6 +76,8 @@ script_info:
 	  echo "ESMF_BATCH: $(ESMF_BATCH)" ; fi
 	-@if [ -n "$(ESMF_BATCHOPTIONS)" ] ; then \
 	  echo "ESMF_BATCHOPTIONS: $(ESMF_BATCHOPTIONS)" ; fi
+	-@if [ -n "$(ESMF_MPIRUNOPTIONS)" ] ; then \
+	  echo "ESMF_MPIRUNOPTIONS: $(ESMF_MPIRUNOPTIONS)" ; fi
 	-@if [ -n "$(ESMF_STDCXX_LIBRARY)" ] ; then \
 	  echo "ESMF_STDCXX_LIBRARY: $(ESMF_STDCXX_LIBRARY)" ; fi
 	-@echo "ESMF_PTHREADS: $(ESMF_PTHREADS)"
@@ -212,6 +214,8 @@ info_mk:
 	  echo "# ESMF_BATCH: $(ESMF_BATCH)" >> $(MKINFO) ; fi
 	-@if [ -n "$(ESMF_BATCHOPTIONS)" ] ; then \
 	  echo "# ESMF_BATCHOPTIONS: $(ESMF_BATCHOPTIONS)" >> $(MKINFO) ; fi
+	-@if [ -n "$(ESMF_MPIRUNOPTIONS)" ] ; then \
+	  echo "# ESMF_MPIRUNOPTIONS: $(ESMF_MPIRUNOPTIONS)" >> $(MKINFO) ; fi
 	-@if [ -n "$(ESMF_STDCXX_LIBRARY)" ] ; then \
 	  echo "# ESMF_STDCXX_LIBRARY: $(ESMF_STDCXX_LIBRARY)" >> $(MKINFO) ; fi
 	-@echo "# ESMF_PTHREADS: $(ESMF_PTHREADS)" >> $(MKINFO)
