@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.13.2.1 2006/08/03 19:51:17 svasquez Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.13.2.2 2006/08/31 17:58:58 theurich Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -47,7 +47,7 @@ contains
 
     integer :: openStatus, readStatus, startTesting, regrid_rc
     integer :: testCount
-    character(ESMF_MAXSTR) :: failMsg, name, testMsg, halo
+    character(ESMF_MAXSTR) :: failMsg, name, testMsg
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0
     real(ESMF_KIND_R8) :: err_threshold
@@ -897,8 +897,6 @@ contains
  !--Compute the values of the test function and store in the f90ptr.
  !  The parameter Choice determines which function is returned.
  !  Choice 3 and 4 are the only ones appropriate for WHOLE_GLOBE tests.
-
-  use ESMF_Mod
 
   integer, intent(in)                             :: Choice
   real(ESMF_KIND_R8), dimension(:,:), pointer     :: xCoord, yCoord
