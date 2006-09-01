@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.24.2.6 2006/08/30 07:18:02 theurich Exp $
+#  $Id: build_rules.mk,v 1.24.2.7 2006/09/01 23:19:23 theurich Exp $
 #
 #  AIX.default.default
 #
@@ -44,13 +44,6 @@ else
 $(error Invalid ESMF_COMM setting: $(ESMF_COMM))
 endif
 endif
-endif
-
-############################################################
-# Set ESMF_MPIRUNDEFAULT according to ESMF_BATCH setting
-#
-ifeq ($(ESMF_BATCH),lsf.ibmpjl)
-ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
 endif
 
 ############################################################
