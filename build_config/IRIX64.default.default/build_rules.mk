@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.26.2.3 2006/08/16 20:09:12 theurich Exp $
+# $Id: build_rules.mk,v 1.26.2.4 2006/09/07 19:46:06 theurich Exp $
 # 
 # IRIX64.default.default
 #
@@ -78,7 +78,14 @@ endif
 ############################################################
 # Special compiler flags
 #
+# abide to C++ language standard; don't put libc into std name space
 ESMF_CXXCOMPILEOPTS       += -LANG:std=on:libc_in_namespace_std=off
+#
+# allow for multi-processor code (important for shared objects!)
+ESMF_CXXCOMPILEOPTS       += -mp
+ESMF_CXXLINKOPTS          += -mp
+ESMF_F90COMPILEOPTS       += -mp
+ESMF_F90LINKOPTS          += -mp
 
 ############################################################
 # Conditionally add pthread compiler and linker flags
