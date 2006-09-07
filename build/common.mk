@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.20 2006/08/25 22:17:55 theurich Exp $
+#  $Id: common.mk,v 1.155.2.21 2006/09/07 19:45:41 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2648,6 +2648,7 @@ shared:
 		    mkdir tmp_$$NEXTLIB ;\
 		    cd tmp_$$NEXTLIB  ;\
 	            $(ESMF_AR) $(ESMF_AREXTRACTFLAGS) ../$$NEXTLIB.a ;\
+                    echo $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(LDIR)/$$NEXTLIB.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) ;\
 		    $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(LDIR)/$$NEXTLIB.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) ;\
 		    cd .. ;\
 		    $(ESMF_RM) -r tmp_$$NEXTLIB ;\
