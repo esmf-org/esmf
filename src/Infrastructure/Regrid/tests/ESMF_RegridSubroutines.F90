@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.13.2.2 2006/08/31 17:58:58 theurich Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.13.2.3 2006/09/07 23:39:44 peggyli Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -748,6 +748,14 @@ contains
    !Distribute the source grid
    !===========================
     call ESMF_GridDistribute(srcgrid, delayout=layout1, rc=rc)
+
+    !--- Grid dimension to cover full physical domain.
+    nx_domain=240
+    ny_domain=120
+
+    !--- Number of cells in the current grid.
+    n_cells = (/ int(real(nx_domain)*crop_factor), &
+                 int(real(ny_domain)*crop_factor) /)
 
    !Create the destination grid
    !===========================
