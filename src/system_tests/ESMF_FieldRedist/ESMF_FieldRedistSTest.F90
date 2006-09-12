@@ -1,10 +1,11 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.6 2004/03/09 23:55:26 jwolfe Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.31.4.1 2006/09/12 16:42:52 theurich Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
 
 !-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+!SYSTEM_TEST        String used by test script to count system tests.
+!=========================================================================
 
 !BOP
 !
@@ -33,35 +34,32 @@
     implicit none
     
     ! Local variables
-    integer :: i, j, rc
-    integer, dimension(:), allocatable :: delist
-    integer :: ndes, deId, nde(2)
+    integer :: i, j, ifld, jfld, rc
+    integer :: npets, my_pet, my_de
     integer :: miscount, hWidth
-    integer :: status
     integer, dimension(2) :: decompids1, decompids2, counts, localCounts
     logical :: match
-    real(ESMF_KIND_R8) :: pi
+    real(ESMF_KIND_R8) :: pi, compval
     real(ESMF_KIND_R8), dimension(2) :: min, max
     real(ESMF_KIND_R8), dimension(:,:), pointer :: coordX, coordY
     real(ESMF_KIND_R8), dimension(:,:), pointer :: srcdata, resdata
-    type(ESMF_GridKind)    :: horzGridKind
-    type(ESMF_GridStagger) :: horzStagger
-    type(ESMF_CoordSystem) :: horzCoordSystem
-    type(ESMF_DELayout) :: layout0, layout1
+    type(ESMF_GridHorzStagger) :: horzStagger
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array1, array2, array3
     type(ESMF_Array), dimension(:), pointer :: coordArray
     type(ESMF_Grid)  ::  grid1,  grid2
     type(ESMF_Field) :: field1, field2, field3
     type(ESMF_RouteHandle) :: rh12, rh23
-        
+    type(ESMF_VM):: vm
+    type(ESMF_DELayout) :: delayout1
+
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
 
     ! individual test name
     character(ESMF_MAXSTR) :: testname
 
-    ! individual test failure message and final status msg
+    ! individual test failure message and final rc msg
     character(ESMF_MAXSTR) :: failMsg, finalMsg
 
 !-------------------------------------------------------------------------
@@ -75,29 +73,20 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    call ESMF_Initialize(rc)
+    ! Initialize the framework and get back the default global VM
+    call ESMF_Initialize(vm=vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
-    ! Create a default 1xN DELayout
-    layout0 = ESMF_DELayoutCreate(rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_DELayoutGetNumDES(layout0, ndes, rc)
+    ! Get the PET count and our PET number
+    call ESMF_VMGet(vm, localPet=my_pet, petCount=npets, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
-    if (ndes .eq. 1) then
-       print *, "This test must run with > 1 processor"
+    miscount = 0
+
+     if (2*(npets/2) .ne. npets) then
+       print *, "This test must run on an even number of processes"
        goto 20
-    endif
-
-    ! And then create a 2D layout to be used by the Fields
-    nde(1) = 2
-    nde(2) = ndes/2
-    allocate(delist(ndes))
-    delist = (/ (i, i=0, ndes-1) /)
-    layout1 = ESMF_DELayoutCreate(layout0, 2, (/ nde(1), nde(2) /), (/ 0, 0 /), &
-                                  de_indices=delist, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    print *, "DELayout Create finished, rc =", rc
+     endif
 
     print *, "Create section finished"
 
@@ -108,6 +97,10 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
+    ! Create a 2D layout to be used by the Fields
+    delayout1 = ESMF_DELayoutCreate(vm, (/ 2, npets/2 /), rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+
     !  Create the grids and corresponding Fields
     !  note that the Grids are the same but decomposed differently
     pi              = 3.14159
@@ -118,60 +111,77 @@
     max(1)          = 60.0
     min(2)          = 0.0
     max(2)          = 50.0
-    horzGridKind    = ESMF_GridKind_XY
-    horzStagger     = ESMF_GridStagger_A
-    horzCoordSystem = ESMF_CoordSystem_Cartesian
-    call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_REAL, &
+    horzStagger     = ESMF_GRID_HORZ_STAGGER_A
+    call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
                             kind=ESMF_R8)
 
     decompids1(1) = 1
     decompids1(2) = 2
-    grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
-                                          minGlobalCoordPerDim=min, &
-                                          maxGlobalCoordPerDim=max, &
-                                          layout=layout1, &
-                                          decompIds=decompids1, &
-                                          horzGridKind=horzGridKind, &
-                                          horzStagger=horzStagger, &
-                                          horzCoordSystem=horzCoordSystem, &
-                                          name="source grid", rc=status)
+    grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
+                                     minGlobalCoordPerDim=min, &
+                                     maxGlobalCoordPerDim=max, &
+                                     horzStagger=horzStagger, &
+                                     name="source grid", rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_GridDistribute(grid1, delayout=delayout1, &
+                             decompIds=decompids1, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     field1 = ESMF_FieldCreate(grid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               haloWidth=hWidth, name="field1", rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     field3 = ESMF_FieldCreate(grid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               haloWidth=hWidth, name="field3", rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     decompids2(1) = 2
     decompids2(2) = 1
-    grid2 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
-                                          minGlobalCoordPerDim=min, &
-                                          maxGlobalCoordPerDim=max, &
-                                          layout=layout1, &
-                                          decompIds=decompids2, &
-                                          horzGridKind=horzGridKind, &
-                                          horzStagger=horzStagger, &
-                                          horzCoordSystem=horzCoordSystem, &
-                                          name="destination grid", rc=status)
+    grid2 = ESMF_GridCreateHorzXYUni(counts=counts, &
+                                     minGlobalCoordPerDim=min, &
+                                     maxGlobalCoordPerDim=max, &
+                                     horzStagger=horzStagger, &
+                                     name="destination grid", rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_GridDistribute(grid2, delayout=delayout1, &
+                             decompIds=decompids2, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     field2 = ESMF_FieldCreate(grid2, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               haloWidth=hWidth, name="field2", rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! precompute communication patterns
-    call ESMF_FieldRedistStore(field1, field2, layout1, rh12, rc=status)
-    call ESMF_FieldRedistStore(field2, field3, layout1, rh23, rc=status)
+    call ESMF_FieldRedistStore(field1, field2, vm, routehandle=rh12, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldRedistStore(field2, field3, vm, routehandle=rh23, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! get coordinate arrays available for setting the source data array
     allocate(coordArray(2))
-    call ESMF_GridGetCoord(grid1, relloc=ESMF_CELL_CENTER, &
-                           centerCoord=coordArray, rc=status)
-    call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
-    call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
-    call ESMF_ArrayGet(coordArray(1), counts=localCounts, rc=status)
+    call ESMF_GridGetCoord(grid1, horzRelloc=ESMF_CELL_CENTER, &
+                           centerCoord=coordArray, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_ArrayGet(coordArray(1), counts=localCounts, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! Get pointers to the data and set it up
-    call ESMF_FieldGetData(field1, array1, rc)
+    call ESMF_FieldGetArray(field1, array1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_ArrayGetData(array1, srcdata, ESMF_DATA_REF, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldGetArray(field3, array3, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_ArrayGetData(array3, resdata, ESMF_DATA_REF, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
-    ! set data array to a function of coordinates (just in the computational part
-    ! of the array)
+    ! initialize data arrays
+    srcdata = 0.0
+    resdata = 0.0
+
+    ! set data array to a function of coordinates (in the computational part
+    ! of the array only, not the halo region)
     do j    = 1,localCounts(2)
        do i = 1,localCounts(1)
            srcdata(i+hWidth,j+hWidth) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
@@ -180,7 +190,7 @@
     enddo
 
     print *, "Initial data, before Transpose:"
-    call ESMF_ArrayPrint(array1, "foo", rc);
+    call ESMF_ArrayPrint(array1, "foo", rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! No deallocate() is needed for array data, it will be freed when the
@@ -196,8 +206,9 @@
 !
 
     !! Call transpose method here, output ends up in field2
-    call ESMF_FieldRedist(field1, field2, rh12, rc=status)
-    call ESMF_FieldGetData(field2, array2, rc)
+    call ESMF_FieldRedist(field1, field2, rh12, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldGetArray(field2, array2, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after Transpose:"
@@ -206,8 +217,9 @@
 
     !! Transpose back so we can compare contents
     !! Call transpose method again here, output ends up in field3
-    call ESMF_FieldRedist(field2, field3, rh23, rc=status)
-    call ESMF_FieldGetData(field3, array3, rc)
+    call ESMF_FieldRedist(field2, field3, rh23, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldGetArray(field3, array3, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after second Transpose, should match original:"
@@ -224,26 +236,27 @@
 !-------------------------------------------------------------------------
 !   Print result
 
-    call ESMF_DELayoutGetDEID(layout1, deId, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_DELayoutGet(delayout1, localDE=my_de, rc=rc)
 
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
-    print *, "Result from deId ", deId
+    print *, "Result from DE number ", my_de
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
 
-    call ESMF_ArrayGetData(array1, srcdata, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArrayGetData(array3, resdata, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
     match    = .true.
     miscount = 0
-    do i     = 1,size(resdata,1)
-      do j   = 1,size(resdata,2)
-        if (srcdata(i,j) .ne. resdata(i,j)) then
+    do j   = 1,localCounts(2)
+      jfld = j+hWidth
+      do i = 1,localCounts(1)
+        ifld = i+hWidth
+        compval = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
+                       + 2.0*sin(coordY(i,j)/50.0*pi)
+        if ((srcdata(ifld,jfld) .ne. resdata(ifld,jfld)) .OR. &
+            (abs(resdata(ifld,jfld)-compval).ge.1.0d-12)) then
           print *, "array contents do not match at: (", i,j, ") on DE ", &
-                   deId, ".  src=", srcdata(i,j), "dst=", resdata(i,j)
+                   my_de, ".  src=", srcdata(ifld,jfld), "dst=", &
+                   resdata(ifld,jfld), "realval=", compval
           match = .false.
           miscount = miscount + 1
           if (miscount .gt. 40) then
@@ -253,7 +266,7 @@
         endif
       enddo
     enddo
-    if (match) print *, "Array contents matched correctly!! deId = ", deId
+    if (match) print *, "Array contents matched correctly!! DE = ", my_de
 10  continue
 
     print *, "Finalize section finished"
@@ -276,15 +289,19 @@
     if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_FieldDestroy(field3, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_DELayoutDestroy(layout1, rc)
+    call ESMF_GridDestroy(grid1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_GridDestroy(grid2, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_DELayoutDestroy(delayout1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-20    print *, "System Test FieldRedist complete!"
+20    print *, "System Test FieldRedist complete."
 
-    if ((deId .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+    if ((my_pet .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
       write(failMsg, *)  "Transposed transpose not same as original"
       write(testname, *) "System Test FieldRedist: Field Transpose/Redistribute"
 
@@ -293,7 +310,7 @@
 
       ! Separate message to console, for quick confirmation of success/failure
       if ((miscount.eq.0) .and. (rc .eq. ESMF_SUCCESS)) then
-        write(finalMsg, *) "SUCCESS!! Data transposed twice same as original"
+        write(finalMsg, *) "SUCCESS: Data transposed twice same as original."
       else
         write(finalMsg, *) "System Test did not succeed. ", &
         "Data transpose does not match expected values, or error code set ", rc
@@ -305,7 +322,7 @@
 
     endif
     
-    call ESMF_Finalize(rc)
+    call ESMF_Finalize(rc=rc)
 
     end program FieldRedist
     
