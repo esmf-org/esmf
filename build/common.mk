@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.22 2006/09/08 21:28:43 svasquez Exp $
+#  $Id: common.mk,v 1.155.2.23 2006/09/12 21:32:43 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1812,7 +1812,7 @@ run_use_test_cases_uni:  reqdir_tests
 	   fi; \
 	   echo current working directory is now `pwd` ; \
         fi; \
-	$(MAKE) ACTION=tree_use_test_cases_uni tree ; \
+	$(MAKE) ACTION=tree_run_use_test_cases_uni tree ; \
 	$(MAKE) check_use_test_cases
 
 tree_run_use_test_cases_uni: $(USE_TEST_CASES_RUN_UNI)
