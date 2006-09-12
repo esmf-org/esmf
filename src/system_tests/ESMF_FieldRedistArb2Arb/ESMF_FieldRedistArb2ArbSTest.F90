@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.1.2.1 2006/08/30 22:36:47 samsoncheung Exp $
+! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.1.2.2 2006/09/12 16:49:54 theurich Exp $
 !
 ! System test FieldRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -87,11 +87,6 @@
      if (status .ne. ESMF_SUCCESS) goto 20
 
      miscount = 0
-
-     if (npets .eq. 1) then
-       print *, "This test must run with > 1 processor"
-       goto 20
-     endif
 
      print *, "Create section finished"
 !
