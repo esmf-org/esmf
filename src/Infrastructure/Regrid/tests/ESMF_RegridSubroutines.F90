@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.13.2.3 2006/09/07 23:39:44 peggyli Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.13.2.4 2006/09/12 09:53:35 peggyli Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -109,7 +109,7 @@ contains
                 	rc = ESMF_FAILURE
                 	return
 		endif
-		! Run the Regrid unit test here
+		! Run the Regrid unit test here: srcgrid to dstgrid1
 		err_threshold=0.5
 		write(failMsg, *) "Error in Regrid"
                 write(name, *) "Regrid test: ", trim(testString)
@@ -444,9 +444,9 @@ contains
       integer, optional, intent(out) :: ier
 
     !--- Local variables
-    type(ESMF_Field) :: field1, field2
-    type(ESMF_Grid) :: srcgrid, dstgrid
-    type(ESMF_RouteHandle) :: regrid_rh
+    type(ESMF_Field) :: field1, field2, field3
+    type(ESMF_Grid) :: srcgrid, dstgrid1, dstgrid2
+    type(ESMF_RouteHandle) :: regrid_rh1, regrid_rh2
     type(ESMF_DELayout) :: layout1, layout2
     integer :: rc
 
@@ -456,11 +456,12 @@ contains
     integer :: nx_domain, ny_domain
     integer ::  n_cells(2), sub_rc
     type(ESMF_ArraySpec) :: arrayspec
-    real(ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
+    real(ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2, f90ptr3
     type(ESMF_Array), dimension(2) :: ESMF_coords
     ! type(ESMF_Array), dimension(2) :: ESMF_coords2
     real(ESMF_KIND_R8), dimension(:,:), pointer :: x_coords,y_coords
     real(ESMF_KIND_R8), dimension(:,:), pointer :: x_coords2,y_coords2
+    real(ESMF_KIND_R8), dimension(:,:), pointer :: x_coords3,y_coords3
     real(ESMF_KIND_R8), dimension(:,:), pointer :: Phi, Theta
     real(ESMF_KIND_R8), dimension(:,:), pointer     :: SolnOnTarget
     real(ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
@@ -554,9 +555,9 @@ contains
                         lbSrc, ubSrc, Srchalo, maxcoords, f90ptr1, ier)
 
 
-   !Create the destination field (with halo width of 0)
+   !Create the destination field for dstgrid1(with halo width of 0)
    !===================================================
-    call createField(grid=Dstgrid,               &
+    call createField(grid=Dstgrid1,               &
                      LocChoice = DstLocChoice,   &
                      halo      = DstHalo,        &
                      fieldName = "Dst pressure", &
@@ -564,6 +565,19 @@ contains
                      f90ptr    = f90ptr2,        &
                      xCoor     = x_coords2,      &
                      yCoor     = y_coords2,      &
+                     arrayspec = arrayspec,      &
+                     rc        = sub_rc )
+
+   !Create the destination field for distgrid2(with halo width of 0)
+   !===================================================
+    call createField(grid=Dstgrid2,               &
+                     LocChoice = DstLocChoice,   &
+                     halo      = DstHalo,        &
+                     fieldName = "Dst pressure", &
+                     field     = field3,         &
+                     f90ptr    = f90ptr3,        &
+                     xCoor     = x_coords3,      &
+                     yCoor     = y_coords3,      &
                      arrayspec = arrayspec,      &
                      rc        = sub_rc )
 
@@ -587,7 +601,17 @@ contains
    !Do all the calculations in preparation for the actual re-gridding
    !=================================================================
     call ESMF_FieldRegridStore(field1, field2, vm, &
-                               routehandle=regrid_rh, &
+                               routehandle=regrid_rh1, &
+                               regridmethod=MethodChoice, rc=rc)
+    if (rc.ne.ESMF_SUCCESS) then 
+	ier = ESMF_FAILURE
+        print *, "ESMF_FieldRegridStore failed"
+    end if
+
+   !Do all the calculations in preparation for the actual re-gridding
+   !=================================================================
+    call ESMF_FieldRegridStore(field1, field3, vm, &
+                               routehandle=regrid_rh2, &
                                regridmethod=MethodChoice, rc=rc)
     if (rc.ne.ESMF_SUCCESS) then 
 	ier = ESMF_FAILURE
@@ -597,7 +621,13 @@ contains
  
    !Regrid
    !======
-    call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)
+    call ESMF_FieldRegrid(field1, field2, regrid_rh1, rc=rc)
+    if (rc.ne.ESMF_SUCCESS) then 
+	ier = ESMF_FAILURE
+        print *, "ESMF_FieldRegrid failed"
+    end if
+
+    call ESMF_FieldRegrid(field1, field3, regrid_rh2, rc=rc)
     if (rc.ne.ESMF_SUCCESS) then 
 	ier = ESMF_FAILURE
         print *, "ESMF_FieldRegrid failed"
@@ -677,13 +707,94 @@ contains
          '  local max norm error=',max_error, &
          '  local avg norm error=',avg_error
 
-    call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
+   deallocate(SolnOnTarget)
+
+   !Verify the second regrid with a different grid size 
+   !=====================================================
+
+    !Array bounds in the destination grid (local indexing)
+    !=====================================================
+     lbDst(:) = lbound(f90ptr3)
+     ubDst(:) = ubound(f90ptr3)
+
+    !Allocate the array pointer for the "exact solution at the dest. grid
+    !====================================================================
+     allocate( SolnOnTarget( lbDst(1):ubDst(1) , lbDst(2):ubDst(2) ) )
+
+
+   !--Re-associate the Phi and Theta pointers to the field2 coordinates
+   !===================================================================
+    if (domainType == 1) then
+      !--Whole_globe domain:
+      Phi => x_coords3
+      Theta => y_coords3
+    else if (domainType ==2) then
+      !--Regional domain:
+      allocate( Phi( size(x_coords3,1), size(x_coords3,2) ) )
+      allocate( Theta( size(y_coords3,1) , size(y_coords3,2) ) )
+      Phi   = 2.  * pi * (x_coords3+10.) / xmax
+      Theta = 0.5 * pi * (y_coords3+10.) / ymax
+    else
+      print*,'ERROR! domainType=',domainType,' valid values=1,2'
+      ier=ESMF_FAILURE
+    end if
+
+
+   !--Compute exact fcn. values at the Destination Grid 
+   !===================================================
+    call functionValues(FieldChoice, x_coords3, y_coords3, Phi, Theta, &
+                        lbDst, ubDst, DstHalo, maxcoords, SolnOnTarget, ier)
+
+ 
+   !Verify success in regridding. Compute maximum and average normalized error
+   !==========================================================================
+   max_error=0.
+   avg_error=0.
+
+   !--set the threshold for the normalized error..
+    if ( present(error_threshold) ) then
+      epsil=error_threshold
+    else
+      epsil=0.5 !threshold for normalized error
+    end if
+
+   do j=lbDst(2)+1,ubDst(2)
+     do i=lbDst(1),ubDst(1)
+       RelativeError=abs( (SolnOnTarget(i,j)-f90ptr3(i,j)) / SolnOnTarget(i,j) )
+      !write(*,'(a,i2,a,2i3,1x,e11.4,1x,e11.4)') &
+      !     'localPET=',localPet,' i,j=',i,j,SolnOnTarget(i,j), &
+      !     f90ptr3(i,j)
+       if (RelativeError .gt. epsil ) then
+         regrid_rc=ESMF_FAILURE
+         ier=ESMF_FAILURE
+        print *, "RelativeError .gt. epsil"
+     !TODO compute the global values of i,j for diagnostic printing
+       end if
+       avg_error=avg_error+RelativeError
+       if(RelativeError > max_error) max_error=RelativeError
+     end do
+   end do
+  !TODO: compute the GLOBAL average and maximum normalized errors
+   avg_error=avg_error/( (ubDst(1)-lbDst(1)+1) * (ubDst(2)-lbDst(2)+1) )
+   write(*,'(a,i3,a,i1,a,1pe12.4,a,1pe12.4)' ) &
+         'localPet=',localPet,' FieldChoice=',FieldChoice, &
+         '  local max norm error=',max_error, &
+         '  local avg norm error=',avg_error
+
+
+    call ESMF_FieldRegridRelease(regrid_rh1, rc=rc)
     if (rc.ne.ESMF_SUCCESS) then 
 	ier = ESMF_FAILURE
         print *, "ESMF_FieldRegridRelease failed"
     end if
 
+    call ESMF_FieldRegridRelease(regrid_rh2, rc=rc)
+    if (rc.ne.ESMF_SUCCESS) then 
+	ier = ESMF_FAILURE
+        print *, "ESMF_FieldRegridRelease failed"
+    end if
 
+    deallocate(SolnOnTarget)
 !-------------------------------------------------------------------------
 !    ! Cleanup
 
@@ -691,9 +802,13 @@ contains
 
     call ESMF_FieldDestroy(field2, rc=rc)
 
+    call ESMF_FieldDestroy(field3, rc=rc)
+
     call ESMF_GridDestroy(srcgrid, rc=rc)
 
-    call ESMF_GridDestroy(dstgrid, rc=rc)
+    call ESMF_GridDestroy(dstgrid1, rc=rc)
+
+    call ESMF_GridDestroy(dstgrid2, rc=rc)
 !----------------------------------------------------------------
     return
 
@@ -716,7 +831,7 @@ contains
     !--- Grid dimension to cover full physical domain.
     nx_domain=100
     ny_domain=150
-
+	
     !--Coordinate ranges of the "test grids"
     ! The following line is replaced with actual values to avoid an
     ! internal compiler error on jazz pgi.
@@ -749,6 +864,19 @@ contains
    !===========================
     call ESMF_GridDistribute(srcgrid, delayout=layout1, rc=rc)
 
+   !Create the destination grid1 (the same size as srcgrid)
+   !=======================================================
+    dstgrid1 = ESMF_GridCreateHorzLatLonUni( n_cells, &
+                   mincoords, maxcoords, &
+                   horzStagger=DstGridChoice, &
+                   dimUnits= (/ "radians" , "radians" /), &
+                   periodic=(/ ESMF_true , ESMF_false /), &
+                   name="dstgrid1", rc=rc)
+
+   !Distribute destination grid
+   !===========================
+    call ESMF_GridDistribute(dstgrid1, delayout=layout2, rc=rc)
+
     !--- Grid dimension to cover full physical domain.
     nx_domain=240
     ny_domain=120
@@ -757,18 +885,18 @@ contains
     n_cells = (/ int(real(nx_domain)*crop_factor), &
                  int(real(ny_domain)*crop_factor) /)
 
-   !Create the destination grid
-   !===========================
-    dstgrid = ESMF_GridCreateHorzLatLonUni( n_cells, &
+   !Create the destination grid2 (different size from srcgrid)
+   !==========================================================
+    dstgrid2 = ESMF_GridCreateHorzLatLonUni( n_cells, &
                    mincoords, maxcoords, &
                    horzStagger=DstGridChoice, &
                    dimUnits= (/ "radians" , "radians" /), &
                    periodic=(/ ESMF_true , ESMF_false /), &
-                   name="dstgrid", rc=rc)
+                   name="dstgrid2", rc=rc)
 
    !Distribute destination grid
    !===========================
-    call ESMF_GridDistribute(dstgrid, delayout=layout2, rc=rc)
+    call ESMF_GridDistribute(dstgrid2, delayout=layout2, rc=rc)
 
     return
     end subroutine createWholeGlobeGrids
@@ -813,16 +941,41 @@ contains
    !===========================
     call ESMF_GridDistribute(srcgrid, delayout=layout1, rc=rc)
 
-   !Create the destination grid
+   !Create the destination grid1
    !===========================
-    dstgrid = ESMF_GridCreateHorzXYUni( n_cells, &
+    dstgrid1 = ESMF_GridCreateHorzXYUni( n_cells, &
                    mincoords, maxcoords, &
                    horzStagger=DstGridChoice, &
-                   name="srcgrid", rc=rc)
+                   name="dstgrid1", rc=rc)
 
-   !Distribute destination grid
+   !Distribute destination grid1
    !===========================
-    call ESMF_GridDistribute(dstgrid, delayout=layout2, rc=rc)
+    call ESMF_GridDistribute(dstgrid1, delayout=layout2, rc=rc)
+
+    !---Maximum range of physical dimensions of the grid
+    !xmin = 0.0
+    !ymin = 0.0
+    !xmax = 48.
+    !ymax = 24.
+
+    !--- Maximum size of the grid (# of grid cells).
+    nx_domain=240
+    ny_domain=120
+    n_cells = (/real(nx_domain)*crop_factor, real(ny_domain)*crop_factor /)
+    !mincoords = (/ xmin*crop_factor,  ymin*crop_factor /)
+    !maxcoords = (/ xmax*crop_factor,  ymax*crop_factor /)
+
+   !Create the destination grid2
+   !===========================
+    dstgrid2 = ESMF_GridCreateHorzXYUni( n_cells, &
+                   mincoords, maxcoords, &
+                   horzStagger=DstGridChoice, &
+                   name="dstgrid2", rc=rc)
+
+   !Distribute destination grid2
+   !===========================
+    call ESMF_GridDistribute(dstgrid2, delayout=layout2, rc=rc)
+
 
     return
     end subroutine createRegionalGrids
