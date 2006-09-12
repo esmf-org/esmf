@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.1.2.1 2006/08/30 22:53:00 samsoncheung Exp $
+! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.1.2.2 2006/09/12 16:29:32 theurich Exp $
 !
 ! System test FieldRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -85,8 +85,8 @@
 
      miscount = 0
 
-     if (npets .eq. 1) then
-       print *, "This test must run with > 1 processor"
+     if (2*(npets/2) .ne. npets) then
+       print *, "This test must run on an even number of processes"
        goto 20
      endif
 
