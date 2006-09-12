@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.33.2.1 2006/09/12 14:49:34 samsoncheung Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.33.2.2 2006/09/12 16:16:25 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.33.2.1 2006/09/12 14:49:34 samsoncheung Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.33.2.2 2006/09/12 16:16:25 samsoncheung Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -328,7 +328,7 @@
          ! This call makes "todays_time" has a second difference between 
          ! pets.
          call date_and_time(values=my_v)
-         if( (my_v(7)-init_sec) .eq. (my_pet+1) ) then
+         if( (my_v(7)-init_sec) .ge. (my_pet+1) ) then
             call date_and_time(date=todays_date, time=todays_time)
             !write(*,*)"my_pet, diff ", my_pet, (my_v(7)-init_sec)
             exit
