@@ -1,6 +1,6 @@
 ================================================================================
 
-                        README - ESMF v2.2.2 beta snapshot
+                        README - ESMF v2.2.2 beta snapshot #12
 
                     Earth System Modeling Framework (ESMF)
 
@@ -350,7 +350,10 @@ Linux    -    The ESMF Linux configurations assume that resources to run the
 Unicos   -    The ESMF Unicos configuration assumes that resources to run the
               test applications have been made available prior to calling ESMF
               gmake test targets. The ESMF makefile uses Cray's MPI startup 
-              script in order to launch parallel execution.
+              script in order to launch parallel execution. On some Cray X1
+              systems it will be necessary to set the MPI_REQUEST_MAX
+              environment variable to about 4000 to successfully run all 
+              bundled ESMF test applications.
               
 
 ================================================================================
@@ -538,6 +541,11 @@ Follow the directions on that web page to download a tarball and for
 access to the ESMF CVS repository.  The Sourceforge site also contains 
 the bugs, support, and task lists for ESMF.
 
+Use test cases demonstrating how ESMF can be used in realistic situations are
+available as a separate module through CVS. Please follow the instructions on 
+the ESMF web site:
+        http://www.esmf.ucar.edu -> Development -> Test and Validation
+
 Contributions from ESMF users are available at:
 	http://sourceforge.net/projects/esmfcontrib
 
@@ -545,4 +553,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.69.2.7 2006/08/31 19:17:20 theurich Exp $
+ $Id: README,v 1.69.2.8 2006/09/13 22:53:23 theurich Exp $
