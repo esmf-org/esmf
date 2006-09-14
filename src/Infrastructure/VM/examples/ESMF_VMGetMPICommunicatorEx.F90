@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiEx.F90,v 1.1.2.3 2006/09/14 16:37:54 theurich Exp $
+! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.5.4.1 2006/09/14 16:37:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -19,13 +19,16 @@
 !
 ! \subsubsection{VMGet MPI Communicator Example}
 !
-! The following example code demonstrates how ESMF can be used inside of a 
-! user application that explicitly calls MPI\_Init() and MPI\_Finalize().
+! The following example code shows how to obtain the MPI intra-communicator
+! out of a VM object. In order not to interfere with ESMF communications it is 
+! advisable to duplicate the communicator before using it in user-level MPI
+! calls. In this example the duplicated communicator is used for a user
+! controlled barrier accross the context.
 !
 !EOE
 !------------------------------------------------------------------------------
 
-program ESMF_VMUserMpiEx
+program ESMF_VMGetMPICommunicatorEx
 
   use ESMF_Mod
   
@@ -34,29 +37,30 @@ program ESMF_VMUserMpiEx
   
   ! local variables
   integer:: rc, ierr
+  type(ESMF_VM):: vm
+!BOC
+  integer:: mpic, mpic2
+!EOC
   ! result code
   integer :: finalrc
   finalrc = ESMF_SUCCESS
-  ! user code initializes MPI
-#ifndef ESMF_MPIUNI     
-  call MPI_Init(ierr)
-  if (ierr/=0) finalrc = ESMF_FAILURE
-#endif
-  ! user code initializes ESMF
-  call ESMF_Initialize(rc=rc)
+  call ESMF_Initialize(vm=vm, rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
-  ! user code finalizes ESMF
-  call ESMF_Finalize(terminationflag=ESMF_KEEPMPI, rc=rc)
+!BOC
+  call ESMF_VMGet(vm, mpiCommunicator=mpic, rc=rc)
+!EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
-  ! user code finalizes MPI
+!BOC
 #ifndef ESMF_MPIUNI     
-  call MPI_Finalize(ierr)
-  if (ierr/=0) finalrc = ESMF_FAILURE
+  call MPI_Comm_dup(mpic, mpic2, ierr)
+  call MPI_Barrier(mpic2, ierr)
 #endif
-  ! print result
+!EOC
+  call ESMF_Finalize(rc=rc)
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
-    print *, "PASS: ESMF_VMUserMpiEx.F90"
+    print *, "PASS: ESMF_VMGetMPICommunicatorEx.F90"
   else
-    print *, "FAIL: ESMF_VMUserMpiEx.F90"
+    print *, "FAIL: ESMF_VMGetMPICommunicatorEx.F90"
   endif
 end program
