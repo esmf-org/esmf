@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateEx.F90,v 1.30.4.3 2006/09/14 17:10:38 theurich Exp $
+! $Id: ESMF_GridCreateEx.F90,v 1.30.4.4 2006/09/14 19:50:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -297,7 +297,7 @@
 
       ! Create the Field 
       humidity1 = ESMF_FieldCreate(grid3, arrayspec1, &
-		horzRelloc=ESMF_CELL_CENTER, &
+		horzRelloc=ESMF_CELL_CENTER, vertRelloc=ESMF_CELL_CENTER, &
 		haloWidth=0, name="humidity1", rc=rc)
 !EOC
  
