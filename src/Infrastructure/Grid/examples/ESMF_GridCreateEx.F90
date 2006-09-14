@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateEx.F90,v 1.30.4.1 2006/09/14 00:43:02 peggyli Exp $
+! $Id: ESMF_GridCreateEx.F90,v 1.30.4.2 2006/09/14 04:28:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -204,13 +204,13 @@
 
 ! This example shows how to create the same non-uniform 3D {\tt ESMF\_Grid} as
 ! from the previous example but distributed in an arbitrary fashion as one might
-! for a column model.  Different from a block distributed ESMF_Grid, the field 
-! associated with an arbitrary grid has to be one dimension less than the grid 
-! itself.  A field associated with a 2D horizontal grid is storedas an 1D
-! array. In this example, the field has to be a 2D field for the 3D ESMF_Grid
+! for a column model.  Different from a block distributed ESMF\_Grid, the Field 
+! associated with an arbitrary Grid has to be one dimension less than the Grid 
+! itself.  A Field associated with a 2D horizontal Grid is stored as an 1D
+! array. In this example, the Field has to be a 2D Field for the 3D ESMF\_Grid
 ! with the 2 horizontal dimensions collapsed into the first dimension of the
-! field and the vertical dimension stored in the second dimension of the 
-! field.
+! Field and the vertical dimension stored in the second dimension of the 
+! Field.
 !EOE
 
 !BOC
@@ -287,13 +287,13 @@
       call ESMF_GridDistribute(grid3, delayout=layout, myCount=myCount, &
                                myIndices=myIndices, rc=rc)
 
-      ! The field for an arbitrary grid has to be one dimension less, i.e., 2D
-      ! for a 3D grid.
-      ! Set up 2D array for the field
+      ! The Field for an arbitrary Grid has to be one dimension less, i.e., 2D
+      ! for a 3D Grid.
+      ! Set up 2D Array for the Field
       call ESMF_ArraySpecSet(arrayspec1, rank=2, type=ESMF_DATA_REAL,&
            kind=ESMF_R8)
 
-      ! Create the field 
+      ! Create the Field 
       humidity1 = ESMF_FieldCreate(grid3, arrayspec1, &
 		horzRelloc=ESMF_CELL_CENTER, &
 		haloWidth=0, name="humidity1", rc=rc)
