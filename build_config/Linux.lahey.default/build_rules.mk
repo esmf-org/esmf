@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.20.2.5 2006/07/24 23:53:49 theurich Exp $
+# $Id: build_rules.mk,v 1.20.2.6 2006/09/14 16:42:46 theurich Exp $
 #
 # Linux.lahey.default
 #
@@ -21,12 +21,11 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90LINKLIBS       += -lmpiuni
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
 ESMF_CXXCOMPILEOPTS    += -DESMF_MPIUNI
 ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
-ESMF_CXXLINKLIBS       += -lmpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
-else
+e
 ifeq ($(ESMF_COMM),mpich)
 # Mpich ----------------------------------------------------
 ESMF_F90DEFAULT         = mpif90

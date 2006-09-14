@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.26.2.4 2006/09/07 19:46:06 theurich Exp $
+# $Id: build_rules.mk,v 1.26.2.5 2006/09/14 16:42:45 theurich Exp $
 # 
 # IRIX64.default.default
 #
@@ -22,10 +22,9 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90LINKLIBS       += -lmpiuni
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
 ESMF_CXXCOMPILEOPTS    += -DESMF_MPIUNI
 ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
-ESMF_CXXLINKLIBS       += -lmpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)

@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.27.2.1 2006/08/04 21:57:53 theurich Exp $
+#  $Id: build_rules.mk,v 1.27.2.2 2006/09/14 16:42:46 theurich Exp $
 #
 #  Linux.nag.default.mk
 #
@@ -21,10 +21,9 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90LINKLIBS       += -lmpiuni
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
 ESMF_CXXCOMPILEOPTS    += -DESMF_MPIUNI
 ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
-ESMF_CXXLINKLIBS       += -lmpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpich)
