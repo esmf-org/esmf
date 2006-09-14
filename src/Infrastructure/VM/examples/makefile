@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.17.2.2 2006/08/18 16:20:04 theurich Exp $
+# $Id: makefile,v 1.17.2.3 2006/09/14 16:36:13 theurich Exp $
 
-ALL: build_examples
-
-run: run_examples
+ALL:      build_examples
+run:      run_examples
+run_uni:  run_examples_uni
 
 CFLAGS    =
 FFLAGS    =
