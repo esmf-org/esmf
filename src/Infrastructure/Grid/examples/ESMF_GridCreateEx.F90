@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateEx.F90,v 1.30.4.2 2006/09/14 04:28:30 theurich Exp $
+! $Id: ESMF_GridCreateEx.F90,v 1.30.4.3 2006/09/14 17:10:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -41,6 +41,8 @@
       character(len=ESMF_MAXSTR) :: name
       real(ESMF_KIND_R8), dimension(2) :: min, max
       real(ESMF_KIND_R8) :: delta1(40), delta2(50), delta3(10)
+      type(ESMF_ArraySpec):: arrayspec1
+      type(ESMF_Field):: humidity1
 
       ! return code
       integer :: rc
