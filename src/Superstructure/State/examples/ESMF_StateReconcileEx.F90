@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.7.2.1 2006/08/31 23:37:28 theurich Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.7.2.2 2006/09/14 18:08:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@ end module ESMF_StateReconcileEx_Mod
     implicit none
 
     ! Local variables
-    integer :: rc
+    integer :: rc, petCount
     type(ESMF_State) :: state1
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_VM) :: vm
@@ -111,7 +111,17 @@ end module ESMF_StateReconcileEx_Mod
     finalrc = ESMF_SUCCESS
 
 
-    call ESMF_Initialize(rc=rc)
+    call ESMF_Initialize(vm=vm, rc=rc)
+    
+    ! verify that this example can run on the given petCount
+    call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+
+    if (petCount<4) then
+      print *, "This test must run on at least 4 PETs."
+      goto 20
+    endif
+    
 
 !-------------------------------------------------------------------------
 !BOE
@@ -210,6 +220,7 @@ end module ESMF_StateReconcileEx_Mod
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !-------------------------------------------------------------------------
+20  continue
     call ESMF_Finalize(rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
