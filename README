@@ -50,13 +50,13 @@ existing makefiles, you can explicitly add the correct compiler and linker
 flags. The ESMF build process puts the modules and libraries in separate
 directories depending on the options used when building the ESMF library.
 The directory containing the ESMF library file also contains a makefile 
-fragment named "esmf.mk" (e.g. ./lib/libg/Linux.intel.32.default/esmf.mk for
-an ESMF library built on Linux with the Intel compiler for 32-bit). This 
-makefile fragment defines several variables indicating compiler options,
-include paths, linker options, library paths and libraries necessary to compile
-and link against ESMF with Fortran or C++. Look at "esmf.mk" to pull out the
-necessary flags to compile and link your own code against the installed ESMF
-library.
+fragment named "esmf.mk" (e.g. ./lib/libg/Linux.intel.32.mpich.default/esmf.mk
+for an ESMF library built on Linux with the Intel compiler for 32-bit using
+the mpich MPI-implementation). This makefile fragment defines several variables
+indicating compiler options, include paths, linker options, library paths and
+libraries necessary to compile and link against ESMF with Fortran or C++. Look
+at "esmf.mk" to pull out the necessary flags to compile and link your own code
+against the installed ESMF library.
 
 Alternatively, you may want to include "esmf.mk" from within your own build
 system. All of the variables defined in "esmf.mk" have prefix "ESMF_"
@@ -553,4 +553,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.69.2.9 2006/09/15 18:06:51 theurich Exp $
+ $Id: README,v 1.69.2.10 2006/09/15 18:55:42 theurich Exp $
