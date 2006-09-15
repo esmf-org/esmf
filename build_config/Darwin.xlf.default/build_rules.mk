@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.16.4.5 2006/09/15 21:56:49 theurich Exp $
+# $Id: build_rules.mk,v 1.16.4.6 2006/09/15 22:26:20 theurich Exp $
 #
 # Darwin.xlf.default
 #
@@ -22,7 +22,7 @@ endif
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
 ESMF_F90COMPILECPPFLAGS+= -WF,-DESMF_MPIUNI
-ESMF_CXXCOMPILEOPTS    += -DESMF_MPIUNI
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
 ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
