@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.19.2.4 2006/09/15 21:26:46 theurich Exp $
+# $Id: build_rules.mk,v 1.19.2.5 2006/09/15 22:07:22 theurich Exp $
 #
 # Darwin.absoft.default
 #
@@ -69,8 +69,8 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER}
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
 
 ############################################################
 #
