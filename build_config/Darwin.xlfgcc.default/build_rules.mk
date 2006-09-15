@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1.2.5 2006/09/15 21:26:46 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.6 2006/09/15 22:00:38 theurich Exp $
 #
 # Darwin.xlfgcc.default
 #
@@ -69,7 +69,7 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V $(ESMF_DIR)/scripts/hello.f90 -qsuffix=f=f90
+ESMF_F90COMPILER_VERSION    = which ${ESMF_F90COMPILER}
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
 
 ############################################################
