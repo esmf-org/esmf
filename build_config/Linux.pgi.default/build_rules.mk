@@ -1,6 +1,6 @@
-# $Id: build_rules.mk,v 1.25.2.9 2006/09/14 16:42:46 theurich Exp $
+# $Id: build_rules.mk,v 1.25.2.10 2006/09/15 21:26:47 theurich Exp $
 #
-#  Linux.pgi.default
+# Linux.pgi.default
 #
 
 ############################################################
@@ -74,6 +74,12 @@ endif
 endif
 
 ############################################################
+# Print compiler version string
+#
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v -c
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v -c
+
+############################################################
 #
 # location of external libs.  if you want to use any of these,
 # define ESMF_SITE to my_site so the build system can find it,
@@ -89,12 +95,6 @@ endif
 # HDF_LIB          = -L/usr/local/lib/ -lmfhdf -ldf -ljpeg -lz
 # BLAS_INCLUDE     = 
 # BLAS_LIB         = -latlas -lscs
-
-############################################################
-# Compiler options to print version string
-#
-ESMF_F90VOPT        = -V -v -c
-ESMF_CXXVOPT        = -V -v -c
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)

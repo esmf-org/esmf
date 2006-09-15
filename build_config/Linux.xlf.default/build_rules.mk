@@ -1,6 +1,6 @@
-#  $Id: build_rules.mk,v 1.5.4.5 2006/09/14 16:42:46 theurich Exp $
+# $Id: build_rules.mk,v 1.5.4.6 2006/09/15 21:26:47 theurich Exp $
 #
-#  AIX.default.default
+# Linux.xlf.default
 #
 
 ############################################################
@@ -53,6 +53,12 @@ ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
 endif
 
 ############################################################
+# Print compiler version string
+#
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -qversion
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -qversion
+
+############################################################
 #
 # location of external libs.  if you want to use any of these,
 # define ESMF_SITE to my_site so the build system can find it,
@@ -91,12 +97,6 @@ ESMF_F90LINKOPTS          += -q64
 ESMF_ARDEFAULT             = ar -X64
 ESMF_RANLIBDEFAULT         = ranlib -X64
 endif
-
-############################################################
-# Compiler options to print version string
-#
-ESMF_CXXVOPT        = -qversion
-ESMF_F90VOPT        = -qversion
 
 ############################################################
 # xlf90 needs flag to indicate FPP options

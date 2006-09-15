@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.48.2.7 2006/09/14 16:42:46 theurich Exp $
+# $Id: build_rules.mk,v 1.48.2.8 2006/09/15 21:26:47 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -82,6 +82,12 @@ endif
 endif
 
 ############################################################
+# Print compiler version string
+#
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
+
+############################################################
 #
 # location of external libs.  if you want to use any of these,
 # define ESMF_SITE to my_site so the build system can find it,
@@ -132,12 +138,6 @@ ESMF_CXXCOMPILEOPTS +=  -pthread
 ESMF_F90LINKOPTS    += -threads
 ESMF_CXXLINKOPTS    += -pthread
 endif
-
-############################################################
-# Compiler options to print version string
-#
-ESMF_CXXVOPT        = -V -v
-ESMF_F90VOPT        = -V -v
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)

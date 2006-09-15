@@ -1,6 +1,6 @@
-# $Id: build_rules.mk,v 1.1.2.7 2006/09/14 16:42:46 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.8 2006/09/15 21:26:47 theurich Exp $
 #
-#  Linux.pgigcc.default
+# Linux.pgigcc.default
 #
 
 ############################################################
@@ -67,6 +67,12 @@ endif
 endif
 
 ############################################################
+# Print compiler version string
+#
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v -c
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
+
+############################################################
 #
 # location of external libs.  if you want to use any of these,
 # define ESMF_SITE to my_site so the build system can find it,
@@ -88,12 +94,6 @@ endif
 #
 ESMF_F90LINKPATHS += -L$(dir $(shell gcc -print-file-name=libstdc++.so))
 ESMF_F90LINKLIBS  += -lstdc++
-
-############################################################
-# Compiler options to print version string
-#
-ESMF_F90VOPT        = -V -v -c
-ESMF_CXXVOPT        = -V -v
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)

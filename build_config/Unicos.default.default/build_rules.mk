@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.8.2.5 2006/09/14 16:42:46 theurich Exp $
+# $Id: build_rules.mk,v 1.8.2.6 2006/09/15 21:26:47 theurich Exp $
 # 
 # Unicos.default.default
 #
@@ -43,6 +43,12 @@ endif
 endif
 
 ############################################################
+# Print compiler version string
+#
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V
+
+############################################################
 #
 # location of external libs.  if you want to use any of these,
 # define ESMF_SITE to my_site so the build system can find it,
@@ -63,12 +69,6 @@ endif
 # on X1 optimization level must be > 1 else no optimization
 #
 ESMF_OPTLEVELDEFAULT  = 2
-
-############################################################
-# Compiler options to print version string
-#
-ESMF_CXXVOPT        = -V
-ESMF_F90VOPT        = -V
 
 ############################################################
 # Blank out variables to prevent rpath encoding

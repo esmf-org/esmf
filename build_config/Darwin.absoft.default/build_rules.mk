@@ -1,6 +1,6 @@
-#  $Id: build_rules.mk,v 1.19.2.3 2006/09/14 16:42:45 theurich Exp $
+# $Id: build_rules.mk,v 1.19.2.4 2006/09/15 21:26:46 theurich Exp $
 #
-#  Darwin.absoft.default
+# Darwin.absoft.default
 #
 
 ############################################################
@@ -67,6 +67,12 @@ endif
 endif
 
 ############################################################
+# Print compiler version string
+#
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
+
+############################################################
 #
 # location of external libs.  if you want to use any of these,
 # define ESMF_SITE to my_site so the build system can find it,
@@ -97,12 +103,6 @@ ESMF_F90IMOD        = -p
 # Force Fortran symbols lower case with trailing underscore
 #
 ESMF_F90COMPILEOPTS += -YEXT_NAMES=LCS -YEXT_SFX=_
-
-############################################################
-# Compiler options to print version string
-#
-ESMF_F90VOPT        = -v
-ESMF_CXXVOPT        = -v --version
 
 ############################################################
 # Blank out variables to prevent rpath encoding

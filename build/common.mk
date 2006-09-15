@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.155.2.24 2006/09/14 16:41:30 theurich Exp $
+#  $Id: common.mk,v 1.155.2.25 2006/09/15 21:26:46 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -638,14 +638,6 @@ ESMF_SL_LIBLIBS      +=
 ifneq ($(origin ESMF_MPIRUN), environment)
 ESMF_MPIRUN = $(ESMF_MPIRUNDEFAULT)
 endif
-
-
-#-------------------------------------------------------------------------------
-# Set aux. variables of how to obtain version string from F90 and C++ compilers
-#-------------------------------------------------------------------------------
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} $(ESMF_CXXVOPT)
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} $(ESMF_F90VOPT)
-
 
 
 #-------------------------------------------------------------------------------

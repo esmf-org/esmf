@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.26.2.5 2006/09/14 16:42:45 theurich Exp $
+# $Id: build_rules.mk,v 1.26.2.6 2006/09/15 21:26:46 theurich Exp $
 # 
 # IRIX64.default.default
 #
@@ -40,6 +40,12 @@ $(error Invalid ESMF_COMM setting: $(ESMF_COMM))
 endif
 endif
 endif
+
+############################################################
+# Print compiler version string
+#
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -version
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -version
 
 ############################################################
 #
@@ -93,12 +99,6 @@ ifeq ($(ESMF_PTHREADS),ON)
 ESMF_F90LINKLIBS       += -lpthread
 ESMF_CXXLINKLIBS       += -lpthread
 endif
-
-############################################################
-# Compiler options to print version string
-#
-ESMF_F90VOPT        = -version
-ESMF_CXXVOPT        = -version
 
 ############################################################
 # Special optimization flags

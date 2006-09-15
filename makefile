@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.69.2.11 2006/08/31 20:12:20 theurich Exp $
+# $Id: makefile,v 1.69.2.12 2006/09/15 21:26:46 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -50,9 +50,9 @@ all:  lib build_unit_tests build_examples build_system_tests build_demos
 script_info:
 	-@echo " "
 	-@echo "------------------------------------------"
-	-@echo "C++ Compiler version:"; $(ESMF_CXXCOMPILER_VERSION); echo "" 
-	-@echo "------------------------------------------"
 	-@echo "Fortran Compiler version:"; $(ESMF_F90COMPILER_VERSION); echo ""
+	-@echo "------------------------------------------"
+	-@echo "C++ Compiler version:"; $(ESMF_CXXCOMPILER_VERSION); echo "" 
 	-@echo "------------------------------------------"
 	-@if [ -f $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h ] ; then \
 	  fgrep ESMF_VERSION_STRING $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) "s/^#define //" ; fi
