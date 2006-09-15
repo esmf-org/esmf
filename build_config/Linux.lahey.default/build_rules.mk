@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.20.2.7 2006/09/15 16:08:10 svasquez Exp $
+# $Id: build_rules.mk,v 1.20.2.8 2006/09/15 16:19:44 svasquez Exp $
 #
 # Linux.lahey.default
 #
@@ -25,6 +25,7 @@ ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
 ESMF_CXXCOMPILEOPTS    += -DESMF_MPIUNI
 ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
+else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich ----------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
