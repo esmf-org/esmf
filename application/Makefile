@@ -1,7 +1,7 @@
 # Example GNU Makefile for user ESMF application
 
 # -> adjust the path in the following line to match your situation:
-include ../lib/libg/Linux.intel.32.default/esmf.mk
+include ../lib/libg/Linux.intel.32.mpich.default/esmf.mk
 
 .SUFFIXES: .f90
 
