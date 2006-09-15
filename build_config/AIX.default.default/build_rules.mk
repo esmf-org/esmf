@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.24.2.10 2006/09/15 21:26:46 theurich Exp $
+# $Id: build_rules.mk,v 1.24.2.11 2006/09/15 21:36:45 theurich Exp $
 #
 # AIX.default.default
 #
@@ -48,8 +48,8 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -qversion
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -qversion
+ESMF_F90COMPILER_VERSION    = lslpp -l | fgrep xlf
+ESMF_CXXCOMPILER_VERSION    = lslpp -l | fgrep xlC
 
 ############################################################
 #
