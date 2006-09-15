@@ -1,6 +1,7 @@
-#  $Id: build_rules.mk,v 1.1.2.3 2006/09/14 16:42:45 theurich Exp $
+#  $Id: build_rules.mk,v 1.1.2.4 2006/09/15 17:45:14 theurich Exp $
 #
 #  Darwin.xlfgcc.default
+#
 
 ############################################################
 # Default compiler setting.
@@ -20,7 +21,7 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
+ESMF_F90COMPILECPPFLAGS+= -WF,-DESMF_MPIUNI
 ESMF_CXXCOMPILEOPTS    += -DESMF_MPIUNI
 ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
