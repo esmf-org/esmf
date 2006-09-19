@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5.4.7 2006/09/15 22:26:21 theurich Exp $
+# $Id: build_rules.mk,v 1.5.4.8 2006/09/19 06:01:27 theurich Exp $
 #
 # Linux.xlf.default
 #
@@ -57,23 +57,6 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -qversion
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -qversion
-
-############################################################
-#
-# location of external libs.  if you want to use any of these,
-# define ESMF_SITE to my_site so the build system can find it,
-# copy this file into Linux.intel.my_site, and uncomment the
-# libs you want included.  remove the rest of this file since
-# both this file and the site file will be included.
-
-# LAPACK_INCLUDE   = 
-# LAPACK_LIB       = -L/usr/local/lib -llapack
-# NETCDF_INCLUDE   = -I/usr/local/include/netcdf
-# NETCDF_LIB       = -L/usr/local/lib -lnetcdf
-# HDF_INCLUDE      = -I/usr/local/include/hdf
-# HDF_LIB          = -L/usr/local/lib/ -lmfhdf -ldf -ljpeg -lz
-# BLAS_INCLUDE     = 
-# BLAS_LIB         = -latlas -lscs
 
 ############################################################
 # 32- vs. 64-bit ABI
