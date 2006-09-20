@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.69.2.12 2006/09/15 21:26:46 theurich Exp $
+# $Id: makefile,v 1.69.2.13 2006/09/20 23:02:34 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -96,8 +96,8 @@ script_info:
 	-@echo "ESMF environment variables pointing to 3rd party software:"
 	-@if [ -n "$(ESMF_NETCDF_INCLUDE)" ] ; then \
 	  echo "ESMF_NETCDF_INCLUDE: $(ESMF_NETCDF_INCLUDE)" ; fi
-	-@if [ -n "$(ESMF_NETCDF_LIB)" ] ; then \
-	  echo "ESMF_NETCDF_LIB: $(ESMF_NETCDF_LIB)" ; fi
+	-@if [ -n "$(ESMF_NETCDF_LIBPATH)" ] ; then \
+	  echo "ESMF_NETCDF_LIBPATH: $(ESMF_NETCDF_LIBPATH)" ; fi
 #
 info:   script_info
 	-@echo " "
@@ -233,8 +233,8 @@ info_mk:
 	-@echo "# ESMF environment variables pointing to 3rd party software:" >> $(MKINFO)
 	-@if [ -n "$(ESMF_NETCDF_INCLUDE)" ] ; then \
 	  echo "# ESMF_NETCDF_INCLUDE: $(ESMF_NETCDF_INCLUDE)" >> $(MKINFO) ; fi
-	-@if [ -n "$(ESMF_NETCDF_LIB)" ] ; then \
-	  echo "# ESMF_NETCDF_LIB: $(ESMF_NETCDF_LIB)" >> $(MKINFO) ; fi
+	-@if [ -n "$(ESMF_NETCDF_LIBPATH)" ] ; then \
+	  echo "# ESMF_NETCDF_LIBPATH: $(ESMF_NETCDF_LIBPATH)" >> $(MKINFO) ; fi
 
 # Ranlib on the libraries
 ranlib:
