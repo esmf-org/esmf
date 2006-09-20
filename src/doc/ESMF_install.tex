@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.49.2.5 2006/08/31 21:53:52 theurich Exp $
+% $Id: ESMF_install.tex,v 1.49.2.6 2006/09/20 23:09:38 theurich Exp $
 
 %\section{Installing and Building the ESMF}
 \subsection{ESMF Download Options}
@@ -250,6 +250,16 @@ Possible value: {\em flags}
 
 This variable can be used to provide additional options to {\tt ESMF\_MPIRUN}. 
 
+\item[ESMF\_NETCDF\_INCLUDE]
+Possible value: {\em path}
+
+This variable can be used to point to the desired NETCDF header files.
+
+\item[ESMF\_NETCDF\_LIBPATH]
+Possible value: {\em path}
+
+This variable can be used to point to the desired NETCDF library files.
+
 \item[ESMF\_NO\_INTEGER\_1\_BYTE]
 Possible value: {\tt TRUE}, {\tt FALSE} (default)
 
@@ -262,9 +272,18 @@ Possible value: {\tt TRUE}, {\tt FALSE} (default)
 Same as {\tt ESMF\_NO\_INTEGER\_1\_BYTE} but for 2-byte integers.
 
 \item[ESMF\_NO\_IOCODE] 
-Possible value: {\tt FALSE} (default)
+Possible value: {\tt TRUE}, {\tt FALSE}
 
-Currently ESMF does not support {\tt netCDF} I/O support.
+If set to {\tt TRUE} ESMF will {\em not} depend on {\tt netCDF} for I/O.
+If set to {\tt FALSE} ESMF will be compiled including an I/O prototype that
+depends on {\tt netCDF}. In the latter case ESMF must be able to find the
+{\tt netCDF} header and library files. Please see environment variables
+{\tt ESMF\_NETCDF\_INCLUDE} and {\tt ESMF\_NETCDF\_LIBPATH} for details.
+
+The default value of {\tt ESMF\_NO\_IOCODE} depends on whether environment variable {\tt ESMF\_NETCDF\_INCLUDE} is defined or not. If {\tt ESMF\_NETCDF\_INCLUDE} is defined {\tt ESMF\_NO\_IOCODE} will be set
+to {\tt FALSE} by default. Otherwise {\tt ESMF\_NO\_IOCODE} will default
+to {\tt TRUE}. In either case the user can override the default by defining
+{\tt ESMF\_NO\_IOCODE} in their environment.
 
 \item[ESMF\_OPTLEVEL] 
 Possible value: {\em numerical value}
